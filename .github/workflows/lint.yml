@@ -1,14 +1,12 @@
 name: Lint
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
   lint:
-    name: Lint
+    name: Lint Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,16 +26,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint and Fix
-        run: pnpm lint:all-fix
+      - name: Lint check
+        run: pnpm lint
 
-      - name: Commit linting fixes if needed
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git add .
-            git commit -m "style: fix linting issues [skip ci]" --no-verify || true
-            git push
-          fi
-        continue-on-error: true
+      - name: Format check
+        run: pnpm format:check

@@ -31,18 +31,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint config files
-        run: pnpm lint:config-files
-        continue-on-error: true
-
-      - name: Lint with auto-fixing
-        run: pnpm lint:all-fix
-        continue-on-error: true
-
-      - name: Format check
-        run: pnpm format:check
-        continue-on-error: true
-
       - name: Type check
         run: pnpm tsc --noEmit
 

@@ -88,6 +88,9 @@ This project is currently in development.
 - `pnpm build` - Build for production
 - `pnpm lint` - Run ESLint
 - `pnpm lint:fix` - Fix ESLint issues
+- `pnpm lint:all-fix` - Fix ESLint issues across all file types
+- `pnpm lint:config-files` - Fix linting in configuration files
+- `pnpm fix-all` - Run all linting and formatting fixes at once
 - `pnpm lint:imports` - Fix import sorting
 - `pnpm preview` - Preview the production build
 - `pnpm format` - Format code with Prettier
@@ -128,6 +131,16 @@ transaction-form-builder/
 ```
 
 ## Code Style
+
+### Git Hooks
+
+This project uses Husky to enforce code quality using Git hooks:
+
+- **pre-commit**: Runs lint-staged to format and lint staged files
+- **pre-push**: Runs comprehensive linting and formatting before pushing to remote
+- **commit-msg**: Enforces conventional commit message format
+
+These hooks ensure that code pushed to the repository maintains consistent quality and style.
 
 ### Import Sorting
 
