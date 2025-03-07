@@ -1,3 +1,17 @@
+# 1.0.0 (2025-03-07)
+
+
+### Bug Fixes
+
+* **config:** migrate to ESLint 9.x CommonJS configuration ([b6ef58d](https://github.com/OpenZeppelin/transaction-form-builder/commit/b6ef58da42aa41f160361b052c12b8096d81db3a))
+* **config:** remove ESM version of ESLint config ([05f9aad](https://github.com/OpenZeppelin/transaction-form-builder/commit/05f9aad2e811ce823710bd2e2e681f2e5afef16b))
+* **config:** resolve ESLint TypeScript import issues ([118e91e](https://github.com/OpenZeppelin/transaction-form-builder/commit/118e91eaed5b4ea133e5ff00cca7809fbd7e2d55))
+
+
+### Features
+
+* **core:** initial commit ([30f1f8b](https://github.com/OpenZeppelin/transaction-form-builder/commit/30f1f8b983f4d5696742c7789f9cb7333a82b180))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
