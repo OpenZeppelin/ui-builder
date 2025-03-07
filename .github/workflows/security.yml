@@ -32,10 +32,11 @@ jobs:
         run: pnpm audit --prod
         continue-on-error: true
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
+      # TODO: Uncomment and configure Snyk once we have company authentication details
+      # - name: Run Snyk to check for vulnerabilities
+      #   uses: snyk/actions/node@master
+      #   continue-on-error: true
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     args: --severity-threshold=high
