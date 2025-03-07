@@ -28,8 +28,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run npm audit
-        run: npm audit --production
+      - name: Run security audit
+        run: pnpm audit --prod
         continue-on-error: true
 
       - name: Run Snyk to check for vulnerabilities

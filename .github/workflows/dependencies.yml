@@ -29,6 +29,6 @@ jobs:
         run: pnpm outdated
         continue-on-error: true
 
-      - name: Run npm audit
-        run: npm audit
+      - name: Run security audit
+        run: pnpm audit
         continue-on-error: true
