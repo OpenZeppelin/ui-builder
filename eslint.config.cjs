@@ -37,7 +37,7 @@ module.exports = [
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
-          project: './tsconfig.json',
+          project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         },
         node: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -58,7 +58,7 @@ module.exports = [
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        project: './tsconfig.json',
+        project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
