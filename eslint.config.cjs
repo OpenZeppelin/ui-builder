@@ -35,7 +35,10 @@ module.exports = [
         version: 'detect',
       },
       'import/resolver': {
-        typescript: {},
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
         node: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
         },
@@ -54,6 +57,11 @@ module.exports = [
     },
     languageOptions: {
       parser: typescriptParser,
+      parserOptions: {
+        project: './tsconfig.json',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
     },
     rules: {
       ...typescriptPlugin.configs.recommended.rules,

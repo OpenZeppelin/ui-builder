@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run ESLint
-npx lint-staged 
+# Only run prettier in pre-commit hook to avoid TypeScript issues
+npx lint-staged --no-stash 

@@ -1,41 +1,42 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/components/ui/use-toast'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 function App() {
-  const [count, setCount] = useState(0)
-  const { toast } = useToast()
+  const [count, setCount] = useState(0);
+  const { toast } = useToast();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground">
-      <div className="max-w-md w-full space-y-8">
+    <div className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold">Transaction Form Builder</h1>
-          <p className="mt-3 text-lg text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-lg">
             Build and customize transaction forms for your blockchain applications
           </p>
         </div>
 
-        <div className="flex flex-col items-center justify-center p-8 border rounded-lg shadow-sm bg-card">
+        <div className="bg-card flex flex-col items-center justify-center rounded-lg border p-8 shadow-sm">
           <Button
             onClick={() => {
-              setCount((count) => count + 1)
+              setCount((count) => count + 1);
               toast({
-                title: "Counter incremented",
+                title: 'Counter incremented',
                 description: `The count is now ${count + 1}`,
-              })
+              });
             }}
             className="w-full"
           >
             Count is {count}
           </Button>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Edit <code className="font-mono bg-muted p-1 rounded">src/App.tsx</code> and save to test HMR
+          <p className="text-muted-foreground mt-4 text-sm">
+            Edit <code className="bg-muted rounded p-1 font-mono">src/App.tsx</code> and save to
+            test HMR
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default App 
+export default App;

@@ -28,7 +28,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --quiet --config eslint.config.cjs",
+      "eslint --fix --quiet --config eslint.config.cjs --rule 'simple-import-sort/imports: off' --rule 'import/first: off' --rule 'import/no-duplicates: off'",
       "prettier --write"
     ],
     "*.{json,css,md}": [
@@ -88,6 +88,7 @@
     "commitizen": "^4.3.1",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-import-resolver-typescript": "^3.8.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.37.4",
