@@ -49,5 +49,10 @@ export default {
     ],
     'scope-empty': [2, 'never'],
   },
-  ignores: [(message) => message.includes('[skip ci]') || /^chore\(release\):.+/.test(message)],
+  ignores: [
+    (message) =>
+      message.includes('[skip ci]') ||
+      /^chore\(release\):.+/.test(message) ||
+      message === 'docs(tests): update coverage badges',
+  ],
 };

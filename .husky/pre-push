@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/usr/bin/env bash
 
 echo "🔍 Running linting and formatting before push..."
 pnpm fix-all 

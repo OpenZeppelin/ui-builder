@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/usr/bin/env bash
 
 # Only run prettier in pre-commit hook to avoid TypeScript issues
 npx lint-staged --no-stash 

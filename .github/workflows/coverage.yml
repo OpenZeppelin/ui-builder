@@ -41,3 +41,5 @@ jobs:
         with:
           coverage-summary-path: ./coverage/coverage-summary.json
           branches: main
+          commit-message: 'docs(tests): update coverage badges'
+          output-folder: ./badges
