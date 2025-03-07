@@ -87,5 +87,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('./src/lib/tailwind-plugins.js')],
+  plugins: [require('./src/lib/tailwind-plugins.cjs')],
 };
