@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.0...v1.0.1) (2025-03-07)
+
+
+### Bug Fixes
+
+* rename postcss.config.js to .cjs to fix ESM compatibility ([78dada4](https://github.com/OpenZeppelin/transaction-form-builder/commit/78dada4f1eb5c7d3afe6b4d24d5a08228142a313))
+
 # 1.0.0 (2025-03-07)
 
 
