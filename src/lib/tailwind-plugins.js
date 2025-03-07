@@ -1,13 +1,13 @@
 // Custom implementation of tailwindcss-animate
-module.exports = function({ addUtilities, matchUtilities, theme }) {
+module.exports = function ({ addUtilities, matchUtilities, theme }) {
   addUtilities({
     '.animate-accordion-down': { animation: 'accordion-down 0.2s ease-out' },
     '.animate-accordion-up': { animation: 'accordion-up 0.2s ease-out' },
-    '.animate-in': { 
+    '.animate-in': {
       animationFillMode: 'both',
       animationTimingFunction: 'ease-out',
     },
-    '.animate-out': { 
+    '.animate-out': {
       animationFillMode: 'both',
       animationTimingFunction: 'ease-in',
     },
@@ -16,7 +16,7 @@ module.exports = function({ addUtilities, matchUtilities, theme }) {
   // Add duration utilities
   matchUtilities(
     {
-      'duration': (value) => ({
+      duration: (value) => ({
         animationDuration: value,
       }),
     },
@@ -26,7 +26,7 @@ module.exports = function({ addUtilities, matchUtilities, theme }) {
   // Add delay utilities
   matchUtilities(
     {
-      'delay': (value) => ({
+      delay: (value) => ({
         animationDelay: value,
       }),
     },
@@ -36,10 +36,10 @@ module.exports = function({ addUtilities, matchUtilities, theme }) {
   // Add ease utilities
   matchUtilities(
     {
-      'ease': (value) => ({
+      ease: (value) => ({
         animationTimingFunction: value,
       }),
     },
     { values: theme('animationTimingFunction') }
   );
-}; 
+};
