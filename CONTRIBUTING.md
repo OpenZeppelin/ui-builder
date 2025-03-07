@@ -1,0 +1,75 @@
+# Contributing to Transaction Form Builder
+
+Thank you for considering contributing to Transaction Form Builder! This document outlines the process for contributing to the project.
+
+## Development Process
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run tests: `pnpm test`
+5. Commit your changes following our [commit convention](./COMMIT_CONVENTION.md)
+   - We recommend using our Commitizen setup: `pnpm commit`
+6. Push to your branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## Pull Request Process
+
+1. Ensure your code follows the style guidelines of the project
+2. Update the README.md with details of changes if applicable
+3. The PR should work for all supported Node.js versions
+4. Include tests for new features or bug fixes
+5. Link any relevant issues in the PR description
+
+## Development Setup
+
+```bash
+# Clone your fork
+git clone https://github.com/your-username/transaction-form-builder.git
+
+# Navigate to the project directory
+cd transaction-form-builder
+
+# Install dependencies
+pnpm install
+
+# Start the development server
+pnpm dev
+```
+
+## Scripts
+
+- `pnpm dev` - Start the development server
+- `pnpm build` - Build for production
+- `pnpm lint` - Run ESLint
+- `pnpm lint:fix` - Fix ESLint issues
+- `pnpm lint:imports` - Fix import sorting
+- `pnpm test` - Run tests
+- `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Run tests with coverage report
+- `pnpm storybook` - Start Storybook development server
+- `pnpm build-storybook` - Build Storybook for production
+- `pnpm commit` - Interactive commit message builder (Commitizen)
+
+## Coding Standards
+
+- Follow the existing code style
+- Write tests for your changes
+- Keep pull requests focused on a single topic
+- Add proper documentation for new features
+
+## Commit Messages
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). See our [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.
+
+To make it easier to follow the convention, we've integrated Commitizen. Instead of using `git commit`, you can use:
+
+```bash
+pnpm commit
+```
+
+This will guide you through an interactive process to create a properly formatted commit message.
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the project's license. 

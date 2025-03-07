@@ -1,0 +1,43 @@
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+coverage/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.eslintcache
+.stylelintcache
+.rollup.cache/
+.turbo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Package files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml 
