@@ -6,35 +6,36 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 0'  # Run weekly on Sundays
+    - cron: '0 0 * * 0' # Run weekly on Sundays
 
 jobs:
   security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
-          
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install
-        
+
       - name: Run npm audit
         run: npm audit --production
         continue-on-error: true
-        
+
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high 
+          args: --severity-threshold=high

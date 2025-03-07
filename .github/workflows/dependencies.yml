@@ -10,25 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
+
       - uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
-          
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install
-        
+
       - name: Check for outdated dependencies
         run: pnpm outdated
         continue-on-error: true
-        
+
       - name: Run npm audit
         run: npm audit
         continue-on-error: true
- 
