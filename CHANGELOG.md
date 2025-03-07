@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.1...v1.0.2) (2025-03-07)
+
+
+### Bug Fixes
+
+* update Tailwind CSS v4 configuration for ESM compatibility ([b5fd682](https://github.com/OpenZeppelin/transaction-form-builder/commit/b5fd6820098124cebb870d04d1270b8f1ecc2e91))
+
 ## [1.0.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.0...v1.0.1) (2025-03-07)
 
 
