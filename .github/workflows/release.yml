@@ -13,6 +13,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # This is needed for semantic-release to calculate version based on commit history
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v2
         with:
@@ -32,8 +34,15 @@ jobs:
         run: pnpm audit
         continue-on-error: true
 
+      # You need to set up the GITHUB_TOKEN and NPM_TOKEN secrets in your repository settings
+      # GITHUB_TOKEN: automatically provided by GitHub Actions, needs write permissions for contents and packages
+      # NPM_TOKEN: create and add to repository secrets if you plan to publish to npm
       - name: Release
         env:
+          # Use the built-in GitHub token for GitHub operations
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Add NPM_TOKEN to repository secrets if publishing to npm
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Disable husky hooks during semantic-release
+          HUSKY: 0
         run: pnpm semantic-release

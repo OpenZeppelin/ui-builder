@@ -44,8 +44,10 @@ export default {
         'utils',
         'docs',
         'tests',
+        'release',
       ],
     ],
     'scope-empty': [2, 'never'],
   },
+  ignores: [(message) => message.includes('[skip ci]') || /^chore\(release\):.+/.test(message)],
 };
