@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.2...v1.0.3) (2025-03-07)
+
+
+### Bug Fixes
+
+* update theme utility classes for Tailwind CSS v4 compatibility ([c5ef108](https://github.com/OpenZeppelin/transaction-form-builder/commit/c5ef108fbd81c146e14289fb2955fa8fc1cbf544))
+
 ## [1.0.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.1...v1.0.2) (2025-03-07)
 
 
