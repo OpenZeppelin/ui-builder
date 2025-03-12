@@ -42,22 +42,23 @@ This project is currently in development.
 
 ## Tech Stack
 
-- **React**: UI library
-- **TypeScript**: Type safety
-- **Vite**: Build tool
-- **Tailwind CSS**: Utility-first CSS framework
-- **shadcn/ui**: Reusable UI components
-- **pnpm**: Package manager
-- **Vitest**: Testing framework
-- **Storybook**: Component documentation
+- **React 19**: UI library with modern hooks API and concurrent features
+- **TypeScript 5.8+**: Enhanced type safety with template literal types
+- **Vite 6**: Fast, modern build tool and dev server
+- **Tailwind CSS v4**: Next-gen utility-first CSS framework with new HSL theme syntax
+- **shadcn/ui**: Unstyled, accessible component system built on Radix UI
+- **pnpm**: Fast, disk-efficient package manager
+- **Vitest**: Testing framework integrated with Vite
+- **Storybook 8**: Component documentation and visual testing
 - **Semantic Release**: Automated versioning and releases
+- **ESLint 9**: Modern linting with improved TypeScript support
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- pnpm (v8 or higher)
+- pnpm (v9 or higher)
 
 ### Installation
 
@@ -119,14 +120,18 @@ transaction-form-builder/
 │   │   ├── ui/          # shadcn/ui components
 │   │   └── ...          # Custom components
 │   ├── lib/             # Utility functions and hooks
+│   │   ├── utils.ts     # General utilities
+│   │   └── button-variants.ts # Component variant definitions
 │   ├── test/            # Test setup and utilities
 │   ├── App.tsx          # Main application component
 │   ├── main.tsx         # Application entry point
-│   └── index.css        # Global styles
+│   └── index.css        # Global styles with Tailwind v4 theme
+├── components.json      # shadcn/ui configuration
 ├── index.html           # HTML template
 ├── tsconfig.json        # TypeScript configuration
 ├── vite.config.ts       # Vite configuration
 ├── vitest.config.ts     # Vitest configuration
+├── tailwind.config.cjs  # Tailwind CSS v4 configuration
 └── ...                  # Other configuration files
 ```
 
