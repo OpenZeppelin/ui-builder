@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react';
 
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
-import { StepArtifactSubmit } from './StepArtifactSubmit';
 import { Chain, StepChainSelect } from './StepChainSelect';
+import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
 import { StepFormCustomization } from './StepFormCustomization';
 import { StepFunctionSelector } from './StepFunctionSelector';
@@ -13,7 +13,7 @@ import type { FormConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<Chain>('ethereum');
-  const [contractAbi, setContractAbi] = useState<AbiItem[]>([]);
+  const [contractDefinition, setContractDefinition] = useState<AbiItem[]>([]);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
 
@@ -22,8 +22,8 @@ export function TransactionFormBuilder() {
     setSelectedChain(chain);
   }, []);
 
-  const handleAbiLoaded = useCallback((abi: AbiItem[]) => {
-    setContractAbi(abi);
+  const handleContractDefinitionLoaded = useCallback((definition: AbiItem[]) => {
+    setContractDefinition(definition);
   }, []);
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
@@ -71,38 +71,20 @@ export function TransactionFormBuilder() {
       component: <StepChainSelect onChainSelect={handleChainSelect} initialChain={selectedChain} />,
     },
     {
-      id: 'artifact-submit',
+      id: 'contract-definition',
       title: 'Upload Contract',
-      component: <StepArtifactSubmit onAbiLoaded={handleAbiLoaded} />,
+      component: (
+        <StepContractDefinition onContractDefinitionLoaded={handleContractDefinitionLoaded} />
+      ),
     },
     {
       id: 'function-selector',
       title: 'Select Function',
       component: (
         <StepFunctionSelector
-          contractSchema={
-            contractAbi.length > 0
-              ? {
-                  chainType: 'evm', // Hardcoded for now, will be based on selectedChain later
-                  functions: contractAbi
-                    .filter((item) => item.type === 'function')
-                    .map((item) => ({
-                      id: `${item.name}_${item.inputs?.map((i) => i.type).join('_') || ''}`,
-                      name: item.name || '',
-                      displayName: item.name ? formatMethodName(item.name) : 'Unknown Method',
-                      inputs:
-                        item.inputs?.map((input) => ({
-                          name: input.name,
-                          type: input.type,
-                          displayName: formatInputName(input.name, input.type),
-                        })) || [],
-                      type: item.type,
-                      stateMutability: item.stateMutability,
-                    })),
-                }
-              : null
-          }
+          contractDefinition={contractDefinition}
           onFunctionSelected={handleFunctionSelected}
+          selectedFunction={selectedFunction}
         />
       ),
     },
@@ -112,22 +94,22 @@ export function TransactionFormBuilder() {
       component: (
         <StepFormCustomization
           contractSchema={
-            contractAbi.length > 0
+            contractDefinition.length > 0
               ? {
                   chainType: 'evm',
-                  functions: contractAbi
+                  functions: contractDefinition
                     .filter((item) => item.type === 'function')
                     .map((item) => ({
                       id: `${item.name}_${item.inputs?.map((i) => i.type).join('_') || ''}`,
                       name: item.name || '',
-                      displayName: item.name ? formatMethodName(item.name) : 'Unknown Method',
+                      displayName: formatMethodName(item.name || ''),
                       inputs:
                         item.inputs?.map((input) => ({
                           name: input.name,
                           type: input.type,
-                          displayName: formatInputName(input.name, input.type),
+                          displayName: formatInputName(input.name || '', input.type),
                         })) || [],
-                      type: item.type,
+                      type: item.type || 'function',
                       stateMutability: item.stateMutability,
                     })),
                 }
@@ -168,7 +150,6 @@ export function TransactionFormBuilder() {
   );
 }
 
-// Utility functions
 function formatMethodName(name: string): string {
   return name
     .replace(/([A-Z])/g, ' $1')
@@ -177,9 +158,12 @@ function formatMethodName(name: string): string {
 }
 
 function formatInputName(name: string, type: string): string {
-  if (!name) return type;
+  if (!name || name === '') {
+    return `Parameter (${type})`;
+  }
   return name
     .replace(/([A-Z])/g, ' $1')
     .replace(/^./, (str) => str.toUpperCase())
+    .replace(/_/g, ' ')
     .trim();
 }

@@ -4,11 +4,13 @@ import { Button } from '../ui/button';
 
 import type { AbiItem } from '../../adapters/evm/types';
 
-interface StepArtifactSubmitProps {
-  onAbiLoaded: (abi: AbiItem[]) => void;
+interface StepContractDefinitionProps {
+  onContractDefinitionLoaded: (definition: AbiItem[]) => void;
 }
 
-export function StepArtifactSubmit({ onAbiLoaded }: StepArtifactSubmitProps) {
+export function StepContractDefinition({
+  onContractDefinitionLoaded,
+}: StepContractDefinitionProps) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function StepArtifactSubmit({ onAbiLoaded }: StepArtifactSubmitProps) {
 
     setFileName(file.name);
     // In a real implementation, we would read the file and parse the JSON
-    // For this POC, we'll skip that and just simulate loading the mock ABI
+    // For this POC, we'll skip that and just simulate loading the mock contract definition
   };
 
   const handleLoadMockData = () => {
@@ -39,13 +41,13 @@ export function StepArtifactSubmit({ onAbiLoaded }: StepArtifactSubmitProps) {
     setTimeout(() => {
       import('../../mocks/EVM_ABI_MOCK.json')
         .then((module) => {
-          const mockAbi = module.default;
-          onAbiLoaded(mockAbi);
+          const mockContractDefinition = module.default;
+          onContractDefinitionLoaded(mockContractDefinition);
           setIsLoading(false);
         })
         .catch((err) => {
-          console.error('Error loading mock ABI:', err);
-          setError('Failed to load mock ABI data');
+          console.error('Error loading mock contract definition:', err);
+          setError('Failed to load mock contract definition data');
           setIsLoading(false);
         });
     }, 1000);
@@ -54,15 +56,15 @@ export function StepArtifactSubmit({ onAbiLoaded }: StepArtifactSubmitProps) {
   return (
     <div className="flex flex-col space-y-6">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Upload Contract Artifact</h3>
+        <h3 className="text-lg font-medium">Upload Contract Definition</h3>
         <p className="text-muted-foreground text-sm">
-          Upload your contract&apos;s ABI JSON file or use our mock data for testing.
+          Upload your contract definition file or use our mock data for testing.
         </p>
       </div>
 
       <div className="grid gap-6">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Contract ABI</label>
+          <label className="text-sm font-medium">Contract Definition</label>
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <label
@@ -109,8 +111,8 @@ export function StepArtifactSubmit({ onAbiLoaded }: StepArtifactSubmitProps) {
           <h4 className="mb-2 font-medium">Using Mock Data</h4>
           <p className="text-muted-foreground text-sm">
             For this proof of concept, we&apos;re using pre-configured mock data. In a production
-            environment, you would upload your actual contract ABI JSON file. The mock data includes
-            various input types to demonstrate the form building capabilities.
+            environment, you would upload your actual contract definition file. The mock data
+            includes various input types to demonstrate the form building capabilities.
           </p>
         </div>
       </div>
