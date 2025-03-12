@@ -1,22 +1,20 @@
 import { useState } from 'react';
 
+import { getChainName } from '../../core/utils/utils';
 // UI components
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-export type Chain = 'ethereum' | 'midnight' | 'solana';
+import type { ChainType } from '../../core/types/ContractSchema';
 
 interface StepChainSelectProps {
-  onChainSelect: (chain: Chain) => void;
-  initialChain?: Chain;
+  onChainSelect: (chain: ChainType) => void;
+  initialChain?: ChainType;
 }
 
-export function StepChainSelect({
-  onChainSelect,
-  initialChain = 'ethereum',
-}: StepChainSelectProps) {
-  const [selectedChain, setSelectedChain] = useState<Chain>(initialChain);
+export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepChainSelectProps) {
+  const [selectedChain, setSelectedChain] = useState<ChainType>(initialChain);
 
-  const handleChainChange = (value: Chain) => {
+  const handleChainChange = (value: ChainType) => {
     setSelectedChain(value);
     onChainSelect(value);
   };
@@ -36,8 +34,9 @@ export function StepChainSelect({
             <SelectValue placeholder="Select a blockchain" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ethereum">Ethereum</SelectItem>
+            <SelectItem value="evm">Ethereum (EVM)</SelectItem>
             <SelectItem value="midnight">Midnight</SelectItem>
+            <SelectItem value="stellar">Stellar</SelectItem>
             <SelectItem value="solana">Solana</SelectItem>
           </SelectContent>
         </Select>
@@ -51,25 +50,14 @@ export function StepChainSelect({
   );
 }
 
-function getChainName(chain: Chain): string {
+function getChainDescription(chain: ChainType): string {
   switch (chain) {
-    case 'ethereum':
-      return 'Ethereum';
-    case 'midnight':
-      return 'Midnight';
-    case 'solana':
-      return 'Solana';
-    default:
-      return '';
-  }
-}
-
-function getChainDescription(chain: Chain): string {
-  switch (chain) {
-    case 'ethereum':
+    case 'evm':
       return 'Ethereum is a decentralized, open-source blockchain with smart contract functionality. It supports the Ethereum Virtual Machine (EVM) and uses the native cryptocurrency Ether (ETH).';
     case 'midnight':
       return 'Midnight is a privacy-focused sidechain that enables confidential smart contracts. It allows developers to build and deploy privacy-preserving applications.';
+    case 'stellar':
+      return 'Stellar is an open network for storing and moving money. It allows users to create, send, and trade digital representations of all forms of money.';
     case 'solana':
       return 'Solana is a high-performance blockchain supporting smart contracts. It offers fast transaction times and low fees using a Proof of History consensus mechanism.';
     default:

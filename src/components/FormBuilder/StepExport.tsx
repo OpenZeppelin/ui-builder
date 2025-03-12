@@ -2,12 +2,11 @@ import { useState } from 'react';
 
 import { Button } from '../ui/button';
 
-import { Chain } from './StepChainSelect';
-
+import type { ChainType } from '../../core/types/ContractSchema';
 import type { FormConfig } from '../../core/types/FormTypes';
 
 export interface StepExportProps {
-  selectedChain: Chain;
+  selectedChain: ChainType;
   selectedFunction: string | null;
   formConfig: FormConfig | null;
   onExport: () => void;
@@ -54,7 +53,7 @@ export function StepExport({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Blockchain:</span>
-              <span className="font-medium">{capitalizeFirstLetter(selectedChain)}</span>
+              <span className="font-medium">{getChainDisplayName(selectedChain)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Selected Function:</span>
@@ -178,6 +177,17 @@ export function StepExport({
   );
 }
 
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+function getChainDisplayName(chainType: ChainType): string {
+  switch (chainType) {
+    case 'evm':
+      return 'Ethereum (EVM)';
+    case 'midnight':
+      return 'Midnight';
+    case 'stellar':
+      return 'Stellar';
+    case 'solana':
+      return 'Solana';
+    default:
+      return chainType;
+  }
 }

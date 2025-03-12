@@ -1,15 +1,19 @@
 import { useState } from 'react';
 
+import { getContractAdapter } from '../../adapters/index.ts';
+import { getChainName } from '../../core/utils/utils';
 import { Button } from '../ui/button';
 
-import type { AbiItem } from '../../adapters/evm/types';
+import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 
 interface StepContractDefinitionProps {
-  onContractDefinitionLoaded: (definition: AbiItem[]) => void;
+  onContractSchemaLoaded: (schema: ContractSchema) => void;
+  selectedChain: ChainType;
 }
 
 export function StepContractDefinition({
-  onContractDefinitionLoaded,
+  onContractSchemaLoaded,
+  selectedChain,
 }: StepContractDefinitionProps) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,17 +43,27 @@ export function StepContractDefinition({
 
     // Simulate API loading
     setTimeout(() => {
-      import('../../mocks/EVM_ABI_MOCK.json')
-        .then((module) => {
-          const mockContractDefinition = module.default;
-          onContractDefinitionLoaded(mockContractDefinition);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.error('Error loading mock contract definition:', err);
-          setError('Failed to load mock contract definition data');
-          setIsLoading(false);
-        });
+      try {
+        // Get the appropriate adapter for the selected chain
+        const adapter = getContractAdapter(selectedChain);
+
+        // Use the adapter to load mock data
+        adapter
+          .loadMockContract()
+          .then((contractSchema: ContractSchema) => {
+            onContractSchemaLoaded(contractSchema);
+            setIsLoading(false);
+          })
+          .catch((err: Error) => {
+            console.error(`Error loading mock contract for ${selectedChain}:`, err);
+            setError(`Failed to load mock contract definition for ${selectedChain}`);
+            setIsLoading(false);
+          });
+      } catch (err: unknown) {
+        console.error('Error getting contract adapter:', err);
+        setError(`No adapter available for ${selectedChain}`);
+        setIsLoading(false);
+      }
     }, 1000);
   };
 
@@ -108,11 +122,12 @@ export function StepContractDefinition({
         </div>
 
         <div className="bg-muted rounded-md p-4">
-          <h4 className="mb-2 font-medium">Using Mock Data</h4>
+          <h4 className="mb-2 font-medium">Using Mock Data for {getChainName(selectedChain)}</h4>
           <p className="text-muted-foreground text-sm">
-            For this proof of concept, we&apos;re using pre-configured mock data. In a production
-            environment, you would upload your actual contract definition file. The mock data
-            includes various input types to demonstrate the form building capabilities.
+            For this proof of concept, we&apos;re using pre-configured mock data for{' '}
+            {getChainName(selectedChain)}. In a production environment, you would upload your actual
+            contract definition file. The mock data includes various input types to demonstrate the
+            form building capabilities.
           </p>
         </div>
       </div>

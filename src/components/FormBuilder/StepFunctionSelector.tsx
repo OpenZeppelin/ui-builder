@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../ui/button';
 
-import type { AbiItem } from '../../adapters/evm/types';
 import type { ContractFunction, ContractSchema } from '../../core/types/ContractSchema';
 
 interface StepFunctionSelectorProps {
-  contractDefinition: AbiItem[];
+  contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   onFunctionSelected: (functionId: string | null) => void;
 }
 
 export function StepFunctionSelector({
-  contractDefinition,
+  contractSchema,
   selectedFunction,
   onFunctionSelected,
 }: StepFunctionSelectorProps) {
@@ -20,34 +19,16 @@ export function StepFunctionSelector({
   const [functions, setFunctions] = useState<ContractFunction[]>([]);
 
   useEffect(() => {
-    if (contractDefinition.length > 0) {
-      // Transform the contract definition into a chain-agnostic schema
-      const contractSchema: ContractSchema = {
-        chainType: 'evm', // Hardcoded for now, will be based on selected chain later
-        functions: contractDefinition
-          .filter((item) => item.type === 'function')
-          .map((item) => ({
-            id: `${item.name}_${item.inputs?.map((i) => i.type).join('_') || ''}`,
-            name: item.name || '',
-            displayName: item.name ? formatMethodName(item.name) : 'Unknown Method',
-            inputs:
-              item.inputs?.map((input) => ({
-                name: input.name,
-                type: input.type,
-                displayName: formatInputName(input.name, input.type),
-              })) || [],
-            type: item.type,
-            stateMutability: item.stateMutability,
-          })),
-      };
-
+    if (contractSchema) {
       // Filter to only include callable functions
       const callableFunctions = contractSchema.functions.filter(
         (fn: ContractFunction) => fn.type === 'function'
       );
       setFunctions(callableFunctions);
+    } else {
+      setFunctions([]);
     }
-  }, [contractDefinition]);
+  }, [contractSchema]);
 
   const selectFunction = (functionId: string) => {
     // Toggle selection - if already selected, deselect it
@@ -58,7 +39,7 @@ export function StepFunctionSelector({
     fn.displayName.toLowerCase().includes(filterValue.toLowerCase())
   );
 
-  if (contractDefinition.length === 0) {
+  if (!contractSchema) {
     return (
       <div className="py-8 text-center">
         <p>Please upload a contract definition first.</p>
@@ -128,22 +109,4 @@ export function StepFunctionSelector({
       </div>
     </div>
   );
-}
-
-function formatMethodName(name: string): string {
-  return name
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim();
-}
-
-function formatInputName(name: string, type: string): string {
-  if (!name || name === '') {
-    return `Parameter (${type})`;
-  }
-  return name
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .replace(/_/g, ' ')
-    .trim();
 }

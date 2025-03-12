@@ -32,6 +32,8 @@ This project is currently in development.
 
 ## Features
 
+- Chain-agnostic architecture supporting multiple blockchain ecosystems
+- Adapter pattern for easily adding support for new blockchains
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
 - Type-safe with TypeScript
@@ -124,7 +126,10 @@ transaction-form-builder/
 │   │   ├── utils/       # Utility functions
 │   │   └── hooks/       # Shared hooks
 │   ├── adapters/        # Chain-specific implementations
-│   │   └── evm/         # Ethereum Virtual Machine adapter
+│   │   ├── evm/         # Ethereum Virtual Machine adapter (mock only for now)
+│   │   ├── midnight/    # Midnight blockchain adapter (skeleton only for now)
+│   │   ├── solana/      # Solana blockchain adapter (skeleton only for now)
+│   │   └── stellar/     # Stellar blockchain adapter (skeleton only for now)
 │   ├── services/        # Core services
 │   ├── test/            # Test setup and utilities
 │   ├── App.tsx          # Main application component
@@ -138,6 +143,16 @@ transaction-form-builder/
 ├── tailwind.config.cjs  # Tailwind CSS v4 configuration
 └── ...                  # Other configuration files
 ```
+
+## Architecture
+
+The application uses an adapter pattern to support multiple blockchain ecosystems:
+
+- **Core**: Chain-agnostic components, types, and utilities
+- **Adapters**: Chain-specific implementations that conform to a common interface
+- **UI Components**: React components that use adapters to interact with different blockchains
+
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic.
 
 ## Code Style
 

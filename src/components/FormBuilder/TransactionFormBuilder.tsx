@@ -2,28 +2,32 @@ import { useCallback, useState } from 'react';
 
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
-import { Chain, StepChainSelect } from './StepChainSelect';
+import { StepChainSelect } from './StepChainSelect';
 import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
 import { StepFormCustomization } from './StepFormCustomization';
 import { StepFunctionSelector } from './StepFunctionSelector';
 
-import type { AbiItem } from '../../adapters/evm/types';
+import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import type { FormConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
-  const [selectedChain, setSelectedChain] = useState<Chain>('ethereum');
-  const [contractDefinition, setContractDefinition] = useState<AbiItem[]>([]);
+  const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
+  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
 
   // Memoize the handler functions to prevent unnecessary re-renders
-  const handleChainSelect = useCallback((chain: Chain) => {
+  const handleChainSelect = useCallback((chain: ChainType) => {
     setSelectedChain(chain);
+    // Reset contract schema when chain changes
+    setContractSchema(null);
+    setSelectedFunction(null);
+    setFormConfig(null);
   }, []);
 
-  const handleContractDefinitionLoaded = useCallback((definition: AbiItem[]) => {
-    setContractDefinition(definition);
+  const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
+    setContractSchema(schema);
   }, []);
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
@@ -74,7 +78,10 @@ export function TransactionFormBuilder() {
       id: 'contract-definition',
       title: 'Upload Contract',
       component: (
-        <StepContractDefinition onContractDefinitionLoaded={handleContractDefinitionLoaded} />
+        <StepContractDefinition
+          onContractSchemaLoaded={handleContractSchemaLoaded}
+          selectedChain={selectedChain}
+        />
       ),
     },
     {
@@ -82,7 +89,7 @@ export function TransactionFormBuilder() {
       title: 'Select Function',
       component: (
         <StepFunctionSelector
-          contractDefinition={contractDefinition}
+          contractSchema={contractSchema}
           onFunctionSelected={handleFunctionSelected}
           selectedFunction={selectedFunction}
         />
@@ -93,28 +100,7 @@ export function TransactionFormBuilder() {
       title: 'Customize Form',
       component: (
         <StepFormCustomization
-          contractSchema={
-            contractDefinition.length > 0
-              ? {
-                  chainType: 'evm',
-                  functions: contractDefinition
-                    .filter((item) => item.type === 'function')
-                    .map((item) => ({
-                      id: `${item.name}_${item.inputs?.map((i) => i.type).join('_') || ''}`,
-                      name: item.name || '',
-                      displayName: formatMethodName(item.name || ''),
-                      inputs:
-                        item.inputs?.map((input) => ({
-                          name: input.name,
-                          type: input.type,
-                          displayName: formatInputName(input.name || '', input.type),
-                        })) || [],
-                      type: item.type || 'function',
-                      stateMutability: item.stateMutability,
-                    })),
-                }
-              : null
-          }
+          contractSchema={contractSchema}
           selectedFunction={selectedFunction}
           onFormConfigUpdated={handleFormConfigUpdated}
         />
@@ -148,22 +134,4 @@ export function TransactionFormBuilder() {
       </div>
     </div>
   );
-}
-
-function formatMethodName(name: string): string {
-  return name
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .trim();
-}
-
-function formatInputName(name: string, type: string): string {
-  if (!name || name === '') {
-    return `Parameter (${type})`;
-  }
-  return name
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^./, (str) => str.toUpperCase())
-    .replace(/_/g, ' ')
-    .trim();
 }
