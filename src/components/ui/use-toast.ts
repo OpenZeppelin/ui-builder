@@ -1,6 +1,8 @@
 // Inspired by react-hot-toast library
 import * as React from 'react';
 
+import { toast as sonnerToast, type ToastT } from 'sonner';
+
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast';
 
 const TOAST_LIMIT = 5;
@@ -19,13 +21,6 @@ const actionTypes = {
   DISMISS_TOAST: 'DISMISS_TOAST',
   REMOVE_TOAST: 'REMOVE_TOAST',
 } as const;
-
-let count = 0;
-
-function genId() {
-  count = (count + 1) % Number.MAX_VALUE;
-  return count.toString();
-}
 
 type ActionType = typeof actionTypes;
 
@@ -133,55 +128,49 @@ function dispatch(action: Action) {
   });
 }
 
-type Toast = Omit<ToasterToast, 'id'>;
+export type SonnerToastProps = {
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info';
+};
 
-function toast({ ...props }: Toast) {
-  const id = genId();
+export const useToast = () => {
+  const toast = ({ title, description, variant = 'default' }: SonnerToastProps) => {
+    if (variant === 'destructive') {
+      return sonnerToast.error(title, {
+        description,
+      });
+    }
 
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: actionTypes.UPDATE_TOAST,
-      toast: { ...props, id },
+    if (variant === 'success') {
+      return sonnerToast.success(title, {
+        description,
+      });
+    }
+
+    if (variant === 'warning') {
+      return sonnerToast.warning(title, {
+        description,
+      });
+    }
+
+    if (variant === 'info') {
+      return sonnerToast.info(title, {
+        description,
+      });
+    }
+
+    return sonnerToast(title || '', {
+      description,
     });
-  const dismiss = () => dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
-
-  dispatch({
-    type: actionTypes.ADD_TOAST,
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss();
-      },
-    },
-  });
-
-  return {
-    id: id,
-    dismiss,
-    update,
   };
-}
-
-function useToast() {
-  const [state, setState] = React.useState<State>(memoryState);
-
-  React.useEffect(() => {
-    listeners.push(setState);
-    return () => {
-      const index = listeners.indexOf(setState);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
-    };
-  }, [state]);
 
   return {
-    ...state,
     toast,
-    dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
+    // For backward compatibility
+    dismiss: (id?: string) => sonnerToast.dismiss(id),
+    toasts: [] as unknown as ToastT[],
   };
-}
+};
 
-export { toast, useToast };
+export { sonnerToast as toast };
