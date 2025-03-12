@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.3...v1.0.4) (2025-03-12)
+
+
+### Bug Fixes
+
+* **ui:** tailwind integration ([13ef57d](https://github.com/OpenZeppelin/transaction-form-builder/commit/13ef57d1e1535ef4774bf7a3bf73412485f2f594))
+
 ## [1.0.3](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.2...v1.0.3) (2025-03-07)
 
 
