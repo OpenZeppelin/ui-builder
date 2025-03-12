@@ -2,13 +2,14 @@ import { useCallback, useState } from 'react';
 
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
-import { AbiItem, StepArtifactSubmit } from './StepArtifactSubmit';
+import { StepArtifactSubmit } from './StepArtifactSubmit';
 import { Chain, StepChainSelect } from './StepChainSelect';
 import { StepExport } from './StepExport';
 import { StepFormCustomization } from './StepFormCustomization';
 import { StepFunctionSelector } from './StepFunctionSelector';
 
-import type { FormConfig } from '../../lib/types/FormTypes';
+import type { AbiItem } from '../../adapters/evm/types';
+import type { FormConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<Chain>('ethereum');

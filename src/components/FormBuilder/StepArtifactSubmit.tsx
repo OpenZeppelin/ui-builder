@@ -2,35 +2,7 @@ import { useState } from 'react';
 
 import { Button } from '../ui/button';
 
-// Define a basic type for ABI items to avoid 'any'
-export interface AbiItem {
-  type: string;
-  name?: string;
-  inputs?: Array<{
-    name: string;
-    type: string;
-    internalType?: string;
-    indexed?: boolean;
-    components?: Array<{
-      name: string;
-      type: string;
-      internalType?: string;
-      indexed?: boolean;
-    }>;
-  }>;
-  stateMutability?: string;
-  anonymous?: boolean;
-  outputs?: Array<{
-    name: string;
-    type: string;
-    internalType?: string;
-    components?: Array<{
-      name: string;
-      type: string;
-      internalType?: string;
-    }>;
-  }>;
-}
+import type { AbiItem } from '../../adapters/evm/types';
 
 interface StepArtifactSubmitProps {
   onAbiLoaded: (abi: AbiItem[]) => void;

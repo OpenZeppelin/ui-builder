@@ -119,9 +119,13 @@ transaction-form-builder/
 │   ├── components/      # Reusable UI components
 │   │   ├── ui/          # shadcn/ui components
 │   │   └── ...          # Custom components
-│   ├── lib/             # Utility functions and hooks
-│   │   ├── utils.ts     # General utilities
-│   │   └── button-variants.ts # Component variant definitions
+│   ├── core/            # Chain-agnostic core functionality
+│   │   ├── types/       # Type definitions
+│   │   ├── utils/       # Utility functions
+│   │   └── hooks/       # Shared hooks
+│   ├── adapters/        # Chain-specific implementations
+│   │   └── evm/         # Ethereum Virtual Machine adapter
+│   ├── services/        # Core services
 │   ├── test/            # Test setup and utilities
 │   ├── App.tsx          # Main application component
 │   ├── main.tsx         # Application entry point

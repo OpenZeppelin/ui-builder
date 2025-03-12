@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
 
-import type { ContractFunction, ContractSchema } from '../../lib/types/ContractSchema';
-import type { FieldType, FormConfig, FormField } from '../../lib/types/FormTypes';
+import type { ContractFunction, ContractSchema } from '../../core/types/ContractSchema';
+import type { FieldType, FormConfig, FormField } from '../../core/types/FormTypes';
 
 // Helper to generate a unique ID
 const generateId = (): string => {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../ui/button';
 
-import { AbiItem } from './StepArtifactSubmit';
+import type { AbiItem } from '../../adapters/evm/types';
 
 // Types for form configuration
 export interface FormMethod {

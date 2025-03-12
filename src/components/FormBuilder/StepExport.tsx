@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 
 import { Chain } from './StepChainSelect';
 
-import type { FormConfig } from '../../lib/types/FormTypes';
+import type { FormConfig } from '../../core/types/FormTypes';
 
 export interface StepExportProps {
   selectedChain: Chain;

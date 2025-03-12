@@ -33,33 +33,3 @@ export interface ContractSchema {
   events?: { id: string; name: string; inputs: FunctionParameter[] }[]; // More specific type
   // Other chain-agnostic schema properties
 }
-
-// Legacy type compatibility (until full refactoring)
-export type AbiItem = {
-  type: string;
-  name?: string;
-  inputs?: Array<{
-    name: string;
-    type: string;
-    internalType?: string;
-    indexed?: boolean;
-    components?: Array<{
-      name: string;
-      type: string;
-      internalType?: string;
-      indexed?: boolean;
-    }>;
-  }>;
-  stateMutability?: string;
-  anonymous?: boolean;
-  outputs?: Array<{
-    name: string;
-    type: string;
-    internalType?: string;
-    components?: Array<{
-      name: string;
-      type: string;
-      internalType?: string;
-    }>;
-  }>;
-};

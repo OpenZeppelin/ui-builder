@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../ui/button';
 
-import type { ContractFunction, ContractSchema } from '../../lib/types/ContractSchema';
+import type { ContractFunction, ContractSchema } from '../../core/types/ContractSchema';
 
 interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
