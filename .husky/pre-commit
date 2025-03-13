@@ -1,4 +1,26 @@
 #!/usr/bin/env bash
 
+echo "🔍 Running pre-commit checks..."
+
+# Try to use NVM's Node.js if available
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  # Load NVM
+  export NVM_DIR="$HOME/.nvm"
+  \. "$NVM_DIR/nvm.sh" # This loads nvm
+  
+  # Use Node.js 20+
+  nvm use 20 >/dev/null 2>&1
+  
+  echo "✅ Using Node.js $(node -v) from NVM"
+fi
+
+# Require Node.js 20+ as specified in package.json
+node_version=$(node -v | cut -d. -f1 | sed 's/v//')
+if [ "$node_version" -lt 20 ]; then
+  echo "❌ Error: Node.js version $(node -v) is incompatible. This project requires Node.js 20.11.1+."
+  echo "❌ Commit aborted. Please use Node.js 20+ for development."
+  exit 1
+fi
+
 # Only run prettier in pre-commit hook to avoid TypeScript issues
 npx lint-staged --no-stash 
