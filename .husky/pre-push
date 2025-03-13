@@ -3,11 +3,23 @@
 echo "🔍 Running linting and formatting before push..."
 
 # Debug information
-echo "📊 Debug - Shell environment:"
-echo "PATH: $PATH"
+echo "📊 Debug - Before NVM attempt:"
 echo "Which node: $(which node)"
-echo "Shell node version: $(node -v)"
-echo "Shell: $SHELL"
+echo "Node version: $(node -v)"
+
+# Try to use NVM's Node.js if available
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  echo "📊 NVM detected, attempting to use it..."
+  export NVM_DIR="$HOME/.nvm"
+  \. "$NVM_DIR/nvm.sh" # This loads nvm
+  
+  # Try to use Node.js 20, fallback to 18
+  nvm use 20 >/dev/null 2>&1 || nvm use 18 >/dev/null 2>&1
+  
+  echo "📊 After NVM attempt:"
+  echo "Which node: $(which node)"
+  echo "Node version: $(node -v)"
+fi
 
 # Skip linting if running on Node.js < 18
 node_version=$(node -v | cut -d. -f1 | sed 's/v//')
