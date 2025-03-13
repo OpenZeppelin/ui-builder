@@ -1,3 +1,10 @@
+// Polyfill for structuredClone for Node.js environments that don't support it natively
+if (typeof structuredClone !== 'function') {
+  global.structuredClone = function (obj) {
+    return JSON.parse(JSON.stringify(obj));
+  };
+}
+
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const reactRefreshPlugin = require('eslint-plugin-react-refresh');
