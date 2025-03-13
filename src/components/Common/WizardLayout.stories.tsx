@@ -3,6 +3,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 import { WizardLayout, WizardStep } from './WizardLayout';
 
@@ -26,12 +27,12 @@ const Step1 = () => (
     </p>
     <div className="flex items-center space-x-2">
       <Checkbox id="terms" />
-      <label
+      <Label
         htmlFor="terms"
         className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
       >
         I accept the terms and conditions
-      </label>
+      </Label>
     </div>
   </div>
 );
@@ -41,15 +42,15 @@ const Step2 = () => (
     <p className="text-muted-foreground">Please enter your personal information.</p>
     <div className="grid gap-4">
       <div className="grid gap-2">
-        <label htmlFor="name" className="text-sm font-medium">
+        <Label htmlFor="name" className="text-sm font-medium">
           Name
-        </label>
+        </Label>
         <Input id="name" placeholder="Enter your name" />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email" className="text-sm font-medium">
           Email
-        </label>
+        </Label>
         <Input id="email" type="email" placeholder="Enter your email" />
       </div>
     </div>
@@ -104,12 +105,12 @@ const Step4 = () => (
     </div>
     <div className="flex items-center space-x-2">
       <Checkbox id="confirm" />
-      <label
+      <Label
         htmlFor="confirm"
         className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
       >
         I confirm all information is correct
-      </label>
+      </Label>
     </div>
   </div>
 );

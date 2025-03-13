@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { getContractAdapter } from '../../adapters/index.ts';
 import { getChainName } from '../../core/utils/utils';
 import { Button } from '../ui/button';
+import { Label } from '../ui/label';
 
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 
@@ -78,10 +79,10 @@ export function StepContractDefinition({
 
       <div className="grid gap-6">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Contract Definition</label>
+          <Label className="text-sm font-medium">Contract Definition</Label>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label
+              <Label
                 htmlFor="file-upload"
                 className="hover:bg-muted/50 flex cursor-pointer items-center justify-center rounded-md border border-dashed p-4 transition-colors"
               >
@@ -112,7 +113,7 @@ export function StepContractDefinition({
                   className="sr-only"
                   onChange={handleFileUpload}
                 />
-              </label>
+              </Label>
             </div>
             <Button onClick={handleLoadMockData} disabled={isLoading}>
               {isLoading ? 'Loading...' : 'Use Mock Data'}

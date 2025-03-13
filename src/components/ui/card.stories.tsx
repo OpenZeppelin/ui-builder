@@ -2,6 +2,8 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { Button } from './button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
+import { Input } from './input';
+import { Label } from './label';
 
 const meta: Meta<typeof Card> = {
   title: 'UI/Card',
@@ -42,25 +44,16 @@ export const LoginForm: Story = {
       <CardContent>
         <form className="grid gap-4">
           <div className="grid gap-2">
-            <label htmlFor="email" className="text-sm font-medium">
+            <Label htmlFor="email" className="text-sm font-medium">
               Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="name@example.com"
-            />
+            </Label>
+            <Input id="email" type="email" placeholder="name@example.com" />
           </div>
           <div className="grid gap-2">
-            <label htmlFor="password" className="text-sm font-medium">
+            <Label htmlFor="password" className="text-sm font-medium">
               Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            />
+            </Label>
+            <Input id="password" type="password" placeholder="••••••••" />
           </div>
         </form>
       </CardContent>

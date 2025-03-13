@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { FormConfig } from '../../core/types/FormTypes';
@@ -80,7 +82,7 @@ export function StepExport({
           <h4 className="font-medium">Export Configuration</h4>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Export Type</label>
+            <Label className="text-sm font-medium">Export Type</Label>
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -107,13 +109,12 @@ export function StepExport({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="package-name" className="text-sm font-medium">
+            <Label htmlFor="package-name" className="text-sm font-medium">
               Package Name
-            </label>
-            <input
+            </Label>
+            <Input
               id="package-name"
               type="text"
-              className="border-input bg-background w-full rounded-md border p-2 text-sm shadow-sm"
               placeholder="my-transaction-form"
               value={packageName}
               onChange={(e) => setPackageName(e.target.value)}

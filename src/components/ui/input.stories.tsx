@@ -1,6 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 
 import { Input } from './input';
+import { Label } from './label';
 
 const meta: Meta<typeof Input> = {
   title: 'UI/Input',
@@ -69,9 +70,9 @@ export const Disabled: Story = {
 export const WithLabel: Story = {
   render: () => (
     <div className="grid w-full max-w-sm items-center gap-1.5">
-      <label htmlFor="input-with-label" className="text-sm font-medium">
+      <Label htmlFor="input-with-label" className="text-sm font-medium">
         Email
-      </label>
+      </Label>
       <Input id="input-with-label" placeholder="Enter your email" />
       <p className="text-muted-foreground text-sm">Enter your email address.</p>
     </div>
@@ -82,15 +83,15 @@ export const InputGroup: Story = {
   render: () => (
     <div className="grid w-full max-w-sm gap-3">
       <div className="grid gap-1.5">
-        <label htmlFor="name" className="text-sm font-medium">
+        <Label htmlFor="name" className="text-sm font-medium">
           Name
-        </label>
+        </Label>
         <Input id="name" placeholder="Enter your name" />
       </div>
       <div className="grid gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email" className="text-sm font-medium">
           Email
-        </label>
+        </Label>
         <Input id="email" type="email" placeholder="Enter your email" />
       </div>
     </div>
