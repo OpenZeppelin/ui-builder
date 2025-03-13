@@ -2,6 +2,13 @@
 
 echo "🔍 Running linting and formatting before push..."
 
+# Debug information
+echo "📊 Debug - Shell environment:"
+echo "PATH: $PATH"
+echo "Which node: $(which node)"
+echo "Shell node version: $(node -v)"
+echo "Shell: $SHELL"
+
 # Skip linting if running on Node.js < 18
 node_version=$(node -v | cut -d. -f1 | sed 's/v//')
 if [ "$node_version" -lt 18 ]; then
