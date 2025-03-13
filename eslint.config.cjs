@@ -1,3 +1,10 @@
+// Add polyfill for structuredClone on older Node.js versions
+if (typeof globalThis.structuredClone !== 'function') {
+  globalThis.structuredClone = function structuredClone(value) {
+    return JSON.parse(JSON.stringify(value));
+  };
+}
+
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const reactRefreshPlugin = require('eslint-plugin-react-refresh');
@@ -66,6 +73,16 @@ module.exports = [
     rules: {
       ...typescriptPlugin.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/ban-ts-comment': [
+        'warn',
+        {
+          'ts-expect-error': 'allow-with-description',
+          'ts-ignore': 'allow-with-description',
+          'ts-nocheck': true,
+          'ts-check': false,
+          minimumDescriptionLength: 3,
+        },
+      ],
     },
   },
 
