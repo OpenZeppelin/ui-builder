@@ -1,7 +1,14 @@
 // Polyfill for structuredClone for Node.js environments that don't support it natively
+// This is a temporary solution for compatibility with ESLint 9 and will be removed once
+// all dependencies are fully compatible
 if (typeof structuredClone !== 'function') {
   global.structuredClone = function (obj) {
-    return JSON.parse(JSON.stringify(obj));
+    try {
+      return JSON.parse(JSON.stringify(obj));
+    } catch (e) {
+      // For circular references or other non-serializable objects, fallback to a shallow copy
+      return Object.assign({}, obj);
+    }
   };
 }
 
@@ -14,6 +21,29 @@ const importPlugin = require('eslint-plugin-import');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
+
+// Safely extract configs to handle both ESLint v8 and v9 formats
+const getPluginConfigs = (plugin, configName) => {
+  try {
+    // ESLint v9 format
+    if (plugin.configs && plugin.configs[configName] && plugin.configs[configName].rules) {
+      return plugin.configs[configName].rules;
+    }
+    // ESLint v8 format (fallback)
+    if (plugin.configs && plugin.configs[configName]) {
+      return plugin.configs[configName].rules || {};
+    }
+    return {};
+  } catch (e) {
+    console.warn(`Failed to load rules from ${configName}:`, e);
+    return {};
+  }
+};
+
+// We need to get these safely since the structure might differ
+const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommended');
+const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
+const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
 module.exports = [
   {
@@ -71,7 +101,7 @@ module.exports = [
       },
     },
     rules: {
-      ...typescriptPlugin.configs.recommended.rules,
+      ...typescriptRecommendedRules,
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
@@ -85,8 +115,8 @@ module.exports = [
       'react-refresh': reactRefreshPlugin,
     },
     rules: {
-      ...reactPlugin.configs.recommended.rules,
-      ...reactHooksPlugin.configs.recommended.rules,
+      ...reactRecommendedRules,
+      ...reactHooksRecommendedRules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
@@ -134,7 +164,7 @@ module.exports = [
       prettier: prettierPlugin,
     },
     rules: {
-      ...prettierConfig.rules,
+      ...(prettierConfig.rules || {}),
       'prettier/prettier': ['error', {}, { usePrettierrc: true }],
     },
   },
