@@ -69,7 +69,7 @@ export const Disabled: Story = {
 
 export const WithLabel: Story = {
   render: () => (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
+    <div className="grid w-full max-w-sm items-center gap-2">
       <Label htmlFor="input-with-label" className="text-sm font-medium">
         Email
       </Label>
@@ -81,14 +81,14 @@ export const WithLabel: Story = {
 
 export const InputGroup: Story = {
   render: () => (
-    <div className="grid w-full max-w-sm gap-3">
-      <div className="grid gap-1.5">
+    <div className="grid w-full max-w-sm gap-4">
+      <div className="grid gap-2">
         <Label htmlFor="name" className="text-sm font-medium">
           Name
         </Label>
         <Input id="name" placeholder="Enter your name" />
       </div>
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         <Label htmlFor="email" className="text-sm font-medium">
           Email
         </Label>

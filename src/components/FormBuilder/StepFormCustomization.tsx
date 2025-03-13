@@ -29,7 +29,7 @@ function FieldEditor({
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Edit Field</h3>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="field-label">Label</Label>
         <Input
           id="field-label"
@@ -38,7 +38,7 @@ function FieldEditor({
         />
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="field-placeholder">Placeholder</Label>
         <Input
           id="field-placeholder"
@@ -49,7 +49,7 @@ function FieldEditor({
         />
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="field-help">Help Text</Label>
         <Textarea
           id="field-help"
@@ -60,7 +60,7 @@ function FieldEditor({
         />
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="field-type">Field Type</Label>
         <Select
           value={field.type}
@@ -81,7 +81,7 @@ function FieldEditor({
         </Select>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="field-width">Field Width</Label>
         <Select
           value={field.width || 'full'}
@@ -207,7 +207,7 @@ function ValidationEditor({
 }) {
   return (
     <div className="space-y-4">
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="validation-mode">Validation Mode</Label>
         <Select
           value={validationConfig.mode}
@@ -224,7 +224,7 @@ function ValidationEditor({
         </Select>
       </div>
 
-      <div>
+      <div className="flex flex-col gap-2">
         <Label htmlFor="validation-display">Error Display</Label>
         <Select
           value={validationConfig.showErrors}
@@ -491,7 +491,7 @@ export function StepFormCustomization({
             {/* Layout configuration */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="layout-columns">Layout Columns</Label>
                   <Select
                     value={formConfig.layout.columns.toString()}
@@ -508,7 +508,7 @@ export function StepFormCustomization({
                   </Select>
                 </div>
 
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="layout-spacing">Field Spacing</Label>
                   <Select
                     value={formConfig.layout.spacing}
@@ -529,7 +529,7 @@ export function StepFormCustomization({
                   </Select>
                 </div>
 
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="layout-labels">Label Position</Label>
                   <Select
                     value={formConfig.layout.labelPosition}
