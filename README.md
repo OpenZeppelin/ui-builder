@@ -59,7 +59,7 @@ This project is currently in development.
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
+- Node.js (v18.17.0 or higher)
 - pnpm (v9 or higher)
 
 ### Installation
