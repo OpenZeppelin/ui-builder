@@ -36,7 +36,7 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
   const currentStep = steps[currentStepIndex];
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col space-y-8 p-6">
+    <div className="flex w-full flex-col space-y-8 p-6">
       <div className="flex flex-col space-y-4">
         <h2 className="text-2xl font-bold">{currentStep.title}</h2>
 
