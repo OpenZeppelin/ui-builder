@@ -2,25 +2,25 @@
 
 echo "🔍 Running linting and formatting before push..."
 
-# Try to use NVM's Node.js if available (required for ESLint 9)
+# Try to use NVM's Node.js if available
 if [ -s "$HOME/.nvm/nvm.sh" ]; then
   # Load NVM
   export NVM_DIR="$HOME/.nvm"
   \. "$NVM_DIR/nvm.sh" # This loads nvm
   
-  # Try to use Node.js 20, fallback to 18
-  nvm use 20 >/dev/null 2>&1 || nvm use 18 >/dev/null 2>&1
+  # Use Node.js 20+
+  nvm use 20 >/dev/null 2>&1
   
   echo "✅ Using Node.js $(node -v) from NVM"
 fi
 
-# Skip linting if running on Node.js < 18
+# Require Node.js 20+ as specified in package.json
 node_version=$(node -v | cut -d. -f1 | sed 's/v//')
-if [ "$node_version" -lt 18 ]; then
-  echo "⚠️ Warning: Node.js version $(node -v) is less than 18. ESLint 9 requires Node.js 18.17.0+."
-  echo "⚠️ Skipping linting to allow push. Please use Node.js 20+ for development."
-  exit 0
+if [ "$node_version" -lt 20 ]; then
+  echo "❌ Error: Node.js version $(node -v) is incompatible. This project requires Node.js 20.11.1+."
+  echo "❌ Push aborted. Please use Node.js 20+ for development."
+  exit 1
 fi
 
-# Run linting only if we have a compatible Node.js version
+# Run linting with compatible Node.js version
 pnpm fix-all 
