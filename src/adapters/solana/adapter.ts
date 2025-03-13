@@ -54,7 +54,7 @@ export class SolanaAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Solana type mapping in future phases
    */
-  mapParameterTypeToFieldType(parameterType: string): FieldType {
+  mapParameterTypeToFieldType(_parameterType: string): FieldType {
     // Placeholder implementation that defaults everything to text fields
     return 'text';
   }
@@ -83,7 +83,7 @@ export class SolanaAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Solana transaction formatting in future phases
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
+  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
     return { placeholder: 'Solana adapter not implemented yet' };
   }
 
@@ -92,7 +92,7 @@ export class SolanaAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Solana transaction signing in future phases
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+  async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
     return { txHash: 'solana_placeholder_tx' };
   }
 }

@@ -54,7 +54,7 @@ export class StellarAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Stellar type mapping in future phases
    */
-  mapParameterTypeToFieldType(parameterType: string): FieldType {
+  mapParameterTypeToFieldType(_parameterType: string): FieldType {
     // Placeholder implementation that defaults everything to text fields
     return 'text';
   }
@@ -83,7 +83,7 @@ export class StellarAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Stellar transaction formatting in future phases
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
+  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
     return { placeholder: 'Stellar adapter not implemented yet' };
   }
 
@@ -92,7 +92,7 @@ export class StellarAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Stellar transaction signing in future phases
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+  async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
     return { txHash: 'stellar_placeholder_tx' };
   }
 }

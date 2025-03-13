@@ -7,9 +7,9 @@
 
 import type { ChainType, ContractSchema } from '../core/types/ContractSchema';
 
-// This will be populated with chain adapters
+// This will be populated with chain adapters in future implementations
 // We'll define a proper adapter interface later
-const adapters: Record<string, unknown> = {};
+// const _adapters: Record<string, unknown> = {};
 
 /**
  * Loads a contract definition using the appropriate chain adapter

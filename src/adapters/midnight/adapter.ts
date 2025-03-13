@@ -54,7 +54,7 @@ export class MidnightAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Midnight type mapping in future phases
    */
-  mapParameterTypeToFieldType(parameterType: string): FieldType {
+  mapParameterTypeToFieldType(_parameterType: string): FieldType {
     // Placeholder implementation that defaults everything to text fields
     return 'text';
   }
@@ -83,7 +83,7 @@ export class MidnightAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Midnight transaction formatting in future phases
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
+  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
     return { placeholder: 'Midnight adapter not implemented yet' };
   }
 
@@ -92,8 +92,23 @@ export class MidnightAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Midnight transaction signing in future phases
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+  async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
     return { txHash: 'midnight_placeholder_tx' };
+  }
+
+  getFieldInputType(_parameterType: string): FieldType {
+    // Placeholder implementation that defaults everything to text fields
+    return 'text';
+  }
+
+  buildExecuteTransaction(_functionId: string, _inputs: Record<string, unknown>): Promise<unknown> {
+    // Placeholder implementation that defaults everything to text fields
+    return Promise.resolve({});
+  }
+
+  parseTransactionResult(_transactionData: unknown): unknown {
+    // Placeholder implementation that defaults everything to text fields
+    return {};
   }
 }
 

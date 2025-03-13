@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
