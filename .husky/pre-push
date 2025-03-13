@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
 
 echo "🔍 Running linting and formatting before push..."
+
+# Ensure we're using Node.js 20+ for compatibility with ESLint 9
+if command -v nvm &> /dev/null; then
+  echo "Using nvm to set Node.js version..."
+  # Use nvm to set Node.js version
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  nvm use 20 || nvm use 18 || echo "Warning: Could not set Node.js 18+, linting may fail"
+else
+  echo "nvm not found. Checking Node.js version..."
+  node_version=$(node -v | cut -d. -f1 | sed 's/v//')
+  if [ "$node_version" -lt 18 ]; then
+    echo "Warning: Node.js version $(node -v) is less than 18. ESLint 9 requires Node.js 18.17.0+."
+    echo "Linting may fail. Consider upgrading Node.js or installing nvm."
+  fi
+fi
+
+# Run the linting and formatting commands
 pnpm fix-all 
