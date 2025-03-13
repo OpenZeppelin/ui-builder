@@ -1,84 +1,45 @@
-import type { ContractSchema } from '../../core/types/ContractSchema';
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import type { FieldType, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 
 /**
  * Solana-specific adapter implementation
+ *
+ * NOTE: This is just a minimal placeholder implementation. The project is currently focusing
+ * exclusively on the EVM adapter. This adapter will be properly implemented in future phases
+ * when we expand support to the Solana blockchain.
  */
 export class SolanaAdapter implements ContractAdapter {
   /**
    * Load a contract from a file or address
+   *
+   * TODO: Implement actual Solana program loading logic in future phases
    */
   async loadContract(source: string): Promise<ContractSchema> {
-    // In a real implementation, this would fetch the program IDL from Solana
-    console.log(`Loading Solana program from: ${source}`);
-
-    // For now, just return the mock contract
+    console.log(`[PLACEHOLDER] Loading Solana program from: ${source}`);
     return this.loadMockContract();
   }
 
   /**
    * Load a mock contract for testing
+   *
+   * TODO: Implement proper Solana program schema in future phases
    */
   async loadMockContract(): Promise<ContractSchema> {
-    // In a real implementation, this would load a Solana-specific mock
-    // For now, we'll create a simple mock contract schema
-
-    const contractSchema: ContractSchema = {
+    // Simple minimal mock contract schema
+    return {
       chainType: 'solana',
-      name: 'MockSolanaProgram',
+      name: 'PlaceholderSolanaProgram',
       functions: [
         {
-          id: 'transfer_sol',
-          name: 'transfer',
-          displayName: 'Transfer SOL',
+          id: 'dummy_function',
+          name: 'placeholderFunction',
+          displayName: 'Placeholder Function',
           inputs: [
             {
-              name: 'recipient',
-              type: 'publicKey',
-              displayName: 'Recipient Address',
-            },
-            {
-              name: 'amount',
-              type: 'u64',
-              displayName: 'Amount (lamports)',
-            },
-          ],
-          type: 'function',
-          stateMutability: 'nonpayable',
-        },
-        {
-          id: 'create_token_account',
-          name: 'createTokenAccount',
-          displayName: 'Create Token Account',
-          inputs: [
-            {
-              name: 'mint',
-              type: 'publicKey',
-              displayName: 'Token Mint Address',
-            },
-            {
-              name: 'owner',
-              type: 'publicKey',
-              displayName: 'Owner Address',
-            },
-          ],
-          type: 'function',
-          stateMutability: 'nonpayable',
-        },
-        {
-          id: 'mint_to',
-          name: 'mintTo',
-          displayName: 'Mint Tokens',
-          inputs: [
-            {
-              name: 'tokenAccount',
-              type: 'publicKey',
-              displayName: 'Token Account',
-            },
-            {
-              name: 'amount',
-              type: 'u64',
-              displayName: 'Amount',
+              name: 'dummyParam',
+              type: 'string',
+              displayName: 'Dummy Parameter',
             },
           ],
           type: 'function',
@@ -86,39 +47,53 @@ export class SolanaAdapter implements ContractAdapter {
         },
       ],
     };
+  }
 
-    return contractSchema;
+  /**
+   * Map a Solana-specific parameter type to a form field type
+   *
+   * TODO: Implement proper Solana type mapping in future phases
+   */
+  mapParameterTypeToFieldType(parameterType: string): FieldType {
+    // Placeholder implementation that defaults everything to text fields
+    return 'text';
+  }
+
+  /**
+   * Generate default field configuration for a Solana function parameter
+   *
+   * TODO: Implement proper Solana field generation in future phases
+   */
+  generateDefaultField(parameter: FunctionParameter): FormField {
+    return {
+      id: Math.random().toString(36).substring(2, 11),
+      name: parameter.name || 'placeholder',
+      label: parameter.displayName || parameter.name || 'Placeholder Field',
+      type: 'text',
+      placeholder: 'Placeholder - not implemented yet',
+      helperText: 'Solana adapter is not fully implemented yet',
+      defaultValue: '',
+      validation: { required: true },
+      width: 'full',
+    };
   }
 
   /**
    * Format transaction data for the specific chain
+   *
+   * TODO: Implement proper Solana transaction formatting in future phases
    */
   formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
-    // In a real implementation, this would create a Solana transaction instruction
-    console.log(`Formatting Solana transaction data for function: ${functionId}`);
-    console.log('Inputs:', inputs);
-
-    // Return a mock transaction object
-    return {
-      programId: 'SoLaNaPrOgRaMiDxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXx',
-      functionId,
-      inputs,
-      // Solana-specific fields would go here
-      signers: ['wallet'],
-    };
+    return { placeholder: 'Solana adapter not implemented yet' };
   }
 
   /**
    * Sign and broadcast a transaction
+   *
+   * TODO: Implement proper Solana transaction signing in future phases
    */
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    // In a real implementation, this would use @solana/web3.js to sign and broadcast
-    console.log('Signing and broadcasting Solana transaction:', transactionData);
-
-    // Return a mock transaction hash
-    return {
-      txHash: `solana_tx_${Math.random().toString(36).substring(2, 15)}`,
-    };
+    return { txHash: 'solana_placeholder_tx' };
   }
 }
 

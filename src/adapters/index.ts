@@ -3,7 +3,8 @@ import MidnightAdapter from './midnight/adapter.ts';
 import SolanaAdapter from './solana/adapter.ts';
 import StellarAdapter from './stellar/adapter.ts';
 
-import type { ChainType, ContractSchema } from '../core/types/ContractSchema';
+import type { ChainType, ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
+import type { FieldType, FormField } from '../core/types/FormTypes';
 
 /**
  * Interface for contract adapters
@@ -18,6 +19,20 @@ export interface ContractAdapter {
    * Load a mock contract for testing
    */
   loadMockContract(): Promise<ContractSchema>;
+
+  /**
+   * Map a blockchain-specific parameter type to a form field type
+   * @param parameterType The blockchain parameter type (e.g., uint256, address)
+   * @returns The appropriate form field type
+   */
+  mapParameterTypeToFieldType(parameterType: string): FieldType;
+
+  /**
+   * Generate default field configuration for a function parameter
+   * @param parameter The function parameter to convert to a form field
+   * @returns A form field configuration with appropriate defaults
+   */
+  generateDefaultField(parameter: FunctionParameter): FormField;
 
   /**
    * Format transaction data for the specific chain

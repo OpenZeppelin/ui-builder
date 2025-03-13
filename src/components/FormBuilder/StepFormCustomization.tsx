@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { getContractAdapter } from '../../adapters/index.ts';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
@@ -17,38 +18,13 @@ const generateId = (): string => {
   return Math.random().toString(36).substring(2, 11);
 };
 
-// Map blockchain types to form field types
-const typeMapping: Record<string, FieldType> = {
-  address: 'address',
-  string: 'text',
-  uint256: 'amount',
-  uint8: 'number',
-  uint: 'number',
-  int: 'number',
-  bool: 'checkbox',
-  bytes: 'text',
-  bytes32: 'text',
-};
-
-// Map parameter type to field type
-const mapParameterTypeToFieldType = (parameterType: string): FieldType => {
-  const baseType = parameterType.replace(/\[\]$/, ''); // Remove array suffix if present
-  return typeMapping[baseType] || 'text';
-};
-
-interface StepFormCustomizationProps {
-  contractSchema: ContractSchema | null;
-  selectedFunction: string | null;
-  onFormConfigUpdated: (config: FormConfig) => void;
-}
-
 // Component to edit a single field's properties
 function FieldEditor({
   field,
   onUpdate,
 }: {
   field: FormField;
-  onUpdate: (updates: Partial<FormField>) => void;
+  onUpdate: (updatedField: Partial<FormField>) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -271,6 +247,12 @@ function ValidationEditor({
   );
 }
 
+interface StepFormCustomizationProps {
+  contractSchema: ContractSchema | null;
+  selectedFunction: string | null;
+  onFormConfigUpdated: (config: FormConfig) => void;
+}
+
 export function StepFormCustomization({
   contractSchema,
   selectedFunction,
@@ -305,53 +287,91 @@ export function StepFormCustomization({
       selectedFunctionDetails &&
       !configInitialized.current
     ) {
-      // Create default form fields from function inputs
-      const fields: FormField[] = selectedFunctionDetails.inputs.map((input) => {
-        const fieldType = mapParameterTypeToFieldType(input.type);
+      try {
+        // Get the appropriate adapter for the selected chain
+        const adapter = getContractAdapter(contractSchema.chainType);
 
-        return {
-          id: generateId(),
-          name: input.name || input.type,
-          label: input.displayName || input.name || input.type,
-          type: fieldType,
-          placeholder: `Enter ${input.displayName || input.name || input.type}`,
-          helperText: '',
-          defaultValue: fieldType === 'checkbox' ? false : '',
-          validation: {
-            required: true,
+        // Create default form fields from function inputs using the adapter
+        const fields: FormField[] = selectedFunctionDetails.inputs.map((input) => {
+          return adapter.generateDefaultField(input);
+        });
+
+        const config: FormConfig = {
+          functionId: selectedFunction,
+          fields,
+          layout: {
+            columns: 1,
+            spacing: 'normal',
+            labelPosition: 'top',
           },
-          width: 'full',
+          theme: {},
+          validation: {
+            mode: 'onChange',
+            showErrors: 'inline',
+          },
         };
-      });
 
-      const config: FormConfig = {
-        functionId: selectedFunction,
-        fields,
-        layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
-        },
-        theme: {},
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
-      };
+        // Set the flag to prevent re-initialization
+        configInitialized.current = true;
 
-      // Set the flag to prevent re-initialization
-      configInitialized.current = true;
+        // Update state first
+        setFormConfig(config);
 
-      // Update state first
-      setFormConfig(config);
+        // Track what we're sending to parent to avoid loops
+        lastParentUpdate.current = config;
 
-      // Track what we're sending to parent to avoid loops
-      lastParentUpdate.current = config;
+        // Notify parent outside of render/effect cycle
+        setTimeout(() => {
+          onFormConfigUpdated(config);
+        }, 0);
+      } catch (error) {
+        console.error('Error generating form configuration:', error);
+        // If adapter fails, fall back to basic form config with text fields
+        const fields: FormField[] = selectedFunctionDetails.inputs.map((input) => {
+          return {
+            id: generateId(),
+            name: input.name || input.type,
+            label: input.displayName || input.name || input.type,
+            type: 'text',
+            placeholder: `Enter ${input.displayName || input.name || input.type}`,
+            helperText: '',
+            defaultValue: '',
+            validation: {
+              required: true,
+            },
+            width: 'full',
+          };
+        });
 
-      // Notify parent outside of render/effect cycle
-      setTimeout(() => {
-        onFormConfigUpdated(config);
-      }, 0);
+        const config: FormConfig = {
+          functionId: selectedFunction,
+          fields,
+          layout: {
+            columns: 1,
+            spacing: 'normal',
+            labelPosition: 'top',
+          },
+          theme: {},
+          validation: {
+            mode: 'onChange',
+            showErrors: 'inline',
+          },
+        };
+
+        // Set the flag to prevent re-initialization
+        configInitialized.current = true;
+
+        // Update state first
+        setFormConfig(config);
+
+        // Track what we're sending to parent to avoid loops
+        lastParentUpdate.current = config;
+
+        // Notify parent outside of render/effect cycle
+        setTimeout(() => {
+          onFormConfigUpdated(config);
+        }, 0);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractSchema, selectedFunction, selectedFunctionDetails]); // deliberately omit onFormConfigUpdated to avoid infinite loops since it may change frequently and we're using setTimeout to break the loop

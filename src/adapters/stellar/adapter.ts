@@ -1,75 +1,45 @@
-import type { ContractSchema } from '../../core/types/ContractSchema';
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import type { FieldType, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 
 /**
  * Stellar-specific adapter implementation
+ *
+ * NOTE: This is just a minimal placeholder implementation. The project is currently focusing
+ * exclusively on the EVM adapter. This adapter will be properly implemented in future phases
+ * when we expand support to the Stellar blockchain.
  */
 export class StellarAdapter implements ContractAdapter {
   /**
    * Load a contract from a file or address
+   *
+   * TODO: Implement actual Stellar contract loading logic in future phases
    */
   async loadContract(source: string): Promise<ContractSchema> {
-    // In a real implementation, this would fetch the contract definition from Stellar
-    console.log(`Loading Stellar contract from: ${source}`);
-
-    // For now, just return the mock contract
+    console.log(`[PLACEHOLDER] Loading Stellar contract from: ${source}`);
     return this.loadMockContract();
   }
 
   /**
    * Load a mock contract for testing
+   *
+   * TODO: Implement proper Stellar contract schema in future phases
    */
   async loadMockContract(): Promise<ContractSchema> {
-    // In a real implementation, this would load a Stellar-specific mock
-    // For now, we'll create a simple mock contract schema
-
-    const contractSchema: ContractSchema = {
+    // Simple minimal mock contract schema
+    return {
       chainType: 'stellar',
-      name: 'MockStellarContract',
+      name: 'PlaceholderStellarContract',
       functions: [
         {
-          id: 'send_payment',
-          name: 'sendPayment',
-          displayName: 'Send Payment',
+          id: 'dummy_function',
+          name: 'placeholderFunction',
+          displayName: 'Placeholder Function',
           inputs: [
             {
-              name: 'destination',
+              name: 'dummyParam',
               type: 'string',
-              displayName: 'Destination Address',
-            },
-            {
-              name: 'amount',
-              type: 'string',
-              displayName: 'Amount',
-            },
-            {
-              name: 'asset',
-              type: 'string',
-              displayName: 'Asset Code',
-            },
-          ],
-          type: 'function',
-          stateMutability: 'nonpayable',
-        },
-        {
-          id: 'create_trustline',
-          name: 'createTrustline',
-          displayName: 'Create Trustline',
-          inputs: [
-            {
-              name: 'assetCode',
-              type: 'string',
-              displayName: 'Asset Code',
-            },
-            {
-              name: 'issuer',
-              type: 'string',
-              displayName: 'Issuer Address',
-            },
-            {
-              name: 'limit',
-              type: 'string',
-              displayName: 'Limit (Optional)',
+              displayName: 'Dummy Parameter',
             },
           ],
           type: 'function',
@@ -77,39 +47,53 @@ export class StellarAdapter implements ContractAdapter {
         },
       ],
     };
+  }
 
-    return contractSchema;
+  /**
+   * Map a Stellar-specific parameter type to a form field type
+   *
+   * TODO: Implement proper Stellar type mapping in future phases
+   */
+  mapParameterTypeToFieldType(parameterType: string): FieldType {
+    // Placeholder implementation that defaults everything to text fields
+    return 'text';
+  }
+
+  /**
+   * Generate default field configuration for a Stellar function parameter
+   *
+   * TODO: Implement proper Stellar field generation in future phases
+   */
+  generateDefaultField(parameter: FunctionParameter): FormField {
+    return {
+      id: Math.random().toString(36).substring(2, 11),
+      name: parameter.name || 'placeholder',
+      label: parameter.displayName || parameter.name || 'Placeholder Field',
+      type: 'text',
+      placeholder: 'Placeholder - not implemented yet',
+      helperText: 'Stellar adapter is not fully implemented yet',
+      defaultValue: '',
+      validation: { required: true },
+      width: 'full',
+    };
   }
 
   /**
    * Format transaction data for the specific chain
+   *
+   * TODO: Implement proper Stellar transaction formatting in future phases
    */
   formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
-    // In a real implementation, this would create a Stellar transaction
-    console.log(`Formatting Stellar transaction data for function: ${functionId}`);
-    console.log('Inputs:', inputs);
-
-    // Return a mock transaction object
-    return {
-      functionId,
-      inputs,
-      // Stellar-specific fields would go here
-      network: 'testnet',
-      fee: '100',
-    };
+    return { placeholder: 'Stellar adapter not implemented yet' };
   }
 
   /**
    * Sign and broadcast a transaction
+   *
+   * TODO: Implement proper Stellar transaction signing in future phases
    */
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    // In a real implementation, this would use Stellar SDK to sign and broadcast
-    console.log('Signing and broadcasting Stellar transaction:', transactionData);
-
-    // Return a mock transaction hash
-    return {
-      txHash: `stellar_tx_${Math.random().toString(36).substring(2, 15)}`,
-    };
+    return { txHash: 'stellar_placeholder_tx' };
   }
 }
 

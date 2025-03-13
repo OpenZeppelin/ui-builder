@@ -1,6 +1,37 @@
-import type { ContractSchema } from '../../core/types/ContractSchema';
+import type { ChainType, ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import type { FieldType, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 import type { AbiItem } from './types';
+
+/**
+ * EVM-specific type mapping
+ */
+const EVM_TYPE_MAPPING: Record<string, FieldType> = {
+  address: 'address',
+  string: 'text',
+  uint256: 'amount',
+  uint8: 'number',
+  uint16: 'number',
+  uint32: 'number',
+  uint64: 'number',
+  uint128: 'number',
+  uint: 'number',
+  int8: 'number',
+  int16: 'number',
+  int32: 'number',
+  int64: 'number',
+  int128: 'number',
+  int256: 'number',
+  int: 'number',
+  bool: 'checkbox',
+  bytes: 'text',
+  bytes32: 'text',
+};
+
+// Helper to generate a unique ID for form fields
+const generateId = (): string => {
+  return Math.random().toString(36).substring(2, 11);
+};
 
 /**
  * EVM-specific adapter implementation
@@ -52,6 +83,91 @@ export class EVMAdapter implements ContractAdapter {
       console.error('Error loading mock EVM contract:', error);
       throw new Error('Failed to load mock EVM contract');
     }
+  }
+
+  /**
+   * Map an EVM-specific parameter type to a form field type
+   * @param parameterType The EVM parameter type (e.g., uint256, address)
+   * @returns The appropriate form field type
+   */
+  mapParameterTypeToFieldType(parameterType: string): FieldType {
+    // Remove array suffix if present (e.g., uint256[] -> uint256)
+    const baseType = parameterType.replace(/\[\d*\]$/, '');
+
+    // Handle tuples (structs) - for now, just use a textarea
+    if (baseType.startsWith('tuple')) {
+      return 'textarea';
+    }
+
+    // Return the mapped type or default to text if no mapping exists
+    return EVM_TYPE_MAPPING[baseType] || 'text';
+  }
+
+  /**
+   * Generate default field configuration for an EVM function parameter
+   * @param parameter The function parameter to convert to a form field
+   * @returns A form field configuration with appropriate defaults
+   */
+  generateDefaultField(parameter: FunctionParameter): FormField {
+    const fieldType = this.mapParameterTypeToFieldType(parameter.type);
+
+    // Create a default field based on the parameter
+    return {
+      id: generateId(),
+      name: parameter.name || parameter.type,
+      label: parameter.displayName || parameter.name || parameter.type,
+      type: fieldType,
+      placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
+      helperText: parameter.description || '',
+      defaultValue: this.getDefaultValueForType(fieldType),
+      validation: this.getDefaultValidationForType(parameter.type),
+      width: 'full',
+    };
+  }
+
+  /**
+   * Get a default value for a field type
+   * @param fieldType The form field type
+   * @returns An appropriate default value
+   */
+  private getDefaultValueForType(fieldType: FieldType): unknown {
+    switch (fieldType) {
+      case 'checkbox':
+        return false;
+      case 'number':
+      case 'amount':
+        return 0;
+      case 'address':
+        return '';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Get default validation rules for a parameter type
+   * @param parameterType The EVM parameter type
+   * @returns Validation rules appropriate for the type
+   */
+  private getDefaultValidationForType(parameterType: string): {
+    required?: boolean;
+    pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+  } {
+    const validation = { required: true };
+
+    // Add specific validation rules based on the parameter type
+    if (parameterType === 'address') {
+      return {
+        ...validation,
+        pattern: '^0x[a-fA-F0-9]{40}$',
+        minLength: 42,
+        maxLength: 42,
+      };
+    }
+
+    return validation;
   }
 
   /**
