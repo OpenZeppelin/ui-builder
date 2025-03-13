@@ -17,7 +17,7 @@ Thank you for considering contributing to Transaction Form Builder! This documen
 
 1. Ensure your code follows the style guidelines of the project
 2. Update the README.md with details of changes if applicable
-3. The PR should work for all supported Node.js versions
+3. The PR should work for Node.js version 20.11.1 or higher
 4. Include tests for new features or bug fixes
 5. Link any relevant issues in the PR description
 
@@ -72,4 +72,4 @@ This will guide you through an interactive process to create a properly formatte
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's license. 
+By contributing, you agree that your contributions will be licensed under the project's license.
