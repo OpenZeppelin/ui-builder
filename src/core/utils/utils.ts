@@ -4,6 +4,7 @@
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { ChainType } from '../types/ContractSchema';
 
@@ -33,8 +34,13 @@ export function getChainName(chain: ChainType): string {
 }
 
 /**
- * Generates a unique ID for form fields, etc.
+ * Generates a unique ID for form fields, components, etc.
+ * Uses the uuid library for proper RFC 4122 UUID v4 generation.
+ *
+ * @param prefix Optional prefix to add before the UUID
+ * @returns A string ID that is guaranteed to be unique
  */
-export function generateId(): string {
-  return Math.random().toString(36).substring(2, 11);
+export function generateId(prefix?: string): string {
+  const uuid = uuidv4();
+  return prefix ? `${prefix}_${uuid}` : uuid;
 }

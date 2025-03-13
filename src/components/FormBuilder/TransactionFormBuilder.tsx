@@ -66,6 +66,32 @@ export function TransactionFormBuilder() {
       function: selectedFunction,
       formConfig,
     });
+
+    // -----------------------------------------------------------------------
+    // COMPLEX FIELDS HANDLING
+    // -----------------------------------------------------------------------
+    // This section detects form fields that represent complex blockchain data types
+    // (like arrays and objects) that require special handling during export.
+    //
+    // TODO: Enhance this implementation to:
+    //  - Parse JSON input from textareas into proper JavaScript data structures
+    //  - Validate the parsed data against expected blockchain types
+    //  - Handle nested arrays and objects
+    //  - Provide proper error handling for malformed JSON
+    //  - Consider providing a specialized UI for array/tuple editing instead of raw JSON
+    // -----------------------------------------------------------------------
+    if (formConfig) {
+      // Log which fields are complex types to assist with the export process
+      const complexFields = formConfig.fields.filter(
+        (field) =>
+          field.type === 'textarea' &&
+          (field.helperText?.includes('JSON array') || field.helperText?.includes('JSON object'))
+      );
+
+      if (complexFields.length > 0) {
+        console.log('Complex fields detected:', complexFields);
+      }
+    }
   }, [selectedChain, selectedFunction, formConfig]);
 
   const steps: WizardStep[] = [

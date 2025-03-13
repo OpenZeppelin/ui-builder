@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { getContractAdapter } from '../../adapters/index.ts';
+import {
+  generateFallbackFields,
+  generateFormConfig,
+  updateFormConfig,
+} from '../../services/FormGenerator.ts';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
@@ -12,11 +16,6 @@ import { Textarea } from '../ui/textarea';
 
 import type { ContractFunction, ContractSchema } from '../../core/types/ContractSchema';
 import type { FieldType, FormConfig, FormField } from '../../core/types/FormTypes';
-
-// Helper to generate a unique ID
-const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 11);
-};
 
 // Component to edit a single field's properties
 function FieldEditor({
@@ -288,28 +287,8 @@ export function StepFormCustomization({
       !configInitialized.current
     ) {
       try {
-        // Get the appropriate adapter for the selected chain
-        const adapter = getContractAdapter(contractSchema.chainType);
-
-        // Create default form fields from function inputs using the adapter
-        const fields: FormField[] = selectedFunctionDetails.inputs.map((input) => {
-          return adapter.generateDefaultField(input);
-        });
-
-        const config: FormConfig = {
-          functionId: selectedFunction,
-          fields,
-          layout: {
-            columns: 1,
-            spacing: 'normal',
-            labelPosition: 'top',
-          },
-          theme: {},
-          validation: {
-            mode: 'onChange',
-            showErrors: 'inline',
-          },
-        };
+        // Use the FormGenerator service to generate the form config
+        const config = generateFormConfig(contractSchema, selectedFunction);
 
         // Set the flag to prevent re-initialization
         configInitialized.current = true;
@@ -326,51 +305,40 @@ export function StepFormCustomization({
         }, 0);
       } catch (error) {
         console.error('Error generating form configuration:', error);
-        // If adapter fails, fall back to basic form config with text fields
-        const fields: FormField[] = selectedFunctionDetails.inputs.map((input) => {
-          return {
-            id: generateId(),
-            name: input.name || input.type,
-            label: input.displayName || input.name || input.type,
-            type: 'text',
-            placeholder: `Enter ${input.displayName || input.name || input.type}`,
-            helperText: '',
-            defaultValue: '',
-            validation: {
-              required: true,
+
+        // If the FormGenerator service fails, use fallback field generation
+        if (selectedFunctionDetails) {
+          const fields = generateFallbackFields(selectedFunctionDetails);
+
+          const config: FormConfig = {
+            functionId: selectedFunction,
+            fields,
+            layout: {
+              columns: 1,
+              spacing: 'normal',
+              labelPosition: 'top',
             },
-            width: 'full',
+            theme: {},
+            validation: {
+              mode: 'onChange',
+              showErrors: 'inline',
+            },
           };
-        });
 
-        const config: FormConfig = {
-          functionId: selectedFunction,
-          fields,
-          layout: {
-            columns: 1,
-            spacing: 'normal',
-            labelPosition: 'top',
-          },
-          theme: {},
-          validation: {
-            mode: 'onChange',
-            showErrors: 'inline',
-          },
-        };
+          // Set the flag to prevent re-initialization
+          configInitialized.current = true;
 
-        // Set the flag to prevent re-initialization
-        configInitialized.current = true;
+          // Update state first
+          setFormConfig(config);
 
-        // Update state first
-        setFormConfig(config);
+          // Track what we're sending to parent to avoid loops
+          lastParentUpdate.current = config;
 
-        // Track what we're sending to parent to avoid loops
-        lastParentUpdate.current = config;
-
-        // Notify parent outside of render/effect cycle
-        setTimeout(() => {
-          onFormConfigUpdated(config);
-        }, 0);
+          // Notify parent outside of render/effect cycle
+          setTimeout(() => {
+            onFormConfigUpdated(config);
+          }, 0);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -394,10 +362,7 @@ export function StepFormCustomization({
       const updatedFields = [...formConfig.fields];
       updatedFields[index] = { ...updatedFields[index], ...updates };
 
-      const updatedConfig = {
-        ...formConfig,
-        fields: updatedFields,
-      };
+      const updatedConfig = updateFormConfig(formConfig, { fields: updatedFields });
 
       setFormConfig(updatedConfig);
 
@@ -414,10 +379,13 @@ export function StepFormCustomization({
     (updates: Partial<FormConfig['layout']>) => {
       if (!formConfig) return;
 
-      const updatedConfig = {
-        ...formConfig,
-        layout: { ...formConfig.layout, ...updates },
+      // Create a properly typed update with all required fields
+      const layoutUpdates = {
+        ...formConfig.layout,
+        ...updates,
       };
+
+      const updatedConfig = updateFormConfig(formConfig, { layout: layoutUpdates });
 
       setFormConfig(updatedConfig);
 
@@ -434,10 +402,13 @@ export function StepFormCustomization({
     (updates: Partial<FormConfig['validation']>) => {
       if (!formConfig) return;
 
-      const updatedConfig = {
-        ...formConfig,
-        validation: { ...formConfig.validation, ...updates },
+      // Create a properly typed update with all required fields
+      const validationUpdates = {
+        ...formConfig.validation,
+        ...updates,
       };
+
+      const updatedConfig = updateFormConfig(formConfig, { validation: validationUpdates });
 
       setFormConfig(updatedConfig);
 

@@ -1,4 +1,6 @@
-import type { ChainType, ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import { generateId } from '../../core/utils/utils';
+
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { FieldType, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 import type { AbiItem } from './types';
@@ -6,31 +8,26 @@ import type { AbiItem } from './types';
 /**
  * EVM-specific type mapping
  */
-const EVM_TYPE_MAPPING: Record<string, FieldType> = {
+const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   address: 'address',
   string: 'text',
-  uint256: 'amount',
+  uint: 'number',
   uint8: 'number',
   uint16: 'number',
   uint32: 'number',
   uint64: 'number',
   uint128: 'number',
-  uint: 'number',
+  uint256: 'number',
+  int: 'number',
   int8: 'number',
   int16: 'number',
   int32: 'number',
   int64: 'number',
   int128: 'number',
   int256: 'number',
-  int: 'number',
   bool: 'checkbox',
   bytes: 'text',
   bytes32: 'text',
-};
-
-// Helper to generate a unique ID for form fields
-const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 11);
 };
 
 /**
@@ -100,7 +97,7 @@ export class EVMAdapter implements ContractAdapter {
     }
 
     // Return the mapped type or default to text if no mapping exists
-    return EVM_TYPE_MAPPING[baseType] || 'text';
+    return EVM_TYPE_TO_FIELD_TYPE[baseType] || 'text';
   }
 
   /**
