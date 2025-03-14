@@ -397,5 +397,123 @@
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "name": "simpleString",
+    "inputs": [
+      {
+        "name": "stringParam",
+        "type": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "name": "simpleNumber",
+    "inputs": [
+      {
+        "name": "numberParam",
+        "type": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "name": "simpleBoolean",
+    "inputs": [
+      {
+        "name": "boolParam",
+        "type": "bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "name": "simpleAddress",
+    "inputs": [
+      {
+        "name": "addressParam",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "name": "multipleParams",
+    "inputs": [
+      {
+        "name": "stringParam",
+        "type": "string"
+      },
+      {
+        "name": "numberParam",
+        "type": "uint256"
+      },
+      {
+        "name": "boolParam",
+        "type": "bool"
+      },
+      {
+        "name": "addressParam",
+        "type": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "name": "arrayParams",
+    "inputs": [
+      {
+        "name": "stringArray",
+        "type": "string[]"
+      },
+      {
+        "name": "numberArray",
+        "type": "uint256[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
