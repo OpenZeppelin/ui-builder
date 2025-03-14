@@ -22,6 +22,9 @@ const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 
+// Custom plugin
+const customPlugin = require('./.eslint/index.cjs');
+
 // Safely extract configs to handle both ESLint v8 and v9 formats
 const getPluginConfigs = (plugin, configName) => {
   try {
@@ -155,6 +158,17 @@ module.exports = [
         },
       ],
       'simple-import-sort/exports': 'error',
+    },
+  },
+
+  // Custom rules for adapter pattern enforcement
+  {
+    files: ['src/adapters/**/*.ts'],
+    plugins: {
+      custom: customPlugin,
+    },
+    rules: {
+      'custom/no-extra-adapter-methods': 'error',
     },
   },
 

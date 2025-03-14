@@ -16,6 +16,38 @@ This directory contains the adapter implementations for different blockchain eco
 
 Do not rely on the non-EVM adapters for any production use as they contain only stub implementations that return placeholder values.
 
+## Adapter Pattern Guidelines
+
+The adapter pattern in this project follows these principles:
+
+1. A single `ContractAdapter` interface defines all methods that must be implemented
+2. Each blockchain has its own adapter implementation (e.g., `EVMAdapter`, `SolanaAdapter`)
+3. Adapters encapsulate all blockchain-specific logic and provide a consistent interface to the application
+
+### Strict Interface Adherence
+
+To maintain a clean architecture and prevent implementation drift, we enforce strict interface adherence through:
+
+1. A custom ESLint rule that checks all adapter implementations
+2. Clear documentation of the allowed methods in the `ContractAdapter` interface
+3. Code review processes that verify new implementations follow the pattern
+
+### ESLint Rule: no-extra-adapter-methods
+
+We've implemented a custom ESLint rule that validates adapter implementations against the `ContractAdapter` interface. This rule ensures:
+
+- All methods in adapter classes must be defined in the `ContractAdapter` interface
+- Any helper methods must be marked as `private`
+- Common methods like constructors are allowed
+
+### How to run the linter
+
+To validate all adapters:
+
+```bash
+pnpm lint:adapters
+```
+
 ## Adapter Interface
 
 Each adapter must implement the `ContractAdapter` interface defined in `index.ts`:
@@ -26,7 +58,10 @@ export interface ContractAdapter {
   loadContract(source: string): Promise<ContractSchema>;
 
   // Load a mock contract for testing
-  loadMockContract(): Promise<ContractSchema>;
+  loadMockContract(mockId?: string): Promise<ContractSchema>;
+
+  // Get only the functions that modify state (writable functions)
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'];
 
   // Map a blockchain-specific parameter type to a form field type
   mapParameterTypeToFieldType(parameterType: string): FieldType;
@@ -40,10 +75,23 @@ export interface ContractAdapter {
   // Sign and broadcast a transaction
   signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }>;
 
-  // Get only the functions that modify blockchain state
-  getWritableFunctions(schema: ContractSchema): ContractFunction[];
+  // Validate a blockchain address for this chain
+  isValidAddress(address: string): boolean;
 }
 ```
+
+### Allowed methods
+
+The following methods are defined in the `ContractAdapter` interface and must be implemented by each adapter:
+
+- `loadContract`
+- `loadMockContract`
+- `getWritableFunctions`
+- `mapParameterTypeToFieldType`
+- `generateDefaultField`
+- `formatTransactionData`
+- `signAndBroadcast`
+- `isValidAddress`
 
 ### Contract Function State Modification Flag
 
@@ -53,6 +101,40 @@ The `ContractAdapter` interface supports a `modifiesState` flag on each `Contrac
 - Read-only functions (e.g., `balanceOf`, `totalSupply`): Cannot be selected for transaction forms but can be shown for reference
 
 The `getWritableFunctions` method returns only the functions that have `modifiesState: true`, which is useful for filtering functions that can be used in transaction forms.
+
+## Private Helper Methods
+
+If you need to add implementation-specific methods:
+
+1. Mark them as `private` using TypeScript's accessibility modifier
+2. Use them only within the adapter class
+3. Consider if the shared functionality could be part of the interface
+
+Example:
+
+```typescript
+class MyAdapter implements ContractAdapter {
+  // Public interface method
+  public async signAndBroadcast(txData: unknown): Promise<{ txHash: string }> {
+    const formattedData = this.formatData(txData);
+    return this.sendToNetwork(formattedData);
+  }
+
+  // Private helper method
+  private formatData(data: unknown): FormattedData {
+    // Implementation details
+  }
+}
+```
+
+## Adding New Interface Methods
+
+If you find yourself needing the same functionality across multiple adapters, consider:
+
+1. Propose an addition to the `ContractAdapter` interface
+2. Document the new method thoroughly
+3. Implement it across all adapter classes
+4. Update tests accordingly
 
 ## Field Type Mapping
 
@@ -193,6 +275,14 @@ private getDefaultValidationForType(parameterType: string): {
   return validation;
 }
 ```
+
+## Best Practices
+
+1. **Encapsulation**: Keep all blockchain-specific logic within adapter classes
+2. **Single Responsibility**: Each method should do one thing well
+3. **Testability**: Write adapters to be easily testable with mock data
+4. **Documentation**: Document the behavior of each method clearly, especially any edge cases
+5. **Error Handling**: Use consistent error handling patterns across adapters
 
 ## Usage in UI Components
 

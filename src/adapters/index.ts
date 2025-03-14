@@ -8,6 +8,13 @@ import type { FieldType, FormField } from '../core/types/FormTypes';
 
 /**
  * Interface for contract adapters
+ *
+ * IMPORTANT: Do not add methods to implementations that are not defined in this interface!
+ * Any additional helper methods should be marked as private.
+ *
+ * The codebase includes a custom ESLint rule that enforces this pattern:
+ * - Run `pnpm lint:adapters` to check all adapter implementations
+ * - See `.eslint/rules/no-extra-adapter-methods.js` for implementation details
  */
 export interface ContractAdapter {
   /**
