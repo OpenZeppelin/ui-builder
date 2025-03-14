@@ -31,3 +31,6 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
+
+      - name: Adapter pattern compliance check
+        run: pnpm lint:adapters

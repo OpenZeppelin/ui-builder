@@ -23,4 +23,8 @@ if [ "$node_version" -lt 20 ]; then
 fi
 
 # Run linting with compatible Node.js version
-pnpm fix-all 
+pnpm fix-all
+
+# Check adapter pattern compliance
+echo "🔍 Checking adapter pattern compliance..."
+pnpm lint:adapters 

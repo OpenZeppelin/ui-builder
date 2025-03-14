@@ -90,6 +90,7 @@ This project is currently in development.
 - `pnpm dev` - Start the development server
 - `pnpm build` - Build for production
 - `pnpm lint` - Run ESLint
+- `pnpm lint:adapters` - Validate adapter implementations against the ContractAdapter interface
 - `pnpm lint:fix` - Fix ESLint issues
 - `pnpm lint:all-fix` - Fix ESLint issues across all file types
 - `pnpm lint:config-files` - Fix linting in configuration files
@@ -161,6 +162,19 @@ The application uses an adapter pattern to support multiple blockchain ecosystem
 - **UI Components**: React components that use adapters to interact with different blockchains
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic.
+
+### Adapter Pattern Enforcement
+
+To maintain the integrity of the adapter pattern, this project includes:
+
+- **Custom ESLint Rule**: Enforces that adapter implementations only include methods defined in the `ContractAdapter` interface
+- **Automated Validation**: The `lint:adapters` command automatically discovers and validates all adapter implementations
+- **CI Integration**: Adapter pattern compliance is checked on every pull request
+- **Pre-Push Hook**: Prevents pushing code that violates the adapter pattern
+
+These enforcement mechanisms ensure that the adapter interface remains the single source of truth for adapter implementations, preventing interface drift and maintaining architectural consistency.
+
+For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the [Adapter System documentation](./src/adapters/README.md).
 
 ## Code Style
 
