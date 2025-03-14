@@ -1,4 +1,5 @@
 import { generateId } from '../../core/utils/utils';
+import MockContractService from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { FieldType, FormField } from '../../core/types/FormTypes';
@@ -47,17 +48,32 @@ export class EVMAdapter implements ContractAdapter {
 
   /**
    * Load a mock contract for testing
+   * @param mockId Optional ID to specify which mock to load
    */
-  async loadMockContract(): Promise<ContractSchema> {
+  async loadMockContract(mockId?: string): Promise<ContractSchema> {
     try {
-      // Import the mock ABI
-      const module = await import('../../mocks/EVM_ABI_MOCK.json');
-      const mockAbi: AbiItem[] = module.default;
+      // Get available mocks to find the file name
+      const mocks = await MockContractService.getAvailableMocks();
+
+      // Default to the first mock if none specified
+      const mockInfo = mockId
+        ? mocks.find((mock) => mock.id === mockId)
+        : mocks.find((mock) => mock.id === 'input-tester');
+
+      if (!mockInfo) {
+        throw new Error(`Mock contract with ID ${mockId || 'input-tester'} not found`);
+      }
+
+      // Load the mock ABI
+      const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
+
+      // Set contract name based on mock info
+      const contractName = mockInfo.name;
 
       // Transform the ABI into a chain-agnostic schema
       const contractSchema: ContractSchema = {
         chainType: 'evm',
-        name: 'MockEVMContract',
+        name: contractName,
         functions: mockAbi
           .filter((item) => item.type === 'function')
           .map((item) => ({

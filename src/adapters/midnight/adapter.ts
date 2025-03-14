@@ -24,8 +24,9 @@ export class MidnightAdapter implements ContractAdapter {
    * Load a mock contract for testing
    *
    * TODO: Implement proper Midnight contract schema in future phases
+   * @param mockId Optional ID to specify which mock to load (not used for Midnight adapter)
    */
-  async loadMockContract(): Promise<ContractSchema> {
+  async loadMockContract(_mockId?: string): Promise<ContractSchema> {
     // Simple minimal mock contract schema
     return {
       chainType: 'midnight',

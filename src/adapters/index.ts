@@ -17,8 +17,9 @@ export interface ContractAdapter {
 
   /**
    * Load a mock contract for testing
+   * @param mockId Optional ID to specify which mock to load
    */
-  loadMockContract(): Promise<ContractSchema>;
+  loadMockContract(mockId?: string): Promise<ContractSchema>;
 
   /**
    * Map a blockchain-specific parameter type to a form field type

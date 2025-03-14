@@ -24,8 +24,9 @@ export class StellarAdapter implements ContractAdapter {
    * Load a mock contract for testing
    *
    * TODO: Implement proper Stellar contract schema in future phases
+   * @param mockId Optional ID to specify which mock to load (not used for Stellar adapter)
    */
-  async loadMockContract(): Promise<ContractSchema> {
+  async loadMockContract(_mockId?: string): Promise<ContractSchema> {
     // Simple minimal mock contract schema
     return {
       chainType: 'stellar',

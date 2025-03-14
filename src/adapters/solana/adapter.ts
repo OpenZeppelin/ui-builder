@@ -24,8 +24,9 @@ export class SolanaAdapter implements ContractAdapter {
    * Load a mock contract for testing
    *
    * TODO: Implement proper Solana program schema in future phases
+   * @param mockId Optional ID to specify which mock to load (not used for Solana adapter)
    */
-  async loadMockContract(): Promise<ContractSchema> {
+  async loadMockContract(_mockId?: string): Promise<ContractSchema> {
     // Simple minimal mock contract schema
     return {
       chainType: 'solana',
