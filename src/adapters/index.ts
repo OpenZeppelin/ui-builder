@@ -51,6 +51,13 @@ export interface ContractAdapter {
    * Sign and broadcast a transaction
    */
   signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }>;
+
+  /**
+   * Validate a blockchain address for this chain
+   * @param address The address to validate
+   * @returns Whether the address is valid for this chain
+   */
+  isValidAddress(address: string): boolean;
 }
 
 // Singleton instances of adapters

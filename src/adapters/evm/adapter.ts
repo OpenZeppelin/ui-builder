@@ -1,3 +1,4 @@
+import { isAddress } from 'ethers';
 import { generateId } from '../../core/utils/utils';
 import MockContractService from '../../services/MockContractService';
 
@@ -246,6 +247,15 @@ export class EVMAdapter implements ContractAdapter {
    */
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
     return contractSchema.functions.filter((fn) => fn.modifiesState);
+  }
+
+  /**
+   * Validate an EVM blockchain address
+   * @param address The address to validate
+   * @returns Whether the address is a valid EVM address
+   */
+  isValidAddress(address: string): boolean {
+    return isAddress(address);
   }
 }
 

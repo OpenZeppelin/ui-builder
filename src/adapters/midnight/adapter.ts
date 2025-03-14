@@ -121,6 +121,17 @@ export class MidnightAdapter implements ContractAdapter {
     // Placeholder implementation that defaults everything to text fields
     return {};
   }
+
+  /**
+   * Validate a Midnight blockchain address
+   * @param address The address to validate
+   * @returns Whether the address is a valid Midnight address
+   */
+  isValidAddress(_address: string): boolean {
+    // TODO: Implement Midnight address validation when chain specs are available
+    // For now, return true to avoid blocking development
+    return true;
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles

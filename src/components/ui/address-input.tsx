@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-import { isAddress } from 'ethers';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 
 import { cn } from '@/core/utils/utils';
+import { getContractAdapter } from '@/adapters';
 
 import { Button } from './button';
 import { Input } from './input';
@@ -50,7 +50,8 @@ export function AddressInput({
 
     // Only validate if there's a value
     if (newValue.trim()) {
-      const valid = isValidAddress(newValue, chainType);
+      const adapter = getContractAdapter(chainType);
+      const valid = adapter.isValidAddress(newValue);
       setIsValid(valid);
     } else {
       setIsValid(null);
@@ -115,32 +116,4 @@ export function AddressInput({
       )}
     </div>
   );
-}
-
-/**
- * Validate a blockchain address based on the chain type
- */
-function isValidAddress(address: string, chainType: ChainType): boolean {
-  switch (chainType) {
-    case 'evm':
-      // Use ethers.js for proper EVM address validation
-      return isAddress(address);
-
-    case 'solana':
-      // TODO: Implement Solana address validation when focusing on that chain
-      // For now, using a basic regex pattern for Base58 encoded, 32-44 characters
-      return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
-
-    case 'stellar':
-      // TODO: Implement Stellar address validation when focusing on that chain
-      // For now, using a basic check that it starts with G and is 56 chars long
-      return /^G[A-Z0-9]{55}$/.test(address);
-
-    case 'midnight':
-      // TODO: Implement Midnight address validation when focusing on that chain
-      return true;
-
-    default:
-      return false;
-  }
 }

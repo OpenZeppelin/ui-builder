@@ -105,6 +105,17 @@ export class SolanaAdapter implements ContractAdapter {
   async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
     return { txHash: 'solana_placeholder_tx' };
   }
+
+  /**
+   * Validate a Solana blockchain address
+   * @param address The address to validate
+   * @returns Whether the address is a valid Solana address
+   */
+  isValidAddress(address: string): boolean {
+    // Basic check for Solana addresses (Base58 encoded, 32-44 characters)
+    // TODO: Use a proper Solana address validation library when focusing on that chain
+    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles
