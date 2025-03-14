@@ -33,9 +33,9 @@ export class StellarAdapter implements ContractAdapter {
       name: 'PlaceholderStellarContract',
       functions: [
         {
-          id: 'dummy_function',
-          name: 'placeholderFunction',
-          displayName: 'Placeholder Function',
+          id: 'dummy_operation',
+          name: 'placeholderOperation',
+          displayName: 'Placeholder Operation',
           inputs: [
             {
               name: 'dummyParam',
@@ -44,10 +44,19 @@ export class StellarAdapter implements ContractAdapter {
             },
           ],
           type: 'function',
-          stateMutability: 'nonpayable',
+          modifiesState: true, // Assume this placeholder operation modifies state
         },
       ],
     };
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
   /**

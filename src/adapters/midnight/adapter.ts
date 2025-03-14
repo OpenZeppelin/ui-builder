@@ -45,9 +45,19 @@ export class MidnightAdapter implements ContractAdapter {
           ],
           type: 'function',
           stateMutability: 'nonpayable',
+          modifiesState: true, // Assume this placeholder function modifies state
         },
       ],
     };
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
   /**

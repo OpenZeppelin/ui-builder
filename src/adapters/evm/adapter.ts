@@ -88,6 +88,8 @@ export class EVMAdapter implements ContractAdapter {
               })) || [],
             type: item.type || 'function',
             stateMutability: item.stateMutability,
+            modifiesState:
+              !item.stateMutability || !['view', 'pure'].includes(item.stateMutability),
           })),
       };
 
@@ -235,6 +237,15 @@ export class EVMAdapter implements ContractAdapter {
       .replace(/^./, (str) => str.toUpperCase())
       .replace(/_/g, ' ')
       .trim();
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 }
 

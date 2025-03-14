@@ -22,6 +22,13 @@ export interface ContractAdapter {
   loadMockContract(mockId?: string): Promise<ContractSchema>;
 
   /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'];
+
+  /**
    * Map a blockchain-specific parameter type to a form field type
    * @param parameterType The blockchain parameter type (e.g., uint256, address)
    * @returns The appropriate form field type

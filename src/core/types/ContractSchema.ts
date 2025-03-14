@@ -24,6 +24,7 @@ export interface ContractFunction {
   outputs?: FunctionParameter[];
   stateMutability?: string;
   type: string;
+  modifiesState: boolean; // Indicates if the function modifies blockchain state (writable)
 }
 
 export interface ContractSchema {

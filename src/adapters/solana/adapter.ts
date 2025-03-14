@@ -33,9 +33,9 @@ export class SolanaAdapter implements ContractAdapter {
       name: 'PlaceholderSolanaProgram',
       functions: [
         {
-          id: 'dummy_function',
-          name: 'placeholderFunction',
-          displayName: 'Placeholder Function',
+          id: 'dummy_instruction',
+          name: 'placeholderInstruction',
+          displayName: 'Placeholder Instruction',
           inputs: [
             {
               name: 'dummyParam',
@@ -44,10 +44,19 @@ export class SolanaAdapter implements ContractAdapter {
             },
           ],
           type: 'function',
-          stateMutability: 'nonpayable',
+          modifiesState: true, // Assume this placeholder instruction modifies state
         },
       ],
     };
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
   /**
