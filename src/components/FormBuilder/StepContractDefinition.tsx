@@ -2,8 +2,10 @@ import { useState } from 'react';
 
 import { getContractAdapter } from '../../adapters/index.ts';
 import { getChainName } from '../../core/utils/utils';
-import { Button } from '../ui/button';
 import { Label } from '../ui/label';
+import { LoadingButton } from '../ui/loading-button';
+
+import { MockContractSelector } from './MockContractSelector';
 
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 
@@ -38,7 +40,7 @@ export function StepContractDefinition({
     // For this POC, we'll skip that and just simulate loading the mock contract definition
   };
 
-  const handleLoadMockData = () => {
+  const handleLoadMockData = (mockId: string) => {
     setIsLoading(true);
     setError(null);
 
@@ -50,7 +52,7 @@ export function StepContractDefinition({
 
         // Use the adapter to load mock data
         adapter
-          .loadMockContract()
+          .loadMockContract(mockId)
           .then((contractSchema: ContractSchema) => {
             onContractSchemaLoaded(contractSchema);
             setIsLoading(false);
@@ -115,9 +117,13 @@ export function StepContractDefinition({
                 />
               </Label>
             </div>
-            <Button onClick={handleLoadMockData} disabled={isLoading}>
-              {isLoading ? 'Loading...' : 'Use Mock Data'}
-            </Button>
+            {isLoading ? (
+              <LoadingButton loading variant="outline">
+                Loading...
+              </LoadingButton>
+            ) : (
+              <MockContractSelector onSelectMock={handleLoadMockData} chainType={selectedChain} />
+            )}
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
         </div>
