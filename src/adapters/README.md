@@ -39,8 +39,20 @@ export interface ContractAdapter {
 
   // Sign and broadcast a transaction
   signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }>;
+
+  // Get only the functions that modify blockchain state
+  getWritableFunctions(schema: ContractSchema): ContractFunction[];
 }
 ```
+
+### Contract Function State Modification Flag
+
+The `ContractAdapter` interface supports a `modifiesState` flag on each `ContractFunction` object within the `ContractSchema`. This flag indicates whether a function modifies the blockchain state (true) or is read-only (false). This allows the UI to appropriately display and handle different function types:
+
+- State-modifying functions (e.g., `transfer`, `mint`): Can be selected for transaction form generation
+- Read-only functions (e.g., `balanceOf`, `totalSupply`): Cannot be selected for transaction forms but can be shown for reference
+
+The `getWritableFunctions` method returns only the functions that have `modifiesState: true`, which is useful for filtering functions that can be used in transaction forms.
 
 ## Field Type Mapping
 

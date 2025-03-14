@@ -120,7 +120,15 @@ transaction-form-builder/
 ├── src/
 │   ├── components/      # Reusable UI components
 │   │   ├── ui/          # shadcn/ui components
-│   │   └── ...          # Custom components
+│   │   ├── Common/      # Shared components across features
+│   │   └── FormBuilder/ # Form builder components
+│   │       ├── StepFunctionSelector/  # Modular component with subcomponents and hooks
+│   │       │   ├── hooks/             # Custom hooks for component logic
+│   │       │   └── ...                # Subcomponents and type definitions
+│   │       ├── StepFormCustomization/ # Modular component with subcomponents and hooks
+│   │       │   ├── hooks/             # Custom hooks for component logic
+│   │       │   └── ...                # Subcomponents and type definitions
+│   │       └── ...      # Other form builder components
 │   ├── core/            # Chain-agnostic core functionality
 │   │   ├── types/       # Type definitions
 │   │   ├── utils/       # Utility functions
