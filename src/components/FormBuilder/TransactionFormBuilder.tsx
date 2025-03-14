@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react';
 
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
+import { StepFormCustomization } from './StepFormCustomization/index';
+import { StepFunctionSelector } from './StepFunctionSelector/index';
 import { StepChainSelect } from './StepChainSelect';
 import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
-import { StepFormCustomization } from './StepFormCustomization';
-import { StepFunctionSelector } from './StepFunctionSelector';
 
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import type { FormConfig } from '../../core/types/FormTypes';
