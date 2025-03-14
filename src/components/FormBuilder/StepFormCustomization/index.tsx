@@ -10,18 +10,20 @@ import { FormPreview } from './FormPreview';
 import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
 
-import type { ContractSchema } from '../../../core/types/ContractSchema';
+import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
 import type { FormConfig } from '../../../core/types/FormTypes';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
+  selectedChain: ChainType;
   onFormConfigUpdated: (config: FormConfig) => void;
 }
 
 export function StepFormCustomization({
   contractSchema,
   selectedFunction,
+  selectedChain,
   onFormConfigUpdated,
 }: StepFormCustomizationProps) {
   const [activeTab, setActiveTab] = useState('fields');
@@ -65,7 +67,11 @@ export function StepFormCustomization({
       </div>
 
       {previewMode ? (
-        <FormPreview formConfig={formConfig} functionDetails={selectedFunctionDetails} />
+        <FormPreview
+          formConfig={formConfig}
+          functionDetails={selectedFunctionDetails}
+          selectedChain={selectedChain}
+        />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">

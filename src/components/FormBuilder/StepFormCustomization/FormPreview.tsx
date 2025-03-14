@@ -1,3 +1,4 @@
+import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Checkbox } from '../../ui/checkbox';
@@ -6,15 +7,16 @@ import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Textarea } from '../../ui/textarea';
 
-import type { ContractFunction } from '../../../core/types/ContractSchema';
+import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
 import type { FormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
   formConfig: FormConfig;
   functionDetails: ContractFunction;
+  selectedChain: ChainType;
 }
 
-export function FormPreview({ formConfig, functionDetails }: FormPreviewProps) {
+export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
   // We're not using useForm() here since this is just a display component
 
   return (
@@ -42,7 +44,10 @@ export function FormPreview({ formConfig, functionDetails }: FormPreviewProps) {
                       : 'col-span-1'
                 }`}
               >
-                <Label htmlFor={`field-${index}`}>{field.label}</Label>
+                {field.type !== 'address' && field.type !== 'checkbox' && (
+                  <Label htmlFor={`field-${index}`}>{field.label}</Label>
+                )}
+
                 {field.type === 'text' && (
                   <Input id={`field-${index}`} placeholder={field.placeholder} />
                 )}
@@ -72,7 +77,15 @@ export function FormPreview({ formConfig, functionDetails }: FormPreviewProps) {
                     </SelectContent>
                   </Select>
                 )}
-                {field.helperText && (
+                {field.type === 'address' && (
+                  <AddressInput
+                    id={`field-${index}`}
+                    label={field.label}
+                    placeholder={field.placeholder || 'Enter blockchain address'}
+                    chainType={selectedChain}
+                  />
+                )}
+                {field.helperText && field.type !== 'address' && (
                   <p className="text-muted-foreground text-sm">{field.helperText}</p>
                 )}
               </div>

@@ -128,6 +128,7 @@ export function TransactionFormBuilder() {
         <StepFormCustomization
           contractSchema={contractSchema}
           selectedFunction={selectedFunction}
+          selectedChain={selectedChain}
           onFormConfigUpdated={handleFormConfigUpdated}
         />
       ),
