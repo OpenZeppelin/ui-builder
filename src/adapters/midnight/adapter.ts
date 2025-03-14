@@ -107,21 +107,6 @@ export class MidnightAdapter implements ContractAdapter {
     return { txHash: 'midnight_placeholder_tx' };
   }
 
-  getFieldInputType(_parameterType: string): FieldType {
-    // Placeholder implementation that defaults everything to text fields
-    return 'text';
-  }
-
-  buildExecuteTransaction(_functionId: string, _inputs: Record<string, unknown>): Promise<unknown> {
-    // Placeholder implementation that defaults everything to text fields
-    return Promise.resolve({});
-  }
-
-  parseTransactionResult(_transactionData: unknown): unknown {
-    // Placeholder implementation that defaults everything to text fields
-    return {};
-  }
-
   /**
    * Validate a Midnight blockchain address
    * @param address The address to validate
