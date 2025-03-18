@@ -9,7 +9,9 @@
       "@form-renderer/*": ["../form-renderer/src/*"]
     },
     "emitDeclarationOnly": false,
-    "noEmit": false
+    "noEmit": false,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "src/**/*.json"]
 }
