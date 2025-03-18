@@ -3,7 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { getContractAdapter } from '../../../adapters';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
-describe('Adapter Integration Tests', () => {
+/**
+ * TODO: Enhance these integration tests:
+ * - Create dedicated test fixtures with sample contract schemas specifically for testing
+ * - Add more comprehensive coverage for all possible parameter types (various integer sizes,
+ *   bytes types, fixed-size arrays, etc.)
+ * - Add more explicit tests for error cases and edge conditions
+ * - Test with all adapters, not just EVM (should create separate test files for each adapter)
+ *
+ * This file specifically tests integration between FormSchemaFactory and the EVMAdapter.
+ * Other adapters should have their own dedicated integration test files.
+ */
+describe('EVM Adapter Integration Tests', () => {
   // Initialize the factory and adapter
   const factory = new FormSchemaFactory();
   const adapter = getContractAdapter('evm');
