@@ -108,6 +108,12 @@ export class EVMAdapter implements ContractAdapter {
    * @returns The appropriate form field type
    */
   mapParameterTypeToFieldType(parameterType: string): FieldType {
+    // Check if this is an array type (ends with [] or [number])
+    if (parameterType.match(/\[\d*\]$/)) {
+      // All array types should use textarea for JSON input
+      return 'textarea';
+    }
+
     // Extract the base type from array types (e.g., uint256[] -> uint256)
     const baseType = parameterType.replace(/\[\d*\]/g, '');
 
