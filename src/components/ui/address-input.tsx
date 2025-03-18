@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 import { CheckIcon, CopyIcon } from 'lucide-react';
 
-import { cn } from '@/core/utils/utils';
 import { getContractAdapter } from '@/adapters';
+import { cn } from '@/core/utils/utils';
 
 import { Button } from './button';
 import { Input } from './input';
