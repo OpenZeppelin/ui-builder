@@ -1,6 +1,6 @@
-# Transaction Form Builder
+# Transaction Form Builder 🧩
 
-A modern web application for building and customizing transaction forms for blockchain applications.
+> A modern web application for building and customizing transaction forms for blockchain applications.
 
 ## Status
 
@@ -29,6 +29,14 @@ This project is currently in development.
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/transaction-form-builder/maintainability)
+
+## Monorepo Structure
+
+This project is organized as a monorepo with the following packages:
+
+- **packages/core**: The main application with the form builder UI
+- **packages/form-renderer**: The shared form rendering library
+- **packages/templates**: Export templates for different frameworks
 
 ## Features
 
@@ -116,40 +124,57 @@ This project is currently in development.
 transaction-form-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
-├── public/              # Static assets
+├── packages/            # Monorepo packages
+│   ├── core/            # Main application
+│   │   ├── public/      # Static assets
+│   │   ├── src/
+│   │   │   ├── components/      # Reusable UI components
+│   │   │   │   ├── ui/          # shadcn/ui components
+│   │   │   │   ├── Common/      # Shared components across features
+│   │   │   │   └── FormBuilder/ # Form builder components
+│   │   │   ├── core/            # Chain-agnostic core functionality
+│   │   │   │   ├── types/       # Type definitions
+│   │   │   │   ├── utils/       # Utility functions
+│   │   │   │   ├── hooks/       # Shared hooks
+│   │   │   │   └── factories/   # Schema factories
+│   │   │   ├── adapters/        # Chain-specific implementations
+│   │   │   │   ├── evm/         # Ethereum Virtual Machine adapter
+│   │   │   │   ├── midnight/    # Midnight blockchain adapter
+│   │   │   │   ├── solana/      # Solana blockchain adapter
+│   │   │   │   └── stellar/     # Stellar blockchain adapter
+│   │   │   ├── services/        # Core services
+│   │   │   ├── test/            # Test setup and utilities
+│   │   │   ├── mocks/           # Mock data for development and testing
+│   │   │   ├── App.tsx          # Main application component
+│   │   │   ├── main.tsx         # Application entry point
+│   │   │   └── index.css        # Global styles with Tailwind
+│   │   ├── index.html           # HTML template
+│   │   ├── tsconfig.json        # TypeScript configuration
+│   │   ├── vite.config.ts       # Vite configuration
+│   │   └── ...                  # Other configuration files
+│   ├── form-renderer/           # Shared form rendering library
+│   │   ├── src/
+│   │   │   ├── components/      # Form rendering components
+│   │   │   │   ├── fields/      # Form field components
+│   │   │   │   └── layout/      # Form layout components
+│   │   │   ├── hooks/           # Form rendering hooks
+│   │   │   ├── types/           # Type definitions
+│   │   │   ├── utils/           # Utility functions
+│   │   │   └── index.ts         # Public API exports
+│   │   ├── tsconfig.json        # TypeScript configuration
+│   │   └── package.json         # Package configuration
+│   └── templates/               # Export templates
+│       ├── typescript-react-vite/ # React+TypeScript+Vite template
+│       │   ├── public/          # Static assets
+│       │   ├── src/             # Source code
+│       │   ├── index.html       # HTML template
+│       │   └── README.md        # Template documentation
+│       └── ...                  # Future templates for other frameworks
 ├── scripts/             # Utility scripts
-├── src/
-│   ├── components/      # Reusable UI components
-│   │   ├── ui/          # shadcn/ui components
-│   │   ├── Common/      # Shared components across features
-│   │   └── FormBuilder/ # Form builder components
-│   │       ├── StepFunctionSelector/  # Modular component with subcomponents and hooks
-│   │       │   ├── hooks/             # Custom hooks for component logic
-│   │       │   └── ...                # Subcomponents and type definitions
-│   │       ├── StepFormCustomization/ # Modular component with subcomponents and hooks
-│   │       │   ├── hooks/             # Custom hooks for component logic
-│   │       │   └── ...                # Subcomponents and type definitions
-│   │       └── ...      # Other form builder components
-│   ├── core/            # Chain-agnostic core functionality
-│   │   ├── types/       # Type definitions
-│   │   ├── utils/       # Utility functions
-│   │   └── hooks/       # Shared hooks
-│   ├── adapters/        # Chain-specific implementations
-│   │   ├── evm/         # Ethereum Virtual Machine adapter (mock only for now)
-│   │   ├── midnight/    # Midnight blockchain adapter (skeleton only for now)
-│   │   ├── solana/      # Solana blockchain adapter (skeleton only for now)
-│   │   └── stellar/     # Stellar blockchain adapter (skeleton only for now)
-│   ├── services/        # Core services
-│   ├── test/            # Test setup and utilities
-│   ├── App.tsx          # Main application component
-│   ├── main.tsx         # Application entry point
-│   └── index.css        # Global styles with Tailwind v4 theme
-├── components.json      # shadcn/ui configuration
-├── index.html           # HTML template
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite configuration
-├── vitest.config.ts     # Vitest configuration
-├── tailwind.config.cjs  # Tailwind CSS v4 configuration
+├── tsconfig.base.json   # Base TypeScript configuration for all packages
+├── tsconfig.json        # Root TypeScript configuration
+├── pnpm-workspace.yaml  # PNPM workspace configuration
+├── package.json         # Root package configuration
 └── ...                  # Other configuration files
 ```
 

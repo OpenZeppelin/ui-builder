@@ -29,7 +29,7 @@ const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   int128: 'number',
   int256: 'number',
   bool: 'checkbox',
-  bytes: 'text',
+  bytes: 'textarea',
   bytes32: 'text',
 };
 
