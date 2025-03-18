@@ -9,13 +9,13 @@ import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
 
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
-import type { FormConfig } from '../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
-  const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
+  const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
 
   // Memoize the handler functions to prevent unnecessary re-renders
   const handleChainSelect = useCallback((chain: ChainType) => {
@@ -38,7 +38,7 @@ export function TransactionFormBuilder() {
     }
   }, []);
 
-  const handleFormConfigUpdated = useCallback((config: FormConfig) => {
+  const handleFormConfigUpdated = useCallback((config: BuilderFormConfig) => {
     // Only update state if the config actually changed
     setFormConfig((prevConfig) => {
       // If the new config is exactly the same object, don't update

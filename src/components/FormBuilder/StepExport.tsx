@@ -5,12 +5,12 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
 import type { ChainType } from '../../core/types/ContractSchema';
-import type { FormConfig } from '../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 export interface StepExportProps {
   selectedChain: ChainType;
   selectedFunction: string | null;
-  formConfig: FormConfig | null;
+  formConfig: BuilderFormConfig | null;
   onExport: () => void;
 }
 

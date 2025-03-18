@@ -7,12 +7,12 @@ import {
 } from '../../../../services/FormGenerator';
 
 import type { ContractSchema } from '../../../../core/types/ContractSchema';
-import type { FormConfig, FormField } from '../../../../core/types/FormTypes';
+import type { BuilderFormConfig, FormField } from '../../../../core/types/FormTypes';
 
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  onFormConfigUpdated: (config: FormConfig) => void;
+  onFormConfigUpdated: (config: BuilderFormConfig) => void;
 }
 
 export function useFormConfig({
@@ -20,10 +20,10 @@ export function useFormConfig({
   selectedFunction,
   onFormConfigUpdated,
 }: UseFormConfigProps) {
-  const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
+  const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
   const configInitialized = useRef(false);
   const lastSelectedFunction = useRef<string | null>(null);
-  const lastParentUpdate = useRef<FormConfig | null>(null);
+  const lastParentUpdate = useRef<BuilderFormConfig | null>(null);
 
   // Only for initial config generation - setup the form config when a function is first selected
   useEffect(() => {
@@ -70,7 +70,7 @@ export function useFormConfig({
         if (selectedFunctionDetails) {
           const fields = generateFallbackFields(selectedFunctionDetails);
 
-          const config: FormConfig = {
+          const config: BuilderFormConfig = {
             functionId: selectedFunction,
             fields,
             layout: {
@@ -132,7 +132,7 @@ export function useFormConfig({
   );
 
   const updateFormLayout = useCallback(
-    (updates: Partial<FormConfig['layout']>) => {
+    (updates: Partial<BuilderFormConfig['layout']>) => {
       if (!formConfig) return;
 
       // Create a properly typed update with all required fields
@@ -155,7 +155,7 @@ export function useFormConfig({
   );
 
   const updateFormValidation = useCallback(
-    (updates: Partial<FormConfig['validation']>) => {
+    (updates: Partial<BuilderFormConfig['validation']>) => {
       if (!formConfig) return;
 
       // Create a properly typed update with all required fields

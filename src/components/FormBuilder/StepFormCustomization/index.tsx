@@ -11,13 +11,13 @@ import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
 
 import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
-import type { FormConfig } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   selectedChain: ChainType;
-  onFormConfigUpdated: (config: FormConfig) => void;
+  onFormConfigUpdated: (config: BuilderFormConfig) => void;
 }
 
 export function StepFormCustomization({

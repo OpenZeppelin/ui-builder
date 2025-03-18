@@ -1,11 +1,11 @@
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
-import type { FormConfig } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface LayoutEditorProps {
-  layoutConfig: FormConfig['layout'];
-  onUpdate: (updates: Partial<FormConfig['layout']>) => void;
+  layoutConfig: BuilderFormConfig['layout'];
+  onUpdate: (updates: Partial<BuilderFormConfig['layout']>) => void;
 }
 
 export function LayoutEditor({ layoutConfig, onUpdate }: LayoutEditorProps) {
@@ -35,7 +35,7 @@ export function LayoutEditor({ layoutConfig, onUpdate }: LayoutEditorProps) {
             value={layoutConfig.spacing}
             onValueChange={(value) =>
               onUpdate({
-                spacing: value as FormConfig['layout']['spacing'],
+                spacing: value as BuilderFormConfig['layout']['spacing'],
               })
             }
           >
@@ -56,7 +56,7 @@ export function LayoutEditor({ layoutConfig, onUpdate }: LayoutEditorProps) {
             value={layoutConfig.labelPosition}
             onValueChange={(value) =>
               onUpdate({
-                labelPosition: value as FormConfig['layout']['labelPosition'],
+                labelPosition: value as BuilderFormConfig['layout']['labelPosition'],
               })
             }
           >
