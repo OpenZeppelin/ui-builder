@@ -47,7 +47,7 @@ export interface ContractAdapter {
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults
    */
-  generateDefaultField(parameter: FunctionParameter): FormField;
+  generateDefaultField<T extends FieldType = FieldType>(parameter: FunctionParameter): FormField<T>;
 
   /**
    * Format transaction data for the specific chain
