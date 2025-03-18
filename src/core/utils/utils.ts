@@ -44,3 +44,25 @@ export function generateId(prefix?: string): string {
   const uuid = uuidv4();
   return prefix ? `${prefix}_${uuid}` : uuid;
 }
+
+/**
+ * Converts a camelCase or snake_case string to a human-readable format
+ *
+ * @param str The string to humanize
+ * @returns A human-readable string with spaces and proper capitalization
+ */
+export function humanizeString(str: string): string {
+  if (!str) return '';
+
+  // Replace underscores with spaces
+  let result = str.replace(/_/g, ' ');
+
+  // Insert spaces before capital letters
+  result = result.replace(/([A-Z])/g, ' $1');
+
+  // Trim extra spaces, ensure first letter is capitalized, rest is lowercase
+  return result
+    .trim()
+    .replace(/^./, (match) => match.toUpperCase())
+    .replace(/\s+/g, ' ');
+}
