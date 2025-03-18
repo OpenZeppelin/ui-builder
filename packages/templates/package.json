@@ -1,0 +1,25 @@
+{
+  "name": "@openzeppelin/transaction-form-builder-templates",
+  "version": "1.0.0",
+  "description": "Export templates for Transaction Form Builder",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "pnpm -r format",
+    "format:check": "pnpm -r format:check"
+  },
+  "keywords": [
+    "templates",
+    "export",
+    "blockchain",
+    "react"
+  ],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}
