@@ -7,18 +7,12 @@
  */
 
 import { getContractAdapter } from '../../adapters';
+import { createTransformForFieldType } from '../utils/transforms';
 import { humanizeString } from '../utils/utils';
 
 import type { ContractAdapter } from '../../adapters';
 import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
-import type {
-  FieldTransforms,
-  FieldType,
-  FieldValue,
-  FormField,
-  FormLayout,
-  RenderFormSchema,
-} from '../types/FormTypes';
+import type { FormField, FormLayout, RenderFormSchema } from '../types/FormTypes';
 
 /**
  * Factory class for generating form schemas from contract functions
@@ -91,85 +85,10 @@ export class FormSchemaFactory {
       return {
         ...field,
         type: fieldType, // Ensure the type is set correctly
-        // Add transforms for UI display and blockchain submission
-        transforms: this.createTransformsForField(
-          { ...field, type: fieldType },
-          input.type,
-          adapter
-        ),
+        // Add transforms using the utility function
+        transforms: createTransformForFieldType(fieldType, input.type, adapter),
       };
     });
-  }
-
-  /**
-   * Creates transform functions for converting between UI and blockchain data formats
-   *
-   * @param field The form field
-   * @param paramType The blockchain parameter type
-   * @param adapter The blockchain adapter
-   * @returns Transform functions for the field
-   */
-  private createTransformsForField<T extends FieldType>(
-    field: FormField<T>,
-    paramType: string,
-    adapter: ContractAdapter
-  ): FieldTransforms<FieldValue<T>> {
-    // Different field types need different transforms
-    switch (field.type) {
-      case 'address':
-        return {
-          // Display transform (blockchain → UI)
-          input: (value: FieldValue<T>) => (value || '') as unknown,
-          // Submission transform (UI → blockchain)
-          output: (value: unknown) =>
-            adapter.isValidAddress(value as string)
-              ? (value as FieldValue<T>)
-              : ('' as FieldValue<T>),
-        };
-      case 'number':
-      case 'amount':
-        return {
-          input: (value: FieldValue<T>) => (value !== undefined ? String(value) : ''),
-          output: (value: unknown) => {
-            const num = parseFloat(value as string);
-            return (isNaN(num) ? 0 : num) as FieldValue<T>;
-          },
-        };
-      case 'checkbox':
-        return {
-          input: (value: FieldValue<T>) => Boolean(value),
-          output: (value: unknown) => Boolean(value) as FieldValue<T>,
-        };
-      case 'textarea':
-        // For complex types like arrays and tuples
-        if (paramType.includes('[') || paramType.startsWith('tuple')) {
-          return {
-            input: (value: FieldValue<T>) => {
-              try {
-                return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-              } catch {
-                return '';
-              }
-            },
-            output: (value: unknown) => {
-              try {
-                return JSON.parse(value as string) as FieldValue<T>;
-              } catch {
-                return null as unknown as FieldValue<T>;
-              }
-            },
-          };
-        }
-        return {} as FieldTransforms<FieldValue<T>>;
-      case 'select':
-      case 'radio':
-        return {
-          input: (value: FieldValue<T>) => value || '',
-          output: (value: unknown) => value as FieldValue<T>,
-        };
-      default:
-        return {} as FieldTransforms<FieldValue<T>>;
-    }
   }
 
   /**
