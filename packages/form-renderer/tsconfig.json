@@ -5,11 +5,12 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@form-renderer/*": ["../form-renderer/src/*"]
+      "@/*": ["./src/*"]
     },
-    "emitDeclarationOnly": false,
-    "noEmit": false
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src/**/*"]
 }
