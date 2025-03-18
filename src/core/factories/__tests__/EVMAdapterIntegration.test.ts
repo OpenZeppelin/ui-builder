@@ -1,28 +1,38 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { getContractAdapter } from '../../../adapters';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
+import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
+
+import type { ContractSchema } from '../../types/ContractSchema';
+
 /**
- * TODO: Enhance these integration tests:
- * - Create dedicated test fixtures with sample contract schemas specifically for testing
- * - Add more comprehensive coverage for all possible parameter types (various integer sizes,
- *   bytes types, fixed-size arrays, etc.)
- * - Add more explicit tests for error cases and edge conditions
- * - Test with all adapters, not just EVM (should create separate test files for each adapter)
+ * EVM Adapter Integration Tests
  *
- * This file specifically tests integration between FormSchemaFactory and the EVMAdapter.
- * Other adapters should have their own dedicated integration test files.
+ * These tests verify the integration between FormSchemaFactory and the EVMAdapter.
+ *
+ * Areas tested:
+ * - Field mapping for different parameter types
+ * - Transform functions for data conversion
+ * - Error handling for edge cases
+ * - End-to-end form generation
  */
 describe('EVM Adapter Integration Tests', () => {
   // Initialize the factory and adapter
   const factory = new FormSchemaFactory();
   const adapter = getContractAdapter('evm');
+  let erc20Schema: ContractSchema;
+  let inputTesterSchema: ContractSchema;
+
+  // Load common schema fixtures before tests
+  beforeAll(async () => {
+    erc20Schema = await adapter.loadMockContract('erc20');
+    inputTesterSchema = await adapter.loadMockContract('input-tester');
+  });
 
   describe('ERC20 Function Integration', () => {
     it('should generate a form schema for ERC20 transfer function', async () => {
-      // Load the contract schema using the proper mock ID from MOCK_CONTRACTS.json
-      const erc20Schema = await adapter.loadMockContract('erc20');
       const transferFunction = erc20Schema.functions.find((f) => f.name === 'transfer');
 
       expect(transferFunction).toBeDefined();
@@ -75,8 +85,6 @@ describe('EVM Adapter Integration Tests', () => {
     });
 
     it('should generate a form schema for ERC20 approve function', async () => {
-      // Load the contract schema properly
-      const erc20Schema = await adapter.loadMockContract('erc20');
       const approveFunction = erc20Schema.functions.find((f) => f.name === 'approve');
 
       expect(approveFunction).toBeDefined();
@@ -105,7 +113,6 @@ describe('EVM Adapter Integration Tests', () => {
 
   describe('Complex Parameter Type Integration', () => {
     it('should handle boolean parameters correctly', async () => {
-      const inputTesterSchema = await adapter.loadMockContract('input-tester');
       const boolFunction = inputTesterSchema.functions.find((f) => f.name === 'inputBool');
 
       expect(boolFunction).toBeDefined();
@@ -133,7 +140,6 @@ describe('EVM Adapter Integration Tests', () => {
     });
 
     it('should handle array parameters correctly', async () => {
-      const inputTesterSchema = await adapter.loadMockContract('input-tester');
       const arrayFunction = inputTesterSchema.functions.find(
         (f) => f.name === 'inputUnlimitedUints'
       );
@@ -161,7 +167,6 @@ describe('EVM Adapter Integration Tests', () => {
     });
 
     it('should handle complex struct parameters', async () => {
-      const inputTesterSchema = await adapter.loadMockContract('input-tester');
       const structFunction = inputTesterSchema.functions.find(
         (f) => f.name === 'inputNestedStruct'
       );
@@ -203,9 +208,171 @@ describe('EVM Adapter Integration Tests', () => {
     });
   });
 
+  describe('Integer Type Parameter Integration', () => {
+    it('should handle different integer sizes correctly', () => {
+      const intFixture = TEST_FIXTURES.integerTypes;
+
+      // Test uint8 field
+      const uint8Function = intFixture.functions.find((f) => f.id === 'function-uint8');
+      expect(uint8Function).toBeDefined();
+      const uint8Schema = factory.generateFormSchema(intFixture, 'function-uint8', 'evm');
+
+      expect(uint8Schema.fields).toHaveLength(1);
+      const uint8Field = uint8Schema.fields[0];
+      expect(uint8Field.type).toBe('number');
+      // Numbers should have appropriate validation
+      expect(uint8Field.validation).toBeDefined();
+
+      // Transform validation
+      if (uint8Field.transforms?.output) {
+        // Should handle different inputs
+        expect(uint8Field.transforms.output('42')).toBe(42);
+        expect(uint8Field.transforms.output('256')).toBe(256); // No range validation in transform
+        expect(uint8Field.transforms.output('-1')).toBe(-1); // No range validation in transform
+      }
+
+      // Test uint256 field
+      const uint256Function = intFixture.functions.find((f) => f.id === 'function-uint256');
+      expect(uint256Function).toBeDefined();
+      const uint256Schema = factory.generateFormSchema(intFixture, 'function-uint256', 'evm');
+
+      expect(uint256Schema.fields).toHaveLength(1);
+      const uint256Field = uint256Schema.fields[0];
+      expect(uint256Field.type).toBe('number');
+
+      // Transform validation
+      if (uint256Field.transforms?.output) {
+        // Should handle large numbers (up to JS number limit)
+        expect(uint256Field.transforms.output('1000000000')).toBe(1000000000);
+      }
+    });
+  });
+
+  describe('Bytes Type Parameter Integration', () => {
+    it('should handle different byte types correctly', () => {
+      const byteFixture = TEST_FIXTURES.byteTypes;
+
+      // Test dynamic bytes field
+      const bytesFunction = byteFixture.functions.find((f) => f.id === 'function-bytes');
+      expect(bytesFunction).toBeDefined();
+      const bytesSchema = factory.generateFormSchema(byteFixture, 'function-bytes', 'evm');
+
+      expect(bytesSchema.fields).toHaveLength(1);
+      const bytesField = bytesSchema.fields[0];
+      // Dynamic bytes should be handled as textarea for better multi-line input
+      expect(bytesField.type).toBe('textarea');
+
+      // Test bytes32 field
+      const bytes32Function = byteFixture.functions.find((f) => f.id === 'function-bytes32');
+      expect(bytes32Function).toBeDefined();
+      const bytes32Schema = factory.generateFormSchema(byteFixture, 'function-bytes32', 'evm');
+
+      expect(bytes32Schema.fields).toHaveLength(1);
+      const bytes32Field = bytes32Schema.fields[0];
+      // bytes32 should be handled as text with hex validation
+      expect(bytes32Field.type).toBe('text');
+    });
+  });
+
+  describe('Array Type Parameter Integration', () => {
+    it('should handle different array types correctly', () => {
+      const arrayFixture = TEST_FIXTURES.arrayTypes;
+
+      // Test dynamic array
+      const dynamicArrayFunction = arrayFixture.functions.find(
+        (f) => f.id === 'function-dynamic-array'
+      );
+      expect(dynamicArrayFunction).toBeDefined();
+      const dynamicArraySchema = factory.generateFormSchema(
+        arrayFixture,
+        'function-dynamic-array',
+        'evm'
+      );
+
+      expect(dynamicArraySchema.fields).toHaveLength(1);
+      const dynamicArrayField = dynamicArraySchema.fields[0];
+      expect(dynamicArrayField.type).toBe('textarea'); // Dynamic arrays should be textarea
+
+      // Test fixed array
+      const fixedArrayFunction = arrayFixture.functions.find(
+        (f) => f.id === 'function-fixed-array'
+      );
+      expect(fixedArrayFunction).toBeDefined();
+      const fixedArraySchema = factory.generateFormSchema(
+        arrayFixture,
+        'function-fixed-array',
+        'evm'
+      );
+
+      expect(fixedArraySchema.fields).toHaveLength(1);
+      const fixedArrayField = fixedArraySchema.fields[0];
+      expect(fixedArrayField.type).toBe('textarea'); // Fixed arrays should also be textarea
+
+      // Transform validation for both types
+      if (dynamicArrayField.transforms?.output && fixedArrayField.transforms?.output) {
+        // For dynamic array
+        expect(dynamicArrayField.transforms.output('[1,2,3]')).toEqual([1, 2, 3]);
+        expect(dynamicArrayField.transforms.output('[]')).toEqual([]);
+        expect(dynamicArrayField.transforms.output('invalid-json')).toBeNull();
+
+        // For fixed array
+        expect(fixedArrayField.transforms.output('[1,2,3]')).toEqual([1, 2, 3]);
+        expect(fixedArrayField.transforms.output('[1]')).toEqual([1]); // No length validation in transform
+      }
+    });
+  });
+
+  describe('Error and Edge Cases', () => {
+    it('should handle functions with no inputs', () => {
+      const errorFixture = TEST_FIXTURES.errorCases;
+      const emptyInputsFunction = errorFixture.functions.find(
+        (f) => f.id === 'function-empty-inputs'
+      );
+      expect(emptyInputsFunction).toBeDefined();
+
+      const emptyInputsSchema = factory.generateFormSchema(
+        errorFixture,
+        'function-empty-inputs',
+        'evm'
+      );
+
+      // Should have no fields but still generate a valid schema
+      expect(emptyInputsSchema.fields).toHaveLength(0);
+      expect(emptyInputsSchema.id).toBe('form-function-empty-inputs');
+      expect(emptyInputsSchema.title).toBe('Test Empty Inputs');
+    });
+
+    it('should throw error when function is not found', () => {
+      // Test non-existent function ID
+      expect(() => {
+        factory.generateFormSchema(erc20Schema, 'non-existent-function', 'evm');
+      }).toThrow('Function non-existent-function not found in contract schema');
+    });
+
+    it('should handle unsupported parameter types gracefully', () => {
+      const errorFixture = TEST_FIXTURES.errorCases;
+      const unsupportedTypeFunction = errorFixture.functions.find(
+        (f) => f.id === 'function-unsupported-type'
+      );
+      expect(unsupportedTypeFunction).toBeDefined();
+
+      // Should generate a schema with a fallback field type that can handle unknown types
+      const unsupportedTypeSchema = factory.generateFormSchema(
+        errorFixture,
+        'function-unsupported-type',
+        'evm'
+      );
+
+      expect(unsupportedTypeSchema.fields).toHaveLength(1);
+      const customTypeField = unsupportedTypeSchema.fields[0];
+
+      // The adapter should provide a fallback field type for unknown types
+      expect(customTypeField.type).toBeDefined();
+    });
+  });
+
   describe('End-to-End Form Generation', () => {
     it('should generate forms for all ERC20 functions', async () => {
-      const erc20Schema = await adapter.loadMockContract('erc20');
       const writableFunctions = adapter.getWritableFunctions(erc20Schema);
 
       // Loop through all writable functions and generate schemas
@@ -226,7 +393,6 @@ describe('EVM Adapter Integration Tests', () => {
 
     it('should test integration between transform system and FormSchemaFactory', async () => {
       // Get a complex contract like InputTester that has various parameter types
-      const inputTesterSchema = await adapter.loadMockContract('input-tester');
       const complexFunction = inputTesterSchema.functions.find(
         (f) =>
           f.name === 'testComplexInputs' || f.inputs.some((input) => input.type.includes('tuple'))
@@ -262,6 +428,48 @@ describe('EVM Adapter Integration Tests', () => {
           const jsonStr = JSON.stringify(jsonObj);
           expect(field.transforms?.output?.(jsonStr)).toEqual(jsonObj);
         }
+      }
+    });
+
+    it('should handle the complete workflow from adapter to form schema', async () => {
+      // This test validates the entire flow from contract loading to form generation
+
+      // 1. Load contract
+      const contract = await adapter.loadMockContract('erc20');
+
+      // 2. Get writable functions
+      const writableFunctions = adapter.getWritableFunctions(contract);
+      expect(writableFunctions.length).toBeGreaterThan(0);
+
+      // 3. Get a function to test
+      const testFunction = writableFunctions[0];
+
+      // 4. Generate a form schema
+      const formSchema = factory.generateFormSchema(contract, testFunction.id, 'evm');
+
+      // 5. Verify the schema is complete and valid
+      expect(formSchema.id).toBe(`form-${testFunction.id}`);
+      expect(formSchema.fields.length).toBe(testFunction.inputs.length);
+      expect(formSchema.layout).toBeDefined();
+      expect(formSchema.validation).toBeDefined();
+      expect(formSchema.submitButton).toBeDefined();
+
+      // 6. Verify each field has the correct structure
+      for (let i = 0; i < formSchema.fields.length; i++) {
+        const field = formSchema.fields[i];
+        const input = testFunction.inputs[i];
+
+        // Field should map to the correct input
+        expect(field.name).toBe(input.name);
+
+        // Field should have a type mapped from the parameter type
+        const expectedType = adapter.mapParameterTypeToFieldType(input.type);
+        expect(field.type).toBe(expectedType);
+
+        // Field should have transforms
+        expect(field.transforms).toBeDefined();
+        expect(field.transforms?.input).toBeDefined();
+        expect(field.transforms?.output).toBeDefined();
       }
     });
   });
