@@ -8,17 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../../ui/textarea';
 
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
-import type { FormConfig } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig, CommonFormProperties } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
-  formConfig: FormConfig;
+  formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
   selectedChain: ChainType;
 }
 
 export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
-  // We're not using useForm() here since this is just a display component
+  // Extract the common form properties for rendering
+  const formProperties: CommonFormProperties = formConfig;
 
+  // We're not using useForm() here since this is just a display component
   return (
     <Card>
       <CardContent className="pt-6">
@@ -26,14 +28,14 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
         <form className="space-y-4">
           <div
             className={`grid gap-4 ${
-              formConfig.layout.columns === 1
+              formProperties.layout.columns === 1
                 ? 'grid-cols-1'
-                : formConfig.layout.columns === 2
+                : formProperties.layout.columns === 2
                   ? 'grid-cols-2'
                   : 'grid-cols-3'
             }`}
           >
-            {formConfig.fields.map((field, index) => (
+            {formProperties.fields.map((field, index) => (
               <div
                 key={field.id}
                 className={`space-y-2 ${

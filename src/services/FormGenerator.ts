@@ -13,7 +13,12 @@ import type {
   ContractSchema,
   FunctionParameter,
 } from '../core/types/ContractSchema';
-import type { FieldType, FormConfig, FormField } from '../core/types/FormTypes';
+import type {
+  BuilderFormConfig,
+  CommonFormProperties,
+  FieldType,
+  FormField,
+} from '../core/types/FormTypes';
 
 /**
  * Generates a default form configuration for a contract function
@@ -22,7 +27,10 @@ import type { FieldType, FormConfig, FormField } from '../core/types/FormTypes';
  * @param functionId The ID of the function to generate a form for
  * @returns A form configuration object
  */
-export function generateFormConfig(contractSchema: ContractSchema, functionId: string): FormConfig {
+export function generateFormConfig(
+  contractSchema: ContractSchema,
+  functionId: string
+): BuilderFormConfig {
   // Find the function details in the schema
   const functionDetails = contractSchema.functions.find((fn) => fn.id === functionId);
   if (!functionDetails) {
@@ -35,20 +43,25 @@ export function generateFormConfig(contractSchema: ContractSchema, functionId: s
   // Generate fields using the adapter
   const fields = generateFieldsFromFunction(adapter, functionDetails);
 
-  // Create the form configuration
-  return {
-    functionId,
+  // Create the common form properties
+  const commonProperties: CommonFormProperties = {
     fields,
     layout: {
       columns: 1,
       spacing: 'normal',
       labelPosition: 'top',
     },
-    theme: {},
     validation: {
       mode: 'onChange',
       showErrors: 'inline',
     },
+    theme: {},
+  };
+
+  // Return the complete form configuration
+  return {
+    ...commonProperties,
+    functionId,
   };
 }
 
@@ -206,24 +219,30 @@ export function isComplexType(parameterType: string): boolean {
  * @returns The updated form configuration
  */
 export function updateFormConfig(
-  existingConfig: FormConfig,
-  updates: Partial<FormConfig>
-): FormConfig {
-  return {
-    ...existingConfig,
-    ...updates,
+  existingConfig: BuilderFormConfig,
+  updates: Partial<BuilderFormConfig>
+): BuilderFormConfig {
+  // Create updated common properties
+  const updatedCommonProperties: CommonFormProperties = {
     fields: updates.fields || existingConfig.fields,
     layout: {
       ...existingConfig.layout,
       ...(updates.layout || {}),
     },
-    theme: {
-      ...existingConfig.theme,
-      ...(updates.theme || {}),
-    },
     validation: {
       ...existingConfig.validation,
       ...(updates.validation || {}),
     },
+    theme: {
+      ...existingConfig.theme,
+      ...(updates.theme || {}),
+    },
+  };
+
+  // Return complete updated configuration
+  return {
+    ...existingConfig,
+    ...updates,
+    ...updatedCommonProperties,
   };
 }
