@@ -1,9 +1,10 @@
 import { isAddress } from 'ethers';
+
 import { generateId } from '../../core/utils/utils';
 import MockContractService from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { FieldType, FormField } from '../../core/types/FormTypes';
+import type { FieldType, FieldValue, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 import type { AbiItem } from './types';
 
@@ -107,15 +108,15 @@ export class EVMAdapter implements ContractAdapter {
    * @returns The appropriate form field type
    */
   mapParameterTypeToFieldType(parameterType: string): FieldType {
-    // Remove array suffix if present (e.g., uint256[] -> uint256)
-    const baseType = parameterType.replace(/\[\d*\]$/, '');
+    // Extract the base type from array types (e.g., uint256[] -> uint256)
+    const baseType = parameterType.replace(/\[\d*\]/g, '');
 
     // Handle tuples (structs) - for now, just use a textarea
     if (baseType.startsWith('tuple')) {
       return 'textarea';
     }
 
-    // Return the mapped type or default to text if no mapping exists
+    // Map common EVM types to appropriate field types
     return EVM_TYPE_TO_FIELD_TYPE[baseType] || 'text';
   }
 
@@ -124,10 +125,13 @@ export class EVMAdapter implements ContractAdapter {
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults
    */
-  generateDefaultField(parameter: FunctionParameter): FormField {
-    const fieldType = this.mapParameterTypeToFieldType(parameter.type);
+  generateDefaultField<T extends FieldType = FieldType>(
+    parameter: FunctionParameter
+  ): FormField<T> {
+    // Get the field type
+    const fieldType = this.mapParameterTypeToFieldType(parameter.type) as T;
 
-    // Create a default field based on the parameter
+    // Create a default field based on the parameter with proper typing
     return {
       id: generateId(),
       name: parameter.name || parameter.type,
@@ -135,7 +139,7 @@ export class EVMAdapter implements ContractAdapter {
       type: fieldType,
       placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
       helperText: parameter.description || '',
-      defaultValue: this.getDefaultValueForType(fieldType),
+      defaultValue: this.getDefaultValueForType(fieldType) as FieldValue<T>,
       validation: this.getDefaultValidationForType(parameter.type),
       width: 'full',
     };
@@ -146,17 +150,17 @@ export class EVMAdapter implements ContractAdapter {
    * @param fieldType The form field type
    * @returns An appropriate default value
    */
-  private getDefaultValueForType(fieldType: FieldType): unknown {
+  private getDefaultValueForType<T extends FieldType>(fieldType: T): FieldValue<T> {
     switch (fieldType) {
       case 'checkbox':
-        return false;
+        return false as FieldValue<T>;
       case 'number':
       case 'amount':
-        return 0;
+        return 0 as FieldValue<T>;
       case 'address':
-        return '';
+        return '' as FieldValue<T>;
       default:
-        return '';
+        return '' as FieldValue<T>;
     }
   }
 

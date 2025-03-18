@@ -1,5 +1,5 @@
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { FieldType, FormField } from '../../core/types/FormTypes';
+import type { FieldType, FieldValue, FormField } from '../../core/types/FormTypes';
 import type { ContractAdapter } from '../index';
 
 /**
@@ -74,15 +74,20 @@ export class StellarAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Stellar field generation in future phases
    */
-  generateDefaultField(parameter: FunctionParameter): FormField {
+  generateDefaultField<T extends FieldType = FieldType>(
+    parameter: FunctionParameter
+  ): FormField<T> {
+    // Default to text fields for now as a placeholder
+    const fieldType = 'text' as T;
+
     return {
       id: Math.random().toString(36).substring(2, 11),
       name: parameter.name || 'placeholder',
       label: parameter.displayName || parameter.name || 'Placeholder Field',
-      type: 'text',
-      placeholder: 'Placeholder - not implemented yet',
+      type: fieldType,
+      placeholder: 'Placeholder - Stellar adapter not fully implemented yet',
       helperText: 'Stellar adapter is not fully implemented yet',
-      defaultValue: '',
+      defaultValue: '' as FieldValue<T>,
       validation: { required: true },
       width: 'full',
     };
