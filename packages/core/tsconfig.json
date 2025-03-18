@@ -8,7 +8,7 @@
       "@/*": ["./src/*"],
       "@form-renderer/*": ["../form-renderer/src/*"]
     },
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "noEmit": false,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
