@@ -1,25 +1,15 @@
-import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, mergeConfig } from 'vitest/config';
+import { sharedVitestConfig } from '../../vitest.shared.config';
 
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    passWithNoTests: true,
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'json-summary'],
-      reportsDirectory: './coverage',
-      exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
+export default defineConfig(
+  mergeConfig(sharedVitestConfig, {
+    // Package-specific overrides
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@form-renderer': path.resolve(__dirname, '../form-renderer/src'),
+      },
     },
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@form-renderer': path.resolve(__dirname, '../form-renderer/src'),
-    },
-  },
-});
+  })
+);
