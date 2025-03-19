@@ -32,7 +32,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
+    "demo:dev": "vite demo",
+    "demo:build": "vite build demo",
+    "demo:preview": "vite preview demo"
   },
   "keywords": [
     "form",
@@ -61,6 +64,7 @@
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-react": "^7.37.4",
@@ -72,6 +76,7 @@
     "react-hook-form": "^7.54.2",
     "tailwindcss": "^4.0.12",
     "typescript": "^5.8.2",
+    "vite": "^5.2.1",
     "vitest": "^3.0.8"
   }
 }
