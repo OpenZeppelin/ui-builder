@@ -13,6 +13,8 @@
  * This decision should be made as part of a larger architecture review of the monorepo structure.
  */
 
+import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
+
 /**
  * Generate a unique ID for form fields
  *
@@ -65,8 +67,6 @@ export function validateField(
  * Form utility functions for the form renderer
  */
 
-import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
-
 /**
  * Creates a transform for address fields
  *
@@ -75,11 +75,11 @@ import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../type
  */
 export function createAddressTransform(adapter: ContractAdapter): FieldTransforms<string> {
   return {
-    input: (value: unknown) => {
+    input: (value: unknown): string => {
       if (value === null || value === undefined) return '';
       return String(value);
     },
-    output: (value: unknown) => {
+    output: (value: unknown): string => {
       const address = String(value || '');
       if (adapter.isValidAddress?.(address)) {
         return address;
@@ -96,11 +96,11 @@ export function createAddressTransform(adapter: ContractAdapter): FieldTransform
  */
 export function createNumberTransform(): FieldTransforms<number> {
   return {
-    input: (value: unknown) => {
+    input: (value: unknown): string => {
       if (value === undefined || value === null) return '';
       return String(value);
     },
-    output: (value: unknown) => {
+    output: (value: unknown): number => {
       const num = Number(value);
       return isNaN(num) ? 0 : num;
     },
@@ -114,10 +114,10 @@ export function createNumberTransform(): FieldTransforms<number> {
  */
 export function createBooleanTransform(): FieldTransforms<boolean> {
   return {
-    input: (value: unknown) => {
+    input: (value: unknown): boolean => {
       return Boolean(value);
     },
-    output: (value: unknown) => {
+    output: (value: unknown): boolean => {
       return Boolean(value);
     },
   };
@@ -130,11 +130,11 @@ export function createBooleanTransform(): FieldTransforms<boolean> {
  */
 export function createTextTransform(): FieldTransforms<string> {
   return {
-    input: (value: unknown) => {
+    input: (value: unknown): string => {
       if (value === null || value === undefined) return '';
       return String(value);
     },
-    output: (value: unknown) => {
+    output: (value: unknown): string => {
       return String(value || '');
     },
   };
@@ -188,12 +188,12 @@ export function composeTransforms<T>(
   ...transforms: Array<FieldTransforms<any>>
 ): FieldTransforms<T> {
   return {
-    input: (value: T) => {
+    input: (value: T): unknown => {
       return transforms.reduce((result, transform) => {
         return transform.input ? transform.input(result) : result;
       }, value as unknown);
     },
-    output: (value: unknown) => {
+    output: (value: unknown): T => {
       return transforms.reduceRight((result, transform) => {
         return transform.output ? transform.output(result) : result;
       }, value) as T;

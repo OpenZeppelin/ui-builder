@@ -2,6 +2,7 @@ import React from 'react';
 import { Control, Controller, useWatch } from 'react-hook-form';
 
 import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
+
 import { TextField } from './fields';
 
 /**
@@ -114,8 +115,13 @@ const fieldComponents: Partial<Record<FieldType, React.ComponentType<FieldCompon
  * Dynamic Form Field Component
  *
  * Renders the appropriate form field based on the field type
+ * @returns The rendered form field component or null if not visible
  */
-export function DynamicFormField({ field, control, error }: DynamicFormFieldProps) {
+export function DynamicFormField({
+  field,
+  control,
+  error,
+}: DynamicFormFieldProps): React.ReactElement | null {
   // Check if the field should be rendered based on visibility conditions
   const shouldRender = useShouldRenderField(field, control);
   if (!shouldRender) {

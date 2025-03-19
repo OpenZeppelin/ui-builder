@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormError, FormValues, TransactionFormRendererProps } from '../types/FormTypes';
+
 import { DynamicFormField } from './DynamicFormField';
 
 /**
@@ -20,14 +21,15 @@ import { DynamicFormField } from './DynamicFormField';
  * 2. Connect visibility conditions to actual form values using the 'watch' function
  * 3. Complete full test coverage for all form scenarios
  * 4. Add support for complex field types (arrays, nested objects)
+ * @returns The rendered form component
  */
 export function TransactionFormRenderer({
   formSchema,
   adapter,
   onSubmit,
   previewMode = false,
-}: TransactionFormRendererProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+}: TransactionFormRendererProps): React.ReactElement {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Create default values from the schema
@@ -55,10 +57,10 @@ export function TransactionFormRenderer({
   // Reset form when schema changes
   useEffect(() => {
     reset(defaultValues);
-  }, [formSchema, reset]);
+  }, [formSchema, reset, defaultValues]);
 
   // Handle form submission
-  const handleFormSubmit = async (data: FormValues) => {
+  const handleFormSubmit = async (data: FormValues): Promise<void> => {
     if (previewMode) {
       console.log('Form data preview:', data);
       onSubmit?.(data);
