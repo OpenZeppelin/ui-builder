@@ -47,9 +47,13 @@ const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
 // Detect if we're in a package context by checking for custom adapter plugin
-let customPlugin;
+let customPlugin = null;
 try {
-  customPlugin = require('./.eslint/index.cjs');
+  // Only attempt to load custom plugin if not already defined
+  if (!global.__HAS_LOADED_CUSTOM_PLUGIN) {
+    customPlugin = require('./.eslint/index.cjs');
+    global.__HAS_LOADED_CUSTOM_PLUGIN = true;
+  }
 } catch (e) {
   // This is fine - we're probably running ESLint in a package subdirectory
   customPlugin = null;
