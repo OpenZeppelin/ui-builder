@@ -143,6 +143,8 @@ For more details, see the [Form-Renderer README](./packages/form-renderer/README
 transaction-form-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
+├── .husky/              # Git hooks
+├── test/                # Shared test setup and utilities
 ├── packages/            # Monorepo packages
 │   ├── core/            # Main application
 │   │   ├── public/      # Static assets
@@ -162,7 +164,7 @@ transaction-form-builder/
 │   │   │   │   ├── solana/      # Solana blockchain adapter
 │   │   │   │   └── stellar/     # Stellar blockchain adapter
 │   │   │   ├── services/        # Core services
-│   │   │   ├── test/            # Test setup and utilities
+│   │   │   ├── test/            # Package-specific tests
 │   │   │   ├── mocks/           # Mock data for development and testing
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
@@ -179,7 +181,10 @@ transaction-form-builder/
 │   │   │   ├── hooks/           # Form rendering hooks
 │   │   │   ├── types/           # Type definitions
 │   │   │   ├── utils/           # Utility functions
+│   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
+│   │   ├── scripts/             # Build scripts
+│   │   ├── demo/                # Demo application for development
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
 │   └── templates/               # Export templates
@@ -190,8 +195,11 @@ transaction-form-builder/
 │       │   └── README.md        # Template documentation
 │       └── ...                  # Future templates for other frameworks
 ├── scripts/             # Utility scripts
+├── .eslint/             # Custom ESLint plugins and rules
 ├── tsconfig.base.json   # Base TypeScript configuration for all packages
 ├── tsconfig.json        # Root TypeScript configuration
+├── vitest.shared.config.ts # Shared Vitest configuration
+├── eslint.config.cjs    # Shared ESLint configuration
 ├── pnpm-workspace.yaml  # PNPM workspace configuration
 ├── package.json         # Root package configuration
 └── ...                  # Other configuration files
