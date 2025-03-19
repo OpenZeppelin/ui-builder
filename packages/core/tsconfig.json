@@ -13,5 +13,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*", "src/**/*.json"]
+  "include": ["src/**/*", "src/**/*.json"],
+  "references": [{ "path": "../form-renderer" }]
 }

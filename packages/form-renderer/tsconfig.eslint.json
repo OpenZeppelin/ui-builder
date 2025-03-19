@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.cjs",
+    "src/**/*.mjs",
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "demo/**/*.ts",
+    "demo/**/*.tsx",
+    "demo/**/*.js",
+    "demo/**/*.jsx",
+    "./*.js",
+    "./*.ts"
+  ],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
+  }
+}
