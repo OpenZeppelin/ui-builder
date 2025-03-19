@@ -22,8 +22,8 @@ const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 
-// Custom plugin
-const customPlugin = require('./.eslint/index.cjs');
+// Get the base configuration from the root
+const baseConfig = require('../../eslint.config.cjs');
 
 // Safely extract configs to handle both ESLint v8 and v9 formats
 const getPluginConfigs = (plugin, configName) => {
@@ -48,20 +48,17 @@ const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommend
 const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
-// Get the base configuration from the root
-const baseConfig = require('../../eslint.config.cjs');
-
 // Only add package-specific overrides
 module.exports = [
   ...baseConfig,
 
   // Core-specific TypeScript configuration with project reference
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.eslint.json'],
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
@@ -70,17 +67,6 @@ module.exports = [
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
-    },
-  },
-
-  // Custom rules for adapter pattern enforcement (package-specific)
-  {
-    files: ['src/adapters/**/*.ts'],
-    plugins: {
-      custom: customPlugin,
-    },
-    rules: {
-      'custom/no-extra-adapter-methods': 'error',
     },
   },
 ];

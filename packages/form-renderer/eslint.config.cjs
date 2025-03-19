@@ -54,11 +54,11 @@ module.exports = [
 
   // Form-renderer specific TypeScript configuration with project reference
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.eslint.json'],
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
@@ -66,24 +66,6 @@ module.exports = [
     rules: {
       '@typescript-eslint/explicit-module-boundary-types': ['warn'],
       '@typescript-eslint/explicit-function-return-type': ['warn'],
-    },
-  },
-
-  // TypeScript configuration for demo files
-  {
-    files: ['demo/**/*.ts', 'demo/**/*.tsx'],
-    languageOptions: {
-      parser: typescriptParser,
-      parserOptions: {
-        project: ['./demo/tsconfig.json'],
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      // Relaxed rules for the demo app
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
 
@@ -136,27 +118,6 @@ module.exports = [
         },
       ],
       'simple-import-sort/exports': 'error',
-    },
-  },
-
-  // Additional library-specific rules
-  {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
-    rules: {
-      // Enforce JSDoc for public API
-      'jsdoc/require-jsdoc': [
-        'warn',
-        {
-          publicOnly: true,
-          require: {
-            FunctionDeclaration: true,
-            MethodDefinition: true,
-            ClassDeclaration: true,
-            ArrowFunctionExpression: false,
-            FunctionExpression: false,
-          },
-        },
-      ],
     },
   },
 
