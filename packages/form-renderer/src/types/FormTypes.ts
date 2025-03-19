@@ -1,15 +1,16 @@
 /**
  * NOTE ON TYPE ARCHITECTURE
  *
- * This file contains the authoritative type definitions for the form renderer.
- * As part of the ongoing monorepo architecture refinement, we've defined these types
- * within the form-renderer package, but there may still be some duplication with
- * core/src/types/FormTypes.ts that needs to be addressed.
+ * This file is the single source of truth for form-related type definitions.
+ * The architecture decision is:
  *
- * TODO: Ensure complete consistency between packages by:
- * 1. Validating that core properly imports types from form-renderer
- * 2. Removing any remaining duplicate type definitions
- * 3. Documenting the final decision on type architecture
+ * 1. Types live in form-renderer package (this file)
+ * 2. Core package imports types from form-renderer using the @form-renderer path alias
+ * 3. This enables proper composition while avoiding duplication
+ *
+ * This approach allows the form-renderer to be a standalone package that can be
+ * published and consumed by external projects, while also being used internally
+ * by the core package.
  */
 
 /**
