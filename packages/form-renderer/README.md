@@ -66,6 +66,47 @@ The main component for rendering transaction forms.
 
 ## Development
 
+### Demo Application
+
+The package includes a demo application to showcase and test the form renderer components during development.
+
+#### Running the Demo
+
+```bash
+# Start the demo app in development mode
+pnpm demo:dev
+
+# Build the demo app for production
+pnpm demo:build
+
+# Preview the built demo app
+pnpm demo:preview
+```
+
+The demo app serves as both a development environment and a showcase of the form renderer's capabilities. It demonstrates form rendering with sample form schemas and a mock adapter implementation.
+
+#### Demo Features
+
+- Vite-powered development environment with hot module replacement
+- Tailwind CSS v4 for modern, responsive styling
+- Sample form schemas demonstrating different field types
+- Mock adapter implementation showing how to integrate with blockchain libraries
+- Full TypeScript support
+
+#### Demo App Structure
+
+```
+demo/
+├── index.html           # HTML entry point
+├── postcss.config.js    # PostCSS configuration
+├── tailwind.config.js   # Tailwind CSS configuration
+├── vite.config.ts       # Vite configuration
+└── src/
+    ├── App.tsx          # Demo application component
+    ├── index.css        # Global styles with Tailwind
+    └── main.tsx         # Application entry point
+```
+
 ### Build System
 
 This package uses a custom build system that generates both ESM and CommonJS output for maximum compatibility.
