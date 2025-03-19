@@ -60,3 +60,160 @@ export function validateField(
 
   return null;
 }
+
+/**
+ * Form utility functions for the form renderer
+ */
+
+import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
+
+/**
+ * Creates a transform for address fields
+ *
+ * @param adapter The blockchain adapter to use for validation
+ * @returns Transform functions for address fields
+ */
+export function createAddressTransform(adapter: ContractAdapter): FieldTransforms<string> {
+  return {
+    input: (value: unknown) => {
+      if (value === null || value === undefined) return '';
+      return String(value);
+    },
+    output: (value: unknown) => {
+      const address = String(value || '');
+      if (adapter.isValidAddress?.(address)) {
+        return address;
+      }
+      return '';
+    },
+  };
+}
+
+/**
+ * Creates a transform for number fields
+ *
+ * @returns Transform functions for number fields
+ */
+export function createNumberTransform(): FieldTransforms<number> {
+  return {
+    input: (value: unknown) => {
+      if (value === undefined || value === null) return '';
+      return String(value);
+    },
+    output: (value: unknown) => {
+      const num = Number(value);
+      return isNaN(num) ? 0 : num;
+    },
+  };
+}
+
+/**
+ * Creates a transform for boolean fields
+ *
+ * @returns Transform functions for boolean fields
+ */
+export function createBooleanTransform(): FieldTransforms<boolean> {
+  return {
+    input: (value: unknown) => {
+      return Boolean(value);
+    },
+    output: (value: unknown) => {
+      return Boolean(value);
+    },
+  };
+}
+
+/**
+ * Creates a transform for text fields
+ *
+ * @returns Transform functions for text fields
+ */
+export function createTextTransform(): FieldTransforms<string> {
+  return {
+    input: (value: unknown) => {
+      if (value === null || value === undefined) return '';
+      return String(value);
+    },
+    output: (value: unknown) => {
+      return String(value || '');
+    },
+  };
+}
+
+/**
+ * Creates a transform for the given field type
+ *
+ * @param fieldType The type of field to create a transform for
+ * @param adapter The adapter to use for validation (required for address fields)
+ * @returns Transform functions for the field type
+ */
+export function createTransformForFieldType<T extends FieldType>(
+  fieldType: T,
+  adapter: ContractAdapter
+): FieldTransforms<FieldValue<T>> {
+  // We need to use type assertion to handle the complex conditional types
+  switch (fieldType) {
+    case 'address':
+      // For 'address', we know FieldValue<'address'> is string
+      return createAddressTransform(adapter) as unknown as FieldTransforms<FieldValue<T>>;
+    case 'number':
+    case 'amount':
+      // For 'number'/'amount', we know FieldValue<'number'|'amount'> is number
+      return createNumberTransform() as unknown as FieldTransforms<FieldValue<T>>;
+    case 'checkbox':
+      // For 'checkbox', we know FieldValue<'checkbox'> is boolean
+      return createBooleanTransform() as unknown as FieldTransforms<FieldValue<T>>;
+    case 'text':
+    case 'textarea':
+    case 'email':
+    case 'password':
+    case 'select':
+    case 'radio':
+      // For text-based fields, we know FieldValue is string
+      return createTextTransform() as unknown as FieldTransforms<FieldValue<T>>;
+    default:
+      // For other types, return an empty transform
+      return {} as FieldTransforms<FieldValue<T>>;
+  }
+}
+
+/**
+ * Composes multiple transforms into a single transform
+ *
+ * @param transforms The transforms to compose
+ * @returns A single transform that applies all transforms in sequence
+ */
+export function composeTransforms<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...transforms: Array<FieldTransforms<any>>
+): FieldTransforms<T> {
+  return {
+    input: (value: T) => {
+      return transforms.reduce((result, transform) => {
+        return transform.input ? transform.input(result) : result;
+      }, value as unknown);
+    },
+    output: (value: unknown) => {
+      return transforms.reduceRight((result, transform) => {
+        return transform.output ? transform.output(result) : result;
+      }, value) as T;
+    },
+  };
+}
+
+/**
+ * Creates a custom transform with the given input and output functions
+ *
+ * @param input Function to transform data from blockchain format to UI format
+ * @param output Function to transform data from UI format to blockchain format
+ * @returns A custom transform with the given functions
+ */
+export function createCustomTransform<T>(
+  input?: (value: T) => unknown,
+  output?: (value: unknown) => T
+): FieldTransforms<T> {
+  return {
+    input,
+    output,
+  };
+}

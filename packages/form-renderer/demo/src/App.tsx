@@ -21,7 +21,7 @@ const sampleSchema: RenderFormSchema = {
       id: 'field2',
       name: 'addressField',
       label: 'Address',
-      type: 'address' as FieldType,
+      type: 'text' as FieldType,
       placeholder: '0x...',
       helperText: 'Enter a valid Ethereum address',
       validation: {
@@ -32,7 +32,7 @@ const sampleSchema: RenderFormSchema = {
       id: 'field3',
       name: 'numberField',
       label: 'Amount',
-      type: 'number' as FieldType,
+      type: 'text' as FieldType,
       placeholder: '0.0',
       helperText: 'Enter a numeric value',
       validation: {
@@ -41,9 +41,19 @@ const sampleSchema: RenderFormSchema = {
       },
     },
   ],
+  layout: {
+    columns: 1,
+    spacing: 'normal',
+    labelPosition: 'top',
+  },
+  validation: {
+    mode: 'onBlur',
+    showErrors: 'both',
+  },
   submitButton: {
     text: 'Submit Transaction',
     loadingText: 'Processing...',
+    variant: 'primary',
   },
 };
 
