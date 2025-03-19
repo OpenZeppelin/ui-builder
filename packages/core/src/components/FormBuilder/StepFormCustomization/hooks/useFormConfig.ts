@@ -7,7 +7,8 @@ import {
 } from '../../../../services/FormGenerator';
 
 import type { ContractSchema } from '../../../../core/types/ContractSchema';
-import type { BuilderFormConfig, FormField } from '../../../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
+import type { FormField } from '@openzeppelin/transaction-form-renderer';
 
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;

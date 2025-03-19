@@ -2,8 +2,9 @@
  * Data transform utilities for converting between UI and blockchain data formats
  */
 
+import { FieldTransforms, FieldType, FieldValue } from '@openzeppelin/transaction-form-renderer';
+
 import { ContractAdapter } from '../../adapters';
-import { FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
 
 /**
  * Creates a transform for address fields

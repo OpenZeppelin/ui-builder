@@ -4,7 +4,7 @@ import SolanaAdapter from './solana/adapter.ts';
 import StellarAdapter from './stellar/adapter.ts';
 
 import type { ChainType, ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
-import type { FieldType, FormField } from '../core/types/FormTypes';
+import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Interface for contract adapters

@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
+import type { FieldType } from '../../../../../form-renderer/src/types/FormTypes';
 import type { ChainType, ContractSchema } from '../../types/ContractSchema';
-import type { FieldType } from '../../types/FormTypes';
 
 // Mock the adapter and other dependencies
 vi.mock('../../../adapters', () => ({
