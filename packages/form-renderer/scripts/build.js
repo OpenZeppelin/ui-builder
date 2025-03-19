@@ -1,46 +1,70 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { copyFileSync, readFileSync, writeFileSync } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.join(__dirname, '..');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
 
-// Run the TypeScript compiler
+// Ensure the dist directory exists
+if (!fs.existsSync(path.join(root, 'dist'))) {
+  fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
+}
+
+// Build TypeScript
 console.log('Building TypeScript...');
-execSync('tsc', { stdio: 'inherit', cwd: root });
+try {
+  execSync('tsc', { stdio: 'inherit', cwd: root });
+} catch (error) {
+  console.error('TypeScript build failed:', error);
+  process.exit(1);
+}
 
-// Create CJS wrapper
+// Check if index.js was generated
+const indexPath = path.join(root, 'dist', 'index.js');
+if (!fs.existsSync(indexPath)) {
+  console.error('Error: TypeScript compilation did not generate dist/index.js');
+  console.log('Checking src directory for index.ts...');
+
+  if (!fs.existsSync(path.join(root, 'src', 'index.ts'))) {
+    console.error('Error: src/index.ts does not exist. Please create an entry file.');
+    process.exit(1);
+  }
+
+  process.exit(1);
+}
+
+// Create CommonJS wrapper
 console.log('Creating CommonJS wrapper...');
-const cjsContent = `
-'use strict';
 
+// Read the ESM output
+const esmCode = fs.readFileSync(indexPath, 'utf8');
+
+// Create development CJS version
+const devCjsWrapper = `'use strict';
+
+// This is an auto-generated CommonJS wrapper
 if (process.env.NODE_ENV === 'production') {
   module.exports = require('./index.prod.cjs');
 } else {
   module.exports = require('./index.dev.cjs');
-}
-`;
+}`;
 
-writeFileSync(path.join(root, 'dist', 'index.cjs'), cjsContent);
+// Create development CJS version
+const devCjs = `'use strict';
 
-// Create dev/prod variants
-const indexPath = path.join(root, 'dist', 'index.js');
-const indexContent = readFileSync(indexPath, 'utf8');
+// CommonJS development version
+${esmCode.replace(/export /g, 'exports.').replace(/import .* from ['"](.*)['"]/g, "const $1 = require('$1')")}`;
 
-// Convert ESM to CJS
-const cjsDevContent = indexContent
-  .replace(/export\s+\{\s*([\w\s,]+)\s*\}\s*;?/g, 'module.exports = { $1 };')
-  .replace(/export\s+default\s+(\w+)\s*;?/g, 'module.exports.default = $1;')
-  .replace(
-    /import\s+\{\s*([\w\s,]+)\s*\}\s+from\s+['"]([^'"]+)['"]\s*;?/g,
-    'const { $1 } = require("$2");'
-  )
-  .replace(/import\s+(\w+)\s+from\s+['"]([^'"]+)['"]\s*;?/g, 'const $1 = require("$2");');
+// Create production CJS version (same as dev but could be optimized differently)
+const prodCjs = devCjs;
 
-writeFileSync(path.join(root, 'dist', 'index.dev.cjs'), cjsDevContent);
-writeFileSync(path.join(root, 'dist', 'index.prod.cjs'), cjsDevContent);
+// Write the files
+fs.writeFileSync(path.join(root, 'dist', 'index.cjs'), devCjsWrapper, 'utf8');
+fs.writeFileSync(path.join(root, 'dist', 'index.dev.cjs'), devCjs, 'utf8');
+fs.writeFileSync(path.join(root, 'dist', 'index.prod.cjs'), prodCjs, 'utf8');
 
-console.log('Build completed successfully.');
+console.log('Build completed successfully!');

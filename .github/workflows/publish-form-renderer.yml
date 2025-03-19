@@ -12,6 +12,11 @@ on:
         description: 'Version to publish (leave empty for semantic-release to determine)'
         required: false
         type: string
+      dry_run:
+        description: 'Dry run (do not actually publish)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   publish:
@@ -52,37 +57,45 @@ jobs:
       - name: Build form-renderer
         run: pnpm --filter=@openzeppelin/transaction-form-renderer build
 
-      # Display message that publishing is disabled during early development
-      - name: Publishing disabled message
+      # Check package files
+      - name: Check package files
+        run: |
+          echo "=== Checking generated files ==="
+          ls -la packages/form-renderer/dist
+
+          echo "=== Checking package.json ==="
+          cat packages/form-renderer/package.json
+
+          echo "=== Dry pack test ==="
+          cd packages/form-renderer
+          npm pack --dry-run
+
+      # Use semantic-release for version management if no version is specified
+      - name: Semantic Release
+        if: ${{ !github.event.inputs.version && !github.event.inputs.dry_run }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HUSKY: 0
+        run: |
+          cd packages/form-renderer
+          npx semantic-release
+
+      # If manual version is provided, publish with that version
+      - name: Publish with manual version
+        if: ${{ github.event.inputs.version && !github.event.inputs.dry_run }}
+        run: |
+          cd packages/form-renderer
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Display success message for dry run
+      - name: Dry run success message
+        if: ${{ github.event.inputs.dry_run }}
         run: |
           echo "==================================================================="
-          echo "NOTICE: Automatic publishing is currently disabled during early development"
-          echo "TO-DO: Re-enable semantic-release or npm publish steps when ready for production"
+          echo "DRY RUN COMPLETED SUCCESSFULLY"
+          echo "The package was built and tested, but not published to npm."
           echo "==================================================================="
-          echo ""
-          echo "Package successfully built and tested, but not published to npm."
-          echo "Run the workflow manually with a version parameter when ready to publish."
-
-      # The following steps are commented out during early development
-      # They will be re-enabled when the package is ready for production
-
-      # # Use semantic-release for version management if no version is specified
-      # - name: Semantic Release
-      #   if: ${{ !github.event.inputs.version }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #     HUSKY: 0
-      #   run: |
-      #     cd packages/form-renderer
-      #     npx semantic-release
-      #
-      # # If manual version is provided, publish with that version
-      # - name: Publish with manual version
-      #   if: ${{ github.event.inputs.version }}
-      #   run: |
-      #     cd packages/form-renderer
-      #     npm version ${{ github.event.inputs.version }} --no-git-tag-version
-      #     npm publish --access public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
