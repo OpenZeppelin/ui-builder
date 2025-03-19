@@ -89,9 +89,35 @@ module.exports = [
     },
   },
 
-  // TypeScript configuration
+  // Base TypeScript configuration - without project references
   {
     files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      '@typescript-eslint': typescriptPlugin,
+    },
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      ...typescriptRecommendedRules,
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    },
+  },
+
+  // TypeScript strict checking - only for source files that should be in the tsconfig
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    excludedFiles: [
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+      'src/**/*.stories.tsx',
+      'src/**/__tests__/**',
+      'src/test/**',
+    ],
     plugins: {
       '@typescript-eslint': typescriptPlugin,
     },
@@ -104,8 +130,24 @@ module.exports = [
       },
     },
     rules: {
-      ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+    },
+  },
+
+  // Config files
+  {
+    files: ['*.config.ts', 'vite.config.ts', 'vitest.config.ts'],
+    plugins: {
+      '@typescript-eslint': typescriptPlugin,
+    },
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
     },
   },
 
