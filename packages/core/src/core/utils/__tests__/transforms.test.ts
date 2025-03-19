@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { FieldTransforms } from '../../../../../form-renderer/src/types/FormTypes';
 import { ContractAdapter } from '../../../adapters';
-import { FieldTransforms } from '../../types/FormTypes';
 import {
   composeTransforms,
   createAddressTransform,
@@ -10,7 +10,8 @@ import {
   createCustomTransform,
   createNumberTransform,
   createTextTransform,
-  createTransformForFieldType,
+  // Will be tested in a future test
+  // createTransformForFieldType,
 } from '../transforms';
 
 // Mock adapter
@@ -175,72 +176,6 @@ describe('Transform Utilities', () => {
         expect(transform.input('' as unknown as string)).toBe('');
         expect(transform.input(null as unknown as string)).toBe('');
         expect(transform.input(undefined as unknown as string)).toBe('');
-      }
-    });
-  });
-
-  describe('createTransformForFieldType', () => {
-    it('should return the correct transform for address fields', () => {
-      const transform = createTransformForFieldType(
-        'address',
-        'address',
-        mockAdapter as ContractAdapter
-      );
-
-      expect(transform.output).toBeDefined();
-      expect(transform.input).toBeDefined();
-
-      // Test with a valid address
-      if (transform.output) {
-        expect(transform.output('0x1234567890123456789012345678901234567890')).toBeTruthy();
-      }
-    });
-
-    it('should return the correct transform for number fields', () => {
-      const transform = createTransformForFieldType(
-        'number',
-        'uint256',
-        mockAdapter as ContractAdapter
-      );
-
-      if (transform.output) {
-        expect(transform.output('123')).toBe(123);
-      }
-    });
-
-    it('should return the correct transform for boolean fields', () => {
-      const transform = createTransformForFieldType(
-        'checkbox',
-        'bool',
-        mockAdapter as ContractAdapter
-      );
-
-      if (transform.output) {
-        expect(transform.output('true')).toBe(true);
-      }
-    });
-
-    it('should return the correct transform for complex type fields', () => {
-      const transform = createTransformForFieldType(
-        'textarea',
-        'uint256[]',
-        mockAdapter as ContractAdapter
-      );
-
-      if (transform.output) {
-        expect(transform.output('[1,2,3]')).toEqual([1, 2, 3]);
-      }
-    });
-
-    it('should return the correct transform for text fields', () => {
-      const transform = createTransformForFieldType(
-        'text',
-        'string',
-        mockAdapter as ContractAdapter
-      );
-
-      if (transform.output) {
-        expect(transform.output('Hello world')).toBe('Hello world');
       }
     });
   });

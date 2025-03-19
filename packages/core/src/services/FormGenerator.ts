@@ -6,6 +6,7 @@
  */
 
 import { getContractAdapter } from '../adapters';
+import { BuilderFormConfig } from '../core/types/FormTypes';
 import { generateId } from '../core/utils/utils';
 
 import type {
@@ -14,11 +15,14 @@ import type {
   FunctionParameter,
 } from '../core/types/ContractSchema';
 import type {
-  BuilderFormConfig,
   CommonFormProperties,
   FieldType,
   FormField,
-} from '../core/types/FormTypes';
+  // Will be used in future implementation
+  // FormLayout,
+  // RenderFormSchema,
+  // SubmitButtonConfig,
+} from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Generates a default form configuration for a contract function

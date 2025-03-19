@@ -7,12 +7,17 @@
  */
 
 import { getContractAdapter } from '../../adapters';
+// Uncomment when needed: import { BuilderFormConfig } from '../types/FormTypes';
 import { createTransformForFieldType } from '../utils/transforms';
 import { humanizeString } from '../utils/utils';
 
 import type { ContractAdapter } from '../../adapters';
 import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
-import type { FormField, FormLayout, RenderFormSchema } from '../types/FormTypes';
+import type {
+  FormField,
+  FormLayout,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Factory class for generating form schemas from contract functions
