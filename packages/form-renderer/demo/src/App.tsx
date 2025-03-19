@@ -59,17 +59,20 @@ const sampleSchema: RenderFormSchema = {
 
 // Sample adapter for demonstration
 const sampleAdapter = {
-  formatTransactionData: (functionId: string, inputs: Record<string, unknown>) => {
+  formatTransactionData: (
+    functionId: string,
+    inputs: Record<string, unknown>
+  ): Record<string, unknown> => {
     console.log('Formatting transaction data', functionId, inputs);
     return { functionId, inputs };
   },
-  isValidAddress: (address: string) => {
+  isValidAddress: (address: string): boolean => {
     return address.startsWith('0x') && address.length === 42;
   },
 };
 
-export default function App() {
-  const handleSubmit = (data: unknown) => {
+export default function App(): React.ReactElement {
+  const handleSubmit = (data: unknown): Promise<{ success: boolean }> => {
     console.log('Form submitted with data:', data);
     return Promise.resolve({ success: true });
   };
