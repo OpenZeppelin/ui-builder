@@ -52,23 +52,37 @@ jobs:
       - name: Build form-renderer
         run: pnpm --filter=@openzeppelin/transaction-form-renderer build
 
-      # Use semantic-release for version management if no version is specified
-      - name: Semantic Release
-        if: ${{ !github.event.inputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          HUSKY: 0
+      # Display message that publishing is disabled during early development
+      - name: Publishing disabled message
         run: |
-          cd packages/form-renderer
-          npx semantic-release
+          echo "==================================================================="
+          echo "NOTICE: Automatic publishing is currently disabled during early development"
+          echo "TO-DO: Re-enable semantic-release or npm publish steps when ready for production"
+          echo "==================================================================="
+          echo ""
+          echo "Package successfully built and tested, but not published to npm."
+          echo "Run the workflow manually with a version parameter when ready to publish."
 
-      # If manual version is provided, publish with that version
-      - name: Publish with manual version
-        if: ${{ github.event.inputs.version }}
-        run: |
-          cd packages/form-renderer
-          npm version ${{ github.event.inputs.version }} --no-git-tag-version
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # The following steps are commented out during early development
+      # They will be re-enabled when the package is ready for production
+
+      # # Use semantic-release for version management if no version is specified
+      # - name: Semantic Release
+      #   if: ${{ !github.event.inputs.version }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     HUSKY: 0
+      #   run: |
+      #     cd packages/form-renderer
+      #     npx semantic-release
+      #
+      # # If manual version is provided, publish with that version
+      # - name: Publish with manual version
+      #   if: ${{ github.event.inputs.version }}
+      #   run: |
+      #     cd packages/form-renderer
+      #     npm version ${{ github.event.inputs.version }} --no-git-tag-version
+      #     npm publish --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

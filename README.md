@@ -10,6 +10,7 @@ This project is currently in development.
 [![Coverage](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/OpenZeppelin/transaction-form-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/transaction-form-builder)
 [![Release](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/release.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/release.yml)
+[![Form-Renderer](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish-form-renderer.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish-form-renderer.yml)
 [![Security](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml)
 [![Dependencies](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml)
 [![Dependency Review](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml)
@@ -35,8 +36,26 @@ This project is currently in development.
 This project is organized as a monorepo with the following packages:
 
 - **packages/core**: The main application with the form builder UI
-- **packages/form-renderer**: The shared form rendering library
+- **packages/form-renderer**: The shared form rendering library (published to npm)
 - **packages/templates**: Export templates for different frameworks
+
+## Packages
+
+### Form-Renderer Package
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-builder-form-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-builder-form-renderer)
+
+The `form-renderer` package provides a reusable library for rendering transaction forms. It's published to npm and can be used independently of the main application.
+
+Features:
+
+- Lightweight form rendering components
+- Framework-agnostic design
+- TypeScript support with full type definitions
+- Support for both ESM and CommonJS environments
+- Customizable styling options
+
+For more details, see the [Form-Renderer README](./packages/form-renderer/README.md).
 
 ## Features
 
@@ -286,3 +305,31 @@ Please read [SECURITY.md](./SECURITY.md) for details on our security policy and 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and delivery:
+
+- **CI Workflow**: Runs tests, linting, and type checking for all packages
+- **Coverage Workflow**: Generates and uploads test coverage reports
+- **Release Workflow**: Manages semantic versioning and releases for the main application
+- **Form-Renderer Publish Workflow**: Builds and tests the form-renderer package automatically when changes are merged to main
+- **Security Workflow**: Checks for security vulnerabilities
+- **Dependencies Workflow**: Checks for outdated dependencies
+- **Update Dependencies Workflow**: Automatically updates dependencies
+
+### Package Publishing
+
+> **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is ready for production release.
+
+The form-renderer package will be automatically published to npm when changes are merged to the main branch once publishing is enabled. Currently, the workflow only builds and tests the package without publishing.
+
+The publishing process (when enabled):
+
+1. Runs when code is pushed to the main branch or via manual trigger
+2. Runs tests and builds the package
+3. Uses semantic-release to determine the next version based on commit messages
+4. Publishes to npm with appropriate tags
+5. Creates a GitHub release with generated release notes
+
+Manual releases can be triggered through the GitHub Actions interface with a version parameter when needed during development.
