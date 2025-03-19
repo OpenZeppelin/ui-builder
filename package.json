@@ -29,6 +29,7 @@
     "storybook": "pnpm --filter=@openzeppelin/transaction-form-builder-core storybook",
     "build-storybook": "pnpm --filter=@openzeppelin/transaction-form-builder-core build-storybook",
     "semantic-release": "semantic-release",
+    "release:form-renderer": "pnpm --filter=@openzeppelin/transaction-form-renderer publish",
     "commit": "git-cz",
     "update-deps": "pnpm update --latest",
     "update-deps:major": "npx npm-check-updates -u && pnpm install",

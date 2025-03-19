@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-renderer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Shared form renderer for Transaction Form Builder",
   "type": "module",
   "main": "dist/index.js",
@@ -9,8 +9,14 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "pnpm run build",
+    "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
