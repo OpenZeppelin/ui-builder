@@ -49,8 +49,22 @@ const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
 module.exports = [
+  // Ignore patterns for all files
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '**/*.d.ts',
+      '**/*.min.js',
+      'coverage/**',
+      '**/*.tsbuildinfo',
+      '**/.DS_Store',
+      '**/*.svg',
+      '**/*.json',
+      '**/*.html',
+      '**/*.css',
+      '**/*.md',
+    ],
   },
 
   // Global settings
@@ -89,6 +103,15 @@ module.exports = [
     },
   },
 
+  // JavaScript files configuration
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+  },
+
   // Base TypeScript configuration - without project references
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -105,19 +128,22 @@ module.exports = [
     rules: {
       ...typescriptRecommendedRules,
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // Disable rules that require type checking as they will be enabled in the strict config
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
 
-  // TypeScript strict checking - only for source files that should be in the tsconfig
+  // TypeScript strict checking - only for source files, excluding tests and stories
   {
-    files: [
-      'src/**/*.ts',
-      'src/**/*.tsx',
-      '!src/**/*.test.ts',
-      '!src/**/*.test.tsx',
-      '!src/**/*.stories.tsx',
-      '!src/**/__tests__/**',
-      '!src/test/**',
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: [
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+      'src/**/*.stories.tsx',
+      'src/**/__tests__/**',
+      'src/test/**',
     ],
     plugins: {
       '@typescript-eslint': typescriptPlugin,
@@ -134,21 +160,6 @@ module.exports = [
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
-    },
-  },
-
-  // Config files
-  {
-    files: ['*.config.ts', 'vite.config.ts', 'vitest.config.ts'],
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
-    languageOptions: {
-      parser: typescriptParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
     },
   },
 
@@ -171,6 +182,7 @@ module.exports = [
 
   // Import and sorting rules
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       import: importPlugin,
       'simple-import-sort': simpleImportSortPlugin,
@@ -219,6 +231,7 @@ module.exports = [
 
   // Prettier configuration
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.cjs', '**/*.mjs'],
     plugins: {
       prettier: prettierPlugin,
     },
