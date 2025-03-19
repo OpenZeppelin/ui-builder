@@ -65,9 +65,15 @@ export function AddressInput({
   // Copy address to clipboard
   const copyToClipboard = () => {
     if (value && typeof value === 'string') {
-      navigator.clipboard.writeText(value);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      navigator.clipboard
+        .writeText(value)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error('Failed to copy address to clipboard:', err);
+        });
     }
   };
 

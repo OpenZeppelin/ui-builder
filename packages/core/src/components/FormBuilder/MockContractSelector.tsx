@@ -28,8 +28,8 @@ export const MockContractSelector: React.FC<MockContractSelectorProps> = ({
 
   useEffect(() => {
     const loadMockContracts = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const mocks = await MockContractService.getAvailableMocks();
 
         // Filter by chain type if provided
@@ -47,7 +47,12 @@ export const MockContractSelector: React.FC<MockContractSelectorProps> = ({
       }
     };
 
-    loadMockContracts();
+    // Call the async function and handle any unexpected errors
+    loadMockContracts().catch((err) => {
+      console.error('Unexpected error in loadMockContracts:', err);
+      setError('An unexpected error occurred');
+      setIsLoading(false);
+    });
   }, [chainType]);
 
   const handleSelectMock = (mockId: string) => {
