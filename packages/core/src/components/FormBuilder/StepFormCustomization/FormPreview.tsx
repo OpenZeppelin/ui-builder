@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../../ui/textarea';
 
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
-import type { BuilderFormConfig, CommonFormProperties } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import type { FormField } from '@openzeppelin/transaction-form-renderer';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
@@ -18,7 +19,7 @@ interface FormPreviewProps {
 
 export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
   // Extract the common form properties for rendering
-  const formProperties: CommonFormProperties = formConfig;
+  const formProperties = formConfig;
 
   // We're not using useForm() here since this is just a display component
   return (
@@ -35,7 +36,7 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
                   : 'grid-cols-3'
             }`}
           >
-            {formProperties.fields.map((field, index) => (
+            {formProperties.fields.map((field: FormField, index: number) => (
               <div
                 key={field.id}
                 className={`space-y-2 ${
@@ -71,7 +72,7 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
                       <SelectValue placeholder={field.placeholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {field.options?.map((option) => (
+                      {field.options?.map((option: { label: string; value: string }) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
