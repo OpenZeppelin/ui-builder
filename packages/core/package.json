@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --ext ts,tsx --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint . --ext ts,tsx,js,cjs,mjs --fix --config eslint.config.cjs",
     "lint:adapters": "node lint-adapters.cjs",
-    "lint:config-files": "eslint .storybook/*.ts vite.config.ts vitest.config.ts --fix --config eslint.config.cjs || true",
+    "lint:config-files": "eslint vite.config.ts vitest.config.ts --fix --config eslint.config.cjs || true",
     "fix-all": "pnpm lint:config-files && pnpm lint:all-fix && pnpm format",
     "lint:imports": "eslint --fix --config eslint.config.cjs --rule 'simple-import-sort/imports: error' --rule 'simple-import-sort/exports: error' --rule 'import/first: error' --rule 'import/newline-after-import: error' --rule 'import/no-duplicates: error' 'src/**/*.{ts,tsx}'",
     "preview": "vite preview",

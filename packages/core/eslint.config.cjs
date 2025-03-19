@@ -110,13 +110,14 @@ module.exports = [
 
   // TypeScript strict checking - only for source files that should be in the tsconfig
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
-    excludedFiles: [
-      'src/**/*.test.ts',
-      'src/**/*.test.tsx',
-      'src/**/*.stories.tsx',
-      'src/**/__tests__/**',
-      'src/test/**',
+    files: [
+      'src/**/*.ts',
+      'src/**/*.tsx',
+      '!src/**/*.test.ts',
+      '!src/**/*.test.tsx',
+      '!src/**/*.stories.tsx',
+      '!src/**/__tests__/**',
+      '!src/test/**',
     ],
     plugins: {
       '@typescript-eslint': typescriptPlugin,
