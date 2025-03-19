@@ -6,6 +6,11 @@
  * 1. Imports from existing utility functions (preferred)
  * 2. Properly aligned implementations that match existing behavior
  * 3. Implementations that integrate with the application's validation system
+ *
+ * TODO: [CLEANUP] This file contains placeholder implementations that should be:
+ * - Either replaced with imports from core utilities
+ * - Or made the canonical implementation that core imports from
+ * This decision should be made as part of a larger architecture review of the monorepo structure.
  */
 
 /**

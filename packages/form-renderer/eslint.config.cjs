@@ -22,6 +22,9 @@ const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 
+// Get the base configuration from the root
+const baseConfig = require('../../eslint.config.cjs');
+
 // Safely extract configs to handle both ESLint v8 and v9 formats
 const getPluginConfigs = (plugin, configName) => {
   try {
@@ -45,53 +48,13 @@ const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommend
 const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
+// Only add package-specific overrides
 module.exports = [
-  {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**'],
-  },
+  ...baseConfig,
 
-  // Global settings
-  {
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-      globals: {
-        document: 'readonly',
-        navigator: 'readonly',
-        window: 'readonly',
-        console: 'readonly',
-      },
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: ['./tsconfig.json', './demo/tsconfig.json'],
-        },
-        node: {
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
-      },
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
-  },
-
-  // TypeScript configuration for source files
+  // Form-renderer specific TypeScript configuration with project reference
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -101,8 +64,6 @@ module.exports = [
       },
     },
     rules: {
-      ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-module-boundary-types': ['warn'],
       '@typescript-eslint/explicit-function-return-type': ['warn'],
     },
@@ -111,9 +72,6 @@ module.exports = [
   // TypeScript configuration for demo files
   {
     files: ['demo/**/*.ts', 'demo/**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -123,8 +81,6 @@ module.exports = [
       },
     },
     rules: {
-      ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       // Relaxed rules for the demo app
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',

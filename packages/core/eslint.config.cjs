@@ -48,106 +48,16 @@ const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommend
 const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
+// Get the base configuration from the root
+const baseConfig = require('../../eslint.config.cjs');
+
+// Only add package-specific overrides
 module.exports = [
-  // Ignore patterns for all files
-  {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      '**/*.d.ts',
-      '**/*.min.js',
-      'coverage/**',
-      '**/*.tsbuildinfo',
-      '**/.DS_Store',
-      '**/*.svg',
-      '**/*.json',
-      '**/*.html',
-      '**/*.css',
-      '**/*.md',
-    ],
-  },
+  ...baseConfig,
 
-  // Global settings
-  {
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-      globals: {
-        document: 'readonly',
-        navigator: 'readonly',
-        window: 'readonly',
-        console: 'readonly',
-      },
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: ['./tsconfig.json'],
-        },
-        node: {
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
-      },
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
-  },
-
-  // JavaScript files configuration
-  {
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-  },
-
-  // Base TypeScript configuration - without project references
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
-    languageOptions: {
-      parser: typescriptParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      // Disable rules that require type checking as they will be enabled in the strict config
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/await-thenable': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
-    },
-  },
-
-  // TypeScript strict checking - only for source files, excluding tests and stories
+  // Core-specific TypeScript configuration with project reference
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
-    ignores: [
-      'src/**/*.test.ts',
-      'src/**/*.test.tsx',
-      'src/**/*.stories.tsx',
-      'src/**/__tests__/**',
-      'src/test/**',
-    ],
-    plugins: {
-      '@typescript-eslint': typescriptPlugin,
-    },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -163,62 +73,7 @@ module.exports = [
     },
   },
 
-  // React configuration
-  {
-    files: ['**/*.jsx', '**/*.tsx'],
-    plugins: {
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin,
-      'react-refresh': reactRefreshPlugin,
-    },
-    rules: {
-      ...reactRecommendedRules,
-      ...reactHooksRecommendedRules,
-      'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-    },
-  },
-
-  // Import and sorting rules
-  {
-    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
-    plugins: {
-      import: importPlugin,
-      'simple-import-sort': simpleImportSortPlugin,
-    },
-    rules: {
-      'import/first': 'error',
-      'import/newline-after-import': 'error',
-      'import/no-duplicates': 'error',
-      'simple-import-sort/imports': [
-        'error',
-        {
-          groups: [
-            // React and related packages come first
-            ['^react', '^react-dom', '^react-.*$'],
-            // External packages
-            ['^@?\\w'],
-            // Form renderer package
-            ['^@form-renderer'],
-            // Internal packages (alias imports)
-            ['^@/'],
-            // Parent imports (starting with ..)
-            ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
-            // Other relative imports (starting with .)
-            ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
-            // Style imports
-            ['^.+\\.s?css$'],
-            // Type imports
-            ['^.+\\u0000$'],
-          ],
-        },
-      ],
-      'simple-import-sort/exports': 'error',
-    },
-  },
-
-  // Custom rules for adapter pattern enforcement
+  // Custom rules for adapter pattern enforcement (package-specific)
   {
     files: ['src/adapters/**/*.ts'],
     plugins: {
@@ -226,18 +81,6 @@ module.exports = [
     },
     rules: {
       'custom/no-extra-adapter-methods': 'error',
-    },
-  },
-
-  // Prettier configuration
-  {
-    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.cjs', '**/*.mjs'],
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      ...(prettierConfig.rules || {}),
-      'prettier/prettier': ['error', {}, { usePrettierrc: true }],
     },
   },
 ];

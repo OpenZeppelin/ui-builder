@@ -21,9 +21,7 @@ const importPlugin = require('eslint-plugin-import');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
-
-// Custom plugin
-const customPlugin = require('./.eslint/index.cjs');
+const jsdocPlugin = require('eslint-plugin-jsdoc');
 
 // Safely extract configs to handle both ESLint v8 and v9 formats
 const getPluginConfigs = (plugin, configName) => {
@@ -48,9 +46,33 @@ const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommend
 const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
-module.exports = [
+// Detect if we're in a package context by checking for custom adapter plugin
+let customPlugin;
+try {
+  customPlugin = require('./.eslint/index.cjs');
+} catch (e) {
+  // This is fine - we're probably running ESLint in a package subdirectory
+  customPlugin = null;
+}
+
+// Base configuration that can be extended by all packages
+const baseConfig = [
+  // Ignore patterns for all files
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '**/*.d.ts',
+      '**/*.min.js',
+      'coverage/**',
+      '**/.DS_Store',
+      '**/*.svg',
+      '**/*.json',
+      '**/*.html',
+      '**/*.css',
+      '**/*.md',
+      '**/tsconfig.tsbuildinfo',
+    ],
   },
 
   // Global settings
@@ -77,7 +99,6 @@ module.exports = [
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
-          project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         },
         node: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -89,7 +110,16 @@ module.exports = [
     },
   },
 
-  // TypeScript configuration
+  // JavaScript files configuration
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+  },
+
+  // Base TypeScript configuration - without project references
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
@@ -98,7 +128,6 @@ module.exports = [
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
@@ -106,6 +135,10 @@ module.exports = [
     rules: {
       ...typescriptRecommendedRules,
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // Disable rules that require type checking as they will be enabled in the strict config
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
 
@@ -128,6 +161,7 @@ module.exports = [
 
   // Import and sorting rules
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       import: importPlugin,
       'simple-import-sort': simpleImportSortPlugin,
@@ -144,6 +178,8 @@ module.exports = [
             ['^react', '^react-dom', '^react-.*$'],
             // External packages
             ['^@?\\w'],
+            // Form renderer package
+            ['^@form-renderer'],
             // Internal packages (alias imports)
             ['^@/'],
             // Parent imports (starting with ..)
@@ -161,19 +197,33 @@ module.exports = [
     },
   },
 
-  // Custom rules for adapter pattern enforcement
+  // JSDoc rules for libraries
   {
-    files: ['src/adapters/**/*.ts'],
+    files: ['packages/form-renderer/src/**/*.ts', 'packages/form-renderer/src/**/*.tsx'],
     plugins: {
-      custom: customPlugin,
+      jsdoc: jsdocPlugin,
     },
     rules: {
-      'custom/no-extra-adapter-methods': 'error',
+      // Enforce JSDoc for public API
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          publicOnly: true,
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ClassDeclaration: true,
+            ArrowFunctionExpression: false,
+            FunctionExpression: false,
+          },
+        },
+      ],
     },
   },
 
   // Prettier configuration
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.cjs', '**/*.mjs'],
     plugins: {
       prettier: prettierPlugin,
     },
@@ -183,3 +233,18 @@ module.exports = [
     },
   },
 ];
+
+// Add custom adapter plugin config only if available
+if (customPlugin) {
+  baseConfig.push({
+    files: ['src/adapters/**/*.ts', 'packages/core/src/adapters/**/*.ts'],
+    plugins: {
+      custom: customPlugin,
+    },
+    rules: {
+      'custom/no-extra-adapter-methods': 'error',
+    },
+  });
+}
+
+module.exports = baseConfig;

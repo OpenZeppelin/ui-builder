@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { TransactionFormRenderer } from '../components';
 
 describe('Form Renderer', () => {
-  it('exists', () => {
-    expect(true).toBe(true);
+  it('exports TransactionFormRenderer component', () => {
+    expect(TransactionFormRenderer).toBeDefined();
+    // Check that it's a function (React component)
+    expect(typeof TransactionFormRenderer).toBe('function');
   });
 });

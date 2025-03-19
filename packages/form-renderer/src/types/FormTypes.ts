@@ -5,6 +5,13 @@
  * These will be replaced with the actual types from the main project.
  * In the final implementation, this package will contain the authoritative
  * type definitions that will be imported by the core package.
+ *
+ * TODO: [CLEANUP] This file contains duplicate type definitions with core/src/types/FormTypes.ts.
+ * As part of monorepo architecture refinement, a decision is needed on whether types should:
+ * 1. Live in core and be imported by form-renderer
+ * 2. Live in form-renderer and be imported by core
+ * 3. Be extracted to a separate shared package
+ * For now, maintaining separate implementations.
  */
 
 // Define a minimal adapter interface for the form renderer
