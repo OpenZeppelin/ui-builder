@@ -184,8 +184,7 @@ export function createTransformForFieldType<T extends FieldType>(
  * @returns A single transform that applies all transforms in sequence
  */
 export function composeTransforms<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ...transforms: Array<FieldTransforms<any>>
+  ...transforms: Array<FieldTransforms<unknown>>
 ): FieldTransforms<T> {
   return {
     input: (value: T): unknown => {
