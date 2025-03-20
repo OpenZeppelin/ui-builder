@@ -122,7 +122,6 @@ For more details, see the [Form-Renderer README](./packages/form-renderer/README
 - `pnpm lint:all-fix` - Fix ESLint issues across all file types
 - `pnpm lint:config-files` - Fix linting in configuration files
 - `pnpm fix-all` - Run all linting and formatting fixes at once
-- `pnpm lint:imports` - Fix import sorting
 - `pnpm preview` - Preview the production build
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check formatting without making changes

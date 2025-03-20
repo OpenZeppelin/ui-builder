@@ -43,7 +43,6 @@ pnpm dev
 - `pnpm build` - Build for production
 - `pnpm lint` - Run ESLint
 - `pnpm lint:fix` - Fix ESLint issues
-- `pnpm lint:imports` - Fix import sorting
 - `pnpm test` - Run tests
 - `pnpm test:watch` - Run tests in watch mode
 - `pnpm test:coverage` - Run tests with coverage report
