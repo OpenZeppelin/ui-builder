@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@form-renderer/*": ["../form-renderer/src/*"]
+      "@form-renderer/*": ["../form-renderer/src/*"],
+      "@styles/*": ["../styles/*"]
     },
     "emitDeclarationOnly": true,
     "noEmit": false,
@@ -14,5 +15,5 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "src/**/*.json"],
-  "references": [{ "path": "../form-renderer" }]
+  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }]
 }

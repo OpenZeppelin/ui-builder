@@ -9,9 +9,11 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@styles/*": ["../styles/*"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.stories.tsx", "dist", "node_modules"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.stories.tsx", "dist", "node_modules"],
+  "references": [{ "path": "../styles" }]
 }

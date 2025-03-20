@@ -1,0 +1,30 @@
+{
+  "name": "@openzeppelin/transaction-form-builder-styles",
+  "version": "0.1.0",
+  "description": "Centralized styling system for Transaction Form Builder",
+  "private": true,
+  "type": "module",
+  "main": "global.css",
+  "scripts": {
+    "clean": "echo 'No build artifacts to clean'",
+    "build": "echo 'No build step needed for styles'",
+    "lint": "eslint 'utils/**/*.{js,cjs}' --report-unused-disable-directives --max-warnings 0 --config ../../eslint.config.cjs",
+    "lint:fix": "eslint 'utils/**/*.{js,cjs}' --fix --config ../../eslint.config.cjs",
+    "format": "prettier --write \"**/*.{css,js,cjs}\" --config ../../.prettierrc",
+    "format:check": "prettier --check \"**/*.{css,js,cjs}\" --config ../../.prettierrc",
+    "test": "echo 'No tests for styles package'"
+  },
+  "keywords": [
+    "css",
+    "tailwind",
+    "styles",
+    "design-system"
+  ],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.12"
+  }
+}

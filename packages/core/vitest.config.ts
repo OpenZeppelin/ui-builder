@@ -10,6 +10,7 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@form-renderer': path.resolve(__dirname, '../form-renderer/src'),
+        '@styles': path.resolve(__dirname, '../styles'),
       },
     },
   })
