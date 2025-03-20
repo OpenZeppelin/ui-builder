@@ -22,8 +22,9 @@ if [ "$node_version" -lt 20 ]; then
   exit 1
 fi
 
-# Run lint-staged with the configuration from package.json
-# This now uses the same commands as the fix-all script 
-# for consistent import sorting behavior
-echo "⚙️ Running lint-staged with consistent sorting configuration..."
-npx lint-staged --no-stash 
+# Check if there are staged changes
+if ! git diff --cached --quiet; then
+  # Run lint-staged to format and lint only the staged files
+  # This will use the configuration from package.json
+  npx lint-staged
+fi 
