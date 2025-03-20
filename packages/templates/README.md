@@ -14,12 +14,9 @@ typescript-react-vite/
 ├── src/
 │   ├── components/   # React components (including the generated form)
 │   ├── adapters/     # Blockchain adapters
-│   ├── types/        # TypeScript type definitions
 │   ├── main.tsx      # Application entry point
-│   └── index.css     # Global styles
+│   └── styles.css    # Global styles
 ├── index.html        # HTML template
-├── tsconfig.json     # TypeScript configuration
-├── vite.config.ts    # Vite configuration
 └── README.md         # Template documentation
 ```
 
