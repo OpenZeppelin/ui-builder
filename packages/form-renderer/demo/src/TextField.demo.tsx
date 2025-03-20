@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { TextField } from '../../src/components/fields/TextField';
@@ -6,23 +6,21 @@ import { TextField } from '../../src/components/fields/TextField';
 interface FormValues {
   username: string;
   email: string;
+  feedback: string;
 }
 
 /**
  * Demo component for TextField
- * Shows basic usage and React Hook Form integration
+ * Shows React Hook Form integration with TextField
  */
-export default function TextFieldDemo() {
-  // State for standalone text field
-  const [value, setValue] = useState('');
-  const [error, setError] = useState<string | undefined>();
-
+export default function TextFieldDemo(): React.ReactElement {
   // Setup for React Hook Form integration
   const formMethods = useForm<FormValues>({
     mode: 'onChange', // Validate on change
     defaultValues: {
       username: '',
       email: '',
+      feedback: '',
     },
     // Add validation rules using React Hook Form
     resolver: (values) => {
@@ -64,19 +62,8 @@ export default function TextFieldDemo() {
   const { handleSubmit, control, formState } = formMethods;
   const { errors, isValid, isSubmitting, isDirty } = formState;
 
-  // Validation handler for standalone field
-  const handleChange = (newValue: string) => {
-    setValue(newValue);
-
-    if (newValue.length < 3) {
-      setError('Input must be at least 3 characters');
-    } else {
-      setError(undefined);
-    }
-  };
-
   // Form submission handler
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: FormValues): void => {
     console.log('Form submitted:', data);
     // Would typically send to API here
   };
@@ -85,53 +72,22 @@ export default function TextFieldDemo() {
     <div className="container mx-auto max-w-4xl p-6">
       <h1 className="text-foreground mb-8 text-2xl font-bold">TextField Component</h1>
 
-      <div className="space-y-10">
-        {/* Standalone Usage */}
-        <div className="bg-card rounded-xl border p-6 shadow-sm">
-          <div className="mb-6 flex flex-col space-y-1.5">
-            <h3 className="text-xl leading-none font-semibold tracking-tight">Basic Usage</h3>
-            <p className="text-muted-foreground text-sm">
-              TextField can be used standalone with your own state management.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <TextField
-              id="standalone-field"
-              label="Name"
-              value={value}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              helperText="Please enter at least 3 characters"
-              error={error}
-              name="name"
-            />
-
-            <div className="border-border/40 bg-muted/50 rounded-lg border p-4">
-              <h4 className="mb-2 text-sm font-medium">Current Value:</h4>
-              <code className="bg-background rounded border px-2 py-1 text-sm">
-                {value || '""'}
-              </code>
-            </div>
-          </div>
-        </div>
-
-        {/* React Hook Form Integration */}
+      <div className="space-y-6">
         <div className="bg-card rounded-xl border p-6 shadow-sm">
           <div className="mb-6 flex flex-col space-y-1.5">
             <h3 className="text-xl leading-none font-semibold tracking-tight">
               React Hook Form Integration
             </h3>
             <p className="text-muted-foreground text-sm">
-              TextField integrates seamlessly with React Hook Form for validation and form state
-              management.
+              TextField is designed specifically for React Hook Form integration. It handles
+              validation, errors, and form state automatically.
             </p>
           </div>
 
           <FormProvider {...formMethods}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <TextField
+                <TextField<FormValues>
                   id="username-field"
                   control={control}
                   name="username"
@@ -140,13 +96,23 @@ export default function TextFieldDemo() {
                   helperText="Username is required and must be at least 5 characters"
                 />
 
-                <TextField
+                <TextField<FormValues>
                   id="email-field"
                   control={control}
                   name="email"
                   label="Email"
                   placeholder="Enter your email"
                   helperText="Enter a valid email address"
+                />
+
+                <TextField<FormValues>
+                  id="feedback-field"
+                  control={control}
+                  name="feedback"
+                  label="Feedback"
+                  placeholder="Tell us what you think"
+                  helperText="Optional feedback"
+                  width="full"
                 />
               </div>
 

@@ -1,13 +1,7 @@
 import React from 'react';
-import { Control, Controller, useWatch } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 
-import {
-  ContractAdapter,
-  FieldCondition,
-  FieldType,
-  FormField,
-  FormValues,
-} from '../types/FormTypes';
+import { FieldCondition, FormField, FormValues } from '../types/FormTypes';
 
 import { TextField } from './fields';
 
@@ -77,69 +71,6 @@ function useShouldRenderField(field: FormField, control: Control<FormValues>): b
 }
 
 /**
- * Props for field components, derived from FormField
- */
-type FieldComponentProps = Pick<
-  FormField,
-  'id' | 'label' | 'placeholder' | 'helperText' | 'options' | 'width'
-> & {
-  /**
-   * Current field value
-   */
-  value: unknown;
-
-  /**
-   * Callback when value changes
-   */
-  onChange: (value: unknown) => void;
-
-  /**
-   * Callback when field loses focus
-   */
-  onBlur?: () => void;
-
-  /**
-   * React ref for DOM access
-   */
-  ref?: React.Ref<unknown>;
-
-  /**
-   * Error message to display
-   */
-  error?: string;
-
-  /**
-   * Field name
-   */
-  name?: string;
-};
-
-/**
- * Registry of field components by type
- */
-const fieldComponents: Partial<Record<FieldType, React.ComponentType<FieldComponentProps>>> = {
-  // Use a function component wrapper to adapt the TextField to our field component interface
-  text: function TextFieldWrapper(props: FieldComponentProps) {
-    return (
-      <TextField
-        id={props.id}
-        label={props.label}
-        placeholder={props.placeholder}
-        helperText={props.helperText}
-        width={props.width}
-        name={props.name || props.id}
-        value={typeof props.value === 'string' ? props.value : ''}
-        onChange={(val) => props.onChange(val)}
-        onBlur={props.onBlur}
-        error={props.error}
-        control={undefined}
-      />
-    );
-  },
-  // Add other field components as they are implemented
-};
-
-/**
  * Dynamic Form Field Component
  *
  * Renders the appropriate form field based on the field type
@@ -148,7 +79,6 @@ const fieldComponents: Partial<Record<FieldType, React.ComponentType<FieldCompon
 export function DynamicFormField({
   field,
   control,
-  error,
 }: DynamicFormFieldProps): React.ReactElement | null {
   // Check if the field should be rendered based on visibility conditions
   const shouldRender = useShouldRenderField(field, control);
@@ -156,79 +86,23 @@ export function DynamicFormField({
     return null;
   }
 
-  // Get the component for this field type
-  const FieldComponent = fieldComponents[field.type];
-
-  // If no component is registered for this type, render nothing
-  if (!FieldComponent) {
-    console.warn(`No component registered for field type: ${field.type}`);
-    return null;
-  }
-
-  // Input transform for displaying values
-  const transformValue = field.transforms?.input;
-
-  return (
-    <Controller
-      name={field.name}
-      control={control}
-      defaultValue={field.defaultValue}
-      rules={{
-        required: field.validation?.required ? 'This field is required' : false,
-        min:
-          field.validation?.min !== undefined
-            ? {
-                value: field.validation.min,
-                message: `Minimum value is ${field.validation.min}`,
-              }
-            : undefined,
-        max:
-          field.validation?.max !== undefined
-            ? {
-                value: field.validation.max,
-                message: `Maximum value is ${field.validation.max}`,
-              }
-            : undefined,
-        minLength:
-          field.validation?.minLength !== undefined
-            ? {
-                value: field.validation.minLength,
-                message: `Minimum length is ${field.validation.minLength}`,
-              }
-            : undefined,
-        maxLength:
-          field.validation?.maxLength !== undefined
-            ? {
-                value: field.validation.maxLength,
-                message: `Maximum length is ${field.validation.maxLength}`,
-              }
-            : undefined,
-        pattern: field.validation?.pattern
-          ? {
-              value:
-                field.validation.pattern instanceof RegExp
-                  ? field.validation.pattern
-                  : new RegExp(field.validation.pattern),
-              message: 'Invalid format',
-            }
-          : undefined,
-      }}
-      render={({ field: { onChange, onBlur, value, ref } }) => (
-        <FieldComponent
+  // For now, we only support text fields
+  // Add more field types as needed
+  switch (field.type) {
+    case 'text':
+      return (
+        <TextField
           id={field.id}
           label={field.label}
-          value={transformValue ? transformValue(value) : value}
-          onChange={(newValue: unknown) => onChange(newValue)}
-          onBlur={onBlur}
-          ref={ref}
           placeholder={field.placeholder}
           helperText={field.helperText}
-          error={error}
-          options={field.options}
           width={field.width}
+          control={control}
           name={field.name}
         />
-      )}
-    />
-  );
+      );
+    default:
+      console.warn(`No component registered for field type: ${field.type}`);
+      return null;
+  }
 }

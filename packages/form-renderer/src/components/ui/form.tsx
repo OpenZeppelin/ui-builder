@@ -1,4 +1,4 @@
-import type { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
+import type { FieldError, FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 
 import * as React from 'react';
 import { Controller, FormProvider, useFormContext } from 'react-hook-form';
@@ -12,7 +12,7 @@ import { Label } from './label';
  */
 const Form = <TFieldValues extends FieldValues = FieldValues, TContext = unknown>({
   ...props
-}: React.ComponentProps<typeof FormProvider<TFieldValues, TContext>>) => {
+}: React.ComponentProps<typeof FormProvider<TFieldValues, TContext>>): React.ReactElement => {
   return <FormProvider {...props} />;
 };
 
@@ -34,7 +34,14 @@ const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFi
 /**
  * Get form field context
  */
-const useFormField = () => {
+const useFormField = (): {
+  id: string;
+  name: string;
+  formItemId: string;
+  formDescriptionId: string;
+  formMessageId: string;
+  error?: FieldError;
+} => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
   const { getFieldState, formState } = useFormContext();
@@ -53,7 +60,7 @@ const useFormField = () => {
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
-    ...fieldState,
+    error: fieldState.error as FieldError | undefined,
   };
 };
 
@@ -65,7 +72,7 @@ const FormField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
-}: ControllerProps<TFieldValues, TName>) => {
+}: ControllerProps<TFieldValues, TName>): React.ReactElement => {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -166,7 +173,7 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
+  const body = error?.message || children;
 
   if (!body) {
     return null;
@@ -212,13 +219,4 @@ type ControllerProps<
   }) => React.ReactElement;
 };
 
-export {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useFormField,
-};
+export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage };
