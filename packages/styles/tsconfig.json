@@ -5,7 +5,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "allowJs": true,
+    "checkJs": false
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.css"],
   "exclude": ["node_modules"]
