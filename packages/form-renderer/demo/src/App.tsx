@@ -1,5 +1,7 @@
 import { FieldType, RenderFormSchema, TransactionForm } from '../../src';
 
+import AddressFieldDemo from './AddressField.demo';
+import NumberFieldDemo from './NumberField.demo';
 import TextFieldDemo from './TextField.demo';
 
 // Sample form schema for demonstration
@@ -93,12 +95,40 @@ export default function App(): React.ReactElement {
             <div className="space-y-2">
               <h2 className="text-xl font-semibold">TextField Component Demo</h2>
               <p className="text-muted-foreground text-sm">
-                Testing our new shadcn/ui TextField component
+                Testing our TextField component with React Hook Form integration
               </p>
             </div>
 
             <div className="bg-background rounded-md border">
               <TextFieldDemo />
+            </div>
+          </section>
+
+          {/* NumberField Demo Section */}
+          <section className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">NumberField Component Demo</h2>
+              <p className="text-muted-foreground text-sm">
+                Testing our NumberField component with React Hook Form integration
+              </p>
+            </div>
+
+            <div className="bg-background rounded-md border">
+              <NumberFieldDemo />
+            </div>
+          </section>
+
+          {/* AddressField Demo Section */}
+          <section className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">AddressField Component Demo</h2>
+              <p className="text-muted-foreground text-sm">
+                Testing our AddressField component with React Hook Form integration
+              </p>
+            </div>
+
+            <div className="bg-background rounded-md border">
+              <AddressFieldDemo />
             </div>
           </section>
 

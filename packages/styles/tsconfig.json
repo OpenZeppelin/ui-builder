@@ -1,19 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"]
-    },
+    "outDir": "./dist",
+    "rootDir": "./src",
     "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noEmit": false,
-    "allowJs": true,
-    "checkJs": false
+    "declarationDir": "./dist"
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.css"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

@@ -13,7 +13,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@src': resolve(__dirname, '../src'),
-      '@styles': resolve(__dirname, '../../styles'),
+      '@styles': resolve(__dirname, '../../styles/src'),
     },
+  },
+  optimizeDeps: {
+    include: ['@styles'],
   },
 });
