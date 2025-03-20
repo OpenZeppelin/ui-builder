@@ -107,7 +107,7 @@ export default function TextFieldDemo() {
               name="name"
             />
 
-            <div className="bg-muted/50 border-border/40 rounded-lg border p-4">
+            <div className="border-border/40 bg-muted/50 rounded-lg border p-4">
               <h4 className="mb-2 text-sm font-medium">Current Value:</h4>
               <code className="bg-background rounded border px-2 py-1 text-sm">
                 {value || '""'}
@@ -151,7 +151,7 @@ export default function TextFieldDemo() {
               </div>
 
               {/* Debug section */}
-              <div className="bg-muted/50 border-border/40 rounded-lg border p-4">
+              <div className="border-border/40 bg-muted/50 rounded-lg border p-4">
                 <h4 className="mb-3 text-sm font-medium">Form State</h4>
                 <div className="space-y-2 text-sm">
                   <div className="grid grid-cols-2 gap-2">
@@ -200,7 +200,7 @@ export default function TextFieldDemo() {
                 <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-4 py-2 font-medium shadow transition-colors disabled:opacity-50"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 font-medium shadow transition-colors disabled:opacity-50"
                 >
                   Submit Form
                 </button>
