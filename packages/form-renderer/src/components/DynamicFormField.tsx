@@ -168,20 +168,20 @@ export function DynamicFormField({
               }
             : undefined,
         minLength:
-          field.validation.minLength !== undefined
+          field.validation?.minLength !== undefined
             ? {
                 value: field.validation.minLength,
                 message: `Minimum length is ${field.validation.minLength}`,
               }
             : undefined,
         maxLength:
-          field.validation.maxLength !== undefined
+          field.validation?.maxLength !== undefined
             ? {
                 value: field.validation.maxLength,
                 message: `Maximum length is ${field.validation.maxLength}`,
               }
             : undefined,
-        pattern: field.validation.pattern
+        pattern: field.validation?.pattern
           ? {
               value:
                 field.validation.pattern instanceof RegExp

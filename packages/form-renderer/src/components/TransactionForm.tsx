@@ -71,10 +71,17 @@ export function TransactionForm({
       return <div className="form-empty-state">No fields defined in schema</div>;
     }
 
+    const { errors } = methods.formState;
+
     return (
       <div className="form-fields-container">
         {schema.fields.map((field) => (
-          <DynamicFormField key={field.id} field={field} control={methods.control} />
+          <DynamicFormField
+            key={field.id}
+            field={field}
+            control={methods.control}
+            error={errors[field.name]?.message as string}
+          />
         ))}
       </div>
     );
