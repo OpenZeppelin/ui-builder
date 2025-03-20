@@ -26,5 +26,5 @@ fi
 if ! git diff --cached --quiet; then
   # Run lint-staged to format and lint only the staged files
   # This will use the configuration from package.json
-  npx lint-staged
+  npx lint-staged --allow-empty
 fi 
