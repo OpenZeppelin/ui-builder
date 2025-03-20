@@ -156,10 +156,8 @@ export function createTransformForFieldType<T extends FieldType>(
  * @returns A composed transform
  */
 export function composeTransforms<T>(
-  // 'any' is necessary here because transforms can have different generic types
-  // and we need to chain them together regardless of their specific input/output types
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ...transforms: Array<FieldTransforms<any>>
+  // Transforms can have different generic types, but we use unknown as a more type-safe alternative to any
+  ...transforms: Array<FieldTransforms<unknown>>
 ): FieldTransforms<T> {
   return {
     input: (value: T) => {
@@ -167,10 +165,8 @@ export function composeTransforms<T>(
       // Apply transforms in order for input (UI display)
       for (const transform of transforms) {
         if (transform.input) {
-          // We need to use 'any' here because transforms can be of different types
-          // and we need to chain them together regardless of their specific types
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result = transform.input(result as any);
+          // We need to cast to unknown here because transforms can be of different types
+          result = transform.input(result);
         }
       }
       return result;
