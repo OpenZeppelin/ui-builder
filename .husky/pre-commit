@@ -22,9 +22,5 @@ if [ "$node_version" -lt 20 ]; then
   exit 1
 fi
 
-# Check if there are staged changes
-if ! git diff --cached --quiet; then
-  # Run lint-staged to format and lint only the staged files
-  # This will use the configuration from package.json
-  npx lint-staged --allow-empty
-fi 
+# Run lint-staged with standard configuration
+npx lint-staged 
