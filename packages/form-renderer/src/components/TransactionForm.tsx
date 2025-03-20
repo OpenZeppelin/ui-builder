@@ -55,7 +55,18 @@ export function TransactionForm({
 
       // Pass the formatted data to the onSubmit handler
       if (onSubmit) {
-        await onSubmit(formattedData);
+        // Create a FormData object if needed for the API
+        // Note: Web API FormData is different from our internal FormValues type
+        const formData = new FormData();
+
+        // If formattedData is an object, append its properties to the FormData
+        if (formattedData && typeof formattedData === 'object') {
+          Object.entries(formattedData as Record<string, unknown>).forEach(([key, value]) => {
+            formData.append(key, String(value));
+          });
+        }
+
+        onSubmit(formData);
       }
     } catch (error) {
       setFormError((error as Error).message || 'An error occurred during submission');

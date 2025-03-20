@@ -1,5 +1,7 @@
 import { FieldType, RenderFormSchema, TransactionForm } from '../../src';
 
+import TextFieldDemo from './TextField.demo';
+
 // Sample form schema for demonstration
 const sampleSchema: RenderFormSchema = {
   id: 'demo-form',
@@ -85,21 +87,38 @@ export default function App(): React.ReactElement {
       </header>
 
       <main>
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Transaction Form</h2>
-            <p className="text-muted-foreground text-sm">
-              Sample form components with Tailwind CSS styling
-            </p>
-          </div>
+        <div className="space-y-12">
+          {/* TextField Demo Section */}
+          <section className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">TextField Component Demo</h2>
+              <p className="text-muted-foreground text-sm">
+                Testing our new shadcn/ui TextField component
+              </p>
+            </div>
 
-          <div className="bg-background rounded-md border p-4">
-            <TransactionForm
-              schema={sampleSchema}
-              adapter={sampleAdapter}
-              onSubmit={handleSubmit}
-            />
-          </div>
+            <div className="bg-background rounded-md border">
+              <TextFieldDemo />
+            </div>
+          </section>
+
+          {/* Transaction Form Section */}
+          <section className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Transaction Form</h2>
+              <p className="text-muted-foreground text-sm">
+                Sample form components with Tailwind CSS styling
+              </p>
+            </div>
+
+            <div className="bg-background rounded-md border p-4">
+              <TransactionForm
+                schema={sampleSchema}
+                adapter={sampleAdapter}
+                onSubmit={handleSubmit}
+              />
+            </div>
+          </section>
         </div>
       </main>
 

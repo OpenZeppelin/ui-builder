@@ -6,10 +6,12 @@
  * while delegating chain-specific logic to the appropriate adapter.
  */
 
-import type {
-  FormField,
+import {
+  // CommonFormProperties,
+  FormFieldType,
   FormLayout,
   RenderFormSchema,
+  // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../adapters';
@@ -79,7 +81,7 @@ export class FormSchemaFactory {
    * @param adapter The blockchain adapter to use
    * @returns An array of form fields with transforms
    */
-  private generateFields(inputs: FunctionParameter[], adapter: ContractAdapter): FormField[] {
+  private generateFields(inputs: FunctionParameter[], adapter: ContractAdapter): FormFieldType[] {
     return inputs.map((input) => {
       // Get the field type
       const fieldType = adapter.mapParameterTypeToFieldType(input.type);

@@ -1,4 +1,4 @@
-import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { isAddress } from 'ethers';
 
@@ -134,7 +134,7 @@ export class EVMAdapter implements ContractAdapter {
    */
   generateDefaultField<T extends FieldType = FieldType>(
     parameter: FunctionParameter
-  ): FormField<T> {
+  ): FormFieldType<T> {
     // Get the field type
     const fieldType = this.mapParameterTypeToFieldType(parameter.type) as T;
 

@@ -107,13 +107,35 @@ type FieldComponentProps = Pick<
    * Error message to display
    */
   error?: string;
+
+  /**
+   * Field name
+   */
+  name?: string;
 };
 
 /**
  * Registry of field components by type
  */
 const fieldComponents: Partial<Record<FieldType, React.ComponentType<FieldComponentProps>>> = {
-  text: TextField as React.ComponentType<FieldComponentProps>,
+  // Use a function component wrapper to adapt the TextField to our field component interface
+  text: function TextFieldWrapper(props: FieldComponentProps) {
+    return (
+      <TextField
+        id={props.id}
+        label={props.label}
+        placeholder={props.placeholder}
+        helperText={props.helperText}
+        width={props.width}
+        name={props.name || props.id}
+        value={typeof props.value === 'string' ? props.value : ''}
+        onChange={(val) => props.onChange(val)}
+        onBlur={props.onBlur}
+        error={props.error}
+        control={undefined}
+      />
+    );
+  },
   // Add other field components as they are implemented
 };
 
@@ -161,7 +183,7 @@ export function DynamicFormField({
               }
             : undefined,
         max:
-          field.validation.max !== undefined
+          field.validation?.max !== undefined
             ? {
                 value: field.validation.max,
                 message: `Maximum value is ${field.validation.max}`,
@@ -204,6 +226,7 @@ export function DynamicFormField({
           error={error}
           options={field.options}
           width={field.width}
+          name={field.name}
         />
       )}
     />

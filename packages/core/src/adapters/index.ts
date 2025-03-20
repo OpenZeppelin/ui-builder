@@ -1,4 +1,4 @@
-import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import EVMAdapter from './evm/adapter.ts';
 import MidnightAdapter from './midnight/adapter.ts';
@@ -48,7 +48,9 @@ export interface ContractAdapter {
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults
    */
-  generateDefaultField<T extends FieldType = FieldType>(parameter: FunctionParameter): FormField<T>;
+  generateDefaultField<T extends FieldType = FieldType>(
+    parameter: FunctionParameter
+  ): FormFieldType<T>;
 
   /**
    * Format transaction data for the specific chain

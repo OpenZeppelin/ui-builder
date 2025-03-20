@@ -1,4 +1,4 @@
-import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
@@ -77,7 +77,7 @@ export class SolanaAdapter implements ContractAdapter {
    */
   generateDefaultField<T extends FieldType = FieldType>(
     parameter: FunctionParameter
-  ): FormField<T> {
+  ): FormFieldType<T> {
     // Default to text fields for now as a placeholder
     const fieldType = 'text' as T;
 

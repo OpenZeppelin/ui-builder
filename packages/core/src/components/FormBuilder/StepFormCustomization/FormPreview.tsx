@@ -1,4 +1,4 @@
-import type { FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
@@ -37,7 +37,7 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
                   : 'grid-cols-3'
             }`}
           >
-            {formProperties.fields.map((field: FormField, index: number) => (
+            {formProperties.fields.map((field: FormFieldType, index: number) => (
               <div
                 key={field.id}
                 className={`space-y-2 ${

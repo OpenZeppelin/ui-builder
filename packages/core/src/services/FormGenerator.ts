@@ -5,13 +5,14 @@
  * Uses chain-specific adapters for field type mapping and other chain-specific details.
  */
 
-import type {
+import {
   CommonFormProperties,
   FieldType,
-  FormField,
+  FormFieldType,
+  // FormValues,
+  // RenderFormSchema,
   // Will be used in future implementation
   // FormLayout,
-  // RenderFormSchema,
   // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
 
@@ -80,7 +81,7 @@ export function generateFormConfig(
 export function generateFieldsFromFunction(
   adapter: import('../adapters').ContractAdapter,
   functionDetails: ContractFunction
-): FormField[] {
+): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
     // Check if this is a complex type that needs special handling
     if (isComplexType(input.type)) {
@@ -102,7 +103,7 @@ export function generateFieldsFromFunction(
 function handleComplexTypeField(
   adapter: import('../adapters').ContractAdapter,
   parameter: FunctionParameter
-): FormField {
+): FormFieldType {
   const baseField = adapter.generateDefaultField(parameter);
 
   // Arrays - We default to using a textarea where the user can input a JSON array
@@ -154,7 +155,7 @@ function getBaseType(parameterType: string): string {
  * @param functionDetails The contract function details
  * @returns An array of basic form fields
  */
-export function generateFallbackFields(functionDetails: ContractFunction): FormField[] {
+export function generateFallbackFields(functionDetails: ContractFunction): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
     let fieldType: FieldType = 'text';
     let placeholder = `Enter ${input.displayName || input.name || input.type}`;

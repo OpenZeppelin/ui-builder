@@ -1,4 +1,4 @@
-import type { FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -114,7 +114,7 @@ export function useFormConfig({
   }, [selectedFunction]);
 
   const updateField = useCallback(
-    (index: number, updates: Partial<FormField>) => {
+    (index: number, updates: Partial<FormFieldType>) => {
       if (!formConfig) return;
 
       const updatedFields = [...formConfig.fields];

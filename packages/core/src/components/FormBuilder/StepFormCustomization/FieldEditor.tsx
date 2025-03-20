@@ -1,4 +1,4 @@
-import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../../ui/textarea';
 
 interface FieldEditorProps {
-  field: FormField;
-  onUpdate: (updatedField: Partial<FormField>) => void;
+  field: FormFieldType;
+  onUpdate: (updatedField: Partial<FormFieldType>) => void;
 }
 
 export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
