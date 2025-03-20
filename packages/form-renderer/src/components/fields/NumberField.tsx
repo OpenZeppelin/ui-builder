@@ -1,4 +1,5 @@
 import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 import { Input } from '../ui';
 
@@ -22,6 +23,11 @@ export interface NumberFieldProps extends BaseFieldProps {
    * Step value for increment/decrement
    */
   step?: number;
+
+  /**
+   * Custom validation function for number values
+   */
+  validateNumber?: (value: number) => boolean | string;
 }
 
 /**
@@ -30,9 +36,11 @@ export interface NumberFieldProps extends BaseFieldProps {
  * It requires the React Hook Form control and properly named field path.
  */
 export const NumberField = forwardRef(function NumberField(
-  { min, max, step, ...baseProps }: NumberFieldProps,
+  { min, max, step, validateNumber, ...baseProps }: NumberFieldProps,
   ref: ForwardedRef<HTMLInputElement>
 ): ReactElement {
+  const { setError, clearErrors } = useFormContext();
+
   return (
     <BaseField
       {...baseProps}
@@ -49,8 +57,46 @@ export const NumberField = forwardRef(function NumberField(
           data-slot="input"
           onChange={(e) => {
             const value = e.target.value === '' ? '' : Number(e.target.value);
+
+            // Call the original onChange from React Hook Form
             if (typeof field.onChange === 'function') {
               field.onChange(value);
+            }
+
+            // Validate input with custom validation if provided
+            if (validateNumber && value !== '' && !isNaN(value)) {
+              const validation = validateNumber(value);
+              if (validation !== true && typeof validation === 'string') {
+                setError(baseProps.name, {
+                  type: 'custom',
+                  message: validation,
+                });
+              } else {
+                clearErrors(baseProps.name);
+              }
+            }
+
+            // Check min/max constraints
+            if (value !== '' && !isNaN(value)) {
+              if (min !== undefined && value < min) {
+                setError(baseProps.name, {
+                  type: 'min',
+                  message: `Value must be at least ${min}`,
+                });
+              } else if (max !== undefined && value > max) {
+                setError(baseProps.name, {
+                  type: 'max',
+                  message: `Value must be at most ${max}`,
+                });
+              } else {
+                // Clear errors if validation passes
+                clearErrors(baseProps.name);
+              }
+            }
+          }}
+          onBlur={(e) => {
+            if (typeof field.onBlur === 'function') {
+              field.onBlur();
             }
           }}
         />

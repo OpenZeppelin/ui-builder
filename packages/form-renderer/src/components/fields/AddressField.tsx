@@ -1,4 +1,5 @@
 import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 import { Input } from '../ui';
 
@@ -23,6 +24,8 @@ export const AddressField = forwardRef(function AddressField(
   { validateAddress, ...baseProps }: AddressFieldProps,
   ref: ForwardedRef<HTMLInputElement>
 ): ReactElement {
+  const { setError, clearErrors } = useFormContext();
+
   return (
     <BaseField
       {...baseProps}
@@ -33,15 +36,22 @@ export const AddressField = forwardRef(function AddressField(
           id={id}
           placeholder={baseProps.placeholder || '0x...'}
           data-slot="input"
-          onBlur={() => {
+          onBlur={(e) => {
             if (typeof field.onBlur === 'function') {
               field.onBlur();
             }
+
             if (validateAddress && typeof field.value === 'string') {
               const validation = validateAddress(field.value);
               if (validation !== true && typeof validation === 'string') {
-                // Handle validation error
-                console.error(validation);
+                // Set the error in React Hook Form
+                setError(baseProps.name, {
+                  type: 'custom',
+                  message: validation,
+                });
+              } else {
+                // Clear previous validation errors if now valid
+                clearErrors(baseProps.name);
               }
             }
           }}
