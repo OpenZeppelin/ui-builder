@@ -1,3 +1,5 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
 import { Button } from './button';
 import {
   Dialog,
@@ -8,8 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './dialog';
-
-import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Dialog> = {
   title: 'UI/Dialog',

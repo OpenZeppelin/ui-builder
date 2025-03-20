@@ -1,12 +1,11 @@
+import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
 import { isAddress } from 'ethers';
 
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import { generateId } from '../../core/utils/utils';
 import MockContractService from '../../services/MockContractService';
-
-import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
 import type { AbiItem } from './types';
-import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * EVM-specific type mapping

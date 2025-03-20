@@ -1,8 +1,7 @@
+import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
 import { AddressInput } from './address-input';
-
-import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof AddressInput> = {
   title: 'UI/AddressInput',

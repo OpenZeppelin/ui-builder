@@ -1,11 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { getContractAdapter } from '../../../adapters';
-import { FormSchemaFactory } from '../FormSchemaFactory';
-
-import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
-
 import type { ContractSchema } from '../../types/ContractSchema';
+import { FormSchemaFactory } from '../FormSchemaFactory';
+import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 
 /**
  * EVM Adapter Integration Tests

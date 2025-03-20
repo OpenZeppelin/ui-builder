@@ -6,18 +6,18 @@
  * while delegating chain-specific logic to the appropriate adapter.
  */
 
-import { getContractAdapter } from '../../adapters';
-// Uncomment when needed: import { BuilderFormConfig } from '../types/FormTypes';
-import { createTransformForFieldType } from '../utils/transforms';
-import { humanizeString } from '../utils/utils';
-
-import type { ContractAdapter } from '../../adapters';
-import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
 import type {
   FormField,
   FormLayout,
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-renderer';
+
+import type { ContractAdapter } from '../../adapters';
+import { getContractAdapter } from '../../adapters';
+import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
+// Uncomment when needed: import { BuilderFormConfig } from '../types/FormTypes';
+import { createTransformForFieldType } from '../utils/transforms';
+import { humanizeString } from '../utils/utils';
 
 /**
  * Factory class for generating form schemas from contract functions

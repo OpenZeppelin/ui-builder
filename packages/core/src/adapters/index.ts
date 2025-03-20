@@ -1,10 +1,10 @@
+import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
+
+import type { ChainType, ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
 import EVMAdapter from './evm/adapter.ts';
 import MidnightAdapter from './midnight/adapter.ts';
 import SolanaAdapter from './solana/adapter.ts';
 import StellarAdapter from './stellar/adapter.ts';
-
-import type { ChainType, ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
-import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Interface for contract adapters

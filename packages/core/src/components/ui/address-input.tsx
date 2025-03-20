@@ -1,15 +1,13 @@
+import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
 
-import { CheckIcon, CopyIcon } from 'lucide-react';
-
 import { getContractAdapter } from '@/adapters';
+import type { ChainType } from '@/core/types/ContractSchema';
 import { cn } from '@/core/utils/utils';
 
 import { Button } from './button';
 import { Input } from './input';
 import { Label } from './label';
-
-import type { ChainType } from '@/core/types/ContractSchema';
 
 export interface AddressInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /**

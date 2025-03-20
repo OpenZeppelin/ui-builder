@@ -1,6 +1,7 @@
+import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
+
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
-import type { FieldType, FieldValue, FormField } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Midnight-specific adapter implementation

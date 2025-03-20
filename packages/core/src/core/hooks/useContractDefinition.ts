@@ -5,7 +5,6 @@
 import { useCallback, useState } from 'react';
 
 import { loadContractDefinition } from '../../services/ContractLoader';
-
 import type { ChainType, ContractSchema } from '../types/ContractSchema';
 
 export function useContractDefinition() {

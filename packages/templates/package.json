@@ -8,6 +8,7 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
+    "lint:imports": "pnpm -r lint:imports",
     "format": "pnpm -r format",
     "format:check": "pnpm -r format:check"
   },

@@ -5,15 +5,6 @@
  * Uses chain-specific adapters for field type mapping and other chain-specific details.
  */
 
-import { getContractAdapter } from '../adapters';
-import { BuilderFormConfig } from '../core/types/FormTypes';
-import { generateId } from '../core/utils/utils';
-
-import type {
-  ContractFunction,
-  ContractSchema,
-  FunctionParameter,
-} from '../core/types/ContractSchema';
 import type {
   CommonFormProperties,
   FieldType,
@@ -23,6 +14,15 @@ import type {
   // RenderFormSchema,
   // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
+
+import { getContractAdapter } from '../adapters';
+import type {
+  ContractFunction,
+  ContractSchema,
+  FunctionParameter,
+} from '../core/types/ContractSchema';
+import { BuilderFormConfig } from '../core/types/FormTypes';
+import { generateId } from '../core/utils/utils';
 
 /**
  * Generates a default form configuration for a contract function

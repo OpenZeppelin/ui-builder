@@ -1,10 +1,10 @@
+import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
+
 import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Textarea } from '../../ui/textarea';
-
-import type { FieldType, FormField } from '@openzeppelin/transaction-form-renderer';
 
 interface FieldEditorProps {
   field: FormField;

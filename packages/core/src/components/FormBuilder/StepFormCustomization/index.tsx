@@ -1,17 +1,15 @@
 import { useMemo, useState } from 'react';
 
-import { Button } from '../../ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-
-import { useFieldSelection } from './hooks/useFieldSelection';
-import { useFormConfig } from './hooks/useFormConfig';
-import { FieldEditor } from './FieldEditor';
-import { FormPreview } from './FormPreview';
-import { LayoutEditor } from './LayoutEditor';
-import { ValidationEditor } from './ValidationEditor';
-
 import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { Button } from '../../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { FieldEditor } from './FieldEditor';
+import { FormPreview } from './FormPreview';
+import { useFieldSelection } from './hooks/useFieldSelection';
+import { useFormConfig } from './hooks/useFormConfig';
+import { LayoutEditor } from './LayoutEditor';
+import { ValidationEditor } from './ValidationEditor';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
