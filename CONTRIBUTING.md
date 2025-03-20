@@ -56,6 +56,10 @@ pnpm dev
 - Write tests for your changes
 - Keep pull requests focused on a single topic
 - Add proper documentation for new features
+- Use the shared Prettier configuration at the root of the repository
+  - Don't add package-specific `.prettierrc` files
+  - Run `pnpm format` to format all code before committing
+  - When making CSS changes with Tailwind, use the `fix-all` script: `pnpm fix-all`
 
 ## Commit Messages
 

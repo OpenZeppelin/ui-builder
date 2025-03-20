@@ -8,8 +8,9 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
-    "format": "pnpm -r format",
-    "format:check": "pnpm -r format:check"
+    "format": "prettier --write \"./**/*.{ts,tsx,css,json,md}\" --config ../../.prettierrc",
+    "format:check": "prettier --check \"./**/*.{ts,tsx,css,json,md}\" --config ../../.prettierrc",
+    "fix-all": "pnpm format && pnpm lint:fix"
   },
   "keywords": [
     "templates",
@@ -20,6 +21,7 @@
   "author": "OpenZeppelin",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "prettier": "^3.5.3"
   }
 }

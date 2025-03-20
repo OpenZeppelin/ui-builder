@@ -250,6 +250,20 @@ pnpm fix-all
 
 This approach ensures that Tailwind CSS classes are consistently sorted by the prettier-plugin-tailwindcss plugin and prevents conflicts between formatting and linting tools.
 
+### Shared Prettier Configuration
+
+This project uses a single, shared Prettier configuration at the root of the monorepo. Individual packages **should not** include their own `.prettierrc` files. The root configuration includes:
+
+- Common code style settings (single quotes, semi-colons, etc.)
+- Tailwind CSS class sorting via prettier-plugin-tailwindcss
+- Configuration for special utility functions like `cva`, `cn`, `clsx`, and `twMerge`
+
+To format all packages:
+
+```bash
+pnpm format
+```
+
 ### Import Sorting
 
 Imports are automatically sorted in the following order:
