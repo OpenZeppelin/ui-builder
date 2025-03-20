@@ -1,6 +1,7 @@
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface ValidationEditorProps {
   validationConfig: BuilderFormConfig['validation'];

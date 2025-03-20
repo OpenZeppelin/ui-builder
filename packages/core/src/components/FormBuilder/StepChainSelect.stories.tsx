@@ -1,8 +1,10 @@
-import { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import type { ChainType } from '../../core/types/ContractSchema';
+import { Meta, StoryObj } from '@storybook/react';
+
 import { StepChainSelect } from './StepChainSelect';
+
+import type { ChainType } from '../../core/types/ContractSchema';
 
 const meta: Meta<typeof StepChainSelect> = {
   title: 'FormBuilder/StepChainSelect',

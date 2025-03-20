@@ -1,13 +1,15 @@
 import type { FormField } from '@openzeppelin/transaction-form-renderer';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { ContractSchema } from '../../../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
   generateFallbackFields,
   generateFormConfig,
   updateFormConfig,
 } from '../../../../services/FormGenerator';
+
+import type { ContractSchema } from '../../../../core/types/ContractSchema';
+import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;

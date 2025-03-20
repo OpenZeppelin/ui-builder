@@ -1,7 +1,7 @@
-import { FilterControls } from './FilterControls';
 import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
 import { useReadOnlyVisibility } from './hooks/useReadOnlyVisibility';
+import { FilterControls } from './FilterControls';
 import { ReadOnlyFunctionsSection } from './ReadOnlyFunctionsSection';
 import { StepFunctionSelectorProps } from './types';
 import { WritableFunctionsSection } from './WritableFunctionsSection';

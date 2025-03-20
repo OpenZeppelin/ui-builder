@@ -17,7 +17,6 @@
     "lint:adapters": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:adapters",
     "lint:config-files": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:config-files",
     "fix-all": "pnpm -r fix-all",
-    "lint:imports": "pnpm -r lint:imports",
     "preview": "pnpm --filter=@openzeppelin/transaction-form-builder-core preview",
     "format": "pnpm -r format",
     "format:check": "pnpm -r format:check",
@@ -38,7 +37,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --quiet --config eslint.config.cjs --rule 'simple-import-sort/imports: off' --rule 'import/first: off' --rule 'import/no-duplicates: off'",
+      "eslint --fix --quiet --config eslint.config.cjs",
       "prettier --write"
     ],
     "*.{json,css,md}": [

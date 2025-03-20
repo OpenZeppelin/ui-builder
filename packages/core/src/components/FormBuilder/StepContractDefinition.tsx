@@ -1,11 +1,13 @@
 import { useState } from 'react';
 
 import { getContractAdapter } from '../../adapters/index.ts';
-import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import { getChainName } from '../../core/utils/utils';
 import { Label } from '../ui/label';
 import { LoadingButton } from '../ui/loading-button';
+
 import { MockContractSelector } from './MockContractSelector';
+
+import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 
 interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;

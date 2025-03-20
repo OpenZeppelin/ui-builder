@@ -1,7 +1,5 @@
 import type { FormField } from '@openzeppelin/transaction-form-renderer';
 
-import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
@@ -10,6 +8,9 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Textarea } from '../../ui/textarea';
+
+import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;

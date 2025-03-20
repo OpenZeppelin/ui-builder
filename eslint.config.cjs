@@ -178,8 +178,12 @@ const baseConfig = [
         'error',
         {
           groups: [
+            // Type imports from external packages
+            ['^type.*\\u0000$', '^@?\\w.*\\u0000$'],
             // React and related packages come first
             ['^react', '^react-dom', '^react-.*$'],
+            // OpenZeppelin packages
+            ['^@openzeppelin/'],
             // External packages
             ['^@?\\w'],
             // Form renderer package
@@ -192,7 +196,7 @@ const baseConfig = [
             ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
             // Style imports
             ['^.+\\.s?css$'],
-            // Type imports
+            // Other type imports
             ['^.+\\u0000$'],
           ],
         },

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+
 import { WizardLayout, WizardStep } from './WizardLayout';
 
 const meta: Meta<typeof WizardLayout> = {

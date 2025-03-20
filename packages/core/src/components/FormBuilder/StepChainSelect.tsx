@@ -1,9 +1,10 @@
 import { useState } from 'react';
 
-import type { ChainType } from '../../core/types/ContractSchema';
 import { getChainName } from '../../core/utils/utils';
 // UI components
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+import type { ChainType } from '../../core/types/ContractSchema';
 
 interface StepChainSelectProps {
   onChainSelect: (chain: ChainType) => void;
