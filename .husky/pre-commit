@@ -22,5 +22,6 @@ if [ "$node_version" -lt 20 ]; then
   exit 1
 fi
 
-# Only run prettier in pre-commit hook to avoid TypeScript issues
+# Run lint-staged which will execute Prettier first, then ESLint
+# This order ensures consistent class name sorting
 npx lint-staged --no-stash 

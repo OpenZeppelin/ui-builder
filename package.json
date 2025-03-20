@@ -9,21 +9,24 @@
     ]
   },
   "scripts": {
+    "clean": "pnpm -r clean",
     "dev": "pnpm --filter=@openzeppelin/transaction-form-builder-core dev",
     "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm -r test:watch",
+    "coverage": "pnpm -r coverage",
+    "preview": "pnpm --filter=@openzeppelin/transaction-form-builder-core preview",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "lint:all-fix": "pnpm -r lint:all-fix",
     "lint:adapters": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:adapters",
     "lint:config-files": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:config-files",
-    "fix-all": "pnpm -r fix-all",
-    "preview": "pnpm --filter=@openzeppelin/transaction-form-builder-core preview",
+    "type-check": "pnpm -r type-check",
     "format": "pnpm -r format",
     "format:check": "pnpm -r format:check",
+    "fix-all": "pnpm format && pnpm lint:fix",
     "ui:add": "pnpm --filter=@openzeppelin/transaction-form-builder-core ui:add",
     "prepare": "husky install",
-    "test": "pnpm -r test",
-    "test:watch": "pnpm -r test:watch",
     "test:coverage": "pnpm -r test:coverage",
     "storybook": "pnpm --filter=@openzeppelin/transaction-form-builder-core storybook",
     "build-storybook": "pnpm --filter=@openzeppelin/transaction-form-builder-core build-storybook",
@@ -37,8 +40,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --quiet --config eslint.config.cjs",
-      "prettier --write"
+      "prettier --write",
+      "eslint --fix --quiet --config eslint.config.cjs"
     ],
     "*.{json,css,md}": [
       "prettier --write"

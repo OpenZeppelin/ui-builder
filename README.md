@@ -121,10 +121,10 @@ For more details, see the [Form-Renderer README](./packages/form-renderer/README
 - `pnpm lint:fix` - Fix ESLint issues
 - `pnpm lint:all-fix` - Fix ESLint issues across all file types
 - `pnpm lint:config-files` - Fix linting in configuration files
-- `pnpm fix-all` - Run all linting and formatting fixes at once
-- `pnpm preview` - Preview the production build
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check formatting without making changes
+- `pnpm fix-all` - Run Prettier first, then ESLint to avoid conflicts with CSS class sorting
+- `pnpm preview` - Preview the production build
 - `pnpm ui:add` - Add shadcn/ui components
 - `pnpm test` - Run tests
 - `pnpm test:watch` - Run tests in watch mode
@@ -233,11 +233,22 @@ For more detailed documentation about the adapter pattern, implementation guidel
 
 This project uses Husky to enforce code quality using Git hooks:
 
-- **pre-commit**: Runs lint-staged to format and lint staged files
+- **pre-commit**: Runs lint-staged to format and lint staged files (Prettier first, then ESLint)
 - **pre-push**: Runs comprehensive linting and formatting before pushing to remote
 - **commit-msg**: Enforces conventional commit message format
 
 These hooks ensure that code pushed to the repository maintains consistent quality and style.
+
+### CSS Class Name Sorting
+
+For consistent CSS class name sorting in Tailwind CSS, always run Prettier first, then ESLint:
+
+```bash
+# Recommended approach (runs formatting, then linting)
+pnpm fix-all
+```
+
+This approach ensures that Tailwind CSS classes are consistently sorted by the prettier-plugin-tailwindcss plugin and prevents conflicts between formatting and linting tools.
 
 ### Import Sorting
 
