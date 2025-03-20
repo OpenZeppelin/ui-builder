@@ -40,11 +40,11 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
+      "prettier --write --config .prettierrc",
       "eslint --fix --quiet --config eslint.config.cjs"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
+      "prettier --write --config .prettierrc"
     ]
   },
   "config": {

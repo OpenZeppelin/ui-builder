@@ -22,5 +22,12 @@ if [ "$node_version" -lt 20 ]; then
   exit 1
 fi
 
-# Run lint-staged with standard configuration
-npx lint-staged 
+# Check if there are any staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$staged_files" ]; then
+  echo "ℹ️ No files staged for commit, skipping checks."
+  exit 0
+fi
+
+# Run fix-all from package.json
+pnpm fix-all 
