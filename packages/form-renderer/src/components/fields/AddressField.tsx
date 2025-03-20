@@ -1,6 +1,5 @@
-import type { Control, FieldPath, FieldValues } from 'react-hook-form';
-
 import { type ForwardedRef, type ReactElement } from 'react';
+import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
 import {
   FormControl,
