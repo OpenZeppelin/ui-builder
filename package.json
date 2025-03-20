@@ -39,13 +39,8 @@
     "outdated": "pnpm outdated"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --fix --quiet --config eslint.config.cjs"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": "node -e \"const fs=require('fs');const files=process.argv.slice(1);const existingFiles=files.filter(f=>fs.existsSync(f));if(existingFiles.length>0){require('child_process').execSync('prettier --write '+existingFiles.join(' '));require('child_process').execSync('eslint --fix --quiet --config eslint.config.cjs '+existingFiles.join(' '));}\"",
+    "*.{json,css,md}": "node -e \"const fs=require('fs');const files=process.argv.slice(1);const nonSymlinks=files.filter(f=>{try{return !fs.lstatSync(f).isSymbolicLink()&&fs.existsSync(f);}catch(e){return false;}});if(nonSymlinks.length>0)require('child_process').execSync('prettier --write '+nonSymlinks.join(' '));\""
   },
   "config": {
     "commitizen": {

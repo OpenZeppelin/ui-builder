@@ -27,12 +27,23 @@ core/
 │   ├── mocks/        # Mock data for development and testing
 │   ├── App.tsx       # Main application component
 │   ├── main.tsx      # Application entry point
-│   └── index.css     # Global styles with Tailwind
+│   └── index.css     # Imports centralized styling from styles package
 ├── index.html        # HTML template
 ├── tsconfig.json     # TypeScript configuration
 ├── vite.config.ts    # Vite configuration
 └── ...               # Other configuration files
 ```
+
+## Styling
+
+This package uses the centralized styling system from the `packages/styles` package:
+
+- **CSS Variables**: Direct OKLCH color values define the theme colors
+- **Tailwind CSS 4.0**: Modern utility-first CSS with the latest features
+- **Component Library**: Built on shadcn/ui with consistent, accessible components
+- **Dark Mode**: Built-in dark mode support
+
+For more details on the styling system, see the [Styles README](../styles/README.md).
 
 ## Development
 
@@ -73,6 +84,7 @@ The core package uses an adapter pattern to support multiple blockchain ecosyste
 - **Core**: Chain-agnostic components, types, and utilities
 - **Adapters**: Chain-specific implementations that conform to a common interface
 - **UI Components**: React components that use adapters to interact with different blockchains
+- **Styling System**: Centralized CSS variables and styling approach from the styles package
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic.
 

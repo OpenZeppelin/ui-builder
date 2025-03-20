@@ -60,6 +60,23 @@ The built files will be in the `dist` directory.
 
 The form is defined in `src/components/GeneratedForm.tsx` and uses the form schema that was generated during export. You can customize the form's appearance and behavior by editing this file.
 
+## Styling
+
+This application includes a modern styling system:
+
+- **Tailwind CSS**: A utility-first CSS framework
+- **CSS Variables**: Custom properties for theming with OKLCH colors
+- **Dark Mode**: Built-in support for light and dark themes
+- **Form Component Styling**: Consistent spacing and layout for form elements
+
+You can customize the styling by:
+
+1. Editing `src/styles.css` to change global styles and variables
+2. Modifying `tailwind.config.js` to adjust Tailwind settings
+3. Adding or changing component styles in the components directory
+
+The styling system is based on the Transaction Form Builder's design system, which ensures consistency and accessibility.
+
 ## Form Renderer
 
 This application uses the `@openzeppelin/transaction-form-renderer` package to render the form. For more information, see the [documentation](https://github.com/OpenZeppelin/transaction-form-builder).

@@ -1,113 +1,60 @@
+@import 'tailwindcss';
+@import '../../../styles/global.css';
+
 /* 
   Base styles for the exported form application
   This file will be included in the final export
 */
 
-:root {
-  --primary-color: #2563eb;
-  --secondary-color: #6b7280;
-  --background-color: #ffffff;
-  --text-color: #1f2937;
-  --border-color: #e5e7eb;
-  --error-color: #dc2626;
-  --success-color: #16a34a;
-}
+/* Template-specific components */
+@layer components {
+  .app {
+    @apply flex min-h-screen flex-col;
+  }
 
-body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
-    'Helvetica Neue', sans-serif;
-  color: var(--text-color);
-  background-color: var(--background-color);
-  margin: 0;
-  padding: 0;
-  line-height: 1.5;
-}
+  .header {
+    @apply border-b px-4 py-6 text-center;
+  }
 
-.app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+  .main {
+    @apply flex-1 py-8;
+  }
 
-.header {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  text-align: center;
-}
+  .container {
+    @apply mx-auto max-w-2xl px-4;
+  }
 
-.main {
-  flex: 1;
-  padding: 2rem 0;
-}
+  .footer {
+    @apply text-muted-foreground border-t px-4 py-6 text-center text-sm;
+  }
 
-.container {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+  /* Form styles */
+  .form-placeholder,
+  .form-example {
+    @apply bg-muted/30 mb-4 rounded-lg p-6;
+  }
 
-.footer {
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--secondary-color);
-}
+  .form-field {
+    @apply mb-4;
+  }
 
-/* Form styles */
-.form-placeholder,
-.form-example {
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-}
+  .form-field label {
+    @apply mb-2 block font-medium;
+  }
 
-.form-field {
-  margin-bottom: 1rem;
-}
+  .form-field input {
+    @apply w-full rounded-md border px-3 py-2 text-base;
+  }
 
-.form-field label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
+  .form-example {
+    @apply mt-6 border;
+  }
 
-.form-field input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
-  font-size: 1rem;
-}
+  ul {
+    @apply my-4 pl-6;
+  }
 
-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-button:hover {
-  background-color: #1d4ed8;
-}
-
-/* Example form styling */
-.form-example {
-  border: 1px solid var(--border-color);
-  margin-top: 1.5rem;
-}
-
-ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-li {
-  margin-bottom: 0.5rem;
+  li {
+    @apply mb-2;
+  }
 }

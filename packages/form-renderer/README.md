@@ -122,14 +122,26 @@ The demo app serves as both a development environment and a showcase of the form
 ```
 demo/
 ├── index.html           # HTML entry point
-├── postcss.config.js    # PostCSS configuration
-├── tailwind.config.js   # Tailwind CSS configuration
 ├── vite.config.ts       # Vite configuration
 └── src/
     ├── App.tsx          # Demo application component
-    ├── index.css        # Global styles with Tailwind
+    ├── index.css        # Imports centralized styling from styles package
     └── main.tsx         # Application entry point
 ```
+
+> Note: The demo app uses the centralized styling system from the `packages/styles` package, with symbolic links to configuration files at the monorepo root.
+
+### Styling
+
+This package uses the centralized styling system from the `packages/styles` package:
+
+- **CSS Variables**: Direct OKLCH color values define the theme colors
+- **Tailwind CSS 4.0**: Modern utility-first CSS with the latest features
+- **Consistent Spacing**: Form components use `gap-2` for label-input spacing and `space-y-4` between fields
+- **Component Library**: Built on shadcn/ui with consistent, accessible components
+- **Dark Mode**: Built-in dark mode support with clear variable handling
+
+For more details on the styling system, see the [Styles README](../styles/README.md).
 
 ### Build System
 

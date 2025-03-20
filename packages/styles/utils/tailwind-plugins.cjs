@@ -1,15 +1,15 @@
-// Custom implementation of tailwindcss-animate
+// Custom animations and utilities for Tailwind CSS 4.0
 module.exports = function ({ addUtilities, matchUtilities, theme }) {
   addUtilities({
     '.animate-accordion-down': { animation: 'accordion-down 0.2s ease-out' },
     '.animate-accordion-up': { animation: 'accordion-up 0.2s ease-out' },
     '.animate-in': {
       animationFillMode: 'both',
-      animationTimingFunction: 'ease-out',
+      animationTimingFunction: 'var(--ease-out)',
     },
     '.animate-out': {
       animationFillMode: 'both',
-      animationTimingFunction: 'ease-in',
+      animationTimingFunction: 'var(--ease-in)',
     },
   });
 

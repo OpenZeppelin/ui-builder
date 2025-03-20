@@ -3,6 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormValues, TransactionFormProps } from '../types/FormTypes';
 
+import { Button } from './ui/button';
 import { DynamicFormField } from './DynamicFormField';
 
 /**
@@ -85,7 +86,7 @@ export function TransactionForm({
     const { errors } = methods.formState;
 
     return (
-      <div className="form-fields-container">
+      <div className="form-fields-container space-y-4">
         {schema.fields.map((field) => (
           <DynamicFormField
             key={field.id}
@@ -107,36 +108,53 @@ export function TransactionForm({
     return `grid grid-cols-1 md:grid-cols-${columns} gap-${layout.spacing || 4}`;
   };
 
+  // Determine button variant based on schema configuration
+  const getButtonVariant = () => {
+    const { submitButton } = schema;
+    if (!submitButton?.variant) return 'default';
+
+    // Map schema button variant to our button component variants
+    switch (submitButton.variant) {
+      case 'primary':
+        return 'default';
+      case 'secondary':
+        return 'secondary';
+      case 'outline':
+        return 'outline';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(handleSubmit)}
-        className={`transaction-form ${getLayoutClasses()}`}
-        noValidate
-      >
-        {schema.title && <h2 className="form-title mb-4 text-xl font-bold">{schema.title}</h2>}
+      <div className="flex flex-col space-y-4">
+        {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
+
         {formError && (
-          <div className="form-error mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+          <div className="form-error rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
             {formError}
           </div>
         )}
 
-        {renderFormContent()}
+        <form
+          onSubmit={methods.handleSubmit(handleSubmit)}
+          className={`transaction-form flex flex-col ${getLayoutClasses()}`}
+          noValidate
+        >
+          <div className="mb-6">{renderFormContent()}</div>
 
-        {!previewMode && (
-          <div className="form-actions mt-6">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn btn-primary rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
-            >
-              {submitting
-                ? schema.submitButton?.loadingText || 'Submitting...'
-                : schema.submitButton?.text || 'Submit'}
-            </button>
-          </div>
-        )}
-      </form>
+          {!previewMode && (
+            <div className="form-actions col-span-full">
+              <Button type="submit" disabled={submitting} variant={getButtonVariant()}>
+                {submitting
+                  ? schema.submitButton?.loadingText || 'Submitting...'
+                  : schema.submitButton?.text || 'Submit'}
+              </Button>
+            </div>
+          )}
+        </form>
+      </div>
     </FormProvider>
   );
 }

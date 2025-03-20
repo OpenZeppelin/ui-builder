@@ -38,6 +38,7 @@ This project is organized as a monorepo with the following packages:
 - **packages/core**: The main application with the form builder UI
 - **packages/form-renderer**: The shared form rendering library (published to npm)
 - **packages/templates**: Export templates for different frameworks
+- **packages/styles**: Centralized styling system with shared CSS variables and configurations
 
 ## Packages
 
@@ -56,6 +57,19 @@ Features:
 - Customizable styling options
 
 For more details, see the [Form-Renderer README](./packages/form-renderer/README.md).
+
+### Styles Package
+
+The `styles` package contains the centralized styling system used across all packages. It provides consistent theming, spacing, and component styles throughout the application.
+
+Features:
+
+- Shared CSS variables with direct OKLCH color values
+- Consistent form component spacing
+- Dark mode support
+- Tailwind CSS v4 integration
+
+For more details, see the [Styles README](./packages/styles/README.md).
 
 ## Features
 
@@ -167,7 +181,7 @@ transaction-form-builder/
 │   │   │   ├── mocks/           # Mock data for development and testing
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
-│   │   │   └── index.css        # Global styles with Tailwind
+│   │   │   └── index.css        # Imports global styles from styles package
 │   │   ├── index.html           # HTML template
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   ├── vite.config.ts       # Vite configuration
@@ -182,10 +196,13 @@ transaction-form-builder/
 │   │   │   ├── utils/           # Utility functions
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
-│   │   ├── scripts/             # Build scripts
 │   │   ├── demo/                # Demo application for development
+│   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
+│   ├── styles/                  # Centralized styling system
+│   │   ├── global.css           # Global CSS variables and base styles
+│   │   └── README.md            # Styling documentation
 │   └── templates/               # Export templates
 │       ├── typescript-react-vite/ # React+TypeScript+Vite template
 │       │   ├── public/          # Static assets
@@ -193,6 +210,9 @@ transaction-form-builder/
 │       │   ├── index.html       # HTML template
 │       │   └── README.md        # Template documentation
 │       └── ...                  # Future templates for other frameworks
+├── tailwind.config.cjs  # Central Tailwind CSS configuration
+├── postcss.config.cjs   # Central PostCSS configuration
+├── components.json      # Central shadcn/ui configuration
 ├── scripts/             # Utility scripts
 ├── .eslint/             # Custom ESLint plugins and rules
 ├── tsconfig.base.json   # Base TypeScript configuration for all packages
@@ -211,6 +231,7 @@ The application uses an adapter pattern to support multiple blockchain ecosystem
 - **Core**: Chain-agnostic components, types, and utilities
 - **Adapters**: Chain-specific implementations that conform to a common interface
 - **UI Components**: React components that use adapters to interact with different blockchains
+- **Styling System**: Centralized CSS variables and styling approach used across all packages
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic.
 
