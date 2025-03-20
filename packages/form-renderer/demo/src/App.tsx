@@ -1,4 +1,4 @@
-import { FieldType, RenderFormSchema, TransactionFormRenderer } from '../../src';
+import { FieldType, RenderFormSchema, TransactionForm } from '../../src';
 
 // Sample form schema for demonstration
 const sampleSchema: RenderFormSchema = {
@@ -94,8 +94,8 @@ export default function App(): React.ReactElement {
           </div>
 
           <div className="bg-background rounded-md border p-4">
-            <TransactionFormRenderer
-              formSchema={sampleSchema}
+            <TransactionForm
+              schema={sampleSchema}
               adapter={sampleAdapter}
               onSubmit={handleSubmit}
             />

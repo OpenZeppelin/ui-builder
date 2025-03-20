@@ -318,16 +318,26 @@ export interface RenderFormSchema extends CommonFormProperties {
    * Optional metadata for the form
    */
   metadata?: Record<string, unknown>;
+
+  /**
+   * Default values for form fields
+   */
+  defaultValues?: FormValues;
+
+  /**
+   * Function ID for the contract function this form represents
+   */
+  functionId?: string;
 }
 
 /**
- * Props for the TransactionFormRenderer component
+ * Props for the TransactionForm component
  */
-export interface TransactionFormRendererProps {
+export interface TransactionFormProps {
   /**
    * The form schema to render
    */
-  formSchema: RenderFormSchema;
+  schema: RenderFormSchema;
 
   /**
    * The adapter for the form's chain
@@ -337,7 +347,7 @@ export interface TransactionFormRendererProps {
   /**
    * Optional callback when form is submitted
    */
-  onSubmit?: (data: unknown) => Promise<unknown>;
+  onSubmit?: (data: FormData) => void;
 
   /**
    * Whether the form is in preview mode

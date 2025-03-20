@@ -1,7 +1,13 @@
 import React from 'react';
 import { Control, Controller, useWatch } from 'react-hook-form';
 
-import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
+import {
+  ContractAdapter,
+  FieldCondition,
+  FieldType,
+  FormField,
+  FormValues,
+} from '../types/FormTypes';
 
 import { TextField } from './fields';
 
@@ -142,13 +148,13 @@ export function DynamicFormField({
 
   return (
     <Controller
-      name={field.id}
+      name={field.name}
       control={control}
       defaultValue={field.defaultValue}
       rules={{
-        required: field.validation.required ? 'This field is required' : false,
+        required: field.validation?.required ? 'This field is required' : false,
         min:
-          field.validation.min !== undefined
+          field.validation?.min !== undefined
             ? {
                 value: field.validation.min,
                 message: `Minimum value is ${field.validation.min}`,

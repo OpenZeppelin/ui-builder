@@ -3,4 +3,4 @@
  */
 
 export * from './fields';
-export * from './TransactionFormRenderer';
+export * from './TransactionForm';

@@ -33,8 +33,31 @@ pnpm add @openzeppelin/transaction-form-builder-form-renderer
 import { TransactionForm } from '@openzeppelin/transaction-form-builder-form-renderer';
 
 // Example form schema
-const formSchema = {
-  // Your form schema here
+const schema = {
+  id: 'example-form',
+  title: 'Example Form',
+  fields: [
+    // Your form fields here
+  ],
+  layout: {
+    columns: 1,
+    spacing: 'normal',
+    labelPosition: 'top',
+  },
+  validation: {
+    mode: 'onChange',
+    showErrors: 'inline',
+  },
+  submitButton: {
+    text: 'Submit',
+    loadingText: 'Submitting...',
+  },
+};
+
+// Simple adapter implementation
+const adapter = {
+  formatTransactionData: (functionId, inputs) => inputs,
+  isValidAddress: (address) => address.length > 0,
 };
 
 function App() {
@@ -43,7 +66,7 @@ function App() {
     // Process transaction
   };
 
-  return <TransactionForm schema={formSchema} onSubmit={handleSubmit} />;
+  return <TransactionForm schema={schema} adapter={adapter} onSubmit={handleSubmit} />;
 }
 ```
 
@@ -55,14 +78,15 @@ The main component for rendering transaction forms.
 
 #### Props
 
-| Prop            | Type                       | Description                               |
-| --------------- | -------------------------- | ----------------------------------------- |
-| `schema`        | `FormSchema`               | The schema definition for the form        |
-| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted  |
-| `initialValues` | `FormData`                 | (Optional) Initial values for form fields |
-| `disabled`      | `boolean`                  | (Optional) Disables all form fields       |
-| `loading`       | `boolean`                  | (Optional) Shows loading state            |
-| `theme`         | `ThemeOptions`             | (Optional) Custom theme options           |
+| Prop            | Type                       | Description                                      |
+| --------------- | -------------------------- | ------------------------------------------------ |
+| `schema`        | `RenderFormSchema`         | The schema definition for the form               |
+| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode          |
+| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted         |
+| `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO] |
+| `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]       |
+| `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |
+| `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]           |
 
 ## Development
 
@@ -127,9 +151,11 @@ pnpm test
 The build process creates the following outputs:
 
 - `dist/index.js` - ESM module
-- `dist/index.dev.cjs` - CommonJS module (development version)
-- `dist/index.prod.cjs` - CommonJS module (production version)
-- `dist/*.d.ts` - TypeScript declaration files
+- `dist/index.cjs` - CommonJS module
+- `dist/index.d.ts` - TypeScript declaration files
+- `dist/types/*.js` - Type utilities as ESM modules
+- `dist/types/*.cjs` - Type utilities as CommonJS modules
+- `dist/types/*.d.ts` - Type declarations for utilities
 
 ### Release Process
 
