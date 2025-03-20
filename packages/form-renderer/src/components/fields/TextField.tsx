@@ -1,103 +1,50 @@
-import { type ForwardedRef, type ReactElement } from 'react';
-import type { Control, FieldPath, FieldValues } from 'react-hook-form';
+import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
 
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from '../ui';
+import { Input } from '../ui';
+
+import { BaseField, type BaseFieldProps } from './BaseField';
 
 /**
- * Props for the TextField component
+ * TextField component properties
  */
-export interface TextFieldProps<TFieldValues extends FieldValues = FieldValues> {
+export interface TextFieldProps extends BaseFieldProps {
   /**
-   * Unique identifier for the field
+   * Minimum length validation
    */
-  id: string;
+  minLength?: number;
 
   /**
-   * Label text to display
+   * Maximum length validation
    */
-  label: string;
-
-  /**
-   * Placeholder text when empty
-   */
-  placeholder?: string;
-
-  /**
-   * Helper text to display below the field
-   */
-  helperText?: string;
-
-  /**
-   * Field width for layout
-   */
-  width?: 'full' | 'half' | 'third';
-
-  /**
-   * Form control from React Hook Form
-   */
-  control: Control<TFieldValues>;
-
-  /**
-   * Field name in the form
-   */
-  name: FieldPath<TFieldValues>;
-}
-
-// Helper function to get width classes
-function getWidthClasses(width: 'full' | 'half' | 'third'): string {
-  switch (width) {
-    case 'half':
-      return 'w-full md:w-1/2';
-    case 'third':
-      return 'w-full md:w-1/3';
-    case 'full':
-    default:
-      return 'w-full';
-  }
+  maxLength?: number;
 }
 
 /**
- * TextField component specifically designed for React Hook Form integration.
+ * Text input field component specifically designed for React Hook Form integration.
  * This component is not meant to be used as a standalone input.
  * It requires the React Hook Form control and properly named field path.
  */
-export function TextField<TFieldValues extends FieldValues = FieldValues>(
-  props: TextFieldProps<TFieldValues> & { ref?: ForwardedRef<HTMLInputElement> }
+export const TextField = forwardRef(function TextField(
+  { minLength, maxLength, ...baseProps }: TextFieldProps,
+  ref: ForwardedRef<HTMLInputElement>
 ): ReactElement {
-  const { id, label, placeholder, helperText, control, name, width = 'full', ref } = props;
-
   return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem className={getWidthClasses(width)}>
-          <FormLabel htmlFor={id}>{label}</FormLabel>
-          <FormControl>
-            <Input
-              id={id}
-              placeholder={placeholder}
-              {...field}
-              value={typeof field.value === 'string' ? field.value : ''}
-              className="border-input h-10 rounded-md px-4 py-2"
-              ref={ref}
-            />
-          </FormControl>
-          {helperText && <FormDescription>{helperText}</FormDescription>}
-          <FormMessage />
-        </FormItem>
+    <BaseField
+      {...baseProps}
+      renderInput={(field, { id }) => (
+        <Input
+          {...field}
+          ref={ref}
+          id={id}
+          placeholder={baseProps.placeholder}
+          minLength={minLength}
+          maxLength={maxLength}
+          data-slot="input"
+        />
       )}
     />
   );
-}
+});
 
-// Set displayName properly
+// Set displayName manually for better debugging
 TextField.displayName = 'TextField';

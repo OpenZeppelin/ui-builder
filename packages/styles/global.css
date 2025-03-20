@@ -247,10 +247,29 @@
   }
 }
 
-/* Button styles */
+/* Component styling */
 @layer components {
+  /* Button styles */
   button[data-slot='button'] {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground focus-visible:ring-primary inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  /* Input field styles */
+  input[data-slot='input'] {
+    @apply border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Form width classes */
+  .form-field-full {
+    @apply w-full;
+  }
+
+  .form-field-half {
+    @apply w-full md:w-1/2;
+  }
+
+  .form-field-third {
+    @apply w-full md:w-1/3;
   }
 }
 

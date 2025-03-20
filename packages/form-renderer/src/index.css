@@ -1,1 +1,6 @@
-@import '../../../packages/styles/global.css';
+@import '../../styles/global.css';
+
+/* Form-renderer specific styles */
+@layer components {
+  /* Any component-specific styles for form-renderer can go here */
+}
