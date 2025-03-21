@@ -85,10 +85,10 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 ## Tech Stack
 
-- **React 19**: UI library with modern hooks API and concurrent features
+- **React**: UI library supporting both React 18 and 19 with modern hooks API
 - **TypeScript 5.8+**: Enhanced type safety with template literal types
 - **Vite 6**: Fast, modern build tool and dev server
-- **Tailwind CSS v4**: Next-gen utility-first CSS framework with new HSL theme syntax
+- **Tailwind CSS v4**: Next-gen utility-first CSS framework with OKLCH color format
 - **shadcn/ui**: Unstyled, accessible component system built on Radix UI
 - **pnpm**: Fast, disk-efficient package manager
 - **Vitest**: Testing framework integrated with Vite
@@ -145,9 +145,10 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - `pnpm test:coverage` - Run tests with coverage report
 - `pnpm storybook` - Start Storybook development server
 - `pnpm build-storybook` - Build Storybook for production
-- `pnpm check-deps` - Check for deprecated dependencies
+- `pnpm commit` - Run commitizen for guided commits
 - `pnpm update-deps` - Update dependencies to their latest versions
 - `pnpm update-deps:major` - Update dependencies including major versions
+- `pnpm check-deps` - Check for deprecated dependencies
 - `pnpm outdated` - List outdated dependencies
 
 ## Project Structure
@@ -190,10 +191,12 @@ transaction-form-builder/
 │   │   ├── src/
 │   │   │   ├── components/      # Form rendering components
 │   │   │   │   ├── fields/      # Form field components
-│   │   │   │   └── layout/      # Form layout components
+│   │   │   │   ├── layout/      # Form layout components
+│   │   │   │   └── ui/          # UI components
 │   │   │   ├── hooks/           # Form rendering hooks
 │   │   │   ├── types/           # Type definitions
 │   │   │   ├── utils/           # Utility functions
+│   │   │   ├── stories/         # Storybook stories
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
 │   │   ├── demo/                # Demo application for development
@@ -202,6 +205,8 @@ transaction-form-builder/
 │   │   └── package.json         # Package configuration
 │   ├── styles/                  # Centralized styling system
 │   │   ├── global.css           # Global CSS variables and base styles
+│   │   ├── src/                 # Source directory for styles
+│   │   ├── utils/               # Styling utilities
 │   │   └── README.md            # Styling documentation
 │   └── templates/               # Export templates
 │       ├── typescript-react-vite/ # React+TypeScript+Vite template
@@ -246,7 +251,42 @@ To maintain the integrity of the adapter pattern, this project includes:
 
 These enforcement mechanisms ensure that the adapter interface remains the single source of truth for adapter implementations, preventing interface drift and maintaining architectural consistency.
 
-For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the [Adapter System documentation](./src/adapters/README.md).
+For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the [Adapter System documentation](./packages/core/src/adapters/README.md).
+
+## Component Architecture
+
+The project follows a structured component architecture centered around form rendering:
+
+### Form Renderer Components
+
+The form-renderer package provides a set of specialized components:
+
+- **TransactionForm**: The main entry point for rendering transaction forms
+- **DynamicFormField**: Renders appropriate field components based on field type
+- **Field Components**: Specialized field implementations (TextField, NumberField, AddressField, etc.)
+
+These components are designed to work exclusively with React Hook Form and should not be used standalone. All field components should be rendered through the DynamicFormField component, which handles field type mapping and validation integration.
+
+### Storybook Integration
+
+The project uses Storybook 8 for component documentation and development:
+
+```bash
+# Start Storybook at the root level
+pnpm storybook
+
+# Or start Storybook for a specific package
+pnpm --filter=@openzeppelin/transaction-form-builder-form-renderer storybook
+```
+
+Storybook stories are organized to:
+
+- Document component usage and API
+- Showcase different component states and variations
+- Provide interactive examples for development
+- Serve as visual regression tests
+
+Stories are located in the `stories` directory of each package, with form-renderer components having the most comprehensive documentation.
 
 ## Code Style
 
