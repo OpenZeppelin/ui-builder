@@ -1,6 +1,6 @@
 import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
-import { useFormContext } from 'react-hook-form';
 import type { FieldValues } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 import { Checkbox } from '../ui';
 
