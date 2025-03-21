@@ -41,7 +41,9 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
     "demo:dev": "vite demo",
     "demo:build": "vite build demo",
-    "demo:preview": "vite preview demo"
+    "demo:preview": "vite preview demo",
+    "storybook": "cd ../.. && pnpm storybook",
+    "build-storybook": "cd ../.. && pnpm build-storybook"
   },
   "keywords": [
     "form",

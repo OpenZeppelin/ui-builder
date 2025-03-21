@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+/* Additional global styles for Storybook */
+body {
+  @apply bg-white dark:bg-gray-900;
+}
+
+.sb-show-main {
+  @apply !m-0 !p-0;
+}
+
+/* Story container */
+.docs-story {
+  @apply p-4;
+}
