@@ -124,7 +124,13 @@ export function TransactionForm({
   };
 
   // Determine button variant based on schema configuration
-  const getButtonVariant = () => {
+  const getButtonVariant = ():
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link' => {
     const { submitButton } = schema;
     if (!submitButton?.variant) return 'default';
 
