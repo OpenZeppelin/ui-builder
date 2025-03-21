@@ -5,7 +5,10 @@ import { CheckIcon } from 'lucide-react';
 
 import { cn } from '../../utils/cn';
 
-function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+function Checkbox({
+  className,
+  ...props
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>): React.ReactElement {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"

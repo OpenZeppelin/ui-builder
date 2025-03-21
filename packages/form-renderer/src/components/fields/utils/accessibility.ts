@@ -170,7 +170,11 @@ export function handleKeyboardEvent(
  * Field focus management utility
  * For managing focus within a field group or complex form component
  */
-export function createFocusManager() {
+export function createFocusManager(): {
+  focusFirstElement: (container: HTMLElement | null) => void;
+  focusElementById: (id: string) => void;
+  trapFocus: (event: KeyboardEvent, container: HTMLElement | null) => void;
+} {
   return {
     /**
      * Focus the first focusable element within a container
