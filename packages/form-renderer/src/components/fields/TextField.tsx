@@ -1,39 +1,27 @@
-import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
 
-import { Input } from '../ui';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
-import { getAccessibilityProps, handleEscapeKey } from './utils/accessibility';
-import { BaseField, type BaseFieldProps } from './BaseField';
+import { BaseFieldProps } from './BaseField';
+import {
+  ErrorMessage,
+  getAccessibilityProps,
+  getValidationStateClasses,
+  handleEscapeKey,
+  validateField,
+} from './utils';
 
 /**
  * TextField component properties
  */
-export interface TextFieldProps extends BaseFieldProps {
+export interface TextFieldProps<TFieldValues extends FieldValues = FieldValues>
+  extends BaseFieldProps<TFieldValues> {
   /**
-   * Minimum length validation
+   * Placeholder text displayed when the field is empty
    */
-  minLength?: number;
-
-  /**
-   * Maximum length validation
-   */
-  maxLength?: number;
-
-  /**
-   * Custom validation function for text values
-   */
-  validateText?: (value: string) => boolean | string;
-
-  /**
-   * Pattern for validation
-   */
-  pattern?: RegExp;
-
-  /**
-   * Message to show when pattern validation fails
-   */
-  patternMessage?: string;
+  placeholder?: string;
 }
 
 /**
@@ -57,99 +45,119 @@ export interface TextFieldProps extends BaseFieldProps {
  * - Full accessibility support with ARIA attributes
  * - Keyboard navigation
  */
-export const TextField = forwardRef(function TextField(
-  { validateText, minLength, maxLength, pattern, patternMessage, ...baseProps }: TextFieldProps,
-  ref: ForwardedRef<HTMLInputElement>
-): ReactElement {
-  const { setError, clearErrors, formState } = useFormContext();
-  const hasError = !!formState.errors[baseProps.name];
+export function TextField<TFieldValues extends FieldValues = FieldValues>({
+  id,
+  label,
+  placeholder,
+  helperText,
+  control,
+  name,
+  width = 'full',
+  validation,
+}: TextFieldProps<TFieldValues>): React.ReactElement {
+  const isRequired = !!validation?.required;
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
 
-  // Determine if the field is required based on validation rules
-  const isRequired = !!baseProps.validation?.required;
+  // Function for validating text values
+  const validateTextValue = (value: string): string | true => {
+    const validationResult = validateField(value, validation);
+    return validationResult === true ? true : (validationResult as string);
+  };
 
   return (
-    <BaseField
-      {...baseProps}
-      renderInput={(field, { id }) => (
-        <Input
-          {...field}
-          ref={ref}
-          id={id}
-          placeholder={baseProps.placeholder}
-          data-slot="input"
-          // Apply accessibility attributes
-          {...getAccessibilityProps({
+    <div
+      className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
+    >
+      {label && (
+        <Label htmlFor={id} className="text-sm font-medium">
+          {label} {isRequired && <span className="text-destructive">*</span>}
+        </Label>
+      )}
+
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value) => {
+            // Handle required validation explicitly
+            if (value === undefined || value === null || value === '') {
+              return validation?.required ? 'This field is required' : true;
+            }
+
+            // Validate text values
+            if (typeof value === 'string') {
+              return validateTextValue(value);
+            }
+
+            return true;
+          },
+        }}
+        render={({ field, fieldState: { error } }) => {
+          const hasError = !!error;
+          const validationClasses = getValidationStateClasses(error);
+
+          // Handle input change with validation for required fields
+          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+            const value = e.target.value;
+            field.onChange(value);
+
+            // Trigger validation if the field is required and empty
+            if (isRequired && value === '') {
+              setTimeout(() => field.onBlur(), 0);
+            }
+          };
+
+          // Handle keyboard events
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+            if (e.key === 'Escape') {
+              handleEscapeKey(field.onChange, field.value)(e);
+
+              // If required, trigger validation after clearing
+              if (isRequired) {
+                setTimeout(() => field.onBlur(), 0);
+              }
+            }
+          };
+
+          // Get accessibility attributes
+          const accessibilityProps = getAccessibilityProps({
             id,
             hasError,
             isRequired,
-            hasHelperText: !!baseProps.helperText,
-          })}
-          onChange={(e) => {
-            const value = e.target.value;
+            hasHelperText: !!helperText,
+          });
 
-            // Call the original onChange from React Hook Form
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
-            }
+          return (
+            <>
+              <Input
+                {...field}
+                id={id}
+                placeholder={placeholder}
+                className={validationClasses}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                data-slot="input"
+                {...accessibilityProps}
+                aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+              />
 
-            // Run custom validation if provided
-            if (validateText && value) {
-              const validation = validateText(value);
-              if (validation !== true && typeof validation === 'string') {
-                setError(baseProps.name, {
-                  type: 'custom',
-                  message: validation,
-                });
-                return; // Stop validation chain if custom validation fails
-              }
-            }
+              {/* Display helper text */}
+              {helperText && (
+                <div id={descriptionId} className="text-muted-foreground text-sm">
+                  {helperText}
+                </div>
+              )}
 
-            // Validate minLength if provided
-            if (minLength && value && value.length < minLength) {
-              setError(baseProps.name, {
-                type: 'minLength',
-                message: `Must be at least ${minLength} characters`,
-              });
-              return;
-            }
-
-            // Validate maxLength if provided
-            if (maxLength && value && value.length > maxLength) {
-              setError(baseProps.name, {
-                type: 'maxLength',
-                message: `Cannot exceed ${maxLength} characters`,
-              });
-              return;
-            }
-
-            // Validate pattern if provided
-            if (pattern && value && !pattern.test(value)) {
-              setError(baseProps.name, {
-                type: 'pattern',
-                message: patternMessage || 'Invalid format',
-              });
-              return;
-            }
-
-            // If we reach here, all validations passed
-            clearErrors(baseProps.name);
-          }}
-          onBlur={() => {
-            if (typeof field.onBlur === 'function') {
-              field.onBlur();
-            }
-          }}
-          // Add keyboard event handling for accessibility
-          onKeyDown={handleEscapeKey((value) => {
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
-            }
-          }, field.value)}
-        />
-      )}
-    />
+              {/* Display error message */}
+              <ErrorMessage error={error} id={errorId} />
+            </>
+          );
+        }}
+      />
+    </div>
   );
-});
+}
 
 // Set displayName manually for better debugging
 TextField.displayName = 'TextField';

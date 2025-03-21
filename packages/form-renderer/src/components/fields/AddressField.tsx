@@ -1,15 +1,23 @@
-import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
 
-import { Input } from '../ui';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
-import { getAccessibilityProps, handleEscapeKey } from './utils/accessibility';
-import { BaseField, type BaseFieldProps } from './BaseField';
+import { BaseFieldProps } from './BaseField';
+import {
+  ErrorMessage,
+  getAccessibilityProps,
+  getValidationStateClasses,
+  handleEscapeKey,
+  validateField,
+} from './utils';
 
 /**
  * AddressField component properties
  */
-export interface AddressFieldProps extends BaseFieldProps {
+export interface AddressFieldProps<TFieldValues extends FieldValues = FieldValues>
+  extends BaseFieldProps<TFieldValues> {
   /**
    * Custom validation function for address format
    */
@@ -38,88 +46,131 @@ export interface AddressFieldProps extends BaseFieldProps {
  * - Full accessibility support with ARIA attributes
  * - Keyboard navigation
  */
-export const AddressField = forwardRef(function AddressField(
-  { validateAddress, ...baseProps }: AddressFieldProps,
-  ref: ForwardedRef<HTMLInputElement>
-): ReactElement {
-  const { setError, clearErrors, formState } = useFormContext();
-  const hasError = !!formState.errors[baseProps.name];
+export function AddressField<TFieldValues extends FieldValues = FieldValues>({
+  id,
+  label,
+  placeholder,
+  helperText,
+  control,
+  name,
+  width = 'full',
+  validation,
+  validateAddress,
+}: AddressFieldProps<TFieldValues>): React.ReactElement {
+  const isRequired = !!validation?.required;
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
 
-  // Determine if the field is required based on validation rules
-  const isRequired = !!baseProps.validation?.required;
+  // Function to validate address values
+  const validateAddressValue = (value: string): string | true => {
+    // Run standard validation first
+    const standardValidation = validateField(value, validation);
+    if (standardValidation !== true) return standardValidation as string;
+
+    // Then run custom validator if provided
+    if (validateAddress) {
+      const customValidation = validateAddress(value);
+      if (customValidation !== true && typeof customValidation === 'string') {
+        return customValidation;
+      }
+    }
+
+    return true;
+  };
 
   return (
-    <BaseField
-      {...baseProps}
-      renderInput={(field, { id }) => (
-        <Input
-          {...field}
-          ref={ref}
-          id={id}
-          placeholder={baseProps.placeholder || '0x...'}
-          data-slot="input"
-          // Apply accessibility attributes
-          {...getAccessibilityProps({
+    <div
+      className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
+    >
+      {label && (
+        <Label htmlFor={id} className="text-sm font-medium">
+          {label} {isRequired && <span className="text-destructive">*</span>}
+        </Label>
+      )}
+
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value) => {
+            // Check required field explicitly
+            if (value === undefined || value === null || value === '') {
+              return validation?.required ? 'This field is required' : true;
+            }
+
+            // Validate string values
+            if (typeof value === 'string') {
+              return validateAddressValue(value);
+            }
+
+            return true;
+          },
+        }}
+        render={({ field, fieldState: { error } }) => {
+          const hasError = !!error;
+          const validationClasses = getValidationStateClasses(error);
+
+          // Handle input change with validation
+          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+            const value = e.target.value;
+            field.onChange(value);
+
+            // Trigger validation if the field is required and empty
+            if (isRequired && value === '') {
+              setTimeout(() => field.onBlur(), 0);
+            }
+          };
+
+          // Add keyboard accessibility for clearing the field with Escape
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+            if (e.key === 'Escape') {
+              handleEscapeKey(field.onChange, field.value)(e);
+
+              // If required, trigger validation after clearing
+              if (isRequired) {
+                setTimeout(() => field.onBlur(), 0);
+              }
+            }
+          };
+
+          // Get accessibility attributes
+          const accessibilityProps = getAccessibilityProps({
             id,
             hasError,
             isRequired,
-            hasHelperText: !!baseProps.helperText,
-          })}
-          onChange={(e) => {
-            const value = e.target.value;
+            hasHelperText: !!helperText,
+          });
 
-            // Call the original onChange from React Hook Form
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
-            }
+          return (
+            <>
+              <Input
+                {...field}
+                id={id}
+                placeholder={placeholder || '0x...'}
+                className={validationClasses}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                data-slot="input"
+                {...accessibilityProps}
+                aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+              />
 
-            // Perform real-time validation for address format
-            if (validateAddress && value) {
-              const validation = validateAddress(value);
-              if (validation !== true && typeof validation === 'string') {
-                setError(baseProps.name, {
-                  type: 'custom',
-                  message: validation,
-                });
-              } else {
-                clearErrors(baseProps.name);
-              }
-            } else {
-              clearErrors(baseProps.name);
-            }
-          }}
-          onBlur={() => {
-            if (typeof field.onBlur === 'function') {
-              field.onBlur();
-            }
+              {/* Display helper text */}
+              {helperText && (
+                <div id={descriptionId} className="text-muted-foreground text-sm">
+                  {helperText}
+                </div>
+              )}
 
-            // Final validation on blur
-            if (validateAddress && typeof field.value === 'string' && field.value) {
-              const validation = validateAddress(field.value);
-              if (validation !== true && typeof validation === 'string') {
-                // Set the error in React Hook Form
-                setError(baseProps.name, {
-                  type: 'custom',
-                  message: validation,
-                });
-              } else {
-                // Clear previous validation errors if now valid
-                clearErrors(baseProps.name);
-              }
-            }
-          }}
-          // Add keyboard event handling for accessibility
-          onKeyDown={handleEscapeKey((value) => {
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
-            }
-            clearErrors(baseProps.name);
-          }, field.value)}
-        />
-      )}
-    />
+              {/* Display error message */}
+              <ErrorMessage error={error} id={errorId} />
+            </>
+          );
+        }}
+      />
+    </div>
   );
-});
+}
 
 // Set displayName manually for better debugging
 AddressField.displayName = 'AddressField';

@@ -124,6 +124,9 @@ export function DynamicFormField({
     return null;
   }
 
+  // Get field-specific props based on type
+  const fieldSpecificProps = getFieldSpecificProps(field);
+
   // Pass all necessary props directly to the field component
   // Each specific field component knows how to handle its own props based on field type
   return (
@@ -133,8 +136,33 @@ export function DynamicFormField({
       placeholder={field.placeholder}
       helperText={field.helperText}
       width={field.width}
+      validation={field.validation}
       control={control}
       name={field.name}
+      {...fieldSpecificProps}
     />
   );
+}
+
+/**
+ * Extract field-specific props based on field type
+ */
+function getFieldSpecificProps(field: FormField): Record<string, unknown> {
+  switch (field.type) {
+    case 'number':
+      // Extract number-specific props from validation
+      return {
+        min: field.validation?.min,
+        max: field.validation?.max,
+        step: field.options?.find((opt) => opt.label === 'step')?.value,
+      };
+    case 'address':
+      // Add address-specific props
+      return {};
+    case 'checkbox':
+      // Add checkbox-specific props
+      return {};
+    default:
+      return {};
+  }
 }

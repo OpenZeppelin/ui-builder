@@ -8,6 +8,8 @@ import { getWidthClasses } from './utils/layout';
 
 /**
  * Base props shared by all field components
+ *
+ * @template TFieldValues The field values type from React Hook Form
  */
 export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> {
   /**

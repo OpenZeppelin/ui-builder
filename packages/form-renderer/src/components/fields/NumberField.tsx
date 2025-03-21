@@ -1,15 +1,23 @@
-import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
 
-import { Input } from '../ui';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
-import { getAccessibilityProps, handleEscapeKey, handleNumericKeys } from './utils/accessibility';
-import { BaseField, type BaseFieldProps } from './BaseField';
+import { BaseFieldProps } from './BaseField';
+import {
+  ErrorMessage,
+  getAccessibilityProps,
+  getValidationStateClasses,
+  handleEscapeKey,
+  validateField,
+} from './utils';
 
 /**
  * NumberField component properties
  */
-export interface NumberFieldProps extends BaseFieldProps {
+export interface NumberFieldProps<TFieldValues extends FieldValues = FieldValues>
+  extends BaseFieldProps<TFieldValues> {
   /**
    * Minimum value validation
    */
@@ -52,122 +60,220 @@ export interface NumberFieldProps extends BaseFieldProps {
  * - Full accessibility support with ARIA attributes
  * - Keyboard navigation with arrow keys for numeric increment/decrement
  */
-export const NumberField = forwardRef(function NumberField(
-  { validateNumber, min, max, step = 1, ...baseProps }: NumberFieldProps,
-  ref: ForwardedRef<HTMLInputElement>
-): ReactElement {
-  const { setError, clearErrors, formState } = useFormContext();
-  const hasError = !!formState.errors[baseProps.name];
+export function NumberField<TFieldValues extends FieldValues = FieldValues>({
+  id,
+  label,
+  placeholder,
+  helperText,
+  control,
+  name,
+  width = 'full',
+  validation,
+  min,
+  max,
+  step = 1,
+  validateNumber,
+}: NumberFieldProps<TFieldValues>): React.ReactElement {
+  const isRequired = !!validation?.required;
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
 
-  // Determine if the field is required based on validation rules
-  const isRequired = !!baseProps.validation?.required;
+  // Create merged validation that includes min/max from props
+  const mergedValidation = {
+    ...validation,
+    min: validation?.min !== undefined ? validation.min : min,
+    max: validation?.max !== undefined ? validation.max : max,
+  };
+
+  // Regular expressions for number validation
+  const NUMBER_REGEX = {
+    // Allow optional minus sign, digits, optional decimal point, more digits
+    VALID_FORMAT: /^-?\d*\.?\d*$/,
+    // Complete number (more strict than the format check)
+    COMPLETE_NUMBER: /^-?\d+\.?\d*$/,
+  };
+
+  // Common validation for numeric values
+  const validateNumericValue = (value: number): string | true => {
+    // Run standard validation
+    const standardValidation = validateField(value, mergedValidation);
+    if (standardValidation !== true) return standardValidation as string;
+
+    // Run custom validator if provided
+    if (validateNumber) {
+      const customValidation = validateNumber(value);
+      if (customValidation !== true && typeof customValidation === 'string') {
+        return customValidation;
+      }
+    }
+
+    return true;
+  };
 
   return (
-    <BaseField
-      {...baseProps}
-      renderInput={(field, { id }) => (
-        <Input
-          {...field}
-          ref={ref}
-          id={id}
-          placeholder={baseProps.placeholder}
-          type="number"
-          min={min}
-          max={max}
-          step={step}
-          data-slot="input"
-          // Apply accessibility attributes
-          {...getAccessibilityProps({
-            id,
-            hasError,
-            isRequired,
-            hasHelperText: !!baseProps.helperText,
-          })}
-          onChange={(e) => {
+    <div
+      className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
+    >
+      {label && (
+        <Label htmlFor={id} className="text-sm font-medium">
+          {label} {isRequired && <span className="text-destructive">*</span>}
+        </Label>
+      )}
+
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value) => {
+            // Skip validation if empty and check required separately
+            if (value === undefined || value === null || value === '') {
+              return mergedValidation?.required ? 'This field is required' : true;
+            }
+
+            // Handle incomplete number inputs
+            if (value === '-') {
+              return 'Please enter a complete number';
+            }
+
+            // Handle decimal point at the end
+            if (typeof value === 'string' && value.endsWith('.')) {
+              return 'Please enter a complete decimal number';
+            }
+
+            // For string values that passed our format check but aren't complete numbers
+            if (typeof value === 'string') {
+              // Parse the validated string to a number
+              const parsedNum = parseFloat(value);
+              return validateNumericValue(parsedNum);
+            }
+
+            // For already numeric values
+            if (typeof value === 'number') {
+              return validateNumericValue(value);
+            }
+
+            return true;
+          },
+        }}
+        render={({ field, fieldState: { error } }) => {
+          const hasError = !!error;
+          const validationClasses = getValidationStateClasses(error);
+
+          // Handle input change
+          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
             const rawValue = e.target.value;
-            const value = rawValue ? parseFloat(rawValue) : null;
 
-            // Call the original onChange from React Hook Form
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
+            // Check if the input matches our valid number format
+            const isValidNumberFormat = NUMBER_REGEX.VALID_FORMAT.test(rawValue);
+
+            if (!isValidNumberFormat && rawValue !== '') {
+              // Don't update the field value for invalid formats
+              // This prevents entering invalid characters
+              return;
             }
 
-            // Skip validation if empty (unless required, which is handled by react-hook-form)
+            // For valid format or empty string
             if (rawValue === '') {
-              clearErrors(baseProps.name);
-              return;
+              // Empty value
+              field.onChange('');
+            } else if (rawValue === '-') {
+              // Allow standalone minus for user to continue typing
+              field.onChange(rawValue);
+            } else if (rawValue.endsWith('.')) {
+              // Allow numbers ending with decimal point for user to continue typing
+              field.onChange(rawValue);
+            } else {
+              // Convert to number for valid numeric values
+              const numValue = parseFloat(rawValue);
+              field.onChange(isNaN(numValue) ? rawValue : numValue);
             }
 
-            // Run custom validation if provided
-            if (validateNumber && value !== null) {
-              const validation = validateNumber(value);
-              if (validation !== true && typeof validation === 'string') {
-                setError(baseProps.name, {
-                  type: 'custom',
-                  message: validation,
-                });
-                return; // Stop validation chain if custom validation fails
-              }
+            // Trigger validation only if the field is potentially invalid
+            if (rawValue === '-' || rawValue === '' || !isValidNumberFormat) {
+              setTimeout(() => field.onBlur(), 0);
             }
+          };
 
-            // Validate min if provided
-            if (typeof min === 'number' && value !== null && value < min) {
-              setError(baseProps.name, {
-                type: 'min',
-                message: `Must be at least ${min}`,
-              });
-              return;
-            }
-
-            // Validate max if provided
-            if (typeof max === 'number' && value !== null && value > max) {
-              setError(baseProps.name, {
-                type: 'max',
-                message: `Cannot exceed ${max}`,
-              });
-              return;
-            }
-
-            // If we reach here, all validations passed
-            clearErrors(baseProps.name);
-          }}
-          onBlur={() => {
-            if (typeof field.onBlur === 'function') {
-              field.onBlur();
-            }
-          }}
-          // Add keyboard event handlers for accessibility
-          onKeyDown={(e) => {
-            // Handle Escape key to clear input
+          // Handle keyboard events
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+            // Handle escape key to clear input
             if (e.key === 'Escape') {
-              handleEscapeKey((value) => {
-                if (typeof field.onChange === 'function') {
-                  field.onChange(value === '' ? null : value);
-                }
-              }, field.value)(e);
+              handleEscapeKey(field.onChange, field.value)(e);
               return;
             }
 
             // Handle arrow keys for increment/decrement
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-              handleNumericKeys(
-                (newValue) => {
-                  if (typeof field.onChange === 'function') {
-                    field.onChange(newValue);
-                  }
-                },
-                typeof field.value === 'number' ? field.value : 0,
-                step,
-                min,
-                max
-              )(e);
+              e.preventDefault(); // Prevent default browser behavior
+
+              // Get current value as number or default to 0
+              let currentValue = 0;
+              if (typeof field.value === 'number') {
+                currentValue = field.value;
+              } else if (
+                typeof field.value === 'string' &&
+                NUMBER_REGEX.COMPLETE_NUMBER.test(field.value)
+              ) {
+                currentValue = parseFloat(field.value);
+              }
+
+              // Calculate new value based on step, respecting min/max
+              const increment = e.key === 'ArrowUp' ? step : -step;
+              const newValue = Math.min(
+                max !== undefined ? max : Infinity,
+                Math.max(min !== undefined ? min : -Infinity, currentValue + increment)
+              );
+
+              // Update the field
+              field.onChange(newValue);
+              setTimeout(() => field.onBlur(), 0); // Trigger validation
             }
-          }}
-        />
-      )}
-    />
+          };
+
+          // Get accessibility attributes
+          const accessibilityProps = getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!helperText,
+          });
+
+          return (
+            <>
+              <Input
+                {...field}
+                id={id}
+                placeholder={placeholder}
+                type="text"
+                min={min}
+                max={max}
+                step={step}
+                className={validationClasses}
+                onKeyDown={handleKeyDown}
+                data-slot="input"
+                onChange={handleInputChange}
+                inputMode="decimal"
+                pattern="-?[0-9]*\.?[0-9]*"
+                {...accessibilityProps}
+                aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+              />
+
+              {/* Display helper text */}
+              {helperText && (
+                <div id={descriptionId} className="text-muted-foreground text-sm">
+                  {helperText}
+                </div>
+              )}
+
+              {/* Display error message */}
+              <ErrorMessage error={error} id={errorId} />
+            </>
+          );
+        }}
+      />
+    </div>
   );
-});
+}
 
 // Set displayName manually for better debugging
 NumberField.displayName = 'NumberField';

@@ -5,8 +5,11 @@ import { BooleanField } from '../components/fields/BooleanField';
 import type { BooleanFieldProps } from '../components/fields/BooleanField';
 import type { Meta, StoryObj } from '@storybook/react';
 
-// Custom type for the wrapper component props
-type BooleanFieldWrapperProps = Omit<BooleanFieldProps, 'control'> & { defaultChecked?: boolean };
+// Extended props for the wrapper component
+interface BooleanFieldWrapperProps extends Omit<BooleanFieldProps, 'control'> {
+  defaultChecked?: boolean;
+  showError?: boolean | string;
+}
 
 // Wrapper component to provide React Hook Form context
 const BooleanFieldWrapper = (args: BooleanFieldWrapperProps) => {
@@ -14,7 +17,30 @@ const BooleanFieldWrapper = (args: BooleanFieldWrapperProps) => {
     defaultValues: {
       [args.name]: args.defaultChecked || false,
     },
+    mode: 'all', // Validate on all events for immediate feedback
   });
+
+  // If showError is true, manually set an error
+  if (args.showError) {
+    setTimeout(() => {
+      methods.setError(args.name, {
+        type: 'manual',
+        message:
+          args.showError === true
+            ? 'This field has an error'
+            : typeof args.showError === 'string'
+              ? args.showError
+              : 'Validation failed',
+      });
+    }, 100);
+  }
+
+  // Force immediate validation for required fields or fields with validateBoolean functions
+  if ((args.validation?.required && !args.defaultChecked) || args.validateBoolean) {
+    setTimeout(() => {
+      methods.trigger(args.name);
+    }, 100);
+  }
 
   return (
     <FormProvider {...methods}>
@@ -25,7 +51,7 @@ const BooleanFieldWrapper = (args: BooleanFieldWrapperProps) => {
   );
 };
 
-const meta: Meta<typeof BooleanFieldWrapper> = {
+const meta = {
   title: 'Form Renderer/Components/Fields/BooleanField',
   component: BooleanFieldWrapper,
   parameters: {
@@ -37,11 +63,15 @@ const meta: Meta<typeof BooleanFieldWrapper> = {
       control: 'boolean',
       description: 'Initial checked state for the story',
     },
+    showError: {
+      control: { type: 'boolean' },
+      description: 'Whether to show an error state',
+    },
   },
-};
+} satisfies Meta<typeof BooleanFieldWrapper>;
 
 export default meta;
-type Story = StoryObj<typeof BooleanFieldWrapper>;
+type Story = StoryObj<typeof meta>;
 
 // Basic checkbox field
 export const Basic: Story = {
@@ -72,6 +102,29 @@ export const WithHelperText: Story = {
   },
 };
 
+// Required checkbox
+export const Required: Story = {
+  args: {
+    id: 'checkbox-field-required',
+    name: 'checkboxFieldRequired',
+    label: 'Required Checkbox',
+    validation: {
+      required: true,
+    },
+    helperText: 'This field is required',
+  },
+};
+
+// With error state
+export const WithError: Story = {
+  args: {
+    id: 'checkbox-field-error',
+    name: 'checkboxFieldError',
+    label: 'Checkbox with Error',
+    showError: 'This checkbox has a validation error',
+  },
+};
+
 // With custom validation
 export const WithValidation: Story = {
   args: {
@@ -79,6 +132,10 @@ export const WithValidation: Story = {
     name: 'checkboxFieldValidation',
     label: 'Checkbox Field with Validation',
     helperText: 'This checkbox must be checked to proceed',
+    validation: {
+      required: true,
+    },
     validateBoolean: (value: boolean) => value || 'You must accept the terms to continue',
+    defaultChecked: false, // Initially unchecked, which fails the validateBoolean check
   },
 };

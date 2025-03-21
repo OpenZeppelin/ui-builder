@@ -29,16 +29,18 @@ export type FieldType =
 Create a new file named `YourNewField.tsx` in the `components/fields` directory:
 
 ```typescript
-import { type ForwardedRef, forwardRef, type ReactElement } from 'react';
-import { useFormContext } from 'react-hook-form';
-import type { FieldValues } from 'react-hook-form';
-
-import { InputComponent } from '../ui'; // Import the UI component you need
-
-import { BaseField, type BaseFieldProps } from './BaseField';
-import { getAccessibilityProps } from './utils/accessibility';
-// Import other keyboard handlers as needed, for example:
-// import { handleEscapeKey, handleNumericKeys, handleToggleKeys } from './utils/accessibility';
+import React from 'react';
+import { FieldValues, Controller, FieldPath } from 'react-hook-form';
+import { BaseFieldProps } from './BaseField';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import {
+  getAccessibilityProps,
+  handleEscapeKey,
+  getValidationStateClasses,
+  ErrorMessage,
+  validateField,
+} from './utils';
 
 /**
  * YourNewField component properties
@@ -74,82 +76,102 @@ export interface YourNewFieldProps<TFieldValues extends FieldValues = FieldValue
  * - Full accessibility support with ARIA attributes
  * - Keyboard navigation
  */
-export const YourNewField = forwardRef(function YourNewField<
-  TFieldValues extends FieldValues = FieldValues,
->(
-  { validateCustom, ...baseProps }: YourNewFieldProps<TFieldValues>,
-  ref: ForwardedRef<HTMLInputElement> // Adjust the ref type as needed
-): ReactElement {
-  const { setError, clearErrors, formState } = useFormContext();
-  const hasError = !!formState.errors[baseProps.name];
-
-  // Determine if the field is required based on validation rules
-  const isRequired = !!baseProps.validation?.required;
+export function YourNewField<TFieldValues extends FieldValues = FieldValues>({
+  id,
+  label,
+  placeholder,
+  helperText,
+  control,
+  name,
+  width = 'full',
+  validation,
+  validateCustom,
+}: YourNewFieldProps<TFieldValues>): React.ReactElement {
+  const isRequired = !!validation?.required;
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
 
   return (
-    <BaseField
-      {...baseProps}
-      renderInput={(field, { id }) => (
-        <InputComponent
-          {...field}
-          ref={ref}
-          id={id}
-          placeholder={baseProps.placeholder}
-          data-slot="input"
-          // Apply accessibility attributes
-          {...getAccessibilityProps({
-            id,
-            hasError,
-            isRequired,
-            hasHelperText: !!baseProps.helperText,
-          })}
-          onChange={(e) => {
-            const value = e.target.value; // Adjust based on your input type
+    <div
+      className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
+    >
+      {label && (
+        <Label htmlFor={id} className="text-sm font-medium">
+          {label} {isRequired && <span className="text-destructive">*</span>}
+        </Label>
+      )}
 
-            // Call the original onChange from React Hook Form
-            if (typeof field.onChange === 'function') {
-              field.onChange(value);
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value) => {
+            // Handle required validation explicitly
+            if (value === undefined || value === null || value === '') {
+              return validation?.required ? 'This field is required' : true;
             }
 
             // Run custom validation if provided
             if (validateCustom && value) {
               const validation = validateCustom(value);
               if (validation !== true && typeof validation === 'string') {
-                setError(baseProps.name, {
-                  type: 'custom',
-                  message: validation,
-                });
-                return; // Stop validation chain if custom validation fails
+                return validation;
               }
             }
 
             // Add field-specific validation logic here
 
-            // If we reach here, all validations passed
-            clearErrors(baseProps.name);
-          }}
-          onBlur={() => {
-            if (typeof field.onBlur === 'function') {
-              field.onBlur();
-            }
+            return true;
+          },
+        }}
+        render={({ field, fieldState: { error } }) => {
+          const hasError = !!error;
+          const validationClasses = getValidationStateClasses(error);
 
-            // Optional: Run final validation on blur
-          }}
-          // Add appropriate keyboard handlers for accessibility
-          // Example for text-like inputs:
-          // onKeyDown={handleEscapeKey(
-          //   (value) => {
-          //     if (typeof field.onChange === 'function') {
-          //       field.onChange(value);
-          //     }
-          //   },
-          //   field.value
-          // )}
-        />
-      )}
-    />
+          // Get accessibility attributes
+          const accessibilityProps = getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!helperText,
+          });
+
+          return (
+            <>
+              <Input
+                {...field}
+                id={id}
+                placeholder={placeholder}
+                className={validationClasses}
+                data-slot="input"
+                {...accessibilityProps}
+                aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+                onKeyDown={handleEscapeKey(
+                  (value) => {
+                    if (typeof field.onChange === 'function') {
+                      field.onChange(value);
+                    }
+                  },
+                  field.value
+                )}
+              />
+
+              {/* Display helper text */}
+              {helperText && (
+                <div id={descriptionId} className="text-muted-foreground text-sm">
+                  {helperText}
+                </div>
+              )}
+
+              {/* Display error message */}
+              <ErrorMessage error={error} id={errorId} />
+            </>
+          );
+        }}
+      />
+    </div>
   );
-});
+}
 
 // Set displayName manually for better debugging
 YourNewField.displayName = 'YourNewField';
@@ -193,7 +215,7 @@ Implement any field-specific validation logic in your component. Common patterns
 
 1. **Custom validation function**: Use `validateCustom` prop
 2. **Built-in validation**: Add specific validation for your field type
-3. **Error handling**: Use `setError` and `clearErrors` from `useFormContext`
+3. **Error handling**: Use field state's error property from React Hook Form
 
 ## Step 6: Ensure Accessibility
 
@@ -286,8 +308,6 @@ Testing your field component is crucial to ensure it integrates properly with th
 
 - [ ] Extended BaseFieldProps with field-specific props
 - [ ] Implemented proper validation logic
-- [ ] Forwarded ref correctly
-- [ ] Handled onChange and onBlur events
 - [ ] Set proper displayName for debugging
 - [ ] Exported component in index.ts
 - [ ] Registered component in fieldComponents registry

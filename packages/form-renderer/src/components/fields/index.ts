@@ -1,8 +1,9 @@
 /**
- * Form Field Components
+ * Field components index
  */
 
 export * from './AddressField';
+export * from './BaseField';
 export * from './BooleanField';
 export * from './NumberField';
 export * from './TextField';
