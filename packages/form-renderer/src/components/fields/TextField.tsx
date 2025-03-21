@@ -3,8 +3,8 @@ import { useFormContext } from 'react-hook-form';
 
 import { Input } from '../ui';
 
-import { BaseField, type BaseFieldProps } from './BaseField';
 import { getAccessibilityProps, handleEscapeKey } from './utils/accessibility';
+import { BaseField, type BaseFieldProps } from './BaseField';
 
 /**
  * TextField component properties

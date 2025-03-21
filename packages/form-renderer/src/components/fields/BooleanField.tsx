@@ -4,8 +4,8 @@ import { useFormContext } from 'react-hook-form';
 
 import { Checkbox } from '../ui';
 
-import { BaseField, type BaseFieldProps } from './BaseField';
 import { getAccessibilityProps, handleToggleKeys } from './utils/accessibility';
+import { BaseField, type BaseFieldProps } from './BaseField';
 
 /**
  * BooleanField component properties
