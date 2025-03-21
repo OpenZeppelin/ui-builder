@@ -1,11 +1,6 @@
 import { TransactionForm } from '../components/TransactionForm';
 
-import type {
-  ContractAdapter,
-  FormValues,
-  RenderFormSchema,
-  TransactionFormProps,
-} from '../types/FormTypes';
+import type { ContractAdapter, RenderFormSchema } from '../types/FormTypes';
 import type { Meta, StoryObj } from '@storybook/react';
 
 // Example adapter for form data processing

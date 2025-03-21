@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control, ControllerProps, FieldPath, FieldValues, useWatch } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 
 import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
 
