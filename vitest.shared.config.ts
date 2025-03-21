@@ -1,8 +1,8 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig, UserConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
-export const sharedVitestConfig: UserConfig = {
+export const sharedVitestConfig = defineConfig({
   plugins: [react()],
   test: {
     globals: true,
@@ -16,4 +16,4 @@ export const sharedVitestConfig: UserConfig = {
       exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
     },
   },
-};
+});
