@@ -4,7 +4,7 @@ import { Control, useWatch } from 'react-hook-form';
 import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
 
 import { BaseFieldProps } from './fields/BaseField';
-import { AddressField, NumberField, TextField } from './fields';
+import { AddressField, BooleanField, NumberField, TextField } from './fields';
 
 /**
  * Props for the DynamicFormField component
@@ -35,7 +35,7 @@ const fieldComponents: Record<FieldType, React.ComponentType<BaseFieldProps<Form
   text: TextField,
   number: NumberField,
   address: AddressField,
-  checkbox: () => <div>Checkbox field not implemented yet</div>,
+  checkbox: BooleanField,
   radio: () => <div>Radio field not implemented yet</div>,
   select: () => <div>Select field not implemented yet</div>,
   textarea: () => <div>Textarea field not implemented yet</div>,
