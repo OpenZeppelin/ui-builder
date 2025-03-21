@@ -3,14 +3,13 @@ import * as React from 'react';
 import { Slot, Slottable } from '@radix-ui/react-slot';
 import { type VariantProps } from 'class-variance-authority';
 
+import { buttonVariants } from '../../utils/button-variants';
 import { cn } from '../../utils/cn';
-
-import { buttonVariants } from './button';
 
 /**
  * Loading spinner component
  */
-const Spinner = () => (
+const Spinner = (): React.ReactElement => (
   <svg
     className="mr-2 h-4 w-4 animate-spin"
     xmlns="http://www.w3.org/2000/svg"
