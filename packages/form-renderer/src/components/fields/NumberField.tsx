@@ -109,7 +109,7 @@ export const NumberField = forwardRef(function NumberField(
               }
             }
           }}
-          onBlur={(e) => {
+          onBlur={() => {
             if (typeof field.onBlur === 'function') {
               field.onBlur();
             }

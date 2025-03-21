@@ -51,7 +51,7 @@ export const AddressField = forwardRef(function AddressField(
           id={id}
           placeholder={baseProps.placeholder || '0x...'}
           data-slot="input"
-          onBlur={(e) => {
+          onBlur={() => {
             if (typeof field.onBlur === 'function') {
               field.onBlur();
             }

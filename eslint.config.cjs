@@ -19,6 +19,7 @@ const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const importPlugin = require('eslint-plugin-import');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
+const unusedImportsPlugin = require('eslint-plugin-unused-imports');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 const jsdocPlugin = require('eslint-plugin-jsdoc');
@@ -138,7 +139,7 @@ const baseConfig = [
     },
     rules: {
       ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Replaced by unused-imports plugin
       // Disable rules that require type checking as they will be enabled in the strict config
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/await-thenable': 'off',
@@ -169,11 +170,22 @@ const baseConfig = [
     plugins: {
       import: importPlugin,
       'simple-import-sort': simpleImportSortPlugin,
+      'unused-imports': unusedImportsPlugin,
     },
     rules: {
       'import/first': 'error',
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
       'simple-import-sort/imports': [
         'error',
         {

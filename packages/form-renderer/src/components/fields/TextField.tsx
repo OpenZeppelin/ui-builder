@@ -122,7 +122,7 @@ export const TextField = forwardRef(function TextField(
             // If we reach here, all validations passed
             clearErrors(baseProps.name);
           }}
-          onBlur={(e) => {
+          onBlur={() => {
             if (typeof field.onBlur === 'function') {
               field.onBlur();
             }
