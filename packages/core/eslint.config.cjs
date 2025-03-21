@@ -19,6 +19,7 @@ const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const importPlugin = require('eslint-plugin-import');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
+const unusedImportsPlugin = require('eslint-plugin-unused-imports');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 
@@ -55,6 +56,10 @@ module.exports = [
   // Core-specific TypeScript configuration with project reference
   {
     files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      '@typescript-eslint': typescriptPlugin,
+      'unused-imports': unusedImportsPlugin,
+    },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -64,9 +69,20 @@ module.exports = [
       },
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': 'off', // Explicitly disable in favor of unused-imports
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ];

@@ -139,7 +139,7 @@ const baseConfig = [
     },
     rules: {
       ...typescriptRecommendedRules,
-      // '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Replaced by unused-imports plugin
+      '@typescript-eslint/no-unused-vars': 'off',
       // Disable rules that require type checking as they will be enabled in the strict config
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/await-thenable': 'off',
