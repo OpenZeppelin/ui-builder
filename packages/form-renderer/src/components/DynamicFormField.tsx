@@ -1,9 +1,10 @@
 import React from 'react';
-import { Control, useWatch } from 'react-hook-form';
+import { Control, ControllerProps, FieldPath, FieldValues, useWatch } from 'react-hook-form';
 
-import { FieldCondition, FormField, FormValues } from '../types/FormTypes';
+import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
 
-import { TextField } from './fields';
+import { BaseFieldProps } from './fields/BaseField';
+import { AddressField, NumberField, TextField } from './fields';
 
 /**
  * Props for the DynamicFormField component
@@ -24,6 +25,26 @@ interface DynamicFormFieldProps {
    */
   error?: string;
 }
+
+/**
+ * Registry of field components mapped to their respective types.
+ * All field components in this registry are designed specifically for React Hook Form integration
+ * and are meant to be used within the DynamicFormField system, not as standalone components.
+ */
+const fieldComponents: Record<FieldType, React.ComponentType<BaseFieldProps<FormValues>>> = {
+  text: TextField,
+  number: NumberField,
+  address: AddressField,
+  checkbox: () => <div>Checkbox field not implemented yet</div>,
+  radio: () => <div>Radio field not implemented yet</div>,
+  select: () => <div>Select field not implemented yet</div>,
+  textarea: () => <div>Textarea field not implemented yet</div>,
+  date: () => <div>Date field not implemented yet</div>,
+  email: () => <div>Email field not implemented yet</div>,
+  password: () => <div>Password field not implemented yet</div>,
+  amount: () => <div>Amount field not implemented yet</div>,
+  hidden: () => null,
+};
 
 /**
  * Evaluates whether a field should be rendered based on its visibility conditions
@@ -73,8 +94,16 @@ function useShouldRenderField(field: FormField, control: Control<FormValues>): b
 /**
  * Dynamic Form Field Component
  *
- * Renders the appropriate form field based on the field type
- * @returns The rendered form field component or null if not visible
+ * Renders the appropriate field component based on the field type defined in the form schema.
+ * This component is part of the form rendering system architecture where:
+ * 1. Form schemas are generated from contract functions using adapters
+ * 2. The schemas are rendered using the TransactionForm component
+ * 3. TransactionForm uses DynamicFormField to render appropriate field components based on the schema
+ *
+ * The field components (TextField, NumberField, AddressField, etc.) are specifically designed
+ * for React Hook Form integration and should not be used as standalone components.
+ *
+ * @returns The rendered form field component or null if the field should not be visible
  */
 export function DynamicFormField({
   field,
@@ -86,23 +115,26 @@ export function DynamicFormField({
     return null;
   }
 
-  // For now, we only support text fields
-  // Add more field types as needed
-  switch (field.type) {
-    case 'text':
-      return (
-        <TextField
-          id={field.id}
-          label={field.label}
-          placeholder={field.placeholder}
-          helperText={field.helperText}
-          width={field.width}
-          control={control}
-          name={field.name}
-        />
-      );
-    default:
-      console.warn(`No component registered for field type: ${field.type}`);
-      return null;
+  // Get the appropriate component for this field type from the registry
+  const FieldComponent = fieldComponents[field.type];
+
+  // If no component is registered for this field type, log a warning and return null
+  if (!FieldComponent) {
+    console.warn(`No component registered for field type: ${field.type}`);
+    return null;
   }
+
+  // Pass all necessary props directly to the field component
+  // Each specific field component knows how to handle its own props based on field type
+  return (
+    <FieldComponent
+      id={field.id}
+      label={field.label}
+      placeholder={field.placeholder}
+      helperText={field.helperText}
+      width={field.width}
+      control={control}
+      name={field.name}
+    />
+  );
 }

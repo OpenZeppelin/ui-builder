@@ -46,6 +46,25 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
 
 /**
  * BaseField component to provide a consistent layout for form fields
+ *
+ * @important This component is the foundation of the form rendering architecture and should
+ * ONLY be used by field-specific components within the system, not as a standalone component.
+ *
+ * Architecture role:
+ * 1. Provides a consistent layout structure for all field types
+ * 2. Handles integration with React Hook Form through the FormField component
+ * 3. Manages common rendering aspects like labels, error messages, and help text
+ * 4. Delegates actual input rendering to field-specific components via renderInput
+ *
+ * Field component hierarchy:
+ * - TransactionForm (top-level form renderer)
+ *   - DynamicFormField (field type selector)
+ *     - Specific field components (TextField, NumberField, etc.)
+ *       - BaseField (common field structure - this component)
+ *         - Actual input element rendered by renderInput
+ *
+ * This component should only be extended by field-specific components like
+ * TextField, NumberField, and AddressField - it is not meant for direct use in forms.
  */
 export function BaseField<TFieldValues extends FieldValues = FieldValues>({
   id,

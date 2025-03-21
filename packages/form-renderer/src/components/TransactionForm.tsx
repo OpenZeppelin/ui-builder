@@ -9,7 +9,21 @@ import { DynamicFormField } from './DynamicFormField';
 /**
  * Transaction Form Component
  *
- * Core implementation of the form renderer
+ * This is the main entry point for the form rendering system. It represents the top level of
+ * the form rendering architecture:
+ *
+ * 1. TransactionForm receives a schema and adapter from the transaction form builder
+ * 2. It sets up React Hook Form for state management and validation
+ * 3. It renders fields dynamically using the DynamicFormField component
+ * 4. On submission, it processes data through the adapter before passing to handlers
+ *
+ * This component should be used in two contexts:
+ * - Inside the form builder as a preview of the form being built
+ * - In exported applications as the actual implementation of the form
+ *
+ * The field components (TextField, NumberField, AddressField, etc.) should never be
+ * used directly outside of this system - they are specifically designed for use within
+ * the DynamicFormField → TransactionForm architecture.
  *
  * Current implementation includes:
  * - Integration with React Hook Form for state management ✅
@@ -22,6 +36,7 @@ import { DynamicFormField } from './DynamicFormField';
  * 2. Connect visibility conditions to actual form values using the 'watch' function
  * 3. Complete full test coverage for all form scenarios
  * 4. Add support for complex field types (arrays, nested objects)
+ *
  * @returns The rendered form component
  */
 export function TransactionForm({

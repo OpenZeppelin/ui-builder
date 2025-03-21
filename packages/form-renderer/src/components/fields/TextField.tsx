@@ -37,8 +37,22 @@ export interface TextFieldProps extends BaseFieldProps {
 
 /**
  * Text input field component specifically designed for React Hook Form integration.
- * This component is not meant to be used as a standalone input.
- * It requires the React Hook Form control and properly named field path.
+ *
+ * @important This component is part of the form rendering system architecture and should
+ * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
+ *
+ * Architecture flow:
+ * 1. Form schemas are generated from contract functions using adapters
+ * 2. TransactionForm renders the overall form structure with React Hook Form
+ * 3. DynamicFormField selects the appropriate field component (like TextField) based on field type
+ * 4. BaseField provides consistent layout and hook form integration
+ * 5. This component handles text-specific rendering and validation
+ *
+ * The component includes:
+ * - Integration with React Hook Form
+ * - Text-specific validation (minLength, maxLength, pattern)
+ * - Custom validation support
+ * - Automatic error handling and reporting
  */
 export const TextField = forwardRef(function TextField(
   { minLength, maxLength, validateText, pattern, patternMessage, ...baseProps }: TextFieldProps,
