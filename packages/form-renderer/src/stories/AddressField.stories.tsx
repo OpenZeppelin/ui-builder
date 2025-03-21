@@ -17,8 +17,8 @@ const AddressFieldWrapper = (args: Omit<AddressFieldProps, 'control'>) => {
   );
 };
 
-const meta: Meta<typeof AddressFieldWrapper> = {
-  title: 'Form Renderer/Fields/AddressField',
+const meta: Meta<typeof AddressField> = {
+  title: 'Form Renderer/Components/Fields/AddressField',
   component: AddressFieldWrapper,
   parameters: {
     layout: 'centered',

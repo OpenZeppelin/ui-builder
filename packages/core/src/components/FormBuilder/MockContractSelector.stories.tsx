@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { MockContractSelector } from './MockContractSelector';
 
 const meta: Meta<typeof MockContractSelector> = {
-  title: 'FormBuilder/MockContractSelector',
+  title: 'Core/FormBuilder/MockContractSelector',
   component: MockContractSelector,
   parameters: {
     layout: 'centered',

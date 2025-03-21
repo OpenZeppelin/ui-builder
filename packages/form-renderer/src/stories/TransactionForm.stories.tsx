@@ -111,7 +111,7 @@ const advancedSchema: RenderFormSchema = {
 };
 
 const meta: Meta<typeof TransactionForm> = {
-  title: 'Form Renderer/TransactionForm',
+  title: 'Form Renderer/Components/TransactionForm',
   component: TransactionForm,
   tags: ['autodocs'],
 };

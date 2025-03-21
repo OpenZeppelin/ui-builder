@@ -7,7 +7,7 @@ import { StepChainSelect } from './StepChainSelect';
 import type { ChainType } from '../../core/types/ContractSchema';
 
 const meta: Meta<typeof StepChainSelect> = {
-  title: 'FormBuilder/StepChainSelect',
+  title: 'Core/FormBuilder/StepChainSelect',
   component: StepChainSelect,
   parameters: {
     layout: 'centered',

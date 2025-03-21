@@ -20,7 +20,7 @@ const preview: Preview = {
     options: {
       // Sort stories by package name first, then by component name
       storySort: {
-        order: ['Core', 'Form Renderer'],
+        order: ['Core', 'Form Renderer', 'Styles', 'Templates'],
         method: 'alphabetical',
       },
     },

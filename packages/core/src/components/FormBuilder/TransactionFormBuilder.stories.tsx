@@ -3,7 +3,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { TransactionFormBuilder } from './TransactionFormBuilder';
 
 const meta: Meta<typeof TransactionFormBuilder> = {
-  title: 'FormBuilder/TransactionFormBuilder',
+  title: 'Core/FormBuilder/TransactionFormBuilder',
   component: TransactionFormBuilder,
   parameters: {
     layout: 'fullscreen',

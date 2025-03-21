@@ -17,8 +17,8 @@ const NumberFieldWrapper = (args: Omit<NumberFieldProps, 'control'>) => {
   );
 };
 
-const meta: Meta<typeof NumberFieldWrapper> = {
-  title: 'Form Renderer/Fields/NumberField',
+const meta: Meta<typeof NumberField> = {
+  title: 'Form Renderer/Components/Fields/NumberField',
   component: NumberFieldWrapper,
   parameters: {
     layout: 'centered',

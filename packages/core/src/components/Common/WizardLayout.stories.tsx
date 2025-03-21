@@ -8,7 +8,7 @@ import { Label } from '../ui/label';
 import { WizardLayout, WizardStep } from './WizardLayout';
 
 const meta: Meta<typeof WizardLayout> = {
-  title: 'Common/WizardLayout',
+  title: 'Core/Common/WizardLayout',
   component: WizardLayout,
   parameters: {
     layout: 'fullscreen',

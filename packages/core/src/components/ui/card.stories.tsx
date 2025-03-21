@@ -6,7 +6,7 @@ import { Input } from './input';
 import { Label } from './label';
 
 const meta: Meta<typeof Card> = {
-  title: 'UI/Card',
+  title: 'Core/UI/Card',
   component: Card,
   parameters: {
     layout: 'centered',

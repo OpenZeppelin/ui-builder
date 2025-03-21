@@ -17,8 +17,8 @@ const TextFieldWrapper = (args: Omit<TextFieldProps, 'control'>) => {
   );
 };
 
-const meta: Meta<typeof TextFieldWrapper> = {
-  title: 'Form Renderer/Fields/TextField',
+const meta: Meta<typeof TextField> = {
+  title: 'Form Renderer/Components/Fields/TextField',
   component: TextFieldWrapper,
   parameters: {
     layout: 'centered',

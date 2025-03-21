@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { AddressInput } from './address-input';
 
 const meta: Meta<typeof AddressInput> = {
-  title: 'UI/AddressInput',
+  title: 'Core/UI/AddressInput',
   component: AddressInput,
   tags: ['autodocs'],
   argTypes: {
