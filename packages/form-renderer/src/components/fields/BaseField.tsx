@@ -1,8 +1,10 @@
 import { type ForwardedRef, type ReactElement, type ReactNode } from 'react';
 import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
-import { getWidthClasses } from '../../components/fields/utils';
+import { type FieldValidation } from '../../types/FormTypes';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui';
+
+import { getWidthClasses } from './utils/layout';
 
 /**
  * Base props shared by all field components
@@ -32,6 +34,11 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
    * Field width for layout
    */
   width?: 'full' | 'half' | 'third';
+
+  /**
+   * Validation rules for the field
+   */
+  validation?: FieldValidation;
 
   /**
    * Form control from React Hook Form
@@ -89,8 +96,8 @@ export function BaseField<TFieldValues extends FieldValues = FieldValues>({
         <FormItem className={getWidthClasses(width)}>
           <FormLabel htmlFor={id}>{label}</FormLabel>
           <FormControl>{renderInput(field, { id })}</FormControl>
-          {helperText && <FormDescription>{helperText}</FormDescription>}
-          <FormMessage />
+          {helperText && <FormDescription id={`${id}-description`}>{helperText}</FormDescription>}
+          <FormMessage id={`${id}-error`} />
         </FormItem>
       )}
     />

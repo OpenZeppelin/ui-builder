@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { Checkbox } from '../ui';
 
 import { BaseField, type BaseFieldProps } from './BaseField';
+import { getAccessibilityProps, handleToggleKeys } from './utils/accessibility';
 
 /**
  * BooleanField component properties
@@ -32,9 +33,11 @@ export interface BooleanFieldProps<TFieldValues extends FieldValues = FieldValue
  *
  * The component includes:
  * - Integration with React Hook Form
- * - Boolean-specific validation
- * - Custom validation support
+ * - Checkbox-specific behavior
+ * - Customizable validation through adapter integration
  * - Automatic error handling and reporting
+ * - Full accessibility support with ARIA attributes
+ * - Keyboard navigation with Space/Enter for toggling
  */
 export const BooleanField = forwardRef(function BooleanField<
   TFieldValues extends FieldValues = FieldValues,
@@ -42,46 +45,74 @@ export const BooleanField = forwardRef(function BooleanField<
   { validateBoolean, ...baseProps }: BooleanFieldProps<TFieldValues>,
   ref: ForwardedRef<HTMLButtonElement>
 ): ReactElement {
-  const { setError, clearErrors } = useFormContext();
+  const { setError, clearErrors, formState } = useFormContext();
+  const hasError = !!formState.errors[baseProps.name];
+
+  // Determine if the field is required based on validation rules
+  const isRequired = !!baseProps.validation?.required;
 
   return (
     <BaseField
       {...baseProps}
       renderInput={(field, { id }) => (
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            {...field}
-            ref={ref}
-            id={id}
-            checked={Boolean(field.value)}
-            onCheckedChange={(checked: boolean) => {
-              // Call the original onChange from React Hook Form
-              if (typeof field.onChange === 'function') {
-                field.onChange(checked);
-              }
+        <Checkbox
+          {...field}
+          id={id}
+          ref={ref}
+          checked={!!field.value}
+          // Apply accessibility attributes
+          {...getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!baseProps.helperText,
+          })}
+          onCheckedChange={(checked) => {
+            const value = checked === true;
 
-              // Run custom validation if provided
-              if (validateBoolean) {
-                const validation = validateBoolean(Boolean(checked));
-                if (validation !== true && typeof validation === 'string') {
-                  setError(baseProps.name, {
-                    type: 'custom',
-                    message: validation,
-                  });
-                  return; // Stop validation chain if custom validation fails
-                }
-              }
+            // Call the original onChange from React Hook Form
+            if (typeof field.onChange === 'function') {
+              field.onChange(value);
+            }
 
-              // If we reach here, all validations passed
-              clearErrors(baseProps.name);
-            }}
-            onBlur={() => {
-              if (typeof field.onBlur === 'function') {
-                field.onBlur();
+            // Run custom validation if provided
+            if (validateBoolean) {
+              const validation = validateBoolean(value);
+              if (validation !== true && typeof validation === 'string') {
+                setError(baseProps.name, {
+                  type: 'custom',
+                  message: validation,
+                });
+              } else {
+                clearErrors(baseProps.name);
               }
-            }}
-          />
-        </div>
+            }
+          }}
+          onBlur={() => {
+            if (typeof field.onBlur === 'function') {
+              field.onBlur();
+            }
+          }}
+          // Add keyboard event handling for accessibility
+          onKeyDown={handleToggleKeys((value) => {
+            if (typeof field.onChange === 'function') {
+              field.onChange(value);
+            }
+
+            // Run validation on toggle
+            if (validateBoolean) {
+              const validation = validateBoolean(value);
+              if (validation !== true && typeof validation === 'string') {
+                setError(baseProps.name, {
+                  type: 'custom',
+                  message: validation,
+                });
+              } else {
+                clearErrors(baseProps.name);
+              }
+            }
+          }, !!field.value)}
+        />
       )}
     />
   );

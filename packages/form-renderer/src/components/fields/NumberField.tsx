@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '../ui';
 
 import { BaseField, type BaseFieldProps } from './BaseField';
+import { getAccessibilityProps, handleEscapeKey, handleNumericKeys } from './utils/accessibility';
 
 /**
  * NumberField component properties
@@ -45,16 +46,21 @@ export interface NumberFieldProps extends BaseFieldProps {
  *
  * The component includes:
  * - Integration with React Hook Form
- * - Number-specific validation (min, max, step)
- * - Custom validation support
- * - Type conversion and formatting
+ * - Numeric-specific validations (min, max, step)
+ * - Customizable validation through adapter integration
  * - Automatic error handling and reporting
+ * - Full accessibility support with ARIA attributes
+ * - Keyboard navigation with arrow keys for numeric increment/decrement
  */
 export const NumberField = forwardRef(function NumberField(
-  { min, max, step, validateNumber, ...baseProps }: NumberFieldProps,
+  { validateNumber, min, max, step = 1, ...baseProps }: NumberFieldProps,
   ref: ForwardedRef<HTMLInputElement>
 ): ReactElement {
-  const { setError, clearErrors } = useFormContext();
+  const { setError, clearErrors, formState } = useFormContext();
+  const hasError = !!formState.errors[baseProps.name];
+
+  // Determine if the field is required based on validation rules
+  const isRequired = !!baseProps.validation?.required;
 
   return (
     <BaseField
@@ -62,56 +68,99 @@ export const NumberField = forwardRef(function NumberField(
       renderInput={(field, { id }) => (
         <Input
           {...field}
-          type="number"
           ref={ref}
           id={id}
+          placeholder={baseProps.placeholder}
+          type="number"
           min={min}
           max={max}
           step={step}
-          placeholder={baseProps.placeholder}
           data-slot="input"
+          // Apply accessibility attributes
+          {...getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!baseProps.helperText,
+          })}
           onChange={(e) => {
-            const value = e.target.value === '' ? '' : Number(e.target.value);
+            const rawValue = e.target.value;
+            const value = rawValue ? parseFloat(rawValue) : null;
 
             // Call the original onChange from React Hook Form
             if (typeof field.onChange === 'function') {
               field.onChange(value);
             }
 
-            // Validate input with custom validation if provided
-            if (validateNumber && value !== '' && !isNaN(value)) {
+            // Skip validation if empty (unless required, which is handled by react-hook-form)
+            if (rawValue === '') {
+              clearErrors(baseProps.name);
+              return;
+            }
+
+            // Run custom validation if provided
+            if (validateNumber && value !== null) {
               const validation = validateNumber(value);
               if (validation !== true && typeof validation === 'string') {
                 setError(baseProps.name, {
                   type: 'custom',
                   message: validation,
                 });
-              } else {
-                clearErrors(baseProps.name);
+                return; // Stop validation chain if custom validation fails
               }
             }
 
-            // Check min/max constraints
-            if (value !== '' && !isNaN(value)) {
-              if (min !== undefined && value < min) {
-                setError(baseProps.name, {
-                  type: 'min',
-                  message: `Value must be at least ${min}`,
-                });
-              } else if (max !== undefined && value > max) {
-                setError(baseProps.name, {
-                  type: 'max',
-                  message: `Value must be at most ${max}`,
-                });
-              } else {
-                // Clear errors if validation passes
-                clearErrors(baseProps.name);
-              }
+            // Validate min if provided
+            if (typeof min === 'number' && value !== null && value < min) {
+              setError(baseProps.name, {
+                type: 'min',
+                message: `Must be at least ${min}`,
+              });
+              return;
             }
+
+            // Validate max if provided
+            if (typeof max === 'number' && value !== null && value > max) {
+              setError(baseProps.name, {
+                type: 'max',
+                message: `Cannot exceed ${max}`,
+              });
+              return;
+            }
+
+            // If we reach here, all validations passed
+            clearErrors(baseProps.name);
           }}
           onBlur={() => {
             if (typeof field.onBlur === 'function') {
               field.onBlur();
+            }
+          }}
+          // Add keyboard event handlers for accessibility
+          onKeyDown={(e) => {
+            // Handle Escape key to clear input
+            if (e.key === 'Escape') {
+              handleEscapeKey((value) => {
+                if (typeof field.onChange === 'function') {
+                  field.onChange(value === '' ? null : value);
+                }
+              }, field.value)(e);
+              return;
+            }
+
+            // Handle arrow keys for increment/decrement
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+              handleNumericKeys(
+                (newValue) => {
+                  if (typeof field.onChange === 'function') {
+                    field.onChange(newValue);
+                  }
+                },
+                typeof field.value === 'number' ? field.value : 0,
+                step,
+                min,
+                max
+              )(e);
             }
           }}
         />

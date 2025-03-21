@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '../ui';
 
 import { BaseField, type BaseFieldProps } from './BaseField';
+import { getAccessibilityProps, handleEscapeKey } from './utils/accessibility';
 
 /**
  * TextField component properties
@@ -50,15 +51,21 @@ export interface TextFieldProps extends BaseFieldProps {
  *
  * The component includes:
  * - Integration with React Hook Form
- * - Text-specific validation (minLength, maxLength, pattern)
- * - Custom validation support
+ * - Text-specific validations (minLength, maxLength, pattern)
+ * - Customizable validation through adapter integration
  * - Automatic error handling and reporting
+ * - Full accessibility support with ARIA attributes
+ * - Keyboard navigation
  */
 export const TextField = forwardRef(function TextField(
-  { minLength, maxLength, validateText, pattern, patternMessage, ...baseProps }: TextFieldProps,
+  { validateText, minLength, maxLength, pattern, patternMessage, ...baseProps }: TextFieldProps,
   ref: ForwardedRef<HTMLInputElement>
 ): ReactElement {
-  const { setError, clearErrors } = useFormContext();
+  const { setError, clearErrors, formState } = useFormContext();
+  const hasError = !!formState.errors[baseProps.name];
+
+  // Determine if the field is required based on validation rules
+  const isRequired = !!baseProps.validation?.required;
 
   return (
     <BaseField
@@ -69,9 +76,14 @@ export const TextField = forwardRef(function TextField(
           ref={ref}
           id={id}
           placeholder={baseProps.placeholder}
-          minLength={minLength}
-          maxLength={maxLength}
           data-slot="input"
+          // Apply accessibility attributes
+          {...getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!baseProps.helperText,
+          })}
           onChange={(e) => {
             const value = e.target.value;
 
@@ -92,8 +104,8 @@ export const TextField = forwardRef(function TextField(
               }
             }
 
-            // Check minLength constraint
-            if (minLength && value.length < minLength) {
+            // Validate minLength if provided
+            if (minLength && value && value.length < minLength) {
               setError(baseProps.name, {
                 type: 'minLength',
                 message: `Must be at least ${minLength} characters`,
@@ -101,8 +113,8 @@ export const TextField = forwardRef(function TextField(
               return;
             }
 
-            // Check maxLength constraint
-            if (maxLength && value.length > maxLength) {
+            // Validate maxLength if provided
+            if (maxLength && value && value.length > maxLength) {
               setError(baseProps.name, {
                 type: 'maxLength',
                 message: `Cannot exceed ${maxLength} characters`,
@@ -110,11 +122,11 @@ export const TextField = forwardRef(function TextField(
               return;
             }
 
-            // Check pattern constraint
-            if (pattern && !pattern.test(value) && value) {
+            // Validate pattern if provided
+            if (pattern && value && !pattern.test(value)) {
               setError(baseProps.name, {
                 type: 'pattern',
-                message: patternMessage || 'Value does not match the required pattern',
+                message: patternMessage || 'Invalid format',
               });
               return;
             }
@@ -127,6 +139,12 @@ export const TextField = forwardRef(function TextField(
               field.onBlur();
             }
           }}
+          // Add keyboard event handling for accessibility
+          onKeyDown={handleEscapeKey((value) => {
+            if (typeof field.onChange === 'function') {
+              field.onChange(value);
+            }
+          }, field.value)}
         />
       )}
     />

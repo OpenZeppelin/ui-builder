@@ -36,6 +36,9 @@ import type { FieldValues } from 'react-hook-form';
 import { InputComponent } from '../ui'; // Import the UI component you need
 
 import { BaseField, type BaseFieldProps } from './BaseField';
+import { getAccessibilityProps } from './utils/accessibility';
+// Import other keyboard handlers as needed, for example:
+// import { handleEscapeKey, handleNumericKeys, handleToggleKeys } from './utils/accessibility';
 
 /**
  * YourNewField component properties
@@ -51,10 +54,25 @@ export interface YourNewFieldProps<TFieldValues extends FieldValues = FieldValue
 }
 
 /**
- * Your custom input field component specifically designed for React Hook Form integration.
+ * Your custom input field component.
  *
  * @important This component is part of the form rendering system architecture and should
  * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
+ *
+ * Architecture flow:
+ * 1. Form schemas are generated from contract functions using adapters
+ * 2. TransactionForm renders the overall form structure with React Hook Form
+ * 3. DynamicFormField selects the appropriate field component based on field type
+ * 4. BaseField provides consistent layout and hook form integration
+ * 5. This component handles field-specific rendering and validation
+ *
+ * The component includes:
+ * - Integration with React Hook Form
+ * - Field-specific validation
+ * - Customizable validation through adapter integration
+ * - Automatic error handling and reporting
+ * - Full accessibility support with ARIA attributes
+ * - Keyboard navigation
  */
 export const YourNewField = forwardRef(function YourNewField<
   TFieldValues extends FieldValues = FieldValues,
@@ -62,7 +80,11 @@ export const YourNewField = forwardRef(function YourNewField<
   { validateCustom, ...baseProps }: YourNewFieldProps<TFieldValues>,
   ref: ForwardedRef<HTMLInputElement> // Adjust the ref type as needed
 ): ReactElement {
-  const { setError, clearErrors } = useFormContext();
+  const { setError, clearErrors, formState } = useFormContext();
+  const hasError = !!formState.errors[baseProps.name];
+
+  // Determine if the field is required based on validation rules
+  const isRequired = !!baseProps.validation?.required;
 
   return (
     <BaseField
@@ -74,6 +96,13 @@ export const YourNewField = forwardRef(function YourNewField<
           id={id}
           placeholder={baseProps.placeholder}
           data-slot="input"
+          // Apply accessibility attributes
+          {...getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!baseProps.helperText,
+          })}
           onChange={(e) => {
             const value = e.target.value; // Adjust based on your input type
 
@@ -103,7 +132,19 @@ export const YourNewField = forwardRef(function YourNewField<
             if (typeof field.onBlur === 'function') {
               field.onBlur();
             }
+
+            // Optional: Run final validation on blur
           }}
+          // Add appropriate keyboard handlers for accessibility
+          // Example for text-like inputs:
+          // onKeyDown={handleEscapeKey(
+          //   (value) => {
+          //     if (typeof field.onChange === 'function') {
+          //       field.onChange(value);
+          //     }
+          //   },
+          //   field.value
+          // )}
         />
       )}
     />
@@ -154,14 +195,92 @@ Implement any field-specific validation logic in your component. Common patterns
 2. **Built-in validation**: Add specific validation for your field type
 3. **Error handling**: Use `setError` and `clearErrors` from `useFormContext`
 
-## Step 6: Test Your Field Component
+## Step 6: Ensure Accessibility
 
-Create tests for your new field component to ensure it works correctly:
+Ensure your field component follows accessibility best practices:
 
-1. Test rendering with different props
-2. Test validation logic
-3. Test integration with form context
-4. Test error handling
+1. Use the `getAccessibilityProps` utility to add ARIA attributes:
+
+```typescript
+{...getAccessibilityProps({
+  id,
+  hasError,
+  isRequired,
+  hasHelperText: !!baseProps.helperText,
+})}
+```
+
+2. Add appropriate keyboard handlers for your field type:
+
+- For text inputs: Use `handleEscapeKey` to clear the input with Escape key
+- For numeric inputs: Use `handleNumericKeys` to increment/decrement with arrow keys
+- For toggle inputs: Use `handleToggleKeys` to toggle with Space/Enter keys
+
+Example:
+
+```typescript
+// For text fields
+onKeyDown={handleEscapeKey(
+  (value) => {
+    if (typeof field.onChange === 'function') {
+      field.onChange(value);
+    }
+  },
+  field.value
+)}
+
+// For numeric fields
+onKeyDown={(e) => {
+  // Handle Escape key
+  if (e.key === 'Escape') {
+    handleEscapeKey(
+      (value) => {
+        if (typeof field.onChange === 'function') {
+          field.onChange(value === '' ? null : value);
+        }
+      },
+      field.value
+    )(e);
+    return;
+  }
+
+  // Handle arrow keys for increment/decrement
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    handleNumericKeys(
+      (newValue) => {
+        if (typeof field.onChange === 'function') {
+          field.onChange(newValue);
+        }
+      },
+      typeof field.value === 'number' ? field.value : 0,
+      step,
+      min,
+      max
+    )(e);
+  }
+}}
+
+// For boolean/toggle fields
+onKeyDown={handleToggleKeys(
+  (value) => {
+    if (typeof field.onChange === 'function') {
+      field.onChange(value);
+    }
+  },
+  !!field.value
+)}
+```
+
+3. Ensure proper focus management for complex fields
+
+## Step 7: Test Your Field Component
+
+Testing your field component is crucial to ensure it integrates properly with the form system:
+
+1. Test with various validation rules
+2. Test error handling and reporting
+3. Test keyboard navigation and accessibility
+4. Test integration with React Hook Form's control and watch functionality
 
 ## Field Component Checklist
 
