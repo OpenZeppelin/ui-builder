@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { TextField } from '@form-renderer/components/fields';
 
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
 import type { ChainType } from '../../core/types/ContractSchema';
@@ -21,9 +23,17 @@ export function StepExport({
   onExport,
 }: StepExportProps) {
   const [exportType, setExportType] = useState<'npm' | 'standalone'>('standalone');
-  const [packageName, setPackageName] = useState('my-transaction-form');
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
+
+  const { control, watch } = useForm({
+    defaultValues: {
+      packageName: 'my-transaction-form',
+    },
+  });
+
+  // Get current package name value from form
+  const packageName = watch('packageName');
 
   const handleExport = () => {
     setExporting(true);
@@ -108,18 +118,13 @@ export function StepExport({
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="package-name" className="text-sm font-medium">
-              Package Name
-            </Label>
-            <Input
-              id="package-name"
-              type="text"
-              placeholder="my-transaction-form"
-              value={packageName}
-              onChange={(e) => setPackageName(e.target.value)}
-            />
-          </div>
+          <TextField
+            id="package-name"
+            name="packageName"
+            label="Package Name"
+            placeholder="my-transaction-form"
+            control={control}
+          />
         </div>
 
         {/* Export Button */}

@@ -1,9 +1,10 @@
+import { useForm } from 'react-hook-form';
+
 import { Meta, StoryObj } from '@storybook/react';
 
+import { BooleanField, TextField } from '@form-renderer/components/fields';
+
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Checkbox } from '../ui/checkbox';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 
 import { WizardLayout, WizardStep } from './WizardLayout';
 
@@ -20,42 +21,47 @@ export default meta;
 type Story = StoryObj<typeof WizardLayout>;
 
 // Mock step components
-const Step1 = () => (
-  <div className="space-y-4">
-    <p className="text-muted-foreground">
-      Welcome to the wizard! Please fill out the following steps to complete the process.
-    </p>
-    <div className="flex items-center space-x-2">
-      <Checkbox id="terms" />
-      <Label
-        htmlFor="terms"
-        className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        I accept the terms and conditions
-      </Label>
-    </div>
-  </div>
-);
+const Step1 = () => {
+  const { control } = useForm({
+    defaultValues: {
+      terms: false,
+    },
+  });
 
-const Step2 = () => (
-  <div className="space-y-4">
-    <p className="text-muted-foreground">Please enter your personal information.</p>
-    <div className="grid gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="name" className="text-sm font-medium">
-          Name
-        </Label>
-        <Input id="name" placeholder="Enter your name" />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="email" className="text-sm font-medium">
-          Email
-        </Label>
-        <Input id="email" type="email" placeholder="Enter your email" />
+  return (
+    <div className="space-y-4">
+      <p className="text-muted-foreground">
+        Welcome to the wizard! Please fill out the following steps to complete the process.
+      </p>
+      <BooleanField control={control} name="terms" label="I accept the terms and conditions" />
+    </div>
+  );
+};
+
+const Step2 = () => {
+  const { control } = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <p className="text-muted-foreground">Please enter your personal information.</p>
+      <div className="grid gap-4">
+        <TextField control={control} name="name" label="Name" placeholder="Enter your name" />
+        <TextField
+          control={control}
+          name="email"
+          label="Email"
+          type="email"
+          placeholder="Enter your email"
+        />
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Step3 = () => (
   <div className="space-y-4">
@@ -83,37 +89,37 @@ const Step3 = () => (
   </div>
 );
 
-const Step4 = () => (
-  <div className="space-y-4">
-    <p className="text-muted-foreground">Review and confirm your information.</p>
-    <div className="bg-muted rounded-md p-4">
-      <h3 className="mb-2 font-medium">Order Summary</h3>
-      <div className="grid gap-2 text-sm">
-        <div className="flex justify-between">
-          <span>Plan:</span>
-          <span>Basic Plan</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Price:</span>
-          <span>$9.99/month</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Billing:</span>
-          <span>Monthly</span>
+const Step4 = () => {
+  const { control } = useForm({
+    defaultValues: {
+      confirm: false,
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <p className="text-muted-foreground">Review and confirm your information.</p>
+      <div className="bg-muted rounded-md p-4">
+        <h3 className="mb-2 font-medium">Order Summary</h3>
+        <div className="grid gap-2 text-sm">
+          <div className="flex justify-between">
+            <span>Plan:</span>
+            <span>Basic Plan</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Price:</span>
+            <span>$9.99/month</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Billing:</span>
+            <span>Monthly</span>
+          </div>
         </div>
       </div>
+      <BooleanField control={control} name="confirm" label="I confirm all information is correct" />
     </div>
-    <div className="flex items-center space-x-2">
-      <Checkbox id="confirm" />
-      <Label
-        htmlFor="confirm"
-        className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        I confirm all information is correct
-      </Label>
-    </div>
-  </div>
-);
+  );
+};
 
 const steps: WizardStep[] = [
   {

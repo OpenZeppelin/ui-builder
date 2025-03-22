@@ -1,73 +1,24 @@
 import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import { Control, FieldValues, useForm } from 'react-hook-form';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 
-import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
+import {
+  AddressField,
+  AmountField,
+  BooleanField,
+  NumberField,
+  SelectField,
+  type SelectOption,
+  TextAreaField,
+  TextField,
+} from '@form-renderer/components/fields';
 
-import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
-import { Checkbox } from '../../ui/checkbox';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import { Textarea } from '../../ui/textarea';
 
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-
-// Helper function to render different field types
-function renderField(
-  field: FormFieldType,
-  index: number,
-  selectControl: Control<FieldValues>
-): React.ReactNode {
-  const fieldId = `field-${index}`;
-
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'number':
-      return (
-        <Input
-          id={fieldId}
-          placeholder={field.placeholder}
-          disabled={true}
-          type={field.type === 'number' ? 'number' : 'text'}
-        />
-      );
-    case 'textarea':
-      return <Textarea id={fieldId} placeholder={field.placeholder} disabled={true} />;
-    case 'checkbox':
-      return (
-        <div className="flex items-center space-x-2">
-          <Checkbox id={fieldId} disabled={true} />
-          <Label htmlFor={fieldId}>{field.label}</Label>
-        </div>
-      );
-    case 'select':
-      // Create options array for SelectField
-      const selectOptions: SelectOption[] =
-        field.options?.map((option) => ({
-          value: option.value,
-          label: option.label,
-        })) || [];
-
-      return (
-        <SelectField
-          id={fieldId}
-          name={`previewSelect-${index}`}
-          label=""
-          placeholder={field.placeholder || 'Select an option'}
-          control={selectControl}
-          options={selectOptions}
-        />
-      );
-    case 'address':
-      return <AddressInput id={fieldId} placeholder={field.placeholder} disabled={true} />;
-    default:
-      return <Input id={fieldId} placeholder={field.placeholder} disabled={true} />;
-  }
-}
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
@@ -76,7 +27,154 @@ interface FormPreviewProps {
 }
 
 export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
-  const { control } = useForm();
+  // Set up form with default values for preview
+  const { control } = useForm({
+    defaultValues: formConfig.fields.reduce(
+      (acc, field, index) => {
+        acc[`preview-field-${index}`] = '';
+        return acc;
+      },
+      {} as Record<string, string | boolean>
+    ),
+  });
+
+  // Helper function to render different field types
+  const renderField = (field: FormFieldType, index: number): React.ReactNode => {
+    const fieldId = `field-${index}`;
+    const fieldName = `preview-field-${index}`;
+    const fieldLabel = formConfig.layout.labelPosition === 'hidden' ? '' : field.label;
+
+    switch (field.type) {
+      case 'text':
+      case 'email':
+        return (
+          <TextField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'number':
+        return (
+          <NumberField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'textarea':
+        return (
+          <TextAreaField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'checkbox':
+        return (
+          <BooleanField
+            id={fieldId}
+            name={fieldName}
+            label={field.label}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'select':
+        // Create options array for SelectField
+        const selectOptions: SelectOption[] =
+          field.options?.map((option) => ({
+            value: option.value,
+            label: option.label,
+          })) || [];
+
+        return (
+          <SelectField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder || 'Select an option'}
+            control={control}
+            options={selectOptions}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'address':
+        return (
+          <AddressField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      case 'amount':
+        return (
+          <AmountField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+      default:
+        return (
+          <TextField
+            id={fieldId}
+            name={fieldName}
+            label={fieldLabel}
+            placeholder={field.placeholder}
+            control={control}
+            validation={{
+              required: field.validation?.required,
+            }}
+            helperText={field.helperText}
+            width={field.width}
+          />
+        );
+    }
+  };
 
   return (
     <Card>
@@ -98,29 +196,7 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
           } grid-cols-${formConfig.layout.columns}`}
         >
           {formConfig.fields.map((field, index) => (
-            <div
-              key={index}
-              className={`${
-                field.width === 'full'
-                  ? 'col-span-full'
-                  : field.width === 'half'
-                    ? 'col-span-1 md:col-span-1'
-                    : 'col-span-1'
-              }`}
-            >
-              <div className="flex flex-col gap-2">
-                {formConfig.layout.labelPosition !== 'hidden' && (
-                  <Label htmlFor={`field-${index}`}>
-                    {field.label}
-                    {field.validation?.required && <span className="text-destructive ml-1">*</span>}
-                  </Label>
-                )}
-                {renderField(field, index, control)}
-                {field.helperText && (
-                  <p className="text-muted-foreground text-sm">{field.helperText}</p>
-                )}
-              </div>
-            </div>
+            <React.Fragment key={index}>{renderField(field, index)}</React.Fragment>
           ))}
         </div>
 

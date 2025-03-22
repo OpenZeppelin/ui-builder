@@ -1,13 +1,15 @@
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
+import React from 'react';
 import { useForm } from 'react-hook-form';
 
-import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
-
-import { Checkbox } from '../../ui/checkbox';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import { Textarea } from '../../ui/textarea';
+import {
+  BooleanField,
+  SelectField,
+  type SelectOption,
+  TextAreaField,
+  TextField,
+} from '@form-renderer/components/fields';
 
 interface FieldEditorProps {
   field: FormFieldType;
@@ -15,12 +17,38 @@ interface FieldEditorProps {
 }
 
 export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
-  const { control } = useForm({
+  const { control, watch } = useForm({
     defaultValues: {
       fieldType: field.type,
       fieldWidth: field.width || 'full',
+      fieldLabel: field.label || '',
+      fieldPlaceholder: field.placeholder || '',
+      fieldDescription: field.helperText || '',
+      fieldRequired: field.validation?.required || false,
     },
   });
+
+  // Watch for changes and update the field
+  React.useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'fieldLabel') {
+        onUpdate({ label: value.fieldLabel });
+      } else if (name === 'fieldPlaceholder') {
+        onUpdate({ placeholder: value.fieldPlaceholder });
+      } else if (name === 'fieldDescription') {
+        onUpdate({ helperText: value.fieldDescription });
+      } else if (name === 'fieldRequired') {
+        onUpdate({
+          validation: {
+            ...field.validation,
+            required: !!value.fieldRequired,
+          },
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, onUpdate, field.validation]);
 
   // Field type options
   const fieldTypeOptions: SelectOption[] = [
@@ -43,82 +71,63 @@ export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="field-label">Field Label</Label>
-          <Input
-            id="field-label"
-            value={field.label || ''}
-            onChange={(e) => onUpdate({ label: e.target.value })}
-            placeholder="Enter field label"
-          />
-        </div>
+        <TextField
+          id="field-label"
+          name="fieldLabel"
+          label="Field Label"
+          control={control}
+          placeholder="Enter field label"
+        />
 
-        <div className="space-y-2">
-          <SelectField
-            id="field-type"
-            name="fieldType"
-            label="Field Type"
-            control={control}
-            options={fieldTypeOptions}
-            placeholder="Select field type"
-            validateSelect={(value) => {
-              onUpdate({ type: value as FieldType });
-              return true;
-            }}
-          />
-        </div>
+        <SelectField
+          id="field-type"
+          name="fieldType"
+          label="Field Type"
+          control={control}
+          options={fieldTypeOptions}
+          placeholder="Select field type"
+          validateSelect={(value) => {
+            onUpdate({ type: value as FieldType });
+            return true;
+          }}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="field-placeholder">Placeholder Text</Label>
-          <Input
-            id="field-placeholder"
-            value={field.placeholder || ''}
-            onChange={(e) => onUpdate({ placeholder: e.target.value })}
-            placeholder="Enter placeholder text"
-          />
-        </div>
+        <TextField
+          id="field-placeholder"
+          name="fieldPlaceholder"
+          label="Placeholder Text"
+          control={control}
+          placeholder="Enter placeholder text"
+        />
 
-        <div className="space-y-2">
-          <SelectField
-            id="field-width"
-            name="fieldWidth"
-            label="Field Width"
-            control={control}
-            options={fieldWidthOptions}
-            placeholder="Select field width"
-            validateSelect={(value) => {
-              onUpdate({ width: value as 'full' | 'half' | 'third' });
-              return true;
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="field-description">Field Description</Label>
-        <Textarea
-          id="field-description"
-          value={field.helperText || ''}
-          onChange={(e) => onUpdate({ helperText: e.target.value })}
-          placeholder="Enter field description or instructions"
+        <SelectField
+          id="field-width"
+          name="fieldWidth"
+          label="Field Width"
+          control={control}
+          options={fieldWidthOptions}
+          placeholder="Select field width"
+          validateSelect={(value) => {
+            onUpdate({ width: value as 'full' | 'half' | 'third' });
+            return true;
+          }}
         />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="field-required"
-          checked={field.validation?.required || false}
-          onCheckedChange={(checked) =>
-            onUpdate({
-              validation: {
-                ...field.validation,
-                required: !!checked,
-              },
-            })
-          }
-        />
-        <Label htmlFor="field-required">Required Field</Label>
-      </div>
+      <TextAreaField
+        id="field-description"
+        name="fieldDescription"
+        label="Field Description"
+        control={control}
+        placeholder="Enter field description or instructions"
+      />
+
+      <BooleanField
+        id="field-required"
+        name="fieldRequired"
+        label="Required Field"
+        control={control}
+      />
     </div>
   );
 }
