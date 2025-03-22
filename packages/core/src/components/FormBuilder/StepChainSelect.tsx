@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+// Import SelectField instead of basic Select components
+import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import { getChainName } from '../../core/utils/utils';
-// UI components
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 import type { ChainType } from '../../core/types/ContractSchema';
 
@@ -13,6 +15,21 @@ interface StepChainSelectProps {
 
 export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepChainSelectProps) {
   const [selectedChain, setSelectedChain] = useState<ChainType>(initialChain);
+
+  // Set up react-hook-form
+  const { control } = useForm({
+    defaultValues: {
+      blockchain: initialChain,
+    },
+  });
+
+  // Create options array for the SelectField
+  const blockchainOptions: SelectOption[] = [
+    { value: 'evm', label: 'Ethereum (EVM)' },
+    { value: 'midnight', label: 'Midnight' },
+    { value: 'stellar', label: 'Stellar' },
+    { value: 'solana', label: 'Solana' },
+  ];
 
   const handleChainChange = (value: ChainType) => {
     setSelectedChain(value);
@@ -29,17 +46,20 @@ export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepCha
       </div>
 
       <div className="space-y-4">
-        <Select value={selectedChain} onValueChange={handleChainChange as (value: string) => void}>
-          <SelectTrigger className="w-full max-w-md">
-            <SelectValue placeholder="Select a blockchain" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="evm">Ethereum (EVM)</SelectItem>
-            <SelectItem value="midnight">Midnight</SelectItem>
-            <SelectItem value="stellar">Stellar</SelectItem>
-            <SelectItem value="solana">Solana</SelectItem>
-          </SelectContent>
-        </Select>
+        <SelectField
+          id="blockchain-select"
+          name="blockchain"
+          label=""
+          width="third"
+          placeholder="Select a blockchain"
+          control={control}
+          options={blockchainOptions}
+          validateSelect={(value) => {
+            // Use the selected value to update state
+            handleChainChange(value as ChainType);
+            return true;
+          }}
+        />
 
         <div className="bg-muted mt-6 rounded-md p-4">
           <h4 className="mb-2 font-medium">About {getChainName(selectedChain)}</h4>

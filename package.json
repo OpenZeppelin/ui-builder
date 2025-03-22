@@ -10,7 +10,10 @@
   },
   "scripts": {
     "clean": "pnpm -r clean",
+    "generate-data-slots": "node packages/styles/scripts/generate-data-slots.js",
+    "predev": "pnpm generate-data-slots",
     "dev": "pnpm --filter=@openzeppelin/transaction-form-builder-core dev",
+    "prebuild": "pnpm generate-data-slots",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",

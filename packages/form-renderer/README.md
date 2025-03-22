@@ -70,6 +70,57 @@ function App() {
 }
 ```
 
+## Component Styling with data-slot
+
+This package uses a data-slot pattern for consistent styling across the monorepo. When creating or modifying UI components:
+
+### Using data-slot Attributes
+
+1. Add `data-slot` attributes to key elements in your components:
+
+```tsx
+<div
+  data-slot="dropdown"
+  className="bg-background relative flex items-center rounded-md border text-sm"
+>
+  <select
+    data-slot="dropdown-select"
+    className="w-full appearance-none bg-transparent px-3 py-2 pr-8"
+  >
+    {options.map((option) => (
+      <option key={option.value} value={option.value}>
+        {option.label}
+      </option>
+    ))}
+  </select>
+  <div data-slot="dropdown-indicator" className="pointer-events-none absolute right-3">
+    {/* Icon */}
+  </div>
+</div>
+```
+
+2. The style generator will automatically extract these Tailwind classes and create CSS rules with `@apply` directives.
+
+### Benefits
+
+- **Cross-package styling**: Components imported from this package into other packages maintain their styling
+- **Purge-safe**: Styles are extracted and centralized, avoiding Tailwind's purging issues
+- **Maintainable**: Changes to component styles are automatically reflected throughout the application
+- **Consistent**: All component styles follow the same pattern
+
+### Important data-slots
+
+The most important data-slots to be aware of:
+
+- `dropdown`, `dropdown-select`, `dropdown-indicator` - Used for select fields
+- `card`, `card-header`, `card-title`, `card-description`, `card-content`, `card-footer` - Used for card components
+- `checkbox`, `checkbox-indicator` - Used for checkbox fields
+- `radio-group`, `radio-item`, `radio-indicator` - Used for radio groups
+- `dialog`, `dialog-content`, `dialog-header`, `dialog-footer` - Used for dialogs/modals
+- `input` - Used for text inputs
+
+For a complete list of available data-slots, see the auto-generated CSS file in the styles package.
+
 ## API Reference
 
 ### `<TransactionForm>`

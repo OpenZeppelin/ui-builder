@@ -1,12 +1,19 @@
 import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@form-renderer/components/ui/select';
+
 import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Textarea } from '../../ui/textarea';
 
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';

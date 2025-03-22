@@ -51,10 +51,7 @@ export const WithLabel: Story = {
   render: () => (
     <div className="flex items-center space-x-2">
       <Checkbox id="terms" />
-      <Label
-        htmlFor="terms"
-        className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
+      <Label htmlFor="terms" className="text-sm leading-none font-medium">
         Accept terms and conditions
       </Label>
     </div>
@@ -66,28 +63,19 @@ export const CheckboxGroup: Story = {
     <div className="grid gap-2">
       <div className="flex items-center space-x-2">
         <Checkbox id="option-1" defaultChecked />
-        <Label
-          htmlFor="option-1"
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
+        <Label htmlFor="option-1" className="text-sm leading-none font-medium">
           Option 1
         </Label>
       </div>
       <div className="flex items-center space-x-2">
         <Checkbox id="option-2" />
-        <Label
-          htmlFor="option-2"
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
+        <Label htmlFor="option-2" className="text-sm leading-none font-medium">
           Option 2
         </Label>
       </div>
       <div className="flex items-center space-x-2">
         <Checkbox id="option-3" disabled />
-        <Label
-          htmlFor="option-3"
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
+        <Label htmlFor="option-3" className="text-sm leading-none font-medium">
           Option 3 (Disabled)
         </Label>
       </div>

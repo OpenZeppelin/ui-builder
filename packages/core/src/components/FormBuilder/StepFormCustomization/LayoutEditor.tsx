@@ -1,5 +1,12 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@form-renderer/components/ui/select';
+
 import { Label } from '../../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
