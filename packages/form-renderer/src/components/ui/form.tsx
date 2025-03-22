@@ -97,7 +97,7 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn('flex flex-col gap-2', className)} {...props} />
+        <div ref={ref} data-slot="form-item" className={className} {...props} />
       </FormItemContext.Provider>
     );
   }
@@ -107,21 +107,20 @@ FormItem.displayName = 'FormItem';
 /**
  * Form label component
  */
-const FormLabel = React.forwardRef<
-  React.ElementRef<typeof Label>,
-  React.ComponentPropsWithoutRef<typeof Label>
->(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
+const FormLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<typeof Label>>(
+  ({ className, ...props }, ref) => {
+    const { error, formItemId } = useFormField();
 
-  return (
-    <Label
-      ref={ref}
-      className={cn(error && 'text-destructive', className)}
-      htmlFor={formItemId}
-      {...props}
-    />
-  );
-});
+    return (
+      <Label
+        ref={ref}
+        className={error ? cn('text-destructive', className) : className}
+        htmlFor={formItemId}
+        {...props}
+      />
+    );
+  }
+);
 FormLabel.displayName = 'FormLabel';
 
 /**
@@ -157,7 +156,8 @@ const FormDescription = React.forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-sm', className)}
+      data-slot="form-description"
+      className={className}
       {...props}
     />
   );
@@ -179,12 +179,7 @@ const FormMessage = React.forwardRef<
   }
 
   return (
-    <p
-      ref={ref}
-      id={formMessageId}
-      className={cn('text-destructive text-sm font-medium', className)}
-      {...props}
-    >
+    <p ref={ref} id={formMessageId} data-slot="form-message" className={className} {...props}>
       {body}
     </p>
   );
