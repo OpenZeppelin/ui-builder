@@ -1,12 +1,6 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@form-renderer/components/ui/select';
+import { useForm } from 'react-hook-form';
 
-import { Label } from '../../ui/label';
+import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
@@ -16,67 +10,74 @@ interface LayoutEditorProps {
 }
 
 export function LayoutEditor({ layoutConfig, onUpdate }: LayoutEditorProps) {
+  const { control } = useForm({
+    defaultValues: {
+      columns: String(layoutConfig.columns || '1'),
+      spacing: layoutConfig.spacing || 'normal',
+      labelPosition: layoutConfig.labelPosition || 'top',
+    },
+  });
+
+  // Options for layout configurations
+  const columnsOptions: SelectOption[] = [
+    { value: '1', label: 'Single Column' },
+    { value: '2', label: 'Two Columns' },
+    { value: '3', label: 'Three Columns' },
+  ];
+
+  const spacingOptions: SelectOption[] = [
+    { value: 'compact', label: 'Compact' },
+    { value: 'normal', label: 'Normal' },
+    { value: 'relaxed', label: 'Relaxed' },
+  ];
+
+  const labelPositionOptions: SelectOption[] = [
+    { value: 'top', label: 'Top' },
+    { value: 'left', label: 'Left' },
+    { value: 'hidden', label: 'Hidden' },
+  ];
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="layout-columns">Layout Columns</Label>
-          <Select
-            value={layoutConfig.columns.toString()}
-            onValueChange={(value) => onUpdate({ columns: parseInt(value) })}
-          >
-            <SelectTrigger id="layout-columns">
-              <SelectValue placeholder="Select number of columns" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">Single Column</SelectItem>
-              <SelectItem value="2">Two Columns</SelectItem>
-              <SelectItem value="3">Three Columns</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <SelectField
+          id="layout-columns"
+          name="columns"
+          label="Number of Columns"
+          control={control}
+          options={columnsOptions}
+          placeholder="Select number of columns"
+          validateSelect={(value) => {
+            onUpdate({ columns: parseInt(value, 10) });
+            return true;
+          }}
+        />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="layout-spacing">Field Spacing</Label>
-          <Select
-            value={layoutConfig.spacing}
-            onValueChange={(value) =>
-              onUpdate({
-                spacing: value as BuilderFormConfig['layout']['spacing'],
-              })
-            }
-          >
-            <SelectTrigger id="layout-spacing">
-              <SelectValue placeholder="Select field spacing" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="compact">Compact</SelectItem>
-              <SelectItem value="normal">Normal</SelectItem>
-              <SelectItem value="relaxed">Relaxed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <SelectField
+          id="layout-spacing"
+          name="spacing"
+          label="Field Spacing"
+          control={control}
+          options={spacingOptions}
+          placeholder="Select field spacing"
+          validateSelect={(value) => {
+            onUpdate({ spacing: value as 'compact' | 'normal' | 'relaxed' });
+            return true;
+          }}
+        />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="layout-labels">Label Position</Label>
-          <Select
-            value={layoutConfig.labelPosition}
-            onValueChange={(value) =>
-              onUpdate({
-                labelPosition: value as BuilderFormConfig['layout']['labelPosition'],
-              })
-            }
-          >
-            <SelectTrigger id="layout-labels">
-              <SelectValue placeholder="Select label position" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="top">Top</SelectItem>
-              <SelectItem value="left">Left</SelectItem>
-              <SelectItem value="hidden">Hidden</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <SelectField
+          id="layout-labels"
+          name="labelPosition"
+          label="Label Position"
+          control={control}
+          options={labelPositionOptions}
+          placeholder="Select label position"
+          validateSelect={(value) => {
+            onUpdate({ labelPosition: value as 'top' | 'left' | 'hidden' });
+            return true;
+          }}
+        />
       </div>
     </div>
   );

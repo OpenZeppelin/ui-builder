@@ -1,12 +1,8 @@
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@form-renderer/components/ui/select';
+import { useForm } from 'react-hook-form';
+
+import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
@@ -19,88 +15,104 @@ interface FieldEditorProps {
 }
 
 export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
+  const { control } = useForm({
+    defaultValues: {
+      fieldType: field.type,
+      fieldWidth: field.width || 'full',
+    },
+  });
+
+  // Field type options
+  const fieldTypeOptions: SelectOption[] = [
+    { value: 'text', label: 'Text Input' },
+    { value: 'number', label: 'Number Input' },
+    { value: 'checkbox', label: 'Checkbox' },
+    { value: 'select', label: 'Dropdown Select' },
+    { value: 'textarea', label: 'Text Area' },
+    { value: 'address', label: 'Blockchain Address' },
+    { value: 'amount', label: 'Token Amount' },
+  ];
+
+  // Field width options
+  const fieldWidthOptions: SelectOption[] = [
+    { value: 'full', label: 'Full Width' },
+    { value: 'half', label: 'Half Width' },
+    { value: 'third', label: 'One Third' },
+  ];
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Edit Field</h3>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="field-label">Field Label</Label>
+          <Input
+            id="field-label"
+            value={field.label || ''}
+            onChange={(e) => onUpdate({ label: e.target.value })}
+            placeholder="Enter field label"
+          />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="field-label">Label</Label>
-        <Input
-          id="field-label"
-          value={field.label}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onUpdate({ label: e.target.value })}
-        />
+        <div className="space-y-2">
+          <SelectField
+            id="field-type"
+            name="fieldType"
+            label="Field Type"
+            control={control}
+            options={fieldTypeOptions}
+            placeholder="Select field type"
+            validateSelect={(value) => {
+              onUpdate({ type: value as FieldType });
+              return true;
+            }}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="field-placeholder">Placeholder Text</Label>
+          <Input
+            id="field-placeholder"
+            value={field.placeholder || ''}
+            onChange={(e) => onUpdate({ placeholder: e.target.value })}
+            placeholder="Enter placeholder text"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <SelectField
+            id="field-width"
+            name="fieldWidth"
+            label="Field Width"
+            control={control}
+            options={fieldWidthOptions}
+            placeholder="Select field width"
+            validateSelect={(value) => {
+              onUpdate({ width: value as 'full' | 'half' | 'third' });
+              return true;
+            }}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="field-placeholder">Placeholder</Label>
-        <Input
-          id="field-placeholder"
-          value={field.placeholder || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            onUpdate({ placeholder: e.target.value })
-          }
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="field-help">Help Text</Label>
+      <div className="space-y-2">
+        <Label htmlFor="field-description">Field Description</Label>
         <Textarea
-          id="field-help"
+          id="field-description"
           value={field.helperText || ''}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            onUpdate({ helperText: e.target.value })
-          }
+          onChange={(e) => onUpdate({ helperText: e.target.value })}
+          placeholder="Enter field description or instructions"
         />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="field-type">Field Type</Label>
-        <Select
-          value={field.type}
-          onValueChange={(value) => onUpdate({ type: value as FieldType })}
-        >
-          <SelectTrigger id="field-type">
-            <SelectValue placeholder="Select field type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="text">Text Input</SelectItem>
-            <SelectItem value="number">Number Input</SelectItem>
-            <SelectItem value="checkbox">Checkbox</SelectItem>
-            <SelectItem value="select">Dropdown Select</SelectItem>
-            <SelectItem value="textarea">Text Area</SelectItem>
-            <SelectItem value="address">Blockchain Address</SelectItem>
-            <SelectItem value="amount">Token Amount</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="field-width">Field Width</Label>
-        <Select
-          value={field.width || 'full'}
-          onValueChange={(value) => onUpdate({ width: value as 'full' | 'half' | 'third' })}
-        >
-          <SelectTrigger id="field-width">
-            <SelectValue placeholder="Select field width" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="full">Full Width</SelectItem>
-            <SelectItem value="half">Half Width</SelectItem>
-            <SelectItem value="third">One Third</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="flex items-center space-x-2">
         <Checkbox
           id="field-required"
-          checked={field.validation.required || false}
-          onCheckedChange={(checked: boolean | 'indeterminate') =>
+          checked={field.validation?.required || false}
+          onCheckedChange={(checked) =>
             onUpdate({
               validation: {
                 ...field.validation,
-                required: checked === true,
+                required: !!checked,
               },
             })
           }

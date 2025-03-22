@@ -1,12 +1,6 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@form-renderer/components/ui/select';
+import { useForm } from 'react-hook-form';
 
-import { Label } from '../../ui/label';
+import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
@@ -16,42 +10,54 @@ interface ValidationEditorProps {
 }
 
 export function ValidationEditor({ validationConfig, onUpdate }: ValidationEditorProps) {
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="validation-mode">Validation Mode</Label>
-        <Select
-          value={validationConfig.mode}
-          onValueChange={(value) => onUpdate({ mode: value as 'onChange' | 'onBlur' | 'onSubmit' })}
-        >
-          <SelectTrigger id="validation-mode">
-            <SelectValue placeholder="Select validation mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="onChange">Validate on Change</SelectItem>
-            <SelectItem value="onBlur">Validate on Blur</SelectItem>
-            <SelectItem value="onSubmit">Validate on Submit</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+  const { control } = useForm({
+    defaultValues: {
+      mode: validationConfig.mode || 'onChange',
+      showErrors: validationConfig.showErrors || 'inline',
+    },
+  });
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="validation-display">Error Display</Label>
-        <Select
-          value={validationConfig.showErrors}
-          onValueChange={(value) =>
-            onUpdate({ showErrors: value as 'inline' | 'summary' | 'both' })
-          }
-        >
-          <SelectTrigger id="validation-display">
-            <SelectValue placeholder="Select error display method" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="inline">Show errors inline</SelectItem>
-            <SelectItem value="summary">Show errors in summary</SelectItem>
-            <SelectItem value="both">Show errors in both places</SelectItem>
-          </SelectContent>
-        </Select>
+  // Options for validation configurations
+  const validationModeOptions: SelectOption[] = [
+    { value: 'onChange', label: 'Validate on Change' },
+    { value: 'onBlur', label: 'Validate on Blur' },
+    { value: 'onSubmit', label: 'Validate on Submit' },
+  ];
+
+  const errorDisplayOptions: SelectOption[] = [
+    { value: 'inline', label: 'Inline (Below Fields)' },
+    { value: 'summary', label: 'Summary (Top of Form)' },
+    { value: 'both', label: 'Both Inline and Summary' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <SelectField
+          id="validation-mode"
+          name="mode"
+          label="Validation Mode"
+          control={control}
+          options={validationModeOptions}
+          placeholder="Select validation mode"
+          validateSelect={(value) => {
+            onUpdate({ mode: value as 'onChange' | 'onBlur' | 'onSubmit' });
+            return true;
+          }}
+        />
+
+        <SelectField
+          id="validation-display"
+          name="showErrors"
+          label="Error Display Method"
+          control={control}
+          options={errorDisplayOptions}
+          placeholder="Select error display method"
+          validateSelect={(value) => {
+            onUpdate({ showErrors: value as 'inline' | 'summary' | 'both' });
+            return true;
+          }}
+        />
       </div>
     </div>
   );

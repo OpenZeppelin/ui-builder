@@ -1,12 +1,8 @@
 import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@form-renderer/components/ui/select';
+import { Control, FieldValues, useForm } from 'react-hook-form';
+
+import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import { AddressInput } from '../../ui/address-input';
 import { Button } from '../../ui/button';
@@ -19,6 +15,60 @@ import { Textarea } from '../../ui/textarea';
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
+// Helper function to render different field types
+function renderField(
+  field: FormFieldType,
+  index: number,
+  selectControl: Control<FieldValues>
+): React.ReactNode {
+  const fieldId = `field-${index}`;
+
+  switch (field.type) {
+    case 'text':
+    case 'email':
+    case 'number':
+      return (
+        <Input
+          id={fieldId}
+          placeholder={field.placeholder}
+          disabled={true}
+          type={field.type === 'number' ? 'number' : 'text'}
+        />
+      );
+    case 'textarea':
+      return <Textarea id={fieldId} placeholder={field.placeholder} disabled={true} />;
+    case 'checkbox':
+      return (
+        <div className="flex items-center space-x-2">
+          <Checkbox id={fieldId} disabled={true} />
+          <Label htmlFor={fieldId}>{field.label}</Label>
+        </div>
+      );
+    case 'select':
+      // Create options array for SelectField
+      const selectOptions: SelectOption[] =
+        field.options?.map((option) => ({
+          value: option.value,
+          label: option.label,
+        })) || [];
+
+      return (
+        <SelectField
+          id={fieldId}
+          name={`previewSelect-${index}`}
+          label=""
+          placeholder={field.placeholder || 'Select an option'}
+          control={selectControl}
+          options={selectOptions}
+        />
+      );
+    case 'address':
+      return <AddressInput id={fieldId} placeholder={field.placeholder} disabled={true} />;
+    default:
+      return <Input id={fieldId} placeholder={field.placeholder} disabled={true} />;
+  }
+}
+
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
@@ -26,86 +76,57 @@ interface FormPreviewProps {
 }
 
 export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
-  // Extract the common form properties for rendering
-  const formProperties = formConfig;
+  const { control } = useForm();
 
-  // We're not using useForm() here since this is just a display component
   return (
     <Card>
       <CardContent className="pt-6">
-        <h3 className="mb-4 text-xl font-bold">{functionDetails.displayName}</h3>
-        <form className="space-y-4">
-          <div
-            className={`grid gap-4 ${
-              formProperties.layout.columns === 1
-                ? 'grid-cols-1'
-                : formProperties.layout.columns === 2
-                  ? 'grid-cols-2'
-                  : 'grid-cols-3'
-            }`}
-          >
-            {formProperties.fields.map((field: FormFieldType, index: number) => (
-              <div
-                key={field.id}
-                className={`space-y-2 ${
-                  field.width === 'full'
-                    ? 'col-span-full'
-                    : field.width === 'half'
-                      ? 'col-span-1 sm:col-span-1'
-                      : 'col-span-1'
-                }`}
-              >
-                {field.type !== 'address' && field.type !== 'checkbox' && (
-                  <Label htmlFor={`field-${index}`}>{field.label}</Label>
-                )}
+        <div className="mb-4">
+          <h3 className="mb-1 text-lg font-medium">{functionDetails.name}</h3>
+          <p className="text-muted-foreground text-sm">
+            {functionDetails.description || 'No description available.'}
+          </p>
+        </div>
 
-                {field.type === 'text' && (
-                  <Input id={`field-${index}`} placeholder={field.placeholder} />
+        <div
+          className={`grid gap-${
+            formConfig.layout.spacing === 'compact'
+              ? '4'
+              : formConfig.layout.spacing === 'relaxed'
+                ? '8'
+                : '6'
+          } grid-cols-${formConfig.layout.columns}`}
+        >
+          {formConfig.fields.map((field, index) => (
+            <div
+              key={index}
+              className={`${
+                field.width === 'full'
+                  ? 'col-span-full'
+                  : field.width === 'half'
+                    ? 'col-span-1 md:col-span-1'
+                    : 'col-span-1'
+              }`}
+            >
+              <div className="flex flex-col gap-2">
+                {formConfig.layout.labelPosition !== 'hidden' && (
+                  <Label htmlFor={`field-${index}`}>
+                    {field.label}
+                    {field.validation?.required && <span className="text-destructive ml-1">*</span>}
+                  </Label>
                 )}
-                {field.type === 'number' && (
-                  <Input id={`field-${index}`} type="number" placeholder={field.placeholder} />
-                )}
-                {field.type === 'checkbox' && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id={`field-${index}`} />
-                    <Label htmlFor={`field-${index}`}>{field.placeholder}</Label>
-                  </div>
-                )}
-                {field.type === 'textarea' && (
-                  <Textarea id={`field-${index}`} placeholder={field.placeholder} />
-                )}
-                {field.type === 'select' && (
-                  <Select>
-                    <SelectTrigger id={`field-${index}`}>
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {field.options?.map((option: { label: string; value: string }) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                {field.type === 'address' && (
-                  <AddressInput
-                    id={`field-${index}`}
-                    label={field.label}
-                    placeholder={field.placeholder || 'Enter blockchain address'}
-                    chainType={selectedChain}
-                  />
-                )}
-                {field.helperText && field.type !== 'address' && (
+                {renderField(field, index, control)}
+                {field.helperText && (
                   <p className="text-muted-foreground text-sm">{field.helperText}</p>
                 )}
               </div>
-            ))}
-          </div>
-          <div className="flex justify-end pt-4">
-            <Button type="button">Submit Transaction</Button>
-          </div>
-        </form>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <Button disabled>Submit Transaction</Button>
+        </div>
       </CardContent>
     </Card>
   );
