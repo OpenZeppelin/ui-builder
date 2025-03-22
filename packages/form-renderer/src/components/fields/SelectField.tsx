@@ -65,13 +65,12 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
 
+  // Determine width values
+  const widthPercentage = width === 'full' ? '100%' : width === 'half' ? '50%' : '33.333%';
+  const widthClass = width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3';
+
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-2',
-        width === 'full' ? 'w-full' : width === 'half' ? 'w-full md:w-1/2' : 'w-full md:w-1/3'
-      )}
-    >
+    <div className={cn('flex flex-col gap-2', widthClass)} style={{ width: widthPercentage }}>
       {label && (
         <Label htmlFor={id}>
           {label} {isRequired && <span className="text-destructive">*</span>}
@@ -121,7 +120,13 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
                 <SelectTrigger id={id} {...accessibilityAttrs}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  // Ensure dropdown width matches trigger width
+                  style={{
+                    width: 'var(--radix-select-trigger-width)',
+                    maxWidth: 'var(--radix-select-trigger-width)',
+                  }}
+                >
                   {options.map((option) => (
                     <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
                       {option.label}
