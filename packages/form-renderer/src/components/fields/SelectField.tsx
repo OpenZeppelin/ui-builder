@@ -109,12 +109,16 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
               `${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`.trim(),
           };
 
+          // Ensure we properly handle the onValueChange event
+          const handleValueChange = (newValue: string): void => {
+            field.onChange(newValue);
+          };
+
           return (
             <>
               <Select
                 defaultValue={field.value}
-                onValueChange={field.onChange}
-                {...field}
+                onValueChange={handleValueChange}
                 value={field.value}
               >
                 <SelectTrigger id={id} {...accessibilityAttrs}>
