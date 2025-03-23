@@ -1,48 +1,8 @@
 /* 
   Auto-generated data-slot styles
   This file is generated automatically. DO NOT EDIT DIRECTLY.
-  Generated on: 2025-03-23T13:33:40.111Z
+  Generated on: 2025-03-23T21:17:27.748Z
 */
-
-[data-slot='card'] {
-  @apply bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm;
-}
-
-[data-slot='card-header'] {
-  @apply flex flex-col gap-1.5 px-6;
-}
-
-[data-slot='card-title'] {
-  @apply leading-none font-semibold;
-}
-
-[data-slot='card-description'] {
-  @apply text-muted-foreground text-sm;
-}
-
-[data-slot='card-content'] {
-  @apply px-6;
-}
-
-[data-slot='card-footer'] {
-  @apply flex items-center px-6;
-}
-
-[data-slot='tabs'] {
-  @apply flex flex-col gap-2;
-}
-
-[data-slot='tabs-list'] {
-  @apply bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-1;
-}
-
-[data-slot='tabs-trigger'] {
-  @apply data-[state=active]:bg-background data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
-}
-
-[data-slot='tabs-content'] {
-  @apply flex-1 outline-none;
-}
 
 [data-slot='checkbox'] {
   @apply border-input data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50;
@@ -126,4 +86,44 @@
 
 [data-slot='textarea'] {
   @apply border-input bg-background ring-offset-background focus-visible:ring-ring placeholder:text-muted-foreground aria-invalid:ring-destructive/20 aria-invalid:border-destructive dark:aria-invalid:ring-destructive/40 min-h-16 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+[data-slot='card'] {
+  @apply bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm;
+}
+
+[data-slot='card-header'] {
+  @apply flex flex-col gap-1.5 px-6;
+}
+
+[data-slot='card-title'] {
+  @apply leading-none font-semibold;
+}
+
+[data-slot='card-description'] {
+  @apply text-muted-foreground text-sm;
+}
+
+[data-slot='card-content'] {
+  @apply px-6;
+}
+
+[data-slot='card-footer'] {
+  @apply flex items-center px-6;
+}
+
+[data-slot='tabs'] {
+  @apply flex flex-col gap-2;
+}
+
+[data-slot='tabs-list'] {
+  @apply bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-1;
+}
+
+[data-slot='tabs-trigger'] {
+  @apply data-[state=active]:bg-background data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
+}
+
+[data-slot='tabs-content'] {
+  @apply flex-1 outline-none;
 }

@@ -5,9 +5,34 @@ import { TextField } from '@form-renderer/components/fields';
 import { Button } from '@form-renderer/components/ui/button';
 import { Label } from '@form-renderer/components/ui/label';
 
+import { FormCodeGenerator } from '../../export/generators';
+
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
+/**
+ * StepExport Component
+ *
+ * This component handles the final step in the form building process - exporting
+ * the created form for use in other applications.
+ *
+ * CURRENT IMPLEMENTATION STATUS:
+ * - Basic form component generation is implemented using FormCodeGenerator
+ * - The generated code is logged to the console but not used further
+ *
+ * MISSING IMPLEMENTATION:
+ * - Integration with the templates package (@openzeppelin/transaction-form-builder-templates)
+ * - Creation of complete project based on selected template
+ * - Adding adapter files and dependencies to the export package
+ * - ZIP file generation and download functionality
+ *
+ * TODO:
+ * 1. Create a TemplateManager class to interact with template files
+ * 2. Implement AdapterExportManager to include required adapter files
+ * 3. Add PackageManager to handle dependencies in package.json
+ * 4. Create ZipGenerator for bundling the exported project
+ * 5. Implement proper download mechanism
+ */
 export interface StepExportProps {
   selectedChain: ChainType;
   selectedFunction: string | null;
@@ -24,6 +49,7 @@ export function StepExport({
   const [exportType, setExportType] = useState<'npm' | 'standalone'>('standalone');
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState<string>('');
 
   const { control, watch } = useForm({
     defaultValues: {
@@ -34,15 +60,76 @@ export function StepExport({
   // Get current package name value from form
   const packageName = watch('packageName');
 
+  /**
+   * Handle the export process
+   *
+   * CURRENT IMPLEMENTATION:
+   * - Generates form component code using FormCodeGenerator
+   * - Logs the generated code to the console
+   * - Does not create a complete project
+   *
+   * TODO: Complete implementation by:
+   * - Retrieving template files from the templates package
+   * - Replacing placeholder files with generated code
+   * - Adding required adapter files
+   * - Updating package.json with dependencies
+   * - Creating a ZIP file for download
+   */
   const handleExport = () => {
     setExporting(true);
 
-    // Simulate export process
-    setTimeout(() => {
-      onExport();
+    try {
+      // Only proceed if we have a function and form config
+      if (selectedFunction && formConfig) {
+        // Generate the form component code
+        const formCodeGenerator = new FormCodeGenerator();
+        const formCode = formCodeGenerator.generateFormComponent(
+          formConfig,
+          selectedChain,
+          selectedFunction
+        );
+
+        // Store the generated code (in a real implementation, this would be written to a file)
+        setGeneratedCode(formCode);
+
+        // TODO: Integration with templates package
+        // In a complete implementation, we would:
+        // 1. Create a TemplateManager instance to access template files from packages/templates
+        // const templateManager = new TemplateManager();
+        // const templateFiles = await templateManager.getTemplateFiles('typescript-react-vite');
+
+        // 2. Add the adapter files for the selected chain
+        // const adapterManager = new AdapterExportManager();
+        // const adapterFiles = await adapterManager.getAdapterFiles(selectedChain);
+
+        // 3. Update package.json with dependencies
+        // const packageManager = new PackageManager();
+        // packageJson = packageManager.updatePackageJson(templateFiles['package.json'], formConfig, selectedChain);
+
+        // 4. Replace FormPlaceholder.tsx with the generated form component
+        // const exportFiles = {
+        //   ...templateFiles,
+        //   'src/components/GeneratedForm.tsx': formCode,
+        //   ...adapterFiles,
+        //   'package.json': packageJson
+        // };
+
+        // 5. Create a ZIP file for download
+        // const zipBlob = await createZipFile(exportFiles);
+        // triggerDownload(zipBlob, `${packageName}.zip`);
+
+        // For now, just log the generated code to console
+        console.log('Generated Form Component:', formCode);
+
+        // Call the onExport callback to notify parent
+        onExport();
+      }
+    } catch (error) {
+      console.error('Error generating form:', error);
+    } finally {
       setExporting(false);
       setExported(true);
-    }, 2000);
+    }
   };
 
   const hasFunction = selectedFunction !== null;
@@ -156,6 +243,9 @@ export function StepExport({
                       Your transaction form has been successfully exported. The file has been
                       downloaded to your browser&apos;s default download location.
                     </p>
+
+                    {/* In a real implementation, add a download button here */}
+                    {/* TODO: Add proper download functionality using the templates package */}
                   </div>
                   <div className="mt-3">
                     <Button variant="outline" size="sm" onClick={() => setExported(false)}>
@@ -170,11 +260,17 @@ export function StepExport({
 
         {/* Note */}
         <div className="rounded-md border border-dashed p-4">
-          <h4 className="mb-2 text-sm font-medium">Note</h4>
+          <h4 className="mb-2 text-sm font-medium">Implementation Note</h4>
           <p className="text-muted-foreground text-xs">
-            In this proof of concept, we simulate the export process. In a production version, this
-            would generate and bundle the actual form code along with all necessary dependencies for
-            the blockchain interaction.
+            This form code generator uses the package
+            &quot;@openzeppelin/transaction-form-builder-form-renderer&quot; for rendering forms.
+            During development, this package is resolved from the local monorepo workspace, while in
+            production it would use the published npm package.
+          </p>
+          <p className="text-muted-foreground mt-2 text-xs">
+            <strong>TODO:</strong> Complete the export process by integrating with the templates
+            package (@openzeppelin/transaction-form-builder-templates) to create full project
+            exports based on the template files in that package.
           </p>
         </div>
       </div>
