@@ -1,11 +1,10 @@
 @import 'tailwindcss';
+/* Import auto-generated data-slot styles */
+@import './utils/auto-generated-data-slots.css';
 
 @layer theme, base, components, utilities;
 
 @plugin 'tailwindcss-animate';
-
-/* Import auto-generated data-slot styles */
-@import './utils/auto-generated-data-slots.css';
 
 @custom-variant dark (.dark, .dark *);
 
