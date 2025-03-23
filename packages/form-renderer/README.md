@@ -141,59 +141,6 @@ The main component for rendering transaction forms.
 
 ## Development
 
-### Demo Application
-
-The package includes a demo application to showcase and test the form renderer components during development.
-
-#### Running the Demo
-
-```bash
-# Start the demo app in development mode
-pnpm demo:dev
-
-# Build the demo app for production
-pnpm demo:build
-
-# Preview the built demo app
-pnpm demo:preview
-```
-
-The demo app serves as both a development environment and a showcase of the form renderer's capabilities. It demonstrates form rendering with sample form schemas and a mock adapter implementation.
-
-#### Demo Features
-
-- Vite-powered development environment with hot module replacement
-- Tailwind CSS v4 for modern, responsive styling
-- Sample form schemas demonstrating different field types
-- Mock adapter implementation showing how to integrate with blockchain libraries
-- Full TypeScript support
-
-#### Demo App Structure
-
-```
-demo/
-├── index.html           # HTML entry point
-├── vite.config.ts       # Vite configuration
-└── src/
-    ├── App.tsx          # Demo application component
-    ├── index.css        # Imports centralized styling from styles package
-    └── main.tsx         # Application entry point
-```
-
-> Note: The demo app uses the centralized styling system from the `packages/styles` package, with symbolic links to configuration files at the monorepo root.
-
-### Styling
-
-This package uses the centralized styling system from the `packages/styles` package:
-
-- **CSS Variables**: Direct OKLCH color values define the theme colors
-- **Tailwind CSS 4.0**: Modern utility-first CSS with the latest features
-- **Consistent Spacing**: Form components use `gap-2` for label-input spacing and `space-y-4` between fields
-- **Component Library**: Built on shadcn/ui with consistent, accessible components
-- **Dark Mode**: Built-in dark mode support with clear variable handling
-
-For more details on the styling system, see the [Styles README](../styles/README.md).
-
 ### Build System
 
 This package uses a custom build system that generates both ESM and CommonJS output for maximum compatibility.

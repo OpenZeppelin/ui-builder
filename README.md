@@ -203,7 +203,6 @@ transaction-form-builder/
 │   │   │   ├── stories/         # Form renderer specific stories
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
-│   │   ├── demo/                # Demo application for development
 │   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
