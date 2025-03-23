@@ -178,6 +178,10 @@ transaction-form-builder/
 │   │   │   │   ├── solana/      # Solana blockchain adapter
 │   │   │   │   └── stellar/     # Stellar blockchain adapter
 │   │   │   ├── services/        # Core services
+│   │   │   ├── stories/         # Centralized Storybook stories
+│   │   │   │   ├── common/      # Stories for common components
+│   │   │   │   ├── form-builder/# Stories for form builder components
+│   │   │   │   └── ui/          # Stories for UI components
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   ├── mocks/           # Mock data for development and testing
 │   │   │   ├── App.tsx          # Main application component
@@ -196,7 +200,7 @@ transaction-form-builder/
 │   │   │   ├── hooks/           # Form rendering hooks
 │   │   │   ├── types/           # Type definitions
 │   │   │   ├── utils/           # Utility functions
-│   │   │   ├── stories/         # Storybook stories
+│   │   │   ├── stories/         # Form renderer specific stories
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
 │   │   ├── demo/                # Demo application for development

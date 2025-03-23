@@ -23,6 +23,10 @@ core/
 │   │   ├── solana/   # Solana blockchain adapter
 │   │   └── stellar/  # Stellar blockchain adapter
 │   ├── services/     # Core services
+│   ├── stories/      # Centralized Storybook stories
+│   │   ├── common/   # Stories for common components
+│   │   ├── form-builder/ # Stories for form builder components
+│   │   └── ui/       # Stories for UI components
 │   ├── test/         # Test setup and utilities
 │   ├── mocks/        # Mock data for development and testing
 │   ├── App.tsx       # Main application component
