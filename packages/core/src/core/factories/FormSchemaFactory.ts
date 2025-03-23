@@ -15,6 +15,7 @@ import {
 } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../adapters';
+import { BuilderFormConfig } from '../types/FormTypes';
 // Uncomment when needed: import { BuilderFormConfig } from '../types/FormTypes';
 import { createTransformForFieldType } from '../utils/transforms';
 import { humanizeString } from '../utils/utils';
@@ -69,7 +70,36 @@ export class FormSchemaFactory {
       submitButton: {
         text: `Execute ${functionDefinition.displayName || functionDefinition.name}`,
         loadingText: 'Processing...',
+        variant: 'primary' as const,
       },
+    };
+  }
+
+  /**
+   * Converts a BuilderFormConfig to a RenderFormSchema
+   * This is useful for previewing a form in the builder
+   *
+   * @param builderConfig The BuilderFormConfig created in the form builder
+   * @param functionName The name of the function (for title and button text)
+   * @param functionDescription Optional description for the form
+   * @returns A complete RenderFormSchema for rendering
+   */
+  builderConfigToRenderSchema(
+    builderConfig: BuilderFormConfig,
+    functionName: string,
+    functionDescription?: string
+  ): RenderFormSchema {
+    return {
+      ...builderConfig,
+      id: `form-${builderConfig.functionId}`,
+      title: this.humanizeString(functionName),
+      description: functionDescription || '',
+      submitButton: {
+        text: `Execute ${functionName}`,
+        loadingText: 'Processing...',
+        variant: 'primary' as const,
+      },
+      defaultValues: {},
     };
   }
 
