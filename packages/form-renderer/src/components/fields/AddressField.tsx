@@ -14,17 +14,6 @@ import {
 } from './utils';
 
 /**
- * AddressField component properties
- */
-export interface AddressFieldProps<TFieldValues extends FieldValues = FieldValues>
-  extends BaseFieldProps<TFieldValues> {
-  /**
-   * Custom validation function for address format
-   */
-  validateAddress?: (address: string) => boolean | string;
-}
-
-/**
  * Address input field component specifically designed for blockchain addresses via React Hook Form integration.
  *
  * @important This component is part of the form rendering system architecture and should
@@ -39,8 +28,7 @@ export interface AddressFieldProps<TFieldValues extends FieldValues = FieldValue
  *
  * The component includes:
  * - Integration with React Hook Form
- * - Blockchain address validation
- * - Customizable validation through adapter integration
+ * - Blockchain address validation through adapter-provided custom validation
  * - Automatic error handling and reporting
  * - Chain-agnostic design (validation handled by adapters)
  * - Full accessibility support with ARIA attributes
@@ -55,28 +43,10 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
-  validateAddress,
-}: AddressFieldProps<TFieldValues>): React.ReactElement {
+}: BaseFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
-
-  // Function to validate address values
-  const validateAddressValue = (value: string): string | true => {
-    // Run standard validation first
-    const standardValidation = validateField(value, validation);
-    if (standardValidation !== true) return standardValidation as string;
-
-    // Then run custom validator if provided
-    if (validateAddress) {
-      const customValidation = validateAddress(value);
-      if (customValidation !== true && typeof customValidation === 'string') {
-        return customValidation;
-      }
-    }
-
-    return true;
-  };
 
   return (
     <div
@@ -98,9 +68,10 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
               return validation?.required ? 'This field is required' : true;
             }
 
-            // Validate string values
+            // Validate string values using our standard validation logic
+            // This will apply all rules including custom validation from the adapter
             if (typeof value === 'string') {
-              return validateAddressValue(value);
+              return validateField(value, validation);
             }
 
             return true;

@@ -1,25 +1,14 @@
 /**
  * Form Utilities
  *
- * TEMPORARY PLACEHOLDER IMPLEMENTATIONS
- * These functions are placeholders that will be replaced with:
- * 1. Imports from existing utility functions (preferred)
- * 2. Properly aligned implementations that match existing behavior
- * 3. Implementations that integrate with the application's validation system
- *
- * TODO: [CLEANUP] This file contains placeholder implementations that should be:
- * - Either replaced with imports from core utilities
- * - Or made the canonical implementation that core imports from
- * This decision should be made as part of a larger architecture review of the monorepo structure.
+ * Utilities for form field transformations, validation, and more.
+ * These functions handle converting between UI and blockchain data formats.
  */
 
 import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
 
 /**
  * Generate a unique ID for form fields
- *
- * TODO: Replace with or align with the existing generateId utility in the main codebase
- * This is a simplified placeholder implementation
  */
 export function generateId(): string {
   return `field-${Math.random().toString(36).substring(2, 9)}`;
@@ -27,14 +16,6 @@ export function generateId(): string {
 
 /**
  * Validate a field value against validation rules
- *
- * TODO: Replace with proper validation system that integrates with:
- * 1. React Hook Form validators
- * 2. The existing validation patterns in the application
- * 3. Support for all validation scenarios used in the main app
- *
- * This is a simplified placeholder implementation that does not represent
- * the full validation capabilities needed
  */
 export function validateField(
   value: unknown,
@@ -62,10 +43,6 @@ export function validateField(
 
   return null;
 }
-
-/**
- * Form utility functions for the form renderer
- */
 
 /**
  * Creates a transform for address fields
@@ -115,10 +92,46 @@ export function createNumberTransform(): FieldTransforms<number> {
 export function createBooleanTransform(): FieldTransforms<boolean> {
   return {
     input: (value: unknown): boolean => {
+      if (value === undefined || value === null) return false;
+      if (typeof value === 'string') {
+        return value.toLowerCase() === 'true' || value === '1';
+      }
       return Boolean(value);
     },
     output: (value: unknown): boolean => {
+      if (typeof value === 'string') {
+        return value.toLowerCase() === 'true' || value === '1';
+      }
       return Boolean(value);
+    },
+  };
+}
+
+/**
+ * Creates a transform for complex type fields (arrays, objects, etc.)
+ *
+ * @returns Transform functions for complex fields
+ */
+export function createComplexTypeTransform(): FieldTransforms<unknown> {
+  return {
+    input: (value: unknown): string => {
+      if (value === undefined || value === null) return '';
+      if (typeof value === 'string') return value;
+
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return '';
+      }
+    },
+    output: (value: unknown): unknown => {
+      if (typeof value !== 'string' || !value) return null;
+
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
     },
   };
 }
@@ -126,7 +139,7 @@ export function createBooleanTransform(): FieldTransforms<boolean> {
 /**
  * Creates a transform for text fields
  *
- * @returns Transform functions for text fields
+ * @returns Transform functions for text-based fields
  */
 export function createTextTransform(): FieldTransforms<string> {
   return {
@@ -141,78 +154,93 @@ export function createTextTransform(): FieldTransforms<string> {
 }
 
 /**
- * Creates a transform for the given field type
+ * Creates a transform for a specific field type
  *
- * @param fieldType The type of field to create a transform for
- * @param adapter The adapter to use for validation (required for address fields)
+ * @param fieldType The type of field
+ * @param blockchainType The blockchain parameter type (e.g., 'uint256', 'address', 'bool[]')
+ *                        Used for specialized transforms based on blockchain type information
+ * @param adapter The blockchain adapter
  * @returns Transform functions for the field type
  */
 export function createTransformForFieldType<T extends FieldType>(
   fieldType: T,
+  blockchainType: string,
   adapter: ContractAdapter
 ): FieldTransforms<FieldValue<T>> {
-  // We need to use type assertion to handle the complex conditional types
+  // Implementation with a type-safe approach using run-time checking
   switch (fieldType) {
     case 'address':
-      // For 'address', we know FieldValue<'address'> is string
       return createAddressTransform(adapter) as unknown as FieldTransforms<FieldValue<T>>;
     case 'number':
     case 'amount':
-      // For 'number'/'amount', we know FieldValue<'number'|'amount'> is number
       return createNumberTransform() as unknown as FieldTransforms<FieldValue<T>>;
     case 'checkbox':
-      // For 'checkbox', we know FieldValue<'checkbox'> is boolean
       return createBooleanTransform() as unknown as FieldTransforms<FieldValue<T>>;
-    case 'text':
     case 'textarea':
-    case 'email':
-    case 'password':
+      return createComplexTypeTransform() as unknown as FieldTransforms<FieldValue<T>>;
+    case 'text':
     case 'select':
     case 'radio':
-      // For text-based fields, we know FieldValue is string
-      return createTextTransform() as unknown as FieldTransforms<FieldValue<T>>;
+    case 'email':
+    case 'password':
     default:
-      // For other types, return an empty transform
-      return {} as FieldTransforms<FieldValue<T>>;
+      return createTextTransform() as unknown as FieldTransforms<FieldValue<T>>;
   }
 }
 
 /**
  * Composes multiple transforms into a single transform
  *
- * @param transforms The transforms to compose
- * @returns A single transform that applies all transforms in sequence
+ * @param transforms Array of transforms to compose
+ * @returns A composed transform
  */
 export function composeTransforms<T>(
+  // Transforms can have different generic types, but we use unknown as a more type-safe alternative to any
   ...transforms: Array<FieldTransforms<unknown>>
 ): FieldTransforms<T> {
   return {
-    input: (value: T): unknown => {
-      return transforms.reduce((result, transform) => {
-        return transform.input ? transform.input(result) : result;
-      }, value as unknown);
+    input: (value: T) => {
+      let result: unknown = value;
+      // Apply transforms in order for input (UI display)
+      for (const transform of transforms) {
+        if (transform.input) {
+          // We need to cast to unknown here because transforms can be of different types
+          result = transform.input(result);
+        }
+      }
+      return result;
     },
-    output: (value: unknown): T => {
-      return transforms.reduceRight((result, transform) => {
-        return transform.output ? transform.output(result) : result;
-      }, value) as T;
+    output: (value: unknown) => {
+      let result = value;
+      // Apply transforms in reverse order for output (blockchain submission)
+      for (const transform of [...transforms].reverse()) {
+        if (transform.output) {
+          result = transform.output(result);
+
+          // Special handling for NaN values
+          if (typeof result === 'number' && isNaN(result)) {
+            return 0 as unknown as T;
+          }
+        }
+      }
+      return result as T;
     },
   };
 }
 
 /**
- * Creates a custom transform with the given input and output functions
+ * Creates a custom transform with specific input and output functions
  *
- * @param input Function to transform data from blockchain format to UI format
- * @param output Function to transform data from UI format to blockchain format
- * @returns A custom transform with the given functions
+ * @param inputFn Function to transform from blockchain to UI
+ * @param outputFn Function to transform from UI to blockchain
+ * @returns A custom transform
  */
 export function createCustomTransform<T>(
   input?: (value: T) => unknown,
-  output?: (value: unknown) => T
+  output?: (value: unknown) => unknown
 ): FieldTransforms<T> {
   return {
     input,
-    output,
+    output: output as ((value: unknown) => T) | undefined,
   };
 }

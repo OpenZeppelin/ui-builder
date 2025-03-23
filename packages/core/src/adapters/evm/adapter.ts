@@ -181,6 +181,7 @@ export class EVMAdapter implements ContractAdapter {
     pattern?: string;
     minLength?: number;
     maxLength?: number;
+    custom?: (value: unknown) => boolean | string;
   } {
     const validation = { required: true };
 
@@ -188,9 +189,17 @@ export class EVMAdapter implements ContractAdapter {
     if (parameterType === 'address') {
       return {
         ...validation,
-        pattern: '^0x[a-fA-F0-9]{40}$',
-        minLength: 42,
-        maxLength: 42,
+        // Use the adapter's isValidAddress method for direct validation
+        custom: (value: unknown): boolean | string => {
+          // Empty values are handled by the required property
+          if (value === '') return true;
+
+          // We expect addresses to be strings
+          if (typeof value !== 'string') return 'Address must be a string';
+
+          // Validate the address format using the adapter's method
+          return this.isValidAddress(value) ? true : 'Invalid address format';
+        },
       };
     }
 

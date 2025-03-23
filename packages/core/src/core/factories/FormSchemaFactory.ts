@@ -7,17 +7,15 @@
  */
 
 import {
-  // CommonFormProperties,
   FormFieldType,
   FormLayout,
   RenderFormSchema,
-  // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
+
+import { createTransformForFieldType } from '@form-renderer/utils/formUtils';
 
 import { getContractAdapter } from '../../adapters';
 import { BuilderFormConfig } from '../types/FormTypes';
-// Uncomment when needed: import { BuilderFormConfig } from '../types/FormTypes';
-import { createTransformForFieldType } from '../utils/transforms';
 import { humanizeString } from '../utils/utils';
 
 import type { ContractAdapter } from '../../adapters';

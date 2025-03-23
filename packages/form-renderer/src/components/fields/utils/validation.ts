@@ -128,6 +128,14 @@ export function validateField(value: unknown, validation?: FieldValidation): str
     return true;
   }
 
+  // Check custom validation function if provided
+  if (validation.custom) {
+    const customResult = validation.custom(value);
+    if (customResult !== true) {
+      return customResult || 'Invalid value';
+    }
+  }
+
   // Validate string length
   if (typeof value === 'string') {
     if (validation.minLength && value.length < validation.minLength) {

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { FieldTransforms } from '../../../../../form-renderer/src/types/FormTypes';
-import { ContractAdapter } from '../../../adapters';
+import { ContractAdapter, FieldTransforms } from '../../types/FormTypes';
 import {
   composeTransforms,
   createAddressTransform,
@@ -12,7 +11,7 @@ import {
   createTextTransform,
   // Will be tested in a future test
   // createTransformForFieldType,
-} from '../transforms';
+} from '../formUtils';
 
 // Mock adapter
 const mockAdapter: Partial<ContractAdapter> = {
@@ -184,16 +183,20 @@ describe('Transform Utilities', () => {
     it('should compose multiple transforms in the correct order', () => {
       // Create transforms for the composition
       const numberToString = createCustomTransform<number>(
-        (num) => String(num),
-        (str) => parseInt(str as string, 10)
+        (num: number) => String(num),
+        (str: unknown) => parseInt(str as string, 10)
       );
 
       const addPrefix = createCustomTransform<string>(
-        (str) => str,
-        (str) => `prefix_${str}`
+        (str: string) => str,
+        (str: unknown) => `prefix_${str}`
       );
 
-      const composed = composeTransforms(numberToString, addPrefix);
+      // Need to cast these to the common type expected by composeTransforms
+      const typedNumberToString = numberToString as FieldTransforms<unknown>;
+      const typedAddPrefix = addPrefix as FieldTransforms<unknown>;
+
+      const composed = composeTransforms(typedNumberToString, typedAddPrefix);
 
       // Input chain: 123 -> "123"
       if (composed.input) {
@@ -212,22 +215,27 @@ describe('Transform Utilities', () => {
     it('should compose three or more transforms', () => {
       // Create three transforms to chain together
       const numberToString = createCustomTransform<number>(
-        (num) => String(num),
-        (str) => parseInt(str as string, 10)
+        (num: number) => String(num),
+        (str: unknown) => parseInt(str as string, 10)
       );
 
       const addPrefix = createCustomTransform<string>(
-        (str) => str,
-        (str) => `prefix_${str}`
+        (str: string) => str,
+        (str: unknown) => `prefix_${str}`
       );
 
       const toUpperCase = createCustomTransform<string>(
-        (str) => str?.toUpperCase(),
-        (str) => String(str).toLowerCase()
+        (str: string) => str?.toUpperCase(),
+        (str: unknown) => String(str).toLowerCase()
       );
 
+      // Type casting for composeTransforms
+      const typedNumberToString = numberToString as FieldTransforms<unknown>;
+      const typedAddPrefix = addPrefix as FieldTransforms<unknown>;
+      const typedToUpperCase = toUpperCase as FieldTransforms<unknown>;
+
       // Compose all three transforms
-      const composed = composeTransforms(numberToString, addPrefix, toUpperCase);
+      const composed = composeTransforms(typedNumberToString, typedAddPrefix, typedToUpperCase);
 
       // Input chain: 123 -> "123" -> "123" -> "123"
       if (composed.input) {
@@ -246,13 +254,16 @@ describe('Transform Utilities', () => {
 
     it('should handle empty transforms', () => {
       const transform1 = createCustomTransform<string>(
-        (str) => str?.toUpperCase(),
-        (str) => String(str)
+        (str: string) => str?.toUpperCase(),
+        (str: unknown) => String(str)
       );
 
       const transform2 = {} as FieldTransforms<unknown>; // Empty transform
 
-      const composed = composeTransforms(transform1, transform2);
+      // Type casting for composeTransforms
+      const typedTransform1 = transform1 as FieldTransforms<unknown>;
+
+      const composed = composeTransforms(typedTransform1, transform2);
 
       if (composed.input) {
         expect(composed.input('hello')).toBe('HELLO');
@@ -267,8 +278,8 @@ describe('Transform Utilities', () => {
   describe('createCustomTransform', () => {
     it('should create a transform with custom functions', () => {
       const transform = createCustomTransform<string>(
-        (str) => str?.toUpperCase(),
-        (value) => String(value)
+        (str: string) => str?.toUpperCase(),
+        (value: unknown) => String(value)
       );
 
       if (transform.input && transform.output) {
