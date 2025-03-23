@@ -1,7 +1,7 @@
 /* 
   Auto-generated data-slot styles
   This file is generated automatically. DO NOT EDIT DIRECTLY.
-  Generated on: 2025-03-23T05:29:40.343Z
+  Generated on: 2025-03-23T13:33:40.111Z
 */
 
 [data-slot='card'] {
@@ -50,6 +50,10 @@
 
 [data-slot='checkbox-indicator'] {
   @apply flex items-center justify-center text-current transition-none;
+}
+
+[data-slot='checkbox-indicator-icon'] {
+  @apply size-3.5;
 }
 
 [data-slot='example-container'] {
