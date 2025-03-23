@@ -116,7 +116,7 @@ async function extractDataSlotsFromFiles(files) {
 
           // If both data-slot and className are found, add to the dataSlots object
           if (dataSlot && classNames) {
-            log(`Found data-slot="${dataSlot}" with classes: ${classNames}`);
+            log(`Found data-slot='${dataSlot}' with classes: ${classNames}`);
             if (!dataSlots[dataSlot]) {
               dataSlots[dataSlot] = new Set();
             }
@@ -147,7 +147,7 @@ function generateCssContent(dataSlots) {
   for (const [slot, classes] of Object.entries(dataSlots)) {
     if (classes.size === 0) continue;
 
-    lines.push(`[data-slot="${slot}"] {`);
+    lines.push(`[data-slot='${slot}'] {`);
     lines.push(`  @apply ${Array.from(classes).join(' ')};`);
     lines.push('}');
     lines.push('');
