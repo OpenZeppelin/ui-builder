@@ -13,8 +13,8 @@ import {
   TextAreaField,
   TextField,
 } from '@form-renderer/components/fields';
+import { Button } from '@form-renderer/components/ui/button';
 
-import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';

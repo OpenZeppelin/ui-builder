@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
-import { Button } from '../../ui/button';
+import { Button } from '@form-renderer/components/ui/button';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 
 import { useFieldSelection } from './hooks/useFieldSelection';

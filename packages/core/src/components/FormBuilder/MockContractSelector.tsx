@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+import { Button } from '@form-renderer/components/ui/button';
+
 import { MockContractInfo, MockContractService } from '../../services/MockContractService';
-import { Button } from '../ui/button';
 import {
   Dialog,
   DialogContent,

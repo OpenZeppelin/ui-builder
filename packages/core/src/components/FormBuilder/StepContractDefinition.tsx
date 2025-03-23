@@ -1,9 +1,10 @@
 import { useState } from 'react';
 
+import { Label } from '@form-renderer/components/ui/label';
+import { LoadingButton } from '@form-renderer/components/ui/loading-button';
+
 import { getContractAdapter } from '../../adapters/index.ts';
 import { getChainName } from '../../core/utils/utils';
-import { Label } from '../ui/label';
-import { LoadingButton } from '../ui/loading-button';
 
 import { MockContractSelector } from './MockContractSelector';
 

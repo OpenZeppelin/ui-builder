@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { TextField } from '@form-renderer/components/fields';
-
-import { Button } from '../ui/button';
-import { Label } from '../ui/label';
+import { Button } from '@form-renderer/components/ui/button';
+import { Label } from '@form-renderer/components/ui/label';
 
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';

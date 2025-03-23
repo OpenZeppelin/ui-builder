@@ -2,10 +2,10 @@ import React from 'react';
 
 import { Meta, StoryObj } from '@storybook/react';
 
+import { Button } from '../../../../form-renderer/src/components/ui/button';
 import { Input } from '../../../../form-renderer/src/components/ui/input';
 import { Label } from '../../../../form-renderer/src/components/ui/label';
 
-import { Button } from './button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
 
 const meta: Meta<typeof Card> = {

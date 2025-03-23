@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 
-import { Button } from '../ui/button';
+import { Button } from '@form-renderer/components/ui/button';
 
 export interface WizardStep {
   id: string;

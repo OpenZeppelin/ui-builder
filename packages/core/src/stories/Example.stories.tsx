@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 // Example component from the core package
-import { Button } from '../components/ui/button';
+import { Button } from '../../../form-renderer/src/components/ui/button';
 
 const meta: Meta<typeof Button> = {
   title: 'Core/Examples/Button',

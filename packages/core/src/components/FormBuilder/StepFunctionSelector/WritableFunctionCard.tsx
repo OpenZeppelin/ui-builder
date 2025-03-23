@@ -1,4 +1,4 @@
-import { Button } from '../../ui/button';
+import { Button } from '@form-renderer/components/ui/button';
 
 import { WritableFunctionCardProps } from './types';
 
