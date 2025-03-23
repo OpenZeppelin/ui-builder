@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-// Import SelectField instead of basic Select components
 import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
 
 import { getChainName } from '../../core/utils/utils';
@@ -17,7 +16,7 @@ export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepCha
   const [selectedChain, setSelectedChain] = useState<ChainType>(initialChain);
 
   // Set up react-hook-form
-  const { control } = useForm({
+  const { control, watch } = useForm({
     defaultValues: {
       blockchain: initialChain,
     },
@@ -31,10 +30,16 @@ export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepCha
     { value: 'solana', label: 'Solana' },
   ];
 
-  const handleChainChange = (value: ChainType) => {
-    setSelectedChain(value);
-    onChainSelect(value);
-  };
+  // Watch the blockchain field for changes
+  const blockchainValue = watch('blockchain') as ChainType;
+
+  // Update the selected chain when the form value changes
+  useEffect(() => {
+    if (blockchainValue && blockchainValue !== selectedChain) {
+      setSelectedChain(blockchainValue);
+      onChainSelect(blockchainValue);
+    }
+  }, [blockchainValue, onChainSelect, selectedChain]);
 
   return (
     <div className="flex flex-col space-y-6">
@@ -54,11 +59,6 @@ export function StepChainSelect({ onChainSelect, initialChain = 'evm' }: StepCha
           placeholder="Select a blockchain"
           control={control}
           options={blockchainOptions}
-          validateSelect={(value) => {
-            // Use the selected value to update state
-            handleChainChange(value as ChainType);
-            return true;
-          }}
         />
 
         <div className="bg-muted mt-6 rounded-md p-4">
