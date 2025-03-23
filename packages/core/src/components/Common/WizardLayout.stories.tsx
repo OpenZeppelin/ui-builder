@@ -2,8 +2,7 @@ import { useForm } from 'react-hook-form';
 
 import { Meta, StoryObj } from '@storybook/react';
 
-import { BooleanField, TextField } from '@form-renderer/components/fields';
-
+import { BooleanField, TextField } from '../../../../form-renderer/src/components/fields';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 import { WizardLayout, WizardStep } from './WizardLayout';

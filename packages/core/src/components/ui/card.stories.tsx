@@ -1,9 +1,12 @@
+import React from 'react';
+
 import { Meta, StoryObj } from '@storybook/react';
+
+import { Input } from '../../../../form-renderer/src/components/ui/input';
+import { Label } from '../../../../form-renderer/src/components/ui/label';
 
 import { Button } from './button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
-import { Input } from './input';
-import { Label } from './label';
 
 const meta: Meta<typeof Card> = {
   title: 'Core/UI/Card',
