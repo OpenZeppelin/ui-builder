@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { Meta, StoryObj } from '@storybook/react';
 
-import { StepChainSelect } from './StepChainSelect';
+import { StepChainSelect } from '../../components/FormBuilder/StepChainSelect';
 
 import type { ChainType } from '../../core/types/ContractSchema';
 
-const meta: Meta<typeof StepChainSelect> = {
+const meta = {
   title: 'Core/FormBuilder/StepChainSelect',
   component: StepChainSelect,
   parameters: {
@@ -18,10 +18,10 @@ const meta: Meta<typeof StepChainSelect> = {
     },
   },
   tags: ['autodocs'],
-};
+} satisfies Meta<typeof StepChainSelect>;
 
 export default meta;
-type Story = StoryObj<typeof StepChainSelect>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
@@ -53,6 +53,19 @@ const ChainSelectWithTracking = () => {
   );
 };
 
-export const WithSelectionTracking: Story = {
+// The render approach is the proper way to use custom components in Storybook
+export const WithStateTracking: Story = {
+  args: {
+    // These args are required by the type system but won't be used
+    initialChain: 'evm',
+    onChainSelect: () => {},
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Example showing state tracking with a custom wrapper component.',
+      },
+    },
+  },
   render: () => <ChainSelectWithTracking />,
 };

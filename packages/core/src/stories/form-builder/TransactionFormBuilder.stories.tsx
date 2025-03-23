@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import { TransactionFormBuilder } from './TransactionFormBuilder';
+import { TransactionFormBuilder } from '../../components/FormBuilder/TransactionFormBuilder';
 
-const meta: Meta<typeof TransactionFormBuilder> = {
+const meta = {
   title: 'Core/FormBuilder/TransactionFormBuilder',
   component: TransactionFormBuilder,
   parameters: {
@@ -15,10 +15,10 @@ const meta: Meta<typeof TransactionFormBuilder> = {
     },
   },
   tags: ['autodocs'],
-};
+} satisfies Meta<typeof TransactionFormBuilder>;
 
 export default meta;
-type Story = StoryObj<typeof TransactionFormBuilder>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
