@@ -1,1 +1,1 @@
-../../postcss.config.cjs
+../../../postcss.config.cjs

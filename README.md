@@ -429,3 +429,23 @@ The publishing process (when enabled):
 5. Creates a GitHub release with generated release notes
 
 Manual releases can be triggered through the GitHub Actions interface with a version parameter when needed during development.
+
+## Monorepo Configuration
+
+This project uses a centralized configuration approach to maintain consistency across all packages:
+
+### Shared Configurations
+
+- **tailwind.config.cjs**: Root configuration for Tailwind CSS, used by all packages
+- **postcss.config.cjs**: Root configuration for PostCSS, used by all packages
+- **components.json**: Root configuration for shadcn/ui components, used by all packages
+
+Each package has symlinks to these root configuration files, ensuring consistent styling, processing, and component behavior across the entire monorepo.
+
+### Symlink Structure
+
+- **Core Package**: Links to root configuration files (../../config.cjs)
+- **Form Renderer Package**: Links to root configuration files (../../config.cjs)
+- **Templates Package**: Links to root configuration files (../../../config.cjs)
+
+During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported project.
