@@ -1,4 +1,7 @@
+import { TemplateManager } from '../TemplateManager';
+
 import type { ChainType } from '../../core/types/ContractSchema';
+import type { TemplateOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 /**
@@ -12,16 +15,19 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * Current implementation:
  * - Generates only the form component code
  * - Uses a consistent import pattern that works in both dev and production
+ * - Integrates with TemplateManager to generate complete projects
  *
- * TODO: Integration with templates package:
- * - Add a TemplateManager class that handles template file access
- * - Copy and process all files from the templates package
- * - Replace placeholder files (like FormPlaceholder.tsx) with generated code
+ * TODO: Additional integrations:
  * - Add required adapter files for the selected blockchain
  * - Update package.json with correct dependencies
- * - Generate a complete, runnable project
  */
 export class FormCodeGenerator {
+  private templateManager: TemplateManager;
+
+  constructor() {
+    this.templateManager = new TemplateManager();
+  }
+
   /**
    * Generate a React component for a form that uses the shared form-renderer package.
    * Uses a consistent import path that works in both development and production
@@ -121,6 +127,83 @@ export default function GeneratedForm({ onSubmit, onError }) {
   );
 }
 `;
+  }
+
+  /**
+   * Generate a complete React project by integrating with the template system.
+   * Uses the typescript-react-vite template and replaces placeholder files with generated code.
+   *
+   * @param formConfig The form configuration from the builder
+   * @param chainType The selected blockchain type
+   * @param functionId The ID of the contract function
+   * @param options Additional template options like project name, description, etc.
+   * @returns A record of file paths to file contents for the complete project
+   */
+  generateTemplateProject(
+    formConfig: BuilderFormConfig,
+    chainType: ChainType,
+    functionId: string,
+    options: TemplateOptions = {}
+  ): Record<string, string> {
+    // Generate the form component code
+    const formComponentCode = this.generateFormComponent(formConfig, chainType, functionId);
+
+    // Create a structure with the custom files to replace in the template
+    const customFiles: Record<string, string> = {
+      // Replace FormPlaceholder.tsx with our generated form component
+      'src/components/GeneratedForm.tsx': formComponentCode,
+
+      // We need to update App.tsx to import GeneratedForm instead of FormPlaceholder
+      'src/components/App.tsx': this.generateUpdatedAppComponent(functionId),
+    };
+
+    // Use the template manager to create a complete project
+    return this.templateManager.createProject('typescript-react-vite', customFiles, options);
+  }
+
+  /**
+   * Generate an updated App component that imports the GeneratedForm instead of FormPlaceholder
+   *
+   * @param functionId The ID of the function this form is for (used in titles)
+   * @returns The content of the updated App.tsx file
+   */
+  private generateUpdatedAppComponent(functionId: string): string {
+    return `import { GeneratedForm } from './GeneratedForm';
+
+/**
+ * App Component
+ *
+ * Main application component that wraps the form.
+ */
+export function App() {
+  return (
+    <div className="app">
+      <header className="header">
+        <h1>Transaction Form for ${functionId}</h1>
+        <p>A form for interacting with blockchain contracts</p>
+      </header>
+
+      <main className="main">
+        <div className="container">
+          <GeneratedForm 
+            onSubmit={(txData) => {
+              console.log('Transaction submitted:', txData);
+              return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });
+            }}
+            onError={(error) => {
+              console.error('Transaction error:', error);
+            }}
+          />
+        </div>
+      </main>
+
+      <footer className="footer">
+        <p>Generated with OpenZeppelin Transaction Form Builder</p>
+        <p>© ${new Date().getFullYear()} OpenZeppelin</p>
+      </footer>
+    </div>
+  );
+}`;
   }
 
   /**

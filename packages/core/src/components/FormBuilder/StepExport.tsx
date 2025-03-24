@@ -17,21 +17,20 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * the created form for use in other applications.
  *
  * CURRENT IMPLEMENTATION STATUS:
- * - Basic form component generation is implemented using FormCodeGenerator
- * - The generated code is logged to the console but not used further
+ * - Form component generation is implemented using FormCodeGenerator
+ * - Template-based project generation is implemented using TemplateManager
+ * - The generated project files are logged to the console but not downloaded yet
  *
  * MISSING IMPLEMENTATION:
- * - Integration with the templates package (@openzeppelin/transaction-form-builder-templates)
- * - Creation of complete project based on selected template
- * - Adding adapter files and dependencies to the export package
+ * - Adding adapter files to the export package
+ * - Managing package dependencies using PackageManager
  * - ZIP file generation and download functionality
  *
  * TODO:
- * 1. Create a TemplateManager class to interact with template files
- * 2. Implement AdapterExportManager to include required adapter files
- * 3. Add PackageManager to handle dependencies in package.json
- * 4. Create ZipGenerator for bundling the exported project
- * 5. Implement proper download mechanism
+ * 1. Implement AdapterExportManager to include required adapter files
+ * 2. Implement PackageManager to handle dependencies in package.json
+ * 3. Create ZipGenerator for bundling the exported project
+ * 4. Implement proper download mechanism
  */
 export interface StepExportProps {
   selectedChain: ChainType;
@@ -49,7 +48,9 @@ export function StepExport({
   const [exportType, setExportType] = useState<'npm' | 'standalone'>('standalone');
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState<string>('');
+  const [generatedProjectFiles, setGeneratedProjectFiles] = useState<Record<string, string> | null>(
+    null
+  );
 
   const { control, watch } = useForm({
     defaultValues: {
@@ -64,16 +65,10 @@ export function StepExport({
    * Handle the export process
    *
    * CURRENT IMPLEMENTATION:
-   * - Generates form component code using FormCodeGenerator
-   * - Logs the generated code to the console
-   * - Does not create a complete project
-   *
-   * TODO: Complete implementation by:
-   * - Retrieving template files from the templates package
-   * - Replacing placeholder files with generated code
-   * - Adding required adapter files
-   * - Updating package.json with dependencies
-   * - Creating a ZIP file for download
+   * - Generates a complete project using FormCodeGenerator and TemplateManager
+   * - Uses the typescript-react-vite template
+   * - Logs the generated project files to the console
+   * - Does not yet create a downloadable ZIP file
    */
   const handleExport = () => {
     setExporting(true);
@@ -81,45 +76,35 @@ export function StepExport({
     try {
       // Only proceed if we have a function and form config
       if (selectedFunction && formConfig) {
-        // Generate the form component code
+        // Initialize the FormCodeGenerator
         const formCodeGenerator = new FormCodeGenerator();
-        const formCode = formCodeGenerator.generateFormComponent(
+
+        // Use the template-based project generation
+        const projectFiles = formCodeGenerator.generateTemplateProject(
           formConfig,
           selectedChain,
-          selectedFunction
+          selectedFunction,
+          {
+            projectName: packageName,
+            description: `Transaction form for ${selectedFunction} function`,
+          }
         );
 
-        // Store the generated code (in a real implementation, this would be written to a file)
-        setGeneratedCode(formCode);
+        // Store the generated project files
+        setGeneratedProjectFiles(projectFiles);
 
-        // TODO: Integration with templates package
+        // Log the project structure to the console
+        console.log('Generated Project Files:', Object.keys(projectFiles));
+        console.log('Project Files:', projectFiles);
+
+        // TODO: Generate ZIP file and trigger download
         // In a complete implementation, we would:
-        // 1. Create a TemplateManager instance to access template files from packages/templates
-        // const templateManager = new TemplateManager();
-        // const templateFiles = await templateManager.getTemplateFiles('typescript-react-vite');
+        // 1. Pass the projectFiles to a ZipGenerator to create a downloadable ZIP file
+        // const zipGenerator = new ZipGenerator();
+        // const zipBlob = await zipGenerator.createZip(projectFiles);
 
-        // 2. Add the adapter files for the selected chain
-        // const adapterManager = new AdapterExportManager();
-        // const adapterFiles = await adapterManager.getAdapterFiles(selectedChain);
-
-        // 3. Update package.json with dependencies
-        // const packageManager = new PackageManager();
-        // packageJson = packageManager.updatePackageJson(templateFiles['package.json'], formConfig, selectedChain);
-
-        // 4. Replace FormPlaceholder.tsx with the generated form component
-        // const exportFiles = {
-        //   ...templateFiles,
-        //   'src/components/GeneratedForm.tsx': formCode,
-        //   ...adapterFiles,
-        //   'package.json': packageJson
-        // };
-
-        // 5. Create a ZIP file for download
-        // const zipBlob = await createZipFile(exportFiles);
+        // 2. Trigger download of the ZIP file
         // triggerDownload(zipBlob, `${packageName}.zip`);
-
-        // For now, just log the generated code to console
-        console.log('Generated Form Component:', formCode);
 
         // Call the onExport callback to notify parent
         onExport();
