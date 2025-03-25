@@ -1,38 +1,57 @@
+/**
+ * Form Renderer Configuration
+ *
+ * This file defines the dependencies required for different field types
+ * and core dependencies for the form renderer.
+ */
 import type { FormRendererConfig } from './types/FormRendererConfig';
 
 /**
- * Configuration for the form-renderer package
- *
- * This file defines dependencies required by the form-renderer package
- * and its various field types when generating exported projects.
+ * Configuration for the form renderer package
+ * Used by the export system to determine dependencies for exported forms
  */
 export const formRendererConfig: FormRendererConfig = {
-  /**
-   * Dependencies for specific field types
-   * Only dependencies for fields used in a form will be included in exports
-   */
-  fieldDependencies: {
-    // TODO: Review and update with real, verified dependencies and versions before production release
+  // Core dependencies required by all exported forms
+  coreDependencies: {
+    react: '^18.2.0',
+    'react-dom': '^18.2.0',
+    'react-hook-form': '^7.45.4',
+    '@radix-ui/react-label': '^2.0.2',
+    '@radix-ui/react-slot': '^1.0.2',
+    'class-variance-authority': '^0.7.0',
+    clsx: '^2.0.0',
+    'tailwind-merge': '^1.14.0',
+    '@openzeppelin/transaction-form-renderer': '^0.1.0',
+  },
 
-    // Date field dependencies
-    date: {
+  // Field-specific dependencies
+  fieldDependencies: {
+    // Text field dependencies
+    text: {
+      runtimeDependencies: {},
+    },
+
+    // Number field dependencies
+    number: {
+      runtimeDependencies: {},
+    },
+
+    // Address field dependencies
+    address: {
+      runtimeDependencies: {},
+    },
+
+    // Boolean field dependencies
+    checkbox: {
       runtimeDependencies: {
-        'react-datepicker': '^4.15.0',
-        'date-fns': '^2.30.0',
-      },
-      devDependencies: {
-        '@types/react-datepicker': '^4.11.2',
+        '@radix-ui/react-checkbox': '^1.0.4',
       },
     },
 
     // Select field dependencies
     select: {
       runtimeDependencies: {
-        'react-select': '^5.7.4',
         '@radix-ui/react-select': '^1.2.2',
-      },
-      devDependencies: {
-        '@types/react-select': '^5.0.1',
       },
     },
 
@@ -43,75 +62,26 @@ export const formRendererConfig: FormRendererConfig = {
       },
     },
 
-    // Checkbox field dependencies
-    checkbox: {
+    // Date field dependencies
+    date: {
       runtimeDependencies: {
-        '@radix-ui/react-checkbox': '^1.0.4',
-      },
-    },
-
-    // File upload field dependencies
-    file: {
-      runtimeDependencies: {
-        'react-dropzone': '^14.2.3',
+        'react-datepicker': '^4.16.0',
       },
       devDependencies: {
-        '@types/react-dropzone': '^5.1.0',
+        '@types/react-datepicker': '^4.11.2',
       },
     },
 
-    // Amount field dependencies (for currency/token inputs)
+    // Amount field dependencies
     amount: {
-      runtimeDependencies: {
-        'react-number-format': '^5.3.0',
-      },
+      runtimeDependencies: {},
     },
 
-    // Address field dependencies (for blockchain addresses)
-    address: {
+    // Progress component dependencies
+    progress: {
       runtimeDependencies: {
-        'react-identicons': '^1.2.5',
+        '@radix-ui/react-progress': '^1.0.3',
       },
     },
-
-    // TextArea field dependencies
-    textarea: {
-      runtimeDependencies: {
-        '@radix-ui/react-textarea': '^1.0.2',
-      },
-    },
-
-    // Basic field types without special dependencies
-    text: { runtimeDependencies: {} },
-    number: { runtimeDependencies: {} },
-    email: { runtimeDependencies: {} },
-    password: { runtimeDependencies: {} },
-    hidden: { runtimeDependencies: {} },
-  },
-
-  /**
-   * Core dependencies required by form-renderer
-   * These will be included in all exported projects
-   */
-  coreDependencies: {
-    // React and core libraries
-    react: '^18.2.0',
-    'react-dom': '^18.2.0',
-
-    // Form management
-    'react-hook-form': '^7.45.4',
-    zod: '^3.22.2',
-    '@hookform/resolvers': '^3.3.1',
-
-    // UI components
-    '@radix-ui/react-label': '^2.0.2',
-    '@radix-ui/react-slot': '^1.0.2',
-    '@radix-ui/react-toast': '^1.1.4',
-    'class-variance-authority': '^0.7.0',
-    'tailwind-merge': '^1.14.0',
-    clsx: '^2.0.0',
-
-    // The form-renderer package itself
-    '@openzeppelin/transaction-form-builder-form-renderer': '^1.0.0',
   },
 };

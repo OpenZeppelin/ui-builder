@@ -6,7 +6,7 @@
  * dependencies to include in the package.json of exported projects.
  */
 
-import type { FormRendererConfig } from '@form-renderer/types/FormRendererConfig';
+import type { FormRendererConfig } from '@form-renderer/types';
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 import type { ChainType } from '../core/types/ContractSchema';
@@ -25,12 +25,12 @@ const adapterConfigFiles = import.meta.glob('../adapters/*/config.ts', {
   eager: true,
 }) as GlobImportResult;
 
-const formRendererConfigFile = import.meta.glob('@form-renderer/config.ts', {
+const formRendererConfigFile = import.meta.glob('../../form-renderer/src/config.ts', {
   eager: true,
 }) as GlobImportResult;
 
 // For testing purposes - make file collections available to tests
-export const _testFiles = {
+export const packageTestFiles = {
   adapterConfig: adapterConfigFiles,
   formRendererConfig: formRendererConfigFile,
 };
@@ -307,12 +307,11 @@ export class PackageManager {
   }
 
   /**
-   * Generate a project name based on form configuration and function ID
-   * @param formConfig The form configuration
+   * Generate a project name based on function ID
    * @param functionId The function ID
    * @returns A suitable package name
    */
-  private generateProjectName(formConfig: BuilderFormConfig, functionId: string): string {
+  private generateProjectName(functionId: string): string {
     // Generate a suitable package name from the function ID
     const baseName = functionId.toLowerCase().replace(/[^a-z0-9]/g, '-');
     return `${baseName}-form`;
@@ -338,7 +337,7 @@ export class PackageManager {
     const packageJson = JSON.parse(packageJsonContent);
 
     // Update name and description
-    packageJson.name = options.projectName || this.generateProjectName(formConfig, functionId);
+    packageJson.name = options.projectName || this.generateProjectName(functionId);
     packageJson.description = options.description || `Form for ${functionId} function`;
 
     // Update author if provided

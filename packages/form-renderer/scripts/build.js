@@ -40,11 +40,8 @@ export const add = (a: number, b: number): number => a + b;
 // Build TypeScript with more specific options
 console.log('Building TypeScript...');
 try {
-  // Using direct tsc options to bypass potential config issues
-  execSync(
-    'tsc --outDir dist --declaration --declarationMap --sourceMap --module ESNext --moduleResolution node --target ES2020 --jsx react-jsx --esModuleInterop --forceConsistentCasingInFileNames --skipLibCheck --strict src/index.ts',
-    { stdio: 'inherit', cwd: root }
-  );
+  // Use tsc with project reference to build all files
+  execSync('tsc --project tsconfig.json', { stdio: 'inherit', cwd: root });
   console.log('TypeScript compilation successful');
 } catch (error) {
   console.error('TypeScript build failed:', error);

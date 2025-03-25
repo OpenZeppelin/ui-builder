@@ -118,7 +118,7 @@ export class FormExportSystem {
       console.log('Project structure:', Object.keys(projectFiles).sort());
 
       // 5. Create ZIP file
-      const fileName = this.generateFileName(formConfig, functionId);
+      const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
 
       // 6. Return the export result with dependencies from PackageManager
@@ -155,15 +155,12 @@ export class FormExportSystem {
   }
 
   /**
-   * Generate a suggested filename for the exported project
-   *
-   * @param formConfig Form configuration
+   * Generate a filename for the exported package
    * @param functionId Function ID
-   * @returns A suitable filename for the exported project
+   * @returns A suitable filename
    */
-  private generateFileName(formConfig: BuilderFormConfig, functionId: string): string {
-    // Use function ID as the base name
-    const baseName = functionId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return `${baseName}-form`;
+  private generateFileName(functionId: string): string {
+    // Create a filename based on the function ID
+    return `${functionId.toLowerCase().replace(/[^a-z0-9]/g, '')}-form.zip`;
   }
 }

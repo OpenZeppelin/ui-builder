@@ -5,13 +5,7 @@
  * and providing them for export without requiring filesystem operations.
  * It implements in-memory project generation to allow browser-based exports.
  */
-
 import type { TemplateOptions } from '../core/types/ExportTypes';
-
-// Define the structure used for imported template files
-interface TemplateFileCollection {
-  [key: string]: Record<string, string>;
-}
 
 // Template registry type - maps template names to file collections
 type TemplateRegistry = Record<string, Record<string, string>>;
@@ -30,7 +24,7 @@ const templateFiles = import.meta.glob('../templates/**/*', {
 }) as GlobImportResult;
 
 // For testing purposes - make file collections available to tests
-export const _testFiles = {
+export const templateTestFiles = {
   templates: templateFiles,
 };
 

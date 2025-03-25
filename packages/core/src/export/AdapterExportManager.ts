@@ -50,7 +50,7 @@ const formRendererTypeFiles = import.meta.glob('../../form-renderer/src/types/Fo
 }) as GlobImportResult;
 
 // For testing purposes - make file collections available to tests
-export const _testFiles = {
+export const adapterTestFiles = {
   adapter: adapterFiles,
   type: typeFiles,
   util: utilFiles,

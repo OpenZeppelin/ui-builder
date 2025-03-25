@@ -8,6 +8,18 @@
 import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
 
 /**
+ * Parameter constraints for validation and default value generation
+ */
+export interface ParameterConstraints {
+  required?: boolean;
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+}
+
+/**
  * Generate a unique ID for form fields
  */
 export function generateId(): string {
@@ -157,14 +169,14 @@ export function createTextTransform(): FieldTransforms<string> {
  * Creates a transform for a specific field type
  *
  * @param fieldType The type of field
- * @param blockchainType The blockchain parameter type (e.g., 'uint256', 'address', 'bool[]')
+ * @param _blockchainType The blockchain parameter type (e.g., 'uint256', 'address', 'bool[]')
  *                        Used for specialized transforms based on blockchain type information
  * @param adapter The blockchain adapter
  * @returns Transform functions for the field type
  */
 export function createTransformForFieldType<T extends FieldType>(
   fieldType: T,
-  blockchainType: string,
+  _blockchainType: string,
   adapter: ContractAdapter
 ): FieldTransforms<FieldValue<T>> {
   // Implementation with a type-safe approach using run-time checking
@@ -199,7 +211,7 @@ export function composeTransforms<T>(
   ...transforms: Array<FieldTransforms<unknown>>
 ): FieldTransforms<T> {
   return {
-    input: (value: T) => {
+    input: (value: T): unknown => {
       let result: unknown = value;
       // Apply transforms in order for input (UI display)
       for (const transform of transforms) {
@@ -210,7 +222,7 @@ export function composeTransforms<T>(
       }
       return result;
     },
-    output: (value: unknown) => {
+    output: (value: unknown): T => {
       let result = value;
       // Apply transforms in reverse order for output (blockchain submission)
       for (const transform of [...transforms].reverse()) {
@@ -237,10 +249,33 @@ export function composeTransforms<T>(
  */
 export function createCustomTransform<T>(
   input?: (value: T) => unknown,
-  output?: (value: unknown) => unknown
+  output?: (value: unknown) => T
 ): FieldTransforms<T> {
   return {
     input,
-    output: output as ((value: unknown) => T) | undefined,
+    output,
   };
+}
+
+/**
+ * Generate a default value for a given field type based on parameter constraints
+ */
+export function generateDefaultValue(
+  parameterType: string,
+  constraints: Partial<ParameterConstraints> = {}
+): unknown {
+  const type = parameterType.toLowerCase();
+
+  // Basic default values based on type
+  if (type.includes('bool')) {
+    return false;
+  } else if (type.includes('int') || type.includes('number')) {
+    return constraints.min !== undefined ? constraints.min : 0;
+  } else if (type.includes('string') || type.includes('address')) {
+    return '';
+  } else if (type.includes('array') || type.includes('[]')) {
+    return [];
+  } else {
+    return null;
+  }
 }

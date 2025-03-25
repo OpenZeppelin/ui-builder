@@ -4,6 +4,7 @@ export * from './form';
 export * from './input';
 export * from './label';
 export * from './loading-button';
+export * from './progress';
 export * from './radio-group';
 export * from './select';
 export * from './textarea';

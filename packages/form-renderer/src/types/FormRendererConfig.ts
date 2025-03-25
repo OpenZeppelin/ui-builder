@@ -9,21 +9,27 @@
  */
 export interface FormRendererConfig {
   /**
-   * Dependencies for specific field types
-   * Only dependencies for fields used in a form will be included in exports
-   *
-   * Organized by field type (e.g., 'date', 'select', 'file', etc.)
-   */
-  fieldDependencies: Record<string, FieldTypeDependencies>;
-
-  /**
-   * Core dependencies required by form-renderer
-   * These will be included in all exported projects
-   *
-   * Format: { packageName: versionRange }
-   * Example: { "react": "^18.2.0" }
+   * Core dependencies required for all form renderer projects
    */
   coreDependencies: Record<string, string>;
+
+  /**
+   * Field-specific dependencies required for different field types
+   */
+  fieldDependencies: Record<
+    string,
+    {
+      /**
+       * Runtime dependencies needed for the field type
+       */
+      runtimeDependencies: Record<string, string>;
+
+      /**
+       * Development dependencies needed for the field type
+       */
+      devDependencies?: Record<string, string>;
+    }
+  >;
 
   // Additional configuration properties can be added in the future
   // as form-renderer evolves, without breaking existing implementations
