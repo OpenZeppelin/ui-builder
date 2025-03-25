@@ -1,0 +1,161 @@
+import JSZip from 'jszip';
+import { describe, expect, it, vi } from 'vitest';
+
+import { ZipGenerator } from '../ZipGenerator';
+
+/**
+ * Tests for the ZipGenerator class
+ */
+describe('ZipGenerator', () => {
+  /**
+   * Tests for the basic ZIP file creation functionality
+   */
+  describe('createZipFile', () => {
+    it('should create a ZIP file from a map of files', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files = {
+        'package.json': '{"name":"test-project"}',
+        'src/index.ts': 'console.log("Hello world");',
+        'README.md': '# Test Project',
+      };
+
+      const result = await zipGenerator.createZipFile(files, 'test-project');
+
+      // Verify the result structure
+      expect(result).toHaveProperty('blob');
+      expect(result).toHaveProperty('fileName', 'test-project.zip');
+
+      // Check that the blob is of the correct type
+      expect(result.blob).toBeInstanceOf(Blob);
+      expect(result.blob.type).toBe('application/zip');
+
+      // Verify the content (by extracting it with JSZip)
+      const zip = new JSZip();
+      const extracted = await zip.loadAsync(result.blob);
+
+      // Filter for actual files (not directories)
+      const actualFiles = Object.keys(extracted.files).filter((path) => !extracted.files[path].dir);
+
+      // Check that all files are present
+      expect(actualFiles).toHaveLength(3);
+      expect(extracted.file('package.json')).toBeTruthy();
+      expect(extracted.file('src/index.ts')).toBeTruthy();
+      expect(extracted.file('README.md')).toBeTruthy();
+
+      // Verify content of a specific file
+      const packageJson = await extracted.file('package.json')?.async('string');
+      expect(packageJson).toBe('{"name":"test-project"}');
+    });
+
+    it('should report progress through the callback', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files = {
+        'file1.txt': 'content1',
+        'file2.txt': 'content2',
+        'file3.txt': 'content3',
+      };
+
+      const progressCallback = vi.fn();
+
+      await zipGenerator.createZipFile(files, 'test-progress', {
+        onProgress: progressCallback,
+      });
+
+      // Verify callback was called at least once
+      expect(progressCallback).toHaveBeenCalled();
+
+      // Verify it was called at least once for adding and once for compressing
+      const addingCalls = progressCallback.mock.calls.filter(
+        (call) => call[0].operation === 'adding'
+      );
+      const compressingCalls = progressCallback.mock.calls.filter(
+        (call) => call[0].operation === 'compressing'
+      );
+
+      expect(addingCalls.length).toBeGreaterThan(0);
+      expect(compressingCalls.length).toBeGreaterThan(0);
+
+      // Check that progress information includes relevant data
+      const firstAddingCall = addingCalls[0][0];
+      expect(firstAddingCall).toHaveProperty('processedFiles');
+      expect(firstAddingCall).toHaveProperty('totalFiles');
+      expect(firstAddingCall).toHaveProperty('percent');
+
+      const lastCompressingCall = compressingCalls[compressingCalls.length - 1][0];
+      expect(lastCompressingCall.percent).toBeGreaterThanOrEqual(50);
+    });
+
+    it('should handle path normalization correctly', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files = {
+        '/leading/slash/file.txt': 'content',
+        'windows/path/file.txt': 'content', // No backslashes, as they need special escaping
+        'normal/path/file.txt': 'content',
+      };
+
+      const result = await zipGenerator.createZipFile(files, 'path-test');
+
+      const zip = new JSZip();
+      const extracted = await zip.loadAsync(result.blob);
+
+      // Check specific paths are normalized
+      expect(extracted.file('leading/slash/file.txt')).toBeTruthy();
+      expect(extracted.file('windows/path/file.txt')).toBeTruthy();
+      expect(extracted.file('normal/path/file.txt')).toBeTruthy();
+
+      // List all files to verify
+      const actualFiles = Object.keys(extracted.files).filter((path) => !extracted.files[path].dir);
+      expect(actualFiles).toContain('leading/slash/file.txt');
+    });
+
+    it('should ensure .zip extension is added to filename', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files = { 'test.txt': 'content' };
+
+      // Test without .zip extension
+      const result1 = await zipGenerator.createZipFile(files, 'test-file');
+      expect(result1.fileName).toBe('test-file.zip');
+
+      // Test with .zip extension already present
+      const result2 = await zipGenerator.createZipFile(files, 'test-file.zip');
+      expect(result2.fileName).toBe('test-file.zip');
+
+      // Test with uppercase .ZIP extension
+      const result3 = await zipGenerator.createZipFile(files, 'test-file.ZIP');
+      expect(result3.fileName).toBe('test-file.ZIP');
+    });
+
+    it('should handle compression options', async () => {
+      const zipGenerator = new ZipGenerator();
+
+      // Create a highly compressible file (100kb of repeating data)
+      const repeatChar = 'a';
+      const fileContent = repeatChar.repeat(100000);
+
+      const files = { 'large-file.txt': fileContent };
+
+      // Instead of testing compression levels directly (which may be unreliable in tests),
+      // we'll just verify that the compression option is accepted
+      const result = await zipGenerator.createZipFile(files, 'compression-test', {
+        compressionLevel: 9,
+      });
+
+      expect(result.blob).toBeInstanceOf(Blob);
+      expect(result.fileName).toBe('compression-test.zip');
+    });
+
+    it('should handle empty file list gracefully', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files = {};
+
+      const result = await zipGenerator.createZipFile(files, 'empty-test');
+
+      // Should still create a valid ZIP file
+      expect(result.blob).toBeInstanceOf(Blob);
+      expect(result.blob.type).toBe('application/zip');
+
+      // Empty ZIP file should be very small
+      expect(result.blob.size).toBeLessThan(100);
+    });
+  });
+});

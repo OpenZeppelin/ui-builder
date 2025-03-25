@@ -9,6 +9,7 @@ import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { AdapterExportManager } from './AdapterExportManager';
 import { PackageManager } from './PackageManager';
 import { TemplateManager } from './TemplateManager';
+import { ZipGenerator, type ZipProgress } from './ZipGenerator';
 
 import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
@@ -23,6 +24,7 @@ export class FormExportSystem {
   private formCodeGenerator: FormCodeGenerator;
   private adapterExportManager: AdapterExportManager;
   private packageManager: PackageManager;
+  private zipGenerator: ZipGenerator;
 
   /**
    * Creates a new FormExportSystem
@@ -32,6 +34,7 @@ export class FormExportSystem {
     this.formCodeGenerator = new FormCodeGenerator();
     this.adapterExportManager = new AdapterExportManager();
     this.packageManager = new PackageManager();
+    this.zipGenerator = new ZipGenerator();
   }
 
   /**
@@ -95,15 +98,13 @@ export class FormExportSystem {
     };
 
     // 6. Create ZIP file
-    const zipBlob = await this.createZipFile(projectFiles);
-
-    // 7. Generate suggested filename
     const fileName = this.generateFileName(formConfig, functionId);
+    const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
 
-    // 8. Return the export result with dependencies from PackageManager
+    // 7. Return the export result with dependencies from PackageManager
     return {
-      zipBlob,
-      fileName,
+      zipBlob: zipResult.blob,
+      fileName: zipResult.fileName,
       dependencies: this.packageManager.getDependencies(formConfig, chainType),
     };
   }
@@ -112,16 +113,21 @@ export class FormExportSystem {
    * Create a ZIP file from the project files
    *
    * @param files Map of file paths to content
-   * @returns A Blob containing the ZIP file
+   * @param fileName Suggested filename for the ZIP
+   * @param onProgress Optional callback for progress updates
+   * @returns A result containing the ZIP blob and filename
    */
-  private async createZipFile(files: Record<string, string>): Promise<Blob> {
-    // In a real implementation, this would use JSZip or similar library
-    // For now, we'll return a placeholder
-    console.log('Creating ZIP file with:', Object.keys(files).length, 'files');
+  private async createZipFile(
+    files: Record<string, string>,
+    fileName: string,
+    onProgress?: (progress: ZipProgress) => void
+  ) {
+    console.log(`Creating ZIP file with ${Object.keys(files).length} files`);
 
-    // Placeholder return - in a real implementation,
-    // this would create an actual ZIP file with JSZip
-    return new Blob(['ZIP file placeholder'], { type: 'application/zip' });
+    return this.zipGenerator.createZipFile(files, fileName, {
+      onProgress,
+      compressionLevel: 6, // Moderate compression
+    });
   }
 
   /**
@@ -134,6 +140,6 @@ export class FormExportSystem {
   private generateFileName(formConfig: BuilderFormConfig, functionId: string): string {
     // Use function ID as the base name
     const baseName = functionId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return `${baseName}-form.zip`;
+    return `${baseName}-form`;
   }
 }

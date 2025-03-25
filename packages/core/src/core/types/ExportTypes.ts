@@ -7,6 +7,8 @@
 
 import { ChainType } from '@/core/types/ContractSchema';
 
+import type { ZipProgress } from '../../export/ZipGenerator';
+
 /**
  * Options for customizing a template
  */
@@ -68,6 +70,12 @@ export interface ExportOptions extends TemplateOptions {
    * Custom README content
    */
   readmeContent?: string;
+
+  /**
+   * Progress callback for export operations
+   * Used to update UI with progress information
+   */
+  onProgress?: (progress: ZipProgress) => void;
 }
 
 /**
