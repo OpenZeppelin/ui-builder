@@ -7,6 +7,7 @@
 
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { AdapterExportManager } from './AdapterExportManager';
+import { PackageManager } from './PackageManager';
 import { TemplateManager } from './TemplateManager';
 
 import type { ChainType } from '../core/types/ContractSchema';
@@ -21,6 +22,7 @@ export class FormExportSystem {
   private templateManager: TemplateManager;
   private formCodeGenerator: FormCodeGenerator;
   private adapterExportManager: AdapterExportManager;
+  private packageManager: PackageManager;
 
   /**
    * Creates a new FormExportSystem
@@ -29,6 +31,7 @@ export class FormExportSystem {
     this.templateManager = new TemplateManager();
     this.formCodeGenerator = new FormCodeGenerator();
     this.adapterExportManager = new AdapterExportManager();
+    this.packageManager = new PackageManager();
   }
 
   /**
@@ -72,24 +75,36 @@ export class FormExportSystem {
         ? this.adapterExportManager.getAdapterFiles(chainType)
         : {};
 
-    // 4. Build the complete export file set
+    // 4. Update package.json using PackageManager
+    const originalPackageJson = templateFiles['package.json'];
+    if (originalPackageJson) {
+      templateFiles['package.json'] = this.packageManager.updatePackageJson(
+        originalPackageJson,
+        formConfig,
+        chainType,
+        functionId,
+        exportOptions
+      );
+    }
+
+    // 5. Build the complete export file set
     const projectFiles = {
       ...templateFiles,
       'src/components/GeneratedForm.tsx': formComponentCode,
       ...adapterFiles,
     };
 
-    // 5. Create ZIP file
+    // 6. Create ZIP file
     const zipBlob = await this.createZipFile(projectFiles);
 
-    // 6. Generate suggested filename
+    // 7. Generate suggested filename
     const fileName = this.generateFileName(formConfig, functionId);
 
-    // 7. Return the export result
+    // 8. Return the export result with dependencies from PackageManager
     return {
       zipBlob,
       fileName,
-      dependencies: this.getDependencies(chainType),
+      dependencies: this.packageManager.getDependencies(formConfig, chainType),
     };
   }
 
@@ -120,43 +135,5 @@ export class FormExportSystem {
     // Use function ID as the base name
     const baseName = functionId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     return `${baseName}-form.zip`;
-  }
-
-  /**
-   * Get dependency information for the exported form
-   *
-   * @param chainType Blockchain type
-   * @returns A map of dependency names to versions
-   *
-   * TODO: This is a temporary solution. In the future, this should be handled by a dedicated
-   * PackageManager component that can determine dependencies based on features used in the form
-   * and manage versioning more effectively.
-   */
-  private getDependencies(chainType: ChainType): Record<string, string> {
-    // Core dependencies required for all forms
-    const dependencies: Record<string, string> = {
-      '@openzeppelin/transaction-form-builder-form-renderer': '^1.0.0',
-      'react-hook-form': '^7.54.2',
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
-    };
-
-    // Chain-specific dependencies
-    switch (chainType) {
-      case 'evm':
-        dependencies['ethers'] = '^6.7.0';
-        break;
-      case 'solana':
-        dependencies['@solana/web3.js'] = '^1.78.0';
-        break;
-      case 'stellar':
-        dependencies['stellar-sdk'] = '^10.0.1';
-        break;
-      case 'midnight':
-        dependencies['@midnight/sdk'] = '^1.0.0';
-        break;
-    }
-
-    return dependencies;
   }
 }
