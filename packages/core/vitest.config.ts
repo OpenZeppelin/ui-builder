@@ -3,28 +3,53 @@ import path from 'path';
 import { defineConfig } from 'vitest/config';
 
 /**
+ * Virtual module mocks for testing
+ *
+ * Define mock implementations for all virtual modules used in the application.
+ * This should mirror the virtual modules defined in vite.config.ts
+ *
+ * For detailed documentation on this approach, see:
+ * packages/core/src/docs/cross-package-imports.md
+ */
+const virtualModuleMocks: Record<string, string> = {
+  // Module ID -> mock implementation
+  'virtual:form-renderer-config': `
+    export const formRendererConfig = {
+      coreDependencies: {},
+      fieldDependencies: {}
+    };
+  `,
+  // Add more virtual module mocks as needed
+  // 'virtual:templates-config': `export const templateConfig = { /* mock data */ };`,
+};
+
+/**
  * Vitest Configuration
  *
- * This configuration includes special handling for the virtual:form-renderer-config module
- * that is used in PackageManager.ts. In the regular application, this module is provided
- * by the Vite plugin in vite.config.ts, but for tests, we need to provide a mock version.
+ * This configuration includes special handling for virtual modules that cross
+ * package boundaries which are used throughout the application.
  *
  * VIRTUAL MODULE SOLUTION OVERVIEW:
  *
- * 1. PROBLEM: The application needs to access configuration from the form-renderer package,
+ * 1. PROBLEM: The application needs to access configuration from other packages,
  *    but import.meta.glob doesn't reliably work across package boundaries in development mode.
  *
  * 2. SOLUTION:
- *    - In vite.config.ts: A virtual module that imports the real config using aliases
- *    - In this file: A mock implementation for tests
- *    - In PackageManager.ts: Direct import from the virtual module
+ *    - In vite.config.ts: Virtual modules that import the real files using aliases
+ *    - In this file: Mock implementations for tests
+ *    - In application code: Direct imports from the virtual modules
  *
  * 3. TESTING APPROACH:
- *    Most tests that use PackageManager provide their own mocks via constructor parameters,
- *    but the virtual module is still needed to satisfy the import statement.
+ *    Most tests that use these modules provide their own mocks via constructor parameters,
+ *    but the virtual modules are still needed to satisfy the import statements.
+ *
+ * HOW TO ADD A NEW VIRTUAL MODULE FOR TESTING:
+ * 1. Add an entry to the virtualModuleMocks object above
+ * 2. Make sure it exports the same interface as the real module
+ * 3. The test plugin below will automatically handle it
  *
  * Without this plugin, tests would fail with:
- * "Failed to resolve import 'virtual:form-renderer-config' from 'src/export/PackageManager.ts'"
+ * "Failed to resolve import 'virtual:module-name' from 'src/path/to/file.ts'"
  */
 export default defineConfig({
   plugins: [
@@ -34,33 +59,28 @@ export default defineConfig({
     /**
      * TEST-SPECIFIC VIRTUAL MODULE PROVIDER
      *
-     * This plugin provides a mock implementation of the virtual:form-renderer-config
-     * module used in the dev/build environment.
+     * This plugin provides mock implementations of virtual modules
+     * used in the dev/build environment.
      *
-     * In the real application, the virtual module is provided by a plugin in vite.config.ts
-     * that imports the actual config from the form-renderer package. For tests, we
-     * provide a basic mock implementation here.
-     *
-     * Most tests already provide their own mock via constructor parameters, but
-     * this plugin is necessary to satisfy the import statement in PackageManager.ts.
+     * In the real application, these modules are provided by a plugin in vite.config.ts
+     * that imports the actual files from other packages. For tests, we
+     * provide basic mock implementations here.
      */
     {
-      name: 'test-form-renderer-config-provider',
+      name: 'test-virtual-modules-provider',
       resolveId(id: string) {
-        if (id === 'virtual:form-renderer-config') {
-          return '\0virtual:form-renderer-config';
+        if (id in virtualModuleMocks) {
+          return `\0${id}`;
         }
         return null;
       },
       load(id: string) {
-        if (id === '\0virtual:form-renderer-config') {
-          // Provide a minimal mock that the actual object will override in tests
-          return `
-            export const formRendererConfig = {
-              coreDependencies: {},
-              fieldDependencies: {}
-            };
-          `;
+        // Extract the original ID without the null byte prefix
+        const originalId = id.startsWith('\0') ? id.slice(1) : id;
+
+        if (originalId in virtualModuleMocks) {
+          // Return the mock implementation
+          return virtualModuleMocks[originalId];
         }
         return null;
       },
