@@ -70,7 +70,7 @@ export function StepExport({
    * - Logs the generated project files to the console
    * - Does not yet create a downloadable ZIP file
    */
-  const handleExport = () => {
+  const handleExport = async () => {
     setExporting(true);
 
     try {
@@ -80,11 +80,12 @@ export function StepExport({
         const formCodeGenerator = new FormCodeGenerator();
 
         // Use the template-based project generation
-        const projectFiles = formCodeGenerator.generateTemplateProject(
+        const projectFiles = await formCodeGenerator.generateTemplateProject(
           formConfig,
           selectedChain,
           selectedFunction,
           {
+            chainType: selectedChain,
             projectName: packageName,
             description: `Transaction form for ${selectedFunction} function`,
           }
@@ -203,7 +204,7 @@ export function StepExport({
           <Button
             className="w-full"
             size="lg"
-            onClick={handleExport}
+            onClick={() => void handleExport()}
             disabled={exporting || exported || !hasFunction || !formConfigured}
           >
             {exporting ? 'Exporting...' : exported ? 'Exported Successfully!' : 'Export Form'}

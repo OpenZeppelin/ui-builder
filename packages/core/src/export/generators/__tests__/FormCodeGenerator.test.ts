@@ -50,7 +50,7 @@ describe('FormCodeGenerator', () => {
   });
 
   describe('generateTemplateProject', () => {
-    it('should generate a complete project structure based on the template', () => {
+    it('should generate a complete project structure based on the template', async () => {
       const generator = new FormCodeGenerator();
 
       // Create a minimal form config for testing
@@ -80,13 +80,24 @@ describe('FormCodeGenerator', () => {
       };
 
       // Generate a complete project
-      const projectFiles = generator.generateTemplateProject(formConfig, 'evm', 'testFunction', {
-        projectName: 'test-project',
-      });
+      const projectFiles = await generator.generateTemplateProject(
+        formConfig,
+        'evm',
+        'testFunction',
+        {
+          chainType: 'evm',
+          projectName: 'test-project',
+          includeAdapters: true,
+        }
+      );
 
       // Verify key files are present in the project
       expect(Object.keys(projectFiles)).toContain('src/components/GeneratedForm.tsx');
       expect(Object.keys(projectFiles)).toContain('src/components/App.tsx');
+
+      // Verify adapter files are included
+      expect(Object.keys(projectFiles)).toContain('src/adapters/evm/adapter.ts');
+      expect(Object.keys(projectFiles)).toContain('src/adapters/index.ts');
 
       // Note: Since we're using a mock/stub TemplateManager in tests,
       // we shouldn't make assumptions about all template files being present.
@@ -100,11 +111,63 @@ describe('FormCodeGenerator', () => {
       // Verify FormPlaceholder.tsx is not present (should be replaced)
       expect(Object.keys(projectFiles)).not.toContain('src/components/FormPlaceholder.tsx');
 
+      // Verify adapter exports only the EVM adapter
+      expect(projectFiles['src/adapters/index.ts']).toContain('EvmAdapter');
+      expect(projectFiles['src/adapters/index.ts']).not.toContain('SolanaAdapter');
+
       // Verify package.json is customized
       if (projectFiles['package.json']) {
         const packageJson = JSON.parse(projectFiles['package.json']);
         expect(packageJson.name).toBe('test-project');
       }
+    });
+
+    it('should generate a project without adapters when includeAdapters is false', async () => {
+      const generator = new FormCodeGenerator();
+
+      // Create a minimal form config for testing
+      const formConfig: BuilderFormConfig = {
+        functionId: 'testFunction',
+        fields: [
+          {
+            id: 'param1',
+            name: 'param1',
+            label: 'Parameter 1',
+            type: 'text',
+            validation: {
+              required: true,
+            },
+          },
+        ],
+        layout: {
+          columns: 1,
+          spacing: 'normal',
+          labelPosition: 'top',
+        },
+        validation: {
+          mode: 'onChange',
+          showErrors: 'inline',
+        },
+        theme: {},
+      };
+
+      // Generate a project without adapters
+      const projectFiles = await generator.generateTemplateProject(
+        formConfig,
+        'evm',
+        'testFunction',
+        {
+          chainType: 'evm',
+          includeAdapters: false,
+        }
+      );
+
+      // Verify key files are present in the project
+      expect(Object.keys(projectFiles)).toContain('src/components/GeneratedForm.tsx');
+
+      // Verify adapter files are NOT included
+      expect(Object.keys(projectFiles)).not.toContain('src/adapters/evm/adapter.ts');
+      expect(Object.keys(projectFiles)).not.toContain('src/adapters/index.ts');
     });
   });
 });

@@ -1,7 +1,8 @@
+import { AdapterExportManager } from '../AdapterExportManager';
 import { TemplateManager } from '../TemplateManager';
 
 import type { ChainType } from '../../core/types/ContractSchema';
-import type { TemplateOptions } from '../../core/types/ExportTypes';
+import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 /**
@@ -16,16 +17,18 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * - Generates only the form component code
  * - Uses a consistent import pattern that works in both dev and production
  * - Integrates with TemplateManager to generate complete projects
+ * - Integrates with AdapterExportManager to include required adapter files
  *
  * TODO: Additional integrations:
- * - Add required adapter files for the selected blockchain
- * - Update package.json with correct dependencies
+ * - Implement PackageManager component to update package.json with correct dependencies
  */
 export class FormCodeGenerator {
   private templateManager: TemplateManager;
+  private adapterExportManager: AdapterExportManager;
 
   constructor() {
     this.templateManager = new TemplateManager();
+    this.adapterExportManager = new AdapterExportManager();
   }
 
   /**
@@ -136,15 +139,15 @@ export default function GeneratedForm({ onSubmit, onError }) {
    * @param formConfig The form configuration from the builder
    * @param chainType The selected blockchain type
    * @param functionId The ID of the contract function
-   * @param options Additional template options like project name, description, etc.
+   * @param options Additional options for export customization
    * @returns A record of file paths to file contents for the complete project
    */
-  generateTemplateProject(
+  async generateTemplateProject(
     formConfig: BuilderFormConfig,
     chainType: ChainType,
     functionId: string,
-    options: TemplateOptions = {}
-  ): Record<string, string> {
+    options: ExportOptions = { chainType }
+  ): Promise<Record<string, string>> {
     // Generate the form component code
     const formComponentCode = this.generateFormComponent(formConfig, chainType, functionId);
 
@@ -156,6 +159,12 @@ export default function GeneratedForm({ onSubmit, onError }) {
       // We need to update App.tsx to import GeneratedForm instead of FormPlaceholder
       'src/components/App.tsx': this.generateUpdatedAppComponent(functionId),
     };
+
+    // Get adapter files if needed
+    if (options.includeAdapters !== false) {
+      const adapterFiles = this.adapterExportManager.getAdapterFiles(chainType);
+      Object.assign(customFiles, adapterFiles);
+    }
 
     // Use the template manager to create a complete project
     return this.templateManager.createProject('typescript-react-vite', customFiles, options);

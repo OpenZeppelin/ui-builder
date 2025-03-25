@@ -5,6 +5,8 @@
  * including template options, export configurations, and results.
  */
 
+import { ChainType } from '@/core/types/ContractSchema';
+
 /**
  * Options for customizing a template
  */
@@ -46,10 +48,21 @@ export interface ExportOptions extends TemplateOptions {
   template?: string;
 
   /**
+   * Blockchain type for the export
+   */
+  chainType: ChainType;
+
+  /**
    * Whether to include source maps
    * @default false
    */
   includeSourceMaps?: boolean;
+
+  /**
+   * Whether to include adapter files in the export
+   * @default true
+   */
+  includeAdapters?: boolean;
 
   /**
    * Custom README content
