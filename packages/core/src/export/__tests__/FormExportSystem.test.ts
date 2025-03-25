@@ -21,7 +21,7 @@ interface MockFormRendererConfig {
 
 // Mock types for internal components
 interface MockTemplateManager {
-  getTemplateFiles: ReturnType<typeof vi.fn>;
+  createProject: ReturnType<typeof vi.fn>;
 }
 
 interface MockFormCodeGenerator {
@@ -143,7 +143,7 @@ describe('FormExportSystem', () => {
   // Create a system with the provided dependencies
   const createExportSystem = () => {
     // Create new instances for each test
-    const templateManager = { getTemplateFiles: vi.fn() } as MockTemplateManager;
+    const templateManager = { createProject: vi.fn() } as MockTemplateManager;
     const formCodeGenerator = { generateFormComponent: vi.fn() } as MockFormCodeGenerator;
     const adapterExportManager = new adapterExportManagerModule.AdapterExportManager();
     const packageManager = new PackageManager(
@@ -152,9 +152,12 @@ describe('FormExportSystem', () => {
     );
 
     // Mock necessary methods
-    templateManager.getTemplateFiles = vi.fn().mockReturnValue({
-      'package.json': mockPackageJson,
-      'index.html': '<html><body><div id="root"></div></body></html>',
+    templateManager.createProject = vi.fn().mockImplementation((templateName, customFiles) => {
+      return {
+        'package.json': mockPackageJson,
+        'index.html': '<html><body><div id="root"></div></body></html>',
+        ...customFiles,
+      };
     });
 
     formCodeGenerator.generateFormComponent = vi
