@@ -30,6 +30,11 @@ import type { FormRendererConfig } from '@form-renderer/types';
  *
  * The virtual module approach works consistently in both development and production
  * environments while preserving all the build-time optimization benefits.
+ *
+ * TEST CONFIGURATION:
+ * For tests, there's a matching plugin in vitest.config.ts that provides a minimal mock
+ * implementation of this module. Most tests provide their own mock via the constructor
+ * parameters, but the virtual module is necessary to satisfy this import statement.
  */
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
