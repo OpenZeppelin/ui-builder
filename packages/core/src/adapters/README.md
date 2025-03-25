@@ -284,6 +284,57 @@ private getDefaultValidationForType(parameterType: string): {
 4. **Documentation**: Document the behavior of each method clearly, especially any edge cases
 5. **Error Handling**: Use consistent error handling patterns across adapters
 
+## Adapter Configuration Files
+
+Each adapter should provide a `config.ts` file that defines its dependencies and other configuration options using the `AdapterConfig` interface:
+
+```typescript
+// /adapters/{chainType}/config.ts
+import type { AdapterConfig } from '../../core/types/AdapterTypes';
+
+/**
+ * Configuration for the {ChainType} adapter
+ */
+export const {chainType}AdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      // Runtime dependencies needed by this adapter
+      // These will be included in package.json dependencies
+      'dependency-name': '^1.0.0',
+      'another-dependency': '^2.0.0',
+    },
+
+    dev: {
+      // Development dependencies for this adapter
+      // These will be included in package.json devDependencies
+      '@types/dependency-name': '^1.0.0',
+    }
+  }
+};
+```
+
+### Dependency Management
+
+The adapter configuration is used by the Package Management System when exporting forms to:
+
+1. Determine which dependencies to include in the exported project's package.json
+2. Set appropriate version ranges for each dependency
+3. Separate runtime dependencies from development dependencies
+
+When adding a new dependency to your adapter:
+
+1. Add it to the `runtime` object if it's needed at runtime
+2. Add it to the `dev` object if it's only needed during development
+3. Use semantic versioning ranges (e.g., `^1.0.0`) to allow for minor and patch updates
+
+### Configuration Discovery
+
+The Package Management System uses Vite's `import.meta.glob` to automatically discover adapter configuration files at build time. This means:
+
+1. No manual registration of adapters is needed
+2. Adapter configurations are discovered based on directory structure
+3. All adapter configuration files must follow the naming convention: `{chainType}AdapterConfig`
+
 ## Usage in UI Components
 
 UI components should never directly implement chain-specific logic. Instead, they should:

@@ -139,6 +139,97 @@ The main component for rendering transaction forms.
 | `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |
 | `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]           |
 
+## Configuration System
+
+The form-renderer package includes a configuration system that defines dependencies and other settings. This configuration is used when forms are exported to ensure proper dependencies are included in the generated project.
+
+### Form Renderer Configuration File
+
+Create a `config.ts` file in the form-renderer package:
+
+```typescript
+// packages/form-renderer/src/config.ts
+import type { FormRendererConfig } from './types/FormRendererConfig';
+
+/**
+ * Configuration for the form-renderer package
+ */
+export const formRendererConfig: FormRendererConfig = {
+  /**
+   * Dependencies for specific field types
+   * Only dependencies for fields used in a form will be included in exports
+   */
+  fieldDependencies: {
+    // Date field dependencies
+    date: {
+      runtimeDependencies: {
+        'react-datepicker': '^4.14.0',
+      },
+      devDependencies: {
+        '@types/react-datepicker': '^4.11.2',
+      },
+    },
+
+    // Select field dependencies
+    select: {
+      runtimeDependencies: {
+        'react-select': '^5.7.3',
+      },
+      devDependencies: {
+        '@types/react-select': '^5.0.1',
+      },
+    },
+
+    // Complex fields like file uploads
+    file: {
+      runtimeDependencies: {
+        'react-dropzone': '^14.2.3',
+      },
+    },
+
+    // Basic fields don't need additional dependencies
+    text: { runtimeDependencies: {} },
+    number: { runtimeDependencies: {} },
+    checkbox: { runtimeDependencies: {} },
+    radio: { runtimeDependencies: {} },
+  },
+
+  /**
+   * Core dependencies required by form-renderer
+   * These will be included in all exported projects
+   */
+  coreDependencies: {
+    react: '^18.2.0',
+    'react-dom': '^18.2.0',
+    'react-hook-form': '^7.43.9',
+    '@openzeppelin/transaction-form-builder-form-renderer': '^1.0.0',
+  },
+};
+```
+
+### Dependency Management
+
+The FormRendererConfig is used by the export system to:
+
+1. Include core dependencies required by all forms
+2. Add field-specific dependencies based on the fields used in a form
+3. Separate runtime from development dependencies
+
+#### Field-specific Dependencies
+
+When a user exports a form, the system analyzes the fields used in the form and only includes dependencies for those specific field types. For example, if a form doesn't use a date picker, the 'react-datepicker' dependency won't be included.
+
+#### Versioning Strategy
+
+The system applies a semantic versioning strategy to dependencies:
+
+1. For form-renderer packages, it uses caret ranges (^) to allow minor and patch updates
+2. This enables exported forms to receive updates without needing to re-export the entire form
+
+### Configuration Discovery
+
+The Package Management System automatically discovers the form-renderer configuration using Vite's `import.meta.glob`. The exported `formRendererConfig` constant name is expected by the system.
+
 ## Development
 
 ### Build System
