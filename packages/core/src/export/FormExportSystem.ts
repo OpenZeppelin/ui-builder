@@ -59,54 +59,78 @@ export class FormExportSystem {
       ...options,
     };
 
-    // 1. Generate form component code
-    const formComponentCode = this.formCodeGenerator.generateFormComponent(
-      formConfig,
-      chainType,
-      functionId
-    );
-
-    // 2. Get template files
-    const templateFiles = this.templateManager.getTemplateFiles(
-      exportOptions.template || 'typescript-react-vite',
-      exportOptions
-    );
-
-    // 3. Get adapter files if needed
-    const adapterFiles =
-      exportOptions.includeAdapters !== false
-        ? this.adapterExportManager.getAdapterFiles(chainType)
-        : {};
-
-    // 4. Update package.json using PackageManager
-    const originalPackageJson = templateFiles['package.json'];
-    if (originalPackageJson) {
-      templateFiles['package.json'] = this.packageManager.updatePackageJson(
-        originalPackageJson,
+    try {
+      // 1. Generate form component code
+      const formComponentCode = this.formCodeGenerator.generateFormComponent(
         formConfig,
         chainType,
-        functionId,
+        functionId
+      );
+
+      // 2. Get adapter files if needed
+      const adapterFiles =
+        exportOptions.includeAdapters !== false
+          ? this.adapterExportManager.getAdapterFiles(chainType)
+          : {};
+
+      // Create custom files object with generated code
+      const customFiles = {
+        'src/components/GeneratedForm.tsx': formComponentCode,
+        ...adapterFiles,
+      };
+
+      // 3. Create the complete project using TemplateManager's createProject method
+      // This will properly handle placeholders and combine template files with custom files
+      const projectFiles = this.templateManager.createProject(
+        exportOptions.template || 'typescript-react-vite',
+        customFiles,
         exportOptions
       );
+
+      // 4. Update package.json using PackageManager
+      const originalPackageJson = projectFiles['package.json'];
+      if (originalPackageJson) {
+        projectFiles['package.json'] = this.packageManager.updatePackageJson(
+          originalPackageJson,
+          formConfig,
+          chainType,
+          functionId,
+          exportOptions
+        );
+      } else {
+        console.warn('No package.json found in template, using default');
+        // Create a basic package.json if none exists
+        projectFiles['package.json'] = JSON.stringify(
+          {
+            name: exportOptions.projectName || `${functionId.toLowerCase()}-form`,
+            version: '0.1.0',
+            private: true,
+            type: 'module',
+            dependencies: this.packageManager.getDependencies(formConfig, chainType),
+          },
+          null,
+          2
+        );
+      }
+
+      // Log the final project structure for debugging
+      console.log('Total project files for export:', Object.keys(projectFiles).length);
+      console.log('Project structure:', Object.keys(projectFiles).sort());
+
+      // 5. Create ZIP file
+      const fileName = this.generateFileName(formConfig, functionId);
+      const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
+
+      // 6. Return the export result with dependencies from PackageManager
+      return {
+        zipBlob: zipResult.blob,
+        fileName: zipResult.fileName,
+        dependencies: this.packageManager.getDependencies(formConfig, chainType),
+      };
+    } catch (error) {
+      console.error('Error exporting form:', error);
+      throw new Error(`Export failed: ${(error as Error).message}`);
     }
-
-    // 5. Build the complete export file set
-    const projectFiles = {
-      ...templateFiles,
-      'src/components/GeneratedForm.tsx': formComponentCode,
-      ...adapterFiles,
-    };
-
-    // 6. Create ZIP file
-    const fileName = this.generateFileName(formConfig, functionId);
-    const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
-
-    // 7. Return the export result with dependencies from PackageManager
-    return {
-      zipBlob: zipResult.blob,
-      fileName: zipResult.fileName,
-      dependencies: this.packageManager.getDependencies(formConfig, chainType),
-    };
   }
 
   /**
