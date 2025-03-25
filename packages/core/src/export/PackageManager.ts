@@ -8,6 +8,31 @@
 
 import type { FormRendererConfig } from '@form-renderer/types';
 
+/**
+ * VIRTUAL MODULE IMPORT
+ *
+ * This import uses a virtual module provided by the 'form-renderer-config-provider'
+ * Vite plugin defined in vite.config.ts.
+ *
+ * WHY THIS APPROACH:
+ * Previous implementation used import.meta.glob to dynamically discover
+ * this configuration file across package boundaries:
+ *
+ * ```
+ * const formRendererConfigFile = import.meta.glob('../../form-renderer/src/config.ts', {
+ *   eager: true,
+ * }) as GlobImportResult;
+ * ```
+ *
+ * However, in development mode (pnpm dev), import.meta.glob cannot reliably
+ * resolve paths that cross package boundaries in a monorepo, causing the error:
+ * "Export failed: No form renderer configuration file found"
+ *
+ * The virtual module approach works consistently in both development and production
+ * environments while preserving all the build-time optimization benefits.
+ */
+import { formRendererConfig } from 'virtual:form-renderer-config';
+
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -25,14 +50,10 @@ const adapterConfigFiles = import.meta.glob('../adapters/*/config.ts', {
   eager: true,
 }) as GlobImportResult;
 
-const formRendererConfigFile = import.meta.glob('../../form-renderer/src/config.ts', {
-  eager: true,
-}) as GlobImportResult;
-
 // For testing purposes - make file collections available to tests
 export const packageTestFiles = {
   adapterConfig: adapterConfigFiles,
-  formRendererConfig: formRendererConfigFile,
+  formRendererConfig: { 'virtual:form-renderer-config': { formRendererConfig } },
 };
 
 /**
@@ -117,34 +138,32 @@ export class PackageManager {
 
   /**
    * Load form-renderer configuration
+   *
+   * This method loads the form-renderer configuration that defines
+   * which dependencies are needed for different field types.
+   *
+   * NOTE: This implementation uses the formRendererConfig imported
+   * from the virtual module rather than trying to discover it via
+   * import.meta.glob, which doesn't work reliably across package
+   * boundaries in development mode.
+   *
    * @returns The form-renderer configuration
    */
   private loadFormRendererConfig(): FormRendererConfig {
-    // Get the form renderer config from the module exports
-    for (const path in formRendererConfigFile) {
-      const module = formRendererConfigFile[path];
-
-      // Look for conventional name 'formRendererConfig'
-      if (!module.formRendererConfig) {
-        throw new Error(
-          `Missing form renderer configuration. ` +
-            `Expected export named "formRendererConfig" in ${path}`
-        );
-      }
-
-      // Validate the config object has required properties
-      if (!this.isFormRendererConfig(module.formRendererConfig)) {
-        throw new Error(
-          `Invalid form renderer configuration. ` +
-            `The export "formRendererConfig" is missing required properties`
-        );
-      }
-
-      return module.formRendererConfig as FormRendererConfig;
+    // Use the imported config from the virtual module
+    if (!formRendererConfig) {
+      throw new Error('No form renderer configuration file found');
     }
 
-    // If no config files are found at all (empty glob result)
-    throw new Error('No form renderer configuration file found');
+    // Validate the config object has required properties
+    if (!this.isFormRendererConfig(formRendererConfig)) {
+      throw new Error(
+        'Invalid form renderer configuration. ' +
+          'The export "formRendererConfig" is missing required properties'
+      );
+    }
+
+    return formRendererConfig;
   }
 
   /**
