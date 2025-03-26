@@ -106,24 +106,11 @@ export class TemplateManager {
       }
     }
 
-    // If registry is empty (which can happen in test environments),
-    // add fallback entries to make tests pass
+    // If no templates were found, throw an error
     if (Object.keys(registry).length === 0) {
-      console.warn('No templates found via import.meta.glob, using fallback template');
-      registry['typescript-react-vite'] = {
-        'package.json': JSON.stringify(
-          {
-            name: 'transaction-form',
-            private: true,
-            version: '0.0.0',
-            type: 'module',
-            // Add minimal fallback content for tests
-          },
-          null,
-          2
-        ),
-        'README.md': '# Transaction Form\n\n{{ PROJECT_DESCRIPTION }}\n',
-      };
+      throw new Error(
+        'No templates found. Please ensure template files exist in the templates directory.'
+      );
     }
 
     return registry;
