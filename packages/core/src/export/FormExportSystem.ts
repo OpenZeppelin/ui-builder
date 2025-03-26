@@ -157,10 +157,14 @@ export class FormExportSystem {
   /**
    * Generate a filename for the exported package
    * @param functionId Function ID
-   * @returns A suitable filename
+   * @returns A suitable filename in kebab-case format
    */
   private generateFileName(functionId: string): string {
-    // Create a filename based on the function ID
-    return `${functionId.toLowerCase().replace(/[^a-z0-9]/g, '')}-form.zip`;
+    // Convert to kebab case by replacing non-alphanumeric chars with hyphens
+    const kebabName = functionId
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace sequences of non-alphanumeric chars with single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    return `${kebabName}-form.zip`;
   }
 }
