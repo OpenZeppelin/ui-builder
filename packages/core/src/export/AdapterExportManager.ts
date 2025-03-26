@@ -162,12 +162,11 @@ export class AdapterExportManager {
       }
     }
 
-    // If registry is empty (which can happen in test environments),
-    // add fallback entries to make tests pass
+    // If no adapters were found, this is likely a critical error in production
     if (Object.keys(registry).length === 0) {
-      console.warn('No adapters found via import.meta.glob, using fallback adapters for tests');
-      registry.evm = ['../adapters/evm/adapter.ts', '../adapters/evm/types.ts'];
-      registry.solana = ['../adapters/solana/adapter.ts', '../adapters/solana/types.ts'];
+      console.error(
+        'No adapters found via import.meta.glob - this may indicate a configuration issue'
+      );
     }
 
     this.adapterRegistry = registry;
