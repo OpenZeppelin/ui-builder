@@ -11,49 +11,79 @@ import type { TemplateOptions } from '../core/types/ExportTypes';
 type TemplateRegistry = Record<string, Record<string, string>>;
 
 /**
- * Type for glob import results
+ * Type for lazy glob import results
  */
-type GlobImportResult = Record<string, string>;
+type LazyGlobImportResult = Record<string, () => Promise<string>>;
 
-// Build-time template discovery using Vite's import.meta.glob
-// This runs at build time and bundles the templates directly
-const templateFiles = import.meta.glob('../templates/**/*', {
+// Template files are loaded lazily using Vite's import.meta.glob
+// This allows code-splitting so the template files are only loaded when needed
+const templateFiles = import.meta.glob<string>('../templates/**/*', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as GlobImportResult;
+}) as LazyGlobImportResult;
 
-// For testing purposes - make file collections available to tests
-export const templateTestFiles = {
-  templates: templateFiles,
-};
+// For testing purposes - make file paths available to tests
+export const templateFilePaths = Object.keys(templateFiles);
 
 /**
  * TemplateManager is responsible for managing template projects
  * used for exporting standalone form applications.
  */
 export class TemplateManager {
-  private readonly templates: TemplateRegistry;
+  private templates: TemplateRegistry | null = null;
   private version: string;
+  private initializing: Promise<void> | null = null;
 
   /**
    * Creates a new TemplateManager instance
    */
   constructor() {
-    // Initialize with the pre-loaded template files
-    this.templates = this.processTemplateFiles();
-    // Get version from package.json
+    // Initialize version
     this.version = this.getPackageVersion();
+    // Templates will be loaded on demand
+    this.templates = null;
+  }
+
+  /**
+   * Load templates if not already loaded
+   */
+  private async ensureTemplatesLoaded(): Promise<void> {
+    // If already loaded, return immediately
+    if (this.templates !== null) {
+      return Promise.resolve();
+    }
+
+    // If already initializing, wait for that to complete
+    if (this.initializing !== null) {
+      return this.initializing;
+    }
+
+    // Start loading
+    this.initializing = this.loadTemplates();
+    await this.initializing;
+
+    // Clear initializing promise
+    this.initializing = null;
+  }
+
+  /**
+   * Load and process all template files
+   */
+  private async loadTemplates(): Promise<void> {
+    this.templates = await this.processTemplateFiles();
   }
 
   /**
    * Process the imported template files to create a more usable structure
    */
-  private processTemplateFiles(): TemplateRegistry {
+  private async processTemplateFiles(): Promise<TemplateRegistry> {
     const registry: TemplateRegistry = {};
 
+    // Get all template file paths
+    const paths = Object.keys(templateFiles);
+
     // Process all discovered template files
-    for (const path in templateFiles) {
+    for (const path of paths) {
       // Extract template name from path (e.g., '../templates/typescript-react-vite/package.json' -> 'typescript-react-vite')
       const match = path.match(/\/templates\/([^/]+)\//);
       if (match) {
@@ -69,7 +99,9 @@ export class TemplateManager {
         const filePathMatch = path.match(/\/templates\/[^/]+\/(.+)$/);
         if (filePathMatch) {
           const relativePath = filePathMatch[1];
-          registry[templateName][relativePath] = templateFiles[path];
+          // Load the file content asynchronously
+          const content = await templateFiles[path]();
+          registry[templateName][relativePath] = content;
         }
       }
     }
@@ -114,9 +146,11 @@ export class TemplateManager {
 
   /**
    * Get a list of available template names
+   * Note: This will trigger template loading if not already loaded
    */
-  getAvailableTemplates(): string[] {
-    return Object.keys(this.templates);
+  async getAvailableTemplates(): Promise<string[]> {
+    await this.ensureTemplatesLoaded();
+    return Object.keys(this.templates!);
   }
 
   /**
@@ -126,16 +160,21 @@ export class TemplateManager {
    * @param options Additional options for template customization
    * @returns A record of file paths to file contents
    */
-  getTemplateFiles(templateName: string, options: TemplateOptions = {}): Record<string, string> {
+  async getTemplateFiles(
+    templateName: string,
+    options: TemplateOptions = {}
+  ): Promise<Record<string, string>> {
+    await this.ensureTemplatesLoaded();
+
     // Check if template exists
-    if (!this.templates[templateName]) {
+    if (!this.templates![templateName]) {
       throw new Error(
-        `Template "${templateName}" not found. Available templates: ${this.getAvailableTemplates().join(', ')}`
+        `Template "${templateName}" not found. Available templates: ${Object.keys(this.templates!).join(', ')}`
       );
     }
 
     // Clone the template files to avoid modifying the original
-    const files: Record<string, string> = { ...this.templates[templateName] };
+    const files: Record<string, string> = { ...this.templates![templateName] };
 
     // Apply template version
     if (files['package.json']) {
@@ -180,13 +219,13 @@ export class TemplateManager {
    * @param options Additional options for template customization
    * @returns A record of file paths to file contents for the complete project
    */
-  createProject(
+  async createProject(
     templateName: string,
     customFiles: Record<string, string> = {},
     options: TemplateOptions = {}
-  ): Record<string, string> {
+  ): Promise<Record<string, string>> {
     // Get base template files
-    const templateFiles = this.getTemplateFiles(templateName, options);
+    const templateFiles = await this.getTemplateFiles(templateName, options);
 
     // Merge custom files, overwriting template files if needed
     const projectFiles = {

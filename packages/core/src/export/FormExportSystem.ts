@@ -81,7 +81,7 @@ export class FormExportSystem {
 
       // 3. Create the complete project using TemplateManager's createProject method
       // This will properly handle placeholders and combine template files with custom files
-      const projectFiles = this.templateManager.createProject(
+      const projectFiles = await this.templateManager.createProject(
         exportOptions.template || 'typescript-react-vite',
         customFiles,
         exportOptions

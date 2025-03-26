@@ -164,7 +164,7 @@ export default function GeneratedForm({ onSubmit, onError }) {
     }
 
     // Use the template manager to create a complete project
-    return this.templateManager.createProject('typescript-react-vite', customFiles, options);
+    return await this.templateManager.createProject('typescript-react-vite', customFiles, options);
   }
 
   /**
