@@ -218,22 +218,32 @@ export class AdapterExportManager {
   private async getCoreAdapterFiles(): Promise<AdapterFileMap> {
     const coreFiles: AdapterFileMap = {};
 
-    // Core schema types - first path in the record or fall back to empty string
+    // ContractSchema.ts - Get from core package
     const schemaTypesPath = Object.keys(coreTypeFiles)[0] || '';
     if (schemaTypesPath) {
-      coreFiles['src/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
+      try {
+        coreFiles['src/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
+      } catch (error) {
+        console.warn('Failed to load ContractSchema.ts:', error);
+        coreFiles['src/types/ContractSchema.ts'] = '// ContractSchema.ts could not be loaded';
+      }
     } else {
-      // Fallback for tests
-      coreFiles['src/types/ContractSchema.ts'] = '// Mock ContractSchema.ts content for tests';
+      console.warn('No ContractSchema.ts file found');
+      coreFiles['src/types/ContractSchema.ts'] = '// ContractSchema.ts file not found';
     }
 
-    // Form renderer types - first path in the record or fall back to empty string
+    // FormTypes.ts - Get from form-renderer package
     const formTypesPath = Object.keys(formRendererTypeFiles)[0] || '';
     if (formTypesPath) {
-      coreFiles['src/types/FormTypes.ts'] = await this.getFileContent(formTypesPath);
+      try {
+        coreFiles['src/types/FormTypes.ts'] = await this.getFileContent(formTypesPath);
+      } catch (error) {
+        console.warn('Failed to load FormTypes.ts:', error);
+        coreFiles['src/types/FormTypes.ts'] = '// FormTypes.ts could not be loaded';
+      }
     } else {
-      // Fallback for tests
-      coreFiles['src/types/FormTypes.ts'] = '// Mock FormTypes.ts content for tests';
+      console.warn('No FormTypes.ts file found');
+      coreFiles['src/types/FormTypes.ts'] = '// FormTypes.ts file not found';
     }
 
     return coreFiles;

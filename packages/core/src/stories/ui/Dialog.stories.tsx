@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import React from 'react';
-
 import { Button } from '../../../../form-renderer/src/components/ui/button';
 import { Input } from '../../../../form-renderer/src/components/ui/input';
 import {

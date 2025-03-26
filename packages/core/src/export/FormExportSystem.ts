@@ -61,13 +61,16 @@ export class FormExportSystem {
 
     try {
       // 1. Generate form component code
-      const formComponentCode = this.formCodeGenerator.generateFormComponent(
+      const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
         chainType,
         functionId
       );
 
-      // 2. Get adapter files if needed
+      // 2. Generate App component code
+      const appComponentCode = await this.formCodeGenerator.generateUpdatedAppComponent(functionId);
+
+      // 3. Get adapter files if needed
       const adapterFiles =
         exportOptions.includeAdapters !== false
           ? await this.adapterExportManager.getAdapterFiles(chainType)
@@ -75,11 +78,12 @@ export class FormExportSystem {
 
       // Create custom files object with generated code
       const customFiles = {
+        'src/App.tsx': appComponentCode,
         'src/components/GeneratedForm.tsx': formComponentCode,
         ...adapterFiles,
       };
 
-      // 3. Create the complete project using TemplateManager's createProject method
+      // 4. Create the complete project using TemplateManager's createProject method
       // This will properly handle placeholders and combine template files with custom files
       const projectFiles = await this.templateManager.createProject(
         exportOptions.template || 'typescript-react-vite',
@@ -87,7 +91,7 @@ export class FormExportSystem {
         exportOptions
       );
 
-      // 4. Update package.json using PackageManager
+      // 5. Update package.json using PackageManager
       const originalPackageJson = projectFiles['package.json'];
       if (originalPackageJson) {
         projectFiles['package.json'] = this.packageManager.updatePackageJson(
@@ -117,11 +121,11 @@ export class FormExportSystem {
       console.log('Total project files for export:', Object.keys(projectFiles).length);
       console.log('Project structure:', Object.keys(projectFiles).sort());
 
-      // 5. Create ZIP file
+      // 6. Create ZIP file
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
 
-      // 6. Return the export result with dependencies from PackageManager
+      // 7. Return the export result with dependencies from PackageManager
       return {
         zipBlob: zipResult.blob,
         fileName: zipResult.fileName,

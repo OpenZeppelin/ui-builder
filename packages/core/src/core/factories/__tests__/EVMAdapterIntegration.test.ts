@@ -10,7 +10,7 @@ import type { ContractSchema } from '../../types/ContractSchema';
 /**
  * EVM Adapter Integration Tests
  *
- * These tests verify the integration between FormSchemaFactory and the EVMAdapter.
+ * These tests verify the integration between FormSchemaFactory and the EvmAdapter.
  *
  * Areas tested:
  * - Field mapping for different parameter types

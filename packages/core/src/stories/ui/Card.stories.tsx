@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Meta, StoryObj } from '@storybook/react';
 
 import { Button } from '../../../../form-renderer/src/components/ui/button';

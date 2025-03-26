@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
+import templatePlugin from './vite.template-plugin';
+
 /**
  * Configuration for virtual modules
  *
@@ -26,6 +28,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    templatePlugin(),
 
     /**
      * CROSS-PACKAGE CONFIGURATION PROVIDER

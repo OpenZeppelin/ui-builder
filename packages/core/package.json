@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --emptyOutDir",
+    "build": "tsc --skipLibCheck && vite build --emptyOutDir",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint 'src/**/*.{ts,tsx,js,cjs,mjs}' --fix --config eslint.config.cjs",

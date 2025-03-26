@@ -46,7 +46,7 @@ This project was generated using the [OpenZeppelin Transaction Form Builder](htt
 The generated form can be imported and used in your components:
 
 ```tsx
-import { GeneratedForm } from './components/GeneratedForm';
+import GeneratedForm from './components/GeneratedForm';
 
 function App() {
   const handleSubmit = async (values) => {

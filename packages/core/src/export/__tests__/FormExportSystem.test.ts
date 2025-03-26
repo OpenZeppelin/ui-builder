@@ -26,6 +26,7 @@ interface MockTemplateManager {
 
 interface MockFormCodeGenerator {
   generateFormComponent: ReturnType<typeof vi.fn>;
+  generateUpdatedAppComponent: ReturnType<typeof vi.fn>;
 }
 
 /**
@@ -152,7 +153,7 @@ describe('FormExportSystem', () => {
     );
 
     // Mock necessary methods
-    templateManager.createProject = vi.fn().mockImplementation((templateName, customFiles) => {
+    templateManager.createProject = vi.fn().mockImplementation((_templateName, customFiles) => {
       return {
         'package.json': mockPackageJson,
         'index.html': '<html><body><div id="root"></div></body></html>',
@@ -163,6 +164,10 @@ describe('FormExportSystem', () => {
     formCodeGenerator.generateFormComponent = vi
       .fn()
       .mockReturnValue('export const GeneratedForm = () => { return <div>Form</div>; };');
+
+    formCodeGenerator.generateUpdatedAppComponent = vi
+      .fn()
+      .mockReturnValue('export function App() { return <div><GeneratedForm /></div>; };');
 
     // Create the system with our mocked dependencies
     const system = new FormExportSystem();
@@ -232,7 +237,7 @@ describe('FormExportSystem', () => {
         const { system, packageManager } = createExportSystem();
 
         // Mock getDependencies to return different dependencies based on field types
-        vi.spyOn(packageManager, 'getDependencies').mockImplementation((formConfig, chainType) => {
+        vi.spyOn(packageManager, 'getDependencies').mockImplementation(() => {
           const deps: Record<string, string> = {
             react: '^18.2.0',
             'react-dom': '^18.2.0',
@@ -286,7 +291,7 @@ describe('FormExportSystem', () => {
       );
 
       // Mock implementation that returns an empty object
-      getAdapterFilesSpy.mockImplementation(() => ({}));
+      getAdapterFilesSpy.mockImplementation(() => Promise.resolve({}));
 
       // Create a new system with the mocked dependencies
       const { system } = createExportSystem();
@@ -321,7 +326,7 @@ describe('FormExportSystem', () => {
       // Mock the PackageManager's updatePackageJson method
       const updatePackageJsonMock = vi
         .spyOn(packageManager, 'updatePackageJson')
-        .mockImplementation((content, formConfig, chainType, functionId, options = {}) => {
+        .mockImplementation((content, _formConfig, _chainType, _functionId, options = {}) => {
           const packageJson = JSON.parse(content);
           packageJson.name = options.projectName || 'default-name';
           packageJson.description = options.description || 'Default description';

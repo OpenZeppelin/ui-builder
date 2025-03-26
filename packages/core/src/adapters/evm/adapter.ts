@@ -37,7 +37,7 @@ const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
 /**
  * EVM-specific adapter implementation
  */
-export class EVMAdapter implements ContractAdapter {
+export class EvmAdapter implements ContractAdapter {
   /**
    * Load a contract from a file or address
    */
@@ -280,4 +280,4 @@ export class EVMAdapter implements ContractAdapter {
 }
 
 // Also export as default to ensure compatibility with various import styles
-export default EVMAdapter;
+export default EvmAdapter;

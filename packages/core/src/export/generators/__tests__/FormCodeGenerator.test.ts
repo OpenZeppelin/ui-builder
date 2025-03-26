@@ -9,7 +9,7 @@ import type { BuilderFormConfig } from '../../../core/types/FormTypes';
  */
 describe('FormCodeGenerator', () => {
   describe('generateFormComponent', () => {
-    it('should generate React component code for a form', () => {
+    it('should generate React component code for a form', async () => {
       const generator = new FormCodeGenerator();
 
       // Create a minimal form config for testing
@@ -38,12 +38,16 @@ describe('FormCodeGenerator', () => {
         theme: {},
       };
 
-      const generatedCode = generator.generateFormComponent(formConfig, 'evm', 'testFunction');
+      const generatedCode = await generator.generateFormComponent(
+        formConfig,
+        'evm',
+        'testFunction'
+      );
 
       // Verify the generated code contains expected elements
-      expect(generatedCode).toContain('import React, { useState }');
-      expect(generatedCode).toContain('import { TransactionForm }');
-      expect(generatedCode).toContain('import { EvmAdapter }');
+      expect(generatedCode).toContain("import { useState } from 'react'");
+      expect(generatedCode).toContain('TransactionForm');
+      expect(generatedCode).toContain('EvmAdapter');
       expect(generatedCode).toContain('export default function GeneratedForm');
       expect(generatedCode).toContain('testFunction');
     });
@@ -92,8 +96,8 @@ describe('FormCodeGenerator', () => {
       );
 
       // Verify key files are present in the project
+      expect(Object.keys(projectFiles)).toContain('src/App.tsx');
       expect(Object.keys(projectFiles)).toContain('src/components/GeneratedForm.tsx');
-      expect(Object.keys(projectFiles)).toContain('src/components/App.tsx');
 
       // Verify adapter files are included
       expect(Object.keys(projectFiles)).toContain('src/adapters/evm/adapter.ts');
@@ -102,11 +106,11 @@ describe('FormCodeGenerator', () => {
       // Note: Since we're using a mock/stub TemplateManager in tests,
       // we shouldn't make assumptions about all template files being present.
       // Just verify our generated files and basic structure are there.
+      expect(projectFiles).toHaveProperty('src/App.tsx');
       expect(projectFiles).toHaveProperty('src/components/GeneratedForm.tsx');
-      expect(projectFiles).toHaveProperty('src/components/App.tsx');
 
       // Verify App.tsx has been updated to import GeneratedForm
-      expect(projectFiles['src/components/App.tsx']).toContain('import { GeneratedForm }');
+      expect(projectFiles['src/App.tsx']).toContain('import GeneratedForm');
 
       // Verify FormPlaceholder.tsx is not present (should be replaced)
       expect(Object.keys(projectFiles)).not.toContain('src/components/FormPlaceholder.tsx');

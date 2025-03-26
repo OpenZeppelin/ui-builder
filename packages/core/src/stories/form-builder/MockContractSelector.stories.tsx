@@ -2,12 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { MockContractSelector } from '../../components/FormBuilder/MockContractSelector';
 
-// Re-define props to avoid the "cannot be named" error with external module
-interface MockContractSelectorProps {
-  onSelectMock: (mockId: string) => void;
-  chainType?: string;
-}
-
 const meta: Meta<typeof MockContractSelector> = {
   title: 'Core/FormBuilder/MockContractSelector',
   component: MockContractSelector,

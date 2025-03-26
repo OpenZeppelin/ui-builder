@@ -263,6 +263,11 @@ export class PackageManager {
   private getFieldDevDependencies(formConfig: BuilderFormConfig): Record<string, string> {
     const devDependencies: Record<string, string> = {};
 
+    // Check if fields exist
+    if (!formConfig.fields || !Array.isArray(formConfig.fields)) {
+      return devDependencies;
+    }
+
     // Get unique field types used in the form
     const fieldTypes = new Set(formConfig.fields.map((field) => field.type));
 
@@ -280,31 +285,48 @@ export class PackageManager {
   }
 
   /**
-   * Get all runtime dependencies for an exported project
-   * @param formConfig The form configuration
+   * Get the combined dependencies needed for a form
+   *
+   * @param formConfig Form configuration from the builder
    * @param chainType The blockchain type
-   * @returns Record of package names to version ranges
+   * @returns Record of dependency packages and versions
    */
   getDependencies(formConfig: BuilderFormConfig, chainType: ChainType): Record<string, string> {
     // Combine dependencies from different sources
     return {
+      // Core dependencies from form-renderer
       ...this.getCoreDependencies(),
+
+      // Chain-specific dependencies from adapter
       ...this.getChainDependencies(chainType),
+
+      // Field-specific dependencies from form-renderer
       ...this.getFieldDependencies(formConfig),
     };
   }
 
   /**
-   * Get all development dependencies for an exported project
+   * Get the combined dev dependencies needed for the project
+   *
    * @param formConfig The form configuration
    * @param chainType The blockchain type
-   * @returns Record of package names to version ranges
+   * @returns Record of development dependency packages and versions
    */
   getDevDependencies(formConfig: BuilderFormConfig, chainType: ChainType): Record<string, string> {
-    // Combine dev dependencies from different sources
+    // Start with common dev dependencies (from chain adapter config)
+    const devDependencies = {};
+
+    // Add chain-specific dev dependencies
+    const chainDevDependencies = this.getChainDevDependencies(chainType);
+
+    // Add field-specific dev dependencies
+    const fieldDevDependencies = this.getFieldDevDependencies(formConfig);
+
+    // Combine them
     return {
-      ...this.getChainDevDependencies(chainType),
-      ...this.getFieldDevDependencies(formConfig),
+      ...devDependencies,
+      ...chainDevDependencies,
+      ...fieldDevDependencies,
     };
   }
 
@@ -318,7 +340,7 @@ export class PackageManager {
 
     // Special handling for our own packages - use caret for easier upgrades
     for (const [name, version] of Object.entries(dependencies)) {
-      if (name.startsWith('@openzeppelin/transaction-form-builder')) {
+      if (name.startsWith('@openzeppelin/transaction-form')) {
         // Use caret range to allow minor and patch updates
         result[name] = version.startsWith('^') ? version : `^${version}`;
       } else {
@@ -411,7 +433,7 @@ export class PackageManager {
 
     // Add a script to update the form-renderer package
     (packageJson.scripts as Record<string, string>)['update-form-renderer'] =
-      'npm update @openzeppelin/transaction-form-builder-form-renderer';
+      'npm update @openzeppelin/transaction-form-renderer';
 
     // Add a script to check for outdated dependencies
     (packageJson.scripts as Record<string, string>)['check-deps'] = 'npm outdated';

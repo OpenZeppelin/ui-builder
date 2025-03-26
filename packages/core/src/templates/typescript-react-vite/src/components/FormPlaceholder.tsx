@@ -5,7 +5,7 @@
  * It demonstrates how the exported form will be structured and integrated with the form-renderer.
  *
  * During export, this will be replaced with a real implementation that uses the
- * @openzeppelin/transaction-form-builder-form-renderer package, which is the same
+ * @openzeppelin/transaction-form-renderer package, which is the same
  * package used in the preview within the form builder tool.
  *
  * This approach ensures consistent behavior between preview and exported forms,
@@ -18,9 +18,7 @@ export function FormPlaceholder() {
       <p>This is a placeholder for the generated transaction form.</p>
       <p>When exported, this file will be replaced with a real implementation that:</p>
       <ul>
-        <li>
-          Imports the TransactionForm from @openzeppelin/transaction-form-builder-form-renderer
-        </li>
+        <li>Imports the TransactionForm from @openzeppelin/transaction-form-renderer</li>
         <li>Creates an instance of the appropriate blockchain adapter</li>
         <li>Loads the form schema generated during export</li>
         <li>Renders the form with proper validation and submission handling</li>

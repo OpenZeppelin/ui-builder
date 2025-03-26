@@ -15,5 +15,6 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "src/**/*.json"],
-  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }]
+  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }],
+  "exclude": ["src/export/codeTemplates/*.template.tsx"]
 }

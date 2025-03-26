@@ -1,4 +1,4 @@
-import { FormPlaceholder } from './FormPlaceholder';
+import { FormPlaceholder } from './components/FormPlaceholder';
 
 /**
  * App Component

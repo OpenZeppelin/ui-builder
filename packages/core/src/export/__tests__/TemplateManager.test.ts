@@ -15,9 +15,9 @@ const mockTemplateContent = {
     2
   ),
   'index.html': '<!DOCTYPE html><html><body><div id="root"></div></body></html>',
+  'src/App.tsx': 'export function App() { return <div>App</div>; }',
   'src/components/FormPlaceholder.tsx':
     'export function FormPlaceholder() { return <div>Placeholder</div>; }',
-  'src/components/App.tsx': 'export function App() { return <div>App</div>; }',
   'src/adapters/AdapterPlaceholder.ts': 'export class AdapterPlaceholder {}',
   'src/main.tsx': 'import React from "react"; import ReactDOM from "react-dom/client";',
 };
@@ -60,8 +60,8 @@ describe('TemplateManager', () => {
       // Check if expected files are present
       expect(files).toHaveProperty('package.json');
       expect(files).toHaveProperty('index.html');
+      expect(files).toHaveProperty('src/App.tsx');
       expect(files).toHaveProperty('src/components/FormPlaceholder.tsx');
-      expect(files).toHaveProperty('src/components/App.tsx');
       expect(files).toHaveProperty('src/adapters/AdapterPlaceholder.ts');
       expect(files).toHaveProperty('src/main.tsx');
     });

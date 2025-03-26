@@ -1,6 +1,6 @@
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import EVMAdapter from './evm/adapter.ts';
+import EvmAdapter from './evm/adapter.ts';
 import MidnightAdapter from './midnight/adapter.ts';
 import SolanaAdapter from './solana/adapter.ts';
 import StellarAdapter from './stellar/adapter.ts';
@@ -72,7 +72,7 @@ export interface ContractAdapter {
 
 // Singleton instances of adapters
 const adapters: Record<ChainType, ContractAdapter> = {
-  evm: new EVMAdapter(),
+  evm: new EvmAdapter(),
   midnight: new MidnightAdapter(),
   stellar: new StellarAdapter(),
   solana: new SolanaAdapter(),

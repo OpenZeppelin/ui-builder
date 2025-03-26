@@ -21,7 +21,7 @@ Do not rely on the non-EVM adapters for any production use as they contain only 
 The adapter pattern in this project follows these principles:
 
 1. A single `ContractAdapter` interface defines all methods that must be implemented
-2. Each blockchain has its own adapter implementation (e.g., `EVMAdapter`, `SolanaAdapter`)
+2. Each blockchain has its own adapter implementation (e.g., `EvmAdapter`, `SolanaAdapter`)
 3. Adapters encapsulate all blockchain-specific logic and provide a consistent interface to the application
 
 ### Strict Interface Adherence
