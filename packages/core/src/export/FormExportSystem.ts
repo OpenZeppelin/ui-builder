@@ -70,7 +70,7 @@ export class FormExportSystem {
       // 2. Get adapter files if needed
       const adapterFiles =
         exportOptions.includeAdapters !== false
-          ? this.adapterExportManager.getAdapterFiles(chainType)
+          ? await this.adapterExportManager.getAdapterFiles(chainType)
           : {};
 
       // Create custom files object with generated code

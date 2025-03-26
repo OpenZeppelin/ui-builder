@@ -17,9 +17,9 @@ describe('AdapterExportManager', () => {
   };
 
   describe('getAvailableChainTypes', () => {
-    it('should return all available chain types', () => {
+    it('should return all available chain types', async () => {
       const manager = new AdapterExportManager(mockRegistry);
-      const chainTypes = manager.getAvailableChainTypes();
+      const chainTypes = await manager.getAvailableChainTypes();
 
       // Verify we have the expected chain types
       expect(chainTypes).toContain('evm');
@@ -31,9 +31,9 @@ describe('AdapterExportManager', () => {
   });
 
   describe('getAdapterFiles', () => {
-    it('should return adapter files for a valid chain type', () => {
+    it('should return adapter files for a valid chain type', async () => {
       const manager = new AdapterExportManager(mockRegistry);
-      const files = manager.getAdapterFiles('evm');
+      const files = await manager.getAdapterFiles('evm');
 
       // Verify core type files are included
       expect(files).toHaveProperty('src/types/ContractSchema.ts');
@@ -49,24 +49,24 @@ describe('AdapterExportManager', () => {
       expect(files['src/adapters/index.ts']).not.toContain('SolanaAdapter');
     });
 
-    it('should throw an error for an invalid chain type', () => {
+    it('should throw an error for an invalid chain type', async () => {
       const manager = new AdapterExportManager(mockRegistry);
 
       // Use a function wrapper to properly catch the error
-      const getInvalidAdapter = () => {
+      const getInvalidAdapter = async () => {
         // @ts-expect-error Invalid chain type for test
-        return manager.getAdapterFiles('invalid');
+        return await manager.getAdapterFiles('invalid');
       };
 
       // Expect the function to throw an error with the specific message
-      expect(getInvalidAdapter).toThrow('No adapter found for chain type: invalid');
+      await expect(getInvalidAdapter()).rejects.toThrow('No adapter found for chain type: invalid');
     });
   });
 
   describe('createAdapterBarrel', () => {
-    it('should create a barrel file that only exports the specified adapter', () => {
+    it('should create a barrel file that only exports the specified adapter', async () => {
       const manager = new AdapterExportManager(mockRegistry);
-      const files = manager.getAdapterFiles('solana');
+      const files = await manager.getAdapterFiles('solana');
 
       // Check barrel file content
       const barrelContent = files['src/adapters/index.ts'];

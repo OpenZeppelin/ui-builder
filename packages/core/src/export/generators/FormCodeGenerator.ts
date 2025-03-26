@@ -159,7 +159,7 @@ export default function GeneratedForm({ onSubmit, onError }) {
 
     // Get adapter files if needed
     if (options.includeAdapters !== false) {
-      const adapterFiles = this.adapterExportManager.getAdapterFiles(chainType);
+      const adapterFiles = await this.adapterExportManager.getAdapterFiles(chainType);
       Object.assign(customFiles, adapterFiles);
     }
 

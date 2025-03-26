@@ -16,46 +16,43 @@ export type AdapterFileMap = Record<string, string>;
 /**
  * Typings for glob import results
  */
-type GlobImportResult = Record<string, string>;
+type LazyGlobImportResult = Record<string, () => Promise<string>>;
 
 // Build-time adapter file discovery using Vite's import.meta.glob
-// This runs at build time and bundles the file contents directly
-// Using eager: true to load the contents synchronously
-const adapterFiles = import.meta.glob('../adapters/*/adapter.ts', {
+// Files will be lazy-loaded only when needed, not at application startup
+const adapterFiles = import.meta.glob<string>('../adapters/*/adapter.ts', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as GlobImportResult;
-const typeFiles = import.meta.glob('../adapters/*/types.ts', {
+}) as LazyGlobImportResult;
+const typeFiles = import.meta.glob<string>('../adapters/*/types.ts', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as GlobImportResult;
-const utilFiles = import.meta.glob('../adapters/*/utils.ts', {
+}) as LazyGlobImportResult;
+const utilFiles = import.meta.glob<string>('../adapters/*/utils.ts', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as GlobImportResult;
+}) as LazyGlobImportResult;
 
 // Core type files for adapter functionality
-const coreTypeFiles = import.meta.glob('../core/types/ContractSchema.ts', {
+const coreTypeFiles = import.meta.glob<string>('../core/types/ContractSchema.ts', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as GlobImportResult;
-const formRendererTypeFiles = import.meta.glob('../../form-renderer/src/types/FormTypes.ts', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as GlobImportResult;
+}) as LazyGlobImportResult;
+const formRendererTypeFiles = import.meta.glob<string>(
+  '../../form-renderer/src/types/FormTypes.ts',
+  {
+    query: '?raw',
+    import: 'default',
+  }
+) as LazyGlobImportResult;
 
-// For testing purposes - make file collections available to tests
-export const adapterTestFiles = {
-  adapter: adapterFiles,
-  type: typeFiles,
-  util: utilFiles,
-  coreType: coreTypeFiles,
-  formRendererType: formRendererTypeFiles,
+// For testing purposes - make file paths available to tests
+export const adapterFilePaths = {
+  adapter: Object.keys(adapterFiles),
+  type: Object.keys(typeFiles),
+  util: Object.keys(utilFiles),
+  coreType: Object.keys(coreTypeFiles),
+  formRendererType: Object.keys(formRendererTypeFiles),
 };
 
 /**
@@ -89,24 +86,56 @@ export const adapterTestFiles = {
  */
 export class AdapterExportManager {
   private adapterRegistry: Record<ChainType, string[]>;
+  private initialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
 
   /**
    * Creates a new AdapterExportManager instance
    * @param mockRegistry Optional registry for testing
    */
   constructor(mockRegistry?: Record<ChainType, string[]>) {
-    // Initialize registry with discovered adapters or use the provided mock
-    this.adapterRegistry = mockRegistry || this.initializeAdapterRegistry();
+    if (mockRegistry) {
+      // Use the provided mock registry and mark as initialized
+      this.adapterRegistry = mockRegistry;
+      this.initialized = true;
+    } else {
+      // Initialize with an empty registry - will be populated on first use
+      this.adapterRegistry = {} as Record<ChainType, string[]>;
+      this.initialized = false;
+    }
+  }
+
+  /**
+   * Ensure the adapter registry is initialized
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) {
+      return Promise.resolve();
+    }
+
+    // If already initializing, return that promise
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    // Start initialization
+    this.initializationPromise = this.initializeAdapterRegistry();
+    await this.initializationPromise;
+
+    // Mark as initialized and clear the promise
+    this.initialized = true;
+    this.initializationPromise = null;
   }
 
   /**
    * Initializes adapter registry using the files discovered at build time by Vite
    */
-  private initializeAdapterRegistry(): Record<ChainType, string[]> {
+  private async initializeAdapterRegistry(): Promise<void> {
     const registry: Record<ChainType, string[]> = {} as Record<ChainType, string[]>;
+    const adapterPaths = Object.keys(adapterFiles);
 
     // Process all adapter files discovered by Vite's import.meta.glob
-    for (const path in adapterFiles) {
+    for (const path of adapterPaths) {
       // Extract chain type from path (e.g., '../adapters/evm/adapter.ts' -> 'evm')
       const match = path.match(/\/adapters\/([^/]+)\//);
       if (match) {
@@ -136,18 +165,19 @@ export class AdapterExportManager {
     // If registry is empty (which can happen in test environments),
     // add fallback entries to make tests pass
     if (Object.keys(registry).length === 0) {
+      console.warn('No adapters found via import.meta.glob, using fallback adapters for tests');
       registry.evm = ['../adapters/evm/adapter.ts', '../adapters/evm/types.ts'];
-
       registry.solana = ['../adapters/solana/adapter.ts', '../adapters/solana/types.ts'];
     }
 
-    return registry;
+    this.adapterRegistry = registry;
   }
 
   /**
    * Get list of available chain types
    */
-  getAvailableChainTypes(): ChainType[] {
+  async getAvailableChainTypes(): Promise<ChainType[]> {
+    await this.ensureInitialized();
     return Object.keys(this.adapterRegistry) as ChainType[];
   }
 
@@ -157,7 +187,9 @@ export class AdapterExportManager {
    * @param chainType The blockchain type to get adapter files for
    * @returns A map of file paths to file contents
    */
-  getAdapterFiles(chainType: ChainType): AdapterFileMap {
+  async getAdapterFiles(chainType: ChainType): Promise<AdapterFileMap> {
+    await this.ensureInitialized();
+
     if (!this.adapterRegistry[chainType]) {
       throw new Error(`No adapter found for chain type: ${chainType}`);
     }
@@ -165,14 +197,14 @@ export class AdapterExportManager {
     const files: AdapterFileMap = {};
 
     // Add core adapter interface files
-    const coreFiles = this.getCoreAdapterFiles();
+    const coreFiles = await this.getCoreAdapterFiles();
     Object.assign(files, coreFiles);
 
     // Add chain-specific adapter files
     for (const path of this.adapterRegistry[chainType]) {
       // Create output path that normalizes the internal path to exported path
       const outputPath = this.createExportPath(path);
-      files[outputPath] = this.getFileContent(path);
+      files[outputPath] = await this.getFileContent(path);
     }
 
     // Create an adapter barrel file that only exports the needed adapter
@@ -184,13 +216,13 @@ export class AdapterExportManager {
   /**
    * Get core adapter interface files required by all adapters
    */
-  private getCoreAdapterFiles(): AdapterFileMap {
+  private async getCoreAdapterFiles(): Promise<AdapterFileMap> {
     const coreFiles: AdapterFileMap = {};
 
     // Core schema types - first path in the record or fall back to empty string
     const schemaTypesPath = Object.keys(coreTypeFiles)[0] || '';
     if (schemaTypesPath) {
-      coreFiles['src/types/ContractSchema.ts'] = this.getFileContent(schemaTypesPath);
+      coreFiles['src/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
     } else {
       // Fallback for tests
       coreFiles['src/types/ContractSchema.ts'] = '// Mock ContractSchema.ts content for tests';
@@ -199,7 +231,7 @@ export class AdapterExportManager {
     // Form renderer types - first path in the record or fall back to empty string
     const formTypesPath = Object.keys(formRendererTypeFiles)[0] || '';
     if (formTypesPath) {
-      coreFiles['src/types/FormTypes.ts'] = this.getFileContent(formTypesPath);
+      coreFiles['src/types/FormTypes.ts'] = await this.getFileContent(formTypesPath);
     } else {
       // Fallback for tests
       coreFiles['src/types/FormTypes.ts'] = '// Mock FormTypes.ts content for tests';
@@ -251,21 +283,39 @@ export { ${adapterClassName} };
    * @param path The path to the file
    * @returns The content of the file
    */
-  private getFileContent(path: string): string {
-    // Access the file content from the bundled imports
-    if (path.includes('/adapters/')) {
-      // Adapter files
-      return (
-        adapterFiles[path] || typeFiles[path] || utilFiles[path] || `// File not found: ${path}`
-      );
-    } else if (path.includes('/core/types/')) {
-      // Core type files
-      return coreTypeFiles[path] || `// File not found: ${path}`;
-    } else if (path.includes('/form-renderer/')) {
-      // Form renderer type files
-      return formRendererTypeFiles[path] || `// File not found: ${path}`;
-    }
+  private async getFileContent(path: string): Promise<string> {
+    try {
+      // Access the file content from the bundled imports
+      if (path.includes('/adapters/')) {
+        // Adapter files - try adapter, type, and util files in that order
+        if (adapterFiles[path]) {
+          return await adapterFiles[path]();
+        }
+        if (typeFiles[path]) {
+          return await typeFiles[path]();
+        }
+        if (utilFiles[path]) {
+          return await utilFiles[path]();
+        }
+        return `// File not found: ${path}`;
+      } else if (path.includes('/core/types/')) {
+        // Core type files
+        if (coreTypeFiles[path]) {
+          return await coreTypeFiles[path]();
+        }
+        return `// File not found: ${path}`;
+      } else if (path.includes('/form-renderer/')) {
+        // Form renderer type files
+        if (formRendererTypeFiles[path]) {
+          return await formRendererTypeFiles[path]();
+        }
+        return `// File not found: ${path}`;
+      }
 
-    return `// Unknown file: ${path}`;
+      return `// Unknown file: ${path}`;
+    } catch (error) {
+      console.error(`Error loading file content for ${path}:`, error);
+      return `// Error loading file: ${path}`;
+    }
   }
 }
