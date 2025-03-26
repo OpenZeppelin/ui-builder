@@ -9,10 +9,6 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * FormCodeGenerator class responsible for generating React components
  * that use the shared form-renderer package.
  *
- * NOTE: This is only one part of the complete export system. A full implementation
- * would need to integrate with the templates package (@openzeppelin/transaction-form-builder-templates)
- * to generate complete projects based on the template files.
- *
  * Current implementation:
  * - Generates only the form component code
  * - Uses a consistent import pattern that works in both dev and production
