@@ -59,9 +59,9 @@ declare module 'virtual:form-renderer-config' {
  */
 
 // Example of how to add another module:
-// declare module 'virtual:templates-config' {
-//   import type { TemplateConfig } from '@templates/types';
-//   export const templateConfig: TemplateConfig;
+// declare module 'virtual:export-templates-config' {
+//   import type { ExportOptions } from '../core/types/ExportTypes';
+//   export const templateConfig: Record<string, ExportOptions>;
 // }
 
 /**

@@ -37,7 +37,6 @@ This project is organized as a monorepo with the following packages:
 
 - **packages/core**: The main application with the form builder UI
 - **packages/form-renderer**: The shared form rendering library (published to npm)
-- **packages/templates**: Export templates for different frameworks
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations
 
 ## Packages
@@ -177,6 +176,12 @@ transaction-form-builder/
 │   │   │   │   ├── midnight/    # Midnight blockchain adapter
 │   │   │   │   ├── solana/      # Solana blockchain adapter
 │   │   │   │   └── stellar/     # Stellar blockchain adapter
+│   │   │   ├── export/          # Export system
+│   │   │   │   ├── generators/  # Form code generators
+│   │   │   │   └── ...          # Export utilities
+│   │   │   ├── templates/       # Export templates
+│   │   │   │   ├── typescript-react-vite/  # React + Vite template
+│   │   │   │   └── ...                     # Future templates for other frameworks
 │   │   │   ├── services/        # Core services
 │   │   │   ├── stories/         # Centralized Storybook stories
 │   │   │   │   ├── common/      # Stories for common components
@@ -206,18 +211,11 @@ transaction-form-builder/
 │   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
-│   ├── styles/                  # Centralized styling system
-│   │   ├── global.css           # Global CSS variables and base styles
-│   │   ├── src/                 # Source directory for styles
-│   │   ├── utils/               # Styling utilities
-│   │   └── README.md            # Styling documentation
-│   └── templates/               # Export templates
-│       ├── typescript-react-vite/ # React+TypeScript+Vite template
-│       │   ├── public/          # Static assets
-│       │   ├── src/             # Source code
-│       │   ├── index.html       # HTML template
-│       │   └── README.md        # Template documentation
-│       └── ...                  # Future templates for other frameworks
+│   └── styles/                  # Centralized styling system
+│       ├── global.css           # Global CSS variables and base styles
+│       ├── src/                 # Source directory for styles
+│       ├── utils/               # Styling utilities
+│       └── README.md            # Styling documentation
 ├── tailwind.config.cjs  # Central Tailwind CSS configuration
 ├── postcss.config.cjs   # Central PostCSS configuration
 ├── components.json      # Central shadcn/ui configuration
@@ -446,6 +444,5 @@ Each package has symlinks to these root configuration files, ensuring consistent
 
 - **Core Package**: Links to root configuration files (../../config.cjs)
 - **Form Renderer Package**: Links to root configuration files (../../config.cjs)
-- **Templates Package**: Links to root configuration files (../../../config.cjs)
 
 During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported project.

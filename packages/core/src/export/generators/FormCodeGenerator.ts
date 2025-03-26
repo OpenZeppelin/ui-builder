@@ -29,8 +29,8 @@ export class FormCodeGenerator {
    * Uses a consistent import path that works in both development and production
    * thanks to pnpm workspace resolution.
    *
-   * NOTE: In a complete implementation, this code would be inserted into the template
-   * project structure from the templates package, replacing the FormPlaceholder.tsx file.
+   * This component is integrated into the export template structure by the
+   * generateTemplateProject method, replacing the placeholder components.
    *
    * @param formConfig The form configuration from the builder
    * @param chainType The selected blockchain type
@@ -54,10 +54,6 @@ import { ${adapterClassName} } from '../adapters/${chainType}/adapter';
  * This component renders a form for interacting with a blockchain contract.
  * It uses the shared form-renderer package which ensures consistent behavior
  * with the preview in the form builder.
- * 
- * NOTE: In a complete export implementation, this file would replace
- * FormPlaceholder.tsx in the template project structure from the
- * @openzeppelin/transaction-form-builder-templates package.
  */
 export default function GeneratedForm({ onSubmit, onError }) {
   const [transactionResult, setTransactionResult] = useState(null);

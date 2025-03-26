@@ -168,15 +168,15 @@ Each package has symbolic links to these root configurations, ensuring consisten
 ```
 packages/core/tailwind.config.cjs -> ../../tailwind.config.cjs
 packages/form-renderer/tailwind.config.cjs -> ../../tailwind.config.cjs
-packages/templates/typescript-react-vite/tailwind.config.cjs -> ../../../tailwind.config.cjs
 ```
 
 ### Exported Templates
 
 During the export process:
 
-1. Symlinks are resolved to create standalone configuration files
-2. The styles from this package are included in the exported project
-3. The result is a self-contained project with proper styling
+1. Template files in the core package are used to create standalone projects
+2. Symlinks are resolved to create standalone configuration files
+3. The styles from this package are included in the exported project
+4. The result is a self-contained project with proper styling
 
 ## Utilities

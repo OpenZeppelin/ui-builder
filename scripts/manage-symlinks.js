@@ -24,24 +24,19 @@ const __dirname = path.dirname(__filename);
 const CONFIG_FILES = ['tailwind.config.cjs', 'postcss.config.cjs', 'components.json'];
 
 // Packages that need symlinks
-const PACKAGES = [
-  'packages/core',
-  'packages/form-renderer',
-  'packages/templates/typescript-react-vite',
-];
+const PACKAGES = ['packages/core', 'packages/form-renderer'];
 
 // Map of relative paths from each package to the root
 const ROOT_PATHS = {
   'packages/core': '../..',
   'packages/form-renderer': '../..',
-  'packages/templates/typescript-react-vite': '../../..',
 };
 
 // Check if a path is a symlink
 function isSymlink(filePath) {
   try {
     return fs.lstatSync(filePath).isSymbolicLink();
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -50,7 +45,7 @@ function isSymlink(filePath) {
 function fileExists(filePath) {
   try {
     return fs.existsSync(filePath);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -59,7 +54,7 @@ function fileExists(filePath) {
 function getSymlinkTarget(filePath) {
   try {
     return fs.readlinkSync(filePath);
-  } catch (error) {
+  } catch {
     return null;
   }
 }
