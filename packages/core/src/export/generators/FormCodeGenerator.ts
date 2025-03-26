@@ -18,9 +18,6 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * - Uses a consistent import pattern that works in both dev and production
  * - Integrates with TemplateManager to generate complete projects
  * - Integrates with AdapterExportManager to include required adapter files
- *
- * TODO: Additional integrations:
- * - Implement PackageManager component to update package.json with correct dependencies
  */
 export class FormCodeGenerator {
   private templateManager: TemplateManager;
