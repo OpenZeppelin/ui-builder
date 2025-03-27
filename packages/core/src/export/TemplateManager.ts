@@ -17,7 +17,7 @@ type LazyGlobImportResult = Record<string, () => Promise<string>>;
 
 // Template files are loaded lazily using Vite's import.meta.glob
 // This allows code-splitting so the template files are only loaded when needed
-const templateFiles = import.meta.glob<string>('../templates/**/*', {
+const templateFiles = import.meta.glob<string>('./templates/**/*', {
   query: '?raw',
   import: 'default',
 }) as LazyGlobImportResult;

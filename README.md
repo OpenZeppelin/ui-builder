@@ -178,10 +178,10 @@ transaction-form-builder/
 │   │   │   │   └── stellar/     # Stellar blockchain adapter
 │   │   │   ├── export/          # Export system
 │   │   │   │   ├── generators/  # Form code generators
-│   │   │   │   └── ...          # Export utilities
-│   │   │   ├── templates/       # Export templates
-│   │   │   │   ├── typescript-react-vite/  # React + Vite template
-│   │   │   │   └── ...                     # Future templates for other frameworks
+│   │   │   │   ├── ...          # Export utilities
+│   │   │   │   ├── templates/   # Export templates
+│   │   │   │   │   ├── typescript-react-vite/  # React + Vite template
+│   │   │   │   │   └── ...                     # Future templates for other frameworks
 │   │   │   ├── services/        # Core services
 │   │   │   ├── stories/         # Centralized Storybook stories
 │   │   │   │   ├── common/      # Stories for common components
