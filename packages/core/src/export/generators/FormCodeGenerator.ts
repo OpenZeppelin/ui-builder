@@ -164,11 +164,58 @@ export class FormCodeGenerator {
       }
     );
 
-    // Then, remove template-specific comments using delimiters
-    return processedTemplate.replace(
+    // Return the processed template (with comments removed, etc.)
+    return processedTemplate;
+  }
+
+  /**
+   * Apply common post-processing steps to template output
+   *
+   * @param processedTemplate The template that has been processed with parameters
+   * @param options Additional options for specific post-processing
+   * @returns The post-processed template
+   */
+  private applyCommonPostProcessing(
+    processedTemplate: string,
+    options?: {
+      adapterClassName?: string;
+      formConfigJSON?: string;
+    }
+  ): string {
+    // Remove template-specific comments using delimiters
+    processedTemplate = processedTemplate.replace(
       /\/\*------------TEMPLATE COMMENT START------------\*\/[\s\S]*?\/\*------------TEMPLATE COMMENT END------------\*\//g,
       ''
     );
+
+    // Remove all @ts-expect-error comments - they're only needed during template development
+    processedTemplate = processedTemplate.replace(/\/\/\s*@ts-expect-error.*\n/g, '');
+
+    // If adapter class name is provided, perform adapter-specific replacements
+    if (options?.adapterClassName) {
+      // Replace adapter placeholder with the actual adapter class name everywhere
+      processedTemplate = processedTemplate.replace(
+        /AdapterPlaceholder/g,
+        options.adapterClassName
+      );
+
+      // Fix any possible malformed imports caused by comment-style placeholders
+      processedTemplate = processedTemplate.replace(
+        /import\s*\{\s*\{\/\*\*\/\}\s*\}\s*from/g,
+        `import { ${options.adapterClassName} } from`
+      );
+    }
+
+    // If form schema JSON is provided, inject it
+    if (options?.formConfigJSON) {
+      // Special case handling for form schema injection
+      processedTemplate = processedTemplate.replace(
+        /const formSchema: RenderFormSchema = \{\};/g,
+        `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
+      );
+    }
+
+    return processedTemplate;
   }
 
   /**
@@ -203,23 +250,11 @@ export class FormCodeGenerator {
     // Process the form component template
     let processedTemplate = await this.processTemplate('form-component', params);
 
-    // Replace adapter placeholder with the actual adapter class name everywhere
-    processedTemplate = processedTemplate.replace(/AdapterPlaceholder/g, adapterClassName);
-
-    // Fix any possible malformed imports caused by comment-style placeholders
-    processedTemplate = processedTemplate.replace(
-      /import\s*\{\s*\{\/\*\*\/\}\s*\}\s*from/g,
-      `import { ${adapterClassName} } from`
-    );
-
-    // Special case handling for form schema injection
-    processedTemplate = processedTemplate.replace(
-      /const formSchema: RenderFormSchema = \{\};/g,
-      `const formSchema: RenderFormSchema = ${params.formConfigJSON as string};`
-    );
-
-    // Remove all @ts-expect-error comments - they're only needed during template development
-    processedTemplate = processedTemplate.replace(/\/\/\s*@ts-expect-error.*\n/g, '');
+    // Apply common post-processing with form-specific options
+    processedTemplate = this.applyCommonPostProcessing(processedTemplate, {
+      adapterClassName,
+      formConfigJSON: params.formConfigJSON as string,
+    });
 
     return processedTemplate;
   }
@@ -278,8 +313,8 @@ export class FormCodeGenerator {
     // Process the app component template
     let processedTemplate = await this.processTemplate('app-component', params);
 
-    // Remove all @ts-expect-error comments from this template too
-    processedTemplate = processedTemplate.replace(/\/\/\s*@ts-expect-error.*\n/g, '');
+    // Apply common post-processing
+    processedTemplate = this.applyCommonPostProcessing(processedTemplate);
 
     return processedTemplate;
   }
