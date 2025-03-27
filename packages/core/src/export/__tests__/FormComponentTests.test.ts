@@ -1,0 +1,166 @@
+import { describe, expect, it } from 'vitest';
+
+import { FormExportSystem } from '../FormExportSystem';
+import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
+import { extractFilesFromZip } from '../utils/zipInspector';
+
+import type { ChainType } from '../../core/types/ContractSchema';
+
+describe('Form Component Tests', () => {
+  /**
+   * Extract and analyze the generated form component
+   */
+  async function extractFormComponent(
+    chainType: ChainType,
+    functionName: string = 'testFunction',
+    useComplexForm: boolean = false
+  ) {
+    // Create the export system
+    const exportSystem = new FormExportSystem();
+
+    // Create form config
+    const formConfig = useComplexForm
+      ? createComplexFormConfig(functionName, chainType)
+      : createMinimalFormConfig(functionName, chainType);
+
+    // Export the form
+    const result = await exportSystem.exportForm(formConfig, chainType, functionName);
+
+    // Extract files from the ZIP
+    const files = await extractFilesFromZip(result.zipBlob);
+
+    // Get the form component code
+    const formComponentCode = files['src/components/GeneratedForm.tsx'];
+
+    if (!formComponentCode) {
+      throw new Error('Form component file not found in export');
+    }
+
+    return { formComponentCode, files };
+  }
+
+  describe('Form Component Structure', () => {
+    it('should generate a valid React component with proper imports', async () => {
+      const { formComponentCode } = await extractFormComponent('evm');
+
+      // Check for React import (modern React doesn't require default import)
+      expect(formComponentCode).toMatch(/import.*from ['"]react['"]/);
+
+      // Check for TransactionForm import - handle multi-line imports
+      expect(formComponentCode).toContain('TransactionForm');
+      expect(formComponentCode).toContain('from');
+      expect(formComponentCode).toMatch(/@openzeppelin\/transaction-form-renderer/);
+
+      // Check for component definition
+      expect(formComponentCode).toMatch(/export default function GeneratedForm/);
+
+      // Check for JSX return
+      expect(formComponentCode).toMatch(/<TransactionForm/);
+    });
+
+    it('should include adapter props in the component', async () => {
+      const { formComponentCode } = await extractFormComponent('evm');
+
+      // Check that adapter is imported specifically from the adapter directory
+      expect(formComponentCode).toMatch(/import.*from ['"]\.\.\/adapters\/evm\/adapter['"]/);
+
+      // Check that adapter is passed to the form
+      expect(formComponentCode).toMatch(/adapter={adapter}/);
+    });
+
+    it('should include proper TypeScript type definitions', async () => {
+      const { formComponentCode } = await extractFormComponent('evm');
+
+      // Check for type imports
+      expect(formComponentCode).toMatch(/import (type )?\{.*\} from/);
+
+      // Check for props interface or type (if any)
+      expect(formComponentCode).toMatch(/type|interface|Props/);
+    });
+  });
+
+  describe('Form Schema Transformation', () => {
+    it('should transform builder config to render schema correctly', async () => {
+      const { formComponentCode } = await extractFormComponent('evm', 'transfer');
+
+      // Check for schema declaration
+      expect(formComponentCode).toMatch(/const formSchema: RenderFormSchema =/);
+
+      // Check for fields array in the JSON
+      expect(formComponentCode).toMatch(/"fields":/);
+
+      // Check for layout config in the JSON
+      expect(formComponentCode).toMatch(/"layout":/);
+
+      // Check for validation config in the JSON
+      expect(formComponentCode).toMatch(/"validation":/);
+    });
+
+    it('should include correct form field definitions', async () => {
+      // Test with a complex form to ensure multiple field types are handled
+      const { formComponentCode } = await extractFormComponent('evm', 'complexForm', true);
+
+      // Check that each field type from the complex form is included
+      expect(formComponentCode).toMatch(/"name": "stringParam"/);
+      expect(formComponentCode).toMatch(/"name": "numberParam"/);
+      expect(formComponentCode).toMatch(/"name": "boolParam"/);
+      expect(formComponentCode).toMatch(/"name": "addressParam"/);
+
+      // Check that validation settings are included
+      expect(formComponentCode).toMatch(/"required": true/);
+    });
+
+    it('should include properly formatted submit button configuration', async () => {
+      const { formComponentCode } = await extractFormComponent('evm');
+
+      // Check submit button config in the JSON
+      expect(formComponentCode).toMatch(/"submitButton":/);
+      expect(formComponentCode).toMatch(/"text":/);
+      expect(formComponentCode).toMatch(/"loadingText":/);
+    });
+  });
+
+  describe('Chain-Specific Components', () => {
+    it('should generate EVM-specific form components', async () => {
+      const { formComponentCode } = await extractFormComponent('evm');
+
+      // Check EVM-specific imports or configurations
+      expect(formComponentCode).toMatch(/evm/i);
+    });
+
+    it('should generate Solana-specific form components', async () => {
+      const { formComponentCode } = await extractFormComponent('solana');
+
+      // Check Solana-specific imports or configurations
+      expect(formComponentCode).toMatch(/solana/i);
+    });
+  });
+
+  describe('Component Integration', () => {
+    it('should import the form component correctly in App.tsx', async () => {
+      const { files } = await extractFormComponent('evm');
+
+      const appCode = files['src/App.tsx'];
+      expect(appCode).toBeDefined();
+
+      // Check App.tsx imports the form component
+      expect(appCode).toMatch(
+        /import.*GeneratedForm.*from ['"](\.\/components\/GeneratedForm|@\/components\/GeneratedForm)['"]/
+      );
+
+      // Check the component is rendered in App.tsx (with or without props)
+      expect(appCode).toMatch(/<GeneratedForm/);
+    });
+
+    it('should export the adapter correctly', async () => {
+      const { files } = await extractFormComponent('evm');
+
+      const adapterIndexCode = files['src/adapters/index.ts'];
+      expect(adapterIndexCode).toBeDefined();
+
+      // Check adapter is exported
+      expect(adapterIndexCode).toMatch(/export/);
+      expect(adapterIndexCode).toMatch(/adapter/i);
+    });
+  });
+});

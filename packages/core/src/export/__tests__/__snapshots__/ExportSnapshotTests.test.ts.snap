@@ -1,0 +1,673 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
+"
+import React from 'react';
+
+import GeneratedForm from './components/GeneratedForm';
+
+// Define types for the transaction data
+interface TransactionData {
+  [key: string]: unknown;
+}
+
+/**
+ * App Component
+ *
+ * Main application component that wraps the form.
+ */
+export function App() {
+  return (
+    <div className="app">
+      <header className="header">
+        <h1>Transaction Form for transfer</h1>
+        <p>A form for interacting with blockchain contracts</p>
+      </header>
+
+      <main className="main">
+        <div className="container">
+          <GeneratedForm
+            onSubmit={(txData: TransactionData) => {
+              console.log('Transaction submitted:', txData);
+              return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });
+            }}
+            onError={(error: Error) => {
+              console.error('Transaction error:', error);
+            }}
+          />
+        </div>
+      </main>
+
+      <footer className="footer">
+        <p>Generated with OpenZeppelin Transaction Form Builder</p>
+        <p>© 2025 OpenZeppelin</p>
+      </footer>
+    </div>
+  );
+}
+"
+`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `
+"import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+
+import { isAddress } from 'ethers';
+
+import { generateId } from '../../core/utils/utils';
+import MockContractService from '../../services/MockContractService';
+
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import type { ContractAdapter } from '../index';
+import type { AbiItem } from './types';
+
+/**
+ * EVM-specific type mapping
+ */
+const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
+  address: 'address',
+  string: 'text',
+  uint: 'number',
+  uint8: 'number',
+  uint16: 'number',
+  uint32: 'number',
+  uint64: 'number',
+  uint128: 'number',
+  uint256: 'number',
+  int: 'number',
+  int8: 'number',
+  int16: 'number',
+  int32: 'number',
+  int64: 'number',
+  int128: 'number',
+  int256: 'number',
+  bool: 'checkbox',
+  bytes: 'textarea',
+  bytes32: 'text',
+};
+
+/**
+ * EVM-specific adapter implementation
+ */
+export class EvmAdapter implements ContractAdapter {
+  /**
+   * Load a contract from a file or address
+   */
+  async loadContract(source: string): Promise<ContractSchema> {
+    // In a real implementation, this would fetch the ABI from the blockchain or parse a file
+    console.log(\`Loading EVM contract from: \${source}\`);
+
+    // For now, just return the mock contract
+    return this.loadMockContract();
+  }
+
+  /**
+   * Load a mock contract for testing
+   * @param mockId Optional ID to specify which mock to load
+   */
+  async loadMockContract(mockId?: string): Promise<ContractSchema> {
+    try {
+      // Get available mocks to find the file name
+      const mocks = await MockContractService.getAvailableMocks();
+
+      // Default to the first mock if none specified
+      const mockInfo = mockId
+        ? mocks.find((mock) => mock.id === mockId)
+        : mocks.find((mock) => mock.id === 'input-tester');
+
+      if (!mockInfo) {
+        throw new Error(\`Mock contract with ID \${mockId || 'input-tester'} not found\`);
+      }
+
+      // Load the mock ABI
+      const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
+
+      // Set contract name based on mock info
+      const contractName = mockInfo.name;
+
+      // Transform the ABI into a chain-agnostic schema
+      const contractSchema: ContractSchema = {
+        chainType: 'evm',
+        name: contractName,
+        functions: mockAbi
+          .filter((item) => item.type === 'function')
+          .map((item) => ({
+            id: \`\${item.name}_\${item.inputs?.map((i) => i.type).join('_') || ''}\`,
+            name: item.name || '',
+            displayName: this.formatMethodName(item.name || ''),
+            inputs:
+              item.inputs?.map((input) => ({
+                name: input.name,
+                type: input.type,
+                displayName: this.formatInputName(input.name, input.type),
+              })) || [],
+            type: item.type || 'function',
+            stateMutability: item.stateMutability,
+            modifiesState:
+              !item.stateMutability || !['view', 'pure'].includes(item.stateMutability),
+          })),
+      };
+
+      return contractSchema;
+    } catch (error) {
+      console.error('Error loading mock EVM contract:', error);
+      throw new Error('Failed to load mock EVM contract');
+    }
+  }
+
+  /**
+   * Map an EVM-specific parameter type to a form field type
+   * @param parameterType The EVM parameter type (e.g., uint256, address)
+   * @returns The appropriate form field type
+   */
+  mapParameterTypeToFieldType(parameterType: string): FieldType {
+    // Check if this is an array type (ends with [] or [number])
+    if (parameterType.match(/\\[\\d*\\]$/)) {
+      // All array types should use textarea for JSON input
+      return 'textarea';
+    }
+
+    // Extract the base type from array types (e.g., uint256[] -> uint256)
+    const baseType = parameterType.replace(/\\[\\d*\\]/g, '');
+
+    // Handle tuples (structs) - for now, just use a textarea
+    if (baseType.startsWith('tuple')) {
+      return 'textarea';
+    }
+
+    // Map common EVM types to appropriate field types
+    return EVM_TYPE_TO_FIELD_TYPE[baseType] || 'text';
+  }
+
+  /**
+   * Generate default field configuration for an EVM function parameter
+   * @param parameter The function parameter to convert to a form field
+   * @returns A form field configuration with appropriate defaults
+   */
+  generateDefaultField<T extends FieldType = FieldType>(
+    parameter: FunctionParameter
+  ): FormFieldType<T> {
+    // Get the field type
+    const fieldType = this.mapParameterTypeToFieldType(parameter.type) as T;
+
+    // Create a default field based on the parameter with proper typing
+    return {
+      id: generateId(),
+      name: parameter.name || parameter.type,
+      label: parameter.displayName || parameter.name || parameter.type,
+      type: fieldType,
+      placeholder: \`Enter \${parameter.displayName || parameter.name || parameter.type}\`,
+      helperText: parameter.description || '',
+      defaultValue: this.getDefaultValueForType(fieldType) as FieldValue<T>,
+      validation: this.getDefaultValidationForType(parameter.type),
+      width: 'full',
+    };
+  }
+
+  /**
+   * Get a default value for a field type
+   * @param fieldType The form field type
+   * @returns An appropriate default value
+   */
+  private getDefaultValueForType<T extends FieldType>(fieldType: T): FieldValue<T> {
+    switch (fieldType) {
+      case 'checkbox':
+        return false as FieldValue<T>;
+      case 'number':
+      case 'amount':
+        return 0 as FieldValue<T>;
+      case 'address':
+        return '' as FieldValue<T>;
+      default:
+        return '' as FieldValue<T>;
+    }
+  }
+
+  /**
+   * Get default validation rules for a parameter type
+   * @param parameterType The EVM parameter type
+   * @returns Validation rules appropriate for the type
+   */
+  private getDefaultValidationForType(parameterType: string): {
+    required?: boolean;
+    pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+    custom?: (value: unknown) => boolean | string;
+  } {
+    const validation = { required: true };
+
+    // Add specific validation rules based on the parameter type
+    if (parameterType === 'address') {
+      return {
+        ...validation,
+        // Use the adapter's isValidAddress method for direct validation
+        custom: (value: unknown): boolean | string => {
+          // Empty values are handled by the required property
+          if (value === '') return true;
+
+          // We expect addresses to be strings
+          if (typeof value !== 'string') return 'Address must be a string';
+
+          // Validate the address format using the adapter's method
+          return this.isValidAddress(value) ? true : 'Invalid address format';
+        },
+      };
+    }
+
+    return validation;
+  }
+
+  /**
+   * Format transaction data for the specific chain
+   */
+  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
+    // In a real implementation, this would encode the function call according to EVM standards
+    console.log(\`Formatting EVM transaction data for function: \${functionId}\`);
+    console.log('Inputs:', inputs);
+
+    // Return a mock transaction object
+    return {
+      to: '0x1234567890123456789012345678901234567890',
+      data: \`0x\${functionId}\`,
+      value: '0',
+      gasLimit: '100000',
+    };
+  }
+
+  /**
+   * Sign and broadcast a transaction
+   */
+  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+    // In a real implementation, this would use ethers.js or web3.js to sign and broadcast
+    console.log('Signing and broadcasting EVM transaction:', transactionData);
+
+    // Return a mock transaction hash
+    return {
+      txHash: \`0x\${Math.random().toString(16).substring(2, 42)}\`,
+    };
+  }
+
+  /**
+   * Format a method name for display
+   */
+  private formatMethodName(name: string): string {
+    return name
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  }
+
+  /**
+   * Format an input name for display
+   */
+  private formatInputName(name: string, type: string): string {
+    if (!name || name === '') {
+      return \`Parameter (\${type})\`;
+    }
+    return name
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .replace(/_/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
+  }
+
+  /**
+   * Validate an EVM blockchain address
+   * @param address The address to validate
+   * @returns Whether the address is a valid EVM address
+   */
+  isValidAddress(address: string): boolean {
+    return isAddress(address);
+  }
+}
+
+// Also export as default to ensure compatibility with various import styles
+export default EvmAdapter;
+"
+`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
+"
+import { useState } from 'react';
+
+import {
+  RenderFormSchema,
+  TransactionForm,
+  TransactionFormProps,
+} from '@openzeppelin/transaction-form-renderer';
+
+
+import { EvmAdapter } from '../adapters/evm/adapter';
+
+// Define type for transaction result (this will be implemented in the future)
+interface TransactionResult {
+  txHash?: string;
+}
+
+/**
+ * Generated Transaction Form for transfer
+ *
+ * This component renders a form for interacting with a blockchain contract.
+ * It uses the shared form-renderer package which ensures consistent behavior
+ * with the preview in the form builder.
+ */
+export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
+  const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
+
+  // Create the adapter instance for evm
+  
+  const adapter = new EvmAdapter();
+
+  // Form schema generated from the builder and transformed by FormSchemaFactory
+  
+    const formSchema: RenderFormSchema = {
+  "functionId": "transfer",
+  "fields": [
+    {
+      "id": "[id]",
+      "type": "text",
+      "name": "testParam",
+      "label": "Test Parameter",
+      "validation": {
+        "required": true
+      },
+      "helperText": "Description for Test Parameter",
+      "placeholder": "Enter test parameter"
+    }
+  ],
+  "layout": {
+    "columns": 1,
+    "spacing": "normal",
+    "labelPosition": "top",
+    "sections": [
+      {
+        "id": "[id]",
+        "title": "Test Section",
+        "description": "A test section",
+        "fields": ["testParam"]
+      }
+    ]
+  },
+  "validation": {
+    "mode": "onChange",
+    "showErrors": "inline"
+  },
+  "theme": {},
+  "id": "form-transfer",
+  "title": "Transfer",
+  "description": "",
+  "submitButton": {
+    "text": "Execute transfer",
+    "loadingText": "Processing...",
+    "variant": "primary"
+  },
+  "defaultValues": {}
+};
+
+  // Handle form submission
+  const handleSubmit = (formData: FormData) => {
+    // If an external submission handler is provided, use it
+    if (onSubmit) {
+      // Result will be something like { txHash: '0x123' } or { error: 'Error message' }
+      // This will be implemented in the future, when we actually submit the transaction
+      const result = { txHash: '0x123' }; // result will be returned from the external submission handler, but for now we'll just return a hardcoded value
+      onSubmit(formData);
+      setTransactionResult({ txHash: '0x123' });
+      return result;
+    } else {
+      throw new Error('No submission handler provided');
+    }
+  };
+
+  return (
+    <div className="generated-form-container">
+      {transactionResult && (
+        <div className="transaction-result mb-4 rounded-md bg-green-50 p-4 text-green-800">
+          <h3 className="font-medium">Transaction Successful!</h3>
+          <p className="mt-2 text-sm">Transaction Hash: {transactionResult.txHash || 'N/A'}</p>
+        </div>
+      )}
+
+      <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+    </div>
+  );
+}
+"
+`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for adapters index > adapter-index-evm 1`] = `
+"// This file is auto-generated - only the EvmAdapter is included
+import { EvmAdapter } from './evm/adapter';
+
+export { EvmAdapter };
+"
+`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
+{
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
+    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@wagmi/core": "^1.4.7",
+    "ethers": "^6.7.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "viem": "^1.10.9",
+  },
+  "devDependencies": {
+    "@types/ethers": "^6.0.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^9.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "hardhat": "^2.17.3",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "check-deps": "npm outdated",
+    "dev": "vite",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "update-form-renderer": "npm update @openzeppelin/transaction-form-renderer",
+  },
+}
+`;
+
+exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for Solana adapter > solana-adapter 1`] = `
+"import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import type { ContractAdapter } from '../index';
+
+/**
+ * Solana-specific adapter implementation
+ *
+ * NOTE: This is just a minimal placeholder implementation. The project is currently focusing
+ * exclusively on the EVM adapter. This adapter will be properly implemented in future phases
+ * when we expand support to the Solana blockchain.
+ */
+export class SolanaAdapter implements ContractAdapter {
+  /**
+   * Load a contract from a file or address
+   *
+   * TODO: Implement actual Solana program loading logic in future phases
+   */
+  async loadContract(source: string): Promise<ContractSchema> {
+    console.log(\`[PLACEHOLDER] Loading Solana program from: \${source}\`);
+    return this.loadMockContract();
+  }
+
+  /**
+   * Load a mock contract for testing
+   *
+   * TODO: Implement proper Solana program schema in future phases
+   * @param mockId Optional ID to specify which mock to load (not used for Solana adapter)
+   */
+  async loadMockContract(_mockId?: string): Promise<ContractSchema> {
+    // Simple minimal mock contract schema
+    return {
+      chainType: 'solana',
+      name: 'PlaceholderSolanaProgram',
+      functions: [
+        {
+          id: 'dummy_instruction',
+          name: 'placeholderInstruction',
+          displayName: 'Placeholder Instruction',
+          inputs: [
+            {
+              name: 'dummyParam',
+              type: 'string',
+              displayName: 'Dummy Parameter',
+            },
+          ],
+          type: 'function',
+          modifiesState: true, // Assume this placeholder instruction modifies state
+        },
+      ],
+    };
+  }
+
+  /**
+   * Get only the functions that modify state (writable functions)
+   * @param contractSchema The contract schema to filter
+   * @returns Array of writable functions
+   */
+  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    return contractSchema.functions.filter((fn) => fn.modifiesState);
+  }
+
+  /**
+   * Map a Solana-specific parameter type to a form field type
+   *
+   * TODO: Implement proper Solana type mapping in future phases
+   */
+  mapParameterTypeToFieldType(_parameterType: string): FieldType {
+    // Placeholder implementation that defaults everything to text fields
+    return 'text';
+  }
+
+  /**
+   * Generate default field configuration for a Solana function parameter
+   *
+   * TODO: Implement proper Solana field generation in future phases
+   */
+  generateDefaultField<T extends FieldType = FieldType>(
+    parameter: FunctionParameter
+  ): FormFieldType<T> {
+    // Default to text fields for now as a placeholder
+    const fieldType = 'text' as T;
+
+    return {
+      id: Math.random().toString(36).substring(2, 11),
+      name: parameter.name || 'placeholder',
+      label: parameter.displayName || parameter.name || 'Placeholder Field',
+      type: fieldType,
+      placeholder: 'Placeholder - Solana adapter not fully implemented yet',
+      helperText: 'Solana adapter is not fully implemented yet',
+      defaultValue: '' as FieldValue<T>,
+      validation: { required: true },
+      width: 'full',
+    };
+  }
+
+  /**
+   * Format transaction data for the specific chain
+   *
+   * TODO: Implement proper Solana transaction formatting in future phases
+   */
+  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
+    return { placeholder: 'Solana adapter not implemented yet' };
+  }
+
+  /**
+   * Sign and broadcast a transaction
+   *
+   * TODO: Implement proper Solana transaction signing in future phases
+   */
+  async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
+    return { txHash: 'solana_placeholder_tx' };
+  }
+
+  /**
+   * Validate a Solana blockchain address
+   * @param address The address to validate
+   * @returns Whether the address is a valid Solana address
+   */
+  isValidAddress(address: string): boolean {
+    // Basic check for Solana addresses (Base58 encoded, 32-44 characters)
+    // TODO: Use a proper Solana address validation library when focusing on that chain
+    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+  }
+}
+
+// Also export as default to ensure compatibility with various import styles
+export default SolanaAdapter;
+"
+`;
+
+exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for adapters index with Solana > adapter-index-solana 1`] = `
+"// This file is auto-generated - only the SolanaAdapter is included
+import { SolanaAdapter } from './solana/adapter';
+
+export { SolanaAdapter };
+"
+`;
+
+exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for package.json with Solana dependencies > package-json-solana 1`] = `
+{
+  "dependencies": {
+    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@project-serum/anchor": "^0.26.0",
+    "@solana/spl-token": "^0.3.8",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/web3.js": "^1.78.5",
+    "bs58": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+  },
+  "devDependencies": {
+    "@solana/cli": "^1.1.0",
+    "@solana/spl-token-registry": "^0.2.4574",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^9.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "check-deps": "npm outdated",
+    "dev": "vite",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "update-form-renderer": "npm update @openzeppelin/transaction-form-renderer",
+  },
+}
+`;
