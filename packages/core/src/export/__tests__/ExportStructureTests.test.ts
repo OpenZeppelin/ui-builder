@@ -99,7 +99,7 @@ describe('Export Structure Tests', () => {
       }
     });
 
-    it('should not include chain-specific adapters when includeAdapters is false', async () => {
+    it('should not include any adapter files when includeAdapters is false', async () => {
       const { fileList } = await testExportStructure(
         createMinimalFormConfig('transfer'),
         'evm',
@@ -107,18 +107,12 @@ describe('Export Structure Tests', () => {
         { includeAdapters: false }
       );
 
-      // Verify specific adapter directories are not present
-      const hasChainSpecificAdapter = fileList.some(
-        (file) =>
-          file.startsWith('src/adapters/evm/') ||
-          file.startsWith('src/adapters/solana/') ||
-          file.startsWith('src/adapters/stellar/')
-      );
+      // Verify no adapter files are present, including placeholders
+      const hasAnyAdapterFile = fileList.some((file) => file.startsWith('src/adapters/'));
+      expect(hasAnyAdapterFile).toBe(false);
 
-      expect(hasChainSpecificAdapter).toBe(false);
-
-      // AdapterPlaceholder.ts might still be present, but that's acceptable
-      // since it's a generic placeholder file, not a chain-specific adapter
+      // Verify the adapter directory is not present
+      expect(fileList.find((file) => file.startsWith('src/adapters/'))).toBeUndefined();
     });
   });
 

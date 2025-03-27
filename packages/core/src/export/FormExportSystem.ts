@@ -91,7 +91,17 @@ export class FormExportSystem {
         exportOptions
       );
 
-      // 5. Update package.json using PackageManager
+      // 5. Remove any adapter files when includeAdapters is false
+      if (exportOptions.includeAdapters === false) {
+        // Remove all files under src/adapters/
+        Object.keys(projectFiles).forEach((path) => {
+          if (path.startsWith('src/adapters/')) {
+            delete projectFiles[path];
+          }
+        });
+      }
+
+      // 6. Update package.json using PackageManager
       const originalPackageJson = projectFiles['package.json'];
       if (originalPackageJson) {
         projectFiles['package.json'] = this.packageManager.updatePackageJson(
@@ -121,11 +131,11 @@ export class FormExportSystem {
       console.log('Total project files for export:', Object.keys(projectFiles).length);
       console.log('Project structure:', Object.keys(projectFiles).sort());
 
-      // 6. Create ZIP file
+      // 7. Create ZIP file
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
 
-      // 7. Return the export result with dependencies from PackageManager
+      // 8. Return the export result with dependencies from PackageManager
       return {
         zipBlob: zipResult.blob,
         fileName: zipResult.fileName,
