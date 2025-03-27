@@ -138,7 +138,6 @@ function generateCssContent(dataSlots) {
     '/* ',
     '  Auto-generated data-slot styles',
     '  This file is generated automatically. DO NOT EDIT DIRECTLY.',
-    `  Generated on: ${new Date().toISOString()}`,
     '*/',
     '',
   ];
