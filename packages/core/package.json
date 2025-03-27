@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.3",
   "type": "module",
+  "bin": {
+    "export-form": "src/export/cli/export-form.cjs"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --skipLibCheck && vite build --emptyOutDir",
@@ -19,6 +22,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:report": "vitest run --reporter=json --outputFile=./test-results/export-tests.json src/export/__tests__/",
+    "export-form": "node src/export/cli/export-form.cjs",
     "storybook": "cd ../.. && pnpm storybook",
     "build-storybook": "cd ../.. && pnpm build-storybook"
   },

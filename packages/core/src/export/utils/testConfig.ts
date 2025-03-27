@@ -12,7 +12,7 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  */
 export function createMinimalFormConfig(
   functionName: string = 'testFunction',
-  chainType: string = 'evm'
+  _chainType: string = 'evm'
 ): BuilderFormConfig {
   return {
     functionId: functionName,
@@ -58,7 +58,7 @@ export function createMinimalFormConfig(
  */
 export function createComplexFormConfig(
   functionName: string = 'complexFunction',
-  chainType: string = 'evm'
+  _chainType: string = 'evm'
 ): BuilderFormConfig {
   const basicFieldIds = [uuidv4(), uuidv4(), uuidv4()];
   const advancedFieldIds = [uuidv4(), uuidv4()];

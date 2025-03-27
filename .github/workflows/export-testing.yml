@@ -1,0 +1,59 @@
+name: Export Testing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/core/src/export/**'
+      - 'packages/templates/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/core/src/export/**'
+      - 'packages/templates/**'
+
+jobs:
+  test-exports:
+    runs-on: ubuntu-latest
+    name: Test Form Exports
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.9.0
+          run_install: false
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Run only export-related tests
+      - name: Run export tests
+        run: pnpm --filter @openzeppelin/transaction-form-builder-core test src/export/__tests__/
+
+      # Generate test report for better CI visibility
+      - name: Generate test report
+        if: success() || failure()
+        run: pnpm --filter @openzeppelin/transaction-form-builder-core test:report
+
+      # Upload test results as artifacts
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: export-test-results
+          path: packages/core/test-results
+          retention-days: 5
