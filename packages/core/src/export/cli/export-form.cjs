@@ -26,7 +26,7 @@
  *   --help, -h                 Show help information
  *   --chain, -c [type]         Chain type (evm, solana, stellar) (default: evm)
  *   --func, -f [name]          Function name (default: transfer)
- *   --output, -o [dir]         Output directory (default: ./exports)
+ *   --output, -o [name]        Subdirectory name within ./exports (default: transfer-form)
  *   --adapters, -a [boolean]   Include blockchain adapters (default: true)
  *   --template, -t [name]      Template to use (default: typescript-react-vite)
  *   --complex, -x              Use complex form with multiple fields
@@ -34,7 +34,7 @@
  *
  * Examples:
  *   export-form export                                  # Export basic EVM transfer form
- *   export-form export -c solana -f stake -o ./my-form  # Export Solana staking form
+ *   export-form export -c solana -f stake -o stake-form # Export Solana staking form
  *   export-form build ./exports/transfer-form           # Build exported form
  *   export-form serve ./exports/transfer-form           # Run exported form locally
  *   export-form export -x                               # Export complex form
@@ -80,7 +80,7 @@ ${colors.bold}Options:${colors.reset}
   --help, -h                 Show this help information
   --chain, -c [type]         Chain type (evm, solana, stellar) (default: evm)
   --func, -f [name]          Function name (default: transfer)
-  --output, -o [dir]         Output directory (default: ./exports)
+  --output, -o [name]        Subdirectory name within ./exports (default: transfer-form)
   --adapters, -a [boolean]   Include blockchain adapters (default: true)
   --template, -t [name]      Template to use (default: typescript-react-vite)
   --complex, -x              Use complex form with multiple fields
@@ -88,7 +88,7 @@ ${colors.bold}Options:${colors.reset}
 
 ${colors.bold}Examples:${colors.reset}
   export-form export                                  # Export basic EVM transfer form
-  export-form export -c solana -f stake -o ./my-form  # Export Solana staking form
+  export-form export -c solana -f stake -o stake-form # Export Solana staking form
   export-form build ./exports/transfer-form           # Build exported form
   export-form serve ./exports/transfer-form           # Run exported form locally
   export-form export -x                               # Export complex form
@@ -128,7 +128,12 @@ function parseArgs() {
     } else if (arg === '--func' || arg === '-f') {
       options.func = args[++i];
     } else if (arg === '--output' || arg === '-o') {
-      options.output = args[++i];
+      // Force all exports to be in the ./exports parent directory
+      const requestedOutput = args[++i];
+      // Extract just the final directory name if a path is provided
+      const dirName = path.basename(requestedOutput);
+      // Construct a path within ./exports
+      options.output = path.join('./exports', dirName);
     } else if (arg === '--adapters' || arg === '-a') {
       options.adapters = args[++i] !== 'false';
     } else if (arg === '--template' || arg === '-t') {
@@ -202,10 +207,26 @@ function exportFormSimple(options) {
 
     // Run a simplified export test directly
     console.log(`${colors.blue}Generating export...${colors.reset}\n`);
-    const command = 'npx vitest run src/export/__tests__/export-cli-wrapper.test.ts --silent';
+
+    // Try to handle different working directory setups
+    const packageDir = path.resolve(currentDir, 'packages/core');
+    const coreDir = fs.existsSync(packageDir) ? packageDir : currentDir;
+
+    // Check if we're directly in the core package
+    const isInCore = fs.existsSync(
+      path.join(currentDir, 'src/export/__tests__/export-cli-wrapper.test.ts')
+    );
+    const testPath = isInCore
+      ? 'src/export/__tests__/export-cli-wrapper.test.ts'
+      : path.join(coreDir, 'src/export/__tests__/export-cli-wrapper.test.ts');
+
+    console.log(`${colors.dim}Working directory:${colors.reset} ${coreDir}`);
+    console.log(`${colors.dim}Test path:${colors.reset} ${testPath}`);
+
+    const command = `cd ${coreDir} && npx vitest run src/export/__tests__/export-cli-wrapper.test.ts --silent`;
 
     try {
-      execSync(command, { cwd: currentDir, env, stdio: 'inherit', shell: true });
+      execSync(command, { env, stdio: 'inherit', shell: true });
     } catch (error) {
       console.error(`${colors.red}Export failed:${colors.reset}`, error.message);
       process.exit(1);
@@ -376,82 +397,28 @@ function verifyExportedForm(options) {
     process.exit(1);
   }
 
+  if (!fs.existsSync(path.join(targetDir, 'package.json'))) {
+    console.error(`${colors.red}Error:${colors.reset} Not a valid project directory: ${targetDir}`);
+    process.exit(1);
+  }
+
   try {
     console.log(`\n${colors.bold}${colors.cyan}Verifying Transaction Form${colors.reset}\n`);
+    console.log(`${colors.blue}Running tests for:${colors.reset} ${targetDir}`);
 
-    // Check for key files
-    const requiredFiles = [
-      'package.json',
-      'index.html',
-      'src/App.tsx',
-      'src/components/GeneratedForm.tsx',
-      'src/main.tsx',
-    ];
-
-    const missingFiles = requiredFiles.filter((file) => !fs.existsSync(path.join(targetDir, file)));
-
-    if (missingFiles.length > 0) {
-      console.error(`${colors.red}Missing required files:${colors.reset}`);
-      missingFiles.forEach((file) => console.error(`  - ${file}`));
-      return false;
+    // Install dependencies if needed
+    if (!fs.existsSync(path.join(targetDir, 'node_modules'))) {
+      console.log(`${colors.yellow}Installing dependencies first...${colors.reset}`);
+      execInDir('npm install', targetDir);
     }
 
-    console.log(`${colors.green}✓ All required files present${colors.reset}`);
+    // Run tests
+    execInDir('npm test', targetDir);
 
-    // Check package.json
-    const packageJson = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf8'));
-
-    if (!packageJson.dependencies || Object.keys(packageJson.dependencies).length === 0) {
-      console.error(`${colors.red}No dependencies found in package.json${colors.reset}`);
-      return false;
-    }
-
-    console.log(
-      `${colors.green}✓ Dependencies verified (${Object.keys(packageJson.dependencies).length} found)${colors.reset}`
-    );
-
-    // Check for adapter files if applicable
-    if (options.adapters !== false) {
-      const adapterFiles = fs.existsSync(path.join(targetDir, 'src/adapters'))
-        ? fs.readdirSync(path.join(targetDir, 'src/adapters'))
-        : [];
-
-      if (adapterFiles.length === 0) {
-        console.warn(`${colors.yellow}Warning: No adapter files found${colors.reset}`);
-      } else {
-        console.log(
-          `${colors.green}✓ Adapter files verified (${adapterFiles.length} found)${colors.reset}`
-        );
-      }
-    }
-
-    // Verify GeneratedForm.tsx
-    const formContent = fs.readFileSync(
-      path.join(targetDir, 'src/components/GeneratedForm.tsx'),
-      'utf8'
-    );
-
-    if (!formContent.includes('import') || !formContent.includes('React')) {
-      console.warn(
-        `${colors.yellow}Warning: GeneratedForm.tsx may not include proper React imports${colors.reset}`
-      );
-    } else {
-      console.log(`${colors.green}✓ GeneratedForm.tsx imports verified${colors.reset}`);
-    }
-
-    if (!formContent.includes('export') || !formContent.includes('function')) {
-      console.warn(
-        `${colors.yellow}Warning: GeneratedForm.tsx may not export a component${colors.reset}`
-      );
-    } else {
-      console.log(`${colors.green}✓ GeneratedForm.tsx exports verified${colors.reset}`);
-    }
-
-    console.log(`\n${colors.green}Verification completed successfully${colors.reset}\n`);
-    return true;
+    console.log(`\n${colors.green}✓ Tests passed successfully${colors.reset}`);
   } catch (error) {
-    console.error(`\n${colors.red}Verification failed:${colors.reset}`, error);
-    return false;
+    console.error(`\n${colors.red}Verification failed${colors.reset}`);
+    process.exit(1);
   }
 }
 

@@ -43,7 +43,7 @@
     "update-deps:major": "npx npm-check-updates -u && pnpm install",
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
     "outdated": "pnpm outdated",
-    "export-form": "cd packages/core && node src/export/cli/export-form.cjs"
+    "export-form": "node packages/core/src/export/cli/export-form.cjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

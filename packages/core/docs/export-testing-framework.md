@@ -23,6 +23,7 @@ The framework consists of several components:
 
    - `export-cli-wrapper.test.ts` - Bridge between CLI tool and export functionality
    - Handles file preservation when run through the CLI
+   - Enforces exports to be within the git-ignored ./exports directory
 
 ## Getting Started
 
@@ -115,6 +116,17 @@ The test framework uses the `EXPORT_CLI_MODE` environment variable to control cl
 - When not set (normal test runs), files are cleaned up after tests complete
 
 This allows the same code to be used both for automated testing and for the CLI tool, while ensuring appropriate behavior in each context.
+
+### Output Directory Management
+
+For version control compatibility, the CLI and wrapper enforce:
+
+1. All exports from the CLI are placed in the `./exports` directory
+2. The CLI transforms any output path to extract only the subdirectory name
+3. This ensures all generated files stay within the git-ignored directory
+4. Test runs will still use the output directory specified in tests (but will clean up unless in CLI mode)
+
+Example: If a user specifies `--output my-form`, the export will go to `./exports/my-form`.
 
 ## Working with Snapshots
 
@@ -225,6 +237,14 @@ it('should export files for inspection', async () => {
 process.env.EXPORT_CLI_MODE = undefined;
 ```
 
+**Output Directory Issues**
+
+For CLI development and testing:
+
+1. Remember that CLI exports always go to subdirectories within `./exports`
+2. When testing the CLI locally, look for files in `./exports/[subdirectory]`
+3. For programmatic tests, the output directory behavior depends on whether the `EXPORT_CLI_MODE` flag is set
+
 ## Best Practices
 
 1. **Keep snapshots minimal** - Only snapshot the essential parts of files
@@ -233,6 +253,7 @@ process.env.EXPORT_CLI_MODE = undefined;
 4. **Update tests when export format changes** - Keep tests in sync with implementation
 5. **Run tests locally before committing** - Catch issues early
 6. **Use CLI for manual exports** - Prefer the CLI tool over direct test runs for manual exports
+7. **Use descriptive subdirectory names** - When testing the CLI, use names that reflect the content (e.g., `evm-transfer`)
 
 ## Resources
 

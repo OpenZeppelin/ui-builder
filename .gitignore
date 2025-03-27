@@ -25,7 +25,7 @@ coverage/
 packages/core/test-results/
 
 # Test exports
-packages/core/exports/
+exports/
 
 # Environment variables
 .env
