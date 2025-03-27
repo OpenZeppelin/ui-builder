@@ -37,6 +37,14 @@ export interface TemplateOptions {
    * Additional dependencies to include
    */
   dependencies?: Record<string, string>;
+
+  /**
+   * Target environment for dependencies
+   * - 'local': Uses workspace dependencies for local development
+   * - 'production': Uses published dependencies for production builds
+   * @default 'local'
+   */
+  env?: 'local' | 'production';
 }
 
 /**

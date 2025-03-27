@@ -31,10 +31,12 @@
  *   --template, -t [name]      Template to use (default: typescript-react-vite)
  *   --complex, -x              Use complex form with multiple fields
  *   --verbose, -v              Enable verbose output
+ *   --env, -e [env]            Target environment: 'local' or 'production' (default: local)
  *
  * Examples:
  *   export-form export                                  # Export basic EVM transfer form
  *   export-form export -c solana -f stake -o stake-form # Export Solana staking form
+ *   export-form export --env production -o prod-form    # Export form for production use
  *   export-form build ./exports/transfer-form           # Build exported form
  *   export-form serve ./exports/transfer-form           # Run exported form locally
  *   export-form export -x                               # Export complex form
@@ -85,10 +87,12 @@ ${colors.bold}Options:${colors.reset}
   --template, -t [name]      Template to use (default: typescript-react-vite)
   --complex, -x              Use complex form with multiple fields
   --verbose, -v              Enable verbose output
+  --env, -e [env]            Target environment: 'local' or 'production' (default: local)
 
 ${colors.bold}Examples:${colors.reset}
   export-form export                                  # Export basic EVM transfer form
   export-form export -c solana -f stake -o stake-form # Export Solana staking form
+  export-form export --env production -o prod-form    # Export form for production use
   export-form build ./exports/transfer-form           # Build exported form
   export-form serve ./exports/transfer-form           # Run exported form locally
   export-form export -x                               # Export complex form
@@ -109,6 +113,7 @@ function parseArgs() {
     template: 'typescript-react-vite',
     complex: false,
     verbose: false,
+    env: 'local',
   };
 
   // Check for help flag as direct argument
@@ -142,6 +147,8 @@ function parseArgs() {
       options.complex = true;
     } else if (arg === '--verbose' || arg === '-v') {
       options.verbose = true;
+    } else if (arg === '--env' || arg === '-e') {
+      options.env = args[++i];
     } else if (!arg.startsWith('-')) {
       options.targetDir = arg;
     }
@@ -191,7 +198,8 @@ function exportFormSimple(options) {
     console.log(
       `  Form Complexity: ${options.complex ? colors.blue + 'Complex' : colors.blue + 'Simple'}${colors.reset}`
     );
-    console.log(`  Output Directory: ${colors.blue}${outputDir}${colors.reset}\n`);
+    console.log(`  Output Directory: ${colors.blue}${outputDir}${colors.reset}`);
+    console.log(`  Environment:      ${colors.blue}${options.env}${colors.reset}\n`);
 
     // Create the test environment variables
     const env = {
@@ -202,6 +210,7 @@ function exportFormSimple(options) {
       EXPORT_TEST_COMPLEX: options.complex.toString(),
       EXPORT_TEST_OUTPUT_DIR: outputDir,
       EXPORT_CLI_MODE: 'true', // Mark as running from CLI to prevent cleanup
+      EXPORT_CLI_ENV: options.env, // Pass environment setting to control dependency handling
       ...process.env,
     };
 
@@ -305,21 +314,72 @@ function buildExportedForm(options) {
 
   try {
     console.log(`\n${colors.bold}${colors.cyan}Building Transaction Form${colors.reset}\n`);
-    console.log(`${colors.blue}Installing dependencies in:${colors.reset} ${targetDir}`);
 
-    // Install dependencies
-    execInDir('npm install', targetDir);
+    // Check for vite.config.ts
+    if (fs.existsSync(path.join(targetDir, 'vite.config.ts'))) {
+      console.log(`${colors.green}✓ vite.config.ts found${colors.reset}`);
+    } else {
+      console.error(`${colors.red}Error: vite.config.ts not found${colors.reset}`);
+      process.exit(1);
+    }
 
-    console.log(`\n${colors.blue}Building project...${colors.reset}`);
+    // Check for workspace dependencies
+    let hasWorkspaceDeps = false;
+    let isProductionBuild = false;
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf8'));
+      const deps = packageJson.dependencies || {};
 
-    // Build the project
-    execInDir('npm run build', targetDir);
+      // Check if there are any workspace dependencies
+      Object.entries(deps).forEach(([name, version]) => {
+        if (typeof version === 'string' && version.startsWith('workspace:')) {
+          hasWorkspaceDeps = true;
+          console.log(`${colors.blue}Workspace dependency:${colors.reset} ${name}@${version}`);
+        } else if (name.startsWith('@openzeppelin/') && version === 'latest') {
+          isProductionBuild = true;
+          console.log(`${colors.blue}Production dependency:${colors.reset} ${name}@${version}`);
+        }
+      });
 
-    console.log(`\n${colors.green}✓ Build completed successfully${colors.reset}`);
+      if (hasWorkspaceDeps) {
+        console.log(`\n${colors.yellow}This project uses workspace dependencies.${colors.reset}`);
+        console.log(`These will be resolved from your local monorepo when you run the dev server.`);
+        console.log(`\n${colors.green}✓ Ready for local development${colors.reset}`);
+      } else if (isProductionBuild) {
+        console.log(`\n${colors.yellow}This project uses production dependencies.${colors.reset}`);
+        console.log(`These will be fetched from npm registries when building.`);
+        console.log(`\n${colors.green}✓ Ready for production build${colors.reset}`);
+      }
+    } catch (error) {
+      console.warn(
+        `${colors.yellow}Warning:${colors.reset} Could not parse package.json: ${error.message}`
+      );
+    }
+
+    // For running in the CLI context, we'll just validate the setup
     console.log(`\n${colors.cyan}Next step:${colors.reset}`);
     console.log(
       `  ${colors.bold}Serve the project:${colors.reset} export-form serve ${targetDir}\n`
     );
+
+    if (hasWorkspaceDeps) {
+      console.log(
+        `${colors.yellow}To manually develop with workspace dependencies:${colors.reset}`
+      );
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. pnpm install`);
+      console.log(`  3. pnpm dev`);
+    } else if (isProductionBuild) {
+      console.log(`${colors.yellow}To manually build for production:${colors.reset}`);
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. npm install --legacy-peer-deps`);
+      console.log(`  3. npm run build`);
+    } else {
+      console.log(`${colors.yellow}To manually build:${colors.reset}`);
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. npm install --legacy-peer-deps`);
+      console.log(`  3. npm run build`);
+    }
   } catch (error) {
     console.error(`\n${colors.red}Build failed${colors.reset}`);
     process.exit(1);
@@ -357,16 +417,93 @@ function serveExportedForm(options) {
 
   try {
     console.log(`\n${colors.bold}${colors.cyan}Serving Transaction Form${colors.reset}\n`);
-    console.log(`${colors.blue}Starting development server for:${colors.reset} ${targetDir}`);
 
-    // Install dependencies if needed
-    if (!fs.existsSync(path.join(targetDir, 'node_modules'))) {
-      console.log(`${colors.yellow}Installing dependencies first...${colors.reset}`);
-      execInDir('npm install', targetDir);
+    // Check for key files
+    const requiredFiles = [
+      'vite.config.ts',
+      'package.json',
+      'index.html',
+      'src/App.tsx',
+      'src/components/GeneratedForm.tsx',
+      'src/main.tsx',
+    ];
+
+    const missingFiles = requiredFiles.filter((file) => !fs.existsSync(path.join(targetDir, file)));
+
+    if (missingFiles.length > 0) {
+      console.error(`${colors.red}Missing required files:${colors.reset}`);
+      missingFiles.forEach((file) => console.error(`  - ${file}`));
+      process.exit(1);
     }
 
-    // Serve the project
-    execInDir('npm run dev', targetDir);
+    console.log(`${colors.green}✓ All required files present${colors.reset}`);
+
+    // Check for workspace dependencies and environment type
+    let hasWorkspaceDeps = false;
+    let isProductionBuild = false;
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf8'));
+      const deps = packageJson.dependencies || {};
+
+      // Check if there are any workspace dependencies
+      Object.entries(deps).forEach(([name, version]) => {
+        if (typeof version === 'string' && version.startsWith('workspace:')) {
+          hasWorkspaceDeps = true;
+          console.log(`${colors.blue}Workspace dependency:${colors.reset} ${name}@${version}`);
+        } else if (name.startsWith('@openzeppelin/') && version === 'latest') {
+          isProductionBuild = true;
+          console.log(`${colors.blue}Production dependency:${colors.reset} ${name}@${version}`);
+        }
+      });
+
+      if (hasWorkspaceDeps) {
+        console.log(`\n${colors.yellow}This project uses workspace dependencies.${colors.reset}`);
+        console.log(`These will be resolved from your local monorepo when using pnpm.`);
+      } else if (isProductionBuild) {
+        console.log(`\n${colors.yellow}This project uses production dependencies.${colors.reset}`);
+        console.log(`Dependencies will be fetched from npm registries.`);
+      }
+    } catch (error) {
+      console.warn(
+        `${colors.yellow}Warning:${colors.reset} Could not parse package.json: ${error.message}`
+      );
+    }
+
+    // Recommend appropriate steps based on the dependency type
+    if (hasWorkspaceDeps) {
+      console.log(
+        `\n${colors.green}Launching development server with workspace dependencies...${colors.reset}`
+      );
+      try {
+        // Use pnpm to start the dev server with monorepo context
+        console.log(`${colors.dim}$ cd ${targetDir} && pnpm install && pnpm dev${colors.reset}`);
+        execInDir('pnpm install', targetDir);
+        execInDir('pnpm dev', targetDir);
+      } catch (error) {
+        console.error(`\n${colors.red}Server failed to start:${colors.reset} ${error.message}`);
+        console.log(`\n${colors.yellow}Please try running manually:${colors.reset}`);
+        console.log(`  1. cd ${targetDir}`);
+        console.log(`  2. pnpm install`);
+        console.log(`  3. pnpm dev`);
+      }
+    } else if (isProductionBuild) {
+      console.log(
+        `\n${colors.yellow}For production builds, start the server manually:${colors.reset}`
+      );
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. npm install --legacy-peer-deps`);
+      console.log(`  3. npm run dev`);
+
+      console.log(`\n${colors.yellow}To build for production:${colors.reset}`);
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. npm install --legacy-peer-deps`);
+      console.log(`  3. npm run build`);
+    } else {
+      console.log(`\n${colors.yellow}Start the server manually:${colors.reset}`);
+      console.log(`  1. cd ${targetDir}`);
+      console.log(`  2. npm install --legacy-peer-deps`);
+      console.log(`  3. npm run dev`);
+    }
   } catch (error) {
     console.error(`\n${colors.red}Server failed${colors.reset}`);
     process.exit(1);

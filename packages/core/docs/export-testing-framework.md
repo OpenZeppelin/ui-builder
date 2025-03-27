@@ -24,6 +24,7 @@ The framework consists of several components:
    - `export-cli-wrapper.test.ts` - Bridge between CLI tool and export functionality
    - Handles file preservation when run through the CLI
    - Enforces exports to be within the git-ignored ./exports directory
+   - Supports configurable dependency handling for different environments
 
 ## Getting Started
 
@@ -117,6 +118,23 @@ The test framework uses the `EXPORT_CLI_MODE` environment variable to control cl
 
 This allows the same code to be used both for automated testing and for the CLI tool, while ensuring appropriate behavior in each context.
 
+### Environment Options
+
+The CLI wrapper supports different dependency handling based on the target environment:
+
+- **Local Development** (`EXPORT_CLI_ENV=local`):
+
+  - Sets `workspace:*` for @openzeppelin packages
+  - Ideal for local development in the monorepo
+  - Allows testing changes without publishing
+
+- **Production** (`EXPORT_CLI_ENV=production`):
+  - Sets `latest` for @openzeppelin packages
+  - For production builds and deployments
+  - Works outside the monorepo context
+
+This is controlled through the `env` option in the template options.
+
 ### Output Directory Management
 
 For version control compatibility, the CLI and wrapper enforce:
@@ -194,6 +212,32 @@ it('should export a custom form with specific fields', async () => {
 });
 ```
 
+## Testing Different Environments
+
+To test different dependency configurations:
+
+```typescript
+it('should export with workspace dependencies for local development', async () => {
+  const formConfig = createMinimalFormConfig('transfer', 'evm');
+  const options = { env: 'local' as const };
+
+  const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
+
+  const packageJson = JSON.parse(files['package.json']);
+  expect(packageJson.dependencies['@openzeppelin/transaction-form-renderer']).toBe('workspace:*');
+});
+
+it('should export with published dependencies for production', async () => {
+  const formConfig = createMinimalFormConfig('transfer', 'evm');
+  const options = { env: 'production' as const };
+
+  const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
+
+  const packageJson = JSON.parse(files['package.json']);
+  expect(packageJson.dependencies['@openzeppelin/transaction-form-renderer']).toBe('latest');
+});
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -245,6 +289,18 @@ For CLI development and testing:
 2. When testing the CLI locally, look for files in `./exports/[subdirectory]`
 3. For programmatic tests, the output directory behavior depends on whether the `EXPORT_CLI_MODE` flag is set
 
+**Environment-Specific Dependencies**
+
+To test different dependency handling:
+
+```typescript
+// For testing local development dependencies
+process.env.EXPORT_CLI_ENV = 'local';
+// or
+// For testing production dependencies
+process.env.EXPORT_CLI_ENV = 'production';
+```
+
 ## Best Practices
 
 1. **Keep snapshots minimal** - Only snapshot the essential parts of files
@@ -253,7 +309,8 @@ For CLI development and testing:
 4. **Update tests when export format changes** - Keep tests in sync with implementation
 5. **Run tests locally before committing** - Catch issues early
 6. **Use CLI for manual exports** - Prefer the CLI tool over direct test runs for manual exports
-7. **Use descriptive subdirectory names** - When testing the CLI, use names that reflect the content (e.g., `evm-transfer`)
+7. **Test both environment types** - Include tests for both local and production dependencies
+8. **Use descriptive subdirectory names** - When testing the CLI, use names that reflect the content (e.g., `evm-transfer`)
 
 ## Resources
 

@@ -184,6 +184,35 @@ export class TemplateManager {
     if (options.projectName && files['package.json']) {
       const packageJson = JSON.parse(files['package.json']);
       packageJson.name = options.projectName;
+
+      // Handle dependencies for export
+      if (packageJson.dependencies) {
+        Object.keys(packageJson.dependencies).forEach((dep) => {
+          // Check the target environment from options or env var
+          const isLocalEnv =
+            options.env === 'local' ||
+            (process.env.EXPORT_CLI_ENV === 'local' && options.env !== 'production');
+
+          // For @openzeppelin packages in local mode, use workspace dependencies
+          if (
+            dep.startsWith('@openzeppelin/') &&
+            isLocalEnv &&
+            process.env.EXPORT_CLI_MODE === 'true'
+          ) {
+            packageJson.dependencies[dep] = 'workspace:*';
+            console.log(`Setting ${dep} to use workspace dependency for local development`);
+          } else if (
+            dep.startsWith('@openzeppelin/') &&
+            !isLocalEnv &&
+            process.env.EXPORT_CLI_MODE === 'true'
+          ) {
+            // For production mode, use the latest published version
+            packageJson.dependencies[dep] = 'latest';
+            console.log(`Setting ${dep} to use latest published version for production`);
+          }
+        });
+      }
+
       files['package.json'] = JSON.stringify(packageJson, null, 2);
     }
 

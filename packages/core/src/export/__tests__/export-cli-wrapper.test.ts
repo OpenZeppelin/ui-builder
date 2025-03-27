@@ -63,6 +63,7 @@ describe('Export CLI Wrapper', () => {
     const includeAdapters = process.env.EXPORT_TEST_INCLUDE_ADAPTERS !== 'false';
     const isComplex = process.env.EXPORT_TEST_COMPLEX === 'true';
     const outputDir = process.env.EXPORT_TEST_OUTPUT_DIR || './exports';
+    const env = (process.env.EXPORT_CLI_ENV || 'local') as 'local' | 'production';
 
     console.log('Export configuration:');
     console.log(`Chain: ${chain}`);
@@ -71,6 +72,7 @@ describe('Export CLI Wrapper', () => {
     console.log(`Include Adapters: ${includeAdapters}`);
     console.log(`Complex Form: ${isComplex}`);
     console.log(`Output Directory: ${outputDir}`);
+    console.log(`Environment: ${env}`);
 
     // Create form config
     const formConfig = isComplex
@@ -85,6 +87,7 @@ describe('Export CLI Wrapper', () => {
       projectName: `${func}-form`,
       template,
       includeAdapters,
+      env,
       onProgress: (progress) =>
         console.log(
           `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`

@@ -32,7 +32,7 @@ pnpm export-form --help
 Here are some common use cases:
 
 ```bash
-# Export a basic EVM transfer form
+# Export a basic EVM transfer form for local development
 pnpm export-form export
 
 # Export a Solana staking form
@@ -41,9 +41,27 @@ pnpm export-form export --chain solana --func stake
 # Export a complex form with multiple fields
 pnpm export-form export --complex
 
-# Export to a specific subdirectory
-pnpm export-form export --output my-custom-form
+# Export a form for production use
+pnpm export-form export --env production --output prod-form
 ```
+
+## Environment Options
+
+The CLI supports two target environments for exports:
+
+### Local Development (`--env local`)
+
+- Default if no environment is specified
+- Uses `workspace:*` for `@openzeppelin` dependencies to link to local packages
+- Ideal for local development and testing changes in the monorepo
+- Requires pnpm for dependency resolution across workspaces
+
+### Production (`--env production`)
+
+- Specified with `--env production`
+- Uses `latest` for `@openzeppelin` dependencies to fetch from npm registry
+- Suitable for deployment or sharing with users outside the monorepo
+- Works with standard npm/yarn without workspace context
 
 ## CLI Commands
 
@@ -64,11 +82,12 @@ Options:
 - `--template, -t [name]` - Template to use (default: typescript-react-vite)
 - `--complex, -x` - Use complex form with multiple fields
 - `--verbose, -v` - Enable verbose output
+- `--env, -e [env]` - Target environment: 'local' or 'production' (default: local)
 
 Example:
 
 ```bash
-pnpm export-form export --chain solana --func stake --output solana-stake-form --complex
+pnpm export-form export --chain solana --func stake --output solana-stake-form --complex --env production
 ```
 
 This will:
@@ -76,6 +95,7 @@ This will:
 1. Create a form for the Solana stake function
 2. Use a complex form configuration with multiple fields
 3. Save the output to the `./exports/solana-stake-form` directory
+4. Configure it for production use with published npm dependencies
 
 ### build
 
@@ -93,8 +113,8 @@ pnpm export-form build ./exports/transfer-form
 
 This will:
 
-1. Install dependencies using npm
-2. Build the project using the configured build script
+1. Detect whether the form uses workspace dependencies or production dependencies
+2. Provide appropriate build instructions based on the environment
 
 ### serve
 
@@ -112,9 +132,9 @@ pnpm export-form serve ./exports/transfer-form
 
 This will:
 
-1. Install dependencies if needed
-2. Start a development server
-3. Open the form in your default browser
+1. Detect the environment type (local or production)
+2. For local development forms, use pnpm to resolve workspace dependencies
+3. For production forms, provide manual instructions for npm/yarn
 
 ### verify
 
@@ -139,19 +159,28 @@ This will check:
 
 ## Workflow Examples
 
-### Complete Export-to-Test Workflow
+### Local Development Workflow
 
-This example shows a full workflow from export to testing:
+For developing and testing against local packages:
 
 ```bash
-# Export a form
-pnpm export-form export --chain evm --func transfer --output my-evm-form
+# Export a form for local development
+pnpm export-form export --output local-dev
 
-# Build the exported form
-pnpm export-form build ./exports/my-evm-form
+# Serve the form with workspace dependencies
+pnpm export-form serve ./exports/local-dev/transfer-form
+```
 
-# Run the form locally
-pnpm export-form serve ./exports/my-evm-form
+### Production Deployment Workflow
+
+For creating forms that can be shared or deployed:
+
+```bash
+# Export a form for production
+pnpm export-form export --env production --output prod-deploy
+
+# Build the form for production
+pnpm export-form build ./exports/prod-deploy/transfer-form
 ```
 
 ### Testing Multiple Chain Types
@@ -166,8 +195,8 @@ pnpm export-form export --chain evm --func transfer --output evm-transfer
 pnpm export-form export --chain solana --func transfer --output solana-transfer
 
 # Verify both forms
-pnpm export-form verify ./exports/evm-transfer
-pnpm export-form verify ./exports/solana-transfer
+pnpm export-form verify ./exports/evm-transfer/transfer-form
+pnpm export-form verify ./exports/solana-transfer/transfer-form
 ```
 
 ## Implementation Details
@@ -187,6 +216,21 @@ For better Git compatibility and to prevent unwanted files from being tracked:
 1. All exported forms are placed in the `./exports` directory, which is already Git-ignored
 2. The `--output` option specifies a subdirectory name within `./exports`, not a complete path
 3. This ensures that all generated files remain outside of version control
+
+### Dependency Management
+
+The CLI handles dependencies differently based on the target environment:
+
+1. For `--env local` (default):
+
+   - @openzeppelin packages use `workspace:*` syntax
+   - Dependencies are resolved through the monorepo using pnpm
+   - Ideal for testing local changes to the renderer and other packages
+
+2. For `--env production`:
+   - @openzeppelin packages use `latest` version
+   - Dependencies are fetched from the npm registry
+   - Works outside the monorepo context with standard npm/yarn
 
 ## Troubleshooting
 
@@ -232,13 +276,27 @@ If files are missing after export, make sure you're using the CLI commands prope
 ```bash
 # Correct usage
 pnpm export-form export --output my-form
-pnpm export-form build ./exports/my-form
+pnpm export-form build ./exports/my-form/transfer-form
 
 # Incorrect usage (running test directly)
 pnpm test src/export/__tests__/export-cli-wrapper.test.ts
 ```
 
 Direct test runs will clean up files, while the CLI preserves them.
+
+**Workspace Dependencies Not Resolving**
+
+If you're getting errors about missing workspace dependencies:
+
+```
+ERROR: No matching version found for @openzeppelin/transaction-form-renderer@workspace:*
+```
+
+Make sure you're:
+
+1. Using pnpm (not npm or yarn)
+2. Running the command from within the monorepo
+3. Using the `serve` command for local development exports
 
 ### Debugging Exports
 
@@ -255,8 +313,9 @@ Then examine the output files to identify issues.
 1. **Use descriptive subdirectory names** - Choose names that reflect the content (e.g., `evm-transfer`, `solana-stake`)
 2. **Export multiple configurations** - Test different chain types and functions
 3. **Verify before building** - Check form structure before spending time on builds
-4. **Use verbose output for debugging** - Get detailed progress information
-5. **Keep exports small** - Only include adapters when necessary
+4. **Use workspace dependencies for development** - Use `--env local` (default) when testing changes to the renderer
+5. **Use production dependencies for deployment** - Use `--env production` when sharing forms outside the monorepo
+6. **Keep exports small** - Only include adapters when necessary
 
 ## Related Resources
 
