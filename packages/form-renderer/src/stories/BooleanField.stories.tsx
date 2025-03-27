@@ -1,9 +1,10 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { BooleanField } from '../components/fields/BooleanField';
 
 import type { BooleanFieldProps } from '../components/fields/BooleanField';
-import type { Meta, StoryObj } from '@storybook/react';
 
 // Extended props for the wrapper component
 interface BooleanFieldWrapperProps extends Omit<BooleanFieldProps, 'control'> {

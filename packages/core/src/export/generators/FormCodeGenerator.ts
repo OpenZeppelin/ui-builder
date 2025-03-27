@@ -192,7 +192,7 @@ export class FormCodeGenerator {
     const adapterClassName = this.getAdapterClassName(chainType);
 
     // Create parameters for the template
-    const params: FormComponentTemplateParams & Record<string, unknown> = {
+    const params: FormComponentTemplateParams = {
       adapterClassName,
       chainType,
       functionId,

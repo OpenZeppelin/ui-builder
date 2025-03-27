@@ -1,10 +1,11 @@
+import type { Meta, StoryObj } from '@storybook/react';
+
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { NumberField } from '../components/fields/NumberField';
 
 import type { NumberFieldProps } from '../components/fields/NumberField';
-import type { Meta, StoryObj } from '@storybook/react';
 
 // Extended props for the wrapper component
 interface NumberFieldWrapperProps extends Omit<NumberFieldProps, 'control'> {

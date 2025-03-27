@@ -1,17 +1,7 @@
-// Polyfill for structuredClone for Node.js environments that don't support it natively
-// This is a temporary solution for compatibility with ESLint 9 and will be removed once
-// all dependencies are fully compatible
-if (typeof structuredClone !== 'function') {
-  global.structuredClone = function (obj) {
-    try {
-      return JSON.parse(JSON.stringify(obj));
-    } catch (e) {
-      // For circular references or other non-serializable objects, fallback to a shallow copy
-      return Object.assign({}, obj);
-    }
-  };
-}
+// Import shared utilities
+const { getPluginConfigs } = require('./.eslint/utils.cjs');
 
+// Import plugins
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const reactRefreshPlugin = require('eslint-plugin-react-refresh');
@@ -24,25 +14,7 @@ const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
 const jsdocPlugin = require('eslint-plugin-jsdoc');
 
-// Safely extract configs to handle both ESLint v8 and v9 formats
-const getPluginConfigs = (plugin, configName) => {
-  try {
-    // ESLint v9 format
-    if (plugin.configs && plugin.configs[configName] && plugin.configs[configName].rules) {
-      return plugin.configs[configName].rules;
-    }
-    // ESLint v8 format (fallback)
-    if (plugin.configs && plugin.configs[configName]) {
-      return plugin.configs[configName].rules || {};
-    }
-    return {};
-  } catch (e) {
-    console.warn(`Failed to load rules from ${configName}:`, e);
-    return {};
-  }
-};
-
-// We need to get these safely since the structure might differ
+// Extract rules from recommended configs
 const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommended');
 const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
@@ -139,7 +111,7 @@ const baseConfig = [
     },
     rules: {
       ...typescriptRecommendedRules,
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off', // Explicitly disable in favor of unused-imports
       // Disable rules that require type checking as they will be enabled in the strict config
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/await-thenable': 'off',
