@@ -38,13 +38,6 @@ const coreTypeFiles = import.meta.glob<string>('../core/types/ContractSchema.ts'
   query: '?raw',
   import: 'default',
 }) as LazyGlobImportResult;
-const formRendererTypeFiles = import.meta.glob<string>(
-  '../../form-renderer/src/types/FormTypes.ts',
-  {
-    query: '?raw',
-    import: 'default',
-  }
-) as LazyGlobImportResult;
 
 // For testing purposes - make file paths available to tests
 export const adapterFilePaths = {
@@ -52,7 +45,6 @@ export const adapterFilePaths = {
   type: Object.keys(typeFiles),
   util: Object.keys(utilFiles),
   coreType: Object.keys(coreTypeFiles),
-  formRendererType: Object.keys(formRendererTypeFiles),
 };
 
 /**
@@ -232,20 +224,6 @@ export class AdapterExportManager {
       coreFiles['src/types/ContractSchema.ts'] = '// ContractSchema.ts file not found';
     }
 
-    // FormTypes.ts - Get from form-renderer package
-    const formTypesPath = Object.keys(formRendererTypeFiles)[0] || '';
-    if (formTypesPath) {
-      try {
-        coreFiles['src/types/FormTypes.ts'] = await this.getFileContent(formTypesPath);
-      } catch (error) {
-        console.warn('Failed to load FormTypes.ts:', error);
-        coreFiles['src/types/FormTypes.ts'] = '// FormTypes.ts could not be loaded';
-      }
-    } else {
-      console.warn('No FormTypes.ts file found');
-      coreFiles['src/types/FormTypes.ts'] = '// FormTypes.ts file not found';
-    }
-
     return coreFiles;
   }
 
@@ -311,12 +289,6 @@ export { ${adapterClassName} };
         // Core type files
         if (coreTypeFiles[path]) {
           return await coreTypeFiles[path]();
-        }
-        return `// File not found: ${path}`;
-      } else if (path.includes('/form-renderer/')) {
-        // Form renderer type files
-        if (formRendererTypeFiles[path]) {
-          return await formRendererTypeFiles[path]();
         }
         return `// File not found: ${path}`;
       }
