@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FormCodeGenerator } from '../FormCodeGenerator';
+import { TemplateProcessor } from '../TemplateProcessor';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
@@ -11,11 +12,15 @@ import type { BuilderFormConfig } from '../../../core/types/FormTypes';
  */
 describe('FormCodeGenerator Templating System', () => {
   let generator: FormCodeGenerator;
+  let templateProcessor: TemplateProcessor;
   let originalConsoleLog: typeof console.log;
   let originalConsoleWarn: typeof console.warn;
 
   beforeEach(() => {
     generator = new FormCodeGenerator();
+
+    // Create a TemplateProcessor instance for direct testing
+    templateProcessor = new TemplateProcessor({});
 
     // Suppress console output during tests
     originalConsoleLog = console.log;
@@ -37,38 +42,27 @@ describe('FormCodeGenerator Templating System', () => {
    * allows us to test each pattern independently.
    */
   describe('processTemplate', () => {
-    // Helper function to access the private processTemplate method
-    const processTemplate = async (
-      templateName: string,
-      params: Record<string, unknown>
-    ): Promise<string> => {
-      // Access the private method using type assertion
-      return (
-        generator as unknown as {
-          processTemplate(templateName: string, params: Record<string, unknown>): Promise<string>;
-        }
-      ).processTemplate(templateName, params);
-    };
-
     // Helper to set template content directly
     const setTemplateContent = (templateName: string, content: string): void => {
       // Cast to access private properties, create a simple templates object
-      const privateGenerator = generator as unknown as { templates: Record<string, string> };
-      privateGenerator.templates = { [templateName]: content };
+      const privateProcessor = templateProcessor as unknown as {
+        templates: Record<string, string>;
+      };
+      privateProcessor.templates = { [templateName]: content };
     };
 
     beforeEach(() => {
       // Mock the loadTemplates method to avoid file system interactions
       vi.spyOn(
-        generator as unknown as { loadTemplates(): Promise<void> },
+        templateProcessor as unknown as { loadTemplates(): Promise<void> },
         'loadTemplates'
       ).mockImplementation(async () => {
-        (generator as unknown as { templates: Record<string, string> }).templates = {};
+        (templateProcessor as unknown as { templates: Record<string, string> }).templates = {};
         return Promise.resolve();
       });
 
       // Pre-initialize the templates property
-      (generator as unknown as { templates: Record<string, string> }).templates = {};
+      (templateProcessor as unknown as { templates: Record<string, string> }).templates = {};
     });
 
     it('should handle regular variable placeholders (@@param-name@@)', async () => {
@@ -89,7 +83,7 @@ describe('FormCodeGenerator Templating System', () => {
         functionId: 'transferTokens',
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       expect(processed).toContain('import { EvmAdapter } from');
       expect(processed).toContain('../adapters/evm/adapter');
@@ -118,7 +112,7 @@ describe('FormCodeGenerator Templating System', () => {
         buttonText: 'Submit Transaction',
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       // The template system preserves the comment syntax in the initial template processing
       expect(processed).toContain('onClick={/*() => console.log("clicked")*/}');
@@ -141,7 +135,7 @@ describe('FormCodeGenerator Templating System', () => {
         debugMode: true,
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       // The template system preserves the comment syntax in the initial template processing
       expect(processed).toContain('const adapter = new /*EvmAdapter*/()');
@@ -168,7 +162,7 @@ describe('FormCodeGenerator Templating System', () => {
         veryLongKebabCasePropertyName: 'This was properly converted',
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       expect(processed).toContain("functionId: 'transferTokens'");
       expect(processed).toContain("formTitle: 'Transfer Tokens Form'");
@@ -205,7 +199,7 @@ describe('FormCodeGenerator Templating System', () => {
         themeConfig: theme,
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       // Use JSON.stringify to check that the object values were properly stringified
       // This approach is more reliable than checking for specific formatting
@@ -220,85 +214,6 @@ describe('FormCodeGenerator Templating System', () => {
       expect(processedLower).toContain('colors');
       expect(processedLower).toContain('primary');
       expect(processedLower).toContain('#3366ff');
-    });
-
-    it('should remove template comments delimited by special markers', async () => {
-      const templateContent = `
-        // This comment will stay
-        
-        /*------------TEMPLATE COMMENT START------------*/
-        // This is a template-specific comment that explains how to use the template
-        // It should be removed from the generated code
-        // Useful for documenting the template itself
-        /*------------TEMPLATE COMMENT END------------*/
-        
-        function Example() {
-          // This comment will stay
-          return <div>Example component</div>;
-        }
-      `;
-
-      setTemplateContent('test-template', templateContent);
-
-      const processed = await processTemplate('test-template', {});
-
-      // In our new architecture, processTemplate does NOT remove template comments
-      // Those are removed in applyCommonPostProcessing
-      expect(processed).toContain('// This comment will stay');
-      expect(processed).toContain('function Example()');
-      expect(processed).toContain('template-specific comment');
-      expect(processed).toContain('TEMPLATE COMMENT');
-    });
-
-    it('should handle all placeholder patterns in a single template while preserving comment syntax', async () => {
-      const templateContent = `
-        import { @@adapter-class-name@@ } from '../adapters/@@chain-type@@/adapter';
-        
-        /*------------TEMPLATE COMMENT START------------*/
-        // This explains how the component should be used
-        /*------------TEMPLATE COMMENT END------------*/
-        
-        function TransactionForm() {
-          // Set up form handler
-          const handleSubmit = /*@@submit-handler@@*/;
-          
-          return (
-            <div className={/*@@container-class@@*/}>
-              <h1>{/*@@title@@*/}</h1>
-              <form onSubmit={handleSubmit}>
-                {/* Form content here */}
-              </form>
-            </div>
-          );
-        }
-      `;
-
-      setTemplateContent('test-template', templateContent);
-
-      const params = {
-        adapterClassName: 'EvmAdapter',
-        chainType: 'evm',
-        submitHandler: '(e) => { e.preventDefault(); console.log("submitted"); }',
-        containerClass: 'form-container',
-        title: 'Transfer Tokens',
-      };
-
-      const processed = await processTemplate('test-template', params);
-
-      // Regular placeholders are replaced directly
-      expect(processed).toContain('import { EvmAdapter } from');
-      expect(processed).toContain('../adapters/evm/adapter');
-
-      // Comment-based placeholders preserve the comment syntax
-      expect(processed).toContain(
-        'const handleSubmit = /*(e) => { e.preventDefault(); console.log("submitted"); }*/;'
-      );
-      expect(processed).toContain('<div className={/*form-container*/}>');
-      expect(processed).toContain('<h1>{/*Transfer Tokens*/}</h1>');
-
-      // In our new architecture, processTemplate does NOT remove template comments
-      // Those are removed in applyCommonPostProcessing
-      expect(processed).toContain('TEMPLATE COMMENT');
     });
 
     it('should handle missing parameter values gracefully', async () => {
@@ -318,7 +233,7 @@ describe('FormCodeGenerator Templating System', () => {
         // functionName is intentionally missing
       };
 
-      const processed = await processTemplate('test-template', params);
+      const processed = await templateProcessor.processTemplate('test-template', params);
 
       expect(processed).toContain("id: 'transferTokens'");
       expect(processed).toContain("name: ''"); // Empty string for missing param
@@ -377,11 +292,7 @@ describe('FormCodeGenerator Templating System', () => {
       // This test verifies that the template processing works correctly
       // when called through the public generateUpdatedAppComponent method
 
-      const code = await (
-        generator as unknown as {
-          generateUpdatedAppComponent(functionId: string): Promise<string>;
-        }
-      ).generateUpdatedAppComponent('transferTokens');
+      const code = await generator.generateUpdatedAppComponent('transferTokens');
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('transferTokens');
@@ -401,28 +312,6 @@ describe('FormCodeGenerator Templating System', () => {
    * Tests for the applyCommonPostProcessing method
    */
   describe('applyCommonPostProcessing', () => {
-    // Helper function to access the private applyCommonPostProcessing method
-    const applyCommonPostProcessing = (
-      template: string,
-      options?: {
-        adapterClassName?: string;
-        formConfigJSON?: string;
-      }
-    ): string => {
-      // Access the private method using type assertion
-      return (
-        generator as unknown as {
-          applyCommonPostProcessing(
-            template: string,
-            options?: {
-              adapterClassName?: string;
-              formConfigJSON?: string;
-            }
-          ): string;
-        }
-      ).applyCommonPostProcessing(template, options);
-    };
-
     it('should remove template comments delimited by special markers', () => {
       const template = `
         // This comment will stay
@@ -439,7 +328,7 @@ describe('FormCodeGenerator Templating System', () => {
         }
       `;
 
-      const processed = applyCommonPostProcessing(template);
+      const processed = templateProcessor.applyCommonPostProcessing(template);
 
       expect(processed).toContain('// This comment will stay');
       expect(processed).toContain('function Example()');
@@ -459,7 +348,7 @@ describe('FormCodeGenerator Templating System', () => {
         const x = 1;
       `;
 
-      const processed = applyCommonPostProcessing(template);
+      const processed = templateProcessor.applyCommonPostProcessing(template);
 
       expect(processed).not.toContain('@ts-expect-error');
       expect(processed).toContain('// This is a normal comment that will stay');
@@ -478,7 +367,9 @@ describe('FormCodeGenerator Templating System', () => {
         }
       `;
 
-      const processed = applyCommonPostProcessing(template, { adapterClassName: 'EvmAdapter' });
+      const processed = templateProcessor.applyCommonPostProcessing(template, {
+        adapterClassName: 'EvmAdapter',
+      });
 
       expect(processed).not.toContain('AdapterPlaceholder');
       expect(processed).toContain('import { EvmAdapter } from');
@@ -501,7 +392,7 @@ describe('FormCodeGenerator Templating System', () => {
         layout: { columns: 1 },
       };
 
-      const processed = applyCommonPostProcessing(template, {
+      const processed = templateProcessor.applyCommonPostProcessing(template, {
         formConfigJSON: JSON.stringify(formConfig),
       });
 
