@@ -41,22 +41,13 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   /*------------TEMPLATE COMMENT END------------*/
   const adapter = new AdapterPlaceholder();
 
-  // Form schema generated from the builder
+  // Form schema generated from the builder and transformed by FormSchemaFactory
   /*------------TEMPLATE COMMENT START------------*/
-  // This is an empty object that will be replaced at generation time
+  // This is an empty object that will be replaced at generation time with a properly
+  // transformed RenderFormSchema that includes all necessary properties
   /*------------TEMPLATE COMMENT END------------*/
   // @ts-expect-error - This is a placeholder for the correct form schema import
   const formSchema: RenderFormSchema = {};
-
-  // Add title and other required properties for RenderFormSchema
-  // TODO: review this, we should not need to do this as it all should come from the builder
-  formSchema.id = 'form-@@function-id@@';
-  formSchema.title = 'Transaction Form for @@function-id@@';
-  formSchema.submitButton = {
-    text: 'Submit Transaction',
-    loadingText: 'Processing...',
-    variant: 'primary',
-  };
 
   // Handle form submission
   const handleSubmit = (formData: FormData) => {

@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import type { RenderFormSchema } from '@form-renderer/types/FormTypes';
 
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import { FormCodeGenerator } from '../FormCodeGenerator';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
@@ -8,6 +11,26 @@ import type { BuilderFormConfig } from '../../../core/types/FormTypes';
  * Unit tests for the FormCodeGenerator class
  */
 describe('FormCodeGenerator', () => {
+  // Mock the formSchemaFactory
+  beforeEach(() => {
+    vi.spyOn(formSchemaFactory, 'builderConfigToRenderSchema').mockImplementation(
+      (formConfig, functionName) => {
+        return {
+          ...formConfig,
+          id: `form-${formConfig.functionId}`,
+          title: functionName,
+          description: '',
+          submitButton: {
+            text: `Execute ${functionName}`,
+            loadingText: 'Processing...',
+            variant: 'primary',
+          },
+          defaultValues: {},
+        };
+      }
+    );
+  });
+
   describe('generateFormComponent', () => {
     it('should generate React component code for a form', async () => {
       const generator = new FormCodeGenerator();
@@ -50,6 +73,79 @@ describe('FormCodeGenerator', () => {
       expect(generatedCode).toContain('EvmAdapter');
       expect(generatedCode).toContain('export default function GeneratedForm');
       expect(generatedCode).toContain('testFunction');
+    });
+
+    it('should use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema', async () => {
+      const generator = new FormCodeGenerator();
+
+      // Create a minimal form config for testing
+      const formConfig: BuilderFormConfig = {
+        functionId: 'transferTokens',
+        fields: [
+          {
+            id: 'param1',
+            name: 'param1',
+            label: 'Parameter 1',
+            type: 'text',
+            validation: {
+              required: true,
+            },
+          },
+        ],
+        layout: {
+          columns: 1,
+          spacing: 'normal',
+          labelPosition: 'top',
+        },
+        validation: {
+          mode: 'onChange',
+          showErrors: 'inline',
+        },
+        theme: {},
+      };
+
+      // Generate the form component
+      await generator.generateFormComponent(formConfig, 'evm', 'transferTokens');
+
+      // Verify that FormSchemaFactory.builderConfigToRenderSchema was called with correct params
+      expect(formSchemaFactory.builderConfigToRenderSchema).toHaveBeenCalledWith(
+        formConfig,
+        'transferTokens',
+        ''
+      );
+
+      // Verify it was called exactly once
+      expect(formSchemaFactory.builderConfigToRenderSchema).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error when transformed schema is missing required properties', async () => {
+      const generator = new FormCodeGenerator();
+
+      // Override mock to return incomplete schema
+      vi.spyOn(formSchemaFactory, 'builderConfigToRenderSchema').mockImplementationOnce(() => {
+        // Return a deliberately incomplete schema to test validation
+        return {
+          fields: [],
+          layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+          validation: { mode: 'onChange', showErrors: 'inline' },
+          theme: {},
+          // Missing id, title, and submitButton properties
+        } as unknown as RenderFormSchema; // Cast to RenderFormSchema for testing validation
+      });
+
+      // Create a minimal form config
+      const formConfig: BuilderFormConfig = {
+        functionId: 'invalidForm',
+        fields: [],
+        layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+        validation: { mode: 'onChange', showErrors: 'inline' },
+        theme: {},
+      };
+
+      // Attempt to generate form with invalid schema should throw
+      await expect(
+        generator.generateFormComponent(formConfig, 'evm', 'invalidForm')
+      ).rejects.toThrow(/Invalid RenderFormSchema/);
     });
   });
 

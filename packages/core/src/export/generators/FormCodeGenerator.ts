@@ -1,3 +1,6 @@
+import type { RenderFormSchema } from '@form-renderer/types/FormTypes';
+
+import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
 import { AdapterExportManager } from '../AdapterExportManager';
 import { TemplateManager } from '../TemplateManager';
 
@@ -59,12 +62,23 @@ export class FormCodeGenerator {
   ): Promise<string> {
     const adapterClassName = this.getAdapterClassName(chainType);
 
+    // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
+    // This ensures consistency with the preview in the form builder
+    const renderSchema = formSchemaFactory.builderConfigToRenderSchema(
+      formConfig,
+      functionId, // Use functionId as the function name
+      '' // Empty description for now - could be enhanced in the future
+    );
+
+    // Validate the schema to ensure it has all required properties
+    this.validateRenderFormSchema(renderSchema, functionId);
+
     // Create parameters for the template
     const params: FormComponentTemplateParams = {
       adapterClassName,
       chainType,
       functionId,
-      formConfigJSON: JSON.stringify(formConfig, null, 2),
+      formConfigJSON: JSON.stringify(renderSchema, null, 2),
       includeDebugMode: false,
     };
 
@@ -78,6 +92,46 @@ export class FormCodeGenerator {
     });
 
     return processedTemplate;
+  }
+
+  /**
+   * Validate that the RenderFormSchema has all required properties
+   *
+   * @param schema The schema to validate
+   * @param functionId The function ID for error messaging
+   * @throws Error if the schema is missing required properties
+   */
+  private validateRenderFormSchema(schema: RenderFormSchema, functionId: string): void {
+    const errors: string[] = [];
+
+    // Check required properties
+    if (!schema.id) {
+      errors.push('Missing id property');
+    }
+    if (!schema.title) {
+      errors.push('Missing title property');
+    }
+    if (!schema.submitButton) {
+      errors.push('Missing submitButton property');
+    } else {
+      // Check submitButton properties
+      if (!schema.submitButton.text) {
+        errors.push('Missing submitButton.text property');
+      }
+      if (!schema.submitButton.loadingText) {
+        errors.push('Missing submitButton.loadingText property');
+      }
+    }
+    if (!schema.fields || !Array.isArray(schema.fields) || schema.fields.length === 0) {
+      errors.push('Missing or empty fields array');
+    }
+
+    // If there are any errors, throw an exception
+    if (errors.length > 0) {
+      throw new Error(
+        `Invalid RenderFormSchema for function ${functionId}. The following issues were found:\n- ${errors.join('\n- ')}`
+      );
+    }
   }
 
   /**
