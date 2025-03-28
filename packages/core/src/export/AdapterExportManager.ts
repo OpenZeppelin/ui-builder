@@ -234,12 +234,12 @@ export class AdapterExportManager {
       try {
         coreFiles['src/core/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
       } catch (error) {
-        console.warn('Failed to load ContractSchema.ts:', error);
-        coreFiles['src/core/types/ContractSchema.ts'] = '// ContractSchema.ts could not be loaded';
+        console.error('Failed to load ContractSchema.ts:', error);
+        throw new Error('Failed to load required type file: ContractSchema.ts');
       }
     } else {
-      console.warn('No ContractSchema.ts file found');
-      coreFiles['src/core/types/ContractSchema.ts'] = '// ContractSchema.ts file not found';
+      console.error('No ContractSchema.ts file found');
+      throw new Error('Required type file ContractSchema.ts not found');
     }
 
     return coreFiles;
@@ -296,8 +296,8 @@ export class AdapterExportManager {
     const indexPath = Object.keys(adapterIndexFiles)[0] || '';
 
     if (!indexPath) {
-      console.warn('No adapter index file found');
-      throw new Error('No adapter index file found');
+      console.error('No adapter index file found');
+      throw new Error('Required adapter index file not found');
     }
 
     try {
@@ -311,8 +311,14 @@ export class AdapterExportManager {
         chainType,
         adapterClassName
       );
+
+      if (!processedContent) {
+        throw new Error('Failed to process adapter index content');
+      }
+
       return processedContent;
     } catch (error) {
+      console.error('Error processing adapter index:', error);
       throw error;
     }
   }
@@ -351,7 +357,7 @@ export class AdapterExportManager {
     );
     if (schemaImports) {
       // Only include ContractSchema and FunctionParameter
-      processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';\n\n`;
+      processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';\n\n`;
     }
 
     // Extract and keep the ContractAdapter interface definition
@@ -373,9 +379,16 @@ export class AdapterExportManager {
         endIndex++;
       }
 
+      // Make sure we found the complete interface
+      if (braceCount !== 0) {
+        throw new Error('Failed to extract complete ContractAdapter interface: unbalanced braces');
+      }
+
       // Extract the complete interface
       const completeInterface = content.substring(startIndex, endIndex);
       processedContent += completeInterface + '\n\n';
+    } else {
+      throw new Error('Failed to find ContractAdapter interface in adapter index file');
     }
 
     // Export the selected adapter class
@@ -412,13 +425,13 @@ export class AdapterExportManager {
         if (utilFiles[path]) {
           return await utilFiles[path]();
         }
-        return `// File not found: ${path}`;
+        throw new Error(`Adapter file not found: ${path}`);
       } else if (path.includes('/core/types/')) {
         // Core type files
         if (coreTypeFiles[path]) {
           return await coreTypeFiles[path]();
         }
-        return `// File not found: ${path}`;
+        throw new Error(`Core type file not found: ${path}`);
       } else if (path.includes('/core/utils/')) {
         // General utility files
         if (generalUtilFiles[path]) {
@@ -427,10 +440,10 @@ export class AdapterExportManager {
         throw new Error(`General utility file not found: ${path}`);
       }
 
-      return `// Unknown file: ${path}`;
+      throw new Error(`Unknown file type: ${path}`);
     } catch (error) {
       console.error(`Error loading file content for ${path}:`, error);
-      return `// Error loading file: ${path}`;
+      throw error;
     }
   }
 }
