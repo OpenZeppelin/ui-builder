@@ -364,63 +364,71 @@ export class PackageManager {
   }
 
   /**
-   * Update package.json with dependencies and other adjustments
-   * @param packageJsonContent Original package.json content as a string
-   * @param formConfig The form configuration
-   * @param chainType The blockchain type
-   * @param functionId The function ID
-   * @param options Export customization options
-   * @returns Updated package.json content as a string
+   * Update package.json content with form-specific modifications
+   *
+   * @param originalContent Original package.json content as a string
+   * @param formConfig Form configuration for dependency detection
+   * @param chainType Chain type for adapter dependencies
+   * @param functionId Function ID for naming
+   * @param options Optional export options
+   * @returns Updated package.json content
    */
   updatePackageJson(
-    packageJsonContent: string,
+    originalContent: string,
     formConfig: BuilderFormConfig,
     chainType: ChainType,
     functionId: string,
     options: Partial<ExportOptions> = {}
   ): string {
-    // Parse package.json
-    const packageJson = JSON.parse(packageJsonContent);
+    try {
+      // Parse the original package.json
+      const packageJson = JSON.parse(originalContent);
 
-    // Update name and description
-    packageJson.name = options.projectName || this.generateProjectName(functionId);
-    packageJson.description = options.description || `Form for ${functionId} function`;
+      // Update name and description
+      packageJson.name = options.projectName || this.generateProjectName(functionId);
+      packageJson.description = options.description || `Transaction form for ${functionId}`;
 
-    // Update author if provided
-    if (options.author) {
-      packageJson.author = options.author;
+      // Update author if provided
+      if (options.author) {
+        packageJson.author = options.author;
+      }
+
+      // Update license if provided
+      if (options.license) {
+        packageJson.license = options.license;
+      }
+
+      // Get dependencies and apply versioning strategy
+      const dependencies = this.applyVersioningStrategy(
+        this.getDependencies(formConfig, chainType)
+      );
+
+      // Get dev dependencies
+      const devDependencies = this.getDevDependencies(formConfig, chainType);
+
+      // Update dependencies
+      packageJson.dependencies = {
+        ...packageJson.dependencies,
+        ...dependencies,
+        // Include any additional dependencies specified in options
+        ...(options.dependencies || {}),
+      };
+
+      // Update dev dependencies
+      packageJson.devDependencies = {
+        ...packageJson.devDependencies,
+        ...devDependencies,
+      };
+
+      // Add upgrade instructions
+      this.addUpgradeInstructions(packageJson);
+
+      // Simply stringify JSON without formatting, as Prettier will handle it later
+      return JSON.stringify(packageJson);
+    } catch (error) {
+      console.error('Error updating package.json:', error);
+      throw error;
     }
-
-    // Update license if provided
-    if (options.license) {
-      packageJson.license = options.license;
-    }
-
-    // Get dependencies and apply versioning strategy
-    const dependencies = this.applyVersioningStrategy(this.getDependencies(formConfig, chainType));
-
-    // Get dev dependencies
-    const devDependencies = this.getDevDependencies(formConfig, chainType);
-
-    // Update dependencies
-    packageJson.dependencies = {
-      ...packageJson.dependencies,
-      ...dependencies,
-      // Include any additional dependencies specified in options
-      ...(options.dependencies || {}),
-    };
-
-    // Update dev dependencies
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      ...devDependencies,
-    };
-
-    // Add upgrade instructions
-    this.addUpgradeInstructions(packageJson);
-
-    // Return stringified package.json
-    return JSON.stringify(packageJson, null, 2);
   }
 
   /**

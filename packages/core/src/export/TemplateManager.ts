@@ -182,38 +182,43 @@ export class TemplateManager {
   private applyTemplateOptions(files: Record<string, string>, options: TemplateOptions): void {
     // Example: Custom project name in package.json
     if (options.projectName && files['package.json']) {
-      const packageJson = JSON.parse(files['package.json']);
-      packageJson.name = options.projectName;
+      try {
+        const packageJson = JSON.parse(files['package.json']);
+        packageJson.name = options.projectName;
 
-      // Handle dependencies for export
-      if (packageJson.dependencies) {
-        Object.keys(packageJson.dependencies).forEach((dep) => {
-          // Check the target environment from options or env var
-          const isLocalEnv =
-            options.env === 'local' ||
-            (process.env.EXPORT_CLI_ENV === 'local' && options.env !== 'production');
+        // Handle dependencies for export
+        if (packageJson.dependencies) {
+          Object.keys(packageJson.dependencies).forEach((dep) => {
+            // Check the target environment from options or env var
+            const isLocalEnv =
+              options.env === 'local' ||
+              (process.env.EXPORT_CLI_ENV === 'local' && options.env !== 'production');
 
-          // For @openzeppelin packages in local mode, use workspace dependencies
-          if (
-            dep.startsWith('@openzeppelin/') &&
-            isLocalEnv &&
-            process.env.EXPORT_CLI_MODE === 'true'
-          ) {
-            packageJson.dependencies[dep] = 'workspace:*';
-            console.log(`Setting ${dep} to use workspace dependency for local development`);
-          } else if (
-            dep.startsWith('@openzeppelin/') &&
-            !isLocalEnv &&
-            process.env.EXPORT_CLI_MODE === 'true'
-          ) {
-            // For production mode, use the latest published version
-            packageJson.dependencies[dep] = 'latest';
-            console.log(`Setting ${dep} to use latest published version for production`);
-          }
-        });
+            // For @openzeppelin packages in local mode, use workspace dependencies
+            if (
+              dep.startsWith('@openzeppelin/') &&
+              isLocalEnv &&
+              process.env.EXPORT_CLI_MODE === 'true'
+            ) {
+              packageJson.dependencies[dep] = 'workspace:*';
+              console.log(`Setting ${dep} to use workspace dependency for local development`);
+            } else if (
+              dep.startsWith('@openzeppelin/') &&
+              !isLocalEnv &&
+              process.env.EXPORT_CLI_MODE === 'true'
+            ) {
+              // For production mode, use the latest published version
+              packageJson.dependencies[dep] = 'latest';
+              console.log(`Setting ${dep} to use latest published version for production`);
+            }
+          });
+        }
+
+        // Use simple JSON.stringify without formatting - Prettier will handle it later
+        files['package.json'] = JSON.stringify(packageJson);
+      } catch (error) {
+        console.error('Error processing package.json:', error);
       }
-
-      files['package.json'] = JSON.stringify(packageJson, null, 2);
     }
 
     // Example: Custom README content
