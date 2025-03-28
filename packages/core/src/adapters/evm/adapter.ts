@@ -3,7 +3,7 @@ import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transac
 import { isAddress } from 'ethers';
 
 import { generateId } from '../../core/utils/utils';
-import MockContractService from '../../services/MockContractService';
+import MockContractService, { MockContractInfo } from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
@@ -60,8 +60,8 @@ export class EvmAdapter implements ContractAdapter {
 
       // Default to the first mock if none specified
       const mockInfo = mockId
-        ? mocks.find((mock) => mock.id === mockId)
-        : mocks.find((mock) => mock.id === 'input-tester');
+        ? mocks.find((mock: MockContractInfo) => mock.id === mockId)
+        : mocks.find((mock: MockContractInfo) => mock.id === 'input-tester');
 
       if (!mockInfo) {
         throw new Error(`Mock contract with ID ${mockId || 'input-tester'} not found`);
