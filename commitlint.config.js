@@ -37,6 +37,7 @@ export default {
         'api',
         'auth',
         'core',
+        'export',
         'deps',
         'config',
         'form',
