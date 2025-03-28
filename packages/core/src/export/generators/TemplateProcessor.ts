@@ -2,6 +2,13 @@
  * TemplateProcessor class responsible for processing code templates
  * with various placeholder formats and applying post-processing steps.
  */
+
+import type { Options, Plugin } from 'prettier';
+
+import * as estreePlugin from 'prettier/plugins/estree';
+import * as typescriptPlugin from 'prettier/plugins/typescript';
+import * as prettierStandalone from 'prettier/standalone';
+
 export class TemplateProcessor {
   private templates: Record<string, string> | null = null;
   private initializing: Promise<void> | null = null;
@@ -96,9 +103,9 @@ export class TemplateProcessor {
         // Get the value safely
         const value = params[camelParamName];
 
-        // For objects, stringify them
+        // For objects, stringify them (without pretty-printing since Prettier will handle it)
         if (typeof value === 'object' && value !== null) {
-          return JSON.stringify(value, null, 2);
+          return JSON.stringify(value);
         }
         // For other types, convert to string
         return String(value ?? '');
@@ -114,7 +121,7 @@ export class TemplateProcessor {
         );
         const value = params[camelParamName];
         if (typeof value === 'object' && value !== null) {
-          return JSON.stringify(value, null, 2);
+          return JSON.stringify(value);
         }
         return String(value ?? '');
       }
@@ -129,7 +136,7 @@ export class TemplateProcessor {
         );
         const value = params[camelParamName];
         if (typeof value === 'object' && value !== null) {
-          return JSON.stringify(value, null, 2);
+          return JSON.stringify(value);
         }
         return String(value ?? '');
       }
@@ -145,13 +152,13 @@ export class TemplateProcessor {
    * @param options Additional options for specific post-processing
    * @returns The post-processed template
    */
-  public applyCommonPostProcessing(
+  public async applyCommonPostProcessing(
     processedTemplate: string,
     options?: {
       adapterClassName?: string;
       formConfigJSON?: string;
     }
-  ): string {
+  ): Promise<string> {
     // Process the template in a way that preserves intended spacing
 
     // Step 1: Handle template comments at the start of a line, including the newline after them
@@ -184,15 +191,84 @@ export class TemplateProcessor {
       );
     }
 
-    // If form schema JSON is provided, inject it
+    // If form schema JSON is provided, inject it with proper formatting using Prettier
     if (options?.formConfigJSON) {
-      // Special case handling for form schema injection
-      processedTemplate = processedTemplate.replace(
-        /const formSchema: RenderFormSchema = \{\};/g,
-        `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
-      );
+      try {
+        // We can inject the JSON directly without parsing and re-stringifying
+        // Prettier will format it properly at the end
+        processedTemplate = processedTemplate.replace(
+          /const formSchema: RenderFormSchema = \{\};/g,
+          `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
+        );
+      } catch (error) {
+        // Log any errors that might occur
+        console.error('Failed to inject form schema:', error);
+        throw error;
+      }
     }
 
     return processedTemplate;
+  }
+
+  /**
+   * Format the final code using Prettier
+   *
+   * @param code The code to format
+   * @param parser The parser to use (defaults to 'typescript')
+   * @returns The formatted code
+   */
+  public async formatFinalCode(code: string, parser: string = 'typescript'): Promise<string> {
+    try {
+      // Configure Prettier for TypeScript formatting
+      const prettierConfig: Options = {
+        parser,
+        semi: true,
+        singleQuote: true,
+        tabWidth: 2,
+        printWidth: 100,
+        trailingComma: 'es5',
+        arrowParens: 'always',
+        bracketSpacing: true,
+        quoteProps: 'as-needed', // Ensures object keys aren't quoted unless necessary
+      };
+
+      // Add plugins to the configuration
+      const config: Options & { plugins: Plugin[] } = {
+        ...prettierConfig,
+        plugins: [estreePlugin, typescriptPlugin],
+      };
+
+      // Format the entire code file
+      return await prettierStandalone.format(code, config);
+    } catch (error) {
+      console.error('Error formatting code with Prettier:', error);
+      // Return the original unformatted code as a fallback
+      return code;
+    }
+  }
+
+  /**
+   * Format JSON using Prettier
+   *
+   * @param jsonString The JSON string to format
+   * @returns The formatted JSON string
+   */
+  public async formatJson(jsonString: string): Promise<string> {
+    try {
+      // Parse the JSON to make sure it's valid
+      const jsonObj = JSON.parse(jsonString);
+
+      // Just use standard JSON.stringify with indentation for proper JSON format
+      // This ensures all property names are properly double-quoted as required by JSON
+      return JSON.stringify(jsonObj, null, 2);
+
+      // Note: We're not using Prettier here because the standalone version
+      // doesn't include the JSON parser plugin, and using TypeScript parser
+      // produces TypeScript-style output with unquoted properties
+    } catch (error) {
+      console.error('Error formatting JSON:', error);
+      // Return the original unformatted JSON as a fallback
+      return jsonString;
+    }
   }
 }
