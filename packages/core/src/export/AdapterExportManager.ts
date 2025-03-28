@@ -39,12 +39,19 @@ const coreTypeFiles = import.meta.glob<string>('../core/types/ContractSchema.ts'
   import: 'default',
 }) as LazyGlobImportResult;
 
+// Get the adapter index file that contains the ContractAdapter interface
+const adapterIndexFiles = import.meta.glob<string>('../adapters/index.ts', {
+  query: '?raw',
+  import: 'default',
+}) as LazyGlobImportResult;
+
 // For testing purposes - make file paths available to tests
 export const adapterFilePaths = {
   adapter: Object.keys(adapterFiles),
   type: Object.keys(typeFiles),
   util: Object.keys(utilFiles),
   coreType: Object.keys(coreTypeFiles),
+  adapterIndex: Object.keys(adapterIndexFiles),
 };
 
 /**
@@ -198,8 +205,8 @@ export class AdapterExportManager {
       files[outputPath] = await this.getFileContent(path);
     }
 
-    // Create an adapter barrel file that only exports the needed adapter
-    files['src/adapters/index.ts'] = this.createAdapterBarrel(chainType);
+    // Process and add the adapter index file with the ContractAdapter interface
+    files['src/adapters/index.ts'] = await this.processAdapterIndex(chainType);
 
     return files;
   }
@@ -214,14 +221,14 @@ export class AdapterExportManager {
     const schemaTypesPath = Object.keys(coreTypeFiles)[0] || '';
     if (schemaTypesPath) {
       try {
-        coreFiles['src/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
+        coreFiles['src/core/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
       } catch (error) {
         console.warn('Failed to load ContractSchema.ts:', error);
-        coreFiles['src/types/ContractSchema.ts'] = '// ContractSchema.ts could not be loaded';
+        coreFiles['src/core/types/ContractSchema.ts'] = '// ContractSchema.ts could not be loaded';
       }
     } else {
       console.warn('No ContractSchema.ts file found');
-      coreFiles['src/types/ContractSchema.ts'] = '// ContractSchema.ts file not found';
+      coreFiles['src/core/types/ContractSchema.ts'] = '// ContractSchema.ts file not found';
     }
 
     return coreFiles;
@@ -245,16 +252,103 @@ export class AdapterExportManager {
   }
 
   /**
-   * Create adapter barrel file that only exports the needed adapter
+   * Process the adapter index file to include only the ContractAdapter interface
+   * and the selected blockchain adapter
+   *
+   * @param chainType The blockchain type to keep in the index file
    */
-  private createAdapterBarrel(chainType: ChainType): string {
+  private async processAdapterIndex(chainType: ChainType): Promise<string> {
     const adapterClassName = this.getAdapterClassName(chainType);
+    const indexPath = Object.keys(adapterIndexFiles)[0] || '';
 
-    return `// This file is auto-generated - only the ${adapterClassName} is included
-import { ${adapterClassName} } from './${chainType}/adapter';
+    if (!indexPath) {
+      console.warn('No adapter index file found');
+      throw new Error('No adapter index file found');
+    }
 
-export { ${adapterClassName} };
+    try {
+      // Get the original index.ts content
+      const originalContent = await adapterIndexFiles[indexPath]();
+
+      // Process the content to retain the ContractAdapter interface
+      // and only the selected blockchain adapter
+      const processedContent = this.processIndexContent(
+        originalContent,
+        chainType,
+        adapterClassName
+      );
+      return processedContent;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Process the index.ts content to remove other blockchain adapters
+   * while keeping the ContractAdapter interface
+   */
+  private processIndexContent(
+    content: string,
+    chainType: ChainType,
+    adapterClassName: string
+  ): string {
+    // Add a header comment
+    let processedContent = `/**
+ * Modified adapter index file
+ * Only includes the ${adapterClassName} and the ContractAdapter interface
+ */
+
 `;
+
+    // First, keep the imports from form-renderer
+    const formRendererImports = content.match(
+      /import.*?from\s+['"]@openzeppelin\/transaction-form-renderer['"];?/g
+    );
+    if (formRendererImports) {
+      processedContent += formRendererImports.join('\n') + '\n\n';
+    }
+
+    // Add only the import for the selected blockchain adapter
+    processedContent += `import ${adapterClassName} from './${chainType}/adapter.ts';\n\n`;
+
+    // Keep the ContractSchema imports
+    const schemaImports = content.match(
+      /import.*?from\s+['"]\.\.\/core\/types\/ContractSchema['"];?/g
+    );
+    if (schemaImports) {
+      // Only include ContractSchema and FunctionParameter
+      processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';\n\n`;
+    }
+
+    // Extract and keep the ContractAdapter interface definition
+    const interfaceStartPattern =
+      /\/\*\*\s*\n\s*\*\s*Interface\s*for\s*contract\s*adapters[\s\S]*?export\s+interface\s+ContractAdapter\s*\{/;
+    const startMatch = content.match(interfaceStartPattern);
+
+    if (startMatch && startMatch.index !== undefined) {
+      const startIndex = startMatch.index;
+      const interfaceStart = startMatch[0];
+
+      // Find the closing brace of the interface by counting braces
+      let braceCount = 1; // Start with 1 for the opening brace
+      let endIndex = startIndex + interfaceStart.length;
+
+      while (braceCount > 0 && endIndex < content.length) {
+        if (content[endIndex] === '{') braceCount++;
+        if (content[endIndex] === '}') braceCount--;
+        endIndex++;
+      }
+
+      // Extract the complete interface
+      const completeInterface = content.substring(startIndex, endIndex);
+      processedContent += completeInterface + '\n\n';
+    }
+
+    // Export the selected adapter class
+    processedContent += `// Export the selected adapter\n`;
+    processedContent += `export { ${adapterClassName} };\n`;
+
+    return processedContent;
   }
 
   /**
