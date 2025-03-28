@@ -36,7 +36,7 @@ describe('AdapterExportManager', () => {
       const files = await manager.getAdapterFiles('evm');
 
       // Verify core type files are included
-      expect(files).toHaveProperty('src/types/ContractSchema.ts');
+      expect(files).toHaveProperty('src/core/types/ContractSchema.ts');
 
       // Verify adapter files are included
       expect(files).toHaveProperty('src/adapters/evm/adapter.ts');
