@@ -368,7 +368,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
     functionId: 'transfer',
     fields: [
       {
-        id: 'dc0b55ef-e897-4038-9278-21ab09bbdf3a',
+        id: '[id]',
         type: 'text',
         name: 'testParam',
         label: 'Test Parameter',
@@ -385,7 +385,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
       labelPosition: 'top',
       sections: [
         {
-          id: '3ed7966b-bc4b-4c5a-a6e9-bac1165836a3',
+          id: '[id]',
           title: 'Test Section',
           description: 'A test section',
           fields: ['testParam'],
@@ -447,9 +447,9 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import EvmAdapter from './evm/adapter.ts';
+import EvmAdapter from './evm/adapter';
 
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
+import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
 
 /**
  * Interface for contract adapters
@@ -699,9 +699,9 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import SolanaAdapter from './solana/adapter.ts';
+import SolanaAdapter from './solana/adapter';
 
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
+import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
 
 /**
  * Interface for contract adapters

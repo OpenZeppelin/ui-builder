@@ -11,9 +11,9 @@ describe('AdapterExportManager', () => {
   // Create a mock registry for testing
   const mockRegistry: Record<ChainType, string[]> = {
     evm: ['../adapters/evm/adapter.ts', '../adapters/evm/types.ts'],
-    solana: ['../adapters/solana/adapter.ts', '../adapters/solana/types.ts'],
-    stellar: ['../adapters/stellar/adapter.ts', '../adapters/stellar/types.ts'],
-    midnight: ['../adapters/midnight/adapter.ts', '../adapters/midnight/types.ts'],
+    solana: ['../adapters/solana/adapter.ts'],
+    stellar: ['../adapters/stellar/adapter.ts'],
+    midnight: ['../adapters/midnight/adapter.ts'],
   };
 
   describe('getAvailableChainTypes', () => {

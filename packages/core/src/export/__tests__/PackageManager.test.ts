@@ -259,7 +259,7 @@ describe('PackageManager', () => {
 
       const result = JSON.parse(updated);
       expect(result.name).toBe('testfunction-form');
-      expect(result.description).toBe('Form for testFunction function');
+      expect(result.description).toBe('Transaction form for testFunction');
     });
 
     it('should respect custom name and description from options', () => {

@@ -349,7 +349,7 @@ export class AdapterExportManager {
     }
 
     // Add only the import for the selected blockchain adapter
-    processedContent += `import ${adapterClassName} from './${chainType}/adapter.ts';\n\n`;
+    processedContent += `import ${adapterClassName} from './${chainType}/adapter';\n\n`;
 
     // Keep the ContractSchema imports
     const schemaImports = content.match(
@@ -357,7 +357,7 @@ export class AdapterExportManager {
     );
     if (schemaImports) {
       // Only include ContractSchema and FunctionParameter
-      processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';\n\n`;
+      processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';\n\n`;
     }
 
     // Extract and keep the ContractAdapter interface definition

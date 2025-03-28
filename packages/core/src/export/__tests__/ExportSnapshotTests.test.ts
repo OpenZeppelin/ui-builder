@@ -44,8 +44,16 @@ describe('Export Snapshot Tests', () => {
       content
         .replace(/\/\/ Generated at:.*$/gm, '// Generated at: [timestamp]')
         .replace(/\/\* Generated:.*\*\//gm, '/* Generated: [timestamp] */')
-        // Replace IDs in the form schema
-        .replace(/"id":\s*"[a-f0-9-]+"/g, '"id": "[id]"')
+        // Replace IDs in the form schema - more comprehensive UUID pattern
+        .replace(
+          /"id":\s*"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"/g,
+          '"id": "[id]"'
+        )
+        // Replace field IDs directly in content - better UUID pattern matching
+        .replace(
+          /id: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'/g,
+          "id: '[id]'"
+        )
         // Replace fields list in sections
         .replace(/"fields":\s*\[\s*"[a-zA-Z0-9-]+"\s*\]/g, '"fields": ["testParam"]')
         // Replace other variables that might make snapshots unstable
