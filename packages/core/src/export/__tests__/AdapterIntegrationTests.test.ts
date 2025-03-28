@@ -112,8 +112,8 @@ describe('Adapter Integration Tests', () => {
       const indexCode = adapterFiles['src/adapters/index.ts'];
       expect(indexCode).toBeDefined();
 
-      // Check for adapter export
-      expect(indexCode).toMatch(/import.*from ['"]\.\/evm\/adapter['"]/);
+      // Check for adapter export with flexible extension (optional .ts)
+      expect(indexCode).toMatch(/import.*from ['"]\.\/evm\/adapter(\.ts)?['"]/);
       expect(indexCode).toMatch(/export \{.*EvmAdapter.*\}/);
     });
   });

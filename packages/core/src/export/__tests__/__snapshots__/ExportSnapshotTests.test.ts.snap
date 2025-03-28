@@ -1,8 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"
-import React from 'react';
+"import React from 'react';
 
 import GeneratedForm from './components/GeneratedForm';
 
@@ -53,10 +52,10 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import { isAddress } from 'ethers';
 
-import { generateId } from '../../core/utils/general.ts';
-import MockContractService, { MockContractInfo } from '../../services/MockContractService.ts';
+import { generateId } from '../../core/utils/general';
+import MockContractService, { MockContractInfo } from '../../services/MockContractService';
 
-import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema.ts';
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
 import type { AbiItem } from './types';
 
@@ -336,15 +335,13 @@ export default EvmAdapter;
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
-"
-import { useState } from 'react';
+"import { useState } from 'react';
 
 import {
   RenderFormSchema,
   TransactionForm,
   TransactionFormProps,
 } from '@openzeppelin/transaction-form-renderer';
-
 
 import { EvmAdapter } from '../adapters/evm/adapter';
 
@@ -364,54 +361,52 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
 
   // Create the adapter instance for evm
-  
   const adapter = new EvmAdapter();
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
-  
-    const formSchema: RenderFormSchema = {
-  "functionId": "transfer",
-  "fields": [
-    {
-      "id": "[id]",
-      "type": "text",
-      "name": "testParam",
-      "label": "Test Parameter",
-      "validation": {
-        "required": true
-      },
-      "helperText": "Description for Test Parameter",
-      "placeholder": "Enter test parameter"
-    }
-  ],
-  "layout": {
-    "columns": 1,
-    "spacing": "normal",
-    "labelPosition": "top",
-    "sections": [
+  const formSchema: RenderFormSchema = {
+    functionId: 'transfer',
+    fields: [
       {
-        "id": "[id]",
-        "title": "Test Section",
-        "description": "A test section",
-        "fields": ["testParam"]
-      }
-    ]
-  },
-  "validation": {
-    "mode": "onChange",
-    "showErrors": "inline"
-  },
-  "theme": {},
-  "id": "form-transfer",
-  "title": "Transfer",
-  "description": "",
-  "submitButton": {
-    "text": "Execute transfer",
-    "loadingText": "Processing...",
-    "variant": "primary"
-  },
-  "defaultValues": {}
-};
+        id: 'dc0b55ef-e897-4038-9278-21ab09bbdf3a',
+        type: 'text',
+        name: 'testParam',
+        label: 'Test Parameter',
+        validation: {
+          required: true,
+        },
+        helperText: 'Description for Test Parameter',
+        placeholder: 'Enter test parameter',
+      },
+    ],
+    layout: {
+      columns: 1,
+      spacing: 'normal',
+      labelPosition: 'top',
+      sections: [
+        {
+          id: '3ed7966b-bc4b-4c5a-a6e9-bac1165836a3',
+          title: 'Test Section',
+          description: 'A test section',
+          fields: ['testParam'],
+        },
+      ],
+    },
+    validation: {
+      mode: 'onChange',
+      showErrors: 'inline',
+    },
+    theme: {},
+    id: 'form-transfer',
+    title: 'Transfer',
+    description: '',
+    submitButton: {
+      text: 'Execute transfer',
+      loadingText: 'Processing...',
+      variant: 'primary',
+    },
+    defaultValues: {},
+  };
 
   // Handle form submission
   const handleSubmit = (formData: FormData) => {
@@ -445,16 +440,16 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for adapters index > adapter-index-evm 1`] = `
-"import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
-
-import EvmAdapter from './evm/adapter';
-
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
-
-/**
+"/**
  * Modified adapter index file
  * Only includes the EvmAdapter and the ContractAdapter interface
  */
+
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+
+import EvmAdapter from './evm/adapter.ts';
+
+import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
 
 /**
  * Interface for contract adapters
@@ -567,7 +562,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for Solana adapter > solana-adapter 1`] = `
 "import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema.ts';
+import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type { ContractAdapter } from '../index';
 
 /**
@@ -697,16 +692,16 @@ export default SolanaAdapter;
 `;
 
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for adapters index with Solana > adapter-index-solana 1`] = `
-"import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
-
-import SolanaAdapter from './solana/adapter';
-
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
-
-/**
+"/**
  * Modified adapter index file
  * Only includes the SolanaAdapter and the ContractAdapter interface
  */
+
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+
+import SolanaAdapter from './solana/adapter.ts';
+
+import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema.ts';
 
 /**
  * Interface for contract adapters

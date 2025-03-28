@@ -86,37 +86,42 @@ describe('Form Component Tests', () => {
       // Check for schema declaration
       expect(formComponentCode).toMatch(/const formSchema: RenderFormSchema =/);
 
-      // Check for fields array in the JSON
-      expect(formComponentCode).toMatch(/"fields":/);
+      // Check for fields array in the TypeScript format
+      expect(formComponentCode).toMatch(/fields:\s*\[/);
 
-      // Check for layout config in the JSON
-      expect(formComponentCode).toMatch(/"layout":/);
+      // Check for layout config in the TypeScript format
+      expect(formComponentCode).toMatch(/layout:\s*\{/);
 
-      // Check for validation config in the JSON
-      expect(formComponentCode).toMatch(/"validation":/);
+      // Check for validation config in TypeScript format
+      expect(formComponentCode).toMatch(/validation:\s*\{/);
     });
 
     it('should include correct form field definitions', async () => {
       // Test with a complex form to ensure multiple field types are handled
       const { formComponentCode } = await extractFormComponent('evm', 'complexForm', true);
 
-      // Check that each field type from the complex form is included
-      expect(formComponentCode).toMatch(/"name": "stringParam"/);
-      expect(formComponentCode).toMatch(/"name": "numberParam"/);
-      expect(formComponentCode).toMatch(/"name": "boolParam"/);
-      expect(formComponentCode).toMatch(/"name": "addressParam"/);
+      // Check that each field type from the complex form is included in TypeScript format
+      expect(formComponentCode).toMatch(/name:\s*['"]stringParam['"]/);
+      expect(formComponentCode).toMatch(/name:\s*['"]numberParam['"]/);
+      expect(formComponentCode).toMatch(/name:\s*['"]boolParam['"]/);
+      expect(formComponentCode).toMatch(/name:\s*['"]addressParam['"]/);
+      expect(formComponentCode).toMatch(/type:\s*['"]text['"]/);
+      expect(formComponentCode).toMatch(/type:\s*['"]number['"]/);
+      expect(formComponentCode).toMatch(/type:\s*['"]checkbox['"]/);
+      expect(formComponentCode).toMatch(/type:\s*['"]address['"]/);
 
-      // Check that validation settings are included
-      expect(formComponentCode).toMatch(/"required": true/);
+      // Check that validation settings are included in TypeScript format
+      expect(formComponentCode).toMatch(/required:\s*true/);
     });
 
     it('should include properly formatted submit button configuration', async () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
-      // Check submit button config in the JSON
-      expect(formComponentCode).toMatch(/"submitButton":/);
-      expect(formComponentCode).toMatch(/"text":/);
-      expect(formComponentCode).toMatch(/"loadingText":/);
+      // Check submit button config in TypeScript format
+      expect(formComponentCode).toMatch(/submitButton:\s*\{/);
+      expect(formComponentCode).toMatch(/text:/);
+      expect(formComponentCode).toMatch(/loadingText:/);
+      expect(formComponentCode).toMatch(/variant:/);
     });
   });
 
