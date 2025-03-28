@@ -6,6 +6,7 @@
  */
 
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
+import { TemplateProcessor } from './generators/TemplateProcessor';
 import { AdapterExportManager } from './AdapterExportManager';
 import { PackageManager } from './PackageManager';
 import { TemplateManager } from './TemplateManager';
@@ -25,6 +26,7 @@ export class FormExportSystem {
   private adapterExportManager: AdapterExportManager;
   private packageManager: PackageManager;
   private zipGenerator: ZipGenerator;
+  private templateProcessor: TemplateProcessor;
 
   /**
    * Creates a new FormExportSystem
@@ -35,6 +37,7 @@ export class FormExportSystem {
     this.adapterExportManager = new AdapterExportManager();
     this.packageManager = new PackageManager();
     this.zipGenerator = new ZipGenerator();
+    this.templateProcessor = new TemplateProcessor({});
   }
 
   /**
@@ -104,6 +107,7 @@ export class FormExportSystem {
       // 6. Update package.json using PackageManager
       const originalPackageJson = projectFiles['package.json'];
       if (originalPackageJson) {
+        console.log('Updating package.json with formatted version...');
         projectFiles['package.json'] = this.packageManager.updatePackageJson(
           originalPackageJson,
           formConfig,
@@ -112,30 +116,32 @@ export class FormExportSystem {
           exportOptions
         );
       } else {
-        console.warn('No package.json found in template, using default');
-        // Create a basic package.json if none exists
-        projectFiles['package.json'] = JSON.stringify(
-          {
-            name: exportOptions.projectName || `${functionId.toLowerCase()}-form`,
-            version: '0.1.0',
-            private: true,
-            type: 'module',
-            dependencies: this.packageManager.getDependencies(formConfig, chainType),
-          },
-          null,
-          2
+        console.error('No package.json found in template, using default');
+        // Fail early if no package.json is found
+        throw new Error('No package.json found in template');
+      }
+
+      // 7. Format JSON files with Prettier
+      console.log('Project files before formatting:', Object.keys(projectFiles));
+      console.log('Found package.json?', projectFiles['package.json'] ? 'Yes' : 'No');
+      if (projectFiles['package.json']) {
+        console.log(
+          'package.json first 100 chars:',
+          projectFiles['package.json'].substring(0, 100)
         );
       }
+
+      await this.formatJsonFiles(projectFiles);
 
       // Log the final project structure for debugging
       console.log('Total project files for export:', Object.keys(projectFiles).length);
       console.log('Project structure:', Object.keys(projectFiles).sort());
 
-      // 7. Create ZIP file
+      // 8. Create ZIP file
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
 
-      // 8. Return the export result with dependencies from PackageManager
+      // 9. Return the export result with dependencies from PackageManager
       return {
         zipBlob: zipResult.blob,
         fileName: zipResult.fileName,
@@ -144,6 +150,34 @@ export class FormExportSystem {
     } catch (error) {
       console.error('Error exporting form:', error);
       throw new Error(`Export failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Format JSON files with Prettier
+   *
+   * @param files Map of file paths to content
+   */
+  private async formatJsonFiles(files: Record<string, string>): Promise<void> {
+    // Get all .json files by checking file extensions
+    const jsonFiles = Object.keys(files).filter((path) => path.endsWith('.json'));
+
+    console.log('Found JSON files to format:', jsonFiles);
+
+    for (const path of jsonFiles) {
+      try {
+        console.log(`Formatting ${path} with JSON formatter...`);
+        const before = files[path].substring(0, 100) + '...'; // Log first 100 chars
+
+        // Use our specialized JSON formatter
+        files[path] = await this.templateProcessor.formatJson(files[path]);
+
+        const after = files[path].substring(0, 100) + '...'; // Log first 100 chars
+        console.log(`Before formatting: ${before}`);
+        console.log(`After formatting: ${after}`);
+      } catch (error) {
+        console.warn(`Failed to format ${path}, using unformatted version:`, error);
+      }
     }
   }
 
