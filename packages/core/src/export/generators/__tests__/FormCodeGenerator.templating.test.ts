@@ -314,26 +314,95 @@ describe('FormCodeGenerator Templating System', () => {
   describe('applyCommonPostProcessing', () => {
     it('should remove template comments delimited by special markers', () => {
       const template = `
-        // This comment will stay
-        
         /*------------TEMPLATE COMMENT START------------*/
-        // This is a template-specific comment that explains how to use the template
-        // It should be removed from the generated code
-        // Useful for documenting the template itself
+        // This is a comment that should be removed
+        // including this entire block
         /*------------TEMPLATE COMMENT END------------*/
-        
-        function Example() {
-          // This comment will stay
-          return <div>Example component</div>;
+        function example() {
+          return 'This should remain';
         }
       `;
 
       const processed = templateProcessor.applyCommonPostProcessing(template);
 
-      expect(processed).toContain('// This comment will stay');
-      expect(processed).toContain('function Example()');
-      expect(processed).not.toContain('template-specific comment');
-      expect(processed).not.toContain('TEMPLATE COMMENT');
+      expect(processed).not.toContain('This is a comment that should be removed');
+      expect(processed).toContain('function example()');
+      expect(processed).toContain('This should remain');
+    });
+
+    it('should remove template comments without leaving empty lines', () => {
+      const template = `/*------------TEMPLATE COMMENT START------------*/
+// First template comment
+/*------------TEMPLATE COMMENT END------------*/
+import { useState } from 'react';
+
+/*------------TEMPLATE COMMENT START------------*/
+// Second template comment
+/*------------TEMPLATE COMMENT END------------*/
+import { Something } from 'somewhere';
+
+function example() {
+  return 'Code';
+}`;
+
+      const processed = templateProcessor.applyCommonPostProcessing(template);
+
+      // The processed output should not have empty lines where comments were removed
+      expect(processed).toBe(`import { useState } from 'react';
+
+import { Something } from 'somewhere';
+
+function example() {
+  return 'Code';
+}`);
+    });
+
+    it('should clean up template comments while preserving intended spacing', () => {
+      const template = `/*------------TEMPLATE COMMENT START------------*/
+// First comment
+/*------------TEMPLATE COMMENT END------------*/
+/*------------TEMPLATE COMMENT START------------*/
+// Second comment right after first
+/*------------TEMPLATE COMMENT END------------*/
+import { useState } from 'react';
+
+// This is a regular comment that should stay
+
+function example() {
+  /*------------TEMPLATE COMMENT START------------*/
+  // Inline comment
+  /*------------TEMPLATE COMMENT END------------*/
+  /*------------TEMPLATE COMMENT START------------*/
+  // Another inline comment
+  /*------------TEMPLATE COMMENT END------------*/
+  return 'Code';
+}
+
+// Preserve this empty line below
+
+const anotherFunction = () => {
+  // Preserve indentation
+  const x = 1;
+}`;
+
+      const processed = templateProcessor.applyCommonPostProcessing(template);
+
+      // There should be no empty lines where consecutive comments were removed
+      // But intended spacing and comments should be preserved
+      expect(processed).toBe(`import { useState } from 'react';
+
+// This is a regular comment that should stay
+
+function example() {
+  return 'Code';
+}
+
+// Preserve this empty line below
+
+const anotherFunction = () => {
+  // Preserve indentation
+  const x = 1;
+}`);
     });
 
     it('should remove @ts-expect-error comments', () => {

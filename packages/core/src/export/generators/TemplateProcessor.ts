@@ -152,7 +152,15 @@ export class TemplateProcessor {
       formConfigJSON?: string;
     }
   ): string {
-    // Remove template-specific comments using delimiters
+    // Process the template in a way that preserves intended spacing
+
+    // Step 1: Handle template comments at the start of a line, including the newline after them
+    processedTemplate = processedTemplate.replace(
+      /^[ \t]*\/\*------------TEMPLATE COMMENT START------------\*\/[\s\S]*?\/\*------------TEMPLATE COMMENT END------------\*\/\r?\n/gm,
+      ''
+    );
+
+    // Step 2: Handle template comments in the middle of a line
     processedTemplate = processedTemplate.replace(
       /\/\*------------TEMPLATE COMMENT START------------\*\/[\s\S]*?\/\*------------TEMPLATE COMMENT END------------\*\//g,
       ''
