@@ -53,7 +53,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import { isAddress } from 'ethers';
 
-import { generateId } from '../../core/utils/utils.ts';
+import { generateId } from '../../core/utils/general.ts';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService.ts';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema.ts';

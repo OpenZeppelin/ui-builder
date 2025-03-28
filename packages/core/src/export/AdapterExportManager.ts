@@ -39,6 +39,12 @@ const coreTypeFiles = import.meta.glob<string>('../core/types/ContractSchema.ts'
   import: 'default',
 }) as LazyGlobImportResult;
 
+// Core utility files
+const generalUtilFiles = import.meta.glob<string>('../core/utils/general.ts', {
+  query: '?raw',
+  import: 'default',
+}) as LazyGlobImportResult;
+
 // Get the adapter index file that contains the ContractAdapter interface
 const adapterIndexFiles = import.meta.glob<string>('../adapters/index.ts', {
   query: '?raw',
@@ -51,6 +57,7 @@ export const adapterFilePaths = {
   type: Object.keys(typeFiles),
   util: Object.keys(utilFiles),
   coreType: Object.keys(coreTypeFiles),
+  generalUtil: Object.keys(generalUtilFiles),
   adapterIndex: Object.keys(adapterIndexFiles),
 };
 
@@ -198,6 +205,10 @@ export class AdapterExportManager {
     const coreFiles = await this.getCoreAdapterFiles();
     Object.assign(files, coreFiles);
 
+    // Add core utility files
+    const generalUtilsFiles = await this.getGeneralUtilFiles();
+    Object.assign(files, generalUtilsFiles);
+
     // Add chain-specific adapter files
     for (const path of this.adapterRegistry[chainType]) {
       // Create output path that normalizes the internal path to exported path
@@ -232,6 +243,29 @@ export class AdapterExportManager {
     }
 
     return coreFiles;
+  }
+
+  /**
+   * Get general utility files required by adapters
+   */
+  private async getGeneralUtilFiles(): Promise<AdapterFileMap> {
+    const utilFiles: AdapterFileMap = {};
+
+    // utils.ts - Get from core package
+    const utilsPath = Object.keys(generalUtilFiles)[0] || '';
+    if (utilsPath) {
+      try {
+        utilFiles['src/core/utils/general.ts'] = await this.getFileContent(utilsPath);
+      } catch (error) {
+        console.error('Failed to load general.ts:', error);
+        throw new Error('Failed to load required utility file: general.ts');
+      }
+    } else {
+      console.error('No general.ts file found');
+      throw new Error('Required utility file general.ts not found');
+    }
+
+    return utilFiles;
   }
 
   /**
@@ -385,6 +419,12 @@ export class AdapterExportManager {
           return await coreTypeFiles[path]();
         }
         return `// File not found: ${path}`;
+      } else if (path.includes('/core/utils/')) {
+        // General utility files
+        if (generalUtilFiles[path]) {
+          return await generalUtilFiles[path]();
+        }
+        throw new Error(`General utility file not found: ${path}`);
       }
 
       return `// Unknown file: ${path}`;

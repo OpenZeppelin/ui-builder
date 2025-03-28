@@ -2,7 +2,7 @@ import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transac
 
 import { isAddress } from 'ethers';
 
-import { generateId } from '../../core/utils/utils';
+import { generateId } from '../../core/utils/general';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';

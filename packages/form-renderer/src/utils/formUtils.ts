@@ -3,6 +3,7 @@
  *
  * Utilities for form field transformations, validation, and more.
  * These functions handle converting between UI and blockchain data formats.
+ * TODO: review this file and check if all of these functions are still needed
  */
 
 import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';

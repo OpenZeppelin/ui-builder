@@ -18,7 +18,7 @@ import {
 
 import { getContractAdapter } from '../adapters';
 import { BuilderFormConfig } from '../core/types/FormTypes';
-import { generateId } from '../core/utils/utils';
+import { generateId } from '../core/utils/general';
 
 import type {
   ContractFunction,
