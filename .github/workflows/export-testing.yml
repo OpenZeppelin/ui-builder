@@ -5,12 +5,10 @@ on:
     branches: [main]
     paths:
       - 'packages/core/src/export/**'
-      - 'packages/templates/**'
   pull_request:
     branches: [main]
     paths:
       - 'packages/core/src/export/**'
-      - 'packages/templates/**'
 
 jobs:
   test-exports:
