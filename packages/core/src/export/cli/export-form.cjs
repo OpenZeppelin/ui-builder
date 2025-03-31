@@ -449,30 +449,46 @@ function buildExportedForm(options) {
  * Serve an exported form for testing
  */
 function serveExportedForm(options) {
-  // Get absolute path of target directory
-  const currentDir = process.cwd();
-  // Handle paths correctly when run from package.json scripts
-  let targetDir = options.targetDir || '.';
+  console.log(`\n${colors.cyan}[Debug] Entering serveExportedForm...${colors.reset}`);
 
-  // If the path starts with a relative path that includes 'packages/core',
-  // it might be relative to the project root rather than the current directory
-  if (targetDir.startsWith('./packages/core') && currentDir.includes('/packages/core')) {
-    // Extract the part after packages/core and make it relative to the current directory
-    targetDir = targetDir.replace('./packages/core', '.');
+  const scriptExecutionDir = process.cwd();
+  console.log(
+    `${colors.cyan}[Debug] Script execution directory (likely packages/core):${colors.reset} ${scriptExecutionDir}`
+  );
+
+  // Find the monorepo root reliably
+  const monorepoRoot = findMonorepoRoot(__dirname); // Use the existing utility
+  if (!monorepoRoot) {
+    console.error(
+      `${colors.red}Error: Could not find monorepo root (pnpm-workspace.yaml).${colors.reset}`
+    );
+    process.exit(1);
   }
+  console.log(`${colors.cyan}[Debug] Found monorepo root:${colors.reset} ${monorepoRoot}`);
 
-  // Resolve to absolute path
-  targetDir = path.resolve(currentDir, targetDir);
+  // Handle paths correctly when run from package.json scripts
+  let targetDirInput = options.targetDir || '.';
+  console.log(`${colors.cyan}[Debug] Initial targetDir option:${colors.reset} ${targetDirInput}`);
+
+  // Resolve to absolute path based on the *monorepo root*
+  const targetDir = path.resolve(monorepoRoot, targetDirInput);
+  console.log(
+    `${colors.cyan}[Debug] Resolved absolute targetDir based on monorepo root:${colors.reset} ${targetDir}`
+  );
 
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
     process.exit(1);
   }
+  console.log(`${colors.green}[Debug] Target directory exists.${colors.reset}`);
 
   if (!fs.existsSync(path.join(targetDir, 'package.json'))) {
-    console.error(`${colors.red}Error:${colors.reset} Not a valid project directory: ${targetDir}`);
+    console.error(
+      `${colors.red}Error:${colors.reset} Not a valid project directory (missing package.json): ${targetDir}`
+    );
     process.exit(1);
   }
+  console.log(`${colors.green}[Debug] package.json found in target directory.${colors.reset}`);
 
   try {
     console.log(`\n${colors.bold}${colors.cyan}Serving Transaction Form${colors.reset}\n`);
@@ -501,19 +517,31 @@ function serveExportedForm(options) {
     let hasWorkspaceDeps = false;
     let isProductionBuild = false;
     try {
+      console.log(
+        `${colors.cyan}[Debug] Reading package.json from: ${path.join(targetDir, 'package.json')}${colors.reset}`
+      );
       const packageJson = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf8'));
       const deps = packageJson.dependencies || {};
+      console.log(`${colors.cyan}[Debug] Dependencies found:${colors.reset}`, deps);
 
       // Check if there are any workspace dependencies
       Object.entries(deps).forEach(([name, version]) => {
         if (typeof version === 'string' && version.startsWith('workspace:')) {
           hasWorkspaceDeps = true;
-          console.log(`${colors.blue}Workspace dependency:${colors.reset} ${name}@${version}`);
+          console.log(
+            `${colors.blue}[Debug] Found workspace dependency:${colors.reset} ${name}@${version}`
+          );
         } else if (name.startsWith('@openzeppelin/') && version === 'latest') {
-          isProductionBuild = true;
-          console.log(`${colors.blue}Production dependency:${colors.reset} ${name}@${version}`);
+          isProductionBuild = true; // Note: This might be too specific, consider any non-workspace OZ dep?
+          console.log(
+            `${colors.blue}[Debug] Found potential production dependency:${colors.reset} ${name}@${version}`
+          );
         }
       });
+
+      console.log(
+        `${colors.cyan}[Debug] Dependency check results: hasWorkspaceDeps=${hasWorkspaceDeps}, isProductionBuild=${isProductionBuild}${colors.reset}`
+      );
 
       if (hasWorkspaceDeps) {
         console.log(`\n${colors.yellow}This project uses workspace dependencies.${colors.reset}`);
@@ -521,6 +549,10 @@ function serveExportedForm(options) {
       } else if (isProductionBuild) {
         console.log(`\n${colors.yellow}This project uses production dependencies.${colors.reset}`);
         console.log(`Dependencies will be fetched from npm registries.`);
+      } else {
+        console.log(
+          `\n${colors.yellow}This project uses standard npm dependencies.${colors.reset}`
+        );
       }
     } catch (error) {
       console.warn(
@@ -531,40 +563,61 @@ function serveExportedForm(options) {
     // Recommend appropriate steps based on the dependency type
     if (hasWorkspaceDeps) {
       console.log(
-        `\n${colors.green}Launching development server with workspace dependencies...${colors.reset}`
+        `\n${colors.green}Attempting to launch development server with workspace dependencies...${colors.reset}`
       );
       try {
         // Use pnpm to start the dev server with monorepo context
-        console.log(`${colors.dim}$ cd ${targetDir} && pnpm install && pnpm dev${colors.reset}`);
+        console.log(
+          `${colors.cyan}[Debug] Running: cd ${targetDir} && pnpm install && pnpm dev${colors.reset}`
+        );
+        console.log(
+          `${colors.cyan}[Debug] Running 'pnpm install' in ${targetDir}...${colors.reset}`
+        );
         execInDir('pnpm install', targetDir);
-        execInDir('pnpm dev', targetDir);
+        console.log(`${colors.green}[Debug] 'pnpm install' completed.${colors.reset}`);
+        console.log(`${colors.cyan}[Debug] Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
+        execInDir('pnpm dev', targetDir); // This command will block if successful
+        console.log(
+          `${colors.green}[Debug] 'pnpm dev' apparently finished or failed silently? This line shouldn't be reached if server starts.${colors.reset}`
+        );
       } catch (error) {
-        console.error(`\n${colors.red}Server failed to start:${colors.reset} ${error.message}`);
+        console.error(`\n${colors.red}Server failed to start automatically:${colors.reset}`);
+        // Log more details from the error object
+        if (error.stdout)
+          console.error(`${colors.yellow}stdout:${colors.reset} ${error.stdout.toString()}`);
+        if (error.stderr)
+          console.error(`${colors.red}stderr:${colors.reset} ${error.stderr.toString()}`);
+        if (!error.stdout && !error.stderr)
+          console.error(`${colors.red}Error details:${colors.reset}`, error);
+
         console.log(`\n${colors.yellow}Please try running manually:${colors.reset}`);
         console.log(`  1. cd ${targetDir}`);
         console.log(`  2. pnpm install`);
         console.log(`  3. pnpm dev`);
+        process.exit(1); // Exit if auto-start fails
       }
     } else if (isProductionBuild) {
       console.log(
-        `\n${colors.yellow}For production builds, start the server manually:${colors.reset}`
+        `\n${colors.yellow}Detected production dependencies. Start the server manually:${colors.reset}`
       );
       console.log(`  1. cd ${targetDir}`);
-      console.log(`  2. npm install --legacy-peer-deps`);
-      console.log(`  3. npm run dev`);
+      console.log(`  2. npm install --legacy-peer-deps`); // or pnpm install if pnpm is preferred
+      console.log(`  3. npm run dev`); // or pnpm dev
 
       console.log(`\n${colors.yellow}To build for production:${colors.reset}`);
       console.log(`  1. cd ${targetDir}`);
-      console.log(`  2. npm install --legacy-peer-deps`);
-      console.log(`  3. npm run build`);
+      console.log(`  2. npm install --legacy-peer-deps`); // or pnpm install
+      console.log(`  3. npm run build`); // or pnpm build
     } else {
-      console.log(`\n${colors.yellow}Start the server manually:${colors.reset}`);
+      console.log(
+        `\n${colors.yellow}Detected standard npm dependencies. Start the server manually:${colors.reset}`
+      );
       console.log(`  1. cd ${targetDir}`);
-      console.log(`  2. npm install --legacy-peer-deps`);
-      console.log(`  3. npm run dev`);
+      console.log(`  2. npm install --legacy-peer-deps`); // or pnpm install
+      console.log(`  3. npm run dev`); // or pnpm dev
     }
   } catch (error) {
-    console.error(`\n${colors.red}Server failed${colors.reset}`);
+    console.error(`\n${colors.red}An error occurred in the serve command:${colors.reset}`, error);
     process.exit(1);
   }
 }

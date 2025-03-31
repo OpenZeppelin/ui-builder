@@ -331,104 +331,96 @@ export class PackageManager {
   }
 
   /**
-   * Apply semantic versioning strategy for dependencies
-   * @param dependencies Record of package names to version ranges
-   * @returns Updated record with versioning strategy applied
-   */
-  private applyVersioningStrategy(dependencies: Record<string, string>): Record<string, string> {
-    const result: Record<string, string> = {};
-
-    // Special handling for our own packages - use caret for easier upgrades
-    for (const [name, version] of Object.entries(dependencies)) {
-      if (name.startsWith('@openzeppelin/transaction-form')) {
-        // Use caret range to allow minor and patch updates
-        result[name] = version.startsWith('^') ? version : `^${version}`;
-      } else {
-        // Use original version for third-party packages
-        result[name] = version;
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Generate a project name based on function ID
-   * @param functionId The function ID
-   * @returns A suitable package name
-   */
-  private generateProjectName(functionId: string): string {
-    // Generate a suitable package name from the function ID
-    const baseName = functionId.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    return `${baseName}-form`;
-  }
-
-  /**
-   * Update package.json content with form-specific modifications
+   * Updates the package.json content with correct dependencies, metadata, and scripts.
    *
-   * @param originalContent Original package.json content as a string
-   * @param formConfig Form configuration for dependency detection
-   * @param chainType Chain type for adapter dependencies
-   * @param functionId Function ID for naming
-   * @param options Optional export options
-   * @returns Updated package.json content
+   * @param originalContent Original package.json content string
+   * @param formConfig The form configuration
+   * @param chainType The blockchain type
+   * @param functionId The function ID
+   * @param options Export options, including the environment (`env`)
+   * @returns Updated package.json content string
    */
   updatePackageJson(
     originalContent: string,
     formConfig: BuilderFormConfig,
     chainType: ChainType,
     functionId: string,
-    options: Partial<ExportOptions> = {}
+    options: Partial<ExportOptions> = {} // Includes 'env' field
   ): string {
     try {
-      // Parse the original package.json
       const packageJson = JSON.parse(originalContent);
 
-      // Update name and description
-      packageJson.name = options.projectName || this.generateProjectName(functionId);
-      packageJson.description = options.description || `Transaction form for ${functionId}`;
+      // Ensure dependencies and devDependencies objects exist
+      packageJson.dependencies = packageJson.dependencies || {};
+      packageJson.devDependencies = packageJson.devDependencies || {};
 
-      // Update author if provided
-      if (options.author) {
-        packageJson.author = options.author;
-      }
-
-      // Update license if provided
-      if (options.license) {
-        packageJson.license = options.license;
-      }
-
-      // Get dependencies and apply versioning strategy
-      const dependencies = this.applyVersioningStrategy(
-        this.getDependencies(formConfig, chainType)
+      // Merge dependencies
+      const finalDependencies = {
+        ...packageJson.dependencies,
+        ...this.getDependencies(formConfig, chainType),
+      };
+      // Apply versioning strategy based on environment
+      packageJson.dependencies = this.applyVersioningStrategy(
+        finalDependencies,
+        options.env // Pass env here
       );
 
-      // Get dev dependencies
-      const devDependencies = this.getDevDependencies(formConfig, chainType);
-
-      // Update dependencies
-      packageJson.dependencies = {
-        ...packageJson.dependencies,
-        ...dependencies,
-        // Include any additional dependencies specified in options
-        ...(options.dependencies || {}),
-      };
-
-      // Update dev dependencies
-      packageJson.devDependencies = {
+      // Merge dev dependencies
+      const finalDevDependencies = {
         ...packageJson.devDependencies,
-        ...devDependencies,
+        ...this.getDevDependencies(formConfig, chainType),
       };
+      // Apply versioning strategy based on environment
+      packageJson.devDependencies = this.applyVersioningStrategy(
+        finalDevDependencies,
+        options.env // Pass env here
+      );
 
-      // Add upgrade instructions
+      // Set package name and description
+      packageJson.name = options.projectName || `${functionId}-form`;
+      packageJson.description = `Exported Transaction Form for ${functionId} on ${chainType}`;
+
+      // Add upgrade instructions if workspace dependencies are present
       this.addUpgradeInstructions(packageJson);
 
-      // Simply stringify JSON without formatting, as Prettier will handle it later
-      return JSON.stringify(packageJson);
+      // Format and return updated package.json content
+      return JSON.stringify(packageJson, null, 2);
     } catch (error) {
       console.error('Error updating package.json:', error);
-      throw error;
+      throw new Error(`Failed to update package.json: ${(error as Error).message}`);
     }
+  }
+
+  /**
+   * Applies the versioning strategy based on the environment.
+   *
+   * - 'local': Uses 'workspace:*' for known internal packages.
+   * - 'production' (or undefined): Uses the versions defined in config (assumed published).
+   *
+   * @param dependencies Original dependencies object
+   * @param env The target environment ('local' or 'production')
+   * @returns Dependencies object with versions adjusted based on strategy
+   */
+  private applyVersioningStrategy(
+    dependencies: Record<string, string>,
+    env: 'local' | 'production' | undefined = 'local' // Default to 'local'
+  ): Record<string, string> {
+    const updatedDependencies: Record<string, string> = {};
+    // Define known internal workspace packages
+    const internalPackages = new Set(['@openzeppelin/transaction-form-renderer']);
+    // NOTE: Add '@openzeppelin/transaction-form-builder-styles' if it becomes a direct dependency
+
+    for (const [pkgName, version] of Object.entries(dependencies)) {
+      if (internalPackages.has(pkgName) && env === 'local') {
+        // Use workspace protocol for local development/testing
+        updatedDependencies[pkgName] = 'workspace:*';
+      } else {
+        // Use the version from config for production or other packages
+        // (Assuming config contains published versions for internal packages)
+        updatedDependencies[pkgName] = version;
+      }
+    }
+    return updatedDependencies;
   }
 
   /**
