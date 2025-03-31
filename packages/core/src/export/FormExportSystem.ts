@@ -253,10 +253,13 @@ export class FormExportSystem {
     // Define paths relative to the EXPORTED project root
     const newContentPaths = [
       './index.html',
-      './src/**/*.{js,ts,jsx,tsx}',
-      // Add path to the installed form-renderer package
-      // Adjust if the actual dist path or file extensions differ
-      './node_modules/@openzeppelin/transaction-form-renderer/dist/**/*.{js,ts,jsx,tsx}',
+      // IMPORTANT: This broad glob pattern solves a critical issue with Tailwind purging:
+      // When using pnpm workspace: references, Tailwind cannot correctly resolve and scan the symlinked
+      // packages in node_modules. This causes utility classes like flex, gap-2, etc. from form-renderer
+      // components to be incorrectly purged from the final CSS, breaking layouts.
+      // Using this catch-all pattern ensures all JS/TS files are scanned regardless of
+      // how the form-renderer package is referenced (workspace: or published version).
+      './**/*.{js,ts,jsx,tsx}',
     ]
       .map((p) => `'${p}'`)
       .join(',\n      '); // Format for readability
