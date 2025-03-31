@@ -34,6 +34,12 @@ The export system follows a modular architecture with several specialized compon
 5. **AdapterExportManager**: Provides adapter files for the selected blockchain.
 6. **PackageManager**: Manages dependencies for the exported project.
 7. **ZipGenerator**: Creates a downloadable ZIP file of the project.
+8. **StyleManager**: Gathers necessary CSS files (`global.css`, `auto-generated-data-slots.css`,
+   template's `src/styles.css`) and root configuration files (`tailwind.config.cjs`,
+   `postcss.config.cjs`, `components.json`). It leverages custom Vite virtual modules
+   (see `vite-plugins/`) to load content reliably across different environments.
+   Crucially, it also modifies the `content` paths in the exported `tailwind.config.cjs`
+   to be relative to the exported project, ensuring Tailwind functions correctly.
 
 ## Schema Transformation
 
@@ -51,9 +57,14 @@ A validation step verifies that all required schema properties are present befor
 2. FormCodeGenerator creates form components using the template system
 3. AdapterExportManager provides blockchain-specific adapter files
 4. TemplateManager creates a complete project structure using one of the available templates
-5. PackageManager adds appropriate dependencies to package.json
-6. ZipGenerator bundles everything into a downloadable ZIP file
-7. The completed ZIP is returned to the user
+5. StyleManager retrieves CSS and root config file content via virtual modules
+6. Files are assembled: Template files + Generated Code + Adapter Files + Style/Config Files
+7. FormExportSystem modifies the `tailwind.config.cjs` content paths
+8. Adapter files are potentially removed based on `includeAdapters` option
+9. PackageManager updates the `package.json` content with merged dependencies and metadata
+10. TemplateProcessor formats JSON files
+11. ZipGenerator bundles everything into a downloadable ZIP file
+12. The completed ZIP is returned to the user
 
 ## Template System
 
@@ -201,3 +212,18 @@ Planned improvements:
 - Advanced customization options (theme, styling, etc.)
 - Framework-specific adapter optimizations
 - Live preview of exported projects
+
+## Virtual Module Loading
+
+To reliably load files outside the `packages/core` scope (like root configs or shared styles)
+across different execution environments (Vite dev, Vite build, Vitest), we use custom Vite plugins:
+
+- **`vite-plugins/virtual-content-loader.ts`**: Loads the raw text content of specified files
+  (configs, shared CSS, template CSS) using `fs.readFileSync` during the build/test setup
+  and makes it available via `virtual:` imports (e.g., `virtual:tailwind-config-content`).
+- **`vite-plugins/cross-package-provider.ts`**: Handles virtual modules that need to import _code_
+  from other packages (like `virtual:form-renderer-config`) by generating intermediate modules
+  that use Vite aliases.
+
+Type definitions for these virtual modules are in `src/types/virtual-modules.d.ts`.
+Mock implementations for tests are provided via a plugin in `vitest.config.ts`.

@@ -23,8 +23,9 @@ describe('Adapter Integration Tests', () => {
     // Export the form
     const result = await exportSystem.exportForm(formConfig, chainType, functionName);
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined();
+    const files = await extractFilesFromZip(result.data);
 
     // Get adapter files
     const adapterFiles = Object.keys(files)

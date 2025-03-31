@@ -19,6 +19,15 @@ const virtualModuleMocks: Record<string, string> = {
       fieldDependencies: {}
     };
   `,
+  // Config content mocks - Use valid stringified JSON
+  'virtual:tailwind-config-content': `export default ${JSON.stringify('{/* Mock Tailwind */}')};`,
+  'virtual:postcss-config-content': `export default ${JSON.stringify('{/* Mock PostCSS */}')};`,
+  'virtual:components-json-content': `export default ${JSON.stringify('{ "mock": true }')};`, // Valid JSON
+  // CSS content mocks
+  'virtual:global-css-content': `export default "/* Mock Global CSS */";`,
+  'virtual:data-slots-css-content': `export default "/* Mock Data Slots CSS */";`,
+  // Template CSS content mock
+  'virtual:template-vite-styles-css-content': `export default "/* Mock Template styles.css */";`,
   // Add more virtual module mocks as needed
   // 'virtual:templates-config': `export const templateConfig = { /* mock data */ };`,
 };

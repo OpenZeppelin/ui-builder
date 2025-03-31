@@ -1,8 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import * as adapterExportManagerModule from '../AdapterExportManager';
+import { AdapterExportManager } from '../AdapterExportManager';
 import { FormExportSystem } from '../FormExportSystem';
+import { FormCodeGenerator } from '../generators/FormCodeGenerator';
+import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { PackageManager } from '../PackageManager';
+import { StyleManager } from '../StyleManager';
+import { TemplateManager } from '../TemplateManager';
+import { ZipGenerator } from '../ZipGenerator';
 
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -17,16 +22,6 @@ interface MockFormRendererConfig {
       devDependencies?: Record<string, string>;
     }
   >;
-}
-
-// Mock types for internal components
-interface MockTemplateManager {
-  createProject: ReturnType<typeof vi.fn>;
-}
-
-interface MockFormCodeGenerator {
-  generateFormComponent: ReturnType<typeof vi.fn>;
-  generateUpdatedAppComponent: ReturnType<typeof vi.fn>;
 }
 
 /**
@@ -143,49 +138,68 @@ describe('FormExportSystem', () => {
 
   // Create a system with the provided dependencies
   const createExportSystem = () => {
-    // Create new instances for each test
-    const templateManager = { createProject: vi.fn() } as MockTemplateManager;
-    const formCodeGenerator = { generateFormComponent: vi.fn() } as MockFormCodeGenerator;
-    const adapterExportManager = new adapterExportManagerModule.AdapterExportManager();
+    // Create REAL instances of dependencies
+    const templateManager = new TemplateManager();
+    const formCodeGenerator = new FormCodeGenerator();
+    const adapterExportManager = new AdapterExportManager();
     const packageManager = new PackageManager(
       mockAdapterConfigs,
       mockFormRendererConfig as MockFormRendererConfig
     );
+    const styleManager = new StyleManager();
+    const zipGenerator = new ZipGenerator();
+    const templateProcessor = new TemplateProcessor({});
 
-    // Mock necessary methods
-    templateManager.createProject = vi.fn().mockImplementation((_templateName, customFiles) => {
-      return {
-        'package.json': mockPackageJson,
-        'index.html': '<html><body><div id="root"></div></body></html>',
-        ...customFiles,
-      };
-    });
+    // --- Mock/Spy on specific methods needed for tests ---
 
-    formCodeGenerator.generateFormComponent = vi
-      .fn()
-      .mockReturnValue('export const GeneratedForm = () => { return <div>Form</div>; };');
+    // Mock TemplateManager's createProject
+    vi.spyOn(templateManager, 'createProject').mockImplementation(
+      async (_templateName, customFiles, _options) => {
+        // Return base files PLUS the custom files passed in
+        return {
+          'package.json': mockPackageJson,
+          'index.html': '<html>...</html>',
+          'src/styles.css': '/* Template styles */',
+          // Ensure customFiles (like adapters, generated form) overwrite if necessary
+          ...customFiles,
+        };
+      }
+    );
 
-    formCodeGenerator.generateUpdatedAppComponent = vi
-      .fn()
-      .mockReturnValue('export function App() { return <div><GeneratedForm /></div>; };');
+    // Mock FormCodeGenerator methods
+    vi.spyOn(formCodeGenerator, 'generateFormComponent').mockResolvedValue(
+      '/* Mock Form Component */'
+    );
+    vi.spyOn(formCodeGenerator, 'generateUpdatedAppComponent').mockResolvedValue(
+      '/* Mock App Component */'
+    );
 
-    // Create the system with our mocked dependencies
-    const system = new FormExportSystem();
+    // Spy on ZipGenerator's createZipFile
+    const createZipFileSpy = vi
+      .spyOn(zipGenerator, 'createZipFile')
+      .mockImplementation(async (_files, fileName, _options) => {
+        return {
+          data: Buffer.from('mock zip content'),
+          fileName: fileName,
+        };
+      });
+    // --- End Mocks/Spies ---
 
-    // Replace internal components with our mocked ones
-    Object.defineProperties(system, {
-      templateManager: { value: templateManager },
-      formCodeGenerator: { value: formCodeGenerator },
-      adapterExportManager: { value: adapterExportManager },
-      packageManager: { value: packageManager },
-    });
-
-    return {
-      system,
+    // Create the system instance, injecting the REAL (but potentially spied) dependencies
+    const system = new FormExportSystem({
       templateManager,
       formCodeGenerator,
       adapterExportManager,
       packageManager,
+      styleManager,
+      zipGenerator, // Inject instance with the spied method
+      templateProcessor,
+    });
+
+    return {
+      system,
+      packageManager,
+      createZipFileSpy,
     };
   };
 
@@ -194,18 +208,16 @@ describe('FormExportSystem', () => {
       const { system } = createExportSystem();
       const formConfig = createMinimalFormConfig();
 
-      // Export the form
       const result = await system.exportForm(formConfig, 'evm', 'testFunction', {
         projectName: 'test-project',
       });
 
-      // Verify the result
-      expect(result).toHaveProperty('zipBlob');
+      // Verify the result structure using 'data'
+      expect(result).toHaveProperty('data'); // Updated property name
       expect(result).toHaveProperty('fileName');
       expect(result).toHaveProperty('dependencies');
-
-      // Verify the filename follows the expected format
       expect(result.fileName).toBe('testfunction-form.zip');
+      expect(Buffer.isBuffer(result.data)).toBe(true); // Check for Buffer
 
       // Verify dependencies contain core and EVM-specific dependencies
       expect(result.dependencies).toHaveProperty(
@@ -281,119 +293,71 @@ describe('FormExportSystem', () => {
     });
 
     it('should respect the includeAdapters option', async () => {
-      // Create a minimal form config
+      // Get system and the spy
+      const { system, createZipFileSpy } = createExportSystem();
       const formConfig = createMinimalFormConfig();
 
-      // Spy on AdapterExportManager's getAdapterFiles method
-      const getAdapterFilesSpy = vi.spyOn(
-        adapterExportManagerModule.AdapterExportManager.prototype,
-        'getAdapterFiles'
-      );
+      // --- Test Case 1: includeAdapters: false ---
+      await system.exportForm(formConfig, 'evm', 'testFunction', { includeAdapters: false });
+      expect(createZipFileSpy).toHaveBeenCalled();
+      const filesPassedWhenFalse = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
+      const fileListWhenFalse = Object.keys(filesPassedWhenFalse);
+      const hasAnyAdapterFile = fileListWhenFalse.some((file) => file.startsWith('src/adapters/'));
+      expect(hasAnyAdapterFile).toBe(false);
 
-      // Mock implementation that returns an empty object
-      getAdapterFilesSpy.mockImplementation(() => Promise.resolve({}));
-
-      // Create a new system with the mocked dependencies
-      const { system } = createExportSystem();
-
-      // Test with includeAdapters: false
-      await system.exportForm(formConfig, 'evm', 'testFunction', {
-        includeAdapters: false,
-      });
-
-      // Verify getAdapterFiles was not called
-      expect(getAdapterFilesSpy).not.toHaveBeenCalled();
-
-      // Reset the call count
-      getAdapterFilesSpy.mockClear();
-
-      // Test with includeAdapters: true
-      await system.exportForm(formConfig, 'evm', 'testFunction', {
+      // --- Test Case 2: includeAdapters: true (Default) ---
+      createZipFileSpy.mockClear();
+      const resultWithAdapters = await system.exportForm(formConfig, 'evm', 'testFunction', {
         includeAdapters: true,
       });
-
-      // Verify getAdapterFiles was called
-      expect(getAdapterFilesSpy).toHaveBeenCalledTimes(1);
-      expect(getAdapterFilesSpy).toHaveBeenCalledWith('evm');
-
-      // Restore the original method
-      getAdapterFilesSpy.mockRestore();
+      expect(createZipFileSpy).toHaveBeenCalled();
+      const filesPassedWhenTrue = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
+      const fileListWhenTrue = Object.keys(filesPassedWhenTrue);
+      expect(fileListWhenTrue.some((file) => file.includes('src/adapters/evm/adapter.ts'))).toBe(
+        true
+      );
+      expect(fileListWhenTrue.some((file) => file.includes('src/adapters/index.ts'))).toBe(true);
+      expect(resultWithAdapters.dependencies).toHaveProperty('ethers');
     });
 
     it('should correctly update package.json with custom options', async () => {
-      const { system, packageManager } = createExportSystem();
-
-      // Mock the PackageManager's updatePackageJson method
-      const updatePackageJsonMock = vi
-        .spyOn(packageManager, 'updatePackageJson')
-        .mockImplementation((content, _formConfig, _chainType, _functionId, options = {}) => {
-          const packageJson = JSON.parse(content);
-          packageJson.name = options.projectName || 'default-name';
-          packageJson.description = options.description || 'Default description';
-          packageJson.author = options.author || undefined;
-          packageJson.license = options.license || undefined;
-
-          // Add dependencies
-          packageJson.dependencies = {
-            ...packageJson.dependencies,
-            'core-dep': '1.0.0',
-            'chain-dep': '1.0.0',
-          };
-
-          if (options.dependencies) {
-            packageJson.dependencies = {
-              ...packageJson.dependencies,
-              ...options.dependencies,
-            };
-          }
-
-          return JSON.stringify(packageJson, null, 2);
-        });
-
-      // Create a minimal form config
+      // Get system and spy
+      const { system, createZipFileSpy } = createExportSystem();
       const formConfig = createMinimalFormConfig();
-
-      // Test custom export options
-      await system.exportForm(formConfig, 'evm', 'testFunction', {
+      const customOptions = {
         projectName: 'custom-project',
         description: 'Custom description',
         author: 'Test Author',
         license: 'MIT',
         dependencies: {
-          'custom-dep': '2.0.0',
+          'custom-lib': '^1.0.0',
         },
-      });
+      };
 
-      // Verify updatePackageJson was called with the correct options
-      expect(updatePackageJsonMock).toHaveBeenCalled();
-      const callArgs = updatePackageJsonMock.mock.calls[0];
+      await system.exportForm(formConfig, 'evm', 'testFunction', customOptions);
+      expect(createZipFileSpy).toHaveBeenCalled();
+      const filesPassedToZip = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
+      const finalPackageJson = JSON.parse(filesPassedToZip['package.json']);
 
-      expect(callArgs[2]).toBe('evm'); // chainType
-      expect(callArgs[3]).toBe('testFunction'); // functionId
-
-      const options = callArgs[4] || {};
-      expect(options.projectName).toBe('custom-project');
-      expect(options.description).toBe('Custom description');
-      expect(options.author).toBe('Test Author');
-      expect(options.license).toBe('MIT');
-      expect(options.dependencies).toEqual({ 'custom-dep': '2.0.0' });
+      // Assertions
+      expect(finalPackageJson.name).toBe('custom-project');
+      expect(finalPackageJson.description).toBe('Custom description');
+      expect(finalPackageJson.author).toBe('Test Author');
+      expect(finalPackageJson.license).toBe('MIT');
+      expect(finalPackageJson.dependencies).toHaveProperty('custom-lib', '^1.0.0');
+      expect(finalPackageJson.dependencies).toHaveProperty('react'); // Verify core deps still present
     });
   });
 
   describe('PackageManager integration', () => {
     it('should call PackageManager to get dependencies for export result', async () => {
       const { system, packageManager } = createExportSystem();
-
-      // Spy on PackageManager's getDependencies method
       const getDependenciesSpy = vi.spyOn(packageManager, 'getDependencies');
-
-      // Create a minimal form config
       const formConfig = createMinimalFormConfig();
 
-      // Export the form
       await system.exportForm(formConfig, 'evm', 'testFunction');
 
-      // Verify getDependencies was called with the correct arguments
+      expect(getDependenciesSpy).toHaveBeenCalled();
       expect(getDependenciesSpy).toHaveBeenCalledWith(formConfig, 'evm');
     });
   });

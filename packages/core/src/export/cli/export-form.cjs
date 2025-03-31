@@ -61,6 +61,36 @@ const colors = {
 };
 
 /**
+ * Finds the monorepo root by searching upwards for pnpm-workspace.yaml
+ * @param {string} startDir - The directory to start searching from.
+ * @returns {string | null} The path to the monorepo root or null if not found.
+ */
+function findMonorepoRoot(startDir) {
+  let currentDir = startDir;
+  while (true) {
+    const markerPath = path.join(currentDir, 'pnpm-workspace.yaml');
+    if (fs.existsSync(markerPath)) {
+      return currentDir;
+    }
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      // Reached the filesystem root
+      return null;
+    }
+    currentDir = parentDir;
+  }
+}
+
+// Determine the monorepo root dynamically
+const monorepoRoot = findMonorepoRoot(__dirname);
+if (!monorepoRoot) {
+  console.error(
+    `${colors.red}Error: Could not find monorepo root (pnpm-workspace.yaml).${colors.reset}`
+  );
+  process.exit(1);
+}
+
+/**
  * Display help information
  */
 function showHelp() {
@@ -181,11 +211,11 @@ function exportFormSimple(options) {
   try {
     console.log(`\n${colors.bold}${colors.cyan}Exporting Transaction Form${colors.reset}\n`);
 
-    // Get current directory
-    const currentDir = process.cwd();
+    // Get user's current directory for resolving output path
+    const userCurrentDir = process.cwd();
 
-    // Create absolute output directory path
-    const outputDir = path.resolve(currentDir, options.output);
+    // Create absolute output directory path relative to user's CWD
+    const outputDir = path.resolve(userCurrentDir, options.output);
     fs.mkdirSync(outputDir, { recursive: true });
 
     console.log(`${colors.green}Using configuration:${colors.reset}`);
@@ -217,31 +247,60 @@ function exportFormSimple(options) {
     // Run a simplified export test directly
     console.log(`${colors.blue}Generating export...${colors.reset}\n`);
 
-    // Try to handle different working directory setups
-    const packageDir = path.resolve(currentDir, 'packages/core');
-    const coreDir = fs.existsSync(packageDir) ? packageDir : currentDir;
-
-    // Check if we're directly in the core package
-    const isInCore = fs.existsSync(
-      path.join(currentDir, 'src/export/__tests__/export-cli-wrapper.test.ts')
-    );
-    const testPath = isInCore
-      ? 'src/export/__tests__/export-cli-wrapper.test.ts'
-      : path.join(coreDir, 'src/export/__tests__/export-cli-wrapper.test.ts');
-
-    console.log(`${colors.dim}Working directory:${colors.reset} ${coreDir}`);
-    console.log(`${colors.dim}Test path:${colors.reset} ${testPath}`);
-
-    const command = `cd ${coreDir} && npx vitest run src/export/__tests__/export-cli-wrapper.test.ts --silent`;
-
+    // *** Ensure data-slot styles are generated before running the export test ***
+    const generateSlotsCommand = 'pnpm generate-data-slots';
+    console.log(`\n${colors.blue}Generating data-slot styles...${colors.reset}`);
     try {
-      execSync(command, { env, stdio: 'inherit', shell: true });
+      // Execute from the determined monorepo root
+      execSync(generateSlotsCommand, {
+        cwd: monorepoRoot,
+        stdio: 'inherit',
+        shell: true,
+      });
+      console.log(`${colors.green}✓ Data-slot styles generated${colors.reset}\n`);
     } catch (error) {
-      console.error(`${colors.red}Export failed:${colors.reset}`, error.message);
+      console.error(
+        `${colors.red}Failed to generate data-slot styles:${colors.reset}`,
+        error.message
+      );
       process.exit(1);
     }
+    // **************************************************************************
 
-    console.log(`\n${colors.green}✓ Export completed${colors.reset}\n`);
+    // Determine paths relative to the monorepo root
+    const corePackageDir = path.join(monorepoRoot, 'packages/core');
+    const testPath = path.join(corePackageDir, 'src/export/__tests__/export-cli-wrapper.test.ts');
+
+    console.log(`${colors.dim}Monorepo root:${colors.reset} ${monorepoRoot}`);
+    console.log(`${colors.dim}Core package dir:${colors.reset} ${corePackageDir}`);
+    console.log(`${colors.dim}Test path:${colors.reset} ${testPath}`);
+
+    // Define the Vitest command - explicitly use the CLI export config
+    const configFilePath = path.join(corePackageDir, 'vitest.config.cli-export.ts');
+    const testFileRelativePath = path.relative(corePackageDir, testPath);
+    const vitestCommand = `npx vitest run --config ${configFilePath} ${testFileRelativePath} --silent`;
+
+    try {
+      console.log(`\n${colors.blue}Running export test via Vitest...${colors.reset}`);
+      console.log(`${colors.dim}Executing in ${corePackageDir}:${colors.reset} ${vitestCommand}`);
+
+      // Set environment variables for the Vitest process
+      const testEnv = { ...process.env, ...env };
+
+      execSync(vitestCommand, {
+        cwd: corePackageDir, // Run vitest from the core package directory
+        env: testEnv,
+        stdio: 'inherit',
+        shell: true,
+      });
+
+      console.log(`\n${colors.green}✓ Export successful!${colors.reset}`);
+      console.log(`Project exported to: ${colors.cyan}${outputDir}${colors.reset}`);
+    } catch (error) {
+      console.error(`\n${colors.red}Export test failed:${colors.reset}`);
+      // Error details are usually printed by execSync with stdio: 'inherit'
+      process.exit(1);
+    }
 
     // Find the zip file
     const zipFiles = fs.readdirSync(outputDir).filter((file) => file.endsWith('.zip'));
@@ -260,7 +319,7 @@ function exportFormSimple(options) {
 
     // Try to use unzip if available
     try {
-      execInDir(`unzip -q -o "${zipPath}" -d "${extractDir}"`, currentDir);
+      execInDir(`unzip -q -o "${zipPath}" -d "${extractDir}"`, userCurrentDir);
     } catch (error) {
       // Fallback to manual extraction message
       console.log(`${colors.yellow}Could not extract automatically.${colors.reset}`);
@@ -278,7 +337,7 @@ function exportFormSimple(options) {
 
     return extractDir;
   } catch (error) {
-    console.error(`\n${colors.red}Export failed:${colors.reset}`, error);
+    console.error(`\n${colors.red}An unexpected error occurred:${colors.reset}`, error);
     process.exit(1);
   }
 }

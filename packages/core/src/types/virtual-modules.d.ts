@@ -35,8 +35,7 @@
  * the form-renderer configuration for dependency management during form export.
  */
 declare module 'virtual:form-renderer-config' {
-  import type { FormRendererConfig } from '@form-renderer/types';
-  export const formRendererConfig: FormRendererConfig;
+  export { formRendererConfig } from '@form-renderer/config';
 }
 
 /**
@@ -77,4 +76,37 @@ declare module 'virtual:form-renderer-config' {
 declare module '@form-renderer/types/FormRendererConfig' {
   // Re-export from the main type module
   export * from '@form-renderer/types';
+}
+
+// Add declarations for the raw config content virtual modules
+declare module 'virtual:tailwind-config-content' {
+  const content: string;
+  export default content;
+}
+
+declare module 'virtual:postcss-config-content' {
+  const content: string;
+  export default content;
+}
+
+declare module 'virtual:components-json-content' {
+  const content: string;
+  export default content;
+}
+
+// Add declarations for the CSS content virtual modules
+declare module 'virtual:global-css-content' {
+  const content: string;
+  export default content;
+}
+
+declare module 'virtual:data-slots-css-content' {
+  const content: string;
+  export default content;
+}
+
+// Add declaration for the template styles CSS content
+declare module 'virtual:template-vite-styles-css-content' {
+  const content: string;
+  export default content;
 }

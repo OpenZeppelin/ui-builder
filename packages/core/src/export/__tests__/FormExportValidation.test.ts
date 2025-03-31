@@ -15,8 +15,9 @@ describe('FormExportValidation', () => {
     // Export the form
     const result = await exportSystem.exportForm(formConfig, 'evm', 'transfer');
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined();
+    const files = await extractFilesFromZip(result.data);
 
     // Validate the project structure
     const validation = validateExportedProject(files, {
@@ -82,8 +83,9 @@ describe('FormExportValidation', () => {
     // Export the form
     const result = await exportSystem.exportForm(formConfig, 'solana', 'solanaTransfer');
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined();
+    const files = await extractFilesFromZip(result.data);
 
     // Validate the project structure
     const validation = validateExportedProject(files, {

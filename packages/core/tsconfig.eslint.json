@@ -12,7 +12,9 @@
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "./*.js",
-    "./*.ts"
+    "./*.ts",
+    "./*.cjs",
+    "vite-plugins/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {

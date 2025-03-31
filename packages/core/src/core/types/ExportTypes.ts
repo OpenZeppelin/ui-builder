@@ -87,21 +87,21 @@ export interface ExportOptions extends TemplateOptions {
 }
 
 /**
- * Result of the export operation
+ * Represents the result of a form export operation.
  */
 export interface ExportResult {
   /**
-   * The ZIP file blob for download
+   * The generated ZIP file data (Blob in browser, Buffer in Node.js).
    */
-  zipBlob: Blob;
+  data: Blob | Buffer;
 
   /**
-   * Suggested filename for the download
+   * Suggested filename for the generated ZIP file.
    */
   fileName: string;
 
   /**
-   * Information about the dependencies used
+   * List of dependencies required by the exported project.
    */
   dependencies: Record<string, string>;
 }

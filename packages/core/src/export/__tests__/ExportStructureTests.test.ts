@@ -34,8 +34,9 @@ describe('Export Structure Tests', () => {
       exportOptions
     );
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined(); // Add check for data property
+    const files = await extractFilesFromZip(result.data);
 
     // Get list of files for debugging
     const fileList = Object.keys(files).sort();
@@ -165,7 +166,8 @@ describe('Export Structure Tests', () => {
         { projectName: customProjectName }
       );
 
-      const files = await extractFilesFromZip(result.zipBlob);
+      expect(result.data).toBeDefined(); // Add check for data property
+      const files = await extractFilesFromZip(result.data);
       const packageJson = JSON.parse(files['package.json']);
 
       expect(packageJson.name).toBe(customProjectName);

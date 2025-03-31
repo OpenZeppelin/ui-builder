@@ -162,7 +162,7 @@ transaction-form-builder/
 │   ├── core/            # Main application
 │   │   ├── public/      # Static assets
 │   │   ├── src/
-│   │   │   ├── components/      # Reusable UI components
+│   │   │   ├── components/      # UI components
 │   │   │   │   ├── ui/          # shadcn/ui components
 │   │   │   │   ├── Common/      # Shared components across features
 │   │   │   │   └── FormBuilder/ # Form builder components
@@ -189,9 +189,11 @@ transaction-form-builder/
 │   │   │   │   └── ui/          # Stories for UI components
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   ├── mocks/           # Mock data for development and testing
+│   │   │   ├── types/           # Shared types for core package
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
-│   │   │   └── index.css        # Imports global styles from styles package
+│   │   │   └── index.css        # Main CSS entry point
+│   │   ├── vite-plugins/      # Custom Vite plugins (e.g., virtual modules)
 │   │   ├── index.html           # HTML template
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   ├── vite.config.ts       # Vite configuration
@@ -239,7 +241,7 @@ The application uses an adapter pattern to support multiple blockchain ecosystem
 - **UI Components**: React components that use adapters to interact with different blockchains
 - **Styling System**: Centralized CSS variables and styling approach used across all packages
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files and CSS) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 
@@ -380,7 +382,8 @@ The project is configured with:
 
 ## Commit Convention
 
-This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). See [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.
+This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). See [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for
+more details.
 
 Example:
 
@@ -414,9 +417,11 @@ This project uses GitHub Actions for continuous integration and delivery:
 
 ### Package Publishing
 
-> **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is ready for production release.
+> **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is
+> ready for production release.
 
-The form-renderer package will be automatically published to npm when changes are merged to the main branch once publishing is enabled. Currently, the workflow only builds and tests the package without publishing.
+The form-renderer package will be automatically published to npm when changes are merged to the main branch once publishing is enabled. Currently,
+the workflow only builds and tests the package without publishing.
 
 The publishing process (when enabled):
 
@@ -438,11 +443,16 @@ This project uses a centralized configuration approach to maintain consistency a
 - **postcss.config.cjs**: Root configuration for PostCSS, used by all packages
 - **components.json**: Root configuration for shadcn/ui components, used by all packages
 
-Each package has symlinks to these root configuration files, ensuring consistent styling, processing, and component behavior across the entire monorepo.
+Each package has symlinks to these root configuration files, ensuring consistent styling, processing, and component behavior across the entire
+monorepo.
 
 ### Symlink Structure
 
-- **Core Package**: Links to root configuration files (../../config.cjs)
-- **Form Renderer Package**: Links to root configuration files (../../config.cjs)
+To ensure consistency, the following packages use symlinks pointing to the root configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`):
 
-During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported project.
+- **Core Package**: Links to root configuration files.
+- **Form Renderer Package**: Links to root configuration files.
+- **Styles Package**: Links to root configuration files.
+
+During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported
+project.

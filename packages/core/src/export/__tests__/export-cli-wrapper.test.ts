@@ -96,7 +96,7 @@ describe('Export CLI Wrapper', () => {
 
     // Ensure we have a valid result
     expect(result).toBeDefined();
-    expect(result.zipBlob).toBeDefined();
+    expect(result.data).toBeDefined();
     expect(result.fileName).toBeDefined();
 
     // Save the export
@@ -110,10 +110,13 @@ describe('Export CLI Wrapper', () => {
     // Use JSZip to directly save the zip file
     try {
       const zip = new JSZip();
-      // Load the blob into a zip
-      await zip.loadAsync(result.zipBlob);
-      // Generate as nodebuffer (works in Node.js environment)
+
+      // Load the data (which will be a Buffer in this Node.js context)
+      await zip.loadAsync(result.data);
+
+      // Generate as nodebuffer
       const buffer = await zip.generateAsync({ type: 'nodebuffer' });
+
       // Save the file
       fs.writeFileSync(outputPath, buffer);
 

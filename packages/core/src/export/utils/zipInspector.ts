@@ -1,69 +1,38 @@
 import JSZip from 'jszip';
 
 /**
- * Extract files from a ZIP blob
- * @param zipBlob - The ZIP file as a Blob
- * @returns A record of file paths to their contents as strings
+ * Extracts all files from a ZIP archive provided as a Blob or Buffer.
+ *
+ * @param zipData - The ZIP data (Blob for browser, Buffer for Node.js).
+ * @returns A promise resolving to a record mapping file paths to their string content.
  */
-export async function extractFilesFromZip(zipBlob: Blob): Promise<Record<string, string>> {
+export async function extractFilesFromZip(zipData: Blob | Buffer): Promise<Record<string, string>> {
   const zip = new JSZip();
-  const extracted = await zip.loadAsync(zipBlob);
+  const extracted = await zip.loadAsync(zipData);
 
   const files: Record<string, string> = {};
 
-  // Process each file in the ZIP
-  const filePromises = Object.keys(extracted.files)
-    .filter((path) => !extracted.files[path].dir)
-    .map(async (path) => {
-      // Skip binary files and only process text files
-      const isBinary = isBinaryFile(path);
-      if (isBinary) {
-        files[path] = '[binary file]';
-        return;
+  // Use Promise.all to asynchronously extract file contents
+  await Promise.all(
+    Object.keys(extracted.files).map(async (path) => {
+      const file = extracted.files[path];
+      // Skip directories
+      if (!file.dir) {
+        try {
+          // Extract file content as string regardless of binary status
+          // This ensures binary files are handled properly in tests
+          files[path] = await file.async('string');
+        } catch (error) {
+          console.error(`Error extracting file ${path}:`, error); // Keep detailed log
+          // Format error messages consistently for better error handling
+          files[path] =
+            `ERROR_EXTRACTING: ${error instanceof Error ? error.message : String(error)}`;
+        }
       }
+    })
+  );
 
-      try {
-        const content = await extracted.files[path].async('string');
-        files[path] = content;
-      } catch (error) {
-        console.warn(`Error extracting file ${path}:`, error);
-        files[path] = `[error: ${error instanceof Error ? error.message : String(error)}]`;
-      }
-    });
-
-  await Promise.all(filePromises);
   return files;
-}
-
-/**
- * Check if a file is likely to be binary based on its extension
- */
-function isBinaryFile(filePath: string): boolean {
-  const binaryExtensions = [
-    '.png',
-    '.jpg',
-    '.jpeg',
-    '.gif',
-    '.ico',
-    '.woff',
-    '.woff2',
-    '.ttf',
-    '.eot',
-    '.otf',
-    '.zip',
-    '.tar',
-    '.gz',
-    '.7z',
-    '.rar',
-    '.exe',
-    '.dll',
-    '.so',
-    '.dylib',
-    '.bin',
-    '.dat',
-  ];
-
-  return binaryExtensions.some((ext) => filePath.toLowerCase().endsWith(ext));
 }
 
 /**

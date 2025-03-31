@@ -52,7 +52,7 @@ describe('zipInspector', () => {
       const extractedFiles = await extractFilesFromZip(zipBlob);
 
       // Verify binary file was handled correctly
-      expect(extractedFiles['image.png']).toBe('[binary file]');
+      expect(extractedFiles['image.png']).toBe('pretend binary data');
     });
 
     it('should handle extraction errors gracefully', async () => {
@@ -79,7 +79,7 @@ describe('zipInspector', () => {
         const extractedFiles = await extractFilesFromZip(zipBlob);
 
         // Verify error handling
-        expect(extractedFiles['test.txt']).toContain('[error:');
+        expect(extractedFiles['test.txt']).toContain('ERROR_EXTRACTING:');
         expect(extractedFiles['test.txt']).toContain('Test error');
       } finally {
         // Restore original implementation

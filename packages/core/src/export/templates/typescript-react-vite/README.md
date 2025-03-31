@@ -37,9 +37,32 @@ This project was generated using the [OpenZeppelin Transaction Form Builder](htt
 │   │   └── {{ CHAIN_TYPE }}/  # Chain-specific adapter code
 │   ├── components/       # React components
 │   │   └── GeneratedForm.tsx  # The main form component
-│   └── types/            # TypeScript type definitions
-└── package.json          # Project dependencies and scripts
+│   ├── styles/           # CSS files
+│   │   ├── global.css    # Base global styles and theme variables
+│   │   └── utils/
+│   │       └── auto-generated-data-slots.css # Styles for data-slot components
+│   ├── types/            # TypeScript type definitions (if any)
+│   ├── App.tsx           # Main application component
+│   ├── main.tsx          # Application entry point
+│   └── styles.css        # Main CSS entry point (imports others)
+├── components.json       # shadcn/ui component configuration
+├── index.html            # HTML template
+├── package.json          # Project dependencies and scripts
+├── postcss.config.cjs    # PostCSS configuration (for Tailwind)
+├── tailwind.config.cjs   # Tailwind CSS configuration
+├── tsconfig.json         # TypeScript configuration
+└── vite.config.ts        # Vite build configuration
 ```
+
+## Configuration Files
+
+Several configuration files are included at the project root:
+
+- **`tailwind.config.cjs`**: Configures Tailwind CSS (content paths, theme extensions).
+- **`postcss.config.cjs`**: Configures PostCSS plugins (includes Tailwind).
+- **`components.json`**: Configures `shadcn/ui` component generation (style, paths).
+- **`vite.config.ts`**: Configures the Vite build tool.
+- **`tsconfig.json`**: Configures the TypeScript compiler.
 
 ## Using the Form
 

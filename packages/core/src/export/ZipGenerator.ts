@@ -50,9 +50,9 @@ export interface ZipProgress {
  */
 export interface ZipResult {
   /**
-   * The generated ZIP file as a Blob
+   * The generated ZIP file data (Blob in browser, Buffer in Node.js)
    */
-  blob: Blob;
+  data: Blob | Buffer;
 
   /**
    * Suggested filename for the ZIP
@@ -61,7 +61,7 @@ export interface ZipResult {
 }
 
 /**
- * Service for generating ZIP files in the browser
+ * Service for generating ZIP files, aware of browser/Node.js environments.
  */
 export class ZipGenerator {
   /**
@@ -70,7 +70,7 @@ export class ZipGenerator {
    * @param files - Record of file paths to content
    * @param fileName - Name for the generated ZIP file
    * @param options - Configuration options
-   * @returns Promise resolving to a Blob containing the ZIP file
+   * @returns Promise resolving to the ZIP file data (Blob or Buffer)
    */
   async createZipFile(
     files: Record<string, string>,
@@ -103,14 +103,20 @@ export class ZipGenerator {
         }
       }
 
+      // Check for Node.js environment more reliably than just `typeof window`
+      const isNode =
+        typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+      const outputType = isNode ? 'nodebuffer' : 'blob';
+
       // Generate ZIP with compression
-      const blob = await zip.generateAsync(
+      const data = await zip.generateAsync(
         {
-          type: 'blob',
+          type: outputType,
           compression: 'DEFLATE',
           compressionOptions: {
             level: options.compressionLevel ?? 6, // Default to moderate compression
           },
+          platform: typeof process !== 'undefined' && process.platform === 'win32' ? 'DOS' : 'UNIX',
         },
         (metadata) => {
           // Report compression progress if callback provided
@@ -124,7 +130,7 @@ export class ZipGenerator {
       );
 
       return {
-        blob,
+        data: data as Blob | Buffer, // Type assertion needed as generateAsync type depends on input
         fileName: this.ensureZipExtension(fileName),
       };
     } catch (error) {

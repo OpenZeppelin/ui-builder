@@ -2,13 +2,15 @@
  * FormExportSystem
  *
  * This class coordinates the form export process by integrating the
- * TemplateManager, FormCodeGenerator, and AdapterExportManager components.
+ * TemplateManager, FormCodeGenerator, AdapterExportManager, PackageManager,
+ * and StyleManager components.
  */
 
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';
 import { AdapterExportManager } from './AdapterExportManager';
 import { PackageManager } from './PackageManager';
+import { StyleManager } from './StyleManager';
 import { TemplateManager } from './TemplateManager';
 import { ZipGenerator, type ZipProgress } from './ZipGenerator';
 
@@ -16,28 +18,45 @@ import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
+// Define an interface for constructor dependencies (optional)
+interface FormExportSystemDependencies {
+  templateManager?: TemplateManager;
+  formCodeGenerator?: FormCodeGenerator;
+  adapterExportManager?: AdapterExportManager;
+  packageManager?: PackageManager;
+  styleManager?: StyleManager;
+  zipGenerator?: ZipGenerator;
+  templateProcessor?: TemplateProcessor;
+}
+
 /**
  * FormExportSystem class coordinates the complete form export process,
- * integrating the template system, code generator, and adapter export.
+ * integrating the template system, code generator, adapter export, package management,
+ * and style management.
  */
 export class FormExportSystem {
   private templateManager: TemplateManager;
   private formCodeGenerator: FormCodeGenerator;
   private adapterExportManager: AdapterExportManager;
   private packageManager: PackageManager;
+  private styleManager: StyleManager;
   private zipGenerator: ZipGenerator;
   private templateProcessor: TemplateProcessor;
 
   /**
-   * Creates a new FormExportSystem
+   * Creates a new FormExportSystem instance, initializing all necessary managers.
+   * Accepts optional dependencies for testing purposes.
    */
-  constructor() {
-    this.templateManager = new TemplateManager();
-    this.formCodeGenerator = new FormCodeGenerator();
-    this.adapterExportManager = new AdapterExportManager();
-    this.packageManager = new PackageManager();
-    this.zipGenerator = new ZipGenerator();
-    this.templateProcessor = new TemplateProcessor({});
+  constructor(dependencies: FormExportSystemDependencies = {}) {
+    // Use provided instances or create new ones
+    this.templateManager = dependencies.templateManager ?? new TemplateManager();
+    this.formCodeGenerator = dependencies.formCodeGenerator ?? new FormCodeGenerator();
+    this.adapterExportManager = dependencies.adapterExportManager ?? new AdapterExportManager();
+    // Assuming PackageManager needs args - adjust if constructor changes
+    this.packageManager = dependencies.packageManager ?? new PackageManager();
+    this.styleManager = dependencies.styleManager ?? new StyleManager();
+    this.zipGenerator = dependencies.zipGenerator ?? new ZipGenerator();
+    this.templateProcessor = dependencies.templateProcessor ?? new TemplateProcessor({});
   }
 
   /**
@@ -63,7 +82,11 @@ export class FormExportSystem {
     };
 
     try {
+      console.log('[Export System] Starting export process...');
+      console.log('[Export System] Options:', exportOptions);
+
       // 1. Generate form component code
+      console.log('[Export System] Generating form component...');
       const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
         chainType,
@@ -71,85 +94,167 @@ export class FormExportSystem {
       );
 
       // 2. Generate App component code
+      console.log('[Export System] Generating App component...');
       const appComponentCode = await this.formCodeGenerator.generateUpdatedAppComponent(functionId);
 
       // 3. Get adapter files if needed
+      console.log('[Export System] Retrieving adapter files...');
       const adapterFiles =
         exportOptions.includeAdapters !== false
           ? await this.adapterExportManager.getAdapterFiles(chainType)
           : {};
+      console.log(`[Export System] Retrieved ${Object.keys(adapterFiles).length} adapter file(s).`);
 
-      // Create custom files object with generated code
+      // Prepare custom files object
       const customFiles = {
         'src/App.tsx': appComponentCode,
         'src/components/GeneratedForm.tsx': formComponentCode,
         ...adapterFiles,
       };
 
-      // 4. Create the complete project using TemplateManager's createProject method
-      // This will properly handle placeholders and combine template files with custom files
-      const projectFiles = await this.templateManager.createProject(
-        exportOptions.template || 'typescript-react-vite',
-        customFiles,
-        exportOptions
+      // --- Assemble Project Files ---
+      console.log('[Export System] Assembling project files...');
+      const projectFiles = await this.assembleProjectFiles(
+        formConfig,
+        chainType,
+        functionId,
+        exportOptions,
+        customFiles
       );
+      console.log(`[Export System] Project files assembled: ${Object.keys(projectFiles).length}`);
+      // --- End Assembly ---
 
-      // 5. Remove any adapter files when includeAdapters is false
-      if (exportOptions.includeAdapters === false) {
-        // Remove all files under src/adapters/
-        Object.keys(projectFiles).forEach((path) => {
-          if (path.startsWith('src/adapters/')) {
-            delete projectFiles[path];
-          }
-        });
-      }
-
-      // 6. Update package.json using PackageManager
-      const originalPackageJson = projectFiles['package.json'];
-      if (originalPackageJson) {
-        console.log('Updating package.json with formatted version...');
-        projectFiles['package.json'] = this.packageManager.updatePackageJson(
-          originalPackageJson,
-          formConfig,
-          chainType,
-          functionId,
-          exportOptions
-        );
-      } else {
-        console.error('No package.json found in template, using default');
-        // Fail early if no package.json is found
-        throw new Error('No package.json found in template');
-      }
-
-      // 7. Format JSON files with Prettier
-      console.log('Project files before formatting:', Object.keys(projectFiles));
-      console.log('Found package.json?', projectFiles['package.json'] ? 'Yes' : 'No');
-      if (projectFiles['package.json']) {
-        console.log(
-          'package.json first 100 chars:',
-          projectFiles['package.json'].substring(0, 100)
-        );
-      }
-
-      await this.formatJsonFiles(projectFiles);
-
-      // Log the final project structure for debugging
-      console.log('Total project files for export:', Object.keys(projectFiles).length);
-      console.log('Project structure:', Object.keys(projectFiles).sort());
-
-      // 8. Create ZIP file
+      // --- Final Steps ---
+      // 10. Create ZIP file
+      console.log('[Export System] Generating ZIP file...');
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
+      console.log(`[Export System] ZIP file generated: ${zipResult.fileName}`);
 
-      // 9. Return the export result with dependencies from PackageManager
-      return {
-        zipBlob: zipResult.blob,
+      // 11. Prepare and return the final export result
+      const finalResult: ExportResult = {
+        data: zipResult.data,
         fileName: zipResult.fileName,
         dependencies: this.packageManager.getDependencies(formConfig, chainType),
       };
+      console.log('[Export System] Export process complete.');
+      return finalResult;
     } catch (error) {
-      console.error('Error exporting form:', error);
+      console.error('[Export System] Export failed:', error);
       throw new Error(`Export failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Assembles the complete set of project files by merging template files,
+   * generated code, styles, configs, and applying necessary modifications.
+   * @private
+   */
+  private async assembleProjectFiles(
+    formConfig: BuilderFormConfig,
+    chainType: ChainType,
+    functionId: string,
+    exportOptions: ExportOptions,
+    customFiles: Record<string, string>
+  ): Promise<Record<string, string>> {
+    // 4. Get base project files from the selected template
+    console.log(
+      `[File Assembly] Creating project from template: ${exportOptions.template || 'typescript-react-vite'}...`
+    );
+    const templateFilesRaw = await this.templateManager.createProject(
+      exportOptions.template || 'typescript-react-vite',
+      customFiles, // Pass custom files to handle placeholders
+      exportOptions
+    );
+    console.log(
+      `[File Assembly] Base template files retrieved: ${Object.keys(templateFilesRaw).length}`
+    );
+
+    // Initialize the final file collection
+    let projectFiles: Record<string, string> = { ...templateFilesRaw };
+
+    // 5. Add shared CSS files (global.css, data-slots.css) and template styles.css via StyleManager
+    console.log('[File Assembly] Adding CSS files...');
+    const styleFiles = this.styleManager.getStyleFiles();
+    styleFiles.forEach((file) => {
+      projectFiles[file.path] = file.content;
+    });
+    console.log(`[File Assembly] Added ${styleFiles.length} CSS file(s).`);
+
+    // 6. Add root configuration files (tailwind, postcss, components) via StyleManager
+    console.log('[File Assembly] Adding root config files...');
+    const configFiles = this.styleManager.getConfigFiles();
+    configFiles.forEach((file) => {
+      if (file.path === 'tailwind.config.cjs') {
+        projectFiles[file.path] = this.modifyTailwindConfigContent(file.content);
+      } else {
+        projectFiles[file.path] = file.content;
+      }
+    });
+    console.log(`[File Assembly] Added ${configFiles.length} config file(s).`);
+
+    // 7. Remove adapter directory if adapters are excluded
+    if (exportOptions.includeAdapters === false) {
+      console.log('[File Assembly] Removing adapter files as per options...');
+      Object.keys(projectFiles).forEach((path) => {
+        if (path.startsWith('src/adapters/')) {
+          delete projectFiles[path];
+        }
+      });
+    }
+
+    // 8. Update package.json with correct dependencies and metadata
+    console.log('[File Assembly] Updating package.json...');
+    const originalPackageJson = projectFiles['package.json'];
+    if (originalPackageJson) {
+      projectFiles['package.json'] = this.packageManager.updatePackageJson(
+        originalPackageJson,
+        formConfig,
+        chainType,
+        functionId,
+        exportOptions
+      );
+      console.log('[File Assembly] package.json updated.');
+    } else {
+      console.error('[File Assembly] Error: No package.json found in template files.');
+      throw new Error('Template is missing package.json');
+    }
+
+    // 9. Format necessary JSON files for readability
+    console.log('[File Assembly] Formatting JSON files...');
+    await this.formatJsonFiles(projectFiles);
+
+    console.log('[File Assembly] File assembly complete.');
+    return projectFiles;
+  }
+
+  /**
+   * Modifies the content paths within tailwind.config.cjs content string.
+   * @param originalContent The original content of tailwind.config.cjs.
+   * @returns The modified content string.
+   * @private
+   */
+  private modifyTailwindConfigContent(originalContent: string): string {
+    // Define paths relative to the EXPORTED project root
+    const newContentPaths = `[
+      './index.html',
+      './src/**/*.{js,ts,jsx,tsx}',
+    ]`;
+    // Replace the 'content: [...]' array in the config string
+    const modifiedContent = originalContent.replace(
+      /(content\s*:\s*\[)[\s\S]*?(\])/, // Regex to find 'content: [' ... ']'
+      `$1${newContentPaths}$2` // Replace array content
+    );
+
+    if (modifiedContent === originalContent) {
+      // Warn if replacement failed, return original content
+      console.warn(
+        '[Export System] Failed to replace content paths in tailwind.config.cjs. Check config format. Using original.'
+      );
+      return originalContent;
+    } else {
+      console.log('[Export System] Successfully modified tailwind.config.cjs content paths.');
+      return modifiedContent;
     }
   }
 

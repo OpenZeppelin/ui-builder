@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*", "src/**/*.json"],
+  "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
   "references": [{ "path": "../form-renderer" }, { "path": "../styles" }],
   "exclude": ["src/export/codeTemplates/*.template.tsx"]
 }

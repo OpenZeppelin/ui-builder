@@ -94,7 +94,7 @@ export function StepExport({
         });
 
         // Create download URL for the ZIP file
-        const url = URL.createObjectURL(result.zipBlob);
+        const url = URL.createObjectURL(result.data as Blob);
         setExportUrl(url);
         setExportFileName(result.fileName);
 

@@ -22,16 +22,15 @@ describe('ZipGenerator', () => {
       const result = await zipGenerator.createZipFile(files, 'test-project');
 
       // Verify the result structure
-      expect(result).toHaveProperty('blob');
+      expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('fileName', 'test-project.zip');
 
-      // Check that the blob is of the correct type
-      expect(result.blob).toBeInstanceOf(Blob);
-      expect(result.blob.type).toBe('application/zip');
+      // In test environment we should get a Buffer (not Blob)
+      expect(Buffer.isBuffer(result.data)).toBe(true);
 
       // Verify the content (by extracting it with JSZip)
       const zip = new JSZip();
-      const extracted = await zip.loadAsync(result.blob);
+      const extracted = await zip.loadAsync(result.data);
 
       // Filter for actual files (not directories)
       const actualFiles = Object.keys(extracted.files).filter((path) => !extracted.files[path].dir);
@@ -96,7 +95,7 @@ describe('ZipGenerator', () => {
       const result = await zipGenerator.createZipFile(files, 'path-test');
 
       const zip = new JSZip();
-      const extracted = await zip.loadAsync(result.blob);
+      const extracted = await zip.loadAsync(result.data);
 
       // Check specific paths are normalized
       expect(extracted.file('leading/slash/file.txt')).toBeTruthy();
@@ -140,7 +139,8 @@ describe('ZipGenerator', () => {
         compressionLevel: 9,
       });
 
-      expect(result.blob).toBeInstanceOf(Blob);
+      // In test environment we should get a Buffer (not Blob)
+      expect(Buffer.isBuffer(result.data)).toBe(true);
       expect(result.fileName).toBe('compression-test.zip');
     });
 
@@ -150,12 +150,10 @@ describe('ZipGenerator', () => {
 
       const result = await zipGenerator.createZipFile(files, 'empty-test');
 
-      // Should still create a valid ZIP file
-      expect(result.blob).toBeInstanceOf(Blob);
-      expect(result.blob.type).toBe('application/zip');
-
-      // Empty ZIP file should be very small
-      expect(result.blob.size).toBeLessThan(100);
+      // In test environment we should get a Buffer (not Blob)
+      expect(Buffer.isBuffer(result.data)).toBe(true);
+      // Buffer should be small for empty zip
+      expect((result.data as Buffer).length).toBeLessThan(100);
     });
   });
 });

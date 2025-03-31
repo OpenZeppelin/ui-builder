@@ -26,8 +26,9 @@ describe('Form Component Tests', () => {
     // Export the form
     const result = await exportSystem.exportForm(formConfig, chainType, functionName);
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined();
+    const files = await extractFilesFromZip(result.data);
 
     // Get the form component code
     const formComponentCode = files['src/components/GeneratedForm.tsx'];

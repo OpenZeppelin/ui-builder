@@ -20,8 +20,9 @@ describe('Export Snapshot Tests', () => {
       projectName: 'snapshot-test-project',
     });
 
-    // Extract files from the ZIP
-    const files = await extractFilesFromZip(result.zipBlob);
+    // Extract files from the ZIP using result.data
+    expect(result.data).toBeDefined();
+    const files = await extractFilesFromZip(result.data);
 
     // Return the files that should be snapshot tested
     return {

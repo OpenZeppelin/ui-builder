@@ -186,8 +186,8 @@ export class TemplateManager {
         const packageJson = JSON.parse(files['package.json']);
         packageJson.name = options.projectName;
 
-        // Handle dependencies for export
-        if (packageJson.dependencies) {
+        // Handle dependencies for export - ONLY apply CLI-specific logic in Node.js environment
+        if (typeof process !== 'undefined' && process.env && packageJson.dependencies) {
           Object.keys(packageJson.dependencies).forEach((dep) => {
             // Check the target environment from options or env var
             const isLocalEnv =
