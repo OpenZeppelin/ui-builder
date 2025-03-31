@@ -74,6 +74,7 @@ export function StepExport({
           description: `Transaction form for ${selectedFunction} function`,
           includeAdapters: true,
           template: 'typescript-react-vite',
+          env: 'production', // Always use production env in UI. Look at CLI for dev env options.
           onProgress: (progress: ZipProgress) => {
             // Update progress based on the stage
             if (progress.operation === 'adding') {
