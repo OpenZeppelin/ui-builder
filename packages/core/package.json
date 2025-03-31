@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --skipLibCheck && vite build --emptyOutDir",
+    "build": "pnpm run build:css && tsc --skipLibCheck && vite build --emptyOutDir",
+    "build:css": "tailwindcss -i ./src/index.css -o ./dist/index.css --minify",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint 'src/**/*.{ts,tsx,js,cjs,mjs}' --fix --config eslint.config.cjs",
@@ -55,6 +56,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.0.12",
     "@tailwindcss/postcss": "^4.0.12",
     "@tailwindcss/vite": "^4.0.13",
     "@testing-library/jest-dom": "^6.6.3",
@@ -85,5 +87,8 @@
     "typescript": "^5.8.2",
     "vite": "^6.2.1",
     "vitest": "^3.0.8"
+  },
+  "exports": {
+    "./index.css": "./dist/index.css"
   }
 }

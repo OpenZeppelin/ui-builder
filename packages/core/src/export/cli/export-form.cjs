@@ -247,26 +247,6 @@ function exportFormSimple(options) {
     // Run a simplified export test directly
     console.log(`${colors.blue}Generating export...${colors.reset}\n`);
 
-    // *** Ensure data-slot styles are generated before running the export test ***
-    const generateSlotsCommand = 'pnpm generate-data-slots';
-    console.log(`\n${colors.blue}Generating data-slot styles...${colors.reset}`);
-    try {
-      // Execute from the determined monorepo root
-      execSync(generateSlotsCommand, {
-        cwd: monorepoRoot,
-        stdio: 'inherit',
-        shell: true,
-      });
-      console.log(`${colors.green}✓ Data-slot styles generated${colors.reset}\n`);
-    } catch (error) {
-      console.error(
-        `${colors.red}Failed to generate data-slot styles:${colors.reset}`,
-        error.message
-      );
-      process.exit(1);
-    }
-    // **************************************************************************
-
     // Determine paths relative to the monorepo root
     const corePackageDir = path.join(monorepoRoot, 'packages/core');
     const testPath = path.join(corePackageDir, 'src/export/__tests__/export-cli-wrapper.test.ts');

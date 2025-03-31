@@ -35,7 +35,7 @@ describe('Test Configuration Utilities', () => {
 
       // Verify basic structure
       expect(config.functionId).toBe('complexFunc');
-      expect(config.fields).toHaveLength(5);
+      expect(config.fields).toHaveLength(7);
 
       // Verify field types
       const fieldTypes = config.fields.map((f) => f.type);

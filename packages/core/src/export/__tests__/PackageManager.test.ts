@@ -57,7 +57,7 @@ describe('PackageManager', () => {
       react: '^18.2.0',
       'react-dom': '^18.2.0',
       'react-hook-form': '^7.43.9',
-      '@openzeppelin/transaction-form-builder-form-renderer': '1.0.0',
+      '@openzeppelin/transaction-form-renderer': '1.0.0',
     },
     fieldDependencies: {
       text: { runtimeDependencies: {} },
@@ -120,7 +120,7 @@ describe('PackageManager', () => {
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
       expect(dependencies).toHaveProperty('react-hook-form');
-      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-builder-form-renderer');
+      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
     });
 
     it('should include chain-specific dependencies for the specified chain', () => {
@@ -360,9 +360,7 @@ describe('PackageManager', () => {
       const result = JSON.parse(updated);
 
       // Our own package should always use caret versioning
-      expect(result.dependencies['@openzeppelin/transaction-form-builder-form-renderer']).toMatch(
-        /^\^/
-      );
+      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toMatch(/^\^/);
     });
 
     it('should add upgrade instructions through scripts', () => {

@@ -9,15 +9,14 @@ The form system follows a layered architecture:
 1. **TransactionForm**: Top-level form renderer
 2. **DynamicFormField**: Selects appropriate field component based on field type
 3. **Field Components**: Type-specific field components (TextField, NumberField, etc.)
-4. **UI Components**: Radix UI based components styled via data-slot attributes
+4. **UI Components**: Radix UI based components
 5. **BaseField**: Common field structure shared by all field components
 
 ## Key Design Principles
 
 1. **Use Radix UI Primitives**: All form components should be built with Radix UI primitives for accessibility and consistency
-2. **Data-Slot Styling**: Use data-slot attributes for component styling to ensure consistent styling across the monorepo
-3. **Consistent Form Patterns**: Follow existing field component patterns for consistency
-4. **Accessibility First**: Ensure all components are fully accessible with proper ARIA attributes
+2. **Consistent Form Patterns**: Follow existing field component patterns for consistency (Renumbered)
+3. **Accessibility First**: Ensure all components are fully accessible with proper ARIA attributes (Renumbered)
 
 ## Step 1: Define Field Type
 
@@ -50,7 +49,6 @@ const YourComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <YourPrimitive.Root
     ref={ref}
-    data-slot="your-component" // Add data-slot attribute for styling
     className={cn(className)} // Only use className for external customization
     {...props}
   />
@@ -59,8 +57,6 @@ YourComponent.displayName = YourPrimitive.Root.displayName;
 
 export { YourComponent };
 ```
-
-The style generator will automatically extract Tailwind classes from your components and create CSS rules with `@apply` directives in the centralized CSS file.
 
 ## Step 3: Create Field Component
 
@@ -155,21 +151,20 @@ export function YourNewField<TFieldValues extends FieldValues = FieldValues>({
             <>
               <YourComponent
                 id={id}
-                data-slot="your-component" // Add data-slot for styling
                 {...field}
                 {...accessibilityAttrs}
               />
 
               {/* Display helper text */}
               {helperText && (
-                <div id={descriptionId} data-slot="form-description">
+                <div id={descriptionId}>
                   {helperText}
                 </div>
               )}
 
               {/* Display error message */}
               {error && (
-                <div id={errorId} data-slot="form-message">
+                <div id={errorId}>
                   {error.message}
                 </div>
               )}
@@ -217,78 +212,7 @@ const fieldComponents: Record<FieldType, React.ComponentType<BaseFieldProps<Form
 };
 ```
 
-## Step 6: Component Styling with data-slot
-
-This package uses a data-slot pattern for consistent styling across the monorepo. When creating or modifying UI components:
-
-### Using data-slot Attributes
-
-1. Add `data-slot` attributes to key elements in your components:
-
-```tsx
-<div
-  data-slot="your-component"
-  className={cn('bg-background relative rounded-md border', className)}
->
-  <input data-slot="your-component-input" {...props} />
-  <div data-slot="your-component-icon">{/* Icon */}</div>
-</div>
-```
-
-2. The style generator will automatically extract these Tailwind classes and create CSS rules with `@apply` directives in the centralized CSS file.
-
-### Benefits of data-slot Styling
-
-- **Cross-package styling**: Components imported from this package into other packages maintain their styling
-- **Purge-safe**: Styles are extracted and centralized, avoiding Tailwind's purging issues
-- **Maintainable**: Changes to component styles are automatically reflected throughout the application
-- **Consistent**: All component styles follow the same pattern
-
-### Guidelines for data-slot Usage
-
-1. **Use data-slot attributes**: All component styling should be controlled via data-slot attributes
-
-   ```tsx
-   <Component data-slot="component-name" />
-   ```
-
-2. **Never use inline styles**: Avoid adding inline styles directly to components
-
-   ```tsx
-   // ❌ Incorrect
-   <Component style={{ border: '1px solid black', padding: '8px' }} />
-
-   // ✅ Correct
-   <Component data-slot="component-name" />
-   ```
-
-3. **Only pass className for customization**: Use className prop only for external customization of components
-
-   ```tsx
-   <Component data-slot="component-name" className={className} />
-   ```
-
-4. **Use the cn utility for className merging**: Always use the cn utility when combining classNames
-   ```tsx
-   <Component data-slot="component-name" className={cn('your-class', className)} />
-   ```
-
-### Important data-slots
-
-The most important data-slots to be aware of:
-
-- `dropdown`, `dropdown-select`, `dropdown-indicator` - Used for select fields
-- `card`, `card-header`, `card-title`, `card-description`, `card-content`, `card-footer` - Used for card components
-- `checkbox`, `checkbox-indicator` - Used for checkbox fields
-- `radio-group`, `radio-item`, `radio-indicator` - Used for radio groups
-- `dialog`, `dialog-content`, `dialog-header`, `dialog-footer` - Used for dialogs/modals
-- `input` - Used for text inputs
-- `form-description` - Used for field help text
-- `form-message` - Used for field error messages
-
-For a complete list of available data-slots, see the auto-generated CSS file in the styles package.
-
-## Step 7: Accessibility Guidelines
+## Step 6: Accessibility Guidelines
 
 Ensure your field component follows accessibility best practices:
 
@@ -298,7 +222,7 @@ Ensure your field component follows accessibility best practices:
 4. **Focus management**: Properly handle focus states with focus indicators
 5. **Screen reader support**: Ensure all content is accessible to screen readers
 
-## Step 8: Test Your Field Component
+## Step 7: Test Your Field Component
 
 Testing your field component is crucial to ensure it integrates properly with the form system:
 
@@ -310,7 +234,6 @@ Testing your field component is crucial to ensure it integrates properly with th
 
 ## Field Component Checklist
 
-- [ ] Added `data-slot` attributes to components for styling
 - [ ] Extended BaseFieldProps with field-specific props
 - [ ] Implemented proper validation logic
 - [ ] Set proper displayName for debugging
@@ -321,9 +244,9 @@ Testing your field component is crucial to ensure it integrates properly with th
 
 ## Example: Creating a SelectField
 
-Here's an example of creating a SelectField using the data-slot pattern:
+Here's an example of creating a SelectField:
 
-1. Create the UI component with Radix UI:
+1. Create the UI component (e.g., using Radix UI):
 
    ```tsx
    // packages/form-renderer/src/components/ui/select.tsx
@@ -339,12 +262,7 @@ Here's an example of creating a SelectField using the data-slot pattern:
      HTMLButtonElement,
      React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
    >(({ className, children, ...props }, ref) => (
-     <SelectPrimitive.Trigger
-       ref={ref}
-       data-slot="select-trigger"
-       className={cn(className)}
-       {...props}
-     >
+     <SelectPrimitive.Trigger ref={ref} className={cn(className)} {...props}>
        {children}
      </SelectPrimitive.Trigger>
    ));
@@ -354,26 +272,18 @@ Here's an example of creating a SelectField using the data-slot pattern:
      React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
    >(({ className, children, position = 'popper', ...props }, ref) => (
      <SelectPrimitive.Portal>
-       <SelectPrimitive.Content
-         ref={ref}
-         data-slot="select-content"
-         className={cn(className)}
-         position={position}
-         {...props}
-       >
+       <SelectPrimitive.Content ref={ref} className={cn(className)} position={position} {...props}>
          {children}
        </SelectPrimitive.Content>
      </SelectPrimitive.Portal>
    ));
 
-   // ... other Select components with data-slot attributes
+   // ... other Select components
 
    export { Select, SelectTrigger, SelectContent /* ...etc */ };
    ```
 
-2. The style generator will automatically extract Tailwind classes and create CSS rules with `@apply` directives in the centralized CSS file.
-
-3. Create the field component with data-slot attributes:
+2. Create the field component incorporating the UI component:
 
    ```tsx
    // packages/form-renderer/src/components/fields/SelectField.tsx
@@ -408,7 +318,8 @@ Here's an example of creating a SelectField using the data-slot pattern:
      options = [],
      validateSelect,
    }: SelectFieldProps<TFieldValues>): React.ReactElement {
-     // Implementation with data-slot attributes for styling
+     // Implementation using the Select components...
+     // Styles are applied via Tailwind during the package build process.
      // ...
    }
    ```

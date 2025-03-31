@@ -46,7 +46,6 @@ const virtualFiles: Record<string, string> = {
   'components-json-content': 'components.json',
   // CSS files
   'global-css-content': 'packages/styles/global.css',
-  'data-slots-css-content': 'packages/styles/utils/auto-generated-data-slots.css',
   // Template-specific CSS (add template name if multiple templates have different styles.css)
   'template-vite-styles-css-content':
     'packages/core/src/export/templates/typescript-react-vite/src/styles.css',

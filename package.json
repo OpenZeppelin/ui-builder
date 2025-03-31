@@ -10,13 +10,10 @@
   },
   "scripts": {
     "clean": "pnpm -r clean",
-    "generate-data-slots": "node packages/styles/scripts/generate-data-slots.js",
     "check-symlinks": "node scripts/manage-symlinks.js check",
     "fix-symlinks": "node scripts/manage-symlinks.js fix",
     "create-symlinks": "node scripts/manage-symlinks.js create",
-    "predev": "pnpm generate-data-slots",
     "dev": "pnpm --filter=@openzeppelin/transaction-form-builder-core dev",
-    "prebuild": "pnpm generate-data-slots",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",

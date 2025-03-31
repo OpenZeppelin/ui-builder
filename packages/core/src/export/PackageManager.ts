@@ -358,6 +358,7 @@ export class PackageManager {
       const finalDependencies = {
         ...packageJson.dependencies,
         ...this.getDependencies(formConfig, chainType),
+        ...(options.dependencies || {}), // Add custom dependencies from options
       };
       // Apply versioning strategy based on environment
       packageJson.dependencies = this.applyVersioningStrategy(
@@ -376,9 +377,20 @@ export class PackageManager {
         options.env // Pass env here
       );
 
-      // Set package name and description
-      packageJson.name = options.projectName || `${functionId}-form`;
-      packageJson.description = `Exported Transaction Form for ${functionId} on ${chainType}`;
+      // Set package name and description (convert functionId to lowercase for name)
+      packageJson.name = options.projectName || `${functionId.toLowerCase()}-form`;
+
+      // Use custom description if provided, otherwise use the default format
+      packageJson.description = options.description || `Transaction form for ${functionId}`;
+
+      // Add author and license if provided
+      if (options.author) {
+        packageJson.author = options.author;
+      }
+
+      if (options.license) {
+        packageJson.license = options.license;
+      }
 
       // Add upgrade instructions if workspace dependencies are present
       this.addUpgradeInstructions(packageJson);
@@ -403,7 +415,7 @@ export class PackageManager {
    */
   private applyVersioningStrategy(
     dependencies: Record<string, string>,
-    env: 'local' | 'production' | undefined = 'local' // Default to 'local'
+    env: 'local' | 'production' | undefined = 'production' // Default to 'production'
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
     // Define known internal workspace packages
@@ -414,9 +426,12 @@ export class PackageManager {
       if (internalPackages.has(pkgName) && env === 'local') {
         // Use workspace protocol for local development/testing
         updatedDependencies[pkgName] = 'workspace:*';
+      } else if (internalPackages.has(pkgName)) {
+        // Use the caret version for production environment to allow compatible updates
+        // Make sure version starts with ^
+        updatedDependencies[pkgName] = version.startsWith('^') ? version : `^${version}`;
       } else {
-        // Use the version from config for production or other packages
-        // (Assuming config contains published versions for internal packages)
+        // Preserve exact versions for external dependencies
         updatedDependencies[pkgName] = version;
       }
     }

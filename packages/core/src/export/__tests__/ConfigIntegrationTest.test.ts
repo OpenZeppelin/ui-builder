@@ -276,9 +276,7 @@ describe('Configuration Integration Tests', () => {
 
       // Verify our own packages use caret versioning if not already specified
       // Mock our own package by adding it to testFormRendererConfig
-      testFormRendererConfig.coreDependencies[
-        '@openzeppelin/transaction-form-builder-form-renderer'
-      ] = '1.0.0';
+      testFormRendererConfig.coreDependencies['@openzeppelin/transaction-form-renderer'] = '1.0.0';
 
       const updatedWithOwnPackage = packageManager.updatePackageJson(
         basePackageJson,
@@ -289,9 +287,9 @@ describe('Configuration Integration Tests', () => {
       const resultWithOwnPackage = JSON.parse(updatedWithOwnPackage);
 
       // Verify our package got the caret prefix
-      expect(
-        resultWithOwnPackage.dependencies['@openzeppelin/transaction-form-builder-form-renderer']
-      ).toBe('^1.0.0');
+      expect(resultWithOwnPackage.dependencies['@openzeppelin/transaction-form-renderer']).toBe(
+        '^1.0.0'
+      );
     });
   });
 });

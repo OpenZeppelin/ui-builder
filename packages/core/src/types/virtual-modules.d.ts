@@ -100,11 +100,6 @@ declare module 'virtual:global-css-content' {
   export default content;
 }
 
-declare module 'virtual:data-slots-css-content' {
-  const content: string;
-  export default content;
-}
-
 // Add declaration for the template styles CSS content
 declare module 'virtual:template-vite-styles-css-content' {
   const content: string;

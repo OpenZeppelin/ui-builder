@@ -1,4 +1,11 @@
 @import 'tailwindcss';
+
+/*
+  Crucial: Imports the compiled Tailwind styles (base, components, utilities)
+  defined and used within the shared @openzeppelin/transaction-form-renderer package.
+  Without this, components from the renderer will lack their necessary styling.
+*/
+@import '@openzeppelin/transaction-form-renderer/index.css';
 @import './styles/global.css';
 
 /* 

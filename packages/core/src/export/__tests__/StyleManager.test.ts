@@ -1,15 +1,5 @@
-// packages/core/src/export/__tests__/StyleManager.test.ts
 import { beforeEach, describe, expect, it } from 'vitest';
 
-// --- Remove Mock Virtual Modules ---
-// Mocks are now provided globally by the plugin in vitest.config.ts
-// vi.mock('virtual:global-css-content', ...);
-// vi.mock('virtual:data-slots-css-content', ...);
-// vi.mock('virtual:template-vite-styles-css-content', ...);
-// vi.mock('virtual:tailwind-config-content', ...);
-// vi.mock('virtual:postcss-config-content', ...);
-// vi.mock('virtual:components-json-content', ...);
-// --- End Remove Mock Virtual Modules ---
 // Import StyleManager AFTER potential (now removed) mocks
 import { StyleManager } from '../StyleManager';
 
@@ -26,19 +16,12 @@ describe('StyleManager', () => {
       const styleFiles = styleManager.getStyleFiles();
 
       expect(styleFiles).toBeInstanceOf(Array);
-      expect(styleFiles).toHaveLength(3); // global, data-slots, template styles.css
+      expect(styleFiles).toHaveLength(2);
 
       // Check global.css - align with mock in vitest.config.ts
       const globalCss = styleFiles.find((f) => f.path === 'src/styles/global.css');
       expect(globalCss).toBeDefined();
       expect(globalCss?.content).toBe('/* Mock Global CSS */');
-
-      // Check data-slots.css - align with mock
-      const dataSlotsCss = styleFiles.find(
-        (f) => f.path === 'src/styles/utils/auto-generated-data-slots.css'
-      );
-      expect(dataSlotsCss).toBeDefined();
-      expect(dataSlotsCss?.content).toBe('/* Mock Data Slots CSS */');
 
       // Check template styles.css - align with mock
       const templateStylesCss = styleFiles.find((f) => f.path === 'src/styles.css');

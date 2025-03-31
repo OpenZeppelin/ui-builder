@@ -1,18 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'], // Use class strategy for dark mode (common with shadcn/ui)
+  // Paths are relative from the MONOREPO ROOT
   content: [
     // Scan files within packages/core
-    './packages/core/pages/**/*.{ts,tsx}',
-    './packages/core/components/**/*.{ts,tsx}',
-    './packages/core/app/**/*.{ts,tsx}',
+    './packages/core/index.html',
     './packages/core/src/**/*.{ts,tsx}',
 
-    // Scan files within packages/form-renderer (adjust if path differs)
+    // Scan files within packages/form-renderer
     './packages/form-renderer/src/**/*.{ts,tsx}',
 
-    // Include index.html if Tailwind classes are used there
-    './packages/core/index.html',
+    // Scan files within the export template source (if its build uses this config, optional but safer)
+    './packages/core/src/export/templates/typescript-react-vite/src/**/*.{ts,tsx}',
+
+    // Add any other packages or specific files that use Tailwind classes
   ],
   prefix: '', // No prefix needed usually
   theme: {

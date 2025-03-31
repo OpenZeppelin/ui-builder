@@ -1,4 +1,10 @@
 @import 'tailwindcss';
+
+/* 
+  Import compiled CSS from the shared form-renderer package
+*/
+@import '@openzeppelin/transaction-form-renderer/index.css';
+
 @import '../../../packages/styles/global.css';
 
 /* Core-specific styles can be added here if needed */

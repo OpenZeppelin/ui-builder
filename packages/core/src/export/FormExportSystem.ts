@@ -173,7 +173,7 @@ export class FormExportSystem {
     // Initialize the final file collection
     let projectFiles: Record<string, string> = { ...templateFilesRaw };
 
-    // 5. Add shared CSS files (global.css, data-slots.css) and template styles.css via StyleManager
+    // 5. Add shared CSS files (global.css) and template styles.css via StyleManager
     console.log('[File Assembly] Adding CSS files...');
     const styleFiles = this.styleManager.getStyleFiles();
     styleFiles.forEach((file) => {

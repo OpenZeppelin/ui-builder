@@ -38,9 +38,7 @@ This project was generated using the [OpenZeppelin Transaction Form Builder](htt
 │   ├── components/       # React components
 │   │   └── GeneratedForm.tsx  # The main form component
 │   ├── styles/           # CSS files
-│   │   ├── global.css    # Base global styles and theme variables
-│   │   └── utils/
-│   │       └── auto-generated-data-slots.css # Styles for data-slot components
+│   │   └── global.css    # Base global styles and theme variables
 │   ├── types/            # TypeScript type definitions (if any)
 │   ├── App.tsx           # Main application component
 │   ├── main.tsx          # Application entry point

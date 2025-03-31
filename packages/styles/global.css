@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-/* Import auto-generated data-slot styles */
-@import './utils/auto-generated-data-slots.css';
 
 @layer theme, base, components, utilities;
 

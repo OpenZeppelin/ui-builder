@@ -34,12 +34,9 @@ The export system follows a modular architecture with several specialized compon
 5. **AdapterExportManager**: Provides adapter files for the selected blockchain.
 6. **PackageManager**: Manages dependencies for the exported project.
 7. **ZipGenerator**: Creates a downloadable ZIP file of the project.
-8. **StyleManager**: Gathers necessary CSS files (`global.css`, `auto-generated-data-slots.css`,
-   template's `src/styles.css`) and root configuration files (`tailwind.config.cjs`,
-   `postcss.config.cjs`, `components.json`). It leverages custom Vite virtual modules
-   (see `vite-plugins/`) to load content reliably across different environments.
-   Crucially, it also modifies the `content` paths in the exported `tailwind.config.cjs`
-   to be relative to the exported project, ensuring Tailwind functions correctly.
+8. **Configuration Processing**: Replaces placeholder values in config files (e.g., Tailwind, PostCSS) with actual content loaded via virtual modules.
+9. **StyleManager**: Gathers necessary CSS files (`global.css`, template `styles.css`) and configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) for inclusion in the export.
+10. **Build Script Generation**: Creates a `package.json` with appropriate dependencies (merged from `core`, `form-renderer`, and template) and build/dev scripts.
 
 ## Schema Transformation
 

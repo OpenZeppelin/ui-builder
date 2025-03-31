@@ -8,7 +8,6 @@
  */
 
 import componentsJsonContent from 'virtual:components-json-content';
-import dataSlotsCssContent from 'virtual:data-slots-css-content';
 import globalCssContent from 'virtual:global-css-content';
 import postcssConfigContent from 'virtual:postcss-config-content';
 import tailwindConfigContent from 'virtual:tailwind-config-content';
@@ -37,10 +36,6 @@ export class StyleManager {
       {
         path: 'src/styles/global.css', // Destination path in exported project
         content: globalCssContent,
-      },
-      {
-        path: 'src/styles/utils/auto-generated-data-slots.css',
-        content: dataSlotsCssContent,
       },
       {
         path: 'src/styles.css',

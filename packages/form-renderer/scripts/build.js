@@ -67,6 +67,31 @@ if (!fs.existsSync(indexPath)) {
 // Create CommonJS wrapper
 console.log('Creating CommonJS wrapper...');
 
+// --- BEGIN TAILWIND BUILD STEP ---
+console.log('Building Tailwind CSS...');
+try {
+  const tailwindInputPath = path.join(root, 'src', 'index.css');
+  const tailwindOutputPath = path.join(root, 'dist', 'index.css');
+
+  // Check if input CSS exists
+  if (fs.existsSync(tailwindInputPath)) {
+    execSync(`npx tailwindcss -i ${tailwindInputPath} -o ${tailwindOutputPath} --minify`, {
+      stdio: 'inherit',
+      cwd: root,
+    });
+    console.log('Tailwind CSS build successful');
+  } else {
+    console.warn(
+      `Warning: Input CSS file not found at ${tailwindInputPath}. Skipping Tailwind build.`
+    );
+  }
+} catch (error) {
+  console.error('Tailwind CSS build failed:', error);
+  // Optionally exit if CSS build is critical
+  // process.exit(1);
+}
+// --- END TAILWIND BUILD STEP ---
+
 // Read the ESM output
 const esmCode = fs.readFileSync(indexPath, 'utf8');
 console.log(`Read ${esmCode.length} bytes from ESM output`);

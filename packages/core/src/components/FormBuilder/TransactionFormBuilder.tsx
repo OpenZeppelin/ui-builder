@@ -148,7 +148,7 @@ export function TransactionFormBuilder() {
   ];
 
   return (
-    <div className="container mx-auto max-w-3xl py-8">
+    <div className="mx-auto max-w-3xl py-8">
       <div className="mb-8 text-center">
         <h1 className="mb-2 text-3xl font-bold">Transaction Form Builder</h1>
         <p className="text-muted-foreground text-lg">

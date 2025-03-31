@@ -25,7 +25,6 @@ const virtualModuleMocks: Record<string, string> = {
   'virtual:components-json-content': `export default ${JSON.stringify('{ "mock": true }')};`, // Valid JSON
   // CSS content mocks
   'virtual:global-css-content': `export default "/* Mock Global CSS */";`,
-  'virtual:data-slots-css-content': `export default "/* Mock Data Slots CSS */";`,
   // Template CSS content mock
   'virtual:template-vite-styles-css-content': `export default "/* Mock Template styles.css */";`,
   // Add more virtual module mocks as needed

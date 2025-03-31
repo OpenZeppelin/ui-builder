@@ -4,112 +4,21 @@ This package contains the centralized styling system for the Transaction Form Bu
 
 ## Structure
 
-- `global.css` - Main CSS file with theme variables and base styles that's shared across all packages
-- `utils/` - Utility CSS files including auto-generated component styles
-- `scripts/` - Scripts for generating component styles
+- `global.css` - Main CSS file with theme variables and base styles that's shared across all packages.
+- `utils/` - Utility CSS files (if any).
+- `scripts/` - Scripts related to styling (if any).
 
-# Data-Slot Style Generator
+## Styling Approach
 
-A solution for ensuring Tailwind properly processes classes across packages in a monorepo.
+This monorepo utilizes a consistent styling approach:
 
-## Problem
+1. **Centralized Configuration:** `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are located at the monorepo root and symlinked into relevant packages.
+2. **Package-Specific Builds:** Each package using Tailwind (`core`, `form-renderer`, export templates) includes a build step (`tailwindcss -i ... -o ...`) to compile its own CSS, ensuring all necessary styles are included.
+3. **CSS Imports:** Packages import the pre-compiled CSS from their dependencies (e.g., `core` imports `form-renderer/dist/index.css`). This guarantees styles from dependencies are available.
+4. **Shared Global Styles:** `global.css` defines theme variables (OKLCH colors, radius, etc.) and base styles, and is imported by packages.
+5. **Tailwind Content Scanning:** The root `tailwind.config.cjs` scans source files across relevant packages to provide context for Tailwind's JIT engine.
 
-In our Transaction Form Builder monorepo, components from the form-renderer package are imported into the core package. However, some Tailwind classes (especially those used in Radix UI components like `left-2` in select dropdowns) were not being applied correctly because Tailwind's purge process wasn't detecting these classes in the core package.
-
-## Solution: Data-Slot Style Generator
-
-A script that automatically extracts Tailwind classes from UI components with data-slot attributes and generates a CSS file with corresponding @apply directives.
-
-### Benefits:
-
-- Robust solution not affected by Tailwind's purging process
-- Automatically extracts all component styles into a shared CSS
-- Works with complex class combinations
-- Only needs to run once before build/dev
-
-### How It Works:
-
-1. Scans all UI components for data-slot attributes
-2. Extracts their Tailwind classes
-3. Generates a CSS file with @apply directives
-4. Makes styles available across all packages
-
-## Usage
-
-The script runs automatically before development and build:
-
-```bash
-# Already configured in package.json
-pnpm dev  # Automatically runs the generator first
-pnpm build  # Automatically runs the generator first
-```
-
-Or run it manually:
-
-```bash
-pnpm generate-data-slots
-```
-
-## Adding New Components
-
-Simply use data-slot attributes in your components:
-
-```jsx
-<div data-slot="your-component" className="flex items-center gap-2">
-  {...}
-</div>
-```
-
-This makes your styling much more maintainable:
-
-- Classes are applied consistently across the application
-- Styling is centralized and reusable
-- No need to worry about Tailwind purging your classes
-
-## Implementation Details
-
-The generator script:
-
-1. Uses Babel to parse and traverse React components
-2. Extracts the className props from elements with data-slot attributes
-3. Handles both simple string literals and complex expressions
-4. Generates a CSS file with [data-slot] selectors and corresponding @apply rules
-5. Updates automatically before each build and development session
-
-## Example Generated Output
-
-```css
-/* Auto-generated data-slot styles */
-[data-slot='button'] {
-  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50;
-}
-
-[data-slot='input'] {
-  @apply border-input bg-background ring-offset-background focus-visible:ring-ring placeholder:text-muted-foreground h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50;
-}
-```
-
-## License
-
-MIT
-
-## Usage
-
-All packages in the monorepo share this styling system through imports and symbolic links:
-
-1. Configuration files at the repo root:
-
-   - `tailwind.config.cjs` - Central Tailwind configuration
-   - `postcss.config.cjs` - Central PostCSS configuration
-   - `components.json` - Central shadcn/ui configuration
-
-2. Each package symbolically links to these central configuration files
-
-3. Each package imports the central CSS with proper import order:
-   ```css
-   @import 'tailwindcss';
-   @import '../../../packages/styles/global.css';
-   ```
+This setup ensures styles are consistently applied, even for components rendered in Portals (like Radix UI primitives), by relying on explicit CSS builds and imports rather than solely on JIT scanning across package boundaries during development.
 
 ## Features
 
@@ -151,7 +60,8 @@ This ensures all components follow the same unified styling approach.
 
 ## Configuration Architecture
 
-This package provides centralized styling utilities and components used across all packages in the monorepo. The project uses a symlink-based configuration approach for consistency:
+This package provides centralized styling utilities and components used across all packages in the monorepo. The project uses a
+symlink-based configuration approach for consistency:
 
 ### Root Configuration Files
 
@@ -180,3 +90,9 @@ During the export process:
 4. The result is a self-contained project with proper styling
 
 ## Utilities
+
+(Add details about any utility functions or components provided by this package if applicable)
+
+```
+
+```

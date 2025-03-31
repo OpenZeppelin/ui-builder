@@ -12,6 +12,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./index.css": "./dist/index.css",
     "./types/*": {
       "types": "./dist/types/*.d.ts",
       "import": "./dist/types/*.js",
@@ -68,6 +69,7 @@
     "tailwind-merge": "^3.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.0.12",
     "@tailwindcss/postcss": "^4.0.12",
     "@tailwindcss/vite": "^4.0.13",
     "@testing-library/jest-dom": "^6.6.3",
