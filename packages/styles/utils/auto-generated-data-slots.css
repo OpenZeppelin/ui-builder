@@ -1,6 +1,16 @@
 /* 
   Auto-generated data-slot styles
   This file is generated automatically. DO NOT EDIT DIRECTLY.
+ 
+  PURPOSE:
+  This file ensures that essential base styles for UI components (especially those
+  using Radix UI and rendering in Portals, like Select, Popover, Dialog) are
+  reliably included in the CSS bundle, particularly for the core app's dev environment.
+  Tailwind's JIT engine can sometimes fail to detect styles used exclusively within
+  portal-rendered content when scanning source code directly. Using `@apply` here
+  forces Tailwind to generate these styles.
+ 
+  See `packages/styles/scripts/generate-data-slots.js` for more details.
 */
 
 [data-slot='card'] {
