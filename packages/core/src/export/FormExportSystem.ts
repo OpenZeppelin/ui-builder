@@ -184,14 +184,27 @@ export class FormExportSystem {
     // 6. Add root configuration files (tailwind, postcss, components) via StyleManager
     console.log('[File Assembly] Adding root config files...');
     const configFiles = this.styleManager.getConfigFiles();
-    configFiles.forEach((file) => {
+    for (const file of configFiles) {
+      // Use a loop to handle formatting
+      let finalContent = file.content;
       if (file.path === 'tailwind.config.cjs') {
-        projectFiles[file.path] = this.modifyTailwindConfigContent(file.content);
-      } else {
-        projectFiles[file.path] = file.content;
+        // Modify content first
+        finalContent = this.modifyTailwindConfigContent(file.content);
+        // Then format using TemplateProcessor
+        console.log('[File Assembly] Formatting tailwind.config.cjs...');
+        finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'typescript');
+      } else if (file.path === 'postcss.config.cjs') {
+        // Optionally format postcss config too if needed (using babel parser might be safer)
+        console.log('[File Assembly] Formatting postcss.config.cjs...');
+        finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'babel'); // Use babel parser for generic JS
+      } else if (file.path === 'components.json') {
+        // Format JSON using the dedicated method
+        console.log('[File Assembly] Formatting components.json...');
+        finalContent = await this.templateProcessor.formatJson(file.content);
       }
-    });
-    console.log(`[File Assembly] Added ${configFiles.length} config file(s).`);
+      projectFiles[file.path] = finalContent;
+    }
+    console.log(`[File Assembly] Added and formatted ${configFiles.length} config file(s).`);
 
     // 7. Remove adapter directory if adapters are excluded
     if (exportOptions.includeAdapters === false) {
@@ -230,20 +243,28 @@ export class FormExportSystem {
 
   /**
    * Modifies the content paths within tailwind.config.cjs content string.
+   * Also adds the path to the installed form-renderer package.
+   *
    * @param originalContent The original content of tailwind.config.cjs.
    * @returns The modified content string.
    * @private
    */
   private modifyTailwindConfigContent(originalContent: string): string {
     // Define paths relative to the EXPORTED project root
-    const newContentPaths = `[
+    const newContentPaths = [
       './index.html',
       './src/**/*.{js,ts,jsx,tsx}',
-    ]`;
+      // Add path to the installed form-renderer package
+      // Adjust if the actual dist path or file extensions differ
+      './node_modules/@openzeppelin/transaction-form-renderer/dist/**/*.{js,ts,jsx,tsx}',
+    ]
+      .map((p) => `'${p}'`)
+      .join(',\n      '); // Format for readability
+
     // Replace the 'content: [...]' array in the config string
     const modifiedContent = originalContent.replace(
       /(content\s*:\s*\[)[\s\S]*?(\])/, // Regex to find 'content: [' ... ']'
-      `$1${newContentPaths}$2` // Replace array content
+      `$1\n      ${newContentPaths}\n    $2` // Replace array content, preserving formatting
     );
 
     if (modifiedContent === originalContent) {

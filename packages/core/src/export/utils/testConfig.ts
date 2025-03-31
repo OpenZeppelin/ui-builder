@@ -61,7 +61,7 @@ export function createComplexFormConfig(
   _chainType: string = 'evm'
 ): BuilderFormConfig {
   const basicFieldIds = [uuidv4(), uuidv4(), uuidv4()];
-  const advancedFieldIds = [uuidv4(), uuidv4()];
+  const advancedFieldIds = [uuidv4(), uuidv4(), uuidv4(), uuidv4()];
 
   return {
     functionId: functionName,
@@ -105,10 +105,32 @@ export function createComplexFormConfig(
         id: advancedFieldIds[1],
         type: 'number',
         name: 'arrayParam',
-        label: 'Array Parameter',
+        label: 'Number Array Parameter',
         validation: { required: true },
-        helperText: 'Description for Array Parameter',
-        placeholder: 'Enter array parameter',
+        helperText: 'Enter multiple numbers (e.g., comma-separated)',
+        placeholder: 'e.g., 1, 2, 3',
+      },
+      {
+        id: advancedFieldIds[2],
+        type: 'textarea',
+        name: 'description',
+        label: 'Description',
+        validation: { required: false },
+        helperText: 'Optional detailed description',
+        placeholder: 'Enter description...',
+      },
+      {
+        id: advancedFieldIds[3],
+        type: 'select',
+        name: 'priority',
+        label: 'Priority',
+        validation: { required: true },
+        helperText: 'Select the priority level',
+        options: [
+          { label: 'Low', value: 'low' },
+          { label: 'Medium', value: 'medium' },
+          { label: 'High', value: 'high' },
+        ],
       },
     ],
     layout: {
@@ -126,7 +148,12 @@ export function createComplexFormConfig(
           id: uuidv4(),
           title: 'Advanced Parameters',
           description: 'Description for Advanced Parameters',
-          fields: [advancedFieldIds[0], advancedFieldIds[1]],
+          fields: [
+            advancedFieldIds[0],
+            advancedFieldIds[1],
+            advancedFieldIds[2],
+            advancedFieldIds[3],
+          ],
         },
       ],
     },

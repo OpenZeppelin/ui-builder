@@ -4,6 +4,28 @@
  * Data-Slot Style Generator
  * This script automatically extracts Tailwind classes from UI components with data-slot attributes
  * and generates a CSS file with corresponding @apply directives.
+ *
+ * WHY THIS IS NECESSARY:
+ * 1. Tailwind's JIT engine scans source files for class strings to generate CSS.
+ * 2. Complex components using libraries like Radix UI often render parts of their UI
+ *    (e.g., dropdowns, dialogs) in DOM Portals, separate from the main component tree.
+ * 3. During development (`pnpm dev` with Vite HMR), Tailwind's JIT scanning can be unreliable
+ *    in detecting utility classes used *only* within these portal-rendered components
+ *    (like Radix Select, Popover, Dialog content).
+ * 4. This can lead to missing base styles (backgrounds, padding, borders) for these
+ *    components in the core app's dynamic preview, even if Tailwind is configured
+ *    to scan the component library's source code.
+ * 5. This script provides a workaround by explicitly finding base utility classes
+ *    associated with `data-slot` attributes in the component source code (both core/ui
+ *    and form-renderer/ui) and generating a static CSS file (`auto-generated-data-slots.css`)
+ *    that uses `@apply` to force Tailwind to include these essential styles.
+ * 6. This generated CSS is imported by `packages/styles/global.css` and ensures
+ *    the base styles for slotted components are always available, bypassing potential
+ *    JIT/portal detection issues in the dev environment.
+ * 7. NOTE: This does NOT address utility classes used on elements *without* data-slots
+ *    within the component library (e.g., layout classes on wrapper divs). Those are
+ *    handled in the *exported* application context by configuring the exported app's
+ *    Tailwind config to scan the library in node_modules.
  */
 
 import generateDefault from '@babel/generator';
@@ -138,6 +160,16 @@ function generateCssContent(dataSlots) {
     '/* ',
     '  Auto-generated data-slot styles',
     '  This file is generated automatically. DO NOT EDIT DIRECTLY.',
+    ' ',
+    '  PURPOSE:',
+    '  This file ensures that essential base styles for UI components (especially those',
+    '  using Radix UI and rendering in Portals, like Select, Popover, Dialog) are',
+    "  reliably included in the CSS bundle, particularly for the core app's dev environment.",
+    "  Tailwind's JIT engine can sometimes fail to detect styles used exclusively within",
+    '  portal-rendered content when scanning source code directly. Using `@apply` here',
+    '  forces Tailwind to generate these styles.',
+    ' ',
+    '  See `packages/styles/scripts/generate-data-slots.js` for more details.',
     '*/',
     '',
   ];
