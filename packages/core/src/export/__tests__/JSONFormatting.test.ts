@@ -1,51 +1,59 @@
 import { describe, expect, it } from 'vitest';
 
-import { TemplateProcessor } from '../generators/TemplateProcessor';
+import { TemplateProcessor } from '../../export/generators/TemplateProcessor';
+
+// Mock template files for TemplateProcessor
+const mockTemplateFiles = {
+  'template.json': async () => Promise.resolve('{ "key": "value" }'),
+};
 
 describe('JSON Formatting', () => {
-  it('should correctly format JSON', async () => {
-    const templateProcessor = new TemplateProcessor({});
+  const processor = new TemplateProcessor(mockTemplateFiles);
 
-    // Test with a sample JSON
-    const unformattedJson = `{"name":"test-package","version":"1.0.0","private":true,"dependencies":{"react":"^19.0.0","react-dom":"^19.0.0"},"scripts":{"test":"echo \\"Error: no test specified\\" && exit 1"}}`;
+  it('should format simple JSON correctly', async () => {
+    const jsonString = '{"name":"simple-package","version":"1.0.0"}';
+    const formattedJson = await processor.formatJson(jsonString);
 
-    const formattedJson = await templateProcessor.formatJson(unformattedJson);
-
-    // Verify formatting
-    expect(formattedJson).toContain('{\n');
-    expect(formattedJson).toContain('  "name":');
-    expect(formattedJson).toContain('  "dependencies":');
-
-    // Should use consistent indentation
-    const lines = formattedJson.split('\n');
-    const indentedLines = lines.filter((line) => line.startsWith('  "'));
-    expect(indentedLines.length).toBeGreaterThan(0);
-
-    // Log the formatted JSON for inspection
-    console.log('Formatted JSON:');
-    console.log(formattedJson);
+    // Expect standard 2-space indentation and ONE trailing newline
+    expect(formattedJson).toBe(
+      `{\n  "name": "simple-package",\n  "version": "1.0.0"\n}\n` // Expect ONE trailing newline
+    );
   });
 
   it('should format complex JSON correctly', async () => {
-    const templateProcessor = new TemplateProcessor({});
+    const complexJson = {
+      name: 'complex-package',
+      nested: { prop1: 'value1', prop2: { subprop: 'subvalue' } },
+      array: [1, 2, 3, { item: 'value' }],
+    };
+    const jsonString = JSON.stringify(complexJson);
+    const formattedJson = await processor.formatJson(jsonString);
 
-    // Test with a nested JSON structure
-    const complexJson = `{"name":"complex-package","nested":{"prop1":"value1","prop2":{"subprop":"subvalue"}},"array":[1,2,3,{"item":"value"}]}`;
+    // Verify correct formatting with 2-space indent and ONE trailing newline
+    const expectedFormattedJson = `{
+  "name": "complex-package",
+  "nested": {
+    "prop1": "value1",
+    "prop2": {
+      "subprop": "subvalue"
+    }
+  },
+  "array": [
+    1,
+    2,
+    3,
+    {
+      "item": "value"
+    }
+  ]
+}\n`; // Expect ONE trailing newline
+    expect(formattedJson).toBe(expectedFormattedJson);
+  });
 
-    const formattedJson = await templateProcessor.formatJson(complexJson);
-
-    // Verify correct formatting of nested structures
-    expect(formattedJson).toContain('  "nested":');
-    expect(formattedJson).toContain('    "prop1":');
-    expect(formattedJson).toContain('    "prop2":');
-    expect(formattedJson).toContain('      "subprop":');
-
-    // Array formatting
-    expect(formattedJson).toContain('  "array":');
-    expect(formattedJson).toContain('    1,');
-
-    // Log the formatted complex JSON
-    console.log('Formatted Complex JSON:');
-    console.log(formattedJson);
+  it('should handle invalid JSON input', async () => {
+    const invalidJsonString = '{"name":"incomplete",';
+    // Expect formatJson to return the original string if formatting fails
+    const result = await processor.formatJson(invalidJsonString);
+    expect(result).toBe(invalidJsonString);
   });
 });

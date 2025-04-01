@@ -1,7 +1,12 @@
 import JSZip from 'jszip';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { extractFilesFromZip, validateExportedProject } from '../zipInspector';
+// Import logger
+import {
+  extractFilesFromZip,
+  validateExportedProject,
+  type ZipExtractionTestCallback,
+} from '../zipInspector';
 
 // Helper to create a test ZIP blob
 async function createTestZip(files: Record<string, string>): Promise<Blob> {
@@ -18,6 +23,24 @@ async function createTestZip(files: Record<string, string>): Promise<Blob> {
   // Generate ZIP blob
   return await zip.generateAsync({ type: 'blob' });
 }
+
+// Store original method implementation directly
+let originalAsyncImpl:
+  | ((type: JSZip.OutputType) => Promise<JSZip.OutputByType[JSZip.OutputType]>)
+  | undefined;
+
+beforeEach(() => {
+  // Capture the original implementation from the prototype
+  originalAsyncImpl = JSZip.prototype.async;
+});
+
+afterEach(() => {
+  // Restore the original implementation to the prototype
+  if (originalAsyncImpl) {
+    JSZip.prototype.async = originalAsyncImpl;
+  }
+  vi.restoreAllMocks();
+});
 
 describe('zipInspector', () => {
   describe('extractFilesFromZip', () => {
@@ -56,35 +79,27 @@ describe('zipInspector', () => {
     });
 
     it('should handle extraction errors gracefully', async () => {
-      // Create a test ZIP
+      // Create a test ZIP with one file that will cause an error
       const zip = new JSZip();
-      zip.file('test.txt', 'test content');
+      zip.file('good.txt', 'good content');
+      zip.file('bad.txt', 'bad content');
       const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-      // Mock an error during extraction
-      const originalLoadAsync = JSZip.prototype.loadAsync;
-      JSZip.prototype.loadAsync = vi.fn().mockImplementation(() => {
-        return Promise.resolve({
-          files: {
-            'test.txt': {
-              dir: false,
-              async: () => Promise.reject(new Error('Test error')),
-            },
-          },
-        });
-      });
+      // Define a test callback to simulate an error for a specific file
+      const testErrorCallback: ZipExtractionTestCallback = (filePath: string /*, fileObject */) => {
+        if (filePath === 'bad.txt') {
+          throw new Error('Simulated extraction error via callback');
+        }
+      };
 
-      try {
-        // Extract files from the ZIP
-        const extractedFiles = await extractFilesFromZip(zipBlob);
+      // Call extractFilesFromZip with the test callback
+      const extractedFiles = await extractFilesFromZip(zipBlob, testErrorCallback);
 
-        // Verify error handling
-        expect(extractedFiles['test.txt']).toContain('ERROR_EXTRACTING:');
-        expect(extractedFiles['test.txt']).toContain('Test error');
-      } finally {
-        // Restore original implementation
-        JSZip.prototype.loadAsync = originalLoadAsync;
-      }
+      // Verify error handling: Expect the good file and an error message for the bad file
+      expect(extractedFiles).toHaveProperty('good.txt', 'good content');
+      expect(extractedFiles['bad.txt']).toContain(
+        'ERROR_EXTRACTING: Simulated extraction error via callback'
+      );
     });
 
     it('should skip directory entries', async () => {

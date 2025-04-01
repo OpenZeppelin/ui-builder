@@ -8,8 +8,9 @@
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { logger } from '../../core/utils/logger';
 import { FormExportSystem } from '../FormExportSystem';
 import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
 
@@ -22,20 +23,33 @@ const createdFiles: string[] = [];
 const isRunningFromCLI = process.env.EXPORT_CLI_MODE === 'true';
 
 describe('Export CLI Wrapper', () => {
+  beforeEach(() => {
+    // Only disable logging when not running from CLI
+    if (!isRunningFromCLI) {
+      logger.configure({ enabled: false });
+    }
+  });
+
+  afterEach(() => {
+    // Reset logger configuration after each test
+    if (!isRunningFromCLI) {
+      logger.configure({ enabled: true, level: 'info' });
+    }
+  });
+
   // Clean up after all tests complete
   afterAll(() => {
-    // Skip cleanup when running from CLI
-    if (isRunningFromCLI) {
-      console.log('Running in CLI mode - skipping cleanup to preserve export files');
-      return;
-    }
-
     try {
-      // Delete any files created during testing
-      createdFiles.forEach((filePath) => {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-          console.log(`Cleaned up test artifact: ${filePath}`);
+      // Only log cleanup messages if running from CLI
+      if (isRunningFromCLI) {
+        logger.info('CLI Wrapper Test', 'Running cleanup...');
+      }
+      createdFiles.forEach((file) => {
+        if (fs.existsSync(file)) {
+          fs.unlinkSync(file);
+          if (isRunningFromCLI) {
+            logger.info('CLI Wrapper Test', `Cleaned up test artifact: ${file}`);
+          }
         }
       });
 
@@ -45,13 +59,23 @@ describe('Export CLI Wrapper', () => {
         const files = fs.readdirSync(defaultExportDir);
         if (files.length === 0) {
           fs.rmdirSync(defaultExportDir);
-          console.log('Removed empty exports directory');
+          if (isRunningFromCLI) {
+            logger.info('CLI Wrapper Test', 'Removed empty exports directory');
+          }
         } else {
-          console.log(`Export directory not empty, contains ${files.length} files`);
+          if (isRunningFromCLI) {
+            logger.info(
+              'CLI Wrapper Test',
+              `Export directory not empty, contains ${files.length} files`
+            );
+          }
         }
       }
     } catch (error) {
-      console.error('Error during cleanup:', error);
+      // Log error only if running from CLI
+      if (isRunningFromCLI) {
+        logger.error('CLI Wrapper Test', 'Error during cleanup:', error);
+      }
     }
   });
 
@@ -65,14 +89,14 @@ describe('Export CLI Wrapper', () => {
     const outputDir = process.env.EXPORT_TEST_OUTPUT_DIR || './exports';
     const env = (process.env.EXPORT_CLI_ENV || 'local') as 'local' | 'production';
 
-    console.log('Export configuration:');
-    console.log(`Chain: ${chain}`);
-    console.log(`Function: ${func}`);
-    console.log(`Template: ${template}`);
-    console.log(`Include Adapters: ${includeAdapters}`);
-    console.log(`Complex Form: ${isComplex}`);
-    console.log(`Output Directory: ${outputDir}`);
-    console.log(`Environment: ${env}`);
+    // console.log('Export configuration:'); // Remove logging
+    // console.log(`Chain: ${chain}`); // Remove logging
+    // console.log(`Function: ${func}`); // Remove logging
+    // console.log(`Template: ${template}`); // Remove logging
+    // console.log(`Include Adapters: ${includeAdapters}`); // Remove logging
+    // console.log(`Complex Form: ${isComplex}`); // Remove logging
+    // console.log(`Output Directory: ${outputDir}`); // Remove logging
+    // console.log(`Environment: ${env}`); // Remove logging
 
     // Create form config
     const formConfig = isComplex
@@ -88,10 +112,14 @@ describe('Export CLI Wrapper', () => {
       template,
       includeAdapters,
       env,
-      onProgress: (progress) =>
-        console.log(
-          `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`
-        ),
+      // Only provide onProgress callback if running from CLI
+      onProgress: isRunningFromCLI
+        ? (progress) =>
+            logger.info(
+              'CLI Wrapper Test',
+              `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`
+            )
+        : undefined,
     });
 
     // Ensure we have a valid result
@@ -109,6 +137,9 @@ describe('Export CLI Wrapper', () => {
 
     // Use JSZip to directly save the zip file
     try {
+      // console.log( // Remove logging
+      //   `Exporting form for chain: ${chain}, function: ${func}, template: ${template}...`
+      // ); // Remove logging
       const zip = new JSZip();
 
       // Load the data (which will be a Buffer in this Node.js context)
@@ -123,10 +154,10 @@ describe('Export CLI Wrapper', () => {
       // Track the file for cleanup
       createdFiles.push(outputPath);
 
-      console.log(`Export saved to: ${outputPath}`);
+      // console.log(`Export saved to: ${outputPath}`); // Remove logging
     } catch (error) {
-      console.error('Error saving zip file:', error);
-      throw error;
+      // console.error('Error saving zip file:', error); // Remove logging
+      process.exit(1);
     }
 
     // Return success

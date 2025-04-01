@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
+import { logger } from '../../core/utils/logger';
 import { AdapterExportManager } from '../AdapterExportManager';
 import { FormExportSystem } from '../FormExportSystem';
 import { FormCodeGenerator } from '../generators/FormCodeGenerator';
@@ -40,6 +41,16 @@ describe('FormExportSystem', () => {
 
   afterAll(() => {
     console.warn = originalConsoleWarn;
+  });
+
+  beforeEach(() => {
+    // Disable logging during tests
+    logger.configure({ enabled: false });
+  });
+
+  afterEach(() => {
+    // Reset logger configuration after each test
+    logger.configure({ enabled: true, level: 'info' });
   });
 
   // Mock adapter configs for testing

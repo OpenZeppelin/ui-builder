@@ -54,8 +54,8 @@ describe('FormExportValidation', () => {
     });
 
     // Log validation results for debugging
-    if (!validation.isValid) {
-      console.error('Export validation errors:', validation.errors);
+    if (validation.errors) {
+      // console.error('Export validation errors:', validation.errors);
     }
 
     // Verify the validation passed
@@ -103,8 +103,8 @@ describe('FormExportValidation', () => {
     });
 
     // Log validation results for debugging
-    if (!validation.isValid) {
-      console.error('Export validation errors:', validation.errors);
+    if (validation.errors) {
+      // console.error('Export validation errors:', validation.errors);
     }
 
     // Verify the validation passed
