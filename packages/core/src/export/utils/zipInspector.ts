@@ -1,37 +1,66 @@
 import JSZip from 'jszip';
 
+import { logger } from '../../core/utils/logger'; // Import logger
+
 /**
- * Extracts all files from a ZIP archive provided as a Blob or Buffer.
- *
- * @param zipData - The ZIP data (Blob for browser, Buffer for Node.js).
- * @returns A promise resolving to a record mapping file paths to their string content.
+ * Optional callback for testing error handling during file extraction.
+ * @param filePath The path of the file being processed.
+ * @param fileObject The JSZip file object.
+ * @returns void | Promise<void> - If it throws an error, extraction for that file will fail.
  */
-export async function extractFilesFromZip(zipData: Blob | Buffer): Promise<Record<string, string>> {
-  const zip = new JSZip();
-  const extracted = await zip.loadAsync(zipData);
+export type ZipExtractionTestCallback = (
+  filePath: string,
+  fileObject: JSZip.JSZipObject
+) => void | Promise<void>;
 
+/**
+ * Extracts all files from a ZIP blob into a record of paths and string content.
+ * Handles potential extraction errors gracefully.
+ * @param zipBlob The ZIP file content as a Blob.
+ * @param testCallback Optional callback for simulating errors during testing.
+ */
+export async function extractFilesFromZip(
+  zipBlob: Blob,
+  testCallback?: ZipExtractionTestCallback
+): Promise<Record<string, string>> {
   const files: Record<string, string> = {};
+  try {
+    const zip = await JSZip.loadAsync(zipBlob);
 
-  // Use Promise.all to asynchronously extract file contents
-  await Promise.all(
-    Object.keys(extracted.files).map(async (path) => {
-      const file = extracted.files[path];
+    // Create an array of promises for file extraction
+    const extractionPromises = Object.entries(zip.files).map(async ([path, fileObject]) => {
       // Skip directories
-      if (!file.dir) {
-        try {
-          // Extract file content as string regardless of binary status
-          // This ensures binary files are handled properly in tests
-          files[path] = await file.async('string');
-        } catch (error) {
-          console.error(`Error extracting file ${path}:`, error); // Keep detailed log
-          // Format error messages consistently for better error handling
-          files[path] =
-            `ERROR_EXTRACTING: ${error instanceof Error ? error.message : String(error)}`;
-        }
+      if (fileObject.dir) {
+        return;
       }
-    })
-  );
 
+      try {
+        // --- TEST HOOK START ---
+        // If a test callback is provided, execute it here.
+        // If it throws, the catch block below will handle it.
+        if (testCallback) {
+          await testCallback(path, fileObject);
+        }
+        // --- TEST HOOK END ---
+
+        // Extract file content as text
+        files[path] = await fileObject.async('text');
+      } catch (error) {
+        // Log the error and store an error message in the files record
+        const errorMessage = `ERROR_EXTRACTING: ${(error as Error).message}`;
+        logger.error('zipInspector', `Error extracting file ${path}:`, error); // Use logger
+        files[path] = errorMessage;
+      }
+    });
+
+    // Wait for all extraction attempts to complete
+    await Promise.all(extractionPromises);
+  } catch (error) {
+    // Log error if the ZIP itself cannot be loaded
+    logger.error('zipInspector', 'Error loading or processing ZIP file:', error);
+    // You might want to throw this error or handle it differently
+    // For now, return the potentially partially populated files object or an empty one
+  }
   return files;
 }
 

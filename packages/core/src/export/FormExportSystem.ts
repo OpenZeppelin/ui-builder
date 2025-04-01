@@ -6,6 +6,8 @@
  * and StyleManager components.
  */
 
+import { logger } from '../core/utils/logger';
+
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';
 import { AdapterExportManager } from './AdapterExportManager';
@@ -82,11 +84,11 @@ export class FormExportSystem {
     };
 
     try {
-      console.log('[Export System] Starting export process...');
-      console.log('[Export System] Options:', exportOptions);
+      logger.info('Export System', 'Starting export process...');
+      logger.info('Export System', 'Options:', exportOptions);
 
       // 1. Generate form component code
-      console.log('[Export System] Generating form component...');
+      logger.info('Export System', 'Generating form component...');
       const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
         chainType,
@@ -94,16 +96,19 @@ export class FormExportSystem {
       );
 
       // 2. Generate App component code
-      console.log('[Export System] Generating App component...');
+      logger.info('Export System', 'Generating App component...');
       const appComponentCode = await this.formCodeGenerator.generateUpdatedAppComponent(functionId);
 
       // 3. Get adapter files if needed
-      console.log('[Export System] Retrieving adapter files...');
+      logger.info('Export System', 'Retrieving adapter files...');
       const adapterFiles =
         exportOptions.includeAdapters !== false
           ? await this.adapterExportManager.getAdapterFiles(chainType)
           : {};
-      console.log(`[Export System] Retrieved ${Object.keys(adapterFiles).length} adapter file(s).`);
+      logger.info(
+        'Export System',
+        `Retrieved ${Object.keys(adapterFiles).length} adapter file(s).`
+      );
 
       // Prepare custom files object
       const customFiles = {
@@ -113,7 +118,7 @@ export class FormExportSystem {
       };
 
       // --- Assemble Project Files ---
-      console.log('[Export System] Assembling project files...');
+      logger.info('Export System', 'Assembling project files...');
       const projectFiles = await this.assembleProjectFiles(
         formConfig,
         chainType,
@@ -121,15 +126,15 @@ export class FormExportSystem {
         exportOptions,
         customFiles
       );
-      console.log(`[Export System] Project files assembled: ${Object.keys(projectFiles).length}`);
+      logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
       // --- End Assembly ---
 
       // --- Final Steps ---
       // 10. Create ZIP file
-      console.log('[Export System] Generating ZIP file...');
+      logger.info('Export System', 'Generating ZIP file...');
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
-      console.log(`[Export System] ZIP file generated: ${zipResult.fileName}`);
+      logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
       // 11. Prepare and return the final export result
       const finalResult: ExportResult = {
@@ -137,10 +142,10 @@ export class FormExportSystem {
         fileName: zipResult.fileName,
         dependencies: this.packageManager.getDependencies(formConfig, chainType),
       };
-      console.log('[Export System] Export process complete.');
+      logger.info('Export System', 'Export process complete.');
       return finalResult;
     } catch (error) {
-      console.error('[Export System] Export failed:', error);
+      logger.error('Export System', 'Export failed:', error);
       throw new Error(`Export failed: ${(error as Error).message}`);
     }
   }
@@ -158,31 +163,33 @@ export class FormExportSystem {
     customFiles: Record<string, string>
   ): Promise<Record<string, string>> {
     // 4. Get base project files from the selected template
-    console.log(
-      `[File Assembly] Creating project from template: ${exportOptions.template || 'typescript-react-vite'}...`
+    logger.info(
+      'File Assembly',
+      `Creating project from template: ${exportOptions.template || 'typescript-react-vite'}...`
     );
     const templateFilesRaw = await this.templateManager.createProject(
       exportOptions.template || 'typescript-react-vite',
       customFiles, // Pass custom files to handle placeholders
       exportOptions
     );
-    console.log(
-      `[File Assembly] Base template files retrieved: ${Object.keys(templateFilesRaw).length}`
+    logger.info(
+      'File Assembly',
+      `Base template files retrieved: ${Object.keys(templateFilesRaw).length}`
     );
 
     // Initialize the final file collection
     let projectFiles: Record<string, string> = { ...templateFilesRaw };
 
     // 5. Add shared CSS files (global.css) and template styles.css via StyleManager
-    console.log('[File Assembly] Adding CSS files...');
+    logger.info('File Assembly', 'Adding CSS files...');
     const styleFiles = this.styleManager.getStyleFiles();
     styleFiles.forEach((file) => {
       projectFiles[file.path] = file.content;
     });
-    console.log(`[File Assembly] Added ${styleFiles.length} CSS file(s).`);
+    logger.info('File Assembly', `Added ${styleFiles.length} CSS file(s).`);
 
     // 6. Add root configuration files (tailwind, postcss, components) via StyleManager
-    console.log('[File Assembly] Adding root config files...');
+    logger.info('File Assembly', 'Adding root config files...');
     const configFiles = this.styleManager.getConfigFiles();
     for (const file of configFiles) {
       // Use a loop to handle formatting
@@ -191,24 +198,21 @@ export class FormExportSystem {
         // Modify content first
         finalContent = this.modifyTailwindConfigContent(file.content);
         // Then format using TemplateProcessor
-        console.log('[File Assembly] Formatting tailwind.config.cjs...');
         finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'typescript');
       } else if (file.path === 'postcss.config.cjs') {
         // Optionally format postcss config too if needed (using babel parser might be safer)
-        console.log('[File Assembly] Formatting postcss.config.cjs...');
         finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'babel'); // Use babel parser for generic JS
       } else if (file.path === 'components.json') {
         // Format JSON using the dedicated method
-        console.log('[File Assembly] Formatting components.json...');
         finalContent = await this.templateProcessor.formatJson(file.content);
       }
       projectFiles[file.path] = finalContent;
     }
-    console.log(`[File Assembly] Added and formatted ${configFiles.length} config file(s).`);
+    logger.info('File Assembly', `Added and formatted ${configFiles.length} config file(s).`);
 
     // 7. Remove adapter directory if adapters are excluded
     if (exportOptions.includeAdapters === false) {
-      console.log('[File Assembly] Removing adapter files as per options...');
+      logger.info('File Assembly', 'Removing adapter files as per options...');
       Object.keys(projectFiles).forEach((path) => {
         if (path.startsWith('src/adapters/')) {
           delete projectFiles[path];
@@ -217,7 +221,7 @@ export class FormExportSystem {
     }
 
     // 8. Update package.json with correct dependencies and metadata
-    console.log('[File Assembly] Updating package.json...');
+    logger.info('File Assembly', 'Updating package.json...');
     const originalPackageJson = projectFiles['package.json'];
     if (originalPackageJson) {
       projectFiles['package.json'] = this.packageManager.updatePackageJson(
@@ -227,17 +231,16 @@ export class FormExportSystem {
         functionId,
         exportOptions
       );
-      console.log('[File Assembly] package.json updated.');
+      logger.info('File Assembly', 'package.json updated.');
     } else {
-      console.error('[File Assembly] Error: No package.json found in template files.');
+      logger.error('File Assembly', 'Error: No package.json found in template files.');
       throw new Error('Template is missing package.json');
     }
 
     // 9. Format necessary JSON files for readability
-    console.log('[File Assembly] Formatting JSON files...');
     await this.formatJsonFiles(projectFiles);
 
-    console.log('[File Assembly] File assembly complete.');
+    logger.info('File Assembly', 'File assembly complete.');
     return projectFiles;
   }
 
@@ -272,12 +275,13 @@ export class FormExportSystem {
 
     if (modifiedContent === originalContent) {
       // Warn if replacement failed, return original content
-      console.warn(
-        '[Export System] Failed to replace content paths in tailwind.config.cjs. Check config format. Using original.'
+      logger.warn(
+        'Export System',
+        'Failed to replace content paths in tailwind.config.cjs. Check config format. Using original.'
       );
       return originalContent;
     } else {
-      console.log('[Export System] Successfully modified tailwind.config.cjs content paths.');
+      logger.info('Export System', 'Successfully modified tailwind.config.cjs content paths.');
       return modifiedContent;
     }
   }
@@ -288,24 +292,12 @@ export class FormExportSystem {
    * @param files Map of file paths to content
    */
   private async formatJsonFiles(files: Record<string, string>): Promise<void> {
-    // Get all .json files by checking file extensions
     const jsonFiles = Object.keys(files).filter((path) => path.endsWith('.json'));
-
-    console.log('Found JSON files to format:', jsonFiles);
-
     for (const path of jsonFiles) {
       try {
-        console.log(`Formatting ${path} with JSON formatter...`);
-        const before = files[path].substring(0, 100) + '...'; // Log first 100 chars
-
-        // Use our specialized JSON formatter
         files[path] = await this.templateProcessor.formatJson(files[path]);
-
-        const after = files[path].substring(0, 100) + '...'; // Log first 100 chars
-        console.log(`Before formatting: ${before}`);
-        console.log(`After formatting: ${after}`);
       } catch (error) {
-        console.warn(`Failed to format ${path}, using unformatted version:`, error);
+        logger.warn('File Assembly', `Failed to format ${path}, using unformatted version:`, error);
       }
     }
   }
@@ -323,7 +315,7 @@ export class FormExportSystem {
     fileName: string,
     onProgress?: (progress: ZipProgress) => void
   ) {
-    console.log(`Creating ZIP file with ${Object.keys(files).length} files`);
+    logger.info('Export System', `Creating ZIP file with ${Object.keys(files).length} files`);
 
     return this.zipGenerator.createZipFile(files, fileName, {
       onProgress,

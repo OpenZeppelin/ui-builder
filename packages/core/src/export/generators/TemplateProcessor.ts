@@ -5,9 +5,12 @@
 
 import type { Options, Plugin } from 'prettier';
 
+import * as babelPlugin from 'prettier/plugins/babel';
 import * as estreePlugin from 'prettier/plugins/estree';
 import * as typescriptPlugin from 'prettier/plugins/typescript';
 import * as prettierStandalone from 'prettier/standalone';
+
+import { logger } from '../../core/utils/logger';
 
 export class TemplateProcessor {
   private templates: Record<string, string> | null = null;
@@ -57,9 +60,10 @@ export class TemplateProcessor {
 
     // If no templates were found, log a warning
     if (Object.keys(templates).length === 0) {
-      console.warn('No template files found in the codeTemplates directory');
+      logger.warn('TemplateProcessor', 'No template files found in the codeTemplates directory');
     } else {
-      console.log(
+      logger.info(
+        'TemplateProcessor',
         `Loaded ${Object.keys(templates).length} templates: ${Object.keys(templates).join(', ')}`
       );
     }
@@ -202,7 +206,7 @@ export class TemplateProcessor {
         );
       } catch (error) {
         // Log any errors that might occur
-        console.error('Failed to inject form schema:', error);
+        logger.error('TemplateProcessor', 'Failed to inject form schema:', error);
         throw error;
       }
     }
@@ -235,13 +239,16 @@ export class TemplateProcessor {
       // Add plugins to the configuration
       const config: Options & { plugins: Plugin[] } = {
         ...prettierConfig,
-        plugins: [estreePlugin, typescriptPlugin],
+        plugins: [estreePlugin.default, typescriptPlugin.default, babelPlugin.default],
       };
 
       // Format the entire code file
       return await prettierStandalone.format(code, config);
     } catch (error) {
-      console.error('Error formatting code with Prettier:', error);
+      logger.warn(
+        'TemplateProcessor',
+        `Error formatting code with Prettier: ${String(error)}. Returning unformatted code.`
+      );
       // Return the original unformatted code as a fallback
       return code;
     }
@@ -255,20 +262,34 @@ export class TemplateProcessor {
    */
   public async formatJson(jsonString: string): Promise<string> {
     try {
-      // Parse the JSON to make sure it's valid
-      const jsonObj = JSON.parse(jsonString);
-
-      // Just use standard JSON.stringify with indentation for proper JSON format
-      // This ensures all property names are properly double-quoted as required by JSON
-      return JSON.stringify(jsonObj, null, 2);
-
-      // Note: We're not using Prettier here because the standalone version
-      // doesn't include the JSON parser plugin, and using TypeScript parser
-      // produces TypeScript-style output with unquoted properties
+      // Use the 'json-stringify' parser, which relies on the estree plugin
+      return await this.formatCodeWithPrettier(jsonString, 'json-stringify', {
+        printWidth: 80,
+      });
     } catch (error) {
-      console.error('Error formatting JSON:', error);
-      // Return the original unformatted JSON as a fallback
+      logger.warn(
+        'TemplateProcessor',
+        `Error formatting JSON: ${String(error)}. Returning unformatted JSON.`
+      );
       return jsonString;
     }
+  }
+
+  /**
+   * Internal Prettier formatting function
+   */
+  private async formatCodeWithPrettier(
+    code: string,
+    parser: string,
+    options?: Options
+  ): Promise<string> {
+    const defaultOptions: Options = {
+      parser: parser,
+      // Ensure estree plugin is included (it handles json-stringify)
+      plugins: [typescriptPlugin.default, estreePlugin.default, babelPlugin.default],
+      // You can add more Prettier options here if needed
+    };
+
+    return prettierStandalone.format(code, { ...defaultOptions, ...options });
   }
 }

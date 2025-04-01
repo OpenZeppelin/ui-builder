@@ -38,6 +38,8 @@ import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer
  */
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
+import { logger } from '../core/utils/logger'; // Import logger
+
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -80,8 +82,14 @@ export class PackageManager {
     mockAdapterConfigs?: Record<string, AdapterConfig>,
     mockFormRendererConfig?: FormRendererConfig
   ) {
+    // // TEMPORARY LOGGING FOR TEST FAILURE
+    // console.log('PackageManager CONSTRUCTOR: mockFormRendererConfig received:', mockFormRendererConfig);
+
     this.adapterConfigs = mockAdapterConfigs || this.loadAdapterConfigs();
     this.formRendererConfig = mockFormRendererConfig || this.loadFormRendererConfig();
+
+    // // TEMPORARY LOGGING FOR TEST FAILURE
+    // console.log('PackageManager CONSTRUCTOR: this.formRendererConfig set to:', this.formRendererConfig);
   }
 
   /**
@@ -207,7 +215,7 @@ export class PackageManager {
     const adapterConfig = this.adapterConfigs[chainType];
 
     if (!adapterConfig) {
-      console.warn(`No configuration found for chain type: ${chainType}`);
+      logger.warn('PackageManager', `No configuration found for chain type: ${chainType}`); // Use logger
       return {};
     }
 
@@ -292,17 +300,25 @@ export class PackageManager {
    * @returns Record of dependency packages and versions
    */
   getDependencies(formConfig: BuilderFormConfig, chainType: ChainType): Record<string, string> {
+    // // TEMPORARY LOGGING FOR TEST FAILURE
+    // const coreDeps = this.getCoreDependencies();
+    // console.log('PackageManager getDependencies: Core Deps:', coreDeps);
+    // const chainDeps = this.getChainDependencies(chainType);
+    // console.log('PackageManager getDependencies: Chain Deps:', chainDeps);
+    // const fieldDeps = this.getFieldDependencies(formConfig);
+    // console.log('PackageManager getDependencies: Field Deps:', fieldDeps);
+
     // Combine dependencies from different sources
-    return {
+    const combined = {
       // Core dependencies from form-renderer
       ...this.getCoreDependencies(),
-
       // Chain-specific dependencies from adapter
       ...this.getChainDependencies(chainType),
-
       // Field-specific dependencies from form-renderer
       ...this.getFieldDependencies(formConfig),
     };
+    // console.log('PackageManager getDependencies: Combined Deps:', combined);
+    return combined;
   }
 
   /**
@@ -398,8 +414,9 @@ export class PackageManager {
       // Format and return updated package.json content
       return JSON.stringify(packageJson, null, 2);
     } catch (error) {
-      console.error('Error updating package.json:', error);
-      throw new Error(`Failed to update package.json: ${(error as Error).message}`);
+      // Log error and re-throw to ensure failure is surfaced
+      logger.error('PackageManager', 'Error updating package.json:', error); // Use logger
+      throw new Error(`Error updating package.json: ${(error as Error).message}`);
     }
   }
 
