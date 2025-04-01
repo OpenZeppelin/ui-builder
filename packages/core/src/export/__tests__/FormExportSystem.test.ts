@@ -12,7 +12,7 @@ import { ZipGenerator } from '../ZipGenerator';
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
-// Mock FormRendererConfig since we can't import it directly from @form-renderer
+// Mock FormRendererConfig since it's not exported from the main package entry
 interface MockFormRendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<

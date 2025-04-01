@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { TransactionForm } from '@form-renderer/components/TransactionForm';
+import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../../adapters';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';

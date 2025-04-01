@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm run build:css && tsc --skipLibCheck && vite build --emptyOutDir",
+    "build": "pnpm --filter=@openzeppelin/transaction-form-renderer build && pnpm run build:css && tsc --skipLibCheck && vite build --emptyOutDir",
     "build:css": "tailwindcss -i ./src/index.css -o ./dist/index.css --minify",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",

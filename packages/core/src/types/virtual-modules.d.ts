@@ -35,7 +35,7 @@
  * the form-renderer configuration for dependency management during form export.
  */
 declare module 'virtual:form-renderer-config' {
-  export { formRendererConfig } from '@form-renderer/config';
+  export { formRendererConfig } from '@openzeppelin/transaction-form-renderer/config';
 }
 
 /**
@@ -64,18 +64,16 @@ declare module 'virtual:form-renderer-config' {
 // }
 
 /**
- * ADDITIONAL TYPE EXPORTS
+ * Declaration merging for FormRendererConfig types
  *
- * This declaration supports any code that might import from the module path
- * '@form-renderer/types/FormRendererConfig'. It re-exports the types from the main
- * '@form-renderer/types' module, ensuring type compatibility.
- *
- * This is particularly important if there are any path transformations happening
- * in the Vite plugin that affect import paths.
+ * This declaration allows importing types like FormRendererConfig using the
+ * deep import path `@openzeppelin/transaction-form-renderer/types/FormRendererConfig`.
+ * It re-exports the types from the main
+ * `@openzeppelin/transaction-form-renderer/types` module, ensuring type compatibility.
  */
-declare module '@form-renderer/types/FormRendererConfig' {
-  // Re-export from the main type module
-  export * from '@form-renderer/types';
+declare module '@openzeppelin/transaction-form-renderer/types/FormRendererConfig' {
+  // Re-export necessary types from the actual implementation
+  export * from '@openzeppelin/transaction-form-renderer/types';
 }
 
 // Add declarations for the raw config content virtual modules

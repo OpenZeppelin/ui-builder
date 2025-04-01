@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-import { BooleanField, TextField } from '@form-renderer/components/fields';
+import { BooleanField, TextField } from '@openzeppelin/transaction-form-renderer';
 
 import type { FilterControlsProps } from './types';
 

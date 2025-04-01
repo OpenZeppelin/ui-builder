@@ -1,15 +1,15 @@
-import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
   BooleanField,
+  FieldType,
+  FormFieldType,
   SelectField,
   type SelectOption,
   TextAreaField,
   TextField,
-} from '@form-renderer/components/fields';
+} from '@openzeppelin/transaction-form-renderer';
 
 interface FieldEditorProps {
   field: FormFieldType;

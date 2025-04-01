@@ -6,8 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@form-renderer/*": ["../form-renderer/src/*"],
-      "@styles/*": ["../styles/*"]
+      "@styles/*": ["../styles/src/*"]
     },
     "emitDeclarationOnly": true,
     "noEmit": false,

@@ -170,8 +170,6 @@ const baseConfig = [
             ['^@openzeppelin/'],
             // External packages
             ['^@?\\w'],
-            // Form renderer package
-            ['^@form-renderer'],
             // Internal packages (alias imports)
             ['^@/'],
             // Parent imports (starting with ..)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { SelectField, type SelectOption } from '@form-renderer/components/fields/SelectField';
+import { SelectField, type SelectOption } from '@openzeppelin/transaction-form-renderer';
 
 import { getChainName } from '../../core/utils/utils';
 

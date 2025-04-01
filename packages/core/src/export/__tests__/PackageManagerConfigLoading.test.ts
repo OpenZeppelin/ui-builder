@@ -95,27 +95,8 @@ const mockFormRendererConfig: FormRendererConfig = {
  * - For adapter patterns, it returns mocked adapter configs
  * - For form-renderer patterns, it returns the mocked form renderer config
  */
-vi.mock('vite', () => ({
-  importMetaGlob: vi.fn().mockImplementation((pattern: string) => {
-    if (pattern.includes('adapters')) {
-      return {
-        '../adapters/evm/config.ts': {
-          evmAdapterConfig: mockAdapterConfigs.evm,
-        },
-        '../adapters/solana/config.ts': {
-          solanaAdapterConfig: mockAdapterConfigs.solana,
-        },
-      };
-    } else if (pattern.includes('form-renderer')) {
-      return {
-        '@form-renderer/config.ts': {
-          formRendererConfig: mockFormRendererConfig,
-        },
-      };
-    }
-    return {};
-  }),
-}));
+vi.mock('virtual:adapter-configs', () => ({ adapterConfigs: mockAdapterConfigs }));
+vi.mock('virtual:form-renderer-config', () => ({ formRendererConfig: mockFormRendererConfig }));
 
 describe('PackageManager configuration loading', () => {
   /**

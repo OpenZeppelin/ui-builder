@@ -1,4 +1,4 @@
-import type { RenderFormSchema } from '@form-renderer/types/FormTypes';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

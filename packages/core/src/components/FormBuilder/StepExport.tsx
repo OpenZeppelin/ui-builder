@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { TextField } from '@form-renderer/components/fields';
-import { Progress } from '@form-renderer/components/ui';
-import { Button } from '@form-renderer/components/ui/button';
-import { Label } from '@form-renderer/components/ui/label';
+import { Button, Label, Progress, TextField } from '@openzeppelin/transaction-form-renderer';
 
 import { FormExportSystem } from '../../export';
 

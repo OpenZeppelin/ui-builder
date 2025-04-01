@@ -30,8 +30,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@form-renderer': path.resolve(__dirname, '../form-renderer/src'),
-      '@styles': path.resolve(__dirname, '../styles'),
+      '@styles': path.resolve(__dirname, '../styles/src'),
 
       // Cross-package aliases for virtual modules
       '@cross-package/form-renderer-config': path.resolve(

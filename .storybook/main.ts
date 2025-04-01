@@ -41,8 +41,6 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       // Core package aliases
       '@': path.resolve(__dirname, '../packages/core/src'),
-      // Form renderer package aliases
-      '@form-renderer': path.resolve(__dirname, '../packages/form-renderer/src'),
     };
 
     return config;

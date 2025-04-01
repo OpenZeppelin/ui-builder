@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
-import { Label } from '@form-renderer/components/ui/label';
-import { LoadingButton } from '@form-renderer/components/ui/loading-button';
+import { Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../adapters/index.ts';
 import { getChainName } from '../../core/utils/utils';

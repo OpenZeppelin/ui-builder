@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Button } from '@form-renderer/components/ui/button';
+import { Button } from '@openzeppelin/transaction-form-renderer';
 
 import { MockContractInfo, MockContractService } from '../../services/MockContractService';
 import {

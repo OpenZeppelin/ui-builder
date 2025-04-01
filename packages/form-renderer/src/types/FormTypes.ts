@@ -5,7 +5,8 @@
  * The architecture decision is:
  *
  * 1. Types live in form-renderer package (this file)
- * 2. Core package imports types from form-renderer using the @form-renderer path alias
+ * 2. Core package imports types from form-renderer using the package name
+ *    `@openzeppelin/transaction-form-renderer`.
  * 3. This enables proper composition while avoiding duplication
  *
  * This approach allows the form-renderer to be a standalone package that can be

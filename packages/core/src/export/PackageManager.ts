@@ -6,7 +6,7 @@
  * dependencies to include in the package.json of exported projects.
  */
 
-import type { FormRendererConfig } from '@form-renderer/types';
+import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * VIRTUAL MODULE IMPORT

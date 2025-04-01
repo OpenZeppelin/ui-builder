@@ -1,4 +1,4 @@
-import { Button } from '@form-renderer/components/ui/button';
+import { Button } from '@openzeppelin/transaction-form-renderer';
 
 import { WritableFunctionCardProps } from './types';
 
