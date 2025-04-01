@@ -41,7 +41,7 @@ class Logger {
   }
 
   private formatMessage(level: LogLevel, system: string, message: string): string {
-    return `[${system}] ${message}`;
+    return `[${level.toUpperCase()}][${system}] ${message}`;
   }
 
   debug(system: string, message: string, ...args: unknown[]): void {

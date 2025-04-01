@@ -17,7 +17,7 @@ describe('FormExportValidation', () => {
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
-    const files = await extractFilesFromZip(result.data);
+    const files = await extractFilesFromZip(result.data as Blob);
 
     // Validate the project structure
     const validation = validateExportedProject(files, {
@@ -85,7 +85,7 @@ describe('FormExportValidation', () => {
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
-    const files = await extractFilesFromZip(result.data);
+    const files = await extractFilesFromZip(result.data as Blob);
 
     // Validate the project structure
     const validation = validateExportedProject(files, {
