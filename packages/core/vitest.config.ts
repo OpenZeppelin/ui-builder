@@ -104,7 +104,10 @@ export default defineConfig({
     // Include all test settings from shared config
     globals: true,
     environment: 'jsdom',
-    setupFiles: [path.resolve(__dirname, '../../test/setup.ts')],
+    setupFiles: [
+      path.resolve(__dirname, '../../test/setup.ts'),
+      path.resolve(__dirname, './src/test/setup.ts'),
+    ],
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
