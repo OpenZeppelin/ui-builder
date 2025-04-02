@@ -91,6 +91,14 @@ export class FormSchemaFactory {
       id: `form-${builderConfig.functionId}`,
       title: this.humanizeString(functionName),
       description: functionDescription || '',
+      fields: builderConfig.fields.map((field) => {
+        const { validation, ...restOfField } = field;
+        return {
+          ...restOfField,
+          // Only include validation if it's not empty or undefined
+          ...(validation && Object.keys(validation).length > 0 ? { validation } : {}),
+        };
+      }) as FormFieldType[], // Cast back to FormFieldType[]
       submitButton: {
         text: `Execute ${functionName}`,
         loadingText: 'Processing...',

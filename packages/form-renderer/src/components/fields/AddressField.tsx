@@ -1,6 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
+import { ContractAdapter } from '../../types/FormTypes';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
@@ -13,6 +14,11 @@ import {
   validateField,
 } from './utils';
 
+interface AddressFieldProps<TFieldValues extends FieldValues = FieldValues>
+  extends BaseFieldProps<TFieldValues> {
+  adapter?: ContractAdapter;
+}
+
 /**
  * Address input field component specifically designed for blockchain addresses via React Hook Form integration.
  *
@@ -24,7 +30,7 @@ import {
  * 2. TransactionForm renders the overall form structure with React Hook Form
  * 3. DynamicFormField selects the appropriate field component (like AddressField) based on field type
  * 4. BaseField provides consistent layout and hook form integration
- * 5. This component handles blockchain address-specific rendering and validation
+ * 5. This component handles blockchain address-specific rendering and validation using the passed adapter
  *
  * The component includes:
  * - Integration with React Hook Form
@@ -43,7 +49,8 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
-}: BaseFieldProps<TFieldValues>): React.ReactElement {
+  adapter,
+}: AddressFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
@@ -63,17 +70,26 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
         name={name}
         rules={{
           validate: (value) => {
-            // Check required field explicitly
+            // Check required field explicitly first
             if (value === undefined || value === null || value === '') {
               return validation?.required ? 'This field is required' : true;
             }
 
-            // Validate string values using our standard validation logic
-            // This will apply all rules including custom validation from the adapter
-            if (typeof value === 'string') {
-              return validateField(value, validation);
+            // Perform standard validations (min, max, pattern, etc.) if they exist
+            // Using the existing validateField utility for this part
+            const standardValidationResult = validateField(value, validation);
+            if (standardValidationResult !== true) {
+              return standardValidationResult;
             }
 
+            // Perform adapter-specific address validation if adapter exists
+            if (adapter && typeof value === 'string') {
+              if (!adapter.isValidAddress(value)) {
+                return 'Invalid address format for the selected chain';
+              }
+            }
+
+            // If all checks pass
             return true;
           },
         }}

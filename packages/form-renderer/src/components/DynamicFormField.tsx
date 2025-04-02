@@ -1,7 +1,13 @@
 import React from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import { FieldCondition, FieldType, FormField, FormValues } from '../types/FormTypes';
+import {
+  ContractAdapter,
+  FieldCondition,
+  FieldType,
+  FormField,
+  FormValues,
+} from '../types/FormTypes';
 
 import { BaseFieldProps } from './fields/BaseField';
 import { AddressField, BooleanField, NumberField, TextField } from './fields';
@@ -21,6 +27,11 @@ interface DynamicFormFieldProps {
   control: Control<FormValues>;
 
   /**
+   * The adapter for chain-specific validation and formatting
+   */
+  adapter: ContractAdapter;
+
+  /**
    * The field error message, if any
    */
   error?: string;
@@ -31,7 +42,10 @@ interface DynamicFormFieldProps {
  * All field components in this registry are designed specifically for React Hook Form integration
  * and are meant to be used within the DynamicFormField system, not as standalone components.
  */
-const fieldComponents: Record<FieldType, React.ComponentType<BaseFieldProps<FormValues>>> = {
+const fieldComponents: Record<
+  FieldType,
+  React.ComponentType<BaseFieldProps<FormValues> & { adapter?: ContractAdapter }>
+> = {
   text: TextField,
   number: NumberField,
   address: AddressField,
@@ -108,6 +122,7 @@ function useShouldRenderField(field: FormField, control: Control<FormValues>): b
 export function DynamicFormField({
   field,
   control,
+  adapter,
 }: DynamicFormFieldProps): React.ReactElement | null {
   // Check if the field should be rendered based on visibility conditions
   const shouldRender = useShouldRenderField(field, control);
@@ -139,6 +154,7 @@ export function DynamicFormField({
       validation={field.validation}
       control={control}
       name={field.name}
+      adapter={adapter}
       {...fieldSpecificProps}
     />
   );

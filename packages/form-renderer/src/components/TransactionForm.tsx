@@ -108,6 +108,7 @@ export function TransactionForm({
             field={field}
             control={methods.control}
             error={errors[field.name]?.message as string}
+            adapter={adapter}
           />
         ))}
       </div>

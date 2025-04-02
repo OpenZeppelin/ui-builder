@@ -120,12 +120,6 @@ export interface FieldValidation {
   pattern?: string | RegExp;
 
   /**
-   * Custom validation function that takes a value and returns true if valid,
-   * or an error message string if invalid
-   */
-  custom?: (value: unknown) => boolean | string;
-
-  /**
    * Validation rules that depend on other fields
    */
   conditions?: FieldCondition[];
