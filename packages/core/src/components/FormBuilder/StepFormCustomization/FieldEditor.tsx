@@ -17,7 +17,7 @@ interface FieldEditorProps {
 }
 
 export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
-  const { control, watch } = useForm({
+  const { control, watch, reset } = useForm({
     defaultValues: {
       fieldType: field.type,
       fieldWidth: field.width || 'full',
@@ -27,6 +27,18 @@ export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
       fieldRequired: field.validation?.required || false,
     },
   });
+
+  // Add useEffect to reset form when field prop changes
+  React.useEffect(() => {
+    reset({
+      fieldType: field.type,
+      fieldWidth: field.width || 'full',
+      fieldLabel: field.label || '',
+      fieldPlaceholder: field.placeholder || '',
+      fieldDescription: field.helperText || '',
+      fieldRequired: field.validation?.required || false,
+    });
+  }, [field, reset]);
 
   // Watch for changes and update the field
   React.useEffect(() => {
