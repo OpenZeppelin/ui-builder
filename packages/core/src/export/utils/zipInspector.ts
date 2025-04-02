@@ -20,12 +20,12 @@ export type ZipExtractionTestCallback = (
  * @param testCallback Optional callback for simulating errors during testing.
  */
 export async function extractFilesFromZip(
-  zipBlob: Blob,
+  zipData: Blob | Buffer,
   testCallback?: ZipExtractionTestCallback
 ): Promise<Record<string, string>> {
   const files: Record<string, string> = {};
   try {
-    const zip = await JSZip.loadAsync(zipBlob);
+    const zip = await JSZip.loadAsync(zipData);
 
     // Create an array of promises for file extraction
     const extractionPromises = Object.entries(zip.files).map(async ([path, fileObject]) => {

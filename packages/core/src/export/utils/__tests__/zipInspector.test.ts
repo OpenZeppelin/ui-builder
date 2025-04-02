@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Import logger
 import {
@@ -23,24 +23,6 @@ async function createTestZip(files: Record<string, string>): Promise<Blob> {
   // Generate ZIP blob
   return await zip.generateAsync({ type: 'blob' });
 }
-
-// Store original method implementation directly
-let originalAsyncImpl:
-  | ((type: JSZip.OutputType) => Promise<JSZip.OutputByType[JSZip.OutputType]>)
-  | undefined;
-
-beforeEach(() => {
-  // Capture the original implementation from the prototype
-  originalAsyncImpl = JSZip.prototype.async;
-});
-
-afterEach(() => {
-  // Restore the original implementation to the prototype
-  if (originalAsyncImpl) {
-    JSZip.prototype.async = originalAsyncImpl;
-  }
-  vi.restoreAllMocks();
-});
 
 describe('zipInspector', () => {
   describe('extractFilesFromZip', () => {

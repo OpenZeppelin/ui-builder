@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "prepare": "pnpm run build",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run",

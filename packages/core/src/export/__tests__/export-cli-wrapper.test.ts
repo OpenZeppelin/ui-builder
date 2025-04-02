@@ -39,43 +39,33 @@ describe('Export CLI Wrapper', () => {
 
   // Clean up after all tests complete
   afterAll(() => {
-    try {
-      // Only log cleanup messages if running from CLI
-      if (isRunningFromCLI) {
-        logger.info('CLI Wrapper Test', 'Running cleanup...');
-      }
-      createdFiles.forEach((file) => {
-        if (fs.existsSync(file)) {
-          fs.unlinkSync(file);
-          if (isRunningFromCLI) {
-            logger.info('CLI Wrapper Test', `Cleaned up test artifact: ${file}`);
+    // Only perform cleanup if NOT running from CLI
+    if (!isRunningFromCLI) {
+      try {
+        createdFiles.forEach((file) => {
+          if (fs.existsSync(file)) {
+            fs.unlinkSync(file);
           }
-        }
-      });
+        });
 
-      // Check if exports directory is empty and remove it if it is
-      const defaultExportDir = path.resolve('./exports');
-      if (fs.existsSync(defaultExportDir)) {
-        const files = fs.readdirSync(defaultExportDir);
-        if (files.length === 0) {
-          fs.rmdirSync(defaultExportDir);
-          if (isRunningFromCLI) {
-            logger.info('CLI Wrapper Test', 'Removed empty exports directory');
-          }
-        } else {
-          if (isRunningFromCLI) {
-            logger.info(
-              'CLI Wrapper Test',
-              `Export directory not empty, contains ${files.length} files`
-            );
+        // Check if exports directory is empty and remove it if it is
+        const defaultExportDir = path.resolve('./exports');
+        if (fs.existsSync(defaultExportDir)) {
+          const files = fs.readdirSync(defaultExportDir);
+          if (files.length === 0) {
+            fs.rmdirSync(defaultExportDir);
           }
         }
+      } catch (error) {
+        // Log cleanup errors only if running interactively (not from CLI)
+        console.error('Error during test cleanup:', error);
       }
-    } catch (error) {
-      // Log error only if running from CLI
-      if (isRunningFromCLI) {
-        logger.error('CLI Wrapper Test', 'Error during cleanup:', error);
-      }
+    } else {
+      // Optional: Log that cleanup is skipped when running from CLI
+      logger.info(
+        'CLI Wrapper Test',
+        'Running in CLI mode, skipping automatic test artifact cleanup.'
+      );
     }
   });
 
@@ -156,11 +146,11 @@ describe('Export CLI Wrapper', () => {
 
       // console.log(`Export saved to: ${outputPath}`); // Remove logging
     } catch (error) {
-      // console.error('Error saving zip file:', error); // Remove logging
-      process.exit(1);
+      logger.error('CLI Wrapper Test', 'Error saving zip file:', error); // Log the error
+      throw error; // Re-throw the error to ensure Vitest fails the test
     }
 
-    // Return success
+    // Return success (this line won't be reached if an error is thrown)
     return true;
   });
 });

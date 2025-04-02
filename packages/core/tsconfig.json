@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
@@ -9,7 +10,7 @@
       "@styles/*": ["../styles/src/*"]
     },
     "emitDeclarationOnly": true,
-    "noEmit": false,
+    "noEmit": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
