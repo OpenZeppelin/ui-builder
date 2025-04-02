@@ -89,7 +89,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **Vite 6**: Fast, modern build tool and dev server
 - **Tailwind CSS v4**: Next-gen utility-first CSS framework with OKLCH color format
 - **shadcn/ui**: Unstyled, accessible component system built on Radix UI
-- **pnpm**: Fast, disk-efficient package manager
+- **pnpm (v9 or higher)**: Fast, disk-efficient package manager
 - **Vitest**: Testing framework integrated with Vite
 - **Storybook 8**: Component documentation and visual testing
 - **Semantic Release**: Automated versioning and releases
@@ -149,6 +149,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - `pnpm update-deps:major` - Update dependencies including major versions
 - `pnpm check-deps` - Check for deprecated dependencies
 - `pnpm outdated` - List outdated dependencies
+- `pnpm export-form [cmd] [opts]` - Export a standalone form project (see `pnpm export-form --help`)
 
 ## Project Structure
 
