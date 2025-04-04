@@ -2,11 +2,9 @@ import type { Preview } from '@storybook/react';
 
 import React from 'react';
 
-// Import Storybook Tailwind styles
-import './tailwind.css';
-// Import CSS from both packages
+// Import the UNIFIED CSS entry point from the core package.
+// This now includes Tailwind base, components, utilities, AND the theme variables.
 import '../packages/core/src/index.css';
-import '../packages/form-renderer/src/index.css';
 
 const preview: Preview = {
   parameters: {

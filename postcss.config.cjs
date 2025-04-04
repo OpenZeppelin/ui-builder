@@ -1,12 +1,12 @@
 /**
- * IMPORTANT: This is the source file for all PostCSS configurations in the monorepo.
- * DO NOT edit the symlinked versions in the packages directories.
- * Instead, edit this file and run `pnpm create-symlinks` to update all copies.
+ * Root PostCSS Configuration
+ * Used by both the `core` build and the `form-renderer` standalone build.
  */
+
 module.exports = {
-  plugins: {
-    'postcss-nesting': {},
-    '@tailwindcss/postcss': {},
-    autoprefixer: {},
-  },
+  plugins: [
+    require('postcss-nesting'),
+    require('@tailwindcss/postcss'),
+    require('autoprefixer'),
+  ].filter(Boolean),
 };

@@ -1,4 +1,15 @@
-@import '../../styles/global.css';
+/*
+ * Entry point for the form-renderer standalone Tailwind build.
+ * This file is processed by Tailwind CLI using the local form-renderer config.
+ * It should only contain the necessary Tailwind directives.
+ */
+@import 'tailwindcss';
+
+/*
+ * Do NOT import global styles (packages/styles/global.css) here.
+ * Theme variables are expected to be provided by the consuming application.
+ * The Tailwind build uses the preset to understand the *structure* based on those variables.
+ */
 
 /* Form-renderer specific styles */
 @layer components {

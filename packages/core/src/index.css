@@ -1,10 +1,27 @@
+/* Define layer order first - this is critical for predictability */
+@layer base, components, utilities;
+
+/* Import Tailwind directives - Needed for core-specific utilities AND scanning form-renderer */
 @import 'tailwindcss';
 
-/* 
-  Import compiled CSS from the shared form-renderer package
+/*
+  DO NOT import compiled CSS from form-renderer anymore.
+  The core build process now scans form-renderer sources and generates
+  the necessary Tailwind classes directly into the core CSS bundle.
 */
-@import '@openzeppelin/transaction-form-renderer/index.css';
 
-@import '../../../packages/styles/global.css';
+/*
+  Import global theme variables and base styles from the styles package.
+  Ensure the path is correct relative to this file.
+  Using the alias defined in vite.config.ts
+*/
+@import '@styles/global.css';
 
-/* Core-specific styles can be added here if needed */
+/*
+  REMOVED WORKAROUND: The core build process MUST scan form-renderer source.
+*/
+
+/* Core-specific styles or overrides can be added here, preferably in layers */
+@layer components {
+  /* Example: Add core-specific component styles */
+}

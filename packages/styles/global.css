@@ -1,9 +1,3 @@
-@import 'tailwindcss';
-
-@layer theme, base, components, utilities;
-
-@plugin 'tailwindcss-animate';
-
 @custom-variant dark (.dark, .dark *);
 
 @theme {
@@ -254,20 +248,5 @@
 
   [data-radix-popper-content-wrapper] *:focus-visible {
     @apply ring-0 ring-offset-0 outline-none;
-  }
-}
-
-/* Form width classes */
-@layer components {
-  .form-field-full {
-    @apply w-full;
-  }
-
-  .form-field-half {
-    @apply w-full md:w-1/2;
-  }
-
-  .form-field-third {
-    @apply w-full md:w-1/3;
   }
 }

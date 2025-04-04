@@ -68,17 +68,22 @@ if (!fs.existsSync(indexPath)) {
 console.log('Creating CommonJS wrapper...');
 
 // --- BEGIN TAILWIND BUILD STEP ---
-console.log('Building Tailwind CSS...');
+console.log('Building Tailwind CSS for form-renderer...');
 try {
   const tailwindInputPath = path.join(root, 'src', 'index.css');
   const tailwindOutputPath = path.join(root, 'dist', 'index.css');
+  const tailwindConfigPath = path.join(root, 'tailwind.config.cjs'); // Explicitly use local config
 
   // Check if input CSS exists
   if (fs.existsSync(tailwindInputPath)) {
-    execSync(`npx tailwindcss -i ${tailwindInputPath} -o ${tailwindOutputPath} --minify`, {
-      stdio: 'inherit',
-      cwd: root,
-    });
+    // Explicitly point to the local tailwind config using -c
+    execSync(
+      `npx tailwindcss -c ${tailwindConfigPath} -i ${tailwindInputPath} -o ${tailwindOutputPath} --minify`,
+      {
+        stdio: 'inherit',
+        cwd: root,
+      }
+    );
     console.log('Tailwind CSS build successful');
   } else {
     console.warn(

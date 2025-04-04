@@ -22,9 +22,5 @@
   ],
   "author": "OpenZeppelin",
   "license": "MIT",
-  "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.12"
-  }
+  "devDependencies": {}
 }

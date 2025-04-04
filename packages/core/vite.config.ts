@@ -1,8 +1,8 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, searchForWorkspaceRoot } from 'vite';
 
+// Restore custom plugins
 import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-provider';
 import { virtualContentLoaderPlugin } from './vite-plugins/virtual-content-loader';
 import templatePlugin from './vite.template-plugin';
@@ -19,29 +19,48 @@ import templatePlugin from './vite.template-plugin';
  */
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    templatePlugin(),
-    virtualContentLoaderPlugin(),
-    crossPackageModulesProviderPlugin(),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@styles': path.resolve(__dirname, '../styles/src'),
+export default defineConfig(({ command }) => {
+  // Use different configuration for dev vs build
+  const isDevMode = command === 'serve';
 
-      // Cross-package aliases for virtual modules
-      '@cross-package/form-renderer-config': path.resolve(
-        __dirname,
-        '../form-renderer/src/config.ts'
-      ),
-      // Add more aliases for other configurations as needed
-      // '@cross-package/templates-config': path.resolve(__dirname, '../templates/src/config.ts'),
+  return {
+    // Set Vite root based on mode - monorepo root for dev, package root for build
+    root: isDevMode ? path.resolve(__dirname, '../..') : path.resolve(__dirname),
+    plugins: [
+      react(),
+      // Restore custom plugins
+      templatePlugin(),
+      virtualContentLoaderPlugin(),
+      crossPackageModulesProviderPlugin(),
+    ],
+    resolve: {
+      preserveSymlinks: true,
+      alias: {
+        // Aliases relative from monorepo root
+        '@': path.resolve(__dirname, './src'), // -> packages/core/src
+        '@styles': path.resolve(__dirname, '../styles'), // -> packages/styles
+        '@cross-package/form-renderer-config': path.resolve(
+          __dirname,
+          '../form-renderer/src/config.ts'
+        ),
+      },
     },
-  },
-  build: {
-    outDir: 'dist',
-  },
+    server: {
+      fs: {
+        // Allow workspace root only; Vite should handle subdirs now
+        allow: [searchForWorkspaceRoot(process.cwd())],
+        strict: true,
+      },
+    },
+    build: {
+      // Adjust output directory relative to the new root
+      outDir: path.resolve(__dirname, 'dist'),
+      emptyOutDir: true,
+    },
+    // CSS config path relative from the new root
+    css: {
+      postcss: './postcss.config.cjs',
+    },
+    publicDir: path.resolve(__dirname, 'public'),
+  };
 });
