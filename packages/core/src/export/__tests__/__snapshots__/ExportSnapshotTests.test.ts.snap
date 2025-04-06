@@ -541,7 +541,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "postcss": "^8.4.35",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.8.2",
-    "vite": "^6.2.2",
+    "vite": "^6.2.5",
   },
   "scripts": {
     "build": "tsc && vite build",
@@ -795,7 +795,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "postcss": "^8.4.35",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.8.2",
-    "vite": "^6.2.2",
+    "vite": "^6.2.5",
   },
   "scripts": {
     "build": "tsc && vite build",
