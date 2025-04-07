@@ -84,6 +84,11 @@ export interface ExportOptions extends TemplateOptions {
    * Used to update UI with progress information
    */
   onProgress?: (progress: ZipProgress) => void;
+
+  /**
+   * Whether the export target is intended for build/serve via the CLI in the monorepo context
+   */
+  isCliBuildTarget?: boolean;
 }
 
 /**

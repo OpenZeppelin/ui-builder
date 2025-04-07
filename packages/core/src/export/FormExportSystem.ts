@@ -237,6 +237,30 @@ export class FormExportSystem {
       throw new Error('Template is missing package.json');
     }
 
+    // --- Conditional CSS Modification for CLI Target ---
+    const mainCssPath = 'src/styles.css'; // Path confirmed from template structure
+    if (exportOptions.isCliBuildTarget && projectFiles[mainCssPath]) {
+      logger.info('File Assembly', `Modifying ${mainCssPath} for CLI target...`);
+      const originalCssContent = projectFiles[mainCssPath];
+      // Simple string replacement assuming a consistent import line format
+      // Using a regex to handle potential variations in quotes and spacing
+      const modifiedCssContent = originalCssContent.replace(
+        /^\s*@import\s+['"]tailwindcss['"]\s*;?/m, // Match variations at start of line
+        "@import 'tailwindcss' source('../../../');" // Replace with required format
+      );
+
+      if (modifiedCssContent !== originalCssContent) {
+        projectFiles[mainCssPath] = modifiedCssContent;
+        logger.info('File Assembly', `${mainCssPath} updated with @source directive.`);
+      } else {
+        logger.warn(
+          'File Assembly',
+          `Could not find standard @import "tailwindcss"; line at start of ${mainCssPath} to modify.`
+        );
+      }
+    }
+    // --- End Conditional CSS Modification ---
+
     // 9. Format necessary JSON files for readability
     await this.formatJsonFiles(projectFiles);
 

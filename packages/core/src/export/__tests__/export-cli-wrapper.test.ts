@@ -102,6 +102,7 @@ describe('Export CLI Wrapper', () => {
       template,
       includeAdapters,
       env,
+      isCliBuildTarget: isRunningFromCLI,
       // Only provide onProgress callback if running from CLI
       onProgress: isRunningFromCLI
         ? (progress) =>
