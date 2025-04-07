@@ -174,7 +174,7 @@ describe('Export Snapshot Tests > Conditional File Modifications', () => {
 
   it('should modify styles.css import correctly based on isCliBuildTarget option', async () => {
     const mainCssPath = 'src/styles.css';
-    const startingCssContent = `@import 'tailwindcss';\n@import '@openzeppelin/transaction-form-renderer/index.css';\n@import './styles/global.css';\n\n/* Base styles... */`;
+    const startingCssContent = `@import 'tailwindcss';\n@import './styles/global.css';\n\n/* Base styles... */`;
 
     // --- Simulate Case 1: isCliBuildTarget = true ---
     let projectFilesCli: Record<string, string> = { [mainCssPath]: startingCssContent };

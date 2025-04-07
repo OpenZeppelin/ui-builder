@@ -2,7 +2,6 @@
 
 exports[`Export Snapshot Tests > Conditional File Modifications > should modify styles.css import correctly based on isCliBuildTarget option > styles-css-cli 1`] = `
 "@import 'tailwindcss' source('../../../');
-@import '@openzeppelin/transaction-form-renderer/index.css';
 @import './styles/global.css';
 
 /* Base styles... */"
@@ -10,7 +9,6 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 
 exports[`Export Snapshot Tests > Conditional File Modifications > should modify styles.css import correctly based on isCliBuildTarget option > styles-css-ui 1`] = `
 "@import 'tailwindcss';
-@import '@openzeppelin/transaction-form-renderer/index.css';
 @import './styles/global.css';
 
 /* Base styles... */"
