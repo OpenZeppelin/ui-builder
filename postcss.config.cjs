@@ -4,9 +4,5 @@
  */
 
 module.exports = {
-  plugins: [
-    require('postcss-nesting'),
-    require('@tailwindcss/postcss'),
-    require('autoprefixer'),
-  ].filter(Boolean),
+  plugins: [require('@tailwindcss/postcss'), require('autoprefixer')].filter(Boolean),
 };

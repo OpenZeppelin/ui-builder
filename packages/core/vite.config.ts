@@ -23,6 +23,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // Restore custom plugins
     templatePlugin(),
     virtualContentLoaderPlugin(),
     crossPackageModulesProviderPlugin(),
@@ -31,14 +32,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@styles': path.resolve(__dirname, '../styles'),
-
-      // Cross-package aliases for virtual modules
       '@cross-package/form-renderer-config': path.resolve(
         __dirname,
         '../form-renderer/src/config.ts'
       ),
-      // Add more aliases for other configurations as needed
-      // '@cross-package/templates-config': path.resolve(__dirname, '../templates/src/config.ts'),
     },
   },
   build: {
