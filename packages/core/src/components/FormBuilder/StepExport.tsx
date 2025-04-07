@@ -178,7 +178,7 @@ export function StepExport({
           <h4 className="font-medium">Export Configuration</h4>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Export Type</Label>
+            <Label>Export Type</Label>
             <div className="flex gap-2">
               <Button
                 type="button"

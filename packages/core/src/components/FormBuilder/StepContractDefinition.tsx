@@ -81,7 +81,7 @@ export function StepContractDefinition({
 
       <div className="grid gap-6">
         <div className="flex flex-col gap-2">
-          <Label className="text-sm font-medium">Contract Definition</Label>
+          <Label>Contract Definition</Label>
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <Label

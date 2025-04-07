@@ -51,15 +51,11 @@ export const LoginForm: Story = {
       <CardContent>
         <form className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email" className="text-sm font-medium">
-              Email
-            </Label>
+            <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="name@example.com" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password" className="text-sm font-medium">
-              Password
-            </Label>
+            <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" />
           </div>
         </form>

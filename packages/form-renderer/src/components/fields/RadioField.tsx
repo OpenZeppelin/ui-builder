@@ -90,7 +90,7 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
       className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
     >
       {label && (
-        <Label htmlFor={radioGroupId} className="text-sm font-medium">
+        <Label htmlFor={radioGroupId}>
           {label} {isRequired && <span className="text-destructive">*</span>}
         </Label>
       )}

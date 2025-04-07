@@ -70,7 +70,7 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
       className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
     >
       {label && (
-        <Label htmlFor={id} className="text-sm font-medium">
+        <Label htmlFor={id}>
           {label} {isRequired && <span className="text-destructive">*</span>}
         </Label>
       )}
