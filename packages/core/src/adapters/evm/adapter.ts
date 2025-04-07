@@ -1,6 +1,7 @@
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { isAddress } from 'ethers';
+import { startCase } from 'lodash';
 
 import { generateId } from '../../core/utils/general';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService';
@@ -142,7 +143,7 @@ export class EvmAdapter implements ContractAdapter {
     return {
       id: generateId(),
       name: parameter.name || parameter.type,
-      label: parameter.displayName || parameter.name || parameter.type,
+      label: startCase(parameter.displayName || parameter.name || parameter.type),
       type: fieldType,
       placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
       helperText: parameter.description || '',

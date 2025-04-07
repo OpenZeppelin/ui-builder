@@ -16,6 +16,8 @@ import {
   // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
 
+import { startCase } from 'lodash';
+
 import { getContractAdapter } from '../adapters';
 import { BuilderFormConfig } from '../core/types/FormTypes';
 import { generateId } from '../core/utils/general';
@@ -184,7 +186,7 @@ export function generateFallbackFields(functionDetails: ContractFunction): FormF
     return {
       id: generateId(),
       name: input.name || input.type,
-      label: input.displayName || input.name || input.type,
+      label: startCase(input.displayName || input.name || input.type),
       type: fieldType,
       placeholder,
       helperText,

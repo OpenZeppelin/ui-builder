@@ -65,6 +65,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 "import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { isAddress } from 'ethers';
+import { startCase } from 'lodash';
 
 import { generateId } from '../../core/utils/general';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService';
@@ -206,7 +207,7 @@ export class EvmAdapter implements ContractAdapter {
     return {
       id: generateId(),
       name: parameter.name || parameter.type,
-      label: parameter.displayName || parameter.name || parameter.type,
+      label: startCase(parameter.displayName || parameter.name || parameter.type),
       type: fieldType,
       placeholder: \`Enter \${parameter.displayName || parameter.name || parameter.type}\`,
       helperText: parameter.description || '',
@@ -538,11 +539,13 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
   "dependencies": {
     "@openzeppelin/transaction-form-renderer": "^1.0.0",
     "ethers": "^6.13.5",
+    "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.26.0",

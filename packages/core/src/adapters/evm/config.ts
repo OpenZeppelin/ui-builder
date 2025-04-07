@@ -19,9 +19,13 @@ export const evmAdapterConfig: AdapterConfig = {
     runtime: {
       // Core EVM libraries
       ethers: '^6.13.5',
+      // Utility library
+      lodash: '^4.17.21',
     },
 
     // Development dependencies
-    dev: {},
+    dev: {
+      '@types/lodash': '^4.17.16',
+    },
   },
 };
