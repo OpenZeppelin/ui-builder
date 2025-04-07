@@ -1,14 +1,10 @@
 /* Define layer order first - this is critical for predictability */
 @layer base, components, utilities;
 
-/* Import Tailwind directives - Needed for core-specific utilities AND scanning form-renderer */
-@import 'tailwindcss';
-
-/*
-  DO NOT import compiled CSS from form-renderer anymore.
-  The core build process now scans form-renderer sources and generates
-  the necessary Tailwind classes directly into the core CSS bundle.
-*/
+/* Import Tailwind directives - Needed for core-specific utilities AND scanning form-renderer + global styles */
+/* `source` is the Tailwind 4 specific way of declaring the base path so it works in the monorepo: 
+https://tailwindcss.com/docs/detecting-classes-in-source-files#setting-your-base-path*/
+@import 'tailwindcss' source('../../');
 
 /*
   Import global theme variables and base styles from the styles package.

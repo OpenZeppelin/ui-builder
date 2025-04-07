@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm --filter=@openzeppelin/transaction-form-renderer build && tsc --skipLibCheck && vite build --emptyOutDir --config vite.config.ts",
+    "build": "tsc --skipLibCheck && vite build --emptyOutDir",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint 'src/**/*.{ts,tsx,js,cjs,mjs}' --fix --config eslint.config.cjs",
