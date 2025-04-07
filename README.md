@@ -179,10 +179,12 @@ transaction-form-builder/
 │   │   │   │   └── stellar/     # Stellar blockchain adapter
 │   │   │   ├── export/          # Export system
 │   │   │   │   ├── generators/  # Form code generators
-│   │   │   │   ├── ...          # Export utilities
-│   │   │   │   ├── templates/   # Export templates
-│   │   │   │   │   ├── typescript-react-vite/  # React + Vite template
-│   │   │   │   │   └── ...                     # Future templates for other frameworks
+│   │   │   │   ├── codeTemplates/ # Individual file templates for generation
+│   │   │   │   ├── templates/   # Base project structures for export
+│   │   │   │   │   ├── typescript-react-vite/  # React + Vite template structure
+│   │   │   │   │   └── ...                     # Future template structures
+│   │   │   │   ├── cli/         # CLI tool for exporting forms
+│   │   │   │   ├── ...          # Other export utilities
 │   │   │   ├── services/        # Core services
 │   │   │   ├── stories/         # Centralized Storybook stories
 │   │   │   │   ├── common/      # Stories for common components
@@ -193,7 +195,7 @@ transaction-form-builder/
 │   │   │   ├── types/           # Shared types for core package
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
-│   │   │   └── index.css        # Main CSS entry point
+│   │   │   └── index.css        # Main CSS entry point (imports from @styles)
 │   │   ├── vite-plugins/      # Custom Vite plugins (e.g., virtual modules)
 │   │   ├── index.html           # HTML template
 │   │   ├── tsconfig.json        # TypeScript configuration

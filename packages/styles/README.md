@@ -10,15 +10,15 @@ This package contains the centralized styling system for the Transaction Form Bu
 
 ## Styling Approach
 
-This monorepo utilizes a consistent styling approach:
+This monorepo utilizes a consistent styling approach driven by the consuming application:
 
-1. **Centralized Configuration:** `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are located at the monorepo root and symlinked into relevant packages.
-2. **Package-Specific Builds:** Each package using Tailwind (`core`, `form-renderer`, export templates) includes a build step (`tailwindcss -i ... -o ...`) to compile its own CSS, ensuring all necessary styles are included.
-3. **CSS Imports:** Packages import the pre-compiled CSS from their dependencies (e.g., `core` imports `form-renderer/dist/index.css`). This guarantees styles from dependencies are available.
-4. **Shared Global Styles:** `global.css` defines theme variables (OKLCH colors, radius, etc.) and base styles, and is imported by packages.
-5. **Tailwind Content Scanning:** The root `tailwind.config.cjs` scans source files across relevant packages to provide context for Tailwind's JIT engine.
+1.  **Centralized Theme:** This `@styles` package provides the single source of truth for theme variables (colors, spacing, radius) and base styles in `global.css`.
+2.  **Centralized Configuration:** Root-level `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are used via symlinks in consuming packages (`core`, exported apps).
+3.  **Consumer-Driven Build:** The main application (`packages/core`) or exported applications are responsible for the Tailwind CSS build process.
+4.  **Automatic Content Scanning:** Tailwind v4 automatically scans the source code of the application _and its dependencies_ (like `@openzeppelin/transaction-form-renderer`) for utility class usage.
+5.  **CSS Generation:** The consumer app's build generates the final CSS file, including base styles from `global.css`, theme variables, and all necessary utility classes used throughout the application and its dependencies.
 
-This setup ensures styles are consistently applied, even for components rendered in Portals (like Radix UI primitives), by relying on explicit CSS builds and imports rather than solely on JIT scanning across package boundaries during development.
+**Key Point:** Library packages like `form-renderer` do **not** build or ship their own CSS. Styling is entirely managed by the final application build, ensuring consistency and leveraging the shared theme from this `@styles` package.
 
 ## Features
 

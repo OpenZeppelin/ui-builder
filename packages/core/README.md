@@ -24,10 +24,12 @@ core/
 │   │   ├── stellar/  # Stellar blockchain adapter
 │   ├── export/       # Export system
 │   │   ├── generators/ # Form code generators
-│   │   ├── codeTemplates/ # Code template files
-│   │   └── templates/ # Export placeholders
-│   │   │   ├── typescript-react-vite/ # React + Vite template
-│   │   │   └── ...   # Future templates for other frameworks
+│   │   ├── codeTemplates/ # Code template files for generation
+│   │   ├── templates/ # Base project structures for export
+│   │   │   ├── typescript-react-vite/ # React + Vite template structure
+│   │   │   └── ...   # Future template structures
+│   │   ├── cli/      # CLI tool for exporting
+│   │   └── ...       # Other export utilities
 │   ├── services/     # Core services
 │   ├── stories/      # Centralized Storybook stories
 │   │   ├── common/   # Stories for common components

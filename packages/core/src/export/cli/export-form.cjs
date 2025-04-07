@@ -48,6 +48,9 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+// Enable debug mode via environment variable
+const DEBUG = process.env.DEBUG === 'true';
+
 // ANSI color codes for formatting output
 const colors = {
   reset: '\x1b[0m',
@@ -59,6 +62,14 @@ const colors = {
   bold: '\x1b[1m',
   dim: '\x1b[2m',
 };
+
+/**
+ * Debug logging utility - only logs when DEBUG=true
+ * @param {string} message - Message to log
+ */
+function debug(message) {
+  if (DEBUG) console.log(`${colors.cyan}[Debug] ${message}${colors.reset}`);
+}
 
 /**
  * Finds the monorepo root by searching upwards for pnpm-workspace.yaml
@@ -81,6 +92,30 @@ function findMonorepoRoot(startDir) {
   }
 }
 
+/**
+ * Resolves a target directory path, handling common edge cases
+ * @param {string} targetDirInput - Input path that might be relative
+ * @param {string} rootDir - Root directory to resolve from if needed
+ * @returns {string} Absolute path to the target directory
+ */
+function resolveTargetDir(targetDirInput, rootDir) {
+  // Default to current directory if not specified
+  const inputPath = targetDirInput || '.';
+  debug(`Initial target directory: ${inputPath}`);
+
+  // Handle paths that might be relative to monorepo root
+  if (inputPath.startsWith('./packages/core') && process.cwd().includes('/packages/core')) {
+    const adjusted = inputPath.replace('./packages/core', '.');
+    debug(`Adjusted path from: ${inputPath} to: ${adjusted}`);
+    return path.resolve(process.cwd(), adjusted);
+  }
+
+  // Resolve to absolute path
+  const absolutePath = path.resolve(rootDir || process.cwd(), inputPath);
+  debug(`Resolved absolute path: ${absolutePath}`);
+  return absolutePath;
+}
+
 // Determine the monorepo root dynamically
 const monorepoRoot = findMonorepoRoot(__dirname);
 if (!monorepoRoot) {
@@ -89,6 +124,7 @@ if (!monorepoRoot) {
   );
   process.exit(1);
 }
+debug(`Found monorepo root: ${monorepoRoot}`);
 
 /**
  * Display help information
@@ -184,6 +220,12 @@ function parseArgs() {
     }
   }
 
+  // If verbose flag is set, enable debug output
+  if (options.verbose) {
+    process.env.DEBUG = 'true';
+    debug('Verbose mode enabled');
+  }
+
   return { command, options };
 }
 
@@ -251,9 +293,9 @@ function exportFormSimple(options) {
     const corePackageDir = path.join(monorepoRoot, 'packages/core');
     const testPath = path.join(corePackageDir, 'src/export/__tests__/export-cli-wrapper.test.ts');
 
-    console.log(`${colors.dim}Monorepo root:${colors.reset} ${monorepoRoot}`);
-    console.log(`${colors.dim}Core package dir:${colors.reset} ${corePackageDir}`);
-    console.log(`${colors.dim}Test path:${colors.reset} ${testPath}`);
+    debug(`Monorepo root: ${monorepoRoot}`);
+    debug(`Core package dir: ${corePackageDir}`);
+    debug(`Test path: ${testPath}`);
 
     // Define the Vitest command - explicitly use the CLI export config
     const configFilePath = path.join(corePackageDir, 'vitest.config.cli-export.ts');
@@ -262,7 +304,7 @@ function exportFormSimple(options) {
 
     try {
       console.log(`\n${colors.blue}Running export test via Vitest...${colors.reset}`);
-      console.log(`${colors.dim}Executing in ${corePackageDir}:${colors.reset} ${vitestCommand}`);
+      debug(`Executing in ${corePackageDir}: ${vitestCommand}`);
 
       // Set environment variables for the Vitest process
       const testEnv = { ...process.env, ...env };
@@ -326,20 +368,8 @@ function exportFormSimple(options) {
  * Build an exported form
  */
 function buildExportedForm(options) {
-  // Get absolute path of target directory
-  const currentDir = process.cwd();
-  // Handle paths correctly when run from package.json scripts
-  let targetDir = options.targetDir || '.';
-
-  // If the path starts with a relative path that includes 'packages/core',
-  // it might be relative to the project root rather than the current directory
-  if (targetDir.startsWith('./packages/core') && currentDir.includes('/packages/core')) {
-    // Extract the part after packages/core and make it relative to the current directory
-    targetDir = targetDir.replace('./packages/core', '.');
-  }
-
-  // Resolve to absolute path
-  targetDir = path.resolve(currentDir, targetDir);
+  // Use the shared target directory resolver
+  const targetDir = resolveTargetDir(options.targetDir || '.', process.cwd());
 
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
@@ -373,12 +403,22 @@ function buildExportedForm(options) {
       Object.entries(deps).forEach(([name, version]) => {
         if (typeof version === 'string' && version.startsWith('workspace:')) {
           hasWorkspaceDeps = true;
-          console.log(`${colors.blue}Workspace dependency:${colors.reset} ${name}@${version}`);
+          debug(`Workspace dependency: ${name}@${version}`);
         } else if (name.startsWith('@openzeppelin/') && version === 'latest') {
           isProductionBuild = true;
-          console.log(`${colors.blue}Production dependency:${colors.reset} ${name}@${version}`);
+          debug(`Production dependency: ${name}@${version}`);
         }
       });
+
+      // Check if the Tailwind configuration is using Tailwind v4 format
+      const hasTailwind =
+        fs.existsSync(path.join(targetDir, 'tailwind.config.js')) ||
+        fs.existsSync(path.join(targetDir, 'tailwind.config.cjs'));
+
+      if (hasTailwind) {
+        console.log(`${colors.green}✓ Tailwind configuration found${colors.reset}`);
+        debug('Generated project uses Tailwind CSS. Ensure it has v4 compatible configuration.');
+      }
 
       if (hasWorkspaceDeps) {
         console.log(`\n${colors.yellow}This project uses workspace dependencies.${colors.reset}`);
@@ -429,38 +469,26 @@ function buildExportedForm(options) {
  * Serve an exported form for testing
  */
 function serveExportedForm(options) {
-  console.log(`\n${colors.cyan}[Debug] Entering serveExportedForm...${colors.reset}`);
-
-  const scriptExecutionDir = process.cwd();
-  console.log(
-    `${colors.cyan}[Debug] Script execution directory (likely packages/core):${colors.reset} ${scriptExecutionDir}`
-  );
+  console.log(`\n${colors.cyan}Starting server for exported form...${colors.reset}`);
 
   // Find the monorepo root reliably
-  const monorepoRoot = findMonorepoRoot(__dirname); // Use the existing utility
+  const monorepoRoot = findMonorepoRoot(__dirname);
   if (!monorepoRoot) {
     console.error(
       `${colors.red}Error: Could not find monorepo root (pnpm-workspace.yaml).${colors.reset}`
     );
     process.exit(1);
   }
-  console.log(`${colors.cyan}[Debug] Found monorepo root:${colors.reset} ${monorepoRoot}`);
+  debug(`Found monorepo root: ${monorepoRoot}`);
 
-  // Handle paths correctly when run from package.json scripts
-  let targetDirInput = options.targetDir || '.';
-  console.log(`${colors.cyan}[Debug] Initial targetDir option:${colors.reset} ${targetDirInput}`);
-
-  // Resolve to absolute path based on the *monorepo root*
-  const targetDir = path.resolve(monorepoRoot, targetDirInput);
-  console.log(
-    `${colors.cyan}[Debug] Resolved absolute targetDir based on monorepo root:${colors.reset} ${targetDir}`
-  );
+  // Use the shared target directory resolver
+  const targetDir = resolveTargetDir(options.targetDir || '.', monorepoRoot);
+  debug(`Resolved target directory: ${targetDir}`);
 
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
     process.exit(1);
   }
-  console.log(`${colors.green}[Debug] Target directory exists.${colors.reset}`);
 
   if (!fs.existsSync(path.join(targetDir, 'package.json'))) {
     console.error(
@@ -468,7 +496,6 @@ function serveExportedForm(options) {
     );
     process.exit(1);
   }
-  console.log(`${colors.green}[Debug] package.json found in target directory.${colors.reset}`);
 
   try {
     console.log(`\n${colors.bold}${colors.cyan}Serving Transaction Form${colors.reset}\n`);
@@ -497,31 +524,20 @@ function serveExportedForm(options) {
     let hasWorkspaceDeps = false;
     let isProductionBuild = false;
     try {
-      console.log(
-        `${colors.cyan}[Debug] Reading package.json from: ${path.join(targetDir, 'package.json')}${colors.reset}`
-      );
       const packageJson = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf8'));
       const deps = packageJson.dependencies || {};
-      console.log(`${colors.cyan}[Debug] Dependencies found:${colors.reset}`, deps);
+      debug(`Dependencies found in package.json`);
 
       // Check if there are any workspace dependencies
       Object.entries(deps).forEach(([name, version]) => {
         if (typeof version === 'string' && version.startsWith('workspace:')) {
           hasWorkspaceDeps = true;
-          console.log(
-            `${colors.blue}[Debug] Found workspace dependency:${colors.reset} ${name}@${version}`
-          );
+          debug(`Found workspace dependency: ${name}@${version}`);
         } else if (name.startsWith('@openzeppelin/') && version === 'latest') {
-          isProductionBuild = true; // Note: This might be too specific, consider any non-workspace OZ dep?
-          console.log(
-            `${colors.blue}[Debug] Found potential production dependency:${colors.reset} ${name}@${version}`
-          );
+          isProductionBuild = true;
+          debug(`Found potential production dependency: ${name}@${version}`);
         }
       });
-
-      console.log(
-        `${colors.cyan}[Debug] Dependency check results: hasWorkspaceDeps=${hasWorkspaceDeps}, isProductionBuild=${isProductionBuild}${colors.reset}`
-      );
 
       if (hasWorkspaceDeps) {
         console.log(`\n${colors.yellow}This project uses workspace dependencies.${colors.reset}`);
@@ -540,6 +556,15 @@ function serveExportedForm(options) {
       );
     }
 
+    // Add check for Tailwind v4 configuration
+    const tailwindConfig = path.join(targetDir, 'tailwind.config.js');
+    const tailwindConfigCjs = path.join(targetDir, 'tailwind.config.cjs');
+
+    if (fs.existsSync(tailwindConfig) || fs.existsSync(tailwindConfigCjs)) {
+      console.log(`${colors.green}✓ Tailwind configuration found${colors.reset}`);
+      // Could add more detailed verification of Tailwind v4 format here
+    }
+
     // Recommend appropriate steps based on the dependency type
     if (hasWorkspaceDeps) {
       console.log(
@@ -547,19 +572,10 @@ function serveExportedForm(options) {
       );
       try {
         // Use pnpm to start the dev server with monorepo context
-        console.log(
-          `${colors.cyan}[Debug] Running: cd ${targetDir} && pnpm install && pnpm dev${colors.reset}`
-        );
-        console.log(
-          `${colors.cyan}[Debug] Running 'pnpm install' in ${targetDir}...${colors.reset}`
-        );
+        console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
         execInDir('pnpm install', targetDir);
-        console.log(`${colors.green}[Debug] 'pnpm install' completed.${colors.reset}`);
-        console.log(`${colors.cyan}[Debug] Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
+        console.log(`${colors.blue}Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
         execInDir('pnpm dev', targetDir); // This command will block if successful
-        console.log(
-          `${colors.green}[Debug] 'pnpm dev' apparently finished or failed silently? This line shouldn't be reached if server starts.${colors.reset}`
-        );
       } catch (error) {
         console.error(`\n${colors.red}Server failed to start automatically:${colors.reset}`);
         // Log more details from the error object
@@ -567,8 +583,6 @@ function serveExportedForm(options) {
           console.error(`${colors.yellow}stdout:${colors.reset} ${error.stdout.toString()}`);
         if (error.stderr)
           console.error(`${colors.red}stderr:${colors.reset} ${error.stderr.toString()}`);
-        if (!error.stdout && !error.stderr)
-          console.error(`${colors.red}Error details:${colors.reset}`, error);
 
         console.log(`\n${colors.yellow}Please try running manually:${colors.reset}`);
         console.log(`  1. cd ${targetDir}`);
@@ -606,20 +620,8 @@ function serveExportedForm(options) {
  * Verify an exported form
  */
 function verifyExportedForm(options) {
-  // Get absolute path of target directory
-  const currentDir = process.cwd();
-  // Handle paths correctly when run from package.json scripts
-  let targetDir = options.targetDir || '.';
-
-  // If the path starts with a relative path that includes 'packages/core',
-  // it might be relative to the project root rather than the current directory
-  if (targetDir.startsWith('./packages/core') && currentDir.includes('/packages/core')) {
-    // Extract the part after packages/core and make it relative to the current directory
-    targetDir = targetDir.replace('./packages/core', '.');
-  }
-
-  // Resolve to absolute path
-  targetDir = path.resolve(currentDir, targetDir);
+  // Use the shared target directory resolver
+  const targetDir = resolveTargetDir(options.targetDir || '.', process.cwd());
 
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
