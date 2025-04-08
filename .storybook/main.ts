@@ -41,6 +41,8 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       // Core package aliases
       '@': path.resolve(__dirname, '../packages/core/src'),
+      // Styles package alias
+      '@styles': path.resolve(__dirname, '../packages/styles'),
     };
 
     return config;

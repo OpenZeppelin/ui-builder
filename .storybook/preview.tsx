@@ -1,7 +1,5 @@
 import type { Preview } from '@storybook/react';
 
-import React from 'react';
-
 // Import the UNIFIED CSS entry point from the core package.
 // This now includes Tailwind base, components, utilities, AND the theme variables.
 import '../packages/core/src/index.css';
