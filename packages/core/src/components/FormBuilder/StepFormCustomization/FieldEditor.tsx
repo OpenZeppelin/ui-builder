@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -19,7 +19,7 @@ interface FieldEditorProps {
   originalParameterType?: string;
 }
 
-export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
+export function FieldEditor({ field, onUpdate, adapter, originalParameterType }: FieldEditorProps) {
   const { control, watch, reset } = useForm({
     defaultValues: {
       fieldType: field.type,
@@ -65,16 +65,111 @@ export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
     return () => subscription.unsubscribe();
   }, [watch, onUpdate, field.validation]);
 
-  // Field type options
-  const fieldTypeOptions: SelectOption[] = [
-    { value: 'text', label: 'Text Input' },
-    { value: 'number', label: 'Number Input' },
-    { value: 'checkbox', label: 'Checkbox' },
-    { value: 'select', label: 'Dropdown Select' },
-    { value: 'textarea', label: 'Text Area' },
-    { value: 'address', label: 'Blockchain Address' },
-    { value: 'amount', label: 'Token Amount' },
-  ];
+  // Get compatible field types
+  const compatibleFieldTypes = useMemo(() => {
+    if (!adapter || !originalParameterType) {
+      // If we don't have adapter or original type, return all field types
+      return [
+        'text',
+        'number',
+        'checkbox',
+        'radio',
+        'select',
+        'textarea',
+        'date',
+        'email',
+        'password',
+        'address',
+        'amount',
+      ];
+    }
+
+    return adapter.getCompatibleFieldTypes(originalParameterType);
+  }, [adapter, originalParameterType]);
+
+  // Get recommended field type (first compatible type)
+  const recommendedFieldType = useMemo(() => {
+    return compatibleFieldTypes[0] || field.type;
+  }, [compatibleFieldTypes, field.type]);
+
+  // Field type options with grouping and compatibility indicators
+  const fieldTypeOptions = useMemo(() => {
+    // Define all field types organized by groups
+    const allFieldGroups = [
+      {
+        label: 'Text Inputs',
+        options: [
+          { value: 'text', label: 'Text Input' },
+          { value: 'textarea', label: 'Text Area' },
+          { value: 'email', label: 'Email Input' },
+          { value: 'password', label: 'Password Input' },
+        ],
+      },
+      {
+        label: 'Numeric Inputs',
+        options: [
+          { value: 'number', label: 'Number Input' },
+          { value: 'amount', label: 'Token Amount' },
+        ],
+      },
+      {
+        label: 'Selection Inputs',
+        options: [
+          { value: 'select', label: 'Dropdown Select' },
+          { value: 'radio', label: 'Radio Buttons' },
+          { value: 'checkbox', label: 'Checkbox' },
+        ],
+      },
+      {
+        label: 'Blockchain Specific',
+        options: [
+          { value: 'address', label: 'Blockchain Address' },
+          { value: 'date', label: 'Date Input' },
+        ],
+      },
+    ];
+
+    // If we don't have compatibility info, return all options as is
+    if (!compatibleFieldTypes.length) {
+      return allFieldGroups;
+    }
+
+    // Enhance options with compatibility information
+    return allFieldGroups.map((group) => {
+      return {
+        label: group.label,
+        options: group.options.map((option) => {
+          const fieldType = option.value as FieldType;
+          const isCompatible = compatibleFieldTypes.includes(fieldType);
+          const isRecommended = fieldType === recommendedFieldType;
+
+          let enhancedLabel = option.label;
+          if (isRecommended) {
+            enhancedLabel = `${option.label} (Recommended)`;
+          }
+
+          return {
+            ...option,
+            label: enhancedLabel,
+            disabled: !isCompatible,
+            // Add data attributes for styling
+            'data-compatible': isCompatible ? 'true' : 'false',
+            'data-recommended': isRecommended ? 'true' : 'false',
+          };
+        }),
+      };
+    });
+  }, [compatibleFieldTypes, recommendedFieldType]);
+
+  // Display a warning for incompatible field type selection
+  const selectedFieldType = watch('fieldType') as FieldType;
+  const showTypeWarning = useMemo(() => {
+    return (
+      compatibleFieldTypes.length > 0 &&
+      selectedFieldType !== recommendedFieldType &&
+      !compatibleFieldTypes.includes(selectedFieldType)
+    );
+  }, [compatibleFieldTypes, recommendedFieldType, selectedFieldType]);
 
   // Field width options
   const fieldWidthOptions: SelectOption[] = [
@@ -94,18 +189,27 @@ export function FieldEditor({ field, onUpdate }: FieldEditorProps) {
           placeholder="Enter field label"
         />
 
-        <SelectField
-          id="field-type"
-          name="fieldType"
-          label="Field Type"
-          control={control}
-          options={fieldTypeOptions}
-          placeholder="Select field type"
-          validateSelect={(value) => {
-            onUpdate({ type: value as FieldType });
-            return true;
-          }}
-        />
+        <div>
+          <SelectField
+            id="field-type"
+            name="fieldType"
+            label="Field Type"
+            control={control}
+            optionGroups={fieldTypeOptions}
+            placeholder="Select field type"
+            validateSelect={(value) => {
+              onUpdate({ type: value as FieldType });
+              return true;
+            }}
+          />
+
+          {showTypeWarning && (
+            <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-800">
+              <p className="font-medium">Warning: Incompatible Field Type</p>
+              <p>This field type may not be suitable for {originalParameterType} data.</p>
+            </div>
+          )}
+        </div>
 
         <TextField
           id="field-placeholder"

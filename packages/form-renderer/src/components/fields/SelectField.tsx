@@ -3,7 +3,15 @@ import { Controller, FieldValues } from 'react-hook-form';
 
 import { cn } from '../../utils/cn';
 import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 import { BaseFieldProps } from './BaseField';
 
@@ -25,6 +33,31 @@ export interface SelectOption {
    * Whether this option is disabled
    */
   disabled?: boolean;
+
+  /**
+   * Data attributes for styling and accessibility
+   */
+  'data-compatible'?: string;
+
+  /**
+   * Whether this option is recommended
+   */
+  'data-recommended'?: string;
+}
+
+/**
+ * Option group for select fields
+ */
+export interface SelectOptionGroup {
+  /**
+   * Label for the option group
+   */
+  label: string;
+
+  /**
+   * Options in this group
+   */
+  options: SelectOption[];
 }
 
 /**
@@ -36,6 +69,11 @@ export interface SelectFieldProps<TFieldValues extends FieldValues = FieldValues
    * Available options for selection
    */
   options?: SelectOption[];
+
+  /**
+   * Option groups for grouped selection
+   */
+  optionGroups?: SelectOptionGroup[];
 
   /**
    * Custom validation function for select values
@@ -59,6 +97,7 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
   width = 'full',
   validation,
   options = [],
+  optionGroups = [],
   validateSelect,
 }: SelectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
@@ -131,11 +170,44 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
                     maxWidth: 'var(--radix-select-trigger-width)',
                   }}
                 >
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {/* Render optgroups if provided */}
+                  {optionGroups.length > 0
+                    ? optionGroups.map((group) => (
+                        <SelectGroup key={group.label}>
+                          <SelectLabel>{group.label}</SelectLabel>
+                          {group.options.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                              disabled={option.disabled}
+                              className={cn(
+                                option['data-compatible'] === 'false' ? 'opacity-50' : '',
+                                option['data-recommended'] === 'true' ? 'font-medium' : ''
+                              )}
+                              data-compatible={option['data-compatible']}
+                              data-recommended={option['data-recommended']}
+                            >
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))
+                    : // Render flat list if no groups
+                      options.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          disabled={option.disabled}
+                          className={cn(
+                            option['data-compatible'] === 'false' ? 'opacity-50' : '',
+                            option['data-recommended'] === 'true' ? 'font-medium' : ''
+                          )}
+                          data-compatible={option['data-compatible']}
+                          data-recommended={option['data-recommended']}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
 
