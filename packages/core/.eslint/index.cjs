@@ -8,8 +8,8 @@
 // Plugin Definition
 //------------------------------------------------------------------------------
 
-// Import our custom rules
-const noExtraAdapterMethods = require('./rules/no-extra-adapter-methods.cjs');
+// Import our custom rules from the root directory to maintain a single source of truth
+const noExtraAdapterMethods = require('../../.eslint/rules/no-extra-adapter-methods.cjs');
 
 // Export the plugin
 module.exports = {
