@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 import { FieldEditor } from './FieldEditor';
+import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
@@ -85,27 +86,11 @@ export function StepFormCustomization({
           <TabsContent value="fields" className="mt-4 rounded-md border p-4">
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1 space-y-4 border-r pr-4">
-                  {/* Field selector list */}
-                  {formConfig.fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className={`cursor-pointer rounded-md border p-3 ${
-                        selectedFieldIndex === index ? 'border-primary bg-primary/5' : ''
-                      }`}
-                      onClick={() => selectField(index)}
-                    >
-                      <p className="font-medium">{field.label}</p>
-                      <p className="text-muted-foreground text-xs">
-                        <code className="bg-muted rounded-sm border px-1 py-0.5 font-mono text-xs">
-                          {field.originalParameterType}
-                        </code>
-                        {' → '}
-                        {field.type}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <FieldSelectorList
+                  fields={formConfig.fields}
+                  selectedFieldIndex={selectedFieldIndex}
+                  onSelectField={selectField}
+                />
 
                 <div className="col-span-2">
                   {/* Field editor */}
