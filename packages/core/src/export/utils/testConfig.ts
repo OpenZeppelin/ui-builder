@@ -94,7 +94,7 @@ export function createComplexFormConfig(
       },
       {
         id: advancedFieldIds[0],
-        type: 'address',
+        type: 'blockchain-address',
         name: 'addressParam',
         label: 'Address Parameter',
         validation: { required: true },

@@ -182,7 +182,7 @@ export function createTransformForFieldType<T extends FieldType>(
 ): FieldTransforms<FieldValue<T>> {
   // Implementation with a type-safe approach using run-time checking
   switch (fieldType) {
-    case 'address':
+    case 'blockchain-address':
       return createAddressTransform(adapter) as unknown as FieldTransforms<FieldValue<T>>;
     case 'number':
     case 'amount':

@@ -174,7 +174,7 @@ export function generateFallbackFields(functionDetails: ContractFunction): FormF
 
     // Try to provide some reasonable defaults based on the parameter name and type
     if (input.type.includes('address')) {
-      fieldType = 'address';
+      fieldType = 'blockchain-address';
       placeholder = 'Enter blockchain address';
     } else if (input.type.includes('int') || input.type.includes('uint')) {
       fieldType = 'number';

@@ -14,7 +14,7 @@ import type { AbiItem } from './types';
  * EVM-specific type mapping
  */
 const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
-  address: 'address',
+  address: 'blockchain-address',
   string: 'text',
   uint: 'number',
   uint8: 'number',
@@ -147,7 +147,7 @@ export class EvmAdapter implements ContractAdapter {
 
     // Define compatibility map
     const compatibilityMap: Record<string, FieldType[]> = {
-      address: ['address', 'text'],
+      address: ['blockchain-address', 'text'],
       uint: ['number', 'amount', 'text'],
       uint8: ['number', 'amount', 'text'],
       uint16: ['number', 'amount', 'text'],
@@ -208,7 +208,7 @@ export class EvmAdapter implements ContractAdapter {
       case 'number':
       case 'amount':
         return 0 as FieldValue<T>;
-      case 'address':
+      case 'blockchain-address':
         return '' as FieldValue<T>;
       default:
         return '' as FieldValue<T>;
@@ -230,7 +230,7 @@ export class EvmAdapter implements ContractAdapter {
     const validation = { required: true };
 
     // Add specific validation rules based on the parameter type
-    if (parameterType === 'address') {
+    if (parameterType === 'blockchain-address') {
       return {
         ...validation,
         // Use the adapter's isValidAddress method for direct validation

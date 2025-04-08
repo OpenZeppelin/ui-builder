@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { FieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { AlertTriangle } from 'lucide-react';
@@ -26,7 +24,7 @@ export function TypeConversionWarning({
 
   // Generate appropriate warning message based on the parameter and field types
   const getMessage = () => {
-    if (originalParameterType?.includes('address') && selectedType !== 'address') {
+    if (originalParameterType?.includes('address') && selectedType !== 'blockchain-address') {
       return 'Converting from an address field may lose blockchain address validation.';
     }
 

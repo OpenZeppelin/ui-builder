@@ -33,7 +33,7 @@ export function getFieldTypeLabel(type: FieldType): string {
     select: 'Dropdown Select',
     radio: 'Radio Buttons',
     checkbox: 'Checkbox',
-    address: 'Blockchain Address',
+    'blockchain-address': 'Blockchain Address',
   };
 
   return labelMap[type] || capitalize(type);
@@ -62,7 +62,7 @@ const DEFAULT_FIELD_TYPES: FieldType[] = [
   'textarea',
   'email',
   'password',
-  'address',
+  'blockchain-address',
   'amount',
 ];
 
@@ -101,7 +101,7 @@ export function getFieldTypeGroups(
     text: ['text', 'textarea', 'email', 'password'],
     numeric: ['number', 'amount'],
     selection: ['select', 'radio', 'checkbox'],
-    blockchain: ['address'],
+    blockchain: ['blockchain-address'],
   };
 
   // Create the field type groups

@@ -89,7 +89,7 @@ export class SolanaAdapter implements ContractAdapter {
       'date',
       'email',
       'password',
-      'address',
+      'blockchain-address',
       'amount',
       'hidden',
     ];

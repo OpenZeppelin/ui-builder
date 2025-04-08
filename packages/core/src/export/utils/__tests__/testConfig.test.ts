@@ -42,7 +42,7 @@ describe('Test Configuration Utilities', () => {
       expect(fieldTypes).toContain('text');
       expect(fieldTypes).toContain('number');
       expect(fieldTypes).toContain('checkbox');
-      expect(fieldTypes).toContain('address');
+      expect(fieldTypes).toContain('blockchain-address');
 
       // Verify sections
       expect(config.layout.sections).toHaveLength(2);

@@ -9,7 +9,7 @@ import type { ChainType, ContractSchema } from '../../types/ContractSchema';
 vi.mock('../../../adapters', () => ({
   getContractAdapter: vi.fn(() => ({
     mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
-      if (type === 'address') return 'address';
+      if (type === 'address') return 'blockchain-address';
       if (type === 'uint256') return 'number';
       if (type === 'bool') return 'checkbox';
       if (type.startsWith('tuple')) return 'textarea';

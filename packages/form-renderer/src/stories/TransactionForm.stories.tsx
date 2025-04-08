@@ -62,7 +62,7 @@ const advancedSchema: RenderFormSchema = {
     {
       id: 'recipient',
       name: 'recipient',
-      type: 'address',
+      type: 'blockchain-address',
       label: 'Recipient Address',
       validation: {
         required: true,

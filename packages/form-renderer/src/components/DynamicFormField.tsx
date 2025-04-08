@@ -48,7 +48,7 @@ const fieldComponents: Record<
 > = {
   text: TextField,
   number: NumberField,
-  address: AddressField,
+  'blockchain-address': AddressField,
   checkbox: BooleanField,
   radio: () => <div>Radio field not implemented yet</div>,
   select: () => <div>Select field not implemented yet</div>,
@@ -172,7 +172,7 @@ function getFieldSpecificProps(field: FormField): Record<string, unknown> {
         max: field.validation?.max,
         step: field.options?.find((opt) => opt.label === 'step')?.value,
       };
-    case 'address':
+    case 'blockchain-address':
       // Add address-specific props
       return {};
     case 'checkbox':

@@ -170,7 +170,7 @@ EVM-specific data types are mapped to form field types using a dictionary:
 
 ```typescript
 const EVM_TYPE_MAPPING: Record<string, FieldType> = {
-  address: 'address',
+  address: 'blockchain-address',
   string: 'text',
   uint256: 'amount',
   uint8: 'number',
@@ -246,7 +246,7 @@ private getDefaultValueForType(fieldType: FieldType): unknown {
     case 'number':
     case 'amount':
       return 0;
-    case 'address':
+    case 'blockchain-address':
       return '';
     default:
       return '';
@@ -263,7 +263,7 @@ private getDefaultValidationForType(parameterType: string): {
   const validation = { required: true };
 
   // Ethereum addresses need specific validation
-  if (parameterType === 'address') {
+  if (parameterType === 'blockchain-address') {
     return {
       ...validation,
       pattern: '^0x[a-fA-F0-9]{40}$',

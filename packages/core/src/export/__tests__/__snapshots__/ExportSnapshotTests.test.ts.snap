@@ -78,7 +78,7 @@ import type { AbiItem } from './types';
  * EVM-specific type mapping
  */
 const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
-  address: 'address',
+  address: 'blockchain-address',
   string: 'text',
   uint: 'number',
   uint8: 'number',
@@ -193,6 +193,49 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   */
+  getCompatibleFieldTypes(parameterType: string): FieldType[] {
+    // Handle array and tuple types
+    if (parameterType.match(/\\[\\d*\\]$/)) {
+      return ['textarea', 'text'];
+    }
+
+    const baseType = parameterType.replace(/\\[\\d*\\]/g, '');
+
+    if (baseType.startsWith('tuple')) {
+      return ['textarea', 'text'];
+    }
+
+    // Define compatibility map
+    const compatibilityMap: Record<string, FieldType[]> = {
+      address: ['blockchain-address', 'text'],
+      uint: ['number', 'amount', 'text'],
+      uint8: ['number', 'amount', 'text'],
+      uint16: ['number', 'amount', 'text'],
+      uint32: ['number', 'amount', 'text'],
+      uint64: ['number', 'amount', 'text'],
+      uint128: ['number', 'amount', 'text'],
+      uint256: ['number', 'amount', 'text'],
+      int: ['number', 'text'],
+      int8: ['number', 'text'],
+      int16: ['number', 'text'],
+      int32: ['number', 'text'],
+      int64: ['number', 'text'],
+      int128: ['number', 'text'],
+      int256: ['number', 'text'],
+      bool: ['checkbox', 'select', 'radio', 'text'],
+      string: ['text', 'textarea', 'email', 'password'],
+      bytes: ['textarea', 'text'],
+      bytes32: ['text', 'textarea'],
+    };
+
+    return compatibilityMap[baseType] || ['text'];
+  }
+
+  /**
    * Generate default field configuration for an EVM function parameter
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults
@@ -229,7 +272,7 @@ export class EvmAdapter implements ContractAdapter {
       case 'number':
       case 'amount':
         return 0 as FieldValue<T>;
-      case 'address':
+      case 'blockchain-address':
         return '' as FieldValue<T>;
       default:
         return '' as FieldValue<T>;
@@ -251,7 +294,7 @@ export class EvmAdapter implements ContractAdapter {
     const validation = { required: true };
 
     // Add specific validation rules based on the parameter type
-    if (parameterType === 'address') {
+    if (parameterType === 'blockchain-address') {
       return {
         ...validation,
         // Use the adapter's isValidAddress method for direct validation
@@ -503,6 +546,13 @@ export interface ContractAdapter {
   mapParameterTypeToFieldType(parameterType: string): FieldType;
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   */
+  getCompatibleFieldTypes(parameterType: string): FieldType[];
+
+  /**
    * Generate default field configuration for a function parameter
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults
@@ -645,6 +695,31 @@ export class SolanaAdapter implements ContractAdapter {
   }
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param _parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   *
+   * TODO: Implement proper Solana field type compatibility in future phases
+   */
+  getCompatibleFieldTypes(_parameterType: string): FieldType[] {
+    // Placeholder implementation that returns all field types
+    return [
+      'text',
+      'number',
+      'checkbox',
+      'radio',
+      'select',
+      'textarea',
+      'date',
+      'email',
+      'password',
+      'blockchain-address',
+      'amount',
+      'hidden',
+    ];
+  }
+
+  /**
    * Generate default field configuration for a Solana function parameter
    *
    * TODO: Implement proper Solana field generation in future phases
@@ -750,6 +825,13 @@ export interface ContractAdapter {
    * @returns The appropriate form field type
    */
   mapParameterTypeToFieldType(parameterType: string): FieldType;
+
+  /**
+   * Get field types compatible with a specific parameter type
+   * @param parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   */
+  getCompatibleFieldTypes(parameterType: string): FieldType[];
 
   /**
    * Generate default field configuration for a function parameter

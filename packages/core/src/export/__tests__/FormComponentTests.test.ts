@@ -109,7 +109,7 @@ describe('Form Component Tests', () => {
       expect(formComponentCode).toMatch(/type:\s*['"]text['"]/);
       expect(formComponentCode).toMatch(/type:\s*['"]number['"]/);
       expect(formComponentCode).toMatch(/type:\s*['"]checkbox['"]/);
-      expect(formComponentCode).toMatch(/type:\s*['"]address['"]/);
+      expect(formComponentCode).toMatch(/type:\s*['"]blockchain-address['"]/);
 
       // Check that validation settings are included in TypeScript format
       expect(formComponentCode).toMatch(/required:\s*true/);

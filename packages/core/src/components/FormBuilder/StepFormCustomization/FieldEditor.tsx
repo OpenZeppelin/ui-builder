@@ -39,7 +39,7 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
 
   // Watch for changes and update fields
   React.useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
+    const subscription = watch((value, { name }) => {
       if (name && value) {
         // Create a partial with just the changed field
         const change = { [name]: value[name] } as Partial<FieldEditorFormValues>;

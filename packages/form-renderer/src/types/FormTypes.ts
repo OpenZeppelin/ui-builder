@@ -60,7 +60,7 @@ export type FieldType =
   | 'date'
   | 'email'
   | 'password'
-  | 'address' // Blockchain address with validation
+  | 'blockchain-address' // Blockchain address with validation
   | 'amount' // Token amount with decimals handling
   | 'hidden';
 
@@ -72,7 +72,7 @@ export type FieldValue<T extends FieldType> = T extends
   | 'email'
   | 'password'
   | 'textarea'
-  | 'address'
+  | 'blockchain-address'
   ? string
   : T extends 'number' | 'amount'
     ? number

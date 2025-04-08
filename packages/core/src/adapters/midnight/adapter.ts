@@ -90,7 +90,7 @@ export class MidnightAdapter implements ContractAdapter {
       'date',
       'email',
       'password',
-      'address',
+      'blockchain-address',
       'amount',
       'hidden',
     ];

@@ -50,7 +50,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Check recipient field (address type) - parameter name has underscore in the mock
       const recipientField = formSchema.fields.find((f) => f.name === '_to');
       expect(recipientField).toBeDefined();
-      expect(recipientField?.type).toBe('address');
+      expect(recipientField?.type).toBe('blockchain-address');
       expect(recipientField?.transforms).toBeDefined();
 
       // Check amount field (number type) - parameter name has underscore in the mock
@@ -102,7 +102,7 @@ describe('EVM Adapter Integration Tests', () => {
       // Check spender field (address type) - parameter name has underscore in the mock
       const spenderField = formSchema.fields.find((f) => f.name === '_spender');
       expect(spenderField).toBeDefined();
-      expect(spenderField?.type).toBe('address');
+      expect(spenderField?.type).toBe('blockchain-address');
 
       // Check amount field (number type) - parameter name has underscore in the mock
       const amountField = formSchema.fields.find((f) => f.name === '_value');
@@ -408,7 +408,7 @@ describe('EVM Adapter Integration Tests', () => {
         expect(field.transforms).toBeDefined();
 
         // Different field types should have different transform behaviors
-        if (field.type === 'address') {
+        if (field.type === 'blockchain-address') {
           // Address fields should validate addresses
           expect(
             field.transforms?.output?.('0x1234567890123456789012345678901234567890')

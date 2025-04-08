@@ -89,7 +89,7 @@ export class StellarAdapter implements ContractAdapter {
       'date',
       'email',
       'password',
-      'address',
+      'blockchain-address',
       'amount',
       'hidden',
     ];
