@@ -3,14 +3,23 @@ import { Controller, FieldValues } from 'react-hook-form';
 
 import { cn } from '../../utils/cn';
 import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 import { BaseFieldProps } from './BaseField';
 
 /**
- * Option item for select fields
+ * Option item for select fields with visual indicators
  */
-export interface SelectOption {
+export interface GroupedSelectOption {
   /**
    * Value to be submitted with the form
    */
@@ -25,17 +34,37 @@ export interface SelectOption {
    * Whether this option is disabled
    */
   disabled?: boolean;
+
+  /**
+   * Custom CSS class to apply to the option
+   */
+  className?: string;
 }
 
 /**
- * SelectField component properties
+ * Option group structure
  */
-export interface SelectFieldProps<TFieldValues extends FieldValues = FieldValues>
+export interface OptionGroup {
+  /**
+   * Group label to display
+   */
+  label: string;
+
+  /**
+   * Options within this group
+   */
+  options: GroupedSelectOption[];
+}
+
+/**
+ * SelectGroupedField component properties
+ */
+export interface SelectGroupedFieldProps<TFieldValues extends FieldValues = FieldValues>
   extends BaseFieldProps<TFieldValues> {
   /**
-   * Available options for selection
+   * Available option groups for selection
    */
-  options?: SelectOption[];
+  groups?: OptionGroup[];
 
   /**
    * Custom validation function for select values
@@ -44,12 +73,12 @@ export interface SelectFieldProps<TFieldValues extends FieldValues = FieldValues
 }
 
 /**
- * Select dropdown field component specifically designed for React Hook Form integration.
+ * Select dropdown field component with grouped options specifically designed for React Hook Form integration.
  *
  * @important This component is part of the form rendering system architecture and should
  * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
  */
-export function SelectField<TFieldValues extends FieldValues = FieldValues>({
+export function SelectGroupedField<TFieldValues extends FieldValues = FieldValues>({
   id,
   label,
   placeholder = 'Select an option',
@@ -58,9 +87,9 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
-  options = [],
+  groups = [],
   validateSelect,
-}: SelectFieldProps<TFieldValues>): React.ReactElement {
+}: SelectGroupedFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
@@ -131,10 +160,23 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
                     maxWidth: 'var(--radix-select-trigger-width)',
                   }}
                 >
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
-                      {option.label}
-                    </SelectItem>
+                  {groups.map((group, groupIndex) => (
+                    <React.Fragment key={`group-${groupIndex}`}>
+                      {groupIndex > 0 && <SelectSeparator />}
+                      <SelectGroup>
+                        <SelectLabel>{group.label}</SelectLabel>
+                        {group.options.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            disabled={option.disabled}
+                            className={cn(option.className, option.disabled && 'opacity-50')}
+                          >
+                            <span>{option.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </React.Fragment>
                   ))}
                 </SelectContent>
               </Select>
@@ -161,4 +203,4 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
 }
 
 // Set displayName manually for better debugging
-SelectField.displayName = 'SelectField';
+SelectGroupedField.displayName = 'SelectGroupedField';

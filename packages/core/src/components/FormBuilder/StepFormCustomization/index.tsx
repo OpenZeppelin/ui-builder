@@ -96,7 +96,13 @@ export function StepFormCustomization({
                       onClick={() => selectField(index)}
                     >
                       <p className="font-medium">{field.label}</p>
-                      <p className="text-muted-foreground text-xs">{field.type}</p>
+                      <p className="text-muted-foreground text-xs">
+                        <code className="bg-muted rounded-sm border px-1 py-0.5 font-mono text-xs">
+                          {field.originalParameterType}
+                        </code>
+                        {' → '}
+                        {field.type}
+                      </p>
                     </div>
                   ))}
                 </div>

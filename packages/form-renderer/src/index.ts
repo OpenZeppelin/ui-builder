@@ -48,6 +48,7 @@ export * from './components/ui/progress';
 // Export specific fields if needed
 export type { SelectOption } from './components/fields/SelectField';
 export * from './components/fields/SelectField';
+export * from './components/fields/SelectGroupedField';
 
 // Export hooks (will be implemented later)
 // export * from './hooks';
