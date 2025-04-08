@@ -1,6 +1,10 @@
 /**
  * @fileoverview Rule to enforce that adapter classes only implement methods defined in the ContractAdapter interface
  * @author Transaction Form Builder Team
+ *
+ * IMPORTANT: This is the central location for this rule in the monorepo.
+ * It is referenced from both the root ESLint configuration and the core package configuration.
+ * Do not duplicate this rule in package-specific directories.
  */
 
 'use strict';
@@ -35,6 +39,7 @@ module.exports = {
       'loadMockContract',
       'getWritableFunctions',
       'mapParameterTypeToFieldType',
+      'getCompatibleFieldTypes',
       'generateDefaultField',
       'formatTransactionData',
       'signAndBroadcast',
