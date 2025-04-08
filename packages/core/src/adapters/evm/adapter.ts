@@ -129,6 +129,49 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   */
+  getCompatibleFieldTypes(parameterType: string): FieldType[] {
+    // Handle array and tuple types
+    if (parameterType.match(/\[\d*\]$/)) {
+      return ['textarea', 'text'];
+    }
+
+    const baseType = parameterType.replace(/\[\d*\]/g, '');
+
+    if (baseType.startsWith('tuple')) {
+      return ['textarea', 'text'];
+    }
+
+    // Define compatibility map
+    const compatibilityMap: Record<string, FieldType[]> = {
+      address: ['address', 'text'],
+      uint: ['number', 'amount', 'text'],
+      uint8: ['number', 'amount', 'text'],
+      uint16: ['number', 'amount', 'text'],
+      uint32: ['number', 'amount', 'text'],
+      uint64: ['number', 'amount', 'text'],
+      uint128: ['number', 'amount', 'text'],
+      uint256: ['number', 'amount', 'text'],
+      int: ['number', 'text'],
+      int8: ['number', 'text'],
+      int16: ['number', 'text'],
+      int32: ['number', 'text'],
+      int64: ['number', 'text'],
+      int128: ['number', 'text'],
+      int256: ['number', 'text'],
+      bool: ['checkbox', 'select', 'radio', 'text'],
+      string: ['text', 'textarea', 'email', 'password'],
+      bytes: ['textarea', 'text'],
+      bytes32: ['text', 'textarea'],
+    };
+
+    return compatibilityMap[baseType] || ['text'];
+  }
+
+  /**
    * Generate default field configuration for an EVM function parameter
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults

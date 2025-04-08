@@ -71,6 +71,31 @@ export class SolanaAdapter implements ContractAdapter {
   }
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param _parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   *
+   * TODO: Implement proper Solana field type compatibility in future phases
+   */
+  getCompatibleFieldTypes(_parameterType: string): FieldType[] {
+    // Placeholder implementation that returns all field types
+    return [
+      'text',
+      'number',
+      'checkbox',
+      'radio',
+      'select',
+      'textarea',
+      'date',
+      'email',
+      'password',
+      'address',
+      'amount',
+      'hidden',
+    ];
+  }
+
+  /**
    * Generate default field configuration for a Solana function parameter
    *
    * TODO: Implement proper Solana field generation in future phases

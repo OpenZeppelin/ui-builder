@@ -87,11 +87,20 @@ export function generateFieldsFromFunction(
   return functionDetails.inputs.map((input) => {
     // Check if this is a complex type that needs special handling
     if (isComplexType(input.type)) {
-      return handleComplexTypeField(adapter, input);
+      return {
+        ...handleComplexTypeField(adapter, input),
+        originalParameterType: input.type,
+      };
     }
 
     // Use adapter to generate the field with appropriate defaults for the chain
-    return adapter.generateDefaultField(input);
+    const field = adapter.generateDefaultField(input);
+
+    // Add the original parameter type
+    return {
+      ...field,
+      originalParameterType: input.type,
+    };
   });
 }
 
@@ -195,6 +204,7 @@ export function generateFallbackFields(functionDetails: ContractFunction): FormF
         required: true,
       },
       width: 'full',
+      originalParameterType: input.type,
     };
   });
 }

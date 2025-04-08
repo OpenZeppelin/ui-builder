@@ -44,6 +44,13 @@ export interface ContractAdapter {
   mapParameterTypeToFieldType(parameterType: string): FieldType;
 
   /**
+   * Get field types compatible with a specific parameter type
+   * @param parameterType The blockchain parameter type
+   * @returns Array of compatible field types
+   */
+  getCompatibleFieldTypes(parameterType: string): FieldType[];
+
+  /**
    * Generate default field configuration for a function parameter
    * @param parameter The function parameter to convert to a form field
    * @returns A form field configuration with appropriate defaults

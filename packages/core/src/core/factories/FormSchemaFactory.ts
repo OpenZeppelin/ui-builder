@@ -130,6 +130,8 @@ export class FormSchemaFactory {
         type: fieldType, // Ensure the type is set correctly
         // Add transforms using the utility function
         transforms: createTransformForFieldType(fieldType, input.type, adapter),
+        // Store the original parameter type for compatibility checks
+        originalParameterType: input.type,
       };
     });
   }

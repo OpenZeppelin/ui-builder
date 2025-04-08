@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import {
   BooleanField,
+  ContractAdapter,
   FieldType,
   FormFieldType,
   SelectField,
@@ -14,6 +15,8 @@ import {
 interface FieldEditorProps {
   field: FormFieldType;
   onUpdate: (updatedField: Partial<FormFieldType>) => void;
+  adapter?: ContractAdapter;
+  originalParameterType?: string;
 }
 
 export function FieldEditor({ field, onUpdate }: FieldEditorProps) {

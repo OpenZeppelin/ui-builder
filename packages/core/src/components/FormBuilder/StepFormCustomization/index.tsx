@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 
+import { getContractAdapter } from '../../../adapters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
@@ -106,6 +107,10 @@ export function StepFormCustomization({
                     <FieldEditor
                       field={formConfig.fields[selectedFieldIndex]}
                       onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                      adapter={getContractAdapter(selectedChain)}
+                      originalParameterType={
+                        formConfig.fields[selectedFieldIndex].originalParameterType
+                      }
                     />
                   )}
                 </div>

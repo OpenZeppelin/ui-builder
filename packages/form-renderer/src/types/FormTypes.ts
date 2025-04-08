@@ -28,6 +28,7 @@
 export interface ContractAdapter {
   formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
   isValidAddress(address: string): boolean;
+  getCompatibleFieldTypes(parameterType: string): FieldType[];
 }
 
 /**
@@ -205,6 +206,12 @@ export interface FormField<T extends FieldType = FieldType> {
    * Conditions that determine when this field should be visible
    */
   visibleWhen?: FieldCondition | FieldCondition[];
+
+  /**
+   * Original blockchain parameter type
+   * Used to determine compatible field types and for data transformation
+   */
+  originalParameterType?: string;
 }
 
 /**
