@@ -34,7 +34,7 @@ describe('FormExportValidation', () => {
             const pkg = JSON.parse(content);
             return pkg.dependencies &&
               (pkg.dependencies['@openzeppelin/transaction-form-renderer'] ||
-                pkg.dependencies['@openzeppelin/transaction-form-builder-form-renderer'])
+                pkg.dependencies['@openzeppelin/transaction-form-renderer'])
               ? true
               : 'Form renderer dependency not found';
           } catch (e) {

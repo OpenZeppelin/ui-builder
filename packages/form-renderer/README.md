@@ -1,7 +1,7 @@
 # Form Renderer Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-builder-form-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-builder-form-renderer)
-[![License](https://img.shields.io/npm/l/@openzeppelin/transaction-form-builder-form-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-renderer)
+[![License](https://img.shields.io/npm/l/@openzeppelin/transaction-form-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
 
 A specialized library for rendering customizable transaction forms for blockchain applications. Part of the Transaction Form Builder ecosystem.
 
@@ -9,13 +9,13 @@ A specialized library for rendering customizable transaction forms for blockchai
 
 ```bash
 # Using npm
-npm install @openzeppelin/transaction-form-builder-form-renderer
+npm install @openzeppelin/transaction-form-renderer
 
 # Using yarn
-yarn add @openzeppelin/transaction-form-builder-form-renderer
+yarn add @openzeppelin/transaction-form-renderer
 
 # Using pnpm
-pnpm add @openzeppelin/transaction-form-builder-form-renderer
+pnpm add @openzeppelin/transaction-form-renderer
 ```
 
 ## Features
@@ -42,7 +42,7 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 ## Usage
 
 ```tsx
-import { TransactionForm } from '@openzeppelin/transaction-form-builder-form-renderer';
+import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
 
 // Example form schema
 const schema = {
@@ -163,7 +163,7 @@ export const formRendererConfig: FormRendererConfig = {
     react: '^18.2.0',
     'react-dom': '^18.2.0',
     'react-hook-form': '^7.43.9',
-    '@openzeppelin/transaction-form-builder-form-renderer': '^1.0.0',
+    '@openzeppelin/transaction-form-renderer': '^1.0.0',
   },
 };
 ```

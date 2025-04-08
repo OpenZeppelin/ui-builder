@@ -91,7 +91,7 @@ describe('FormExportSystem', () => {
       react: '^18.2.0',
       'react-dom': '^18.2.0',
       'react-hook-form': '^7.43.9',
-      '@openzeppelin/transaction-form-builder-form-renderer': '^1.0.0',
+      '@openzeppelin/transaction-form-renderer': '^1.0.0',
     },
     fieldDependencies: {
       text: { runtimeDependencies: {} },
@@ -231,9 +231,7 @@ describe('FormExportSystem', () => {
       expect(Buffer.isBuffer(result.data)).toBe(true); // Check for Buffer
 
       // Verify dependencies contain core and EVM-specific dependencies
-      expect(result.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-builder-form-renderer'
-      );
+      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
       expect(result.dependencies).toHaveProperty('react-hook-form');
       expect(result.dependencies).toHaveProperty('ethers');
       expect(result.dependencies).toHaveProperty('viem');
