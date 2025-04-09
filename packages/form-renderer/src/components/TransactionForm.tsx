@@ -67,7 +67,7 @@ export function TransactionForm({
     try {
       // Format data for submission using the adapter
       const functionId = schema.functionId || 'unknown';
-      const formattedData = adapter.formatTransactionData(functionId, data);
+      const formattedData = adapter.formatTransactionData(functionId, data, schema.fields);
 
       // Pass the formatted data to the onSubmit handler
       if (onSubmit) {

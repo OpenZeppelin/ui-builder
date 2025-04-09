@@ -26,7 +26,11 @@
  * Minimal adapter interface for the form renderer
  */
 export interface ContractAdapter {
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormField[]
+  ): unknown;
   isValidAddress(address: string): boolean;
   getCompatibleFieldTypes(parameterType: string): FieldType[];
 }

@@ -317,10 +317,25 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * Format transaction data for the specific chain
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
-    // In a real implementation, this would encode the function call according to EVM standards
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
+  ): unknown {
+    // In a real implementation, this would use allFieldsConfig to merge hardcoded values
+    // with submittedInputs before encoding the function call according to EVM standards.
+    // For now, just log everything.
     console.log(\`Formatting EVM transaction data for function: \${functionId}\`);
-    console.log('Inputs:', inputs);
+    console.log('Submitted Inputs:', submittedInputs);
+    console.log('All Fields Config:', allFieldsConfig);
+
+    // Filter/map config for debugging (optional)
+    const hardcoded = allFieldsConfig
+      .filter((f) => f.isHardcoded)
+      .map((f) => ({ name: f.name, value: f.hardcodedValue }));
+    const hidden = allFieldsConfig.filter((f) => f.isHidden).map((f) => f.name);
+    console.log('Hardcoded fields:', hardcoded);
+    console.log('Hidden fields:', hidden);
 
     // Return a mock transaction object
     return {
@@ -562,9 +577,19 @@ export interface ContractAdapter {
   ): FormFieldType<T>;
 
   /**
-   * Format transaction data for the specific chain
+   * Format transaction data for the specific chain,
+   * considering submitted inputs and field configurations (e.g., hardcoded values).
+   *
+   * @param functionId The ID of the function being called.
+   * @param submittedInputs The data submitted from the rendered form fields.
+   * @param allFieldsConfig The configuration for ALL original fields (including hidden/hardcoded).
+   * @returns The formatted data payload for the blockchain transaction.
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
+  ): unknown;
 
   /**
    * Sign and broadcast a transaction
@@ -748,7 +773,11 @@ export class SolanaAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Solana transaction formatting in future phases
    */
-  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
+  formatTransactionData(
+    _functionId: string,
+    _submittedInputs: Record<string, unknown>,
+    _allFieldsConfig: FormFieldType[]
+  ): unknown {
     return { placeholder: 'Solana adapter not implemented yet' };
   }
 
@@ -843,9 +872,19 @@ export interface ContractAdapter {
   ): FormFieldType<T>;
 
   /**
-   * Format transaction data for the specific chain
+   * Format transaction data for the specific chain,
+   * considering submitted inputs and field configurations (e.g., hardcoded values).
+   *
+   * @param functionId The ID of the function being called.
+   * @param submittedInputs The data submitted from the rendered form fields.
+   * @param allFieldsConfig The configuration for ALL original fields (including hidden/hardcoded).
+   * @returns The formatted data payload for the blockchain transaction.
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
+  ): unknown;
 
   /**
    * Sign and broadcast a transaction

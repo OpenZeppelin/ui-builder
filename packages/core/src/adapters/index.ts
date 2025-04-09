@@ -60,9 +60,19 @@ export interface ContractAdapter {
   ): FormFieldType<T>;
 
   /**
-   * Format transaction data for the specific chain
+   * Format transaction data for the specific chain,
+   * considering submitted inputs and field configurations (e.g., hardcoded values).
+   *
+   * @param functionId The ID of the function being called.
+   * @param submittedInputs The data submitted from the rendered form fields.
+   * @param allFieldsConfig The configuration for ALL original fields (including hidden/hardcoded).
+   * @returns The formatted data payload for the blockchain transaction.
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
+  ): unknown;
 
   /**
    * Sign and broadcast a transaction

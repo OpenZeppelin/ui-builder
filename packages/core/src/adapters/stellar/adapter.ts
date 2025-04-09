@@ -124,7 +124,11 @@ export class StellarAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Stellar transaction formatting in future phases
    */
-  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
+  formatTransactionData(
+    _functionId: string,
+    _submittedInputs: Record<string, unknown>,
+    _allFieldsConfig: FormFieldType[]
+  ): unknown {
     return { placeholder: 'Stellar adapter not implemented yet' };
   }
 

@@ -253,10 +253,25 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * Format transaction data for the specific chain
    */
-  formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown {
-    // In a real implementation, this would encode the function call according to EVM standards
+  formatTransactionData(
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
+  ): unknown {
+    // In a real implementation, this would use allFieldsConfig to merge hardcoded values
+    // with submittedInputs before encoding the function call according to EVM standards.
+    // For now, just log everything.
     console.log(`Formatting EVM transaction data for function: ${functionId}`);
-    console.log('Inputs:', inputs);
+    console.log('Submitted Inputs:', submittedInputs);
+    console.log('All Fields Config:', allFieldsConfig);
+
+    // Filter/map config for debugging (optional)
+    const hardcoded = allFieldsConfig
+      .filter((f) => f.isHardcoded)
+      .map((f) => ({ name: f.name, value: f.hardcodedValue }));
+    const hidden = allFieldsConfig.filter((f) => f.isHidden).map((f) => f.name);
+    console.log('Hardcoded fields:', hardcoded);
+    console.log('Hidden fields:', hidden);
 
     // Return a mock transaction object
     return {

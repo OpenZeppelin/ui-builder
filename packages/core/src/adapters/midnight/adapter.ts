@@ -125,7 +125,11 @@ export class MidnightAdapter implements ContractAdapter {
    *
    * TODO: Implement proper Midnight transaction formatting in future phases
    */
-  formatTransactionData(_functionId: string, _inputs: Record<string, unknown>): unknown {
+  formatTransactionData(
+    _functionId: string,
+    _submittedInputs: Record<string, unknown>,
+    _allFieldsConfig: FormFieldType[]
+  ): unknown {
     return { placeholder: 'Midnight adapter not implemented yet' };
   }
 
