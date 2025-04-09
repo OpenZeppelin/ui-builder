@@ -78,8 +78,10 @@ export class FormCodeGenerator {
       adapterClassName,
       chainType,
       functionId,
-      formConfigJSON: JSON.stringify(renderSchema, null, 2),
-      includeDebugMode: false,
+      formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
+      // Embed the ORIGINAL field configuration for the adapter's submission logic
+      allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
+      includeDebugMode: false, // Or make this configurable via options
     };
 
     // Process the form component template

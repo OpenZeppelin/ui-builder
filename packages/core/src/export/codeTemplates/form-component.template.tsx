@@ -9,6 +9,7 @@
 import { useState } from 'react';
 
 import {
+  FormFieldType,
   RenderFormSchema,
   TransactionForm,
   TransactionFormProps,
@@ -23,6 +24,7 @@ import { AdapterPlaceholder } from '../adapters/@@chain-type@@/adapter';
 // Define type for transaction result (this will be implemented in the future)
 interface TransactionResult {
   txHash?: string;
+  error?: string;
 }
 
 /**
@@ -49,18 +51,50 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   // @ts-expect-error - This is a placeholder for the correct form schema import
   const formSchema: RenderFormSchema = {};
 
-  // Handle form submission
+  // Original field configurations (including hidden, hardcoded values)
+  /*------------TEMPLATE COMMENT START------------*/
+  // This is an empty array that will be replaced at generation time with the
+  // original, unfiltered FormField[] configuration.
+  /*------------TEMPLATE COMMENT END------------*/
+  const allFieldsConfig: FormFieldType[] = [];
+
+  // Handle form submission - remove async for now
   const handleSubmit = (formData: FormData) => {
-    // If an external submission handler is provided, use it
-    if (onSubmit) {
-      // Result will be something like { txHash: '0x123' } or { error: 'Error message' }
-      // This will be implemented in the future, when we actually submit the transaction
-      const result = { txHash: '0x123' }; // result will be returned from the external submission handler, but for now we'll just return a hardcoded value
-      onSubmit(formData);
-      setTransactionResult({ txHash: '0x123' });
-      return result;
-    } else {
-      throw new Error('No submission handler provided');
+    // Convert FormData to Record<string, unknown> for adapter
+    const submittedInputs: Record<string, unknown> = {};
+    formData.forEach((value, key) => {
+      submittedInputs[key] = value;
+    });
+
+    try {
+      const functionId = '@@function-id@@';
+      // Format data using the adapter, passing the original field configurations
+      const formattedData = adapter.formatTransactionData(
+        functionId,
+        submittedInputs,
+        allFieldsConfig // Pass the original config here
+      );
+
+      // --- Integration with onSubmit prop ---
+      if (onSubmit) {
+        // We might need to reconsider passing raw FormData if onSubmit expects the formatted data
+        // For now, assume onSubmit handles the interaction
+        onSubmit(formData);
+        setTransactionResult({ txHash: '0x_SUBMITTED_VIA_PROP' }); // Indicate submission via prop
+      } else {
+        // --- Default submission logic (if no onSubmit provided) ---
+        // This would typically involve signing and broadcasting
+        console.log('Formatted data:', formattedData);
+        // const result = await adapter.signAndBroadcast(formattedData);
+        // setTransactionResult(result);
+        // For template testing:
+        setTransactionResult({ txHash: '0x_MOCK_TX_HASH' });
+        console.log('Mock submission successful!');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      // TODO: Set an error state to display to the user
+      setTransactionResult({ error: (error as Error).message });
     }
   };
 
