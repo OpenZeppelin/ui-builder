@@ -35,7 +35,7 @@ describe('Test Configuration Utilities', () => {
 
       // Verify basic structure
       expect(config.functionId).toBe('complexFunc');
-      expect(config.fields).toHaveLength(7);
+      expect(config.fields).toHaveLength(10);
 
       // Verify field types
       const fieldTypes = config.fields.map((f) => f.type);
@@ -45,9 +45,10 @@ describe('Test Configuration Utilities', () => {
       expect(fieldTypes).toContain('blockchain-address');
 
       // Verify sections
-      expect(config.layout.sections).toHaveLength(2);
+      expect(config.layout.sections).toHaveLength(3);
       expect(config.layout.sections?.[0].title).toBe('Basic Parameters');
-      expect(config.layout.sections?.[1].title).toBe('Advanced Parameters');
+      expect(config.layout.sections?.[1].title).toBe('Other Parameters');
+      expect(config.layout.sections?.[2].title).toBe('Hardcoded / ReadOnly Examples');
 
       // Verify field IDs in sections match actual field IDs
       const basicSectionFields = config.layout.sections?.[0].fields || [];
