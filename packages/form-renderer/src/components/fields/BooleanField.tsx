@@ -54,6 +54,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
   width = 'full',
   validation,
   validateBoolean,
+  isReadOnly,
 }: BooleanFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -103,6 +104,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
+        disabled={isReadOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -148,6 +150,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
                   onCheckedChange={handleCheckedChange}
                   className={validationClasses}
                   onKeyDown={handleKeyDown}
+                  disabled={isReadOnly}
                   {...accessibilityProps}
                   aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 />
@@ -156,14 +159,12 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
                 </Label>
               </div>
 
-              {/* Display helper text */}
               {helperText && (
                 <div id={descriptionId} className="text-muted-foreground pl-6 text-sm">
                   {helperText}
                 </div>
               )}
 
-              {/* Display error message */}
               <ErrorMessage error={error} id={errorId} className="pl-6" />
             </>
           );
@@ -173,5 +174,4 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
   );
 }
 
-// Set displayName manually for better debugging
 BooleanField.displayName = 'BooleanField';

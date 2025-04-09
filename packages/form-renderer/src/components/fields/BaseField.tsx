@@ -52,6 +52,12 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
    * Field name in the form
    */
   name: FieldPath<TFieldValues>;
+
+  /**
+   * Whether the field should be displayed as read-only/disabled.
+   * @default false
+   */
+  isReadOnly?: boolean;
 }
 
 /**

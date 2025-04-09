@@ -125,6 +125,7 @@ export function DynamicFormField({
       control={control as unknown as Control<FormValues>}
       name={field.name}
       adapter={adapter}
+      isReadOnly={field.isReadOnly}
       {...fieldSpecificProps}
     />
   );

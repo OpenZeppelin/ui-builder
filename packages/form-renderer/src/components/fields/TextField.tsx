@@ -54,6 +54,7 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
+  isReadOnly,
 }: TextFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -93,6 +94,7 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
+        disabled={isReadOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -140,6 +142,7 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
                 data-slot="input"
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+                disabled={isReadOnly}
               />
 
               {/* Display helper text */}

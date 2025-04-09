@@ -10,6 +10,7 @@ import {
   createTransformForFieldType,
   FormFieldType,
   FormLayout,
+  FormValues,
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-renderer';
 
@@ -86,25 +87,49 @@ export class FormSchemaFactory {
     functionName: string,
     functionDescription?: string
   ): RenderFormSchema {
+    // Filter fields and map properties for the RenderFormSchema
+    const renderFields = builderConfig.fields
+      .filter((field) => !field.isHidden) // Filter out hidden fields
+      .map((field) => {
+        const { validation, isHardcoded, hardcodedValue, ...restOfField } = field;
+        const outputField: Partial<FormFieldType> = { ...restOfField }; // Start with rest
+
+        // Include validation only if it exists and has keys
+        if (validation && Object.keys(validation).length > 0) {
+          outputField.validation = validation;
+        }
+
+        // Handle hardcoded fields that are NOT hidden
+        if (isHardcoded) {
+          outputField.defaultValue = hardcodedValue; // Set defaultValue
+          // isReadOnly is copied via restOfField
+        }
+
+        return outputField as FormFieldType; // Cast to final type
+      });
+
+    // Create defaultValues object for RHF from hardcoded fields
+    const defaultValues: FormValues = {};
+    builderConfig.fields.forEach((field) => {
+      if (field.isHardcoded && field.hardcodedValue !== undefined) {
+        // Use the field's name (parameter name) as the key
+        defaultValues[field.name] = field.hardcodedValue;
+      }
+    });
+
     return {
       ...builderConfig,
       id: `form-${builderConfig.functionId}`,
       title: this.humanizeString(functionName),
       description: functionDescription || '',
-      fields: builderConfig.fields.map((field) => {
-        const { validation, ...restOfField } = field;
-        return {
-          ...restOfField,
-          // Only include validation if it's not empty or undefined
-          ...(validation && Object.keys(validation).length > 0 ? { validation } : {}),
-        };
-      }) as FormFieldType[], // Cast back to FormFieldType[]
+      fields: renderFields,
       submitButton: {
         text: `Execute ${functionName}`,
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
-      defaultValues: {},
+      // Pass the populated defaultValues object
+      defaultValues: defaultValues,
     };
   }
 
