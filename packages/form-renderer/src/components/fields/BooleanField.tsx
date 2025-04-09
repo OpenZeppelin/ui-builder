@@ -137,6 +137,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
             id,
             hasError,
             isRequired,
+            isDisabled: isReadOnly,
             hasHelperText: !!helperText,
           });
 

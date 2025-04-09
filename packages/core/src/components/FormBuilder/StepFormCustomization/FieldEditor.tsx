@@ -25,7 +25,7 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
   const defaultValues = useMemo(() => initializeFormValues(field), [field]);
 
   // Initialize form with field values
-  const { control, watch, reset } = useForm<FieldEditorFormValues>({
+  const { control, watch, reset, getValues } = useForm<FieldEditorFormValues>({
     defaultValues,
     mode: 'onChange',
   });
@@ -57,15 +57,21 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
           return; // Don't update if type is somehow undefined
         }
 
-        // Create a partial with just the changed field
-        const change = { [name]: value[name] } as Partial<FormFieldType>;
-        // Update directly since we're using the same property names
-        onUpdate(change);
+        // Special handling for nested validation updates
+        if (name === 'validation.required') {
+          // Get current validation state and send upwards
+          const currentValues = getValues();
+          onUpdate({ validation: currentValues.validation });
+        } else {
+          // For other fields, send the simple change
+          const change = { [name]: value[name] } as Partial<FormFieldType>;
+          onUpdate(change);
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, onUpdate, field.validation]);
+  }, [watch, onUpdate, field.validation, getValues]);
 
   // Field width options
   const widthOptions = [

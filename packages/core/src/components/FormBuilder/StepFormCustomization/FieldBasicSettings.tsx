@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Control, useWatch } from 'react-hook-form';
+import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import {
   BooleanField,
@@ -43,8 +43,17 @@ export function FieldBasicSettings({
   fieldWidthOptions,
   adapter,
 }: FieldBasicSettingsProps) {
+  // TODO: Prevent wizard from advancing to the next step if `isHardcodedValueInvalid` is true.
+  // This might involve lifting the validation state up or providing a callback/ref to the parent wizard.
+
   const isHardcoded = useWatch({ control, name: 'isHardcoded' }) || false;
   const fieldType = useWatch({ control, name: 'type' }) || 'text';
+  // Watch the 'Required Field' checkbox state
+  const isFieldRequired = useWatch({ control, name: 'validation.required' }) || false;
+  // Get the entire errors object from form state
+  const { errors } = useFormState({ control });
+  // Check specifically for the hardcodedValue error
+  const isHardcodedValueInvalid = !!errors?.hardcodedValue;
 
   // Construct synthetic field config for DynamicFormField
   const hardcodedFieldConfig = useMemo(
@@ -53,9 +62,10 @@ export function FieldBasicSettings({
       name: 'hardcodedValue',
       label: 'Hardcoded Value',
       type: fieldType,
-      validation: { required: true },
+      // Make hardcoded value required only if the main field is marked as required
+      validation: isFieldRequired ? { required: true } : {},
     }),
-    [fieldType]
+    [fieldType, isFieldRequired]
   );
 
   return (
@@ -126,6 +136,7 @@ export function FieldBasicSettings({
             label="Display as read-only"
             control={control}
             helperText="If checked, the field shows the hardcoded value but cannot be edited by the end-user."
+            isReadOnly={isHardcodedValueInvalid}
           />
         </div>
       )}
