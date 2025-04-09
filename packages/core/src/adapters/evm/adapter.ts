@@ -258,9 +258,52 @@ export class EvmAdapter implements ContractAdapter {
     submittedInputs: Record<string, unknown>,
     allFieldsConfig: FormFieldType[]
   ): unknown {
-    // In a real implementation, this would use allFieldsConfig to merge hardcoded values
-    // with submittedInputs before encoding the function call according to EVM standards.
-    // For now, just log everything.
+    /*
+     * TODO: Implement Full Hardcoded Value Merging and EVM ABI Encoding
+     *
+     * This function needs to construct the final ordered array of arguments
+     * expected by the EVM function call, considering both user-submitted
+     * data and hardcoded values defined in the configuration.
+     *
+     * Steps:
+     * 1. Determine Argument Order: The order must match the function signature in the ABI.
+     *    - It might be necessary to retrieve the original ABI definition for `functionId` here.
+     *    - Alternatively, if `allFieldsConfig` preserves the original parameter order reliably,
+     *      it can be used as the source of truth for iteration.
+     *
+     * 2. Iterate Through Expected Parameters (in order):
+     *    - For each expected parameter:
+     *      a. Find the corresponding field configuration in `allFieldsConfig` (using `field.name`).
+     *      b. Check `field.isHardcoded`.
+     *      c. If `true`, use `field.hardcodedValue`.
+     *      d. If `false`, retrieve the value from `submittedInputs` using `field.name`.
+     *      e. Handle cases where a non-hardcoded field might be missing from `submittedInputs`
+     *         (this shouldn't happen if `isHidden` logic is correct, but add defensive checks).
+     *
+     * 3. Apply Type Transformations:
+     *    - Based on the original EVM parameter type (e.g., `field.originalParameterType` or
+     *      looked up from the ABI), convert the selected value (hardcoded or submitted)
+     *      to the type expected by the encoding library (e.g., ethers.js).
+     *    - Examples:
+     *      - 'uint256': Convert string/number from form/hardcoded value to `BigInt`.
+     *      - 'address': Ensure correct casing (checksummed) via `ethers.getAddress()`.
+     *      - 'bool': Ensure value is `true` or `false`.
+     *      - 'bytes': Convert hex string to appropriate format.
+     *      - Arrays/Structs: Parse JSON strings (if textarea was used) or handle appropriately.
+     *      - Use `field.transforms?.output` if available for custom transformations.
+     *
+     * 4. EVM ABI Encode (using ethers.js or similar):
+     *    - Use a library like `ethers.js` (`Interface` class or `AbiCoder`)
+     *      to encode the function selector and the prepared, ordered, type-corrected arguments
+     *      into the final transaction `data` payload (hex string).
+     *
+     * 5. Return Formatted Transaction Object:
+     *    - Return an object suitable for the next step (signing/broadcasting),
+     *      including the `to` address (contract address), `data` (encoded payload),
+     *      `value` (if payable), etc.
+     */
+
+    // --- Current Placeholder Logic ---
     console.log(`Formatting EVM transaction data for function: ${functionId}`);
     console.log('Submitted Inputs:', submittedInputs);
     console.log('All Fields Config:', allFieldsConfig);
@@ -273,12 +316,12 @@ export class EvmAdapter implements ContractAdapter {
     console.log('Hardcoded fields:', hardcoded);
     console.log('Hidden fields:', hidden);
 
-    // Return a mock transaction object
+    // Placeholder return - Replace with actual encoded data
     return {
-      to: '0x1234567890123456789012345678901234567890',
-      data: `0x${functionId}`,
-      value: '0',
-      gasLimit: '100000',
+      to: '0x1234567890123456789012345678901234567890', // Replace with actual contract address
+      data: `0x${functionId.substring(0, 8)}0000...`, // Placeholder - Replace with encoded function call
+      value: '0', // Replace if payable
+      gasLimit: '100000', // Example gas limit
     };
   }
 
