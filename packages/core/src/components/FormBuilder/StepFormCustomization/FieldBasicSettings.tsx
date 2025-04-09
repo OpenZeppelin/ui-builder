@@ -1,6 +1,12 @@
-import { Control } from 'react-hook-form';
+import { useMemo } from 'react';
+import { Control, useWatch } from 'react-hook-form';
 
 import {
+  BooleanField,
+  ContractAdapter,
+  DynamicFormField,
+  FormFieldType,
+  FormValues,
   SelectField,
   SelectGroupedField,
   TextField,
@@ -24,6 +30,8 @@ interface FieldBasicSettingsProps {
    * Field width options for the select dropdown
    */
   fieldWidthOptions: { value: string; label: string }[];
+
+  adapter?: ContractAdapter;
 }
 
 /**
@@ -33,12 +41,28 @@ export function FieldBasicSettings({
   control,
   fieldTypeGroups,
   fieldWidthOptions,
+  adapter,
 }: FieldBasicSettingsProps) {
+  const isHardcoded = useWatch({ control, name: 'isHardcoded' }) || false;
+  const fieldType = useWatch({ control, name: 'type' }) || 'text';
+
+  // Construct synthetic field config for DynamicFormField
+  const hardcodedFieldConfig = useMemo(
+    (): FormFieldType => ({
+      id: 'hardcoded-value',
+      name: 'hardcodedValue',
+      label: 'Hardcoded Value',
+      type: fieldType,
+      validation: { required: true },
+    }),
+    [fieldType]
+  );
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <TextField
         id="field-label"
-        name="fieldLabel"
+        name="label"
         label="Field Label"
         control={control}
         placeholder="Enter field label"
@@ -46,7 +70,7 @@ export function FieldBasicSettings({
 
       <SelectGroupedField
         id="field-type"
-        name="fieldType"
+        name="type"
         label="Field Type"
         control={control}
         groups={fieldTypeGroups}
@@ -55,7 +79,7 @@ export function FieldBasicSettings({
 
       <TextField
         id="field-placeholder"
-        name="fieldPlaceholder"
+        name="placeholder"
         label="Placeholder Text"
         control={control}
         placeholder="Enter placeholder text"
@@ -63,12 +87,53 @@ export function FieldBasicSettings({
 
       <SelectField
         id="field-width"
-        name="fieldWidth"
+        name="width"
         label="Field Width"
         control={control}
         options={fieldWidthOptions}
         placeholder="Select field width"
       />
+
+      <div className="grid grid-cols-1 gap-4 border-t pt-4 md:col-span-2 md:grid-cols-2">
+        <BooleanField
+          id="is-hidden"
+          name="isHidden"
+          label="Hide field from form UI"
+          control={control}
+          helperText="Field will not be shown, but its value (if any) is still used."
+        />
+
+        <BooleanField
+          id="is-hardcoded"
+          name="isHardcoded"
+          label="Use hardcoded value"
+          control={control}
+          helperText="Provide a fixed value instead of user input."
+        />
+      </div>
+
+      {isHardcoded && adapter && (
+        <div className="space-y-4 border-t pt-4 md:col-span-2">
+          <DynamicFormField
+            key={`hardcoded-${fieldType}`}
+            field={hardcodedFieldConfig}
+            control={control as unknown as Control<FormValues>}
+            adapter={adapter}
+          />
+          <BooleanField
+            id="is-read-only"
+            name="isReadOnly"
+            label="Display as read-only"
+            control={control}
+            helperText="If checked, the field shows the hardcoded value but cannot be edited by the end-user."
+          />
+        </div>
+      )}
+      {isHardcoded && !adapter && fieldType === 'blockchain-address' && (
+        <div className="text-destructive border-t pt-4 text-sm md:col-span-2">
+          Cannot edit hardcoded address value: Adapter not available.
+        </div>
+      )}
     </div>
   );
 }

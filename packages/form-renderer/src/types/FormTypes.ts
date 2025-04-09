@@ -212,6 +212,32 @@ export interface FormField<T extends FieldType = FieldType> {
    * Used to determine compatible field types and for data transformation
    */
   originalParameterType?: string;
+
+  /**
+   * Whether this field should be hidden from the rendered form UI
+   * @default false
+   */
+  isHidden?: boolean;
+
+  /**
+   * Whether this field's value is fixed and not user-editable
+   * If true and isHidden is false, the field might be rendered as read-only
+   * @default false
+   */
+  isHardcoded?: boolean;
+
+  /**
+   * The fixed value to use if isHardcoded is true
+   * The type should ideally correspond to FieldValue<T>, but using any for initial flexibility
+   */
+  hardcodedValue?: FieldValue<T>;
+
+  /**
+   * Whether the field should be displayed as read-only in the UI.
+   * Typically used when isHardcoded is true but isHidden is false.
+   * @default false
+   */
+  isReadOnly?: boolean;
 }
 
 /**

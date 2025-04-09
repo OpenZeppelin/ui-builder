@@ -19,15 +19,22 @@ export function FieldAdvancedSettings({ control }: FieldAdvancedSettingsProps) {
     <>
       <TextAreaField
         id="field-description"
-        name="fieldDescription"
+        name="helperText"
         label="Field Description"
         control={control}
         placeholder="Enter field description or instructions"
       />
 
+      {/* 
+        React Hook Form supports dot notation in name attributes to access nested properties.
+        "validation.required" will automatically:
+        1. Access/create the validation object in form values
+        2. Set the required property within that object
+        3. Maintain the proper nested structure needed for FormFieldType
+      */}
       <BooleanField
         id="field-required"
-        name="fieldRequired"
+        name="validation.required"
         label="Required Field"
         control={control}
       />

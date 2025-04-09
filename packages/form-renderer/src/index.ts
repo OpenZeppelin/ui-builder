@@ -55,3 +55,12 @@ export * from './components/fields/SelectGroupedField';
 
 // Export utilities
 export * from './utils';
+
+// Export core types and utilities
+export * from './types';
+
+// Export main components
+export * from './components';
+
+// Specifically re-export key components for easier top-level import
+export { DynamicFormField } from './components/DynamicFormField';

@@ -8,7 +8,7 @@ import { FieldAdvancedSettings } from './FieldAdvancedSettings';
 import { FieldBasicSettings } from './FieldBasicSettings';
 import { FieldEditorFormValues } from './types';
 import { TypeWarningSection } from './TypeWarningSection';
-import { initializeFormValues, mapFormValuesToField } from './utils';
+import { initializeFormValues } from './utils';
 
 interface FieldEditorProps {
   field: FormFieldType;
@@ -21,30 +21,46 @@ interface FieldEditorProps {
  * Component for editing form field properties
  */
 export function FieldEditor({ field, onUpdate, adapter, originalParameterType }: FieldEditorProps) {
+  // Create default values with proper initialization to avoid uncontrolled/controlled warnings
+  const defaultValues = useMemo(() => initializeFormValues(field), [field]);
+
   // Initialize form with field values
   const { control, watch, reset } = useForm<FieldEditorFormValues>({
-    defaultValues: initializeFormValues(field),
+    defaultValues,
+    mode: 'onChange',
   });
 
   // Get field type groups using utility function
-  const fieldTypeGroups = useMemo(
+  const typeGroups = useMemo(
     () => getFieldTypeGroups(adapter, originalParameterType),
     [adapter, originalParameterType]
   );
 
-  // Reset form when field changes
+  // Reset form when field changes - use a deep reset to ensure all values are properly refreshed
   React.useEffect(() => {
-    reset(initializeFormValues(field));
+    const newValues = initializeFormValues(field);
+    reset(newValues);
   }, [field, reset]);
 
   // Watch for changes and update fields
   React.useEffect(() => {
-    const subscription = watch((value, { name }) => {
+    const subscription = watch((value, { name, type: eventType }) => {
+      // Skip updates if we're just seeing validation changes for hardcodedValue
+      // This prevents wiping out error state when validation happens
+      if (name === 'hardcodedValue' && eventType === undefined) {
+        return; // Do nothing when validation updates come through
+      }
+
       if (name && value) {
+        // Defensive handling for fields that should never be undefined
+        if (name === 'type' && value[name] === undefined) {
+          return; // Don't update if type is somehow undefined
+        }
+
         // Create a partial with just the changed field
-        const change = { [name]: value[name] } as Partial<FieldEditorFormValues>;
-        // Convert to FormField format and update
-        onUpdate(mapFormValuesToField(change));
+        const change = { [name]: value[name] } as Partial<FormFieldType>;
+        // Update directly since we're using the same property names
+        onUpdate(change);
       }
     });
 
@@ -52,20 +68,22 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
   }, [watch, onUpdate, field.validation]);
 
   // Field width options
-  const fieldWidthOptions = [
+  const widthOptions = [
     { value: 'full', label: 'Full Width' },
     { value: 'half', label: 'Half Width' },
     { value: 'third', label: 'One Third' },
   ];
 
-  const selectedType = watch('fieldType');
+  // Get the current type value with a fallback to the field's original type to avoid undefined
+  const selectedType = watch('type') || field.type;
 
   return (
     <div className="space-y-6">
       <FieldBasicSettings
         control={control}
-        fieldTypeGroups={fieldTypeGroups}
-        fieldWidthOptions={fieldWidthOptions}
+        fieldTypeGroups={typeGroups}
+        fieldWidthOptions={widthOptions}
+        adapter={adapter}
       />
 
       <TypeWarningSection

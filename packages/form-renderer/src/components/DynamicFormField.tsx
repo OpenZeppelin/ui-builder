@@ -1,16 +1,9 @@
 import React from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import {
-  ContractAdapter,
-  FieldCondition,
-  FieldType,
-  FormField,
-  FormValues,
-} from '../types/FormTypes';
+import { ContractAdapter, FieldCondition, FormField, FormValues } from '../types/FormTypes';
 
-import { BaseFieldProps } from './fields/BaseField';
-import { AddressField, BooleanField, NumberField, TextField } from './fields';
+import { fieldComponents } from './fieldRegistry'; // Import the shared registry
 
 /**
  * Props for the DynamicFormField component
@@ -32,33 +25,10 @@ interface DynamicFormFieldProps {
   adapter: ContractAdapter;
 
   /**
-   * The field error message, if any
+   * The field error message, if any (Kept for potential direct use, though RHF handles it)
    */
   error?: string;
 }
-
-/**
- * Registry of field components mapped to their respective types.
- * All field components in this registry are designed specifically for React Hook Form integration
- * and are meant to be used within the DynamicFormField system, not as standalone components.
- */
-const fieldComponents: Record<
-  FieldType,
-  React.ComponentType<BaseFieldProps<FormValues> & { adapter?: ContractAdapter }>
-> = {
-  text: TextField,
-  number: NumberField,
-  'blockchain-address': AddressField,
-  checkbox: BooleanField,
-  radio: () => <div>Radio field not implemented yet</div>,
-  select: () => <div>Select field not implemented yet</div>,
-  textarea: () => <div>Textarea field not implemented yet</div>,
-  date: () => <div>Date field not implemented yet</div>,
-  email: () => <div>Email field not implemented yet</div>,
-  password: () => <div>Password field not implemented yet</div>,
-  amount: () => <div>Amount field not implemented yet</div>,
-  hidden: () => null,
-};
 
 /**
  * Evaluates whether a field should be rendered based on its visibility conditions
@@ -135,7 +105,7 @@ export function DynamicFormField({
 
   // If no component is registered for this field type, log a warning and return null
   if (!FieldComponent) {
-    console.warn(`No component registered for field type: ${field.type}`);
+    console.warn(`DynamicFormField: No component registered for field type: ${field.type}`);
     return null;
   }
 
@@ -152,7 +122,7 @@ export function DynamicFormField({
       helperText={field.helperText}
       width={field.width}
       validation={field.validation}
-      control={control}
+      control={control as unknown as Control<FormValues>}
       name={field.name}
       adapter={adapter}
       {...fieldSpecificProps}
