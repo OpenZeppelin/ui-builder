@@ -46,8 +46,20 @@ export interface SelectFieldProps<TFieldValues extends FieldValues = FieldValues
 /**
  * Select dropdown field component specifically designed for React Hook Form integration.
  *
- * @important This component is part of the form rendering system architecture and should
- * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
+ * Architecture flow:
+ * 1. Form schemas are generated from contract functions using adapters
+ * 2. TransactionForm renders the overall form structure with React Hook Form
+ * 3. DynamicFormField selects the appropriate field component based on field type
+ * 4. BaseField provides consistent layout and hook form integration
+ * 5. This component handles radio-specific rendering and validation
+ *
+ * The component includes:
+ * - Integration with React Hook Form
+ * - Customizable options list
+ * - Horizontal or vertical layout options
+ * - Customizable validation through adapter integration
+ * - Automatic error handling and reporting
+ * - Full accessibility support with ARIA attributes
  */
 export function SelectField<TFieldValues extends FieldValues = FieldValues>({
   id,

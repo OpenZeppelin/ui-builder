@@ -86,8 +86,6 @@ export interface YourNewFieldProps<TFieldValues extends FieldValues = FieldValue
 /**
  * Your custom input field component.
  *
- * @important This component is part of the form rendering system architecture and should
- * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
  */
 export function YourNewField<TFieldValues extends FieldValues = FieldValues>({
   id,

@@ -57,9 +57,6 @@ export interface AmountFieldProps<TFieldValues extends FieldValues = FieldValues
 /**
  * Amount input field component specifically designed for currency/token amounts with React Hook Form integration.
  *
- * @important This component is part of the form rendering system architecture and should
- * ONLY be used within the DynamicFormField → TransactionForm system, not as a standalone component.
- *
  * Architecture flow:
  * 1. Form schemas are generated from contract functions using adapters
  * 2. TransactionForm renders the overall form structure with React Hook Form
