@@ -6,6 +6,7 @@ export interface WizardStep {
   id: string;
   title: string;
   component: ReactNode;
+  isValid?: boolean;
 }
 
 interface WizardLayoutProps {
@@ -34,6 +35,7 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
   };
 
   const currentStep = steps[currentStepIndex];
+  const isCurrentStepValid = currentStep.isValid !== false;
 
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
@@ -69,7 +71,9 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
         <Button variant="outline" onClick={handlePrevious} disabled={isFirstStep}>
           Previous
         </Button>
-        <Button onClick={handleNext}>{isLastStep ? 'Complete' : 'Next'}</Button>
+        <Button onClick={handleNext} disabled={!isCurrentStepValid}>
+          {isLastStep ? 'Complete' : 'Next'}
+        </Button>
       </div>
     </div>
   );

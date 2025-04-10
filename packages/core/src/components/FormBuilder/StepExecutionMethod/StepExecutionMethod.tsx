@@ -21,15 +21,16 @@ export function StepExecutionMethod({
     supportedMethods,
     watchedMethodType,
     watchedEoaOption,
-    // TODO: Get validation state from hook later
+    // Get validation state from hook
+    validationError,
   } = useExecutionMethodState({ currentConfig, adapter, onUpdateConfig });
 
-  // Generate options for the primary selector
+  // Generate options - rely solely on adapter's disabled flag
   const primaryMethodOptions = supportedMethods.map((detail: ExecutionMethodDetail) => ({
     value: detail.type,
     label: detail.name,
-    disabled: detail.type !== 'eoa' || detail.disabled, // Initially only allow EOA
-    // TODO: Add description tooltips
+    disabled: detail.disabled, // Use adapter's value directly
+    // TODO: Add description tooltips based on detail.description
   }));
 
   return (
@@ -52,8 +53,32 @@ export function StepExecutionMethod({
         />
       )}
 
-      {/* TODO: Add display area for final adapter validation error */}
-      {/* Example: <div className="text-sm text-destructive pt-2">{validationError}</div> */}
+      {/* Placeholder for Relayer */}
+      {watchedMethodType === 'relayer' && (
+        <div className="border-border bg-muted/50 mt-4 rounded-md border border-dashed p-4">
+          <p className="text-muted-foreground text-center text-sm">
+            OpenZeppelin transaction relayer configuration options will be available here in a
+            future update.
+          </p>
+        </div>
+      )}
+
+      {/* Placeholder for Multisig */}
+      {watchedMethodType === 'multisig' && (
+        <div className="border-border bg-muted/50 mt-4 rounded-md border border-dashed p-4">
+          <p className="text-muted-foreground text-center text-sm">
+            Multisig (e.g., Safe, Squads) configuration options will be available here in a future
+            update.
+          </p>
+        </div>
+      )}
+
+      {/* Display validation error if present */}
+      {validationError && (
+        <div className="border-destructive bg-destructive/10 mt-4 rounded-md border p-3">
+          <p className="text-destructive text-sm font-medium">{validationError}</p>
+        </div>
+      )}
     </div>
   );
 }

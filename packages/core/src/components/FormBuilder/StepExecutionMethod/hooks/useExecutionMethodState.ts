@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
+import { ensureCompleteConfig, useExecutionMethodValidation } from './useExecutionMethodValidation';
+
 import type { ContractAdapter } from '../../../../adapters';
 import type {
   ExecutionConfig,
@@ -12,7 +14,7 @@ import type { ExecutionMethodFormData } from '../types';
 interface UseExecutionMethodStateArgs {
   currentConfig?: ExecutionConfig;
   adapter: ContractAdapter | null;
-  onUpdateConfig: (config: ExecutionConfig | undefined) => void;
+  onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
 }
 
 interface UseExecutionMethodStateReturn {
@@ -20,7 +22,8 @@ interface UseExecutionMethodStateReturn {
   supportedMethods: ExecutionMethodDetail[];
   watchedMethodType: ExecutionMethodType | undefined;
   watchedEoaOption: 'any' | 'specific' | undefined;
-  // Add validation state later if needed
+  isValid: boolean;
+  validationError: string | null;
 }
 
 export function useExecutionMethodState({
@@ -33,19 +36,28 @@ export function useExecutionMethodState({
     defaultValues: {
       executionMethodType: currentConfig?.method,
       eoaOption:
-        currentConfig?.method === 'eoa' ? (currentConfig.allowAny ? 'any' : 'specific') : undefined,
+        currentConfig?.method === 'eoa'
+          ? currentConfig.allowAny === false
+            ? 'specific'
+            : 'any'
+          : undefined,
       specificEoaAddress: currentConfig?.method === 'eoa' ? currentConfig.specificAddress : '',
     },
   });
 
-  const { control, watch, reset, setValue } = formMethods;
+  const { control, watch, reset, setValue, getValues } = formMethods;
 
   const watchedMethodType = watch('executionMethodType');
   const watchedEoaOption = watch('eoaOption');
 
   const [supportedMethods, setSupportedMethods] = useState<ExecutionMethodDetail[]>([]);
 
-  // Fetch supported methods from adapter
+  const {
+    isValid,
+    validationError,
+    validate: validateExecutionConfig,
+  } = useExecutionMethodValidation({ adapter, onUpdateConfig });
+
   useEffect(() => {
     let isMounted = true;
     if (adapter) {
@@ -54,22 +66,36 @@ export function useExecutionMethodState({
         .then((methods: ExecutionMethodDetail[]) => {
           if (isMounted) {
             setSupportedMethods(methods);
-            const currentMethodType = control._defaultValues.executionMethodType;
-            if (
-              !currentMethodType ||
-              !methods.some((m: ExecutionMethodDetail) => m.type === currentMethodType)
-            ) {
-              const defaultMethod =
-                methods.find((m: ExecutionMethodDetail) => m.type === 'eoa') || methods[0];
+            const currentFormValues = getValues();
+            let methodToValidate = currentFormValues.executionMethodType;
+
+            if (!methodToValidate || !methods.some((m) => m.type === methodToValidate)) {
+              const defaultMethod = methods.find((m) => m.type === 'eoa') || methods[0];
               if (defaultMethod) {
-                setValue('executionMethodType', defaultMethod.type as ExecutionMethodType);
+                methodToValidate = defaultMethod.type;
+                setValue('executionMethodType', methodToValidate, {
+                  shouldValidate: false,
+                  shouldDirty: false,
+                });
+                setValue('eoaOption', 'any', { shouldValidate: false });
+                setValue('specificEoaAddress', '', { shouldValidate: false });
               }
             }
+
+            const configForInitialValidation = ensureCompleteConfig({
+              method: methodToValidate,
+              allowAny: getValues('eoaOption') === 'any',
+              specificAddress: getValues('specificEoaAddress') || undefined,
+            });
+            void validateExecutionConfig(configForInitialValidation);
           }
         })
         .catch((error: unknown) => {
           console.error('Failed to fetch supported execution methods:', error);
-          if (isMounted) setSupportedMethods([]);
+          if (isMounted) {
+            setSupportedMethods([]);
+            void validateExecutionConfig(undefined);
+          }
         });
     } else {
       setSupportedMethods([]);
@@ -78,59 +104,40 @@ export function useExecutionMethodState({
         eoaOption: undefined,
         specificEoaAddress: undefined,
       });
-      onUpdateConfig(undefined);
+      void validateExecutionConfig(undefined);
     }
     return () => {
       isMounted = false;
     };
-  }, [adapter, control, setValue, reset, onUpdateConfig]);
+  }, [adapter, control, getValues, onUpdateConfig, reset, setValue, validateExecutionConfig]);
 
-  // Update parent config when local RHF state changes
   useEffect(() => {
-    const watchCallback: WatchObserver<ExecutionMethodFormData> = (
-      value, // value is the full form state
-      { name, type } // name/type of the field that triggered the change
-    ) => {
-      // Use 'value' directly as it contains the latest form data
+    const watchCallback: WatchObserver<ExecutionMethodFormData> = (value, { name, type }) => {
+      if (type === undefined && name === undefined) {
+        return;
+      }
+
       const formData = value as ExecutionMethodFormData;
 
-      // Clear dependent fields first
-      if (name === 'eoaOption' && formData.eoaOption === 'any') {
-        setValue('specificEoaAddress', '');
-      }
-      if (name === 'executionMethodType' && formData.executionMethodType !== 'eoa') {
-        setValue('eoaOption', undefined);
-        setValue('specificEoaAddress', '');
-      }
+      const newConfig = ensureCompleteConfig({
+        method: formData.executionMethodType,
+        allowAny: formData.eoaOption === 'any',
+        specificAddress: formData.specificEoaAddress || undefined,
+      });
 
-      // Construct the ExecutionConfig
-      let newConfig: ExecutionConfig | undefined = undefined;
-      if (formData.executionMethodType === 'eoa') {
-        const allowAny = formData.eoaOption === 'any';
-        const specificAddress = allowAny ? undefined : formData.specificEoaAddress || undefined;
-        newConfig = {
-          method: 'eoa',
-          allowAny: allowAny,
-          specificAddress: specificAddress,
-        };
-      } else if (formData.executionMethodType) {
-        newConfig = { method: formData.executionMethodType } as ExecutionConfig;
-      }
-
-      onUpdateConfig(newConfig);
-      // TODO: Trigger final adapter validation logic here
+      void validateExecutionConfig(newConfig);
     };
 
-    // Type the subscription based on its expected shape
-    const subscription: { unsubscribe: () => void } = watch(watchCallback);
-
+    const subscription = watch(watchCallback);
     return () => subscription.unsubscribe();
-  }, [watch, onUpdateConfig, setValue]);
+  }, [watch, validateExecutionConfig]);
 
   return {
     formMethods,
     supportedMethods,
     watchedMethodType,
     watchedEoaOption,
+    isValid,
+    validationError,
   };
 }

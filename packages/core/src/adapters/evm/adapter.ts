@@ -393,12 +393,19 @@ export class EvmAdapter implements ContractAdapter {
         name: 'EOA (External Account)',
         description: 'Execute using a standard wallet address.',
       },
-      // {
-      //   type: 'multisig',
-      //   name: 'Safe Multisig', // Example for future
-      //   description: 'Execute via a Safe multisignature wallet.',
-      //   disabled: true // Example: disable if not configured
-      // },
+      {
+        type: 'multisig',
+        name: 'Safe Multisig', // Example for future
+        description: 'Execute via a Safe multisignature wallet.',
+        disabled: false, // Enable for UI testing, even if not fully implemented
+      },
+      // Add a basic relayer placeholder for UI testing
+      {
+        type: 'relayer',
+        name: 'Relayer (Placeholder)',
+        description: 'Execute via a OpenZeppelin transaction relayer (not yet implemented).',
+        disabled: false, // Enable for UI testing, even if not fully implemented
+      },
     ]);
   }
 
@@ -407,23 +414,35 @@ export class EvmAdapter implements ContractAdapter {
    * TODO: Implement actual validation logic for EVM execution configs.
    */
   public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    // Placeholder: Basic validation
     console.warn('EVMAdapter.validateExecutionConfig is using placeholder implementation.');
-    if (config.method === 'eoa') {
-      if (!config.allowAny && !config.specificAddress) {
-        return 'Specific EOA address is required.';
+
+    switch (config.method) {
+      case 'eoa': {
+        if (!config.allowAny) {
+          if (!config.specificAddress) {
+            return 'Specific EOA address is required.';
+          }
+          if (!this.isValidAddress(config.specificAddress)) {
+            return 'Invalid EOA address format.';
+          }
+        }
+        return true; // Placeholder: EOA config is valid if address format is okay
       }
-      if (
-        !config.allowAny &&
-        config.specificAddress &&
-        !this.isValidAddress(config.specificAddress)
-      ) {
-        return 'Invalid EOA address format for EVM.';
+      case 'multisig': {
+        // Placeholder: Accept multisig config for now
+        // TODO: Add Safe-specific validation (e.g., check if address is a valid Safe)
+        return true;
       }
-      return true;
-    } else {
-      // For now, consider other methods unsupported by this placeholder
-      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
+      case 'relayer': {
+        // Placeholder: Accept relayer config for now
+        // TODO: Add relayer-specific validation
+        return true;
+      }
+      default: {
+        // This handles the 'never' case for exhaustive checks
+        const exhaustiveCheck: never = config;
+        return `Unsupported execution method type: ${(exhaustiveCheck as ExecutionConfig).method}`;
+      }
     }
   }
 }

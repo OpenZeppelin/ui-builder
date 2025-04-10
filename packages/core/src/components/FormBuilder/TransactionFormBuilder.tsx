@@ -1,29 +1,40 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { getContractAdapter } from '../../adapters';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 import { StepChainSelect } from './StepChainSelect';
 import { StepContractDefinition } from './StepContractDefinition';
+import { StepExecutionMethod } from './StepExecutionMethod';
 import { StepExport } from './StepExport';
 
+import type { ContractAdapter } from '../../adapters';
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
+  const [executionConfig, setExecutionConfig] = useState<ExecutionConfig | null>(null);
+  const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
+
+  // Instantiate the correct adapter based on the selected chain using the factory
+  const adapter = useMemo<ContractAdapter>(() => {
+    return getContractAdapter(selectedChain);
+  }, [selectedChain]);
 
   // Memoize the handler functions to prevent unnecessary re-renders
   const handleChainSelect = useCallback((chain: ChainType) => {
     setSelectedChain(chain);
-    // Reset contract schema when chain changes
+    // Reset dependent states when chain changes
     setContractSchema(null);
     setSelectedFunction(null);
     setFormConfig(null);
+    setExecutionConfig(null);
   }, []);
 
   const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
@@ -58,6 +69,24 @@ export function TransactionFormBuilder() {
       return config;
     });
   }, []);
+
+  // Update this handler to also receive validation status
+  const handleExecutionConfigUpdated = useCallback(
+    (config: ExecutionConfig | undefined, isValid: boolean) => {
+      setExecutionConfig((prevConfig) => {
+        if (prevConfig === config) {
+          return prevConfig;
+        }
+        // Simple check for now, might need deeper comparison later
+        if (prevConfig && JSON.stringify(prevConfig) === JSON.stringify(config)) {
+          return prevConfig;
+        }
+        return config ?? null;
+      });
+      setIsExecutionStepValid(isValid);
+    },
+    []
+  );
 
   const handleExport = useCallback(() => {
     // In a real implementation, this would generate the actual form code
@@ -132,6 +161,18 @@ export function TransactionFormBuilder() {
           onFormConfigUpdated={handleFormConfigUpdated}
         />
       ),
+    },
+    {
+      id: 'execution-method',
+      title: 'Execution Method',
+      component: (
+        <StepExecutionMethod
+          adapter={adapter}
+          currentConfig={executionConfig}
+          onUpdateConfig={handleExecutionConfigUpdated}
+        />
+      ),
+      isValid: isExecutionStepValid,
     },
     {
       id: 'export',
