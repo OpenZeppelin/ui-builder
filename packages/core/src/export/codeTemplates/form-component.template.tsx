@@ -58,8 +58,20 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   /*------------TEMPLATE COMMENT END------------*/
   const allFieldsConfig: FormFieldType[] = [];
 
+  // Execution configuration selected in the builder
+  /*------------TEMPLATE COMMENT START------------*/
+  // This will be replaced at generation time with the stringified ExecutionConfig or 'undefined'.
+  // Use 'unknown' for the placeholder type. Assign undefined and use comment marker for replacement.
+  /*------------TEMPLATE COMMENT END------------*/
+  const executionConfig: unknown | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
+  // TODO (Export Integration): Use executionConfig at runtime to determine
+  // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
+
   // Handle form submission - remove async for now
   const handleSubmit = (formData: FormData) => {
+    // Log the execution config (will be used for signing/broadcasting logic later)
+    console.log('Using Execution Config:', executionConfig);
+
     // Convert FormData to Record<string, unknown> for adapter
     const submittedInputs: Record<string, unknown> = {};
     formData.forEach((value, key) => {

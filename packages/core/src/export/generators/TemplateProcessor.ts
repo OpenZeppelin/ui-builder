@@ -161,6 +161,8 @@ export class TemplateProcessor {
     options?: {
       adapterClassName?: string;
       formConfigJSON?: string;
+      allFieldsConfigJSON?: string;
+      executionConfigJSON?: string;
     }
   ): Promise<string> {
     // Process the template in a way that preserves intended spacing
@@ -207,6 +209,34 @@ export class TemplateProcessor {
       } catch (error) {
         // Log any errors that might occur
         logger.error('TemplateProcessor', 'Failed to inject form schema:', error);
+        throw error;
+      }
+    }
+
+    // Inject allFieldsConfig JSON if provided
+    if (options?.allFieldsConfigJSON) {
+      try {
+        processedTemplate = processedTemplate.replace(
+          // Match the placeholder variable assignment
+          /const allFieldsConfig: FormFieldType\[\] = \[];/g,
+          // Replace with the actual JSON string
+          `const allFieldsConfig: FormFieldType[] = ${options.allFieldsConfigJSON};`
+        );
+      } catch (error) {
+        logger.error('TemplateProcessor', 'Failed to inject allFieldsConfig:', error);
+        throw error;
+      }
+    }
+
+    // If execution config JSON is provided, inject it
+    if (options?.executionConfigJSON) {
+      try {
+        const regex =
+          /const executionConfig: unknown \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
+        const replacement = `const executionConfig: unknown | undefined = ${options.executionConfigJSON};`;
+        processedTemplate = processedTemplate.replace(regex, replacement);
+      } catch (error) {
+        logger.error('TemplateProcessor', 'Failed to inject execution config:', error);
         throw error;
       }
     }

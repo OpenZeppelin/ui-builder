@@ -61,6 +61,7 @@ export class FormCodeGenerator {
     functionId: string
   ): Promise<string> {
     const adapterClassName = this.getAdapterClassName(chainType);
+    const executionConfig = formConfig.executionConfig;
 
     // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
     // This ensures consistency with the preview in the form builder
@@ -81,6 +82,8 @@ export class FormCodeGenerator {
       formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
       // Embed the ORIGINAL field configuration for the adapter's submission logic
       allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
+      // Pass executionConfig to the template
+      executionConfigJSON: executionConfig ? JSON.stringify(executionConfig, null, 2) : 'undefined',
       includeDebugMode: false, // Or make this configurable via options
     };
 
@@ -90,7 +93,9 @@ export class FormCodeGenerator {
     // Apply common post-processing with form-specific options
     processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
       adapterClassName,
-      formConfigJSON: params.formConfigJSON as string,
+      formConfigJSON: params.formConfigJSON,
+      executionConfigJSON: params.executionConfigJSON,
+      allFieldsConfigJSON: params.allFieldsConfigJSON,
     });
 
     // Format the entire code with Prettier

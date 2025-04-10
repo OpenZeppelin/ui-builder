@@ -593,10 +593,30 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   };
 
   // Original field configurations (including hidden, hardcoded values)
-  const allFieldsConfig: FormFieldType[] = [];
+  const allFieldsConfig: FormFieldType[] = [
+    {
+      id: '[id]',
+      type: 'text',
+      name: 'testParam',
+      label: 'Test Parameter',
+      validation: {
+        required: true,
+      },
+      helperText: 'Description for Test Parameter',
+      placeholder: 'Enter test parameter',
+    },
+  ];
+
+  // Execution configuration selected in the builder
+  const executionConfig: unknown | undefined = undefined;
+  // TODO (Export Integration): Use executionConfig at runtime to determine
+  // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
   // Handle form submission - remove async for now
   const handleSubmit = (formData: FormData) => {
+    // Log the execution config (will be used for signing/broadcasting logic later)
+    console.log('Using Execution Config:', executionConfig);
+
     // Convert FormData to Record<string, unknown> for adapter
     const submittedInputs: Record<string, unknown> = {};
     formData.forEach((value, key) => {

@@ -3,11 +3,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { getContractAdapter } from '../../adapters';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
+import { StepExecutionMethod } from './StepExecutionMethod/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 import { StepChainSelect } from './StepChainSelect';
 import { StepContractDefinition } from './StepContractDefinition';
-import { StepExecutionMethod } from './StepExecutionMethod';
 import { StepExport } from './StepExport';
 
 import type { ContractAdapter } from '../../adapters';
@@ -19,7 +19,6 @@ export function TransactionFormBuilder() {
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
-  const [executionConfig, setExecutionConfig] = useState<ExecutionConfig | undefined>(undefined);
   const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
 
   // Instantiate the correct adapter based on the selected chain using the factory
@@ -34,7 +33,6 @@ export function TransactionFormBuilder() {
     setContractSchema(null);
     setSelectedFunction(null);
     setFormConfig(null);
-    setExecutionConfig(undefined);
   }, []);
 
   const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
@@ -65,15 +63,21 @@ export function TransactionFormBuilder() {
       ) {
         return prevConfig;
       }
-
-      return config;
+      const existingExecutionConfig = prevConfig?.executionConfig;
+      return { ...config, executionConfig: existingExecutionConfig };
     });
   }, []);
 
   // Update this handler to also receive validation status
   const handleExecutionConfigUpdated = useCallback(
-    (config: ExecutionConfig | undefined, isValid: boolean) => {
-      setExecutionConfig(config);
+    (execConfig: ExecutionConfig | undefined, isValid: boolean) => {
+      setFormConfig((prevConfig) => {
+        if (!prevConfig) return null;
+        if (JSON.stringify(prevConfig.executionConfig) === JSON.stringify(execConfig)) {
+          return prevConfig;
+        }
+        return { ...prevConfig, executionConfig: execConfig };
+      });
       setIsExecutionStepValid(isValid);
     },
     []
@@ -159,7 +163,7 @@ export function TransactionFormBuilder() {
       component: (
         <StepExecutionMethod
           adapter={adapter}
-          currentConfig={executionConfig}
+          currentConfig={formConfig?.executionConfig}
           onUpdateConfig={handleExecutionConfigUpdated}
         />
       ),

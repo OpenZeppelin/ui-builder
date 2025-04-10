@@ -1,1 +1,1 @@
-export * from './StepExecutionMethod';
+export { StepExecutionMethod } from './StepExecutionMethod';

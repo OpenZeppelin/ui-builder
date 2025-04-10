@@ -42,6 +42,11 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   allFieldsConfigJSON: string;
 
   /**
+   * The execution configuration as a JSON string or 'undefined'
+   */
+  executionConfigJSON: string | undefined;
+
+  /**
    * Optional flag to include debug mode
    */
   includeDebugMode?: boolean;
