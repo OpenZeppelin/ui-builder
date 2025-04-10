@@ -1,38 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
+import { ensureCompleteConfig } from '../utils';
+
 import type { ContractAdapter } from '../../../../adapters';
 import type {
-  EoaExecutionConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
 } from '../../../../core/types/FormTypes';
 import type { ExecutionMethodFormData } from '../types';
-
-//---------------------------------------------------------------------------
-// Helper Functions
-//---------------------------------------------------------------------------
-
-// Moved helper function here
-function ensureCompleteConfig(
-  partialConfig: Partial<ExecutionConfig>
-): ExecutionConfig | undefined {
-  if (!partialConfig.method) return undefined;
-  if (partialConfig.method === 'eoa') {
-    const config = partialConfig as Partial<EoaExecutionConfig>;
-    return {
-      method: 'eoa',
-      allowAny: config.allowAny ?? true,
-      specificAddress: config.specificAddress,
-    };
-  } else if (partialConfig.method === 'relayer') {
-    return { method: 'relayer' };
-  } else if (partialConfig.method === 'multisig') {
-    return { method: 'multisig' };
-  }
-  return undefined;
-}
 
 //---------------------------------------------------------------------------
 // Hook Definition
@@ -52,6 +29,8 @@ interface UseExecutionMethodStateReturn {
   watchedEoaOption: 'any' | 'specific' | undefined;
   isValid: boolean;
   validationError: string | null;
+  // Expose validator for testing
+  validateExecutionConfig: (config: ExecutionConfig | undefined) => Promise<void>;
 }
 
 export function useExecutionMethodState({
@@ -89,46 +68,46 @@ export function useExecutionMethodState({
   //---------------------------------------------------------------------------
   const validateExecutionConfig = useCallback(
     async (configToValidate: ExecutionConfig | undefined): Promise<void> => {
-      let currentIsValid = false;
-      let currentError: string | null = null;
+      let isValidResult = false;
+      let errorResult: string | null = null;
 
       if (!adapter) {
-        currentError = 'Adapter not available.';
+        errorResult = 'Adapter not available.';
       } else if (!configToValidate) {
-        currentError = 'Please select an execution method.';
+        errorResult = 'Please select an execution method.';
       } else if (configToValidate.method === 'eoa') {
         if (!configToValidate.allowAny && !configToValidate.specificAddress) {
-          currentError = 'Please provide the specific EOA address.';
+          errorResult = 'Please provide the specific EOA address.';
         }
       } else if (configToValidate.method === 'relayer') {
-        currentError = null; // Placeholder
+        errorResult = null; // Placeholder
       } else if (configToValidate.method === 'multisig') {
-        currentError = null; // Placeholder
+        errorResult = null; // Placeholder
       }
 
-      if (!currentError && adapter && configToValidate) {
+      if (!errorResult && adapter && configToValidate) {
         try {
-          const result = await adapter.validateExecutionConfig(configToValidate);
-          if (result === true) {
-            currentIsValid = true;
-            currentError = null;
+          const adapterValidationResult = await adapter.validateExecutionConfig(configToValidate);
+          if (adapterValidationResult === true) {
+            isValidResult = true;
+            errorResult = null;
           } else {
-            currentError = result;
+            isValidResult = false;
+            errorResult = adapterValidationResult;
           }
         } catch (error) {
+          isValidResult = false;
+          errorResult = 'An unexpected error occurred during validation.';
           console.error('Validation error:', error);
-          currentError = 'An unexpected error occurred during validation.';
         }
       } else {
-        currentIsValid = false;
+        isValidResult = false;
       }
 
-      // Update local state
-      setIsValid(currentIsValid);
-      setValidationError(currentError);
+      setIsValid(isValidResult);
+      setValidationError(errorResult);
 
-      // Call the combined callback prop
-      onUpdateConfig(configToValidate, currentIsValid);
+      onUpdateConfig(configToValidate, isValidResult);
     },
     [adapter, onUpdateConfig]
   );
@@ -222,5 +201,6 @@ export function useExecutionMethodState({
     watchedEoaOption,
     isValid,
     validationError,
+    validateExecutionConfig,
   };
 }
