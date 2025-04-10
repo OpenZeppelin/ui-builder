@@ -52,7 +52,7 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
                 }`}
               />
               <span
-                className={`text-sm ${
+                className={`text-xs ${
                   index === currentStepIndex ? 'text-primary font-bold' : 'text-muted-foreground'
                 }`}
               >
