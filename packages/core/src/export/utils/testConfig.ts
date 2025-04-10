@@ -46,6 +46,10 @@ export function createMinimalFormConfig(
       mode: 'onChange',
       showErrors: 'inline',
     },
+    executionConfig: {
+      method: 'eoa',
+      allowAny: true,
+    },
     theme: {},
   };
 }
@@ -190,6 +194,11 @@ export function createComplexFormConfig(
     validation: {
       mode: 'onChange',
       showErrors: 'inline',
+    },
+    executionConfig: {
+      method: 'eoa',
+      allowAny: false,
+      specificAddress: '0x0000000000000000000000000000000000000000',
     },
     theme: {},
   };
