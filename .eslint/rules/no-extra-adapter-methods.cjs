@@ -44,6 +44,8 @@ module.exports = {
       'formatTransactionData',
       'signAndBroadcast',
       'isValidAddress',
+      'getSupportedExecutionMethods',
+      'validateExecutionConfig',
     ];
 
     // Common standard methods and properties that are allowed

@@ -1,7 +1,7 @@
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 
 /**
  * Stellar-specific adapter implementation
@@ -150,6 +150,49 @@ export class StellarAdapter implements ContractAdapter {
     // Basic check for Stellar addresses (starts with G and is 56 chars long)
     // TODO: Use a proper Stellar SDK for validation when focusing on that chain
     return /^G[A-Z0-9]{55}$/.test(address);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for Stellar.
+   */
+  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn(
+      'StellarAdapter.getSupportedExecutionMethods is using placeholder implementation.'
+    );
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'Stellar Account',
+        description: 'Execute using a standard Stellar account address.',
+      },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for Stellar execution configs.
+   */
+  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    // Placeholder: Basic validation
+    console.warn('StellarAdapter.validateExecutionConfig is using placeholder implementation.');
+    if (config.method === 'eoa') {
+      if (!config.allowAny && !config.specificAddress) {
+        return 'Specific Stellar account address is required.';
+      }
+      if (
+        !config.allowAny &&
+        config.specificAddress &&
+        !this.isValidAddress(config.specificAddress)
+      ) {
+        return 'Invalid account address format for Stellar.';
+      }
+      return true;
+    } else {
+      // For now, consider other methods unsupported by this placeholder
+      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
+    }
   }
 }
 

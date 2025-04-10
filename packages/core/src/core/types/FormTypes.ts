@@ -18,4 +18,42 @@ export interface BuilderFormConfig extends CommonFormProperties {
    * ID of the contract function this form is for
    */
   functionId: string;
+  executionConfig?: ExecutionConfig;
 }
+
+/**
+ * Generic internal type identifier for execution methods.
+ */
+export type ExecutionMethodType = 'eoa' | 'relayer' | 'multisig'; // Extendable
+
+/**
+ * Detailed information about a supported execution method, provided by the adapter.
+ */
+export interface ExecutionMethodDetail {
+  type: ExecutionMethodType; // The generic type used internally
+  name: string; // User-facing display name (e.g., "Safe Multisig")
+  description?: string; // Optional description for UI tooltips
+  disabled?: boolean; // Allows adapter to disable (e.g., requires extra setup)
+}
+
+export interface EoaExecutionConfig {
+  method: 'eoa';
+  allowAny: boolean;
+  specificAddress?: string; // Required if allowAny is false, validated by adapter
+}
+
+export interface RelayerExecutionConfig {
+  method: 'relayer';
+  // Relayer-specific config options TBD. Adapter will validate.
+  // Example: relayerUrl?: string;
+}
+
+export interface MultisigExecutionConfig {
+  method: 'multisig';
+  // Generic Multisig Config TBD. Adapter will validate based on the specific
+  // multisig type it represents (e.g., Safe, Squads).
+  // Example: multisigAddress?: string; requiredSigners?: number;
+}
+
+// Union type for the configuration stored in the builder state
+export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;

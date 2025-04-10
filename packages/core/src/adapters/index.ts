@@ -5,7 +5,30 @@ import MidnightAdapter from './midnight/adapter.ts';
 import SolanaAdapter from './solana/adapter.ts';
 import StellarAdapter from './stellar/adapter.ts';
 
-import type { ChainType, ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
+import type {
+  ChainDefinition,
+  ChainType,
+  ContractFunction,
+  ContractSchema,
+  FunctionParameter,
+} from '../core/types/ContractSchema';
+import type {
+  ExecutionConfig,
+  ExecutionMethodDetail,
+  ExecutionMethodType,
+} from '../core/types/FormTypes';
+
+// Re-export necessary types
+export type {
+  ChainDefinition,
+  ChainType,
+  ContractFunction,
+  ContractSchema,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+  ExecutionMethodType,
+  FunctionParameter,
+};
 
 /**
  * Interface for contract adapters
@@ -85,6 +108,33 @@ export interface ContractAdapter {
    * @returns Whether the address is valid for this chain
    */
   isValidAddress(address: string): boolean;
+
+  // --- NEW METHODS for Execution Configuration ---
+
+  /**
+   * Returns details for execution methods supported by this chain adapter.
+   *
+   * This allows the UI to dynamically show only relevant execution options
+   * (e.g., EOA, Safe Multisig, Squads) with chain-specific names.
+   *
+   * @returns {Promise<ExecutionMethodDetail[]>} A promise resolving to an array of supported method details.
+   */
+  getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]>;
+
+  /**
+   * Validates the complete execution configuration object against the specific
+   * requirements and capabilities of this chain adapter.
+   *
+   * Allows the adapter to enforce chain-specific rules (e.g., address format,
+   * supported method, required fields for a method).
+   *
+   * @param {ExecutionConfig} config - The execution configuration object selected by the user.
+   * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
+   */
+  validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
+
+  // TODO: Consider adding methods related to runtime execution if needed later,
+  // e.g., signTransaction(transactionData, executionConfig), etc.
 }
 
 // Singleton instances of adapters

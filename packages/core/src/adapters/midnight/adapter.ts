@@ -1,7 +1,7 @@
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 
 /**
  * Midnight-specific adapter implementation
@@ -151,6 +151,49 @@ export class MidnightAdapter implements ContractAdapter {
     // TODO: Implement Midnight address validation when chain specs are available
     // For now, return true to avoid blocking development
     return true;
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for Midnight.
+   */
+  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn(
+      'MidnightAdapter.getSupportedExecutionMethods is using placeholder implementation.'
+    );
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'EOA (Midnight Account)',
+        description: 'Execute using a standard Midnight account.',
+      },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for Midnight execution configs.
+   */
+  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    // Placeholder: Basic validation
+    console.warn('MidnightAdapter.validateExecutionConfig is using placeholder implementation.');
+    if (config.method === 'eoa') {
+      if (!config.allowAny && !config.specificAddress) {
+        return 'Specific EOA address is required.';
+      }
+      if (
+        !config.allowAny &&
+        config.specificAddress &&
+        !this.isValidAddress(config.specificAddress)
+      ) {
+        return 'Invalid EOA address format for Midnight.';
+      }
+      return true;
+    } else {
+      // For now, consider other methods unsupported by this placeholder
+      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
+    }
   }
 }
 

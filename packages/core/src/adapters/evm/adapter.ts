@@ -7,7 +7,7 @@ import { generateId } from '../../core/utils/general';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 import type { AbiItem } from './types';
 
 /**
@@ -378,6 +378,53 @@ export class EvmAdapter implements ContractAdapter {
    */
   isValidAddress(address: string): boolean {
     return isAddress(address);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for EVM (e.g., EOA, Safe).
+   */
+  public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn('EVMAdapter.getSupportedExecutionMethods is using placeholder implementation.');
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'EOA (External Account)',
+        description: 'Execute using a standard wallet address.',
+      },
+      // {
+      //   type: 'multisig',
+      //   name: 'Safe Multisig', // Example for future
+      //   description: 'Execute via a Safe multisignature wallet.',
+      //   disabled: true // Example: disable if not configured
+      // },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for EVM execution configs.
+   */
+  public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    // Placeholder: Basic validation
+    console.warn('EVMAdapter.validateExecutionConfig is using placeholder implementation.');
+    if (config.method === 'eoa') {
+      if (!config.allowAny && !config.specificAddress) {
+        return 'Specific EOA address is required.';
+      }
+      if (
+        !config.allowAny &&
+        config.specificAddress &&
+        !this.isValidAddress(config.specificAddress)
+      ) {
+        return 'Invalid EOA address format for EVM.';
+      }
+      return true;
+    } else {
+      // For now, consider other methods unsupported by this placeholder
+      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
+    }
   }
 }
 

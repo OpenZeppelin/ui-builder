@@ -1,7 +1,7 @@
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 
 /**
  * Solana-specific adapter implementation
@@ -150,6 +150,53 @@ export class SolanaAdapter implements ContractAdapter {
     // Basic check for Solana addresses (Base58 encoded, 32-44 characters)
     // TODO: Use a proper Solana address validation library when focusing on that chain
     return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for Solana (e.g., EOA, Squads).
+   */
+  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn('SolanaAdapter.getSupportedExecutionMethods is using placeholder implementation.');
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'EOA (Wallet Account)',
+        description: 'Execute using a standard Solana wallet address.',
+      },
+      // {
+      //   type: 'multisig',
+      //   name: 'Squads Protocol',
+      //   description: 'Execute via the Squads multisig program.',
+      //   disabled: true
+      // },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for Solana execution configs.
+   */
+  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    // Placeholder: Basic validation
+    console.warn('SolanaAdapter.validateExecutionConfig is using placeholder implementation.');
+    if (config.method === 'eoa') {
+      if (!config.allowAny && !config.specificAddress) {
+        return 'Specific Solana account address is required.';
+      }
+      if (
+        !config.allowAny &&
+        config.specificAddress &&
+        !this.isValidAddress(config.specificAddress)
+      ) {
+        return 'Invalid account address format for Solana.';
+      }
+      return true;
+    } else {
+      // For now, consider other methods unsupported by this placeholder
+      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
+    }
   }
 }
 
