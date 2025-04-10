@@ -77,6 +77,28 @@ export interface ContractAdapter {
 
   // Validate a blockchain address for this chain
   isValidAddress(address: string): boolean;
+
+  /**
+   * Returns details for execution methods supported by this chain adapter.
+   *
+   * This allows the UI to dynamically show only relevant execution options
+   * (e.g., EOA, Safe Multisig, Squads) with chain-specific names.
+   *
+   * @returns {Promise<ExecutionMethodDetail[]>} A promise resolving to an array of supported method details.
+   */
+  getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]>;
+
+  /**
+   * Validates the complete execution configuration object against the specific
+   * requirements and capabilities of this chain adapter.
+   *
+   * Allows the adapter to enforce chain-specific rules (e.g., address format,
+   * supported method, required fields for a method).
+   *
+   * @param {ExecutionConfig} config - The execution configuration object selected by the user.
+   * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
+   */
+  validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
 }
 ```
 
@@ -88,10 +110,13 @@ The following methods are defined in the `ContractAdapter` interface and must be
 - `loadMockContract`
 - `getWritableFunctions`
 - `mapParameterTypeToFieldType`
+- `getCompatibleFieldTypes`
 - `generateDefaultField`
 - `formatTransactionData`
 - `signAndBroadcast`
 - `isValidAddress`
+- `getSupportedExecutionMethods`
+- `validateExecutionConfig`
 
 ### Contract Function State Modification Flag
 

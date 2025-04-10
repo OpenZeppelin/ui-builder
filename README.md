@@ -76,6 +76,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - Adapter pattern for easily adding support for new blockchains
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
+- Configure transaction execution methods (EOA, Relayer, Multisig) via adapters
 - Type-safe with TypeScript
 - Fast development with Vite
 - Component documentation with Storybook
@@ -240,7 +241,7 @@ transaction-form-builder/
 The application uses an adapter pattern to support multiple blockchain ecosystems:
 
 - **Core**: Chain-agnostic components, types, and utilities
-- **Adapters**: Chain-specific implementations that conform to a common interface
+- **Adapters**: Chain-specific implementations that conform to a common interface (including methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods)
 - **UI Components**: React components that use adapters to interact with different blockchains
 - **Styling System**: Centralized CSS variables and styling approach used across all packages
 
