@@ -19,7 +19,7 @@ export function TransactionFormBuilder() {
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
-  const [executionConfig, setExecutionConfig] = useState<ExecutionConfig | null>(null);
+  const [executionConfig, setExecutionConfig] = useState<ExecutionConfig | undefined>(undefined);
   const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
 
   // Instantiate the correct adapter based on the selected chain using the factory
@@ -34,7 +34,7 @@ export function TransactionFormBuilder() {
     setContractSchema(null);
     setSelectedFunction(null);
     setFormConfig(null);
-    setExecutionConfig(null);
+    setExecutionConfig(undefined);
   }, []);
 
   const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
@@ -73,16 +73,7 @@ export function TransactionFormBuilder() {
   // Update this handler to also receive validation status
   const handleExecutionConfigUpdated = useCallback(
     (config: ExecutionConfig | undefined, isValid: boolean) => {
-      setExecutionConfig((prevConfig) => {
-        if (prevConfig === config) {
-          return prevConfig;
-        }
-        // Simple check for now, might need deeper comparison later
-        if (prevConfig && JSON.stringify(prevConfig) === JSON.stringify(config)) {
-          return prevConfig;
-        }
-        return config ?? null;
-      });
+      setExecutionConfig(config);
       setIsExecutionStepValid(isValid);
     },
     []

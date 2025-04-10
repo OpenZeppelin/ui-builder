@@ -13,7 +13,7 @@ export function StepExecutionMethod({
   currentConfig,
   onUpdateConfig,
   adapter,
-  formConfig, // Keep formConfig if needed by potential future logic
+  // formConfig, // Removed unused prop
 }: StepExecutionMethodProps): React.ReactElement {
   // Use the custom hook to manage state and logic
   const {

@@ -12,9 +12,9 @@ import type {
  */
 export interface StepExecutionMethodProps {
   currentConfig?: ExecutionConfig;
-  onUpdateConfig: (config: ExecutionConfig | undefined) => void;
+  onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
   adapter: ContractAdapter | null;
-  formConfig: BuilderFormConfig;
+  formConfig?: BuilderFormConfig;
 }
 
 /**

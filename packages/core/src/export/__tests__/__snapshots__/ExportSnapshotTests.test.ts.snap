@@ -71,7 +71,7 @@ import { generateId } from '../../core/utils/general';
 import MockContractService, { MockContractInfo } from '../../services/MockContractService';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 import type { AbiItem } from './types';
 
 /**
@@ -443,6 +443,72 @@ export class EvmAdapter implements ContractAdapter {
   isValidAddress(address: string): boolean {
     return isAddress(address);
   }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for EVM (e.g., EOA, Safe).
+   */
+  public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn('EVMAdapter.getSupportedExecutionMethods is using placeholder implementation.');
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'EOA (External Account)',
+        description: 'Execute using a standard wallet address.',
+      },
+      {
+        type: 'multisig',
+        name: 'Safe Multisig', // Example for future
+        description: 'Execute via a Safe multisignature wallet.',
+        disabled: false, // Enable for UI testing, even if not fully implemented
+      },
+      // Add a basic relayer placeholder for UI testing
+      {
+        type: 'relayer',
+        name: 'Relayer (Placeholder)',
+        description: 'Execute via a OpenZeppelin transaction relayer (not yet implemented).',
+        disabled: false, // Enable for UI testing, even if not fully implemented
+      },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for EVM execution configs.
+   */
+  public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    console.warn('EVMAdapter.validateExecutionConfig is using placeholder implementation.');
+
+    switch (config.method) {
+      case 'eoa': {
+        if (!config.allowAny) {
+          if (!config.specificAddress) {
+            return 'Specific EOA address is required.';
+          }
+          if (!this.isValidAddress(config.specificAddress)) {
+            return 'Invalid EOA address format.';
+          }
+        }
+        return true; // Placeholder: EOA config is valid if address format is okay
+      }
+      case 'multisig': {
+        // Placeholder: Accept multisig config for now
+        // TODO: Add Safe-specific validation (e.g., check if address is a valid Safe)
+        return true;
+      }
+      case 'relayer': {
+        // Placeholder: Accept relayer config for now
+        // TODO: Add relayer-specific validation
+        return true;
+      }
+      default: {
+        // This handles the 'never' case for exhaustive checks
+        const exhaustiveCheck: never = config;
+        return \`Unsupported execution method type: \${(exhaustiveCheck as ExecutionConfig).method}\`;
+      }
+    }
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles
@@ -595,8 +661,6 @@ import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-re
 
 import EvmAdapter from './evm/adapter';
 
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
-
 /**
  * Interface for contract adapters
  *
@@ -675,6 +739,33 @@ export interface ContractAdapter {
    * @returns Whether the address is valid for this chain
    */
   isValidAddress(address: string): boolean;
+
+  // --- NEW METHODS for Execution Configuration ---
+
+  /**
+   * Returns details for execution methods supported by this chain adapter.
+   *
+   * This allows the UI to dynamically show only relevant execution options
+   * (e.g., EOA, Safe Multisig, Squads) with chain-specific names.
+   *
+   * @returns {Promise<ExecutionMethodDetail[]>} A promise resolving to an array of supported method details.
+   */
+  getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]>;
+
+  /**
+   * Validates the complete execution configuration object against the specific
+   * requirements and capabilities of this chain adapter.
+   *
+   * Allows the adapter to enforce chain-specific rules (e.g., address format,
+   * supported method, required fields for a method).
+   *
+   * @param {ExecutionConfig} config - The execution configuration object selected by the user.
+   * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
+   */
+  validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
+
+  // TODO: Consider adding methods related to runtime execution if needed later,
+  // e.g., signTransaction(transactionData, executionConfig), etc.
 }
 
 // Export the selected adapter
@@ -723,7 +814,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 "import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter } from '../index';
+import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
 
 /**
  * Solana-specific adapter implementation
@@ -873,6 +964,53 @@ export class SolanaAdapter implements ContractAdapter {
     // TODO: Use a proper Solana address validation library when focusing on that chain
     return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
   }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual supported methods for Solana (e.g., EOA, Squads).
+   */
+  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    // Placeholder: Assume only EOA is supported for now
+    console.warn('SolanaAdapter.getSupportedExecutionMethods is using placeholder implementation.');
+    return Promise.resolve([
+      {
+        type: 'eoa',
+        name: 'EOA (Wallet Account)',
+        description: 'Execute using a standard Solana wallet address.',
+      },
+      // {
+      //   type: 'multisig',
+      //   name: 'Squads Protocol',
+      //   description: 'Execute via the Squads multisig program.',
+      //   disabled: true
+      // },
+    ]);
+  }
+
+  /**
+   * @inheritdoc
+   * TODO: Implement actual validation logic for Solana execution configs.
+   */
+  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    // Placeholder: Basic validation
+    console.warn('SolanaAdapter.validateExecutionConfig is using placeholder implementation.');
+    if (config.method === 'eoa') {
+      if (!config.allowAny && !config.specificAddress) {
+        return 'Specific Solana account address is required.';
+      }
+      if (
+        !config.allowAny &&
+        config.specificAddress &&
+        !this.isValidAddress(config.specificAddress)
+      ) {
+        return 'Invalid account address format for Solana.';
+      }
+      return true;
+    } else {
+      // For now, consider other methods unsupported by this placeholder
+      return \`Execution method '\${config.method}' is not yet supported by this adapter implementation.\`;
+    }
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles
@@ -889,8 +1027,6 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import SolanaAdapter from './solana/adapter';
-
-import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';
 
 /**
  * Interface for contract adapters
@@ -970,6 +1106,33 @@ export interface ContractAdapter {
    * @returns Whether the address is valid for this chain
    */
   isValidAddress(address: string): boolean;
+
+  // --- NEW METHODS for Execution Configuration ---
+
+  /**
+   * Returns details for execution methods supported by this chain adapter.
+   *
+   * This allows the UI to dynamically show only relevant execution options
+   * (e.g., EOA, Safe Multisig, Squads) with chain-specific names.
+   *
+   * @returns {Promise<ExecutionMethodDetail[]>} A promise resolving to an array of supported method details.
+   */
+  getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]>;
+
+  /**
+   * Validates the complete execution configuration object against the specific
+   * requirements and capabilities of this chain adapter.
+   *
+   * Allows the adapter to enforce chain-specific rules (e.g., address format,
+   * supported method, required fields for a method).
+   *
+   * @param {ExecutionConfig} config - The execution configuration object selected by the user.
+   * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
+   */
+  validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
+
+  // TODO: Consider adding methods related to runtime execution if needed later,
+  // e.g., signTransaction(transactionData, executionConfig), etc.
 }
 
 // Export the selected adapter
