@@ -153,6 +153,9 @@ importers:
       '@types/jszip':
         specifier: ^3.4.1
         version: 3.4.1
+      '@web3icons/react':
+        specifier: ^4.0.13
+        version: 4.0.13(react@19.1.0)(typescript@5.8.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2274,6 +2277,16 @@ packages:
 
   '@vitest/utils@3.1.1':
     resolution: {integrity: sha512-1XIjflyaU2k3HMArJ50bwSh3wKWPD6Q47wz/NUSmRV0zNywPc4w79ARjg/i/aNINHwA+mIALhUVqD9/aUvZNgg==}
+
+  '@web3icons/common@0.11.10':
+    resolution: {integrity: sha512-j7aHyK4Bw8VX06KvEdIKqoM4AJUSjC6ReiZg+1OChfUce2AjHhE2It/LbaQQ2+Gxw9d6m0eyYkmcVvZMFRlUhQ==}
+    peerDependencies:
+      typescript: ^5.0.0
+
+  '@web3icons/react@4.0.13':
+    resolution: {integrity: sha512-JF10cZFVCMYKhhpVOfHufB1qHIDMZ02LYibECmrQ50zcQxiTmqbSkvrv5LHhnSjLMuvo0wRLsa092ig0cp+dLg==}
+    peerDependencies:
+      react: ^18.2.0
 
   JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -7698,6 +7711,17 @@ snapshots:
       loupe: 3.1.3
       tinyrainbow: 2.0.0
 
+  '@web3icons/common@0.11.10(typescript@5.8.3)':
+    dependencies:
+      typescript: 5.8.3
+
+  '@web3icons/react@4.0.13(react@19.1.0)(typescript@5.8.3)':
+    dependencies:
+      '@web3icons/common': 0.11.10(typescript@5.8.3)
+      react: 19.1.0
+    transitivePeerDependencies:
+      - typescript
+
   JSONStream@1.3.5:
     dependencies:
       jsonparse: 1.3.1
@@ -8500,7 +8524,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.29.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0)(eslint@9.24.0(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.29.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@9.24.0(jiti@2.4.2)))(eslint@9.24.0(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -8522,7 +8546,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.24.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.29.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0)(eslint@9.24.0(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.29.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@9.24.0(jiti@2.4.2)))(eslint@9.24.0(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
