@@ -25,11 +25,25 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
-    return formSchemaFactory.builderConfigToRenderSchema(
+    // Use the custom title and description from formConfig if available, otherwise use defaults
+    const formTitle =
+      formConfig.title !== undefined
+        ? formConfig.title
+        : `${functionDetails.displayName || functionDetails.name} Form`;
+
+    const formDescription =
+      formConfig.description !== undefined
+        ? formConfig.description
+        : functionDetails.description ||
+          `Form for interacting with the ${functionDetails.displayName} function.`;
+
+    const schema = formSchemaFactory.builderConfigToRenderSchema(
       formConfig,
-      functionDetails.displayName || functionDetails.name,
-      functionDetails.description
+      formTitle,
+      formDescription
     );
+
+    return schema;
   }, [formConfig, functionDetails]);
 
   // Create mock submission handler for preview
@@ -61,8 +75,8 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="overflow-visible">
+      <CardContent className="p-6">
         <TransactionForm
           schema={renderSchema}
           adapter={adapter}

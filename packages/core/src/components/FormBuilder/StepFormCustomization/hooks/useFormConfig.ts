@@ -179,10 +179,46 @@ export function useFormConfig({
     [formConfig, onFormConfigUpdated]
   );
 
+  const updateFormTitle = useCallback(
+    (title: string) => {
+      if (!formConfig) return;
+
+      const updatedConfig = updateFormConfig(formConfig, { title });
+
+      setFormConfig(updatedConfig);
+
+      // Only notify parent if the config actually changed
+      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
+        lastParentUpdate.current = updatedConfig;
+        onFormConfigUpdated(updatedConfig);
+      }
+    },
+    [formConfig, onFormConfigUpdated]
+  );
+
+  const updateFormDescription = useCallback(
+    (description: string) => {
+      if (!formConfig) return;
+
+      const updatedConfig = updateFormConfig(formConfig, { description });
+
+      setFormConfig(updatedConfig);
+
+      // Only notify parent if the config actually changed
+      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
+        lastParentUpdate.current = updatedConfig;
+        onFormConfigUpdated(updatedConfig);
+      }
+    },
+    [formConfig, onFormConfigUpdated]
+  );
+
   return {
     formConfig,
     updateField,
     updateFormLayout,
     updateFormValidation,
+    updateFormTitle,
+    updateFormDescription,
   };
 }

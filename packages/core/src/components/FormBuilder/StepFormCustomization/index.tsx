@@ -10,6 +10,7 @@ import { useFormConfig } from './hooks/useFormConfig';
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
+import { GeneralSettings } from './GeneralSettings';
 import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
 
@@ -29,10 +30,17 @@ export function StepFormCustomization({
   selectedChain,
   onFormConfigUpdated,
 }: StepFormCustomizationProps) {
-  const [activeTab, setActiveTab] = useState('fields');
+  const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { formConfig, updateField, updateFormLayout, updateFormValidation } = useFormConfig({
+  const {
+    formConfig,
+    updateField,
+    updateFormLayout,
+    updateFormValidation,
+    updateFormTitle,
+    updateFormDescription,
+  } = useFormConfig({
     contractSchema,
     selectedFunction,
     onFormConfigUpdated,
@@ -77,11 +85,22 @@ export function StepFormCustomization({
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>
             <TabsTrigger value="layout">Layout</TabsTrigger>
             <TabsTrigger value="validation">Validation</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="general" className="mt-4 rounded-md border p-4">
+            <GeneralSettings
+              title={formConfig.title}
+              description={formConfig.description}
+              onUpdateTitle={updateFormTitle}
+              onUpdateDescription={updateFormDescription}
+              selectedFunctionDetails={selectedFunctionDetails}
+            />
+          </TabsContent>
 
           <TabsContent value="fields" className="mt-4 rounded-md border p-4">
             <div className="space-y-4">

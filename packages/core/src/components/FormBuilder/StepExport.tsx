@@ -160,6 +160,22 @@ export function StepExport({
               </span>
             </div>
             <div className="flex justify-between">
+              <span className="text-muted-foreground">Form Title:</span>
+              <span className="font-medium">
+                {formConfigured && formConfig?.title !== undefined
+                  ? formConfig.title || '<Empty Title>'
+                  : 'Default Title'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Form Description:</span>
+              <span className="max-w-[50%] truncate text-right font-medium">
+                {formConfigured && formConfig?.description !== undefined
+                  ? formConfig.description || '<Empty Description>'
+                  : 'Default Description'}
+              </span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-muted-foreground">Form Fields:</span>
               <span className="font-medium">
                 {formConfigured ? `${formConfig?.fields.length} field(s)` : 'None'}

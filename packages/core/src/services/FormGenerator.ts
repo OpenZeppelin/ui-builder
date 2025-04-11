@@ -70,6 +70,10 @@ export function generateFormConfig(
   return {
     ...commonProperties,
     functionId,
+    title: `${functionDetails.displayName} Form`,
+    description:
+      functionDetails.description ||
+      `Form for interacting with the ${functionDetails.displayName} function.`,
   };
 }
 
@@ -257,10 +261,19 @@ export function updateFormConfig(
     },
   };
 
+  // Create a copy of the updates, properly handling the title
+  const processedUpdates = { ...updates };
+
+  // Special handling for title - only if it exists in updates
+  // This ensures empty strings are preserved and not replaced with defaults
+  if ('title' in updates) {
+    processedUpdates.title = updates.title;
+  }
+
   // Return complete updated configuration
   return {
     ...existingConfig,
-    ...updates,
+    ...processedUpdates,
     ...updatedCommonProperties,
   };
 }

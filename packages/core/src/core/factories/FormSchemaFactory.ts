@@ -120,7 +120,7 @@ export class FormSchemaFactory {
     return {
       ...builderConfig,
       id: `form-${builderConfig.functionId}`,
-      title: this.humanizeString(functionName),
+      title: functionName,
       description: functionDescription || '',
       fields: renderFields,
       submitButton: {

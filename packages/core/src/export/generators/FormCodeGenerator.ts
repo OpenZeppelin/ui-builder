@@ -65,10 +65,16 @@ export class FormCodeGenerator {
 
     // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
     // This ensures consistency with the preview in the form builder
+    const formTitle = formConfig.title !== undefined ? formConfig.title : functionId;
+    const formDescription =
+      formConfig.description !== undefined
+        ? formConfig.description
+        : `Form for interacting with the ${functionId} function.`;
+
     const renderSchema = formSchemaFactory.builderConfigToRenderSchema(
       formConfig,
-      functionId, // Use functionId as the function name
-      '' // Empty description for now - could be enhanced in the future
+      formTitle,
+      formDescription
     );
 
     // Validate the schema to ensure it has all required properties

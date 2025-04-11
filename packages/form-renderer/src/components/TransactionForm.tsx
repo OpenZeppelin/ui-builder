@@ -150,9 +150,17 @@ export function TransactionForm({
 
   return (
     <FormProvider {...methods}>
-      <div className="flex flex-col space-y-4">
-        {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
+      {/* Title and description at the top, outside of space-y-4 container */}
+      {schema.title && <h2 className="mb-4 text-xl font-bold">{schema.title}</h2>}
 
+      {/* Always render description container, just change content */}
+      <div className="description-container mb-6">
+        <p className="text-muted-foreground rounded-md border border-gray-100 bg-gray-50 p-3 text-sm">
+          {schema.description || 'No description provided.'}
+        </p>
+      </div>
+
+      <div className="flex flex-col space-y-4">
         {formError && (
           <div className="form-error rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
             {formError}

@@ -18,6 +18,17 @@ export interface BuilderFormConfig extends CommonFormProperties {
    * ID of the contract function this form is for
    */
   functionId: string;
+
+  /**
+   * Custom title for the form
+   */
+  title?: string;
+
+  /**
+   * Custom description for the form
+   */
+  description?: string;
+
   executionConfig?: ExecutionConfig;
 }
 
