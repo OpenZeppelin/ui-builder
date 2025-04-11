@@ -6,7 +6,7 @@ import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 import { StepExecutionMethod } from './StepExecutionMethod/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
-import { StepChainSelect } from './StepChainSelect';
+import { ChainTileSelector } from './ChainTileSelector';
 import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
 
@@ -122,7 +122,9 @@ export function TransactionFormBuilder() {
     {
       id: 'chain-select',
       title: 'Select Blockchain',
-      component: <StepChainSelect onChainSelect={handleChainSelect} initialChain={selectedChain} />,
+      component: (
+        <ChainTileSelector onChainSelect={handleChainSelect} initialChain={selectedChain} />
+      ),
     },
     {
       id: 'contract-definition',
