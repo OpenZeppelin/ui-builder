@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
-import { Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
+import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../adapters/index.ts';
 import { getChainName } from '../../core/utils/utils';
+import { loadContractDefinition } from '../../services/ContractLoader';
 
 import { MockContractSelector } from './MockContractSelector';
 
@@ -14,130 +16,125 @@ interface StepContractDefinitionProps {
   selectedChain: ChainType;
 }
 
+interface ContractFormData {
+  contractAddress: string;
+}
+
 export function StepContractDefinition({
   onContractSchemaLoaded,
   selectedChain,
 }: StepContractDefinitionProps) {
-  const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const { control, handleSubmit, watch, reset } = useForm<ContractFormData>({
+    defaultValues: { contractAddress: '' },
+  });
+
+  useEffect(() => {
+    reset({ contractAddress: '' });
     setError(null);
-    const file = event.target.files?.[0];
+    setIsLoading(false);
+  }, [selectedChain, reset]);
 
-    if (!file) {
-      return;
-    }
+  const adapter = getContractAdapter(selectedChain);
 
-    if (!file.name.endsWith('.json')) {
-      setError('Please upload a JSON file');
-      return;
-    }
+  const onSubmitAddress = useCallback(
+    async (data: ContractFormData) => {
+      const address = data.contractAddress;
+      if (!address) {
+        setError('Please enter a contract address.');
+        return;
+      }
+      setIsLoading(true);
+      setError(null);
 
-    setFileName(file.name);
-    // In a real implementation, we would read the file and parse the JSON
-    // For this POC, we'll skip that and just simulate loading the mock contract definition
-  };
-
-  const handleLoadMockData = (mockId: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    // Simulate API loading
-    setTimeout(() => {
       try {
-        // Get the appropriate adapter for the selected chain
-        const adapter = getContractAdapter(selectedChain);
+        const schema = await loadContractDefinition(selectedChain, address);
+        if (schema) {
+          onContractSchemaLoaded(schema);
+        } else {
+          setError(
+            'Failed to load contract definition. Check address, network, and Etherscan verification.'
+          );
+        }
+      } catch (err) {
+        setError('An unexpected error occurred.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedChain, onContractSchemaLoaded]
+  );
 
-        // Use the adapter to load mock data
+  const handleLoadMockData = useCallback(
+    (mockId: string) => {
+      setIsLoading(true);
+      setError(null);
+      reset({ contractAddress: '' });
+
+      try {
         adapter
           .loadMockContract(mockId)
           .then((contractSchema: ContractSchema) => {
             onContractSchemaLoaded(contractSchema);
-            setIsLoading(false);
           })
           .catch((err: Error) => {
-            console.error(`Error loading mock contract for ${selectedChain}:`, err);
-            setError(`Failed to load mock contract definition for ${selectedChain}`);
-            setIsLoading(false);
-          });
+            setError(`Failed to load mock contract: ${err.message}`);
+          })
+          .finally(() => setIsLoading(false));
       } catch (err: unknown) {
-        console.error('Error getting contract adapter:', err);
-        setError(`No adapter available for ${selectedChain}`);
+        setError('Adapter error loading mock data.');
         setIsLoading(false);
       }
-    }, 1000);
-  };
+    },
+    [selectedChain, onContractSchemaLoaded, reset, adapter]
+  );
+
+  const currentAddress = watch('contractAddress');
 
   return (
-    <div className="flex flex-col space-y-6">
+    <form
+      onSubmit={(e) => void handleSubmit(onSubmitAddress)(e)}
+      className="flex flex-col space-y-6"
+    >
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Upload Contract Definition</h3>
+        <h3 className="text-lg font-medium">Provide Contract Address (EVM)</h3>
         <p className="text-muted-foreground text-sm">
-          Upload your contract definition file or use our mock data for testing.
+          Enter the address of a verified contract on {getChainName(selectedChain)} (e.g.,
+          Etherscan) or load mock data.
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <div className="flex flex-col gap-2">
-          <Label>Contract Definition</Label>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Label
-                htmlFor="file-upload"
-                className="hover:bg-muted/50 flex cursor-pointer items-center justify-center rounded-md border border-dashed p-4 transition-colors"
-              >
-                <div className="flex flex-col items-center gap-1 text-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="text-muted-foreground h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                    />
-                  </svg>
-                  <div className="text-muted-foreground text-xs font-medium">
-                    {fileName ? fileName : 'Click to upload or drag and drop'}
-                  </div>
-                </div>
-                <input
-                  id="file-upload"
-                  name="file"
-                  type="file"
-                  accept=".json"
-                  className="sr-only"
-                  onChange={handleFileUpload}
-                />
-              </Label>
-            </div>
-            {isLoading ? (
-              <LoadingButton loading variant="outline">
-                Loading...
-              </LoadingButton>
-            ) : (
-              <MockContractSelector onSelectMock={handleLoadMockData} chainType={selectedChain} />
-            )}
-          </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-        </div>
+      <div className="grid gap-4">
+        <AddressField
+          id="contract-address"
+          name="contractAddress"
+          label="Contract Address"
+          control={control}
+          adapter={adapter}
+          validation={{ required: true }}
+          placeholder={`Enter ${getChainName(selectedChain)} contract address (e.g., 0x...)`}
+        />
 
-        <div className="bg-muted rounded-md p-4">
-          <h4 className="mb-2 font-medium">Using Mock Data for {getChainName(selectedChain)}</h4>
-          <p className="text-muted-foreground text-sm">
-            For this proof of concept, we&apos;re using pre-configured mock data for{' '}
-            {getChainName(selectedChain)}. In a production environment, you would upload your actual
-            contract definition file. The mock data includes various input types to demonstrate the
-            form building capabilities.
-          </p>
+        <div className="flex items-end justify-between gap-4">
+          <LoadingButton
+            type="submit"
+            loading={isLoading}
+            disabled={isLoading || !currentAddress}
+            className="w-1/2"
+          >
+            Load ABI from Address
+          </LoadingButton>
+
+          <div className="flex flex-col items-end text-right">
+            <Label className="text-muted-foreground mb-1 text-xs">Or load mock:</Label>
+            <MockContractSelector onSelectMock={handleLoadMockData} chainType={selectedChain} />
+          </div>
         </div>
+        {error && <p className="text-destructive pt-1 text-sm">{error}</p>}
       </div>
-    </div>
+    </form>
   );
 }
