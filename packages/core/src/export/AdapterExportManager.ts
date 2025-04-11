@@ -45,6 +45,12 @@ const generalUtilFiles = import.meta.glob<string>('../core/utils/general.ts', {
   import: 'default',
 }) as LazyGlobImportResult;
 
+// Logger file
+const loggerFile = import.meta.glob<string>('../core/utils/logger.ts', {
+  query: '?raw',
+  import: 'default',
+}) as LazyGlobImportResult;
+
 // Get the adapter index file that contains the ContractAdapter interface
 const adapterIndexFiles = import.meta.glob<string>('../adapters/index.ts', {
   query: '?raw',
@@ -58,6 +64,7 @@ export const adapterFilePaths = {
   util: Object.keys(utilFiles),
   coreType: Object.keys(coreTypeFiles),
   generalUtil: Object.keys(generalUtilFiles),
+  logger: Object.keys(loggerFile),
   adapterIndex: Object.keys(adapterIndexFiles),
 };
 
@@ -209,6 +216,10 @@ export class AdapterExportManager {
     const generalUtilsFiles = await this.getGeneralUtilFiles();
     Object.assign(files, generalUtilsFiles);
 
+    // Add logger file
+    const loggerFiles = await this.getLoggerFiles();
+    Object.assign(files, loggerFiles);
+
     // Add chain-specific adapter files
     for (const path of this.adapterRegistry[chainType]) {
       // Create output path that normalizes the internal path to exported path
@@ -266,6 +277,29 @@ export class AdapterExportManager {
     }
 
     return utilFiles;
+  }
+
+  /**
+   * Get logger file required by adapters
+   */
+  private async getLoggerFiles(): Promise<AdapterFileMap> {
+    const loggerFiles: AdapterFileMap = {};
+
+    // logger.ts - Get from core package
+    const loggerPath = Object.keys(loggerFile)[0] || '';
+    if (loggerPath) {
+      try {
+        loggerFiles['src/core/utils/logger.ts'] = await this.getFileContent(loggerPath);
+      } catch (error) {
+        console.error('Failed to load logger.ts:', error);
+        throw new Error('Failed to load required utility file: logger.ts');
+      }
+    } else {
+      console.error('No logger.ts file found');
+      throw new Error('Required utility file logger.ts not found');
+    }
+
+    return loggerFiles;
   }
 
   /**
@@ -360,7 +394,9 @@ export class AdapterExportManager {
       processedContent += `import type { ContractSchema, FunctionParameter } from '../core/types/ContractSchema';\n\n`;
     }
 
-    // Extract and keep the ContractAdapter interface definition
+    // Extract and keep all interface and type definitions
+
+    // Extract the ContractAdapter interface
     const interfaceStartPattern =
       /\/\*\*\s*\n\s*\*\s*Interface\s*for\s*contract\s*adapters[\s\S]*?export\s+interface\s+ContractAdapter\s*\{/;
     const startMatch = content.match(interfaceStartPattern);
@@ -391,9 +427,25 @@ export class AdapterExportManager {
       throw new Error('Failed to find ContractAdapter interface in adapter index file');
     }
 
+    // Extract ExecutionConfig and ExecutionMethodDetail types
+    const typePatterns = [
+      /\/\*\*[\s\S]*?export\s+(?:type|interface)\s+ExecutionConfig\s*=[\s\S]*?;/,
+      /\/\*\*[\s\S]*?export\s+(?:type|interface)\s+ExecutionMethodDetail\s*=[\s\S]*?;/,
+      /\/\*\*[\s\S]*?export\s+(?:type|interface)\s+ExecutionConfig\s*\{[\s\S]*?\}/,
+      /\/\*\*[\s\S]*?export\s+(?:type|interface)\s+ExecutionMethodDetail\s*\{[\s\S]*?\}/,
+    ];
+
+    for (const pattern of typePatterns) {
+      const match = content.match(pattern);
+      if (match) {
+        processedContent += match[0] + '\n\n';
+      }
+    }
+
     // Export the selected adapter class
     processedContent += `// Export the selected adapter\n`;
     processedContent += `export { ${adapterClassName} };\n`;
+    processedContent += `export type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail };\n`;
 
     return processedContent;
   }
@@ -437,7 +489,11 @@ export class AdapterExportManager {
         if (generalUtilFiles[path]) {
           return await generalUtilFiles[path]();
         }
-        throw new Error(`General utility file not found: ${path}`);
+        // Logger file
+        if (loggerFile[path]) {
+          return await loggerFile[path]();
+        }
+        throw new Error(`Utility file not found: ${path}`);
       }
 
       throw new Error(`Unknown file type: ${path}`);
