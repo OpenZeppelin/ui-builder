@@ -580,10 +580,14 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
       mode: 'onChange',
       showErrors: 'inline',
     },
+    executionConfig: {
+      method: 'eoa',
+      allowAny: true,
+    },
     theme: {},
     id: 'form-transfer',
-    title: 'Transfer',
-    description: '',
+    title: 'transfer',
+    description: 'Form for interacting with the transfer function.',
     submitButton: {
       text: 'Execute transfer',
       loadingText: 'Processing...',
@@ -608,7 +612,10 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   ];
 
   // Execution configuration selected in the builder
-  const executionConfig: unknown | undefined = undefined;
+  const executionConfig: unknown | undefined = {
+    method: 'eoa',
+    allowAny: true,
+  };
   // TODO (Export Integration): Use executionConfig at runtime to determine
   // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 

@@ -111,7 +111,7 @@ describe('FormCodeGenerator', () => {
       expect(formSchemaFactory.builderConfigToRenderSchema).toHaveBeenCalledWith(
         formConfig,
         'transferTokens',
-        ''
+        'Form for interacting with the transferTokens function.'
       );
 
       // Verify it was called exactly once
