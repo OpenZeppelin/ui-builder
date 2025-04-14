@@ -10,8 +10,8 @@
     "build": "echo 'No build step needed for styles'",
     "lint": "eslint 'utils/**/*.{js,cjs}' --report-unused-disable-directives --max-warnings 0 --config ../../eslint.config.cjs",
     "lint:fix": "eslint 'utils/**/*.{js,cjs}' --fix --config ../../eslint.config.cjs",
-    "format": "prettier --write \"**/*.{css,js,cjs}\" --config ../../.prettierrc",
-    "format:check": "prettier --check \"**/*.{css,js,cjs}\" --config ../../.prettierrc",
+    "format": "prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
+    "format:check": "prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
     "test": "echo 'No tests for styles package'"
   },
   "keywords": [
