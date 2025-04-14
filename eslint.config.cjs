@@ -1,3 +1,7 @@
+// Import shared utilities
+const { getPluginConfigs } = require('./.eslint/utils.cjs');
+
+// Import plugins
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const reactRefreshPlugin = require('eslint-plugin-react-refresh');
@@ -5,12 +9,47 @@ const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const importPlugin = require('eslint-plugin-import');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
+const unusedImportsPlugin = require('eslint-plugin-unused-imports');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
+const jsdocPlugin = require('eslint-plugin-jsdoc');
 
-module.exports = [
+// Extract rules from recommended configs
+const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommended');
+const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
+const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
+
+// Detect if we're in a package context by checking for custom adapter plugin
+let customPlugin = null;
+try {
+  // Only attempt to load custom plugin if not already defined
+  if (!global.__HAS_LOADED_CUSTOM_PLUGIN) {
+    customPlugin = require('./.eslint/index.cjs');
+    global.__HAS_LOADED_CUSTOM_PLUGIN = true;
+  }
+} catch (e) {
+  // This is fine - we're probably running ESLint in a package subdirectory
+  customPlugin = null;
+}
+
+// Base configuration that can be extended by all packages
+const baseConfig = [
+  // Ignore patterns for all files
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '**/*.d.ts',
+      '**/*.min.js',
+      'coverage/**',
+      '**/.DS_Store',
+      '**/*.svg',
+      '**/*.json',
+      '**/*.html',
+      '**/*.css',
+      '**/*.md',
+      '**/tsconfig.tsbuildinfo',
+    ],
   },
 
   // Global settings
@@ -37,7 +76,6 @@ module.exports = [
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
-          project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         },
         node: {
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -49,7 +87,16 @@ module.exports = [
     },
   },
 
-  // TypeScript configuration
+  // JavaScript files configuration
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+  },
+
+  // Base TypeScript configuration - without project references
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
@@ -58,14 +105,17 @@ module.exports = [
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.eslint.json'],
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
     },
     rules: {
-      ...typescriptPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      ...typescriptRecommendedRules,
+      '@typescript-eslint/no-unused-vars': 'off', // Explicitly disable in favor of unused-imports
+      // Disable rules that require type checking as they will be enabled in the strict config
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
 
@@ -78,8 +128,8 @@ module.exports = [
       'react-refresh': reactRefreshPlugin,
     },
     rules: {
-      ...reactPlugin.configs.recommended.rules,
-      ...reactHooksPlugin.configs.recommended.rules,
+      ...reactRecommendedRules,
+      ...reactHooksRecommendedRules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
@@ -88,20 +138,36 @@ module.exports = [
 
   // Import and sorting rules
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       import: importPlugin,
       'simple-import-sort': simpleImportSortPlugin,
+      'unused-imports': unusedImportsPlugin,
     },
     rules: {
       'import/first': 'error',
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
       'simple-import-sort/imports': [
         'error',
         {
           groups: [
+            // Type imports from external packages
+            ['^type.*\\u0000$', '^@?\\w.*\\u0000$'],
             // React and related packages come first
             ['^react', '^react-dom', '^react-.*$'],
+            // OpenZeppelin packages
+            ['^@openzeppelin/'],
             // External packages
             ['^@?\\w'],
             // Internal packages (alias imports)
@@ -112,7 +178,7 @@ module.exports = [
             ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
             // Style imports
             ['^.+\\.s?css$'],
-            // Type imports
+            // Other type imports
             ['^.+\\u0000$'],
           ],
         },
@@ -121,14 +187,54 @@ module.exports = [
     },
   },
 
+  // JSDoc rules for libraries
+  {
+    files: ['packages/form-renderer/src/**/*.ts', 'packages/form-renderer/src/**/*.tsx'],
+    plugins: {
+      jsdoc: jsdocPlugin,
+    },
+    rules: {
+      // Enforce JSDoc for public API
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          publicOnly: true,
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ClassDeclaration: true,
+            ArrowFunctionExpression: false,
+            FunctionExpression: false,
+          },
+        },
+      ],
+    },
+  },
+
   // Prettier configuration
   {
+    files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx', '**/*.cjs', '**/*.mjs'],
     plugins: {
       prettier: prettierPlugin,
     },
     rules: {
-      ...prettierConfig.rules,
+      ...(prettierConfig.rules || {}),
       'prettier/prettier': ['error', {}, { usePrettierrc: true }],
     },
   },
 ];
+
+// Add custom adapter plugin config only if available
+if (customPlugin) {
+  baseConfig.push({
+    files: ['src/adapters/**/*.ts', 'packages/core/src/adapters/**/*.ts'],
+    plugins: {
+      custom: customPlugin,
+    },
+    rules: {
+      'custom/no-extra-adapter-methods': 'error',
+    },
+  });
+}
+
+module.exports = baseConfig;

@@ -21,6 +21,12 @@ out/
 coverage/
 *.tsbuildinfo
 
+# Test reports
+packages/core/test-results/
+
+# Test exports
+exports/
+
 # Environment variables
 .env
 .env.local

@@ -17,7 +17,7 @@ Thank you for considering contributing to Transaction Form Builder! This documen
 
 1. Ensure your code follows the style guidelines of the project
 2. Update the README.md with details of changes if applicable
-3. The PR should work for all supported Node.js versions
+3. The PR should work for Node.js version 20.11.1 or higher
 4. Include tests for new features or bug fixes
 5. Link any relevant issues in the PR description
 
@@ -43,7 +43,6 @@ pnpm dev
 - `pnpm build` - Build for production
 - `pnpm lint` - Run ESLint
 - `pnpm lint:fix` - Fix ESLint issues
-- `pnpm lint:imports` - Fix import sorting
 - `pnpm test` - Run tests
 - `pnpm test:watch` - Run tests in watch mode
 - `pnpm test:coverage` - Run tests with coverage report
@@ -57,6 +56,10 @@ pnpm dev
 - Write tests for your changes
 - Keep pull requests focused on a single topic
 - Add proper documentation for new features
+- Use the shared Prettier configuration at the root of the repository
+  - Don't add package-specific `.prettierrc` files
+  - Run `pnpm format` to format all code before committing
+  - When making CSS changes with Tailwind, use the `fix-all` script: `pnpm fix-all`
 
 ## Commit Messages
 
@@ -72,4 +75,4 @@ This will guide you through an interactive process to create a properly formatte
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's license. 
+By contributing, you agree that your contributions will be licensed under the project's license.

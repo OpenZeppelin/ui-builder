@@ -1,0 +1,101 @@
+name: Publish Form Renderer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/form-renderer/**'
+      - '.github/workflows/publish-form-renderer.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty for semantic-release to determine)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run (do not actually publish)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    name: Publish Form Renderer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.9.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Run tests to ensure package is working
+      - name: Test form-renderer
+        run: pnpm --filter=@openzeppelin/transaction-form-renderer test
+
+      # Build the package
+      - name: Build form-renderer
+        run: pnpm --filter=@openzeppelin/transaction-form-renderer build
+
+      # Check package files
+      - name: Check package files
+        run: |
+          echo "=== Checking generated files ==="
+          ls -la packages/form-renderer/dist
+
+          echo "=== Checking package.json ==="
+          cat packages/form-renderer/package.json
+
+          echo "=== Dry pack test ==="
+          cd packages/form-renderer
+          npm pack --dry-run
+
+      # Use semantic-release for version management if no version is specified
+      - name: Semantic Release
+        if: ${{ !github.event.inputs.version && !github.event.inputs.dry_run }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HUSKY: 0
+        run: |
+          cd packages/form-renderer
+          npx semantic-release
+
+      # If manual version is provided, publish with that version
+      - name: Publish with manual version
+        if: ${{ github.event.inputs.version && !github.event.inputs.dry_run }}
+        run: |
+          cd packages/form-renderer
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Display success message for dry run
+      - name: Dry run success message
+        if: ${{ github.event.inputs.dry_run }}
+        run: |
+          echo "==================================================================="
+          echo "DRY RUN COMPLETED SUCCESSFULLY"
+          echo "The package was built and tested, but not published to npm."
+          echo "==================================================================="

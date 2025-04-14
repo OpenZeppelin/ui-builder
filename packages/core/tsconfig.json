@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@styles/*": ["../styles/src/*"]
+    },
+    "emitDeclarationOnly": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
+  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }],
+  "exclude": ["src/export/codeTemplates/*.template.tsx"]
+}
