@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../../../adapters/index';
-import { getChainName } from '../../../../core/utils/utils';
+import { getChainExplorerGuidance, getChainName } from '../../../../core/chains';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { MockContractSelector } from '../../MockContractSelector';
 import { ContractAddressFormProps, ContractFormData } from '../types';
@@ -84,22 +84,7 @@ export function ContractAddressForm({
 
   const currentAddress = watch('contractAddress');
   const chainName = getChainName(selectedChain);
-
-  // Determine chain-specific guidance text
-  const getChainSpecificGuidance = () => {
-    switch (selectedChain) {
-      case 'evm':
-        return `(e.g., Etherscan verified contracts)`;
-      case 'solana':
-        return `(e.g., program IDs on Solana Explorer)`;
-      case 'stellar':
-        return `(e.g., contract IDs on Stellar Expert)`;
-      case 'midnight':
-        return `(e.g., contract IDs on Midnight Explorer)`;
-      default:
-        return '';
-    }
-  };
+  const explorerGuidance = getChainExplorerGuidance(selectedChain);
 
   return (
     <form
@@ -109,8 +94,8 @@ export function ContractAddressForm({
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Provide Contract Address</h3>
         <p className="text-muted-foreground text-sm">
-          Enter the address of a verified contract on the {chainName} network{' '}
-          {getChainSpecificGuidance()} or load from mock data.
+          Enter the address of a verified contract on the {chainName} network
+          {explorerGuidance && ` (e.g., ${explorerGuidance})`} or load from mock data.
         </p>
       </div>
 

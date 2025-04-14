@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 
 // Import the Midnight logo SVG
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
+import { getChainDescription, getChainName } from '../../core/chains';
 import type { ChainType } from '../../core/types/ContractSchema';
 
 // Mapping of our chain types to web3icons network names
@@ -34,25 +35,25 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
   const blockchainOptions = [
     {
       value: 'evm' as const,
-      label: 'Ethereum (EVM)',
+      label: getChainName('evm'),
       network: networkMapping.evm,
       customIcon: null,
     },
     {
       value: 'midnight' as const,
-      label: 'Midnight',
+      label: getChainName('midnight'),
       network: null,
       customIcon: true, // Used to indicate we need to use the imported SVG
     },
     {
       value: 'stellar' as const,
-      label: 'Stellar',
+      label: getChainName('stellar'),
       network: networkMapping.stellar,
       customIcon: null,
     },
     {
       value: 'solana' as const,
-      label: 'Solana',
+      label: getChainName('solana'),
       network: networkMapping.solana,
       customIcon: null,
     },
@@ -115,34 +116,4 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
       </div>
     </div>
   );
-}
-
-function getChainName(chain: ChainType): string {
-  switch (chain) {
-    case 'evm':
-      return 'Ethereum (EVM)';
-    case 'midnight':
-      return 'Midnight';
-    case 'stellar':
-      return 'Stellar';
-    case 'solana':
-      return 'Solana';
-    default:
-      return chain;
-  }
-}
-
-function getChainDescription(chain: ChainType): string {
-  switch (chain) {
-    case 'evm':
-      return 'Ethereum is a decentralized, open-source blockchain with smart contract functionality. It supports the Ethereum Virtual Machine (EVM) and uses the native cryptocurrency Ether (ETH).';
-    case 'midnight':
-      return 'Midnight is a data protection blockchain that enables programmable privacy. It allows developers to build applications that shield sensitive data, including wallet addresses and transaction information, while leveraging zero-knowledge proofs for selective disclosure of data.';
-    case 'stellar':
-      return 'Stellar is a fast, energy-efficient blockchain network designed for real-world financial applications. It enables near-instant global payments at low cost, connects digital assets to traditional finance, and supports smart contracts through Soroban. Its anchor network spans over 180 countries and supports 20+ digital assets.';
-    case 'solana':
-      return 'Solana is a high-performance blockchain supporting smart contracts. It offers fast transaction times and low fees using a Proof of History consensus mechanism.';
-    default:
-      return '';
-  }
 }
