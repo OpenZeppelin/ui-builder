@@ -60,16 +60,18 @@ export function App() {
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `
-"import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
-
-import { isAddress } from 'ethers';
+"import { isAddress } from 'ethers';
 import { startCase } from 'lodash';
 
-import { generateId } from '../../core/utils/general';
-import MockContractService, { MockContractInfo } from '../../services/MockContractService';
+import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
+import { generateId } from '../../core/utils/general';
+import { logger } from '../../core/utils/logger';
+import MockContractService from '../../services/MockContractService';
+import type { MockContractInfo } from '../../services/MockContractService';
 import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
+
 import type { AbiItem } from './types';
 
 /**
@@ -102,68 +104,139 @@ const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
  */
 export class EvmAdapter implements ContractAdapter {
   /**
-   * Load a contract from a file or address
+   * Load a contract from a source string (address or JSON ABI)
    */
   async loadContract(source: string): Promise<ContractSchema> {
-    // In a real implementation, this would fetch the ABI from the blockchain or parse a file
-    console.log(\`Loading EVM contract from: \${source}\`);
-
-    // For now, just return the mock contract
-    return this.loadMockContract();
+    // Step 1: Input Type Detection
+    if (isAddress(source)) {
+      // Input is likely an address, attempt Etherscan fetch
+      logger.info('EvmAdapter', \`Detected address: \${source}. Attempting Etherscan ABI fetch...\`);
+      return this.loadAbiFromEtherscan(source);
+    } else {
+      // Input is likely a JSON ABI string (or potentially invalid)
+      logger.info('EvmAdapter', 'Input is not an address. Attempting to parse as JSON ABI...');
+      // Assume input is JSON string if not an address
+      return this.loadAbiFromJson(source);
+    }
   }
 
   /**
-   * Load a mock contract for testing
-   * @param mockId Optional ID to specify which mock to load
+   * Loads and parses an ABI directly from a JSON string.
    */
-  async loadMockContract(mockId?: string): Promise<ContractSchema> {
+  private async loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
+    let abi: AbiItem[];
     try {
-      // Get available mocks to find the file name
-      const mocks = await MockContractService.getAvailableMocks();
-
-      // Default to the first mock if none specified
-      const mockInfo = mockId
-        ? mocks.find((mock: MockContractInfo) => mock.id === mockId)
-        : mocks.find((mock: MockContractInfo) => mock.id === 'input-tester');
-
-      if (!mockInfo) {
-        throw new Error(\`Mock contract with ID \${mockId || 'input-tester'} not found\`);
+      abi = JSON.parse(abiJsonString);
+      if (!Array.isArray(abi)) {
+        throw new Error('Parsed JSON is not an array.');
       }
-
-      // Load the mock ABI
-      const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
-
-      // Set contract name based on mock info
-      const contractName = mockInfo.name;
-
-      // Transform the ABI into a chain-agnostic schema
-      const contractSchema: ContractSchema = {
-        chainType: 'evm',
-        name: contractName,
-        functions: mockAbi
-          .filter((item) => item.type === 'function')
-          .map((item) => ({
-            id: \`\${item.name}_\${item.inputs?.map((i) => i.type).join('_') || ''}\`,
-            name: item.name || '',
-            displayName: this.formatMethodName(item.name || ''),
-            inputs:
-              item.inputs?.map((input) => ({
-                name: input.name,
-                type: input.type,
-                displayName: this.formatInputName(input.name, input.type),
-              })) || [],
-            type: item.type || 'function',
-            stateMutability: item.stateMutability,
-            modifiesState:
-              !item.stateMutability || !['view', 'pure'].includes(item.stateMutability),
-          })),
-      };
-
-      return contractSchema;
+      // TODO: Add more robust ABI structure validation if needed
     } catch (error) {
-      console.error('Error loading mock EVM contract:', error);
-      throw new Error('Failed to load mock EVM contract');
+      logger.error('EvmAdapter', 'Failed to parse source string as JSON ABI:', error);
+      throw new Error(\`Invalid JSON ABI provided: \${(error as Error).message}\`);
     }
+
+    logger.info('EvmAdapter', \`Successfully parsed JSON ABI with \${abi.length} items.\`);
+    const contractName = 'ContractFromABI'; // Default name for direct ABI
+    return this.transformAbiToSchema(abi, contractName);
+  }
+
+  /**
+   * Fetches and parses an ABI from Etherscan using a contract address.
+   */
+  private async loadAbiFromEtherscan(address: string): Promise<ContractSchema> {
+    const apiKey = import.meta.env.VITE_ETHERSCAN_API_KEY;
+    if (!apiKey) {
+      logger.error('EvmAdapter', 'Etherscan API Key (VITE_ETHERSCAN_API_KEY) is missing.');
+      throw new Error('Etherscan API Key is not configured.');
+    }
+
+    // TODO: Make network dynamic
+    const apiBaseUrl = 'https://api.etherscan.io/api'; // Mainnet default
+    const url = \`\${apiBaseUrl}?module=contract&action=getabi&address=\${address}&apikey=\${apiKey}\`;
+
+    let response: Response;
+    try {
+      logger.info('EvmAdapter', \`Fetching ABI from Etherscan for address: \${address}\`);
+      response = await fetch(url);
+    } catch (networkError) {
+      logger.error('EvmAdapter', 'Network error fetching ABI from Etherscan:', networkError);
+      throw new Error(\`Network error fetching ABI: \${(networkError as Error).message}\`);
+    }
+
+    if (!response.ok) {
+      logger.error('EvmAdapter', \`Etherscan API request failed with status: \${response.status}\`);
+      throw new Error(\`Etherscan API request failed: \${response.status} \${response.statusText}\`);
+    }
+
+    let etherscanResult: { status: string; message: string; result: string };
+    try {
+      etherscanResult = await response.json();
+    } catch (jsonError) {
+      logger.error('EvmAdapter', 'Failed to parse Etherscan API response as JSON:', jsonError);
+      throw new Error('Invalid JSON response received from Etherscan API.');
+    }
+
+    if (etherscanResult.status !== '1') {
+      logger.warn(
+        'EvmAdapter',
+        \`Etherscan API error: Status \${etherscanResult.status}, Result: \${etherscanResult.result}\`
+      );
+      if (etherscanResult.result?.includes('Contract source code not verified')) {
+        throw new Error(
+          \`Contract not verified on Etherscan (address: \${address}). ABI not available.\`
+        );
+      }
+      throw new Error(\`Etherscan API Error: \${etherscanResult.result || etherscanResult.message}\`);
+    }
+
+    let abi: AbiItem[];
+    try {
+      abi = JSON.parse(etherscanResult.result);
+      if (!Array.isArray(abi)) {
+        throw new Error('Parsed ABI from Etherscan is not an array.');
+      }
+    } catch (error) {
+      logger.error('EvmAdapter', 'Failed to parse ABI JSON string from Etherscan result:', error);
+      throw new Error(\`Invalid ABI JSON received from Etherscan: \${(error as Error).message}\`);
+    }
+
+    logger.info('EvmAdapter', \`Successfully parsed Etherscan ABI with \${abi.length} items.\`);
+    // TODO: Fetch contract name?
+    const contractName = \`Contract_\${address.substring(0, 6)}\`;
+    return this.transformAbiToSchema(abi, contractName);
+  }
+
+  /**
+   * Transforms a standard ABI array into the ContractSchema format.
+   */
+  private transformAbiToSchema(abi: AbiItem[], contractName: string): ContractSchema {
+    logger.info('EvmAdapter', \`Transforming ABI to ContractSchema for: \${contractName}\`);
+    const contractSchema: ContractSchema = {
+      chainType: 'evm',
+      name: contractName,
+      functions: abi
+        .filter((item) => item.type === 'function')
+        .map((item) => ({
+          id: \`\${item.name}_\${item.inputs?.map((i) => i.type).join('_') || ''}\`,
+          name: item.name || '',
+          displayName: this.formatMethodName(item.name || ''),
+          inputs:
+            item.inputs?.map((input) => ({
+              name: input.name,
+              type: input.type,
+              displayName: this.formatInputName(input.name, input.type),
+            })) || [],
+          type: item.type || 'function',
+          stateMutability: item.stateMutability,
+          modifiesState: !item.stateMutability || !['view', 'pure'].includes(item.stateMutability),
+        })),
+    };
+    logger.info(
+      'EvmAdapter',
+      \`Transformation complete. Found \${contractSchema.functions.length} functions.\`
+    );
+    return contractSchema;
   }
 
   /**
@@ -507,6 +580,34 @@ export class EvmAdapter implements ContractAdapter {
       }
     }
   }
+
+  /**
+   * Load a mock contract for testing
+   * @param mockId Optional ID to specify which mock to load
+   */
+  async loadMockContract(mockId?: string): Promise<ContractSchema> {
+    try {
+      const mocks = await MockContractService.getAvailableMocks();
+      const mockInfo = mockId
+        ? mocks.find((mock: MockContractInfo) => mock.id === mockId)
+        : mocks.find((mock: MockContractInfo) => mock.id === 'input-tester');
+
+      if (!mockInfo) {
+        throw new Error(\`Mock contract with ID \${mockId || 'input-tester'} not found\`);
+      }
+
+      const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
+      const contractName = mockInfo.name;
+
+      // Use the shared transformer
+      return this.transformAbiToSchema(mockAbi, contractName);
+    } catch (error) {
+      // Type assertion for error message
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Error loading mock EVM contract:', errorMessage);
+      throw new Error('Failed to load mock EVM contract');
+    }
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles
@@ -795,6 +896,7 @@ export interface ContractAdapter {
 
 // Export the selected adapter
 export { EvmAdapter };
+export type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail };
 "
 `;
 
@@ -1162,6 +1264,7 @@ export interface ContractAdapter {
 
 // Export the selected adapter
 export { SolanaAdapter };
+export type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail };
 "
 `;
 
