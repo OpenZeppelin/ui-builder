@@ -1,40 +1,31 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
-import { getContractAdapter } from '../../adapters/index';
-import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
-import { getChainName } from '../../core/utils/utils';
-import { loadContractDefinition } from '../../services/ContractLoader';
+import { getContractAdapter } from '../../../../adapters/index';
+import { getChainName } from '../../../../core/utils/utils';
+import { loadContractDefinition } from '../../../../services/ContractLoader';
+import { MockContractSelector } from '../../MockContractSelector';
+import { ContractAddressFormProps, ContractFormData } from '../types';
 
-import { MockContractSelector } from './MockContractSelector';
-
-interface StepContractDefinitionProps {
-  onContractSchemaLoaded: (schema: ContractSchema) => void;
-  selectedChain: ChainType;
-}
-
-interface ContractFormData {
-  contractAddress: string;
-}
-
-export function StepContractDefinition({
-  onContractSchemaLoaded,
+export function ContractAddressForm({
   selectedChain,
-}: StepContractDefinitionProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+  isLoading,
+  onLoadContract,
+  setIsLoading,
+  setError,
+  error,
+}: ContractAddressFormProps) {
   const { control, handleSubmit, watch, reset } = useForm<ContractFormData>({
     defaultValues: { contractAddress: '' },
+    mode: 'onBlur',
   });
 
   useEffect(() => {
     reset({ contractAddress: '' });
     setError(null);
-    setIsLoading(false);
-  }, [selectedChain, reset]);
+  }, [selectedChain, reset, setError]);
 
   const adapter = getContractAdapter(selectedChain);
 
@@ -51,10 +42,10 @@ export function StepContractDefinition({
       try {
         const schema = await loadContractDefinition(selectedChain, address);
         if (schema) {
-          onContractSchemaLoaded(schema);
+          onLoadContract(schema);
         } else {
           setError(
-            'Failed to load contract definition. Check address, network, and Etherscan verification.'
+            `Failed to load contract definition. Check the address and verify it's available on the ${getChainName(selectedChain)} network.`
           );
         }
       } catch (err) {
@@ -64,7 +55,7 @@ export function StepContractDefinition({
         setIsLoading(false);
       }
     },
-    [selectedChain, onContractSchemaLoaded]
+    [selectedChain, onLoadContract, setIsLoading, setError]
   );
 
   const handleLoadMockData = useCallback(
@@ -76,8 +67,8 @@ export function StepContractDefinition({
       try {
         adapter
           .loadMockContract(mockId)
-          .then((contractSchema: ContractSchema) => {
-            onContractSchemaLoaded(contractSchema);
+          .then((contractSchema) => {
+            onLoadContract(contractSchema);
           })
           .catch((err: Error) => {
             setError(`Failed to load mock contract: ${err.message}`);
@@ -88,10 +79,27 @@ export function StepContractDefinition({
         setIsLoading(false);
       }
     },
-    [onContractSchemaLoaded, reset, adapter]
+    [onLoadContract, reset, adapter, setIsLoading, setError]
   );
 
   const currentAddress = watch('contractAddress');
+  const chainName = getChainName(selectedChain);
+
+  // Determine chain-specific guidance text
+  const getChainSpecificGuidance = () => {
+    switch (selectedChain) {
+      case 'evm':
+        return `(e.g., Etherscan verified contracts)`;
+      case 'solana':
+        return `(e.g., program IDs on Solana Explorer)`;
+      case 'stellar':
+        return `(e.g., contract IDs on Stellar Expert)`;
+      case 'midnight':
+        return `(e.g., contract IDs on Midnight Explorer)`;
+      default:
+        return '';
+    }
+  };
 
   return (
     <form
@@ -99,10 +107,10 @@ export function StepContractDefinition({
       className="flex flex-col space-y-6"
     >
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Provide Contract Address (EVM)</h3>
+        <h3 className="text-lg font-medium">Provide Contract Address</h3>
         <p className="text-muted-foreground text-sm">
-          Enter the address of a verified contract on {getChainName(selectedChain)} (e.g.,
-          Etherscan) or load mock data.
+          Enter the address of a verified contract on the {chainName} network{' '}
+          {getChainSpecificGuidance()} or load from mock data.
         </p>
       </div>
 
@@ -114,7 +122,7 @@ export function StepContractDefinition({
           control={control}
           adapter={adapter}
           validation={{ required: true }}
-          placeholder={`Enter ${getChainName(selectedChain)} contract address (e.g., 0x...)`}
+          placeholder={`Enter ${chainName} contract address`}
         />
 
         <div className="flex items-end justify-between gap-4">
@@ -124,7 +132,7 @@ export function StepContractDefinition({
             disabled={isLoading || !currentAddress}
             className="w-1/2"
           >
-            Load ABI from Address
+            Load Contract
           </LoadingButton>
 
           <div className="flex flex-col items-end text-right">
