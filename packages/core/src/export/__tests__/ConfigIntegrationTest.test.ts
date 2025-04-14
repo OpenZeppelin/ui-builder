@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { PackageManager } from '../PackageManager';
-
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { PackageManager } from '../PackageManager';
 
 // Define explicit types for our test configs
 interface TestFormRendererConfig {

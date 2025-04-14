@@ -5,7 +5,6 @@
  * for a selected blockchain. It uses Vite's build-time capabilities to avoid hardcoding
  * chain types, making it easy to add new blockchain adapters without code changes.
  */
-
 import { ChainType } from '../core/types/ContractSchema';
 
 /**

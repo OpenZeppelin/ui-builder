@@ -3,19 +3,19 @@ import { useMemo, useState } from 'react';
 import { Button } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../../adapters';
+import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
+
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
 import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
-
-import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;

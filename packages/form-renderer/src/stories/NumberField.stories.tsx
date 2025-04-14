@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { NumberField } from '../components/fields/NumberField';
-
 import type { NumberFieldProps } from '../components/fields/NumberField';
 
 // Extended props for the wrapper component

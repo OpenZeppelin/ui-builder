@@ -1,11 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { ChainType } from '../../core/types/ContractSchema';
 import { logger } from '../../core/utils/logger';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
-
-import type { ChainType } from '../../core/types/ContractSchema';
 
 describe('Export Snapshot Tests', () => {
   /**

@@ -3,10 +3,9 @@ import { useForm } from 'react-hook-form';
 
 import { Button, Label, Progress, TextField } from '@openzeppelin/transaction-form-renderer';
 
-import { FormExportSystem } from '../../export';
-
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { FormExportSystem } from '../../export';
 import type { ZipProgress } from '../../export/ZipGenerator';
 
 /**

@@ -3,7 +3,9 @@ import { Control, useWatch } from 'react-hook-form';
 
 import { ContractAdapter, FieldCondition, FormField, FormValues } from '../types/FormTypes';
 
-import { fieldComponents } from './fieldRegistry'; // Import the shared registry
+import { fieldComponents } from './fieldRegistry';
+
+// Import the shared registry
 
 /**
  * Props for the DynamicFormField component

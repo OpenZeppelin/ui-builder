@@ -3,11 +3,10 @@ import { useState } from 'react';
 import { Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../adapters/index';
+import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import { getChainName } from '../../core/utils/utils';
 
 import { MockContractSelector } from './MockContractSelector';
-
-import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 
 interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;

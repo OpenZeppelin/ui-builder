@@ -1,7 +1,7 @@
+import { Meta, StoryObj } from '@storybook/react';
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
-
-import { Meta, StoryObj } from '@storybook/react';
 
 import { BooleanField, TextField } from '../../../../form-renderer/src/components/fields';
 import { WizardLayout, WizardStep } from '../../components/Common/WizardLayout';

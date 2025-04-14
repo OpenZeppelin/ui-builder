@@ -9,6 +9,19 @@
   "bracketSpacing": true,
   "jsxSingleQuote": false,
   "quoteProps": "as-needed",
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "tailwindFunctions": ["cva", "cn", "clsx", "twMerge"]
+  "plugins": ["prettier-plugin-tailwindcss", "@trivago/prettier-plugin-sort-imports"],
+  "tailwindFunctions": ["cva", "cn", "clsx", "twMerge"],
+  "importOrder": [
+    "^react",
+    "^@openzeppelin/",
+    "^@/",
+    "^\\.\\.(?!/?$)",
+    "^\\./(?=.*/)(?!/?$)",
+    "^\\.$",
+    "^\\.(?!/?$)",
+    "^\\./?$",
+    "^.+\\.s?css$"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

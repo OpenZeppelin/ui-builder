@@ -1,5 +1,5 @@
-import { WritableFunctionsSectionProps } from './types';
 import { WritableFunctionCard } from './WritableFunctionCard';
+import { WritableFunctionsSectionProps } from './types';
 
 export function WritableFunctionsSection({
   functions,

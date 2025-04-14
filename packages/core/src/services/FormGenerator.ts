@@ -4,6 +4,7 @@
  * Generates form configurations based on contract functions.
  * Uses chain-specific adapters for field type mapping and other chain-specific details.
  */
+import { startCase } from 'lodash';
 
 import {
   CommonFormProperties,
@@ -16,17 +17,14 @@ import {
   // SubmitButtonConfig,
 } from '@openzeppelin/transaction-form-renderer';
 
-import { startCase } from 'lodash';
-
 import { getContractAdapter } from '../adapters';
-import { BuilderFormConfig } from '../core/types/FormTypes';
-import { generateId } from '../core/utils/general';
-
 import type {
   ContractFunction,
   ContractSchema,
   FunctionParameter,
 } from '../core/types/ContractSchema';
+import { BuilderFormConfig } from '../core/types/FormTypes';
+import { generateId } from '../core/utils/general';
 
 /**
  * Generates a default form configuration for a contract function

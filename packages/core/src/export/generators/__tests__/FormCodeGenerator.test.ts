@@ -1,11 +1,10 @@
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import { FormCodeGenerator } from '../FormCodeGenerator';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
 
+import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { FormCodeGenerator } from '../FormCodeGenerator';
 
 /**
  * Unit tests for the FormCodeGenerator class

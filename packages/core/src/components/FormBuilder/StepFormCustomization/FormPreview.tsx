@@ -4,10 +4,9 @@ import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
 
 import { getContractAdapter } from '../../../adapters';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import { Card, CardContent } from '../../ui/card';
-
 import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { Card, CardContent } from '../../ui/card';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;

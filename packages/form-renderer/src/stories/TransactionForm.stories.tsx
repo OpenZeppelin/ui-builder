@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { TransactionForm } from '../components/TransactionForm';
-
 import type { ContractAdapter, RenderFormSchema } from '../types/FormTypes';
 
 // Example adapter for form data processing

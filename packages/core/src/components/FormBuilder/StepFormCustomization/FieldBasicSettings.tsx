@@ -13,6 +13,7 @@ import {
 } from '@openzeppelin/transaction-form-renderer';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
+
 import { FieldEditorFormValues } from './types';
 
 interface FieldBasicSettingsProps {

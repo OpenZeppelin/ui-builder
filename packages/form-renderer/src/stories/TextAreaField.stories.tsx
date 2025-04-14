@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { TextAreaField } from '../components/fields/TextAreaField';
-
 import type { TextAreaFieldProps } from '../components/fields/TextAreaField';
 
 // Extended props for the wrapper component

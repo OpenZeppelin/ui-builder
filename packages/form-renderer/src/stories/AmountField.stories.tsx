@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { AmountField } from '../components/fields/AmountField';
-
 import type { AmountFieldProps } from '../components/fields/AmountField';
 
 // Extended props for the wrapper component

@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { AdapterExportManager } from '../AdapterExportManager';
-
 import type { ChainType } from '../../core/types/ContractSchema';
+import { AdapterExportManager } from '../AdapterExportManager';
 
 /**
  * Unit tests for the AdapterExportManager class

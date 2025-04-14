@@ -2,9 +2,7 @@
  * TemplateProcessor class responsible for processing code templates
  * with various placeholder formats and applying post-processing steps.
  */
-
 import type { Options, Plugin } from 'prettier';
-
 import * as babelPlugin from 'prettier/plugins/babel';
 import * as estreePlugin from 'prettier/plugins/estree';
 import * as typescriptPlugin from 'prettier/plugins/typescript';

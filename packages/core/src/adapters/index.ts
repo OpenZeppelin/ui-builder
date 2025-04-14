@@ -1,10 +1,5 @@
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import EvmAdapter from './evm/adapter';
-import MidnightAdapter from './midnight/adapter';
-import SolanaAdapter from './solana/adapter';
-import StellarAdapter from './stellar/adapter';
-
 import type {
   ChainDefinition,
   ChainType,
@@ -17,6 +12,11 @@ import type {
   ExecutionMethodDetail,
   ExecutionMethodType,
 } from '../core/types/FormTypes';
+
+import EvmAdapter from './evm/adapter';
+import MidnightAdapter from './midnight/adapter';
+import SolanaAdapter from './solana/adapter';
+import StellarAdapter from './stellar/adapter';
 
 // Re-export necessary types
 export type {

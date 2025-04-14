@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { ChainType } from '../../core/types/ContractSchema';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
-
-import type { ChainType } from '../../core/types/ContractSchema';
 
 describe('Adapter Integration Tests', () => {
   let exportSystem: FormExportSystem;

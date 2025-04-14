@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
-
-import { ensureCompleteConfig } from '../utils';
+import { UseFormReturn, WatchObserver, useForm } from 'react-hook-form';
 
 import type { ContractAdapter } from '../../../../adapters';
 import type {
@@ -10,6 +8,7 @@ import type {
   ExecutionMethodType,
 } from '../../../../core/types/FormTypes';
 import type { ExecutionMethodFormData } from '../types';
+import { ensureCompleteConfig } from '../utils';
 
 //---------------------------------------------------------------------------
 // Hook Definition

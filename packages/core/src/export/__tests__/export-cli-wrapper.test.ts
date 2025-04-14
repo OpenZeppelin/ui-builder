@@ -4,17 +4,15 @@
  * This is a helper test that serves as an interface between the CLI and the export system.
  * This test file can be run with specific environment variables to export a form with the desired configuration.
  */
-
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { ChainType } from '../../core/types/ContractSchema';
 import { logger } from '../../core/utils/logger';
 import { FormExportSystem } from '../FormExportSystem';
 import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
-
-import type { ChainType } from '../../core/types/ContractSchema';
 
 // Keep track of created files for cleanup
 const createdFiles: string[] = [];

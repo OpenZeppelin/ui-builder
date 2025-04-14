@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form';
 import { ContractAdapter, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { getFieldTypeGroups } from './utils/fieldTypeUtils';
+
 import { FieldAdvancedSettings } from './FieldAdvancedSettings';
 import { FieldBasicSettings } from './FieldBasicSettings';
-import { FieldEditorFormValues } from './types';
 import { TypeWarningSection } from './TypeWarningSection';
+import { FieldEditorFormValues } from './types';
 import { initializeFormValues } from './utils';
 
 interface FieldEditorProps {

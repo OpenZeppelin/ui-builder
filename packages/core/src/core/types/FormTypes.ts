@@ -5,7 +5,6 @@
  * Common form types are imported directly from the form-renderer package
  * when needed, rather than being re-exported here.
  */
-
 // Import using the package name from dependencies
 import type { CommonFormProperties } from '@openzeppelin/transaction-form-renderer';
 

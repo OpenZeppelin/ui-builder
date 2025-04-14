@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { PackageManager } from '../PackageManager';
-
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { PackageManager } from '../PackageManager';
 
 // Mock FormRendererConfig since we can't import it directly
 interface MockFormRendererConfig {

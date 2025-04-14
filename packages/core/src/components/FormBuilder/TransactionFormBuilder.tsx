@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { getContractAdapter } from '../../adapters';
+import type { ContractAdapter } from '../../adapters';
+import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
+import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 
 import { StepExecutionMethod } from './StepExecutionMethod/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
+
 import { ChainTileSelector } from './ChainTileSelector';
 import { StepContractDefinition } from './StepContractDefinition';
 import { StepExport } from './StepExport';
-
-import type { ContractAdapter } from '../../adapters';
-import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
-import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<ChainType>('evm');

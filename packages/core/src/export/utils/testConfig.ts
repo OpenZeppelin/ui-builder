@@ -1,6 +1,6 @@
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
-
 import { v4 as uuidv4 } from 'uuid';
+
+import type { FieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 

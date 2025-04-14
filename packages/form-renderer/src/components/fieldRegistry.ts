@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { FieldType, FormValues } from '../types/FormTypes';
+import type { ContractAdapter } from '../types/FormTypes';
 
 import { BaseFieldProps } from './fields/BaseField';
+
 import { AddressField, BooleanField, NumberField, TextField } from './fields';
 
-import type { ContractAdapter } from '../types/FormTypes'; // Import ContractAdapter type
+// Import ContractAdapter type
 
 /**
  * Registry of field components mapped to their respective types.

@@ -6,7 +6,6 @@
  * file content at build time, ensuring consistency between browser
  * and CLI export environments.
  */
-
 import componentsJsonContent from 'virtual:components-json-content';
 import globalCssContent from 'virtual:global-css-content';
 import postcssConfigContent from 'virtual:postcss-config-content';

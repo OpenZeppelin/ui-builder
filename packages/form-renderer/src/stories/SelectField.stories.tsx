@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { SelectField } from '../components/fields/SelectField';
-
 import type { SelectFieldProps, SelectOption } from '../components/fields/SelectField';
 
 // Sample options for select fields

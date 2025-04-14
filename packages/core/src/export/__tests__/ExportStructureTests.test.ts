@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import type { ChainType } from '../../core/types/ContractSchema';
+import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
-
-import type { ChainType } from '../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 describe('Export Structure Tests', () => {
   /**

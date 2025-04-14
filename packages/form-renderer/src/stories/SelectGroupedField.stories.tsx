@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { SelectGroupedField } from '../components/fields/SelectGroupedField';
-
 import type { OptionGroup, SelectGroupedFieldProps } from '../components/fields/SelectGroupedField';
 
 // Sample option groups for select fields

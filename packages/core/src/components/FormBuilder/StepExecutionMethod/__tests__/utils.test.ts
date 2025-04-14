@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { ensureCompleteConfig } from '../utils';
-
 import type { ExecutionMethodType } from '../../../../core/types/FormTypes';
+import { ensureCompleteConfig } from '../utils';
 
 describe('ensureCompleteConfig', () => {
   it('should return undefined for null or undefined input', () => {

@@ -8,7 +8,6 @@ const reactRefreshPlugin = require('eslint-plugin-react-refresh');
 const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const importPlugin = require('eslint-plugin-import');
-const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const unusedImportsPlugin = require('eslint-plugin-unused-imports');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
@@ -141,7 +140,6 @@ const baseConfig = [
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       import: importPlugin,
-      'simple-import-sort': simpleImportSortPlugin,
       'unused-imports': unusedImportsPlugin,
     },
     rules: {
@@ -158,32 +156,6 @@ const baseConfig = [
           argsIgnorePattern: '^_',
         },
       ],
-      'simple-import-sort/imports': [
-        'error',
-        {
-          groups: [
-            // Type imports from external packages
-            ['^type.*\\u0000$', '^@?\\w.*\\u0000$'],
-            // React and related packages come first
-            ['^react', '^react-dom', '^react-.*$'],
-            // OpenZeppelin packages
-            ['^@openzeppelin/'],
-            // External packages
-            ['^@?\\w'],
-            // Internal packages (alias imports)
-            ['^@/'],
-            // Parent imports (starting with ..)
-            ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
-            // Other relative imports (starting with .)
-            ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
-            // Style imports
-            ['^.+\\.s?css$'],
-            // Other type imports
-            ['^.+\\u0000$'],
-          ],
-        },
-      ],
-      'simple-import-sort/exports': 'error',
     },
   },
 

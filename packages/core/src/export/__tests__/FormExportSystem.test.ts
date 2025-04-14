@@ -1,17 +1,16 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { AdapterConfig } from '../../core/types/AdapterTypes';
+import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { logger } from '../../core/utils/logger';
 import { AdapterExportManager } from '../AdapterExportManager';
 import { FormExportSystem } from '../FormExportSystem';
-import { FormCodeGenerator } from '../generators/FormCodeGenerator';
-import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { PackageManager } from '../PackageManager';
 import { StyleManager } from '../StyleManager';
 import { TemplateManager } from '../TemplateManager';
 import { ZipGenerator } from '../ZipGenerator';
-
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { FormCodeGenerator } from '../generators/FormCodeGenerator';
+import { TemplateProcessor } from '../generators/TemplateProcessor';
 
 // Mock FormRendererConfig since it's not exported from the main package entry
 interface MockFormRendererConfig {

@@ -1,14 +1,13 @@
 // Import types from form-renderer
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
-
 import { v4 as uuidv4 } from 'uuid';
 import { describe, expect, it, vi } from 'vitest';
 
-import { FormSchemaFactory } from '../FormSchemaFactory';
+import type { FieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ChainType, ContractSchema } from '../../types/ContractSchema';
 // Import types from core
 import type { BuilderFormConfig } from '../../types/FormTypes';
+import { FormSchemaFactory } from '../FormSchemaFactory';
 
 // Mock the adapter and other dependencies
 vi.mock('../../../adapters', () => ({

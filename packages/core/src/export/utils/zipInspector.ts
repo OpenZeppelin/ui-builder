@@ -1,6 +1,8 @@
 import JSZip from 'jszip';
 
-import { logger } from '../../core/utils/logger'; // Import logger
+import { logger } from '../../core/utils/logger';
+
+// Import logger
 
 /**
  * Optional callback for testing error handling during file extraction.

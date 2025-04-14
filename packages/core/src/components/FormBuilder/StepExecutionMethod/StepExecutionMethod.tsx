@@ -1,10 +1,11 @@
 import React from 'react';
 
+import type { ExecutionMethodDetail } from '../../../core/types/FormTypes';
+
 import { EoaConfiguration } from './components/EoaConfiguration';
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';
 
-import type { ExecutionMethodDetail } from '../../../core/types/FormTypes';
 // Import types, hook, and sub-components directly from their files
 import type { StepExecutionMethodProps } from './types';
 

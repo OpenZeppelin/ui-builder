@@ -5,9 +5,6 @@
  * It loads configuration from adapters and form-renderer to determine which
  * dependencies to include in the package.json of exported projects.
  */
-
-import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
-
 /**
  * VIRTUAL MODULE IMPORT
  *
@@ -38,12 +35,15 @@ import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer
  */
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
-import { logger } from '../core/utils/logger'; // Import logger
+import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
+
+// Import logger
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
+import { logger } from '../core/utils/logger';
 
 /**
  * Type for glob import results - using Record with index signature

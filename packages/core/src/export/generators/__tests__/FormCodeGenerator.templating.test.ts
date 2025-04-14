@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { FormCodeGenerator } from '../FormCodeGenerator';
 import { TemplateProcessor } from '../TemplateProcessor';
-
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 /**
  * These tests focus specifically on testing the templating system

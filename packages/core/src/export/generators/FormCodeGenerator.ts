@@ -1,19 +1,18 @@
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
 
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
-import { AdapterExportManager } from '../AdapterExportManager';
-import { TemplateManager } from '../TemplateManager';
-
-import { TemplateProcessor } from './TemplateProcessor';
-
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { AdapterExportManager } from '../AdapterExportManager';
+import { TemplateManager } from '../TemplateManager';
 // Import types for template parameters
 import type {
   AppComponentTemplateParams,
   FormComponentTemplateParams,
 } from '../codeTemplates/TemplateTypes';
+
+import { TemplateProcessor } from './TemplateProcessor';
 
 // Use the glob pattern to discover template files
 const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx', {

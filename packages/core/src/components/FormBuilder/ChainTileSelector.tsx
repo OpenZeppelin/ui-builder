@@ -1,11 +1,10 @@
+import { NetworkIcon } from '@web3icons/react';
+
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { NetworkIcon } from '@web3icons/react';
-
 // Import the Midnight logo SVG
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
-
 import type { ChainType } from '../../core/types/ContractSchema';
 
 // Mapping of our chain types to web3icons network names

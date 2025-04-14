@@ -1,6 +1,6 @@
-import { FieldType } from '@openzeppelin/transaction-form-renderer';
-
 import { AlertTriangle } from 'lucide-react';
+
+import { FieldType } from '@openzeppelin/transaction-form-renderer';
 
 interface TypeConversionWarningProps {
   selectedType: FieldType;

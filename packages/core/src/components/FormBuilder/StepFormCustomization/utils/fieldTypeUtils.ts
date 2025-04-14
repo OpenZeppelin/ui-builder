@@ -1,6 +1,6 @@
-import { ContractAdapter, FieldType } from '@openzeppelin/transaction-form-renderer';
-
 import { capitalize } from 'lodash';
+
+import { ContractAdapter, FieldType } from '@openzeppelin/transaction-form-renderer';
 
 /**
  * Field type option with display label

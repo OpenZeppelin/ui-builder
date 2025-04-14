@@ -13,18 +13,16 @@
  * 3. Testing dependencies resolution across different blockchain types
  * 4. Validating package.json updates with the correct dependencies
  */
-
 // Mock declarations must come before imports
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
-
 import { describe, expect, it, vi } from 'vitest';
 
-import { PackageManager } from '../PackageManager';
+import type { FieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { ChainType } from '../../core/types/ContractSchema';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import { PackageManager } from '../PackageManager';
 
 vi.mock('virtual:adapter-configs', () => {
   const adapterConfigs = {

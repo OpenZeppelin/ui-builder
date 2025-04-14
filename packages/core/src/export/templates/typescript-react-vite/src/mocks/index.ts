@@ -1,5 +1,5 @@
-import { ERC20_MOCK, ERC721_MOCK, evmMockFiles, INPUT_TESTER_MOCK } from './evm';
 import MOCK_CONTRACTS from './MOCK_CONTRACTS.json';
+import { ERC20_MOCK, ERC721_MOCK, INPUT_TESTER_MOCK, evmMockFiles } from './evm';
 
 export { ERC20_MOCK, ERC721_MOCK, INPUT_TESTER_MOCK, MOCK_CONTRACTS };
 

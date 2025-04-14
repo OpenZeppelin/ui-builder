@@ -1,9 +1,8 @@
-import { useState } from 'react';
-
 import { Meta, StoryObj } from '@storybook/react';
 
-import { ChainTileSelector } from '../../components/FormBuilder/ChainTileSelector';
+import { useState } from 'react';
 
+import { ChainTileSelector } from '../../components/FormBuilder/ChainTileSelector';
 import type { ChainType } from '../../core/types/ContractSchema';
 
 const meta = {
