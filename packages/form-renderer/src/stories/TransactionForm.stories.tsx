@@ -14,6 +14,9 @@ const mockAdapter: ContractAdapter = {
     // Simple validation just for the story example
     return address.startsWith('0x') && address.length === 42;
   },
+  getCompatibleFieldTypes: () => {
+    return ['text', 'number', 'blockchain-address'];
+  },
 };
 
 // Basic schema with text and number fields

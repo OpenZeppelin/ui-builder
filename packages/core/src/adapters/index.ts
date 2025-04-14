@@ -1,9 +1,9 @@
 import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
-import EvmAdapter from './evm/adapter.ts';
-import MidnightAdapter from './midnight/adapter.ts';
-import SolanaAdapter from './solana/adapter.ts';
-import StellarAdapter from './stellar/adapter.ts';
+import EvmAdapter from './evm/adapter';
+import MidnightAdapter from './midnight/adapter';
+import SolanaAdapter from './solana/adapter';
+import StellarAdapter from './stellar/adapter';
 
 import type {
   ChainDefinition,

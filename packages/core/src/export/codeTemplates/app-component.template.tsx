@@ -6,7 +6,6 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-import React from 'react';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';

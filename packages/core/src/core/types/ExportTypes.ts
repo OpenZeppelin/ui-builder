@@ -5,7 +5,7 @@
  * including template options, export configurations, and results.
  */
 
-import { ChainType } from '@/core/types/ContractSchema';
+import { ChainType } from './ContractSchema';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 

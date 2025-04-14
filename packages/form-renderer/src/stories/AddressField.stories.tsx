@@ -5,10 +5,25 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { AddressField } from '../components/fields/AddressField';
 
-import type { AddressFieldProps } from '../components/fields/AddressField';
+// Define the props directly based on what the component needs
+interface AddressFieldProps {
+  id: string;
+  name: string;
+  label: string;
+  placeholder?: string;
+  helperText?: string;
+  validation?: {
+    required?: boolean;
+    pattern?: RegExp;
+    minLength?: number;
+    maxLength?: number;
+  };
+  validateAddress?: (value: string) => string | true;
+  width?: 'full' | 'half' | 'third';
+}
 
 // Extended props for the wrapper component
-interface AddressFieldWrapperProps extends Omit<AddressFieldProps, 'control'> {
+interface AddressFieldWrapperProps extends AddressFieldProps {
   defaultValue?: string;
   showError?: boolean | string;
 }
@@ -57,10 +72,20 @@ const AddressFieldWrapper = (args: AddressFieldWrapperProps) => {
     args.defaultValue,
   ]);
 
+  // Explicitly include id, name, and label props
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(console.log)}>
-        <AddressField {...args} control={methods.control} />
+        <AddressField
+          id={args.id}
+          name={args.name}
+          label={args.label}
+          placeholder={args.placeholder}
+          helperText={args.helperText}
+          validation={args.validation}
+          width={args.width}
+          control={methods.control}
+        />
       </form>
     </FormProvider>
   );

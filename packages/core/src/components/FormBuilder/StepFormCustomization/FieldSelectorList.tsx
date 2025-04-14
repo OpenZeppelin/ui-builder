@@ -2,7 +2,12 @@ import { FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import { Braces, FormInput, Tag } from 'lucide-react';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../../components/ui/tooltip';
 
 interface FieldSelectorListProps {
   /**

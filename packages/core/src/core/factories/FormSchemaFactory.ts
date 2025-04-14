@@ -18,8 +18,8 @@ import { getContractAdapter } from '../../adapters';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
 
+import type { ContractAdapter } from '../../adapters';
 import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
-import type { ContractAdapter } from '@/adapters';
 
 /**
  * Factory class for generating form schemas from contract functions

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
-import { getContractAdapter } from '../../adapters/index.ts';
+import { getContractAdapter } from '../../adapters/index';
 import { getChainName } from '../../core/utils/utils';
 
 import { MockContractSelector } from './MockContractSelector';

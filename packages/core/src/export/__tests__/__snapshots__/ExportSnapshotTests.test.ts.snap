@@ -15,9 +15,7 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"import React from 'react';
-
-import GeneratedForm from './components/GeneratedForm';
+"import GeneratedForm from './components/GeneratedForm';
 
 // Define types for the transaction data
 interface TransactionData {
