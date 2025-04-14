@@ -50,7 +50,7 @@ jobs:
       # Upload test results as artifacts
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: export-test-results
           path: packages/core/test-results
