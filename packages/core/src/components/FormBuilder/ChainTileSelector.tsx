@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { NetworkIcon } from '@web3icons/react';
@@ -60,16 +60,19 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
   ];
 
   // Handle selection of a blockchain
-  const handleSelectChain = (chain: ChainType) => {
-    setSelectedChain(chain);
-    setValue('blockchain', chain);
-    onChainSelect(chain);
-  };
+  const handleSelectChain = useCallback(
+    (chain: ChainType) => {
+      setSelectedChain(chain);
+      setValue('blockchain', chain);
+      onChainSelect(chain);
+    },
+    [setValue, onChainSelect]
+  );
 
   // Update the selected chain when the component mounts
   useEffect(() => {
     handleSelectChain(initialChain);
-  }, [initialChain]);
+  }, [initialChain, handleSelectChain]);
 
   return (
     <div className="flex flex-col space-y-6">
