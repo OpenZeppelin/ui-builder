@@ -1,7 +1,12 @@
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
 
 import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
-import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
+import type {
+  ContractAdapter,
+  ContractFunction,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+} from '../index';
 
 /**
  * Solana-specific adapter implementation
@@ -197,6 +202,42 @@ export class SolanaAdapter implements ContractAdapter {
       // For now, consider other methods unsupported by this placeholder
       return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
     }
+  }
+
+  /**
+   * Determines if a function is a view/pure function (read-only)
+   */
+  isViewFunction(_functionDetails: ContractFunction): boolean {
+    // TODO: Implement properly based on Solana Program types
+    return false; // Temporary placeholder
+  }
+
+  /**
+   * Queries a view function on a contract
+   */
+  async queryViewFunction(
+    _contractAddress: string,
+    _functionId: string,
+    _params: unknown[] = [],
+    _contractSchema?: ContractSchema
+  ): Promise<unknown> {
+    // TODO: Implement Solana contract query functionality
+    throw new Error('Solana view function queries not yet implemented');
+  }
+
+  /**
+   * Formats a function result for display
+   */
+  formatFunctionResult(
+    result: unknown,
+    _functionDetails: ContractFunction
+  ): string | Record<string, unknown> {
+    // TODO: Implement Solana-specific result formatting
+    if (result === null || result === undefined) {
+      return 'No data';
+    }
+
+    return String(result);
   }
 }
 

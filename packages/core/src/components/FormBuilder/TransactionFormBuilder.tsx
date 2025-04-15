@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { getContractAdapter } from '../../adapters';
 import type { ContractAdapter } from '../../adapters';
+import { getContractAdapter } from '../../adapters';
 import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
+import { ContractStateWidget } from '../ContractStateWidget';
 
 import { StepExecutionMethod } from './StepExecutionMethod/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
@@ -20,6 +21,7 @@ export function TransactionFormBuilder() {
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
   const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
+  const [contractAddress, setContractAddress] = useState<string | null>(null);
 
   // Instantiate the correct adapter based on the selected chain using the factory
   const adapter = useMemo<ContractAdapter>(() => {
@@ -37,6 +39,7 @@ export function TransactionFormBuilder() {
 
   const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
     setContractSchema(schema);
+    setContractAddress(schema.address ?? null);
   }, []);
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
@@ -133,6 +136,17 @@ export function TransactionFormBuilder() {
         <StepContractDefinition
           onContractSchemaLoaded={handleContractSchemaLoaded}
           selectedChain={selectedChain}
+        />
+      ),
+    },
+    {
+      id: 'contract-state',
+      title: 'Contract State',
+      component: (
+        <ContractStateWidget
+          contractSchema={contractSchema}
+          contractAddress={contractAddress}
+          chainType={selectedChain}
         />
       ),
     },

@@ -32,5 +32,6 @@ export interface ContractSchema {
   chainType: ChainType;
   functions: ContractFunction[];
   events?: { id: string; name: string; inputs: FunctionParameter[] }[]; // More specific type
+  address?: string;
   // Other chain-agnostic schema properties
 }

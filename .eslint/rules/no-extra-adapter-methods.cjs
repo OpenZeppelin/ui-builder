@@ -46,6 +46,9 @@ module.exports = {
       'isValidAddress',
       'getSupportedExecutionMethods',
       'validateExecutionConfig',
+      'isViewFunction',
+      'queryViewFunction',
+      'formatFunctionResult',
     ];
 
     // Common standard methods and properties that are allowed

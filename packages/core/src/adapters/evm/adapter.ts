@@ -1,4 +1,4 @@
-import { isAddress } from 'ethers';
+import { Contract, JsonRpcProvider, isAddress } from 'ethers';
 import { startCase } from 'lodash';
 
 import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
@@ -8,7 +8,12 @@ import { generateId } from '../../core/utils/general';
 import { logger } from '../../core/utils/logger';
 import MockContractService from '../../services/MockContractService';
 import type { MockContractInfo } from '../../services/MockContractService';
-import type { ContractAdapter, ExecutionConfig, ExecutionMethodDetail } from '../index';
+import type {
+  ContractAdapter,
+  ContractFunction,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+} from '../index';
 
 import type { AbiItem } from './types';
 
@@ -76,7 +81,7 @@ export class EvmAdapter implements ContractAdapter {
 
     logger.info('EvmAdapter', `Successfully parsed JSON ABI with ${abi.length} items.`);
     const contractName = 'ContractFromABI'; // Default name for direct ABI
-    return this.transformAbiToSchema(abi, contractName);
+    return this.transformAbiToSchema(abi, contractName, undefined);
   }
 
   /**
@@ -142,17 +147,25 @@ export class EvmAdapter implements ContractAdapter {
     logger.info('EvmAdapter', `Successfully parsed Etherscan ABI with ${abi.length} items.`);
     // TODO: Fetch contract name?
     const contractName = `Contract_${address.substring(0, 6)}`;
-    return this.transformAbiToSchema(abi, contractName);
+    return this.transformAbiToSchema(abi, contractName, address);
   }
 
   /**
    * Transforms a standard ABI array into the ContractSchema format.
+   * @param abi The ABI array to transform
+   * @param contractName The name to use for the contract
+   * @param address Optional contract address to include in the schema
    */
-  private transformAbiToSchema(abi: AbiItem[], contractName: string): ContractSchema {
+  private transformAbiToSchema(
+    abi: AbiItem[],
+    contractName: string,
+    address?: string
+  ): ContractSchema {
     logger.info('EvmAdapter', `Transforming ABI to ContractSchema for: ${contractName}`);
     const contractSchema: ContractSchema = {
       chainType: 'evm',
       name: contractName,
+      address,
       functions: abi
         .filter((item) => item.type === 'function')
         .map((item) => ({
@@ -537,14 +550,118 @@ export class EvmAdapter implements ContractAdapter {
       const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
       const contractName = mockInfo.name;
 
-      // Use the shared transformer
-      return this.transformAbiToSchema(mockAbi, contractName);
+      // Use the shared transformer - pass undefined for address since this is a mock
+      return this.transformAbiToSchema(mockAbi, contractName, undefined);
     } catch (error) {
       // Type assertion for error message
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error loading mock EVM contract:', errorMessage);
       throw new Error('Failed to load mock EVM contract');
     }
+  }
+
+  /**
+   * Determines if a function is a view/pure function (read-only)
+   */
+  isViewFunction(functionDetails: ContractFunction): boolean {
+    return functionDetails.stateMutability === 'view' || functionDetails.stateMutability === 'pure';
+  }
+
+  /**
+   * Queries a view function on a contract
+   * @param contractAddress The contract address
+   * @param functionId The function identifier
+   * @param params Optional parameters for the function call
+   * @param contractSchema Optional pre-loaded contract schema
+   * @returns The query result as raw data
+   */
+  async queryViewFunction(
+    contractAddress: string,
+    functionId: string,
+    params: unknown[] = [],
+    contractSchema?: ContractSchema
+  ): Promise<unknown> {
+    try {
+      // Validate contract address
+      if (!contractAddress || contractAddress.trim() === '') {
+        throw new Error('Contract address is empty or not provided');
+      }
+
+      if (!isAddress(contractAddress)) {
+        throw new Error(`Invalid Ethereum address: ${contractAddress}`);
+      }
+
+      // Use ethers.js to create a contract instance
+      const provider = new JsonRpcProvider(
+        // Use a reliable public RPC URL that allows CORS
+        // TODO: Make this configurable
+        import.meta.env.VITE_RPC_URL || 'https://eth.llamarpc.com'
+      );
+
+      // Use provided schema or load it
+      const schema = contractSchema || (await this.loadContract(contractAddress));
+
+      // Find the function in the schema
+      const functionDetails = schema.functions.find((fn) => fn.id === functionId);
+      if (!functionDetails) {
+        throw new Error(`Function with ID ${functionId} not found`);
+      }
+
+      // Create minimal ABI for just this function with generic bytes output
+      // TODO: Add support for a better formatting of the output (formatFunctionResult)
+      const genericAbi = [
+        {
+          name: functionDetails.name,
+          type: 'function',
+          stateMutability: functionDetails.stateMutability || 'view',
+          inputs: functionDetails.inputs.map((i) => ({ name: i.name, type: i.type })),
+          outputs: [{ name: '', type: 'bytes' }],
+        },
+      ];
+
+      // Create contract interface
+      const genericContract = new Contract(contractAddress, genericAbi, provider);
+
+      // Just make the raw call and return the result
+      const rawResult = await provider.call({
+        to: contractAddress,
+        data: genericContract.interface.encodeFunctionData(functionDetails.name, params),
+      });
+
+      // TODO: Add support for a better formatting of the output (formatFunctionResult)
+      return rawResult;
+    } catch (error) {
+      console.error('Error querying view function:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Formats a function result for display
+   * TODO: Implement EVM-specific formatting that can be used for query and transaction execution results
+   */
+  formatFunctionResult(
+    result: unknown,
+    _functionDetails: ContractFunction
+  ): string | Record<string, unknown> {
+    // Handle null/undefined
+    if (result === null || result === undefined) {
+      return 'No data';
+    }
+
+    // For arrays and objects, return JSON
+    if (typeof result === 'object') {
+      // Convert to plain object/string to remove any special object instances
+      try {
+        return JSON.parse(JSON.stringify(result));
+      } catch {
+        // Fall back to string if JSON conversion fails
+        return String(result);
+      }
+    }
+
+    // Default case, just convert to string
+    return String(result);
   }
 }
 

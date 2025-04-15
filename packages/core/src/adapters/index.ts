@@ -109,8 +109,6 @@ export interface ContractAdapter {
    */
   isValidAddress(address: string): boolean;
 
-  // --- NEW METHODS for Execution Configuration ---
-
   /**
    * Returns details for execution methods supported by this chain adapter.
    *
@@ -133,8 +131,38 @@ export interface ContractAdapter {
    */
   validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
 
-  // TODO: Consider adding methods related to runtime execution if needed later,
-  // e.g., signTransaction(transactionData, executionConfig), etc.
+  /**
+   * Determines if a function is a view/pure function (read-only)
+   * @param functionDetails The function details
+   * @returns True if the function is read-only
+   */
+  isViewFunction(functionDetails: ContractFunction): boolean;
+
+  /**
+   * Queries a view function on a contract
+   * @param contractAddress The contract address
+   * @param functionId The function identifier
+   * @param params Optional parameters for the function call
+   * @param contractSchema Optional pre-loaded contract schema
+   * @returns The query result, properly formatted
+   */
+  queryViewFunction(
+    contractAddress: string,
+    functionId: string,
+    params?: unknown[],
+    contractSchema?: ContractSchema
+  ): Promise<unknown>;
+
+  /**
+   * Formats a function result for display
+   * @param result The raw result from the contract
+   * @param functionDetails The function details
+   * @returns Formatted result ready for display
+   */
+  formatFunctionResult(
+    result: unknown,
+    functionDetails: ContractFunction
+  ): string | Record<string, unknown>;
 }
 
 // Singleton instances of adapters
