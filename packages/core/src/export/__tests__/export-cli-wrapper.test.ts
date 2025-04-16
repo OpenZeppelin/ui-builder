@@ -9,7 +9,8 @@ import JSZip from 'jszip';
 import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { ChainType } from '../../core/types/ContractSchema';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+
 import { logger } from '../../core/utils/logger';
 import { FormExportSystem } from '../FormExportSystem';
 import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';

@@ -103,3 +103,9 @@ declare module 'virtual:template-vite-styles-css-content' {
   const content: string;
   export default content;
 }
+
+// Add declaration for contract schema content
+declare module 'virtual:contract-schema-content' {
+  const content: string;
+  export default content;
+}

@@ -1,0 +1,68 @@
+{
+  "name": "@openzeppelin/transaction-form-types",
+  "version": "0.1.0",
+  "description": "Shared types for Transaction Form Builder",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "import": "./dist/adapters/index.js",
+      "require": "./dist/adapters/index.cjs"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js",
+      "require": "./dist/contracts/index.cjs"
+    },
+    "./forms": {
+      "types": "./dist/forms/index.d.ts",
+      "import": "./dist/forms/index.js",
+      "require": "./dist/forms/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --outDir dist --declaration",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "prepare": "pnpm run build",
+    "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc"
+  },
+  "keywords": [
+    "types",
+    "blockchain",
+    "form",
+    "typescript"
+  ],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  }
+}

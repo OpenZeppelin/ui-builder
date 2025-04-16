@@ -16,10 +16,10 @@
 // Mock declarations must come before imports
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
-import type { ChainType } from '../../core/types/ContractSchema';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';

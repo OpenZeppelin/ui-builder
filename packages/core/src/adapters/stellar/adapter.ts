@@ -1,11 +1,16 @@
-import type { FieldType, FieldValue, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+import type {
+  FieldType,
+  FieldValue,
+  FormFieldType,
+} from '@openzeppelin/transaction-form-types/forms';
 
-import type { ContractSchema, FunctionParameter } from '../../core/types/ContractSchema';
 import type {
   ContractAdapter,
   ContractFunction,
+  ContractSchema,
   ExecutionConfig,
   ExecutionMethodDetail,
+  FunctionParameter,
 } from '../index';
 
 /**

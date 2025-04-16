@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { FormValues, TransactionFormProps } from '../types/FormTypes';
+import { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
 
 import { Button } from './ui/button';
 

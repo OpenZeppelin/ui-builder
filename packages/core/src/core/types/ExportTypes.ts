@@ -4,9 +4,9 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { ZipProgress } from '../../export/ZipGenerator';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
-import { ChainType } from './ContractSchema';
+import type { ZipProgress } from '../../export/ZipGenerator';
 
 /**
  * Options for customizing a template

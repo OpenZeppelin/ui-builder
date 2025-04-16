@@ -3,10 +3,11 @@ import { NetworkIcon } from '@web3icons/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+
 // Import the Midnight logo SVG
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
 import { getChainDescription, getChainName } from '../../core/chains';
-import type { ChainType } from '../../core/types/ContractSchema';
 
 // Mapping of our chain types to web3icons network names
 const networkMapping = {

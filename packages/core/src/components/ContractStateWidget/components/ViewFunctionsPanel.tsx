@@ -1,9 +1,12 @@
 import { useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
+import type {
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types/contracts';
 
 import { ContractAdapter } from '../../../adapters';
-import { ContractFunction, ContractSchema } from '../../../core/types/ContractSchema';
 
 import { FunctionResult } from './FunctionResult';
 

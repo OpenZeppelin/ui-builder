@@ -1,4 +1,4 @@
-import { FormFieldType } from '@openzeppelin/transaction-form-renderer';
+import { FormFieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import { FieldEditorFormValues } from '../types';
 

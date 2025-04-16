@@ -1,7 +1,12 @@
 import React from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import { ContractAdapter, FieldCondition, FormField, FormValues } from '../types/FormTypes';
+import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import {
+  FieldCondition,
+  FormFieldType,
+  FormValues,
+} from '@openzeppelin/transaction-form-types/forms';
 
 import { fieldComponents } from './fieldRegistry';
 
@@ -14,7 +19,7 @@ interface DynamicFormFieldProps {
   /**
    * The field configuration to render
    */
-  field: FormField;
+  field: FormFieldType;
 
   /**
    * The React Hook Form control
@@ -35,7 +40,7 @@ interface DynamicFormFieldProps {
 /**
  * Evaluates whether a field should be rendered based on its visibility conditions
  */
-function useShouldRenderField(field: FormField, control: Control<FormValues>): boolean {
+function useShouldRenderField(field: FormFieldType, control: Control<FormValues>): boolean {
   // Use React Hook Form's useWatch to get the values of form fields
   // This will reactively update when form values change
   const formValues = useWatch({ control });
@@ -136,7 +141,7 @@ export function DynamicFormField({
 /**
  * Extract field-specific props based on field type
  */
-function getFieldSpecificProps(field: FormField): Record<string, unknown> {
+function getFieldSpecificProps(field: FormFieldType): Record<string, unknown> {
   switch (field.type) {
     case 'number':
       // Extract number-specific props from validation

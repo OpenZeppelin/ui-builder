@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
-import type { ChainType } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 

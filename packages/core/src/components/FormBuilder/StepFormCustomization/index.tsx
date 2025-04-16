@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getContractAdapter } from '../../../adapters';
-import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { FormFieldType } from '@openzeppelin/transaction-form-renderer';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { FormFieldType } from '@openzeppelin/transaction-form-types/forms';
 
-import type { ContractSchema } from '../../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
   generateFallbackFields,

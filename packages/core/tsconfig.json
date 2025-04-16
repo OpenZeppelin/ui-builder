@@ -7,13 +7,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@styles/*": ["../styles/src/*"]
+      "@styles/*": ["../styles/src/*"],
+      "@openzeppelin/transaction-form-types/*": ["../types/src/*"]
     },
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
-  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }],
+  "references": [{ "path": "../form-renderer" }, { "path": "../styles" }, { "path": "../types" }],
   "exclude": ["src/export/codeTemplates/*.template.tsx"]
 }

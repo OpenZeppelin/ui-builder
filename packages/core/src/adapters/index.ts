@@ -1,12 +1,12 @@
-import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-renderer';
-
 import type {
   ChainDefinition,
   ChainType,
   ContractFunction,
   ContractSchema,
   FunctionParameter,
-} from '../core/types/ContractSchema';
+} from '@openzeppelin/transaction-form-types/contracts';
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+
 import type {
   ExecutionConfig,
   ExecutionMethodDetail,

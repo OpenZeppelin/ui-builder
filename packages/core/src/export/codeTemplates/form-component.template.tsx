@@ -54,7 +54,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   // Original field configurations (including hidden, hardcoded values)
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty array that will be replaced at generation time with the
-  // original, unfiltered FormField[] configuration.
+  // original, unfiltered FormFieldType[] configuration.
   /*------------TEMPLATE COMMENT END------------*/
   const allFieldsConfig: FormFieldType[] = [];
 

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 
+import type {
+  ChainType,
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types/contracts';
+
 import { getContractAdapter } from '../../adapters';
-import type { ChainType, ContractFunction, ContractSchema } from '../../core/types/ContractSchema';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 

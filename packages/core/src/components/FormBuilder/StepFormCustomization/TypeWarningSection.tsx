@@ -1,4 +1,5 @@
-import { ContractAdapter, FieldType } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import { FieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import { TypeConversionWarning } from './TypeConversionWarning';
 

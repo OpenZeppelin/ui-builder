@@ -67,7 +67,7 @@ export interface ContractAdapter {
   mapParameterTypeToFieldType(parameterType: string): FieldType;
 
   // Generate default field configuration for a function parameter
-  generateDefaultField(parameter: FunctionParameter): FormField;
+  generateDefaultField(parameter: FunctionParameter): FormFieldType;
 
   // Format transaction data for the specific chain
   formatTransactionData(functionId: string, inputs: Record<string, unknown>): unknown;
@@ -241,7 +241,7 @@ mapParameterTypeToFieldType(parameterType: string): FieldType {
 The `generateDefaultField` method creates complete form field configurations based on the parameter:
 
 ```typescript
-generateDefaultField(parameter: FunctionParameter): FormField {
+generateDefaultField(parameter: FunctionParameter): FormFieldType {
   const fieldType = this.mapParameterTypeToFieldType(parameter.type);
 
   return {

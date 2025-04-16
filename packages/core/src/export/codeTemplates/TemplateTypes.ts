@@ -37,7 +37,7 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   formConfigJSON: string;
 
   /**
-   * The original FormField[] config as a JSON string
+   * The original FormFieldType[] config as a JSON string
    */
   allFieldsConfigJSON: string;
 

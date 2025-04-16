@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+
 import { getContractAdapter } from '../../../adapters';
-import type { ContractSchema } from '../../types/ContractSchema';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';

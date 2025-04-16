@@ -1,4 +1,4 @@
-import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 export interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;

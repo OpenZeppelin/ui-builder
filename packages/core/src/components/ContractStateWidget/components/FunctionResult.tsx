@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ContractFunction } from '../../../core/types/ContractSchema';
+import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 interface FunctionResultProps {
   functionDetails: ContractFunction;

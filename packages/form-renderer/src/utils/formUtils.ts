@@ -5,7 +5,8 @@
  * These functions handle converting between UI and blockchain data formats.
  * TODO: review this file and check if all of these functions are still needed
  */
-import { ContractAdapter, FieldTransforms, FieldType, FieldValue } from '../types/FormTypes';
+import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import { FieldTransforms, FieldType, FieldValue } from '@openzeppelin/transaction-form-types/forms';
 
 /**
  * Parameter constraints for validation and default value generation

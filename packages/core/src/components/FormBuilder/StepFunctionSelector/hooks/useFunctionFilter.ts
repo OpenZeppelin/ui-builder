@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { ContractFunction, ContractSchema } from '../../../../core/types/ContractSchema';
+import type {
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types/contracts';
 
 interface UseFunctionFilterResult {
   functions: ContractFunction[];

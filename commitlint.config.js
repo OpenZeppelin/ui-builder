@@ -41,6 +41,7 @@ export default {
         'deps',
         'config',
         'form',
+        'types',
         'transaction',
         'utils',
         'docs',

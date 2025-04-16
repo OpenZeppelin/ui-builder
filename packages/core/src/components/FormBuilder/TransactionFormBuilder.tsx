@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+
 import type { ContractAdapter } from '../../adapters';
 import { getContractAdapter } from '../../adapters';
-import type { ChainType, ContractSchema } from '../../core/types/ContractSchema';
 import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 import { ContractStateWidget } from '../ContractStateWidget';

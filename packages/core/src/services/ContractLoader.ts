@@ -4,8 +4,9 @@
  * Handles loading contract definitions across different blockchain platforms.
  * Uses the appropriate adapter based on the selected chain type.
  */
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+
 import { getContractAdapter } from '../adapters';
-import type { ChainType, ContractSchema } from '../core/types/ContractSchema';
 import { logger } from '../core/utils/logger';
 
 // This will be populated with chain adapters in future implementations

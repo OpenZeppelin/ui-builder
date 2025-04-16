@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { ContractSchema } from '../../../core/types/ContractSchema';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { ContractAddressForm } from './components/ContractAddressForm';
 import { ContractPreview } from './components/ContractPreview';

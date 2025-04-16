@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '../../core/types/ContractSchema';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalFormConfig } from '../utils/testConfig';

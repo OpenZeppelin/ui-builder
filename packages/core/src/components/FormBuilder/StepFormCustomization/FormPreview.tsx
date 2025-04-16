@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
 import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getContractAdapter } from '../../../adapters';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { Card, CardContent } from '../../ui/card';
 

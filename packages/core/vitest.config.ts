@@ -27,6 +27,8 @@ const virtualModuleMocks: Record<string, string> = {
   'virtual:global-css-content': `export default "/* Mock Global CSS */";`,
   // Template CSS content mock
   'virtual:template-vite-styles-css-content': `export default "/* Mock Template styles.css */";`,
+  // Contract Schema content mock (added)
+  'virtual:contract-schema-content': `export default "/* Mock Contract Schema Content */";`,
   // Add more virtual module mocks as needed
   // 'virtual:templates-config': `export const templateConfig = { /* mock data */ };`,
 };

@@ -36,11 +36,11 @@
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 // Import logger
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
-import type { ChainType } from '../core/types/ContractSchema';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 import { logger } from '../core/utils/logger';

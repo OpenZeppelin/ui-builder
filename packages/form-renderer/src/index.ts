@@ -6,23 +6,6 @@
 
 // Export types from FormTypes
 export type { FormRendererConfig } from './types/FormRendererConfig';
-export type {
-  CommonFormProperties,
-  ContractAdapter,
-  FieldCondition,
-  FieldTransforms,
-  FieldType,
-  FieldValidation,
-  FieldValue,
-  FormError,
-  // Export FormField type but rename it to avoid conflict with UI component
-  FormField as FormFieldType,
-  FormLayout,
-  FormValues,
-  RenderFormSchema,
-  SubmitButtonConfig,
-  TransactionFormProps,
-} from './types/FormTypes';
 
 // Export components selectively to avoid name conflicts
 export * from './components/fields';
@@ -55,9 +38,6 @@ export * from './components/fields/SelectGroupedField';
 
 // Export utilities
 export * from './utils';
-
-// Export core types and utilities
-export * from './types';
 
 // Export main components
 export * from './components';

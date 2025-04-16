@@ -3,14 +3,13 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import {
   BooleanField,
-  ContractAdapter,
   DynamicFormField,
-  FormFieldType,
-  FormValues,
   SelectField,
   SelectGroupedField,
   TextField,
 } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types/forms';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
 

@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/transaction-form-renderer';
+import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 import { ContractAdapter } from '../../../adapters';
-import { ContractFunction } from '../../../core/types/ContractSchema';
 
 interface ParameterInputsProps {
   functionDetails: ContractFunction;

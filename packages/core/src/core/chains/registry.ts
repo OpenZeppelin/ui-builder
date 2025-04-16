@@ -1,4 +1,4 @@
-import type { ChainType } from '../types/ContractSchema';
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 /**
  * Interface for chain-specific data in the registry

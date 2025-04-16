@@ -5,7 +5,9 @@
  * for a selected blockchain. It uses Vite's build-time capabilities to avoid hardcoding
  * chain types, making it easy to add new blockchain adapters without code changes.
  */
-import { ChainType } from '../core/types/ContractSchema';
+import contractSchemaContent from 'virtual:contract-schema-content';
+
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 /**
  * Type for a map of file paths to content
@@ -28,12 +30,6 @@ const typeFiles = import.meta.glob<string>('../adapters/*/types.ts', {
   import: 'default',
 }) as LazyGlobImportResult;
 const utilFiles = import.meta.glob<string>('../adapters/*/utils.ts', {
-  query: '?raw',
-  import: 'default',
-}) as LazyGlobImportResult;
-
-// Core type files for adapter functionality
-const coreTypeFiles = import.meta.glob<string>('../core/types/ContractSchema.ts', {
   query: '?raw',
   import: 'default',
 }) as LazyGlobImportResult;
@@ -61,7 +57,6 @@ export const adapterFilePaths = {
   adapter: Object.keys(adapterFiles),
   type: Object.keys(typeFiles),
   util: Object.keys(utilFiles),
-  coreType: Object.keys(coreTypeFiles),
   generalUtil: Object.keys(generalUtilFiles),
   logger: Object.keys(loggerFile),
   adapterIndex: Object.keys(adapterIndexFiles),
@@ -238,17 +233,17 @@ export class AdapterExportManager {
   private async getCoreAdapterFiles(): Promise<AdapterFileMap> {
     const coreFiles: AdapterFileMap = {};
 
-    // ContractSchema.ts - Get from core package
-    const schemaTypesPath = Object.keys(coreTypeFiles)[0] || '';
-    if (schemaTypesPath) {
+    // ContractSchema.ts - Use the imported content from the virtual module
+    if (contractSchemaContent) {
       try {
-        coreFiles['src/core/types/ContractSchema.ts'] = await this.getFileContent(schemaTypesPath);
+        // Use the content directly, map it to the expected export path
+        coreFiles['src/core/types/ContractSchema.ts'] = contractSchemaContent;
       } catch (error) {
-        console.error('Failed to load ContractSchema.ts:', error);
+        console.error('Failed to load ContractSchema.ts from virtual module:', error);
         throw new Error('Failed to load required type file: ContractSchema.ts');
       }
     } else {
-      console.error('No ContractSchema.ts file found');
+      console.error('No ContractSchema.ts content found from virtual module');
       throw new Error('Required type file ContractSchema.ts not found');
     }
 
@@ -477,12 +472,6 @@ export class AdapterExportManager {
           return await utilFiles[path]();
         }
         throw new Error(`Adapter file not found: ${path}`);
-      } else if (path.includes('/core/types/')) {
-        // Core type files
-        if (coreTypeFiles[path]) {
-          return await coreTypeFiles[path]();
-        }
-        throw new Error(`Core type file not found: ${path}`);
       } else if (path.includes('/core/utils/')) {
         // General utility files
         if (generalUtilFiles[path]) {

@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 
 import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-provider';
 import { virtualContentLoaderPlugin } from './vite-plugins/virtual-content-loader';
+
 import templatePlugin from './vite.template-plugin';
 
 /**

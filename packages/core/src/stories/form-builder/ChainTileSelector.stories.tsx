@@ -2,8 +2,9 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { useState } from 'react';
 
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+
 import { ChainTileSelector } from '../../components/FormBuilder/ChainTileSelector';
-import type { ChainType } from '../../core/types/ContractSchema';
 
 const meta = {
   title: 'Core/FormBuilder/ChainTileSelector',

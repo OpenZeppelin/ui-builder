@@ -1,7 +1,8 @@
 import { type ForwardedRef, type ReactElement, type ReactNode } from 'react';
 import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
-import { type FieldValidation } from '../../types/FormTypes';
+import { type FieldValidation } from '@openzeppelin/transaction-form-types/forms';
+
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui';
 
 import { getWidthClasses } from './utils/layout';

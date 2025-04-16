@@ -3,8 +3,9 @@
  */
 import { useCallback, useState } from 'react';
 
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+
 import { loadContractDefinition } from '../../services/ContractLoader';
-import type { ChainType, ContractSchema } from '../types/ContractSchema';
 
 export function useContractDefinition() {
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);

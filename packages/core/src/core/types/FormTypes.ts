@@ -4,9 +4,11 @@
  * NOTE: This file contains only types specific to the core package.
  * Common form types are imported directly from the form-renderer package
  * when needed, rather than being re-exported here.
+ * If you see that the types must be used in multiple packages, please consider
+ * adding them to the @openzeppelin/transaction-form-types package instead.
  */
 // Import using the package name from dependencies
-import type { CommonFormProperties } from '@openzeppelin/transaction-form-renderer';
+import type { CommonFormProperties } from '@openzeppelin/transaction-form-types/forms';
 
 /**
  * Configuration input used during form creation and editing in the builder

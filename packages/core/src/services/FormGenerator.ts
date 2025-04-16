@@ -6,23 +6,18 @@
  */
 import { startCase } from 'lodash';
 
-import {
-  CommonFormProperties,
-  FieldType,
-  FormFieldType,
-  // FormValues,
-  // RenderFormSchema,
-  // Will be used in future implementation
-  // FormLayout,
-  // SubmitButtonConfig,
-} from '@openzeppelin/transaction-form-renderer';
-
-import { getContractAdapter } from '../adapters';
 import type {
   ContractFunction,
   ContractSchema,
   FunctionParameter,
-} from '../core/types/ContractSchema';
+} from '@openzeppelin/transaction-form-types/contracts';
+import {
+  CommonFormProperties,
+  FieldType,
+  FormFieldType,
+} from '@openzeppelin/transaction-form-types/forms';
+
+import { getContractAdapter } from '../adapters';
 import { BuilderFormConfig } from '../core/types/FormTypes';
 import { generateId } from '../core/utils/general';
 
