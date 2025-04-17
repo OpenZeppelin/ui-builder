@@ -13,7 +13,7 @@ core/
 │   │   ├── Common/   # Shared components across features
 │   │   └── FormBuilder/ # Form builder components
 │   ├── core/         # Chain-agnostic core functionality
-│   │   ├── types/    # Type definitions
+│   │   ├── types/    # Local type definitions (shared types in @openzeppelin/transaction-form-types)
 │   │   ├── utils/    # Utility functions
 │   │   ├── hooks/    # Shared hooks
 │   │   └── factories/ # Schema factories
@@ -46,6 +46,14 @@ core/
 └── ...               # Other configuration files
 ```
 
+## Dependencies
+
+This package relies on:
+
+- **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms
+- **@openzeppelin/transaction-form-renderer**: Form rendering components
+- **@openzeppelin/transaction-form-styles**: Centralized styling system
+
 ## Styling
 
 This package uses the centralized styling system from the `packages/styles` package:
@@ -56,6 +64,16 @@ This package uses the centralized styling system from the `packages/styles` pack
 - **Dark Mode**: Built-in dark mode support
 
 For more details on the styling system, see the [Styles README](../styles/README.md).
+
+## Type System
+
+The core package uses type definitions from the `@openzeppelin/transaction-form-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These include:
+
+- **Contract Types**: Definitions for blockchain contracts and their schemas
+- **Adapter Types**: Interfaces for chain-specific adapters
+- **Form Types**: Definitions for form fields, layouts, and validation
+
+By using the shared types package, we ensure consistency across all packages and eliminate type duplication.
 
 ## Development
 

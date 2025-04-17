@@ -37,6 +37,7 @@ This project is organized as a monorepo with the following packages:
 
 - **packages/core**: The main application with the form builder UI
 - **packages/form-renderer**: The shared form rendering library (published to npm)
+- **packages/types**: Shared TypeScript type definitions for all packages (published to npm)
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations
 
 ## Packages
@@ -56,6 +57,19 @@ Features:
 - Customizable styling options
 
 For more details, see the [Form-Renderer README](./packages/form-renderer/README.md).
+
+### Types Package
+
+The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Transaction Form Builder.
+
+Features:
+
+- Centralized type definitions
+- Organized namespaces for contracts, adapters, and forms
+- Clear separation of concerns
+- TypeScript project references for proper type checking
+
+For more details, see the [Types README](./packages/types/README.md).
 
 ### Styles Package
 
@@ -215,6 +229,14 @@ transaction-form-builder/
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports
 │   │   ├── scripts/             # Build scripts
+│   │   ├── tsconfig.json        # TypeScript configuration
+│   │   └── package.json         # Package configuration
+│   ├── types/                   # Shared TypeScript type definitions
+│   │   ├── src/
+│   │   │   ├── adapters/        # Contract adapter interfaces
+│   │   │   ├── contracts/       # Contract and blockchain types
+│   │   │   ├── forms/           # Form field and layout definitions
+│   │   │   └── index.ts         # Main entry point
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
 │   └── styles/                  # Centralized styling system

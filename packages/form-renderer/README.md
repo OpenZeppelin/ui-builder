@@ -9,23 +9,40 @@ A specialized library for rendering customizable transaction forms for blockchai
 
 ```bash
 # Using npm
-npm install @openzeppelin/transaction-form-renderer
+npm install @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 
 # Using yarn
-yarn add @openzeppelin/transaction-form-renderer
+yarn add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 
 # Using pnpm
-pnpm add @openzeppelin/transaction-form-renderer
+pnpm add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 ```
 
 ## Features
 
 - Lightweight form rendering components
 - Framework-agnostic design
-- TypeScript support with full type definitions
+- TypeScript support with full type definitions (via @openzeppelin/transaction-form-types)
 - Support for both ESM and CommonJS environments
 - Customizable styling options
 - Optimized for blockchain transaction data
+
+## Type System
+
+This package uses type definitions from the `@openzeppelin/transaction-form-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These types include:
+
+- Form field and component definitions
+- Layout and validation schemas
+- Adapter interfaces for blockchain interactions
+
+When using this package, you should also install `@openzeppelin/transaction-form-types` to ensure proper type checking in your application.
+
+```tsx
+// Example of importing types
+import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import type { FormValues, RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+```
 
 ## Component Styling
 
