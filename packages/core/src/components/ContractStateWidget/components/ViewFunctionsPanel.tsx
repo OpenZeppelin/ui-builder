@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 import type {
@@ -63,6 +63,13 @@ export function ViewFunctionsPanel({
     }
   };
 
+  // Auto-query all functions on component mount
+  useEffect(() => {
+    if (functions.length > 0) {
+      void handleQueryAll();
+    }
+  }, [functions, contractAddress]); // Re-query when functions or contract address changes
+
   if (functions.length === 0) {
     return (
       <div className="text-xs text-muted-foreground">
@@ -79,7 +86,7 @@ export function ViewFunctionsPanel({
         size="sm"
         className="text-xs w-full"
       >
-        {isLoading ? 'Querying...' : 'Query All'}
+        {isLoading ? 'Querying...' : 'Refresh All'}
       </Button>
 
       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">

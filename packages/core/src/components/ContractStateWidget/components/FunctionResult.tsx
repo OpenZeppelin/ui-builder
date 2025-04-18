@@ -43,7 +43,7 @@ export function FunctionResult({ functionDetails, result, loading }: FunctionRes
       </div>
 
       {loading ? (
-        <div className="text-xs text-muted-foreground italic">Loading...</div>
+        <div className="text-xs text-muted-foreground italic animate-pulse">Loading...</div>
       ) : hasResult ? (
         <pre
           className={`text-xs p-1 max-h-24 bg-muted overflow-auto rounded whitespace-pre-wrap break-all ${
@@ -53,7 +53,7 @@ export function FunctionResult({ functionDetails, result, loading }: FunctionRes
           {formattedResult}
         </pre>
       ) : (
-        <div className="text-xs text-muted-foreground italic">Click Query All to fetch result</div>
+        <div className="text-xs text-muted-foreground italic">Click Refresh to fetch result</div>
       )}
     </div>
   );
