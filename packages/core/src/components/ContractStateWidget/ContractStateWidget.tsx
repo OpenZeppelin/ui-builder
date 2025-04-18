@@ -10,6 +10,7 @@ import type {
 } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getContractAdapter } from '../../adapters';
+import { truncateMiddle } from '../../core/utils/general';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
@@ -22,20 +23,6 @@ interface ContractStateWidgetProps {
   chainType: ChainType;
   isVisible?: boolean;
   onToggle?: () => void;
-}
-
-/**
- * Truncates a string (like an Ethereum address) in the middle
- * @param str The string to truncate
- * @param startChars Number of characters to show at the beginning
- * @param endChars Number of characters to show at the end
- * @returns The truncated string with ellipsis in the middle
- */
-function truncateMiddle(str: string, startChars = 6, endChars = 4): string {
-  if (!str) return '';
-  if (str.length <= startChars + endChars) return str;
-
-  return `${str.substring(0, startChars)}...${str.substring(str.length - endChars)}`;
 }
 
 /**
