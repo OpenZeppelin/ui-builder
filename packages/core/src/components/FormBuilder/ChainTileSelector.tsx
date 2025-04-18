@@ -9,6 +9,8 @@ import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
 import { getChainDescription, getChainName } from '../../core/chains';
 
+import { StepTitleWithDescription } from './Common';
+
 // Mapping of our chain types to web3icons network names
 const networkMapping = {
   evm: 'ethereum',
@@ -77,12 +79,10 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
 
   return (
     <div className="flex flex-col space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Select Blockchain</h3>
-        <p className="text-muted-foreground text-sm">
-          Choose the blockchain network that your contract is deployed on.
-        </p>
-      </div>
+      <StepTitleWithDescription
+        title="Select Blockchain"
+        description="Choose the blockchain network that your contract is deployed on."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
         {blockchainOptions.map((option) => {

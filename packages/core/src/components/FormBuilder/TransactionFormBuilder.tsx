@@ -23,6 +23,7 @@ export function TransactionFormBuilder() {
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
   const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(false);
 
   // Instantiate the correct adapter based on the selected chain using the factory
   const adapter = useMemo<ContractAdapter>(() => {
@@ -36,11 +37,14 @@ export function TransactionFormBuilder() {
     setContractSchema(null);
     setSelectedFunction(null);
     setFormConfig(null);
+    setContractAddress(null);
   }, []);
 
   const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
     setContractSchema(schema);
     setContractAddress(schema.address ?? null);
+    // Automatically show the widget when a contract is loaded for the first time
+    setIsWidgetVisible(true);
   }, []);
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
@@ -122,6 +126,25 @@ export function TransactionFormBuilder() {
     }
   }, [selectedChain, selectedFunction, formConfig]);
 
+  // Toggle widget visibility
+  const toggleWidget = useCallback(() => {
+    setIsWidgetVisible((prev) => !prev);
+  }, []);
+
+  // Create sidebar widget when we have contract data
+  const sidebarWidget =
+    contractAddress && contractSchema ? (
+      <div className="sticky top-4">
+        <ContractStateWidget
+          contractSchema={contractSchema}
+          contractAddress={contractAddress}
+          chainType={selectedChain}
+          isVisible={isWidgetVisible}
+          onToggle={toggleWidget}
+        />
+      </div>
+    ) : null;
+
   const steps: WizardStep[] = [
     {
       id: 'chain-select',
@@ -132,22 +155,11 @@ export function TransactionFormBuilder() {
     },
     {
       id: 'contract-definition',
-      title: 'Upload Contract',
+      title: 'Load Contract',
       component: (
         <StepContractDefinition
           onContractSchemaLoaded={handleContractSchemaLoaded}
           selectedChain={selectedChain}
-        />
-      ),
-    },
-    {
-      id: 'contract-state',
-      title: 'Contract State',
-      component: (
-        <ContractStateWidget
-          contractSchema={contractSchema}
-          contractAddress={contractAddress}
-          chainType={selectedChain}
         />
       ),
     },
@@ -201,7 +213,7 @@ export function TransactionFormBuilder() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl py-8">
+    <div className="mx-auto max-w-5xl py-8">
       <div className="mb-8 text-center">
         <h1 className="mb-2 text-3xl font-bold">Transaction Form Builder</h1>
         <p className="text-muted-foreground text-lg">
@@ -210,7 +222,11 @@ export function TransactionFormBuilder() {
       </div>
 
       <div className="bg-card rounded-lg border shadow-sm">
-        <WizardLayout steps={steps} />
+        <WizardLayout
+          steps={steps}
+          sidebarWidget={sidebarWidget}
+          isWidgetExpanded={isWidgetVisible}
+        />
       </div>
     </div>
   );

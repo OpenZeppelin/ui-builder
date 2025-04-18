@@ -13,9 +13,17 @@ interface WizardLayoutProps {
   steps: WizardStep[];
   initialStep?: number;
   onComplete?: () => void;
+  sidebarWidget?: ReactNode;
+  isWidgetExpanded?: boolean;
 }
 
-export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayoutProps) {
+export function WizardLayout({
+  steps,
+  initialStep = 0,
+  onComplete,
+  sidebarWidget,
+  isWidgetExpanded = false,
+}: WizardLayoutProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
@@ -63,8 +71,18 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
         </div>
       </div>
 
-      {/* Step content */}
-      <div className="w-full">{currentStep.component}</div>
+      {/* Main content area with optional sidebar */}
+      <div className="flex w-full relative">
+        {/* Step content */}
+        <div className="w-full">{currentStep.component}</div>
+
+        {/* Sidebar widget (if provided) */}
+        {sidebarWidget && (
+          <div className={isWidgetExpanded ? 'w-80 shrink-0 ml-6' : 'shrink-0'}>
+            {sidebarWidget}
+          </div>
+        )}
+      </div>
 
       {/* Navigation buttons */}
       <div className="flex justify-between border-t pt-6">

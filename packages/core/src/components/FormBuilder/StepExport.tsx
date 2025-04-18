@@ -8,6 +8,8 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../../export';
 import type { ZipProgress } from '../../export/ZipGenerator';
 
+import { StepTitleWithDescription } from './Common';
+
 /**
  * StepExport Component
  *
@@ -136,12 +138,10 @@ export function StepExport({
 
   return (
     <div className="flex flex-col space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Export Your Form</h3>
-        <p className="text-muted-foreground text-sm">
-          Configure export settings and generate your transaction form.
-        </p>
-      </div>
+      <StepTitleWithDescription
+        title="Export Your Form"
+        description="Configure export settings and generate your transaction form."
+      />
 
       <div className="space-y-6">
         {/* Export Summary */}

@@ -6,6 +6,7 @@ import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-t
 import { getContractAdapter } from '../../../adapters';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { StepTitleWithDescription } from '../Common';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
@@ -63,13 +64,15 @@ export function StepFormCustomization({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Customize Form</h3>
-        <p className="text-muted-foreground">
-          Customize the form fields, layout, and validation for the &quot;
-          {selectedFunctionDetails.displayName}&quot; function.
-        </p>
-      </div>
+      <StepTitleWithDescription
+        title="Customize Form"
+        description={
+          <>
+            Customize the form fields, layout, and validation for the &quot;
+            {selectedFunctionDetails.displayName}&quot; function.
+          </>
+        }
+      />
 
       <div className="flex justify-end space-x-2">
         <Button variant="outline" size="sm" onClick={() => setPreviewMode(!previewMode)}>

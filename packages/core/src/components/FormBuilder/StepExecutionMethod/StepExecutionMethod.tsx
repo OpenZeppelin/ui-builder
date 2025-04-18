@@ -1,6 +1,7 @@
 import React from 'react';
 
 import type { ExecutionMethodDetail } from '../../../core/types/FormTypes';
+import { StepTitleWithDescription } from '../Common';
 
 import { EoaConfiguration } from './components/EoaConfiguration';
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
@@ -36,7 +37,10 @@ export function StepExecutionMethod({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Configure Execution Method</h2>
+      <StepTitleWithDescription
+        title="Configure Execution Method"
+        description="Select how this transaction will be executed on the blockchain and configure the required parameters."
+      />
 
       {/* Render Primary Method Selector Sub-component */}
       <PrimaryMethodSelector

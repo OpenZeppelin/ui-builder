@@ -37,6 +37,7 @@ export function ParameterInputs({
   const formValues = watch();
 
   useEffect(() => {
+    if (!functionDetails.inputs) return;
     functionDetails.inputs.forEach((_, index) => {
       const key = `param${index}`;
       if (formValues[key] !== undefined && formValues[key] !== values[index]) {
@@ -45,18 +46,22 @@ export function ParameterInputs({
     });
   }, [formValues, functionDetails.inputs, onChange, values]);
 
+  if (!functionDetails.inputs || functionDetails.inputs.length === 0) {
+    return <div className="text-xs text-muted-foreground">No parameters</div>;
+  }
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {functionDetails.inputs.map((parameter, index) => {
         // Use the adapter's field generation logic (same as used in form builder)
         const fieldConfig = adapter.generateDefaultField(parameter);
 
-        // Set up a compact field layout
         fieldConfig.width = 'full';
         fieldConfig.label = `${parameter.displayName || parameter.name} (${parameter.type})`;
+        fieldConfig.helperText = '';
 
         return (
-          <div key={`${functionDetails.id}-param-${index}`} className="mb-2">
+          <div key={`${functionDetails.id}-param-${index}`} className="mb-1">
             <DynamicFormField field={fieldConfig} control={control} adapter={adapter} />
           </div>
         );

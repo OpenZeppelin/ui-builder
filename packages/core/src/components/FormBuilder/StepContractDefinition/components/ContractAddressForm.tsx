@@ -6,6 +6,7 @@ import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-fo
 import { getContractAdapter } from '../../../../adapters/index';
 import { getChainExplorerGuidance, getChainName } from '../../../../core/chains';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
+import { StepTitleWithDescription } from '../../Common';
 import { MockContractSelector } from '../../MockContractSelector';
 import { ContractAddressFormProps, ContractFormData } from '../types';
 
@@ -91,13 +92,15 @@ export function ContractAddressForm({
       onSubmit={(e) => void handleSubmit(onSubmitAddress)(e)}
       className="flex flex-col space-y-6"
     >
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Provide Contract Address</h3>
-        <p className="text-muted-foreground text-sm">
-          Enter the address of a verified contract on the {chainName} network
-          {explorerGuidance && ` (e.g., ${explorerGuidance})`} or load from mock data.
-        </p>
-      </div>
+      <StepTitleWithDescription
+        title="Provide Contract Address"
+        description={
+          <>
+            Enter the address of a verified contract on the {chainName} network
+            {explorerGuidance && ` (e.g., ${explorerGuidance})`} or load from mock data.
+          </>
+        }
+      />
 
       <div className="grid gap-4">
         <AddressField

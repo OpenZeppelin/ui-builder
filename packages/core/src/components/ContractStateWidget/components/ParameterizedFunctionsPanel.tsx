@@ -47,49 +47,35 @@ export function ParameterizedFunctionsPanel({
     });
   };
 
-  // Query a specific function with its parameters
-  const queryFunction = async (fn: ContractFunction) => {
-    setLoadingFunctions((prev) => new Set(prev).add(fn.id));
+  // Query a specific parameterized function
+  const queryFunction = async (functionId: string) => {
+    const functionDetails = functions.find((f) => f.id === functionId);
+    if (!functionDetails) return;
 
-    // Validate contract address first
-    if (!contractAddress || contractAddress.trim() === '') {
-      setResults((prev) => ({
-        ...prev,
-        [fn.id]: 'Error: Contract address is empty or not provided',
-      }));
+    // Get parameter values for this function
+    const params = paramValues[functionId] || [];
 
-      // Remove loading state
-      setLoadingFunctions((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(fn.id);
-        return newSet;
-      });
-
-      return;
-    }
+    // Add to loading set
+    setLoadingFunctions((prev) => new Set([...prev, functionId]));
 
     try {
-      const params = paramValues[fn.id] || [];
       const result = await adapter.queryViewFunction(
         contractAddress,
-        fn.id,
+        functionId,
         params,
         contractSchema
       );
-
+      setResults((prev) => ({ ...prev, [functionId]: result }));
+    } catch (err) {
+      console.error(`Error querying function ${functionDetails.name}:`, err);
       setResults((prev) => ({
         ...prev,
-        [fn.id]: adapter.formatFunctionResult(result, fn),
-      }));
-    } catch (error) {
-      setResults((prev) => ({
-        ...prev,
-        [fn.id]: `Error: ${(error as Error).message}`,
+        [functionId]: `Error: ${err instanceof Error ? err.message : 'Unknown error'}`,
       }));
     } finally {
       setLoadingFunctions((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(fn.id);
+        const newSet = new Set([...prev]);
+        newSet.delete(functionId);
         return newSet;
       });
     }
@@ -97,41 +83,44 @@ export function ParameterizedFunctionsPanel({
 
   if (functions.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground">No parameterized view functions available</div>
+      <div className="text-xs text-muted-foreground">
+        No parameterized view functions found in this contract.
+      </div>
     );
   }
 
   return (
-    <Accordion type="multiple" className="w-full">
-      {functions.map((fn) => (
-        <AccordionItem key={fn.id} value={fn.id}>
-          <AccordionTrigger className="text-sm font-medium hover:no-underline">
-            {fn.displayName || fn.name}
+    <Accordion type="multiple" className="space-y-1 max-h-64 overflow-y-auto">
+      {functions.map((func) => (
+        <AccordionItem key={func.id} value={func.id} className="border-b-0 py-1">
+          <AccordionTrigger className="py-1 text-xs">
+            {func.name} ({func.inputs?.length || 0} params)
           </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3 pt-2">
+          <AccordionContent className="pt-1 pb-2 px-1">
+            <div className="space-y-2">
               <ParameterInputs
-                functionDetails={fn}
-                values={paramValues[fn.id] || []}
-                onChange={(index, value) => updateParam(fn.id, index, value)}
+                functionDetails={func}
+                values={paramValues[func.id] || []}
+                onChange={(index, value) => updateParam(func.id, index, value)}
                 adapter={adapter}
               />
 
-              <div className="flex justify-end">
+              <div>
                 <Button
+                  onClick={() => void queryFunction(func.id)}
+                  disabled={loadingFunctions.has(func.id)}
                   size="sm"
-                  onClick={() => void queryFunction(fn)}
-                  disabled={loadingFunctions.has(fn.id)}
+                  className="text-xs w-full"
                 >
-                  {loadingFunctions.has(fn.id) ? 'Querying...' : 'Query'}
+                  {loadingFunctions.has(func.id) ? 'Querying...' : 'Query'}
                 </Button>
               </div>
 
-              {results[fn.id] !== undefined && (
+              {results[func.id] !== undefined && (
                 <FunctionResult
-                  functionDetails={fn}
-                  result={results[fn.id]}
-                  loading={loadingFunctions.has(fn.id)}
+                  functionDetails={func}
+                  result={results[func.id]}
+                  loading={loadingFunctions.has(func.id)}
                 />
               )}
             </div>

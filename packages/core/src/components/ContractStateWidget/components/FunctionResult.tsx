@@ -12,34 +12,49 @@ interface FunctionResultProps {
  * Component for displaying function results
  */
 export function FunctionResult({ functionDetails, result, loading }: FunctionResultProps) {
-  const formatResult = (result: unknown): React.ReactNode => {
-    if (result === undefined) {
-      return null;
-    }
+  // Format result for display
+  const formatResult = (rawResult: unknown): string => {
+    if (rawResult === undefined) return '';
+    if (rawResult === null) return 'null';
+    if (typeof rawResult === 'string' && rawResult.startsWith('Error:')) return rawResult;
 
-    if (typeof result === 'object' && result !== null) {
-      // For complex objects/arrays, show as JSON
-      return (
-        <pre className="mt-1 max-h-20 overflow-auto rounded bg-muted p-2 text-xs">
-          {JSON.stringify(result, null, 2)}
-        </pre>
-      );
+    try {
+      // Compact JSON without indentation
+      return JSON.stringify(rawResult, null, 0);
+    } catch {
+      return String(rawResult);
     }
-
-    // For simple values
-    return <span className="font-mono text-sm">{String(result)}</span>;
   };
 
+  const formattedResult = formatResult(result);
+  const hasResult = result !== undefined;
+  const isError = typeof result === 'string' && result.startsWith('Error:');
+  const outputs = functionDetails.outputs || [];
+
   return (
-    <div className="rounded-md border p-3">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">
-          {functionDetails.displayName || functionDetails.name}
-        </div>
-        {loading && <div className="text-xs text-muted-foreground">Loading...</div>}
+    <div className="border rounded-sm p-2">
+      <div className="text-xs font-medium mb-1">
+        {functionDetails.name}
+        {outputs.length > 0 && (
+          <span className="text-muted-foreground ml-2">
+            {`→ ${outputs.map((o) => o.type).join(', ')}`}
+          </span>
+        )}
       </div>
 
-      {result !== undefined && <div className="mt-2">{formatResult(result)}</div>}
+      {loading ? (
+        <div className="text-xs text-muted-foreground italic">Loading...</div>
+      ) : hasResult ? (
+        <pre
+          className={`text-xs p-1 max-h-24 bg-muted overflow-auto rounded whitespace-pre-wrap break-all ${
+            isError ? 'text-destructive' : ''
+          }`}
+        >
+          {formattedResult}
+        </pre>
+      ) : (
+        <div className="text-xs text-muted-foreground italic">Click Query All to fetch result</div>
+      )}
     </div>
   );
 }

@@ -27,68 +27,68 @@ export function ViewFunctionsPanel({
   contractSchema,
 }: ViewFunctionsPanelProps) {
   const [results, setResults] = useState<Record<string, unknown>>({});
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Query all functions at once
-  const queryAllFunctions = async () => {
-    setLoading(true);
-    setError(null);
+  // Query all view functions at once
+  const handleQueryAll = async () => {
+    if (functions.length === 0) return;
 
-    // Validate contract address first
-    if (!contractAddress || contractAddress.trim() === '') {
-      setError('Contract address is empty or not provided');
-      setLoading(false);
-      return;
-    }
+    setIsLoading(true);
+    const newResults: Record<string, unknown> = {};
 
     try {
-      const newResults: Record<string, unknown> = {};
-
-      // Query each function sequentially
-      for (const fn of functions) {
+      // Create an array of promises for all function queries
+      const queries = functions.map(async (func) => {
         try {
           const result = await adapter.queryViewFunction(
             contractAddress,
-            fn.id,
-            [], // No params for simple view functions
+            func.id,
+            [],
             contractSchema
           );
-          newResults[fn.id] = adapter.formatFunctionResult(result, fn);
-        } catch (fnError) {
-          newResults[fn.id] = `Error: ${(fnError as Error).message}`;
+          newResults[func.id] = result;
+        } catch (err) {
+          console.error(`Error calling ${func.name}:`, err);
+          newResults[func.id] = `Error: ${err instanceof Error ? err.message : 'Unknown error'}`;
         }
-      }
+      });
 
+      // Wait for all queries to complete
+      await Promise.all(queries);
       setResults(newResults);
     } catch (err) {
-      setError(`Failed to query functions: ${(err as Error).message}`);
+      console.error('Error querying functions:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   if (functions.length === 0) {
-    return <div className="text-sm text-muted-foreground">No simple view functions available</div>;
+    return (
+      <div className="text-xs text-muted-foreground">
+        No simple view functions found in this contract.
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => void queryAllFunctions()} disabled={loading} size="sm">
-          {loading ? 'Querying...' : 'Query All'}
-        </Button>
-      </div>
+    <div className="space-y-2">
+      <Button
+        onClick={() => void handleQueryAll()}
+        disabled={isLoading}
+        size="sm"
+        className="text-xs w-full"
+      >
+        {isLoading ? 'Querying...' : 'Query All'}
+      </Button>
 
-      {error && <div className="text-sm text-destructive">{error}</div>}
-
-      <div className="space-y-3">
-        {functions.map((fn) => (
+      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+        {functions.map((func) => (
           <FunctionResult
-            key={fn.id}
-            functionDetails={fn}
-            result={results[fn.id]}
-            loading={loading}
+            key={func.id}
+            functionDetails={func}
+            result={results[func.id]}
+            loading={isLoading}
           />
         ))}
       </div>

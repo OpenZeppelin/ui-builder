@@ -1,3 +1,5 @@
+import { StepTitleWithDescription } from '../Common';
+
 import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
 import { useReadOnlyVisibility } from './hooks/useReadOnlyVisibility';
@@ -30,13 +32,10 @@ export function StepFunctionSelector({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Select Contract Function</h3>
-        <p className="text-muted-foreground">
-          Choose the contract function you want to create a transaction form for. Each function will
-          have its own dedicated form.
-        </p>
-      </div>
+      <StepTitleWithDescription
+        title="Select Contract Function"
+        description="Choose the contract function you want to create a transaction form for. Each function will have its own dedicated form."
+      />
 
       <FilterControls
         filterValue={filterValue}
