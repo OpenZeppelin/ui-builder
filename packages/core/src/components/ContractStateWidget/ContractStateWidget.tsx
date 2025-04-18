@@ -107,7 +107,7 @@ export function ContractStateWidget({
 
   return (
     <Card
-      className={`mb-2 overflow-hidden
+      className={`mb-2 overflow-hidden p-0
         transition-all duration-300 ease-in-out
         ${
           animationState === 'entering' || animationState === 'entered'
@@ -116,7 +116,7 @@ export function ContractStateWidget({
         }
       `}
     >
-      <CardHeader className="pb-2 pt-3 px-3 flex flex-row items-center justify-between">
+      <CardHeader className="pb-1 pt-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium">Contract State</CardTitle>
         {onToggle && (
           <Button
@@ -131,7 +131,7 @@ export function ContractStateWidget({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-2 px-3 py-2">
+      <CardContent className="space-y-2 px-3 py-1">
         <Tabs defaultValue="simple" className="w-full">
           <TabsList className="grid w-full grid-cols-2 h-7">
             <TabsTrigger value="simple" className="text-xs py-1">
