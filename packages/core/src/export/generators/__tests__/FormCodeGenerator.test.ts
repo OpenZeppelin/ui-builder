@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
@@ -25,6 +25,11 @@ describe('FormCodeGenerator', () => {
             variant: 'primary',
           },
           defaultValues: {},
+          layout: {
+            columns: 1 as const,
+            spacing: 'normal' as const,
+            labelPosition: 'top' as const,
+          },
         };
       }
     );
@@ -49,9 +54,9 @@ describe('FormCodeGenerator', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange',
@@ -92,9 +97,9 @@ describe('FormCodeGenerator', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange',
@@ -121,22 +126,29 @@ describe('FormCodeGenerator', () => {
       const generator = new FormCodeGenerator();
 
       // Override mock to return incomplete schema
-      vi.spyOn(formSchemaFactory, 'builderConfigToRenderSchema').mockImplementationOnce(() => {
-        // Return a deliberately incomplete schema to test validation
+      vi.spyOn(formSchemaFactory, 'builderConfigToRenderSchema').mockImplementationOnce((() => {
         return {
           fields: [],
-          layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+          layout: {
+            columns: 1,
+            spacing: 'normal',
+            labelPosition: 'top',
+          },
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
-          // Missing id, title, and submitButton properties
-        } as unknown as RenderFormSchema; // Cast to RenderFormSchema for testing validation
-      });
+          // intentionally missing id, title, and submitButton to test validation
+        };
+      }) as unknown as (
+        builderConfig: BuilderFormConfig,
+        functionName: string,
+        functionDescription?: string
+      ) => RenderFormSchema);
 
       // Create a minimal form config
       const formConfig: BuilderFormConfig = {
         functionId: 'invalidForm',
         fields: [],
-        layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+        layout: { columns: 1 as const, spacing: 'normal' as const, labelPosition: 'top' as const },
         validation: { mode: 'onChange', showErrors: 'inline' },
         theme: {},
       };
@@ -167,9 +179,9 @@ describe('FormCodeGenerator', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange',
@@ -239,9 +251,9 @@ describe('FormCodeGenerator', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange',

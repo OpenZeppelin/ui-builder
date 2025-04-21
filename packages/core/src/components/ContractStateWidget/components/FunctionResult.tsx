@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 interface FunctionResultProps {

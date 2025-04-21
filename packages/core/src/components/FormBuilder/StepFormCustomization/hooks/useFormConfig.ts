@@ -132,29 +132,6 @@ export function useFormConfig({
     [formConfig, onFormConfigUpdated]
   );
 
-  const updateFormLayout = useCallback(
-    (updates: Partial<BuilderFormConfig['layout']>) => {
-      if (!formConfig) return;
-
-      // Create a properly typed update with all required fields
-      const layoutUpdates = {
-        ...formConfig.layout,
-        ...updates,
-      };
-
-      const updatedConfig = updateFormConfig(formConfig, { layout: layoutUpdates });
-
-      setFormConfig(updatedConfig);
-
-      // Only notify parent if the config actually changed
-      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
-        lastParentUpdate.current = updatedConfig;
-        onFormConfigUpdated(updatedConfig);
-      }
-    },
-    [formConfig, onFormConfigUpdated]
-  );
-
   const updateFormValidation = useCallback(
     (updates: Partial<BuilderFormConfig['validation']>) => {
       if (!formConfig) return;
@@ -215,7 +192,6 @@ export function useFormConfig({
   return {
     formConfig,
     updateField,
-    updateFormLayout,
     updateFormValidation,
     updateFormTitle,
     updateFormDescription,

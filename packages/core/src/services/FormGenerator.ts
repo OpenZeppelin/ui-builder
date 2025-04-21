@@ -241,8 +241,9 @@ export function updateFormConfig(
   const updatedCommonProperties: CommonFormProperties = {
     fields: updates.fields || existingConfig.fields,
     layout: {
-      ...existingConfig.layout,
-      ...(updates.layout || {}),
+      columns: 1,
+      spacing: 'normal',
+      labelPosition: 'top',
     },
     validation: {
       ...existingConfig.validation,

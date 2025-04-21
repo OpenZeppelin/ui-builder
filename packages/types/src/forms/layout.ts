@@ -1,61 +1,21 @@
 /**
- * Form section for organizing fields
- */
-export interface FormSection {
-  /**
-   * Unique identifier for the section
-   */
-  id: string;
-
-  /**
-   * Section title
-   */
-  title: string;
-
-  /**
-   * Optional section description
-   */
-  description?: string;
-
-  /**
-   * Whether the section can be collapsed
-   */
-  collapsible?: boolean;
-
-  /**
-   * Whether the section is collapsed by default
-   */
-  defaultCollapsed?: boolean;
-
-  /**
-   * Field IDs included in this section
-   */
-  fields: string[];
-}
-
-/**
- * Layout configuration for form rendering
+ * Layout configuration for form rendering (fixed values)
  */
 export interface FormLayout {
   /**
-   * Number of columns in the layout grid
+   * Number of columns in the layout grid (fixed to 1)
    */
-  columns: number;
+  columns: 1;
 
   /**
-   * Spacing between form elements
+   * Spacing between form elements (fixed to 'normal')
    */
-  spacing: 'compact' | 'normal' | 'relaxed';
+  spacing: 'normal';
 
   /**
-   * Position of field labels
+   * Position of field labels (fixed to 'top')
    */
-  labelPosition: 'top' | 'left' | 'hidden';
-
-  /**
-   * Sections for organizing fields
-   */
-  sections?: FormSection[];
+  labelPosition: 'top';
 }
 
 /**

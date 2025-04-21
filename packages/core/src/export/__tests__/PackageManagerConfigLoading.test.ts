@@ -148,7 +148,11 @@ describe('PackageManager configuration loading', () => {
         {
           functionId: 'test',
           fields: [],
-          layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+          layout: {
+            columns: 1 as const,
+            spacing: 'normal' as const,
+            labelPosition: 'top' as const,
+          },
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
         },
@@ -168,7 +172,11 @@ describe('PackageManager configuration loading', () => {
         {
           functionId: 'test',
           fields: [],
-          layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+          layout: {
+            columns: 1 as const,
+            spacing: 'normal' as const,
+            labelPosition: 'top' as const,
+          },
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
         },
@@ -204,9 +212,9 @@ describe('PackageManager configuration loading', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal' as 'normal' | 'compact' | 'relaxed',
-          labelPosition: 'top' as 'top' | 'left' | 'hidden',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange' as 'onChange' | 'onBlur' | 'onSubmit',
@@ -248,9 +256,9 @@ describe('PackageManager configuration loading', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal' as 'normal' | 'compact' | 'relaxed',
-          labelPosition: 'top' as 'top' | 'left' | 'hidden',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange' as 'onChange' | 'onBlur' | 'onSubmit',
@@ -294,7 +302,7 @@ describe('PackageManager configuration loading', () => {
           },
         ],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
@@ -328,7 +336,7 @@ describe('PackageManager configuration loading', () => {
             validation: { required: false },
           },
         ],
-        layout: { columns: 1, spacing: 'normal', labelPosition: 'top', sections: [] },
+        layout: { columns: 1 as const, spacing: 'normal' as const, labelPosition: 'top' as const },
         validation: { mode: 'onChange', showErrors: 'inline' },
         theme: {},
       };
@@ -364,7 +372,7 @@ describe('PackageManager configuration loading', () => {
         functionId: 'test',
         fields: [],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
@@ -401,7 +409,7 @@ describe('PackageManager configuration loading', () => {
         functionId: 'test',
         fields: [],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
@@ -445,7 +453,7 @@ describe('PackageManager configuration loading', () => {
         functionId: 'test',
         fields: [],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
@@ -478,7 +486,7 @@ describe('PackageManager configuration loading', () => {
           },
         ],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
@@ -505,7 +513,7 @@ describe('PackageManager configuration loading', () => {
         functionId: 'test',
         fields: [],
         layout: {
-          columns: 1,
+          columns: 1 as const,
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },

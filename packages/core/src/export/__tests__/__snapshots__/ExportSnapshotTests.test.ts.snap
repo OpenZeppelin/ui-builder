@@ -790,14 +790,6 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
       columns: 1,
       spacing: 'normal',
       labelPosition: 'top',
-      sections: [
-        {
-          id: '[id]',
-          title: 'Test Section',
-          description: 'A test section',
-          fields: ['testParam'],
-        },
-      ],
     },
     validation: {
       mode: 'onChange',

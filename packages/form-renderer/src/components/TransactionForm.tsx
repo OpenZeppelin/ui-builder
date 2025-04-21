@@ -116,13 +116,11 @@ export function TransactionForm({
     );
   };
 
-  // Apply column layout if specified
+  // Apply fixed column layout
+  // TODO: Add support for layout customization in the UI
   const getLayoutClasses = (): string => {
-    const { layout } = schema;
-    if (!layout) return '';
-
-    const columns = layout.columns || 1;
-    return `grid grid-cols-1 md:grid-cols-${columns} gap-${layout.spacing || 4}`;
+    // Fixed layout with 1 column and normal spacing
+    return 'grid grid-cols-1 gap-4';
   };
 
   // Determine button variant based on schema configuration

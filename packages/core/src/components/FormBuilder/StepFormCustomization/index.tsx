@@ -15,7 +15,6 @@ import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
-import { LayoutEditor } from './LayoutEditor';
 import { ValidationEditor } from './ValidationEditor';
 
 interface StepFormCustomizationProps {
@@ -34,18 +33,12 @@ export function StepFormCustomization({
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const {
-    formConfig,
-    updateField,
-    updateFormLayout,
-    updateFormValidation,
-    updateFormTitle,
-    updateFormDescription,
-  } = useFormConfig({
-    contractSchema,
-    selectedFunction,
-    onFormConfigUpdated,
-  });
+  const { formConfig, updateField, updateFormValidation, updateFormTitle, updateFormDescription } =
+    useFormConfig({
+      contractSchema,
+      selectedFunction,
+      onFormConfigUpdated,
+    });
 
   const { selectedFieldIndex, selectField } = useFieldSelection();
 
@@ -68,7 +61,7 @@ export function StepFormCustomization({
         title="Customize Form"
         description={
           <>
-            Customize the form fields, layout, and validation for the &quot;
+            Customize the form fields, validation, and general settings for the &quot;
             {selectedFunctionDetails.displayName}&quot; function.
           </>
         }
@@ -88,10 +81,9 @@ export function StepFormCustomization({
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>
-            <TabsTrigger value="layout">Layout</TabsTrigger>
             <TabsTrigger value="validation">Validation</TabsTrigger>
           </TabsList>
 
@@ -129,11 +121,6 @@ export function StepFormCustomization({
                 </div>
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="layout" className="mt-4 rounded-md border p-4">
-            {/* Layout configuration */}
-            <LayoutEditor layoutConfig={formConfig.layout} onUpdate={updateFormLayout} />
           </TabsContent>
 
           <TabsContent value="validation" className="mt-4 rounded-md border p-4">

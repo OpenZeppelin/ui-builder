@@ -261,9 +261,9 @@ describe('FormCodeGenerator Templating System', () => {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
         validation: {
           mode: 'onChange',
@@ -381,9 +381,9 @@ function example() {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
       };
 
@@ -503,7 +503,7 @@ const anotherFunction = () => {
 
       const formConfig = {
         fields: [{ id: 'amount', label: 'Amount', type: 'number' }],
-        layout: { columns: 1 },
+        layout: { columns: 1 as const },
       };
 
       const processed = await templateProcessor.applyCommonPostProcessing(template, {
@@ -600,7 +600,7 @@ const anotherFunction = () => {
             }
           ],
           "layout": {
-            "columns": 1
+            "columns": 1 as const
           }
         };
       
