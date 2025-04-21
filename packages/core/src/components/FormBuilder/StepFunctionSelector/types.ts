@@ -12,8 +12,6 @@ export interface StepFunctionSelectorProps {
 export interface FilterControlsProps {
   filterValue: string;
   setFilterValue: (value: string) => void;
-  showReadOnlyFunctions: boolean;
-  setShowReadOnlyFunctions: (show: boolean) => void;
 }
 
 export interface WritableFunctionCardProps {

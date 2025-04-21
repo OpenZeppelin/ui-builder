@@ -9,7 +9,6 @@ interface UseFunctionFilterResult {
   functions: ContractFunction[];
   filteredFunctions: ContractFunction[];
   writableFunctions: ContractFunction[];
-  readOnlyFunctions: ContractFunction[];
   filterValue: string;
   setFilterValue: (value: string) => void;
 }
@@ -39,15 +38,10 @@ export function useFunctionFilter(contractSchema: ContractSchema | null): UseFun
     return filteredFunctions.filter((fn) => fn.modifiesState);
   }, [filteredFunctions]);
 
-  const readOnlyFunctions = useMemo(() => {
-    return filteredFunctions.filter((fn) => !fn.modifiesState);
-  }, [filteredFunctions]);
-
   return {
     functions,
     filteredFunctions,
     writableFunctions,
-    readOnlyFunctions,
     filterValue,
     setFilterValue,
   };
