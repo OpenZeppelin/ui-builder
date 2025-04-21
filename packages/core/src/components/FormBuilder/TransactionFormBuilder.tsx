@@ -1,14 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
-import type { ContractAdapter } from '../../adapters';
-import { getContractAdapter } from '../../adapters';
 import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 import { ContractStateWidget } from '../ContractStateWidget';
 
-import { StepExecutionMethod } from './StepExecutionMethod/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
@@ -24,11 +21,6 @@ export function TransactionFormBuilder() {
   const [isExecutionStepValid, setIsExecutionStepValid] = useState(false);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
-
-  // Instantiate the correct adapter based on the selected chain using the factory
-  const adapter = useMemo<ContractAdapter>(() => {
-    return getContractAdapter(selectedChain);
-  }, [selectedChain]);
 
   // Memoize the handler functions to prevent unnecessary re-renders
   const handleChainSelect = useCallback((chain: ChainType) => {
@@ -183,17 +175,8 @@ export function TransactionFormBuilder() {
           selectedFunction={selectedFunction}
           selectedChain={selectedChain}
           onFormConfigUpdated={handleFormConfigUpdated}
-        />
-      ),
-    },
-    {
-      id: 'execution-method',
-      title: 'Execution Method',
-      component: (
-        <StepExecutionMethod
-          adapter={adapter}
-          currentConfig={formConfig?.executionConfig}
-          onUpdateConfig={handleExecutionConfigUpdated}
+          onExecutionConfigUpdated={handleExecutionConfigUpdated}
+          currentExecutionConfig={formConfig?.executionConfig}
         />
       ),
       isValid: isExecutionStepValid,

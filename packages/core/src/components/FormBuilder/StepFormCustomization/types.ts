@@ -1,4 +1,9 @@
+import type { Control } from 'react-hook-form';
+
 import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types/forms';
+
+import type { ContractAdapter } from '../../../adapters';
+import type { ExecutionMethodType } from '../../../core/types/FormTypes';
 
 /**
  * Form values interface for the field editor form
@@ -11,4 +16,28 @@ import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types/
 export interface FieldEditorFormValues extends FormValues, Partial<FormFieldType> {
   // We intentionally don't add any new properties here to maintain a direct mapping
   // to the FormFieldType interface
+}
+
+/**
+ * Shape of the form data managed by react-hook-form within the execution method UI.
+ */
+export interface ExecutionMethodFormData {
+  executionMethodType: ExecutionMethodType | undefined;
+  eoaOption?: 'any' | 'specific';
+  specificEoaAddress?: string;
+}
+
+/**
+ * Props for UI sub-components handling specific sections.
+ */
+export interface EoaConfigurationProps {
+  control: Control<ExecutionMethodFormData>;
+  adapter: ContractAdapter | null;
+  watchedEoaOption: 'any' | 'specific' | undefined;
+}
+
+export interface PrimaryMethodSelectorProps {
+  control: Control<ExecutionMethodFormData>;
+  adapterAvailable: boolean;
+  options: { value: string; label: string; disabled?: boolean }[];
 }

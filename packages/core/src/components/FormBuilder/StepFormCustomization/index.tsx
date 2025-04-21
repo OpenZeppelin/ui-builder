@@ -4,9 +4,10 @@ import { Button } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getContractAdapter } from '../../../adapters';
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
+import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
@@ -15,13 +16,14 @@ import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
-import { ValidationEditor } from './ValidationEditor';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   selectedChain: ChainType;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
+  onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
+  currentExecutionConfig?: ExecutionConfig;
 }
 
 export function StepFormCustomization({
@@ -29,16 +31,17 @@ export function StepFormCustomization({
   selectedFunction,
   selectedChain,
   onFormConfigUpdated,
+  onExecutionConfigUpdated,
+  currentExecutionConfig,
 }: StepFormCustomizationProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { formConfig, updateField, updateFormValidation, updateFormTitle, updateFormDescription } =
-    useFormConfig({
-      contractSchema,
-      selectedFunction,
-      onFormConfigUpdated,
-    });
+  const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
+    contractSchema,
+    selectedFunction,
+    onFormConfigUpdated,
+  });
 
   const { selectedFieldIndex, selectField } = useFieldSelection();
 
@@ -61,7 +64,7 @@ export function StepFormCustomization({
         title="Customize Form"
         description={
           <>
-            Customize the form fields, validation, and general settings for the &quot;
+            Customize the form fields and general settings for the &quot;
             {selectedFunctionDetails.displayName}&quot; function.
           </>
         }
@@ -84,7 +87,7 @@ export function StepFormCustomization({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>
-            <TabsTrigger value="validation">Validation</TabsTrigger>
+            <TabsTrigger value="execution">Execution Method</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
@@ -123,11 +126,11 @@ export function StepFormCustomization({
             </div>
           </TabsContent>
 
-          <TabsContent value="validation" className="mt-4 rounded-md border p-4">
-            {/* Validation configuration */}
-            <ValidationEditor
-              validationConfig={formConfig.validation}
-              onUpdate={updateFormValidation}
+          <TabsContent value="execution" className="mt-4 rounded-md border p-4">
+            <ExecutionMethodSettings
+              adapter={getContractAdapter(selectedChain)}
+              currentConfig={currentExecutionConfig}
+              onUpdateConfig={onExecutionConfigUpdated || (() => {})}
             />
           </TabsContent>
         </Tabs>

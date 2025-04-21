@@ -17,11 +17,11 @@ export interface CommonFormProperties {
   layout: FormLayout;
 
   /**
-   * Validation behavior
+   * Validation behavior (fixed values)
    */
   validation: {
-    mode: 'onChange' | 'onBlur' | 'onSubmit';
-    showErrors: 'inline' | 'summary' | 'both';
+    mode: 'onChange';
+    showErrors: 'inline';
   };
 
   /**

@@ -1,47 +1,36 @@
 import React from 'react';
 
-import type { ExecutionMethodDetail } from '../../../core/types/FormTypes';
-import { StepTitleWithDescription } from '../Common';
+import type { ContractAdapter } from '../../../adapters';
+import type { ExecutionConfig, ExecutionMethodDetail } from '../../../core/types/FormTypes';
 
 import { EoaConfiguration } from './components/EoaConfiguration';
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';
 
-// Import types, hook, and sub-components directly from their files
-import type { StepExecutionMethodProps } from './types';
+export interface ExecutionMethodSettingsProps {
+  currentConfig?: ExecutionConfig;
+  onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
+  adapter: ContractAdapter | null;
+}
 
-export function StepExecutionMethod({
-  // Destructure props
+export function ExecutionMethodSettings({
   currentConfig,
   onUpdateConfig,
   adapter,
-  // formConfig, // Removed unused prop
-}: StepExecutionMethodProps): React.ReactElement {
+}: ExecutionMethodSettingsProps): React.ReactElement {
   // Use the custom hook to manage state and logic
-  const {
-    formMethods,
-    supportedMethods,
-    watchedMethodType,
-    watchedEoaOption,
-    // Get validation state from hook
-    validationError,
-  } = useExecutionMethodState({ currentConfig, adapter, onUpdateConfig });
+  const { formMethods, supportedMethods, watchedMethodType, watchedEoaOption, validationError } =
+    useExecutionMethodState({ currentConfig, adapter, onUpdateConfig });
 
   // Generate options - rely solely on adapter's disabled flag
   const primaryMethodOptions = supportedMethods.map((detail: ExecutionMethodDetail) => ({
     value: detail.type,
     label: detail.name,
-    disabled: detail.disabled, // Use adapter's value directly
-    // TODO: Add description tooltips based on detail.description
+    disabled: detail.disabled,
   }));
 
   return (
     <div className="space-y-6">
-      <StepTitleWithDescription
-        title="Configure Execution Method"
-        description="Select how this transaction will be executed on the blockchain and configure the required parameters."
-      />
-
       {/* Render Primary Method Selector Sub-component */}
       <PrimaryMethodSelector
         control={formMethods.control}
@@ -88,4 +77,4 @@ export function StepExecutionMethod({
   );
 }
 
-StepExecutionMethod.displayName = 'StepExecutionMethod';
+ExecutionMethodSettings.displayName = 'ExecutionMethodSettings';

@@ -246,8 +246,8 @@ export function updateFormConfig(
       labelPosition: 'top',
     },
     validation: {
-      ...existingConfig.validation,
-      ...(updates.validation || {}),
+      mode: 'onChange',
+      showErrors: 'inline',
     },
     theme: {
       ...existingConfig.theme,

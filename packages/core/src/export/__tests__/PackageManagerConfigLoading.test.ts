@@ -217,8 +217,8 @@ describe('PackageManager configuration loading', () => {
           labelPosition: 'top' as const,
         },
         validation: {
-          mode: 'onChange' as 'onChange' | 'onBlur' | 'onSubmit',
-          showErrors: 'inline' as 'inline' | 'summary' | 'both',
+          mode: 'onChange' as const,
+          showErrors: 'inline' as const,
         },
         theme: {},
       };
@@ -261,8 +261,8 @@ describe('PackageManager configuration loading', () => {
           labelPosition: 'top' as const,
         },
         validation: {
-          mode: 'onChange' as 'onChange' | 'onBlur' | 'onSubmit',
-          showErrors: 'inline' as 'inline' | 'summary' | 'both',
+          mode: 'onChange' as const,
+          showErrors: 'inline' as const,
         },
         theme: {},
       };
