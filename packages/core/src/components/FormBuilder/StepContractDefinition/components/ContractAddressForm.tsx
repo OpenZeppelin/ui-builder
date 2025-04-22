@@ -7,7 +7,7 @@ import { getContractAdapter } from '../../../../adapters/index';
 import { getChainExplorerGuidance, getChainName } from '../../../../core/chains';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { StepTitleWithDescription } from '../../Common';
-import { MockContractSelector } from '../../MockContractSelector';
+import { MockContractSelector } from '../../ContractSelectors/MockContractSelector';
 import { ContractAddressFormProps, ContractFormData } from '../types';
 
 export function ContractAddressForm({

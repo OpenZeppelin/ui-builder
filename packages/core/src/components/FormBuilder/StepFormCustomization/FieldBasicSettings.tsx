@@ -4,7 +4,6 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 import {
   BooleanField,
   DynamicFormField,
-  SelectField,
   SelectGroupedField,
   TextField,
 } from '@openzeppelin/transaction-form-renderer';
@@ -26,23 +25,13 @@ interface FieldBasicSettingsProps {
    */
   fieldTypeGroups: OptionGroup[];
 
-  /**
-   * Field width options for the select dropdown
-   */
-  fieldWidthOptions: { value: string; label: string }[];
-
   adapter?: ContractAdapter;
 }
 
 /**
  * Component for editing basic field settings like label, type, etc.
  */
-export function FieldBasicSettings({
-  control,
-  fieldTypeGroups,
-  fieldWidthOptions,
-  adapter,
-}: FieldBasicSettingsProps) {
+export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldBasicSettingsProps) {
   // TODO: Prevent wizard from advancing to the next step if `isHardcodedValueInvalid` is true.
   // This might involve lifting the validation state up or providing a callback/ref to the parent wizard.
 
@@ -93,15 +82,6 @@ export function FieldBasicSettings({
         label="Placeholder Text"
         control={control}
         placeholder="Enter placeholder text"
-      />
-
-      <SelectField
-        id="field-width"
-        name="width"
-        label="Field Width"
-        control={control}
-        options={fieldWidthOptions}
-        placeholder="Select field width"
       />
 
       <div className="grid grid-cols-1 gap-4 border-t pt-4 md:col-span-2 md:grid-cols-2">

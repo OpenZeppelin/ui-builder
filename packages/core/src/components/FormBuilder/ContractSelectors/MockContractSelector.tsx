@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 
-import { MockContractInfo, MockContractService } from '../../services/MockContractService';
+import { MockContractInfo, MockContractService } from '../../../services/MockContractService';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
+} from '../../ui/dialog';
 
 interface MockContractSelectorProps {
   onSelectMock: (mockId: string) => void;
