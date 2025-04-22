@@ -12,9 +12,7 @@ import type {
 import { getContractAdapter } from '../../adapters';
 import { truncateMiddle } from '../../core/utils/general';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
-import { ParameterizedFunctionsPanel } from './components/ParameterizedFunctionsPanel';
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 
 interface ContractStateWidgetProps {
@@ -27,9 +25,7 @@ interface ContractStateWidgetProps {
 
 /**
  * SidebarContractStateWidget - Compact widget designed specifically for sidebar display
- * Shows contract state by allowing users to query view functions, split into:
- * 1. Simple view functions (no parameters)
- * 2. Parameterized view functions (require input)
+ * Shows contract state by allowing users to query simple view functions (no parameters)
  */
 export function ContractStateWidget({
   contractSchema,
@@ -39,7 +35,6 @@ export function ContractStateWidget({
   onToggle,
 }: ContractStateWidgetProps) {
   const [viewFunctions, setViewFunctions] = useState<ContractFunction[]>([]);
-  const [parameteredFunctions, setParameteredFunctions] = useState<ContractFunction[]>([]);
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting' | 'exited'
   >(isVisible ? 'entered' : 'exited');
@@ -48,11 +43,9 @@ export function ContractStateWidget({
 
   useEffect(() => {
     if (!contractSchema) return;
-    // Filter functions into view/non-view and parameterized/non-parameterized
+    // Filter functions to only simple view functions (no parameters)
     const viewFns = contractSchema.functions.filter((fn) => adapter.isViewFunction(fn));
-
     setViewFunctions(viewFns.filter((fn) => fn.inputs.length === 0));
-    setParameteredFunctions(viewFns.filter((fn) => fn.inputs.length > 0));
   }, [contractSchema, adapter]);
 
   // Control the animation state based on isVisible prop changes
@@ -132,42 +125,16 @@ export function ContractStateWidget({
         )}
       </CardHeader>
       <CardContent className="space-y-2 px-3 py-1">
-        <Tabs defaultValue="simple" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-7">
-            <TabsTrigger value="simple" className="text-xs py-1">
-              Simple ({viewFunctions.length})
-            </TabsTrigger>
-            <TabsTrigger value="parameterized" className="text-xs py-1">
-              Param ({parameteredFunctions.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="simple" className="pt-2 space-y-2">
-            {viewFunctions.length > 0 ? (
-              <ViewFunctionsPanel
-                functions={viewFunctions}
-                contractAddress={contractAddress}
-                adapter={adapter}
-                contractSchema={contractSchema}
-              />
-            ) : (
-              <div className="text-xs text-muted-foreground">No simple view functions found</div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="parameterized" className="pt-2 space-y-2">
-            {parameteredFunctions.length > 0 ? (
-              <ParameterizedFunctionsPanel
-                functions={parameteredFunctions}
-                contractAddress={contractAddress}
-                adapter={adapter}
-                contractSchema={contractSchema}
-              />
-            ) : (
-              <div className="text-xs text-muted-foreground">No parameterized functions found</div>
-            )}
-          </TabsContent>
-        </Tabs>
+        {viewFunctions.length > 0 ? (
+          <ViewFunctionsPanel
+            functions={viewFunctions}
+            contractAddress={contractAddress}
+            adapter={adapter}
+            contractSchema={contractSchema}
+          />
+        ) : (
+          <div className="text-xs text-muted-foreground">No simple view functions found</div>
+        )}
       </CardContent>
     </Card>
   );
