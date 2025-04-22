@@ -1,3 +1,5 @@
+import { RefreshCw } from 'lucide-react';
+
 import { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
@@ -80,14 +82,20 @@ export function ViewFunctionsPanel({
 
   return (
     <div className="space-y-2">
-      <Button
-        onClick={() => void handleQueryAll()}
-        disabled={isLoading}
-        size="sm"
-        className="text-xs w-full"
-      >
-        {isLoading ? 'Querying...' : 'Refresh All'}
-      </Button>
+      <div className="flex items-center justify-between mb-1">
+        <h4 className="text-xs font-medium">View Functions</h4>
+        <Button
+          onClick={() => void handleQueryAll()}
+          disabled={isLoading}
+          size="sm"
+          variant="ghost"
+          className="h-6 w-6 p-0"
+          title="Refresh all view functions"
+        >
+          <RefreshCw size={14} className={`${isLoading ? 'animate-spin' : ''}`} />
+          <span className="sr-only">{isLoading ? 'Querying...' : 'Refresh All'}</span>
+        </Button>
+      </div>
 
       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
         {functions.map((func) => (
