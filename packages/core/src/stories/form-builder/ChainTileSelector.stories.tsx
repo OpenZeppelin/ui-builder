@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
-import { ChainTileSelector } from '../../components/FormBuilder/ChainTileSelector';
+import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/ChainTileSelector';
 
 const meta = {
   title: 'Core/FormBuilder/ChainTileSelector',
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof ChainTileSelector>;
 export const Default: Story = {
   args: {
     initialChain: 'evm',
-    onChainSelect: (chain) => console.log('Selected chain:', chain),
+    onChainSelect: (chain: ChainType) => console.log('Selected chain:', chain),
   },
 };
 
@@ -43,7 +43,7 @@ export const Interactive = () => {
     <div className="max-w-3xl">
       <ChainTileSelector
         initialChain={selectedChain}
-        onChainSelect={(chain) => {
+        onChainSelect={(chain: ChainType) => {
           console.log('Chain selected:', chain);
           setSelectedChain(chain);
         }}

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { MockContractSelector } from '../../components/FormBuilder/MockContractSelector';
+import { MockContractSelector } from '../../components/FormBuilder/ContractSelectors/MockContractSelector';
 
 const meta: Meta<typeof MockContractSelector> = {
   title: 'Core/FormBuilder/MockContractSelector',
@@ -16,7 +16,7 @@ type Story = StoryObj<typeof MockContractSelector>;
 
 export const Default: Story = {
   args: {
-    onSelectMock: (mockId) => {
+    onSelectMock: (mockId: string) => {
       console.log('Selected mock contract:', mockId);
     },
   },
@@ -24,7 +24,7 @@ export const Default: Story = {
 
 export const WithChainTypeFilter: Story = {
   args: {
-    onSelectMock: (mockId) => {
+    onSelectMock: (mockId: string) => {
       console.log('Selected mock contract:', mockId);
     },
     chainType: 'evm',

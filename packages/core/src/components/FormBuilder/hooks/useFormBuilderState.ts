@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { useChainSelectionState } from './useChainSelectionState';
+import { useCompleteStepState } from './useCompleteStepState';
 import { useContractDefinitionState } from './useContractDefinitionState';
 import { useContractWidgetState } from './useContractWidgetState';
 import { useFormCustomizationState } from './useFormCustomizationState';
@@ -19,6 +20,7 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
   const functionSelection = useFunctionSelectionState();
   const formCustomization = useFormCustomizationState();
   const contractWidget = useContractWidgetState();
+  const completeStep = useCompleteStepState();
 
   // Create enhanced chain selection handler that resets downstream state
   const handleChainSelect = useCallback(
@@ -28,8 +30,16 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
       functionSelection.resetFunctionSelection();
       formCustomization.resetFormConfig();
       contractWidget.hideWidget();
+      completeStep.resetLoadingState();
     },
-    [chainSelection, contractDefinition, functionSelection, formCustomization, contractWidget]
+    [
+      chainSelection,
+      contractDefinition,
+      functionSelection,
+      formCustomization,
+      contractWidget,
+      completeStep,
+    ]
   );
 
   // Create enhanced contract schema loaded handler that shows widget
@@ -47,9 +57,10 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
       functionSelection.handleFunctionSelected(functionId);
       if (functionId === null) {
         formCustomization.resetFormConfig();
+        completeStep.resetLoadingState();
       }
     },
-    [functionSelection, formCustomization]
+    [functionSelection, formCustomization, completeStep]
   );
 
   // Create sidebar widget props
@@ -69,6 +80,7 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     isExecutionStepValid: formCustomization.isExecutionStepValid,
     isWidgetVisible: contractWidget.isWidgetVisible,
     sidebarWidget,
+    exportLoading: completeStep.loading,
 
     // Enhanced handlers with dependencies handled
     handleChainSelect,
@@ -77,5 +89,6 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     handleFormConfigUpdated: formCustomization.handleFormConfigUpdated,
     handleExecutionConfigUpdated: formCustomization.handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
+    exportForm: completeStep.exportForm,
   };
 }

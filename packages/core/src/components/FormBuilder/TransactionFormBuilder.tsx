@@ -2,11 +2,10 @@ import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
 import { ContractStateWidget } from '../ContractStateWidget';
 
-import { useFormExport } from './StepComplete/hooks/useFormExport';
+import { ChainTileSelector } from './StepChainSelection/ChainTileSelector';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
-import { ChainTileSelector } from './ChainTileSelector';
 import { StepComplete } from './StepComplete';
 import { StepContractDefinition } from './StepContractDefinition';
 import { useFormBuilderState } from './hooks';
@@ -20,19 +19,15 @@ export function TransactionFormBuilder() {
     isExecutionStepValid,
     isWidgetVisible,
     sidebarWidget: widgetData,
+    exportLoading,
 
     handleChainSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated,
     handleExecutionConfigUpdated,
+    exportForm,
   } = useFormBuilderState();
-
-  const { exportForm, loading: exportLoading } = useFormExport({
-    formConfig,
-    selectedChain,
-    selectedFunction,
-  });
 
   // Create sidebar widget when we have contract data
   const sidebarWidget = widgetData ? (
@@ -99,7 +94,7 @@ export function TransactionFormBuilder() {
           selectedChain={selectedChain}
           formConfig={formConfig}
           onExport={() => {
-            void exportForm();
+            void exportForm(formConfig, selectedChain, selectedFunction);
           }}
           exportLoading={exportLoading}
           functionDetails={
