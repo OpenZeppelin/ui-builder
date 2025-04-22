@@ -168,7 +168,7 @@ export function TransactionFormBuilder() {
     },
     {
       id: 'form-customization',
-      title: 'Customize Form',
+      title: 'Customize',
       component: (
         <StepFormCustomization
           contractSchema={contractSchema}

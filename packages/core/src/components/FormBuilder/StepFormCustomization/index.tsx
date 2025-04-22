@@ -63,7 +63,7 @@ export function StepFormCustomization({
   return (
     <div className="space-y-6">
       <StepTitleWithDescription
-        title="Customize Form"
+        title="Customize"
         description={
           <>
             Customize the form fields and general settings for the &quot;
