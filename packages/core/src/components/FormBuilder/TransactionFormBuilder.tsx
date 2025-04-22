@@ -210,7 +210,6 @@ export function TransactionFormBuilder() {
       component: (
         <CompleteStep
           selectedChain={selectedChain}
-          selectedFunction={selectedFunction}
           formConfig={formConfig}
           onExport={() => {
             void exportForm();
