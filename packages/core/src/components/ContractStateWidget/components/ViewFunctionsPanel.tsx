@@ -1,6 +1,6 @@
 import { RefreshCw } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 import type {
@@ -32,7 +32,7 @@ export function ViewFunctionsPanel({
   const [isLoading, setIsLoading] = useState(false);
 
   // Query all view functions at once
-  const handleQueryAll = async () => {
+  const handleQueryAll = useCallback(async () => {
     if (functions.length === 0) return;
 
     setIsLoading(true);
@@ -63,14 +63,14 @@ export function ViewFunctionsPanel({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [functions, contractAddress, adapter, contractSchema]);
 
   // Auto-query all functions on component mount
   useEffect(() => {
     if (functions.length > 0) {
       void handleQueryAll();
     }
-  }, [functions, contractAddress]); // Re-query when functions or contract address changes
+  }, [functions, contractAddress, handleQueryAll]); // Re-query when functions or contract address changes
 
   if (functions.length === 0) {
     return (
