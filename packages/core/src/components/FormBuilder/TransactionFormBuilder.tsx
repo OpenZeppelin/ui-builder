@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig, ExecutionConfig } from '../../core/types/FormTypes';
+import { FormExportSystem } from '../../export';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 import { ContractStateWidget } from '../ContractStateWidget';
 
@@ -10,8 +11,59 @@ import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
 import { ChainTileSelector } from './ChainTileSelector';
+import { CompleteStep } from './CompleteStep';
 import { StepContractDefinition } from './StepContractDefinition';
-import { StepExport } from './StepExport';
+
+interface UseFormExportParams {
+  formConfig: BuilderFormConfig | null;
+  selectedChain: ChainType;
+  selectedFunction: string | null;
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 0);
+}
+
+function useFormExport({ formConfig, selectedChain, selectedFunction }: UseFormExportParams) {
+  const [loading, setLoading] = useState(false);
+
+  const exportForm = useCallback(async () => {
+    if (!formConfig || !selectedFunction) return;
+    setLoading(true);
+    const exportSystem = new FormExportSystem();
+    try {
+      const result = await exportSystem.exportForm(formConfig, selectedChain, selectedFunction, {
+        chainType: selectedChain,
+      });
+      if (result.data instanceof Blob) {
+        downloadBlob(result.data, result.fileName);
+      } else if (
+        typeof window !== 'undefined' &&
+        window.Blob &&
+        result.data instanceof ArrayBuffer
+      ) {
+        downloadBlob(new Blob([result.data]), result.fileName);
+      } else {
+        alert('Export is only supported in the browser.');
+      }
+    } catch (err) {
+      alert('Failed to export form: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setLoading(false);
+    }
+  }, [formConfig, selectedChain, selectedFunction]);
+
+  return { exportForm, loading };
+}
 
 export function TransactionFormBuilder() {
   const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
@@ -83,40 +135,11 @@ export function TransactionFormBuilder() {
     []
   );
 
-  const handleExport = useCallback(() => {
-    // In a real implementation, this would generate the actual form code
-    console.log('Exporting form with:', {
-      chain: selectedChain,
-      function: selectedFunction,
-      formConfig,
-    });
-
-    // -----------------------------------------------------------------------
-    // COMPLEX FIELDS HANDLING
-    // -----------------------------------------------------------------------
-    // This section detects form fields that represent complex blockchain data types
-    // (like arrays and objects) that require special handling during export.
-    //
-    // TODO: Enhance this implementation to:
-    //  - Parse JSON input from textareas into proper JavaScript data structures
-    //  - Validate the parsed data against expected blockchain types
-    //  - Handle nested arrays and objects
-    //  - Provide proper error handling for malformed JSON
-    //  - Consider providing a specialized UI for array/tuple editing instead of raw JSON
-    // -----------------------------------------------------------------------
-    if (formConfig) {
-      // Log which fields are complex types to assist with the export process
-      const complexFields = formConfig.fields.filter(
-        (field) =>
-          field.type === 'textarea' &&
-          (field.helperText?.includes('JSON array') || field.helperText?.includes('JSON object'))
-      );
-
-      if (complexFields.length > 0) {
-        console.log('Complex fields detected:', complexFields);
-      }
-    }
-  }, [selectedChain, selectedFunction, formConfig]);
+  const { exportForm, loading: exportLoading } = useFormExport({
+    formConfig,
+    selectedChain,
+    selectedFunction,
+  });
 
   // Toggle widget visibility
   const toggleWidget = useCallback(() => {
@@ -182,14 +205,20 @@ export function TransactionFormBuilder() {
       isValid: isExecutionStepValid,
     },
     {
-      id: 'export',
-      title: 'Export Form',
+      id: 'complete',
+      title: 'Complete',
       component: (
-        <StepExport
+        <CompleteStep
           selectedChain={selectedChain}
           selectedFunction={selectedFunction}
           formConfig={formConfig}
-          onExport={handleExport}
+          onExport={() => {
+            void exportForm();
+          }}
+          exportLoading={exportLoading}
+          functionDetails={
+            contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null
+          }
         />
       ),
     },
