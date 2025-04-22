@@ -100,7 +100,7 @@ export function ContractStateWidget({
 
   return (
     <Card
-      className={`mb-2 overflow-hidden p-0
+      className={`mb-2 overflow-hidden p-0 gap-0
         transition-all duration-300 ease-in-out
         ${
           animationState === 'entering' || animationState === 'entered'
