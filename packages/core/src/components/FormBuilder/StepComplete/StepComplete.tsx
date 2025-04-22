@@ -5,14 +5,12 @@ import { useMemo } from 'react';
 import { LoadingButton } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
-
-import { FormPreview } from './StepFormCustomization/FormPreview';
-
-import { StepTitleWithDescription } from './Common';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { StepTitleWithDescription } from '../Common';
+import { FormPreview } from '../StepFormCustomization/FormPreview';
 
 /**
- * CompleteStep Component
+ * StepComplete Component
  *
  * This component handles the final step in the form building process - presenting
  * the created form for use and allowing the user to export it if desired.
@@ -25,7 +23,7 @@ import { StepTitleWithDescription } from './Common';
  * - PackageManager handles dependencies in package.json
  * - ZipGenerator creates a downloadable ZIP file
  */
-export interface CompleteStepProps {
+export interface StepCompleteProps {
   selectedChain: ChainType;
   formConfig: BuilderFormConfig | null;
   onExport: () => void;
@@ -33,13 +31,13 @@ export interface CompleteStepProps {
   functionDetails?: ContractFunction | null;
 }
 
-export function CompleteStep({
+export function StepComplete({
   selectedChain,
   formConfig,
   onExport,
   exportLoading,
   functionDetails,
-}: CompleteStepProps) {
+}: StepCompleteProps) {
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {
     if (!functionDetails) return null;

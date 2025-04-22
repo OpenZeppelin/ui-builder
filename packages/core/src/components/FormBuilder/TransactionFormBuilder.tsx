@@ -7,11 +7,11 @@ import { FormExportSystem } from '../../export';
 import { WizardLayout, WizardStep } from '../Common/WizardLayout';
 import { ContractStateWidget } from '../ContractStateWidget';
 
+import { StepComplete } from './StepComplete/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
 import { ChainTileSelector } from './ChainTileSelector';
-import { CompleteStep } from './CompleteStep';
 import { StepContractDefinition } from './StepContractDefinition';
 
 interface UseFormExportParams {
@@ -208,7 +208,7 @@ export function TransactionFormBuilder() {
       id: 'complete',
       title: 'Complete',
       component: (
-        <CompleteStep
+        <StepComplete
           selectedChain={selectedChain}
           formConfig={formConfig}
           onExport={() => {
