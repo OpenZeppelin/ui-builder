@@ -1,3 +1,5 @@
+import { Eye, Pencil } from 'lucide-react';
+
 import { useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
@@ -71,8 +73,23 @@ export function StepFormCustomization({
       />
 
       <div className="flex justify-end space-x-2">
-        <Button variant="outline" size="sm" onClick={() => setPreviewMode(!previewMode)}>
-          {previewMode ? 'Back to Editor' : 'Preview Form'}
+        <Button
+          variant={previewMode ? 'outline' : 'default'}
+          size="sm"
+          onClick={() => setPreviewMode(!previewMode)}
+          className="gap-2"
+        >
+          {previewMode ? (
+            <>
+              <Pencil size={16} />
+              <span>Back to Editor</span>
+            </>
+          ) : (
+            <>
+              <Eye size={16} />
+              <span>Preview Form</span>
+            </>
+          )}
         </Button>
       </div>
 
