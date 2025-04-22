@@ -1,4 +1,4 @@
-import { FileText, X } from 'lucide-react';
+import { FileText, Minimize2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
@@ -109,7 +109,7 @@ export function ContractStateWidget({
         }
       `}
     >
-      <CardHeader className="pb-1 pt-2 px-3 flex flex-row items-center justify-between">
+      <CardHeader className="pb-2 pt-2 px-3 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium">Contract State</CardTitle>
         {onToggle && (
           <Button
@@ -117,14 +117,14 @@ export function ContractStateWidget({
             size="sm"
             className="h-7 w-7 p-0"
             onClick={handleToggle}
-            title="Hide Contract State"
+            title="Minimize Contract State"
           >
-            <X size={14} />
-            <span className="sr-only">Hide Contract State</span>
+            <Minimize2 size={14} />
+            <span className="sr-only">Minimize Contract State</span>
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-2 px-3 py-1">
+      <CardContent className="space-y-3 px-3 py-2">
         {viewFunctions.length > 0 ? (
           <ViewFunctionsPanel
             functions={viewFunctions}

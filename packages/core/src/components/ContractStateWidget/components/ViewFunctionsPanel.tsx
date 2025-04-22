@@ -81,15 +81,15 @@ export function ViewFunctionsPanel({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between mb-1">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <h4 className="text-xs font-medium">View Functions</h4>
         <Button
           onClick={() => void handleQueryAll()}
           disabled={isLoading}
           size="sm"
-          variant="ghost"
-          className="h-6 w-6 p-0"
+          variant="outline"
+          className="h-6 w-6 p-0 rounded-full"
           title="Refresh all view functions"
         >
           <RefreshCw size={14} className={`${isLoading ? 'animate-spin' : ''}`} />
