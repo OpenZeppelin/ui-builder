@@ -9,6 +9,7 @@ import type {
 } from '@openzeppelin/transaction-form-types/contracts';
 
 import { ContractAdapter } from '../../../adapters';
+import { cn } from '../../../core/utils/utils';
 
 import { FunctionResult } from './FunctionResult';
 
@@ -17,6 +18,7 @@ interface ViewFunctionsPanelProps {
   contractAddress: string;
   adapter: ContractAdapter;
   contractSchema: ContractSchema;
+  className?: string;
 }
 
 /**
@@ -27,6 +29,7 @@ export function ViewFunctionsPanel({
   contractAddress,
   adapter,
   contractSchema,
+  className,
 }: ViewFunctionsPanelProps) {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -81,7 +84,7 @@ export function ViewFunctionsPanel({
   }
 
   return (
-    <div className="space-y-4">
+    <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-medium">View Functions</h4>
         <Button
@@ -97,7 +100,7 @@ export function ViewFunctionsPanel({
         </Button>
       </div>
 
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+      <div className="space-y-2 overflow-y-auto pr-1 flex-grow min-h-0">
         {functions.map((func) => (
           <FunctionResult
             key={func.id}

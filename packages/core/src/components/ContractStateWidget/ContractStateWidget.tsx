@@ -21,6 +21,7 @@ interface ContractStateWidgetProps {
   chainType: ChainType;
   isVisible?: boolean;
   onToggle?: () => void;
+  className?: string;
 }
 
 /**
@@ -33,6 +34,7 @@ export function ContractStateWidget({
   chainType,
   isVisible = true,
   onToggle,
+  className,
 }: ContractStateWidgetProps) {
   const [viewFunctions, setViewFunctions] = useState<ContractFunction[]>([]);
   const [animationState, setAnimationState] = useState<
@@ -100,7 +102,7 @@ export function ContractStateWidget({
 
   return (
     <Card
-      className={`mb-2 overflow-hidden p-0 gap-0
+      className={`mb-2 overflow-hidden p-0 gap-0 flex flex-col h-full ${className || ''}
         transition-all duration-300 ease-in-out
         ${
           animationState === 'entering' || animationState === 'entered'
@@ -109,7 +111,7 @@ export function ContractStateWidget({
         }
       `}
     >
-      <CardHeader className="pb-2 pt-2 px-3 flex flex-row items-center justify-between">
+      <CardHeader className="pb-2 pt-2 px-3 flex-shrink-0 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium">Contract State</CardTitle>
         {onToggle && (
           <Button
@@ -124,13 +126,14 @@ export function ContractStateWidget({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-3 px-3 py-2">
+      <CardContent className="space-y-3 px-3 py-2 flex-grow overflow-hidden flex flex-col min-h-0">
         {viewFunctions.length > 0 ? (
           <ViewFunctionsPanel
             functions={viewFunctions}
             contractAddress={contractAddress}
             adapter={adapter}
             contractSchema={contractSchema}
+            className="flex-grow flex flex-col min-h-0"
           />
         ) : (
           <div className="text-xs text-muted-foreground">No simple view functions found</div>
