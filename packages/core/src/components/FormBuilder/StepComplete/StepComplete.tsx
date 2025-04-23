@@ -60,7 +60,7 @@ export function StepComplete({
       />
       <div className="flex justify-end space-x-2">
         <LoadingButton
-          variant="outline"
+          variant="default"
           size="sm"
           onClick={onExport}
           className="gap-2"
