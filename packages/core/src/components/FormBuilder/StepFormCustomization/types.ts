@@ -40,4 +40,6 @@ export interface PrimaryMethodSelectorProps {
   control: Control<ExecutionMethodFormData>;
   adapterAvailable: boolean;
   options: { value: string; label: string; disabled?: boolean }[];
+  watchedEoaOption?: 'any' | 'specific' | undefined;
+  adapter?: ContractAdapter | null;
 }

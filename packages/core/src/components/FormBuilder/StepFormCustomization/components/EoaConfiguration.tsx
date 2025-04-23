@@ -15,7 +15,7 @@ export function EoaConfiguration({
   watchedEoaOption,
 }: EoaConfigurationProps): React.ReactElement {
   return (
-    <div className="space-y-4 rounded-md border p-4 md:p-6">
+    <div className="space-y-4">
       <h3 className="text-base font-medium">EOA Configuration</h3>
 
       {/* EOA Sub-Options RadioField */}
