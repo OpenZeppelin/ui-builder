@@ -1,6 +1,6 @@
 import { Eye, Pencil } from 'lucide-react';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
@@ -51,6 +51,18 @@ export function StepFormCustomization({
   const selectedFunctionDetails = useMemo(() => {
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
+
+  // Auto-select the first field when the Fields tab is selected for the first time
+  useEffect(() => {
+    if (
+      activeTab === 'fields' &&
+      selectedFieldIndex === null &&
+      formConfig &&
+      formConfig.fields.length > 0
+    ) {
+      selectField(0);
+    }
+  }, [activeTab, formConfig, selectedFieldIndex, selectField]);
 
   if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig) {
     return (
