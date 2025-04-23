@@ -76,13 +76,15 @@ export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldB
         placeholder="Select field type"
       />
 
-      <TextField
-        id="field-placeholder"
-        name="placeholder"
-        label="Placeholder Text"
-        control={control}
-        placeholder="Enter placeholder text"
-      />
+      <div className="md:col-span-2">
+        <TextField
+          id="field-placeholder"
+          name="placeholder"
+          label="Placeholder Text"
+          control={control}
+          placeholder="Enter placeholder text"
+        />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 border-t pt-4 md:col-span-2 md:grid-cols-2">
         <BooleanField
