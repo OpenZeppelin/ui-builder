@@ -47,21 +47,25 @@ export function WizardLayout({
 
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
-      <div className="flex flex-col space-y-4">
-        <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+      <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
+        <h2 className="text-2xl font-bold mb-5">{currentStep.title}</h2>
 
         {/* Step progress indicators with names */}
-        <div className="flex w-full gap-2">
+        <div className="flex w-full gap-3">
           {steps.map((step, index) => (
             <div key={step.id} className="flex flex-1 flex-col items-center">
               <div
-                className={`mb-2 h-2 w-full rounded-full ${
-                  index <= currentStepIndex ? 'bg-primary' : 'bg-muted'
+                className={`mb-2 h-3 w-full rounded-full ${
+                  index <= currentStepIndex ? 'bg-primary shadow-sm' : 'bg-muted'
                 }`}
               />
               <span
-                className={`text-sm ${
-                  index === currentStepIndex ? 'text-primary font-bold' : 'text-muted-foreground'
+                className={`text-sm font-medium ${
+                  index === currentStepIndex
+                    ? 'text-primary font-bold'
+                    : index < currentStepIndex
+                      ? 'text-muted-foreground'
+                      : 'text-muted-foreground'
                 }`}
               >
                 {step.title}
@@ -84,11 +88,14 @@ export function WizardLayout({
         )}
       </div>
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between border-t pt-6">
-        <Button variant="outline" onClick={handlePrevious} disabled={isFirstStep}>
-          Previous
-        </Button>
+      <div className="mt-8 -mx-6 -mb-6 bg-muted px-6 py-4 border-t shadow-inner flex justify-between items-center rounded-b-lg">
+        <div>
+          {!isFirstStep && (
+            <Button variant="outline" onClick={handlePrevious}>
+              Previous
+            </Button>
+          )}
+        </div>
         {!isLastStep && (
           <Button onClick={handleNext} disabled={!isCurrentStepValid}>
             Next
