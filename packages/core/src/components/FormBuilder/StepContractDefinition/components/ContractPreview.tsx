@@ -10,7 +10,7 @@ export function ContractPreview({
   return (
     <div className="mt-6 space-y-3">
       <div className="space-y-1">
-        <h4 className="text-base font-medium">ABI Preview</h4>
+        <h4 className="text-base font-medium mb-2">ABI Preview</h4>
         <p className="text-muted-foreground text-sm">
           Contract {contractSchema.name} loaded successfully with {contractSchema.functions.length}{' '}
           functions.
