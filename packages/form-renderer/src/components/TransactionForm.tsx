@@ -4,6 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
 
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import { createDefaultFormValues } from '../utils/formUtils';
 
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 import { WalletConnectButton } from './wallet/WalletConnectButton';
@@ -44,7 +45,7 @@ export function TransactionForm({
   // Initialize form with React Hook Form
   const methods = useForm<FormValues>({
     mode: schema.validation?.mode || 'onChange',
-    defaultValues: schema.defaultValues || {},
+    defaultValues: createDefaultFormValues(schema.fields, schema.defaultValues),
   });
 
   // Reset form when schema changes

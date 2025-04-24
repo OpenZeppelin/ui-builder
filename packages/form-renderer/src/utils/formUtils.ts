@@ -6,7 +6,13 @@
  * TODO: review this file and check if all of these functions are still needed
  */
 import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FieldTransforms, FieldType, FieldValue } from '@openzeppelin/transaction-form-types/forms';
+import {
+  FieldTransforms,
+  FieldType,
+  FieldValue,
+  FormFieldType,
+  FormValues,
+} from '@openzeppelin/transaction-form-types/forms';
 
 /**
  * Parameter constraints for validation and default value generation
@@ -279,4 +285,46 @@ export function generateDefaultValue(
   } else {
     return null;
   }
+}
+
+/**
+ * Returns the appropriate default value based on field type
+ */
+export function getDefaultValueByFieldType(fieldType: FieldType): string | boolean | number {
+  switch (fieldType) {
+    case 'checkbox':
+      return false;
+    case 'number':
+      return '';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Creates a complete default values object for form initialization
+ * Ensures all fields have appropriate default values to avoid React controlled/uncontrolled input warnings
+ *
+ * @param fields The form field definitions
+ * @param existingDefaults Any existing default values to preserve
+ * @returns A complete form values object with no undefined values
+ */
+export function createDefaultFormValues(
+  fields: FormFieldType[] | undefined,
+  existingDefaults: Record<string, unknown> = {}
+): FormValues {
+  const defaults: FormValues = { ...existingDefaults };
+
+  if (!fields) {
+    return defaults;
+  }
+
+  fields.forEach((field) => {
+    // Only set default if not already set
+    if (defaults[field.name] === undefined) {
+      defaults[field.name] = getDefaultValueByFieldType(field.type);
+    }
+  });
+
+  return defaults;
 }
