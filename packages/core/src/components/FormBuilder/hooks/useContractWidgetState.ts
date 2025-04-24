@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 /**
  * Hook for managing contract state widget visibility and data.
@@ -26,14 +27,14 @@ export function useContractWidgetState() {
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      chainType: ChainType
+      adapter: FullContractAdapter
     ) => {
       if (!contractSchema || !contractAddress) return null;
 
       return {
         contractSchema,
         contractAddress,
-        chainType,
+        adapter,
         isVisible: isWidgetVisible,
         onToggle: toggleWidget,
       };

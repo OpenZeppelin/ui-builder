@@ -2,15 +2,14 @@ import { FileText, Minimize2 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-renderer';
+import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
-  ChainType,
   ContractFunction,
   ContractSchema,
 } from '@openzeppelin/transaction-form-types/contracts';
 
-import { getContractAdapter } from '../../adapters';
-import { truncateMiddle } from '../../core/utils/general';
+import { truncateMiddle } from '../../utils/formatting';
+import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
@@ -18,20 +17,20 @@ import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 interface ContractStateWidgetProps {
   contractSchema: ContractSchema | null;
   contractAddress: string | null;
-  chainType: ChainType;
+  adapter: FullContractAdapter; // Changed from chainType to adapter
   isVisible?: boolean;
   onToggle?: () => void;
   className?: string;
 }
 
 /**
- * SidebarContractStateWidget - Compact widget designed specifically for sidebar display
+ * ContractStateWidget - Compact widget for displaying contract state
  * Shows contract state by allowing users to query simple view functions (no parameters)
  */
 export function ContractStateWidget({
   contractSchema,
   contractAddress,
-  chainType,
+  adapter, // Using adapter directly
   isVisible = true,
   onToggle,
   className,
@@ -40,8 +39,6 @@ export function ContractStateWidget({
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting' | 'exited'
   >(isVisible ? 'entered' : 'exited');
-
-  const adapter = getContractAdapter(chainType);
 
   useEffect(() => {
     if (!contractSchema) return;

@@ -1,6 +1,7 @@
+import { ContractStateWidget } from '@openzeppelin/transaction-form-renderer';
+
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
-import { ContractStateWidget } from '../ContractStateWidget';
 
 import { ChainTileSelector } from './StepChainSelection/ChainTileSelector';
 import { StepFormCustomization } from './StepFormCustomization/index';
@@ -35,7 +36,7 @@ export function TransactionFormBuilder() {
       <ContractStateWidget
         contractSchema={widgetData.contractSchema}
         contractAddress={widgetData.contractAddress}
-        chainType={widgetData.chainType}
+        adapter={widgetData.adapter}
         isVisible={widgetData.isVisible}
         onToggle={widgetData.onToggle}
       />

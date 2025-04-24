@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
+import { getContractAdapter } from '../../../adapters';
+
 import { useChainSelectionState } from './useChainSelectionState';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractDefinitionState } from './useContractDefinitionState';
@@ -63,12 +65,20 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     [functionSelection, formCustomization, completeStep]
   );
 
+  // Get the adapter for the selected chain
+  const adapter = chainSelection.selectedChain
+    ? getContractAdapter(chainSelection.selectedChain)
+    : null;
+
   // Create sidebar widget props
-  const sidebarWidget = contractWidget.createWidgetProps(
-    contractDefinition.contractSchema,
-    contractDefinition.contractAddress,
-    chainSelection.selectedChain
-  );
+  const sidebarWidget =
+    contractDefinition.contractSchema && contractDefinition.contractAddress && adapter
+      ? contractWidget.createWidgetProps(
+          contractDefinition.contractSchema,
+          contractDefinition.contractAddress,
+          adapter
+        )
+      : null;
 
   return {
     // State from all hooks

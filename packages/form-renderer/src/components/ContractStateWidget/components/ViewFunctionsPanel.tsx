@@ -2,21 +2,21 @@ import { RefreshCw } from 'lucide-react';
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-renderer';
+import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ContractFunction,
   ContractSchema,
 } from '@openzeppelin/transaction-form-types/contracts';
 
-import { ContractAdapter } from '../../../adapters';
-import { cn } from '../../../core/utils/utils';
+import { cn } from '../../../utils/cn';
+import { Button } from '../../ui/button';
 
 import { FunctionResult } from './FunctionResult';
 
 interface ViewFunctionsPanelProps {
   functions: ContractFunction[];
   contractAddress: string;
-  adapter: ContractAdapter;
+  adapter: FullContractAdapter;
   contractSchema: ContractSchema;
   className?: string;
 }
