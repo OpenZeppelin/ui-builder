@@ -59,6 +59,7 @@ export function TransactionFormBuilder() {
           selectedChain={selectedChain}
         />
       ),
+      isValid: !!contractSchema,
     },
     {
       id: 'function-selector',
@@ -70,6 +71,7 @@ export function TransactionFormBuilder() {
           selectedFunction={selectedFunction}
         />
       ),
+      isValid: !!selectedFunction,
     },
     {
       id: 'form-customization',
