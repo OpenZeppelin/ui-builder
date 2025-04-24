@@ -3,7 +3,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
 
-import { Button } from './ui/button';
+import { useWalletConnection } from '../hooks/useWalletConnection';
+
+import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
+import { WalletConnectButton } from './wallet/WalletConnectButton';
 
 import { DynamicFormField } from './DynamicFormField';
 
@@ -16,27 +19,12 @@ import { DynamicFormField } from './DynamicFormField';
  * 1. TransactionForm receives a schema and adapter from the transaction form builder
  * 2. It sets up React Hook Form for state management and validation
  * 3. It renders fields dynamically using the DynamicFormField component
- * 4. On submission, it processes data through the adapter before passing to handlers
+ * 4. Provides wallet connection UI (demo implementation)
+ * 5. On submission, it processes data through the adapter before passing to handlers
  *
- * This component should be used in two contexts:
- * - Inside the form builder as a preview of the form being built
- * - In exported applications as the actual implementation of the form
- *
- * The field components (TextField, NumberField, AddressField, etc.) should never be
- * used directly outside of this system - they are specifically designed for use within
- * the DynamicFormField → TransactionForm architecture.
- *
- * Current implementation includes:
- * - Integration with React Hook Form for state management ✅
- * - Support for form validation from schema ✅
- * - Layout customization with sections ✅
- * - Form submission through adapter ✅
- *
- * TODO: Remaining implementation tasks:
- * 1. Implement additional field components (NumberField, AddressField, etc.)
- * 2. Connect visibility conditions to actual form values using the 'watch' function
- * 3. Complete full test coverage for all form scenarios
- * 4. Add support for complex field types (arrays, nested objects)
+ * Note: The previewMode prop is currently used only for demo purposes and does not affect
+ * the visibility of wallet connection or transaction execution UI. In the future, it will be used
+ * to enable/disable actual blockchain interactions without changing the UI structure.
  *
  * @returns The rendered form component
  */
@@ -49,6 +37,9 @@ export function TransactionForm({
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Use the wallet connection hook
+  const { isConnected, handleConnectionChange } = useWalletConnection();
+
   // Initialize form with React Hook Form
   const methods = useForm<FormValues>({
     mode: schema.validation?.mode || 'onChange',
@@ -60,7 +51,8 @@ export function TransactionForm({
     methods.reset(schema.defaultValues || {});
   }, [schema, methods]);
 
-  // Form submission handler
+  // Form submission handler - use previewMode here to determine whether actual transaction execution
+  // should happen in the future, without changing UI
   const handleSubmit = async (data: FormValues): Promise<void> => {
     setSubmitting(true);
     setFormError(null);
@@ -69,6 +61,13 @@ export function TransactionForm({
       // Format data for submission using the adapter
       const functionId = schema.functionId || 'unknown';
       const formattedData = adapter.formatTransactionData(functionId, data, schema.fields);
+
+      // In future implementation, previewMode would prevent actual blockchain interaction
+      // but for now, we'll just pass the formatted data to the onSubmit handler regardless
+      if (!previewMode) {
+        // Future: Here we would handle actual blockchain transaction
+        // This is where wallet connection would be required
+      }
 
       // Pass the formatted data to the onSubmit handler
       if (onSubmit) {
@@ -87,7 +86,6 @@ export function TransactionForm({
       }
     } catch (error) {
       setFormError((error as Error).message || 'An error occurred during submission');
-      console.error('Form submission error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -149,8 +147,13 @@ export function TransactionForm({
 
   return (
     <FormProvider {...methods}>
-      {/* Title and description at the top, outside of space-y-4 container */}
-      {schema.title && <h2 className="mb-4 text-xl font-bold">{schema.title}</h2>}
+      {/* Header with wallet connection */}
+      <div className="mb-4 flex items-center justify-between">
+        {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
+        <div className="wallet-connection">
+          <WalletConnectButton onConnectionChange={handleConnectionChange} />
+        </div>
+      </div>
 
       {/* Always render description container, just change content */}
       <div className="description-container mb-6">
@@ -173,15 +176,15 @@ export function TransactionForm({
         >
           <div className="mb-6">{renderFormContent()}</div>
 
-          {!previewMode && (
-            <div className="form-actions col-span-full">
-              <Button type="submit" disabled={submitting} variant={getButtonVariant()}>
-                {submitting
-                  ? schema.submitButton?.loadingText || 'Submitting...'
-                  : schema.submitButton?.text || 'Submit'}
-              </Button>
-            </div>
-          )}
+          {/* Form actions - always visible regardless of preview mode */}
+          <div className="form-actions col-span-full mt-4 pt-4 border-t border-gray-100 flex justify-end">
+            <TransactionExecuteButton
+              isWalletConnected={isConnected}
+              isSubmitting={submitting}
+              isFormValid={methods.formState.isValid}
+              variant={getButtonVariant()}
+            />
+          </div>
         </form>
       </div>
     </FormProvider>
