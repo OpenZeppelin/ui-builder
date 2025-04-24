@@ -1,6 +1,6 @@
 import { RefreshCw } from 'lucide-react';
 
-import { useCallback, useEffect, useState } from 'react';
+import { JSX, useCallback, useEffect, useState } from 'react';
 
 import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
@@ -30,7 +30,7 @@ export function ViewFunctionsPanel({
   adapter,
   contractSchema,
   className,
-}: ViewFunctionsPanelProps) {
+}: ViewFunctionsPanelProps): JSX.Element {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [isLoading, setIsLoading] = useState(false);
 

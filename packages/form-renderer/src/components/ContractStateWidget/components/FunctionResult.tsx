@@ -1,3 +1,5 @@
+import { JSX } from 'react';
+
 import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 interface FunctionResultProps {
@@ -9,7 +11,11 @@ interface FunctionResultProps {
 /**
  * Component for displaying function results
  */
-export function FunctionResult({ functionDetails, result, loading }: FunctionResultProps) {
+export function FunctionResult({
+  functionDetails,
+  result,
+  loading,
+}: FunctionResultProps): JSX.Element {
   // Format result for display
   const formatResult = (rawResult: unknown): string => {
     if (rawResult === undefined) return '';

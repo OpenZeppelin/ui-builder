@@ -1,6 +1,6 @@
 import { FileText, Minimize2 } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 
 import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
@@ -30,11 +30,11 @@ interface ContractStateWidgetProps {
 export function ContractStateWidget({
   contractSchema,
   contractAddress,
-  adapter, // Using adapter directly
+  adapter,
   isVisible = true,
   onToggle,
   className,
-}: ContractStateWidgetProps) {
+}: ContractStateWidgetProps): JSX.Element | null {
   const [viewFunctions, setViewFunctions] = useState<ContractFunction[]>([]);
   const [animationState, setAnimationState] = useState<
     'entering' | 'entered' | 'exiting' | 'exited'
@@ -54,17 +54,17 @@ export function ContractStateWidget({
       const timer = setTimeout(() => {
         setAnimationState('entered');
       }, 300);
-      return () => clearTimeout(timer);
+      return (): void => clearTimeout(timer);
     } else {
       setAnimationState('exiting');
       const timer = setTimeout(() => {
         setAnimationState('exited');
       }, 300);
-      return () => clearTimeout(timer);
+      return (): void => clearTimeout(timer);
     }
   }, [isVisible]);
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     if (onToggle) {
       onToggle();
     }
