@@ -2,7 +2,7 @@ import { Wallet } from 'lucide-react';
 
 import { useState } from 'react';
 
-import { Button } from '../ui/button';
+import { LoadingButton } from '../ui/loading-button';
 
 export interface WalletConnectButtonProps {
   /**
@@ -67,22 +67,21 @@ export function WalletConnectButton({
   };
 
   return (
-    <Button
+    <LoadingButton
       type="button"
       variant="outline"
       size="sm"
       onClick={handleConnect}
       disabled={isConnecting}
+      loading={isConnecting}
       className="flex items-center gap-2"
     >
       <Wallet className="h-4 w-4" />
-      {isConnecting
-        ? 'Connecting...'
-        : isConnected
-          ? connectedAddress
-            ? formatAddress(connectedAddress)
-            : 'Connected'
-          : 'Connect Wallet'}
-    </Button>
+      {isConnected
+        ? connectedAddress
+          ? formatAddress(connectedAddress)
+          : 'Connected'
+        : 'Connect Wallet'}
+    </LoadingButton>
   );
 }
