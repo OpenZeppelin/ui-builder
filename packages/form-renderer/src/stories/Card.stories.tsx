@@ -1,19 +1,19 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '../../../../form-renderer/src/components/ui/button';
-import { Input } from '../../../../form-renderer/src/components/ui/input';
-import { Label } from '../../../../form-renderer/src/components/ui/label';
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../components/ui/card';
+  Input,
+  Label,
+} from '..';
 
 const meta = {
-  title: 'Core/UI/Card',
+  title: 'UI/Card',
   component: Card,
   parameters: {
     layout: 'centered',

@@ -10,6 +10,7 @@ export { DynamicFormField } from './DynamicFormField';
 
 // UI components
 export { Button } from './ui/button';
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 // Wallet and transaction components
 export { WalletConnectButton } from './wallet/WalletConnectButton';
