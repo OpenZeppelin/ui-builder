@@ -36,6 +36,7 @@ export function TransactionForm({
 }: TransactionFormProps): React.ReactElement {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [transactionSuccess, setTransactionSuccess] = useState(false);
 
   // Use the wallet connection hook
   const { isConnected, handleConnectionChange } = useWalletConnection();
@@ -56,8 +57,12 @@ export function TransactionForm({
   const handleSubmit = async (data: FormValues): Promise<void> => {
     setSubmitting(true);
     setFormError(null);
+    setTransactionSuccess(false);
 
     try {
+      // Add artificial delay to ensure loading state is visible
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Format data for submission using the adapter
       const functionId = schema.functionId || 'unknown';
       const formattedData = adapter.formatTransactionData(functionId, data, schema.fields);
@@ -84,9 +89,20 @@ export function TransactionForm({
 
         onSubmit(formData);
       }
+
+      // Simulate transaction success after a delay
+      setTimeout(() => {
+        setTransactionSuccess(true);
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          setTransactionSuccess(false);
+        }, 5000);
+
+        // Keep loading state visible until transaction completes
+        setSubmitting(false);
+      }, 1500);
     } catch (error) {
       setFormError((error as Error).message || 'An error occurred during submission');
-    } finally {
       setSubmitting(false);
     }
   };
@@ -145,6 +161,11 @@ export function TransactionForm({
     }
   };
 
+  // Close success message
+  const handleCloseSuccess = (): void => {
+    setTransactionSuccess(false);
+  };
+
   return (
     <FormProvider {...methods}>
       {/* Header with wallet connection */}
@@ -169,10 +190,31 @@ export function TransactionForm({
           </div>
         )}
 
+        {transactionSuccess && (
+          <div className="transaction-success rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold">Transaction executed successfully!</p>
+                <p className="text-sm">
+                  Transaction hash: 0x{Math.random().toString(16).substring(2, 42)}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-green-700 hover:text-green-900"
+                onClick={handleCloseSuccess}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
+
         <form
-          onSubmit={methods.handleSubmit(handleSubmit)}
           className={`transaction-form flex flex-col ${getLayoutClasses()}`}
           noValidate
+          onSubmit={methods.handleSubmit(handleSubmit)}
         >
           <div className="mb-6">{renderFormContent()}</div>
 

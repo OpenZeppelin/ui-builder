@@ -1,4 +1,5 @@
-import { Button, ButtonProps } from '../ui/button';
+import { ButtonProps } from '../ui/button';
+import { LoadingButton } from '../ui/loading-button';
 
 export interface TransactionExecuteButtonProps {
   /**
@@ -38,14 +39,15 @@ export function TransactionExecuteButton({
   variant = 'default',
 }: TransactionExecuteButtonProps): React.ReactElement {
   return (
-    <Button
+    <LoadingButton
       type="submit"
-      disabled={!isWalletConnected || isSubmitting || !isFormValid}
+      disabled={!isWalletConnected || !isFormValid}
+      loading={isSubmitting}
       variant={variant}
       size="lg"
       className="w-full md:w-auto"
     >
       {isSubmitting ? 'Executing...' : 'Execute Transaction'}
-    </Button>
+    </LoadingButton>
   );
 }
