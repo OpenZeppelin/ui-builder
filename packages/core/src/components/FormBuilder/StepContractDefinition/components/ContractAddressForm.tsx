@@ -17,16 +17,27 @@ export function ContractAddressForm({
   setIsLoading,
   setError,
   error,
+  existingContractAddress = null,
 }: ContractAddressFormProps) {
-  const { control, handleSubmit, watch, reset } = useForm<ContractFormData>({
-    defaultValues: { contractAddress: '' },
+  const { control, handleSubmit, watch, reset, setValue } = useForm<ContractFormData>({
+    defaultValues: { contractAddress: existingContractAddress || '' },
     mode: 'onBlur',
   });
 
+  // Update form values if existingContractAddress changes
   useEffect(() => {
-    reset({ contractAddress: '' });
-    setError(null);
-  }, [selectedChain, reset, setError]);
+    if (existingContractAddress) {
+      setValue('contractAddress', existingContractAddress);
+    }
+  }, [existingContractAddress, setValue]);
+
+  // Reset form when chain changes
+  useEffect(() => {
+    if (!existingContractAddress) {
+      reset({ contractAddress: '' });
+      setError(null);
+    }
+  }, [selectedChain, reset, setError, existingContractAddress]);
 
   const adapter = getContractAdapter(selectedChain);
 
@@ -120,7 +131,7 @@ export function ContractAddressForm({
             disabled={isLoading || !currentAddress}
             className="w-1/2"
           >
-            Load Contract
+            {existingContractAddress ? 'Reload Contract' : 'Load Contract'}
           </LoadingButton>
 
           <div className="flex flex-col items-end text-right">

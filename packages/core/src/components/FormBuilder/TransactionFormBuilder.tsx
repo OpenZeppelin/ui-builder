@@ -57,6 +57,7 @@ export function TransactionFormBuilder() {
         <StepContractDefinition
           onContractSchemaLoaded={handleContractSchemaLoaded}
           selectedChain={selectedChain}
+          existingContractSchema={contractSchema}
         />
       ),
       isValid: !!contractSchema,
