@@ -74,15 +74,20 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
   };
 
   return (
-    <Card className="overflow-visible">
-      <CardContent className="p-6">
-        <TransactionForm
-          schema={renderSchema}
-          adapter={adapter}
-          onSubmit={handleSubmit}
-          previewMode={true}
-        />
-      </CardContent>
-    </Card>
+    <div className="relative">
+      <div className="absolute -top-3 left-4 bg-primary text-white text-xs px-2 py-1 rounded-sm z-10">
+        Preview
+      </div>
+      <Card className="overflow-visible border-dashed border-primary/50 bg-gray-50/50">
+        <CardContent className="p-6">
+          <TransactionForm
+            schema={renderSchema}
+            adapter={adapter}
+            onSubmit={handleSubmit}
+            previewMode={true}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
