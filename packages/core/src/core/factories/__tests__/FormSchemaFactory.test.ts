@@ -45,6 +45,7 @@ describe('FormSchemaFactory', () => {
   const mockContractSchema: ContractSchema = {
     chainType: 'evm' as ChainType,
     name: 'TestContract',
+    address: '0x1234567890123456789012345678901234567890',
     functions: [
       {
         id: 'transfer_address_uint256',
@@ -189,6 +190,7 @@ describe('FormSchemaFactory', () => {
       ],
       layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
       validation: { mode: 'onChange', showErrors: 'inline' },
+      contractAddress: '0xTestAddress',
     };
 
     it('should filter out fields where isHidden is true', () => {

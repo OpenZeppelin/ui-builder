@@ -72,4 +72,10 @@ export interface RenderFormSchema extends CommonFormProperties {
    * Function ID for the contract function this form represents
    */
   functionId?: string;
+
+  /**
+   * The deployed contract address for this form.
+   * Required for widgets like ContractStateWidget and for transaction execution.
+   */
+  contractAddress: string;
 }

@@ -6,14 +6,15 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import {
+import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type {
   FormFieldType,
   RenderFormSchema,
-  TransactionForm,
   TransactionFormProps,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/transaction-form-types/forms';
 
 /*------------TEMPLATE COMMENT START------------*/
 // This import will be replaced at generation time
@@ -36,12 +37,14 @@ interface TransactionResult {
  */
 export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
+  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(false);
 
   // Create the adapter instance for @@chain-type@@
   /*------------TEMPLATE COMMENT START------------*/
   // @@adapter-class-name@@ will be replaced at generation time
   /*------------TEMPLATE COMMENT END------------*/
-  const adapter = new AdapterPlaceholder();
+  const adapter = useMemo(() => new AdapterPlaceholder(), []);
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
   /*------------TEMPLATE COMMENT START------------*/
@@ -66,6 +69,19 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const executionConfig: unknown | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
   // TODO (Export Integration): Use executionConfig at runtime to determine
   // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
+
+  // @ts-expect-error - contractAddress will be present at generation time
+  const contractAddress = formSchema.contractAddress;
+
+  useEffect(() => {
+    if (contractAddress) {
+      adapter.loadContract(contractAddress).then(setContractSchema);
+    }
+  }, [contractAddress, adapter]);
+
+  const toggleWidget = () => {
+    setIsWidgetVisible((prev) => !prev);
+  };
 
   // Handle form submission - remove async for now
   const handleSubmit = (formData: FormData) => {
@@ -119,7 +135,26 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
         </div>
       )}
 
-      <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+        </div>
+
+        {/* Right sidebar with ContractStateWidget */}
+        {contractSchema && contractAddress && (
+          <div className="w-[300px] flex-shrink-0">
+            <div className="sticky top-4">
+              <ContractStateWidget
+                contractSchema={contractSchema}
+                contractAddress={contractAddress}
+                adapter={adapter}
+                isVisible={isWidgetVisible}
+                onToggle={toggleWidget}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -43,6 +43,7 @@ export function createMinimalFormConfig(
       allowAny: true,
     },
     theme: {},
+    contractAddress: '0xTestAddress',
   };
 }
 
@@ -198,6 +199,7 @@ export function createComplexFormConfig(
       specificAddress: '0x0000000000000000000000000000000000000000',
     },
     theme: {},
+    contractAddress: '0xTestAddress',
   };
 }
 
@@ -235,5 +237,6 @@ export function createTestField(
     helperText: `Description for ${label}`,
     placeholder: `Enter ${label.toLowerCase()}`,
     ...options,
+    contractAddress: '0xTestAddress',
   };
 }

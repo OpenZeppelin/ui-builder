@@ -69,7 +69,8 @@ export function useFormConfig({
 
         // If the FormGenerator service fails, use fallback field generation
         if (selectedFunctionDetails) {
-          const fields = generateFallbackFields(selectedFunctionDetails);
+          const contractAddress = contractSchema?.address || '';
+          const fields = generateFallbackFields(selectedFunctionDetails, contractAddress);
 
           const config: BuilderFormConfig = {
             functionId: selectedFunction,
@@ -84,6 +85,7 @@ export function useFormConfig({
               mode: 'onChange',
               showErrors: 'inline',
             },
+            contractAddress,
           };
 
           // Set the flag to prevent re-initialization
@@ -119,7 +121,10 @@ export function useFormConfig({
       const updatedFields = [...formConfig.fields];
       updatedFields[index] = { ...updatedFields[index], ...updates };
 
-      const updatedConfig = updateFormConfig(formConfig, { fields: updatedFields });
+      const updatedConfig = updateFormConfig(formConfig, {
+        fields: updatedFields,
+        contractAddress: formConfig.contractAddress,
+      });
 
       setFormConfig(updatedConfig);
 
@@ -136,7 +141,10 @@ export function useFormConfig({
     (title: string) => {
       if (!formConfig) return;
 
-      const updatedConfig = updateFormConfig(formConfig, { title });
+      const updatedConfig = updateFormConfig(formConfig, {
+        title,
+        contractAddress: formConfig.contractAddress,
+      });
 
       setFormConfig(updatedConfig);
 
@@ -153,7 +161,10 @@ export function useFormConfig({
     (description: string) => {
       if (!formConfig) return;
 
-      const updatedConfig = updateFormConfig(formConfig, { description });
+      const updatedConfig = updateFormConfig(formConfig, {
+        description,
+        contractAddress: formConfig.contractAddress,
+      });
 
       setFormConfig(updatedConfig);
 

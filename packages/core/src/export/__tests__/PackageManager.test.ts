@@ -90,6 +90,7 @@ describe('PackageManager', () => {
       label: `Parameter ${index}`,
       type,
       validation: { required: true },
+      contractAddress: '0xTestAddress',
     })) as unknown as BuilderFormConfig['fields'], // Type assertion with a more specific type
     layout: {
       columns: 1,
@@ -101,6 +102,7 @@ describe('PackageManager', () => {
       showErrors: 'inline',
     },
     theme: {},
+    contractAddress: '0xTestAddress',
   });
 
   describe('getDependencies', () => {

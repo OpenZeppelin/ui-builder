@@ -270,6 +270,7 @@ describe('FormCodeGenerator Templating System', () => {
           showErrors: 'inline',
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const code = await generator.generateFormComponent(formConfig, 'evm', 'transferTokens');
@@ -385,6 +386,7 @@ function example() {
           spacing: 'normal' as const,
           labelPosition: 'top' as const,
         },
+        contractAddress: '0xTestAddress',
       };
 
       // Test that applyCommonPostProcessing inserts the JSON correctly
@@ -504,6 +506,7 @@ const anotherFunction = () => {
       const formConfig = {
         fields: [{ id: 'amount', label: 'Amount', type: 'number' }],
         layout: { columns: 1 as const },
+        contractAddress: '0xTestAddress',
       };
 
       const processed = await templateProcessor.applyCommonPostProcessing(template, {
@@ -601,7 +604,8 @@ const anotherFunction = () => {
           ],
           "layout": {
             "columns": 1 as const
-          }
+          },
+          contractAddress: '0xTestAddress'
         };
       
         return (

@@ -11,7 +11,7 @@ export const TEST_FIXTURES = {
   integerTypes: {
     id: 'test-integers',
     name: 'Test Integer Types',
-    address: '0x0000000000000000000000000000000000000000',
+    address: '0x1234567890123456789012345678901234567890',
     chainType: 'evm' as const,
     functions: [
       {
@@ -72,7 +72,7 @@ export const TEST_FIXTURES = {
   byteTypes: {
     id: 'test-bytes',
     name: 'Test Byte Types',
-    address: '0x0000000000000000000000000000000000000000',
+    address: '0x1234567890123456789012345678901234567890',
     chainType: 'evm' as const,
     functions: [
       {
@@ -116,7 +116,7 @@ export const TEST_FIXTURES = {
   arrayTypes: {
     id: 'test-arrays',
     name: 'Test Array Types',
-    address: '0x0000000000000000000000000000000000000000',
+    address: '0x1234567890123456789012345678901234567890',
     chainType: 'evm' as const,
     functions: [
       {
@@ -177,7 +177,7 @@ export const TEST_FIXTURES = {
   errorCases: {
     id: 'test-errors',
     name: 'Test Error Cases',
-    address: '0x0000000000000000000000000000000000000000',
+    address: '0x1234567890123456789012345678901234567890',
     chainType: 'evm' as const,
     functions: [
       {

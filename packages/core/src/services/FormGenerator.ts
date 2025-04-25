@@ -67,6 +67,7 @@ export function generateFormConfig(
     description:
       functionDetails.description ||
       `Form for interacting with the ${functionDetails.displayName} function.`,
+    contractAddress: contractSchema.address || '',
   };
 }
 
@@ -161,9 +162,13 @@ function getBaseType(parameterType: string): string {
  * Fallback field generation in case the adapter fails
  *
  * @param functionDetails The contract function details
+ * @param contractAddress The contract address
  * @returns An array of basic form fields
  */
-export function generateFallbackFields(functionDetails: ContractFunction): FormFieldType[] {
+export function generateFallbackFields(
+  functionDetails: ContractFunction,
+  contractAddress: string = ''
+): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
     let fieldType: FieldType = 'text';
     let placeholder = `Enter ${input.displayName || input.name || input.type}`;
@@ -202,6 +207,7 @@ export function generateFallbackFields(functionDetails: ContractFunction): FormF
       },
       width: 'full',
       originalParameterType: input.type,
+      contractAddress,
     };
   });
 }
@@ -269,5 +275,6 @@ export function updateFormConfig(
     ...existingConfig,
     ...processedUpdates,
     ...updatedCommonProperties,
+    contractAddress: updates.contractAddress || existingConfig.contractAddress,
   };
 }

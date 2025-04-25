@@ -155,6 +155,7 @@ describe('PackageManager configuration loading', () => {
           },
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
+          contractAddress: '0xTestAddress',
         },
         'evm'
       );
@@ -179,6 +180,7 @@ describe('PackageManager configuration loading', () => {
           },
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
+          contractAddress: '0xTestAddress',
         },
         'evm'
       );
@@ -221,6 +223,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Test that dependencies for a specific field type are correctly resolved
@@ -265,6 +268,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Test package.json updating
@@ -311,6 +315,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const devDeps = packageManager.getDevDependencies(formConfig, 'evm');
@@ -339,6 +344,7 @@ describe('PackageManager configuration loading', () => {
         layout: { columns: 1 as const, spacing: 'normal' as const, labelPosition: 'top' as const },
         validation: { mode: 'onChange', showErrors: 'inline' },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
       const chainType: ChainType = 'evm';
       const exportOptions: Partial<ExportOptions> = { env: 'local' };
@@ -381,6 +387,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const updated = packageManager.updatePackageJson(
@@ -418,6 +425,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const customDeps = {
@@ -462,6 +470,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const deps = packageManager.getDependencies(formConfig, 'unknown-chain' as ChainType);
@@ -495,6 +504,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const deps = packageManager.getDependencies(formConfig, 'evm');
@@ -522,6 +532,7 @@ describe('PackageManager configuration loading', () => {
           showErrors: 'inline' as const,
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       expect(() =>

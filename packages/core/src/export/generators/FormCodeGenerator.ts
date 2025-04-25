@@ -1,5 +1,5 @@
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../core/types/ExportTypes';

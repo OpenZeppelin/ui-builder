@@ -557,8 +557,9 @@ export class EvmAdapter implements ContractAdapter {
       const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
       const contractName = mockInfo.name;
 
-      // Use the shared transformer - pass undefined for address since this is a mock
-      return this.transformAbiToSchema(mockAbi, contractName, undefined);
+      // Always provide a valid address for test schemas
+      const address = '0x1234567890123456789012345678901234567890';
+      return this.transformAbiToSchema(mockAbi, contractName, address);
     } catch (error) {
       // Type assertion for error message
       const errorMessage = error instanceof Error ? error.message : String(error);

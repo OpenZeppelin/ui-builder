@@ -436,7 +436,10 @@ export class PackageManager {
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
     // Define known internal workspace packages
-    const internalPackages = new Set(['@openzeppelin/transaction-form-renderer']);
+    const internalPackages = new Set([
+      '@openzeppelin/transaction-form-renderer',
+      '@openzeppelin/transaction-form-types',
+    ]);
     // NOTE: Add '@openzeppelin/transaction-form-builder-styles' if it becomes a direct dependency
 
     for (const [pkgName, version] of Object.entries(dependencies)) {

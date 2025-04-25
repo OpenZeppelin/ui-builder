@@ -90,6 +90,7 @@ describe('Configuration Integration Tests', () => {
       showErrors: 'inline',
     },
     theme: {},
+    contractAddress: '0xTestAddress',
   });
 
   describe('Dynamic Configuration Loading', () => {

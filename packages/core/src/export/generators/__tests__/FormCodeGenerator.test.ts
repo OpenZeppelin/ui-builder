@@ -30,6 +30,7 @@ describe('FormCodeGenerator', () => {
             spacing: 'normal' as const,
             labelPosition: 'top' as const,
           },
+          contractAddress: '0xTestAddress',
         };
       }
     );
@@ -63,6 +64,7 @@ describe('FormCodeGenerator', () => {
           showErrors: 'inline',
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       const generatedCode = await generator.generateFormComponent(
@@ -72,7 +74,11 @@ describe('FormCodeGenerator', () => {
       );
 
       // Verify the generated code contains expected elements
-      expect(generatedCode).toContain("import { useState } from 'react'");
+      expect(
+        generatedCode.includes("import { useState } from 'react'") ||
+          generatedCode.includes("import { useEffect, useState } from 'react'") ||
+          generatedCode.includes("import { useEffect, useMemo, useState } from 'react'")
+      ).toBe(true);
       expect(generatedCode).toContain('TransactionForm');
       expect(generatedCode).toContain('EvmAdapter');
       expect(generatedCode).toContain('export default function GeneratedForm');
@@ -106,6 +112,7 @@ describe('FormCodeGenerator', () => {
           showErrors: 'inline',
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Generate the form component
@@ -137,6 +144,7 @@ describe('FormCodeGenerator', () => {
           validation: { mode: 'onChange', showErrors: 'inline' },
           theme: {},
           // intentionally missing id, title, and submitButton to test validation
+          contractAddress: '0xTestAddress',
         };
       }) as unknown as (
         builderConfig: BuilderFormConfig,
@@ -151,6 +159,7 @@ describe('FormCodeGenerator', () => {
         layout: { columns: 1 as const, spacing: 'normal' as const, labelPosition: 'top' as const },
         validation: { mode: 'onChange', showErrors: 'inline' },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Attempt to generate form with invalid schema should throw
@@ -188,6 +197,7 @@ describe('FormCodeGenerator', () => {
           showErrors: 'inline',
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Generate a complete project
@@ -260,6 +270,7 @@ describe('FormCodeGenerator', () => {
           showErrors: 'inline',
         },
         theme: {},
+        contractAddress: '0xTestAddress',
       };
 
       // Generate a project without adapters

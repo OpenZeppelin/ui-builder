@@ -144,6 +144,7 @@ describe('FormExportSystem', () => {
       showErrors: 'inline',
     },
     theme: {},
+    contractAddress: '0xTestAddress',
   });
 
   // Create a system with the provided dependencies

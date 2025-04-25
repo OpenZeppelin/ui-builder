@@ -61,6 +61,11 @@ export class FormSchemaFactory {
       theme: {},
     };
 
+    // Ensure contract address is present
+    if (!contractSchema.address) {
+      throw new Error('Contract schema is missing required address field');
+    }
+
     // Return the complete render schema
     return {
       ...commonProperties,
@@ -72,6 +77,7 @@ export class FormSchemaFactory {
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
+      contractAddress: contractSchema.address,
     };
   }
 
@@ -132,6 +138,7 @@ export class FormSchemaFactory {
       },
       // Pass the populated defaultValues object
       defaultValues: defaultValues,
+      contractAddress: builderConfig.contractAddress,
     };
   }
 

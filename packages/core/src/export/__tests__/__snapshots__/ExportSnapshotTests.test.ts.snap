@@ -619,8 +619,9 @@ export class EvmAdapter implements ContractAdapter {
       const mockAbi = (await MockContractService.getMockAbi(mockInfo.file)) as AbiItem[];
       const contractName = mockInfo.name;
 
-      // Use the shared transformer - pass undefined for address since this is a mock
-      return this.transformAbiToSchema(mockAbi, contractName, undefined);
+      // Always provide a valid address for test schemas
+      const address = '0x1234567890123456789012345678901234567890';
+      return this.transformAbiToSchema(mockAbi, contractName, address);
     } catch (error) {
       // Type assertion for error message
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -740,14 +741,15 @@ export default EvmAdapter;
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
-"import { useState } from 'react';
+"import { useEffect, useMemo, useState } from 'react';
 
-import {
+import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type {
   FormFieldType,
   RenderFormSchema,
-  TransactionForm,
   TransactionFormProps,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/transaction-form-types/forms';
 
 import { EvmAdapter } from '../adapters/evm/adapter';
 
@@ -766,9 +768,11 @@ interface TransactionResult {
  */
 export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
+  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+  const [isWidgetVisible, setIsWidgetVisible] = useState(false);
 
   // Create the adapter instance for evm
-  const adapter = new EvmAdapter();
+  const adapter = useMemo(() => new EvmAdapter(), []);
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
   const formSchema: RenderFormSchema = {
@@ -800,6 +804,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
       allowAny: true,
     },
     theme: {},
+    contractAddress: '0xTestAddress',
     id: 'form-transfer',
     title: 'transfer',
     description: 'Form for interacting with the transfer function.',
@@ -833,6 +838,18 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   };
   // TODO (Export Integration): Use executionConfig at runtime to determine
   // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
+
+  const contractAddress = formSchema.contractAddress;
+
+  useEffect(() => {
+    if (contractAddress) {
+      adapter.loadContract(contractAddress).then(setContractSchema);
+    }
+  }, [contractAddress, adapter]);
+
+  const toggleWidget = () => {
+    setIsWidgetVisible((prev) => !prev);
+  };
 
   // Handle form submission - remove async for now
   const handleSubmit = (formData: FormData) => {
@@ -886,7 +903,26 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
         </div>
       )}
 
-      <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+        </div>
+
+        {/* Right sidebar with ContractStateWidget */}
+        {contractSchema && contractAddress && (
+          <div className="w-[300px] flex-shrink-0">
+            <div className="sticky top-4">
+              <ContractStateWidget
+                contractSchema={contractSchema}
+                contractAddress={contractAddress}
+                adapter={adapter}
+                isVisible={isWidgetVisible}
+                onToggle={toggleWidget}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

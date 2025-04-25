@@ -21,6 +21,11 @@ export interface BuilderFormConfig extends CommonFormProperties {
   functionId: string;
 
   /**
+   * The deployed contract address for this form (required for export and execution)
+   */
+  contractAddress: string;
+
+  /**
    * Custom title for the form
    */
   title?: string;
