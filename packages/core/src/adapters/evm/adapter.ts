@@ -1,6 +1,7 @@
 import { Contract, JsonRpcProvider, isAddress } from 'ethers';
 import { startCase } from 'lodash';
 
+import { generateId, logger } from '@openzeppelin/transaction-form-renderer';
 import type {
   ContractSchema,
   FunctionParameter,
@@ -11,8 +12,6 @@ import type {
   FormFieldType,
 } from '@openzeppelin/transaction-form-types/forms';
 
-import { generateId } from '../../core/utils/general';
-import { logger } from '../../core/utils/logger';
 import MockContractService from '../../services/MockContractService';
 import type { MockContractInfo } from '../../services/MockContractService';
 import type {

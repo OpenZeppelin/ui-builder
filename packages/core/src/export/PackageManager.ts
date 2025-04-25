@@ -36,14 +36,12 @@
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
-
-// Import logger
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
-import { logger } from '../core/utils/logger';
 
 /**
  * Type for glob import results - using Record with index signature

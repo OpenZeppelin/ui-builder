@@ -6,6 +6,7 @@
  */
 import { startCase } from 'lodash';
 
+import { generateId } from '@openzeppelin/transaction-form-renderer';
 import type {
   ContractFunction,
   ContractSchema,
@@ -19,7 +20,6 @@ import {
 
 import { getContractAdapter } from '../adapters';
 import { BuilderFormConfig } from '../core/types/FormTypes';
-import { generateId } from '../core/utils/general';
 
 /**
  * Generates a default form configuration for a contract function

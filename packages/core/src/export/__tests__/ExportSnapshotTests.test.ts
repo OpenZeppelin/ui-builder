@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
-import { logger } from '../../core/utils/logger';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';

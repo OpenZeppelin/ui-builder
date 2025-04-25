@@ -34,18 +34,6 @@ const utilFiles = import.meta.glob<string>('../adapters/*/utils.ts', {
   import: 'default',
 }) as LazyGlobImportResult;
 
-// Core utility files
-const generalUtilFiles = import.meta.glob<string>('../core/utils/general.ts', {
-  query: '?raw',
-  import: 'default',
-}) as LazyGlobImportResult;
-
-// Logger file
-const loggerFile = import.meta.glob<string>('../core/utils/logger.ts', {
-  query: '?raw',
-  import: 'default',
-}) as LazyGlobImportResult;
-
 // Get the adapter index file that contains the ContractAdapter interface
 const adapterIndexFiles = import.meta.glob<string>('../adapters/index.ts', {
   query: '?raw',
@@ -57,8 +45,6 @@ export const adapterFilePaths = {
   adapter: Object.keys(adapterFiles),
   type: Object.keys(typeFiles),
   util: Object.keys(utilFiles),
-  generalUtil: Object.keys(generalUtilFiles),
-  logger: Object.keys(loggerFile),
   adapterIndex: Object.keys(adapterIndexFiles),
 };
 
@@ -206,14 +192,6 @@ export class AdapterExportManager {
     const coreFiles = await this.getCoreAdapterFiles();
     Object.assign(files, coreFiles);
 
-    // Add core utility files
-    const generalUtilsFiles = await this.getGeneralUtilFiles();
-    Object.assign(files, generalUtilsFiles);
-
-    // Add logger file
-    const loggerFiles = await this.getLoggerFiles();
-    Object.assign(files, loggerFiles);
-
     // Add chain-specific adapter files
     for (const path of this.adapterRegistry[chainType]) {
       // Create output path that normalizes the internal path to exported path
@@ -248,69 +226,6 @@ export class AdapterExportManager {
     }
 
     return coreFiles;
-  }
-
-  /**
-   * Get general utility files required by adapters
-   */
-  private async getGeneralUtilFiles(): Promise<AdapterFileMap> {
-    const utilFiles: AdapterFileMap = {};
-
-    // utils.ts - Get from core package
-    const utilsPath = Object.keys(generalUtilFiles)[0] || '';
-    if (utilsPath) {
-      try {
-        utilFiles['src/core/utils/general.ts'] = await this.getFileContent(utilsPath);
-      } catch (error) {
-        console.error('Failed to load general.ts:', error);
-        throw new Error('Failed to load required utility file: general.ts');
-      }
-    } else {
-      console.error('No general.ts file found');
-      throw new Error('Required utility file general.ts not found');
-    }
-
-    return utilFiles;
-  }
-
-  /**
-   * Get logger file required by adapters
-   */
-  private async getLoggerFiles(): Promise<AdapterFileMap> {
-    const loggerFiles: AdapterFileMap = {};
-
-    // logger.ts - Get from core package
-    const loggerPath = Object.keys(loggerFile)[0] || '';
-    if (loggerPath) {
-      try {
-        loggerFiles['src/core/utils/logger.ts'] = await this.getFileContent(loggerPath);
-      } catch (error) {
-        console.error('Failed to load logger.ts:', error);
-        throw new Error('Failed to load required utility file: logger.ts');
-      }
-    } else {
-      console.error('No logger.ts file found');
-      throw new Error('Required utility file logger.ts not found');
-    }
-
-    return loggerFiles;
-  }
-
-  /**
-   * Create export path for adapter file
-   */
-  private createExportPath(originalPath: string): string {
-    // Transform internal path to exported project path
-    // Example: '../adapters/evm/adapter.ts' -> 'src/adapters/evm/adapter.ts'
-
-    // Extract the part after /adapters/
-    const match = originalPath.match(/\/adapters\/(.*)/);
-    if (match) {
-      return `src/adapters/${match[1]}`;
-    }
-
-    // For other paths, just use a reasonable default
-    return `src/${originalPath.split('/').pop() || ''}`;
   }
 
   /**
@@ -473,14 +388,6 @@ export class AdapterExportManager {
         }
         throw new Error(`Adapter file not found: ${path}`);
       } else if (path.includes('/core/utils/')) {
-        // General utility files
-        if (generalUtilFiles[path]) {
-          return await generalUtilFiles[path]();
-        }
-        // Logger file
-        if (loggerFile[path]) {
-          return await loggerFile[path]();
-        }
         throw new Error(`Utility file not found: ${path}`);
       }
 
@@ -489,5 +396,22 @@ export class AdapterExportManager {
       console.error(`Error loading file content for ${path}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Create export path for adapter file
+   */
+  private createExportPath(originalPath: string): string {
+    // Transform internal path to exported project path
+    // Example: '../adapters/evm/adapter.ts' -> 'src/adapters/evm/adapter.ts'
+
+    // Extract the part after /adapters/
+    const match = originalPath.match(/\/adapters\/(.*)/);
+    if (match) {
+      return `src/adapters/${match[1]}`;
+    }
+
+    // For other paths, just use a reasonable default
+    return `src/${originalPath.split('/').pop() || ''}`;
   }
 }

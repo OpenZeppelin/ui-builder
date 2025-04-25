@@ -5,11 +5,11 @@
  * TemplateManager, FormCodeGenerator, AdapterExportManager, PackageManager,
  * and StyleManager components.
  */
+import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
-import { logger } from '../core/utils/logger';
 
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';

@@ -8,7 +8,16 @@
 /*------------TEMPLATE COMMENT END------------*/
 import { useEffect, useMemo, useState } from 'react';
 
-import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  ContractStateWidget,
+  TransactionForm,
+  logger,
+} from '@openzeppelin/transaction-form-renderer';
 import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type {
   FormFieldType,
@@ -39,6 +48,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
+  const [loadError, setLoadError] = useState<Error | null>(null);
 
   // Create the adapter instance for @@chain-type@@
   /*------------TEMPLATE COMMENT START------------*/
@@ -73,8 +83,24 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   const contractAddress = formSchema.contractAddress;
 
   useEffect(() => {
+    setLoadError(null);
+    setContractSchema(null);
+
     if (contractAddress) {
-      adapter.loadContract(contractAddress).then(setContractSchema);
+      adapter
+        .loadContract(contractAddress)
+        .then(setContractSchema)
+        .catch((err: unknown) => {
+          // Catch error during contract loading
+          logger.error('GeneratedForm', 'Error loading contract schema:', err);
+          // Create a new Error object if caught value is not already one
+          const errorToSet =
+            err instanceof Error ? err : new Error('Failed to load contract state');
+          setLoadError(errorToSet);
+          setContractSchema(null);
+        });
+    } else {
+      setContractSchema(null);
     }
   }, [contractAddress, adapter]);
 
@@ -116,44 +142,61 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
         // setTransactionResult(result);
         // For template testing:
         setTransactionResult({ txHash: '0x_MOCK_TX_HASH' });
-        console.log('Mock submission successful!');
+        logger.info('GeneratedForm', 'Mock submission successful!');
       }
     } catch (error) {
-      console.error('Submission error:', error);
+      logger.error('GeneratedForm', 'Submission error:', error);
       // TODO: Set an error state to display to the user
       setTransactionResult({ error: (error as Error).message });
     }
   };
 
   return (
-    <div className="generated-form-container">
-      {transactionResult && (
-        <div className="transaction-result mb-4 rounded-md bg-green-50 p-4 text-green-800">
-          <h3 className="font-medium">Transaction Successful!</h3>
-          <p className="mt-2 text-sm">Transaction Hash: {transactionResult.txHash || 'N/A'}</p>
+    <div className="flex gap-4">
+      <div className="flex-1">
+        <Card>
+          <CardHeader>
+            {/* Render title unconditionally; React handles empty strings */}
+            <CardTitle>{/*@@formSchema.title@@*/}</CardTitle>
+            {/* Render description unconditionally */}
+            <CardDescription>{/*@@formSchema.description@@*/}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {transactionResult && (
+              <div className="transaction-result rounded-md bg-green-50 p-4 text-green-800">
+                <h3 className="font-medium">Transaction Successful!</h3>
+                <p className="mt-2 text-sm">
+                  Transaction Hash: {transactionResult.txHash || 'N/A'}
+                </p>
+              </div>
+            )}
+            {/* Check the actual contractAddress variable at runtime */}
+            {contractAddress ? (
+              <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+            ) : (
+              <div className="text-destructive-foreground rounded-md bg-destructive p-4">
+                <h3 className="font-medium">Configuration Error</h3>
+                <p className="mt-2 text-sm">Missing contract address in the form schema.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {contractAddress && (
+        <div className="w-[300px] flex-shrink-0">
+          <div className="sticky top-4">
+            <ContractStateWidget
+              contractSchema={contractSchema}
+              contractAddress={contractAddress}
+              adapter={adapter}
+              isVisible={isWidgetVisible}
+              onToggle={toggleWidget}
+              error={loadError}
+            />
+          </div>
         </div>
       )}
-
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
-        </div>
-
-        {/* Right sidebar with ContractStateWidget */}
-        {contractSchema && contractAddress && (
-          <div className="w-[300px] flex-shrink-0">
-            <div className="sticky top-4">
-              <ContractStateWidget
-                contractSchema={contractSchema}
-                contractAddress={contractAddress}
-                adapter={adapter}
-                isVisible={isWidgetVisible}
-                onToggle={toggleWidget}
-              />
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

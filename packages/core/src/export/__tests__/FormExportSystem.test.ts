@@ -1,8 +1,9 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { logger } from '@openzeppelin/transaction-form-renderer';
+
 import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { logger } from '../../core/utils/logger';
 import { AdapterExportManager } from '../AdapterExportManager';
 import { FormExportSystem } from '../FormExportSystem';
 import { PackageManager } from '../PackageManager';

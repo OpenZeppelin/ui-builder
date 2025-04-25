@@ -21,6 +21,7 @@ interface ContractStateWidgetProps {
   isVisible?: boolean;
   onToggle?: () => void;
   className?: string;
+  error?: Error | null;
 }
 
 /**
@@ -34,6 +35,7 @@ export function ContractStateWidget({
   isVisible = true,
   onToggle,
   className,
+  error,
 }: ContractStateWidgetProps): JSX.Element | null {
   const [viewFunctions, setViewFunctions] = useState<ContractFunction[]>([]);
   const [animationState, setAnimationState] = useState<
@@ -70,8 +72,8 @@ export function ContractStateWidget({
     }
   };
 
-  if (!contractSchema || !contractAddress) {
-    return null; // Don't show the widget at all if no contract is loaded
+  if (!contractAddress) {
+    return null;
   }
 
   // If widget is hidden, render just a compact floating button
@@ -124,7 +126,16 @@ export function ContractStateWidget({
         )}
       </CardHeader>
       <CardContent className="space-y-3 px-3 py-2 flex-grow overflow-hidden flex flex-col min-h-0">
-        {viewFunctions.length > 0 ? (
+        {error ? (
+          <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md p-3 flex flex-col items-center justify-center h-full">
+            <p className="font-medium text-center">Error loading contract state</p>
+            <p className="mt-1 text-xs text-center">{error.message}</p>
+          </div>
+        ) : !contractSchema ? (
+          <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+            <p>Loading contract info...</p>
+          </div>
+        ) : viewFunctions.length > 0 ? (
           <ViewFunctionsPanel
             functions={viewFunctions}
             contractAddress={contractAddress}

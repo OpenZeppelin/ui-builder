@@ -2,8 +2,6 @@
  * General utility functions, which are not specific to any blockchain
  * It's important to keep these functions as simple as possible and avoid any
  * dependencies from other packages.
- * This file is intended to be used ot only in the core app but also in all exported projects.
- * TODO: think about moving this file into a separate shared package (core-utils)
  */
 import { v4 as uuidv4 } from 'uuid';
 

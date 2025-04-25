@@ -43,7 +43,7 @@ export function createMinimalFormConfig(
       allowAny: true,
     },
     theme: {},
-    contractAddress: '0xTestAddress',
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
   };
 }
 
@@ -199,7 +199,7 @@ export function createComplexFormConfig(
       specificAddress: '0x0000000000000000000000000000000000000000',
     },
     theme: {},
-    contractAddress: '0xTestAddress',
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
   };
 }
 
@@ -237,6 +237,6 @@ export function createTestField(
     helperText: `Description for ${label}`,
     placeholder: `Enter ${label.toLowerCase()}`,
     ...options,
-    contractAddress: '0xTestAddress',
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
   };
 }
