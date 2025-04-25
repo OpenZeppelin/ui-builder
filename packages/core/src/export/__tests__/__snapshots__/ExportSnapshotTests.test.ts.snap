@@ -848,7 +848,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   }, [contractAddress, adapter]);
 
   const toggleWidget = () => {
-    setIsWidgetVisible((prev) => !prev);
+    setIsWidgetVisible((prev: boolean) => !prev);
   };
 
   // Handle form submission - remove async for now
