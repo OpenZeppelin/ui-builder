@@ -59,7 +59,7 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 ## Usage
 
 ```tsx
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import { TransactionForm, generateId, logger } from '@openzeppelin/transaction-form-renderer';
 
 // Example form schema
 const schema = {
@@ -116,6 +116,28 @@ The main component for rendering transaction forms.
 | `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]       |
 | `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |
 | `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]           |
+
+### Utilities
+
+#### `logger`
+
+A pre-configured singleton instance of the Logger utility for consistent application logging.
+
+```typescript
+import { logger } from '@openzeppelin/transaction-form-renderer';
+
+logger.info('MyComponent', 'Component loaded');
+```
+
+#### `generateId`
+
+A utility function to generate unique IDs (UUID v4) for form elements or other components.
+
+```typescript
+import { generateId } from '@openzeppelin/transaction-form-renderer';
+
+const uniqueFieldId = generateId('field_');
+```
 
 ## Configuration System
 

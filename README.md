@@ -262,12 +262,13 @@ transaction-form-builder/
 
 The application uses an adapter pattern to support multiple blockchain ecosystems:
 
-- **Core**: Chain-agnostic components, types, and utilities
-- **Adapters**: Chain-specific implementations that conform to a common interface (including methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods)
-- **UI Components**: React components that use adapters to interact with different blockchains
-- **Styling System**: Centralized CSS variables and styling approach used across all packages
+- **Core**: Chain-agnostic application logic, UI components, export system, and adapters.
+- **Adapters**: Chain-specific implementations that conform to a common interface (including methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods).
+- **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
+- **Types**: Shared TypeScript type definitions across all packages.
+- **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files and CSS) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 
