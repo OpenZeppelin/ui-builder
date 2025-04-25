@@ -10,17 +10,12 @@ import type { TemplateOptions } from '../core/types/ExportTypes';
 // Template registry type - maps template names to file collections
 type TemplateRegistry = Record<string, Record<string, string>>;
 
-/**
- * Type for lazy glob import results
- */
-type LazyGlobImportResult = Record<string, () => Promise<string>>;
-
 // Template files are loaded lazily using Vite's import.meta.glob
 // This allows code-splitting so the template files are only loaded when needed
 const templateFiles = import.meta.glob<string>('./templates/**/*', {
   query: '?raw',
   import: 'default',
-}) as LazyGlobImportResult;
+}) as Record<string, () => Promise<string>>;
 
 // For testing purposes - make file paths available to tests
 export const templateFilePaths = Object.keys(templateFiles);

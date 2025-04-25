@@ -18,7 +18,7 @@ import { TemplateProcessor } from './TemplateProcessor';
 const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx', {
   query: '?raw',
   import: 'default',
-});
+}) as Record<string, () => Promise<string>>;
 
 /**
  * FormCodeGenerator class responsible for generating React components

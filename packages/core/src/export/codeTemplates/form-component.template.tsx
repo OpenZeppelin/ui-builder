@@ -70,7 +70,6 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   // TODO (Export Integration): Use executionConfig at runtime to determine
   // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
-  // @ts-expect-error - contractAddress will be present at generation time
   const contractAddress = formSchema.contractAddress;
 
   useEffect(() => {
@@ -80,7 +79,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   }, [contractAddress, adapter]);
 
   const toggleWidget = () => {
-    setIsWidgetVisible((prev) => !prev);
+    setIsWidgetVisible((prev: boolean) => !prev);
   };
 
   // Handle form submission - remove async for now
