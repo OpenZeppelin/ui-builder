@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 
-import { Card, CardContent, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import {
+  Card,
+  CardContent,
+  TransactionForm,
+  WalletConnectionProvider,
+} from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getContractAdapter } from '../../../adapters';
@@ -79,12 +84,14 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
       </div>
       <Card className="overflow-visible border-dashed border-primary/50 bg-gray-50/50">
         <CardContent className="p-6">
-          <TransactionForm
-            schema={renderSchema}
-            adapter={adapter}
-            onSubmit={handleSubmit}
-            previewMode={true}
-          />
+          <WalletConnectionProvider adapter={adapter}>
+            <TransactionForm
+              schema={renderSchema}
+              adapter={adapter}
+              onSubmit={handleSubmit}
+              previewMode={true}
+            />
+          </WalletConnectionProvider>
         </CardContent>
       </Card>
     </div>

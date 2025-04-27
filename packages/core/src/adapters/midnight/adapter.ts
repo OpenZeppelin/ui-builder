@@ -1,9 +1,11 @@
+import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   FieldType,
   FieldValue,
   FormFieldType,
 } from '@openzeppelin/transaction-form-types/forms';
 
+// Explicit relative path
 import type {
   ContractAdapter,
   ContractFunction,
@@ -240,6 +242,51 @@ export class MidnightAdapter implements ContractAdapter {
     }
 
     return String(result);
+  }
+
+  /**
+   * Indicates if this adapter supports wallet connection
+   * @returns Whether wallet connection is supported by this adapter
+   */
+  supportsWalletConnection(): boolean {
+    return false; // Midnight adapter does not support wallet connection yet
+  }
+
+  async getAvailableConnectors(): Promise<Connector[]> {
+    return [];
+  }
+
+  async connectWallet(
+    _connectorId: string
+  ): Promise<{ connected: boolean; address?: string; error?: string }> {
+    return { connected: false, error: 'Midnight adapter does not support wallet connection.' };
+  }
+
+  async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
+    return { disconnected: false, error: 'Midnight adapter does not support wallet connection.' };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+    // Stub implementation: Always return disconnected status
+    return { isConnected: false };
+  }
+
+  /**
+   * Gets a blockchain explorer URL for an address on Midnight
+   *
+   * @param address The address to get the explorer URL for
+   * @param _chainId Optional chain ID (not used for Midnight yet)
+   * @returns A URL to view the address on a block explorer, or null if not available
+   */
+  getExplorerUrl(address: string, _chainId?: string): string | null {
+    if (!address) return null;
+
+    // Midnight explorer is not yet available, return null
+    // In the future, this would return the appropriate explorer URL
+    return null;
   }
 }
 

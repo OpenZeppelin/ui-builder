@@ -3,11 +3,11 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
 
-import { useWalletConnection } from '../hooks/useWalletConnection';
 import { createDefaultFormValues } from '../utils/formUtils';
 
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 import { WalletConnectButton } from './wallet/WalletConnectButton';
+import { useWalletConnection } from './wallet/useWalletConnection';
 
 import { DynamicFormField } from './DynamicFormField';
 
@@ -39,8 +39,8 @@ export function TransactionForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [transactionSuccess, setTransactionSuccess] = useState(false);
 
-  // Use the wallet connection hook
-  const { isConnected, handleConnectionChange } = useWalletConnection();
+  // Use the wallet connection context
+  const { isConnected } = useWalletConnection();
 
   // Initialize form with React Hook Form
   const methods = useForm<FormValues>({
@@ -173,7 +173,7 @@ export function TransactionForm({
       <div className="mb-4 flex items-center justify-between">
         {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
         <div className="wallet-connection">
-          <WalletConnectButton onConnectionChange={handleConnectionChange} />
+          <WalletConnectButton />
         </div>
       </div>
 

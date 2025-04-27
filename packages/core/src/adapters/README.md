@@ -99,6 +99,26 @@ export interface ContractAdapter {
    * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
    */
   validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
+
+  // Check if wallet connection is supported by this adapter
+  supportsWalletConnection(): boolean;
+
+  // Connect to a wallet
+  connectWallet(): Promise<{ connected: boolean; address?: string; error?: string }>;
+
+  // Disconnect the currently connected wallet
+  disconnectWallet(): Promise<{ disconnected: boolean; error?: string }>;
+
+  // Get the current wallet connection status
+  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string };
+
+  // Get a blockchain explorer URL for an address
+  getExplorerUrl(address: string, chainId?: string): string | null;
+
+  // Subscribe to wallet connection changes (optional)
+  onWalletConnectionChange?(
+    callback: (status: { isConnected: boolean; address?: string }) => void
+  ): () => void;
 }
 ```
 
@@ -117,6 +137,15 @@ The following methods are defined in the `ContractAdapter` interface and must be
 - `isValidAddress`
 - `getSupportedExecutionMethods`
 - `validateExecutionConfig`
+- `isViewFunction`
+- `queryViewFunction`
+- `formatFunctionResult`
+- `supportsWalletConnection`
+- `connectWallet`
+- `disconnectWallet`
+- `getWalletConnectionStatus`
+- `getExplorerUrl`
+- `onWalletConnectionChange` (optional)
 
 ### Contract Function State Modification Flag
 
@@ -126,6 +155,34 @@ The `ContractAdapter` interface supports a `modifiesState` flag on each `Contrac
 - Read-only functions (e.g., `balanceOf`, `totalSupply`): Cannot be selected for transaction forms but can be shown for reference
 
 The `getWritableFunctions` method returns only the functions that have `modifiesState: true`, which is useful for filtering functions that can be used in transaction forms.
+
+## Wallet Connection Methods
+
+The adapter interface includes wallet connection methods to enable wallet interaction in a chain-agnostic way:
+
+### `supportsWalletConnection()`
+
+Returns a boolean indicating whether this adapter supports wallet connection. This allows UI components to conditionally render wallet-related features.
+
+### `connectWallet()`
+
+Initiates the wallet connection process and returns a Promise with the connection result, including the connected address if successful.
+
+### `disconnectWallet()`
+
+Disconnects the currently connected wallet and returns a Promise with the disconnection result.
+
+### `getWalletConnectionStatus()`
+
+Returns an object containing the current wallet connection status, including whether a wallet is connected and the connected address.
+
+### `getExplorerUrl()`
+
+Returns a blockchain explorer URL for a given address, allowing users to view the address on a block explorer. This method encapsulates chain-specific explorer URL knowledge within the adapter.
+
+### `onWalletConnectionChange()`
+
+An optional method that allows subscribing to wallet connection changes. Returns a cleanup function to unsubscribe.
 
 ## Private Helper Methods
 

@@ -1,7 +1,9 @@
+import type { GetAccountReturnType } from '@wagmi/core';
 import { Contract, JsonRpcProvider, isAddress } from 'ethers';
 import { startCase } from 'lodash';
 
 import { generateId, logger } from '@openzeppelin/transaction-form-renderer';
+import type { Connector } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ContractSchema,
   FunctionParameter,
@@ -20,6 +22,8 @@ import type {
   ExecutionConfig,
   ExecutionMethodDetail,
 } from '../index';
+
+import { WagmiWalletImplementation } from './wallet-connect/wagmi-implementation';
 
 import type { AbiItem } from './types';
 
@@ -53,7 +57,17 @@ const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
  */
 export class EvmAdapter implements ContractAdapter {
   /**
-   * Load a contract from a source string (address or JSON ABI)
+   * Private implementation of wallet connection using Wagmi
+   */
+  private walletImplementation: WagmiWalletImplementation;
+
+  constructor() {
+    // Initialize the Wagmi wallet implementation
+    this.walletImplementation = new WagmiWalletImplementation();
+  }
+
+  /**
+   * @inheritdoc
    */
   async loadContract(source: string): Promise<ContractSchema> {
     // Step 1: Input Type Detection
@@ -197,9 +211,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Map an EVM-specific parameter type to a form field type
-   * @param parameterType The EVM parameter type (e.g., uint256, address)
-   * @returns The appropriate form field type
+   * @inheritdoc
    */
   mapParameterTypeToFieldType(parameterType: string): FieldType {
     // Check if this is an array type (ends with [] or [number])
@@ -221,9 +233,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Get field types compatible with a specific parameter type
-   * @param parameterType The blockchain parameter type
-   * @returns Array of compatible field types
+   * @inheritdoc
    */
   getCompatibleFieldTypes(parameterType: string): FieldType[] {
     // Handle array and tuple types
@@ -264,9 +274,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Generate default field configuration for an EVM function parameter
-   * @param parameter The function parameter to convert to a form field
-   * @returns A form field configuration with appropriate defaults
+   * @inheritdoc
    */
   generateDefaultField<T extends FieldType = FieldType>(
     parameter: FunctionParameter
@@ -343,7 +351,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Format transaction data for the specific chain
+   * @inheritdoc
    */
   formatTransactionData(
     functionId: string,
@@ -418,7 +426,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Sign and broadcast a transaction
+   * @inheritdoc
    */
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
     // In a real implementation, this would use ethers.js or web3.js to sign and broadcast
@@ -455,18 +463,14 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Get only the functions that modify state (writable functions)
-   * @param contractSchema The contract schema to filter
-   * @returns Array of writable functions
+   * @inheritdoc
    */
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
     return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
   /**
-   * Validate an EVM blockchain address
-   * @param address The address to validate
-   * @returns Whether the address is a valid EVM address
+   * @inheritdoc
    */
   isValidAddress(address: string): boolean {
     return isAddress(address);
@@ -539,8 +543,7 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Load a mock contract for testing
-   * @param mockId Optional ID to specify which mock to load
+   * @inheritdoc
    */
   async loadMockContract(mockId?: string): Promise<ContractSchema> {
     try {
@@ -562,25 +565,20 @@ export class EvmAdapter implements ContractAdapter {
     } catch (error) {
       // Type assertion for error message
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error loading mock EVM contract:', errorMessage);
+      logger.error('EvmAdapter', 'Error loading mock EVM contract:', errorMessage);
       throw new Error('Failed to load mock EVM contract');
     }
   }
 
   /**
-   * Determines if a function is a view/pure function (read-only)
+   * @inheritdoc
    */
   isViewFunction(functionDetails: ContractFunction): boolean {
     return functionDetails.stateMutability === 'view' || functionDetails.stateMutability === 'pure';
   }
 
   /**
-   * Queries a view function on a contract
-   * @param contractAddress The contract address
-   * @param functionId The function identifier
-   * @param params Optional parameters for the function call
-   * @param contractSchema Optional pre-loaded contract schema
-   * @returns The query result as raw data
+   * @inheritdoc
    */
   async queryViewFunction(
     contractAddress: string,
@@ -644,31 +642,90 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
-   * Formats a function result for display
-   * TODO: Implement EVM-specific formatting that can be used for query and transaction execution results
+   * @inheritdoc
    */
   formatFunctionResult(
     result: unknown,
     _functionDetails: ContractFunction
   ): string | Record<string, unknown> {
-    // Handle null/undefined
+    // Existing implementation...
     if (result === null || result === undefined) {
       return 'No data';
     }
 
-    // For arrays and objects, return JSON
-    if (typeof result === 'object') {
-      // Convert to plain object/string to remove any special object instances
-      try {
-        return JSON.parse(JSON.stringify(result));
-      } catch {
-        // Fall back to string if JSON conversion fails
-        return String(result);
-      }
+    // Special handling for BigInt values
+    if (typeof result === 'bigint') {
+      return result.toString();
     }
 
-    // Default case, just convert to string
     return String(result);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  supportsWalletConnection(): boolean {
+    return true; // EVM adapter supports wallet connection via Wagmi
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async getAvailableConnectors(): Promise<Connector[]> {
+    return this.walletImplementation.getAvailableConnectors();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async connectWallet(
+    connectorId: string
+  ): Promise<{ connected: boolean; address?: string; error?: string }> {
+    // Delegate to the Wagmi implementation
+    return this.walletImplementation.connect(connectorId);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
+    // Delegate to the Wagmi implementation
+    return this.walletImplementation.disconnect();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+    // Delegate to the Wagmi implementation and map the result
+    const status = this.walletImplementation.getWalletConnectionStatus();
+    return {
+      isConnected: status.isConnected,
+      address: status.address,
+      // Convert chainId from number to string for the interface
+      chainId: status.chainId?.toString(),
+    };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onWalletConnectionChange(
+    callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
+  ): () => void {
+    // Delegate to the Wagmi implementation
+    return this.walletImplementation.onWalletConnectionChange(callback);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  getExplorerUrl(address: string, _chainId?: string): string | null {
+    // TODO: Enhance this to use the actual connected chainId from getWalletConnectionStatus
+    // and potentially support multiple explorers based on the chain.
+    // For now, defaults to Etherscan (Mainnet).
+    if (!this.isValidAddress(address)) return null;
+    return `https://etherscan.io/address/${address}`;
   }
 }
 

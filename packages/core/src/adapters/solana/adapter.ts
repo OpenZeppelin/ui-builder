@@ -1,3 +1,4 @@
+import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   FieldType,
   FieldValue,
@@ -243,6 +244,50 @@ export class SolanaAdapter implements ContractAdapter {
     }
 
     return String(result);
+  }
+
+  /**
+   * Indicates if this adapter supports wallet connection
+   * @returns Whether wallet connection is supported by this adapter
+   */
+  supportsWalletConnection(): boolean {
+    return false; // Solana wallet connection not yet implemented
+  }
+
+  async getAvailableConnectors(): Promise<Connector[]> {
+    return [];
+  }
+
+  async connectWallet(
+    _connectorId: string
+  ): Promise<{ connected: boolean; address?: string; error?: string }> {
+    return { connected: false, error: 'Solana adapter does not support wallet connection.' };
+  }
+
+  async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
+    return { disconnected: false, error: 'Solana adapter does not support wallet connection.' };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+    // Stub implementation: Always return disconnected status
+    return { isConnected: false };
+  }
+
+  /**
+   * Gets a blockchain explorer URL for an address on Solana
+   *
+   * @param address The address to get the explorer URL for
+   * @param _chainId Optional chain ID (not used for Solana as it uses clusters instead)
+   * @returns A URL to view the address on a Solana explorer
+   */
+  getExplorerUrl(address: string, _chainId?: string): string | null {
+    if (!address) return null;
+
+    // Default to Solana explorer for mainnet
+    return `https://explorer.solana.com/address/${address}`;
   }
 }
 

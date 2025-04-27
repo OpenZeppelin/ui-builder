@@ -1,87 +1,78 @@
 import { Wallet } from 'lucide-react';
 
-import { useState } from 'react';
-
+import { logger } from '../../utils/logger';
+import { Button } from '../ui/button';
 import { LoadingButton } from '../ui/loading-button';
+
+import { useWalletConnection } from './useWalletConnection';
+import { formatAddress } from './utils';
 
 export interface WalletConnectButtonProps {
   /**
-   * Callback function to be called when wallet connection state changes
+   * Additional CSS class name for the button
    */
-  onConnectionChange: (isConnected: boolean, address: string | null) => void;
+  className?: string;
 }
 
 /**
  * WalletConnectButton Component
  *
- * Displays a button for connecting/disconnecting a wallet. In this demo implementation,
- * it simulates the connection process without actual blockchain interaction.
+ * Displays a button for connecting/disconnecting a wallet using the adapter interface.
+ * The component must be used within a WalletConnectionProvider.
  *
  * @param props The component props
  * @returns A React component
  */
 export function WalletConnectButton({
-  onConnectionChange,
-}: WalletConnectButtonProps): React.ReactElement {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
-
-  // Demo wallet connection handler
-  const handleConnect = async (): Promise<void> => {
-    if (isConnected) {
-      // Disconnect wallet
-      setIsConnecting(true);
-
-      // Simulate disconnect delay
-      setTimeout(() => {
-        setIsConnected(false);
-        setConnectedAddress(null);
-        setIsConnecting(false);
-        onConnectionChange(false, null);
-      }, 500);
-      return;
-    }
-
-    // Connect wallet
-    setIsConnecting(true);
-
-    // Simulate connection delay
-    setTimeout(() => {
-      // Generate a mock Ethereum address
-      const mockAddress =
-        '0x' +
-        Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-
-      setIsConnected(true);
-      setConnectedAddress(mockAddress);
-      setIsConnecting(false);
-      onConnectionChange(true, mockAddress);
-    }, 1000);
+  className,
+}: WalletConnectButtonProps = {}): React.ReactElement {
+  const { isConnected, address, isConnecting, connect, disconnect, isSupported, error } =
+    useWalletConnection();
+  // Handle connect click with console logs
+  const handleConnectClick = (): void => {
+    connect().catch((err) =>
+      logger.error('WalletConnectButton', 'Error in connect button click handler:', err)
+    );
   };
 
-  // Format connected address for display
-  const formatAddress = (address: string): string => {
-    if (!address || address.length < 10) return address;
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  // Handle disconnect click with console logs
+  const handleDisconnectClick = (): void => {
+    disconnect().catch((err) => console.error('Error in disconnect button click handler:', err));
   };
+
+  // If wallet connection is not supported by the adapter, don't render anything
+  if (!isSupported) {
+    return <></>;
+  }
+
+  if (isConnected && address) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className={`flex items-center gap-2 ${className || ''}`}
+        onClick={handleDisconnectClick}
+        title="Click to disconnect wallet"
+      >
+        <Wallet className="h-4 w-4" />
+        {formatAddress(address)}
+      </Button>
+    );
+  }
 
   return (
     <LoadingButton
       type="button"
       variant="outline"
       size="sm"
-      onClick={handleConnect}
+      onClick={handleConnectClick}
       disabled={isConnecting}
       loading={isConnecting}
-      className="flex items-center gap-2"
+      className={`flex items-center gap-2 ${className || ''}`}
+      title={error}
     >
       <Wallet className="h-4 w-4" />
-      {isConnected
-        ? connectedAddress
-          ? formatAddress(connectedAddress)
-          : 'Connected'
-        : 'Connect Wallet'}
+      Connect Wallet
     </LoadingButton>
   );
 }

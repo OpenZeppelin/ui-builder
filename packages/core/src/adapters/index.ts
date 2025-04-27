@@ -1,3 +1,10 @@
+// Import core types from the types package
+import type {
+  // Import the canonical interface
+  Connector,
+  // Also import Connector type if needed directly
+  ContractAdapter,
+} from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ChainDefinition,
   ChainType,
@@ -5,7 +12,6 @@ import type {
   ContractSchema,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types/contracts';
-import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import type {
   ExecutionConfig,
@@ -28,142 +34,9 @@ export type {
   ExecutionMethodDetail,
   ExecutionMethodType,
   FunctionParameter,
+  ContractAdapter, // Re-export the imported interface
+  Connector, // Re-export the imported type
 };
-
-/**
- * Interface for contract adapters
- *
- * IMPORTANT: Do not add methods to implementations that are not defined in this interface!
- * Any additional helper methods should be marked as private.
- *
- * The codebase includes a custom ESLint rule that enforces this pattern:
- * - Run `pnpm lint:adapters` to check all adapter implementations
- * - See `.eslint/rules/no-extra-adapter-methods.js` for implementation details
- */
-export interface ContractAdapter {
-  /**
-   * Load a contract from a file or address
-   */
-  loadContract(source: string): Promise<ContractSchema>;
-
-  /**
-   * Load a mock contract for testing
-   * @param mockId Optional ID to specify which mock to load
-   */
-  loadMockContract(mockId?: string): Promise<ContractSchema>;
-
-  /**
-   * Get only the functions that modify state (writable functions)
-   * @param contractSchema The contract schema to filter
-   * @returns Array of writable functions
-   */
-  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'];
-
-  /**
-   * Map a blockchain-specific parameter type to a form field type
-   * @param parameterType The blockchain parameter type (e.g., uint256, address)
-   * @returns The appropriate form field type
-   */
-  mapParameterTypeToFieldType(parameterType: string): FieldType;
-
-  /**
-   * Get field types compatible with a specific parameter type
-   * @param parameterType The blockchain parameter type
-   * @returns Array of compatible field types
-   */
-  getCompatibleFieldTypes(parameterType: string): FieldType[];
-
-  /**
-   * Generate default field configuration for a function parameter
-   * @param parameter The function parameter to convert to a form field
-   * @returns A form field configuration with appropriate defaults
-   */
-  generateDefaultField<T extends FieldType = FieldType>(
-    parameter: FunctionParameter
-  ): FormFieldType<T>;
-
-  /**
-   * Format transaction data for the specific chain,
-   * considering submitted inputs and field configurations (e.g., hardcoded values).
-   *
-   * @param functionId The ID of the function being called.
-   * @param submittedInputs The data submitted from the rendered form fields.
-   * @param allFieldsConfig The configuration for ALL original fields (including hidden/hardcoded).
-   * @returns The formatted data payload for the blockchain transaction.
-   */
-  formatTransactionData(
-    functionId: string,
-    submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
-  ): unknown;
-
-  /**
-   * Sign and broadcast a transaction
-   */
-  signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }>;
-
-  /**
-   * Validate a blockchain address for this chain
-   * @param address The address to validate
-   * @returns Whether the address is valid for this chain
-   */
-  isValidAddress(address: string): boolean;
-
-  /**
-   * Returns details for execution methods supported by this chain adapter.
-   *
-   * This allows the UI to dynamically show only relevant execution options
-   * (e.g., EOA, Safe Multisig, Squads) with chain-specific names.
-   *
-   * @returns {Promise<ExecutionMethodDetail[]>} A promise resolving to an array of supported method details.
-   */
-  getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]>;
-
-  /**
-   * Validates the complete execution configuration object against the specific
-   * requirements and capabilities of this chain adapter.
-   *
-   * Allows the adapter to enforce chain-specific rules (e.g., address format,
-   * supported method, required fields for a method).
-   *
-   * @param {ExecutionConfig} config - The execution configuration object selected by the user.
-   * @returns {Promise<true | string>} A promise resolving to true if valid, or a string error message if invalid.
-   */
-  validateExecutionConfig(config: ExecutionConfig): Promise<true | string>;
-
-  /**
-   * Determines if a function is a view/pure function (read-only)
-   * @param functionDetails The function details
-   * @returns True if the function is read-only
-   */
-  isViewFunction(functionDetails: ContractFunction): boolean;
-
-  /**
-   * Queries a view function on a contract
-   * @param contractAddress The contract address
-   * @param functionId The function identifier
-   * @param params Optional parameters for the function call
-   * @param contractSchema Optional pre-loaded contract schema
-   * @returns The query result, properly formatted
-   */
-  queryViewFunction(
-    contractAddress: string,
-    functionId: string,
-    params?: unknown[],
-    contractSchema?: ContractSchema
-  ): Promise<unknown>;
-
-  /**
-   * Formats a function result for display
-   * @param result The raw result from the contract
-   * @param functionDetails The function details
-   * @returns Formatted result ready for display
-   */
-  formatFunctionResult(
-    result: unknown,
-    functionDetails: ContractFunction
-  ): string | Record<string, unknown>;
-}
 
 // Singleton instances of adapters
 const adapters: Record<ChainType, ContractAdapter> = {

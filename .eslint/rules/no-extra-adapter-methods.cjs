@@ -49,6 +49,13 @@ module.exports = {
       'isViewFunction',
       'queryViewFunction',
       'formatFunctionResult',
+      'supportsWalletConnection',
+      'getAvailableConnectors',
+      'connectWallet',
+      'disconnectWallet',
+      'getWalletConnectionStatus',
+      'onWalletConnectionChange',
+      'getExplorerUrl',
     ];
 
     // Common standard methods and properties that are allowed
