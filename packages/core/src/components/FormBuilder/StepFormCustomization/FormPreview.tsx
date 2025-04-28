@@ -8,7 +8,7 @@ import {
 } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
 
-import { getContractAdapter } from '../../../adapters';
+import { getAdapter } from '../../../core/adapterRegistry';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
@@ -24,7 +24,7 @@ interface FormPreviewProps {
  */
 export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
   // Get the adapter for the selected chain
-  const adapter = useMemo(() => getContractAdapter(selectedChain), [selectedChain]);
+  const adapter = useMemo(() => getAdapter(selectedChain), [selectedChain]);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {

@@ -1,5 +1,3 @@
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
-
 /**
  * Configuration for the Stellar adapter
  *
@@ -7,7 +5,7 @@ import type { AdapterConfig } from '../../core/types/AdapterTypes';
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const stellarAdapterConfig: AdapterConfig = {
+export const stellarAdapterConfig = {
   /**
    * Dependencies required by the Stellar adapter
    * These will be included in exported projects that use this adapter
@@ -23,7 +21,7 @@ export const stellarAdapterConfig: AdapterConfig = {
 
       // Stellar wallet integration
       '@stellar/design-system': '^0.5.1',
-      '@stellar/wallet-sdk': '^0.6.0',
+      '@stellar/wallet-sdk': '^0.11.2',
 
       // Utilities for Stellar development
       'bignumber.js': '^9.1.1',
@@ -33,10 +31,10 @@ export const stellarAdapterConfig: AdapterConfig = {
     // Development dependencies
     dev: {
       // Testing utilities for Stellar
-      '@stellar/typescript-wallet-sdk': '^0.2.0',
+      '@stellar/typescript-wallet-sdk': '^1.9.0',
 
       // Soroban contract SDK for Stellar
-      '@stellar/soroban-sdk': '^0.7.0',
+      // '@stellar/soroban-sdk': '^0.7.0',
     },
   },
 };

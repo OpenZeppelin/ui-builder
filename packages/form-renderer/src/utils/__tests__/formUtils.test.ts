@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FieldTransforms } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import { FieldTransforms, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import {
   composeTransforms,
@@ -327,10 +327,10 @@ describe('createDefaultFormValues', () => {
 
   it('should create default values for fields', () => {
     const fields = [
-      { id: '1', name: 'name', type: 'text', label: 'Name' },
-      { id: '2', name: 'age', type: 'number', label: 'Age' },
-      { id: '3', name: 'active', type: 'checkbox', label: 'Active' },
-    ];
+      { id: '1', name: 'name', type: 'text', label: 'Name', validation: {} },
+      { id: '2', name: 'age', type: 'number', label: 'Age', validation: {} },
+      { id: '3', name: 'active', type: 'checkbox', label: 'Active', validation: {} },
+    ] as FormFieldType[];
 
     const result = createDefaultFormValues(fields);
     expect(result).toEqual({
@@ -342,10 +342,10 @@ describe('createDefaultFormValues', () => {
 
   it('should preserve existing default values', () => {
     const fields = [
-      { id: '1', name: 'name', type: 'text', label: 'Name' },
-      { id: '2', name: 'age', type: 'number', label: 'Age' },
-      { id: '3', name: 'active', type: 'checkbox', label: 'Active' },
-    ];
+      { id: '1', name: 'name', type: 'text', label: 'Name', validation: {} },
+      { id: '2', name: 'age', type: 'number', label: 'Age', validation: {} },
+      { id: '3', name: 'active', type: 'checkbox', label: 'Active', validation: {} },
+    ] as FormFieldType[];
 
     const existingDefaults = {
       name: 'John',

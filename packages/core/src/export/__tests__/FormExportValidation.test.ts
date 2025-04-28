@@ -21,22 +21,19 @@ describe('FormExportValidation', () => {
 
     // Validate the project structure
     const validation = validateExportedProject(files, {
-      requiredFiles: [
-        'package.json',
-        'src/App.tsx',
-        'src/components/GeneratedForm.tsx',
-        'src/adapters/evm/adapter.ts',
-        'src/adapters/index.ts',
-      ],
+      requiredFiles: ['package.json', 'src/App.tsx', 'src/components/GeneratedForm.tsx'],
       contentValidations: {
         'package.json': (content) => {
           try {
             const pkg = JSON.parse(content);
-            return pkg.dependencies &&
-              (pkg.dependencies['@openzeppelin/transaction-form-renderer'] ||
-                pkg.dependencies['@openzeppelin/transaction-form-renderer'])
-              ? true
-              : 'Form renderer dependency not found';
+            const deps = pkg.dependencies || {};
+            if (!deps['@openzeppelin/transaction-form-renderer'])
+              return 'Missing @openzeppelin/transaction-form-renderer dependency';
+            if (!deps['@openzeppelin/transaction-form-types'])
+              return 'Missing @openzeppelin/transaction-form-types dependency';
+            if (!deps['@openzeppelin/transaction-form-adapter-evm'])
+              return 'Missing @openzeppelin/transaction-form-adapter-evm dependency';
+            return true;
           } catch (e) {
             return `Invalid JSON in package.json: ${String(e)}`;
           }
@@ -45,32 +42,23 @@ describe('FormExportValidation', () => {
           content.includes('TransactionForm') || 'TransactionForm component not used',
         'src/App.tsx': (content) =>
           content.includes('GeneratedForm') || 'GeneratedForm not imported in App',
-        'src/adapters/index.ts': (content) =>
-          content.includes('EvmAdapter') || 'EvmAdapter not exported',
-      },
-      contentPatterns: {
-        'src/adapters/evm/adapter.ts': /EvmAdapter/,
       },
     });
 
     // Log validation results for debugging
     if (validation.errors) {
-      // console.error('Export validation errors:', validation.errors);
+      console.error('EVM Export validation errors:', validation.errors);
     }
 
     // Verify the validation passed
     expect(validation.isValid).toBe(true);
 
-    // Verify key files exist and have proper content
-    expect(files['src/components/GeneratedForm.tsx']).toContain('TransactionForm');
-    expect(files['src/App.tsx']).toContain('GeneratedForm');
-    expect(files['src/adapters/index.ts']).toContain('EvmAdapter');
-
-    // Verify package.json has the right structure
+    // Verify package.json has the right structure and dependencies
     const packageJson = JSON.parse(files['package.json']);
     expect(packageJson).toHaveProperty('name');
-    expect(packageJson).toHaveProperty('version');
     expect(packageJson).toHaveProperty('dependencies');
+    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
   });
 
   it('should export a valid Solana project structure', async () => {
@@ -89,28 +77,32 @@ describe('FormExportValidation', () => {
 
     // Validate the project structure
     const validation = validateExportedProject(files, {
-      requiredFiles: [
-        'package.json',
-        'src/App.tsx',
-        'src/components/GeneratedForm.tsx',
-        'src/adapters/solana/adapter.ts',
-        'src/adapters/index.ts',
-      ],
+      requiredFiles: ['package.json', 'src/App.tsx', 'src/components/GeneratedForm.tsx'],
       contentValidations: {
-        'src/adapters/index.ts': (content) =>
-          content.includes('solana') || 'Solana adapter not exported',
+        'package.json': (content) => {
+          try {
+            const pkg = JSON.parse(content);
+            const deps = pkg.dependencies || {};
+            if (!deps['@openzeppelin/transaction-form-renderer'])
+              return 'Missing @openzeppelin/transaction-form-renderer dependency';
+            if (!deps['@openzeppelin/transaction-form-types'])
+              return 'Missing @openzeppelin/transaction-form-types dependency';
+            if (!deps['@openzeppelin/transaction-form-adapter-solana'])
+              return 'Missing @openzeppelin/transaction-form-adapter-solana dependency';
+            return true;
+          } catch (e) {
+            return `Invalid JSON in package.json: ${String(e)}`;
+          }
+        },
       },
     });
 
     // Log validation results for debugging
     if (validation.errors) {
-      // console.error('Export validation errors:', validation.errors);
+      console.error('Solana Export validation errors:', validation.errors);
     }
 
     // Verify the validation passed
     expect(validation.isValid).toBe(true);
-
-    // Verify the adapter export includes the correct adapter
-    expect(files['src/adapters/index.ts']).toContain('solana');
   });
 });

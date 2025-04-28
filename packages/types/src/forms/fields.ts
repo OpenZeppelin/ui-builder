@@ -1,4 +1,4 @@
-import { ContractAdapter } from '../adapters';
+import type { ContractAdapter } from '../adapters';
 
 import { RenderFormSchema } from './schema';
 

@@ -6,6 +6,12 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
+/*------------TEMPLATE COMMENT START------------*/
+// This import will be replaced at generation time
+/*------------TEMPLATE COMMENT END------------*/
+// @ts-expect-error - This is a placeholder for the correct adapter import
+import { AdapterPlaceholder } from '@@adapter-package-name@@';
+
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -16,6 +22,7 @@ import {
   CardTitle,
   ContractStateWidget,
   TransactionForm,
+  WalletConnectionProvider,
   logger,
 } from '@openzeppelin/transaction-form-renderer';
 import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
@@ -24,12 +31,6 @@ import type {
   RenderFormSchema,
   TransactionFormProps,
 } from '@openzeppelin/transaction-form-types/forms';
-
-/*------------TEMPLATE COMMENT START------------*/
-// This import will be replaced at generation time
-/*------------TEMPLATE COMMENT END------------*/
-// @ts-expect-error - This is a placeholder for the correct adapter import
-import { AdapterPlaceholder } from '../adapters/@@chain-type@@/adapter';
 
 // Define type for transaction result (this will be implemented in the future)
 interface TransactionResult {
@@ -52,7 +53,7 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
 
   // Create the adapter instance for @@chain-type@@
   /*------------TEMPLATE COMMENT START------------*/
-  // @@adapter-class-name@@ will be replaced at generation time
+  // AdapterPlaceholder will be replaced at generation time
   /*------------TEMPLATE COMMENT END------------*/
   const adapter = useMemo(() => new AdapterPlaceholder(), []);
 
@@ -152,51 +153,53 @@ export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
   };
 
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
-        <Card>
-          <CardHeader>
-            {/* Render title unconditionally; React handles empty strings */}
-            <CardTitle>{/*@@formSchema.title@@*/}</CardTitle>
-            {/* Render description unconditionally */}
-            <CardDescription>{/*@@formSchema.description@@*/}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {transactionResult && (
-              <div className="transaction-result rounded-md bg-green-50 p-4 text-green-800">
-                <h3 className="font-medium">Transaction Successful!</h3>
-                <p className="mt-2 text-sm">
-                  Transaction Hash: {transactionResult.txHash || 'N/A'}
-                </p>
-              </div>
-            )}
-            {/* Check the actual contractAddress variable at runtime */}
-            {contractAddress ? (
-              <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
-            ) : (
-              <div className="text-destructive-foreground rounded-md bg-destructive p-4">
-                <h3 className="font-medium">Configuration Error</h3>
-                <p className="mt-2 text-sm">Missing contract address in the form schema.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {contractAddress && (
-        <div className="w-[300px] flex-shrink-0">
-          <div className="sticky top-4">
-            <ContractStateWidget
-              contractSchema={contractSchema}
-              contractAddress={contractAddress}
-              adapter={adapter}
-              isVisible={isWidgetVisible}
-              onToggle={toggleWidget}
-              error={loadError}
-            />
-          </div>
+    <WalletConnectionProvider adapter={adapter}>
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <Card>
+            <CardHeader>
+              {/* Render title unconditionally; React handles empty strings */}
+              <CardTitle>{/*@@formSchema.title@@*/}</CardTitle>
+              {/* Render description unconditionally */}
+              <CardDescription>{/*@@formSchema.description@@*/}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {transactionResult && (
+                <div className="transaction-result rounded-md bg-green-50 p-4 text-green-800">
+                  <h3 className="font-medium">Transaction Successful!</h3>
+                  <p className="mt-2 text-sm">
+                    Transaction Hash: {transactionResult.txHash || 'N/A'}
+                  </p>
+                </div>
+              )}
+              {/* Check the actual contractAddress variable at runtime */}
+              {contractAddress ? (
+                <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+              ) : (
+                <div className="text-destructive-foreground rounded-md bg-destructive p-4">
+                  <h3 className="font-medium">Configuration Error</h3>
+                  <p className="mt-2 text-sm">Missing contract address in the form schema.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      )}
-    </div>
+
+        {contractAddress && (
+          <div className="w-[300px] flex-shrink-0">
+            <div className="sticky top-4">
+              <ContractStateWidget
+                contractSchema={contractSchema}
+                contractAddress={contractAddress}
+                adapter={adapter}
+                isVisible={isWidgetVisible}
+                onToggle={toggleWidget}
+                error={loadError}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </WalletConnectionProvider>
   );
 }

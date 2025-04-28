@@ -2,9 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
 
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { AdapterExportManager } from '../AdapterExportManager';
 import { FormExportSystem } from '../FormExportSystem';
 import { PackageManager } from '../PackageManager';
 import { StyleManager } from '../StyleManager';
@@ -52,38 +50,6 @@ describe('FormExportSystem', () => {
     // Reset logger configuration after each test
     logger.configure({ enabled: true, level: 'info' });
   });
-
-  // Mock adapter configs for testing
-  const mockAdapterConfigs: Record<string, AdapterConfig> = {
-    evm: {
-      dependencies: {
-        runtime: {
-          ethers: '^6.7.0',
-          viem: '^1.10.9',
-        },
-        dev: {
-          '@types/ethers': '^6.7.0',
-        },
-      },
-    },
-    solana: {
-      dependencies: {
-        runtime: {
-          '@solana/web3.js': '^1.73.0',
-        },
-        dev: {
-          '@types/bn.js': '^5.1.1',
-        },
-      },
-    },
-    stellar: {
-      dependencies: {
-        runtime: {
-          'stellar-sdk': '^10.4.1',
-        },
-      },
-    },
-  };
 
   // Mock form renderer config for testing
   const mockFormRendererConfig: MockFormRendererConfig = {
@@ -153,11 +119,7 @@ describe('FormExportSystem', () => {
     // Create REAL instances of dependencies
     const templateManager = new TemplateManager();
     const formCodeGenerator = new FormCodeGenerator();
-    const adapterExportManager = new AdapterExportManager();
-    const packageManager = new PackageManager(
-      mockAdapterConfigs,
-      mockFormRendererConfig as MockFormRendererConfig
-    );
+    const packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     const styleManager = new StyleManager();
     const zipGenerator = new ZipGenerator();
     const templateProcessor = new TemplateProcessor({});
@@ -201,7 +163,6 @@ describe('FormExportSystem', () => {
     const system = new FormExportSystem({
       templateManager,
       formCodeGenerator,
-      adapterExportManager,
       packageManager,
       styleManager,
       zipGenerator, // Inject instance with the spied method
@@ -231,11 +192,13 @@ describe('FormExportSystem', () => {
       expect(result.fileName).toBe('testfunction-form.zip');
       expect(Buffer.isBuffer(result.data)).toBe(true); // Check for Buffer
 
-      // Verify dependencies contain core and EVM-specific dependencies
+      // Verify dependencies contain core, types, renderer, and EVM adapter packages
+      // Check PRESENCE only, as applyVersioningStrategy might change value
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
-      expect(result.dependencies).toHaveProperty('react-hook-form');
-      expect(result.dependencies).toHaveProperty('ethers');
-      expect(result.dependencies).toHaveProperty('viem');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      // Check a base dependency from the mock config is still present
+      expect(result.dependencies).toHaveProperty('react', '^18.2.0');
     });
 
     it('should use the correct dependencies for different blockchain types', async () => {
@@ -244,13 +207,37 @@ describe('FormExportSystem', () => {
 
       // Test with Solana
       const solanaResult = await system.exportForm(formConfig, 'solana', 'testFunction');
-      expect(solanaResult.dependencies).toHaveProperty('@solana/web3.js');
-      expect(solanaResult.dependencies).not.toHaveProperty('ethers');
+      expect(solanaResult.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-solana',
+        'workspace:*'
+      );
+      expect(solanaResult.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-types',
+        'workspace:*'
+      );
+      expect(solanaResult.dependencies).not.toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-evm'
+      );
+      expect(solanaResult.dependencies).not.toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-stellar'
+      );
 
       // Test with Stellar
       const stellarResult = await system.exportForm(formConfig, 'stellar', 'testFunction');
-      expect(stellarResult.dependencies).toHaveProperty('stellar-sdk');
-      expect(stellarResult.dependencies).not.toHaveProperty('ethers');
+      expect(stellarResult.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-stellar',
+        'workspace:*'
+      );
+      expect(stellarResult.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-types',
+        'workspace:*'
+      );
+      expect(stellarResult.dependencies).not.toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-evm'
+      );
+      expect(stellarResult.dependencies).not.toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-solana'
+      );
     });
 
     it('should include field-specific dependencies based on form fields', async () => {
@@ -300,34 +287,6 @@ describe('FormExportSystem', () => {
       // Advanced form should have date picker and select dependencies
       expect(advancedResult.dependencies).toHaveProperty('react-datepicker');
       expect(advancedResult.dependencies).toHaveProperty('react-select');
-    });
-
-    it('should respect the includeAdapters option', async () => {
-      // Get system and the spy
-      const { system, createZipFileSpy } = createExportSystem();
-      const formConfig = createMinimalFormConfig();
-
-      // --- Test Case 1: includeAdapters: false ---
-      await system.exportForm(formConfig, 'evm', 'testFunction', { includeAdapters: false });
-      expect(createZipFileSpy).toHaveBeenCalled();
-      const filesPassedWhenFalse = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
-      const fileListWhenFalse = Object.keys(filesPassedWhenFalse);
-      const hasAnyAdapterFile = fileListWhenFalse.some((file) => file.startsWith('src/adapters/'));
-      expect(hasAnyAdapterFile).toBe(false);
-
-      // --- Test Case 2: includeAdapters: true (Default) ---
-      createZipFileSpy.mockClear();
-      const resultWithAdapters = await system.exportForm(formConfig, 'evm', 'testFunction', {
-        includeAdapters: true,
-      });
-      expect(createZipFileSpy).toHaveBeenCalled();
-      const filesPassedWhenTrue = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
-      const fileListWhenTrue = Object.keys(filesPassedWhenTrue);
-      expect(fileListWhenTrue.some((file) => file.includes('src/adapters/evm/adapter.ts'))).toBe(
-        true
-      );
-      expect(fileListWhenTrue.some((file) => file.includes('src/adapters/index.ts'))).toBe(true);
-      expect(resultWithAdapters.dependencies).toHaveProperty('ethers');
     });
 
     it('should correctly update package.json with custom options', async () => {

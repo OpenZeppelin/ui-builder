@@ -18,7 +18,6 @@ import {
 import { http } from 'viem';
 import { base, mainnet, optimism, sepolia } from 'viem/chains';
 
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
 
 // TODO: Make chains configurable, potentially passed from adapter instantiation
@@ -28,7 +27,7 @@ const supportedChains = [mainnet, base, optimism, sepolia] as const; // Use 'as 
 const WALLETCONNECT_PROJECT_ID = import.meta.env?.VITE_WALLETCONNECT_PROJECT_ID;
 
 if (!WALLETCONNECT_PROJECT_ID) {
-  logger.error(
+  console.error(
     'WagmiWalletImplementation',
     'WalletConnect Project ID is not set. Please provide a valid ID via VITE_WALLETCONNECT_PROJECT_ID environment variable.'
   );
@@ -104,7 +103,7 @@ export class WagmiWalletImplementation {
       }
 
       if (!connector) {
-        logger.error(
+        console.error(
           'WagmiWalletImplementation',
           `Wallet connector "${connectorId}" not found. Available connectors: ${connectors.map((c) => c.name).join(', ')}`
         );
@@ -116,7 +115,7 @@ export class WagmiWalletImplementation {
       const result = await connect(this.config, { connector });
       return { connected: true, address: result.accounts[0] };
     } catch (error: unknown) {
-      logger.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
+      console.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
       return {
         connected: false,
         error: error instanceof Error ? error.message : 'Unknown connection error',
@@ -133,7 +132,7 @@ export class WagmiWalletImplementation {
       await disconnect(this.config);
       return { disconnected: true };
     } catch (error: unknown) {
-      logger.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
+      console.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
       return {
         disconnected: false,
         error: error instanceof Error ? error.message : 'Unknown disconnection error',

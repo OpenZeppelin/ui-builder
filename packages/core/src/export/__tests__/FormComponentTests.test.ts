@@ -62,10 +62,13 @@ describe('Form Component Tests', () => {
     it('should include adapter props in the component', async () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
-      // Check that adapter is imported specifically from the adapter directory
-      expect(formComponentCode).toMatch(/import.*from ['"]\.\.\/adapters\/evm\/adapter['"]/);
+      // Check that adapter is imported from the correct package
+      expect(formComponentCode).toMatch(
+        /import.*from ['"]@openzeppelin\/transaction-form-adapter-evm['"]/
+      );
 
-      // Check that adapter is passed to the form
+      // Check that adapter is instantiated and passed to the form
+      expect(formComponentCode).toMatch(/new EvmAdapter\(/);
       expect(formComponentCode).toMatch(/adapter={adapter}/);
     });
 
@@ -156,17 +159,6 @@ describe('Form Component Tests', () => {
 
       // Check the component is rendered in App.tsx (with or without props)
       expect(appCode).toMatch(/<GeneratedForm/);
-    });
-
-    it('should export the adapter correctly', async () => {
-      const { files } = await extractFormComponent('evm');
-
-      const adapterIndexCode = files['src/adapters/index.ts'];
-      expect(adapterIndexCode).toBeDefined();
-
-      // Check adapter is exported
-      expect(adapterIndexCode).toMatch(/export/);
-      expect(adapterIndexCode).toMatch(/adapter/i);
     });
   });
 });

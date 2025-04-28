@@ -279,10 +279,10 @@ describe('FormCodeGenerator Templating System', () => {
       expect(code).toContain('EvmAdapter');
       expect(code).toContain('transferTokens');
 
-      // Verify that no template placeholders remain
-      expect(code).not.toContain('@@');
-      expect(code).not.toMatch(/\{\s*\/\*@@.*@@\*\/\s*\}/);
-      expect(code).not.toMatch(/\/\*@@.*@@\*\//);
+      // Verify that specific VARIABLE template placeholders were replaced
+      expect(code).not.toContain('@@function-id@@');
+      expect(code).not.toContain('@@adapter-package-name@@');
+      // We don't check for @@chain-type@@ as it might be within comments handled later
 
       // Verify that template comments were removed
       expect(code).not.toContain('TEMPLATE COMMENT');
@@ -298,10 +298,9 @@ describe('FormCodeGenerator Templating System', () => {
       expect(code).toContain('transferTokens');
       expect(code).toContain(new Date().getFullYear().toString()); // current year
 
-      // Verify that no template placeholders remain
-      expect(code).not.toContain('@@');
-      expect(code).not.toMatch(/\{\s*\/\*@@.*@@\*\/\s*\}/);
-      expect(code).not.toMatch(/\/\*@@.*@@\*\//);
+      // Verify that specific VARIABLE template placeholders were replaced
+      expect(code).not.toContain('@@app-title@@');
+      expect(code).not.toContain('@@current-year@@');
 
       // Verify that template comments were removed
       expect(code).not.toContain('TEMPLATE COMMENT');

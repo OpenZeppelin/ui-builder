@@ -1,0 +1,55 @@
+{
+  "name": "@openzeppelin/transaction-form-adapter-stellar",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Stellar Adapter for Transaction Form Builder",
+  "keywords": [
+    "openzeppelin",
+    "transaction",
+    "form",
+    "builder",
+    "adapter",
+    "stellar"
+  ],
+  "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
+  "homepage": "https://github.com/OpenZeppelin/transaction-form-builder#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/transaction-form-builder.git",
+    "directory": "packages/adapter-stellar"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openzeppelin/transaction-form-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "eslint": "^9.22.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}

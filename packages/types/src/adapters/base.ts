@@ -1,6 +1,8 @@
 import type { ContractFunction, ContractSchema, FunctionParameter } from '../contracts';
 import type { FieldType, FormFieldType } from '../forms';
 
+// Base types and interfaces for adapters will be defined here.
+
 export type ExecutionMethodType = 'eoa' | 'relayer' | 'multisig'; // Extendable
 
 export interface ExecutionMethodDetail {
@@ -39,11 +41,6 @@ export type Connector = {
  *
  * This is the base interface that all chain-specific adapters must implement.
  * It defines the core functionality needed for form rendering and contract interaction.
- *
- * IMPORTANT: When adding new public methods to this interface, ensure they are also added
- * to the `interfaceMethods` array in the ESLint rule at `.eslint/rules/no-extra-adapter-methods.cjs`
- * to prevent linting errors in adapter implementations. You will need to restart the linter
- * after adding new methods to the interface.
  */
 export interface ContractAdapter {
   /**

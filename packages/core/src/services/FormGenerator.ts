@@ -7,6 +7,7 @@
 import { startCase } from 'lodash';
 
 import { generateId } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ContractFunction,
   ContractSchema,
@@ -18,7 +19,7 @@ import {
   FormFieldType,
 } from '@openzeppelin/transaction-form-types/forms';
 
-import { getContractAdapter } from '../adapters';
+import { getAdapter } from '../core/adapterRegistry';
 import { BuilderFormConfig } from '../core/types/FormTypes';
 
 /**
@@ -39,7 +40,7 @@ export function generateFormConfig(
   }
 
   // Get the appropriate adapter for the selected chain
-  const adapter = getContractAdapter(contractSchema.chainType);
+  const adapter = getAdapter(contractSchema.chainType);
 
   // Generate fields using the adapter
   const fields = generateFieldsFromFunction(adapter, functionDetails);
@@ -79,7 +80,7 @@ export function generateFormConfig(
  * @returns An array of form fields
  */
 export function generateFieldsFromFunction(
-  adapter: import('../adapters').ContractAdapter,
+  adapter: ContractAdapter,
   functionDetails: ContractFunction
 ): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
@@ -110,7 +111,7 @@ export function generateFieldsFromFunction(
  * @returns A form field appropriate for the complex type
  */
 function handleComplexTypeField(
-  adapter: import('../adapters').ContractAdapter,
+  adapter: ContractAdapter,
   parameter: FunctionParameter
 ): FormFieldType {
   const baseField = adapter.generateDefaultField(parameter);

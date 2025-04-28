@@ -1,11 +1,15 @@
 /**
- * Contract adapter interfaces
+ * Contract adapter interfaces and types
+ * Re-exports base adapter types and defines combined types.
  * @packageDocumentation
  */
 import type { ContractAdapter } from './base';
 import type { ContractStateCapabilities } from './contract-state';
 
+// Re-export all types from base
 export * from './base';
+
+// Re-export contract state capabilities
 export * from './contract-state';
 
 /**

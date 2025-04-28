@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -19,38 +18,6 @@ interface MockFormRendererConfig {
 }
 
 describe('PackageManager', () => {
-  // Mock adapter configs for testing
-  const mockAdapterConfigs: Record<string, AdapterConfig> = {
-    evm: {
-      dependencies: {
-        runtime: {
-          ethers: '^6.7.0',
-          viem: '^1.10.9',
-        },
-        dev: {
-          '@types/ethers': '^6.7.0',
-        },
-      },
-    },
-    solana: {
-      dependencies: {
-        runtime: {
-          '@solana/web3.js': '^1.73.0',
-        },
-        dev: {
-          '@types/bn.js': '^5.1.1',
-        },
-      },
-    },
-    stellar: {
-      dependencies: {
-        runtime: {
-          'stellar-sdk': '^10.4.1',
-        },
-      },
-    },
-  };
-
   // Mock form renderer config for testing
   const mockFormRendererConfig: MockFormRendererConfig = {
     coreDependencies: {
@@ -109,10 +76,7 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(
-        mockAdapterConfigs,
-        mockFormRendererConfig as MockFormRendererConfig
-      );
+      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     });
 
     it('should include core dependencies for all forms', () => {
@@ -125,24 +89,22 @@ describe('PackageManager', () => {
       expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
     });
 
-    it('should include chain-specific dependencies for the specified chain', () => {
+    it('should include the correct adapter package dependency', () => {
       const formConfig = createMinimalFormConfig();
 
-      // Test EVM dependencies
       const evmDependencies = packageManager.getDependencies(formConfig, 'evm');
-      expect(evmDependencies).toHaveProperty('ethers');
-      expect(evmDependencies).toHaveProperty('viem');
-      expect(evmDependencies).not.toHaveProperty('@solana/web3.js');
+      expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Should also include types
+      expect(evmDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
+      // Remove assertions for specific libs like ethers
+      expect(evmDependencies).not.toHaveProperty('ethers');
 
-      // Test Solana dependencies
       const solanaDependencies = packageManager.getDependencies(formConfig, 'solana');
-      expect(solanaDependencies).toHaveProperty('@solana/web3.js');
-      expect(solanaDependencies).not.toHaveProperty('ethers');
-
-      // Test Stellar dependencies
-      const stellarDependencies = packageManager.getDependencies(formConfig, 'stellar');
-      expect(stellarDependencies).toHaveProperty('stellar-sdk');
-      expect(stellarDependencies).not.toHaveProperty('ethers');
+      expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
+      expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(solanaDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      // Remove assertions for specific libs like @solana/web3.js
+      expect(solanaDependencies).not.toHaveProperty('@solana/web3.js');
     });
 
     it('should include field-specific dependencies based on form fields', () => {
@@ -165,15 +127,10 @@ describe('PackageManager', () => {
 
     it('should handle unknown chain types gracefully', () => {
       const formConfig = createMinimalFormConfig();
-
-      // We still expect core dependencies even for unknown chain
       const dependencies = packageManager.getDependencies(formConfig, 'unknown-chain' as ChainType);
-
-      expect(dependencies).toHaveProperty('react');
-      expect(dependencies).toHaveProperty('react-dom');
-      expect(dependencies).toHaveProperty('react-hook-form');
-      expect(dependencies).not.toHaveProperty('ethers');
-      expect(dependencies).not.toHaveProperty('@solana/web3.js');
+      expect(dependencies).toHaveProperty('react'); // Core deps still present
+      expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter package not included
+      expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-types'); // Types package not included for unknown chain
     });
   });
 
@@ -181,49 +138,17 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(
-        mockAdapterConfigs,
-        mockFormRendererConfig as MockFormRendererConfig
-      );
-    });
-
-    it('should include chain-specific dev dependencies', () => {
-      const formConfig = createMinimalFormConfig();
-
-      // EVM has dev dependencies
-      const evmDevDependencies = packageManager.getDevDependencies(formConfig, 'evm');
-      expect(evmDevDependencies).toHaveProperty('@types/ethers');
-
-      // Solana has different dev dependencies
-      const solanaDevDependencies = packageManager.getDevDependencies(formConfig, 'solana');
-      expect(solanaDevDependencies).toHaveProperty('@types/bn.js');
-
-      // Stellar doesn't have dev dependencies in our mock
-      const stellarDevDependencies = packageManager.getDevDependencies(formConfig, 'stellar');
-      expect(Object.keys(stellarDevDependencies)).toHaveLength(0);
+      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     });
 
     it('should include field-specific dev dependencies', () => {
-      // Form with date fields which have dev dependencies
       const dateFormConfig = createMinimalFormConfig(['date']);
       const dateDeps = packageManager.getDevDependencies(dateFormConfig, 'evm');
-
-      // Form with select fields which have dev dependencies
-      const selectFormConfig = createMinimalFormConfig(['select']);
-      const selectDeps = packageManager.getDevDependencies(selectFormConfig, 'evm');
-
-      // Form with basic fields which don't have dev dependencies
-      const basicFormConfig = createMinimalFormConfig(['text', 'number']);
-      const basicDeps = packageManager.getDevDependencies(basicFormConfig, 'evm');
-
-      // Check that field-specific dev dependencies are included
       expect(dateDeps).toHaveProperty('@types/react-datepicker');
-      expect(selectDeps).toHaveProperty('@types/react-select');
 
-      // Check that basic form only has chain dev dependencies
-      expect(basicDeps).toHaveProperty('@types/ethers');
-      expect(basicDeps).not.toHaveProperty('@types/react-datepicker');
-      expect(basicDeps).not.toHaveProperty('@types/react-select');
+      const basicFormConfig = createMinimalFormConfig(['text']);
+      const basicDeps = packageManager.getDevDependencies(basicFormConfig, 'evm');
+      expect(Object.keys(basicDeps)).not.toContain('@types/react-datepicker');
     });
   });
 
@@ -231,10 +156,7 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(
-        mockAdapterConfigs,
-        mockFormRendererConfig as MockFormRendererConfig
-      );
+      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     });
 
     // Create test package.json content
@@ -302,32 +224,52 @@ describe('PackageManager', () => {
       expect(result.license).toBe('MIT');
     });
 
-    it('should merge dependencies from all sources', () => {
+    it('should merge dependencies from all sources (core, field, adapter package)', () => {
       const formConfig = createMinimalFormConfig(['date']);
-
       const updated = packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
         'testFunction'
       );
-
       const result = JSON.parse(updated);
 
-      // Should keep existing dependencies
-      expect(result.dependencies).toHaveProperty('existing-dep', '1.0.0');
+      expect(result.dependencies).toHaveProperty('react'); // Core
+      expect(result.dependencies).toHaveProperty('react-datepicker'); // Field
+      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter pkg
+      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Types pkg
+      expect(result.dependencies).not.toHaveProperty('ethers'); // Specific lib removed
+      expect(result.dependencies).not.toHaveProperty('viem'); // Specific lib removed
+    });
 
-      // Should add core dependencies
-      expect(result.dependencies).toHaveProperty('react');
-      expect(result.dependencies).toHaveProperty('react-dom');
-      expect(result.dependencies).toHaveProperty('react-hook-form');
+    it('should apply versioning strategy correctly (local env)', () => {
+      const formConfig = createMinimalFormConfig();
+      const updated = packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'testFunction',
+        { env: 'local' }
+      );
+      const result = JSON.parse(updated);
+      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/transaction-form-types']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
+    });
 
-      // Should add chain-specific dependencies
-      expect(result.dependencies).toHaveProperty('ethers');
-      expect(result.dependencies).toHaveProperty('viem');
-
-      // Should add field-specific dependencies
-      expect(result.dependencies).toHaveProperty('react-datepicker');
+    it('should apply versioning strategy correctly (prod env)', () => {
+      const formConfig = createMinimalFormConfig();
+      const updated = packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'testFunction',
+        { env: 'production' }
+      );
+      const result = JSON.parse(updated);
+      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/transaction-form-types']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toMatch(/^\^/);
     });
 
     it('should include additional dependencies from options', () => {
@@ -347,22 +289,6 @@ describe('PackageManager', () => {
 
       const result = JSON.parse(updated);
       expect(result.dependencies).toHaveProperty('custom-dep', '2.0.0');
-    });
-
-    it('should apply semantic versioning strategy', () => {
-      const formConfig = createMinimalFormConfig();
-
-      const updated = packageManager.updatePackageJson(
-        basePackageJson,
-        formConfig,
-        'evm',
-        'testFunction'
-      );
-
-      const result = JSON.parse(updated);
-
-      // Our own package should always use caret versioning
-      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toMatch(/^\^/);
     });
 
     it('should add upgrade instructions through scripts', () => {

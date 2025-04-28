@@ -1,9 +1,10 @@
 /**
  * FormExportSystem
  *
- * This class coordinates the form export process by integrating the
- * TemplateManager, FormCodeGenerator, AdapterExportManager, PackageManager,
- * and StyleManager components.
+ * Orchestrates the entire form export process, integrating modules like
+ * TemplateManager, FormCodeGenerator, PackageManager,
+ * and ZipGenerator to produce a downloadable ZIP archive containing a
+ * standalone form project.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
@@ -14,7 +15,6 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';
 
-import { AdapterExportManager } from './AdapterExportManager';
 import { PackageManager } from './PackageManager';
 import { StyleManager } from './StyleManager';
 import { TemplateManager } from './TemplateManager';
@@ -24,7 +24,6 @@ import { ZipGenerator, type ZipProgress } from './ZipGenerator';
 interface FormExportSystemDependencies {
   templateManager?: TemplateManager;
   formCodeGenerator?: FormCodeGenerator;
-  adapterExportManager?: AdapterExportManager;
   packageManager?: PackageManager;
   styleManager?: StyleManager;
   zipGenerator?: ZipGenerator;
@@ -39,7 +38,6 @@ interface FormExportSystemDependencies {
 export class FormExportSystem {
   private templateManager: TemplateManager;
   private formCodeGenerator: FormCodeGenerator;
-  private adapterExportManager: AdapterExportManager;
   private packageManager: PackageManager;
   private styleManager: StyleManager;
   private zipGenerator: ZipGenerator;
@@ -53,8 +51,6 @@ export class FormExportSystem {
     // Use provided instances or create new ones
     this.templateManager = dependencies.templateManager ?? new TemplateManager();
     this.formCodeGenerator = dependencies.formCodeGenerator ?? new FormCodeGenerator();
-    this.adapterExportManager = dependencies.adapterExportManager ?? new AdapterExportManager();
-    // Assuming PackageManager needs args - adjust if constructor changes
     this.packageManager = dependencies.packageManager ?? new PackageManager();
     this.styleManager = dependencies.styleManager ?? new StyleManager();
     this.zipGenerator = dependencies.zipGenerator ?? new ZipGenerator();
@@ -99,25 +95,13 @@ export class FormExportSystem {
       logger.info('Export System', 'Generating App component...');
       const appComponentCode = await this.formCodeGenerator.generateUpdatedAppComponent(functionId);
 
-      // 3. Get adapter files if needed
-      logger.info('Export System', 'Retrieving adapter files...');
-      const adapterFiles =
-        exportOptions.includeAdapters !== false
-          ? await this.adapterExportManager.getAdapterFiles(chainType)
-          : {};
-      logger.info(
-        'Export System',
-        `Retrieved ${Object.keys(adapterFiles).length} adapter file(s).`
-      );
-
-      // Prepare custom files object
+      // 3. Prepare custom files object
       const customFiles = {
         'src/App.tsx': appComponentCode,
         'src/components/GeneratedForm.tsx': formComponentCode,
-        ...adapterFiles,
       };
 
-      // --- Assemble Project Files ---
+      // 4. Assemble Project Files
       logger.info('Export System', 'Assembling project files...');
       const projectFiles = await this.assembleProjectFiles(
         formConfig,
@@ -127,16 +111,14 @@ export class FormExportSystem {
         customFiles
       );
       logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
-      // --- End Assembly ---
 
-      // --- Final Steps ---
-      // 10. Create ZIP file
+      // 5. Create ZIP file
       logger.info('Export System', 'Generating ZIP file...');
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
       logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
-      // 11. Prepare and return the final export result
+      // 6. Prepare and return the final export result
       const finalResult: ExportResult = {
         data: zipResult.data,
         fileName: zipResult.fileName,
@@ -162,7 +144,7 @@ export class FormExportSystem {
     exportOptions: ExportOptions,
     customFiles: Record<string, string>
   ): Promise<Record<string, string>> {
-    // 4. Get base project files from the selected template
+    // 1. Get base project files from the selected template
     logger.info(
       'File Assembly',
       `Creating project from template: ${exportOptions.template || 'typescript-react-vite'}...`
@@ -180,7 +162,7 @@ export class FormExportSystem {
     // Initialize the final file collection
     let projectFiles: Record<string, string> = { ...templateFilesRaw };
 
-    // 5. Add shared CSS files (global.css) and template styles.css via StyleManager
+    // 2. Add shared CSS files (global.css) and template styles.css via StyleManager
     logger.info('File Assembly', 'Adding CSS files...');
     const styleFiles = this.styleManager.getStyleFiles();
     styleFiles.forEach((file) => {
@@ -188,7 +170,7 @@ export class FormExportSystem {
     });
     logger.info('File Assembly', `Added ${styleFiles.length} CSS file(s).`);
 
-    // 6. Add root configuration files (tailwind, postcss, components) via StyleManager
+    // 3. Add root configuration files (tailwind, postcss, components) via StyleManager
     logger.info('File Assembly', 'Adding root config files...');
     const configFiles = this.styleManager.getConfigFiles();
     for (const file of configFiles) {
@@ -210,17 +192,9 @@ export class FormExportSystem {
     }
     logger.info('File Assembly', `Added and formatted ${configFiles.length} config file(s).`);
 
-    // 7. Remove adapter directory if adapters are excluded
-    if (exportOptions.includeAdapters === false) {
-      logger.info('File Assembly', 'Removing adapter files as per options...');
-      Object.keys(projectFiles).forEach((path) => {
-        if (path.startsWith('src/adapters/')) {
-          delete projectFiles[path];
-        }
-      });
-    }
+    // 4. Remove adapter directory if adapters are excluded
 
-    // 8. Update package.json with correct dependencies and metadata
+    // 5. Update package.json with correct dependencies and metadata
     logger.info('File Assembly', 'Updating package.json...');
     const originalPackageJson = projectFiles['package.json'];
     if (originalPackageJson) {
@@ -237,7 +211,7 @@ export class FormExportSystem {
       throw new Error('Template is missing package.json');
     }
 
-    // --- Conditional CSS Modification for CLI Target ---
+    // 6. Conditional CSS Modification for CLI Target
     const mainCssPath = 'src/styles.css'; // Path confirmed from template structure
     if (exportOptions.isCliBuildTarget && projectFiles[mainCssPath]) {
       logger.info('File Assembly', `Modifying ${mainCssPath} for CLI target...`);
@@ -259,9 +233,8 @@ export class FormExportSystem {
         );
       }
     }
-    // --- End Conditional CSS Modification ---
 
-    // 9. Format necessary JSON files for readability
+    // 7. Format necessary JSON files for readability
     await this.formatJsonFiles(projectFiles);
 
     logger.info('File Assembly', 'File assembly complete.');

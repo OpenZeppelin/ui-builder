@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
-
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -18,34 +15,15 @@ interface TestFormRendererConfig {
   >;
 }
 
-describe('Configuration Integration Tests', () => {
-  // Create different adapter configurations for testing
-  const testAdapterConfigs: Record<string, AdapterConfig> = {
-    'test-chain-1': {
-      dependencies: {
-        runtime: {
-          'chain1-sdk': '^1.0.0',
-          'chain1-signer': '^2.0.0',
-        },
-        dev: {
-          '@types/chain1-sdk': '^1.0.0',
-        },
-      },
-    },
-    'test-chain-2': {
-      dependencies: {
-        runtime: {
-          'chain2-sdk': '^3.0.0',
-        },
-      },
-    },
-  };
-
+describe('PackageManager Integration Tests', () => {
   // Create a test form renderer configuration
   const testFormRendererConfig: TestFormRendererConfig = {
     coreDependencies: {
-      'core-lib': '^1.0.0',
+      'core-lib': '^1.0.0', // Mock external core dep
       react: '^18.2.0',
+      // Add renderer and types packages here as they are expected by PackageManager
+      '@openzeppelin/transaction-form-renderer': '^1.0.0', // Use a placeholder caret version
+      '@openzeppelin/transaction-form-types': '^0.1.0', // Use a placeholder caret version
     },
     fieldDependencies: {
       text: {
@@ -67,18 +45,26 @@ describe('Configuration Integration Tests', () => {
           'select-control': '^1.5.0',
         },
       },
+      // Add mocks for other field types if needed by tests
+      'blockchain-address': { runtimeDependencies: {} },
+      checkbox: { runtimeDependencies: {} },
     },
   };
 
   // Helper function to create test form configs with different field types
-  const createFormConfig = (fieldTypes: string[]): BuilderFormConfig => ({
-    functionId: 'testFunction',
+  const createFormConfig = (
+    fieldTypes: string[],
+    functionId = 'testFunction'
+  ): BuilderFormConfig => ({
+    functionId,
     fields: fieldTypes.map((type, index) => ({
       id: `field${index}`,
       name: `field${index}`,
       label: `Field ${index}`,
       type,
       validation: { required: true },
+      // Simulate original type needed for transforms, though not directly used by PackageManager
+      originalParameterType: type === 'blockchain-address' ? 'address' : type,
     })) as unknown as BuilderFormConfig['fields'],
     layout: {
       columns: 1,
@@ -93,204 +79,189 @@ describe('Configuration Integration Tests', () => {
     contractAddress: '0xTestAddress',
   });
 
-  describe('Dynamic Configuration Loading', () => {
-    it('should load different dependencies based on chain type', () => {
-      // Create a PackageManager with our test configurations
-      const packageManager = new PackageManager(
-        testAdapterConfigs,
-        testFormRendererConfig as TestFormRendererConfig
-      );
+  describe('getDependencies', () => {
+    it('should include core, renderer, types, and specific adapter package based on chain type', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['text']); // Basic form
 
-      // Create a basic form config
-      const formConfig = createFormConfig(['text', 'number']);
+      // EVM
+      const evmDeps = packageManager.getDependencies(formConfig, 'evm');
+      expect(evmDeps).toHaveProperty('core-lib', '^1.0.0'); // From mock renderer config
+      expect(evmDeps).toHaveProperty('react', '^18.2.0'); // From mock renderer config
+      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0'); // FROM MOCK CORE DEPS
+      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
+      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm', 'workspace:*'); // Added by PM
+      expect(evmDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
 
-      // Get dependencies for different chain types
-      const chain1Dependencies = packageManager.getDependencies(
-        formConfig,
-        'test-chain-1' as ChainType
-      );
-      const chain2Dependencies = packageManager.getDependencies(
-        formConfig,
-        'test-chain-2' as ChainType
-      );
-
-      // Verify chain-specific dependencies are included
-      expect(chain1Dependencies).toHaveProperty('chain1-sdk');
-      expect(chain1Dependencies).toHaveProperty('chain1-signer');
-      expect(chain1Dependencies).not.toHaveProperty('chain2-sdk');
-
-      expect(chain2Dependencies).toHaveProperty('chain2-sdk');
-      expect(chain2Dependencies).not.toHaveProperty('chain1-sdk');
-      expect(chain2Dependencies).not.toHaveProperty('chain1-signer');
-
-      // Both should have core dependencies
-      expect(chain1Dependencies).toHaveProperty('core-lib');
-      expect(chain2Dependencies).toHaveProperty('core-lib');
+      // Solana
+      const solanaDeps = packageManager.getDependencies(formConfig, 'solana');
+      expect(solanaDeps).toHaveProperty('core-lib', '^1.0.0');
+      expect(solanaDeps).toHaveProperty('react', '^18.2.0');
+      expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0'); // FROM MOCK CORE DEPS
+      expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
+      expect(solanaDeps).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-solana',
+        'workspace:*'
+      ); // Added by PM
+      expect(solanaDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
     });
 
-    it('should load different dependencies based on field types', () => {
-      // Create a PackageManager with our test configurations
-      const packageManager = new PackageManager(
-        testAdapterConfigs,
-        testFormRendererConfig as TestFormRendererConfig
-      );
+    it('should include field-specific dependencies based on form fields', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
 
-      // Create forms with different field types
       const basicFormConfig = createFormConfig(['text', 'number']);
       const advancedFormConfig = createFormConfig(['date', 'select']);
-      const mixedFormConfig = createFormConfig(['text', 'date', 'select']);
+      const mixedFormConfig = createFormConfig(['text', 'date']);
 
-      // Get dependencies for each form config using the same chain
-      const basicDeps = packageManager.getDependencies(
-        basicFormConfig,
-        'test-chain-1' as ChainType
-      );
-      const advancedDeps = packageManager.getDependencies(
-        advancedFormConfig,
-        'test-chain-1' as ChainType
-      );
-      const mixedDeps = packageManager.getDependencies(
-        mixedFormConfig,
-        'test-chain-1' as ChainType
-      );
+      const basicDeps = packageManager.getDependencies(basicFormConfig, 'evm');
+      const advancedDeps = packageManager.getDependencies(advancedFormConfig, 'evm');
+      const mixedDeps = packageManager.getDependencies(mixedFormConfig, 'evm');
 
-      // Basic form should not have field-specific dependencies
+      // Basic checks
       expect(basicDeps).not.toHaveProperty('date-picker');
       expect(basicDeps).not.toHaveProperty('select-control');
 
-      // Advanced form should have date and select dependencies
-      expect(advancedDeps).toHaveProperty('date-picker');
-      expect(advancedDeps).toHaveProperty('select-control');
+      // Advanced checks
+      expect(advancedDeps).toHaveProperty('date-picker', '^2.0.0');
+      expect(advancedDeps).toHaveProperty('select-control', '^1.5.0');
 
-      // Mixed form should have all field-specific dependencies
-      expect(mixedDeps).toHaveProperty('date-picker');
-      expect(mixedDeps).toHaveProperty('select-control');
+      // Mixed checks
+      expect(mixedDeps).toHaveProperty('date-picker', '^2.0.0');
+      expect(mixedDeps).not.toHaveProperty('select-control');
 
-      // All forms should have chain and core dependencies
-      expect(basicDeps).toHaveProperty('chain1-sdk');
-      expect(basicDeps).toHaveProperty('core-lib');
-      expect(advancedDeps).toHaveProperty('chain1-sdk');
-      expect(advancedDeps).toHaveProperty('core-lib');
+      // Core/Adapter checks remain - Check for PRESENCE and workspace:*
+      expect(advancedDeps).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-evm',
+        'workspace:*'
+      );
+      expect(mixedDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*');
+    });
+
+    it('should use workspace protocol for internal packages', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['text']);
+      const deps = packageManager.getDependencies(formConfig, 'evm');
+
+      // getDependencies uses mock for renderer, adds others explicitly
+      expect(deps['@openzeppelin/transaction-form-renderer']).toBe('^1.0.0'); // From mock
+      expect(deps['@openzeppelin/transaction-form-types']).toBe('workspace:*'); // Added by PM
+      expect(deps['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*'); // Added by PM
     });
   });
 
-  describe('Package.json Integration', () => {
-    it('should generate different package.json files based on form configs', () => {
-      // Create a PackageManager with our test configurations
-      const packageManager = new PackageManager(
-        testAdapterConfigs,
-        testFormRendererConfig as TestFormRendererConfig
-      );
-
-      // Create template package.json content
-      const basePackageJson = JSON.stringify({
+  describe('updatePackageJson', () => {
+    const basePackageJson = JSON.stringify(
+      {
         name: 'template-project',
+        version: '0.1.0',
         description: 'Template description',
-        dependencies: {},
-        devDependencies: {},
-      });
+        dependencies: { 'existing-dep': '1.0.0', react: '*' },
+        devDependencies: { 'existing-dev-dep': '1.0.0' },
+      },
+      null,
+      2
+    );
 
-      // Create different form configs
-      const basicFormConfig = createFormConfig(['text']);
-      const advancedFormConfig = createFormConfig(['date', 'select']);
+    it('should merge dependencies correctly, preserving existing ones and applying strategy', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['date', 'text'], 'mergeTest');
 
-      // Generate package.json for different configs and chains
-      const chain1BasicJson = packageManager.updatePackageJson(
-        basePackageJson,
-        basicFormConfig,
-        'test-chain-1' as ChainType,
-        'basicFunction'
+      const updatedJson = packageManager.updatePackageJson(
+        basePackageJson, // This base includes react: '*'
+        formConfig,
+        'evm',
+        'mergeTest'
+        // No env specified, defaults to 'production' in applyVersioningStrategy
       );
-      const chain2AdvancedJson = packageManager.updatePackageJson(
-        basePackageJson,
-        advancedFormConfig,
-        'test-chain-2' as ChainType,
-        'advancedFunction'
+      const result = JSON.parse(updatedJson);
+
+      // Check preservation
+      expect(result.dependencies).toHaveProperty('existing-dep', '1.0.0');
+      expect(result.devDependencies).toHaveProperty('existing-dev-dep', '1.0.0');
+
+      // Check merged runtime deps
+      expect(result.dependencies).toHaveProperty('core-lib', '^1.0.0'); // From mock
+      expect(result.dependencies).toHaveProperty('react', '^18.2.0'); // Updated from mock
+      expect(result.dependencies).toHaveProperty('date-picker', '^2.0.0'); // From field
+      // Check for caret versions (default 'production' env applies versioning)
+      expect(result.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-evm',
+        expect.stringMatching(/^\^/)
+      );
+      expect(result.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-types',
+        expect.stringMatching(/^\^/)
+      );
+      expect(result.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-renderer',
+        expect.stringMatching(/^\^/)
       );
 
-      // Parse the generated JSON
-      const chain1BasicResult = JSON.parse(chain1BasicJson);
-      const chain2AdvancedResult = JSON.parse(chain2AdvancedJson);
-
-      // Check dependencies appropriate to the configuration
-      expect(chain1BasicResult.dependencies).toHaveProperty('chain1-sdk');
-      expect(chain1BasicResult.dependencies).not.toHaveProperty('date-picker');
-      expect(chain1BasicResult.dependencies).not.toHaveProperty('chain2-sdk');
-
-      expect(chain2AdvancedResult.dependencies).toHaveProperty('chain2-sdk');
-      expect(chain2AdvancedResult.dependencies).toHaveProperty('date-picker');
-      expect(chain2AdvancedResult.dependencies).toHaveProperty('select-control');
-      expect(chain2AdvancedResult.dependencies).not.toHaveProperty('chain1-sdk');
-
-      // Check that project names reflect the function IDs
-      expect(chain1BasicResult.name).toBe('basicfunction-form');
-      expect(chain2AdvancedResult.name).toBe('advancedfunction-form');
-
-      // Verify custom options are applied
-      const customOptionsJson = packageManager.updatePackageJson(
-        basePackageJson,
-        basicFormConfig,
-        'test-chain-1' as ChainType,
-        'customFunction',
-        {
-          projectName: 'custom-project',
-          description: 'Custom description',
-          author: 'Test Author',
-          license: 'MIT',
-        }
-      );
-      const customOptionsResult = JSON.parse(customOptionsJson);
-
-      expect(customOptionsResult.name).toBe('custom-project');
-      expect(customOptionsResult.description).toBe('Custom description');
-      expect(customOptionsResult.author).toBe('Test Author');
-      expect(customOptionsResult.license).toBe('MIT');
+      // Check merged dev deps
+      expect(result.devDependencies).toHaveProperty('@types/date-picker', '^2.0.0');
     });
 
-    it('should apply versioning strategy to package dependencies', () => {
-      // Create a PackageManager with our test configurations
-      const packageManager = new PackageManager(
-        testAdapterConfigs,
-        testFormRendererConfig as TestFormRendererConfig
-      );
+    it('should update basic package metadata (name, description)', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['text'], 'metadataTest');
 
-      // Create base package.json that already has a dependency
-      const basePackageJson = JSON.stringify({
-        name: 'template-project',
-        dependencies: {
-          'existing-dep': '1.0.0',
-        },
-      });
-
-      // Create a form config and update the package.json
-      const formConfig = createFormConfig(['text']);
-      const updated = packageManager.updatePackageJson(
+      const updatedJson = packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
-        'test-chain-1' as ChainType,
-        'testFunction'
+        'evm',
+        'metadataTest',
+        { env: 'local' }
       );
-      const result = JSON.parse(updated);
+      const result = JSON.parse(updatedJson);
 
-      // Verify the existing dependency was preserved
-      expect(result.dependencies).toHaveProperty('existing-dep', '1.0.0');
+      // Default name generation
+      expect(result.name).toBe('metadatatest-form'); // Kebab-case functionId + -form
+      // Default description check - check it contains the function name
+      expect(result.description).toContain('metadataTest');
+    });
 
-      // Verify our own packages use caret versioning if not already specified
-      // Mock our own package by adding it to testFormRendererConfig
-      testFormRendererConfig.coreDependencies['@openzeppelin/transaction-form-renderer'] = '1.0.0';
+    it('should apply custom metadata from export options', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['text'], 'customMeta');
 
-      const updatedWithOwnPackage = packageManager.updatePackageJson(
+      const updatedJson = packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
-        'test-chain-1' as ChainType,
-        'testFunction'
+        'evm',
+        'customMeta',
+        {
+          env: 'local',
+          projectName: 'my-custom-project',
+          description: 'My custom description.',
+          author: 'Test Author <test@example.com>',
+          license: 'MIT',
+          // Note: custom dependencies are not handled by this test focus
+        }
       );
-      const resultWithOwnPackage = JSON.parse(updatedWithOwnPackage);
+      const result = JSON.parse(updatedJson);
 
-      // Verify our package got the caret prefix
-      expect(resultWithOwnPackage.dependencies['@openzeppelin/transaction-form-renderer']).toBe(
-        '^1.0.0'
+      expect(result.name).toBe('my-custom-project');
+      expect(result.description).toBe('My custom description.');
+      expect(result.author).toBe('Test Author <test@example.com>');
+      expect(result.license).toBe('MIT');
+    });
+
+    it('should not add empty devDependencies section if none exist', () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig = createFormConfig(['text']); // No dev deps needed
+      const baseJsonNoDev = JSON.stringify({ name: 'no-dev', dependencies: {} }); // No devDependencies key
+
+      const updatedJson = packageManager.updatePackageJson(
+        baseJsonNoDev,
+        formConfig,
+        'evm',
+        'noDevDepsTest',
+        { env: 'local' }
       );
+      const result = JSON.parse(updatedJson);
+
+      // Check that devDependencies property itself is not present
+      expect(result.hasOwnProperty('devDependencies')).toBe(false);
     });
   });
 });

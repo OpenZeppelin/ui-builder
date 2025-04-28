@@ -17,6 +17,16 @@
       "import": "./dist/adapters/index.js",
       "require": "./dist/adapters/index.cjs"
     },
+    "./adapters/base": {
+      "types": "./dist/adapters/base.d.ts",
+      "import": "./dist/adapters/base.js",
+      "require": "./dist/adapters/base.cjs"
+    },
+    "./adapters/contract-state": {
+      "types": "./dist/adapters/contract-state.d.ts",
+      "import": "./dist/adapters/contract-state.js",
+      "require": "./dist/adapters/contract-state.cjs"
+    },
     "./contracts": {
       "types": "./dist/contracts/index.d.ts",
       "import": "./dist/contracts/index.js",
@@ -39,7 +49,6 @@
   "scripts": {
     "build": "tsc --outDir dist --declaration",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "prepare": "pnpm run build",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
@@ -64,5 +73,6 @@
     "eslint-config-prettier": "^10.1.1",
     "typescript": "^5.8.2",
     "vitest": "^3.0.8"
-  }
+  },
+  "dependencies": {}
 }

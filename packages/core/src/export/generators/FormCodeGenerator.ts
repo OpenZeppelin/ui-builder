@@ -1,12 +1,11 @@
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
+import { adapterPackageMap } from '../../core/adapterRegistry';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { AdapterExportManager } from '../AdapterExportManager';
 import { TemplateManager } from '../TemplateManager';
-// Import types for template parameters
 import type {
   AppComponentTemplateParams,
   FormComponentTemplateParams,
@@ -28,16 +27,13 @@ const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx'
  * - Generates only the form component code
  * - Uses a consistent import pattern that works in both dev and production
  * - Integrates with TemplateManager to generate complete projects
- * - Integrates with AdapterExportManager to include required adapter files
  */
 export class FormCodeGenerator {
   private templateManager: TemplateManager;
-  private adapterExportManager: AdapterExportManager;
   private templateProcessor: TemplateProcessor;
 
   constructor() {
     this.templateManager = new TemplateManager();
-    this.adapterExportManager = new AdapterExportManager();
     this.templateProcessor = new TemplateProcessor(templateFiles);
   }
 
@@ -60,6 +56,10 @@ export class FormCodeGenerator {
     functionId: string
   ): Promise<string> {
     const adapterClassName = this.getAdapterClassName(chainType);
+    const adapterPackageName = adapterPackageMap[chainType];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+    }
     const executionConfig = formConfig.executionConfig;
 
     // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
@@ -82,6 +82,7 @@ export class FormCodeGenerator {
     // Create parameters for the template
     const params: FormComponentTemplateParams = {
       adapterClassName,
+      adapterPackageName,
       chainType,
       functionId,
       formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
@@ -98,6 +99,7 @@ export class FormCodeGenerator {
     // Apply common post-processing with form-specific options
     processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
       adapterClassName,
+      adapterPackageName,
       formConfigJSON: params.formConfigJSON,
       executionConfigJSON: params.executionConfigJSON,
       allFieldsConfigJSON: params.allFieldsConfigJSON,
@@ -165,25 +167,13 @@ export class FormCodeGenerator {
     functionId: string,
     options: ExportOptions = { chainType }
   ): Promise<Record<string, string>> {
-    // Generate the form component code
     const formComponentCode = await this.generateFormComponent(formConfig, chainType, functionId);
 
-    // Create a structure with the custom files to replace in the template
     const customFiles: Record<string, string> = {
-      // Replace FormPlaceholder.tsx with our generated form component
       'src/components/GeneratedForm.tsx': formComponentCode,
-
-      // We need to update App.tsx to import GeneratedForm instead of FormPlaceholder
       'src/App.tsx': await this.generateUpdatedAppComponent(functionId),
     };
 
-    // Get adapter files if needed
-    if (options.includeAdapters !== false) {
-      const adapterFiles = await this.adapterExportManager.getAdapterFiles(chainType);
-      Object.assign(customFiles, adapterFiles);
-    }
-
-    // Use the template manager to create a complete project
     return await this.templateManager.createProject('typescript-react-vite', customFiles, options);
   }
 

@@ -8,35 +8,45 @@ import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
-// Mock the adapter and other dependencies
-vi.mock('../../../adapters', () => ({
-  getContractAdapter: vi.fn(() => ({
-    mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
-      if (type === 'address') return 'blockchain-address';
-      if (type === 'uint256') return 'number';
-      if (type === 'bool') return 'checkbox';
-      if (type.startsWith('tuple')) return 'textarea';
-      if (type.includes('[')) return 'textarea';
-      return 'text';
-    }),
-    generateDefaultField: vi.fn((param) => {
-      const fieldType =
-        param.type === 'address' ? 'address' : param.type === 'uint256' ? 'number' : 'text';
+// Mock the adapter registry and the specific adapter
+const mockAdapterImplementation = {
+  mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
+    if (type === 'address') return 'blockchain-address';
+    if (type === 'uint256') return 'number';
+    if (type === 'bool') return 'checkbox';
+    if (type.startsWith('tuple')) return 'textarea';
+    if (type.includes('[')) return 'textarea';
+    return 'text';
+  }),
+  generateDefaultField: vi.fn((param) => {
+    const fieldType = mockAdapterImplementation.mapParameterTypeToFieldType(param.type);
 
-      return {
-        id: `field-${param.name}`,
-        name: param.name,
-        label: param.displayName || param.name,
-        type: fieldType,
-        placeholder: `Enter ${param.name}`,
-        helperText: '',
-        defaultValue: fieldType === 'number' ? 0 : '',
-        validation: { required: true },
-        width: 'full',
-      };
-    }),
-    isValidAddress: vi.fn((address: string) => address.startsWith('0x') && address.length === 42),
-  })),
+    return {
+      id: `field-${param.name}-${uuidv4()}`,
+      name: param.name,
+      label: param.displayName || param.name,
+      type: fieldType,
+      placeholder: `Enter ${param.name}`,
+      helperText: '',
+      defaultValue: fieldType === 'number' ? 0 : fieldType === 'checkbox' ? false : '',
+      validation: { required: true },
+      width: 'full',
+      originalParameterType: param.type,
+    };
+  }),
+  isValidAddress: vi.fn(
+    (address: string) =>
+      typeof address === 'string' && address.startsWith('0x') && address.length === 42
+  ),
+  getCompatibleFieldTypes: vi.fn((type: string): FieldType[] => {
+    if (type === 'address') return ['blockchain-address', 'text'];
+    if (type === 'uint256') return ['number', 'text'];
+    return ['text'];
+  }),
+};
+
+vi.mock('../../core/adapterRegistry', () => ({
+  getAdapter: vi.fn(() => mockAdapterImplementation),
 }));
 
 describe('FormSchemaFactory', () => {

@@ -1,19 +1,19 @@
-import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
+import type {
+  Connector,
+  ContractAdapter,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+} from '@openzeppelin/transaction-form-types/adapters';
+import type {
+  ContractFunction,
+  ContractSchema,
+  FunctionParameter,
+} from '@openzeppelin/transaction-form-types/contracts';
 import type {
   FieldType,
   FieldValue,
   FormFieldType,
 } from '@openzeppelin/transaction-form-types/forms';
-
-// Explicit relative path
-import type {
-  ContractAdapter,
-  ContractFunction,
-  ContractSchema,
-  ExecutionConfig,
-  ExecutionMethodDetail,
-  FunctionParameter,
-} from '../index';
 
 /**
  * Midnight-specific adapter implementation

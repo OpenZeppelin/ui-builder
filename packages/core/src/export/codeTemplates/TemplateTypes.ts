@@ -22,6 +22,11 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   adapterClassName: string;
 
   /**
+   * The adapter package name
+   */
+  adapterPackageName: string;
+
+  /**
    * The blockchain type (e.g., 'evm', 'solana')
    */
   chainType: string;

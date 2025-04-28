@@ -6,6 +6,7 @@
  * while delegating chain-specific logic to the appropriate adapter.
  */
 import { createTransformForFieldType } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ChainType,
   ContractSchema,
@@ -18,8 +19,7 @@ import {
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-types/forms';
 
-import { getContractAdapter } from '../../adapters';
-import type { ContractAdapter } from '../../adapters';
+import { getAdapter } from '../adapterRegistry';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
 
@@ -48,7 +48,7 @@ export class FormSchemaFactory {
     }
 
     // Get the appropriate adapter for the chain type
-    const adapter = getContractAdapter(chainType);
+    const adapter = getAdapter(chainType);
 
     // Create the common properties
     const commonProperties = {
@@ -125,8 +125,11 @@ export class FormSchemaFactory {
       }
     });
 
+    // Explicitly exclude executionConfig when spreading builderConfig
+    const { executionConfig: _executionConfig, ...restOfBuilderConfig } = builderConfig;
+
     return {
-      ...builderConfig,
+      ...restOfBuilderConfig, // Spread the rest of the config
       id: `form-${builderConfig.functionId}`,
       title: functionName,
       description: functionDescription || '',
@@ -136,7 +139,6 @@ export class FormSchemaFactory {
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
-      // Pass the populated defaultValues object
       defaultValues: defaultValues,
       contractAddress: builderConfig.contractAddress,
     };

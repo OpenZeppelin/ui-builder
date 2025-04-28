@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
-import { getContractAdapter } from '../../../adapters';
+import { getAdapter } from '../../../core/adapterRegistry';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
@@ -144,7 +144,7 @@ export function StepFormCustomization({
                     <FieldEditor
                       field={formConfig.fields[selectedFieldIndex]}
                       onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                      adapter={getContractAdapter(selectedChain)}
+                      adapter={getAdapter(selectedChain)}
                       originalParameterType={
                         formConfig.fields[selectedFieldIndex].originalParameterType
                       }
@@ -157,7 +157,7 @@ export function StepFormCustomization({
 
           <TabsContent value="execution" className="mt-4 rounded-md border p-4">
             <ExecutionMethodSettings
-              adapter={getContractAdapter(selectedChain)}
+              adapter={getAdapter(selectedChain)}
               currentConfig={currentExecutionConfig}
               onUpdateConfig={onExecutionConfigUpdated || (() => {})}
             />

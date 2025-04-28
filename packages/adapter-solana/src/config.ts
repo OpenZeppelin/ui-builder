@@ -1,4 +1,4 @@
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
+// import type { AdapterConfig } from '../../core/types/AdapterTypes';
 
 /**
  * Configuration for the Solana adapter
@@ -7,7 +7,7 @@ import type { AdapterConfig } from '../../core/types/AdapterTypes';
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const solanaAdapterConfig: AdapterConfig = {
+export const solanaAdapterConfig = {
   /**
    * Dependencies required by the Solana adapter
    * These will be included in exported projects that use this adapter

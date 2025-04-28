@@ -7,11 +7,7 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
-import { getContractAdapter } from '../adapters';
-
-// This will be populated with chain adapters in future implementations
-// We'll define a proper adapter interface later
-// const _adapters: Record<string, unknown> = {};
+import { getAdapter } from '../core/adapterRegistry';
 
 /**
  * Loads a contract definition using the appropriate chain adapter.
@@ -27,7 +23,7 @@ export async function loadContractDefinition(
 ): Promise<ContractSchema | null> {
   logger.info('ContractLoader', `Loading contract definition for ${chainType}...`);
   try {
-    const adapter = getContractAdapter(chainType);
+    const adapter = getAdapter(chainType);
     let sourceString: string;
 
     if (contractDefinition instanceof File) {

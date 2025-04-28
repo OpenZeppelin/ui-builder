@@ -1,7 +1,10 @@
 import React from 'react';
 
-import type { ContractAdapter } from '../../../adapters';
-import type { ExecutionConfig, ExecutionMethodDetail } from '../../../core/types/FormTypes';
+import type {
+  ContractAdapter,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+} from '@openzeppelin/transaction-form-types/adapters';
 
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';

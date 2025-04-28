@@ -1,5 +1,3 @@
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
-
 /**
  * Configuration for the Midnight adapter
  *
@@ -7,7 +5,7 @@ import type { AdapterConfig } from '../../core/types/AdapterTypes';
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const midnightAdapterConfig: AdapterConfig = {
+export const midnightAdapterConfig = {
   /**
    * Dependencies required by the Midnight adapter
    * These will be included in exported projects that use this adapter

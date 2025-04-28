@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
-import { getContractAdapter } from '../../../../adapters/index';
+import { getAdapter } from '../../../../core/adapterRegistry';
 import { getChainExplorerGuidance, getChainName } from '../../../../core/chains';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { StepTitleWithDescription } from '../../Common';
@@ -39,7 +39,7 @@ export function ContractAddressForm({
     }
   }, [selectedChain, reset, setError, existingContractAddress]);
 
-  const adapter = getContractAdapter(selectedChain);
+  const adapter = getAdapter(selectedChain);
 
   const onSubmitAddress = useCallback(
     async (data: ContractFormData) => {

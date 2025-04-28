@@ -17,7 +17,7 @@ import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 interface ContractStateWidgetProps {
   contractSchema: ContractSchema | null;
   contractAddress: string | null;
-  adapter: FullContractAdapter; // Changed from chainType to adapter
+  adapter: FullContractAdapter;
   isVisible?: boolean;
   onToggle?: () => void;
   className?: string;

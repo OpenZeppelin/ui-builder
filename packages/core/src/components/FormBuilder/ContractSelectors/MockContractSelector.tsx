@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
 
-import { MockContractInfo, MockContractService } from '../../../services/MockContractService';
 import {
   Dialog,
   DialogContent,
@@ -18,51 +17,54 @@ interface MockContractSelectorProps {
   chainType?: string;
 }
 
-export const MockContractSelector: React.FC<MockContractSelectorProps> = ({
-  onSelectMock,
-  chainType,
-}) => {
-  const [mockContracts, setMockContracts] = useState<MockContractInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+interface TempMockInfo {
+  id: string;
+  name: string;
+  chainType: string;
+  description?: string;
+}
+
+export function MockContractSelector({ onSelectMock, chainType }: MockContractSelectorProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [mockContracts, setMockContracts] = useState<TempMockInfo[]>([]);
 
   useEffect(() => {
-    const loadMockContracts = async () => {
-      setIsLoading(true);
-      try {
-        const mocks = await MockContractService.getAvailableMocks();
+    // Temp mock list until service is refactored/replaced
+    const tempMocks: TempMockInfo[] = [
+      {
+        id: 'erc20',
+        name: 'ERC20 Token',
+        chainType: 'evm',
+        description: 'Standard ERC20 Fungible Token',
+      },
+      {
+        id: 'erc721',
+        name: 'ERC721 NFT',
+        chainType: 'evm',
+        description: 'Standard ERC721 Non-Fungible Token',
+      },
+      {
+        id: 'input-tester',
+        name: 'Input Tester',
+        chainType: 'evm',
+        description: 'Contract with various input types',
+      },
+    ];
+    setMockContracts(tempMocks);
+  }, []);
 
-        // Filter by chain type if provided
-        const filteredMocks = chainType
-          ? mocks.filter((mock) => mock.chainType === chainType)
-          : mocks;
-
-        setMockContracts(filteredMocks);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load mock contracts');
-        console.error('Error loading mock contracts:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Call the async function and handle any unexpected errors
-    loadMockContracts().catch((err) => {
-      console.error('Unexpected error in loadMockContracts:', err);
-      setError('An unexpected error occurred');
-      setIsLoading(false);
-    });
-  }, [chainType]);
+  // Filter mocks based on the selected chain type
+  const filteredMocks = chainType
+    ? mockContracts.filter((mock) => mock.chainType === chainType)
+    : mockContracts;
 
   const handleSelectMock = (mockId: string) => {
     onSelectMock(mockId);
-    setOpen(false);
+    setIsOpen(false); // Close dialog after selection
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           Use Mock Contract
@@ -77,17 +79,13 @@ export const MockContractSelector: React.FC<MockContractSelectorProps> = ({
         </DialogHeader>
 
         <div className="py-4">
-          {isLoading ? (
-            <div className="flex justify-center py-4">Loading mock contracts...</div>
-          ) : error ? (
-            <div className="py-2 text-red-500">{error}</div>
-          ) : mockContracts.length === 0 ? (
+          {mockContracts.length === 0 ? (
             <div className="py-4 text-center">
               No mock contracts available{chainType ? ` for ${chainType}` : ''}.
             </div>
           ) : (
             <div className="grid max-h-[300px] gap-4 overflow-y-auto pr-2">
-              {mockContracts.map((mock) => (
+              {filteredMocks.map((mock) => (
                 <div
                   key={mock.id}
                   className="hover:bg-muted cursor-pointer rounded-md border p-4 transition-colors"
@@ -103,11 +101,11 @@ export const MockContractSelector: React.FC<MockContractSelectorProps> = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn, WatchObserver, useForm } from 'react-hook-form';
 
-import type { ContractAdapter } from '../../../../adapters';
 import type {
+  ContractAdapter,
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
-} from '../../../../core/types/FormTypes';
+} from '@openzeppelin/transaction-form-types/adapters';
+
 import type { ExecutionMethodFormData } from '../types';
 import { ensureCompleteConfig } from '../utils';
 

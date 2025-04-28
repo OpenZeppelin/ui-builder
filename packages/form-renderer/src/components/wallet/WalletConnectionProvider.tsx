@@ -41,8 +41,6 @@ export function WalletConnectionProvider({
 
   // Subscribe to wallet connection changes
   useEffect(() => {
-    // Only set up the listener if the adapter supports wallet connection
-    // and has the subscription method
     if (isSupported && adapter.onWalletConnectionChange) {
       const unsubscribe = adapter.onWalletConnectionChange((status) => {
         setConnectionStatus((prev) => ({
@@ -51,9 +49,6 @@ export function WalletConnectionProvider({
           address: status.address,
         }));
       });
-
-      // Clean up subscription when the component unmounts
-      // or when the adapter changes
       return unsubscribe;
     }
     return undefined;
@@ -101,9 +96,6 @@ export function WalletConnectionProvider({
       if (!result.disconnected) {
         setError(result.error || 'Failed to disconnect wallet');
       }
-
-      // Update connection status
-      setConnectionStatus(adapter.getWalletConnectionStatus());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {

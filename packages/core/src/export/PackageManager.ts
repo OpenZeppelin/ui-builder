@@ -39,27 +39,9 @@ import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
-import type { AdapterConfig } from '../core/types/AdapterTypes';
+import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
-
-/**
- * Type for glob import results - using Record with index signature
- * to avoid hardcoding chain types, maintaining our chain-agnostic approach
- */
-type GlobImportResult = Record<string, Record<string, unknown>>;
-
-// Build-time configuration discovery using Vite's import.meta.glob
-// This runs at build time and bundles the configurations directly
-const adapterConfigFiles = import.meta.glob('../adapters/*/config.ts', {
-  eager: true,
-}) as GlobImportResult;
-
-// For testing purposes - make file collections available to tests
-export const packageTestFiles = {
-  adapterConfig: adapterConfigFiles,
-  formRendererConfig: { 'virtual:form-renderer-config': { formRendererConfig } },
-};
 
 /**
  * PackageManager is responsible for managing dependencies in exported form projects.
@@ -68,83 +50,24 @@ export const packageTestFiles = {
  * field types.
  */
 export class PackageManager {
-  private adapterConfigs: Record<string, AdapterConfig>;
+  // Removed adapterConfigs property
   private formRendererConfig: FormRendererConfig;
 
   /**
    * Creates a new PackageManager instance
-   * @param mockAdapterConfigs Optional adapter configs for testing
    * @param mockFormRendererConfig Optional form renderer config for testing
    */
   constructor(
-    mockAdapterConfigs?: Record<string, AdapterConfig>,
+    // Removed mockAdapterConfigs parameter
     mockFormRendererConfig?: FormRendererConfig
   ) {
     // // TEMPORARY LOGGING FOR TEST FAILURE
     // console.log('PackageManager CONSTRUCTOR: mockFormRendererConfig received:', mockFormRendererConfig);
 
-    this.adapterConfigs = mockAdapterConfigs || this.loadAdapterConfigs();
     this.formRendererConfig = mockFormRendererConfig || this.loadFormRendererConfig();
 
     // // TEMPORARY LOGGING FOR TEST FAILURE
     // console.log('PackageManager CONSTRUCTOR: this.formRendererConfig set to:', this.formRendererConfig);
-  }
-
-  /**
-   * Load adapter configuration files using Vite's import.meta.glob
-   * @returns A record of adapter configurations by chain type
-   */
-  private loadAdapterConfigs(): Record<string, AdapterConfig> {
-    const configs: Record<string, AdapterConfig> = {};
-
-    // Process all discovered config files
-    for (const path in adapterConfigFiles) {
-      // Extract chain type from path (e.g., '../adapters/evm/config.ts' -> 'evm')
-      const match = path.match(/\/adapters\/([^/]+)\//);
-      if (match) {
-        const chainType = match[1];
-        const module = adapterConfigFiles[path];
-
-        // Look for {chainType}AdapterConfig (conventional naming)
-        const conventionalConfigName = `${chainType}AdapterConfig`;
-
-        if (!module[conventionalConfigName]) {
-          throw new Error(
-            `Missing adapter configuration for ${chainType}. ` +
-              `Expected export named "${conventionalConfigName}" in ${path}`
-          );
-        }
-
-        // Validate the config object has required properties
-        if (!this.isAdapterConfig(module[conventionalConfigName])) {
-          throw new Error(
-            `Invalid adapter configuration for ${chainType}. ` +
-              `The export "${conventionalConfigName}" is missing required properties`
-          );
-        }
-
-        configs[chainType] = module[conventionalConfigName] as AdapterConfig;
-      }
-    }
-
-    return configs;
-  }
-
-  /**
-   * Check if an object appears to be an AdapterConfig
-   * @param obj The object to check
-   * @returns True if the object has the required AdapterConfig properties
-   */
-  private isAdapterConfig(obj: unknown): obj is AdapterConfig {
-    if (!obj || typeof obj !== 'object') return false;
-
-    // Check for the dependencies property which is required in AdapterConfig
-    const candidate = obj as Partial<AdapterConfig>;
-    return (
-      candidate.dependencies !== undefined &&
-      typeof candidate.dependencies === 'object' &&
-      candidate.dependencies.runtime !== undefined
-    );
   }
 
   /**
@@ -201,40 +124,6 @@ export class PackageManager {
    */
   private getCoreDependencies(): Record<string, string> {
     return this.formRendererConfig.coreDependencies;
-  }
-
-  /**
-   * Get chain-specific runtime dependencies from adapter config
-   * @param chainType The blockchain type
-   * @returns Record of package names to version ranges
-   */
-  private getChainDependencies(chainType: ChainType): Record<string, string> {
-    // Get dependencies from the adapter's config
-    const adapterConfig = this.adapterConfigs[chainType];
-
-    if (!adapterConfig) {
-      logger.warn('PackageManager', `No configuration found for chain type: ${chainType}`); // Use logger
-      return {};
-    }
-
-    // Return runtime dependencies
-    return adapterConfig.dependencies.runtime;
-  }
-
-  /**
-   * Get chain-specific development dependencies from adapter config
-   * @param chainType The blockchain type
-   * @returns Record of package names to version ranges
-   */
-  private getChainDevDependencies(chainType: ChainType): Record<string, string> {
-    // Get dev dependencies from the adapter's config
-    const adapterConfig = this.adapterConfigs[chainType];
-
-    if (!adapterConfig || !adapterConfig.dependencies.dev) {
-      return {};
-    }
-
-    return adapterConfig.dependencies.dev;
   }
 
   /**
@@ -298,24 +187,24 @@ export class PackageManager {
    * @returns Record of dependency packages and versions
    */
   getDependencies(formConfig: BuilderFormConfig, chainType: ChainType): Record<string, string> {
-    // // TEMPORARY LOGGING FOR TEST FAILURE
-    // const coreDeps = this.getCoreDependencies();
-    // console.log('PackageManager getDependencies: Core Deps:', coreDeps);
-    // const chainDeps = this.getChainDependencies(chainType);
-    // console.log('PackageManager getDependencies: Chain Deps:', chainDeps);
-    // const fieldDeps = this.getFieldDependencies(formConfig);
-    // console.log('PackageManager getDependencies: Field Deps:', fieldDeps);
+    const adapterPackageName = adapterPackageMap[chainType];
+    if (!adapterPackageName) {
+      logger.warn('PackageManager', `No adapter package configured for chain type: ${chainType}`);
+      // Return core and field dependencies even if adapter package is unknown
+      return {
+        ...this.getCoreDependencies(),
+        ...this.getFieldDependencies(formConfig),
+      };
+    }
 
-    // Combine dependencies from different sources
     const combined = {
-      // Core dependencies from form-renderer
       ...this.getCoreDependencies(),
-      // Chain-specific dependencies from adapter
-      ...this.getChainDependencies(chainType),
-      // Field-specific dependencies from form-renderer
       ...this.getFieldDependencies(formConfig),
+      // Add the specific adapter package
+      [adapterPackageName]: 'workspace:*', // Use workspace protocol for now
+      // Add the types package as adapters depend on it
+      '@openzeppelin/transaction-form-types': 'workspace:*',
     };
-    // console.log('PackageManager getDependencies: Combined Deps:', combined);
     return combined;
   }
 
@@ -326,20 +215,13 @@ export class PackageManager {
    * @param chainType The blockchain type
    * @returns Record of development dependency packages and versions
    */
-  getDevDependencies(formConfig: BuilderFormConfig, chainType: ChainType): Record<string, string> {
-    // Start with common dev dependencies (from chain adapter config)
+  getDevDependencies(formConfig: BuilderFormConfig, _chainType: ChainType): Record<string, string> {
+    // Removed chainDevDependencies lookup
     const devDependencies = {};
-
-    // Add chain-specific dev dependencies
-    const chainDevDependencies = this.getChainDevDependencies(chainType);
-
-    // Add field-specific dev dependencies
     const fieldDevDependencies = this.getFieldDevDependencies(formConfig);
-
-    // Combine them
+    // Assume no adapter-specific dev deps needed in exported form for now
     return {
       ...devDependencies,
-      ...chainDevDependencies,
       ...fieldDevDependencies,
     };
   }
@@ -372,7 +254,7 @@ export class PackageManager {
       const finalDependencies = {
         ...packageJson.dependencies,
         ...this.getDependencies(formConfig, chainType),
-        ...(options.dependencies || {}), // Add custom dependencies from options
+        ...(options.dependencies || {}),
       };
       // Apply versioning strategy based on environment
       packageJson.dependencies = this.applyVersioningStrategy(
@@ -381,15 +263,23 @@ export class PackageManager {
       );
 
       // Merge dev dependencies
-      const finalDevDependencies = {
-        ...packageJson.devDependencies,
-        ...this.getDevDependencies(formConfig, chainType),
-      };
-      // Apply versioning strategy based on environment
-      packageJson.devDependencies = this.applyVersioningStrategy(
-        finalDevDependencies,
-        options.env // Pass env here
+      const originalDevDependencies = { ...(packageJson.devDependencies || {}) }; // Store original safely
+      const fieldDevDependencies = this.getFieldDevDependencies(formConfig);
+      // Apply versioning ONLY to the NEW field-specific dev dependencies
+      const versionedFieldDevDependencies = this.applyVersioningStrategy(
+        fieldDevDependencies,
+        options.env
       );
+      // Merge original dev deps with the processed new ones
+      packageJson.devDependencies = {
+        ...originalDevDependencies,
+        ...versionedFieldDevDependencies,
+      };
+
+      // Remove devDependencies key if the final merged object is empty
+      if (Object.keys(packageJson.devDependencies).length === 0) {
+        delete packageJson.devDependencies;
+      }
 
       // Set package name and description (convert functionId to lowercase for name)
       packageJson.name = options.projectName || `${functionId.toLowerCase()}-form`;
@@ -433,23 +323,23 @@ export class PackageManager {
     env: 'local' | 'production' | undefined = 'production' // Default to 'production'
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
-    // Define known internal workspace packages
     const internalPackages = new Set([
       '@openzeppelin/transaction-form-renderer',
       '@openzeppelin/transaction-form-types',
+      ...Object.values(adapterPackageMap),
     ]);
-    // NOTE: Add '@openzeppelin/transaction-form-builder-styles' if it becomes a direct dependency
 
     for (const [pkgName, version] of Object.entries(dependencies)) {
       if (internalPackages.has(pkgName) && env === 'local') {
-        // Use workspace protocol for local development/testing
         updatedDependencies[pkgName] = 'workspace:*';
       } else if (internalPackages.has(pkgName)) {
-        // Use the caret version for production environment to allow compatible updates
-        // Make sure version starts with ^
-        updatedDependencies[pkgName] = version.startsWith('^') ? version : `^${version}`;
+        // Use ^ version from config (assuming config provides a base version)
+        // Or default to workspace if version isn't available (shouldn't happen often)
+        const baseVersion = version === 'workspace:*' ? '0.0.1' : version; // Fallback needed?
+        updatedDependencies[pkgName] = baseVersion.startsWith('^')
+          ? baseVersion
+          : `^${baseVersion}`;
       } else {
-        // Preserve exact versions for external dependencies
         updatedDependencies[pkgName] = version;
       }
     }

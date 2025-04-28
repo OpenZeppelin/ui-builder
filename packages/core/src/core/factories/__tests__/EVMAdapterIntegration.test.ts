@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
-import { getContractAdapter } from '../../../adapters';
+import { getAdapter } from '../../../core/adapterRegistry';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
@@ -21,7 +21,7 @@ import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 describe('EVM Adapter Integration Tests', () => {
   // Initialize the factory and adapter
   const factory = new FormSchemaFactory();
-  const adapter = getContractAdapter('evm');
+  const adapter = getAdapter('evm');
   let erc20Schema: ContractSchema;
   let inputTesterSchema: ContractSchema;
 
