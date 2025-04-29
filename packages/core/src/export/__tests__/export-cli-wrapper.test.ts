@@ -116,6 +116,7 @@ describe('Export CLI Wrapper', () => {
     expect(result).toBeDefined();
     expect(result.data).toBeDefined();
     expect(result.fileName).toBeDefined();
+    expect(result.dependencies).toBeDefined();
 
     // Save the export
     const outputPath = path.resolve(outputDir, result.fileName);

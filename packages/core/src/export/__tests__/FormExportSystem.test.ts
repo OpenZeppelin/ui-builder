@@ -246,7 +246,7 @@ describe('FormExportSystem', () => {
         const { system, packageManager } = createExportSystem();
 
         // Mock getDependencies to return different dependencies based on field types
-        vi.spyOn(packageManager, 'getDependencies').mockImplementation(() => {
+        vi.spyOn(packageManager, 'getDependencies').mockImplementation(async () => {
           const deps: Record<string, string> = {
             react: '^18.2.0',
             'react-dom': '^18.2.0',

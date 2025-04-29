@@ -79,9 +79,9 @@ describe('PackageManager', () => {
       packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     });
 
-    it('should include core dependencies for all forms', () => {
+    it('should include core dependencies for all forms', async () => {
       const formConfig = createMinimalFormConfig();
-      const dependencies = packageManager.getDependencies(formConfig, 'evm');
+      const dependencies = await packageManager.getDependencies(formConfig, 'evm');
 
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
@@ -89,32 +89,38 @@ describe('PackageManager', () => {
       expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
     });
 
-    it('should include the correct adapter package dependency', () => {
+    it('should include the correct adapter package dependency', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const evmDependencies = packageManager.getDependencies(formConfig, 'evm');
+      const evmDependencies = await packageManager.getDependencies(formConfig, 'evm');
+      // Check for core adapter package
       expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Should also include types
       expect(evmDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
-      // Remove assertions for specific libs like ethers
-      expect(evmDependencies).not.toHaveProperty('ethers');
+      // Check for specific runtime libs from EVM adapter config
+      expect(evmDependencies).toHaveProperty('ethers');
+      expect(evmDependencies).toHaveProperty('viem');
+      expect(evmDependencies).toHaveProperty('wagmi');
 
-      const solanaDependencies = packageManager.getDependencies(formConfig, 'solana');
+      const solanaDependencies = await packageManager.getDependencies(formConfig, 'solana');
+      // Check for core adapter package
       expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
       expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-types');
       expect(solanaDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
-      // Remove assertions for specific libs like @solana/web3.js
-      expect(solanaDependencies).not.toHaveProperty('@solana/web3.js');
+      // Check for specific runtime libs from Solana adapter config
+      expect(solanaDependencies).toHaveProperty('@solana/web3.js');
+      // Check that EVM libs are NOT present
+      expect(solanaDependencies).not.toHaveProperty('ethers');
     });
 
-    it('should include field-specific dependencies based on form fields', () => {
+    it('should include field-specific dependencies based on form fields', async () => {
       // Form with basic fields
       const basicFormConfig = createMinimalFormConfig(['text', 'number']);
-      const basicDependencies = packageManager.getDependencies(basicFormConfig, 'evm');
+      const basicDependencies = await packageManager.getDependencies(basicFormConfig, 'evm');
 
       // Form with advanced fields
       const advancedFormConfig = createMinimalFormConfig(['date', 'select']);
-      const advancedDependencies = packageManager.getDependencies(advancedFormConfig, 'evm');
+      const advancedDependencies = await packageManager.getDependencies(advancedFormConfig, 'evm');
 
       // Basic form should not have advanced field dependencies
       expect(basicDependencies).not.toHaveProperty('react-datepicker');
@@ -125,9 +131,12 @@ describe('PackageManager', () => {
       expect(advancedDependencies).toHaveProperty('react-select');
     });
 
-    it('should handle unknown chain types gracefully', () => {
+    it('should handle unknown chain types gracefully', async () => {
       const formConfig = createMinimalFormConfig();
-      const dependencies = packageManager.getDependencies(formConfig, 'unknown-chain' as ChainType);
+      const dependencies = await packageManager.getDependencies(
+        formConfig,
+        'unknown-chain' as ChainType
+      );
       expect(dependencies).toHaveProperty('react'); // Core deps still present
       expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter package not included
       expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-types'); // Types package not included for unknown chain
@@ -141,13 +150,13 @@ describe('PackageManager', () => {
       packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     });
 
-    it('should include field-specific dev dependencies', () => {
+    it('should include field-specific dev dependencies', async () => {
       const dateFormConfig = createMinimalFormConfig(['date']);
-      const dateDeps = packageManager.getDevDependencies(dateFormConfig, 'evm');
+      const dateDeps = await packageManager.getDevDependencies(dateFormConfig, 'evm');
       expect(dateDeps).toHaveProperty('@types/react-datepicker');
 
       const basicFormConfig = createMinimalFormConfig(['text']);
-      const basicDeps = packageManager.getDevDependencies(basicFormConfig, 'evm');
+      const basicDeps = await packageManager.getDevDependencies(basicFormConfig, 'evm');
       expect(Object.keys(basicDeps)).not.toContain('@types/react-datepicker');
     });
   });
@@ -171,10 +180,10 @@ describe('PackageManager', () => {
       },
     });
 
-    it('should update name and description based on form config', () => {
+    it('should update name and description based on form config', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -186,10 +195,10 @@ describe('PackageManager', () => {
       expect(result.description).toBe('Transaction form for testFunction');
     });
 
-    it('should respect custom name and description from options', () => {
+    it('should respect custom name and description from options', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -205,10 +214,10 @@ describe('PackageManager', () => {
       expect(result.description).toBe('Custom description');
     });
 
-    it('should apply author and license from options', () => {
+    it('should apply author and license from options', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -224,9 +233,9 @@ describe('PackageManager', () => {
       expect(result.license).toBe('MIT');
     });
 
-    it('should merge dependencies from all sources (core, field, adapter package)', () => {
+    it('should merge dependencies from all sources (core, field, adapter package)', async () => {
       const formConfig = createMinimalFormConfig(['date']);
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -238,13 +247,15 @@ describe('PackageManager', () => {
       expect(result.dependencies).toHaveProperty('react-datepicker'); // Field
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter pkg
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Types pkg
-      expect(result.dependencies).not.toHaveProperty('ethers'); // Specific lib removed
-      expect(result.dependencies).not.toHaveProperty('viem'); // Specific lib removed
+      // Check for specific runtime libs from EVM adapter config
+      expect(result.dependencies).toHaveProperty('ethers');
+      expect(result.dependencies).toHaveProperty('viem');
+      expect(result.dependencies).toHaveProperty('wagmi');
     });
 
-    it('should apply versioning strategy correctly (local env)', () => {
+    it('should apply versioning strategy correctly (local env)', async () => {
       const formConfig = createMinimalFormConfig();
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -257,9 +268,9 @@ describe('PackageManager', () => {
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
     });
 
-    it('should apply versioning strategy correctly (prod env)', () => {
+    it('should apply versioning strategy correctly (prod env)', async () => {
       const formConfig = createMinimalFormConfig();
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -272,10 +283,10 @@ describe('PackageManager', () => {
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toMatch(/^\^/);
     });
 
-    it('should include additional dependencies from options', () => {
+    it('should include additional dependencies from options', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -291,10 +302,10 @@ describe('PackageManager', () => {
       expect(result.dependencies).toHaveProperty('custom-dep', '2.0.0');
     });
 
-    it('should add upgrade instructions through scripts', () => {
+    it('should add upgrade instructions through scripts', async () => {
       const formConfig = createMinimalFormConfig();
 
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',

@@ -119,10 +119,11 @@ export class FormExportSystem {
       logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
       // 6. Prepare and return the final export result
+      const dependencies = await this.packageManager.getDependencies(formConfig, chainType);
       const finalResult: ExportResult = {
         data: zipResult.data,
         fileName: zipResult.fileName,
-        dependencies: this.packageManager.getDependencies(formConfig, chainType),
+        dependencies,
       };
       logger.info('Export System', 'Export process complete.');
       return finalResult;
@@ -198,7 +199,7 @@ export class FormExportSystem {
     logger.info('File Assembly', 'Updating package.json...');
     const originalPackageJson = projectFiles['package.json'];
     if (originalPackageJson) {
-      projectFiles['package.json'] = this.packageManager.updatePackageJson(
+      projectFiles['package.json'] = await this.packageManager.updatePackageJson(
         originalPackageJson,
         formConfig,
         chainType,

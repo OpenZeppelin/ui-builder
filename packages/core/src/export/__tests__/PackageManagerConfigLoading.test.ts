@@ -116,42 +116,47 @@ describe('PackageManager configuration loading', () => {
    * the mocked import.meta.glob.
    */
   describe('Using constructor injection', () => {
-    it('should properly load form renderer config from constructor', () => {
+    it('should properly load form renderer config from constructor', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
-      const dependencies = packageManager.getDependencies(createMinimalFormConfig(), 'evm');
+      const dependencies = await packageManager.getDependencies(createMinimalFormConfig(), 'evm');
       expect(dependencies).toHaveProperty('react', '^18.2.0');
       expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0');
     });
 
-    it('should include field-specific dependencies based on form config', () => {
+    it('should include field-specific dependencies based on form config', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig(['text', 'date']);
-      const dependencies = packageManager.getDependencies(formConfig, 'evm');
+      const dependencies = await packageManager.getDependencies(formConfig, 'evm');
       expect(dependencies).toHaveProperty('react-datepicker', '^4.14.0');
     });
 
-    it('should properly update package.json with dependencies', () => {
+    it('should properly update package.json with dependencies', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig(['date']);
       const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
-      const updated = packageManager.updatePackageJson(basePackageJson, formConfig, 'evm', 'func1');
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'func1'
+      );
       const result = JSON.parse(updated);
       expect(result.dependencies).toHaveProperty('react-datepicker');
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
     });
 
-    it('should handle dev dependencies correctly', () => {
+    it('should handle dev dependencies correctly', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig(['date']);
-      const devDependencies = packageManager.getDevDependencies(formConfig, 'evm');
+      const devDependencies = await packageManager.getDevDependencies(formConfig, 'evm');
       expect(devDependencies).toHaveProperty('@types/react-datepicker', '^4.11.2');
     });
 
-    it('should apply correct versioning for local environment', () => {
+    it('should apply correct versioning for local environment', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -163,11 +168,11 @@ describe('PackageManager configuration loading', () => {
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
     });
 
-    it('should include upgrade instructions in package.json', () => {
+    it('should include upgrade instructions in package.json', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({});
-      const updated = packageManager.updatePackageJson(
+      const updated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
         'evm',
@@ -177,14 +182,20 @@ describe('PackageManager configuration loading', () => {
       expect(result.scripts).toHaveProperty('update-form-renderer');
     });
 
-    it('should handle custom dependencies from export options', () => {
+    it('should handle custom dependencies from export options', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({});
       const customDeps = { 'custom-dep': '^1.0.0' };
-      const updated = packageManager.updatePackageJson(basePackageJson, formConfig, 'evm', 'test', {
-        dependencies: customDeps,
-      });
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'test',
+        {
+          dependencies: customDeps,
+        }
+      );
       const result = JSON.parse(updated);
       expect(result.dependencies).toHaveProperty('custom-dep', '^1.0.0');
     });
@@ -197,29 +208,29 @@ describe('PackageManager configuration loading', () => {
    */
 
   describe('Error handling', () => {
-    it('should handle unknown chain types gracefully', () => {
+    it('should handle unknown chain types gracefully', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig();
-      const deps = packageManager.getDependencies(formConfig, 'unknown' as ChainType);
+      const deps = await packageManager.getDependencies(formConfig, 'unknown' as ChainType);
       expect(deps).toHaveProperty('react');
       expect(Object.keys(deps)).not.toContain('@openzeppelin/transaction-form-adapter-evm');
     });
 
-    it('should handle unknown field types gracefully', () => {
+    it('should handle unknown field types gracefully', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig(['unknown-type']);
-      const deps = packageManager.getDependencies(formConfig, 'evm');
+      const deps = await packageManager.getDependencies(formConfig, 'evm');
       expect(deps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       expect(deps).not.toHaveProperty('unknown-field-dep'); // Assuming no dep for unknown type
     });
 
-    it('should handle malformed package.json gracefully', () => {
+    it('should handle malformed package.json gracefully', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const malformedJson = 'not-a-json';
       const formConfig = createMinimalFormConfig();
-      expect(() =>
+      await expect(
         packageManager.updatePackageJson(malformedJson, formConfig, 'evm', 'testFunction')
-      ).toThrow();
+      ).rejects.toThrow();
     });
   });
 });

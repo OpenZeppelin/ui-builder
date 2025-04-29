@@ -30,7 +30,7 @@ vi.mock('../../PackageManager', () => {
     updatePackageJson: vi
       .fn()
       .mockImplementation(
-        (
+        async (
           originalContent: string,
           _formConfig: BuilderFormConfig,
           chainType: ChainType,
@@ -49,6 +49,20 @@ vi.mock('../../PackageManager', () => {
           return JSON.stringify(packageJson, null, 2);
         }
       ),
+    getDependencies: vi
+      .fn()
+      .mockImplementation(async (_formConfig: BuilderFormConfig, chainType: ChainType) => {
+        return {
+          '@openzeppelin/transaction-form-renderer': '^1.0.0',
+          '@openzeppelin/transaction-form-types': '^0.1.0',
+          [`@openzeppelin/transaction-form-adapter-${chainType}`]: '^0.0.1',
+        };
+      }),
+    getDevDependencies: vi
+      .fn()
+      .mockImplementation(async (_formConfig: BuilderFormConfig, _chainType: ChainType) => {
+        return {};
+      }),
   }));
   return { PackageManager: MockPackageManager };
 });
