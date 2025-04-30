@@ -39,6 +39,7 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit"
   },

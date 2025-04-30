@@ -9,26 +9,21 @@ const fs = require('fs');
 // Create an instance of ESLint with our custom config
 const eslint = new ESLint();
 
-// Function to find all adapter implementations
+// Function to find adapter implementation in the current package
 function findAdapterFiles() {
-  const adaptersDir = path.resolve(process.cwd(), 'src/adapters');
   const adapterFiles = [];
+  const srcDir = path.resolve(process.cwd(), 'src');
 
-  // Read the adapters directory
-  const items = fs.readdirSync(adaptersDir, { withFileTypes: true });
+  // Skip if the src directory doesn't exist
+  if (!fs.existsSync(srcDir)) {
+    console.warn(`Warning: src directory not found: ${srcDir}`);
+    return adapterFiles;
+  }
 
-  // Process each item
-  for (const item of items) {
-    // Skip the index.ts file and any non-directories
-    if (item.name === 'index.ts' || !item.isDirectory()) continue;
-
-    const adapterDir = path.join(adaptersDir, item.name);
-    const adapterFile = path.join(adapterDir, 'adapter.ts');
-
-    // Check if the adapter.ts file exists
-    if (fs.existsSync(adapterFile)) {
-      adapterFiles.push(adapterFile);
-    }
+  // Look for adapter.ts in the src directory
+  const adapterFile = path.join(srcDir, 'adapter.ts');
+  if (fs.existsSync(adapterFile)) {
+    adapterFiles.push(adapterFile);
   }
 
   return adapterFiles;
@@ -43,7 +38,7 @@ async function lintAdapters() {
     const adapterFiles = findAdapterFiles();
 
     if (adapterFiles.length === 0) {
-      console.error('No adapter files found. Check the src/adapters directory structure.');
+      console.error('No adapter files found. Check the src directory for adapter.ts file.');
       process.exit(1);
     }
 

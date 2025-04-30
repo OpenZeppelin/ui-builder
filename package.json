@@ -22,7 +22,7 @@
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix",
     "lint:all-fix": "pnpm -r lint:all-fix",
-    "lint:adapters": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:adapters",
+    "lint:adapters": "pnpm --filter='./packages/adapter-*' lint:adapters",
     "lint:config-files": "pnpm --filter=@openzeppelin/transaction-form-builder-core lint:config-files",
     "type-check": "pnpm -r type-check",
     "format": "pnpm -r format",
