@@ -81,35 +81,25 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
             customFiles: Record<string, string>,
             options: Partial<ExportOptions>
           ) => {
-            // Create a simple template structure with the required files
+            // Create a simple template structure reflecting the *new* base template
             const baseTemplate: Record<string, string> = {
-              'src/App.tsx':
-                'import GeneratedForm from "./components/GeneratedForm";\nexport default function App() { return <GeneratedForm />; }',
-              'src/components/FormPlaceholder.tsx':
-                'export default function FormPlaceholder() { return <div>Placeholder</div>; }',
+              'src/App.tsx': '// Base App.tsx placeholder content',
+              // The base template now has GeneratedForm.tsx as the placeholder file
+              'src/components/GeneratedForm.tsx':
+                'export function GeneratedForm() { return <div>Placeholder Content</div>; }',
+              'src/main.tsx': '// Base main.tsx placeholder content',
               'package.json': '{"name":"template","dependencies":{}}',
             };
 
-            // Process the template - remove placeholders and add custom files
+            // Process the template - merge custom files, overwriting base placeholders
             const result = { ...baseTemplate, ...customFiles };
 
-            // Remove the placeholder file if it's replaced by a custom file
-            if (
-              customFiles['src/components/GeneratedForm.tsx'] &&
-              'src/components/FormPlaceholder.tsx' in result
-            ) {
-              delete result['src/components/FormPlaceholder.tsx'];
-            }
+            // No explicit deletion needed anymore - overwriting handles it.
 
+            // Simulate PackageManager update for package.json (as before)
             if (result['package.json']) {
-              // Extract the form data from the customFiles
-              // In a real scenario, FormCodeGenerator would pass the form config and functionId
-              // to the TemplateManager's createProject method via the FormCodeGenerator.generateTemplateProject
-              // We just need to simulate that the TemplateManager is using the PackageManager correctly
-
               const packageJson = JSON.parse(result['package.json']);
               packageJson.name = options?.projectName || 'default-test-name';
-              // Simulate adding dependencies based on chainType
               packageJson.dependencies = {
                 ...(packageJson.dependencies || {}),
                 '@openzeppelin/transaction-form-renderer': '^1.0.0',
@@ -122,6 +112,9 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
             return result;
           }
         ),
+      // Mock getAvailableTemplates and getTemplateFiles if needed by other tests
+      getAvailableTemplates: vi.fn().mockResolvedValue(['typescript-react-vite']),
+      getTemplateFiles: vi.fn().mockResolvedValue({}), // Simplified mock
     })),
   };
 });
@@ -302,20 +295,11 @@ describe('FormCodeGenerator', () => {
             name: 'param1',
             label: 'Parameter 1',
             type: 'text',
-            validation: {
-              required: true,
-            },
+            validation: { required: true },
           },
         ],
-        layout: {
-          columns: 1 as const,
-          spacing: 'normal' as const,
-          labelPosition: 'top' as const,
-        },
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
+        layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+        validation: { mode: 'onChange', showErrors: 'inline' },
         theme: {},
         contractAddress: '0xTestAddress',
       };
@@ -331,29 +315,23 @@ describe('FormCodeGenerator', () => {
         }
       );
 
-      // Verify key files are present in the project
+      // Verify key generated files are present in the project
+      expect(Object.keys(projectFiles)).toContain('src/main.tsx');
       expect(Object.keys(projectFiles)).toContain('src/App.tsx');
       expect(Object.keys(projectFiles)).toContain('src/components/GeneratedForm.tsx');
       expect(Object.keys(projectFiles)).toContain('package.json');
 
-      // Note: Since we're using a mock/stub TemplateManager in tests,
-      // we shouldn't make assumptions about all template files being present.
-      // Just verify our generated files and basic structure are there.
-      expect(projectFiles).toHaveProperty('src/App.tsx');
-      expect(projectFiles).toHaveProperty('src/components/GeneratedForm.tsx');
-
-      // Verify App.tsx has been updated to import GeneratedForm
-      expect(projectFiles['src/App.tsx']).toContain('import GeneratedForm');
-
-      // Verify FormPlaceholder.tsx is not present (should be replaced)
-      expect(Object.keys(projectFiles)).not.toContain('src/components/FormPlaceholder.tsx');
+      // Verify the content of the generated files (optional, more detailed checks)
+      expect(projectFiles['src/main.tsx']).toContain('EvmAdapter');
+      expect(projectFiles['src/App.tsx']).toContain('GeneratedForm');
+      expect(projectFiles['src/components/GeneratedForm.tsx']).toContain('testFunction');
+      expect(projectFiles['src/components/GeneratedForm.tsx']).not.toContain('Placeholder Content'); // Ensure it was overwritten
 
       // Verify package.json is customized and includes correct adapter dependency
       expect(projectFiles['package.json']).toBeDefined();
       if (projectFiles['package.json']) {
         const packageJson = JSON.parse(projectFiles['package.json']);
         expect(packageJson.name).toBe('test-project');
-        // Check presence and expect caret versions (default export env)
         expect(packageJson.dependencies).toHaveProperty(
           '@openzeppelin/transaction-form-adapter-evm',
           expect.stringMatching(/^\^/)

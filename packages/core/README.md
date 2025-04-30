@@ -1,10 +1,10 @@
 # Transaction Form Builder Core
 
-The main application for the Transaction Form Builder monorepo. This package contains the form builder UI, adapters for different blockchain ecosystems, and core functionality.
+The main application for the Transaction Form Builder monorepo. This package contains the form builder UI and core functionality.
 
 ## Structure
 
-```
+```text
 core/
 ├── public/           # Static assets
 ├── src/
@@ -18,12 +18,6 @@ core/
 │   │   ├── hooks/    # Shared hooks
 │   │   ├── factories/ # Schema factories
 │   │   └── adapterRegistry.ts # Central registration of adapter instances
-│   ├── adapters/     # Chain-specific implementations
-│   │   ├── evm/      # Ethereum Virtual Machine adapter
-│   │   ├── midnight/ # Midnight blockchain adapter
-│   │   ├── solana/   # Solana blockchain adapter
-│   │   ├── stellar/  # Stellar blockchain adapter
-│   │   └── ...       # Future adapter packages
 │   ├── export/       # Export system
 │   │   ├── generators/ # Form code generators
 │   │   ├── codeTemplates/ # Code template files for generation
@@ -55,6 +49,7 @@ This package relies on:
 - **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms
 - **@openzeppelin/transaction-form-renderer**: Form rendering components
 - **@openzeppelin/transaction-form-styles**: Centralized styling system
+- **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`)
 
 ## Styling
 

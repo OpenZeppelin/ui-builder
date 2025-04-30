@@ -249,34 +249,6 @@ export class TemplateManager {
       ...customFiles,
     };
 
-    // Apply special transformations for placeholder files
-    this.processPlaceholderFiles(projectFiles, customFiles);
-
     return projectFiles;
-  }
-
-  /**
-   * Process placeholder files in the template
-   */
-  private processPlaceholderFiles(
-    projectFiles: Record<string, string>,
-    customFiles: Record<string, string>
-  ): void {
-    // Replace FormPlaceholder.tsx with the generated form if provided
-    if (
-      customFiles['src/components/GeneratedForm.tsx'] &&
-      projectFiles['src/components/FormPlaceholder.tsx']
-    ) {
-      // Remove the placeholder
-      delete projectFiles['src/components/FormPlaceholder.tsx'];
-    }
-
-    // Similar logic for other placeholder files
-    if (
-      customFiles['src/adapters/evm/adapter.ts'] &&
-      projectFiles['src/adapters/AdapterPlaceholder.ts']
-    ) {
-      delete projectFiles['src/adapters/AdapterPlaceholder.ts'];
-    }
   }
 }

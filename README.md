@@ -94,6 +94,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - Adapter pattern for easily adding support for new blockchains
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
+- Handles wallet connection state consistently in both core app and exported forms
 - Configure transaction execution methods (EOA, Relayer, Multisig) via adapters
 - Type-safe with TypeScript
 - Fast development with Vite

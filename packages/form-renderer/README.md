@@ -60,9 +60,11 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 
 ```tsx
 import { TransactionForm, generateId, logger } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 // Example form schema
-const schema = {
+const schema: RenderFormSchema = {
   id: 'example-form',
   title: 'Example Form',
   fields: [
@@ -83,14 +85,33 @@ const schema = {
   },
 };
 
-// Simple adapter implementation
-const adapter = {
+// Simple adapter implementation for demonstration.
+// Real applications use adapters like @openzeppelin/transaction-form-adapter-evm
+const adapter: ContractAdapter = {
+  chainType: 'evm', // Example chain type
+  loadContract: async (source: string) => {
+    throw new Error('Not implemented');
+  },
+  mapParameterTypeToFieldType: (type: string) => 'text',
+  getCompatibleFieldTypes: (type: string) => ['text'],
+  generateDefaultField: (param: any) => ({ id: 'f', name: 'p', label: 'L', type: 'text' }),
   formatTransactionData: (functionId, inputs) => inputs,
-  isValidAddress: (address) => address.length > 0,
+  isValidAddress: (address) => !!address && address.length > 0,
+  getWritableFunctions: (schema: any) => [],
+  getSupportedExecutionMethods: async () => [],
+  validateExecutionConfig: async (config: any) => true,
+  loadMockContract: async (id?: string) => {
+    throw new Error('Not implemented');
+  },
+  isViewFunction: (func: any) => false,
+  queryViewFunction: async (addr: string, funcId: string, params: any[]) => null,
+  formatFunctionResult: (result: any) => String(result),
+  supportsWalletConnection: () => false, // Indicate no support in this simple example
+  // Other methods omitted for brevity...
 };
 
 function App() {
-  const handleSubmit = (data) => {
+  const handleSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
     // Process transaction
   };
@@ -110,8 +131,9 @@ The main component for rendering transaction forms.
 | Prop            | Type                       | Description                                      |
 | --------------- | -------------------------- | ------------------------------------------------ |
 | `schema`        | `RenderFormSchema`         | The schema definition for the form               |
-| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode          |
+| `adapter`       | `ContractAdapter`          | The blockchain adapter instance                  |
 | `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted         |
+| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode          |
 | `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO] |
 | `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]       |
 | `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |

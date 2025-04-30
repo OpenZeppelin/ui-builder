@@ -8,35 +8,39 @@ The Export System is a key component of the Transaction Form Builder that allows
 
 The export system follows a modular architecture with several specialized components:
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ FormExportSystem│────▶│TemplateProcessor│────▶│  TemplateManager│
-└────────┬────────┘     └─────────────────┘     └─────────────────┘
-         │                                               ▲
-         │                                               │
-         ▼                                               │
-┌─────────────────┐     ┌─────────────────┐     ┌───────┴───────┐
-│FormCodeGenerator│────▶│AdapterExportMgr │────▶│ PackageManager│
-└─────────────────┘     └─────────────────┘     └───────────────┘
-                                                        │
-                                                        ▼
-                                                ┌───────────────┐
-                                                │ ZipGenerator  │
-                                                └───────────────┘
+```mermaid
+graph TD
+    %% Define Nodes
+    FES[FormExportSystem]
+    TP(TemplateProcessor)
+    TM(TemplateManager)
+    FCG(FormCodeGenerator)
+    PM(PackageManager)
+    SM(StyleManager)
+    ZG(ZipGenerator)
+
+    %% Define Links
+    FES --> TP
+    FES --> FCG
+    FES --> PM
+    FES --> SM
+    FES --> ZG
+    TP --> TM
+    %% FormCodeGenerator link to PM removed as FES coordinates PM directly
+
+    %% Comments
+    %% FormExportSystem coordinates PackageManager
 ```
 
 ### Key Components
 
-1. **FormExportSystem**: The main orchestrator that coordinates the entire export process.
-2. **FormCodeGenerator**: Generates React components that use the shared form-renderer package.
-3. **TemplateManager**: Manages template files for different project types.
-4. **TemplateProcessor**: Processes code templates with placeholder substitution.
-5. **AdapterExportManager**: Provides adapter files for the selected blockchain.
-6. **PackageManager**: Manages dependencies for the exported project.
-7. **ZipGenerator**: Creates a downloadable ZIP file of the project.
-8. **Configuration Processing**: Replaces placeholder values in config files (e.g., Tailwind, PostCSS) with actual content loaded via virtual modules.
-9. **StyleManager**: Gathers necessary CSS files (`global.css`, template `styles.css`) and configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) for inclusion in the export.
-10. **Build Script Generation**: Creates a `package.json` with appropriate dependencies (merged from `core`, `form-renderer`, and template) and build/dev scripts.
+1.  **FormExportSystem**: The main orchestrator that coordinates the entire export process.
+2.  **FormCodeGenerator**: Generates React components (`main.tsx`, `App.tsx`, `GeneratedForm.tsx`) using code templates and the user's configuration.
+3.  **TemplateManager**: Manages base project template files (structure, static assets, placeholder components).
+4.  **TemplateProcessor**: Processes code templates with placeholder substitution and formatting.
+5.  **PackageManager**: Manages dependencies for the exported project (core, adapter, form-renderer).
+6.  **ZipGenerator**: Creates a downloadable ZIP file of the project.
+7.  **StyleManager**: Gathers necessary shared CSS files (`global.css`) and configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) for inclusion in the export.
 
 ## Schema Transformation
 
@@ -50,18 +54,19 @@ A validation step verifies that all required schema properties are present befor
 
 ## Export Process Flow
 
-1. User initiates export with a form configuration, chain type, and function ID
-2. FormCodeGenerator creates form components using the template system
-3. AdapterExportManager provides blockchain-specific adapter files
-4. TemplateManager creates a complete project structure using one of the available templates
-5. StyleManager retrieves CSS and root config file content via virtual modules
-6. Files are assembled: Template files + Generated Code + Adapter Files + Style/Config Files
-7. FormExportSystem modifies the `tailwind.config.cjs` content paths
-8. Adapter files are potentially removed based on `includeAdapters` option
-9. PackageManager updates the `package.json` content with merged dependencies and metadata
-10. TemplateProcessor formats JSON files
-11. ZipGenerator bundles everything into a downloadable ZIP file
-12. The completed ZIP is returned to the user
+1.  User initiates export with a form configuration, chain type, and function ID.
+2.  `FormCodeGenerator` creates the content for `main.tsx`, `App.tsx`, and `GeneratedForm.tsx` using code templates.
+3.  `TemplateManager` creates a base project structure from a template (e.g., `typescript-react-vite`), excluding files that will be generated (like `main.tsx`).
+4.  `StyleManager` retrieves shared CSS and root config file content.
+5.  `FormExportSystem` assembles the final project files:
+    - Copies base template files.
+    - Adds the generated `main.tsx`, `App.tsx`, `GeneratedForm.tsx` (overwriting placeholders like the base `App.tsx`).
+    - Adds shared styles and configs.
+    - Modifies `tailwind.config.cjs` content paths.
+6.  `PackageManager` updates the `package.json` content with merged dependencies and metadata.
+7.  `TemplateProcessor` formats JSON files.
+8.  `ZipGenerator` bundles everything into a downloadable ZIP file.
+9.  The completed ZIP is returned to the user.
 
 ## Template System
 
@@ -75,8 +80,8 @@ The template system uses real code files as templates instead of string literals
 
 Templates are stored in two locations:
 
-- `/codeTemplates`: Contains component templates (form-component.template.tsx, app-component.template.tsx)
-- `/templates`: Contains complete project templates (typescript-react-vite)
+- `/codeTemplates`: Contains templates for dynamically generated files (`main.template.tsx`, `app-component.template.tsx`, `form-component.template.tsx`).
+- `/templates`: Contains base project structure templates (e.g., `typescript-react-vite`) including placeholder components and static files.
 
 ### Placeholder Syntax
 
@@ -101,11 +106,11 @@ const adapter = new /*@@adapter-class-name@@*/();
 
 ## Code Generation
 
-The code generation system produces:
+The code generation system (`FormCodeGenerator`) produces the content for:
 
-1. **Form Component**: A React component that renders the transaction form
-2. **App Component**: An updated App component that imports the form
-3. **Adapter Files**: Blockchain-specific adapter implementation
+1.  **`main.tsx`**: The application entry point, initializing the adapter.
+2.  **`App.tsx`**: The main application component, passing the adapter down.
+3.  **`GeneratedForm.tsx`**: The specific form component rendering the UI using `form-renderer`.
 
 ### Form Component Generation
 
@@ -156,7 +161,7 @@ const result = await exportSystem.exportForm(
 );
 
 // Result contains:
-// - zipBlob: The generated ZIP file
+// - data: The generated ZIP file blob/buffer
 // - fileName: Suggested filename for the ZIP
 // - dependencies: List of dependencies used
 ```
