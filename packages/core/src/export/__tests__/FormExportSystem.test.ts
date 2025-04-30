@@ -144,7 +144,7 @@ describe('FormExportSystem', () => {
     vi.spyOn(formCodeGenerator, 'generateFormComponent').mockResolvedValue(
       '/* Mock Form Component */'
     );
-    vi.spyOn(formCodeGenerator, 'generateUpdatedAppComponent').mockResolvedValue(
+    vi.spyOn(formCodeGenerator, 'generateAppComponent').mockResolvedValue(
       '/* Mock App Component */'
     );
 

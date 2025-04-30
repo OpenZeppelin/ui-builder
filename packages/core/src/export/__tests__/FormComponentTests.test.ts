@@ -67,8 +67,8 @@ describe('Form Component Tests', () => {
         /import.*from ['"]@openzeppelin\/transaction-form-adapter-evm['"]/
       );
 
-      // Check that adapter is instantiated and passed to the form
-      expect(formComponentCode).toMatch(/new EvmAdapter\(/);
+      // Check that adapter is passed as a prop with the correct type
+      expect(formComponentCode).toMatch(/adapter:\s*EvmAdapter/);
       expect(formComponentCode).toMatch(/adapter={adapter}/);
     });
 

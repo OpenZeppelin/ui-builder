@@ -15,11 +15,17 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"import GeneratedForm from './components/GeneratedForm';
+"import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
+
+import GeneratedForm from './components/GeneratedForm';
 
 // Define types for the transaction data
 interface TransactionData {
   [key: string]: unknown;
+}
+
+interface AppProps {
+  adapter: EvmAdapter;
 }
 
 /**
@@ -27,7 +33,7 @@ interface TransactionData {
  *
  * Main application component that wraps the form.
  */
-export function App() {
+export function App({ adapter }: AppProps) {
   return (
     <div className="app">
       <header className="header">
@@ -38,6 +44,7 @@ export function App() {
       <main className="main">
         <div className="container">
           <GeneratedForm
+            adapter={adapter}
             onSubmit={(txData: TransactionData) => {
               console.log('Transaction submitted:', txData);
               return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });
@@ -62,7 +69,7 @@ export function App() {
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
-"import { useEffect, useMemo, useState } from 'react';
+"import { useEffect, useState } from 'react';
 
 import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
 import {
@@ -89,6 +96,11 @@ interface TransactionResult {
   error?: string;
 }
 
+// Define props for the component - extending TransactionFormProps but making schema optional
+interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema'> {
+  adapter: EvmAdapter;
+}
+
 /**
  * Generated Transaction Form for transfer
  *
@@ -96,14 +108,11 @@ interface TransactionResult {
  * It uses the shared form-renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
-export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
+export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
-
-  // Create the adapter instance for evm
-  const adapter = useMemo(() => new EvmAdapter(), []);
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
   const formSchema: RenderFormSchema = {
