@@ -7,6 +7,9 @@
  */
 /*------------TEMPLATE COMMENT END------------*/
 // @ts-expect-error - This import will be processed during code generation
+import { AdapterPlaceholder } from '@@adapter-package-name@@';
+
+// @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
 
 // Define types for the transaction data
@@ -14,12 +17,16 @@ interface TransactionData {
   [key: string]: unknown;
 }
 
+interface AppProps {
+  adapter: AdapterPlaceholder;
+}
+
 /**
  * App Component
  *
  * Main application component that wraps the form.
  */
-export function App() {
+export function App({ adapter }: AppProps) {
   return (
     <div className="app">
       <header className="header">
@@ -30,6 +37,7 @@ export function App() {
       <main className="main">
         <div className="container">
           <GeneratedForm
+            adapter={adapter}
             onSubmit={(txData: TransactionData) => {
               console.log('Transaction submitted:', txData);
               return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });

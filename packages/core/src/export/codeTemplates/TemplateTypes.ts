@@ -71,3 +71,18 @@ export interface AppComponentTemplateParams extends BaseTemplateParams {
    */
   currentYear: number;
 }
+
+/**
+ * Parameters for the main.tsx template
+ */
+export interface MainTemplateParams extends BaseTemplateParams {
+  /**
+   * The class name of the adapter to use (e.g., 'EvmAdapter')
+   */
+  adapterClassName: string;
+
+  /**
+   * The adapter package name
+   */
+  adapterPackageName: string;
+}

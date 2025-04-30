@@ -12,7 +12,7 @@
 // @ts-expect-error - This is a placeholder for the correct adapter import
 import { AdapterPlaceholder } from '@@adapter-package-name@@';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Card,
@@ -38,6 +38,11 @@ interface TransactionResult {
   error?: string;
 }
 
+// Define props for the component - extending TransactionFormProps but making schema optional
+interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema'> {
+  adapter: AdapterPlaceholder;
+}
+
 /**
  * Generated Transaction Form for @@function-id@@
  *
@@ -45,17 +50,11 @@ interface TransactionResult {
  * It uses the shared form-renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
-export default function GeneratedForm({ onSubmit }: TransactionFormProps) {
+export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
-
-  // Create the adapter instance for @@chain-type@@
-  /*------------TEMPLATE COMMENT START------------*/
-  // AdapterPlaceholder will be replaced at generation time
-  /*------------TEMPLATE COMMENT END------------*/
-  const adapter = useMemo(() => new AdapterPlaceholder(), []);
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
   /*------------TEMPLATE COMMENT START------------*/

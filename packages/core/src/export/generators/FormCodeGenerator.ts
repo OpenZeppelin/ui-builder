@@ -167,34 +167,84 @@ export class FormCodeGenerator {
     functionId: string,
     options: ExportOptions = { chainType }
   ): Promise<Record<string, string>> {
+    // Generate all necessary component code
+    const mainTsxCode = await this.generateMainTsx(chainType);
+    const appComponentCode = await this.generateAppComponent(chainType, functionId);
     const formComponentCode = await this.generateFormComponent(formConfig, chainType, functionId);
 
     const customFiles: Record<string, string> = {
+      'src/main.tsx': mainTsxCode,
+      'src/App.tsx': appComponentCode,
       'src/components/GeneratedForm.tsx': formComponentCode,
-      'src/App.tsx': await this.generateUpdatedAppComponent(functionId),
     };
 
     return await this.templateManager.createProject('typescript-react-vite', customFiles, options);
   }
 
   /**
-   * Generate an updated App component that imports the GeneratedForm instead of FormPlaceholder
+   * Generate the main.tsx file content.
    *
+   * @param chainType The chain type to determine adapter details
+   * @returns The content of the generated main.tsx file
+   */
+  public async generateMainTsx(chainType: ChainType): Promise<string> {
+    const adapterClassName = this.getAdapterClassName(chainType);
+    const adapterPackageName = adapterPackageMap[chainType];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+    }
+
+    // Define parameters for the main template
+    const params = {
+      adapterClassName,
+      adapterPackageName,
+    };
+
+    // Process the main template
+    let processedTemplate = await this.templateProcessor.processTemplate('main', params);
+
+    // Apply common post-processing
+    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
+      adapterClassName,
+      adapterPackageName,
+    });
+
+    // Format the code
+    processedTemplate = await this.templateProcessor.formatFinalCode(processedTemplate);
+
+    return processedTemplate;
+  }
+
+  /**
+   * Generate an App component that imports the GeneratedForm
+   *
+   * @param chainType The selected blockchain type
    * @param functionId The ID of the function this form is for (used in titles)
    * @returns The content of the updated App.tsx file
    */
-  public async generateUpdatedAppComponent(functionId: string): Promise<string> {
+  public async generateAppComponent(chainType: ChainType, functionId: string): Promise<string> {
+    const adapterClassName = this.getAdapterClassName(chainType);
+    const adapterPackageName = adapterPackageMap[chainType];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+    }
+
     // Create parameters for the template
     const params: AppComponentTemplateParams & Record<string, unknown> = {
       functionId,
       currentYear: new Date().getFullYear(),
+      adapterClassName,
+      adapterPackageName,
     };
 
     // Process the app component template
     let processedTemplate = await this.templateProcessor.processTemplate('app-component', params);
 
     // Apply common post-processing
-    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate);
+    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
+      adapterClassName,
+      adapterPackageName,
+    });
 
     // Format the entire code with Prettier
     processedTemplate = await this.templateProcessor.formatFinalCode(processedTemplate);

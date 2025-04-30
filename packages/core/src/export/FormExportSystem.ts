@@ -9,6 +9,7 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
+import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
@@ -83,25 +84,27 @@ export class FormExportSystem {
       logger.info('Export System', 'Starting export process...');
       logger.info('Export System', 'Options:', exportOptions);
 
-      // 1. Generate form component code
-      logger.info('Export System', 'Generating form component...');
+      // 1. Generate all necessary code components
+      logger.info('Export System', 'Generating code components...');
+      const mainTsxCode = await this.formCodeGenerator.generateMainTsx(chainType);
+      const appComponentCode = await this.formCodeGenerator.generateAppComponent(
+        chainType,
+        functionId
+      );
       const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
         chainType,
         functionId
       );
 
-      // 2. Generate App component code
-      logger.info('Export System', 'Generating App component...');
-      const appComponentCode = await this.formCodeGenerator.generateUpdatedAppComponent(functionId);
-
-      // 3. Prepare custom files object
+      // 2. Prepare custom files object
       const customFiles = {
+        'src/main.tsx': mainTsxCode,
         'src/App.tsx': appComponentCode,
         'src/components/GeneratedForm.tsx': formComponentCode,
       };
 
-      // 4. Assemble Project Files
+      // 3. Assemble Project Files
       logger.info('Export System', 'Assembling project files...');
       const projectFiles = await this.assembleProjectFiles(
         formConfig,
@@ -112,13 +115,13 @@ export class FormExportSystem {
       );
       logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
 
-      // 5. Create ZIP file
+      // 4. Create ZIP file
       logger.info('Export System', 'Generating ZIP file...');
       const fileName = this.generateFileName(functionId);
       const zipResult = await this.createZipFile(projectFiles, fileName, exportOptions.onProgress);
       logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
-      // 6. Prepare and return the final export result
+      // 5. Prepare and return the final export result
       const dependencies = await this.packageManager.getDependencies(formConfig, chainType);
       const finalResult: ExportResult = {
         data: zipResult.data,
@@ -145,14 +148,20 @@ export class FormExportSystem {
     exportOptions: ExportOptions,
     customFiles: Record<string, string>
   ): Promise<Record<string, string>> {
-    // 1. Get base project files from the selected template
+    // Determine adapter details (needed for package.json update)
+    const adapterPackageName = adapterPackageMap[chainType];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+    }
+
+    // 1. Get base project template structure (will not include main.tsx anymore)
     logger.info(
       'File Assembly',
-      `Creating project from template: ${exportOptions.template || 'typescript-react-vite'}...`
+      `Getting base template structure: ${exportOptions.template || 'typescript-react-vite'}...`
     );
     const templateFilesRaw = await this.templateManager.createProject(
       exportOptions.template || 'typescript-react-vite',
-      customFiles, // Pass custom files to handle placeholders
+      {}, // Start with empty custom files
       exportOptions
     );
     logger.info(
@@ -163,7 +172,11 @@ export class FormExportSystem {
     // Initialize the final file collection
     let projectFiles: Record<string, string> = { ...templateFilesRaw };
 
-    // 2. Add shared CSS files (global.css) and template styles.css via StyleManager
+    // 2. Add the generated custom components
+    // This will overwrite the placeholder files from the base template given the same file names
+    Object.assign(projectFiles, customFiles);
+
+    // 3. Add shared CSS files (global.css) and template styles.css via StyleManager
     logger.info('File Assembly', 'Adding CSS files...');
     const styleFiles = this.styleManager.getStyleFiles();
     styleFiles.forEach((file) => {
@@ -171,7 +184,7 @@ export class FormExportSystem {
     });
     logger.info('File Assembly', `Added ${styleFiles.length} CSS file(s).`);
 
-    // 3. Add root configuration files (tailwind, postcss, components) via StyleManager
+    // 4. Add root configuration files (tailwind, postcss, components) via StyleManager
     logger.info('File Assembly', 'Adding root config files...');
     const configFiles = this.styleManager.getConfigFiles();
     for (const file of configFiles) {
@@ -192,8 +205,6 @@ export class FormExportSystem {
       projectFiles[file.path] = finalContent;
     }
     logger.info('File Assembly', `Added and formatted ${configFiles.length} config file(s).`);
-
-    // 4. Remove adapter directory if adapters are excluded
 
     // 5. Update package.json with correct dependencies and metadata
     logger.info('File Assembly', 'Updating package.json...');

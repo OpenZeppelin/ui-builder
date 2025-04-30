@@ -292,7 +292,7 @@ describe('FormCodeGenerator Templating System', () => {
       // This test verifies that the template processing works correctly
       // when called through the public generateUpdatedAppComponent method
 
-      const code = await generator.generateUpdatedAppComponent('transferTokens');
+      const code = await generator.generateAppComponent('evm', 'transferTokens');
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('transferTokens');
