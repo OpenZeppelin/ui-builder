@@ -47,6 +47,7 @@ export default {
         'docs',
         'tests',
         'release',
+        'adapter',
       ],
     ],
     'scope-empty': [2, 'never'],
