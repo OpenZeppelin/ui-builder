@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
+
 import { FormCodeGenerator } from '../FormCodeGenerator';
 import { TemplateProcessor } from '../TemplateProcessor';
 
@@ -249,31 +250,15 @@ describe('FormCodeGenerator Templating System', () => {
       // This test verifies that the template processing works correctly
       // when called through the public generateFormComponent method
 
-      const formConfig: BuilderFormConfig = {
-        functionId: 'transferTokens',
-        fields: [
-          {
-            id: 'amount',
-            name: 'amount',
-            label: 'Amount',
-            type: 'text' as const,
-            validation: { required: true },
-          },
-        ],
-        layout: {
-          columns: 1 as const,
-          spacing: 'normal' as const,
-          labelPosition: 'top' as const,
-        },
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
-        theme: {},
-        contractAddress: '0xTestAddress',
-      };
+      const formConfig = createMinimalFormConfig('transferTokens', 'evm');
+      const contractSchema = createMinimalContractSchema('transferTokens', 'evm');
 
-      const code = await generator.generateFormComponent(formConfig, 'evm', 'transferTokens');
+      const code = await generator.generateFormComponent(
+        formConfig,
+        contractSchema,
+        'evm',
+        'transferTokens'
+      );
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('EvmAdapter');

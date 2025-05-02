@@ -2,6 +2,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
 
+import { createMinimalContractSchema } from '@/export/utils/testConfig';
+
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
 import { PackageManager } from '../PackageManager';
@@ -180,8 +182,9 @@ describe('FormExportSystem', () => {
     it('should generate a complete form export package', async () => {
       const { system } = createExportSystem();
       const formConfig = createMinimalFormConfig();
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
-      const result = await system.exportForm(formConfig, 'evm', 'testFunction', {
+      const result = await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction', {
         projectName: 'test-project',
       });
 
@@ -204,9 +207,14 @@ describe('FormExportSystem', () => {
     it('should use the correct dependencies for different blockchain types', async () => {
       const { system } = createExportSystem();
       const formConfig = createMinimalFormConfig();
-
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
       // Test with Solana
-      const solanaResult = await system.exportForm(formConfig, 'solana', 'testFunction');
+      const solanaResult = await system.exportForm(
+        formConfig,
+        contractSchema,
+        'solana',
+        'testFunction'
+      );
       expect(solanaResult.dependencies).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana',
         'workspace:*'
@@ -223,7 +231,12 @@ describe('FormExportSystem', () => {
       );
 
       // Test with Stellar
-      const stellarResult = await system.exportForm(formConfig, 'stellar', 'testFunction');
+      const stellarResult = await system.exportForm(
+        formConfig,
+        contractSchema,
+        'stellar',
+        'testFunction'
+      );
       expect(stellarResult.dependencies).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-stellar',
         'workspace:*'
@@ -275,10 +288,21 @@ describe('FormExportSystem', () => {
 
       // Create a form config
       const formConfig = createMinimalFormConfig();
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
       // Export the forms with different systems
-      const basicResult = await basicSystem.exportForm(formConfig, 'evm', 'testFunction');
-      const advancedResult = await advancedSystem.exportForm(formConfig, 'evm', 'testFunction');
+      const basicResult = await basicSystem.exportForm(
+        formConfig,
+        contractSchema,
+        'evm',
+        'testFunction'
+      );
+      const advancedResult = await advancedSystem.exportForm(
+        formConfig,
+        contractSchema,
+        'evm',
+        'testFunction'
+      );
 
       // Basic form should not have date picker or select dependencies
       expect(basicResult.dependencies).not.toHaveProperty('react-datepicker');
@@ -302,8 +326,8 @@ describe('FormExportSystem', () => {
           'custom-lib': '^1.0.0',
         },
       };
-
-      await system.exportForm(formConfig, 'evm', 'testFunction', customOptions);
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
+      await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction', customOptions);
       expect(createZipFileSpy).toHaveBeenCalled();
       const filesPassedToZip = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
       const finalPackageJson = JSON.parse(filesPassedToZip['package.json']);
@@ -323,8 +347,9 @@ describe('FormExportSystem', () => {
       const { system, packageManager } = createExportSystem();
       const getDependenciesSpy = vi.spyOn(packageManager, 'getDependencies');
       const formConfig = createMinimalFormConfig();
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
-      await system.exportForm(formConfig, 'evm', 'testFunction');
+      await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction');
 
       expect(getDependenciesSpy).toHaveBeenCalled();
       expect(getDependenciesSpy).toHaveBeenCalledWith(formConfig, 'evm');

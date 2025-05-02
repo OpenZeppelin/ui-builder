@@ -1,5 +1,7 @@
+import { capitalize } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -44,6 +46,40 @@ export function createMinimalFormConfig(
     },
     theme: {},
     contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
+  };
+}
+
+/**
+ * Creates a minimal mock ContractSchema for testing.
+ */
+export function createMinimalContractSchema(
+  functionName: string,
+  chainType: ChainType
+): ContractSchema {
+  return {
+    chainType: chainType,
+    name: 'MockContract',
+    address: '0x1234567890123456789012345678901234567890', // Use a valid-looking address
+    functions: [
+      {
+        id: functionName,
+        name: functionName,
+        displayName: capitalize(functionName),
+        inputs: [], // Basic schema assumes no inputs for simplicity
+        type: 'function',
+        modifiesState: true,
+      },
+      // Add a basic view function for potential widget tests?
+      {
+        id: 'viewFunction',
+        name: 'viewFunction',
+        displayName: 'View Function',
+        inputs: [],
+        type: 'function',
+        modifiesState: false,
+        stateMutability: 'view',
+      },
+    ],
   };
 }
 

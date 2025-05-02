@@ -110,6 +110,7 @@ export function StepFormCustomization({
           formConfig={formConfig}
           functionDetails={selectedFunctionDetails}
           selectedChain={selectedChain}
+          contractSchema={contractSchema}
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>

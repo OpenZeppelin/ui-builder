@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
+import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
+
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
@@ -153,35 +155,12 @@ describe('FormCodeGenerator', () => {
     it('should generate React component code for a form', async () => {
       const generator = new FormCodeGenerator();
 
-      // Create a minimal form config for testing
-      const formConfig: BuilderFormConfig = {
-        functionId: 'testFunction',
-        fields: [
-          {
-            id: 'param1',
-            name: 'param1',
-            label: 'Parameter 1',
-            type: 'text',
-            validation: {
-              required: true,
-            },
-          },
-        ],
-        layout: {
-          columns: 1 as const,
-          spacing: 'normal' as const,
-          labelPosition: 'top' as const,
-        },
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
-        theme: {},
-        contractAddress: '0xTestAddress',
-      };
+      const formConfig = createMinimalFormConfig('testFunction', 'evm');
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
       const generatedCode = await generator.generateFormComponent(
         formConfig,
+        contractSchema,
         'evm',
         'testFunction'
       );
@@ -202,34 +181,11 @@ describe('FormCodeGenerator', () => {
       const generator = new FormCodeGenerator();
 
       // Create a minimal form config for testing
-      const formConfig: BuilderFormConfig = {
-        functionId: 'transferTokens',
-        fields: [
-          {
-            id: 'param1',
-            name: 'param1',
-            label: 'Parameter 1',
-            type: 'text',
-            validation: {
-              required: true,
-            },
-          },
-        ],
-        layout: {
-          columns: 1 as const,
-          spacing: 'normal' as const,
-          labelPosition: 'top' as const,
-        },
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
-        theme: {},
-        contractAddress: '0xTestAddress',
-      };
+      const formConfig = createMinimalFormConfig('transferTokens', 'evm');
+      const contractSchema = createMinimalContractSchema('transferTokens', 'evm');
 
       // Generate the form component
-      await generator.generateFormComponent(formConfig, 'evm', 'transferTokens');
+      await generator.generateFormComponent(formConfig, contractSchema, 'evm', 'transferTokens');
 
       // Verify that FormSchemaFactory.builderConfigToRenderSchema was called with correct params
       expect(formSchemaFactory.builderConfigToRenderSchema).toHaveBeenCalledWith(
@@ -266,18 +222,12 @@ describe('FormCodeGenerator', () => {
       ) => RenderFormSchema);
 
       // Create a minimal form config
-      const formConfig: BuilderFormConfig = {
-        functionId: 'invalidForm',
-        fields: [],
-        layout: { columns: 1 as const, spacing: 'normal' as const, labelPosition: 'top' as const },
-        validation: { mode: 'onChange', showErrors: 'inline' },
-        theme: {},
-        contractAddress: '0xTestAddress',
-      };
+      const formConfig = createMinimalFormConfig('invalidForm', 'evm');
+      const contractSchema = createMinimalContractSchema('invalidForm', 'evm');
 
       // Attempt to generate form with invalid schema should throw
       await expect(
-        generator.generateFormComponent(formConfig, 'evm', 'invalidForm')
+        generator.generateFormComponent(formConfig, contractSchema, 'evm', 'invalidForm')
       ).rejects.toThrow(/Invalid RenderFormSchema/);
     });
   });
@@ -287,26 +237,13 @@ describe('FormCodeGenerator', () => {
       const generator = new FormCodeGenerator();
 
       // Create a minimal form config for testing
-      const formConfig: BuilderFormConfig = {
-        functionId: 'testFunction',
-        fields: [
-          {
-            id: 'param1',
-            name: 'param1',
-            label: 'Parameter 1',
-            type: 'text',
-            validation: { required: true },
-          },
-        ],
-        layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-        validation: { mode: 'onChange', showErrors: 'inline' },
-        theme: {},
-        contractAddress: '0xTestAddress',
-      };
+      const formConfig = createMinimalFormConfig('testFunction', 'evm');
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
       // Generate a complete project with standard options
       const projectFiles = await generator.generateTemplateProject(
         formConfig,
+        contractSchema,
         'evm',
         'testFunction',
         {

@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getAdapter } from '../../../core/adapterRegistry';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 import { useChainSelectionState } from './useChainSelectionState';
 import { useCompleteStepState } from './useCompleteStepState';
@@ -78,6 +79,24 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
         )
       : null;
 
+  // Create a handler that calls exportForm with the current state
+  const handleExportForm = useCallback(
+    (
+      formConfig: BuilderFormConfig | null,
+      selectedChain: ChainType,
+      selectedFunction: string | null
+    ) => {
+      // Use void to explicitly ignore the promise
+      void completeStep.exportForm(
+        formConfig,
+        selectedChain,
+        selectedFunction,
+        contractDefinition.contractSchema
+      );
+    },
+    [completeStep]
+  );
+
   return {
     // State from all hooks
     selectedChain: chainSelection.selectedChain,
@@ -97,6 +116,6 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     handleFormConfigUpdated: formCustomization.handleFormConfigUpdated,
     handleExecutionConfigUpdated: formCustomization.handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
-    exportForm: completeStep.exportForm,
+    exportForm: handleExportForm,
   };
 }

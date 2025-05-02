@@ -6,7 +6,11 @@ import {
   TransactionForm,
   WalletConnectionProvider,
 } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
+import type {
+  ChainType,
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types/contracts';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
@@ -16,13 +20,19 @@ interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
   selectedChain: ChainType;
+  contractSchema: ContractSchema;
 }
 
 /**
  * Form preview component that renders a preview of the form being built
  * Uses the TransactionForm component from the form-renderer package
  */
-export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
+export function FormPreview({
+  formConfig,
+  functionDetails,
+  selectedChain,
+  contractSchema,
+}: FormPreviewProps) {
   // Get the adapter for the selected chain
   const adapter = useMemo(() => getAdapter(selectedChain), [selectedChain]);
 
@@ -64,7 +74,10 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
     try {
       // Format data using the adapter, passing the field config
       const functionId = renderSchema.functionId || functionDetails.id || 'unknown';
+
+      // Use the passed-in contractSchema directly
       const formattedData = adapter.formatTransactionData(
+        contractSchema,
         functionId,
         submittedInputs, // Pass the parsed submitted data
         formConfig.fields // Pass the original field configurations
@@ -89,7 +102,7 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
               schema={renderSchema}
               adapter={adapter}
               onSubmit={handleSubmit}
-              previewMode={true}
+              contractSchema={contractSchema}
             />
           </WalletConnectionProvider>
         </CardContent>

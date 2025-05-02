@@ -132,16 +132,19 @@ export class SolanaAdapter implements ContractAdapter {
   }
 
   /**
-   * Format transaction data for the specific chain
-   *
-   * TODO: Implement proper Solana transaction formatting in future phases
+   * @inheritdoc
    */
   formatTransactionData(
+    _contractSchema: ContractSchema,
     _functionId: string,
     _submittedInputs: Record<string, unknown>,
     _allFieldsConfig: FormFieldType[]
   ): unknown {
-    return { placeholder: 'Solana adapter not implemented yet' };
+    console.warn(
+      'SolanaAdapter.formatTransactionData not implemented, returning placeholder data.'
+    );
+    // Placeholder implementation
+    return { data: 'solana_formatted_placeholder' };
   }
 
   /**

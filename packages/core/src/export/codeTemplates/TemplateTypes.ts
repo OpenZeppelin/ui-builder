@@ -3,6 +3,7 @@
  *
  * These types define the parameters that can be passed to template functions.
  */
+import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 /**
  * Base interface for all template parameters
@@ -29,7 +30,7 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   /**
    * The blockchain type (e.g., 'evm', 'solana')
    */
-  chainType: string;
+  chainType: ChainType;
 
   /**
    * The function ID (e.g., 'transferTokens')
@@ -49,12 +50,17 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   /**
    * The execution configuration as a JSON string or 'undefined'
    */
-  executionConfigJSON: string | undefined;
+  executionConfigJSON: string;
 
   /**
    * Optional flag to include debug mode
    */
   includeDebugMode?: boolean;
+
+  /**
+   * The contract schema as a JSON string
+   */
+  contractSchemaJSON: string;
 }
 
 /**

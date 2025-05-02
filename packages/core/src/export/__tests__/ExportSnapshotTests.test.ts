@@ -4,7 +4,7 @@ import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
 describe('Export Snapshot Tests', () => {
@@ -15,11 +15,18 @@ describe('Export Snapshot Tests', () => {
     // Create the export system and form config
     const exportSystem = new FormExportSystem();
     const formConfig = createMinimalFormConfig(functionName, chainType);
+    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
 
     // Export the form with a consistent project name for snapshots
-    const result = await exportSystem.exportForm(formConfig, chainType, functionName, {
-      projectName: 'snapshot-test-project',
-    });
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      chainType,
+      functionName,
+      {
+        projectName: 'snapshot-test-project',
+      }
+    );
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();

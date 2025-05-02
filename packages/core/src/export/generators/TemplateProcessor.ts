@@ -161,6 +161,7 @@ export class TemplateProcessor {
       adapterClassName?: string;
       adapterPackageName?: string;
       formConfigJSON?: string;
+      contractSchemaJSON?: string;
       allFieldsConfigJSON?: string;
       executionConfigJSON?: string;
     }
@@ -206,8 +207,21 @@ export class TemplateProcessor {
           `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
         );
       } catch (error) {
-        // Log any errors that might occur
         logger.error('TemplateProcessor', 'Failed to inject form schema:', error);
+        throw error;
+      }
+    }
+
+    // Inject ContractSchema JSON if provided
+    if (options?.contractSchemaJSON) {
+      try {
+        processedTemplate = processedTemplate.replace(
+          // Assume a similar placeholder variable assignment
+          /const contractSchema: ContractSchema = \{\}; \/\*@@CONTRACT_SCHEMA_JSON@@\*\//g,
+          `const contractSchema: ContractSchema = ${options.contractSchemaJSON};`
+        );
+      } catch (error) {
+        logger.error('TemplateProcessor', 'Failed to inject contract schema:', error);
         throw error;
       }
     }
@@ -227,7 +241,7 @@ export class TemplateProcessor {
       }
     }
 
-    // If execution config JSON is provided, inject it
+    // Inject execution config JSON if provided
     if (options?.executionConfigJSON) {
       try {
         const regex =

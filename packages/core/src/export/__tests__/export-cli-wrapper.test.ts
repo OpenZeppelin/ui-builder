@@ -13,7 +13,12 @@ import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 import { FormExportSystem } from '../FormExportSystem';
-import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
+import { ZipProgress } from '../ZipGenerator';
+import {
+  createComplexFormConfig,
+  createMinimalContractSchema,
+  createMinimalFormConfig,
+} from '../utils/testConfig';
 
 // Keep track of created files for cleanup
 const createdFiles: string[] = [];
@@ -92,11 +97,13 @@ describe('Export CLI Wrapper', () => {
       ? createComplexFormConfig(func, chain)
       : createMinimalFormConfig(func, chain);
 
+    const mockContractSchema = createMinimalContractSchema(func, chain);
+
     // Create export system
     const exportSystem = new FormExportSystem();
 
     // Generate the export
-    const result = await exportSystem.exportForm(formConfig, chain, func, {
+    const result = await exportSystem.exportForm(formConfig, mockContractSchema, chain, func, {
       projectName: `${func}-form`,
       template,
       includeAdapters,
@@ -104,7 +111,7 @@ describe('Export CLI Wrapper', () => {
       isCliBuildTarget: isRunningFromCLI,
       // Only provide onProgress callback if running from CLI
       onProgress: isRunningFromCLI
-        ? (progress) =>
+        ? (progress: ZipProgress) =>
             logger.info(
               'CLI Wrapper Test',
               `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`

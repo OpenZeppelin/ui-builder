@@ -1,4 +1,5 @@
 import type { ContractAdapter } from '../adapters';
+import type { ContractSchema } from '../contracts';
 
 import { RenderFormSchema } from './schema';
 
@@ -87,31 +88,6 @@ export interface FieldTransforms<T = unknown> {
 export type FormValues = Record<string, unknown>;
 
 /**
- * Props for the TransactionForm component
- */
-export interface TransactionFormProps {
-  /**
-   * The form schema to render
-   */
-  schema: RenderFormSchema;
-
-  /**
-   * The adapter for the form's chain
-   */
-  adapter: ContractAdapter;
-
-  /**
-   * Optional callback when form is submitted
-   */
-  onSubmit?: (data: FormData) => void;
-
-  /**
-   * Whether the form is in preview mode
-   */
-  previewMode?: boolean;
-}
-
-/**
  * Type for React Hook Form error objects
  */
 export type FormError =
@@ -121,3 +97,30 @@ export type FormError =
       type?: string;
       [key: string]: unknown;
     };
+
+/**
+ * Props for the TransactionForm component
+ */
+export interface TransactionFormProps {
+  /**
+   * The form schema to render
+   */
+  schema: RenderFormSchema;
+
+  /**
+   * The full contract schema containing function definitions and details
+   * for the target contract on the specific blockchain.
+   * Required by the adapter to format transaction data correctly.
+   */
+  contractSchema: ContractSchema;
+
+  /**
+   * The chain-specific adapter instance.
+   */
+  adapter: ContractAdapter;
+
+  /**
+   * Optional callback when form is submitted
+   */
+  onSubmit?: (data: FormData) => void;
+}

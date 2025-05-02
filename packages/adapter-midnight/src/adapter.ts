@@ -133,16 +133,19 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   /**
-   * Format transaction data for the specific chain
-   *
-   * TODO: Implement proper Midnight transaction formatting in future phases
+   * @inheritdoc
    */
   formatTransactionData(
+    _contractSchema: ContractSchema,
     _functionId: string,
     _submittedInputs: Record<string, unknown>,
     _allFieldsConfig: FormFieldType[]
   ): unknown {
-    return { placeholder: 'Midnight adapter not implemented yet' };
+    console.warn(
+      'MidnightAdapter.formatTransactionData not implemented, returning placeholder data.'
+    );
+    // Placeholder implementation
+    return { data: 'midnight_formatted_placeholder' };
   }
 
   /**

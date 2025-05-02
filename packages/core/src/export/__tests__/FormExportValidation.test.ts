@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip, validateExportedProject } from '../utils/zipInspector';
 
 describe('FormExportValidation', () => {
@@ -11,9 +11,10 @@ describe('FormExportValidation', () => {
 
     // Create a test form config
     const formConfig = createMinimalFormConfig('transfer', 'evm');
+    const contractSchema = createMinimalContractSchema('transfer', 'evm');
 
     // Export the form
-    const result = await exportSystem.exportForm(formConfig, 'evm', 'transfer');
+    const result = await exportSystem.exportForm(formConfig, contractSchema, 'evm', 'transfer');
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
@@ -67,9 +68,15 @@ describe('FormExportValidation', () => {
 
     // Create a test form config
     const formConfig = createMinimalFormConfig('solanaTransfer', 'solana');
+    const contractSchema = createMinimalContractSchema('solanaTransfer', 'solana');
 
     // Export the form
-    const result = await exportSystem.exportForm(formConfig, 'solana', 'solanaTransfer');
+    const result = await exportSystem.exportForm(
+      formConfig,
+      contractSchema,
+      'solana',
+      'solanaTransfer'
+    );
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();

@@ -1,4 +1,4 @@
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 import { adapterPackageMap } from '../../core/adapterRegistry';
@@ -46,12 +46,14 @@ export class FormCodeGenerator {
    * generateTemplateProject method, replacing the placeholder components.
    *
    * @param formConfig The form configuration from the builder
+   * @param contractSchema The full contract schema
    * @param chainType The selected blockchain type
    * @param functionId The ID of the contract function
    * @returns Generated React component code as a string
    */
   async generateFormComponent(
     formConfig: BuilderFormConfig,
+    contractSchema: ContractSchema,
     chainType: ChainType,
     functionId: string
   ): Promise<string> {
@@ -86,9 +88,8 @@ export class FormCodeGenerator {
       chainType,
       functionId,
       formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
-      // Embed the ORIGINAL field configuration for the adapter's submission logic
+      contractSchemaJSON: JSON.stringify(contractSchema, null, 2), // Add full contract schema
       allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
-      // Pass executionConfig to the template
       executionConfigJSON: executionConfig ? JSON.stringify(executionConfig, null, 2) : 'undefined',
       includeDebugMode: false, // Or make this configurable via options
     };
@@ -101,6 +102,7 @@ export class FormCodeGenerator {
       adapterClassName,
       adapterPackageName,
       formConfigJSON: params.formConfigJSON,
+      contractSchemaJSON: params.contractSchemaJSON,
       executionConfigJSON: params.executionConfigJSON,
       allFieldsConfigJSON: params.allFieldsConfigJSON,
     });
@@ -156,6 +158,7 @@ export class FormCodeGenerator {
    * Uses the typescript-react-vite template and replaces placeholder files with generated code.
    *
    * @param formConfig The form configuration from the builder
+   * @param contractSchema The full contract schema
    * @param chainType The selected blockchain type
    * @param functionId The ID of the contract function
    * @param options Additional options for export customization
@@ -163,6 +166,7 @@ export class FormCodeGenerator {
    */
   async generateTemplateProject(
     formConfig: BuilderFormConfig,
+    contractSchema: ContractSchema,
     chainType: ChainType,
     functionId: string,
     options: ExportOptions = { chainType }
@@ -170,7 +174,12 @@ export class FormCodeGenerator {
     // Generate all necessary component code
     const mainTsxCode = await this.generateMainTsx(chainType);
     const appComponentCode = await this.generateAppComponent(chainType, functionId);
-    const formComponentCode = await this.generateFormComponent(formConfig, chainType, functionId);
+    const formComponentCode = await this.generateFormComponent(
+      formConfig,
+      contractSchema,
+      chainType,
+      functionId
+    );
 
     const customFiles: Record<string, string> = {
       'src/main.tsx': mainTsxCode,

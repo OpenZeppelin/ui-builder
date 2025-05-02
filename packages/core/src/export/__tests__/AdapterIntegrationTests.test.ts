@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
 describe('Adapter Integration Tests', () => {
@@ -16,7 +16,13 @@ describe('Adapter Integration Tests', () => {
   // Helper function to get exported files and parsed package.json
   async function getExportedPackageJson(chainType: ChainType, functionName: string = 'transfer') {
     const formConfig = createMinimalFormConfig(functionName, chainType);
-    const result = await exportSystem.exportForm(formConfig, chainType, functionName);
+    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      chainType,
+      functionName
+    );
     expect(result.data).toBeDefined();
     const files = await extractFilesFromZip(result.data);
     expect(files['package.json']).toBeDefined();
@@ -26,10 +32,6 @@ describe('Adapter Integration Tests', () => {
       allFiles: files,
     };
   }
-
-  // REMOVED OBSOLETE TEST SUITES: 'Adapter File Structure', 'Adapter Content Validation', 'Adapter Type Definitions', 'Adapter Function Tests'
-  // These tested the old structure where adapter source was copied into src/adapters.
-  // Adapter implementation details should be tested within their respective packages.
 
   describe('Package.json Adapter Dependencies', () => {
     it('should include correct dependencies for EVM in package.json', async () => {

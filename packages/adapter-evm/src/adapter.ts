@@ -1,8 +1,8 @@
 import type { GetAccountReturnType } from '@wagmi/core';
-import { Contract, JsonRpcProvider, isAddress } from 'ethers';
+import { Contract, JsonRpcProvider } from 'ethers';
 import { startCase } from 'lodash';
+import { type Abi, type AbiStateMutability, getAddress, isAddress } from 'viem';
 
-// import { generateId, logger } from '@openzeppelin/transaction-form-renderer'; // Removed import
 import type {
   Connector,
   ContractAdapter,
@@ -60,6 +60,16 @@ const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   bytes32: 'text',
 };
 
+// Define the expected structure for transaction data passed to signAndBroadcast
+interface WriteContractParameters {
+  address: `0x${string}`; // Ensure address is a valid hex string type
+  abi: Abi;
+  functionName: string;
+  args: unknown[];
+  value?: bigint;
+  // Add other potential viem parameters if needed (e.g., gas)
+}
+
 /**
  * EVM-specific adapter implementation
  */
@@ -78,13 +88,11 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   async loadContract(source: string): Promise<ContractSchema> {
-    // Step 1: Input Type Detection
     if (isAddress(source)) {
       console.info('EvmAdapter', `Detected address: ${source}. Attempting Etherscan ABI fetch...`);
       return this.loadAbiFromEtherscan(source);
     } else {
       console.info('EvmAdapter', 'Input is not an address. Attempting to parse as JSON ABI...');
-      // Assume input is JSON string if not an address
       return this.loadAbiFromJson(source);
     }
   }
@@ -357,88 +365,196 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   formatTransactionData(
+    contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
     allFieldsConfig: FormFieldType[]
   ): unknown {
-    /*
-     * TODO: Implement Full Hardcoded Value Merging and EVM ABI Encoding
-     *
-     * This function needs to construct the final ordered array of arguments
-     * expected by the EVM function call, considering both user-submitted
-     * data and hardcoded values defined in the configuration.
-     *
-     * Steps:
-     * 1. Determine Argument Order: The order must match the function signature in the ABI.
-     *    - It might be necessary to retrieve the original ABI definition for `functionId` here.
-     *    - Alternatively, if `allFieldsConfig` preserves the original parameter order reliably,
-     *      it can be used as the source of truth for iteration.
-     *
-     * 2. Iterate Through Expected Parameters (in order):
-     *    - For each expected parameter:
-     *      a. Find the corresponding field configuration in `allFieldsConfig` (using `field.name`).
-     *      b. Check `field.isHardcoded`.
-     *      c. If `true`, use `field.hardcodedValue`.
-     *      d. If `false`, retrieve the value from `submittedInputs` using `field.name`.
-     *      e. Handle cases where a non-hardcoded field might be missing from `submittedInputs`
-     *         (this shouldn't happen if `isHidden` logic is correct, but add defensive checks).
-     *
-     * 3. Apply Type Transformations:
-     *    - Based on the original EVM parameter type (e.g., `field.originalParameterType` or
-     *      looked up from the ABI), convert the selected value (hardcoded or submitted)
-     *      to the type expected by the encoding library (e.g., ethers.js).
-     *    - Examples:
-     *      - 'uint256': Convert string/number from form/hardcoded value to `BigInt`.
-     *      - 'address': Ensure correct casing (checksummed) via `ethers.getAddress()`.
-     *      - 'bool': Ensure value is `true` or `false`.
-     *      - 'bytes': Convert hex string to appropriate format.
-     *      - Arrays/Structs: Parse JSON strings (if textarea was used) or handle appropriately.
-     *      - Use `field.transforms?.output` if available for custom transformations.
-     *
-     * 4. EVM ABI Encode (using ethers.js or similar):
-     *    - Use a library like `ethers.js` (`Interface` class or `AbiCoder`)
-     *      to encode the function selector and the prepared, ordered, type-corrected arguments
-     *      into the final transaction `data` payload (hex string).
-     *
-     * 5. Return Formatted Transaction Object:
-     *    - Return an object suitable for the next step (signing/broadcasting),
-     *      including the `to` address (contract address), `data` (encoded payload),
-     *      `value` (if payable), etc.
-     */
-
-    // --- Current Placeholder Logic ---
     console.log(`Formatting EVM transaction data for function: ${functionId}`);
+    console.log('Contract Schema Provided:', contractSchema.name, contractSchema.address);
     console.log('Submitted Inputs:', submittedInputs);
     console.log('All Fields Config:', allFieldsConfig);
 
-    // Filter/map config for debugging (optional)
-    const hardcoded = allFieldsConfig
-      .filter((f) => f.isHardcoded)
-      .map((f) => ({ name: f.name, value: f.hardcodedValue }));
-    const hidden = allFieldsConfig.filter((f) => f.isHidden).map((f) => f.name);
-    console.log('Hardcoded fields:', hardcoded);
-    console.log('Hidden fields:', hidden);
+    // --- Step 1: Determine Argument Order --- //
+    // Use the provided schema directly
+    const schema = contractSchema;
 
-    // Placeholder return - Replace with actual encoded data
-    return {
-      to: '0x1234567890123456789012345678901234567890', // Replace with actual contract address
-      data: `0x${functionId.substring(0, 8)}0000...`, // Placeholder - Replace with encoded function call
-      value: '0', // Replace if payable
-      gasLimit: '100000', // Example gas limit
+    const functionDetails = schema.functions.find((fn) => fn.id === functionId);
+    if (!functionDetails) {
+      console.error(`formatTransactionData: Function with ID ${functionId} not found in schema.`);
+      throw new Error(
+        `Function definition for ${functionId} not found in provided contract schema.`
+      );
+    }
+
+    console.log('Function Details Found:', functionDetails);
+
+    const expectedArgs = functionDetails.inputs;
+    console.log('Expected Arguments (Order & Type):', expectedArgs);
+
+    // --- Step 2: Iterate and Select Values --- //
+    const orderedValues: unknown[] = [];
+    for (const expectedArg of expectedArgs) {
+      const fieldConfig = allFieldsConfig.find(
+        (field) => field.name === expectedArg.name || field.name === expectedArg.type
+      );
+      if (!fieldConfig) {
+        throw new Error(
+          `Configuration missing for argument: ${expectedArg.name || expectedArg.type}`
+        );
+      }
+      let value: unknown;
+      if (fieldConfig.isHardcoded) {
+        value = fieldConfig.hardcodedValue;
+      } else if (fieldConfig.isHidden) {
+        throw new Error(`Field '${fieldConfig.name}' cannot be hidden without being hardcoded.`);
+      } else {
+        if (!(fieldConfig.name in submittedInputs)) {
+          throw new Error(`Missing submitted input for field: ${fieldConfig.name}`);
+        }
+        value = submittedInputs[fieldConfig.name];
+      }
+      orderedValues.push(value);
+    }
+    console.log('Ordered Values (Before Transformation):', orderedValues);
+
+    // --- Step 3: Apply Type Transformations --- //
+    // TODO: Implement a more robust, potentially bidirectional serialization/deserialization
+    //       mechanism for handling inputs/outputs, especially for complex types (arrays, tuples)
+    //       and bytes. The current JSON.parse/stringify approach for complex types and the
+    //       placeholder for bytes are naive and may not handle all edge cases or ABI requirements correctly.
+    const transformedArgs = expectedArgs.map((param, index) => {
+      const rawValue = orderedValues[index];
+      const paramType = param.type;
+      try {
+        if (paramType.startsWith('uint') || paramType.startsWith('int')) {
+          if (rawValue === '') throw new Error('Numeric value cannot be empty');
+          try {
+            return BigInt(rawValue as string | number | bigint);
+          } catch {
+            throw new Error(`Invalid numeric value: ${rawValue}`);
+          }
+        } else if (paramType === 'address') {
+          if (typeof rawValue !== 'string' || !rawValue)
+            throw new Error('Address value must be a non-empty string');
+          if (!isAddress(rawValue)) throw new Error(`Invalid address format: ${rawValue}`);
+          return getAddress(rawValue);
+        } else if (paramType === 'bool') {
+          if (typeof rawValue === 'boolean') return rawValue;
+          if (typeof rawValue === 'string') {
+            if (rawValue.toLowerCase() === 'true') return true;
+            if (rawValue.toLowerCase() === 'false') return false;
+          }
+          return Boolean(rawValue);
+        } else if (paramType === 'string') {
+          return String(rawValue);
+        } else if (paramType.startsWith('bytes')) {
+          console.warn(`Bytes transformation for type '${paramType}' not fully implemented yet.`);
+          return rawValue;
+        } else if (paramType.includes('[') || paramType.startsWith('tuple')) {
+          if (typeof rawValue !== 'string' || rawValue.trim() === '')
+            throw new Error(`Input for ${paramType} must be a non-empty JSON string`);
+          try {
+            return JSON.parse(rawValue);
+          } catch (e) {
+            throw new Error(
+              `Invalid JSON for ${paramType}: ${rawValue}. Error: ${(e as Error).message}`
+            );
+          }
+        }
+        console.warn(`Unknown parameter type encountered: ${paramType}. Using raw value.`);
+        return rawValue;
+      } catch (error) {
+        throw new Error(
+          `Failed to transform value for '${param.name}': ${(error as Error).message}`
+        );
+      }
+    });
+    console.log('Transformed Arguments:', transformedArgs);
+
+    // --- Step 4 & 5: Prepare Return Object --- //
+    const isPayable = functionDetails.stateMutability === 'payable';
+    let transactionValue = '0';
+    if (isPayable) {
+      console.warn('Payable function detected, but sending 0 ETH. Implement value input.');
+    }
+
+    // Re-construct the minimal ABI for the specific function, matching AbiFunction type
+    const resolvedStateMutability = (functionDetails.stateMutability ||
+      'nonpayable') as AbiStateMutability;
+    const functionAbiItem = {
+      type: 'function',
+      stateMutability: resolvedStateMutability,
+      name: functionDetails.name,
+      inputs: functionDetails.inputs.map((i) => ({ name: i.name, type: i.type })),
+      outputs: functionDetails.outputs?.map((o) => ({ name: o.name, type: o.type })) || [],
+    } as const; // Keep 'as const' for stricter typing of properties
+
+    if (!schema.address || !isAddress(schema.address)) {
+      throw new Error('Contract address is missing or invalid in the provided schema.');
+    }
+
+    // This structure IS what signAndBroadcast needs, but we return unknown for interface compatibility for now
+    const paramsForSignAndBroadcast: WriteContractParameters = {
+      address: schema.address,
+      abi: [functionAbiItem], // Pass the specific function ABI item directly
+      functionName: functionDetails.name,
+      args: transformedArgs,
+      value: BigInt(transactionValue),
     };
+    return paramsForSignAndBroadcast;
   }
 
   /**
    * @inheritdoc
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    // In a real implementation, this would use ethers.js or web3.js to sign and broadcast
-    console.log('Signing and broadcasting EVM transaction:', transactionData);
+  async signAndBroadcast(transactionData: WriteContractParameters): Promise<{ txHash: string }> {
+    console.log('Attempting to sign and broadcast EVM transaction:', transactionData);
 
-    // Return a mock transaction hash
-    return {
-      txHash: `0x${Math.random().toString(16).substring(2, 42)}`,
-    };
+    // 1. Get the Wallet Client
+    const walletClient = await this.walletImplementation.getWalletClient();
+    if (!walletClient) {
+      console.error('signAndBroadcast: Wallet client not available. Is wallet connected?');
+      throw new Error('Wallet is not connected or client is unavailable.');
+    }
+
+    // 2. Get the connected account
+    const accountStatus = this.walletImplementation.getWalletConnectionStatus();
+    if (!accountStatus.isConnected || !accountStatus.address) {
+      console.error('signAndBroadcast: Account not available. Is wallet connected?');
+      throw new Error('Wallet is not connected or account address is unavailable.');
+    }
+
+    try {
+      // 3. Call viem's writeContract
+      console.log('Calling walletClient.writeContract with:', {
+        account: accountStatus.address,
+        address: transactionData.address,
+        abi: transactionData.abi,
+        functionName: transactionData.functionName,
+        args: transactionData.args,
+        value: transactionData.value,
+        chain: walletClient.chain, // Pass the chain explicitly
+      });
+
+      const hash = await walletClient.writeContract({
+        account: accountStatus.address,
+        address: transactionData.address,
+        abi: transactionData.abi,
+        functionName: transactionData.functionName,
+        args: transactionData.args,
+        value: transactionData.value,
+        chain: walletClient.chain, // Explicitly pass the chain from the client
+      });
+
+      console.log('Transaction initiated successfully. Hash:', hash);
+      return { txHash: hash };
+    } catch (error: unknown) {
+      console.error('Error during writeContract call:', error);
+      // TODO: Improve error parsing (Phase 4)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown transaction error';
+      throw new Error(`Transaction failed: ${errorMessage}`);
+    }
   }
 
   /**

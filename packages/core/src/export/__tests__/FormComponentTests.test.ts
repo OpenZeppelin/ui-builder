@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest';
 import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 
 import { FormExportSystem } from '../FormExportSystem';
-import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
+import {
+  createComplexFormConfig,
+  createMinimalContractSchema,
+  createMinimalFormConfig,
+} from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
 describe('Form Component Tests', () => {
@@ -22,9 +26,15 @@ describe('Form Component Tests', () => {
     const formConfig = useComplexForm
       ? createComplexFormConfig(functionName, chainType)
       : createMinimalFormConfig(functionName, chainType);
+    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
 
     // Export the form
-    const result = await exportSystem.exportForm(formConfig, chainType, functionName);
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      chainType,
+      functionName
+    );
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();

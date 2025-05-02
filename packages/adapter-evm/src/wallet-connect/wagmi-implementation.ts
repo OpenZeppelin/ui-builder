@@ -12,10 +12,10 @@ import {
   createConfig,
   disconnect,
   getAccount,
-  getConnectors,
+  getWalletClient as getWagmiWalletClient,
   watchAccount,
 } from '@wagmi/core';
-import { http } from 'viem';
+import { type WalletClient, http } from 'viem';
 import { base, mainnet, optimism, sepolia } from 'viem/chains';
 
 import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
@@ -71,14 +71,30 @@ export class WagmiWalletImplementation {
   }
 
   /**
+   * Gets the Viem Wallet Client instance for the currently connected account and chain.
+   * Returns null if not connected.
+   *
+   * @returns A promise resolving to the Viem WalletClient or null.
+   */
+  public async getWalletClient(): Promise<WalletClient | null> {
+    const accountStatus = this.getWalletConnectionStatus();
+    if (!accountStatus.isConnected || !accountStatus.chainId || !accountStatus.address) {
+      return null;
+    }
+    return getWagmiWalletClient(this.config, {
+      chainId: accountStatus.chainId,
+      account: accountStatus.address,
+    });
+  }
+
+  /**
    * Gets the list of available wallet connectors configured in Wagmi.
    * @returns A promise resolving to an array of available connectors.
    */
   public async getAvailableConnectors(): Promise<Connector[]> {
-    const connectors = getConnectors(this.config);
-    // Map Wagmi connectors to the standardized Connector type
+    const connectors = this.config.connectors;
     return connectors.map((conn) => ({
-      id: conn.uid, // Use Wagmi's unique identifier
+      id: conn.uid,
       name: conn.name,
     }));
   }
@@ -92,24 +108,23 @@ export class WagmiWalletImplementation {
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
     try {
-      const connectors = getConnectors(this.config);
+      const connectors = this.config.connectors;
 
-      // First try exact ID match
       let connector = connectors.find((c) => c.uid === connectorId);
 
-      // If not found, try case-insensitive name match as fallback
       if (!connector) {
         connector = connectors.find((c) => c.name.toLowerCase() === connectorId.toLowerCase());
       }
 
       if (!connector) {
+        const availableConnectorNames = connectors.map((c) => c.name).join(', ');
         console.error(
           'WagmiWalletImplementation',
-          `Wallet connector "${connectorId}" not found. Available connectors: ${connectors.map((c) => c.name).join(', ')}`
+          `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`
         );
         return {
           connected: false,
-          error: `Wallet connector "${connectorId}" not found. Available connectors: ${connectors.map((c) => c.name).join(', ')}`,
+          error: `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`,
         };
       }
       const result = await connect(this.config, { connector });
@@ -145,7 +160,6 @@ export class WagmiWalletImplementation {
    * @returns Account status object.
    */
   public getWalletConnectionStatus(): GetAccountReturnType {
-    // Uses the synchronous getAccount from @wagmi/core
     return getAccount(this.config);
   }
 
@@ -157,10 +171,8 @@ export class WagmiWalletImplementation {
   public onWalletConnectionChange(
     callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
   ): () => void {
-    // If there's an existing subscription, clean it up first.
     this.unsubscribe?.();
 
-    // watchAccount provides the connection status
     this.unsubscribe = watchAccount(this.config, {
       onChange: callback,
     });

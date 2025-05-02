@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { FormExportSystem } from '../../../export';
@@ -17,17 +17,24 @@ export function useCompleteStepState() {
     async (
       formConfig: BuilderFormConfig | null,
       selectedChain: ChainType,
-      selectedFunction: string | null
+      selectedFunction: string | null,
+      contractSchema: ContractSchema | null
     ) => {
-      if (!formConfig || !selectedFunction) return;
+      if (!formConfig || !selectedFunction || !contractSchema) return;
 
       setLoading(true);
       const exportSystem = new FormExportSystem();
 
       try {
-        const result = await exportSystem.exportForm(formConfig, selectedChain, selectedFunction, {
-          chainType: selectedChain,
-        });
+        const result = await exportSystem.exportForm(
+          formConfig,
+          contractSchema,
+          selectedChain,
+          selectedFunction,
+          {
+            chainType: selectedChain,
+          }
+        );
 
         if (result.data instanceof Blob) {
           downloadBlob(result.data, result.fileName);

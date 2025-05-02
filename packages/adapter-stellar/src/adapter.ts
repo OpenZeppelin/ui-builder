@@ -132,16 +132,19 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   /**
-   * Format transaction data for the specific chain
-   *
-   * TODO: Implement proper Stellar transaction formatting in future phases
+   * @inheritdoc
    */
   formatTransactionData(
+    _contractSchema: ContractSchema,
     _functionId: string,
     _submittedInputs: Record<string, unknown>,
     _allFieldsConfig: FormFieldType[]
   ): unknown {
-    return { placeholder: 'Stellar adapter not implemented yet' };
+    console.warn(
+      'StellarAdapter.formatTransactionData not implemented, returning placeholder data.'
+    );
+    // Placeholder implementation
+    return { data: 'stellar_formatted_placeholder' };
   }
 
   /**

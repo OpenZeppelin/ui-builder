@@ -12,7 +12,7 @@
 // @ts-expect-error - This is a placeholder for the correct adapter import
 import { AdapterPlaceholder } from '@@adapter-package-name@@';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   Card,
@@ -52,7 +52,7 @@ interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema'> {
  */
 export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
-  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+  // const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
 
@@ -63,6 +63,14 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
   /*------------TEMPLATE COMMENT END------------*/
   // @ts-expect-error - This is a placeholder for the correct form schema import
   const formSchema: RenderFormSchema = {};
+
+  // Contract schema injected by generator (loaded or uploaded by the user)
+  /*------------TEMPLATE COMMENT START------------*/
+  // This is an empty object that will be replaced at generation time with a properly
+  // transformed ContractSchema that includes all necessary properties
+  /*------------TEMPLATE COMMENT END------------*/
+  // @ts-expect-error - This is a placeholder for the correct contract schema import
+  const contractSchema: ContractSchema = {}; /*@@CONTRACT_SCHEMA_JSON@@*/
 
   // Original field configurations (including hidden, hardcoded values)
   /*------------TEMPLATE COMMENT START------------*/
@@ -82,6 +90,10 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
 
   const contractAddress = formSchema.contractAddress;
 
+  // TODO: Enable this useEffect as a fallback?
+  // If the adapter supports runtime schema loading (e.g., via Etherscan)
+  // and the injected schema is missing or invalid, this could attempt to load it.
+  /*
   useEffect(() => {
     setLoadError(null);
     setContractSchema(null);
@@ -103,12 +115,16 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
       setContractSchema(null);
     }
   }, [contractAddress, adapter]);
+  */
+
+  // Decide which schema to use: prioritize injected, fallback maybe later?
+  const schemaToUse = contractSchema; // Sticking to injected schema for now
 
   const toggleWidget = () => {
     setIsWidgetVisible((prev: boolean) => !prev);
   };
 
-  // Handle form submission - remove async for now
+  // Handle form submission
   const handleSubmit = (formData: FormData) => {
     // Log the execution config (will be used for signing/broadcasting logic later)
     console.log('Using Execution Config:', executionConfig);
@@ -119,13 +135,19 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
       submittedInputs[key] = value;
     });
 
+    if (!schemaToUse) {
+      console.error('handleSubmit: Contract schema is not available!');
+      setTransactionResult({ error: 'Contract schema not loaded.' });
+      return;
+    }
+
     try {
       const functionId = '@@function-id@@';
-      // Format data using the adapter, passing the original field configurations
       const formattedData = adapter.formatTransactionData(
+        schemaToUse,
         functionId,
         submittedInputs,
-        allFieldsConfig // Pass the original config here
+        allFieldsConfig
       );
 
       // --- Integration with onSubmit prop ---
@@ -173,7 +195,12 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
               )}
               {/* Check the actual contractAddress variable at runtime */}
               {contractAddress ? (
-                <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+                <TransactionForm
+                  schema={formSchema}
+                  contractSchema={schemaToUse}
+                  adapter={adapter}
+                  onSubmit={handleSubmit}
+                />
               ) : (
                 <div className="text-destructive-foreground rounded-md bg-destructive p-4">
                   <h3 className="font-medium">Configuration Error</h3>
@@ -188,7 +215,7 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
           <div className="w-[300px] flex-shrink-0">
             <div className="sticky top-4">
               <ContractStateWidget
-                contractSchema={contractSchema}
+                contractSchema={schemaToUse}
                 contractAddress={contractAddress}
                 adapter={adapter}
                 isVisible={isWidgetVisible}

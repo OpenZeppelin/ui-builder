@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
 describe('Export Structure Tests', () => {
@@ -13,6 +13,7 @@ describe('Export Structure Tests', () => {
    */
   async function testExportStructure(
     formConfig: BuilderFormConfig,
+    contractSchema: ContractSchema,
     chainType: ChainType,
     functionName: string
   ) {
@@ -27,6 +28,7 @@ describe('Export Structure Tests', () => {
     // Export the form
     const result = await exportSystem.exportForm(
       formConfig,
+      contractSchema,
       chainType,
       functionName,
       exportOptions
@@ -47,6 +49,7 @@ describe('Export Structure Tests', () => {
     it('should include standard project files in all exports', async () => {
       const { files, fileList } = await testExportStructure(
         createMinimalFormConfig('transfer'),
+        createMinimalContractSchema('transfer', 'evm'),
         'evm',
         'transfer'
       );
@@ -90,6 +93,7 @@ describe('Export Structure Tests', () => {
     it('should include correct dependencies for EVM exports', async () => {
       const { files } = await testExportStructure(
         createMinimalFormConfig('transfer'),
+        createMinimalContractSchema('transfer', 'evm'),
         'evm',
         'transfer'
       );
@@ -103,6 +107,7 @@ describe('Export Structure Tests', () => {
     it('should include correct dependencies for Solana exports', async () => {
       const { files } = await testExportStructure(
         createMinimalFormConfig('transfer'),
+        createMinimalContractSchema('transfer', 'solana'),
         'solana',
         'transfer'
       );
@@ -125,6 +130,7 @@ describe('Export Structure Tests', () => {
 
       const result = await exportSystem.exportForm(
         createMinimalFormConfig('transfer'),
+        createMinimalContractSchema('transfer', 'evm'),
         'evm',
         'transfer',
         { projectName: customProjectName }
@@ -140,6 +146,7 @@ describe('Export Structure Tests', () => {
     it('should generate a valid index.html file', async () => {
       const { files } = await testExportStructure(
         createMinimalFormConfig('transfer'),
+        createMinimalContractSchema('transfer', 'evm'),
         'evm',
         'transfer'
       );

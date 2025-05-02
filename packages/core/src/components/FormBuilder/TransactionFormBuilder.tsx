@@ -97,6 +97,7 @@ export function TransactionFormBuilder() {
         <StepComplete
           selectedChain={selectedChain}
           formConfig={formConfig}
+          contractSchema={contractSchema}
           onExport={() => {
             void exportForm(formConfig, selectedChain, selectedFunction);
           }}

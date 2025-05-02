@@ -3,7 +3,11 @@ import { Download } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { LoadingButton } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType, ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
+import type {
+  ChainType,
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { StepTitleWithDescription } from '../Common';
@@ -26,6 +30,7 @@ import { FormPreview } from '../StepFormCustomization/FormPreview';
 export interface StepCompleteProps {
   selectedChain: ChainType;
   formConfig: BuilderFormConfig | null;
+  contractSchema: ContractSchema | null;
   onExport: () => void;
   exportLoading?: boolean;
   functionDetails?: ContractFunction | null;
@@ -34,6 +39,7 @@ export interface StepCompleteProps {
 export function StepComplete({
   selectedChain,
   formConfig,
+  contractSchema,
   onExport,
   exportLoading,
   functionDetails,
@@ -44,7 +50,7 @@ export function StepComplete({
     return functionDetails;
   }, [functionDetails]);
 
-  if (!formConfig || !selectedFunctionDetails) {
+  if (!formConfig || !selectedFunctionDetails || !contractSchema) {
     return (
       <div className="py-8 text-center">
         <p>Please complete the previous steps to build your form.</p>
@@ -74,6 +80,7 @@ export function StepComplete({
         formConfig={formConfig}
         functionDetails={selectedFunctionDetails}
         selectedChain={selectedChain}
+        contractSchema={contractSchema}
       />
     </div>
   );

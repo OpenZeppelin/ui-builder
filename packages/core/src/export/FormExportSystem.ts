@@ -7,7 +7,7 @@
  * standalone form project.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
@@ -63,6 +63,7 @@ export class FormExportSystem {
    * form configuration, chain type, and options.
    *
    * @param formConfig Form configuration created in the builder
+   * @param contractSchema Full contract schema including ABI/function details
    * @param chainType Blockchain type (evm, solana, etc.)
    * @param functionId Function ID this form is for
    * @param options Export customization options
@@ -70,6 +71,7 @@ export class FormExportSystem {
    */
   async exportForm(
     formConfig: BuilderFormConfig,
+    contractSchema: ContractSchema,
     chainType: ChainType,
     functionId: string,
     options: Partial<ExportOptions> = {}
@@ -93,6 +95,7 @@ export class FormExportSystem {
       );
       const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
+        contractSchema,
         chainType,
         functionId
       );
