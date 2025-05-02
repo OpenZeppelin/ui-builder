@@ -140,10 +140,7 @@ export interface ContractAdapter {
    * @param functionDetails The function details
    * @returns Formatted result ready for display
    */
-  formatFunctionResult(
-    result: unknown,
-    functionDetails: ContractFunction
-  ): string | Record<string, unknown>;
+  formatFunctionResult(result: unknown, functionDetails: ContractFunction): string;
 
   /**
    * Get field types compatible with a specific parameter type

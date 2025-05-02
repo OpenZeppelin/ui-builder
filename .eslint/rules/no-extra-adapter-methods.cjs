@@ -56,6 +56,8 @@ module.exports = {
       'getWalletConnectionStatus',
       'onWalletConnectionChange',
       'getExplorerUrl',
+      'getExplorerTxUrl',
+      'waitForTransactionConfirmation',
     ];
 
     // Common standard methods and properties that are allowed

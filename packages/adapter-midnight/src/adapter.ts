@@ -235,15 +235,13 @@ export class MidnightAdapter implements ContractAdapter {
   /**
    * Formats a function result for display
    */
-  formatFunctionResult(
-    result: unknown,
-    _functionDetails: ContractFunction
-  ): string | Record<string, unknown> {
+  formatFunctionResult(result: unknown, _functionDetails: ContractFunction): string {
     // TODO: Implement Midnight-specific result formatting
     if (result === null || result === undefined) {
       return 'No data';
     }
 
+    // Placeholder: Return simple string representation
     return String(result);
   }
 

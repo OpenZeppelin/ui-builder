@@ -4,35 +4,22 @@ import type { ContractFunction } from '@openzeppelin/transaction-form-types/cont
 
 interface FunctionResultProps {
   functionDetails: ContractFunction;
-  result?: unknown;
+  result?: string;
   loading: boolean;
 }
 
 /**
- * Component for displaying function results
+ * Component for displaying formatted function results (strings)
  */
 export function FunctionResult({
   functionDetails,
   result,
   loading,
 }: FunctionResultProps): JSX.Element {
-  // Format result for display
-  const formatResult = (rawResult: unknown): string => {
-    if (rawResult === undefined) return '';
-    if (rawResult === null) return 'null';
-    if (typeof rawResult === 'string' && rawResult.startsWith('Error:')) return rawResult;
+  const formattedResult = result ?? '';
+  const hasResult = typeof result === 'string';
+  const isError = hasResult && (result.startsWith('Error:') || result.startsWith('[Error:'));
 
-    try {
-      // Compact JSON without indentation
-      return JSON.stringify(rawResult, null, 0);
-    } catch {
-      return String(rawResult);
-    }
-  };
-
-  const formattedResult = formatResult(result);
-  const hasResult = result !== undefined;
-  const isError = typeof result === 'string' && result.startsWith('Error:');
   const outputs = functionDetails.outputs || [];
 
   return (

@@ -60,7 +60,27 @@ export function ViewFunctionsPanel({
 
       // Wait for all queries to complete
       await Promise.all(queries);
-      setResults(newResults);
+
+      // Format results using the adapter
+      const formattedResults: Record<string, string> = {};
+      for (const func of functions) {
+        if (func.id in newResults) {
+          // Only format if the query didn't already return an error string
+          if (
+            typeof newResults[func.id] !== 'string' ||
+            !newResults[func.id]?.toString().startsWith('Error:')
+          ) {
+            formattedResults[func.id] = adapter.formatFunctionResult(newResults[func.id], func);
+          } else {
+            formattedResults[func.id] = newResults[func.id] as string; // Keep error string
+          }
+        } else {
+          // Handle cases where query might not have even populated (should be rare)
+          formattedResults[func.id] = '[Error: Query did not return data]';
+        }
+      }
+
+      setResults(formattedResults);
     } catch (err) {
       console.error('Error querying functions:', err);
     } finally {
@@ -105,7 +125,7 @@ export function ViewFunctionsPanel({
           <FunctionResult
             key={func.id}
             functionDetails={func}
-            result={results[func.id]}
+            result={results[func.id] as string | undefined}
             loading={isLoading}
           />
         ))}

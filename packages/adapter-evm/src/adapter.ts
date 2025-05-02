@@ -1,13 +1,17 @@
 import type { GetAccountReturnType } from '@wagmi/core';
-import { Contract, JsonRpcProvider } from 'ethers';
 import { startCase } from 'lodash';
 import {
   type Abi,
+  type AbiFunction,
   type AbiStateMutability,
+  type PublicClient,
   type TransactionReceipt,
+  createPublicClient,
   getAddress,
+  http,
   isAddress,
 } from 'viem';
+import { mainnet } from 'viem/chains';
 
 import type {
   Connector,
@@ -30,6 +34,7 @@ import type {
 import ERC20_MOCK from './mocks/ERC20_MOCK.json';
 import ERC721_MOCK from './mocks/ERC721_MOCK.json';
 import INPUT_TESTER_MOCK from './mocks/INPUT_TESTER_MOCK.json';
+import { stringifyWithBigInt } from './utils/json';
 import { WagmiWalletImplementation } from './wallet-connect/wagmi-implementation';
 
 import type { AbiItem } from './types';
@@ -88,6 +93,49 @@ export class EvmAdapter implements ContractAdapter {
   constructor() {
     // Initialize the Wagmi wallet implementation
     this.walletImplementation = new WagmiWalletImplementation();
+  }
+
+  /**
+   * Private helper to get a PublicClient instance.
+   * Uses the connected wallet's client if available,
+   * otherwise falls back to a default public RPC client.
+   * Throws an error if a client cannot be obtained.
+   */
+  private getPublicClientForQuery(): PublicClient {
+    const accountStatus = this.walletImplementation.getWalletConnectionStatus();
+    let publicClient: PublicClient | null = null;
+
+    if (accountStatus.isConnected && accountStatus.chainId) {
+      // Use client configured for the connected wallet's chain
+      publicClient = this.walletImplementation.getPublicClient();
+      console.log(
+        `Using connected wallet's public client (Chain ID: ${accountStatus.chainId}) for query.`
+      );
+    } else {
+      // Not connected, create a temporary public client using default RPC
+      console.log('Wallet not connected, creating default public RPC client for query.');
+      const defaultRpcUrl = import.meta.env.VITE_RPC_URL || 'https://eth.llamarpc.com';
+      if (!defaultRpcUrl) {
+        throw new Error('Default VITE_RPC_URL is not configured for connectionless queries.');
+      }
+      const defaultChain = mainnet;
+      try {
+        publicClient = createPublicClient({
+          chain: defaultChain,
+          transport: http(defaultRpcUrl),
+        });
+      } catch (error) {
+        console.error('Failed to create default public client:', error);
+        throw new Error(`Failed to create default public client: ${(error as Error).message}`);
+      }
+    }
+
+    if (!publicClient) {
+      // This path should ideally be unreachable due to the logic above
+      throw new Error('Failed to obtain Public Client for query.');
+    }
+
+    return publicClient;
   }
 
   /**
@@ -214,11 +262,18 @@ export class EvmAdapter implements ContractAdapter {
           displayName: this.formatMethodName(item.name || ''),
           inputs:
             item.inputs?.map((input) => ({
-              name: input.name,
+              name: input.name || '',
               type: input.type,
               displayName: this.formatInputName(input.name, input.type),
+              ...(input.components ? { components: input.components } : {}),
             })) || [],
-          type: item.type || 'function',
+          outputs:
+            item.outputs?.map((output) => ({
+              name: output.name || '',
+              type: output.type,
+              ...(output.components ? { components: output.components } : {}),
+            })) || [],
+          type: 'function',
           stateMutability: item.stateMutability,
           modifiesState: !item.stateMutability || !['view', 'pure'].includes(item.stateMutability),
         })),
@@ -368,6 +423,198 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   /**
+   * Recursively parses a raw input value based on its expected ABI type definition.
+   *
+   * @param param The ABI parameter definition ({ name, type, components?, ... })
+   * @param rawValue The raw value obtained from the form input or hardcoded config.
+   * @param isRecursive Internal flag to indicate if the call is nested.
+   * @returns The parsed and typed value suitable for ABI encoding.
+   * @throws {Error} If parsing or type validation fails.
+   */
+  private parseEvmInput(param: FunctionParameter, rawValue: unknown, isRecursive = false): unknown {
+    const { type, name } = param;
+    const baseType = type.replace(/\[\d*\]$/, ''); // Remove array indicators like `[]` or `[2]`
+    const isArray = type.endsWith(']');
+
+    try {
+      // --- Handle Arrays --- //
+      if (isArray) {
+        // Only expect string at the top level, recursive calls get arrays directly
+        let parsedArray: unknown[];
+        if (!isRecursive) {
+          if (typeof rawValue !== 'string') {
+            throw new Error('Array input must be a JSON string representation.');
+          }
+          try {
+            parsedArray = JSON.parse(rawValue);
+          } catch (e) {
+            throw new Error(`Invalid JSON for array: ${(e as Error).message}`);
+          }
+        } else {
+          // If recursive, rawValue should already be an array
+          if (!Array.isArray(rawValue)) {
+            throw new Error('Internal error: Expected array in recursive call.');
+          }
+          parsedArray = rawValue;
+        }
+
+        if (!Array.isArray(parsedArray)) {
+          // Double check after parsing/assignment
+          throw new Error('Parsed JSON is not an array.');
+        }
+
+        // Recursively parse each element
+        const itemAbiParam = { ...param, type: baseType }; // Create a dummy param for the base type
+        return parsedArray.map((item) => this.parseEvmInput(itemAbiParam, item, true)); // Pass isRecursive=true
+      }
+
+      // --- Handle Tuples --- //
+      if (baseType === 'tuple') {
+        if (!param.components) {
+          throw new Error(`ABI definition missing 'components' for tuple parameter '${name}'.`);
+        }
+        // Only expect string at the top level, recursive calls get objects directly
+        let parsedObject: Record<string, unknown>;
+        if (!isRecursive) {
+          if (typeof rawValue !== 'string') {
+            throw new Error('Tuple input must be a JSON string representation of an object.');
+          }
+          try {
+            parsedObject = JSON.parse(rawValue);
+          } catch (e) {
+            throw new Error(`Invalid JSON for tuple: ${(e as Error).message}`);
+          }
+        } else {
+          // If recursive, rawValue should already be an object
+          if (typeof rawValue !== 'object' || rawValue === null || Array.isArray(rawValue)) {
+            throw new Error('Internal error: Expected object in recursive tuple call.');
+          }
+          parsedObject = rawValue as Record<string, unknown>; // Cast needed
+        }
+
+        if (
+          typeof parsedObject !== 'object' ||
+          parsedObject === null ||
+          Array.isArray(parsedObject)
+        ) {
+          // Double check
+          throw new Error('Parsed JSON is not an object for tuple.');
+        }
+
+        // Recursively parse each component
+        const resultObject: Record<string, unknown> = {};
+        for (const component of param.components) {
+          if (!(component.name in parsedObject)) {
+            throw new Error(`Missing component '${component.name}' in tuple JSON.`);
+          }
+          resultObject[component.name] = this.parseEvmInput(
+            component,
+            parsedObject[component.name],
+            true // Pass isRecursive=true
+          );
+        }
+        // Check for extra, unexpected keys in the provided JSON object
+        if (Object.keys(parsedObject).length !== param.components.length) {
+          const expectedKeys = param.components.map((c) => c.name).join(', ');
+          const actualKeys = Object.keys(parsedObject).join(', ');
+          throw new Error(
+            `Tuple object has incorrect number of keys. Expected ${param.components.length} (${expectedKeys}), but got ${Object.keys(parsedObject).length} (${actualKeys}).`
+          );
+        }
+        return resultObject;
+      }
+
+      // --- Handle Bytes --- //
+      if (baseType.startsWith('bytes')) {
+        if (typeof rawValue !== 'string') {
+          throw new Error('Bytes input must be a string.');
+        }
+        if (!/^0x([0-9a-fA-F]{2})*$/.test(rawValue)) {
+          throw new Error(
+            `Invalid hex string format for ${type}: must start with 0x and contain only hex characters.`
+          );
+        }
+        // Check byte length for fixed-size bytes? (e.g., bytes32)
+        const fixedSizeMatch = baseType.match(/^bytes(\d+)$/);
+        if (fixedSizeMatch) {
+          const expectedBytes = parseInt(fixedSizeMatch[1], 10);
+          const actualBytes = (rawValue.length - 2) / 2;
+          if (actualBytes !== expectedBytes) {
+            throw new Error(
+              `Invalid length for ${type}: expected ${expectedBytes} bytes (${expectedBytes * 2} hex chars), got ${actualBytes} bytes.`
+            );
+          }
+        }
+        return rawValue as `0x${string}`; // Already validated, cast to viem type
+      }
+
+      // --- Handle Simple Types --- //
+      if (baseType.startsWith('uint') || baseType.startsWith('int')) {
+        if (rawValue === '' || rawValue === null || rawValue === undefined)
+          throw new Error('Numeric value cannot be empty.');
+        try {
+          // Use BigInt for all integer types
+          return BigInt(rawValue as string | number | bigint);
+        } catch {
+          throw new Error(`Invalid numeric value: '${rawValue}'.`);
+        }
+      } else if (baseType === 'address') {
+        if (typeof rawValue !== 'string' || !rawValue)
+          throw new Error('Address value must be a non-empty string.');
+        if (!isAddress(rawValue)) throw new Error(`Invalid address format: '${rawValue}'.`);
+        return getAddress(rawValue); // Return checksummed address
+      } else if (baseType === 'bool') {
+        if (typeof rawValue === 'boolean') return rawValue;
+        if (typeof rawValue === 'string') {
+          const lowerVal = rawValue.toLowerCase().trim();
+          if (lowerVal === 'true') return true;
+          if (lowerVal === 'false') return false;
+        }
+        // Try simple truthy/falsy conversion as fallback, but might be too lenient?
+        // Consider throwing error if not explicit boolean or 'true'/'false' string
+        // For now, keep simple conversion:
+        return Boolean(rawValue);
+      } else if (baseType === 'string') {
+        // Ensure it's treated as a string
+        return String(rawValue);
+      }
+
+      // --- Fallback for unknown types --- //
+      console.warn(`Unknown EVM parameter type encountered: '${type}'. Using raw value.`);
+      return rawValue;
+    } catch (error) {
+      // Add parameter context to the error message
+      throw new Error(
+        `Failed to parse value for parameter '${name || '(unnamed)'}' (type '${type}'): ${(error as Error).message}`
+      );
+    }
+  }
+
+  /**
+   * Private helper to convert internal function details to viem AbiFunction format.
+   */
+  private createAbiFunctionItem(functionDetails: ContractFunction): AbiFunction {
+    return {
+      name: functionDetails.name,
+      type: 'function',
+      // Correctly map inputs, including components
+      inputs: functionDetails.inputs.map((i) => ({
+        name: i.name || '',
+        type: i.type,
+        ...(i.components && { components: i.components }),
+      })),
+      // Correctly map outputs, including components
+      outputs:
+        functionDetails.outputs?.map((o) => ({
+          name: o.name || '',
+          type: o.type,
+          ...(o.components && { components: o.components }),
+        })) || [],
+      stateMutability: (functionDetails.stateMutability ?? 'view') as AbiStateMutability,
+    };
+  }
+
+  /**
    * @inheritdoc
    */
   formatTransactionData(
@@ -382,99 +629,48 @@ export class EvmAdapter implements ContractAdapter {
     console.log('All Fields Config:', allFieldsConfig);
 
     // --- Step 1: Determine Argument Order --- //
-    // Use the provided schema directly
-    const schema = contractSchema;
-
-    const functionDetails = schema.functions.find((fn) => fn.id === functionId);
+    const functionDetails = contractSchema.functions.find((fn) => fn.id === functionId);
     if (!functionDetails) {
-      console.error(`formatTransactionData: Function with ID ${functionId} not found in schema.`);
       throw new Error(
         `Function definition for ${functionId} not found in provided contract schema.`
       );
     }
-
-    console.log('Function Details Found:', functionDetails);
-
     const expectedArgs = functionDetails.inputs;
     console.log('Expected Arguments (Order & Type):', expectedArgs);
 
     // --- Step 2: Iterate and Select Values --- //
-    const orderedValues: unknown[] = [];
+    const orderedRawValues: unknown[] = [];
     for (const expectedArg of expectedArgs) {
       const fieldConfig = allFieldsConfig.find(
-        (field) => field.name === expectedArg.name || field.name === expectedArg.type
+        (field) => field.name === expectedArg.name // Match by name only now
       );
       if (!fieldConfig) {
-        throw new Error(
-          `Configuration missing for argument: ${expectedArg.name || expectedArg.type}`
-        );
+        throw new Error(`Configuration missing for argument: ${expectedArg.name}`);
       }
+
       let value: unknown;
       if (fieldConfig.isHardcoded) {
         value = fieldConfig.hardcodedValue;
+        console.log(`Using hardcoded value for ${fieldConfig.name}:`, value);
       } else if (fieldConfig.isHidden) {
+        // This case should ideally be prevented by the UI/config validation
         throw new Error(`Field '${fieldConfig.name}' cannot be hidden without being hardcoded.`);
       } else {
         if (!(fieldConfig.name in submittedInputs)) {
-          throw new Error(`Missing submitted input for field: ${fieldConfig.name}`);
+          // This should ideally be caught by form validation (required fields)
+          throw new Error(`Missing submitted input for required field: ${fieldConfig.name}`);
         }
         value = submittedInputs[fieldConfig.name];
+        console.log(`Using submitted value for ${fieldConfig.name}:`, value);
       }
-      orderedValues.push(value);
+      orderedRawValues.push(value);
     }
-    console.log('Ordered Values (Before Transformation):', orderedValues);
+    console.log('Ordered Raw Values (Before Transformation):', orderedRawValues);
 
-    // --- Step 3: Apply Type Transformations --- //
-    // TODO: Implement a more robust, potentially bidirectional serialization/deserialization
-    //       mechanism for handling inputs/outputs, especially for complex types (arrays, tuples)
-    //       and bytes. The current JSON.parse/stringify approach for complex types and the
-    //       placeholder for bytes are naive and may not handle all edge cases or ABI requirements correctly.
+    // --- Step 3: Parse/Transform Values using the new parser --- //
     const transformedArgs = expectedArgs.map((param, index) => {
-      const rawValue = orderedValues[index];
-      const paramType = param.type;
-      try {
-        if (paramType.startsWith('uint') || paramType.startsWith('int')) {
-          if (rawValue === '') throw new Error('Numeric value cannot be empty');
-          try {
-            return BigInt(rawValue as string | number | bigint);
-          } catch {
-            throw new Error(`Invalid numeric value: ${rawValue}`);
-          }
-        } else if (paramType === 'address') {
-          if (typeof rawValue !== 'string' || !rawValue)
-            throw new Error('Address value must be a non-empty string');
-          if (!isAddress(rawValue)) throw new Error(`Invalid address format: ${rawValue}`);
-          return getAddress(rawValue);
-        } else if (paramType === 'bool') {
-          if (typeof rawValue === 'boolean') return rawValue;
-          if (typeof rawValue === 'string') {
-            if (rawValue.toLowerCase() === 'true') return true;
-            if (rawValue.toLowerCase() === 'false') return false;
-          }
-          return Boolean(rawValue);
-        } else if (paramType === 'string') {
-          return String(rawValue);
-        } else if (paramType.startsWith('bytes')) {
-          console.warn(`Bytes transformation for type '${paramType}' not fully implemented yet.`);
-          return rawValue;
-        } else if (paramType.includes('[') || paramType.startsWith('tuple')) {
-          if (typeof rawValue !== 'string' || rawValue.trim() === '')
-            throw new Error(`Input for ${paramType} must be a non-empty JSON string`);
-          try {
-            return JSON.parse(rawValue);
-          } catch (e) {
-            throw new Error(
-              `Invalid JSON for ${paramType}: ${rawValue}. Error: ${(e as Error).message}`
-            );
-          }
-        }
-        console.warn(`Unknown parameter type encountered: ${paramType}. Using raw value.`);
-        return rawValue;
-      } catch (error) {
-        throw new Error(
-          `Failed to transform value for '${param.name}': ${(error as Error).message}`
-        );
-      }
+      const rawValue = orderedRawValues[index];
+      return this.parseEvmInput(param, rawValue, false); // Initial call is not recursive
     });
     console.log('Transformed Arguments:', transformedArgs);
 
@@ -485,24 +681,16 @@ export class EvmAdapter implements ContractAdapter {
       console.warn('Payable function detected, but sending 0 ETH. Implement value input.');
     }
 
-    // Re-construct the minimal ABI for the specific function, matching AbiFunction type
-    const resolvedStateMutability = (functionDetails.stateMutability ||
-      'nonpayable') as AbiStateMutability;
-    const functionAbiItem = {
-      type: 'function',
-      stateMutability: resolvedStateMutability,
-      name: functionDetails.name,
-      inputs: functionDetails.inputs.map((i) => ({ name: i.name, type: i.type })),
-      outputs: functionDetails.outputs?.map((o) => ({ name: o.name, type: o.type })) || [],
-    } as const; // Keep 'as const' for stricter typing of properties
+    // Use the helper to create the ABI item
+    const functionAbiItem = this.createAbiFunctionItem(functionDetails);
 
-    if (!schema.address || !isAddress(schema.address)) {
+    if (!contractSchema.address || !isAddress(contractSchema.address)) {
       throw new Error('Contract address is missing or invalid in the provided schema.');
     }
 
     // This structure IS what signAndBroadcast needs, but we return unknown for interface compatibility for now
     const paramsForSignAndBroadcast: WriteContractParameters = {
-      address: schema.address,
+      address: contractSchema.address,
       abi: [functionAbiItem], // Pass the specific function ABI item directly
       functionName: functionDetails.name,
       args: transformedArgs,
@@ -715,79 +903,134 @@ export class EvmAdapter implements ContractAdapter {
     params: unknown[] = [],
     contractSchema?: ContractSchema
   ): Promise<unknown> {
+    console.log(`Querying view function: ${functionId} on ${contractAddress}`, { params });
     try {
-      // Validate contract address
-      if (!contractAddress || contractAddress.trim() === '') {
-        throw new Error('Contract address is empty or not provided');
+      // Use the helper method to get the appropriate client
+      const publicClient = this.getPublicClientForQuery();
+
+      // --- Validate Address --- //
+      if (!contractAddress || !isAddress(contractAddress)) {
+        throw new Error(`Invalid contract address provided: ${contractAddress}`);
       }
 
-      if (!isAddress(contractAddress)) {
-        throw new Error(`Invalid Ethereum address: ${contractAddress}`);
-      }
-
-      // Use ethers.js to create a contract instance
-      const provider = new JsonRpcProvider(
-        // Use a reliable public RPC URL that allows CORS
-        // TODO: Make this configurable
-        import.meta.env.VITE_RPC_URL || 'https://eth.llamarpc.com'
-      );
-
-      // Use provided schema or load it
+      // --- Get Schema & Function Details --- //
       const schema = contractSchema || (await this.loadContract(contractAddress));
-
-      // Find the function in the schema
       const functionDetails = schema.functions.find((fn) => fn.id === functionId);
       if (!functionDetails) {
-        throw new Error(`Function with ID ${functionId} not found`);
+        throw new Error(`Function with ID ${functionId} not found in contract schema.`);
+      }
+      if (!this.isViewFunction(functionDetails)) {
+        // Should ideally be prevented by UI, but double-check
+        throw new Error(`Function ${functionDetails.name} is not a view function.`);
       }
 
-      // Create minimal ABI for just this function with generic bytes output
-      // TODO: Add support for a better formatting of the output (formatFunctionResult)
-      const genericAbi = [
-        {
-          name: functionDetails.name,
-          type: 'function',
-          stateMutability: functionDetails.stateMutability || 'view',
-          inputs: functionDetails.inputs.map((i) => ({ name: i.name, type: i.type })),
-          outputs: [{ name: '', type: 'bytes' }],
-        },
-      ];
-
-      // Create contract interface
-      const genericContract = new Contract(contractAddress, genericAbi, provider);
-
-      // Just make the raw call and return the result
-      const rawResult = await provider.call({
-        to: contractAddress,
-        data: genericContract.interface.encodeFunctionData(functionDetails.name, params),
+      // --- Parse Input Parameters --- //
+      const expectedInputs = functionDetails.inputs;
+      if (params.length !== expectedInputs.length) {
+        throw new Error(
+          `Incorrect number of parameters provided for ${functionDetails.name}. Expected ${expectedInputs.length}, got ${params.length}.`
+        );
+      }
+      const args = expectedInputs.map((inputParam, index) => {
+        const rawValue = params[index];
+        // Use the existing helper, initial call is not recursive
+        return this.parseEvmInput(inputParam, rawValue, false);
       });
+      console.log('Parsed Args for readContract:', args);
 
-      // TODO: Add support for a better formatting of the output (formatFunctionResult)
-      return rawResult;
+      // Use the helper to create the ABI item
+      const functionAbiItem = this.createAbiFunctionItem(functionDetails);
+
+      console.log(
+        `[Query ${functionDetails.name}] Calling readContract with ABI:`,
+        functionAbiItem,
+        'Args:',
+        args
+      );
+
+      // --- Call readContract --- //
+      let decodedResult: unknown;
+      try {
+        decodedResult = await publicClient.readContract({
+          address: contractAddress as `0x${string}`,
+          abi: [functionAbiItem],
+          functionName: functionDetails.name,
+          args: args, // Pass the parsed arguments
+        });
+      } catch (readError) {
+        console.error(
+          `[Query ${functionDetails.name}] publicClient.readContract specific error:`,
+          readError
+        );
+        throw new Error(
+          `Viem readContract failed for ${functionDetails.name}: ${(readError as Error).message}`
+        );
+      }
+
+      console.log(`[Query ${functionDetails.name}] Raw decoded result:`, decodedResult);
+
+      return decodedResult; // Return the already decoded result
     } catch (error) {
-      console.error('Error querying view function:', error);
-      throw error;
+      const errorMessage = `Failed to query view function ${functionId}: ${(error as Error).message}`;
+      console.error(`EvmAdapter.queryViewFunction Error: ${errorMessage}`, {
+        contractAddress,
+        functionId,
+        params,
+        error,
+      });
+      throw new Error(errorMessage);
     }
   }
 
   /**
    * @inheritdoc
    */
-  formatFunctionResult(
-    result: unknown,
-    _functionDetails: ContractFunction
-  ): string | Record<string, unknown> {
-    // Existing implementation...
-    if (result === null || result === undefined) {
-      return 'No data';
+  formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
+    if (!functionDetails.outputs || !Array.isArray(functionDetails.outputs)) {
+      console.warn(
+        `formatFunctionResult: Output ABI definition missing or invalid for function ${functionDetails.name}.`
+      );
+      return '[Error: Output ABI definition missing]';
     }
 
-    // Special handling for BigInt values
-    if (typeof result === 'bigint') {
-      return result.toString();
-    }
+    try {
+      let valueToFormat: unknown;
+      if (Array.isArray(decodedValue)) {
+        if (decodedValue.length === 1) {
+          valueToFormat = decodedValue[0]; // Single output, format the inner value
+        } else {
+          // Multiple outputs, format the whole array as JSON
+          valueToFormat = decodedValue;
+        }
+      } else {
+        // Not an array, could be a single value (like from a struct return) or undefined
+        valueToFormat = decodedValue;
+      }
 
-    return String(result);
+      // Now format valueToFormat based on its type
+      if (typeof valueToFormat === 'bigint') {
+        return valueToFormat.toString();
+      } else if (
+        typeof valueToFormat === 'string' ||
+        typeof valueToFormat === 'number' ||
+        typeof valueToFormat === 'boolean'
+      ) {
+        return String(valueToFormat);
+      } else if (valueToFormat === null || valueToFormat === undefined) {
+        return '(null)'; // Represent null/undefined clearly
+      } else {
+        // Handles arrays with multiple elements or objects (structs) by stringifying
+        return stringifyWithBigInt(valueToFormat, 2); // Pretty print with 2 spaces
+      }
+    } catch (error) {
+      const errorMessage = `Error formatting result for ${functionDetails.name}: ${(error as Error).message}`;
+      console.error(`EvmAdapter.formatFunctionResult Error: ${errorMessage}`, {
+        functionName: functionDetails.name,
+        decodedValue,
+        error,
+      });
+      return `[${errorMessage}]`;
+    }
   }
 
   /**
@@ -857,6 +1100,18 @@ export class EvmAdapter implements ContractAdapter {
     return `https://etherscan.io/address/${address}`;
   }
 
+  /**
+   * @inheritdoc
+   */
+  getExplorerTxUrl?(txHash: string): string | null {
+    // TODO: Enhance this to use the actual connected chainId
+    if (!txHash) return null;
+    return `https://etherscan.io/tx/${txHash}`;
+  }
+
+  /**
+   * @inheritdoc
+   */
   async waitForTransactionConfirmation(txHash: string): Promise<{
     status: 'success' | 'error';
     receipt?: TransactionReceipt;
