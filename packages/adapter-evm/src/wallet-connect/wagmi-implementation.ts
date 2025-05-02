@@ -5,6 +5,7 @@
  * It's encapsulated within the EVM adapter and not exposed to the rest of the application.
  */
 import { injected, metaMask, safe, walletConnect } from '@wagmi/connectors';
+// Import functions from @wagmi/core
 import {
   type Config,
   type GetAccountReturnType,
@@ -12,10 +13,13 @@ import {
   createConfig,
   disconnect,
   getAccount,
+  getPublicClient as getWagmiPublicClient,
   getWalletClient as getWagmiWalletClient,
   watchAccount,
 } from '@wagmi/core';
-import { type WalletClient, http } from 'viem';
+// Import types and http from viem
+import { type PublicClient, type WalletClient, http } from 'viem';
+// Only import http directly if not re-exported
 import { base, mainnet, optimism, sepolia } from 'viem/chains';
 
 import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
@@ -85,6 +89,26 @@ export class WagmiWalletImplementation {
       chainId: accountStatus.chainId,
       account: accountStatus.address,
     });
+  }
+
+  /**
+   * Gets the Viem Public Client instance for the currently connected chain.
+   *
+   * @returns A promise resolving to the Viem PublicClient or null.
+   */
+  public getPublicClient(): PublicClient | null {
+    const accountStatus = this.getWalletConnectionStatus();
+    if (!accountStatus.chainId) {
+      return null;
+    }
+    // Note: getPublicClient is synchronous in wagmi v2
+    // Explicitly cast the return type. Addresses a TS error ("Two different types with this name exist...")
+    // that can occur in pnpm monorepos where TypeScript might resolve the PublicClient type
+    // from both the direct 'viem' import and the instance potentially used internally by '@wagmi/core'.
+    // This cast asserts their compatibility.
+    return getWagmiPublicClient(this.config, {
+      chainId: accountStatus.chainId,
+    }) as PublicClient;
   }
 
   /**

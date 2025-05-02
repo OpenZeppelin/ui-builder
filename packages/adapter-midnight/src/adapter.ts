@@ -284,13 +284,33 @@ export class MidnightAdapter implements ContractAdapter {
    * @param _chainId Optional chain ID (not used for Midnight yet)
    * @returns A URL to view the address on a block explorer, or null if not available
    */
-  getExplorerUrl(address: string, _chainId?: string): string | null {
-    if (!address) return null;
-
-    // Midnight explorer is not yet available, return null
-    // In the future, this would return the appropriate explorer URL
+  getExplorerUrl(_address: string, _chainId?: string): string | null {
+    // Placeholder: Replace with actual Midnight explorer URL structure if available
     return null;
   }
+
+  /**
+   * Gets a blockchain explorer URL for a transaction in this chain
+   *
+   * @param txHash - The hash of the transaction to get the explorer URL for
+   * @returns A URL to view the transaction on a blockchain explorer, or null if not supported
+   */
+  getExplorerTxUrl?(_txHash: string): string | null {
+    // Placeholder: Replace with actual Midnight explorer URL structure for transactions if available
+    return null;
+  }
+
+  /**
+   * (Optional) Waits for a transaction to be confirmed on the blockchain.
+   *
+   * @param txHash - The hash of the transaction to wait for.
+   * @returns A promise resolving to the final status and receipt/error.
+   */
+  waitForTransactionConfirmation?(txHash: string): Promise<{
+    status: 'success' | 'error';
+    receipt?: unknown;
+    error?: Error;
+  }>;
 }
 
 // Also export as default to ensure compatibility with various import styles

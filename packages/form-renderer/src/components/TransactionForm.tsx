@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import type { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
-import type { TransactionStatus } from '@openzeppelin/transaction-form-types/transactions/status';
+import type { TxStatus } from '@openzeppelin/transaction-form-types/transactions/status';
 
 import { createDefaultFormValues } from '../utils/formUtils';
 import { logger } from '../utils/logger';
@@ -37,12 +37,11 @@ export function TransactionForm({
   schema,
   contractSchema,
   adapter,
-  onSubmit,
 }: TransactionFormProps): React.ReactElement {
   const [formError, setFormError] = useState<string | null>(null);
 
   // Transaction Lifecycle State
-  const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
+  const [txStatus, setTxStatus] = useState<TxStatus>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
 
@@ -66,48 +65,79 @@ export function TransactionForm({
 
   // Form submission handler - Actual transaction logic
   const handleSubmit = async (data: FormValues): Promise<void> => {
-    if (!isConnected) {
-      setTxError('Wallet not connected.');
+    logger.info('TransactionForm', 'Form submitted', data);
+    setTxStatus('idle'); // Reset status on new submission
+    setTxHash(null);
+    setTxError(null);
+
+    if (!adapter) {
+      logger.error('TransactionForm', 'Adapter not provided');
+      setTxError('Configuration error: Adapter not available.');
       setTxStatus('error');
       return;
     }
 
-    setTxStatus('pendingSignature');
-    setTxHash(null);
-    setTxError(null);
-    setFormError(null);
+    const connectionStatus = adapter.getWalletConnectionStatus();
+    if (!connectionStatus.isConnected) {
+      logger.warn('TransactionForm', 'Wallet not connected for submission');
+      setTxError('Please connect your wallet to submit the transaction.');
+      setTxStatus('error');
+      return;
+    }
 
     try {
-      // 1. Format transaction data using the adapter
-      const functionId = schema.functionId || 'unknown';
+      setTxStatus('pendingSignature');
       const formattedData = adapter.formatTransactionData(
         contractSchema,
-        functionId,
+        schema.functionId as string, // TODO: Ensure functionId is present
         data,
-        schema.fields
+        schema.fields // Pass all fields config
       );
+      logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
 
-      // 2. Sign and broadcast transaction using the adapter
-      const result = await adapter.signAndBroadcast(formattedData);
+      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(formattedData);
+      logger.info('TransactionForm', `Transaction submitted with hash: ${submittedTxHash}`);
+      setTxHash(submittedTxHash);
 
-      // 3. Update state on successful initiation
-      setTxHash(result.txHash);
-      setTxStatus('pendingConfirmation'); // Move to pending confirmation
-      logger.info('TransactionForm', 'Transaction submitted:', result.txHash);
-
-      // Call original onSubmit if provided
-      if (onSubmit) {
-        logger.info(
+      // --> Start: Wait for confirmation <--
+      if (adapter.waitForTransactionConfirmation) {
+        setTxStatus('pendingConfirmation');
+        logger.info('TransactionForm', `Waiting for confirmation for tx: ${submittedTxHash}`);
+        const confirmationResult = await adapter.waitForTransactionConfirmation(submittedTxHash);
+        if (confirmationResult.status === 'success') {
+          logger.info(
+            'TransactionForm',
+            `Transaction confirmed: ${submittedTxHash}`,
+            confirmationResult.receipt
+          );
+          setTxStatus('success');
+          setTxError(null);
+        } else {
+          logger.error(
+            'TransactionForm',
+            `Transaction failed confirmation: ${submittedTxHash}`,
+            confirmationResult.error
+          );
+          setTxError(
+            confirmationResult.error?.message ?? 'Transaction failed during confirmation.'
+          );
+          setTxStatus('error');
+        }
+      } else {
+        // If adapter doesn't support waiting, consider submission as success immediately
+        logger.warn(
           'TransactionForm',
-          'Calling original onSubmit after transaction submission attempt.'
+          'Adapter does not support waitForTransactionConfirmation. Marking as success after submission.'
         );
+        setTxStatus('success'); // Or maybe a different status like 'submitted'?
+        setTxError(null);
       }
+      // --> End: Wait for confirmation <--
     } catch (error) {
-      logger.error('TransactionForm', 'Transaction Error:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'An unknown transaction error occurred.';
-      setTxError(errorMessage);
+      logger.error('TransactionForm', 'Transaction error:', error);
+      setTxError(error instanceof Error ? error.message : 'An unknown error occurred.');
       setTxStatus('error');
+      // Keep txHash if it was set before the error (e.g., during signAndBroadcast)
     }
   };
 

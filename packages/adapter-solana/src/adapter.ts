@@ -293,6 +293,29 @@ export class SolanaAdapter implements ContractAdapter {
     // Default to Solana explorer for mainnet
     return `https://explorer.solana.com/address/${address}`;
   }
+
+  /**
+   * Gets a blockchain explorer URL for a transaction in this chain
+   *
+   * @param txHash - The hash of the transaction to get the explorer URL for
+   * @returns A URL to view the transaction on a blockchain explorer, or null if not supported
+   */
+  getExplorerTxUrl?(txHash: string): string | null {
+    // Solana Explorer uses /tx/ prefix for transactions
+    return txHash ? `https://explorer.solana.com/tx/${txHash}` : null;
+  }
+
+  /**
+   * (Optional) Waits for a transaction to be confirmed on the blockchain.
+   *
+   * @param txHash - The hash of the transaction to wait for.
+   * @returns A promise resolving to the final status and receipt/error.
+   */
+  waitForTransactionConfirmation?(txHash: string): Promise<{
+    status: 'success' | 'error';
+    receipt?: unknown;
+    error?: Error;
+  }>;
 }
 
 // Also export as default to ensure compatibility with various import styles

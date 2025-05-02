@@ -1,7 +1,13 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import { Contract, JsonRpcProvider } from 'ethers';
 import { startCase } from 'lodash';
-import { type Abi, type AbiStateMutability, getAddress, isAddress } from 'viem';
+import {
+  type Abi,
+  type AbiStateMutability,
+  type TransactionReceipt,
+  getAddress,
+  isAddress,
+} from 'viem';
 
 import type {
   Connector,
@@ -849,6 +855,50 @@ export class EvmAdapter implements ContractAdapter {
     // For now, defaults to Etherscan (Mainnet).
     if (!this.isValidAddress(address)) return null;
     return `https://etherscan.io/address/${address}`;
+  }
+
+  async waitForTransactionConfirmation(txHash: string): Promise<{
+    status: 'success' | 'error';
+    receipt?: TransactionReceipt;
+    error?: Error;
+  }> {
+    console.info('EvmAdapter.waitForTransactionConfirmation', `Waiting for tx: ${txHash}`);
+    try {
+      // Get the public client (synchronous in wagmi v2)
+      const publicClient = this.walletImplementation.getPublicClient();
+      if (!publicClient) {
+        throw new Error('Public client not available to wait for transaction.');
+      }
+
+      // Wait for the transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash as `0x${string}`,
+      });
+
+      console.info('EvmAdapter.waitForTransactionConfirmation', 'Received receipt:', receipt);
+
+      // Check the status field in the receipt
+      if (receipt.status === 'success') {
+        return { status: 'success', receipt };
+      } else {
+        console.error(
+          'EvmAdapter.waitForTransactionConfirmation',
+          'Transaction reverted:',
+          receipt
+        );
+        return { status: 'error', receipt, error: new Error('Transaction reverted.') };
+      }
+    } catch (error) {
+      console.error(
+        'EvmAdapter.waitForTransactionConfirmation',
+        'Error waiting for transaction confirmation:',
+        error
+      );
+      return {
+        status: 'error',
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
+    }
   }
 }
 

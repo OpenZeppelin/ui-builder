@@ -289,6 +289,29 @@ export class StellarAdapter implements ContractAdapter {
     // Use StellarExpert as the default explorer for Stellar addresses
     return `https://stellar.expert/explorer/public/account/${address}`;
   }
+
+  /**
+   * Gets a blockchain explorer URL for a transaction in this chain
+   *
+   * @param txHash - The hash of the transaction to get the explorer URL for
+   * @returns A URL to view the transaction on a blockchain explorer, or null if not supported
+   */
+  getExplorerTxUrl?(txHash: string): string | null {
+    // Stellar Expert uses /tx/ prefix for transactions
+    return txHash ? `https://stellar.expert/explorer/public/tx/${txHash}` : null;
+  }
+
+  /**
+   * (Optional) Waits for a transaction to be confirmed on the blockchain.
+   *
+   * @param txHash - The hash of the transaction to wait for.
+   * @returns A promise resolving to the final status and receipt/error.
+   */
+  waitForTransactionConfirmation?(txHash: string): Promise<{
+    status: 'success' | 'error';
+    receipt?: unknown;
+    error?: Error;
+  }>;
 }
 
 // Also export as default to ensure compatibility with various import styles
