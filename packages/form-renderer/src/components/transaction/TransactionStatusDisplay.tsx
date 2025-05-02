@@ -74,17 +74,17 @@ export function TransactionStatusDisplay({
   }
 
   return (
-    <Alert variant={variant} className={cn('relative', className)}>
-      {icon}
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{content}</AlertDescription>
+    <Alert variant={variant} className={cn('relative pt-9', className)}>
+      <div className="absolute left-4 top-4">{icon}</div>
+      <AlertTitle className="mb-1 ml-6">{title}</AlertTitle>
+      <AlertDescription className="ml-6">{content}</AlertDescription>
       {onClose && (status === 'success' || status === 'error') && (
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 h-6 w-6"
+          className="absolute right-2 top-2 h-6 w-6 text-muted-foreground hover:text-foreground"
           onClick={onClose}
-          aria-label="Close"
+          aria-label="Reset Status"
         >
           <X className="h-4 w-4" />
         </Button>
