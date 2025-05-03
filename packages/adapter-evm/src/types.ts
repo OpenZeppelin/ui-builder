@@ -1,3 +1,5 @@
+import type { Abi } from 'viem';
+
 /**
  * EVM-specific type definitions
  */
@@ -58,3 +60,18 @@ export enum EVMChainType {
   BSC = 'bsc',
   AVALANCHE = 'avalanche',
 }
+// Import Viem's Abi type
+
+/**
+ * Defines the structure for parameters required to execute a contract write operation via viem.
+ */
+export interface WriteContractParameters {
+  address: `0x${string}`; // Ensure address is a valid hex string type
+  abi: Abi;
+  functionName: string;
+  args: unknown[];
+  value?: bigint;
+  // Add other potential viem parameters if needed (e.g., gas)
+}
+
+// Add other adapter-specific internal types here if necessary

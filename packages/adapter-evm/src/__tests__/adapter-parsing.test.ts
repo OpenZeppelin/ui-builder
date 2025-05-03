@@ -7,6 +7,7 @@ import type {
 } from '@openzeppelin/transaction-form-types/contracts';
 
 import { EvmAdapter } from '../adapter';
+import { parseEvmInput as parseEvmInputFunction } from '../transform';
 
 // Mock FunctionParameter type helper
 const createParam = (
@@ -21,22 +22,13 @@ const createParam = (
 });
 
 describe('EvmAdapter Input Parsing', () => {
-  let adapter: EvmAdapter;
-
-  beforeEach(() => {
-    adapter = new EvmAdapter();
-    // Need to access the private method, so using type assertion/casting
-    // Alternatively, make it protected or use a testing utility if available
-  });
-
   // Define valid address constants accessible to multiple test blocks
   const validAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
   const checksummedAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // viem getAddress checksums
 
-  // Helper to call the private parseEvmInput method
+  // Helper to call the imported parseEvmInput function
   const parseInput = (param: FunctionParameter, value: unknown) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (adapter as any).parseEvmInput(param, value);
+    return parseEvmInputFunction(param, value);
   };
 
   // --- Simple Type Tests ---

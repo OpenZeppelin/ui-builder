@@ -54,7 +54,7 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
   // const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
-  const [loadError, setLoadError] = useState<Error | null>(null);
+  const [loadError, _setLoadError] = useState<Error | null>(null);
 
   // Form schema generated from the builder and transformed by FormSchemaFactory
   /*------------TEMPLATE COMMENT START------------*/

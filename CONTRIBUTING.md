@@ -13,6 +13,18 @@ Thank you for considering contributing to Transaction Form Builder! This documen
 6. Push to your branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
+### Adding New Adapters
+
+If you are contributing support for a new blockchain:
+
+1.  **Familiarize Yourself:** Please read the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)** thoroughly to understand the expected modular structure and responsibilities.
+2.  **Interface:** Ensure your new adapter class implements the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
+3.  **Structure:** Follow the domain-driven module structure outlined in the architecture guide (e.g., `mapping/`, `transaction/`, `query/`, etc.) within your new `packages/adapter-<chain-name>/src/` directory.
+4.  **Scaffolding:** Consider using the (potential) `pnpm create-adapter <chain-name>` script if available to generate the initial file structure.
+5.  **Registration:** Register your adapter instance in `packages/core/src/core/adapterRegistry.ts`.
+6.  **Testing:** Add comprehensive unit tests for your adapter's logic.
+7.  **Documentation:** Update any relevant documentation, including potentially adding chain-specific notes to the architecture guide if necessary.
+
 ## Pull Request Process
 
 1. Ensure your code follows the style guidelines of the project

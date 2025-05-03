@@ -268,7 +268,9 @@ transaction-form-builder/
 
 ## Architecture
 
-The application uses an adapter pattern to support multiple blockchain ecosystems:
+The application uses a modular, domain-driven adapter pattern to support multiple blockchain ecosystems. For a detailed explanation of the adapter architecture and module responsibilities, please see the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)**.
+
+**Key Components:**
 
 - **Core**: Chain-agnostic application logic, UI components, export system, and the central `adapterRegistry` for managing adapter instances.
 - **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. This includes methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods.
