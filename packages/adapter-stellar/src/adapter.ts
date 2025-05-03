@@ -9,307 +9,162 @@ import type {
   ContractSchema,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types/contracts';
-import type {
-  FieldType,
-  FieldValue,
-  FormFieldType,
-} from '@openzeppelin/transaction-form-types/forms';
+import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+
+// Import functions from modules
+import {
+  getStellarSupportedExecutionMethods,
+  validateStellarExecutionConfig,
+} from './configuration/execution';
+import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './configuration/explorer';
+
+import { loadStellarContract } from './definition';
+import {
+  generateStellarDefaultField,
+  getStellarCompatibleFieldTypes,
+  mapStellarParameterTypeToFieldType,
+} from './mapping';
+import { loadStellarMockContract } from './mocking';
+import { isStellarViewFunction, queryStellarViewFunction } from './query';
+import { formatStellarTransactionData, signAndBroadcastStellarTransaction } from './transaction';
+import { formatStellarFunctionResult } from './transform';
+import { isValidAddress as isStellarValidAddress } from './utils';
+import {
+  connectStellarWallet,
+  disconnectStellarWallet,
+  getStellarAvailableConnectors,
+  getStellarWalletConnectionStatus,
+  supportsStellarWalletConnection,
+  // onStellarWalletConnectionChange, // Placeholder if needed later
+} from './wallet';
 
 /**
- * Stellar-specific adapter implementation
+ * Stellar-specific adapter implementation using explicit method delegation.
  *
- * NOTE: This is just a minimal placeholder implementation. The project is currently focusing
- * exclusively on the EVM adapter. This adapter will be properly implemented in future phases
- * when we expand support to the Stellar blockchain.
+ * NOTE: Contains placeholder implementations for most functionalities.
  */
 export class StellarAdapter implements ContractAdapter {
-  /**
-   * Load a contract from a file or address
-   *
-   * TODO: Implement actual Stellar contract loading logic in future phases
-   */
+  // Optional: Constructor for initializing internal state (e.g., wallet implementations)
+  // constructor() { }
+
+  // --- Contract Loading --- //
   async loadContract(source: string): Promise<ContractSchema> {
-    console.log(`[PLACEHOLDER] Loading Stellar contract from: ${source}`);
-    return this.loadMockContract();
+    return loadStellarContract(source);
+  }
+  async loadMockContract(mockId?: string): Promise<ContractSchema> {
+    return loadStellarMockContract(mockId);
   }
 
-  /**
-   * Load a mock contract for testing
-   *
-   * TODO: Implement proper Stellar contract schema in future phases
-   * @param mockId Optional ID to specify which mock to load (not used for Stellar adapter)
-   */
-  async loadMockContract(_mockId?: string): Promise<ContractSchema> {
-    // Simple minimal mock contract schema
-    return {
-      chainType: 'stellar',
-      name: 'PlaceholderStellarContract',
-      functions: [
-        {
-          id: 'dummy_operation',
-          name: 'placeholderOperation',
-          displayName: 'Placeholder Operation',
-          inputs: [
-            {
-              name: 'dummyParam',
-              type: 'string',
-              displayName: 'Dummy Parameter',
-            },
-          ],
-          type: 'function',
-          modifiesState: true, // Assume this placeholder operation modifies state
-        },
-      ],
-    };
-  }
-
-  /**
-   * Get only the functions that modify state (writable functions)
-   * @param contractSchema The contract schema to filter
-   * @returns Array of writable functions
-   */
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+    // Simple filtering logic, could be moved to a util if it grows
     return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
-  /**
-   * Map a Stellar-specific parameter type to a form field type
-   *
-   * TODO: Implement proper Stellar type mapping in future phases
-   */
-  mapParameterTypeToFieldType(_parameterType: string): FieldType {
-    // Placeholder implementation that defaults everything to text fields
-    return 'text';
+  // --- Type Mapping & Field Generation --- //
+  mapParameterTypeToFieldType(parameterType: string): FieldType {
+    return mapStellarParameterTypeToFieldType(parameterType);
   }
-
-  /**
-   * Get field types compatible with a specific parameter type
-   * @param _parameterType The blockchain parameter type
-   * @returns Array of compatible field types
-   *
-   * TODO: Implement proper Stellar field type compatibility in future phases
-   */
-  getCompatibleFieldTypes(_parameterType: string): FieldType[] {
-    // Placeholder implementation that returns all field types
-    return [
-      'text',
-      'number',
-      'checkbox',
-      'radio',
-      'select',
-      'textarea',
-      'date',
-      'email',
-      'password',
-      'blockchain-address',
-      'amount',
-      'hidden',
-    ];
+  getCompatibleFieldTypes(parameterType: string): FieldType[] {
+    return getStellarCompatibleFieldTypes(parameterType);
   }
-
-  /**
-   * Generate default field configuration for a Stellar function parameter
-   *
-   * TODO: Implement proper Stellar field generation in future phases
-   */
   generateDefaultField<T extends FieldType = FieldType>(
     parameter: FunctionParameter
   ): FormFieldType<T> {
-    // Default to text fields for now as a placeholder
-    const fieldType = 'text' as T;
-
-    return {
-      id: Math.random().toString(36).substring(2, 11),
-      name: parameter.name || 'placeholder',
-      label: parameter.displayName || parameter.name || 'Placeholder Field',
-      type: fieldType,
-      placeholder: 'Placeholder - Stellar adapter not fully implemented yet',
-      helperText: 'Stellar adapter is not fully implemented yet',
-      defaultValue: '' as FieldValue<T>,
-      validation: { required: true },
-      width: 'full',
-    };
+    return generateStellarDefaultField(parameter);
   }
 
-  /**
-   * @inheritdoc
-   */
+  // --- Transaction Formatting & Execution --- //
   formatTransactionData(
-    _contractSchema: ContractSchema,
-    _functionId: string,
-    _submittedInputs: Record<string, unknown>,
-    _allFieldsConfig: FormFieldType[]
+    contractSchema: ContractSchema,
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    allFieldsConfig: FormFieldType[]
   ): unknown {
-    console.warn(
-      'StellarAdapter.formatTransactionData not implemented, returning placeholder data.'
+    return formatStellarTransactionData(
+      contractSchema,
+      functionId,
+      submittedInputs,
+      allFieldsConfig
     );
-    // Placeholder implementation
-    return { data: 'stellar_formatted_placeholder' };
+  }
+  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+    // Pass internal state like wallet implementation here if needed in the future
+    return signAndBroadcastStellarTransaction(transactionData);
   }
 
-  /**
-   * Sign and broadcast a transaction
-   *
-   * TODO: Implement proper Stellar transaction signing in future phases
-   */
-  async signAndBroadcast(_transactionData: unknown): Promise<{ txHash: string }> {
-    return { txHash: 'stellar_placeholder_tx' };
-  }
+  // NOTE: waitForTransactionConfirmation? is optional in the interface.
+  // Since the imported function is currently undefined, we omit the method here.
+  // If implemented in ./transaction/sender.ts later, add the method back:
+  // async waitForTransactionConfirmation?(...) { ... }
 
-  /**
-   * Validate a Stellar blockchain address
-   * @param address The address to validate
-   * @returns Whether the address is a valid Stellar address
-   */
-  isValidAddress(address: string): boolean {
-    // Basic check for Stellar addresses (starts with G and is 56 chars long)
-    // TODO: Use a proper Stellar SDK for validation when focusing on that chain
-    return /^G[A-Z0-9]{55}$/.test(address);
+  // --- View Function Querying --- //
+  isViewFunction(functionDetails: ContractFunction): boolean {
+    return isStellarViewFunction(functionDetails);
   }
-
-  /**
-   * @inheritdoc
-   * TODO: Implement actual supported methods for Stellar.
-   */
-  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
-    // Placeholder: Assume only EOA is supported for now
-    console.warn(
-      'StellarAdapter.getSupportedExecutionMethods is using placeholder implementation.'
-    );
-    return Promise.resolve([
-      {
-        type: 'eoa',
-        name: 'Stellar Account',
-        description: 'Execute using a standard Stellar account address.',
-      },
-    ]);
-  }
-
-  /**
-   * @inheritdoc
-   * TODO: Implement actual validation logic for Stellar execution configs.
-   */
-  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    // Placeholder: Basic validation
-    console.warn('StellarAdapter.validateExecutionConfig is using placeholder implementation.');
-    if (config.method === 'eoa') {
-      if (!config.allowAny && !config.specificAddress) {
-        return 'Specific Stellar account address is required.';
-      }
-      if (
-        !config.allowAny &&
-        config.specificAddress &&
-        !this.isValidAddress(config.specificAddress)
-      ) {
-        return 'Invalid account address format for Stellar.';
-      }
-      return true;
-    } else {
-      // For now, consider other methods unsupported by this placeholder
-      return `Execution method '${config.method}' is not yet supported by this adapter implementation.`;
-    }
-  }
-
-  /**
-   * Determines if a function is a view/pure function (read-only)
-   */
-  isViewFunction(_functionDetails: ContractFunction): boolean {
-    // TODO: Implement properly for Stellar Soroban contracts
-    return false; // Temporary placeholder
-  }
-
-  /**
-   * Queries a view function on a contract
-   */
   async queryViewFunction(
-    _contractAddress: string,
-    _functionId: string,
-    _params: unknown[] = [],
-    _contractSchema?: ContractSchema
+    contractAddress: string,
+    functionId: string,
+    params: unknown[] = [],
+    contractSchema?: ContractSchema
   ): Promise<unknown> {
-    // TODO: Implement Stellar contract query functionality
-    throw new Error('Stellar view function queries not yet implemented');
+    // Pass internal state like wallet implementation or this.loadContract here if needed
+    return queryStellarViewFunction(contractAddress, functionId, params, contractSchema);
+  }
+  formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
+    return formatStellarFunctionResult(decodedValue, functionDetails);
   }
 
-  /**
-   * Formats a function result for display
-   */
-  formatFunctionResult(result: unknown, _functionDetails: ContractFunction): string {
-    // TODO: Implement Stellar-specific result formatting
-    if (result === null || result === undefined) {
-      return 'No data';
-    }
-
-    // Placeholder: Return simple string representation
-    return String(result);
-  }
-
-  /**
-   * Indicates if this adapter supports wallet connection
-   * @returns Whether wallet connection is supported by this adapter
-   */
+  // --- Wallet Interaction --- //
   supportsWalletConnection(): boolean {
-    return false; // Stellar wallet connection not yet implemented
+    return supportsStellarWalletConnection();
   }
-
   async getAvailableConnectors(): Promise<Connector[]> {
-    return [];
+    // Pass internal state like wallet implementation here if needed
+    return getStellarAvailableConnectors();
   }
-
   async connectWallet(
-    _connectorId: string
+    connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
-    return { connected: false, error: 'Stellar adapter does not support wallet connection.' };
+    // Pass internal state like wallet implementation here if needed
+    return connectStellarWallet(connectorId);
   }
-
   async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
-    return { disconnected: false, error: 'Stellar adapter does not support wallet connection.' };
+    // Pass internal state like wallet implementation here if needed
+    return disconnectStellarWallet();
   }
-
-  /**
-   * @inheritdoc
-   */
   getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    // Stub implementation: Always return disconnected status
-    return { isConnected: false };
+    // Pass internal state like wallet implementation here if needed
+    return getStellarWalletConnectionStatus();
+  }
+  // Optional: onWalletConnectionChange(...) implementation would go here
+
+  // --- Configuration & Metadata --- //
+  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    return getStellarSupportedExecutionMethods();
+  }
+  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    return validateStellarExecutionConfig(config);
+  }
+  getExplorerUrl(address: string, chainId?: string): string | null {
+    return getStellarExplorerAddressUrl(address, chainId);
   }
 
-  /**
-   * Gets a blockchain explorer URL for an address on Stellar
-   *
-   * @param address The address to get the explorer URL for
-   * @param _chainId Optional chain ID (not used for Stellar, which uses public/testnet)
-   * @returns A URL to view the address on Stellar Expert explorer
-   */
-  getExplorerUrl(address: string, _chainId?: string): string | null {
-    if (!address) return null;
-
-    // Use StellarExpert as the default explorer for Stellar addresses
-    return `https://stellar.expert/explorer/public/account/${address}`;
-  }
-
-  /**
-   * Gets a blockchain explorer URL for a transaction in this chain
-   *
-   * @param txHash - The hash of the transaction to get the explorer URL for
-   * @returns A URL to view the transaction on a blockchain explorer, or null if not supported
-   */
+  // NOTE: getExplorerTxUrl? is optional in the interface.
+  // Since the imported function exists, we can implement it.
+  // However, if getStellarExplorerTxUrl were undefined in its module,
+  // we would omit this method definition.
   getExplorerTxUrl?(txHash: string): string | null {
-    // Stellar Expert uses /tx/ prefix for transactions
-    return txHash ? `https://stellar.expert/explorer/public/tx/${txHash}` : null;
+    // Check still needed in case the function exists but could return null/undefined
+    if (getStellarExplorerTxUrl) {
+      return getStellarExplorerTxUrl(txHash);
+    }
+    return null;
   }
 
-  /**
-   * (Optional) Waits for a transaction to be confirmed on the blockchain.
-   *
-   * @param txHash - The hash of the transaction to wait for.
-   * @returns A promise resolving to the final status and receipt/error.
-   */
-  waitForTransactionConfirmation?(txHash: string): Promise<{
-    status: 'success' | 'error';
-    receipt?: unknown;
-    error?: Error;
-  }>;
+  // --- Validation --- //
+  isValidAddress(address: string): boolean {
+    return isStellarValidAddress(address);
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles

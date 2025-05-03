@@ -57,7 +57,7 @@ adapter-<chain>/
     │   ├── connection.ts      # Wraps implementation calls
     │   ├── [impl].ts          # e.g., wagmi-implementation.ts
     │   └── index.ts
-    ├── config/                # Generic: Metadata/configuration logic
+    ├── configuration/         # Generic: Metadata/configuration logic
     │   ├── execution.ts
     │   └── explorer.ts
     │   └── index.ts
@@ -115,7 +115,7 @@ adapter-<chain>/
   - **Key Exports:** `connect[Chain]Wallet`, `disconnect[Chain]Wallet`, `get[Chain]WalletConnectionStatus`, etc.
   - **Internal Implementation:** Often contains a class (e.g., `WagmiWalletImplementation`) that manages the library specifics. The exported functions act as a facade.
 
-- **`config/`:**
+- **`configuration/`:**
 
   - **Purpose:** Provides configuration metadata about the adapter and chain.
   - **Key Exports:** `get[Chain]SupportedExecutionMethods`, `validate[Chain]ExecutionConfig`, `get[Chain]ExplorerAddressUrl`, `get[Chain]ExplorerTxUrl`.
