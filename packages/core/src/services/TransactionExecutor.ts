@@ -4,13 +4,13 @@
  * Handles execution of transactions on different blockchain platforms.
  * Uses the appropriate adapter based on the chain type.
  */
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 /**
  * Interface for transaction parameters
  */
 export interface TransactionParams {
-  chainType: ChainType;
+  ecosystem: Ecosystem;
   contractAddress: string;
   functionId: string;
   functionName: string;

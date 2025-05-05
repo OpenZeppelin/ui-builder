@@ -3,7 +3,8 @@ import { Eye, Pencil } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
@@ -22,7 +23,7 @@ import { GeneralSettings } from './GeneralSettings';
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  selectedChain: ChainType;
+  selectedEcosystem: Ecosystem;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
   onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
   currentExecutionConfig?: ExecutionConfig;
@@ -31,7 +32,7 @@ interface StepFormCustomizationProps {
 export function StepFormCustomization({
   contractSchema,
   selectedFunction,
-  selectedChain,
+  selectedEcosystem,
   onFormConfigUpdated,
   onExecutionConfigUpdated,
   currentExecutionConfig,
@@ -110,7 +111,7 @@ export function StepFormCustomization({
         <FormPreview
           formConfig={formConfig}
           functionDetails={selectedFunctionDetails}
-          selectedChain={selectedChain}
+          selectedEcosystem={selectedEcosystem}
           contractSchema={contractSchema}
         />
       ) : (
@@ -146,7 +147,7 @@ export function StepFormCustomization({
                     <FieldEditor
                       field={formConfig.fields[selectedFieldIndex]}
                       onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                      adapter={getAdapter(selectedChain)}
+                      adapter={getAdapter(selectedEcosystem)}
                       originalParameterType={
                         formConfig.fields[selectedFieldIndex].originalParameterType
                       }
@@ -159,7 +160,7 @@ export function StepFormCustomization({
 
           <TabsContent value="execution" className="mt-4 rounded-md border p-4">
             <ExecutionMethodSettings
-              adapter={getAdapter(selectedChain)}
+              adapter={getAdapter(selectedEcosystem)}
               currentConfig={currentExecutionConfig}
               onUpdateConfig={onExecutionConfigUpdated || (() => {})}
             />

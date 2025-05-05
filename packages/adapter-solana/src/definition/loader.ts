@@ -5,7 +5,7 @@ export async function loadSolanaContract(source: string): Promise<ContractSchema
   console.warn('loadSolanaContract not implemented');
   // Return a minimal valid schema to avoid breaking types further down
   return {
-    chainType: 'solana',
+    ecosystem: 'solana',
     name: 'PlaceholderSolanaContract',
     address: source,
     functions: [],

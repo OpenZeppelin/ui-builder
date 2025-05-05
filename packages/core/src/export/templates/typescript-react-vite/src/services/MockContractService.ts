@@ -4,14 +4,14 @@
  * TODO: remove this file together with mocks directory once the contract loading is implemented.
  */
 // Import mock contract data
-import { MOCK_CONTRACTS, mockFiles, mockFilesByChain } from '../mocks';
+import { MOCK_CONTRACTS, mockFiles, mockFilesByEcosystem } from '../mocks';
 
 export interface MockContractInfo {
   id: string;
   name: string;
   description: string;
   file: string;
-  chainType: string;
+  ecosystem: string;
 }
 
 /**
@@ -46,12 +46,12 @@ export class MockContractService {
       // Determine if this is a chain-specific file
       const parts = fileName.split('/');
       if (parts.length > 1) {
-        const chainType = parts[0];
+        const ecosystem = parts[0];
         const actualFileName = parts[parts.length - 1];
 
         // Check if we have chain-specific mock files
-        if (mockFilesByChain[chainType] && mockFilesByChain[chainType][actualFileName]) {
-          return mockFilesByChain[chainType][actualFileName];
+        if (mockFilesByEcosystem[ecosystem] && mockFilesByEcosystem[ecosystem][actualFileName]) {
+          return mockFilesByEcosystem[ecosystem][actualFileName];
         }
       }
 

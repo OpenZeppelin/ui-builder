@@ -12,7 +12,7 @@ export const TEST_FIXTURES = {
     id: 'test-integers',
     name: 'Test Integer Types',
     address: '0x1234567890123456789012345678901234567890',
-    chainType: 'evm' as const,
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-uint8',
@@ -73,7 +73,7 @@ export const TEST_FIXTURES = {
     id: 'test-bytes',
     name: 'Test Byte Types',
     address: '0x1234567890123456789012345678901234567890',
-    chainType: 'evm' as const,
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-bytes',
@@ -117,7 +117,7 @@ export const TEST_FIXTURES = {
     id: 'test-arrays',
     name: 'Test Array Types',
     address: '0x1234567890123456789012345678901234567890',
-    chainType: 'evm' as const,
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-dynamic-array',
@@ -178,7 +178,7 @@ export const TEST_FIXTURES = {
     id: 'test-errors',
     name: 'Test Error Cases',
     address: '0x1234567890123456789012345678901234567890',
-    chainType: 'evm' as const,
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-empty-inputs',

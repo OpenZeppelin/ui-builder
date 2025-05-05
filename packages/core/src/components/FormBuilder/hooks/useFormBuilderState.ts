@@ -1,14 +1,15 @@
 import { useCallback } from 'react';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
-import { useChainSelectionState } from './useChainSelectionState';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractDefinitionState } from './useContractDefinitionState';
 import { useContractWidgetState } from './useContractWidgetState';
+import { useEcosystemSelectionState } from './useEcosystemSelectionState';
 import { useFormCustomizationState } from './useFormCustomizationState';
 import { useFunctionSelectionState } from './useFunctionSelectionState';
 
@@ -16,19 +17,19 @@ import { useFunctionSelectionState } from './useFunctionSelectionState';
  * Coordinating hook that combines all step-specific hooks and manages dependencies between steps.
  * This ensures that when earlier step values change, later step values are reset appropriately.
  */
-export function useFormBuilderState(initialChain: ChainType = 'evm') {
+export function useFormBuilderState(initialEcosystem: Ecosystem = 'evm') {
   // Initialize all step-specific hooks
-  const chainSelection = useChainSelectionState(initialChain);
+  const ecosystemSelection = useEcosystemSelectionState(initialEcosystem);
   const contractDefinition = useContractDefinitionState();
   const functionSelection = useFunctionSelectionState();
   const formCustomization = useFormCustomizationState();
   const contractWidget = useContractWidgetState();
   const completeStep = useCompleteStepState();
 
-  // Create enhanced chain selection handler that resets downstream state
-  const handleChainSelect = useCallback(
-    (chain: ChainType) => {
-      chainSelection.handleChainSelect(chain);
+  // Create enhanced ecosystem selection handler that resets downstream state
+  const handleEcosystemSelect = useCallback(
+    (ecosystem: Ecosystem) => {
+      ecosystemSelection.handleEcosystemSelect(ecosystem);
       contractDefinition.resetContractSchema();
       functionSelection.resetFunctionSelection();
       formCustomization.resetFormConfig();
@@ -36,7 +37,7 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
       completeStep.resetLoadingState();
     },
     [
-      chainSelection,
+      ecosystemSelection,
       contractDefinition,
       functionSelection,
       formCustomization,
@@ -66,8 +67,10 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     [functionSelection, formCustomization, completeStep]
   );
 
-  // Get the adapter for the selected chain
-  const adapter = chainSelection.selectedChain ? getAdapter(chainSelection.selectedChain) : null;
+  // Get the adapter for the selected ecosystem
+  const adapter = ecosystemSelection.selectedEcosystem
+    ? getAdapter(ecosystemSelection.selectedEcosystem)
+    : null;
 
   // Create sidebar widget props
   const sidebarWidget =
@@ -83,13 +86,13 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
   const handleExportForm = useCallback(
     (
       formConfig: BuilderFormConfig | null,
-      selectedChain: ChainType,
+      selectedEcosystem: Ecosystem,
       selectedFunction: string | null
     ) => {
       // Use void to explicitly ignore the promise
       void completeStep.exportForm(
         formConfig,
-        selectedChain,
+        selectedEcosystem,
         selectedFunction,
         contractDefinition.contractSchema
       );
@@ -99,7 +102,7 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
 
   return {
     // State from all hooks
-    selectedChain: chainSelection.selectedChain,
+    selectedEcosystem: ecosystemSelection.selectedEcosystem,
     contractSchema: contractDefinition.contractSchema,
     contractAddress: contractDefinition.contractAddress,
     selectedFunction: functionSelection.selectedFunction,
@@ -110,7 +113,7 @@ export function useFormBuilderState(initialChain: ChainType = 'evm') {
     exportLoading: completeStep.loading,
 
     // Enhanced handlers with dependencies handled
-    handleChainSelect,
+    handleEcosystemSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated: formCustomization.handleFormConfigUpdated,

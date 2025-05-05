@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { adapterConfigExportMap, adapterConfigLoaders } from '../core/adapterRegistry';
 import type { AdapterConfig } from '../core/types/AdapterTypes';
@@ -20,30 +20,30 @@ interface DependenciesWithRuntime {
  * functions provided by the adapterRegistry.
  */
 export class AdapterConfigLoader {
-  private configCache: Record<ChainType, AdapterConfig | null> = Object.create(null);
+  private configCache: Record<Ecosystem, AdapterConfig | null> = Object.create(null);
 
   /**
    * Load config for a specific chain type
    *
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @returns The adapter configuration, or null if not available
    */
-  async loadConfig(chainType: ChainType): Promise<AdapterConfig | null> {
+  async loadConfig(ecosystem: Ecosystem): Promise<AdapterConfig | null> {
     // Return from cache if available
-    if (this.configCache[chainType] !== undefined) {
-      return this.configCache[chainType];
+    if (this.configCache[ecosystem] !== undefined) {
+      return this.configCache[ecosystem];
     }
 
     // Get the loader function and expected export key for the config
-    const loaderFunc = adapterConfigLoaders[chainType];
-    const configKey = adapterConfigExportMap[chainType];
+    const loaderFunc = adapterConfigLoaders[ecosystem];
+    const configKey = adapterConfigExportMap[ecosystem];
 
     if (!loaderFunc || !configKey) {
       logger.warn(
         'AdapterConfigLoader',
-        `No config loader function or export key found for chain type: ${chainType}`
+        `No config loader function or export key found for ecosystem: ${ecosystem}`
       );
-      this.configCache[chainType] = null;
+      this.configCache[ecosystem] = null;
       return null;
     }
 
@@ -57,17 +57,17 @@ export class AdapterConfigLoader {
       if (!config || !this.isValidAdapterConfig(config)) {
         logger.error(
           'AdapterConfigLoader',
-          `Invalid or missing config export '${configKey}' for ${chainType}`
+          `Invalid or missing config export '${configKey}' for ${ecosystem}`
         );
-        this.configCache[chainType] = null;
+        this.configCache[ecosystem] = null;
         return null;
       }
 
-      this.configCache[chainType] = config;
+      this.configCache[ecosystem] = config;
       return config;
     } catch (error) {
-      logger.error('AdapterConfigLoader', `Error executing config loader for ${chainType}:`, error);
-      this.configCache[chainType] = null;
+      logger.error('AdapterConfigLoader', `Error executing config loader for ${ecosystem}:`, error);
+      this.configCache[ecosystem] = null;
       return null;
     }
   }

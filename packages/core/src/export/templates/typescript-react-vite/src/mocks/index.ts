@@ -12,6 +12,6 @@ export const mockFiles: Record<string, unknown> = {
 };
 
 // Export all chains' mock files by chain type
-export const mockFilesByChain: Record<string, Record<string, unknown>> = {
+export const mockFilesByEcosystem: Record<string, Record<string, unknown>> = {
   evm: evmMockFiles,
 };

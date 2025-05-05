@@ -11,7 +11,7 @@ The templating system supports three placeholder formats:
 The primary format for regular replacements in text, using kebab-case. These placeholders are completely replaced with their values:
 
 ```tsx
-import { @@adapter-class-name@@ } from '../adapters/@@chain-type@@/adapter';
+import { @@adapter-class-name@@ } from '../adapters/@@ecosystem@@/adapter';
 // ↓ Becomes ↓
 import { EvmAdapter } from '../adapters/evm/adapter';
 ```
@@ -85,7 +85,7 @@ For form component templates (`form-component.template.tsx`):
 When using any of these template formats, kebab-case is automatically converted to camelCase in the parameter lookup:
 
 - `@@adapter-class-name@@` → looks up `params.adapterClassName`
-- `@@chain-type@@` → looks up `params.chainType`
+- `@@ecosystem@@` → looks up `params.ecosystem`
 
 ## Important Notes
 
@@ -126,7 +126,7 @@ Each template has specific parameters defined in `TemplateTypes.ts`:
 
 - `adapterClassName`: The class name of the adapter.
 - `adapterPackageName`: The npm package name for the adapter.
-- `chainType`: The blockchain type (e.g., 'evm').
+- `ecosystem`: The ecosystem (e.g., 'evm').
 - `functionId`: The function ID.
 - `formConfigJSON`: The generated `RenderFormSchema` as a JSON string.
 - `allFieldsConfigJSON`: The original `BuilderFormConfig.fields` array as a JSON string.

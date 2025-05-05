@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -11,17 +11,17 @@ describe('Export Snapshot Tests', () => {
   /**
    * Helper function to extract key files from the export for snapshot testing
    */
-  async function getSnapshotFiles(chainType: ChainType = 'evm', functionName: string = 'transfer') {
+  async function getSnapshotFiles(ecosystem: Ecosystem = 'evm', functionName: string = 'transfer') {
     // Create the export system and form config
     const exportSystem = new FormExportSystem();
-    const formConfig = createMinimalFormConfig(functionName, chainType);
-    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
+    const formConfig = createMinimalFormConfig(functionName, ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form with a consistent project name for snapshots
     const result = await exportSystem.exportForm(
       formConfig,
       mockContractSchema,
-      chainType,
+      ecosystem,
       functionName,
       {
         projectName: 'snapshot-test-project',
@@ -38,7 +38,7 @@ describe('Export Snapshot Tests', () => {
       appComponent: files['src/App.tsx'],
       formComponent: files['src/components/GeneratedForm.tsx'],
       adapterIndex: files['src/adapters/index.ts'],
-      [`adapter_${chainType}`]: files[`src/adapters/${chainType}/adapter.ts`],
+      [`adapter_${ecosystem}`]: files[`src/adapters/${ecosystem}/adapter.ts`],
     };
   }
 

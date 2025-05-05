@@ -4,14 +4,17 @@ import { useForm } from 'react-hook-form';
 import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
 import { getAdapter } from '../../../../core/adapterRegistry';
-import { getChainExplorerGuidance, getChainName } from '../../../../core/chains';
+import {
+  getEcosystemExplorerGuidance,
+  getEcosystemName,
+} from '../../../../core/ecosystems/registry';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { StepTitleWithDescription } from '../../Common';
 import { MockContractSelector } from '../../ContractSelectors/MockContractSelector';
 import { ContractAddressFormProps, ContractFormData } from '../types';
 
 export function ContractAddressForm({
-  selectedChain,
+  selectedEcosystem,
   isLoading,
   onLoadContract,
   setIsLoading,
@@ -37,9 +40,9 @@ export function ContractAddressForm({
       reset({ contractAddress: '' });
       setError(null);
     }
-  }, [selectedChain, reset, setError, existingContractAddress]);
+  }, [selectedEcosystem, reset, setError, existingContractAddress]);
 
-  const adapter = getAdapter(selectedChain);
+  const adapter = getAdapter(selectedEcosystem);
 
   const onSubmitAddress = useCallback(
     async (data: ContractFormData) => {
@@ -52,12 +55,12 @@ export function ContractAddressForm({
       setError(null);
 
       try {
-        const schema = await loadContractDefinition(selectedChain, address);
+        const schema = await loadContractDefinition(selectedEcosystem, address);
         if (schema) {
           onLoadContract(schema);
         } else {
           setError(
-            `Failed to load contract definition. Check the address and verify it's available on the ${getChainName(selectedChain)} network.`
+            `Failed to load contract definition. Check the address and verify it's available on the ${getEcosystemName(selectedEcosystem)} network.`
           );
         }
       } catch (err) {
@@ -67,7 +70,7 @@ export function ContractAddressForm({
         setIsLoading(false);
       }
     },
-    [selectedChain, onLoadContract, setIsLoading, setError]
+    [selectedEcosystem, onLoadContract, setIsLoading, setError]
   );
 
   const handleLoadMockData = useCallback(
@@ -95,8 +98,8 @@ export function ContractAddressForm({
   );
 
   const currentAddress = watch('contractAddress');
-  const chainName = getChainName(selectedChain);
-  const explorerGuidance = getChainExplorerGuidance(selectedChain);
+  const ecosystemName = getEcosystemName(selectedEcosystem);
+  const explorerGuidance = getEcosystemExplorerGuidance(selectedEcosystem);
 
   return (
     <form
@@ -107,7 +110,7 @@ export function ContractAddressForm({
         title="Provide Contract Address"
         description={
           <>
-            Enter the address of a verified contract on the {chainName} network
+            Enter the address of a verified contract on the {ecosystemName} network
             {explorerGuidance && ` (e.g., ${explorerGuidance})`} or load from mock data.
           </>
         }
@@ -121,7 +124,7 @@ export function ContractAddressForm({
           control={control}
           adapter={adapter}
           validation={{ required: true }}
-          placeholder={`Enter ${chainName} contract address`}
+          placeholder={`Enter ${ecosystemName} contract address`}
         />
 
         <div className="flex items-end justify-between gap-4">
@@ -136,7 +139,7 @@ export function ContractAddressForm({
 
           <div className="flex flex-col items-end text-right">
             <Label className="text-muted-foreground mb-1 text-xs">Or load mock:</Label>
-            <MockContractSelector onSelectMock={handleLoadMockData} chainType={selectedChain} />
+            <MockContractSelector onSelectMock={handleLoadMockData} ecosystem={selectedEcosystem} />
           </div>
         </div>
         {error && <p className="text-destructive pt-1 text-sm">{error}</p>}

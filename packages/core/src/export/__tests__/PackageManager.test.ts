@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
@@ -135,7 +135,7 @@ describe('PackageManager', () => {
       const formConfig = createMinimalFormConfig();
       const dependencies = await packageManager.getDependencies(
         formConfig,
-        'unknown-chain' as ChainType
+        'unknown-ecosystem' as Ecosystem
       );
       expect(dependencies).toHaveProperty('react'); // Core deps still present
       expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter package not included

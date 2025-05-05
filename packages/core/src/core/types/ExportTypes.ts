@@ -4,7 +4,7 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 
@@ -57,9 +57,9 @@ export interface ExportOptions extends TemplateOptions {
   template?: string;
 
   /**
-   * Blockchain type for the export
+   * Blockchain ecosystem for the export
    */
-  chainType: ChainType;
+  ecosystem: Ecosystem;
 
   /**
    * Whether to include source maps

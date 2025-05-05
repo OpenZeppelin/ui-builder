@@ -21,7 +21,7 @@ export function transformAbiToSchema(
 ): ContractSchema {
   console.info(`Transforming ABI to ContractSchema for: ${contractName}`);
   const contractSchema: ContractSchema = {
-    chainType: 'evm',
+    ecosystem: 'evm',
     name: contractName,
     address,
     functions: abi

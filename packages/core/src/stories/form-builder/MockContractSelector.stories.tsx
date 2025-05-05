@@ -22,11 +22,11 @@ export const Default: Story = {
   },
 };
 
-export const WithChainTypeFilter: Story = {
+export const WithEcosystemFilter: Story = {
   args: {
     onSelectMock: (mockId: string) => {
       console.log('Selected mock contract:', mockId);
     },
-    chainType: 'evm',
+    ecosystem: 'evm',
   },
 };

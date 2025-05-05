@@ -5,7 +5,8 @@
  * Uses the appropriate adapter based on the selected chain type.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import { getAdapter } from '../core/adapterRegistry';
 
@@ -13,17 +14,17 @@ import { getAdapter } from '../core/adapterRegistry';
  * Loads a contract definition using the appropriate chain adapter.
  * Handles both File objects (ABI JSON upload) and strings (address or ABI JSON string).
  *
- * @param chainType The blockchain type (e.g., 'evm')
+ * @param ecosystem The ecosystem (e.g., 'evm')
  * @param contractDefinition A contract address string, a JSON ABI string, or a File object containing a JSON ABI.
  * @returns A Promise resolving to the ContractSchema or null if loading fails.
  */
 export async function loadContractDefinition(
-  chainType: ChainType,
+  ecosystem: Ecosystem,
   contractDefinition: string | File
 ): Promise<ContractSchema | null> {
-  logger.info('ContractLoader', `Loading contract definition for ${chainType}...`);
+  logger.info('ContractLoader', `Loading contract definition for ${ecosystem}...`);
   try {
-    const adapter = getAdapter(chainType);
+    const adapter = getAdapter(ecosystem);
     let sourceString: string;
 
     if (contractDefinition instanceof File) {

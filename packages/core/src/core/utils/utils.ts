@@ -6,13 +6,13 @@ import { twMerge } from 'tailwind-merge';
 
 // Export chain utilities from centralized registry
 export {
-  getChainName,
-  getChainDescription,
-  getChainExplorerGuidance,
-  getChainAddressExample,
-  getAvailableChains,
-  getChainStyling,
-} from '../chains';
+  getEcosystemName,
+  getEcosystemDescription,
+  getEcosystemExplorerGuidance,
+  getEcosystemAddressExample,
+  getAvailableEcosystems,
+  getEcosystemStyling,
+} from '../ecosystems/registry';
 
 /**
  * Combines class names with Tailwind's merge utility

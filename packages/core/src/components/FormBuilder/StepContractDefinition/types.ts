@@ -1,8 +1,9 @@
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 export interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;
-  selectedChain: ChainType;
+  selectedEcosystem: Ecosystem;
   existingContractSchema?: ContractSchema | null;
 }
 
@@ -11,7 +12,7 @@ export interface ContractFormData {
 }
 
 export interface ContractAddressFormProps {
-  selectedChain: ChainType;
+  selectedEcosystem: Ecosystem;
   isLoading: boolean;
   onLoadContract: (schema: ContractSchema) => void;
   setIsLoading: (loading: boolean) => void;

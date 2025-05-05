@@ -9,7 +9,7 @@ import type { ContractSchema } from '@openzeppelin/transaction-form-types/contra
 export function loadMidnightMockContract(_mockId?: string): Promise<ContractSchema> {
   // Simple minimal mock contract schema
   return Promise.resolve({
-    chainType: 'midnight',
+    ecosystem: 'midnight',
     name: 'PlaceholderMidnightContract',
     functions: [
       {

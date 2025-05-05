@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { FormExportSystem } from '../../../export';
@@ -16,7 +17,7 @@ export function useCompleteStepState() {
   const exportForm = useCallback(
     async (
       formConfig: BuilderFormConfig | null,
-      selectedChain: ChainType,
+      selectedEcosystem: Ecosystem,
       selectedFunction: string | null,
       contractSchema: ContractSchema | null
     ) => {
@@ -29,10 +30,10 @@ export function useCompleteStepState() {
         const result = await exportSystem.exportForm(
           formConfig,
           contractSchema,
-          selectedChain,
+          selectedEcosystem,
           selectedFunction,
           {
-            chainType: selectedChain,
+            ecosystem: selectedEcosystem,
           }
         );
 

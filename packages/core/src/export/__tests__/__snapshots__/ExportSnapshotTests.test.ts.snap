@@ -154,7 +154,7 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
 
   // Contract schema injected by generator (loaded or uploaded by the user)
   const contractSchema: ContractSchema = {
-    chainType: 'evm',
+    ecosystem: 'evm',
     name: 'MockContract',
     address: '0x1234567890123456789012345678901234567890',
     functions: [

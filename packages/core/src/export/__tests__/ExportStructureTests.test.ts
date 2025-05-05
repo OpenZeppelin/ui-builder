@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
@@ -14,7 +15,7 @@ describe('Export Structure Tests', () => {
   async function testExportStructure(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionName: string
   ) {
     // Create the export system
@@ -22,14 +23,14 @@ describe('Export Structure Tests', () => {
 
     // Generate export options
     const exportOptions = {
-      projectName: `test-${chainType}-project`,
+      projectName: `test-${ecosystem}-project`,
     };
 
     // Export the form
     const result = await exportSystem.exportForm(
       formConfig,
       contractSchema,
-      chainType,
+      ecosystem,
       functionName,
       exportOptions
     );

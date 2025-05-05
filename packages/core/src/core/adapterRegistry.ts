@@ -1,7 +1,7 @@
 /**
  * Centralized Adapter Registry
  *
- * Provides mappings and accessors for different chain adapters.
+ * Provides mappings and accessors for different blockchain ecosystem adapters.
  */
 // Import adapter implementations
 import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
@@ -9,12 +9,12 @@ import { MidnightAdapter } from '@openzeppelin/transaction-form-adapter-midnight
 import { SolanaAdapter } from '@openzeppelin/transaction-form-adapter-solana';
 import { StellarAdapter } from '@openzeppelin/transaction-form-adapter-stellar';
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 
 // --- Adapter Instance Map ---
-const adapterInstances: Record<ChainType, ContractAdapter> = {
+const adapterInstances: Record<Ecosystem, ContractAdapter> = {
   evm: new EvmAdapter(),
   solana: new SolanaAdapter(),
   stellar: new StellarAdapter(),
@@ -22,7 +22,7 @@ const adapterInstances: Record<ChainType, ContractAdapter> = {
 };
 
 // --- Adapter Package Name Map ---
-export const adapterPackageMap: Record<ChainType, string> = {
+export const adapterPackageMap: Record<Ecosystem, string> = {
   evm: '@openzeppelin/transaction-form-adapter-evm',
   solana: '@openzeppelin/transaction-form-adapter-solana',
   stellar: '@openzeppelin/transaction-form-adapter-stellar',
@@ -32,7 +32,7 @@ export const adapterPackageMap: Record<ChainType, string> = {
 // --- Adapter Config Path Map ---
 // Defines the path within each adapter package where the config file resides.
 // Assumes a consistent build output structure (`dist/config.js`).
-export const adapterConfigPathMap: Record<ChainType, string> = {
+export const adapterConfigPathMap: Record<Ecosystem, string> = {
   evm: `${adapterPackageMap.evm}/dist/config.js`,
   solana: `${adapterPackageMap.solana}/dist/config.js`,
   stellar: `${adapterPackageMap.stellar}/dist/config.js`,
@@ -41,7 +41,7 @@ export const adapterConfigPathMap: Record<ChainType, string> = {
 
 // --- Adapter Config Export Name Map ---
 // Defines the name of the exported configuration variable within each adapter's config module.
-export const adapterConfigExportMap: Record<ChainType, string> = {
+export const adapterConfigExportMap: Record<Ecosystem, string> = {
   evm: 'evmAdapterConfig',
   solana: 'solanaAdapterConfig',
   stellar: 'stellarAdapterConfig',
@@ -49,11 +49,11 @@ export const adapterConfigExportMap: Record<ChainType, string> = {
 };
 
 // --- Adapter Config Loaders Map ---
-// Provides async functions to load the specific config module for each chain.
+// Provides async functions to load the specific config module for each ecosystem.
 // Using functions with static imports avoids dynamic import analysis issues.
 // REF: https://github.com/vitejs/vite/issues/14102
 export const adapterConfigLoaders: Record<
-  ChainType,
+  Ecosystem,
   () => Promise<Record<string, AdapterConfig | unknown>>
 > = {
   evm: () => import('@openzeppelin/transaction-form-adapter-evm/dist/config.js'),
@@ -63,16 +63,16 @@ export const adapterConfigLoaders: Record<
 };
 
 /**
- * Gets the singleton adapter instance for a given chain type.
+ * Gets the singleton adapter instance for a given ecosystem.
  *
- * @param chainType The chain type (e.g., 'evm', 'solana')
+ * @param ecosystem The blockchain ecosystem (e.g., 'evm', 'solana')
  * @returns The corresponding ContractAdapter instance.
- * @throws If no adapter is available for the specified chain type.
+ * @throws If no adapter is available for the specified ecosystem.
  */
-export function getAdapter(chainType: ChainType): ContractAdapter {
-  const adapter = adapterInstances[chainType];
+export function getAdapter(ecosystem: Ecosystem): ContractAdapter {
+  const adapter = adapterInstances[ecosystem];
   if (!adapter) {
-    throw new Error(`No adapter instance available for chain type: ${chainType}`);
+    throw new Error(`No adapter instance available for ecosystem: ${ecosystem}`);
   }
   return adapter;
 }

@@ -11,7 +11,7 @@ import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
   onContractSchemaLoaded,
-  selectedChain,
+  selectedEcosystem,
   existingContractSchema = null,
 }: StepContractDefinitionProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ export function StepContractDefinition({
   return (
     <div className="space-y-6">
       <ContractAddressForm
-        selectedChain={selectedChain}
+        selectedEcosystem={selectedEcosystem}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         onLoadContract={handleLoadContract}

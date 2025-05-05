@@ -2,7 +2,7 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { useState } from 'react';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/ChainTileSelector';
 
@@ -28,8 +28,8 @@ type Story = StoryObj<typeof ChainTileSelector>;
  */
 export const Default: Story = {
   args: {
-    initialChain: 'evm',
-    onChainSelect: (chain: ChainType) => console.log('Selected chain:', chain),
+    initialEcosystem: 'evm',
+    onEcosystemSelect: (ecosystem: Ecosystem) => console.log('Selected ecosystem:', ecosystem),
   },
 };
 
@@ -37,20 +37,20 @@ export const Default: Story = {
  * Interactive demo where selections are tracked in state.
  */
 export const Interactive = () => {
-  const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
+  const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem>('evm');
 
   return (
     <div className="max-w-3xl">
       <ChainTileSelector
-        initialChain={selectedChain}
-        onChainSelect={(chain: ChainType) => {
-          console.log('Chain selected:', chain);
-          setSelectedChain(chain);
+        initialEcosystem={selectedEcosystem}
+        onEcosystemSelect={(ecosystem: Ecosystem) => {
+          console.log('Ecosystem selected:', ecosystem);
+          setSelectedEcosystem(ecosystem);
         }}
       />
       <div className="mt-4">
         <p>
-          <strong>Selected chain:</strong> {selectedChain}
+          <strong>Selected ecosystem:</strong> {selectedEcosystem}
         </p>
       </div>
     </div>

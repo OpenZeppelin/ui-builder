@@ -3,7 +3,7 @@
  *
  * These types define the parameters that can be passed to template functions.
  */
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 /**
  * Base interface for all template parameters
@@ -28,9 +28,9 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   adapterPackageName: string;
 
   /**
-   * The blockchain type (e.g., 'evm', 'solana')
+   * The ecosystem (e.g., 'evm', 'solana')
    */
-  chainType: ChainType;
+  ecosystem: Ecosystem;
 
   /**
    * The function ID (e.g., 'transferTokens')

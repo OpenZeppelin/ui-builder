@@ -1,4 +1,5 @@
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 import { adapterPackageMap } from '../../core/adapterRegistry';
@@ -47,20 +48,20 @@ export class FormCodeGenerator {
    *
    * @param formConfig The form configuration from the builder
    * @param contractSchema The full contract schema
-   * @param chainType The selected blockchain type
+   * @param ecosystem The selected ecosystem
    * @param functionId The ID of the contract function
    * @returns Generated React component code as a string
    */
   async generateFormComponent(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionId: string
   ): Promise<string> {
-    const adapterClassName = this.getAdapterClassName(chainType);
-    const adapterPackageName = adapterPackageMap[chainType];
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
     if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
     }
     const executionConfig = formConfig.executionConfig;
 
@@ -85,7 +86,7 @@ export class FormCodeGenerator {
     const params: FormComponentTemplateParams = {
       adapterClassName,
       adapterPackageName,
-      chainType,
+      ecosystem,
       functionId,
       formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
       contractSchemaJSON: JSON.stringify(contractSchema, null, 2), // Add full contract schema
@@ -159,7 +160,7 @@ export class FormCodeGenerator {
    *
    * @param formConfig The form configuration from the builder
    * @param contractSchema The full contract schema
-   * @param chainType The selected blockchain type
+   * @param ecosystem The selected ecosystem
    * @param functionId The ID of the contract function
    * @param options Additional options for export customization
    * @returns A record of file paths to file contents for the complete project
@@ -167,17 +168,17 @@ export class FormCodeGenerator {
   async generateTemplateProject(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionId: string,
-    options: ExportOptions = { chainType }
+    options: ExportOptions = { ecosystem }
   ): Promise<Record<string, string>> {
     // Generate all necessary component code
-    const mainTsxCode = await this.generateMainTsx(chainType);
-    const appComponentCode = await this.generateAppComponent(chainType, functionId);
+    const mainTsxCode = await this.generateMainTsx(ecosystem);
+    const appComponentCode = await this.generateAppComponent(ecosystem, functionId);
     const formComponentCode = await this.generateFormComponent(
       formConfig,
       contractSchema,
-      chainType,
+      ecosystem,
       functionId
     );
 
@@ -193,14 +194,14 @@ export class FormCodeGenerator {
   /**
    * Generate the main.tsx file content.
    *
-   * @param chainType The chain type to determine adapter details
+   * @param ecosystem The ecosystem to determine adapter details
    * @returns The content of the generated main.tsx file
    */
-  public async generateMainTsx(chainType: ChainType): Promise<string> {
-    const adapterClassName = this.getAdapterClassName(chainType);
-    const adapterPackageName = adapterPackageMap[chainType];
+  public async generateMainTsx(ecosystem: Ecosystem): Promise<string> {
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
     if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
     }
 
     // Define parameters for the main template
@@ -227,15 +228,15 @@ export class FormCodeGenerator {
   /**
    * Generate an App component that imports the GeneratedForm
    *
-   * @param chainType The selected blockchain type
+   * @param ecosystem The selected ecosystem
    * @param functionId The ID of the function this form is for (used in titles)
    * @returns The content of the updated App.tsx file
    */
-  public async generateAppComponent(chainType: ChainType, functionId: string): Promise<string> {
-    const adapterClassName = this.getAdapterClassName(chainType);
-    const adapterPackageName = adapterPackageMap[chainType];
+  public async generateAppComponent(ecosystem: Ecosystem, functionId: string): Promise<string> {
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
     if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for chain type: ${chainType}`);
+      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
     }
 
     // Create parameters for the template
@@ -265,7 +266,7 @@ export class FormCodeGenerator {
    * Get the class name for a chain type's adapter.
    * Converts chain type to PascalCase (e.g., 'evm' -> 'EvmAdapter').
    */
-  private getAdapterClassName(chainType: ChainType): string {
-    return `${chainType.charAt(0).toUpperCase()}${chainType.slice(1)}Adapter`;
+  private getAdapterClassName(ecosystem: Ecosystem): string {
+    return `${ecosystem.charAt(0).toUpperCase()}${ecosystem.slice(1)}Adapter`;
   }
 }

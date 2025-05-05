@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { FormExportSystem } from '../FormExportSystem';
 import {
@@ -15,7 +15,7 @@ describe('Form Component Tests', () => {
    * Extract and analyze the generated form component
    */
   async function extractFormComponent(
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionName: string = 'testFunction',
     useComplexForm: boolean = false
   ) {
@@ -24,15 +24,15 @@ describe('Form Component Tests', () => {
 
     // Create form config
     const formConfig = useComplexForm
-      ? createComplexFormConfig(functionName, chainType)
-      : createMinimalFormConfig(functionName, chainType);
-    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
+      ? createComplexFormConfig(functionName, ecosystem)
+      : createMinimalFormConfig(functionName, ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form
     const result = await exportSystem.exportForm(
       formConfig,
       mockContractSchema,
-      chainType,
+      ecosystem,
       functionName
     );
 

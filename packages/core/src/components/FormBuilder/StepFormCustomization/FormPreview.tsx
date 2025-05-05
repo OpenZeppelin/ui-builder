@@ -6,8 +6,8 @@ import {
   TransactionForm,
   WalletConnectionProvider,
 } from '@openzeppelin/transaction-form-renderer';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 import type {
-  ChainType,
   ContractFunction,
   ContractSchema,
 } from '@openzeppelin/transaction-form-types/contracts';
@@ -19,7 +19,7 @@ import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
-  selectedChain: ChainType;
+  selectedEcosystem: Ecosystem;
   contractSchema: ContractSchema;
 }
 
@@ -30,11 +30,11 @@ interface FormPreviewProps {
 export function FormPreview({
   formConfig,
   functionDetails,
-  selectedChain,
+  selectedEcosystem,
   contractSchema,
 }: FormPreviewProps) {
   // Get the adapter for the selected chain
-  const adapter = useMemo(() => getAdapter(selectedChain), [selectedChain]);
+  const adapter = useMemo(() => getAdapter(selectedEcosystem), [selectedEcosystem]);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {

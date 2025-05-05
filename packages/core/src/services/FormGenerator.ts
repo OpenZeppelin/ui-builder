@@ -40,7 +40,7 @@ export function generateFormConfig(
   }
 
   // Get the appropriate adapter for the selected chain
-  const adapter = getAdapter(contractSchema.chainType);
+  const adapter = getAdapter(contractSchema.ecosystem);
 
   // Generate fields using the adapter
   const fields = generateFieldsFromFunction(adapter, functionDetails);

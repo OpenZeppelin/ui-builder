@@ -1,4 +1,4 @@
-export * from './useChainSelectionState';
+export * from './useEcosystemSelectionState';
 export * from './useContractDefinitionState';
 export * from './useFunctionSelectionState';
 export * from './useFormCustomizationState';

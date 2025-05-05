@@ -7,8 +7,8 @@
  */
 import { createTransformForFieldType } from '@openzeppelin/transaction-form-renderer';
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 import type {
-  ChainType,
   ContractSchema,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types/contracts';
@@ -33,13 +33,13 @@ export class FormSchemaFactory {
    *
    * @param contractSchema The contract schema containing function definitions
    * @param functionId The ID of the function to generate a form for
-   * @param chainType The blockchain type (used to get the adapter)
+   * @param ecosystem The ecosystem (used to get the adapter)
    * @returns A complete form schema for rendering
    */
   generateFormSchema(
     contractSchema: ContractSchema,
     functionId: string,
-    chainType: ChainType
+    ecosystem: Ecosystem
   ): RenderFormSchema {
     // Find the function in the contract schema
     const functionDefinition = contractSchema.functions.find((fn) => fn.id === functionId);
@@ -47,8 +47,8 @@ export class FormSchemaFactory {
       throw new Error(`Function ${functionId} not found in contract schema`);
     }
 
-    // Get the appropriate adapter for the chain type
-    const adapter = getAdapter(chainType);
+    // Get the appropriate adapter for the ecosystem
+    const adapter = getAdapter(ecosystem);
 
     // Create the common properties
     const commonProperties = {

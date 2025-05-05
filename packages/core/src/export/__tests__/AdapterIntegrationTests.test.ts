@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -14,13 +14,13 @@ describe('Adapter Integration Tests', () => {
   });
 
   // Helper function to get exported files and parsed package.json
-  async function getExportedPackageJson(chainType: ChainType, functionName: string = 'transfer') {
-    const formConfig = createMinimalFormConfig(functionName, chainType);
-    const mockContractSchema = createMinimalContractSchema(functionName, chainType);
+  async function getExportedPackageJson(ecosystem: Ecosystem, functionName: string = 'transfer') {
+    const formConfig = createMinimalFormConfig(functionName, ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
     const result = await exportSystem.exportForm(
       formConfig,
       mockContractSchema,
-      chainType,
+      ecosystem,
       functionName
     );
     expect(result.data).toBeDefined();

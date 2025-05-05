@@ -19,7 +19,7 @@ import { useFormBuilderState } from './hooks';
 
 export function TransactionFormBuilder() {
   const {
-    selectedChain,
+    selectedEcosystem,
     contractSchema,
     selectedFunction,
     formConfig,
@@ -29,7 +29,7 @@ export function TransactionFormBuilder() {
     exportLoading,
     contractAddress,
 
-    handleChainSelect,
+    handleEcosystemSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated,
@@ -75,7 +75,10 @@ export function TransactionFormBuilder() {
       id: 'chain-select',
       title: 'Select Blockchain',
       component: (
-        <ChainTileSelector onChainSelect={handleChainSelect} initialChain={selectedChain} />
+        <ChainTileSelector
+          onEcosystemSelect={handleEcosystemSelect}
+          initialEcosystem={selectedEcosystem}
+        />
       ),
     },
     {
@@ -84,7 +87,7 @@ export function TransactionFormBuilder() {
       component: (
         <StepContractDefinition
           onContractSchemaLoaded={handleContractSchemaLoaded}
-          selectedChain={selectedChain}
+          selectedEcosystem={selectedEcosystem}
           existingContractSchema={contractSchema}
         />
       ),
@@ -109,7 +112,7 @@ export function TransactionFormBuilder() {
         <StepFormCustomization
           contractSchema={contractSchema}
           selectedFunction={selectedFunction}
-          selectedChain={selectedChain}
+          selectedEcosystem={selectedEcosystem}
           onFormConfigUpdated={handleFormConfigUpdated}
           onExecutionConfigUpdated={handleExecutionConfigUpdated}
           currentExecutionConfig={formConfig?.executionConfig}
@@ -122,11 +125,11 @@ export function TransactionFormBuilder() {
       title: 'Complete',
       component: (
         <StepComplete
-          selectedChain={selectedChain}
+          selectedEcosystem={selectedEcosystem}
           formConfig={formConfig}
           contractSchema={contractSchema}
           onExport={() => {
-            void exportForm(formConfig, selectedChain, selectedFunction);
+            void exportForm(formConfig, selectedEcosystem, selectedFunction);
           }}
           exportLoading={exportLoading}
           functionDetails={

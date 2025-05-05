@@ -3,11 +3,11 @@ import { NetworkIcon } from '@web3icons/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 // Import the Midnight logo SVG
 import MidnightLogoSvg from '../../../assets/icons/MidnightLogo.svg';
-import { getChainDescription, getChainName } from '../../../core/chains';
+import { getEcosystemDescription, getEcosystemName } from '../../../core/ecosystems/registry';
 import { StepTitleWithDescription } from '../Common';
 
 // Mapping of our chain types to web3icons network names
@@ -19,62 +19,65 @@ const networkMapping = {
 };
 
 interface ChainTileSelectorProps {
-  onChainSelect: (chain: ChainType) => void;
-  initialChain?: ChainType;
+  onEcosystemSelect: (ecosystem: Ecosystem) => void;
+  initialEcosystem?: Ecosystem;
 }
 
-export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: ChainTileSelectorProps) {
-  const [selectedChain, setSelectedChain] = useState<ChainType>(initialChain);
+export function ChainTileSelector({
+  onEcosystemSelect,
+  initialEcosystem = 'evm',
+}: ChainTileSelectorProps) {
+  const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem>(initialEcosystem);
 
   // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({
     defaultValues: {
-      blockchain: initialChain,
+      ecosystem: initialEcosystem,
     },
   });
 
-  // Define blockchain options
-  const blockchainOptions = [
+  // Define ecosystem options
+  const ecosystemOptions = [
     {
       value: 'evm' as const,
-      label: getChainName('evm'),
+      label: getEcosystemName('evm'),
       network: networkMapping.evm,
       customIcon: null,
     },
     {
       value: 'midnight' as const,
-      label: getChainName('midnight'),
+      label: getEcosystemName('midnight'),
       network: null,
       customIcon: true, // Used to indicate we need to use the imported SVG
     },
     {
       value: 'stellar' as const,
-      label: getChainName('stellar'),
+      label: getEcosystemName('stellar'),
       network: networkMapping.stellar,
       customIcon: null,
     },
     {
       value: 'solana' as const,
-      label: getChainName('solana'),
+      label: getEcosystemName('solana'),
       network: networkMapping.solana,
       customIcon: null,
     },
   ];
 
   // Handle selection of a blockchain
-  const handleSelectChain = useCallback(
-    (chain: ChainType) => {
-      setSelectedChain(chain);
-      setValue('blockchain', chain);
-      onChainSelect(chain);
+  const handleSelectEcosystem = useCallback(
+    (ecosystem: Ecosystem) => {
+      setSelectedEcosystem(ecosystem);
+      setValue('ecosystem', ecosystem);
+      onEcosystemSelect(ecosystem);
     },
-    [setValue, onChainSelect]
+    [setValue, onEcosystemSelect]
   );
 
-  // Update the selected chain when the component mounts
+  // Update the selected ecosystem when the component mounts
   useEffect(() => {
-    handleSelectChain(initialChain);
-  }, [initialChain, handleSelectChain]);
+    handleSelectEcosystem(initialEcosystem);
+  }, [initialEcosystem, handleSelectEcosystem]);
 
   return (
     <div className="flex flex-col space-y-6">
@@ -84,14 +87,14 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-        {blockchainOptions.map((option) => {
-          const isSelected = selectedChain === option.value;
+        {ecosystemOptions.map((option) => {
+          const isSelected = selectedEcosystem === option.value;
 
           return (
             <button
               key={option.value}
               type="button"
-              onClick={() => handleSelectChain(option.value)}
+              onClick={() => handleSelectEcosystem(option.value)}
               className={`group hover:bg-muted flex flex-col items-center justify-center rounded-lg border p-4 text-center transition-all hover:shadow-md ${isSelected ? 'border-primary bg-primary/5 ring-primary/20 ring-2' : 'border-border bg-card'} `}
               aria-selected={isSelected}
             >
@@ -111,8 +114,10 @@ export function ChainTileSelector({ onChainSelect, initialChain = 'evm' }: Chain
       </div>
 
       <div className="bg-muted mt-6 rounded-md p-4">
-        <h4 className="mb-2 font-medium">About {getChainName(selectedChain)}</h4>
-        <p className="text-muted-foreground text-sm">{getChainDescription(selectedChain)}</p>
+        <h4 className="mb-2 font-medium">About {getEcosystemName(selectedEcosystem)}</h4>
+        <p className="text-muted-foreground text-sm">
+          {getEcosystemDescription(selectedEcosystem)}
+        </p>
       </div>
     </div>
   );

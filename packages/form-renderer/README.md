@@ -88,7 +88,7 @@ const schema: RenderFormSchema = {
 // Simple adapter implementation for demonstration.
 // Real applications use adapters like @openzeppelin/transaction-form-adapter-evm
 const adapter: ContractAdapter = {
-  chainType: 'evm', // Example chain type
+  ecosystem: 'evm', // Example ecosystem
   loadContract: async (source: string) => {
     throw new Error('Not implemented');
   },

@@ -17,7 +17,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
@@ -211,7 +211,7 @@ describe('PackageManager configuration loading', () => {
     it('should handle unknown chain types gracefully', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const formConfig = createMinimalFormConfig();
-      const deps = await packageManager.getDependencies(formConfig, 'unknown' as ChainType);
+      const deps = await packageManager.getDependencies(formConfig, 'unknown' as Ecosystem);
       expect(deps).toHaveProperty('react');
       expect(Object.keys(deps)).not.toContain('@openzeppelin/transaction-form-adapter-evm');
     });

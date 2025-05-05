@@ -3,5 +3,4 @@
  * @packageDocumentation
  */
 
-export * from './chains';
 export * from './schema';

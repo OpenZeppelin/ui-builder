@@ -1,4 +1,4 @@
-import { ChainType } from './chains';
+import { Ecosystem } from '../common';
 
 /**
  * Represents a parameter in a contract function
@@ -110,9 +110,9 @@ export interface ContractSchema {
   name?: string;
 
   /**
-   * Chain type the contract is deployed on
+   * Ecosystem the contract is deployed on
    */
-  chainType: ChainType;
+  ecosystem: Ecosystem;
 
   /**
    * Functions defined in the contract

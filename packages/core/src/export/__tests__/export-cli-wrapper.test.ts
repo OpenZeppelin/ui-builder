@@ -10,7 +10,7 @@ import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { ZipProgress } from '../ZipGenerator';
@@ -75,7 +75,7 @@ describe('Export CLI Wrapper', () => {
 
   it('exports a form with provided configuration', async () => {
     // Read configuration from environment variables
-    const chain = (process.env.EXPORT_TEST_CHAIN || 'evm') as ChainType;
+    const ecosystem = (process.env.EXPORT_TEST_ECOSYSTEM || 'evm') as Ecosystem;
     const func = process.env.EXPORT_TEST_FUNCTION || 'transfer';
     const template = process.env.EXPORT_TEST_TEMPLATE || 'typescript-react-vite';
     const includeAdapters = process.env.EXPORT_TEST_INCLUDE_ADAPTERS !== 'false';
@@ -94,16 +94,16 @@ describe('Export CLI Wrapper', () => {
 
     // Create form config
     const formConfig = isComplex
-      ? createComplexFormConfig(func, chain)
-      : createMinimalFormConfig(func, chain);
+      ? createComplexFormConfig(func, ecosystem)
+      : createMinimalFormConfig(func, ecosystem);
 
-    const mockContractSchema = createMinimalContractSchema(func, chain);
+    const mockContractSchema = createMinimalContractSchema(func, ecosystem);
 
     // Create export system
     const exportSystem = new FormExportSystem();
 
     // Generate the export
-    const result = await exportSystem.exportForm(formConfig, mockContractSchema, chain, func, {
+    const result = await exportSystem.exportForm(formConfig, mockContractSchema, ecosystem, func, {
       projectName: `${func}-form`,
       template,
       includeAdapters,

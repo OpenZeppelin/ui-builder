@@ -9,7 +9,7 @@ import type { ContractSchema } from '@openzeppelin/transaction-form-types/contra
 export function loadStellarMockContract(_mockId?: string): Promise<ContractSchema> {
   // Simple minimal mock contract schema
   return Promise.resolve({
-    chainType: 'stellar',
+    ecosystem: 'stellar',
     name: 'PlaceholderStellarContract',
     functions: [
       {

@@ -1,7 +1,8 @@
 import { capitalize } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -9,12 +10,12 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
 /**
  * Create a minimal form configuration for testing
  * @param functionName - Optional function name (defaults to 'testFunction')
- * @param chainType - Optional chain type (defaults to 'evm')
+ * @param ecosystem - Optional ecosystem (defaults to 'evm')
  * @returns A minimal BuilderFormConfig instance for testing
  */
 export function createMinimalFormConfig(
   functionName: string = 'testFunction',
-  _chainType: string = 'evm'
+  _ecosystem: Ecosystem = 'evm'
 ): BuilderFormConfig {
   return {
     functionId: functionName,
@@ -54,10 +55,10 @@ export function createMinimalFormConfig(
  */
 export function createMinimalContractSchema(
   functionName: string,
-  chainType: ChainType
+  ecosystem: Ecosystem
 ): ContractSchema {
   return {
-    chainType: chainType,
+    ecosystem,
     name: 'MockContract',
     address: '0x1234567890123456789012345678901234567890', // Use a valid-looking address
     functions: [
@@ -86,12 +87,12 @@ export function createMinimalContractSchema(
 /**
  * Create a complex form configuration for testing
  * @param functionName - Optional function name (defaults to 'complexFunction')
- * @param chainType - Optional chain type (defaults to 'evm')
+ * @param ecosystem - Optional ecosystem (defaults to 'evm')
  * @returns A complex BuilderFormConfig instance with multiple field types
  */
 export function createComplexFormConfig(
   functionName: string = 'complexFunction',
-  _chainType: string = 'evm'
+  _ecosystem: Ecosystem = 'evm'
 ): BuilderFormConfig {
   const basicFieldIds = [uuidv4(), uuidv4(), uuidv4()];
   const advancedFieldIds = [uuidv4(), uuidv4(), uuidv4(), uuidv4()];

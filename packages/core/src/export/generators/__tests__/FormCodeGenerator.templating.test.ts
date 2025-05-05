@@ -67,7 +67,7 @@ describe('FormCodeGenerator Templating System', () => {
 
     it('should handle regular variable placeholders (@@param-name@@)', async () => {
       const templateContent = `
-        import { @@adapter-class-name@@ } from '../adapters/@@chain-type@@/adapter';
+        import { @@adapter-class-name@@ } from '../adapters/@@ecosystem@@/adapter';
         
         function Example() {
           const id = '@@function-id@@';
@@ -79,7 +79,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       const params = {
         adapterClassName: 'EvmAdapter',
-        chainType: 'evm',
+        ecosystem: 'evm',
         functionId: 'transferTokens',
       };
 
@@ -221,7 +221,7 @@ describe('FormCodeGenerator Templating System', () => {
         const config = {
           id: '@@function-id@@',
           name: '@@function-name@@', // This parameter doesn't exist
-          chainType: '@@chain-type@@'
+          ecosystem: '@@ecosystem@@'
         };
       `;
 
@@ -229,7 +229,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       const params = {
         functionId: 'transferTokens',
-        chainType: 'evm',
+        ecosystem: 'evm',
         // functionName is intentionally missing
       };
 
@@ -237,7 +237,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       expect(processed).toContain("id: 'transferTokens'");
       expect(processed).toContain("name: ''"); // Empty string for missing param
-      expect(processed).toContain("chainType: 'evm'");
+      expect(processed).toContain("ecosystem: 'evm'");
     });
   });
 
@@ -267,7 +267,7 @@ describe('FormCodeGenerator Templating System', () => {
       // Verify that specific VARIABLE template placeholders were replaced
       expect(code).not.toContain('@@function-id@@');
       expect(code).not.toContain('@@adapter-package-name@@');
-      // We don't check for @@chain-type@@ as it might be within comments handled later
+      // We don't check for @@ecosystem@@ as it might be within comments handled later
 
       // Verify that template comments were removed
       expect(code).not.toContain('TEMPLATE COMMENT');

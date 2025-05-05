@@ -98,7 +98,7 @@ Example:
 <h2>Transaction Form for @@function-id@@</h2>
 
 // JSX placeholder for React component
-import { {/*@@adapter-class-name@@*/} } from '../adapters/@@chain-type@@/adapter';
+import { {/*@@adapter-class-name@@*/} } from '../adapters/@@ecosystem@@/adapter';
 
 // Inline comment placeholder
 const adapter = new /*@@adapter-class-name@@*/();

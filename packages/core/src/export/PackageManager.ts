@@ -37,7 +37,7 @@ import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -126,11 +126,11 @@ export class PackageManager {
 
   /**
    * Get chain-specific runtime dependencies from adapter config
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @returns Record of package names to version ranges
    */
-  private async getChainDependencies(chainType: ChainType): Promise<Record<string, string>> {
-    const adapterConfig = await this.adapterConfigLoader.loadConfig(chainType);
+  private async getChainDependencies(ecosystem: Ecosystem): Promise<Record<string, string>> {
+    const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
     if (!adapterConfig) {
       return {};
     }
@@ -139,11 +139,11 @@ export class PackageManager {
 
   /**
    * Get chain-specific development dependencies from adapter config
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @returns Record of package names to version ranges
    */
-  private async getChainDevDependencies(chainType: ChainType): Promise<Record<string, string>> {
-    const adapterConfig = await this.adapterConfigLoader.loadConfig(chainType);
+  private async getChainDevDependencies(ecosystem: Ecosystem): Promise<Record<string, string>> {
+    const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
     if (!adapterConfig || !adapterConfig.dependencies.dev) {
       return {};
     }
@@ -207,22 +207,22 @@ export class PackageManager {
    * Get the combined dependencies needed for a form
    *
    * @param formConfig Form configuration from the builder
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @returns Record of dependency packages and versions
    */
   async getDependencies(
     formConfig: BuilderFormConfig,
-    chainType: ChainType
+    ecosystem: Ecosystem
   ): Promise<Record<string, string>> {
-    const adapterPackageName = adapterPackageMap[chainType];
+    const adapterPackageName = adapterPackageMap[ecosystem];
 
     // Get adapter-specific runtime dependencies
-    const chainDependencies = await this.getChainDependencies(chainType);
+    const ecosystemDependencies = await this.getChainDependencies(ecosystem);
 
     const combined = {
       ...this.getCoreDependencies(),
       ...this.getFieldDependencies(formConfig),
-      ...chainDependencies, // Include adapter's runtime dependencies
+      ...ecosystemDependencies, // Include adapter's runtime dependencies
     };
 
     // Add the adapter package itself if available
@@ -238,21 +238,21 @@ export class PackageManager {
    * Get the combined dev dependencies needed for the project
    *
    * @param formConfig The form configuration
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @returns Record of development dependency packages and versions
    */
   async getDevDependencies(
     formConfig: BuilderFormConfig,
-    chainType: ChainType
+    ecosystem: Ecosystem
   ): Promise<Record<string, string>> {
     // Get chain-specific dev dependencies
-    const chainDevDependencies = await this.getChainDevDependencies(chainType);
+    const ecosystemDevDependencies = await this.getChainDevDependencies(ecosystem);
 
     // Get field-specific dev dependencies
     const fieldDevDependencies = this.getFieldDevDependencies(formConfig);
 
     return {
-      ...chainDevDependencies,
+      ...ecosystemDevDependencies,
       ...fieldDevDependencies,
     };
   }
@@ -262,7 +262,7 @@ export class PackageManager {
    *
    * @param originalContent Original package.json content string
    * @param formConfig The form configuration
-   * @param chainType The blockchain type
+   * @param ecosystem The ecosystem
    * @param functionId The function ID
    * @param options Export options, including the environment (`env`)
    * @returns Updated package.json content string
@@ -270,7 +270,7 @@ export class PackageManager {
   async updatePackageJson(
     originalContent: string,
     formConfig: BuilderFormConfig,
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionId: string,
     options: Partial<ExportOptions> = {} // Includes 'env' field
   ): Promise<string> {
@@ -282,8 +282,8 @@ export class PackageManager {
       packageJson.devDependencies = packageJson.devDependencies || {};
 
       // Get all dependencies
-      const dependencies = await this.getDependencies(formConfig, chainType);
-      const devDependencies = await this.getDevDependencies(formConfig, chainType);
+      const dependencies = await this.getDependencies(formConfig, ecosystem);
+      const devDependencies = await this.getDevDependencies(formConfig, ecosystem);
 
       // Merge dependencies
       const finalDependencies = {

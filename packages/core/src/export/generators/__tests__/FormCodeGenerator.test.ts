@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ChainType } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
 
 import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
@@ -35,34 +35,34 @@ vi.mock('../../PackageManager', () => {
         async (
           originalContent: string,
           _formConfig: BuilderFormConfig,
-          chainType: ChainType,
+          ecosystem: Ecosystem,
           _functionId: string,
           options?: Partial<ExportOptions>
         ) => {
           const packageJson = JSON.parse(originalContent);
           packageJson.name = options?.projectName || 'default-test-name';
-          // Simulate adding dependencies based on chainType
+          // Simulate adding dependencies based on ecosystem
           packageJson.dependencies = {
             ...(packageJson.dependencies || {}),
             '@openzeppelin/transaction-form-renderer': '^1.0.0',
             '@openzeppelin/transaction-form-types': '^0.1.0',
-            [`@openzeppelin/transaction-form-adapter-${chainType}`]: '^0.0.1', // Add caret version
+            [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
         }
       ),
     getDependencies: vi
       .fn()
-      .mockImplementation(async (_formConfig: BuilderFormConfig, chainType: ChainType) => {
+      .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
         return {
           '@openzeppelin/transaction-form-renderer': '^1.0.0',
           '@openzeppelin/transaction-form-types': '^0.1.0',
-          [`@openzeppelin/transaction-form-adapter-${chainType}`]: '^0.0.1',
+          [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
     getDevDependencies: vi
       .fn()
-      .mockImplementation(async (_formConfig: BuilderFormConfig, _chainType: ChainType) => {
+      .mockImplementation(async (_formConfig: BuilderFormConfig, _ecosystem: Ecosystem) => {
         return {};
       }),
   }));
@@ -106,7 +106,7 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
                 ...(packageJson.dependencies || {}),
                 '@openzeppelin/transaction-form-renderer': '^1.0.0',
                 '@openzeppelin/transaction-form-types': '^0.1.0',
-                [`@openzeppelin/transaction-form-adapter-${options.chainType || 'evm'}`]: '^0.0.1',
+                [`@openzeppelin/transaction-form-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);
             }
@@ -247,7 +247,7 @@ describe('FormCodeGenerator', () => {
         'evm',
         'testFunction',
         {
-          chainType: 'evm',
+          ecosystem: 'evm',
           projectName: 'test-project',
         }
       );

@@ -2,7 +2,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ChainType, ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
@@ -53,7 +54,7 @@ describe('FormSchemaFactory', () => {
   const factory = new FormSchemaFactory();
 
   const mockContractSchema: ContractSchema = {
-    chainType: 'evm' as ChainType,
+    ecosystem: 'evm' as Ecosystem,
     name: 'TestContract',
     address: '0x1234567890123456789012345678901234567890',
     functions: [

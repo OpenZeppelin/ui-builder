@@ -42,7 +42,6 @@ import * as forms from '@openzeppelin/transaction-form-types/forms';
 
 // Import specific types from their respective namespaces
 import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { ChainType } from '@openzeppelin/transaction-form-types/contracts';
 import { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
 
 // Example usage in a function
@@ -92,7 +91,6 @@ The `adapters` namespace provides interfaces for blockchain-specific adapters, i
 
 The `contracts` namespace contains types related to blockchain contracts:
 
-- `ChainType`: Enum of supported blockchain types
 - `ContractSchema`: Interface for contract schema definitions
 - `ContractFunction`: Interface for function definitions within a contract
 

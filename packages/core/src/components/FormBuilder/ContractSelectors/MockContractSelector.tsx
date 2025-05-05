@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
+import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 
 import {
   Dialog,
@@ -14,17 +15,17 @@ import {
 
 interface MockContractSelectorProps {
   onSelectMock: (mockId: string) => void;
-  chainType?: string;
+  ecosystem: Ecosystem;
 }
 
 interface TempMockInfo {
   id: string;
   name: string;
-  chainType: string;
+  ecosystem: Ecosystem;
   description?: string;
 }
 
-export function MockContractSelector({ onSelectMock, chainType }: MockContractSelectorProps) {
+export function MockContractSelector({ onSelectMock, ecosystem }: MockContractSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mockContracts, setMockContracts] = useState<TempMockInfo[]>([]);
 
@@ -34,19 +35,19 @@ export function MockContractSelector({ onSelectMock, chainType }: MockContractSe
       {
         id: 'erc20',
         name: 'ERC20 Token',
-        chainType: 'evm',
+        ecosystem: 'evm',
         description: 'Standard ERC20 Fungible Token',
       },
       {
         id: 'erc721',
         name: 'ERC721 NFT',
-        chainType: 'evm',
+        ecosystem: 'evm',
         description: 'Standard ERC721 Non-Fungible Token',
       },
       {
         id: 'input-tester',
         name: 'Input Tester',
-        chainType: 'evm',
+        ecosystem: 'evm',
         description: 'Contract with various input types',
       },
     ];
@@ -54,8 +55,8 @@ export function MockContractSelector({ onSelectMock, chainType }: MockContractSe
   }, []);
 
   // Filter mocks based on the selected chain type
-  const filteredMocks = chainType
-    ? mockContracts.filter((mock) => mock.chainType === chainType)
+  const filteredMocks = ecosystem
+    ? mockContracts.filter((mock) => mock.ecosystem === ecosystem)
     : mockContracts;
 
   const handleSelectMock = (mockId: string) => {
@@ -81,7 +82,7 @@ export function MockContractSelector({ onSelectMock, chainType }: MockContractSe
         <div className="py-4">
           {mockContracts.length === 0 ? (
             <div className="py-4 text-center">
-              No mock contracts available{chainType ? ` for ${chainType}` : ''}.
+              No mock contracts available{ecosystem ? ` for ${ecosystem}` : ''}.
             </div>
           ) : (
             <div className="grid max-h-[300px] gap-4 overflow-y-auto pr-2">
@@ -93,7 +94,9 @@ export function MockContractSelector({ onSelectMock, chainType }: MockContractSe
                 >
                   <h3 className="font-medium">{mock.name}</h3>
                   <p className="text-muted-foreground mt-1 text-sm">{mock.description}</p>
-                  <div className="text-muted-foreground mt-2 text-xs">Chain: {mock.chainType}</div>
+                  <div className="text-muted-foreground mt-2 text-xs">
+                    Ecosystem: {mock.ecosystem}
+                  </div>
                 </div>
               ))}
             </div>
