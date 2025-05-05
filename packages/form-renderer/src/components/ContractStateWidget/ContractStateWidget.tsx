@@ -22,6 +22,11 @@ interface ContractStateWidgetProps {
   onToggle?: () => void;
   className?: string;
   error?: Error | null;
+  /**
+   * If true, the widget won't render the minimized pill when collapsed
+   * This is useful when the parent component handles the toggle UI
+   */
+  externalToggleMode?: boolean;
 }
 
 /**
@@ -36,6 +41,7 @@ export function ContractStateWidget({
   onToggle,
   className,
   error,
+  externalToggleMode = false,
 }: ContractStateWidgetProps): JSX.Element | null {
   const [viewFunctions, setViewFunctions] = useState<ContractFunction[]>([]);
   const [animationState, setAnimationState] = useState<
@@ -76,25 +82,28 @@ export function ContractStateWidget({
     return null;
   }
 
-  // If widget is hidden, render just a compact floating button
+  // If widget is hidden and in external toggle mode, don't render the pill
+  if (!isVisible && externalToggleMode) {
+    return null;
+  }
+
+  // If widget is hidden and not in external toggle mode, render just a compact floating button
   if (!isVisible) {
     return (
-      <div className="relative h-0 w-full">
-        <div className="absolute right-0 top-0">
-          <Button
-            variant="outline"
-            size="sm"
-            className={`h-8 gap-2 rounded-full shadow-sm hover:bg-primary hover:text-primary-foreground
-              transition-all duration-300 ease-in-out
-              ${animationState === 'exited' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-2'}
-            `}
-            onClick={handleToggle}
-            title={`Show Contract State`}
-          >
-            <FileText size={16} className="shrink-0" />
-            <span className="text-xs font-medium">{truncateMiddle(contractAddress)}</span>
-          </Button>
-        </div>
+      <div className="relative z-10 mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className={`h-8 gap-2 rounded-full shadow-sm hover:bg-primary hover:text-primary-foreground
+            transition-all duration-300 ease-in-out
+            ${animationState === 'exited' ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-2'}
+          `}
+          onClick={handleToggle}
+          title={`Show Contract State`}
+        >
+          <FileText size={16} className="shrink-0" />
+          <span className="text-xs font-medium">{truncateMiddle(contractAddress)}</span>
+        </Button>
       </div>
     );
   }

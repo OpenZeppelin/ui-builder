@@ -85,6 +85,7 @@ export function StepFormCustomization({
       />
 
       <div className="flex justify-end space-x-2">
+        {/* Preview Form Button */}
         <Button
           variant={previewMode ? 'outline' : 'default'}
           size="sm"

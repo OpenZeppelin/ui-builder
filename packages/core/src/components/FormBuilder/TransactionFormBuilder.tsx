@@ -1,4 +1,10 @@
-import { ContractStateWidget } from '@openzeppelin/transaction-form-renderer';
+import { FileText } from 'lucide-react';
+
+import {
+  Button,
+  ContractStateWidget,
+  truncateMiddle,
+} from '@openzeppelin/transaction-form-renderer';
 
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
@@ -21,12 +27,14 @@ export function TransactionFormBuilder() {
     isWidgetVisible,
     sidebarWidget: widgetData,
     exportLoading,
+    contractAddress,
 
     handleChainSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated,
     handleExecutionConfigUpdated,
+    toggleWidget,
     exportForm,
   } = useFormBuilderState();
 
@@ -39,9 +47,28 @@ export function TransactionFormBuilder() {
         adapter={widgetData.adapter}
         isVisible={widgetData.isVisible}
         onToggle={widgetData.onToggle}
+        externalToggleMode={true}
       />
     </div>
   ) : null;
+
+  // Header actions - Contract State toggle button (only when state is hidden)
+  const headerActions =
+    contractSchema && contractAddress && !isWidgetVisible ? (
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={toggleWidget}
+        title="Show Contract State"
+      >
+        <FileText size={16} className="shrink-0" />
+        <span className="text-sm font-medium">View Contract State</span>
+        <span className="ml-2 text-xs text-muted-foreground">
+          ({truncateMiddle(contractAddress)})
+        </span>
+      </Button>
+    ) : null;
 
   const steps: WizardStep[] = [
     {
@@ -124,6 +151,7 @@ export function TransactionFormBuilder() {
           steps={steps}
           sidebarWidget={sidebarWidget}
           isWidgetExpanded={isWidgetVisible}
+          headerActions={headerActions}
         />
       </div>
     </div>

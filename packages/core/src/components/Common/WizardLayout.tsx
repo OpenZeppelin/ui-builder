@@ -15,6 +15,11 @@ interface WizardLayoutProps {
   onComplete?: () => void;
   sidebarWidget?: ReactNode;
   isWidgetExpanded?: boolean;
+  /**
+   * Header actions that will be displayed in the top-right corner of the wizard
+   * across all steps (e.g., toggle buttons, controls)
+   */
+  headerActions?: ReactNode;
 }
 
 export function WizardLayout({
@@ -23,6 +28,7 @@ export function WizardLayout({
   onComplete,
   sidebarWidget,
   isWidgetExpanded = false,
+  headerActions,
 }: WizardLayoutProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const isFirstStep = currentStepIndex === 0;
@@ -48,7 +54,10 @@ export function WizardLayout({
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
       <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
-        <h2 className="text-2xl font-bold mb-5">{currentStep.title}</h2>
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+          {headerActions && <div className="flex space-x-2">{headerActions}</div>}
+        </div>
 
         {/* Step progress indicators with names */}
         <div className="flex w-full gap-3">
@@ -77,15 +86,15 @@ export function WizardLayout({
 
       {/* Main content area with optional sidebar */}
       <div className="flex w-full relative">
-        {/* Step content */}
-        <div className="w-full">{currentStep.component}</div>
-
-        {/* Sidebar widget (if provided) */}
+        {/* Sidebar widget (if provided) - Now on the left */}
         {sidebarWidget && (
-          <div className={isWidgetExpanded ? 'w-80 shrink-0 ml-6' : 'shrink-0'}>
+          <div className={isWidgetExpanded ? 'w-80 shrink-0 mr-6' : 'shrink-0'}>
             {sidebarWidget}
           </div>
         )}
+
+        {/* Step content */}
+        <div className="w-full">{currentStep.component}</div>
       </div>
 
       <div className="mt-8 -mx-6 -mb-6 bg-muted px-6 py-4 border-t shadow-inner flex justify-between items-center rounded-b-lg">
