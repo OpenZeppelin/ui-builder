@@ -201,6 +201,19 @@ export function TransactionForm({
     setTxError(null);
   };
 
+  // Get explorer URL for the transaction
+  const getExplorerTxUrl = (hash: string): string | null => {
+    if (!adapter || !hash) return null;
+
+    // Use getExplorerTxUrl if available (preferred for transaction URLs)
+    if (adapter.getExplorerTxUrl) {
+      return adapter.getExplorerTxUrl(hash);
+    }
+
+    // Fallback to general getExplorerUrl if getExplorerTxUrl is not implemented
+    return adapter.getExplorerUrl(hash);
+  };
+
   return (
     <FormProvider {...methods}>
       {/* Header with wallet connection */}
@@ -226,16 +239,18 @@ export function TransactionForm({
           </div>
         )}
 
-        {/* Render the Transaction Status Display */}
-        <TransactionStatusDisplay
-          status={txStatus}
-          txHash={txHash}
-          error={txError}
-          // Pass explorer URL (will be null initially, adapter provides it)
-          explorerUrl={txHash ? adapter.getExplorerUrl(txHash) : null}
-          onClose={handleResetStatus}
-          className="mb-4"
-        />
+        {/* Transaction Status Display - Moved OUTSIDE the form to avoid pointer-events-none */}
+        {txStatus !== 'idle' && (
+          <div className="mb-8 pointer-events-auto">
+            <TransactionStatusDisplay
+              status={txStatus}
+              txHash={txHash}
+              error={txError}
+              explorerUrl={txHash ? getExplorerTxUrl(txHash) : null}
+              onClose={handleResetStatus}
+            />
+          </div>
+        )}
 
         <form
           className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus !== 'idle' ? 'opacity-70 pointer-events-none' : ''}`}
