@@ -1,7 +1,3 @@
-import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
-import { MidnightAdapter } from '@openzeppelin/transaction-form-adapter-midnight';
-import { SolanaAdapter } from '@openzeppelin/transaction-form-adapter-solana';
-import { StellarAdapter } from '@openzeppelin/transaction-form-adapter-stellar';
 import type {
   ContractAdapter,
   Ecosystem,
@@ -14,39 +10,60 @@ import type {
 
 import type { AdapterConfig } from './types/AdapterTypes';
 
-type AnyAdapterConstructor = new (networkConfig: NetworkConfig) => ContractAdapter;
+// Define specific constructor types for each adapter
+type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;
+type SolanaAdapterConstructor = new (networkConfig: SolanaNetworkConfig) => ContractAdapter;
+type StellarAdapterConstructor = new (networkConfig: StellarNetworkConfig) => ContractAdapter;
+type MidnightAdapterConstructor = new (networkConfig: MidnightNetworkConfig) => ContractAdapter;
+
+// Union of all possible adapter constructor types
+type AnySpecificAdapterConstructor =
+  | EvmAdapterConstructor
+  | SolanaAdapterConstructor
+  | StellarAdapterConstructor
+  | MidnightAdapterConstructor;
 
 // Define the structure for each ecosystem's metadata
 interface EcosystemMetadata {
   networksExportName: string; // e.g., 'evmNetworks'
-  AdapterClass: AnyAdapterConstructor;
-  adapterConfigPackagePath?: string; // e.g., '@openzeppelin/transaction-form-adapter-evm/dist/config.js'
-  adapterConfigExportName?: string; // e.g., 'evmAdapterConfig'
+  // Store a function that returns a promise of the Class constructor.
+  // The constructor itself will be cast to 'any' before use in getAdapter due to varying specific NetworkConfig types.
+  getAdapterClass: () => Promise<AnySpecificAdapterConstructor>;
+  adapterConfigPackagePath?: string;
+  adapterConfigExportName?: string;
 }
 
 // Centralized configuration for each ecosystem
 const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
   evm: {
     networksExportName: 'evmNetworks',
-    AdapterClass: EvmAdapter as AnyAdapterConstructor,
+    getAdapterClass: async () =>
+      (await import('@openzeppelin/transaction-form-adapter-evm'))
+        .EvmAdapter as EvmAdapterConstructor,
     adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-evm/dist/config.js',
     adapterConfigExportName: 'evmAdapterConfig',
   },
   solana: {
     networksExportName: 'solanaNetworks',
-    AdapterClass: SolanaAdapter as AnyAdapterConstructor,
+    getAdapterClass: async () =>
+      (await import('@openzeppelin/transaction-form-adapter-solana'))
+        .SolanaAdapter as SolanaAdapterConstructor,
     adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-solana/dist/config.js',
     adapterConfigExportName: 'solanaAdapterConfig',
   },
   stellar: {
     networksExportName: 'stellarNetworks',
-    AdapterClass: StellarAdapter as AnyAdapterConstructor,
+    getAdapterClass: async () =>
+      (await import('@openzeppelin/transaction-form-adapter-stellar'))
+        .StellarAdapter as StellarAdapterConstructor,
     adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-stellar/dist/config.js',
     adapterConfigExportName: 'stellarAdapterConfig',
   },
   midnight: {
     networksExportName: 'midnightNetworks',
-    AdapterClass: MidnightAdapter as AnyAdapterConstructor,
+    getAdapterClass: async () =>
+      (await import('@openzeppelin/transaction-form-adapter-midnight'))
+        .MidnightAdapter as MidnightAdapterConstructor,
     adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-midnight/dist/config.js',
     adapterConfigExportName: 'midnightAdapterConfig',
   },
@@ -163,29 +180,29 @@ export function getAdapterConfigExportName(ecosystem: Ecosystem): string | undef
   return ecosystemRegistry[ecosystem]?.adapterConfigExportName;
 }
 
-// --- Adapter Instantiation Logic (adapted from adapterRegistry.ts) ---
-export function getAdapter(networkConfig: NetworkConfig): ContractAdapter {
+// --- Adapter Instantiation Logic ---
+export async function getAdapter(networkConfig: NetworkConfig): Promise<ContractAdapter> {
   const meta = ecosystemRegistry[networkConfig.ecosystem];
   if (!meta) {
     throw new Error(`No adapter metadata registered for ecosystem: ${networkConfig.ecosystem}`);
   }
 
-  // The switch statement handles the specific type casting for networkConfig
-  // The AdapterClass is cast to AnyAdapterConstructor in the registry, which is compatible.
+  const AdapterClass = await meta.getAdapterClass();
+
   switch (networkConfig.ecosystem) {
     case 'evm':
-      return new meta.AdapterClass(networkConfig as EvmNetworkConfig);
+      return new (AdapterClass as EvmAdapterConstructor)(networkConfig as EvmNetworkConfig);
     case 'solana':
-      return new meta.AdapterClass(networkConfig as SolanaNetworkConfig);
+      return new (AdapterClass as SolanaAdapterConstructor)(networkConfig as SolanaNetworkConfig);
     case 'stellar':
-      return new meta.AdapterClass(networkConfig as StellarNetworkConfig);
+      return new (AdapterClass as StellarAdapterConstructor)(networkConfig as StellarNetworkConfig);
     case 'midnight':
-      return new meta.AdapterClass(networkConfig as MidnightNetworkConfig);
+      return new (AdapterClass as MidnightAdapterConstructor)(
+        networkConfig as MidnightNetworkConfig
+      );
     default:
       const unhandledEcosystem = (networkConfig as NetworkConfig).ecosystem;
-      throw new Error(
-        `No adapter constructor available for unhandled ecosystem: ${String(unhandledEcosystem)}`
-      );
+      throw new Error(`No adapter constructor for ${String(unhandledEcosystem)}`);
   }
 }
 

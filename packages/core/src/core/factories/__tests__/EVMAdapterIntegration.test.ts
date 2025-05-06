@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  EvmNetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../../../core/ecosystemManager';
 import { FormSchemaFactory } from '../FormSchemaFactory';
@@ -35,15 +39,14 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 };
 
 describe('EVM Adapter Integration Tests', () => {
-  // Initialize the factory and adapter
   const factory = new FormSchemaFactory();
-  // Get adapter using the mock network config
-  const adapter = getAdapter(mockEvmNetworkConfig);
+  let adapter: ContractAdapter; // Type it as ContractAdapter
   let erc20Schema: ContractSchema;
   let inputTesterSchema: ContractSchema;
 
-  // Load common schema fixtures before tests
   beforeAll(async () => {
+    // Await the adapter initialization
+    adapter = await getAdapter(mockEvmNetworkConfig);
     erc20Schema = await adapter.loadMockContract('erc20');
     inputTesterSchema = await adapter.loadMockContract('input-tester');
   });

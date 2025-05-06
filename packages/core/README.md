@@ -108,7 +108,7 @@ pnpm test
 
 The core package uses an adapter pattern to support multiple blockchain ecosystems:
 
-- **Core**: Chain-agnostic components, types, services, and utilities. Manages ecosystem details, network configurations, and adapter instantiation via `src/core/ecosystemManager.ts`.
+- **Core**: Chain-agnostic components, types, services, and utilities. Manages ecosystem details, network configurations, and adapter instantiation via `src/core/ecosystemManager.ts`. The `ecosystemManager.getAdapter()` function is asynchronous, and UI components typically obtain configured adapter instances either through the `useConfiguredAdapter` hook for direct use, or via props from higher-level state management hooks (like `useFormBuilderState`) which handle the asynchronous loading.
 - **Adapters (`@openzeppelin/transaction-form-adapter-*`)**: Separate packages containing chain-specific implementations conforming to the `ContractAdapter` interface (defined in `@openzeppelin/transaction-form-types`). Adapters are now instantiated with a specific `NetworkConfig` making them network-aware.
 - **UI Components**: React components within this package that utilize the centrally managed, network-configured adapters to interact with different blockchains.
 - **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/transaction-form-styles` package.

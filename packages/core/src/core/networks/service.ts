@@ -54,15 +54,13 @@ export class NetworkService {
       return null;
     }
 
-    const adapter = getAdapter(network);
-    // The null check for adapter might be less necessary if getAdapter throws for unknown ecosystems,
-    // but keeping it for safety or if getAdapter could return null in some path.
-    if (!adapter) {
-      console.error(`Adapter could not be created for ecosystem: ${network.ecosystem}`);
+    try {
+      const adapter = await getAdapter(network);
+      return { network, adapter };
+    } catch (error) {
+      console.error(`Adapter could not be created for ecosystem: ${network.ecosystem}`, error);
       return null;
     }
-
-    return { network, adapter };
   }
 }
 

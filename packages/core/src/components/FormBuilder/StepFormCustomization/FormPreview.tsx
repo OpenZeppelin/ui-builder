@@ -9,8 +9,8 @@ import {
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
-import { getAdapter } from '../../../core/ecosystemManager';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
+import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
@@ -30,11 +30,7 @@ export function FormPreview({
   contractSchema,
   networkConfig,
 }: FormPreviewProps) {
-  // Get the adapter using the networkConfig
-  const adapter = useMemo(() => {
-    if (!networkConfig) return null;
-    return getAdapter(networkConfig);
-  }, [networkConfig]);
+  const { adapter, isLoading: adapterLoading } = useConfiguredAdapter(networkConfig);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
@@ -72,7 +68,7 @@ export function FormPreview({
     console.log('Form submitted in preview mode with Parsed Inputs:', submittedInputs);
 
     if (!adapter) {
-      console.error('Preview error: Adapter not available due to missing networkConfig.');
+      console.error('Preview error: Adapter not available.');
       return;
     }
 
@@ -95,10 +91,14 @@ export function FormPreview({
     // In a real implementation, this would be a no-op or trigger a mock transaction
   };
 
+  if (adapterLoading) {
+    return <div className="p-4 text-center text-muted-foreground">Loading form preview...</div>;
+  }
+
   if (!adapter) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        Form preview requires a selected network.
+        Form preview requires a selected and valid network to load adapter.
       </div>
     );
   }
