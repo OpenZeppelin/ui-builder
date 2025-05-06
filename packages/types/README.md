@@ -36,13 +36,13 @@ The package is organized into namespaces for better organization and to prevent 
 import { adapters, contracts, forms } from '@openzeppelin/transaction-form-types';
 
 // Import specific namespaces
-import * as contracts from '@openzeppelin/transaction-form-types/contracts';
-import * as adapters from '@openzeppelin/transaction-form-types/adapters';
-import * as forms from '@openzeppelin/transaction-form-types/forms';
+import * as contracts from '@openzeppelin/transaction-form-types';
+import * as adapters from '@openzeppelin/transaction-form-types';
+import * as forms from '@openzeppelin/transaction-form-types';
 
 // Import specific types from their respective namespaces
-import { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+import { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types';
 
 // Example usage in a function
 function validateField(field: forms.FormFieldType): boolean {

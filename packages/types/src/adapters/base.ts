@@ -1,5 +1,6 @@
-import type { ContractFunction, ContractSchema, FunctionParameter } from '../contracts';
-import type { FieldType, FormFieldType } from '../forms';
+import type { ContractFunction, ContractSchema, FunctionParameter } from '../contracts/schema';
+import type { FieldType } from '../forms/fields';
+import type { FormFieldType } from '../forms/form-field';
 
 // Base types and interfaces for adapters will be defined here.
 

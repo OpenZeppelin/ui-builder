@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-types';
 
 import { TransactionForm } from '../components/TransactionForm';
 

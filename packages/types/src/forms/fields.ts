@@ -1,5 +1,5 @@
-import type { ContractAdapter } from '../adapters';
-import type { ContractSchema } from '../contracts';
+import type { ContractAdapter } from '../adapters/base';
+import type { ContractSchema } from '../contracts/schema';
 
 import { RenderFormSchema } from './schema';
 

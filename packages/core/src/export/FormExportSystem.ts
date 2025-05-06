@@ -7,8 +7,7 @@
  * standalone form project.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';

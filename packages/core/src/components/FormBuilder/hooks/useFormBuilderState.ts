@@ -1,7 +1,11 @@
 import { useCallback } from 'react';
 
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import {
+  ContractAdapter,
+  ContractSchema,
+  Ecosystem,
+  NetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';

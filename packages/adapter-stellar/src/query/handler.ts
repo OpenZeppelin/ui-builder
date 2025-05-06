@@ -1,4 +1,4 @@
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 /**
  * Queries a view function on a contract

@@ -5,8 +5,7 @@
  * Uses the appropriate adapter based on the selected chain type.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../core/adapterRegistry';
 

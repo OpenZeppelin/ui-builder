@@ -17,7 +17,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';

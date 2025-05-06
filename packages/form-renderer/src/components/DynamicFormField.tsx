@@ -1,12 +1,8 @@
 import React from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import {
-  FieldCondition,
-  FormFieldType,
-  FormValues,
-} from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldCondition, FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 import { fieldComponents } from './fieldRegistry';
 

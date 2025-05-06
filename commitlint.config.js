@@ -48,6 +48,7 @@ export default {
         'tests',
         'release',
         'adapter',
+        'types',
       ],
     ],
     'scope-empty': [2, 'never'],

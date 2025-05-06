@@ -1,4 +1,4 @@
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 // Placeholder
 export async function loadSolanaContract(source: string): Promise<ContractSchema> {

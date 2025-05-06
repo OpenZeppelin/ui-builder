@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 
 export interface WalletConnectionContextValue {
   /**

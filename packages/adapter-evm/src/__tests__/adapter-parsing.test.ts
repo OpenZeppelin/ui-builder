@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 // Adjust path as needed
-import type {
-  ContractFunction,
-  FunctionParameter,
-} from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractFunction, FunctionParameter } from '@openzeppelin/transaction-form-types';
 
 import { EvmAdapter } from '../adapter';
 import { parseEvmInput as parseEvmInputFunction } from '../transform';

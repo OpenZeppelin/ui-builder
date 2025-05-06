@@ -40,8 +40,11 @@ When using this package, you should also install `@openzeppelin/transaction-form
 ```tsx
 // Example of importing types
 import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type { FormValues, RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+import type {
+  ContractAdapter,
+  FormValues,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 ```
 
 ## Component Styling
@@ -60,8 +63,7 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 
 ```tsx
 import { TransactionForm, generateId, logger } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter, RenderFormSchema } from '@openzeppelin/transaction-form-types';
 
 // Example form schema
 const schema: RenderFormSchema = {

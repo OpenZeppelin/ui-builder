@@ -1,6 +1,6 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 
-import type { Connector } from '@openzeppelin/transaction-form-types/adapters';
+import type { Connector } from '@openzeppelin/transaction-form-types';
 
 import type { WagmiWalletImplementation } from '../wallet-connect/wagmi-implementation';
 

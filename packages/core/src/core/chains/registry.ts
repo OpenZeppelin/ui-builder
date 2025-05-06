@@ -1,4 +1,4 @@
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 /**
  * Interface for ecosystem-specific data in the registry

@@ -1,4 +1,4 @@
-import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractFunction } from '@openzeppelin/transaction-form-types';
 
 // Placeholder
 export function isSolanaViewFunction(_functionDetails: ContractFunction): boolean {

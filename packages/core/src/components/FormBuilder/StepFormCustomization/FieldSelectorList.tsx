@@ -1,6 +1,6 @@
 import { Braces, FormInput, Tag } from 'lucide-react';
 
-import type { FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { FormFieldType } from '@openzeppelin/transaction-form-types';
 
 import {
   Tooltip,

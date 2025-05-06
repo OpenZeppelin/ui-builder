@@ -1,7 +1,4 @@
-import type {
-  ExecutionConfig,
-  ExecutionMethodDetail,
-} from '@openzeppelin/transaction-form-types/adapters';
+import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/transaction-form-types';
 
 // Placeholders
 export async function getSolanaSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {

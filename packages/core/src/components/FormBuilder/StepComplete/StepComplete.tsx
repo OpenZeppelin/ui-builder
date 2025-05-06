@@ -3,11 +3,8 @@ import { Download } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { LoadingButton } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type {
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { StepTitleWithDescription } from '../Common';

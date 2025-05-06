@@ -2,11 +2,11 @@ import { FileText, Minimize2 } from 'lucide-react';
 
 import { JSX, useEffect, useState } from 'react';
 
-import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ContractFunction,
   ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+  FullContractAdapter,
+} from '@openzeppelin/transaction-form-types';
 
 import { truncateMiddle } from '../../utils/formatting';
 import { Button } from '../ui/button';

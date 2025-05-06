@@ -1,4 +1,4 @@
-import type { ContractFunction } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractFunction } from '@openzeppelin/transaction-form-types';
 
 /**
  * Formats a function result for display

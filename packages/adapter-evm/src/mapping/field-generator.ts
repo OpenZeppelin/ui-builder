@@ -1,12 +1,12 @@
 import { startCase } from 'lodash';
 
-import type { FunctionParameter } from '@openzeppelin/transaction-form-types/contracts';
 import type {
   FieldType,
   FieldValidation,
   FieldValue,
   FormFieldType,
-} from '@openzeppelin/transaction-form-types/forms';
+  FunctionParameter,
+} from '@openzeppelin/transaction-form-types';
 
 import { isValidEvmAddress } from '../utils';
 

@@ -3,8 +3,8 @@ import { Eye, Pencil } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';

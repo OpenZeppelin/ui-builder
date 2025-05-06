@@ -1,7 +1,4 @@
-import type {
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;

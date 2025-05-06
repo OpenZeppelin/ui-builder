@@ -6,18 +6,18 @@
  * while delegating chain-specific logic to the appropriate adapter.
  */
 import { createTransformForFieldType } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
 import type {
+  ContractAdapter,
   ContractSchema,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types/contracts';
+} from '@openzeppelin/transaction-form-types';
 import {
+  Ecosystem,
   FormFieldType,
   FormLayout,
   FormValues,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types/forms';
+} from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../adapterRegistry';
 import { BuilderFormConfig } from '../types/FormTypes';

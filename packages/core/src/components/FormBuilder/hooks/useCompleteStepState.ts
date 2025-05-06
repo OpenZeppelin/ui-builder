@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { FormExportSystem } from '../../../export';

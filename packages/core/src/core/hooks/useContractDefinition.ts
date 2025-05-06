@@ -3,8 +3,8 @@
  */
 import { useCallback, useState } from 'react';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { loadContractDefinition } from '../../services/ContractLoader';
 

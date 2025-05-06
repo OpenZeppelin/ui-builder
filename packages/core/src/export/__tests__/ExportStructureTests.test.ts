@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';

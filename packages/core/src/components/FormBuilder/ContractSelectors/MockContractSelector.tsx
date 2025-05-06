@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import {
   Dialog,

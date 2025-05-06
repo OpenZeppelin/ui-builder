@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';

@@ -430,7 +430,7 @@ To add support for a new blockchain ecosystem:
 3.  **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
 4.  **Implement Adapter**:
     - Create `src/adapter.ts`.
-    - Import `ContractAdapter` and related types from `@openzeppelin/transaction-form-types/adapters`.
+    - Import `ContractAdapter` and related types from `@openzeppelin/transaction-form-types`.
     - Implement the `ContractAdapter` interface with chain-specific logic.
 5.  **Export Adapter**: Create `src/index.ts` and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`).
 6.  **Register Adapter**:

@@ -37,7 +37,7 @@ import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { adapterPackageMap } from '../core/adapterRegistry';
 import type { ExportOptions } from '../core/types/ExportTypes';

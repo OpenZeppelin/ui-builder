@@ -10,7 +10,7 @@ import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { ZipProgress } from '../ZipGenerator';

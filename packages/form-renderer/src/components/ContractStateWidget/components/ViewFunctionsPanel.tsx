@@ -2,11 +2,11 @@ import { RefreshCw } from 'lucide-react';
 
 import { JSX, useCallback, useEffect, useState } from 'react';
 
-import type { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
 import type {
   ContractFunction,
   ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+  FullContractAdapter,
+} from '@openzeppelin/transaction-form-types';
 
 import { cn } from '../../../utils/cn';
 import { Button } from '../../ui/button';

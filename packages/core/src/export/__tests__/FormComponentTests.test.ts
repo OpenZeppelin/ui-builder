@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import {

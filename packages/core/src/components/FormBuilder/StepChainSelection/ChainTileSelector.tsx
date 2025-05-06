@@ -3,7 +3,7 @@ import { NetworkIcon } from '@web3icons/react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 // Import the Midnight logo SVG
 import MidnightLogoSvg from '../../../assets/icons/MidnightLogo.svg';

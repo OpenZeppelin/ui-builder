@@ -1,4 +1,4 @@
-import type { Connector } from '@openzeppelin/transaction-form-types/adapters';
+import type { Connector } from '@openzeppelin/transaction-form-types';
 
 /**
  * Indicates if this adapter supports wallet connection

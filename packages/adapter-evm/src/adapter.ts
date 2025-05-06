@@ -4,15 +4,14 @@ import { type TransactionReceipt } from 'viem';
 import type {
   Connector,
   ContractAdapter,
-  ExecutionConfig,
-  ExecutionMethodDetail,
-} from '@openzeppelin/transaction-form-types/adapters';
-import type {
   ContractFunction,
   ContractSchema,
+  ExecutionConfig,
+  ExecutionMethodDetail,
+  FieldType,
+  FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types/contracts';
-import type { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+} from '@openzeppelin/transaction-form-types';
 
 import { WagmiWalletImplementation } from './wallet-connect/wagmi-implementation';
 

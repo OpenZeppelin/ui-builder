@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FieldTransforms, FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldTransforms, FormFieldType } from '@openzeppelin/transaction-form-types';
 
 import {
   composeTransforms,

@@ -1,10 +1,7 @@
 import { type PublicClient, createPublicClient, http, isAddress } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import type {
-  ContractSchema,
-  FunctionParameter,
-} from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema, FunctionParameter } from '@openzeppelin/transaction-form-types';
 
 import { createAbiFunctionItem } from '../abi';
 import { parseEvmInput } from '../transform';

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 /**
  * Hook for managing contract definition state in the Transaction Form Builder.

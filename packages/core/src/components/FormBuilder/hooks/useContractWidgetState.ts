@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
-import { FullContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { FullContractAdapter } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 /**
  * Hook for managing contract state widget visibility and data.

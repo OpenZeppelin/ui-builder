@@ -4,7 +4,7 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 

@@ -1,9 +1,8 @@
 import { capitalize } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
-import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FieldType } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 

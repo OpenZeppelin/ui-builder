@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { FieldType } from '@openzeppelin/transaction-form-types';
 
 /**
  * Map a Midnight-specific parameter type to a form field type

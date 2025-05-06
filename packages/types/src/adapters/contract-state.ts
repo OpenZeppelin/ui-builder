@@ -1,4 +1,4 @@
-import type { ContractFunction, ContractSchema } from '../contracts';
+import type { ContractFunction, ContractSchema } from '../contracts/schema';
 
 /**
  * Extension interface for adapters that support contract state querying

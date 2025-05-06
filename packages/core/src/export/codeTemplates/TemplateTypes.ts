@@ -3,7 +3,7 @@
  *
  * These types define the parameters that can be passed to template functions.
  */
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 /**
  * Base interface for all template parameters

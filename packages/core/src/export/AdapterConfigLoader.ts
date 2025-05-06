@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { adapterConfigExportMap, adapterConfigLoaders } from '../core/adapterRegistry';
 import type { AdapterConfig } from '../core/types/AdapterTypes';

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { RenderFormSchema } from '@openzeppelin/transaction-form-types';
 
 import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
 

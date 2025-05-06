@@ -6,11 +6,8 @@ import {
   TransactionForm,
   WalletConnectionProvider,
 } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type {
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../../../core/adapterRegistry';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';

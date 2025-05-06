@@ -1,9 +1,6 @@
 import type { AbiFunction, AbiStateMutability } from 'viem';
 
-import type {
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { AbiItem } from '../types';
 import { formatInputName, formatMethodName } from '../utils';

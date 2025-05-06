@@ -1,9 +1,9 @@
-import type { FunctionParameter } from '@openzeppelin/transaction-form-types/contracts';
 import type {
   FieldType,
   FieldValue,
   FormFieldType,
-} from '@openzeppelin/transaction-form-types/forms';
+  FunctionParameter,
+} from '@openzeppelin/transaction-form-types';
 
 /**
  * Generate default field configuration for a Midnight function parameter

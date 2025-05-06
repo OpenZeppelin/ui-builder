@@ -2,7 +2,7 @@ import { CheckCircle } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { ContractAddressForm } from './components/ContractAddressForm';
 import { ContractPreview } from './components/ContractPreview';

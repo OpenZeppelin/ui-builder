@@ -7,8 +7,8 @@ import {
   SelectGroupedField,
   TextField,
 } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
 

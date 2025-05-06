@@ -7,20 +7,18 @@
 import { startCase } from 'lodash';
 
 import { generateId } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type {
-  ContractFunction,
-  ContractSchema,
-  FunctionParameter,
-} from '@openzeppelin/transaction-form-types/contracts';
 import {
   CommonFormProperties,
+  ContractAdapter,
+  ContractFunction,
+  ContractSchema,
   FieldType,
   FormFieldType,
-} from '@openzeppelin/transaction-form-types/forms';
+  FunctionParameter,
+} from '@openzeppelin/transaction-form-types';
 
 import { getAdapter } from '../core/adapterRegistry';
-import { BuilderFormConfig } from '../core/types/FormTypes';
+import type { BuilderFormConfig } from '../core/types/FormTypes';
 
 /**
  * Generates a default form configuration for a contract function

@@ -1,7 +1,7 @@
 import React from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FieldType, FormValues } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 import { BaseFieldProps } from './fields/BaseField';
 

@@ -1,5 +1,5 @@
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 export interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;

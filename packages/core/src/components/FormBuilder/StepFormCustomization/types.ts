@@ -1,7 +1,7 @@
 import type { Control } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 import type { ExecutionMethodType } from '../../../core/types/FormTypes';
 

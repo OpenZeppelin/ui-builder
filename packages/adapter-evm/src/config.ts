@@ -1,5 +1,3 @@
-// import type { AdapterConfig } from '@openzeppelin/transaction-form-types/configs'; // Removed import
-
 /**
  * Configuration for the EVM adapter
  *

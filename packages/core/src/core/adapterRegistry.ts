@@ -8,8 +8,7 @@ import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
 import { MidnightAdapter } from '@openzeppelin/transaction-form-adapter-midnight';
 import { SolanaAdapter } from '@openzeppelin/transaction-form-adapter-solana';
 import { StellarAdapter } from '@openzeppelin/transaction-form-adapter-stellar';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types/adapters';
-import type { Ecosystem } from '@openzeppelin/transaction-form-types/common';
+import type { ContractAdapter, Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 

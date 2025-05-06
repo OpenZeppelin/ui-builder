@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
-import type { FormFieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {

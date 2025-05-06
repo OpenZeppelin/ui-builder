@@ -1,4 +1,4 @@
-import { Ecosystem } from '../common';
+import { Ecosystem } from '../common/ecosystem';
 
 /**
  * Represents a parameter in a contract function

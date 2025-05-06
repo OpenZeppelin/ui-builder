@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import type { FormValues, TransactionFormProps } from '@openzeppelin/transaction-form-types/forms';
-import type { TxStatus } from '@openzeppelin/transaction-form-types/transactions/status';
+import type {
+  FormValues,
+  TransactionFormProps,
+  TxStatus,
+} from '@openzeppelin/transaction-form-types';
 
 import { createDefaultFormValues } from '../utils/formUtils';
 import { logger } from '../utils/logger';

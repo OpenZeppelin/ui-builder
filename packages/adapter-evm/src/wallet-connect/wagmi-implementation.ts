@@ -22,7 +22,7 @@ import { type PublicClient, type WalletClient, http } from 'viem';
 // Only import http directly if not re-exported
 import { base, mainnet, optimism, sepolia } from 'viem/chains';
 
-import { type Connector } from '@openzeppelin/transaction-form-types/adapters';
+import { type Connector } from '@openzeppelin/transaction-form-types';
 
 // TODO: Make chains configurable, potentially passed from adapter instantiation
 const supportedChains = [mainnet, base, optimism, sepolia] as const; // Use 'as const' for stricter typing

@@ -8,7 +8,7 @@
  * adding them to the @openzeppelin/transaction-form-types package instead.
  */
 // Import using the package name from dependencies
-import type { CommonFormProperties } from '@openzeppelin/transaction-form-types/forms';
+import type { CommonFormProperties } from '@openzeppelin/transaction-form-types';
 
 /**
  * Configuration input used during form creation and editing in the builder

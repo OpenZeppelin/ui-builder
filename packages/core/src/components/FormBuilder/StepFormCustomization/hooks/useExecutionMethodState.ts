@@ -6,7 +6,7 @@ import type {
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
-} from '@openzeppelin/transaction-form-types/adapters';
+} from '@openzeppelin/transaction-form-types';
 
 import type { ExecutionMethodFormData } from '../types';
 import { ensureCompleteConfig } from '../utils';

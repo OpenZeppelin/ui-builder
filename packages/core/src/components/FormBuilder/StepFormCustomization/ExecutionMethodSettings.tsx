@@ -4,7 +4,7 @@ import type {
   ContractAdapter,
   ExecutionConfig,
   ExecutionMethodDetail,
-} from '@openzeppelin/transaction-form-types/adapters';
+} from '@openzeppelin/transaction-form-types';
 
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';

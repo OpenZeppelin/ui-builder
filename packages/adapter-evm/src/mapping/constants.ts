@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { FieldType } from '@openzeppelin/transaction-form-types';
 
 /**
  * EVM-specific type mapping to default form field types.

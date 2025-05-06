@@ -1,6 +1,5 @@
-import { Ecosystem } from '@openzeppelin/transaction-form-types/common';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-types/forms';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
 
 import { adapterPackageMap } from '../../core/adapterRegistry';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';

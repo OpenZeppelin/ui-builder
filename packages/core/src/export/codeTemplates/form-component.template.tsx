@@ -25,12 +25,12 @@ import {
   WalletConnectionProvider,
   logger,
 } from '@openzeppelin/transaction-form-renderer';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
 import type {
+  ContractSchema,
   FormFieldType,
   RenderFormSchema,
   TransactionFormProps,
-} from '@openzeppelin/transaction-form-types/forms';
+} from '@openzeppelin/transaction-form-types';
 
 // Define type for transaction result (this will be implemented in the future)
 interface TransactionResult {

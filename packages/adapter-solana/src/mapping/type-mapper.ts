@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/transaction-form-types/forms';
+import type { FieldType } from '@openzeppelin/transaction-form-types';
 
 import { SOLANA_TYPE_TO_FIELD_TYPE } from './constants';
 

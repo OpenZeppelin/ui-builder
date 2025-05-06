@@ -1,6 +1,6 @@
 import { isAddress } from 'viem';
 
-import type { ContractSchema } from '@openzeppelin/transaction-form-types/contracts';
+import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { AbiItem } from '../types';
 
