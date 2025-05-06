@@ -192,7 +192,7 @@ transaction-form-builder/
 │   │   │   │   ├── utils/       # Utility functions
 │   │   │   │   ├── hooks/       # Shared hooks
 │   │   │   │   ├── factories/   # Schema factories
-│   │   │   │   └── adapterRegistry.ts # Central registration of adapter instances
+│   │   │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   │   │   ├── export/          # Export system
 │   │   │   │   ├── generators/  # Form code generators
 │   │   │   │   ├── codeTemplates/ # Individual file templates for generation
@@ -272,13 +272,13 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 **Key Components:**
 
-- **Core**: Chain-agnostic application logic, UI components, export system, and the central `adapterRegistry` for managing adapter instances.
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. This includes methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods.
+- **Core**: Chain-agnostic application logic, UI components, export system, and the central `ecosystemManager.ts` for managing ecosystem details, network configurations, and adapter instantiation.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are now instantiated with a specific `NetworkConfig`, making them network-aware. The core package dynamically discovers network configurations and instantiates adapters via `ecosystemManager.ts`.
 - **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
 - **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The core package dynamically loads and uses adapters via the `adapterRegistry`, and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The core package dynamically loads and uses adapters via the `ecosystemManager.ts`, and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 
@@ -427,22 +427,32 @@ To add support for a new blockchain ecosystem:
     - Add a dependency on `@openzeppelin/transaction-form-types` (`workspace:*`).
     - Add any chain-specific SDKs or libraries required by the adapter.
     - Include standard build scripts (refer to existing adapter packages).
+    - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
 3.  **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
 4.  **Implement Adapter**:
     - Create `src/adapter.ts`.
-    - Import `ContractAdapter` and related types from `@openzeppelin/transaction-form-types`.
-    - Implement the `ContractAdapter` interface with chain-specific logic.
-5.  **Export Adapter**: Create `src/index.ts` and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`).
-6.  **Register Adapter**:
-    - Open `packages/core/src/core/adapterRegistry.ts`.
-    - Import the new adapter class.
-    - Add an entry to the `adapterInstances` map (e.g., `sui: new SuiAdapter()`).
-    - Add an entry to the `adapterPackageMap` (e.g., `sui: '@openzeppelin/transaction-form-adapter-sui'`).
-7.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
-8.  **Build & Test**:
+    - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/transaction-form-types`.
+    - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
+    - Implement methods to use `this.networkConfig` internally for network-specific operations.
+5.  **Define Network Configurations**:
+    - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
+    - Each network config should include a `viemChain` property if it's an EVM-compatible chain and relies on Viem for client creation, or provide all necessary details like `rpcUrl`.
+    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`).
+6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the networks array (e.g., `export { suiNetworks } from './networks';`).
+7.  **Register Ecosystem in Core**:
+    - Open `packages/core/src/core/ecosystemManager.ts`.
+    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/transaction-form-adapter-sui';`).
+    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
+      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks').
+      - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
+      - Optionally, `adapterConfigPackagePath` and `adapterConfigExportName` if your adapter has a separate `dist/config.js` file for the export system.
+    - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package.
+    - Add a case for your new ecosystem in the `switch` statement within `getAdapterConfigLoader` if you have an adapter-specific config file.
+8.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
+9.  **Build & Test**:
     - Build the new adapter package (`pnpm --filter @openzeppelin/transaction-form-adapter-<chain-name> build`).
     - Add relevant unit/integration tests.
-    - Ensure the core application (`pnpm --filter @openzeppelin/transaction-form-core build`) and the export system still function correctly.
+    - Ensure the core application (`pnpm --filter @openzeppelin/transaction-form-builder-core build`) and the export system still function correctly.
 
 ## Commit Convention
 

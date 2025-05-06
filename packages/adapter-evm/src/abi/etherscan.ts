@@ -1,26 +1,40 @@
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import type { AbiItem } from '../types';
 
 import { transformAbiToSchema } from './transformer';
 
 /**
- * Fetches and parses an ABI from Etherscan using a contract address.
+ * Fetches and parses an ABI from Etherscan-compatible explorers using a contract address and network config.
  */
-export async function loadAbiFromEtherscan(address: string): Promise<ContractSchema> {
+export async function loadAbiFromEtherscan(
+  address: string,
+  networkConfig: EvmNetworkConfig
+): Promise<ContractSchema> {
+  // Try to get the API key from environment variables
   const apiKey = import.meta.env.VITE_ETHERSCAN_API_KEY;
   if (!apiKey) {
     console.error('loadAbiFromEtherscan', 'Etherscan API Key (VITE_ETHERSCAN_API_KEY) is missing.');
     throw new Error('Etherscan API Key is not configured.');
   }
 
-  // TODO: Make network dynamic
-  const apiBaseUrl = 'https://api.etherscan.io/api'; // Mainnet default
+  const apiBaseUrl = networkConfig.apiUrl;
+
+  if (!apiBaseUrl) {
+    console.error(
+      'loadAbiFromEtherscan',
+      `API URL (apiUrl) is missing in the network configuration for ${networkConfig.name} (ID: ${networkConfig.id}).`
+    );
+    throw new Error(
+      `Etherscan-compatible API URL is not configured for network: ${networkConfig.name}`
+    );
+  }
+
   const url = `${apiBaseUrl}?module=contract&action=getabi&address=${address}&apikey=${apiKey}`;
 
   let response: Response;
   try {
-    console.info(`Fetching ABI from Etherscan for address: ${address}`);
+    console.info(`Fetching ABI from ${apiBaseUrl} for address: ${address}`);
     response = await fetch(url);
   } catch (networkError) {
     console.error('Network error fetching ABI from Etherscan:', networkError);
@@ -47,7 +61,7 @@ export async function loadAbiFromEtherscan(address: string): Promise<ContractSch
     );
     if (etherscanResult.result?.includes('Contract source code not verified')) {
       throw new Error(
-        `Contract not verified on Etherscan (address: ${address}). ABI not available.`
+        `Contract not verified on ${networkConfig.name} explorer (address: ${address}). ABI not available.`
       );
     }
     throw new Error(`Etherscan API Error: ${etherscanResult.result || etherscanResult.message}`);
@@ -64,7 +78,9 @@ export async function loadAbiFromEtherscan(address: string): Promise<ContractSch
     throw new Error(`Invalid ABI JSON received from Etherscan: ${(error as Error).message}`);
   }
 
-  console.info(`Successfully parsed Etherscan ABI with ${abi.length} items.`);
+  console.info(
+    `Successfully parsed Etherscan ABI for ${networkConfig.name} with ${abi.length} items.`
+  );
   // TODO: Fetch contract name?
   const contractName = `Contract_${address.substring(0, 6)}`;
   return transformAbiToSchema(abi, contractName, address);

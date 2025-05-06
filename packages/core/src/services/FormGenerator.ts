@@ -17,17 +17,18 @@ import {
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
 
-import { getAdapter } from '../core/adapterRegistry';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
 /**
  * Generates a default form configuration for a contract function
  *
+ * @param adapter The blockchain adapter to use for field generation
  * @param contractSchema The contract schema containing chain type and function details
  * @param functionId The ID of the function to generate a form for
  * @returns A form configuration object
  */
 export function generateFormConfig(
+  adapter: ContractAdapter,
   contractSchema: ContractSchema,
   functionId: string
 ): BuilderFormConfig {
@@ -36,9 +37,6 @@ export function generateFormConfig(
   if (!functionDetails) {
     throw new Error(`Function ${functionId} not found in contract schema`);
   }
-
-  // Get the appropriate adapter for the selected chain
-  const adapter = getAdapter(contractSchema.ecosystem);
 
   // Generate fields using the adapter
   const fields = generateFieldsFromFunction(adapter, functionDetails);

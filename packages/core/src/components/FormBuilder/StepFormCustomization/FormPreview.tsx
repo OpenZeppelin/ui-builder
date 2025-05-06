@@ -6,18 +6,18 @@ import {
   TransactionForm,
   WalletConnectionProvider,
 } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
-import { getAdapter } from '../../../core/adapterRegistry';
+import { getAdapter } from '../../../core/ecosystemManager';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
-  selectedEcosystem: Ecosystem;
   contractSchema: ContractSchema;
+  networkConfig: NetworkConfig | null;
 }
 
 /**
@@ -27,11 +27,14 @@ interface FormPreviewProps {
 export function FormPreview({
   formConfig,
   functionDetails,
-  selectedEcosystem,
   contractSchema,
+  networkConfig,
 }: FormPreviewProps) {
-  // Get the adapter for the selected chain
-  const adapter = useMemo(() => getAdapter(selectedEcosystem), [selectedEcosystem]);
+  // Get the adapter using the networkConfig
+  const adapter = useMemo(() => {
+    if (!networkConfig) return null;
+    return getAdapter(networkConfig);
+  }, [networkConfig]);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
@@ -68,6 +71,11 @@ export function FormPreview({
     });
     console.log('Form submitted in preview mode with Parsed Inputs:', submittedInputs);
 
+    if (!adapter) {
+      console.error('Preview error: Adapter not available due to missing networkConfig.');
+      return;
+    }
+
     try {
       // Format data using the adapter, passing the field config
       const functionId = renderSchema.functionId || functionDetails.id || 'unknown';
@@ -87,6 +95,14 @@ export function FormPreview({
     // In a real implementation, this would be a no-op or trigger a mock transaction
   };
 
+  if (!adapter) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        Form preview requires a selected network.
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       <div className="absolute -top-3 left-4 bg-primary text-white text-xs px-2 py-1 rounded-sm z-10">
@@ -100,6 +116,7 @@ export function FormPreview({
               adapter={adapter}
               onSubmit={handleSubmit}
               contractSchema={contractSchema}
+              networkConfig={networkConfig}
             />
           </WalletConnectionProvider>
         </CardContent>

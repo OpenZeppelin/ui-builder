@@ -80,20 +80,49 @@ export { evmNetworks, evmMainnetNetworks, evmTestnetNetworks } from './networks'
 
 ### 4. Core App Network Discovery
 
-The core app discovers and aggregates network configurations from all adapters:
+The core application, specifically the `ecosystemManager.ts` module, dynamically discovers and aggregates network configurations from all registered adapter packages. This is achieved by:
+
+1.  Maintaining an `ecosystemRegistry` that maps each `Ecosystem` to its metadata, including the conventional export name for its network list (e.g., `evmNetworks`).
+2.  Dynamically importing the main module of each adapter package (e.g., `@openzeppelin/transaction-form-adapter-evm`).
+3.  Accessing the exported network list from the imported module using the conventional name (e.g., `module.evmNetworks`).
+
+This allows the core to remain decoupled from the specifics of each adapter package while still being able to gather all network configurations.
 
 ```typescript
-// In core/src/core/networks/registry.ts
-import { evmNetworks } from '@openzeppelin/transaction-form-adapter-evm';
-import { solanaNetworks } from '@openzeppelin/transaction-form-adapter-solana';
+// Simplified conceptual example from core/src/core/ecosystemManager.ts
 
-// ...other imports
+// Centralized configuration for each ecosystem
+const ecosystemRegistry = {
+  evm: {
+    networksExportName: 'evmNetworks',
+    // ... other metadata ...
+  },
+  solana: {
+    networksExportName: 'solanaNetworks',
+    // ... other metadata ...
+  },
+  // ... other ecosystems
+};
 
-export const allNetworks = [
-  ...evmNetworks,
-  ...solanaNetworks,
-  // ...other networks
-];
+async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<any> {
+  switch (ecosystem) {
+    case 'evm':
+      return import('@openzeppelin/transaction-form-adapter-evm');
+    case 'solana':
+      return import('@openzeppelin/transaction-form-adapter-solana');
+    // ... etc.
+    default:
+      throw new Error('...');
+  }
+}
+
+export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
+  // ... (caching logic) ...
+  const meta = ecosystemRegistry[ecosystem];
+  const module = await loadAdapterPackageModule(ecosystem);
+  const networks = module[meta.networksExportName] || [];
+  // ... (caching and return logic) ...
+}
 ```
 
 ## Template for Adapter Network Exports

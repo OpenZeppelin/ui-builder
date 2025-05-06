@@ -16,7 +16,8 @@ export interface ContractStateCapabilities {
   isViewFunction(functionDetails: ContractFunction): boolean;
 
   /**
-   * Queries a view function on a contract
+   * Queries a view function on a contract.
+   * The adapter instance should be pre-configured with the necessary network context.
    *
    * @param contractAddress - The contract address
    * @param functionId - The function identifier

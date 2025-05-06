@@ -6,6 +6,8 @@ import type { ContractFunction, FunctionParameter } from '@openzeppelin/transact
 import { EvmAdapter } from '../adapter';
 import { parseEvmInput as parseEvmInputFunction } from '../transform';
 
+import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
+
 // Mock FunctionParameter type helper
 const createParam = (
   type: string,
@@ -347,7 +349,8 @@ describe('EvmAdapter Output Formatting', () => {
   let adapter: EvmAdapter;
 
   beforeEach(() => {
-    adapter = new EvmAdapter();
+    // Instantiate adapter WITH shared mock config
+    adapter = new EvmAdapter(mockEvmNetworkConfig);
   });
 
   // Helper to call formatFunctionResult

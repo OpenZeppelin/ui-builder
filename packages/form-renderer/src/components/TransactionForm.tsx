@@ -213,8 +213,8 @@ export function TransactionForm({
       return adapter.getExplorerTxUrl(hash);
     }
 
-    // Fallback to general getExplorerUrl if getExplorerTxUrl is not implemented
-    return adapter.getExplorerUrl(hash);
+    console.warn('getExplorerTxUrl not implemented by adapter, cannot generate URL.');
+    return null;
   };
 
   return (

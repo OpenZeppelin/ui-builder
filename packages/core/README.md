@@ -17,7 +17,7 @@ core/
 │   │   ├── utils/    # Utility functions
 │   │   ├── hooks/    # Shared hooks
 │   │   ├── factories/ # Schema factories
-│   │   └── adapterRegistry.ts # Central registration of adapter instances
+│   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   ├── export/       # Export system
 │   │   ├── generators/ # Form code generators
 │   │   ├── codeTemplates/ # Code template files for generation
@@ -108,11 +108,11 @@ pnpm test
 
 The core package uses an adapter pattern to support multiple blockchain ecosystems:
 
-- **Core**: Chain-agnostic components, types, services, and utilities. Manages adapter instances via `src/core/adapterRegistry.ts`.
-- **Adapters (`@openzeppelin/transaction-form-adapter-*`)**: Separate packages containing chain-specific implementations conforming to the `ContractAdapter` interface (defined in `@openzeppelin/transaction-form-types`).
-- **UI Components**: React components within this package that utilize the centrally managed adapters to interact with different blockchains.
+- **Core**: Chain-agnostic components, types, services, and utilities. Manages ecosystem details, network configurations, and adapter instantiation via `src/core/ecosystemManager.ts`.
+- **Adapters (`@openzeppelin/transaction-form-adapter-*`)**: Separate packages containing chain-specific implementations conforming to the `ContractAdapter` interface (defined in `@openzeppelin/transaction-form-types`). Adapters are now instantiated with a specific `NetworkConfig` making them network-aware.
+- **UI Components**: React components within this package that utilize the centrally managed, network-configured adapters to interact with different blockchains.
 - **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/transaction-form-styles` package.
 
-This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages without modifying the core application logic.
+This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts` without modifying core application logic significantly.
 
 For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters).

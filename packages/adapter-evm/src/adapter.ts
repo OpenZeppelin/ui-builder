@@ -6,12 +6,14 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
+  EvmNetworkConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
+import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import { WagmiWalletImplementation } from './wallet-connect/wagmi-implementation';
 
@@ -50,21 +52,26 @@ import {
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
-  /**
-   * Private implementation of wallet connection using Wagmi
-   */
   private walletImplementation: WagmiWalletImplementation;
+  readonly networkConfig: EvmNetworkConfig;
 
-  constructor() {
-    // Initialize the Wagmi wallet implementation
+  constructor(networkConfig: EvmNetworkConfig) {
+    if (!isEvmNetworkConfig(networkConfig)) {
+      throw new Error('EvmAdapter requires a valid EVM network configuration.');
+    }
+    this.networkConfig = networkConfig;
     this.walletImplementation = new WagmiWalletImplementation();
+
+    console.log(
+      `EvmAdapter initialized for network: ${this.networkConfig.name} (ID: ${this.networkConfig.id})`
+    );
   }
 
   /**
    * @inheritdoc
    */
   async loadContract(source: string): Promise<ContractSchema> {
-    return loadEvmContract(source);
+    return loadEvmContract(source, this.networkConfig);
   }
 
   /**
@@ -99,7 +106,6 @@ export class EvmAdapter implements ContractAdapter {
     submittedInputs: Record<string, unknown>,
     allFieldsConfig: FormFieldType[]
   ): unknown {
-    // Return type is `WriteContractParameters`, but adapter method returns `unknown` for interface compatibility
     return formatEvmTransactionData(contractSchema, functionId, submittedInputs, allFieldsConfig);
   }
 
@@ -107,7 +113,6 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    // Type assertion needed as formatTransactionData returns unknown for interface compatibility
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
       this.walletImplementation
@@ -168,10 +173,11 @@ export class EvmAdapter implements ContractAdapter {
     return queryEvmViewFunction(
       contractAddress,
       functionId,
+      this.networkConfig,
       params,
       contractSchema,
       this.walletImplementation,
-      this.loadContract // Pass the adapter's loadContract method
+      (src) => this.loadContract(src)
     );
   }
 
@@ -231,15 +237,18 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  getExplorerUrl(address: string, _chainId?: string): string | null {
-    return getEvmExplorerAddressUrl(address, _chainId);
+  getExplorerUrl(address: string): string | null {
+    return getEvmExplorerAddressUrl(address, this.networkConfig);
   }
 
   /**
    * @inheritdoc
    */
   getExplorerTxUrl?(txHash: string): string | null {
-    return getEvmExplorerTxUrl(txHash);
+    if (getEvmExplorerTxUrl) {
+      return getEvmExplorerTxUrl(txHash, this.networkConfig);
+    }
+    return null;
   }
 
   /**

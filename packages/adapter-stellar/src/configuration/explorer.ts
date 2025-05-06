@@ -1,24 +1,41 @@
+import { NetworkConfig } from '@openzeppelin/transaction-form-types';
+
 /**
- * Gets a blockchain explorer URL for an address on Stellar
+ * Gets a blockchain explorer URL for an address on Stellar.
+ * Uses the explorerUrl from the network configuration.
  *
  * @param address The address to get the explorer URL for
- * @param _chainId Optional chain ID (not used for Stellar, which uses public/testnet)
- * @returns A URL to view the address on Stellar Expert explorer
+ * @param networkConfig The network configuration object.
+ * @returns A URL to view the address on the configured Stellar explorer, or null.
  */
-export function getStellarExplorerAddressUrl(address: string, _chainId?: string): string | null {
-  if (!address) return null;
-
-  // Use StellarExpert as the default explorer for Stellar addresses
-  return `https://stellar.expert/explorer/public/account/${address}`;
+export function getStellarExplorerAddressUrl(
+  address: string,
+  networkConfig: NetworkConfig
+): string | null {
+  if (!address || !networkConfig.explorerUrl) {
+    return null;
+  }
+  // Construct the URL, assuming a standard /account/ path for Stellar explorers
+  const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
+  return `${baseUrl}/account/${address}`;
 }
 
 /**
- * Gets a blockchain explorer URL for a transaction in this chain
+ * Gets a blockchain explorer URL for a transaction on Stellar.
+ * Uses the explorerUrl from the network configuration.
  *
  * @param txHash - The hash of the transaction to get the explorer URL for
- * @returns A URL to view the transaction on a blockchain explorer, or null if not supported
+ * @param networkConfig The network configuration object.
+ * @returns A URL to view the transaction on the configured Stellar explorer, or null.
  */
-export function getStellarExplorerTxUrl(txHash: string): string | null {
-  // Stellar Expert uses /tx/ prefix for transactions
-  return txHash ? `https://stellar.expert/explorer/public/tx/${txHash}` : null;
+export function getStellarExplorerTxUrl(
+  txHash: string,
+  networkConfig: NetworkConfig
+): string | null {
+  if (!txHash || !networkConfig.explorerUrl) {
+    return null;
+  }
+  // Construct the URL, assuming a standard /tx/ path for Stellar explorers
+  const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
+  return `${baseUrl}/tx/${txHash}`;
 }

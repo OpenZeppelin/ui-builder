@@ -4,6 +4,8 @@
  * This file defines the TypeScript types for network configurations across different blockchain ecosystems.
  * It uses a discriminated union pattern with the 'ecosystem' property as the discriminant to ensure type safety.
  */
+import type { Chain } from 'viem';
+
 import { Ecosystem, NetworkType } from '../common/ecosystem';
 
 /**
@@ -44,6 +46,12 @@ export interface BaseNetworkConfig {
    * Base URL for the block explorer (common across ecosystems)
    */
   explorerUrl?: string;
+
+  /**
+   * Optional icon name for the network (for use with @web3icons/react or similar)
+   * If not provided, the network property will be used as a fallback
+   */
+  icon?: string;
 }
 
 /**
@@ -58,7 +66,7 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
   chainId: number;
 
   /**
-   * JSON-RPC endpoint for the network
+   * JSON-RPC endpoint for the network (can be a base URL if API key is resolved from env)
    */
   rpcUrl: string;
 
@@ -70,6 +78,25 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
     symbol: string; // e.g., 'ETH'
     decimals: number; // typically 18
   };
+
+  /**
+   * Optional icon name for the network (for use with @web3icons/react or similar)
+   * If not provided, the network property will be used as a fallback
+   */
+  icon?: string;
+
+  /**
+   * Base URL for the Etherscan-compatible API endpoint (e.g., 'https://api.etherscan.io/api')
+   * Needed because API URL patterns vary across explorers.
+   */
+  apiUrl?: string;
+
+  /**
+   * Optional Viem Chain object for this network.
+   * If provided, this will be used directly by Viem clients.
+   * If not provided, a fallback or minimal custom chain object might be used.
+   */
+  viemChain?: Chain;
 }
 
 /**

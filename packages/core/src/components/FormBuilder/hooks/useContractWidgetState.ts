@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { FullContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FullContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 /**
@@ -27,14 +27,16 @@ export function useContractWidgetState() {
     (
       contractSchema: ContractSchema | null,
       contractAddress: string | null,
-      adapter: FullContractAdapter
+      adapter: FullContractAdapter,
+      networkConfig: NetworkConfig | null
     ) => {
-      if (!contractSchema || !contractAddress) return null;
+      if (!contractSchema || !contractAddress || !networkConfig) return null;
 
       return {
         contractSchema,
         contractAddress,
         adapter,
+        networkConfig,
         isVisible: isWidgetVisible,
         onToggle: toggleWidget,
       };

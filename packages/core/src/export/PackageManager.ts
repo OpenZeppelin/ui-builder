@@ -39,7 +39,7 @@ import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import { adapterPackageMap } from '../core/adapterRegistry';
+import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 

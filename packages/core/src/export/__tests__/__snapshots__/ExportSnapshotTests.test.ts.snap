@@ -83,8 +83,8 @@ import {
   WalletConnectionProvider,
   logger,
 } from '@openzeppelin/transaction-form-renderer';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 import type {
+  ContractSchema,
   FormFieldType,
   RenderFormSchema,
   TransactionFormProps,

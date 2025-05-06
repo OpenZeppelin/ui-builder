@@ -11,6 +11,7 @@ export const solanaDevnet: SolanaNetworkConfig = {
   rpcEndpoint: 'https://api.devnet.solana.com',
   commitment: 'confirmed',
   explorerUrl: 'https://explorer.solana.com/?cluster=devnet',
+  icon: 'solana',
 };
 
 // Placeholder for Solana Testnet
@@ -24,6 +25,7 @@ export const solanaTestnet: SolanaNetworkConfig = {
   rpcEndpoint: 'https://api.testnet.solana.com',
   commitment: 'confirmed',
   explorerUrl: 'https://explorer.solana.com/?cluster=testnet',
+  icon: 'solana',
 };
 
 // Add other Solana testnet/devnet networks if applicable

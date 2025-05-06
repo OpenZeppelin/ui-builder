@@ -11,4 +11,5 @@ export const stellarTestnet: StellarNetworkConfig = {
   horizonUrl: 'https://horizon-testnet.stellar.org',
   networkPassphrase: 'Test SDF Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/testnet',
+  icon: 'stellar',
 };

@@ -45,7 +45,11 @@ export type Connector = {
  */
 export interface ContractAdapter {
   /**
-   * Load a contract from a source (address or JSON ABI string)
+   * Load a contract from a source (address or JSON ABI string).
+   * The adapter instance should be pre-configured with the necessary network context.
+   *
+   * @param source - The contract address or JSON ABI string.
+   * @returns A promise resolving to the ContractSchema.
    */
   loadContract(source: string): Promise<ContractSchema>;
 
@@ -121,7 +125,9 @@ export interface ContractAdapter {
   isViewFunction(functionDetails: ContractFunction): boolean;
 
   /**
-   * Queries a view function on a contract
+   * Queries a view function on a contract.
+   * The adapter instance should be pre-configured with the necessary network context.
+   *
    * @param contractAddress The contract address
    * @param functionId The function identifier
    * @param params Optional parameters for the function call
@@ -205,13 +211,13 @@ export interface ContractAdapter {
   getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string };
 
   /**
-   * Gets a blockchain explorer URL for an address in this chain
+   * Gets a blockchain explorer URL for an address in this chain.
+   * The adapter instance should be pre-configured with the necessary network context.
    *
    * @param address - The address to get the explorer URL for
-   * @param chainId - Optional chain ID if the adapter supports multiple chains
    * @returns A URL to view the address on a blockchain explorer, or null if not supported
    */
-  getExplorerUrl(address: string, chainId?: string): string | null;
+  getExplorerUrl(address: string): string | null;
 
   /**
    * Optional method to subscribe to wallet connection changes
@@ -224,7 +230,8 @@ export interface ContractAdapter {
   ): () => void;
 
   /**
-   * Gets a blockchain explorer URL for a transaction in this chain
+   * Gets a blockchain explorer URL for a transaction in this chain.
+   * The adapter instance should be pre-configured with the necessary network context.
    *
    * @param txHash - The hash of the transaction to get the explorer URL for
    * @returns A URL to view the transaction on a blockchain explorer, or null if not supported

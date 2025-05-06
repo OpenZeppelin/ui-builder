@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  FormFieldType,
+} from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
@@ -12,12 +16,14 @@ import {
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
+  adapter: ContractAdapter | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
 }
 
 export function useFormConfig({
   contractSchema,
   selectedFunction,
+  adapter,
   onFormConfigUpdated,
 }: UseFormConfigProps) {
   const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
@@ -44,11 +50,12 @@ export function useFormConfig({
       contractSchema &&
       selectedFunction &&
       selectedFunctionDetails &&
+      adapter &&
       !configInitialized.current
     ) {
       try {
         // Use the FormGenerator service to generate the form config
-        const config = generateFormConfig(contractSchema, selectedFunction);
+        const config = generateFormConfig(adapter, contractSchema, selectedFunction);
 
         // Set the flag to prevent re-initialization
         configInitialized.current = true;
@@ -103,7 +110,7 @@ export function useFormConfig({
         }
       }
     }
-  }, [contractSchema, selectedFunction, onFormConfigUpdated]); // Include all dependencies
+  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated]); // Include all dependencies
 
   // Reset state if function selection changes
   useEffect(() => {

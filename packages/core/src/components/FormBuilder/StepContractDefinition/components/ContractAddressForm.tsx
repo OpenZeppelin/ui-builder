@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 
 import { AddressField, Label, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 
-import { getAdapter } from '../../../../core/adapterRegistry';
 import {
   getEcosystemExplorerGuidance,
   getEcosystemName,
@@ -14,7 +13,8 @@ import { MockContractSelector } from '../../ContractSelectors/MockContractSelect
 import { ContractAddressFormProps, ContractFormData } from '../types';
 
 export function ContractAddressForm({
-  selectedEcosystem,
+  adapter,
+  networkConfig,
   isLoading,
   onLoadContract,
   setIsLoading,
@@ -34,15 +34,13 @@ export function ContractAddressForm({
     }
   }, [existingContractAddress, setValue]);
 
-  // Reset form when chain changes
+  // Reset form when networkConfig (and thus adapter) changes
   useEffect(() => {
     if (!existingContractAddress) {
       reset({ contractAddress: '' });
       setError(null);
     }
-  }, [selectedEcosystem, reset, setError, existingContractAddress]);
-
-  const adapter = getAdapter(selectedEcosystem);
+  }, [networkConfig, reset, setError, existingContractAddress]);
 
   const onSubmitAddress = useCallback(
     async (data: ContractFormData) => {
@@ -55,12 +53,12 @@ export function ContractAddressForm({
       setError(null);
 
       try {
-        const schema = await loadContractDefinition(selectedEcosystem, address);
+        const schema = await loadContractDefinition(adapter, address);
         if (schema) {
           onLoadContract(schema);
         } else {
           setError(
-            `Failed to load contract definition. Check the address and verify it's available on the ${getEcosystemName(selectedEcosystem)} network.`
+            `Failed to load contract definition. Check the address and verify it's available on the ${getEcosystemName(networkConfig.ecosystem)} network.`
           );
         }
       } catch (err) {
@@ -70,7 +68,7 @@ export function ContractAddressForm({
         setIsLoading(false);
       }
     },
-    [selectedEcosystem, onLoadContract, setIsLoading, setError]
+    [adapter, networkConfig, onLoadContract, setIsLoading, setError]
   );
 
   const handleLoadMockData = useCallback(
@@ -98,8 +96,8 @@ export function ContractAddressForm({
   );
 
   const currentAddress = watch('contractAddress');
-  const ecosystemName = getEcosystemName(selectedEcosystem);
-  const explorerGuidance = getEcosystemExplorerGuidance(selectedEcosystem);
+  const ecosystemName = getEcosystemName(networkConfig.ecosystem);
+  const explorerGuidance = getEcosystemExplorerGuidance(networkConfig.ecosystem);
 
   return (
     <form
@@ -139,7 +137,10 @@ export function ContractAddressForm({
 
           <div className="flex flex-col items-end text-right">
             <Label className="text-muted-foreground mb-1 text-xs">Or load mock:</Label>
-            <MockContractSelector onSelectMock={handleLoadMockData} ecosystem={selectedEcosystem} />
+            <MockContractSelector
+              onSelectMock={handleLoadMockData}
+              ecosystem={networkConfig.ecosystem}
+            />
           </div>
         </div>
         {error && <p className="text-destructive pt-1 text-sm">{error}</p>}

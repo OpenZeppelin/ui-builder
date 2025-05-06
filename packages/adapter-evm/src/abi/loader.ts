@@ -1,6 +1,6 @@
 import { isAddress } from 'viem';
 
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import type { AbiItem } from '../types';
 
@@ -31,12 +31,15 @@ async function loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
  * Loads contract schema by detecting if the source is an address (fetch from Etherscan)
  * or a JSON string (parse directly).
  *
- * This is the primary function exported for use by the EvmAdapter.
+ * Requires networkConfig when source is an address.
  */
-export async function loadEvmContract(source: string): Promise<ContractSchema> {
+export async function loadEvmContract(
+  source: string,
+  networkConfig: EvmNetworkConfig
+): Promise<ContractSchema> {
   if (isAddress(source)) {
     console.info(`Detected address: ${source}. Attempting Etherscan ABI fetch...`);
-    return loadAbiFromEtherscan(source);
+    return loadAbiFromEtherscan(source, networkConfig);
   } else {
     console.info('Input is not an address. Attempting to parse as JSON ABI...');
     return loadAbiFromJson(source);

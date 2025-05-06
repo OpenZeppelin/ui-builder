@@ -1,7 +1,7 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import { adapterConfigExportMap, adapterConfigLoaders } from '../core/adapterRegistry';
+import { getAdapterConfigExportName, getAdapterConfigLoader } from '../core/ecosystemManager';
 import type { AdapterConfig } from '../core/types/AdapterTypes';
 
 // Helper type for the type guard
@@ -35,8 +35,8 @@ export class AdapterConfigLoader {
     }
 
     // Get the loader function and expected export key for the config
-    const loaderFunc = adapterConfigLoaders[ecosystem];
-    const configKey = adapterConfigExportMap[ecosystem];
+    const loaderFunc = getAdapterConfigLoader(ecosystem);
+    const configKey = getAdapterConfigExportName(ecosystem);
 
     if (!loaderFunc || !configKey) {
       logger.warn(

@@ -8,7 +8,10 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  NetworkConfig,
+  SolanaNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import {
   getSolanaExplorerAddressUrl,
@@ -45,14 +48,18 @@ import {
  * Solana-specific adapter implementation
  */
 export class SolanaAdapter implements ContractAdapter {
+  readonly networkConfig: SolanaNetworkConfig;
   // private walletImplementation: SolanaWalletImplementation; // Example
 
-  constructor() {
-    // Initialize any internal state/implementation needed
-    // this.walletImplementation = new SolanaWalletImplementation();
+  constructor(networkConfig: SolanaNetworkConfig) {
+    if (!isSolanaNetworkConfig(networkConfig)) {
+      throw new Error('SolanaAdapter requires a valid Solana network configuration.');
+    }
+    this.networkConfig = networkConfig;
+    console.log(`SolanaAdapter initialized for network: ${this.networkConfig.name}`);
   }
 
-  async loadContract(source: string): Promise<ContractSchema> {
+  async loadContract(source: string, _networkConfig?: NetworkConfig): Promise<ContractSchema> {
     return loadSolanaContract(source);
   }
 
@@ -122,10 +129,11 @@ export class SolanaAdapter implements ContractAdapter {
     return querySolanaViewFunction(
       contractAddress,
       functionId,
+      this.networkConfig,
       params,
       contractSchema,
       undefined,
-      this.loadContract
+      (src) => this.loadContract(src)
     );
   }
 
@@ -165,14 +173,13 @@ export class SolanaAdapter implements ContractAdapter {
     return () => {}; // Default no-op cleanup
   }
 
-  getExplorerUrl(address: string, chainId?: string): string | null {
-    return getSolanaExplorerAddressUrl(address, chainId);
+  getExplorerUrl(address: string): string | null {
+    return getSolanaExplorerAddressUrl(address, this.networkConfig);
   }
 
   getExplorerTxUrl?(txHash: string): string | null {
-    // Optional methods need careful handling during delegation
     if (getSolanaExplorerTxUrl) {
-      return getSolanaExplorerTxUrl(txHash);
+      return getSolanaExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
   }

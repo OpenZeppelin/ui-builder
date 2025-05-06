@@ -3,10 +3,9 @@ import { Eye, Pencil } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { getAdapter } from '../../../core/adapterRegistry';
+import { getAdapter } from '../../../core/ecosystemManager';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
@@ -23,7 +22,7 @@ import { GeneralSettings } from './GeneralSettings';
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  selectedEcosystem: Ecosystem;
+  networkConfig: NetworkConfig | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
   onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
   currentExecutionConfig?: ExecutionConfig;
@@ -32,7 +31,7 @@ interface StepFormCustomizationProps {
 export function StepFormCustomization({
   contractSchema,
   selectedFunction,
-  selectedEcosystem,
+  networkConfig,
   onFormConfigUpdated,
   onExecutionConfigUpdated,
   currentExecutionConfig,
@@ -40,9 +39,15 @@ export function StepFormCustomization({
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
+  const adapter = useMemo(() => {
+    if (!networkConfig) return null;
+    return getAdapter(networkConfig);
+  }, [networkConfig]);
+
   const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
     contractSchema,
     selectedFunction,
+    adapter,
     onFormConfigUpdated,
   });
 
@@ -65,10 +70,10 @@ export function StepFormCustomization({
     }
   }, [activeTab, formConfig, selectedFieldIndex, selectField]);
 
-  if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig) {
+  if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig || !adapter) {
     return (
       <div className="py-8 text-center">
-        <p>Please select a contract function first.</p>
+        <p>Please select a contract function and network first.</p>
       </div>
     );
   }
@@ -111,8 +116,8 @@ export function StepFormCustomization({
         <FormPreview
           formConfig={formConfig}
           functionDetails={selectedFunctionDetails}
-          selectedEcosystem={selectedEcosystem}
           contractSchema={contractSchema}
+          networkConfig={networkConfig}
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -147,7 +152,7 @@ export function StepFormCustomization({
                     <FieldEditor
                       field={formConfig.fields[selectedFieldIndex]}
                       onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                      adapter={getAdapter(selectedEcosystem)}
+                      adapter={adapter}
                       originalParameterType={
                         formConfig.fields[selectedFieldIndex].originalParameterType
                       }
@@ -160,7 +165,7 @@ export function StepFormCustomization({
 
           <TabsContent value="execution" className="mt-4 rounded-md border p-4">
             <ExecutionMethodSettings
-              adapter={getAdapter(selectedEcosystem)}
+              adapter={adapter}
               currentConfig={currentExecutionConfig}
               onUpdateConfig={onExecutionConfigUpdated || (() => {})}
             />

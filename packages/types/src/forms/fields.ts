@@ -1,7 +1,13 @@
-import type { ContractAdapter } from '../adapters/base';
+import type { FullContractAdapter } from '../adapters';
 import type { ContractSchema } from '../contracts/schema';
+import type { NetworkConfig } from '../networks/config';
 
-import { RenderFormSchema } from './schema';
+import type { RenderFormSchema } from './schema';
+
+/**
+ * Type representing form values in a submission or form state
+ */
+export type FormValues = Record<string, unknown>;
 
 /**
  * Field types supported by the form renderer
@@ -83,11 +89,6 @@ export interface FieldTransforms<T = unknown> {
 }
 
 /**
- * Type representing form values in a submission or form state
- */
-export type FormValues = Record<string, unknown>;
-
-/**
  * Type for React Hook Form error objects
  */
 export type FormError =
@@ -99,7 +100,7 @@ export type FormError =
     };
 
 /**
- * Props for the TransactionForm component
+ * Props for the top-level TransactionForm component
  */
 export interface TransactionFormProps {
   /**
@@ -117,10 +118,15 @@ export interface TransactionFormProps {
   /**
    * The chain-specific adapter instance.
    */
-  adapter: ContractAdapter;
+  adapter: FullContractAdapter;
 
   /**
    * Optional callback when form is submitted
    */
   onSubmit?: (data: FormData) => void;
+
+  /**
+   * The network configuration for the transaction
+   */
+  networkConfig: NetworkConfig | null;
 }

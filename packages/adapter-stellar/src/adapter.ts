@@ -8,7 +8,9 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { isStellarNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 // Import functions from modules
 import {
@@ -43,8 +45,15 @@ import {
  * NOTE: Contains placeholder implementations for most functionalities.
  */
 export class StellarAdapter implements ContractAdapter {
-  // Optional: Constructor for initializing internal state (e.g., wallet implementations)
-  // constructor() { }
+  readonly networkConfig: StellarNetworkConfig;
+
+  constructor(networkConfig: StellarNetworkConfig) {
+    if (!isStellarNetworkConfig(networkConfig)) {
+      throw new Error('StellarAdapter requires a valid Stellar network configuration.');
+    }
+    this.networkConfig = networkConfig;
+    console.log(`StellarAdapter initialized for network: ${this.networkConfig.name}`);
+  }
 
   // --- Contract Loading --- //
   async loadContract(source: string): Promise<ContractSchema> {
@@ -55,8 +64,7 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
-    // Simple filtering logic, could be moved to a util if it grows
-    return contractSchema.functions.filter((fn) => fn.modifiesState);
+    return contractSchema.functions.filter((fn: ContractFunction) => fn.modifiesState);
   }
 
   // --- Type Mapping & Field Generation --- //
@@ -87,7 +95,6 @@ export class StellarAdapter implements ContractAdapter {
     );
   }
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    // Pass internal state like wallet implementation here if needed in the future
     return signAndBroadcastStellarTransaction(transactionData);
   }
 
@@ -100,15 +107,23 @@ export class StellarAdapter implements ContractAdapter {
   isViewFunction(functionDetails: ContractFunction): boolean {
     return isStellarViewFunction(functionDetails);
   }
+
+  // Implement queryViewFunction with the correct signature from ContractAdapter
   async queryViewFunction(
     contractAddress: string,
     functionId: string,
     params: unknown[] = [],
     contractSchema?: ContractSchema
   ): Promise<unknown> {
-    // Pass internal state like wallet implementation or this.loadContract here if needed
-    return queryStellarViewFunction(contractAddress, functionId, params, contractSchema);
+    return queryStellarViewFunction(
+      contractAddress,
+      functionId,
+      this.networkConfig,
+      params,
+      contractSchema
+    );
   }
+
   formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
     return formatStellarFunctionResult(decodedValue, functionDetails);
   }
@@ -118,21 +133,17 @@ export class StellarAdapter implements ContractAdapter {
     return supportsStellarWalletConnection();
   }
   async getAvailableConnectors(): Promise<Connector[]> {
-    // Pass internal state like wallet implementation here if needed
     return getStellarAvailableConnectors();
   }
   async connectWallet(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
-    // Pass internal state like wallet implementation here if needed
     return connectStellarWallet(connectorId);
   }
   async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
-    // Pass internal state like wallet implementation here if needed
     return disconnectStellarWallet();
   }
   getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    // Pass internal state like wallet implementation here if needed
     return getStellarWalletConnectionStatus();
   }
   // Optional: onWalletConnectionChange(...) implementation would go here
@@ -144,18 +155,16 @@ export class StellarAdapter implements ContractAdapter {
   async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
     return validateStellarExecutionConfig(config);
   }
-  getExplorerUrl(address: string, chainId?: string): string | null {
-    return getStellarExplorerAddressUrl(address, chainId);
+
+  // Implement getExplorerUrl with the correct signature from ContractAdapter
+  getExplorerUrl(address: string): string | null {
+    return getStellarExplorerAddressUrl(address, this.networkConfig);
   }
 
-  // NOTE: getExplorerTxUrl? is optional in the interface.
-  // Since the imported function exists, we can implement it.
-  // However, if getStellarExplorerTxUrl were undefined in its module,
-  // we would omit this method definition.
+  // Implement getExplorerTxUrl with the correct signature from ContractAdapter
   getExplorerTxUrl?(txHash: string): string | null {
-    // Check still needed in case the function exists but could return null/undefined
     if (getStellarExplorerTxUrl) {
-      return getStellarExplorerTxUrl(txHash);
+      return getStellarExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
   }

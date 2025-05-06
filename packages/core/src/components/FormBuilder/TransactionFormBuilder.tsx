@@ -9,7 +9,7 @@ import {
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
 
-import { ChainTileSelector } from './StepChainSelection/ChainTileSelector';
+import { ChainTileSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
@@ -19,6 +19,9 @@ import { useFormBuilderState } from './hooks';
 
 export function TransactionFormBuilder() {
   const {
+    selectedNetworkConfigId,
+    selectedNetwork,
+    selectedAdapter,
     selectedEcosystem,
     contractSchema,
     selectedFunction,
@@ -29,7 +32,7 @@ export function TransactionFormBuilder() {
     exportLoading,
     contractAddress,
 
-    handleEcosystemSelect,
+    handleNetworkSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated,
@@ -45,6 +48,7 @@ export function TransactionFormBuilder() {
         contractSchema={widgetData.contractSchema}
         contractAddress={widgetData.contractAddress}
         adapter={widgetData.adapter}
+        networkConfig={widgetData.networkConfig}
         isVisible={widgetData.isVisible}
         onToggle={widgetData.onToggle}
         externalToggleMode={true}
@@ -76,10 +80,12 @@ export function TransactionFormBuilder() {
       title: 'Select Blockchain',
       component: (
         <ChainTileSelector
-          onEcosystemSelect={handleEcosystemSelect}
-          initialEcosystem={selectedEcosystem}
+          onNetworkSelect={handleNetworkSelect}
+          initialEcosystem={selectedNetwork?.ecosystem ?? selectedEcosystem ?? 'evm'}
+          selectedNetworkId={selectedNetworkConfigId}
         />
       ),
+      isValid: !!selectedNetworkConfigId,
     },
     {
       id: 'contract-definition',
@@ -87,7 +93,8 @@ export function TransactionFormBuilder() {
       component: (
         <StepContractDefinition
           onContractSchemaLoaded={handleContractSchemaLoaded}
-          selectedEcosystem={selectedEcosystem}
+          adapter={selectedAdapter}
+          networkConfig={selectedNetwork}
           existingContractSchema={contractSchema}
         />
       ),
@@ -112,7 +119,7 @@ export function TransactionFormBuilder() {
         <StepFormCustomization
           contractSchema={contractSchema}
           selectedFunction={selectedFunction}
-          selectedEcosystem={selectedEcosystem}
+          networkConfig={selectedNetwork}
           onFormConfigUpdated={handleFormConfigUpdated}
           onExecutionConfigUpdated={handleExecutionConfigUpdated}
           currentExecutionConfig={formConfig?.executionConfig}
@@ -125,11 +132,11 @@ export function TransactionFormBuilder() {
       title: 'Complete',
       component: (
         <StepComplete
-          selectedEcosystem={selectedEcosystem}
+          networkConfig={selectedNetwork}
           formConfig={formConfig}
           contractSchema={contractSchema}
           onExport={() => {
-            void exportForm(formConfig, selectedEcosystem, selectedFunction);
+            void exportForm(formConfig, selectedFunction);
           }}
           exportLoading={exportLoading}
           functionDetails={

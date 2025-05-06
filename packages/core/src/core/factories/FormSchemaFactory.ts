@@ -12,14 +12,12 @@ import type {
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
 import {
-  Ecosystem,
   FormFieldType,
   FormLayout,
   FormValues,
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-types';
 
-import { getAdapter } from '../adapterRegistry';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
 
@@ -31,24 +29,21 @@ export class FormSchemaFactory {
    * Creates a complete form schema from a contract function
    * using the appropriate adapter for field mapping and validation
    *
-   * @param contractSchema The contract schema containing function definitions
-   * @param functionId The ID of the function to generate a form for
-   * @param ecosystem The ecosystem (used to get the adapter)
-   * @returns A complete form schema for rendering
+   * @param adapter The configured ContractAdapter instance for the specific network.
+   * @param contractSchema The contract schema containing function definitions.
+   * @param functionId The ID of the function to generate a form for.
+   * @returns A complete form schema for rendering.
    */
   generateFormSchema(
+    adapter: ContractAdapter,
     contractSchema: ContractSchema,
-    functionId: string,
-    ecosystem: Ecosystem
+    functionId: string
   ): RenderFormSchema {
     // Find the function in the contract schema
     const functionDefinition = contractSchema.functions.find((fn) => fn.id === functionId);
     if (!functionDefinition) {
       throw new Error(`Function ${functionId} not found in contract schema`);
     }
-
-    // Get the appropriate adapter for the ecosystem
-    const adapter = getAdapter(ecosystem);
 
     // Create the common properties
     const commonProperties = {

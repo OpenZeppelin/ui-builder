@@ -3,7 +3,7 @@ import { Download } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { LoadingButton } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
@@ -25,7 +25,7 @@ import { FormPreview } from '../StepFormCustomization/FormPreview';
  * - ZipGenerator creates a downloadable ZIP file
  */
 export interface StepCompleteProps {
-  selectedEcosystem: Ecosystem;
+  networkConfig: NetworkConfig | null;
   formConfig: BuilderFormConfig | null;
   contractSchema: ContractSchema | null;
   onExport: () => void;
@@ -34,7 +34,7 @@ export interface StepCompleteProps {
 }
 
 export function StepComplete({
-  selectedEcosystem,
+  networkConfig,
   formConfig,
   contractSchema,
   onExport,
@@ -75,9 +75,9 @@ export function StepComplete({
       </div>
       <FormPreview
         formConfig={formConfig}
-        functionDetails={selectedFunctionDetails}
-        selectedEcosystem={selectedEcosystem}
-        contractSchema={contractSchema}
+        functionDetails={selectedFunctionDetails!}
+        contractSchema={contractSchema!}
+        networkConfig={networkConfig}
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/ChainTileSelector';
+import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/index';
 
 const meta = {
   title: 'Core/FormBuilder/ChainTileSelector',
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof ChainTileSelector>;
 export const Default: Story = {
   args: {
     initialEcosystem: 'evm',
-    onEcosystemSelect: (ecosystem: Ecosystem) => console.log('Selected ecosystem:', ecosystem),
+    onNetworkSelect: (networkId: string) => console.log('Selected network:', networkId),
   },
 };
 
@@ -37,21 +37,29 @@ export const Default: Story = {
  * Interactive demo where selections are tracked in state.
  */
 export const Interactive = () => {
-  const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem>('evm');
+  // Using a simple value instead of state since we're not updating it in this demo
+  const selectedEcosystem: Ecosystem = 'evm';
+  const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null);
 
   return (
     <div className="max-w-3xl">
       <ChainTileSelector
         initialEcosystem={selectedEcosystem}
-        onEcosystemSelect={(ecosystem: Ecosystem) => {
-          console.log('Ecosystem selected:', ecosystem);
-          setSelectedEcosystem(ecosystem);
+        selectedNetworkId={selectedNetworkId}
+        onNetworkSelect={(networkId: string) => {
+          console.log('Network selected:', networkId);
+          setSelectedNetworkId(networkId);
         }}
       />
       <div className="mt-4">
         <p>
           <strong>Selected ecosystem:</strong> {selectedEcosystem}
         </p>
+        {selectedNetworkId && (
+          <p>
+            <strong>Selected network ID:</strong> {selectedNetworkId}
+          </p>
+        )}
       </div>
     </div>
   );

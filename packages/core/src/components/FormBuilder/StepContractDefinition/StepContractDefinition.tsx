@@ -11,7 +11,8 @@ import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
   onContractSchemaLoaded,
-  selectedEcosystem,
+  adapter,
+  networkConfig,
   existingContractSchema = null,
 }: StepContractDefinitionProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,15 +25,35 @@ export function StepContractDefinition({
     }
   }, [existingContractSchema]);
 
+  // When adapter or networkConfig changes, reset loaded state if they are null (e.g. network deselected)
+  useEffect(() => {
+    if (!adapter || !networkConfig) {
+      setLoadedSchema(null);
+      setError(null);
+      // Note: We don't call onContractSchemaLoaded(null) here as that might trigger downstream resets
+      // The parent useFormBuilderState handles resetting schema when network changes.
+    }
+  }, [adapter, networkConfig]);
+
   const handleLoadContract = (schema: ContractSchema) => {
     setLoadedSchema(schema);
     onContractSchemaLoaded(schema);
   };
 
+  // If adapter or networkConfig is not available, show a message or disable the form
+  if (!adapter || !networkConfig) {
+    return (
+      <div className="text-muted-foreground p-4 text-center">
+        Please select a valid network first.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <ContractAddressForm
-        selectedEcosystem={selectedEcosystem}
+        adapter={adapter}
+        networkConfig={networkConfig}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         onLoadContract={handleLoadContract}

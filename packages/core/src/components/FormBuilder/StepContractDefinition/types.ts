@@ -1,9 +1,10 @@
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 export interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema) => void;
-  selectedEcosystem: Ecosystem;
+  adapter: ContractAdapter | null;
+  networkConfig: NetworkConfig | null;
   existingContractSchema?: ContractSchema | null;
 }
 
@@ -12,7 +13,8 @@ export interface ContractFormData {
 }
 
 export interface ContractAddressFormProps {
-  selectedEcosystem: Ecosystem;
+  adapter: ContractAdapter;
+  networkConfig: NetworkConfig;
   isLoading: boolean;
   onLoadContract: (schema: ContractSchema) => void;
   setIsLoading: (loading: boolean) => void;

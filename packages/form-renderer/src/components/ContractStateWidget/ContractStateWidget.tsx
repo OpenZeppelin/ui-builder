@@ -6,6 +6,7 @@ import type {
   ContractFunction,
   ContractSchema,
   FullContractAdapter,
+  NetworkConfig,
 } from '@openzeppelin/transaction-form-types';
 
 import { truncateMiddle } from '../../utils/formatting';
@@ -18,6 +19,7 @@ interface ContractStateWidgetProps {
   contractSchema: ContractSchema | null;
   contractAddress: string | null;
   adapter: FullContractAdapter;
+  networkConfig: NetworkConfig | null;
   isVisible?: boolean;
   onToggle?: () => void;
   className?: string;
@@ -37,6 +39,7 @@ export function ContractStateWidget({
   contractSchema,
   contractAddress,
   adapter,
+  networkConfig,
   isVisible = true,
   onToggle,
   className,
@@ -78,7 +81,7 @@ export function ContractStateWidget({
     }
   };
 
-  if (!contractAddress) {
+  if (!contractAddress || !networkConfig) {
     return null;
   }
 
@@ -140,7 +143,7 @@ export function ContractStateWidget({
             <p className="font-medium text-center">Error loading contract state</p>
             <p className="mt-1 text-xs text-center">{error.message}</p>
           </div>
-        ) : !contractSchema ? (
+        ) : !contractSchema || !networkConfig ? (
           <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
             <p>Loading contract info...</p>
           </div>

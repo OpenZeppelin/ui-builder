@@ -2,14 +2,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema, FieldType } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  FieldType,
+  FormFieldType,
+} from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
-// Mock the adapter registry and the specific adapter
-const mockAdapterImplementation = {
+const mockAdapterInstance: ContractAdapter = {
   mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
     if (type === 'address') return 'blockchain-address';
     if (type === 'uint256') return 'number';
@@ -18,9 +22,8 @@ const mockAdapterImplementation = {
     if (type.includes('[')) return 'textarea';
     return 'text';
   }),
-  generateDefaultField: vi.fn((param) => {
-    const fieldType = mockAdapterImplementation.mapParameterTypeToFieldType(param.type);
-
+  generateDefaultField: vi.fn((param): FormFieldType => {
+    const fieldType = mockAdapterInstance.mapParameterTypeToFieldType(param.type) as FieldType;
     return {
       id: `field-${param.name}-${uuidv4()}`,
       name: param.name,
@@ -32,25 +35,53 @@ const mockAdapterImplementation = {
       validation: { required: true },
       width: 'full',
       originalParameterType: param.type,
-    };
+    } as FormFieldType;
   }),
-  isValidAddress: vi.fn(
-    (address: string) =>
-      typeof address === 'string' && address.startsWith('0x') && address.length === 42
-  ),
+  // Add other methods from ContractAdapter if FormSchemaFactory uses them
+  // For now, these two are the primary ones used by generateFields
+  // Add dummy implementations or mocks for other required ContractAdapter methods if needed by tests
+  loadContract: vi.fn(),
+  loadMockContract: vi.fn(),
+  getWritableFunctions: vi.fn(() => []),
+  formatTransactionData: vi.fn(),
+  signAndBroadcast: vi.fn(),
+  isValidAddress: vi.fn(),
+  getSupportedExecutionMethods: vi.fn(),
+  validateExecutionConfig: vi.fn(),
+  isViewFunction: vi.fn(),
+  queryViewFunction: vi.fn(),
+  formatFunctionResult: vi.fn(),
   getCompatibleFieldTypes: vi.fn((type: string): FieldType[] => {
-    if (type === 'address') return ['blockchain-address', 'text'];
-    if (type === 'uint256') return ['number', 'text'];
-    return ['text'];
+    if (type === 'address') return ['blockchain-address', 'text'] as FieldType[];
+    if (type === 'uint256') return ['number', 'text'] as FieldType[];
+    return ['text'] as FieldType[]; // Ensure these are valid FieldType strings
   }),
+  supportsWalletConnection: vi.fn(),
+  getAvailableConnectors: vi.fn(),
+  connectWallet: vi.fn(),
+  disconnectWallet: vi.fn(),
+  getWalletConnectionStatus: vi.fn(),
+  getExplorerUrl: vi.fn(),
+  getExplorerTxUrl: vi.fn(),
 };
 
 vi.mock('../../core/adapterRegistry', () => ({
-  getAdapter: vi.fn(() => mockAdapterImplementation),
+  // getAdapter is now called with NetworkConfig
+  // For this test, we assume the factory receives the correct adapter directly
+  // So, this mock might not be strictly needed if factory is passed adapter directly.
+  // However, if factory *still* uses getAdapter internally, this needs to match:
+  getAdapter: vi.fn((networkConfig: NetworkConfig) => {
+    if (networkConfig.ecosystem === 'evm') {
+      return mockAdapterInstance;
+    }
+    throw new Error(`Mock getAdapter called with unhandled ecosystem: ${networkConfig.ecosystem}`);
+  }),
 }));
 
 describe('FormSchemaFactory', () => {
   const factory = new FormSchemaFactory();
+  // The factory's generateFormSchema now expects the adapter as the first argument
+  const testAdapter = mockAdapterInstance; // Use the fully mocked adapter
 
   const mockContractSchema: ContractSchema = {
     ecosystem: 'evm' as Ecosystem,
@@ -104,9 +135,9 @@ describe('FormSchemaFactory', () => {
 
   it('should generate a form schema from a contract function', () => {
     const schema = factory.generateFormSchema(
+      testAdapter, // Pass adapter instance
       mockContractSchema,
-      'transfer_address_uint256',
-      'evm'
+      'transfer_address_uint256'
     );
 
     // Check basic schema properties
@@ -130,15 +161,15 @@ describe('FormSchemaFactory', () => {
 
   it('should throw an error if function is not found', () => {
     expect(() => {
-      factory.generateFormSchema(mockContractSchema, 'nonexistent_function', 'evm');
+      factory.generateFormSchema(testAdapter, mockContractSchema, 'nonexistent_function');
     }).toThrow('Function nonexistent_function not found in contract schema');
   });
 
   it('should add transform functions to fields', () => {
     const schema = factory.generateFormSchema(
+      testAdapter,
       mockContractSchema,
-      'transfer_address_uint256',
-      'evm'
+      'transfer_address_uint256'
     );
 
     // Check transforms exist for address and number fields

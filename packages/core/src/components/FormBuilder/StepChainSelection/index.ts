@@ -1,1 +1,2 @@
-export * from './ChainTileSelector.tsx';
+export * from './components/ChainTileSelector';
+export * from './components/NetworkSelectionPanel';

@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EvmAdapter } from '../adapter';
 
+import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
+
 // Mock the WagmiWalletImplementation to isolate EvmAdapter logic
 vi.mock('../wallet-connect/wagmi-implementation', () => {
   // --- Mock implementations for WagmiWalletImplementation methods ---
@@ -60,7 +62,8 @@ describe('EvmAdapter Wallet Connection', () => {
   let adapter: EvmAdapter;
 
   beforeEach(() => {
-    adapter = new EvmAdapter();
+    // Instantiate adapter WITH shared mock config
+    adapter = new EvmAdapter(mockEvmNetworkConfig);
     // Optionally clear mock history if needed between tests
     // vi.clearAllMocks();
   });

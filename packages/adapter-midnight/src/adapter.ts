@@ -8,7 +8,9 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  MidnightNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 // Import functions from modules
 import {
@@ -42,8 +44,15 @@ import {
  * NOTE: Contains placeholder implementations for most functionalities.
  */
 export class MidnightAdapter implements ContractAdapter {
-  // Optional: Constructor for initializing internal state
-  // constructor() { }
+  readonly networkConfig: MidnightNetworkConfig;
+
+  constructor(networkConfig: MidnightNetworkConfig) {
+    if (!isMidnightNetworkConfig(networkConfig)) {
+      throw new Error('MidnightAdapter requires a valid Midnight network configuration.');
+    }
+    this.networkConfig = networkConfig;
+    console.log(`MidnightAdapter initialized for network: ${this.networkConfig.name}`);
+  }
 
   // --- Contract Loading --- //
   async loadContract(source: string): Promise<ContractSchema> {
@@ -100,7 +109,13 @@ export class MidnightAdapter implements ContractAdapter {
     params: unknown[] = [],
     contractSchema?: ContractSchema
   ): Promise<unknown> {
-    return queryMidnightViewFunction(contractAddress, functionId, params, contractSchema);
+    return queryMidnightViewFunction(
+      contractAddress,
+      functionId,
+      this.networkConfig,
+      params,
+      contractSchema
+    );
   }
   formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
     return formatMidnightFunctionResult(decodedValue, functionDetails);
@@ -133,13 +148,12 @@ export class MidnightAdapter implements ContractAdapter {
   async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
     return validateMidnightExecutionConfig(config);
   }
-  getExplorerUrl(address: string, chainId?: string): string | null {
-    return getMidnightExplorerAddressUrl(address, chainId);
+  getExplorerUrl(address: string): string | null {
+    return getMidnightExplorerAddressUrl(address, this.networkConfig);
   }
   getExplorerTxUrl?(txHash: string): string | null {
-    // Although imported function exists, it returns null, so this check is simple
     if (getMidnightExplorerTxUrl) {
-      return getMidnightExplorerTxUrl(txHash);
+      return getMidnightExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
   }

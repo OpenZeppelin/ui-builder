@@ -3,8 +3,7 @@
  */
 import { useCallback, useState } from 'react';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { loadContractDefinition } from '../../services/ContractLoader';
 
@@ -14,12 +13,12 @@ export function useContractDefinition() {
   const [error, setError] = useState<string | null>(null);
 
   const loadContract = useCallback(
-    async (ecosystem: Ecosystem, contractDefinition: string | File) => {
+    async (adapter: ContractAdapter, contractDefinition: string | File) => {
       setLoading(true);
       setError(null);
 
       try {
-        const schema = await loadContractDefinition(ecosystem, contractDefinition);
+        const schema = await loadContractDefinition(adapter, contractDefinition);
         setContractSchema(schema);
         return schema;
       } catch (err) {
