@@ -36,7 +36,8 @@ export function WalletConnectionProvider({
 
   // Update connection status when adapter changes
   useEffect(() => {
-    setConnectionStatus(adapter.getWalletConnectionStatus());
+    const status = adapter.getWalletConnectionStatus();
+    setConnectionStatus(status);
   }, [adapter]);
 
   // Subscribe to wallet connection changes
@@ -49,6 +50,7 @@ export function WalletConnectionProvider({
           address: status.address,
         }));
       });
+
       return unsubscribe;
     }
     return undefined;
@@ -83,25 +85,42 @@ export function WalletConnectionProvider({
     }
   }, [adapter, isSupported]);
 
-  // Disconnect wallet
-  const disconnect = useCallback(async () => {
-    if (!isSupported) return;
-
-    setIsConnecting(true);
+  /**
+   * Disconnects the wallet
+   * @returns Promise that resolves when the wallet is disconnected
+   */
+  const disconnectWallet = useCallback(async (): Promise<void> => {
+    setIsConnecting(false);
     setError(undefined);
 
     try {
       const result = await adapter.disconnectWallet();
 
-      if (!result.disconnected) {
-        setError(result.error || 'Failed to disconnect wallet');
+      // Always update state regardless of the result from adapter
+      // This ensures UI is updated even if the adapter has internal issues
+      setConnectionStatus({
+        isConnected: false,
+        address: undefined,
+        chainId: undefined,
+      });
+
+      if (!result.disconnected && result.error) {
+        setError(result.error);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-    } finally {
-      setIsConnecting(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error disconnecting wallet';
+
+      // Set disconnected state even after error to ensure UI updates
+      setConnectionStatus({
+        isConnected: false,
+        address: undefined,
+        chainId: undefined,
+      });
+
+      setError(errorMessage);
     }
-  }, [adapter, isSupported]);
+  }, [adapter]);
 
   // Context value
   const value: WalletConnectionContextValue = {
@@ -111,7 +130,7 @@ export function WalletConnectionProvider({
     isConnecting,
     error,
     connect,
-    disconnect,
+    disconnect: disconnectWallet,
     isSupported,
     adapter,
   };

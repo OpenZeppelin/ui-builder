@@ -28,14 +28,13 @@ export function WalletConnectButton({
 }: WalletConnectButtonProps = {}): React.ReactElement {
   const { isConnected, address, isConnecting, connect, disconnect, isSupported, error } =
     useWalletConnection();
-  // Handle connect click with console logs
+
   const handleConnectClick = (): void => {
     connect().catch((err) =>
       logger.error('WalletConnectButton', 'Error in connect button click handler:', err)
     );
   };
 
-  // Handle disconnect click with console logs
   const handleDisconnectClick = (): void => {
     disconnect().catch((err) => console.error('Error in disconnect button click handler:', err));
   };

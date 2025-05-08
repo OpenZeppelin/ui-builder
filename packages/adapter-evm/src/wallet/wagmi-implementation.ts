@@ -151,6 +151,7 @@ export class WagmiWalletImplementation {
           error: `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`,
         };
       }
+
       const result = await connect(this.config, { connector });
       return { connected: true, address: result.accounts[0] };
     } catch (error: unknown) {
@@ -170,7 +171,7 @@ export class WagmiWalletImplementation {
     try {
       await disconnect(this.config);
       return { disconnected: true };
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
       return {
         disconnected: false,
