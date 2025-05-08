@@ -38,8 +38,8 @@ interface TransactionResult {
   error?: string;
 }
 
-// Define props for the component - extending TransactionFormProps but making schema optional
-interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema'> {
+// Define props for the component, extending TransactionFormProps but making schemas optional as they are injected by the generator
+interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'contractSchema'> {
   adapter: AdapterPlaceholder;
 }
 

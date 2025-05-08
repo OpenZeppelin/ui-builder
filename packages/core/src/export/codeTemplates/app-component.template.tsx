@@ -38,12 +38,9 @@ export function App({ adapter }: AppProps) {
         <div className="container">
           <GeneratedForm
             adapter={adapter}
-            onSubmit={(txData: TransactionData) => {
-              console.log('Transaction submitted:', txData);
-              return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });
-            }}
-            onError={(error: Error) => {
-              console.error('Transaction error:', error);
+            onSubmit={(data: FormData) => {
+              console.log('Transaction submitted:', data);
+              // Don't return a Promise, this function should be void
             }}
           />
         </div>
