@@ -29,7 +29,6 @@ import {
   getEvmCompatibleFieldTypes,
   mapEvmParamTypeToFieldType,
 } from './mapping';
-import { loadEvmMockContract } from './mocking';
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
 import {
   formatEvmTransactionData,
@@ -145,13 +144,6 @@ export class EvmAdapter implements ContractAdapter {
    */
   public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
     return validateEvmExecutionConfig(config);
-  }
-
-  /**
-   * @inheritdoc
-   */
-  async loadMockContract(mockId?: string): Promise<ContractSchema> {
-    return loadEvmMockContract(mockId);
   }
 
   /**

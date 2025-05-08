@@ -14,7 +14,7 @@ The main `adapter.ts` file within each package acts as an orchestrator, delegati
 
 All adapters **must** implement the `ContractAdapter` interface found in `packages/types/src/adapters/base.ts`. This interface defines the required methods for:
 
-- Loading contract definitions (e.g., `loadContract`, `loadMockContract`)
+- Loading contract definitions (e.g., `loadContract`)
 - Mapping blockchain types to form field types (e.g., `mapParameterTypeToFieldType`, `getCompatibleFieldTypes`)
 - Generating default form fields (e.g., `generateDefaultField`)
 - Parsing user input and formatting transaction data (e.g., `formatTransactionData`)
@@ -69,11 +69,6 @@ adapter-<chain>/
     │   ├── execution.ts
     │   └── explorer.ts        # Uses NetworkConfig for explorer URLs
     │   └── index.ts
-    ├── mocking/               # Generic: Mock contract loading
-    │   ├── loader.ts
-    │   └── index.ts
-    ├── mocks/                 # Chain-specific mock files (ABIs, IDLs)
-    │   └── ...
     ├── types.ts               # Adapter-specific internal types
     ├── utils/                 # Adapter-specific utils
     │   └── ...
@@ -134,11 +129,6 @@ adapter-<chain>/
   - **Purpose:** Provides configuration metadata about the adapter and chain. Uses `networkConfig` for network-specific details like explorer URLs.
   - **Key Exports:** `get[Chain]SupportedExecutionMethods`, `validate[Chain]ExecutionConfig`, `get[Chain]ExplorerAddressUrl`, `get[Chain]ExplorerTxUrl`.
 
-- **`mocking/`:**
-
-  - **Purpose:** Handles loading mock contract data for development and testing.
-  - **Key Exports:** `load[Chain]MockContract`.
-
 - **`utils/`:**
 
   - **Purpose:** Contains general utility functions specific to the needs of this adapter (e.g., formatting helpers, JSON helpers).
@@ -146,9 +136,6 @@ adapter-<chain>/
 - **`types.ts`:**
 
   - **Purpose:** Defines any internal TypeScript types used only within this specific adapter package.
-
-- **`mocks/`:**
-  - **Purpose:** Stores mock contract definition files (e.g., JSON ABIs).
 
 ## 5. Data Flow Example (EVM View Query)
 

@@ -207,7 +207,6 @@ transaction-form-builder/
 │   │   │   │   ├── form-builder/# Stories for form builder components
 │   │   │   │   └── ui/          # Stories for UI components
 │   │   │   ├── test/            # Package-specific tests
-│   │   │   ├── mocks/           # Mock data for development and testing
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
 │   │   │   └── index.css        # Main CSS entry point (imports from @styles)

@@ -25,7 +25,6 @@ import {
   getStellarCompatibleFieldTypes,
   mapStellarParameterTypeToFieldType,
 } from './mapping';
-import { loadStellarMockContract } from './mocking';
 import { isStellarViewFunction, queryStellarViewFunction } from './query';
 import { formatStellarTransactionData, signAndBroadcastStellarTransaction } from './transaction';
 import { formatStellarFunctionResult } from './transform';
@@ -58,9 +57,6 @@ export class StellarAdapter implements ContractAdapter {
   // --- Contract Loading --- //
   async loadContract(source: string): Promise<ContractSchema> {
     return loadStellarContract(source);
-  }
-  async loadMockContract(mockId?: string): Promise<ContractSchema> {
-    return loadStellarMockContract(mockId);
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {

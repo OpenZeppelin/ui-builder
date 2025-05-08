@@ -127,9 +127,6 @@ const adapter: ContractAdapter = {
   getWritableFunctions: (schema: any) => [],
   getSupportedExecutionMethods: async () => [],
   validateExecutionConfig: async (config: any) => true,
-  loadMockContract: async (id?: string) => {
-    throw new Error('Not implemented');
-  },
   isViewFunction: (func: any) => false,
   queryViewFunction: async (addr: string, funcId: string, params: any[]) => {
     // Implementation would use this.networkConfig

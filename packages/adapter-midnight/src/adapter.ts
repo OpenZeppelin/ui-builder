@@ -25,7 +25,6 @@ import {
   getMidnightCompatibleFieldTypes,
   mapMidnightParameterTypeToFieldType,
 } from './mapping';
-import { loadMidnightMockContract } from './mocking';
 import { isMidnightViewFunction, queryMidnightViewFunction } from './query';
 import { formatMidnightTransactionData, signAndBroadcastMidnightTransaction } from './transaction';
 import { formatMidnightFunctionResult } from './transform';
@@ -57,9 +56,6 @@ export class MidnightAdapter implements ContractAdapter {
   // --- Contract Loading --- //
   async loadContract(source: string): Promise<ContractSchema> {
     return loadMidnightContract(source);
-  }
-  async loadMockContract(mockId?: string): Promise<ContractSchema> {
-    return loadMidnightMockContract(mockId);
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {

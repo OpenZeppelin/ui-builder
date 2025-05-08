@@ -36,7 +36,6 @@ module.exports = {
     // Known interface methods from ContractAdapter
     const interfaceMethods = [
       'loadContract',
-      'loadMockContract',
       'getWritableFunctions',
       'mapParameterTypeToFieldType',
       'getCompatibleFieldTypes',

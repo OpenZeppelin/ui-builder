@@ -26,7 +26,6 @@ import {
   getSolanaCompatibleFieldTypes,
   mapSolanaParamTypeToFieldType,
 } from './mapping';
-import { loadSolanaMockContract } from './mocking';
 import { isSolanaViewFunction, querySolanaViewFunction } from './query';
 import {
   formatSolanaTransactionData,
@@ -61,10 +60,6 @@ export class SolanaAdapter implements ContractAdapter {
 
   async loadContract(source: string, _networkConfig?: NetworkConfig): Promise<ContractSchema> {
     return loadSolanaContract(source);
-  }
-
-  async loadMockContract(mockId?: string): Promise<ContractSchema> {
-    return loadSolanaMockContract(mockId);
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {

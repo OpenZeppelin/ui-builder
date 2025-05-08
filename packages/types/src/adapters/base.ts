@@ -60,12 +60,6 @@ export interface ContractAdapter {
   loadContract(source: string): Promise<ContractSchema>;
 
   /**
-   * Load a mock contract for testing
-   * @param mockId Optional ID to specify which mock to load
-   */
-  loadMockContract(mockId?: string): Promise<ContractSchema>;
-
-  /**
    * Get only the functions that modify state (writable functions)
    * @param contractSchema The contract schema to filter
    * @returns Array of writable functions

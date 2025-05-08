@@ -62,7 +62,6 @@ const mockAdapterInstance: ContractAdapter = {
   }),
   // Add dummy implementations for ALL methods in ContractAdapter
   loadContract: vi.fn().mockResolvedValue({} as ContractSchema),
-  loadMockContract: vi.fn().mockResolvedValue({} as ContractSchema),
   getWritableFunctions: vi.fn(() => []),
   formatTransactionData: vi.fn(() => ({})),
   signAndBroadcast: vi.fn().mockResolvedValue({ txHash: '0xmockhash' }),

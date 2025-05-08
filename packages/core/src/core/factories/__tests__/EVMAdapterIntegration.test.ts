@@ -48,8 +48,153 @@ describe('EVM Adapter Integration Tests', () => {
   beforeAll(async () => {
     // Await the adapter initialization
     adapter = await getAdapter(mockEvmNetworkConfig);
-    erc20Schema = await adapter.loadMockContract('erc20');
-    inputTesterSchema = await adapter.loadMockContract('input-tester');
+
+    // Create mock schemas directly instead of loading them
+    erc20Schema = {
+      ecosystem: 'evm',
+      name: 'ERC20 Token',
+      address: '0x1234567890123456789012345678901234567890',
+      functions: [
+        {
+          id: 'transfer_address_uint256',
+          name: 'transfer',
+          displayName: 'Transfer',
+          description: 'Transfer tokens to another address',
+          inputs: [
+            {
+              name: '_to',
+              type: 'address',
+              displayName: 'Recipient Address',
+            },
+            {
+              name: '_value',
+              type: 'uint256',
+              displayName: 'Amount',
+            },
+          ],
+          type: 'function',
+          stateMutability: 'nonpayable',
+          modifiesState: true,
+        },
+        {
+          id: 'approve_address_uint256',
+          name: 'approve',
+          displayName: 'Approve',
+          description: 'Approve tokens for another address to spend',
+          inputs: [
+            {
+              name: '_spender',
+              type: 'address',
+              displayName: 'Spender Address',
+            },
+            {
+              name: '_value',
+              type: 'uint256',
+              displayName: 'Amount',
+            },
+          ],
+          type: 'function',
+          stateMutability: 'nonpayable',
+          modifiesState: true,
+        },
+      ],
+    };
+
+    inputTesterSchema = {
+      ecosystem: 'evm',
+      name: 'Input Tester',
+      address: '0x1234567890123456789012345678901234567890',
+      functions: [
+        {
+          id: 'inputBool_bool',
+          name: 'inputBool',
+          displayName: 'Input Boolean',
+          description: 'Tests boolean input',
+          inputs: [
+            {
+              name: '_value',
+              type: 'bool',
+              displayName: 'Boolean Value',
+            },
+          ],
+          type: 'function',
+          stateMutability: 'nonpayable',
+          modifiesState: true,
+        },
+        {
+          id: 'inputUnlimitedUints_uint256[]',
+          name: 'inputUnlimitedUints',
+          displayName: 'Input Unlimited Uints',
+          description: 'Tests array input',
+          inputs: [
+            {
+              name: '_values',
+              type: 'uint256[]',
+              displayName: 'Values Array',
+            },
+          ],
+          type: 'function',
+          stateMutability: 'nonpayable',
+          modifiesState: true,
+        },
+        {
+          id: 'inputNestedStruct_tuple',
+          name: 'inputNestedStruct',
+          displayName: 'Input Nested Struct',
+          description: 'Tests struct input',
+          inputs: [
+            {
+              name: '_struct',
+              type: 'tuple',
+              displayName: 'Complex Structure',
+              components: [
+                {
+                  name: 'isToggled',
+                  type: 'bool',
+                },
+                {
+                  name: 'title',
+                  type: 'string',
+                },
+                {
+                  name: 'author',
+                  type: 'string',
+                },
+                {
+                  name: 'book_id',
+                  type: 'uint256',
+                },
+                {
+                  name: 'addr',
+                  type: 'address',
+                },
+                {
+                  name: 'tags',
+                  type: 'string[]',
+                },
+                {
+                  name: 'meta',
+                  type: 'tuple',
+                  components: [
+                    {
+                      name: 'subtitle',
+                      type: 'string',
+                    },
+                    {
+                      name: 'pages',
+                      type: 'uint256',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          type: 'function',
+          stateMutability: 'nonpayable',
+          modifiesState: true,
+        },
+      ],
+    };
   });
 
   describe('ERC20 Function Integration', () => {
@@ -455,8 +600,8 @@ describe('EVM Adapter Integration Tests', () => {
     it('should handle the complete workflow from adapter to form schema', async () => {
       // This test validates the entire flow from contract loading to form generation
 
-      // 1. Load contract
-      const contract = await adapter.loadMockContract('erc20');
+      // 1. Use the already defined erc20Schema instead of loading a mock contract
+      const contract = erc20Schema;
 
       // 2. Get writable functions
       const writableFunctions = adapter.getWritableFunctions(contract);
