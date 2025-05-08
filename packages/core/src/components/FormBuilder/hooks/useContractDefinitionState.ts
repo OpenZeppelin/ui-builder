@@ -10,9 +10,9 @@ export function useContractDefinitionState() {
   const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
 
-  const handleContractSchemaLoaded = useCallback((schema: ContractSchema) => {
+  const handleContractSchemaLoaded = useCallback((schema: ContractSchema | null) => {
     setContractSchema(schema);
-    setContractAddress(schema.address ?? null);
+    setContractAddress(schema?.address ?? null);
   }, []);
 
   const resetContractSchema = useCallback(() => {

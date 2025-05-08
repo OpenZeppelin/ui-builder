@@ -42,6 +42,13 @@ export function StepContractDefinition({
     onContractSchemaLoaded(schema);
   };
 
+  // Function to clear the contract schema when address becomes invalid
+  const handleClearContract = () => {
+    setLoadedSchema(null);
+    // Notify parent components that the contract has been cleared
+    onContractSchemaLoaded(null);
+  };
+
   // If adapter or networkConfig is not available, show a message or disable the form
   if (!adapter || !networkConfig) {
     return (
@@ -63,6 +70,7 @@ export function StepContractDefinition({
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         onLoadContract={handleLoadContract}
+        onClearContract={handleClearContract}
         setError={setError}
         error={error}
         existingContractAddress={loadedSchema?.address || null}

@@ -93,9 +93,13 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
 
   // Create enhanced contract schema loaded handler that shows widget
   const handleContractSchemaLoaded = useCallback(
-    (schema: ContractSchema) => {
+    (schema: ContractSchema | null) => {
       contractDefinition.handleContractSchemaLoaded(schema);
-      contractWidget.showWidget();
+      if (schema) {
+        contractWidget.showWidget();
+      } else {
+        contractWidget.hideWidget();
+      }
     },
     [contractDefinition, contractWidget]
   );

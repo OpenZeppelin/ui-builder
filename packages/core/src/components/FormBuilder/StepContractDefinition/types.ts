@@ -2,7 +2,7 @@ import { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-t
 import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
 export interface StepContractDefinitionProps {
-  onContractSchemaLoaded: (schema: ContractSchema) => void;
+  onContractSchemaLoaded: (schema: ContractSchema | null) => void;
   adapter: ContractAdapter | null;
   networkConfig: NetworkConfig | null;
   existingContractSchema?: ContractSchema | null;
@@ -17,6 +17,7 @@ export interface ContractAddressFormProps {
   networkConfig: NetworkConfig;
   isLoading: boolean;
   onLoadContract: (schema: ContractSchema) => void;
+  onClearContract: () => void;
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   error: string | null;
