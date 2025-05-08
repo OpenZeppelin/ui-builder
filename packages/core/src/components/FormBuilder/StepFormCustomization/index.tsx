@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
+import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
@@ -41,7 +41,7 @@ export function StepFormCustomization({
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapter(networkConfig);
+  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
 
   const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
     contractSchema,

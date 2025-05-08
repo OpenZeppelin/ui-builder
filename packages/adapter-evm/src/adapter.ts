@@ -62,7 +62,8 @@ export class EvmAdapter implements ContractAdapter {
     this.walletImplementation = new WagmiWalletImplementation();
 
     console.log(
-      `EvmAdapter initialized for network: ${this.networkConfig.name} (ID: ${this.networkConfig.id})`
+      'EvmAdapter initialized for network:',
+      `${networkConfig.name} (ID: ${networkConfig.id})`
     );
   }
 

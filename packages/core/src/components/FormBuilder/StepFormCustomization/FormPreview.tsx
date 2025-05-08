@@ -10,7 +10,7 @@ import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
+import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
@@ -30,7 +30,8 @@ export function FormPreview({
   contractSchema,
   networkConfig,
 }: FormPreviewProps) {
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapter(networkConfig);
+  // Use the singleton adapter hook to ensure we're using shared instances
+  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
