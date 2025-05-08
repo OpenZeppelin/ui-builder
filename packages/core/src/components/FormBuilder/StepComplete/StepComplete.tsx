@@ -1,8 +1,5 @@
-import { Download } from 'lucide-react';
-
 import { useMemo } from 'react';
 
-import { LoadingButton } from '@openzeppelin/transaction-form-renderer';
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
@@ -68,6 +65,9 @@ export function StepComplete({
           contractAddress={contractSchema.address}
           onToggleContractState={onToggleContractState}
           isWidgetExpanded={isWidgetExpanded}
+          showExportButton={true}
+          exportLoading={exportLoading}
+          onExport={onExport}
         />
       )}
 
@@ -75,18 +75,6 @@ export function StepComplete({
         title="Complete"
         description={<>Your form is ready! You can use it below or export it for use elsewhere.</>}
       />
-      <div className="flex justify-end space-x-2">
-        <LoadingButton
-          variant="default"
-          size="sm"
-          onClick={onExport}
-          className="gap-2"
-          loading={exportLoading}
-        >
-          <Download size={16} />
-          <span>Export</span>
-        </LoadingButton>
-      </div>
       <FormPreview
         formConfig={formConfig}
         functionDetails={selectedFunctionDetails!}

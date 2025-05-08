@@ -1,8 +1,5 @@
-import { Eye, Pencil } from 'lucide-react';
-
 import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-renderer';
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
@@ -115,6 +112,9 @@ export function StepFormCustomization({
           contractAddress={contractSchema.address}
           onToggleContractState={onToggleContractState}
           isWidgetExpanded={isWidgetExpanded}
+          showPreviewButton={true}
+          isPreviewMode={previewMode}
+          onTogglePreview={() => setPreviewMode(!previewMode)}
         />
       )}
 
@@ -127,28 +127,6 @@ export function StepFormCustomization({
           </>
         }
       />
-
-      <div className="flex justify-end space-x-2">
-        {/* Preview Form Button */}
-        <Button
-          variant={previewMode ? 'outline' : 'default'}
-          size="sm"
-          onClick={() => setPreviewMode(!previewMode)}
-          className="gap-2"
-        >
-          {previewMode ? (
-            <>
-              <Pencil size={16} />
-              <span>Back to Editor</span>
-            </>
-          ) : (
-            <>
-              <Eye size={16} />
-              <span>Preview Form</span>
-            </>
-          )}
-        </Button>
-      </div>
 
       {previewMode ? (
         <FormPreview
