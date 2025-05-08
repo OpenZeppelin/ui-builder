@@ -86,8 +86,8 @@ export function WizardLayout({
 
       {/* Main content area with optional sidebar */}
       <div className="flex w-full relative">
-        {/* Sidebar widget (if provided) - Now on the left */}
-        {sidebarWidget && (
+        {/* Sidebar widget - Only show when not on the first step */}
+        {sidebarWidget && !isFirstStep && (
           <div className={isWidgetExpanded ? 'w-80 shrink-0 mr-6' : 'shrink-0'}>
             {sidebarWidget}
           </div>
