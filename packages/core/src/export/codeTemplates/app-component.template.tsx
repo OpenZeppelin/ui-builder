@@ -12,11 +12,6 @@ import { AdapterPlaceholder } from '@@adapter-package-name@@';
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
 
-// Define types for the transaction data
-interface TransactionData {
-  [key: string]: unknown;
-}
-
 interface AppProps {
   adapter: AdapterPlaceholder;
 }
