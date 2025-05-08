@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import type { ContractSchema } from '@openzeppelin/transaction-form-types';
 
-import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
+import { ActionBar } from '../../Common/ActionBar';
 
 import { ContractAddressForm } from './components/ContractAddressForm';
 import { ContractPreview } from './components/ContractPreview';
@@ -16,6 +16,8 @@ export function StepContractDefinition({
   adapter,
   networkConfig,
   existingContractSchema = null,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepContractDefinitionProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,9 +62,12 @@ export function StepContractDefinition({
 
   return (
     <div className="space-y-6">
-      <div className="mb-4">
-        <NetworkStatusBadge network={networkConfig} />
-      </div>
+      <ActionBar
+        network={networkConfig}
+        contractAddress={loadedSchema?.address}
+        onToggleContractState={onToggleContractState}
+        isWidgetExpanded={isWidgetExpanded}
+      />
 
       <ContractAddressForm
         adapter={adapter}

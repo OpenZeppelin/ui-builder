@@ -1,10 +1,4 @@
-import { FileText } from 'lucide-react';
-
-import {
-  Button,
-  ContractStateWidget,
-  truncateMiddle,
-} from '@openzeppelin/transaction-form-renderer';
+import { ContractStateWidget } from '@openzeppelin/transaction-form-renderer';
 
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
@@ -30,7 +24,6 @@ export function TransactionFormBuilder() {
     isWidgetVisible,
     sidebarWidget: widgetData,
     exportLoading,
-    contractAddress,
 
     handleNetworkSelect,
     handleContractSchemaLoaded,
@@ -55,24 +48,6 @@ export function TransactionFormBuilder() {
     </div>
   ) : null;
 
-  // Header actions - Contract State toggle button (only when state is hidden)
-  const headerActions =
-    contractSchema && contractAddress && !isWidgetVisible ? (
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-2"
-        onClick={toggleWidget}
-        title="Show Contract State"
-      >
-        <FileText size={16} className="shrink-0" />
-        <span className="text-sm font-medium">View Contract State</span>
-        <span className="ml-2 text-xs text-muted-foreground">
-          ({truncateMiddle(contractAddress)})
-        </span>
-      </Button>
-    ) : null;
-
   const steps: WizardStep[] = [
     {
       id: 'chain-select',
@@ -95,6 +70,8 @@ export function TransactionFormBuilder() {
           adapter={selectedAdapter}
           networkConfig={selectedNetwork}
           existingContractSchema={contractSchema}
+          onToggleContractState={toggleWidget}
+          isWidgetExpanded={isWidgetVisible}
         />
       ),
       isValid: !!contractSchema,
@@ -108,6 +85,8 @@ export function TransactionFormBuilder() {
           onFunctionSelected={handleFunctionSelected}
           selectedFunction={selectedFunction}
           networkConfig={selectedNetwork}
+          onToggleContractState={toggleWidget}
+          isWidgetExpanded={isWidgetVisible}
         />
       ),
       isValid: !!selectedFunction,
@@ -123,6 +102,8 @@ export function TransactionFormBuilder() {
           onFormConfigUpdated={handleFormConfigUpdated}
           onExecutionConfigUpdated={handleExecutionConfigUpdated}
           currentExecutionConfig={formConfig?.executionConfig}
+          onToggleContractState={toggleWidget}
+          isWidgetExpanded={isWidgetVisible}
         />
       ),
       isValid: isExecutionStepValid,
@@ -142,6 +123,8 @@ export function TransactionFormBuilder() {
           functionDetails={
             contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null
           }
+          onToggleContractState={toggleWidget}
+          isWidgetExpanded={isWidgetVisible}
         />
       ),
     },
@@ -161,7 +144,6 @@ export function TransactionFormBuilder() {
           steps={steps}
           sidebarWidget={sidebarWidget}
           isWidgetExpanded={isWidgetVisible}
-          headerActions={headerActions}
         />
       </div>
     </div>

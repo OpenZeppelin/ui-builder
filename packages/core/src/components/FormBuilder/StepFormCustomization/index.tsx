@@ -7,7 +7,7 @@ import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-ty
 
 import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
-import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
+import { ActionBar } from '../../Common/ActionBar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
@@ -27,6 +27,8 @@ interface StepFormCustomizationProps {
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
   onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
   currentExecutionConfig?: ExecutionConfig;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export function StepFormCustomization({
@@ -36,6 +38,8 @@ export function StepFormCustomization({
   onFormConfigUpdated,
   onExecutionConfigUpdated,
   currentExecutionConfig,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepFormCustomizationProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
@@ -106,9 +110,12 @@ export function StepFormCustomization({
   return (
     <div className="space-y-6">
       {networkConfig && (
-        <div className="mb-4">
-          <NetworkStatusBadge network={networkConfig} />
-        </div>
+        <ActionBar
+          network={networkConfig}
+          contractAddress={contractSchema.address}
+          onToggleContractState={onToggleContractState}
+          isWidgetExpanded={isWidgetExpanded}
+        />
       )}
 
       <StepTitleWithDescription

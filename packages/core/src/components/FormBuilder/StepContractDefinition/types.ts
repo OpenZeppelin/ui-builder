@@ -6,6 +6,8 @@ export interface StepContractDefinitionProps {
   adapter: ContractAdapter | null;
   networkConfig: NetworkConfig | null;
   existingContractSchema?: ContractSchema | null;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export interface ContractFormData {

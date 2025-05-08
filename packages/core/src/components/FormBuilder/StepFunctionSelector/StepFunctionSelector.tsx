@@ -1,4 +1,4 @@
-import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
+import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
 
 import { useFunctionFilter } from './hooks/useFunctionFilter';
@@ -13,6 +13,8 @@ export function StepFunctionSelector({
   selectedFunction,
   onFunctionSelected,
   networkConfig,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepFunctionSelectorProps) {
   // Use custom hooks to manage component logic
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
@@ -31,9 +33,12 @@ export function StepFunctionSelector({
   return (
     <div className="space-y-6">
       {networkConfig && (
-        <div className="mb-4">
-          <NetworkStatusBadge network={networkConfig} />
-        </div>
+        <ActionBar
+          network={networkConfig}
+          contractAddress={contractSchema.address}
+          onToggleContractState={onToggleContractState}
+          isWidgetExpanded={isWidgetExpanded}
+        />
       )}
 
       <StepTitleWithDescription

@@ -9,6 +9,8 @@ export interface StepFunctionSelectorProps {
   selectedFunction: string | null;
   onFunctionSelected: (functionId: string | null) => void;
   networkConfig?: NetworkConfig | null;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export interface FilterControlsProps {

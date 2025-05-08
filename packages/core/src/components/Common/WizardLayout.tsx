@@ -15,11 +15,6 @@ interface WizardLayoutProps {
   onComplete?: () => void;
   sidebarWidget?: ReactNode;
   isWidgetExpanded?: boolean;
-  /**
-   * Header actions that will be displayed in the top-right corner of the wizard
-   * across all steps (e.g., toggle buttons, controls)
-   */
-  headerActions?: ReactNode;
 }
 
 export function WizardLayout({
@@ -28,7 +23,6 @@ export function WizardLayout({
   onComplete,
   sidebarWidget,
   isWidgetExpanded = false,
-  headerActions,
 }: WizardLayoutProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const isFirstStep = currentStepIndex === 0;
@@ -56,7 +50,6 @@ export function WizardLayout({
       <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-2xl font-bold">{currentStep.title}</h2>
-          {headerActions && <div className="flex space-x-2">{headerActions}</div>}
         </div>
 
         {/* Step progress indicators with names */}

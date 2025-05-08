@@ -20,14 +20,14 @@ export function NetworkStatusBadge({
   const iconName = getNetworkIconName(network);
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-1.5 shadow-sm">
+    <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 border-0">
       {/* Network icon - reusing same icon component from NetworkMiniTile */}
       {network.ecosystem === 'midnight' ? (
         <img src={MidnightLogoSvg} alt="Midnight" width={ICON_SIZE} height={ICON_SIZE} />
       ) : iconName ? (
         <NetworkIcon name={iconName} size={ICON_SIZE} variant="branded" />
       ) : (
-        <div className="bg-muted flex-shrink-0 h-4 w-4 rounded-full"></div>
+        <div className="bg-muted-foreground/20 flex-shrink-0 h-4 w-4 rounded-full"></div>
       )}
 
       {/* Combined ecosystem + network name */}

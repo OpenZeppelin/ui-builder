@@ -7,7 +7,7 @@ import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
+import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
 import { FormPreview } from '../StepFormCustomization/FormPreview';
 
@@ -32,6 +32,8 @@ export interface StepCompleteProps {
   onExport: () => void;
   exportLoading?: boolean;
   functionDetails?: ContractFunction | null;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export function StepComplete({
@@ -41,6 +43,8 @@ export function StepComplete({
   onExport,
   exportLoading,
   functionDetails,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepCompleteProps) {
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {
@@ -59,9 +63,12 @@ export function StepComplete({
   return (
     <div className="space-y-6">
       {networkConfig && (
-        <div className="mb-4">
-          <NetworkStatusBadge network={networkConfig} />
-        </div>
+        <ActionBar
+          network={networkConfig}
+          contractAddress={contractSchema.address}
+          onToggleContractState={onToggleContractState}
+          isWidgetExpanded={isWidgetExpanded}
+        />
       )}
 
       <StepTitleWithDescription
