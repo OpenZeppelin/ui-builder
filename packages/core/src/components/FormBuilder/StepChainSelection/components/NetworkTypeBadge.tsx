@@ -5,7 +5,7 @@ interface NetworkTypeBadgeProps {
 }
 
 // Define a fixed size for the badge to ensure it's a circle
-const BADGE_SIZE = '1.25rem'; // E.g., 20px, adjust as needed (h-5 w-5 in Tailwind)
+const BADGE_SIZE = '1.2rem'; // E.g., 20px, adjust as needed (h-5 w-5 in Tailwind)
 
 export function NetworkTypeBadge({ type }: NetworkTypeBadgeProps) {
   const isTestnet = type === 'testnet' || type === 'devnet'; // Also consider devnet as testnet-like
