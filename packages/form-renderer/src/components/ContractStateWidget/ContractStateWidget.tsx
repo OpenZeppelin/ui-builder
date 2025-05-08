@@ -123,9 +123,6 @@ export function ContractStateWidget({
     >
       <CardHeader className="pb-2 pt-2 px-3 flex-shrink-0 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium">Contract State</CardTitle>
-        {networkConfig?.name && (
-          <span className="ml-2 text-xs text-muted-foreground">({adapter.networkConfig.name})</span>
-        )}
         {onToggle && (
           <Button
             variant="ghost"
