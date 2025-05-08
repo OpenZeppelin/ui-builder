@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { FormExportSystem } from '../../../export';
@@ -16,11 +16,14 @@ export function useCompleteStepState() {
   const exportForm = useCallback(
     async (
       formConfig: BuilderFormConfig | null,
-      selectedEcosystem: Ecosystem,
+      networkConfig: NetworkConfig | null,
       selectedFunction: string | null,
       contractSchema: ContractSchema | null
     ) => {
-      if (!formConfig || !selectedFunction || !contractSchema) return;
+      if (!formConfig || !selectedFunction || !contractSchema || !networkConfig) {
+        console.error('exportForm: Missing required configuration for export.');
+        return;
+      }
 
       setLoading(true);
       const exportSystem = new FormExportSystem();
@@ -29,11 +32,9 @@ export function useCompleteStepState() {
         const result = await exportSystem.exportForm(
           formConfig,
           contractSchema,
-          selectedEcosystem,
+          networkConfig,
           selectedFunction,
-          {
-            ecosystem: selectedEcosystem,
-          }
+          { ecosystem: networkConfig.ecosystem }
         );
 
         if (result.data instanceof Blob) {

@@ -1,5 +1,11 @@
+import { capitalize } from 'lodash';
+
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractSchema,
+  NetworkConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 
 import { adapterPackageMap } from '../../core/ecosystemManager';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
@@ -47,51 +53,69 @@ export class FormCodeGenerator {
    *
    * @param formConfig The form configuration from the builder
    * @param contractSchema The full contract schema
-   * @param ecosystem The selected ecosystem
+   * @param networkConfig The network configuration for the selected network
    * @param functionId The ID of the contract function
    * @returns Generated React component code as a string
    */
   async generateFormComponent(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    ecosystem: Ecosystem,
+    networkConfig: NetworkConfig,
     functionId: string
   ): Promise<string> {
+    const ecosystem = networkConfig.ecosystem;
     const adapterClassName = this.getAdapterClassName(ecosystem);
     const adapterPackageName = adapterPackageMap[ecosystem];
     if (!adapterPackageName) {
       throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
     }
+
+    // Ensure the networkConfig has the required export name
+    if (!networkConfig.exportConstName) {
+      throw new Error(
+        `NetworkConfig object for ${networkConfig.id} is missing the required 'exportConstName' property.`
+      );
+    }
+    const networkConfigImportName = networkConfig.exportConstName;
+
+    // Find the function details FIRST to use for defaults
+    const functionDetails = contractSchema.functions.find((fn) => fn.id === functionId);
+    if (!functionDetails) {
+      // This should ideally be caught earlier, but good to have defense
+      throw new Error(
+        `Function ${functionId} not found in contract schema during component generation.`
+      );
+    }
+
     const executionConfig = formConfig.executionConfig;
 
     // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
-    // This ensures consistency with the preview in the form builder
-    const formTitle = formConfig.title !== undefined ? formConfig.title : functionId;
+    const formTitle =
+      formConfig.title !== undefined ? formConfig.title : functionDetails.displayName || functionId;
     const formDescription =
       formConfig.description !== undefined
         ? formConfig.description
-        : `Form for interacting with the ${functionId} function.`;
+        : functionDetails.description ||
+          `Form for interacting with the ${functionDetails.displayName || functionId} function.`;
 
     const renderSchema = formSchemaFactory.builderConfigToRenderSchema(
       formConfig,
       formTitle,
       formDescription
     );
-
-    // Validate the schema to ensure it has all required properties
     this.validateRenderFormSchema(renderSchema, functionId);
 
     // Create parameters for the template
     const params: FormComponentTemplateParams = {
       adapterClassName,
       adapterPackageName,
-      ecosystem,
+      networkConfigImportName,
       functionId,
-      formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
-      contractSchemaJSON: JSON.stringify(contractSchema, null, 2), // Add full contract schema
+      formConfigJSON: JSON.stringify(renderSchema, null, 2),
+      contractSchemaJSON: JSON.stringify(contractSchema, null, 2),
       allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
       executionConfigJSON: executionConfig ? JSON.stringify(executionConfig, null, 2) : 'undefined',
-      includeDebugMode: false, // Or make this configurable via options
+      includeDebugMode: false,
     };
 
     // Process the form component template
@@ -101,6 +125,7 @@ export class FormCodeGenerator {
     processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
       adapterClassName,
       adapterPackageName,
+      networkConfigImportName,
       formConfigJSON: params.formConfigJSON,
       contractSchemaJSON: params.contractSchemaJSON,
       executionConfigJSON: params.executionConfigJSON,
@@ -155,11 +180,10 @@ export class FormCodeGenerator {
 
   /**
    * Generate a complete React project by integrating with the template system.
-   * Uses the typescript-react-vite template and replaces placeholder files with generated code.
    *
    * @param formConfig The form configuration from the builder
    * @param contractSchema The full contract schema
-   * @param ecosystem The selected ecosystem
+   * @param networkConfig The network configuration for the selected network
    * @param functionId The ID of the contract function
    * @param options Additional options for export customization
    * @returns A record of file paths to file contents for the complete project
@@ -167,17 +191,21 @@ export class FormCodeGenerator {
   async generateTemplateProject(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    ecosystem: Ecosystem,
+    networkConfig: NetworkConfig,
     functionId: string,
-    options: ExportOptions = { ecosystem }
+    options?: ExportOptions
   ): Promise<Record<string, string>> {
+    // Derive ecosystem from networkConfig if needed elsewhere, or pass networkConfig down
+    const ecosystem = networkConfig.ecosystem;
+    const exportOptions = options || { ecosystem }; // Ensure options has ecosystem
+
     // Generate all necessary component code
-    const mainTsxCode = await this.generateMainTsx(ecosystem);
+    const mainTsxCode = await this.generateMainTsx(networkConfig);
     const appComponentCode = await this.generateAppComponent(ecosystem, functionId);
     const formComponentCode = await this.generateFormComponent(
       formConfig,
       contractSchema,
-      ecosystem,
+      networkConfig,
       functionId
     );
 
@@ -187,26 +215,34 @@ export class FormCodeGenerator {
       'src/components/GeneratedForm.tsx': formComponentCode,
     };
 
-    return await this.templateManager.createProject('typescript-react-vite', customFiles, options);
+    return await this.templateManager.createProject(
+      'typescript-react-vite',
+      customFiles,
+      exportOptions
+    );
   }
 
   /**
    * Generate the main.tsx file content.
    *
-   * @param ecosystem The ecosystem to determine adapter details
+   * @param networkConfig The specific network configuration object
    * @returns The content of the generated main.tsx file
    */
-  public async generateMainTsx(ecosystem: Ecosystem): Promise<string> {
+  public async generateMainTsx(networkConfig: NetworkConfig): Promise<string> {
+    const ecosystem = networkConfig.ecosystem;
     const adapterClassName = this.getAdapterClassName(ecosystem);
     const adapterPackageName = adapterPackageMap[ecosystem];
-    if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
+    const networkConfigImportName = networkConfig.exportConstName;
+
+    if (!adapterPackageName || !networkConfigImportName) {
+      throw new Error(`Adapter/Network details missing for ecosystem: ${ecosystem}`);
     }
 
     // Define parameters for the main template
     const params = {
       adapterClassName,
       adapterPackageName,
+      networkConfigImportName,
     };
 
     // Process the main template
@@ -216,6 +252,7 @@ export class FormCodeGenerator {
     processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
       adapterClassName,
       adapterPackageName,
+      networkConfigImportName,
     });
 
     // Format the code
@@ -266,6 +303,6 @@ export class FormCodeGenerator {
    * Converts chain type to PascalCase (e.g., 'evm' -> 'EvmAdapter').
    */
   private getAdapterClassName(ecosystem: Ecosystem): string {
-    return `${ecosystem.charAt(0).toUpperCase()}${ecosystem.slice(1)}Adapter`;
+    return `${capitalize(ecosystem)}Adapter`;
   }
 }

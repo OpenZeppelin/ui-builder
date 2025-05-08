@@ -3,7 +3,6 @@
  *
  * These types define the parameters that can be passed to template functions.
  */
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 /**
  * Base interface for all template parameters
@@ -26,11 +25,6 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
    * The adapter package name
    */
   adapterPackageName: string;
-
-  /**
-   * The ecosystem (e.g., 'evm', 'solana')
-   */
-  ecosystem: Ecosystem;
 
   /**
    * The function ID (e.g., 'transferTokens')
@@ -61,6 +55,11 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
    * The contract schema as a JSON string
    */
   contractSchemaJSON: string;
+
+  /**
+   * The network config import name
+   */
+  networkConfigImportName: string;
 }
 
 /**

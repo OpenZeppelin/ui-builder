@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+
 import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
 
 import { FormCodeGenerator } from '../FormCodeGenerator';
@@ -15,6 +17,21 @@ describe('FormCodeGenerator Templating System', () => {
   let templateProcessor: TemplateProcessor;
   let originalConsoleLog: typeof console.log;
   let originalConsoleWarn: typeof console.warn;
+
+  // Define mock network config
+  const mockEvmNetworkConfig: EvmNetworkConfig = {
+    id: 'test-codegen-templating-evm',
+    name: 'Test CodeGen Template EVM',
+    exportConstName: 'mockEvmNetworkConfig',
+    ecosystem: 'evm',
+    network: 'ethereum',
+    type: 'testnet',
+    isTestnet: true,
+    chainId: 1337,
+    rpcUrl: 'http://localhost:8545',
+    nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+    apiUrl: '',
+  };
 
   beforeEach(() => {
     generator = new FormCodeGenerator();
@@ -256,7 +273,7 @@ describe('FormCodeGenerator Templating System', () => {
       const code = await generator.generateFormComponent(
         formConfig,
         contractSchema,
-        'evm',
+        mockEvmNetworkConfig,
         'transferTokens'
       );
 

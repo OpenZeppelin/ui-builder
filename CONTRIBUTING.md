@@ -15,15 +15,20 @@ Thank you for considering contributing to Transaction Form Builder! This documen
 
 ### Adding New Adapters
 
-If you are contributing support for a new blockchain:
+If you are contributing support for a new blockchain ecosystem, please follow the detailed instructions in the main **[README.md under the "Adding New Adapters" section](./README.md#adding-new-adapters)**.
 
-1.  **Familiarize Yourself:** Please read the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)** thoroughly to understand the expected modular structure and responsibilities.
-2.  **Interface:** Ensure your new adapter class implements the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
-3.  **Structure:** Follow the domain-driven module structure outlined in the architecture guide (e.g., `mapping/`, `transaction/`, `query/`, etc.) within your new `packages/adapter-<chain-name>/src/` directory.
-4.  **Scaffolding:** Consider using the (potential) `pnpm create-adapter <chain-name>` script if available to generate the initial file structure.
-5.  **Registration:** Register your adapter instance in `packages/core/src/core/adapterRegistry.ts`.
-6.  **Testing:** Add comprehensive unit tests for your adapter's logic.
-7.  **Documentation:** Update any relevant documentation, including potentially adding chain-specific notes to the architecture guide if necessary.
+Key steps include:
+
+1.  **Familiarize Yourself:** Read the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)** to understand the modular structure and responsibilities.
+2.  **Package Setup**: Create a new `packages/adapter-<chain-name>` package with appropriate `package.json` (depending on `@openzeppelin/transaction-form-types`) and `tsconfig.json`.
+3.  **Network Configurations**: Define `YourEcosystemNetworkConfig` objects in `src/networks/`, ensuring they provide all necessary details (RPC URLs, chain IDs, etc.). Export a combined list (e.g., `export const suiNetworks = [...]`) and individual configurations from `src/networks/index.ts`.
+4.  **Adapter Implementation**: Implement the `ContractAdapter` interface from `@openzeppelin/transaction-form-types` in `src/adapter.ts`. The constructor must accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`) and use `this.networkConfig` internally.
+5.  **Exports**: Export your adapter class and the main networks array (and ideally individual network configs) from your adapter package's `src/index.ts`.
+6.  **Ecosystem Registration**: Register your new ecosystem in `packages/core/src/core/ecosystemManager.ts` by:
+    - Adding an entry to `ecosystemRegistry` with the `AdapterClass` constructor and the `networksExportName` (the name of your exported network list).
+    - Updating the `switch` statement in `loadAdapterPackageModule` to enable dynamic import of your adapter package.
+7.  **Testing**: Add comprehensive unit and integration tests for your adapter's logic and network configurations.
+8.  **Documentation**: Update any relevant documentation.
 
 ## Pull Request Process
 

@@ -2,8 +2,9 @@ import { polygonAmoy as viemPolygonAmoy, sepolia as viemSepolia } from 'viem/cha
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-export const ethereumSepolia = {
+export const ethereumSepolia: EvmNetworkConfig = {
   id: 'ethereum-sepolia',
+  exportConstName: 'ethereumSepolia',
   name: 'Ethereum Sepolia',
   ecosystem: 'evm',
   network: 'ethereum',
@@ -20,10 +21,11 @@ export const ethereumSepolia = {
     decimals: 18,
   },
   viemChain: viemSepolia,
-} as EvmNetworkConfig;
+};
 
-export const polygonAmoy = {
+export const polygonAmoy: EvmNetworkConfig = {
   id: 'polygon-amoy',
+  exportConstName: 'polygonAmoy',
   name: 'Polygon Amoy',
   ecosystem: 'evm',
   network: 'polygon',
@@ -40,6 +42,6 @@ export const polygonAmoy = {
     decimals: 18,
   },
   viemChain: viemPolygonAmoy,
-} as EvmNetworkConfig;
+};
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

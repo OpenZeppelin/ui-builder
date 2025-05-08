@@ -134,13 +134,12 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
     (formConfig: BuilderFormConfig | null, selectedFunction: string | null) => {
       if (!resolvedNetwork || !selectedFunction) {
         console.error('Cannot export: Network/Adapter or Function not selected.');
-        // Optionally trigger some user feedback
         return;
       }
       // Use void to explicitly ignore the promise
       void completeStep.exportForm(
         formConfig,
-        resolvedNetwork.network.ecosystem,
+        resolvedNetwork.network,
         selectedFunction,
         contractDefinition.contractSchema
       );

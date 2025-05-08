@@ -48,7 +48,6 @@ export function TransactionFormBuilder() {
         contractSchema={widgetData.contractSchema}
         contractAddress={widgetData.contractAddress}
         adapter={widgetData.adapter}
-        networkConfig={widgetData.networkConfig}
         isVisible={widgetData.isVisible}
         onToggle={widgetData.onToggle}
         externalToggleMode={true}
@@ -108,6 +107,7 @@ export function TransactionFormBuilder() {
           contractSchema={contractSchema}
           onFunctionSelected={handleFunctionSelected}
           selectedFunction={selectedFunction}
+          networkConfig={selectedNetwork}
         />
       ),
       isValid: !!selectedFunction,

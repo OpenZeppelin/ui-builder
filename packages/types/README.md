@@ -58,50 +58,85 @@ The package is organized into the following directories and files:
 ```
 types/
 ├── src/
-│   ├── adapters/         # Contract adapter interfaces
-│   │   ├── base.ts       # Core adapter interface
+│   ├── adapters/           # Contract adapter interfaces
+│   │   ├── base.ts         # Core ContractAdapter interface
 │   │   ├── contract-state.ts # Contract state querying capabilities
-│   │   └── index.ts      # Re-exports all adapter types
-│   ├── contracts/        # Contract and blockchain related types
-│   │   ├── chains.ts     # Chain type definitions
-│   │   ├── schema.ts     # Contract schema interfaces
-│   │   └── index.ts      # Re-exports all contract types
-│   ├── forms/            # Form field and layout definitions
-│   │   ├── fields.ts     # Field type definitions
-│   │   ├── form-field.ts # Form field definitions
-│   │   ├── layout.ts     # Layout type definitions
-│   │   ├── validation.ts # Validation type definitions
-│   │   ├── schema.ts     # Form schema definitions
-│   │   └── index.ts      # Re-exports all form types
-│   └── index.ts          # Main entry point that re-exports all modules
-├── package.json          # Package configuration
-└── tsconfig.json         # TypeScript configuration
+│   │   └── index.ts        # Re-exports all adapter types
+│   ├── common/             # Common types shared across namespaces
+│   │   ├── ecosystem.ts    # NetworkEcosystem enum/type
+│   │   └── index.ts        # Re-exports common types
+│   ├── contracts/          # Contract schema related types
+│   │   ├── schema.ts       # ContractSchema, ContractFunction etc.
+│   │   └── index.ts        # Re-exports contract types
+│   ├── forms/              # Form field, layout, schema, and validation definitions
+│   │   ├── fields.ts       # Base FieldType definitions
+│   │   ├── form-field.ts   # FormField definition
+│   │   ├── layout.ts       # FormLayout definitions
+│   │   ├── schema.ts       # RenderFormSchema, BuilderFormConfig definitions
+│   │   ├── validation.ts   # FieldValidation definitions
+│   │   ├── values.ts       # FormValues type
+│   │   └── index.ts        # Re-exports all form types
+│   ├── networks/           # Network configuration types
+│   │   ├── config.ts       # Defines BaseNetworkConfig, EvmNetworkConfig, SolanaNetworkConfig, etc., NetworkConfig union type, and type guards
+│   │   ├── validation.ts   # Network configuration validation utilities
+│   │   ├── README.md       # Documentation for network types
+│   │   └── index.ts        # Re-exports all network types
+│   ├── transactions/       # Types related to transaction submission status
+│   │   ├── status.ts       # TransactionStatus types
+│   │   └── index.ts        # Re-exports transaction types
+│   └── index.ts            # Main entry point that re-exports all modules
+├── package.json            # Package configuration
+└── tsconfig.json           # TypeScript configuration
 ```
 
 ## Type Definitions
 
-### Adapter Types
+### Adapter Types (`./src/adapters`)
 
-The `adapters` namespace provides interfaces for blockchain-specific adapters, including:
+Interfaces for blockchain-specific adapters:
 
-- `ContractAdapter`: The base interface that all chain-specific adapters must implement
-- Contract state and execution related interfaces
+- `ContractAdapter`: The core interface defining methods for loading contracts, mapping types, querying state, formatting data, validating addresses, handling transactions, and interacting with wallets.
 
-### Contract Types
+### Common Types (`./src/common`)
 
-The `contracts` namespace contains types related to blockchain contracts:
+Shared foundational types:
 
-- `ContractSchema`: Interface for contract schema definitions
-- `ContractFunction`: Interface for function definitions within a contract
+- `NetworkEcosystem`: Enum or type defining supported blockchain ecosystems (e.g., 'evm', 'solana').
 
-### Form Types
+### Contract Types (`./src/contracts`)
 
-The `forms` namespace includes types for form rendering and handling:
+Types related to blockchain contract structure:
 
-- `FieldType`: Types of form fields (text, number, checkbox, etc.)
-- `FormFieldType`: Complete definition of a form field with validation
-- `FormLayout`: Layout configuration for forms
-- `FieldValidation`: Validation rules for form fields
+- `ContractSchema`: Interface for contract schema definitions (ABI in EVM).
+- `ContractFunction`: Interface for function definitions within a contract.
+- `ContractParameter`: Interface for function parameter definitions.
+
+### Form Types (`./src/forms`)
+
+Types for form structure, rendering, and handling:
+
+- `FieldType`: Types of form fields (text, number, boolean, address, select, etc.).
+- `FormField`: Complete definition of a form field including ID, type, label, validation, etc.
+- `RenderFormSchema`: The schema used by the form-renderer package.
+- `BuilderFormConfig`: The configuration used by the form builder UI.
+- `FieldValidation`: Validation rules for form fields.
+- `FormValues`: Type representing the collected data from a form submission.
+
+### Network Types (`./src/networks`)
+
+Types for defining specific blockchain network configurations:
+
+- Interfaces for common properties (`BaseNetworkConfig`) and ecosystem-specific details (`EvmNetworkConfig`, `SolanaNetworkConfig`, `StellarNetworkConfig`, `MidnightNetworkConfig`).
+- The discriminated union type `NetworkConfig` representing any valid network configuration.
+- Type guard functions (e.g., `isEvmNetworkConfig(config)`) to safely narrow down the `NetworkConfig` union type.
+- (These are primarily defined within `config.ts`)
+
+### Transaction Types (`./src/transactions`)
+
+Types related to the status of transaction submissions:
+
+- `TransactionStatus`: Enum or type defining possible states (Idle, Signing, Broadcasting, PendingConfirmation, Success, Error).
+- `TransactionProgress`: Interface potentially holding details like transaction hash, error messages, explorer links.
 
 ## Integration with Other Packages
 

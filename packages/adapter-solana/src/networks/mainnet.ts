@@ -3,6 +3,7 @@ import { SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
 // Placeholder for Solana Mainnet Beta
 export const solanaMainnetBeta: SolanaNetworkConfig = {
   id: 'solana-mainnet-beta',
+  exportConstName: 'solanaMainnetBeta',
   name: 'Solana',
   ecosystem: 'solana',
   network: 'solana',

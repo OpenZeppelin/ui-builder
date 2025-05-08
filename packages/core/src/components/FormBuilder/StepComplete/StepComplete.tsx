@@ -7,6 +7,7 @@ import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
 import { StepTitleWithDescription } from '../Common';
 import { FormPreview } from '../StepFormCustomization/FormPreview';
 
@@ -57,6 +58,12 @@ export function StepComplete({
 
   return (
     <div className="space-y-6">
+      {networkConfig && (
+        <div className="mb-4">
+          <NetworkStatusBadge network={networkConfig} />
+        </div>
+      )}
+
       <StepTitleWithDescription
         title="Complete"
         description={<>Your form is ready! You can use it below or export it for use elsewhere.</>}

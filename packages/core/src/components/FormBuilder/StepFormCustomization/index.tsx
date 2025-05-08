@@ -7,6 +7,7 @@ import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-ty
 
 import { useConfiguredAdapter } from '../../../core/hooks/useConfiguredAdapter';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
+import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
@@ -104,6 +105,12 @@ export function StepFormCustomization({
 
   return (
     <div className="space-y-6">
+      {networkConfig && (
+        <div className="mb-4">
+          <NetworkStatusBadge network={networkConfig} />
+        </div>
+      )}
+
       <StepTitleWithDescription
         title="Customize"
         description={

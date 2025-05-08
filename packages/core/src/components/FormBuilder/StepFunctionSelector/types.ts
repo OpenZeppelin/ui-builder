@@ -1,9 +1,14 @@
-import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractFunction,
+  ContractSchema,
+  NetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   onFunctionSelected: (functionId: string | null) => void;
+  networkConfig?: NetworkConfig | null;
 }
 
 export interface FilterControlsProps {

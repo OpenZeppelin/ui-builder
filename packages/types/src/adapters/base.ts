@@ -1,6 +1,7 @@
 import type { ContractFunction, ContractSchema, FunctionParameter } from '../contracts/schema';
 import type { FieldType } from '../forms/fields';
 import type { FormFieldType } from '../forms/form-field';
+import type { NetworkConfig } from '../networks/config';
 
 // Base types and interfaces for adapters will be defined here.
 
@@ -44,6 +45,11 @@ export type Connector = {
  * It defines the core functionality needed for form rendering and contract interaction.
  */
 export interface ContractAdapter {
+  /**
+   * The network configuration this adapter instance is configured for.
+   */
+  readonly networkConfig: NetworkConfig;
+
   /**
    * Load a contract from a source (address or JSON ABI string).
    * The adapter instance should be pre-configured with the necessary network context.

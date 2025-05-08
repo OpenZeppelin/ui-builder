@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { FormExportSystem } from '../FormExportSystem';
@@ -9,6 +10,21 @@ import {
   createMinimalFormConfig,
 } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network config
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-formcomp-evm',
+  name: 'Test FormComp EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
 
 describe('Form Component Tests', () => {
   /**
@@ -32,7 +48,7 @@ describe('Form Component Tests', () => {
     const result = await exportSystem.exportForm(
       formConfig,
       mockContractSchema,
-      ecosystem,
+      mockEvmNetworkConfig,
       functionName
     );
 

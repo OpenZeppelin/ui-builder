@@ -51,6 +51,9 @@ export function TransactionForm({
   // Use the wallet connection context
   const { isConnected } = useWalletConnection();
 
+  // Derive networkConfig from the adapter instance
+  const networkConfig = adapter.networkConfig;
+
   // Initialize form with React Hook Form
   const methods = useForm<FormValues>({
     mode: schema.validation?.mode || 'onChange',
@@ -206,15 +209,19 @@ export function TransactionForm({
 
   // Get explorer URL for the transaction
   const getExplorerTxUrl = (hash: string): string | null => {
-    if (!adapter || !hash) return null;
+    if (!adapter || !hash || !networkConfig) return null;
 
-    // Use getExplorerTxUrl if available (preferred for transaction URLs)
     if (adapter.getExplorerTxUrl) {
+      // Call adapter method (which uses its internal networkConfig)
       return adapter.getExplorerTxUrl(hash);
     }
 
-    console.warn('getExplorerTxUrl not implemented by adapter, cannot generate URL.');
-    return null;
+    // Fallback using getExplorerUrl (also uses internal networkConfig)
+    console.warn(
+      'getExplorerTxUrl not implemented by adapter, trying getExplorerUrl as fallback (might expect address).'
+    );
+    // Ensure adapter.getExplorerUrl exists before calling
+    return adapter.getExplorerUrl ? adapter.getExplorerUrl(hash) : null;
   };
 
   return (

@@ -3,6 +3,7 @@ import { MidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
 // Placeholder for a potential Midnight Mainnet
 export const midnightMainnet: MidnightNetworkConfig = {
   id: 'midnight-mainnet',
+  exportConstName: 'midnightMainnet',
   name: 'Midnight',
   ecosystem: 'midnight',
   network: 'midnight',

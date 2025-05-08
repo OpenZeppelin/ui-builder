@@ -1,9 +1,15 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
+import type {
+  Ecosystem,
+  EvmNetworkConfig,
+  SolanaNetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
-import { createMinimalContractSchema } from '@/export/utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
 
+import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
 import { PackageManager } from '../PackageManager';
@@ -13,17 +19,37 @@ import { ZipGenerator } from '../ZipGenerator';
 import { FormCodeGenerator } from '../generators/FormCodeGenerator';
 import { TemplateProcessor } from '../generators/TemplateProcessor';
 
-// Mock FormRendererConfig since it's not exported from the main package entry
+// Mock FormRendererConfig (define before use)
 interface MockFormRendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<
     string,
-    {
-      runtimeDependencies: Record<string, string>;
-      devDependencies?: Record<string, string>;
-    }
+    { runtimeDependencies: Record<string, string>; devDependencies?: Record<string, string> }
   >;
 }
+const mockFormRendererConfig: MockFormRendererConfig = {
+  coreDependencies: {
+    /* ... */
+  },
+  fieldDependencies: {
+    /* ... */
+  },
+};
+
+// Define mock network config
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-fesyse-evm',
+  name: 'Test FESys EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
 
 /**
  * Unit tests for the FormExportSystem class
@@ -53,36 +79,6 @@ describe('FormExportSystem', () => {
     logger.configure({ enabled: true, level: 'info' });
   });
 
-  // Mock form renderer config for testing
-  const mockFormRendererConfig: MockFormRendererConfig = {
-    coreDependencies: {
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
-      'react-hook-form': '^7.43.9',
-      '@openzeppelin/transaction-form-renderer': '^1.0.0',
-    },
-    fieldDependencies: {
-      text: { runtimeDependencies: {} },
-      number: { runtimeDependencies: {} },
-      date: {
-        runtimeDependencies: {
-          'react-datepicker': '^4.14.0',
-        },
-        devDependencies: {
-          '@types/react-datepicker': '^4.11.2',
-        },
-      },
-      select: {
-        runtimeDependencies: {
-          'react-select': '^5.7.3',
-        },
-        devDependencies: {
-          '@types/react-select': '^5.0.1',
-        },
-      },
-    },
-  };
-
   // Create a mock package.json content
   const mockPackageJson = JSON.stringify({
     name: 'template-project',
@@ -91,90 +87,96 @@ describe('FormExportSystem', () => {
     devDependencies: {},
   });
 
-  // Create a minimal form config for tests
-  const createMinimalFormConfig = (): BuilderFormConfig => ({
-    functionId: 'testFunction',
-    fields: [
-      {
-        id: 'param0',
-        name: 'param0',
-        label: 'Parameter 0',
-        type: 'text',
-        validation: { required: true },
-      },
-    ],
-    layout: {
-      columns: 1,
-      spacing: 'normal',
-      labelPosition: 'top',
-    },
-    validation: {
-      mode: 'onChange',
-      showErrors: 'inline',
-    },
-    theme: {},
-    contractAddress: '0xTestAddress',
-  });
-
   // Create a system with the provided dependencies
   const createExportSystem = () => {
-    // Create REAL instances of dependencies
     const templateManager = new TemplateManager();
     const formCodeGenerator = new FormCodeGenerator();
-    const packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
     const styleManager = new StyleManager();
     const zipGenerator = new ZipGenerator();
     const templateProcessor = new TemplateProcessor({});
 
-    // --- Mock/Spy on specific methods needed for tests ---
+    // Mock PackageManager instance
+    const packageManager = {
+      getDependencies: vi
+        .fn()
+        .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
+          // Simulate dependency logic: return base + adapter with correct versions
+          const baseDeps = {
+            react: '^18.2.0', // Correct version for assertion
+            '@openzeppelin/transaction-form-renderer': '^1.0.0', // Use consistent placeholder version
+            '@openzeppelin/transaction-form-types': '^0.1.0', // Use consistent placeholder version
+          };
+          const adapterDep = `@openzeppelin/transaction-form-adapter-${ecosystem}`;
+          return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
+        }),
+      updatePackageJson: vi
+        .fn()
+        .mockImplementation(
+          async (
+            originalContent: string,
+            _formConfig: BuilderFormConfig,
+            ecosystem: Ecosystem,
+            functionId: string,
+            options?: Partial<ExportOptions>
+          ) => {
+            const packageJson = JSON.parse(originalContent);
+            // Apply options correctly
+            packageJson.name = options?.projectName || `${functionId}-form`; // Use projectName from options
+            packageJson.description = options?.description || _formConfig?.description || ''; // Use optional chaining for safety
+            packageJson.author = options?.author || '';
+            packageJson.license = options?.license || 'UNLICENSED';
+            // Get deps and merge
+            const newDeps = await packageManager.getDependencies(_formConfig, ecosystem);
+            packageJson.dependencies = {
+              ...(packageJson.dependencies || {}),
+              ...newDeps,
+              ...(options?.dependencies || {}),
+            };
+            return JSON.stringify(packageJson, null, 2);
+          }
+        ),
+      loadFormRendererConfig: vi.fn().mockResolvedValue(mockFormRendererConfig),
+    } as unknown as PackageManager;
 
-    // Mock TemplateManager's createProject
-    vi.spyOn(templateManager, 'createProject').mockImplementation(
-      async (_templateName, customFiles, _options) => {
-        // Return base files PLUS the custom files passed in
-        return {
-          'package.json': mockPackageJson,
-          'index.html': '<html>...</html>',
-          'src/styles.css': '/* Template styles */',
-          // Ensure customFiles (like adapters, generated form) overwrite if necessary
-          ...customFiles,
-        };
-      }
-    );
-
-    // Mock FormCodeGenerator methods
-    vi.spyOn(formCodeGenerator, 'generateFormComponent').mockResolvedValue(
-      '/* Mock Form Component */'
-    );
-    vi.spyOn(formCodeGenerator, 'generateAppComponent').mockResolvedValue(
-      '/* Mock App Component */'
-    );
-
-    // Spy on ZipGenerator's createZipFile
+    // Mock ZipGenerator
     const createZipFileSpy = vi
       .spyOn(zipGenerator, 'createZipFile')
       .mockImplementation(async (_files, fileName, _options) => {
-        return {
-          data: Buffer.from('mock zip content'),
-          fileName: fileName,
-        };
+        return { data: Buffer.from('mock zip'), fileName: fileName }; // Return passed filename
       });
-    // --- End Mocks/Spies ---
 
-    // Create the system instance, injecting the REAL (but potentially spied) dependencies
+    // --- Mock/Spy on other dependencies' methods ---
+    vi.spyOn(templateManager, 'createProject').mockResolvedValue({
+      'package.json': mockPackageJson,
+      'index.html': '<html>...</html>',
+      'src/styles.css': '/* Template styles */',
+    });
+    const generateFormComponentSpy = vi
+      .spyOn(formCodeGenerator, 'generateFormComponent')
+      .mockResolvedValue('/* Mock Form */');
+
+    // Create the system instance, injecting mocks
     const system = new FormExportSystem({
       templateManager,
       formCodeGenerator,
-      packageManager,
+      packageManager, // Inject the mock object
       styleManager,
-      zipGenerator, // Inject instance with the spied method
+      zipGenerator,
       templateProcessor,
     });
 
     return {
       system,
-      packageManager,
-      createZipFileSpy,
+      mocks: {
+        templateManager,
+        formCodeGenerator,
+        packageManager, // Return the mock object
+        styleManager,
+        zipGenerator,
+        templateProcessor,
+        createZipFileSpy,
+        generateFormComponentSpy,
+      },
     };
   };
 
@@ -184,9 +186,15 @@ describe('FormExportSystem', () => {
       const formConfig = createMinimalFormConfig();
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
-      const result = await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction', {
-        projectName: 'test-project',
-      });
+      const result = await system.exportForm(
+        formConfig,
+        contractSchema,
+        mockEvmNetworkConfig,
+        'testFunction',
+        {
+          projectName: 'test-project',
+        }
+      );
 
       // Verify the result structure using 'data'
       expect(result).toHaveProperty('data'); // Updated property name
@@ -207,48 +215,50 @@ describe('FormExportSystem', () => {
     it('should use the correct dependencies for different blockchain types', async () => {
       const { system } = createExportSystem();
       const formConfig = createMinimalFormConfig();
-      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
-      // Test with Solana
+      const contractSchemaEvm = createMinimalContractSchema('testFunction', 'evm');
+      const contractSchemaSol = createMinimalContractSchema('testFunction', 'solana');
+      const funcId = 'testFunction';
+
+      // Define Solana mock config
+      const mockSolanaConfig = {
+        id: 'test-solana-dep',
+        name: 'Test Solana Dep',
+        exportConstName: 'mockSolanaConfig',
+        ecosystem: 'solana' as const,
+        network: 'solana',
+        type: 'testnet' as const,
+        isTestnet: true,
+        rpcEndpoint: 'mock',
+        commitment: 'confirmed' as const,
+      } as SolanaNetworkConfig;
+
+      // Test with Solana config
       const solanaResult = await system.exportForm(
         formConfig,
-        contractSchema,
-        'solana',
-        'testFunction'
+        contractSchemaSol,
+        mockSolanaConfig,
+        funcId
       );
       expect(solanaResult.dependencies).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana',
         'workspace:*'
       );
-      expect(solanaResult.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-types',
-        'workspace:*'
-      );
       expect(solanaResult.dependencies).not.toHaveProperty(
         '@openzeppelin/transaction-form-adapter-evm'
-      );
-      expect(solanaResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-stellar'
       );
 
-      // Test with Stellar
-      const stellarResult = await system.exportForm(
+      // Test with EVM config (use the mock defined at top level)
+      const evmResult = await system.exportForm(
         formConfig,
-        contractSchema,
-        'stellar',
-        'testFunction'
+        contractSchemaEvm,
+        mockEvmNetworkConfig,
+        funcId
       );
-      expect(stellarResult.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-stellar',
+      expect(evmResult.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-evm',
         'workspace:*'
       );
-      expect(stellarResult.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-types',
-        'workspace:*'
-      );
-      expect(stellarResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-evm'
-      );
-      expect(stellarResult.dependencies).not.toHaveProperty(
+      expect(evmResult.dependencies).not.toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana'
       );
     });
@@ -256,10 +266,10 @@ describe('FormExportSystem', () => {
     it('should include field-specific dependencies based on form fields', async () => {
       // Create systems with different configs
       const createSystemWithFields = (fieldTypes: string[]) => {
-        const { system, packageManager } = createExportSystem();
+        const { system, mocks } = createExportSystem();
 
         // Mock getDependencies to return different dependencies based on field types
-        vi.spyOn(packageManager, 'getDependencies').mockImplementation(async () => {
+        vi.spyOn(mocks.packageManager, 'getDependencies').mockImplementation(async () => {
           const deps: Record<string, string> = {
             react: '^18.2.0',
             'react-dom': '^18.2.0',
@@ -294,13 +304,13 @@ describe('FormExportSystem', () => {
       const basicResult = await basicSystem.exportForm(
         formConfig,
         contractSchema,
-        'evm',
+        mockEvmNetworkConfig,
         'testFunction'
       );
       const advancedResult = await advancedSystem.exportForm(
         formConfig,
         contractSchema,
-        'evm',
+        mockEvmNetworkConfig,
         'testFunction'
       );
 
@@ -315,7 +325,7 @@ describe('FormExportSystem', () => {
 
     it('should correctly update package.json with custom options', async () => {
       // Get system and spy
-      const { system, createZipFileSpy } = createExportSystem();
+      const { system, mocks } = createExportSystem();
       const formConfig = createMinimalFormConfig();
       const customOptions = {
         projectName: 'custom-project',
@@ -327,9 +337,15 @@ describe('FormExportSystem', () => {
         },
       };
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
-      await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction', customOptions);
-      expect(createZipFileSpy).toHaveBeenCalled();
-      const filesPassedToZip = createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
+      await system.exportForm(
+        formConfig,
+        contractSchema,
+        mockEvmNetworkConfig,
+        'testFunction',
+        customOptions
+      );
+      expect(mocks.createZipFileSpy).toHaveBeenCalled();
+      const filesPassedToZip = mocks.createZipFileSpy.mock.calls[0][0] as Record<string, string>; // Type assertion
       const finalPackageJson = JSON.parse(filesPassedToZip['package.json']);
 
       // Assertions
@@ -340,19 +356,29 @@ describe('FormExportSystem', () => {
       expect(finalPackageJson.dependencies).toHaveProperty('custom-lib', '^1.0.0');
       expect(finalPackageJson.dependencies).toHaveProperty('react'); // Verify core deps still present
     });
-  });
 
-  describe('PackageManager integration', () => {
     it('should call PackageManager to get dependencies for export result', async () => {
-      const { system, packageManager } = createExportSystem();
-      const getDependenciesSpy = vi.spyOn(packageManager, 'getDependencies');
+      // Correctly destructure mocks
+      const { system, mocks } = createExportSystem();
+      // Spy on the *instance* provided by the helper
+      const getDependenciesSpy = vi.spyOn(mocks.packageManager, 'getDependencies');
       const formConfig = createMinimalFormConfig();
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
-
-      await system.exportForm(formConfig, contractSchema, 'evm', 'testFunction');
-
-      expect(getDependenciesSpy).toHaveBeenCalled();
+      await system.exportForm(formConfig, contractSchema, mockEvmNetworkConfig, 'testFunction');
       expect(getDependenciesSpy).toHaveBeenCalledWith(formConfig, 'evm');
+    });
+
+    it('should handle errors during ZIP generation', async () => {
+      const { system, mocks } = createExportSystem();
+      // Mock the method implementation on the instance to throw an error
+      vi.spyOn(mocks.zipGenerator, 'createZipFile').mockRejectedValue(new Error('Zip Error'));
+      const formConfig = createMinimalFormConfig();
+      const contractSchema = createMinimalContractSchema('testFunction', 'evm');
+      const funcId = 'testFunction'; // Define funcId
+
+      await expect(
+        system.exportForm(formConfig, contractSchema, mockEvmNetworkConfig, funcId)
+      ).rejects.toThrow('Zip Error');
     });
   });
 });

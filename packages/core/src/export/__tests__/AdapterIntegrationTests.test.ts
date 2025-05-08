@@ -1,10 +1,41 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type {
+  EvmNetworkConfig,
+  NetworkConfig,
+  SolanaNetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network configs
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-export-adapter-evm',
+  name: 'Test Export EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
+
+const mockSolanaNetworkConfig: SolanaNetworkConfig = {
+  id: 'test-export-adapter-solana',
+  name: 'Test Export Solana',
+  exportConstName: 'mockSolanaNetworkConfig',
+  ecosystem: 'solana',
+  network: 'solana',
+  type: 'testnet',
+  isTestnet: true,
+  rpcEndpoint: 'mock',
+  commitment: 'confirmed',
+};
 
 describe('Adapter Integration Tests', () => {
   let exportSystem: FormExportSystem;
@@ -14,13 +45,16 @@ describe('Adapter Integration Tests', () => {
   });
 
   // Helper function to get exported files and parsed package.json
-  async function getExportedPackageJson(ecosystem: Ecosystem, functionName: string = 'transfer') {
-    const formConfig = createMinimalFormConfig(functionName, ecosystem);
-    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
+  async function getExportedPackageJson(
+    networkConfig: NetworkConfig,
+    functionName: string = 'transfer'
+  ) {
+    const formConfig = createMinimalFormConfig(functionName, networkConfig.ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, networkConfig.ecosystem);
     const result = await exportSystem.exportForm(
       formConfig,
       mockContractSchema,
-      ecosystem,
+      networkConfig,
       functionName
     );
     expect(result.data).toBeDefined();
@@ -35,7 +69,7 @@ describe('Adapter Integration Tests', () => {
 
   describe('Package.json Adapter Dependencies', () => {
     it('should include correct dependencies for EVM in package.json', async () => {
-      const { packageJson } = await getExportedPackageJson('evm');
+      const { packageJson } = await getExportedPackageJson(mockEvmNetworkConfig);
 
       // Check required packages are present
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
@@ -46,7 +80,7 @@ describe('Adapter Integration Tests', () => {
     });
 
     it('should include correct dependencies for Solana in package.json', async () => {
-      const { packageJson } = await getExportedPackageJson('solana');
+      const { packageJson } = await getExportedPackageJson(mockSolanaNetworkConfig);
 
       // Check required packages are present
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');

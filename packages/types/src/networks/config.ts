@@ -43,6 +43,14 @@ export interface BaseNetworkConfig {
   isTestnet: boolean;
 
   /**
+   * The constant name under which this specific network configuration object
+   * is exported from its adapter package's network index file.
+   * Used by the export system to dynamically import the correct config.
+   * Example: 'ethereumMainnet', 'ethereumSepolia'
+   */
+  exportConstName: string;
+
+  /**
    * Base URL for the block explorer (common across ecosystems)
    */
   explorerUrl?: string;

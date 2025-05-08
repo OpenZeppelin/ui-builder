@@ -3,6 +3,7 @@ import { SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
 // Placeholder for Solana Devnet
 export const solanaDevnet: SolanaNetworkConfig = {
   id: 'solana-devnet',
+  exportConstName: 'solanaDevnet',
   name: 'Solana Devnet',
   ecosystem: 'solana',
   network: 'solana',
@@ -17,6 +18,7 @@ export const solanaDevnet: SolanaNetworkConfig = {
 // Placeholder for Solana Testnet
 export const solanaTestnet: SolanaNetworkConfig = {
   id: 'solana-testnet',
+  exportConstName: 'solanaTestnet',
   name: 'Solana Testnet',
   ecosystem: 'solana',
   network: 'solana',

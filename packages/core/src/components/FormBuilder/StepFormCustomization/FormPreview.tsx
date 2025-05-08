@@ -116,7 +116,6 @@ export function FormPreview({
               adapter={adapter}
               onSubmit={handleSubmit}
               contractSchema={contractSchema}
-              networkConfig={networkConfig}
             />
           </WalletConnectionProvider>
         </CardContent>

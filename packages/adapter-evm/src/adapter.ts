@@ -15,7 +15,7 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { WagmiWalletImplementation } from './wallet-connect/wagmi-implementation';
+import { WagmiWalletImplementation } from './wallet/wagmi-implementation';
 
 import { loadEvmContract } from './abi';
 import {

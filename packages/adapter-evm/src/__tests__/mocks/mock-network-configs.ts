@@ -5,6 +5,7 @@ import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
  */
 export const mockEvmNetworkConfig: EvmNetworkConfig = {
   id: 'test-evm-mocknet',
+  exportConstName: 'mockEvmNetworkConfig',
   name: 'Test EVM Mocknet',
   ecosystem: 'evm',
   network: 'ethereum', // Can be any mock string

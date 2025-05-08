@@ -6,7 +6,9 @@ This document outlines the standardized architecture for blockchain adapters wit
 
 The goal of the adapter architecture is to provide a consistent, maintainable, and extensible way to integrate support for various blockchain ecosystems. The core principle is **separation of concerns** through a domain-driven modular structure, enforced by the central `ContractAdapter` interface defined in `packages/types`.
 
-Each adapter lives in its own package (e.g., `packages/adapter-evm`, `packages/adapter-solana`) and implements the `ContractAdapter` interface. The main `adapter.ts` file within each package acts as an orchestrator, delegating specific tasks to functions or classes exported from dedicated modules within its `src/` directory.
+Each adapter lives in its own package (e.g., `packages/adapter-evm`, `packages/adapter-solana`) and implements the `ContractAdapter` interface. A key architectural principle is that **adapters are network-aware**. They are instantiated with a specific `NetworkConfig` object (e.g., `EvmNetworkConfig`, `SolanaNetworkConfig`) corresponding to the target network (like Ethereum Mainnet or Solana Devnet). This `networkConfig` is stored internally (usually as `this.networkConfig`) and used by the adapter's methods for all network-dependent operations (e.g., using the correct RPC URL, chain ID, explorer URL).
+
+The main `adapter.ts` file within each package acts as an orchestrator, delegating specific tasks to functions or classes exported from dedicated modules within its `src/` directory.
 
 ## 2. Core `ContractAdapter` Interface
 
@@ -23,6 +25,8 @@ All adapters **must** implement the `ContractAdapter` interface found in `packag
 - Providing configuration and metadata (e.g., `getSupportedExecutionMethods`, `validateExecutionConfig`, `getExplorerUrl`, `getExplorerTxUrl?`)
 - Basic validation (e.g., `isValidAddress`)
 
+**Note:** Methods requiring network context (like `queryViewFunction`, `getExplorerUrl`, `loadContract` when fetching from network) rely on the `networkConfig` provided during adapter instantiation, rather than receiving it as a parameter.
+
 ## 3. Standardized Module Structure
 
 To promote consistency and maintainability, each adapter package should follow this general structure within its `src/` directory:
@@ -31,9 +35,13 @@ To promote consistency and maintainability, each adapter package should follow t
 adapter-<chain>/
 └── src/
     ├── adapter.ts             # Main Adapter class implementing ContractAdapter
+    ├── networks/              # Network configurations
+    │   ├── mainnet.ts         # Specific mainnet NetworkConfig objects
+    │   ├── testnet.ts         # Specific testnet NetworkConfig objects
+    │   └── index.ts           # Exports all configs + combined list (e.g., evmNetworks)
     ├── [chain-specific-def]/  # e.g., abi/ (EVM), idl/ (Solana), etc.
     │   ├── loader.ts          # Implements `loadContract` logic
-    │   ├── [source].ts        # e.g., etherscan.ts, on-chain-lookup.ts
+    │   ├── [source].ts        # e.g., etherscan.ts (uses NetworkConfig.apiUrl)
     │   └── transformer.ts     # Transforms raw def -> ContractSchema
     │   └── index.ts
     ├── mapping/               # Generic: Type mapping, field generation
@@ -50,7 +58,7 @@ adapter-<chain>/
     │   └── sender.ts
     │   └── index.ts
     ├── query/                 # Generic: View function querying
-    │   ├── handler.ts
+    │   ├── handler.ts         # Uses NetworkConfig for RPC/client
     │   └── view-checker.ts
     │   └── index.ts
     ├── wallet/                # Generic: Wallet connection interface logic
@@ -59,7 +67,7 @@ adapter-<chain>/
     │   └── index.ts
     ├── configuration/         # Generic: Metadata/configuration logic
     │   ├── execution.ts
-    │   └── explorer.ts
+    │   └── explorer.ts        # Uses NetworkConfig for explorer URLs
     │   └── index.ts
     ├── mocking/               # Generic: Mock contract loading
     │   ├── loader.ts
@@ -78,14 +86,20 @@ adapter-<chain>/
 - **`adapter.ts`:**
 
   - Contains the main class (e.g., `EvmAdapter`) that `implements ContractAdapter`.
+  - Constructor accepts a specific `NetworkConfig` (e.g., `EvmNetworkConfig`) and stores it.
   - Should be lean, acting primarily as an orchestrator.
   - Instantiates necessary internal classes (like `WagmiWalletImplementation`).
   - Imports functions/classes from other modules.
-  - Delegates the implementation of `ContractAdapter` interface methods to the imported functions/classes, passing necessary state (like `walletImplementation`) or instance methods (like `this.loadContract`).
+  - Delegates the implementation of `ContractAdapter` interface methods to the imported functions/classes, passing necessary state (like `this.networkConfig`, `walletImplementation`) or instance methods.
+
+- **`networks/`:**
+
+  - **Purpose:** Defines and exports the specific `NetworkConfig` objects for this adapter's ecosystem (e.g., `ethereumMainnet`, `polygonAmoy`).
+  - **Key Exports:** Individual named `NetworkConfig` constants, and a combined array of all configurations (e.g., `evmNetworks`).
 
 - **`[chain-specific-def]/` (e.g., `abi/`, `idl/`):**
 
-  - **Purpose:** Handles loading and parsing the chain's native contract interface definition format (ABI, IDL, etc.) and transforming it into the common `ContractSchema` defined in `packages/types`.
+  - **Purpose:** Handles loading and parsing the chain's native contract interface definition format (ABI, IDL, etc.) and transforming it into the common `ContractSchema` defined in `packages/types`. May use `networkConfig` (e.g., `apiUrl` for Etherscan).
   - **Key Exports:** A primary function (e.g., `loadEvmContract`) called by `Adapter.loadContract`. Might also export the transformer (e.g., `transformAbiToSchema`).
   - **Flexibility:** This directory name is flexible to reflect the chain's specific definition format.
 
@@ -101,23 +115,23 @@ adapter-<chain>/
 
 - **`transaction/`:**
 
-  - **Purpose:** Contains logic specifically related to preparing and executing state-changing transactions.
+  - **Purpose:** Contains logic specifically related to preparing and executing state-changing transactions. Uses `networkConfig` for details like Chain ID.
   - **Key Exports:** `format[Chain]TransactionData`, `signAndBroadcast[Chain]Transaction`, `waitFor[Chain]TransactionConfirmation`.
 
 - **`query/`:**
 
-  - **Purpose:** Handles the logic for querying read-only (view/pure) contract functions.
+  - **Purpose:** Handles the logic for querying read-only (view/pure) contract functions. Uses `networkConfig` to connect to the correct RPC endpoint.
   - **Key Exports:** `query[Chain]ViewFunction`, `is[Chain]ViewFunction`.
 
 - **`wallet/`:**
 
-  - **Purpose:** Encapsulates all direct interaction with wallet connection libraries (e.g., Wagmi, WalletConnect, Solana Wallet Adapter).
+  - **Purpose:** Encapsulates all direct interaction with wallet connection libraries (e.g., Wagmi, WalletConnect, Solana Wallet Adapter). May use `networkConfig` to initialize or configure the library.
   - **Key Exports:** `connect[Chain]Wallet`, `disconnect[Chain]Wallet`, `get[Chain]WalletConnectionStatus`, etc.
   - **Internal Implementation:** Often contains a class (e.g., `WagmiWalletImplementation`) that manages the library specifics. The exported functions act as a facade.
 
 - **`configuration/`:**
 
-  - **Purpose:** Provides configuration metadata about the adapter and chain.
+  - **Purpose:** Provides configuration metadata about the adapter and chain. Uses `networkConfig` for network-specific details like explorer URLs.
   - **Key Exports:** `get[Chain]SupportedExecutionMethods`, `validate[Chain]ExecutionConfig`, `get[Chain]ExplorerAddressUrl`, `get[Chain]ExplorerTxUrl`.
 
 - **`mocking/`:**

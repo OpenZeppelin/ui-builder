@@ -7,7 +7,7 @@
  */
 /*------------TEMPLATE COMMENT END------------*/
 // @ts-expect-error - This is a placeholder for the correct adapter import
-import { AdapterPlaceholder } from '@@adapter-package-name@@';
+import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-name@@';
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -16,8 +16,9 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './styles.css';
 
+const networkConfig = NetworkConfigPlaceholder;
 // Create adapter instance at the root level to ensure consistent connection state
-const adapter = new AdapterPlaceholder();
+const adapter = new AdapterPlaceholder(networkConfig);
 
 /**
  * Main entry point for the application

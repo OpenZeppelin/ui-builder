@@ -27,6 +27,7 @@ import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 const mockEvmNetworkConfig: EvmNetworkConfig = {
   id: 'test-evm-mocknet',
   name: 'Test EVM Mocknet',
+  exportConstName: 'mockEvmNetworkConfig',
   ecosystem: 'evm',
   network: 'ethereum', // Or any mock string
   type: 'testnet',

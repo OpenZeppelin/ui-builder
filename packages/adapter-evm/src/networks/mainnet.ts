@@ -2,8 +2,9 @@ import { mainnet as viemMainnet, polygon as viemPolygon } from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-export const ethereumMainnet = {
+export const ethereumMainnet: EvmNetworkConfig = {
   id: 'ethereum-mainnet',
+  exportConstName: 'ethereumMainnet',
   name: 'Ethereum',
   ecosystem: 'evm',
   network: 'ethereum',
@@ -20,10 +21,11 @@ export const ethereumMainnet = {
     decimals: 18,
   },
   viemChain: viemMainnet,
-} as EvmNetworkConfig;
+};
 
-export const polygonMainnet = {
+export const polygonMainnet: EvmNetworkConfig = {
   id: 'polygon-mainnet',
+  exportConstName: 'polygonMainnet',
   name: 'Polygon',
   ecosystem: 'evm',
   network: 'polygon',
@@ -40,6 +42,6 @@ export const polygonMainnet = {
     decimals: 18,
   },
   viemChain: viemPolygon,
-} as EvmNetworkConfig;
+};
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

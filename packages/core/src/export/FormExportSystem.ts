@@ -7,7 +7,7 @@
  * standalone form project.
  */
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import type { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
@@ -64,7 +64,7 @@ export class FormExportSystem {
    *
    * @param formConfig Form configuration created in the builder
    * @param contractSchema Full contract schema including ABI/function details
-   * @param ecosystem Blockchain ecosystem (evm, solana, etc.)
+   * @param networkConfig Network configuration including ecosystem
    * @param functionId Function ID this form is for
    * @param options Export customization options
    * @returns An export result with the file blob and metadata
@@ -72,13 +72,13 @@ export class FormExportSystem {
   async exportForm(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
-    ecosystem: Ecosystem,
+    networkConfig: NetworkConfig,
     functionId: string,
     options: Partial<ExportOptions> = {}
   ): Promise<ExportResult> {
-    // Ensure ecosystem is set in options
+    // Ensure ecosystem is set in options from networkConfig
     const exportOptions: ExportOptions = {
-      ecosystem,
+      ecosystem: networkConfig.ecosystem,
       ...options,
     };
 
@@ -88,15 +88,15 @@ export class FormExportSystem {
 
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');
-      const mainTsxCode = await this.formCodeGenerator.generateMainTsx(ecosystem);
+      const mainTsxCode = await this.formCodeGenerator.generateMainTsx(networkConfig);
       const appComponentCode = await this.formCodeGenerator.generateAppComponent(
-        ecosystem,
+        networkConfig.ecosystem,
         functionId
       );
       const formComponentCode = await this.formCodeGenerator.generateFormComponent(
         formConfig,
         contractSchema,
-        ecosystem,
+        networkConfig,
         functionId
       );
 
@@ -111,7 +111,7 @@ export class FormExportSystem {
       logger.info('Export System', 'Assembling project files...');
       const projectFiles = await this.assembleProjectFiles(
         formConfig,
-        ecosystem,
+        networkConfig,
         functionId,
         exportOptions,
         customFiles
@@ -125,7 +125,10 @@ export class FormExportSystem {
       logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
       // 5. Prepare and return the final export result
-      const dependencies = await this.packageManager.getDependencies(formConfig, ecosystem);
+      const dependencies = await this.packageManager.getDependencies(
+        formConfig,
+        networkConfig.ecosystem
+      );
       const finalResult: ExportResult = {
         data: zipResult.data,
         fileName: zipResult.fileName,
@@ -146,15 +149,14 @@ export class FormExportSystem {
    */
   private async assembleProjectFiles(
     formConfig: BuilderFormConfig,
-    ecosystem: Ecosystem,
+    networkConfig: NetworkConfig,
     functionId: string,
     exportOptions: ExportOptions,
     customFiles: Record<string, string>
   ): Promise<Record<string, string>> {
-    // Determine adapter details (needed for package.json update)
-    const adapterPackageName = adapterPackageMap[ecosystem];
+    const adapterPackageName = adapterPackageMap[networkConfig.ecosystem];
     if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
+      throw new Error(`No adapter package configured for ecosystem: ${networkConfig.ecosystem}`);
     }
 
     // 1. Get base project template structure (will not include main.tsx anymore)
@@ -216,7 +218,7 @@ export class FormExportSystem {
       projectFiles['package.json'] = await this.packageManager.updatePackageJson(
         originalPackageJson,
         formConfig,
-        ecosystem,
+        networkConfig.ecosystem,
         functionId,
         exportOptions
       );

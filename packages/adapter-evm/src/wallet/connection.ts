@@ -2,7 +2,7 @@ import type { GetAccountReturnType } from '@wagmi/core';
 
 import type { Connector } from '@openzeppelin/transaction-form-types';
 
-import type { WagmiWalletImplementation } from '../wallet-connect/wagmi-implementation';
+import type { WagmiWalletImplementation } from './wagmi-implementation';
 
 /**
  * Indicates if this adapter implementation supports wallet connection.

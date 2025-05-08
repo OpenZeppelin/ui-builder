@@ -10,7 +10,12 @@ import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+
+// Import ecosystemManager utils
+import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';
+// Import others as needed for different ecosystem tests
+// import { solanaDevnet } from '@openzeppelin/transaction-form-adapter-solana';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { ZipProgress } from '../ZipGenerator';
@@ -76,6 +81,7 @@ describe('Export CLI Wrapper', () => {
   it('exports a form with provided configuration', async () => {
     // Read configuration from environment variables
     const ecosystem = (process.env.EXPORT_TEST_ECOSYSTEM || 'evm') as Ecosystem;
+    const networkId = process.env.EXPORT_TEST_NETWORK_ID; // New optional env var
     const func = process.env.EXPORT_TEST_FUNCTION || 'transfer';
     const template = process.env.EXPORT_TEST_TEMPLATE || 'typescript-react-vite';
     const includeAdapters = process.env.EXPORT_TEST_INCLUDE_ADAPTERS !== 'false';
@@ -99,25 +105,72 @@ describe('Export CLI Wrapper', () => {
 
     const mockContractSchema = createMinimalContractSchema(func, ecosystem);
 
-    // Create export system
+    // Select the network config dynamically using ecosystemManager
+    let networkConfigToUse: NetworkConfig | undefined;
+
+    if (networkId) {
+      logger.info('CLI Wrapper Test', `Attempting to load specific network ID: ${networkId}`);
+      networkConfigToUse = await getNetworkById(networkId);
+      if (!networkConfigToUse) {
+        logger.error('CLI Wrapper Test', `Specified network ID not found: ${networkId}`);
+        throw new Error(`Specified network ID not found: ${networkId}`);
+      }
+      // Optional: Check if the found network's ecosystem matches the one specified, although getNetworkById doesn't require ecosystem
+      if (networkConfigToUse.ecosystem !== ecosystem) {
+        logger.warn(
+          'CLI Wrapper Test',
+          `Specified network ID ${networkId} belongs to ecosystem ${networkConfigToUse.ecosystem}, but testing for ${ecosystem}. Proceeding anyway.`
+        );
+        // Decide whether to throw an error or allow mismatch based on desired strictness
+        // throw new Error(`Network ID ${networkId} ecosystem mismatch: expected ${ecosystem}, got ${networkConfigToUse.ecosystem}`);
+      }
+    } else {
+      logger.info(
+        'CLI Wrapper Test',
+        `No specific network ID provided. Loading networks for ecosystem: ${ecosystem}`
+      );
+      const networksForEcosystem = await getNetworksByEcosystem(ecosystem);
+      if (networksForEcosystem.length > 0) {
+        networkConfigToUse = networksForEcosystem[0]; // Default to the first network
+        logger.info(
+          'CLI Wrapper Test',
+          `Using first available network for ${ecosystem}: ${networkConfigToUse.id}`
+        );
+      } else {
+        logger.error('CLI Wrapper Test', `No networks found for ecosystem: ${ecosystem}`);
+        throw new Error(`No networks found for ecosystem: ${ecosystem}`);
+      }
+    }
+
+    // Ensure networkConfigToUse is defined before proceeding
+    if (!networkConfigToUse) {
+      // This case should theoretically be caught above, but ensures type safety
+      throw new Error('Failed to determine network configuration to use.');
+    }
+
     const exportSystem = new FormExportSystem();
 
-    // Generate the export
-    const result = await exportSystem.exportForm(formConfig, mockContractSchema, ecosystem, func, {
-      projectName: `${func}-form`,
-      template,
-      includeAdapters,
-      env,
-      isCliBuildTarget: isRunningFromCLI,
-      // Only provide onProgress callback if running from CLI
-      onProgress: isRunningFromCLI
-        ? (progress: ZipProgress) =>
-            logger.info(
-              'CLI Wrapper Test',
-              `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`
-            )
-        : undefined,
-    });
+    // Pass the actual NetworkConfig object
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      networkConfigToUse,
+      func,
+      {
+        projectName: `${func}-form`,
+        template,
+        includeAdapters,
+        env,
+        isCliBuildTarget: isRunningFromCLI,
+        onProgress: isRunningFromCLI
+          ? (progress: ZipProgress) =>
+              logger.info(
+                'CLI Wrapper Test',
+                `Progress: ${progress.percent?.toFixed(1) || '0'}% - ${progress.currentFile || 'unknown'}`
+              )
+          : undefined,
+      }
+    );
 
     // Ensure we have a valid result
     expect(result).toBeDefined();
@@ -135,9 +188,6 @@ describe('Export CLI Wrapper', () => {
 
     // Use JSZip to directly save the zip file
     try {
-      // console.log( // Remove logging
-      //   `Exporting form for chain: ${chain}, function: ${func}, template: ${template}...`
-      // ); // Remove logging
       const zip = new JSZip();
 
       // Load the data (which will be a Buffer in this Node.js context)
@@ -151,11 +201,9 @@ describe('Export CLI Wrapper', () => {
 
       // Track the file for cleanup
       createdFiles.push(outputPath);
-
-      // console.log(`Export saved to: ${outputPath}`); // Remove logging
     } catch (error) {
-      logger.error('CLI Wrapper Test', 'Error saving zip file:', error); // Log the error
-      throw error; // Re-throw the error to ensure Vitest fails the test
+      logger.error('CLI Wrapper Test', 'Error saving zip file:', error);
+      throw error;
     }
 
     // Return success (this line won't be reached if an error is thrown)

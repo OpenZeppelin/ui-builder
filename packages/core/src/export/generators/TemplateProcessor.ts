@@ -158,6 +158,7 @@ export class TemplateProcessor {
   public async applyCommonPostProcessing(
     processedTemplate: string,
     options?: {
+      networkConfigImportName?: string;
       adapterClassName?: string;
       adapterPackageName?: string;
       formConfigJSON?: string;
@@ -182,6 +183,19 @@ export class TemplateProcessor {
 
     // Remove all @ts-expect-error comments - they're only needed during template development
     processedTemplate = processedTemplate.replace(/\/\/\s*@ts-expect-error.*\n/g, '');
+
+    if (options?.networkConfigImportName) {
+      processedTemplate = processedTemplate.replace(
+        /NetworkConfigPlaceholder/g,
+        options.networkConfigImportName
+      );
+
+      // Fix any possible malformed imports caused by comment-style placeholders
+      processedTemplate = processedTemplate.replace(
+        /import\s*\{\s*\{\/\*\*\/\}\s*\}\s*from/g,
+        `import { ${options.networkConfigImportName} } from`
+      );
+    }
 
     // Replace adapter class name placeholder
     if (options?.adapterClassName) {

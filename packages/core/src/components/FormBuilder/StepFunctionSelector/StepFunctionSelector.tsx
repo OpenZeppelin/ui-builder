@@ -1,3 +1,4 @@
+import { NetworkStatusBadge } from '../../Common/NetworkStatusBadge';
 import { StepTitleWithDescription } from '../Common';
 
 import { useFunctionFilter } from './hooks/useFunctionFilter';
@@ -11,6 +12,7 @@ export function StepFunctionSelector({
   contractSchema,
   selectedFunction,
   onFunctionSelected,
+  networkConfig,
 }: StepFunctionSelectorProps) {
   // Use custom hooks to manage component logic
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
@@ -28,6 +30,12 @@ export function StepFunctionSelector({
 
   return (
     <div className="space-y-6">
+      {networkConfig && (
+        <div className="mb-4">
+          <NetworkStatusBadge network={networkConfig} />
+        </div>
+      )}
+
       <StepTitleWithDescription
         title="Select Contract Function"
         description="Choose the contract function you want to create a transaction form for. Each function will have its own dedicated form."

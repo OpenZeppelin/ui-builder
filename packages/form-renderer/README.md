@@ -63,7 +63,12 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 
 ```tsx
 import { TransactionForm, generateId, logger } from '@openzeppelin/transaction-form-renderer';
-import type { ContractAdapter, RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  EvmNetworkConfig,
+  NetworkConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 
 // Example form schema
 const schema: RenderFormSchema = {
@@ -87,11 +92,31 @@ const schema: RenderFormSchema = {
   },
 };
 
+// Example network configuration (replace with actual config from adapter packages)
+const networkConfig: EvmNetworkConfig = {
+  id: 'example-evm-network',
+  name: 'Example EVM Network',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 11155111,
+  rpcUrl: 'https://rpc.example.com',
+  explorerUrl: 'https://explorer.example.com',
+  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+  apiUrl: 'https://api.example.com',
+};
+
 // Simple adapter implementation for demonstration.
 // Real applications use adapters like @openzeppelin/transaction-form-adapter-evm
+// crucially, the adapter instance should be configured for the specific networkConfig
 const adapter: ContractAdapter = {
+  // Adapter methods should use the networkConfig passed during instantiation
+  // (or assume it was passed during instantiation as shown in adapter READMEs)
+  networkConfig: networkConfig, // Adapters hold their config internally
   ecosystem: 'evm', // Example ecosystem
   loadContract: async (source: string) => {
+    // Implementation would use this.networkConfig
     throw new Error('Not implemented');
   },
   mapParameterTypeToFieldType: (type: string) => 'text',
@@ -106,19 +131,31 @@ const adapter: ContractAdapter = {
     throw new Error('Not implemented');
   },
   isViewFunction: (func: any) => false,
-  queryViewFunction: async (addr: string, funcId: string, params: any[]) => null,
+  queryViewFunction: async (addr: string, funcId: string, params: any[]) => {
+    // Implementation would use this.networkConfig
+    return null;
+  },
   formatFunctionResult: (result: any) => String(result),
   supportsWalletConnection: () => false, // Indicate no support in this simple example
+  getExplorerUrl: (address: string) => `${networkConfig.explorerUrl}/address/${address}`, // Example usage
+  getExplorerTxUrl: (txHash: string) => `${networkConfig.explorerUrl}/tx/${txHash}`, // Example usage
   // Other methods omitted for brevity...
 };
 
 function App() {
   const handleSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
-    // Process transaction
+    // Process transaction using the configured adapter and network
   };
 
-  return <TransactionForm schema={schema} adapter={adapter} onSubmit={handleSubmit} />;
+  return (
+    <TransactionForm
+      schema={schema}
+      adapter={adapter}
+      networkConfig={networkConfig}
+      onSubmit={handleSubmit}
+    />
+  );
 }
 ```
 
@@ -130,16 +167,17 @@ The main component for rendering transaction forms.
 
 #### Props
 
-| Prop            | Type                       | Description                                      |
-| --------------- | -------------------------- | ------------------------------------------------ |
-| `schema`        | `RenderFormSchema`         | The schema definition for the form               |
-| `adapter`       | `ContractAdapter`          | The blockchain adapter instance                  |
-| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted         |
-| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode          |
-| `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO] |
-| `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]       |
-| `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |
-| `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]           |
+| Prop            | Type                       | Description                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------------- |
+| `schema`        | `RenderFormSchema`         | The schema definition for the form                                   |
+| `adapter`       | `ContractAdapter`          | The blockchain adapter instance (must be configured for the network) |
+| `networkConfig` | `NetworkConfig`            | The specific network configuration object for the target network     |
+| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted                             |
+| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode                              |
+| `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO]                     |
+| `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]                           |
+| `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]                                |
+| `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]                               |
 
 ### Utilities
 

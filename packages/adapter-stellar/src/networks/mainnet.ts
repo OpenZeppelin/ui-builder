@@ -3,6 +3,7 @@ import { StellarNetworkConfig } from '@openzeppelin/transaction-form-types';
 // Placeholder for Stellar Public Network (Mainnet)
 export const stellarPublic: StellarNetworkConfig = {
   id: 'stellar-public',
+  exportConstName: 'stellarPublic',
   name: 'Stellar',
   ecosystem: 'stellar',
   network: 'stellar',

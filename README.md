@@ -433,21 +433,20 @@ To add support for a new blockchain ecosystem:
     - Create `src/adapter.ts`.
     - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/transaction-form-types`.
     - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
-    - Implement methods to use `this.networkConfig` internally for network-specific operations.
-5.  **Define Network Configurations**:
+    - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
+5.  **Define Network Configurations**:\
     - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
-    - Each network config should include a `viemChain` property if it's an EVM-compatible chain and relies on Viem for client creation, or provide all necessary details like `rpcUrl`.
-    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`).
-6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the networks array (e.g., `export { suiNetworks } from './networks';`).
+    - Each network config must provide all necessary details for the adapter to function, such as RPC endpoints (`rpcUrl` or `rpcEndpoint`), chain identifiers (`chainId` for EVM), explorer URLs, native currency details, etc., as defined by its `YourEcosystemNetworkConfig` interface.
+    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
+6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
 7.  **Register Ecosystem in Core**:
     - Open `packages/core/src/core/ecosystemManager.ts`.
     - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/transaction-form-adapter-sui';`).
     - Add a new entry to the `ecosystemRegistry` object. This entry defines:
-      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks').
+      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
       - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
-      - Optionally, `adapterConfigPackagePath` and `adapterConfigExportName` if your adapter has a separate `dist/config.js` file for the export system.
-    - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package.
-    - Add a case for your new ecosystem in the `switch` statement within `getAdapterConfigLoader` if you have an adapter-specific config file.
+    - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package module (which should export the `AdapterClass` and the `networksExportName` list).
+    - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
 8.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
 9.  **Build & Test**:
     - Build the new adapter package (`pnpm --filter @openzeppelin/transaction-form-adapter-<chain-name> build`).

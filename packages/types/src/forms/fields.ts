@@ -1,6 +1,5 @@
 import type { FullContractAdapter } from '../adapters';
 import type { ContractSchema } from '../contracts/schema';
-import type { NetworkConfig } from '../networks/config';
 
 import type { RenderFormSchema } from './schema';
 
@@ -116,7 +115,8 @@ export interface TransactionFormProps {
   contractSchema: ContractSchema;
 
   /**
-   * The chain-specific adapter instance.
+   * The chain-specific adapter instance, pre-configured for a specific network.
+   * It should contain the networkConfig internally.
    */
   adapter: FullContractAdapter;
 
@@ -124,9 +124,4 @@ export interface TransactionFormProps {
    * Optional callback when form is submitted
    */
   onSubmit?: (data: FormData) => void;
-
-  /**
-   * The network configuration for the transaction
-   */
-  networkConfig: NetworkConfig | null;
 }

@@ -1,38 +1,59 @@
 import { describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  EvmNetworkConfig,
+  NetworkConfig,
+  SolanaNetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network configs
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-export-structure-evm',
+  name: 'Test Export Structure EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
+const mockSolanaConfig: SolanaNetworkConfig = {
+  id: 'test-export-structure-solana',
+  name: 'Test Export Structure Solana',
+  exportConstName: 'mockSolanaNetworkConfig',
+  ecosystem: 'solana',
+  network: 'solana',
+  type: 'testnet',
+  isTestnet: true,
+  rpcEndpoint: 'mock',
+  commitment: 'confirmed',
+};
 
 describe('Export Structure Tests', () => {
   /**
    * Common validation function for basic project structure
    */
   async function testExportStructure(
-    formConfig: BuilderFormConfig,
-    contractSchema: ContractSchema,
-    ecosystem: Ecosystem,
-    functionName: string
+    networkConfig: NetworkConfig,
+    functionName: string = 'transfer'
   ) {
-    // Create the export system
     const exportSystem = new FormExportSystem();
+    const formConfig = createMinimalFormConfig(functionName, networkConfig.ecosystem);
+    const contractSchema = createMinimalContractSchema(functionName, networkConfig.ecosystem);
 
-    // Generate export options
-    const exportOptions = {
-      projectName: `test-${ecosystem}-project`,
-    };
-
-    // Export the form
     const result = await exportSystem.exportForm(
       formConfig,
       contractSchema,
-      ecosystem,
+      networkConfig,
       functionName,
-      exportOptions
+      { projectName: `test-${networkConfig.ecosystem}-project` }
     );
 
     // Extract files from the ZIP using result.data
@@ -48,12 +69,7 @@ describe('Export Structure Tests', () => {
 
   describe('Basic Project Structure', () => {
     it('should include standard project files in all exports', async () => {
-      const { files, fileList } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        createMinimalContractSchema('transfer', 'evm'),
-        'evm',
-        'transfer'
-      );
+      const { files, fileList } = await testExportStructure(mockEvmNetworkConfig);
 
       // Core project files that should always be present
       const requiredCoreFiles = [
@@ -92,12 +108,7 @@ describe('Export Structure Tests', () => {
 
   describe('Chain-Specific Exports', () => {
     it('should include correct dependencies for EVM exports', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        createMinimalContractSchema('transfer', 'evm'),
-        'evm',
-        'transfer'
-      );
+      const { files } = await testExportStructure(mockEvmNetworkConfig);
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
@@ -106,12 +117,7 @@ describe('Export Structure Tests', () => {
     });
 
     it('should include correct dependencies for Solana exports', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        createMinimalContractSchema('transfer', 'solana'),
-        'solana',
-        'transfer'
-      );
+      const { files } = await testExportStructure(mockSolanaConfig);
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
@@ -132,7 +138,7 @@ describe('Export Structure Tests', () => {
       const result = await exportSystem.exportForm(
         createMinimalFormConfig('transfer'),
         createMinimalContractSchema('transfer', 'evm'),
-        'evm',
+        mockEvmNetworkConfig,
         'transfer',
         { projectName: customProjectName }
       );
@@ -145,12 +151,7 @@ describe('Export Structure Tests', () => {
     });
 
     it('should generate a valid index.html file', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        createMinimalContractSchema('transfer', 'evm'),
-        'evm',
-        'transfer'
-      );
+      const { files } = await testExportStructure(mockEvmNetworkConfig);
 
       // Verify index.html exists and has basic HTML structure
       expect(files['index.html']).toBeDefined();
