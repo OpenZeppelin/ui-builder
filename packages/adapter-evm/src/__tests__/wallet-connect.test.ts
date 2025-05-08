@@ -19,10 +19,13 @@ vi.mock('../wallet/wagmi-implementation', () => {
   const mockConnect = vi.fn().mockImplementation(async (_connectorId: string) => ({
     connected: true,
     address: '0x1234567890123456789012345678901234567890',
-    error: undefined, // Explicitly undefined on success
+    chainId: mockEvmNetworkConfig.chainId,
+    error: undefined,
   }));
 
   const mockDisconnect = vi.fn().mockResolvedValue({ disconnected: true, error: undefined });
+
+  const mockSwitchNetwork = vi.fn().mockResolvedValue(undefined);
 
   // Mock the raw Wagmi status returned by the implementation class
   const mockWagmiStatus: GetAccountReturnType = {
@@ -54,6 +57,7 @@ vi.mock('../wallet/wagmi-implementation', () => {
       disconnect: mockDisconnect,
       getWalletConnectionStatus: mockGetWalletConnectionStatus,
       onWalletConnectionChange: mockOnWalletConnectionChange,
+      switchNetwork: mockSwitchNetwork,
     })),
   };
 });

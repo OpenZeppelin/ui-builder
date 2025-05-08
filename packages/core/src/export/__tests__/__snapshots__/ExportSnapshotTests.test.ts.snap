@@ -19,11 +19,6 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import GeneratedForm from './components/GeneratedForm';
 
-// Define types for the transaction data
-interface TransactionData {
-  [key: string]: unknown;
-}
-
 interface AppProps {
   adapter: EvmAdapter;
 }
@@ -45,12 +40,9 @@ export function App({ adapter }: AppProps) {
         <div className="container">
           <GeneratedForm
             adapter={adapter}
-            onSubmit={(txData: TransactionData) => {
-              console.log('Transaction submitted:', txData);
-              return Promise.resolve({ txHash: 'demo-tx-hash-' + Date.now() });
-            }}
-            onError={(error: Error) => {
-              console.error('Transaction error:', error);
+            onSubmit={(data: FormData) => {
+              console.log('Transaction submitted:', data);
+              // Don't return a Promise, this function should be void
             }}
           />
         </div>
@@ -96,8 +88,8 @@ interface TransactionResult {
   error?: string;
 }
 
-// Define props for the component - extending TransactionFormProps but making schema optional
-interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema'> {
+// Define props for the component, extending TransactionFormProps but making schemas optional as they are injected by the generator
+interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'contractSchema'> {
   adapter: EvmAdapter;
 }
 

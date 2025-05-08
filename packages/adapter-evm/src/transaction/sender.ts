@@ -8,9 +8,45 @@ import type { WagmiWalletImplementation } from '../wallet/wagmi-implementation';
  */
 export async function signAndBroadcastEvmTransaction(
   transactionData: WriteContractParameters,
-  walletImplementation: WagmiWalletImplementation
+  walletImplementation: WagmiWalletImplementation,
+  targetChainId: number
 ): Promise<{ txHash: string }> {
   console.log('Attempting to sign and broadcast EVM transaction:', transactionData);
+  console.log('Target chain ID for transaction:', targetChainId);
+
+  // 0. Check and switch network if necessary
+  const initialAccountStatus = walletImplementation.getWalletConnectionStatus();
+  if (!initialAccountStatus.isConnected || !initialAccountStatus.chainId) {
+    console.error(
+      'signAndBroadcast: Wallet not connected or chainId unavailable before network check.'
+    );
+    throw new Error('Wallet not connected or chain ID is unavailable.');
+  }
+
+  if (initialAccountStatus.chainId !== targetChainId) {
+    console.info(
+      `Wallet is on chain ${initialAccountStatus.chainId}, but transaction targets chain ${targetChainId}. Attempting to switch.`
+    );
+    try {
+      await walletImplementation.switchNetwork(targetChainId);
+      // After attempting switch, re-check the status
+      const postSwitchAccountStatus = walletImplementation.getWalletConnectionStatus();
+      if (postSwitchAccountStatus.chainId !== targetChainId) {
+        // This case should ideally be caught by switchNetwork throwing an error, but double check.
+        console.error(
+          `Failed to switch to target chain ${targetChainId}. Current chain: ${postSwitchAccountStatus.chainId}`
+        );
+        throw new Error(
+          `Failed to switch to the required network (target: ${targetChainId}). Please switch manually.`
+        );
+      }
+      console.info(`Successfully switched to target chain ${targetChainId}.`);
+    } catch (error) {
+      console.error('Network switch failed:', error);
+      // Re-throw the error from switchNetwork which might include "User rejected"
+      throw error;
+    }
+  }
 
   // 1. Get the Wallet Client
   const walletClient = await walletImplementation.getWalletClient();

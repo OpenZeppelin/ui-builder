@@ -39,7 +39,7 @@ import { formatEvmFunctionResult } from './transform';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
 import {
-  connectEvmWallet,
+  connectAndEnsureCorrectNetwork,
   disconnectEvmWallet,
   evmSupportsWalletConnection,
   getEvmAvailableConnectors,
@@ -115,7 +115,8 @@ export class EvmAdapter implements ContractAdapter {
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
-      this.walletImplementation
+      this.walletImplementation,
+      this.networkConfig.chainId
     );
   }
 
@@ -201,7 +202,20 @@ export class EvmAdapter implements ContractAdapter {
   async connectWallet(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
-    return connectEvmWallet(connectorId, this.walletImplementation);
+    const result = await connectAndEnsureCorrectNetwork(
+      connectorId,
+      this.walletImplementation,
+      this.networkConfig.chainId
+    );
+
+    if (result.connected && result.address) {
+      return { connected: true, address: result.address };
+    } else {
+      return {
+        connected: false,
+        error: result.error || 'Connection failed for an unknown reason.',
+      };
+    }
   }
 
   /**

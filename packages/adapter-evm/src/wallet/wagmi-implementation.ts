@@ -15,6 +15,7 @@ import {
   getAccount,
   getPublicClient as getWagmiPublicClient,
   getWalletClient as getWagmiWalletClient,
+  switchChain,
   watchAccount,
 } from '@wagmi/core';
 // Import types and http from viem
@@ -126,11 +127,11 @@ export class WagmiWalletImplementation {
   /**
    * Initiates the connection process for a specific connector.
    * @param connectorId The ID or name of the connector to use.
-   * @returns Connection result object.
+   * @returns Connection result object including chainId if successful.
    */
   public async connect(
     connectorId: string
-  ): Promise<{ connected: boolean; address?: string; error?: string }> {
+  ): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
     try {
       const connectors = this.config.connectors;
 
@@ -153,7 +154,8 @@ export class WagmiWalletImplementation {
       }
 
       const result = await connect(this.config, { connector });
-      return { connected: true, address: result.accounts[0] };
+      // result is of type ConnectReturnType, which includes accounts and chainId
+      return { connected: true, address: result.accounts[0], chainId: result.chainId };
     } catch (error: unknown) {
       console.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
       return {
@@ -210,5 +212,41 @@ export class WagmiWalletImplementation {
    */
   public cleanup(): void {
     this.unsubscribe?.();
+  }
+
+  /**
+   * Prompts the user to switch to the specified network (chain).
+   * @param chainId The target chain ID to switch to.
+   * @returns A promise that resolves if the switch is successful, or rejects with an error.
+   */
+  public async switchNetwork(chainId: number): Promise<void> {
+    try {
+      // First, check if we are already on the correct chain.
+      // The getAccount() method returns the current chainId if connected.
+      const currentAccount = this.getWalletConnectionStatus();
+      if (currentAccount.isConnected && currentAccount.chainId === chainId) {
+        console.info('WagmiWalletImplementation', `Already on target chain ID: ${chainId}`);
+        return; // Already on the correct network
+      }
+
+      console.info('WagmiWalletImplementation', `Attempting to switch to chain ID: ${chainId}`);
+      await switchChain(this.config, { chainId });
+      console.info('WagmiWalletImplementation', `Successfully switched to chain ID: ${chainId}`);
+    } catch (error: unknown) {
+      console.error(
+        'WagmiWalletImplementation',
+        `Error switching network to chain ID ${chainId}:`,
+        error
+      );
+      // Wagmi's switchChain can throw specific error types, e.g., UserRejectedRequestError
+      // For simplicity, rethrow a generic error message.
+      // More specific error handling could be added here based on error.name or instanceof checks.
+      if (error instanceof Error && error.name === 'UserRejectedRequestError') {
+        throw new Error('Network switch rejected by user.');
+      }
+      throw new Error(
+        `Failed to switch network: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 }
