@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { AddressField } from '@openzeppelin/transaction-form-renderer';
+import { AddressField, logger } from '@openzeppelin/transaction-form-renderer';
 
 import {
   getEcosystemExplorerGuidance,
@@ -53,6 +53,9 @@ export function ContractAddressForm({
   const loadingRef = useRef(false);
   // Track the last successfully loaded address to prevent reloading the same contract
   const [loadedAddress, setLoadedAddress] = useState<string | null>(existingContractAddress);
+  const [lastAttemptedAddress, setLastAttemptedAddress] = useState<string | null>(
+    existingContractAddress
+  );
 
   // Get current address value from form
   const currentAddress = watch('contractAddress');
@@ -65,6 +68,7 @@ export function ContractAddressForm({
     if (existingContractAddress) {
       setValue('contractAddress', existingContractAddress);
       setLoadedAddress(existingContractAddress);
+      setLastAttemptedAddress(existingContractAddress);
     }
   }, [existingContractAddress, setValue]);
 
@@ -74,8 +78,16 @@ export function ContractAddressForm({
       reset({ contractAddress: '' });
       setError(null);
       setLoadedAddress(null);
+      setLastAttemptedAddress(null);
     }
-  }, [networkConfig, reset, setError, existingContractAddress]);
+  }, [
+    networkConfig,
+    reset,
+    setError,
+    existingContractAddress,
+    setLoadedAddress,
+    setLastAttemptedAddress,
+  ]);
 
   // Check if address is valid using the adapter
   useEffect(() => {
@@ -103,36 +115,36 @@ export function ContractAddressForm({
 
   // Load contract when debounced address changes and is valid
   useEffect(() => {
-    // Don't do anything if address is empty, invalid, already loaded, or we're already loading
     if (
       !debouncedAddress ||
       !isAddressValid ||
       loadingRef.current ||
       isLoading ||
-      debouncedAddress === loadedAddress
+      debouncedAddress === lastAttemptedAddress
     ) {
       return;
     }
 
     const loadContractFromAddress = async () => {
-      // Set loading state and clear any previous errors
+      setLastAttemptedAddress(debouncedAddress);
       setIsLoading(true);
       loadingRef.current = true;
       setError(null);
 
       try {
+        logger.info('ContractAddressForm', `Attempting to load contract: ${debouncedAddress}`);
         const schema = await loadContractDefinition(adapter, debouncedAddress);
-        if (schema) {
-          onLoadContract(schema);
-          setLoadedAddress(debouncedAddress);
-        } else {
-          setError(
-            `Failed to load contract definition. Check the address and verify it's available on the ${getEcosystemName(networkConfig.ecosystem)} network.`
-          );
-        }
+        logger.info('ContractAddressForm', `Successfully loaded contract: ${debouncedAddress}`);
+        if (!schema) throw new Error('Internal error: Schema was null after successful load.');
+        onLoadContract(schema);
+        setLoadedAddress(debouncedAddress);
       } catch (err) {
-        setError('An unexpected error occurred.');
-        console.error(err);
+        logger.error('ContractAddressForm', `Failed to load contract ${debouncedAddress}:`, err);
+        const errorMessage =
+          err instanceof Error ? err.message : 'An unknown error occurred during contract loading.';
+        setError(errorMessage);
+        setLoadedAddress(null);
+        onClearContract();
       } finally {
         setIsLoading(false);
         loadingRef.current = false;
@@ -144,12 +156,12 @@ export function ContractAddressForm({
     debouncedAddress,
     isAddressValid,
     adapter,
-    networkConfig,
     onLoadContract,
     setIsLoading,
     setError,
     isLoading,
-    loadedAddress,
+    lastAttemptedAddress,
+    onClearContract,
   ]);
 
   const ecosystemName = getEcosystemName(networkConfig.ecosystem);

@@ -47,10 +47,9 @@ export async function loadContractDefinition(
     return schema;
   } catch (error) {
     logger.error('ContractLoader', 'Failed to load contract definition:', error);
-    // Propagate specific error messages if possible, otherwise return null
-    // UI should handle the null return and potentially show the logged error
-    // Re-throwing the error might be better for more specific UI handling
-    // throw error; // Consider re-throwing
-    return null; // Return null on any error during loading/parsing
+    // Propagate specific error messages by re-throwing the error.
+    // The calling component should handle this error and update the UI accordingly.
+    // Returning null hides the specific reason for failure.
+    throw error; // Re-throw the caught error
   }
 }
