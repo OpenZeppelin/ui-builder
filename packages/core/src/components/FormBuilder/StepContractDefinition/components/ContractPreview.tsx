@@ -16,8 +16,10 @@ export function ContractPreview({
           functions.
         </p>
       </div>
-      <div className="max-h-80 overflow-auto rounded-md border bg-muted p-4">
-        <pre className="text-xs font-mono">{JSON.stringify(contractSchema, null, 2)}</pre>
+      <div className="max-h-80 overflow-auto rounded-md border bg-muted p-4 w-full">
+        <pre className="text-xs font-mono whitespace-pre-wrap break-all">
+          {JSON.stringify(contractSchema, null, 2)}
+        </pre>
       </div>
     </div>
   );
