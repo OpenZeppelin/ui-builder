@@ -12,6 +12,9 @@ export * from './base';
 // Re-export contract state capabilities
 export * from './contract-state';
 
+// Re-export adapter configuration types
+export * from './config';
+
 /**
  * Combined adapter interface with all capabilities
  *

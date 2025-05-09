@@ -1,4 +1,5 @@
 import type {
+  AdapterConfig,
   ContractAdapter,
   Ecosystem,
   EvmNetworkConfig,
@@ -7,8 +8,6 @@ import type {
   SolanaNetworkConfig,
   StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
-
-import type { AdapterConfig } from './types/AdapterTypes';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;
