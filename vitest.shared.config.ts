@@ -4,6 +4,9 @@ import { defineConfig } from 'vitest/config';
 
 export const sharedVitestConfig = defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+  },
   test: {
     globals: true,
     environment: 'jsdom',
