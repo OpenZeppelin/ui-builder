@@ -105,6 +105,14 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
    * If not provided, a fallback or minimal custom chain object might be used.
    */
   viemChain?: Chain;
+
+  /**
+   * A unique identifier for the specific explorer API service used by this network.
+   * This is used by the AppConfigService to fetch the correct API key.
+   * Examples: "etherscan-mainnet", "polygonscan-mainnet", "bscscan-mainnet"
+   * Should align with keys in AppRuntimeConfig.networkServiceConfigs
+   */
+  explorerApiIdentifier?: string;
 }
 
 /**

@@ -11,9 +11,10 @@ export const ethereumSepolia: EvmNetworkConfig = {
   type: 'testnet',
   isTestnet: true,
   chainId: 11155111,
-  rpcUrl: 'https://ethereum-sepolia.rpc.subquery.network/public', // Public RPC for Sepolia
+  rpcUrl: process.env.VITE_RPC_URL_ETHEREUM_SEPOLIA || viemSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.etherscan.io',
   apiUrl: 'https://api-sepolia.etherscan.io/api',
+  explorerApiIdentifier: 'etherscan-sepolia',
   icon: 'ethereum',
   nativeCurrency: {
     name: 'Sepolia Ether',
@@ -32,9 +33,10 @@ export const polygonAmoy: EvmNetworkConfig = {
   type: 'testnet',
   isTestnet: true,
   chainId: 80002,
-  rpcUrl: 'https://rpc-amoy.polygon.technology', // Public RPC for Polygon Amoy
-  explorerUrl: 'https://www.oklink.com/amoy', // Amoy explorer
+  rpcUrl: process.env.VITE_RPC_URL_POLYGON_AMOY || viemPolygonAmoy.rpcUrls.default.http[0],
+  explorerUrl: 'https://amoy.polygonscan.com',
   apiUrl: 'https://api-amoy.polygonscan.com/api',
+  explorerApiIdentifier: 'polygonscan-amoy',
   icon: 'polygon',
   nativeCurrency: {
     name: 'Matic',

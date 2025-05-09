@@ -13,3 +13,4 @@ export * from './contracts';
 export * from './forms';
 export * from './networks';
 export * from './transactions';
+export * from './config/app-config';

@@ -11,9 +11,10 @@ export const ethereumMainnet: EvmNetworkConfig = {
   type: 'mainnet',
   isTestnet: false,
   chainId: 1,
-  rpcUrl: 'https://eth.llamarpc.com', // Public RPC for Ethereum Mainnet
+  rpcUrl: process.env.VITE_RPC_URL_ETHEREUM_MAINNET || viemMainnet.rpcUrls.default.http[0],
   explorerUrl: 'https://etherscan.io',
   apiUrl: 'https://api.etherscan.io/api',
+  explorerApiIdentifier: 'etherscan-mainnet',
   icon: 'ethereum',
   nativeCurrency: {
     name: 'Ether',
@@ -32,9 +33,10 @@ export const polygonMainnet: EvmNetworkConfig = {
   type: 'mainnet',
   isTestnet: false,
   chainId: 137,
-  rpcUrl: 'https://polygon-rpc.com', // Public RPC for Polygon Mainnet
+  rpcUrl: process.env.VITE_RPC_URL_POLYGON_MAINNET || viemPolygon.rpcUrls.default.http[0],
   explorerUrl: 'https://polygonscan.com',
   apiUrl: 'https://api.polygonscan.com/api',
+  explorerApiIdentifier: 'polygonscan-mainnet',
   icon: 'polygon',
   nativeCurrency: {
     name: 'Matic',

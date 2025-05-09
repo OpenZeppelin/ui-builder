@@ -45,3 +45,6 @@ export { DynamicFormField } from './components/DynamicFormField';
 // Add logger and generateId exports
 export { logger } from './utils/logger';
 export { generateId } from './utils/general';
+
+// Export services
+export * from './services';
