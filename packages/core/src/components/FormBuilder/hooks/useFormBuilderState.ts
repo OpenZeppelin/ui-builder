@@ -76,7 +76,7 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
       contractDefinition.resetContractSchema();
       functionSelection.resetFunctionSelection();
       formCustomization.resetFormConfig();
-      contractWidget.hideWidget();
+      contractWidget.resetWidget();
       completeStep.resetLoadingState();
     },
     [

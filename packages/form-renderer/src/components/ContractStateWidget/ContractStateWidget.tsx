@@ -1,4 +1,4 @@
-import { FileText, Minimize2 } from 'lucide-react';
+import { FileText, Loader2, Minimize2 } from 'lucide-react';
 
 import { JSX, useEffect, useState } from 'react';
 
@@ -143,8 +143,14 @@ export function ContractStateWidget({
             <p className="mt-1 text-xs text-center">{error.message}</p>
           </div>
         ) : !contractSchema || !adapter ? (
-          <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
-            <p>Loading contract info...</p>
+          <div className="flex flex-col items-center justify-center h-full space-y-3 py-6">
+            <Loader2 className="h-8 w-8 text-primary animate-spin opacity-70" />
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Loading contract info...</p>
+              <p className="text-xs text-muted-foreground">
+                Retrieving contract data and available functions
+              </p>
+            </div>
           </div>
         ) : viewFunctions.length > 0 ? (
           <ViewFunctionsPanel
@@ -155,7 +161,16 @@ export function ContractStateWidget({
             className="flex-grow flex flex-col min-h-0"
           />
         ) : (
-          <div className="text-xs text-muted-foreground">No simple view functions found</div>
+          <div className="flex flex-col items-center justify-center h-full py-4 text-center">
+            <div className="rounded-full bg-muted p-3 mb-3">
+              <FileText className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium">No simple view functions found</p>
+            <p className="text-xs text-muted-foreground mt-1 mb-4 max-w-[220px]">
+              This contract doesn&apos;t have any simple view functions that can be queried without
+              parameters
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
