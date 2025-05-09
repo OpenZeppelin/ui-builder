@@ -101,6 +101,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@styles': path.resolve(__dirname, '../styles/src'),
     },
+    dedupe: [
+      '@openzeppelin/transaction-form-renderer',
+      '@openzeppelin/transaction-form-types',
+      'react',
+      'react-dom',
+    ],
   },
   // Add optimizeDeps for Vite to correctly process these linked workspace packages
   optimizeDeps: {
