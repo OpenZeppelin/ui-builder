@@ -7,6 +7,9 @@ export const sharedVitestConfig = defineConfig({
   optimizeDeps: {
     include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
   },
+  ssr: {
+    noExternal: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+  },
   test: {
     globals: true,
     environment: 'jsdom',
