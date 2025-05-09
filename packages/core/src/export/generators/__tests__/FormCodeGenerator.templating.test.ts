@@ -2,8 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
-
+import { createMinimalContractSchema, createMinimalFormConfig } from '../../utils/testConfig';
 import { FormCodeGenerator } from '../FormCodeGenerator';
 import { TemplateProcessor } from '../TemplateProcessor';
 

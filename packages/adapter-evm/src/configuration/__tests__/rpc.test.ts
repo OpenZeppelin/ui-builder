@@ -14,6 +14,7 @@ const createMockConfig = (id: string, rpcUrl?: string): EvmNetworkConfig => ({
   network: 'test-network',
   type: 'testnet',
   isTestnet: true,
+  exportConstName: id.replace(/-([a-z])/g, (g) => g[1].toUpperCase()),
   chainId: 1337,
   rpcUrl: rpcUrl || 'https://default-public.rpc.com', // Default public RPC for the mock
   nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
 
 import { TransactionForm } from '../components/TransactionForm';
 
@@ -141,7 +141,7 @@ export const PreviewMode: Story = {
   args: {
     schema: advancedSchema,
     adapter: mockAdapter,
-    previewMode: true,
+    // previewMode: true, // This prop does not exist on TransactionFormProps
   },
 };
 
@@ -199,6 +199,36 @@ const _basicSchema: RenderFormSchema = {
   submitButton: { text: 'Submit Basic', loadingText: 'Submitting Basic...' },
 };
 
+// Define a mock ContractSchema instance
+const mockContractSchemaInstance: ContractSchema = {
+  ecosystem: 'evm',
+  name: 'MockContractForStory',
+  address: '0xMockContractAddressForStory',
+  functions: [
+    {
+      id: 'mockFunction_0x123',
+      name: 'mockFunction',
+      displayName: 'Mock Function',
+      inputs: [{ name: 'param1', type: 'uint256', displayName: 'Parameter 1' }],
+      outputs: [],
+      type: 'function',
+      stateMutability: 'nonpayable',
+      modifiesState: true,
+    },
+    {
+      id: 'viewFunction_0x456',
+      name: 'viewFunction',
+      displayName: 'View Function',
+      inputs: [],
+      outputs: [{ name: 'value', type: 'bool', displayName: 'Value' }],
+      type: 'function',
+      stateMutability: 'view',
+      modifiesState: false,
+    },
+  ],
+  events: [],
+};
+
 // Story for complex types
 export const ComplexTypes: Story = {
   args: {
@@ -214,29 +244,6 @@ export const ComplexTypes: Story = {
       submitButton: { text: 'Submit Complex', loadingText: 'Submitting Complex...' },
     },
   },
-};
-
-const _mockSchema: RenderFormSchema = {
-  id: 'mock-form',
-  title: 'Mock Schema Form',
-  functionId: 'mockFunc',
-  contractAddress: '0xMockContract',
-  fields: [],
-  layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-  validation: { mode: 'onChange', showErrors: 'inline' },
-  submitButton: { text: 'Submit Mock', loadingText: 'Submitting Mock...' },
-};
-
-// Another mock schema
-const _anotherMockSchema: RenderFormSchema = {
-  id: 'another-mock-form',
-  title: 'Another Mock Schema Form',
-  functionId: 'anotherMockFunc',
-  contractAddress: '0xAnotherMockContract',
-  fields: [],
-  layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-  validation: { mode: 'onChange', showErrors: 'inline' },
-  submitButton: { text: 'Submit Another Mock', loadingText: 'Submitting Another Mock...' },
 };
 
 export const EVMTransfer: Story = {
@@ -274,5 +281,17 @@ export const EVMTransfer: Story = {
       submitButton: { text: 'Send Transfer', loadingText: 'Sending...' },
     },
     adapter: mockAdapter,
+  },
+};
+
+export const PreviewState: Story = {
+  args: {
+    adapter: mockAdapter,
+    schema: _basicSchema,
+    contractSchema: mockContractSchemaInstance,
+    onSubmit: (data: FormData) => {
+      console.log('Form submitted:', data);
+      alert('Form submitted successfully!');
+    },
   },
 };

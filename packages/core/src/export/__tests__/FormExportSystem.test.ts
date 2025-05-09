@@ -7,8 +7,6 @@ import type {
   SolanaNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
 
-import { createMinimalContractSchema, createMinimalFormConfig } from '@/export/utils/testConfig';
-
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { FormExportSystem } from '../FormExportSystem';
@@ -18,6 +16,7 @@ import { TemplateManager } from '../TemplateManager';
 import { ZipGenerator } from '../ZipGenerator';
 import { FormCodeGenerator } from '../generators/FormCodeGenerator';
 import { TemplateProcessor } from '../generators/TemplateProcessor';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 
 // Mock FormRendererConfig (define before use)
 interface MockFormRendererConfig {
