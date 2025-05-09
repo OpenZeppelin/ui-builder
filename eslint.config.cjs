@@ -48,6 +48,15 @@ const baseConfig = [
       '**/*.css',
       '**/*.md',
       '**/tsconfig.tsbuildinfo',
+      '**/dist/',
+      'packages/core/test-results/',
+      '*.snap',
+      '*.lock',
+      '*.log',
+      'badges/',
+      'public/',
+      '.husky/_/',
+      'exports/',
     ],
   },
 
@@ -199,7 +208,7 @@ const baseConfig = [
 // Add custom adapter plugin config only if available
 if (customPlugin) {
   baseConfig.push({
-    files: ['src/adapters/**/*.ts', 'packages/core/src/adapters/**/*.ts'],
+    files: ['packages/adapter-*/src/adapter.ts'],
     plugins: {
       custom: customPlugin,
     },

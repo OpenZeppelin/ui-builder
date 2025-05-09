@@ -1,18 +1,20 @@
+import { capitalize } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FieldType } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 /**
  * Create a minimal form configuration for testing
  * @param functionName - Optional function name (defaults to 'testFunction')
- * @param chainType - Optional chain type (defaults to 'evm')
+ * @param ecosystem - Optional ecosystem (defaults to 'evm')
  * @returns A minimal BuilderFormConfig instance for testing
  */
 export function createMinimalFormConfig(
   functionName: string = 'testFunction',
-  _chainType: string = 'evm'
+  _ecosystem: Ecosystem = 'evm'
 ): BuilderFormConfig {
   return {
     functionId: functionName,
@@ -33,14 +35,6 @@ export function createMinimalFormConfig(
       columns: 1,
       spacing: 'normal',
       labelPosition: 'top',
-      sections: [
-        {
-          id: uuidv4(),
-          title: 'Test Section',
-          description: 'A test section',
-          fields: ['testParam'],
-        },
-      ],
     },
     validation: {
       mode: 'onChange',
@@ -51,145 +45,185 @@ export function createMinimalFormConfig(
       allowAny: true,
     },
     theme: {},
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
+  };
+}
+
+/**
+ * Creates a minimal mock ContractSchema for testing.
+ */
+export function createMinimalContractSchema(
+  functionName: string,
+  ecosystem: Ecosystem
+): ContractSchema {
+  return {
+    ecosystem,
+    name: 'MockContract',
+    address: '0x1234567890123456789012345678901234567890', // Use a valid-looking address
+    functions: [
+      {
+        id: functionName,
+        name: functionName,
+        displayName: capitalize(functionName),
+        inputs: [], // Basic schema assumes no inputs for simplicity
+        type: 'function',
+        modifiesState: true,
+      },
+      // Add a basic view function for potential widget tests?
+      {
+        id: 'viewFunction',
+        name: 'viewFunction',
+        displayName: 'View Function',
+        inputs: [],
+        type: 'function',
+        modifiesState: false,
+        stateMutability: 'view',
+      },
+    ],
   };
 }
 
 /**
  * Create a complex form configuration for testing
  * @param functionName - Optional function name (defaults to 'complexFunction')
- * @param chainType - Optional chain type (defaults to 'evm')
+ * @param ecosystem - Optional ecosystem (defaults to 'evm')
  * @returns A complex BuilderFormConfig instance with multiple field types
  */
 export function createComplexFormConfig(
   functionName: string = 'complexFunction',
-  _chainType: string = 'evm'
+  _ecosystem: Ecosystem = 'evm'
 ): BuilderFormConfig {
   const basicFieldIds = [uuidv4(), uuidv4(), uuidv4()];
   const advancedFieldIds = [uuidv4(), uuidv4(), uuidv4(), uuidv4()];
 
   return {
     functionId: functionName,
+    title: 'Complex Test Form',
+    description: 'A test form with multiple different field types',
     fields: [
       {
         id: basicFieldIds[0],
         type: 'text',
         name: 'stringParam',
-        label: 'String Parameter',
-        validation: { required: true },
-        helperText: 'Description for String Parameter',
-        placeholder: 'Enter string parameter',
+        label: 'Text Parameter',
+        placeholder: 'Enter text',
+        helperText: 'A basic text field',
+        validation: {
+          required: true,
+          minLength: 3,
+          maxLength: 100,
+        },
       },
       {
         id: basicFieldIds[1],
         type: 'number',
         name: 'numberParam',
         label: 'Number Parameter',
-        validation: { required: true, min: 0, max: 100 },
-        helperText: 'Description for Number Parameter (0-100)',
-        placeholder: 'Enter number parameter',
+        placeholder: 'Enter a number',
+        helperText: 'A number field',
+        validation: {
+          required: true,
+          min: 1,
+          max: 100,
+        },
       },
       {
         id: basicFieldIds[2],
         type: 'checkbox',
         name: 'boolParam',
         label: 'Boolean Parameter',
-        validation: { required: true },
-        helperText: 'Description for Boolean Parameter',
+        helperText: 'A checkbox field',
+        defaultValue: false,
+        validation: {
+          required: true,
+        },
       },
       {
         id: advancedFieldIds[0],
         type: 'blockchain-address',
         name: 'addressParam',
         label: 'Address Parameter',
-        validation: { required: true },
-        helperText: 'Description for Address Parameter',
-        placeholder: 'Enter address parameter',
-      },
-      {
-        id: uuidv4(),
-        type: 'number',
-        name: 'hiddenParam',
-        label: 'Hidden Number',
-        validation: { required: true },
-        isHidden: true,
-      },
-      {
-        id: uuidv4(),
-        type: 'text',
-        name: 'hardcodedTextParam',
-        label: 'Fixed Text Value',
-        validation: { required: true },
-        isHardcoded: true,
-        hardcodedValue: 'This value is fixed',
-        helperText: 'This text value is set and cannot be changed.',
-      },
-      {
-        id: uuidv4(),
-        type: 'number',
-        name: 'readOnlyHardcodedNumber',
-        label: 'Fixed Number (Read Only)',
-        validation: { required: true },
-        isHardcoded: true,
-        hardcodedValue: 12345,
-        isReadOnly: true,
-        helperText: 'This number is fixed and displayed as read-only.',
+        placeholder: '0x...',
+        helperText: 'Enter an Ethereum address',
+        validation: {
+          required: true,
+        },
       },
       {
         id: advancedFieldIds[1],
         type: 'textarea',
-        name: 'arrayParam',
-        label: 'Text Array Parameter',
-        validation: { required: true },
-        helperText: 'Enter text array (e.g., ["a", "b"])',
-        placeholder: 'e.g., ["a", "b"]',
+        name: 'longTextParam',
+        label: 'Long Text Parameter',
+        placeholder: 'Enter detailed information',
+        helperText: 'A textarea for longer content',
+        validation: {
+          required: false,
+          maxLength: 1000,
+        },
       },
       {
         id: advancedFieldIds[2],
-        type: 'textarea',
-        name: 'description',
-        label: 'Description',
-        validation: { required: false },
-        helperText: 'Optional detailed description',
-        placeholder: 'Enter description...',
+        type: 'select',
+        name: 'selectParam',
+        label: 'Select Parameter',
+        placeholder: 'Choose an option',
+        helperText: 'A dropdown selection field',
+        validation: {
+          required: true,
+        },
+        options: [
+          { label: 'Option A', value: 'a' },
+          { label: 'Option B', value: 'b' },
+          { label: 'Option C', value: 'c' },
+        ],
       },
       {
         id: advancedFieldIds[3],
-        type: 'select',
-        name: 'priority',
-        label: 'Priority',
-        validation: { required: true },
-        helperText: 'Select the priority level',
-        options: [
-          { label: 'Low', value: 'low' },
-          { label: 'Medium', value: 'medium' },
-          { label: 'High', value: 'high' },
-        ],
+        type: 'date',
+        name: 'dateParam',
+        label: 'Date Parameter',
+        placeholder: 'Select a date',
+        helperText: 'A date selection field',
+        validation: {
+          required: false,
+        },
+      },
+      {
+        id: 'hardcodedTextParam',
+        type: 'text',
+        name: 'hardcodedTextParam',
+        label: 'Hardcoded Text',
+        isHardcoded: true,
+        hardcodedValue: 'This is a fixed value',
+        helperText: 'This field has a hardcoded value',
+        validation: {},
+      },
+      {
+        id: 'readOnlyText',
+        type: 'text',
+        name: 'readOnlyText',
+        label: 'Read-Only Text',
+        isReadOnly: true,
+        defaultValue: 'Cannot be changed',
+        helperText: 'This field is read-only',
+        validation: {},
+      },
+      {
+        id: 'readOnlyHardcodedNumber',
+        type: 'number',
+        name: 'readOnlyHardcodedNumber',
+        label: 'Hardcoded Read-Only Number',
+        isHardcoded: true,
+        hardcodedValue: 42,
+        isReadOnly: true,
+        helperText: 'This field is hardcoded and read-only',
+        validation: {},
       },
     ],
     layout: {
       columns: 1,
       spacing: 'normal',
       labelPosition: 'top',
-      sections: [
-        {
-          id: uuidv4(),
-          title: 'Basic Parameters',
-          description: 'Description for Basic Parameters',
-          fields: [basicFieldIds[0], basicFieldIds[1], basicFieldIds[2], advancedFieldIds[0]],
-        },
-        {
-          id: uuidv4(),
-          title: 'Other Parameters',
-          description: 'Description for Other Parameters',
-          fields: [advancedFieldIds[1], advancedFieldIds[2], advancedFieldIds[3]],
-        },
-        {
-          id: uuidv4(),
-          title: 'Hardcoded / ReadOnly Examples',
-          description: 'Fields demonstrating hardcoding and read-only features.',
-          fields: ['hardcodedTextParam', 'readOnlyHardcodedNumber'],
-        },
-      ],
     },
     validation: {
       mode: 'onChange',
@@ -201,6 +235,7 @@ export function createComplexFormConfig(
       specificAddress: '0x0000000000000000000000000000000000000000',
     },
     theme: {},
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
   };
 }
 
@@ -238,5 +273,6 @@ export function createTestField(
     helperText: `Description for ${label}`,
     placeholder: `Enter ${label.toLowerCase()}`,
     ...options,
+    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
   };
 }

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll } from 'vitest';
 
-import { logger } from '../core/utils/logger';
+import { logger } from '@openzeppelin/transaction-form-renderer';
 
 // Disable logging before all tests
 beforeAll(() => {

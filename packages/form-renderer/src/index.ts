@@ -6,23 +6,6 @@
 
 // Export types from FormTypes
 export type { FormRendererConfig } from './types/FormRendererConfig';
-export type {
-  CommonFormProperties,
-  ContractAdapter,
-  FieldCondition,
-  FieldTransforms,
-  FieldType,
-  FieldValidation,
-  FieldValue,
-  FormError,
-  // Export FormField type but rename it to avoid conflict with UI component
-  FormField as FormFieldType,
-  FormLayout,
-  FormValues,
-  RenderFormSchema,
-  SubmitButtonConfig,
-  TransactionFormProps,
-} from './types/FormTypes';
 
 // Export components selectively to avoid name conflicts
 export * from './components/fields';
@@ -50,17 +33,15 @@ export type { SelectOption } from './components/fields/SelectField';
 export * from './components/fields/SelectField';
 export * from './components/fields/SelectGroupedField';
 
-// Export hooks (will be implemented later)
-// export * from './hooks';
-
 // Export utilities
 export * from './utils';
-
-// Export core types and utilities
-export * from './types';
 
 // Export main components
 export * from './components';
 
 // Specifically re-export key components for easier top-level import
 export { DynamicFormField } from './components/DynamicFormField';
+
+// Add logger and generateId exports
+export { logger } from './utils/logger';
+export { generateId } from './utils/general';

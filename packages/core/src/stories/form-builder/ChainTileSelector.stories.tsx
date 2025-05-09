@@ -2,8 +2,9 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { useState } from 'react';
 
-import { ChainTileSelector } from '../../components/FormBuilder/ChainTileSelector';
-import type { ChainType } from '../../core/types/ContractSchema';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+
+import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/index';
 
 const meta = {
   title: 'Core/FormBuilder/ChainTileSelector',
@@ -27,8 +28,8 @@ type Story = StoryObj<typeof ChainTileSelector>;
  */
 export const Default: Story = {
   args: {
-    initialChain: 'evm',
-    onChainSelect: (chain) => console.log('Selected chain:', chain),
+    initialEcosystem: 'evm',
+    onNetworkSelect: (networkId: string) => console.log('Selected network:', networkId),
   },
 };
 
@@ -36,21 +37,29 @@ export const Default: Story = {
  * Interactive demo where selections are tracked in state.
  */
 export const Interactive = () => {
-  const [selectedChain, setSelectedChain] = useState<ChainType>('evm');
+  // Using a simple value instead of state since we're not updating it in this demo
+  const selectedEcosystem: Ecosystem = 'evm';
+  const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null);
 
   return (
     <div className="max-w-3xl">
       <ChainTileSelector
-        initialChain={selectedChain}
-        onChainSelect={(chain) => {
-          console.log('Chain selected:', chain);
-          setSelectedChain(chain);
+        initialEcosystem={selectedEcosystem}
+        selectedNetworkId={selectedNetworkId}
+        onNetworkSelect={(networkId: string) => {
+          console.log('Network selected:', networkId);
+          setSelectedNetworkId(networkId);
         }}
       />
       <div className="mt-4">
         <p>
-          <strong>Selected chain:</strong> {selectedChain}
+          <strong>Selected ecosystem:</strong> {selectedEcosystem}
         </p>
+        {selectedNetworkId && (
+          <p>
+            <strong>Selected network ID:</strong> {selectedNetworkId}
+          </p>
+        )}
       </div>
     </div>
   );

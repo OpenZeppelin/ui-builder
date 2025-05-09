@@ -38,6 +38,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # Add this build step to ensure all workspace packages are built before testing
+      - name: Build all packages
+        run: pnpm -r build
+
       # Run only export-related tests
       - name: Run export tests
         run: pnpm --filter @openzeppelin/transaction-form-builder-core test src/export/__tests__/

@@ -5,17 +5,19 @@
  * This factory is responsible for generating schemas that can be used to render forms
  * while delegating chain-specific logic to the appropriate adapter.
  */
+import { createTransformForFieldType } from '@openzeppelin/transaction-form-renderer';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  FunctionParameter,
+} from '@openzeppelin/transaction-form-types';
 import {
   FormFieldType,
   FormLayout,
   FormValues,
   RenderFormSchema,
-  createTransformForFieldType,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/transaction-form-types';
 
-import { getContractAdapter } from '../../adapters';
-import type { ContractAdapter } from '../../adapters';
-import type { ChainType, ContractSchema, FunctionParameter } from '../types/ContractSchema';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
 
@@ -27,24 +29,21 @@ export class FormSchemaFactory {
    * Creates a complete form schema from a contract function
    * using the appropriate adapter for field mapping and validation
    *
-   * @param contractSchema The contract schema containing function definitions
-   * @param functionId The ID of the function to generate a form for
-   * @param chainType The blockchain type (used to get the adapter)
-   * @returns A complete form schema for rendering
+   * @param adapter The configured ContractAdapter instance for the specific network.
+   * @param contractSchema The contract schema containing function definitions.
+   * @param functionId The ID of the function to generate a form for.
+   * @returns A complete form schema for rendering.
    */
   generateFormSchema(
+    adapter: ContractAdapter,
     contractSchema: ContractSchema,
-    functionId: string,
-    chainType: ChainType
+    functionId: string
   ): RenderFormSchema {
     // Find the function in the contract schema
     const functionDefinition = contractSchema.functions.find((fn) => fn.id === functionId);
     if (!functionDefinition) {
       throw new Error(`Function ${functionId} not found in contract schema`);
     }
-
-    // Get the appropriate adapter for the chain type
-    const adapter = getContractAdapter(chainType);
 
     // Create the common properties
     const commonProperties = {
@@ -57,6 +56,11 @@ export class FormSchemaFactory {
       theme: {},
     };
 
+    // Ensure contract address is present
+    if (!contractSchema.address) {
+      throw new Error('Contract schema is missing required address field');
+    }
+
     // Return the complete render schema
     return {
       ...commonProperties,
@@ -68,6 +72,7 @@ export class FormSchemaFactory {
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
+      contractAddress: contractSchema.address,
     };
   }
 
@@ -115,8 +120,11 @@ export class FormSchemaFactory {
       }
     });
 
+    // Explicitly exclude executionConfig when spreading builderConfig
+    const { executionConfig: _executionConfig, ...restOfBuilderConfig } = builderConfig;
+
     return {
-      ...builderConfig,
+      ...restOfBuilderConfig, // Spread the rest of the config
       id: `form-${builderConfig.functionId}`,
       title: functionName,
       description: functionDescription || '',
@@ -126,8 +134,8 @@ export class FormSchemaFactory {
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
-      // Pass the populated defaultValues object
       defaultValues: defaultValues,
+      contractAddress: builderConfig.contractAddress,
     };
   }
 

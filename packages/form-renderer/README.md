@@ -9,23 +9,43 @@ A specialized library for rendering customizable transaction forms for blockchai
 
 ```bash
 # Using npm
-npm install @openzeppelin/transaction-form-renderer
+npm install @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 
 # Using yarn
-yarn add @openzeppelin/transaction-form-renderer
+yarn add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 
 # Using pnpm
-pnpm add @openzeppelin/transaction-form-renderer
+pnpm add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
 ```
 
 ## Features
 
 - Lightweight form rendering components
 - Framework-agnostic design
-- TypeScript support with full type definitions
+- TypeScript support with full type definitions (via @openzeppelin/transaction-form-types)
 - Support for both ESM and CommonJS environments
 - Customizable styling options
 - Optimized for blockchain transaction data
+
+## Type System
+
+This package uses type definitions from the `@openzeppelin/transaction-form-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These types include:
+
+- Form field and component definitions
+- Layout and validation schemas
+- Adapter interfaces for blockchain interactions
+
+When using this package, you should also install `@openzeppelin/transaction-form-types` to ensure proper type checking in your application.
+
+```tsx
+// Example of importing types
+import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type {
+  ContractAdapter,
+  FormValues,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
+```
 
 ## Component Styling
 
@@ -42,10 +62,16 @@ This ensures that the necessary utility classes used by `form-renderer` componen
 ## Usage
 
 ```tsx
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import { TransactionForm, generateId, logger } from '@openzeppelin/transaction-form-renderer';
+import type {
+  ContractAdapter,
+  EvmNetworkConfig,
+  NetworkConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 
 // Example form schema
-const schema = {
+const schema: RenderFormSchema = {
   id: 'example-form',
   title: 'Example Form',
   fields: [
@@ -66,19 +92,67 @@ const schema = {
   },
 };
 
-// Simple adapter implementation
-const adapter = {
+// Example network configuration (replace with actual config from adapter packages)
+const networkConfig: EvmNetworkConfig = {
+  id: 'example-evm-network',
+  name: 'Example EVM Network',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 11155111,
+  rpcUrl: 'https://rpc.example.com',
+  explorerUrl: 'https://explorer.example.com',
+  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+  apiUrl: 'https://api.example.com',
+};
+
+// Simple adapter implementation for demonstration.
+// Real applications use adapters like @openzeppelin/transaction-form-adapter-evm
+// crucially, the adapter instance should be configured for the specific networkConfig
+const adapter: ContractAdapter = {
+  // Adapter methods should use the networkConfig passed during instantiation
+  // (or assume it was passed during instantiation as shown in adapter READMEs)
+  networkConfig: networkConfig, // Adapters hold their config internally
+  ecosystem: 'evm', // Example ecosystem
+  loadContract: async (source: string) => {
+    // Implementation would use this.networkConfig
+    throw new Error('Not implemented');
+  },
+  mapParameterTypeToFieldType: (type: string) => 'text',
+  getCompatibleFieldTypes: (type: string) => ['text'],
+  generateDefaultField: (param: any) => ({ id: 'f', name: 'p', label: 'L', type: 'text' }),
   formatTransactionData: (functionId, inputs) => inputs,
-  isValidAddress: (address) => address.length > 0,
+  isValidAddress: (address) => !!address && address.length > 0,
+  getWritableFunctions: (schema: any) => [],
+  getSupportedExecutionMethods: async () => [],
+  validateExecutionConfig: async (config: any) => true,
+  isViewFunction: (func: any) => false,
+  queryViewFunction: async (addr: string, funcId: string, params: any[]) => {
+    // Implementation would use this.networkConfig
+    return null;
+  },
+  formatFunctionResult: (result: any) => String(result),
+  supportsWalletConnection: () => false, // Indicate no support in this simple example
+  getExplorerUrl: (address: string) => `${networkConfig.explorerUrl}/address/${address}`, // Example usage
+  getExplorerTxUrl: (txHash: string) => `${networkConfig.explorerUrl}/tx/${txHash}`, // Example usage
+  // Other methods omitted for brevity...
 };
 
 function App() {
-  const handleSubmit = (data) => {
+  const handleSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
-    // Process transaction
+    // Process transaction using the configured adapter and network
   };
 
-  return <TransactionForm schema={schema} adapter={adapter} onSubmit={handleSubmit} />;
+  return (
+    <TransactionForm
+      schema={schema}
+      adapter={adapter}
+      networkConfig={networkConfig}
+      onSubmit={handleSubmit}
+    />
+  );
 }
 ```
 
@@ -90,15 +164,39 @@ The main component for rendering transaction forms.
 
 #### Props
 
-| Prop            | Type                       | Description                                      |
-| --------------- | -------------------------- | ------------------------------------------------ |
-| `schema`        | `RenderFormSchema`         | The schema definition for the form               |
-| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode          |
-| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted         |
-| `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO] |
-| `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]       |
-| `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]            |
-| `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]           |
+| Prop            | Type                       | Description                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------------- |
+| `schema`        | `RenderFormSchema`         | The schema definition for the form                                   |
+| `adapter`       | `ContractAdapter`          | The blockchain adapter instance (must be configured for the network) |
+| `networkConfig` | `NetworkConfig`            | The specific network configuration object for the target network     |
+| `onSubmit`      | `(data: FormData) => void` | Callback function when form is submitted                             |
+| `previewMode`   | `boolean`                  | (Optional) Renders form in preview mode                              |
+| `initialValues` | `FormData`                 | (Optional) Initial values for form fields [TODO]                     |
+| `disabled`      | `boolean`                  | (Optional) Disables all form fields [TODO]                           |
+| `loading`       | `boolean`                  | (Optional) Shows loading state [TODO]                                |
+| `theme`         | `ThemeOptions`             | (Optional) Custom theme options [TODO]                               |
+
+### Utilities
+
+#### `logger`
+
+A pre-configured singleton instance of the Logger utility for consistent application logging.
+
+```typescript
+import { logger } from '@openzeppelin/transaction-form-renderer';
+
+logger.info('MyComponent', 'Component loaded');
+```
+
+#### `generateId`
+
+A utility function to generate unique IDs (UUID v4) for form elements or other components.
+
+```typescript
+import { generateId } from '@openzeppelin/transaction-form-renderer';
+
+const uniqueFieldId = generateId('field_');
+```
 
 ## Configuration System
 

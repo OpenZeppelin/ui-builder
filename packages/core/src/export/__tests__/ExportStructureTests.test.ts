@@ -1,36 +1,59 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../core/types/FormTypes';
+import type {
+  EvmNetworkConfig,
+  NetworkConfig,
+  SolanaNetworkConfig,
+} from '@openzeppelin/transaction-form-types';
+
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network configs
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-export-structure-evm',
+  name: 'Test Export Structure EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
+const mockSolanaConfig: SolanaNetworkConfig = {
+  id: 'test-export-structure-solana',
+  name: 'Test Export Structure Solana',
+  exportConstName: 'mockSolanaNetworkConfig',
+  ecosystem: 'solana',
+  network: 'solana',
+  type: 'testnet',
+  isTestnet: true,
+  rpcEndpoint: 'mock',
+  commitment: 'confirmed',
+};
 
 describe('Export Structure Tests', () => {
   /**
    * Common validation function for basic project structure
    */
   async function testExportStructure(
-    formConfig: BuilderFormConfig,
-    chainType: ChainType,
-    functionName: string,
-    options: { includeAdapters?: boolean } = {}
+    networkConfig: NetworkConfig,
+    functionName: string = 'transfer'
   ) {
-    // Create the export system
     const exportSystem = new FormExportSystem();
+    const formConfig = createMinimalFormConfig(functionName, networkConfig.ecosystem);
+    const contractSchema = createMinimalContractSchema(functionName, networkConfig.ecosystem);
 
-    // Generate export options
-    const exportOptions = {
-      includeAdapters: options.includeAdapters ?? true,
-      projectName: `test-${chainType}-project`,
-    };
-
-    // Export the form
     const result = await exportSystem.exportForm(
       formConfig,
-      chainType,
+      contractSchema,
+      networkConfig,
       functionName,
-      exportOptions
+      { projectName: `test-${networkConfig.ecosystem}-project` }
     );
 
     // Extract files from the ZIP using result.data
@@ -46,11 +69,7 @@ describe('Export Structure Tests', () => {
 
   describe('Basic Project Structure', () => {
     it('should include standard project files in all exports', async () => {
-      const { files, fileList } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'evm',
-        'transfer'
-      );
+      const { files, fileList } = await testExportStructure(mockEvmNetworkConfig);
 
       // Core project files that should always be present
       const requiredCoreFiles = [
@@ -80,77 +99,35 @@ describe('Export Structure Tests', () => {
       const dependencies = packageJson.dependencies;
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
+      // Check for the form-renderer package as well
+      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
     });
 
-    it('should generate proper file structure when includeAdapters is true', async () => {
-      const { fileList } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'evm',
-        'transfer',
-        { includeAdapters: true }
-      );
-
-      // Adapter files that should be present
-      const adapterFiles = ['src/adapters/index.ts', 'src/adapters/evm/adapter.ts'];
-
-      // Verify adapter files exist
-      for (const file of adapterFiles) {
-        expect(fileList).toContain(file);
-      }
-    });
-
-    it('should not include any adapter files when includeAdapters is false', async () => {
-      const { fileList } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'evm',
-        'transfer',
-        { includeAdapters: false }
-      );
-
-      // Verify no adapter files are present, including placeholders
-      const hasAnyAdapterFile = fileList.some((file) => file.startsWith('src/adapters/'));
-      expect(hasAnyAdapterFile).toBe(false);
-
-      // Verify the adapter directory is not present
-      expect(fileList.find((file) => file.startsWith('src/adapters/'))).toBeUndefined();
-    });
+    // REMOVED TESTS for includeAdapters true/false as the src/adapters dir is gone
   });
 
   describe('Chain-Specific Exports', () => {
-    it('should include EVM-specific files for EVM exports', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'evm',
-        'transfer'
-      );
+    it('should include correct dependencies for EVM exports', async () => {
+      const { files } = await testExportStructure(mockEvmNetworkConfig);
 
-      // Verify EVM adapter is included and exports correct content
-      expect(files['src/adapters/index.ts']).toContain('EvmAdapter');
-      expect(files['src/adapters/evm/adapter.ts']).toContain('EvmAdapter');
-
-      // Verify package.json has ethers dependency
+      // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      expect(packageJson.dependencies).toHaveProperty('ethers');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
     });
 
-    it('should include Solana-specific files for Solana exports', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'solana',
-        'transfer'
-      );
+    it('should include correct dependencies for Solana exports', async () => {
+      const { files } = await testExportStructure(mockSolanaConfig);
 
-      // Verify Solana adapter is included and exports correct content
-      expect(files['src/adapters/index.ts']).toContain('solana');
-      expect(files['src/adapters/solana/adapter.ts']).toBeDefined();
-
-      // Verify package.json has solana dependencies
+      // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      const hasSolanaDependency = Object.keys(packageJson.dependencies).some(
-        (dep) => dep.includes('solana') || dep.includes('@solana')
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty(
+        '@openzeppelin/transaction-form-adapter-solana'
       );
-      expect(hasSolanaDependency).toBe(true);
     });
+
+    // Add tests for Stellar/Midnight if needed
   });
 
   describe('Project Naming and Configuration', () => {
@@ -160,7 +137,8 @@ describe('Export Structure Tests', () => {
 
       const result = await exportSystem.exportForm(
         createMinimalFormConfig('transfer'),
-        'evm',
+        createMinimalContractSchema('transfer', 'evm'),
+        mockEvmNetworkConfig,
         'transfer',
         { projectName: customProjectName }
       );
@@ -173,11 +151,7 @@ describe('Export Structure Tests', () => {
     });
 
     it('should generate a valid index.html file', async () => {
-      const { files } = await testExportStructure(
-        createMinimalFormConfig('transfer'),
-        'evm',
-        'transfer'
-      );
+      const { files } = await testExportStructure(mockEvmNetworkConfig);
 
       // Verify index.html exists and has basic HTML structure
       expect(files['index.html']).toBeDefined();

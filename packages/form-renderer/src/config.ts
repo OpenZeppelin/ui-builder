@@ -22,6 +22,7 @@ export const formRendererConfig: FormRendererConfig = {
     clsx: '^2.0.0',
     'tailwind-merge': '^1.14.0',
     '@openzeppelin/transaction-form-renderer': '^0.1.0',
+    '@openzeppelin/transaction-form-types': '^0.1.0',
   },
 
   // Field-specific dependencies

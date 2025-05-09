@@ -24,7 +24,11 @@
     "forceConsistentCasingInFileNames": true,
     "emitDeclarationOnly": true,
     "noEmit": false,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "exclude": ["**/node_modules/**", "**/dist/**"]
 }

@@ -10,17 +10,12 @@ import type { TemplateOptions } from '../core/types/ExportTypes';
 // Template registry type - maps template names to file collections
 type TemplateRegistry = Record<string, Record<string, string>>;
 
-/**
- * Type for lazy glob import results
- */
-type LazyGlobImportResult = Record<string, () => Promise<string>>;
-
 // Template files are loaded lazily using Vite's import.meta.glob
 // This allows code-splitting so the template files are only loaded when needed
 const templateFiles = import.meta.glob<string>('./templates/**/*', {
   query: '?raw',
   import: 'default',
-}) as LazyGlobImportResult;
+}) as Record<string, () => Promise<string>>;
 
 // For testing purposes - make file paths available to tests
 export const templateFilePaths = Object.keys(templateFiles);
@@ -254,34 +249,6 @@ export class TemplateManager {
       ...customFiles,
     };
 
-    // Apply special transformations for placeholder files
-    this.processPlaceholderFiles(projectFiles, customFiles);
-
     return projectFiles;
-  }
-
-  /**
-   * Process placeholder files in the template
-   */
-  private processPlaceholderFiles(
-    projectFiles: Record<string, string>,
-    customFiles: Record<string, string>
-  ): void {
-    // Replace FormPlaceholder.tsx with the generated form if provided
-    if (
-      customFiles['src/components/GeneratedForm.tsx'] &&
-      projectFiles['src/components/FormPlaceholder.tsx']
-    ) {
-      // Remove the placeholder
-      delete projectFiles['src/components/FormPlaceholder.tsx'];
-    }
-
-    // Similar logic for other placeholder files
-    if (
-      customFiles['src/adapters/evm/adapter.ts'] &&
-      projectFiles['src/adapters/AdapterPlaceholder.ts']
-    ) {
-      delete projectFiles['src/adapters/AdapterPlaceholder.ts'];
-    }
   }
 }

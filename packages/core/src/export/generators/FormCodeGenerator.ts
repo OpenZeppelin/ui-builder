@@ -1,12 +1,17 @@
-import type { RenderFormSchema } from '@openzeppelin/transaction-form-renderer/types/FormTypes';
+import { capitalize } from 'lodash';
 
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractSchema,
+  NetworkConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
+
+import { adapterPackageMap } from '../../core/ecosystemManager';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
-import type { ChainType } from '../../core/types/ContractSchema';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { AdapterExportManager } from '../AdapterExportManager';
 import { TemplateManager } from '../TemplateManager';
-// Import types for template parameters
 import type {
   AppComponentTemplateParams,
   FormComponentTemplateParams,
@@ -18,7 +23,7 @@ import { TemplateProcessor } from './TemplateProcessor';
 const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx', {
   query: '?raw',
   import: 'default',
-});
+}) as Record<string, () => Promise<string>>;
 
 /**
  * FormCodeGenerator class responsible for generating React components
@@ -28,16 +33,13 @@ const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx'
  * - Generates only the form component code
  * - Uses a consistent import pattern that works in both dev and production
  * - Integrates with TemplateManager to generate complete projects
- * - Integrates with AdapterExportManager to include required adapter files
  */
 export class FormCodeGenerator {
   private templateManager: TemplateManager;
-  private adapterExportManager: AdapterExportManager;
   private templateProcessor: TemplateProcessor;
 
   constructor() {
     this.templateManager = new TemplateManager();
-    this.adapterExportManager = new AdapterExportManager();
     this.templateProcessor = new TemplateProcessor(templateFiles);
   }
 
@@ -50,46 +52,70 @@ export class FormCodeGenerator {
    * generateTemplateProject method, replacing the placeholder components.
    *
    * @param formConfig The form configuration from the builder
-   * @param chainType The selected blockchain type
+   * @param contractSchema The full contract schema
+   * @param networkConfig The network configuration for the selected network
    * @param functionId The ID of the contract function
    * @returns Generated React component code as a string
    */
   async generateFormComponent(
     formConfig: BuilderFormConfig,
-    chainType: ChainType,
+    contractSchema: ContractSchema,
+    networkConfig: NetworkConfig,
     functionId: string
   ): Promise<string> {
-    const adapterClassName = this.getAdapterClassName(chainType);
+    const ecosystem = networkConfig.ecosystem;
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
+    }
+
+    // Ensure the networkConfig has the required export name
+    if (!networkConfig.exportConstName) {
+      throw new Error(
+        `NetworkConfig object for ${networkConfig.id} is missing the required 'exportConstName' property.`
+      );
+    }
+    const networkConfigImportName = networkConfig.exportConstName;
+
+    // Find the function details FIRST to use for defaults
+    const functionDetails = contractSchema.functions.find((fn) => fn.id === functionId);
+    if (!functionDetails) {
+      // This should ideally be caught earlier, but good to have defense
+      throw new Error(
+        `Function ${functionId} not found in contract schema during component generation.`
+      );
+    }
+
     const executionConfig = formConfig.executionConfig;
 
     // Use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema
-    // This ensures consistency with the preview in the form builder
-    const formTitle = formConfig.title !== undefined ? formConfig.title : functionId;
+    const formTitle =
+      formConfig.title !== undefined ? formConfig.title : functionDetails.displayName || functionId;
     const formDescription =
       formConfig.description !== undefined
         ? formConfig.description
-        : `Form for interacting with the ${functionId} function.`;
+        : functionDetails.description ||
+          `Form for interacting with the ${functionDetails.displayName || functionId} function.`;
 
     const renderSchema = formSchemaFactory.builderConfigToRenderSchema(
       formConfig,
       formTitle,
       formDescription
     );
-
-    // Validate the schema to ensure it has all required properties
     this.validateRenderFormSchema(renderSchema, functionId);
 
     // Create parameters for the template
     const params: FormComponentTemplateParams = {
       adapterClassName,
-      chainType,
+      adapterPackageName,
+      networkConfigImportName,
       functionId,
-      formConfigJSON: JSON.stringify(renderSchema, null, 2), // Schema for rendering
-      // Embed the ORIGINAL field configuration for the adapter's submission logic
+      formConfigJSON: JSON.stringify(renderSchema, null, 2),
+      contractSchemaJSON: JSON.stringify(contractSchema, null, 2),
       allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
-      // Pass executionConfig to the template
       executionConfigJSON: executionConfig ? JSON.stringify(executionConfig, null, 2) : 'undefined',
-      includeDebugMode: false, // Or make this configurable via options
+      includeDebugMode: false,
     };
 
     // Process the form component template
@@ -98,7 +124,10 @@ export class FormCodeGenerator {
     // Apply common post-processing with form-specific options
     processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
       adapterClassName,
+      adapterPackageName,
+      networkConfigImportName,
       formConfigJSON: params.formConfigJSON,
+      contractSchemaJSON: params.contractSchemaJSON,
       executionConfigJSON: params.executionConfigJSON,
       allFieldsConfigJSON: params.allFieldsConfigJSON,
     });
@@ -151,60 +180,117 @@ export class FormCodeGenerator {
 
   /**
    * Generate a complete React project by integrating with the template system.
-   * Uses the typescript-react-vite template and replaces placeholder files with generated code.
    *
    * @param formConfig The form configuration from the builder
-   * @param chainType The selected blockchain type
+   * @param contractSchema The full contract schema
+   * @param networkConfig The network configuration for the selected network
    * @param functionId The ID of the contract function
    * @param options Additional options for export customization
    * @returns A record of file paths to file contents for the complete project
    */
   async generateTemplateProject(
     formConfig: BuilderFormConfig,
-    chainType: ChainType,
+    contractSchema: ContractSchema,
+    networkConfig: NetworkConfig,
     functionId: string,
-    options: ExportOptions = { chainType }
+    options?: ExportOptions
   ): Promise<Record<string, string>> {
-    // Generate the form component code
-    const formComponentCode = await this.generateFormComponent(formConfig, chainType, functionId);
+    // Derive ecosystem from networkConfig if needed elsewhere, or pass networkConfig down
+    const ecosystem = networkConfig.ecosystem;
+    const exportOptions = options || { ecosystem }; // Ensure options has ecosystem
 
-    // Create a structure with the custom files to replace in the template
+    // Generate all necessary component code
+    const mainTsxCode = await this.generateMainTsx(networkConfig);
+    const appComponentCode = await this.generateAppComponent(ecosystem, functionId);
+    const formComponentCode = await this.generateFormComponent(
+      formConfig,
+      contractSchema,
+      networkConfig,
+      functionId
+    );
+
     const customFiles: Record<string, string> = {
-      // Replace FormPlaceholder.tsx with our generated form component
+      'src/main.tsx': mainTsxCode,
+      'src/App.tsx': appComponentCode,
       'src/components/GeneratedForm.tsx': formComponentCode,
-
-      // We need to update App.tsx to import GeneratedForm instead of FormPlaceholder
-      'src/App.tsx': await this.generateUpdatedAppComponent(functionId),
     };
 
-    // Get adapter files if needed
-    if (options.includeAdapters !== false) {
-      const adapterFiles = await this.adapterExportManager.getAdapterFiles(chainType);
-      Object.assign(customFiles, adapterFiles);
-    }
-
-    // Use the template manager to create a complete project
-    return await this.templateManager.createProject('typescript-react-vite', customFiles, options);
+    return await this.templateManager.createProject(
+      'typescript-react-vite',
+      customFiles,
+      exportOptions
+    );
   }
 
   /**
-   * Generate an updated App component that imports the GeneratedForm instead of FormPlaceholder
+   * Generate the main.tsx file content.
    *
+   * @param networkConfig The specific network configuration object
+   * @returns The content of the generated main.tsx file
+   */
+  public async generateMainTsx(networkConfig: NetworkConfig): Promise<string> {
+    const ecosystem = networkConfig.ecosystem;
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
+    const networkConfigImportName = networkConfig.exportConstName;
+
+    if (!adapterPackageName || !networkConfigImportName) {
+      throw new Error(`Adapter/Network details missing for ecosystem: ${ecosystem}`);
+    }
+
+    // Define parameters for the main template
+    const params = {
+      adapterClassName,
+      adapterPackageName,
+      networkConfigImportName,
+    };
+
+    // Process the main template
+    let processedTemplate = await this.templateProcessor.processTemplate('main', params);
+
+    // Apply common post-processing
+    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
+      adapterClassName,
+      adapterPackageName,
+      networkConfigImportName,
+    });
+
+    // Format the code
+    processedTemplate = await this.templateProcessor.formatFinalCode(processedTemplate);
+
+    return processedTemplate;
+  }
+
+  /**
+   * Generate an App component that imports the GeneratedForm
+   *
+   * @param ecosystem The selected ecosystem
    * @param functionId The ID of the function this form is for (used in titles)
    * @returns The content of the updated App.tsx file
    */
-  public async generateUpdatedAppComponent(functionId: string): Promise<string> {
+  public async generateAppComponent(ecosystem: Ecosystem, functionId: string): Promise<string> {
+    const adapterClassName = this.getAdapterClassName(ecosystem);
+    const adapterPackageName = adapterPackageMap[ecosystem];
+    if (!adapterPackageName) {
+      throw new Error(`No adapter package configured for ecosystem: ${ecosystem}`);
+    }
+
     // Create parameters for the template
     const params: AppComponentTemplateParams & Record<string, unknown> = {
       functionId,
       currentYear: new Date().getFullYear(),
+      adapterClassName,
+      adapterPackageName,
     };
 
     // Process the app component template
     let processedTemplate = await this.templateProcessor.processTemplate('app-component', params);
 
     // Apply common post-processing
-    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate);
+    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
+      adapterClassName,
+      adapterPackageName,
+    });
 
     // Format the entire code with Prettier
     processedTemplate = await this.templateProcessor.formatFinalCode(processedTemplate);
@@ -216,7 +302,7 @@ export class FormCodeGenerator {
    * Get the class name for a chain type's adapter.
    * Converts chain type to PascalCase (e.g., 'evm' -> 'EvmAdapter').
    */
-  private getAdapterClassName(chainType: ChainType): string {
-    return `${chainType.charAt(0).toUpperCase()}${chainType.slice(1)}Adapter`;
+  private getAdapterClassName(ecosystem: Ecosystem): string {
+    return `${capitalize(ecosystem)}Adapter`;
   }
 }

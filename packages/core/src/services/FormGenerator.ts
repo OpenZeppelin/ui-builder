@@ -6,34 +6,29 @@
  */
 import { startCase } from 'lodash';
 
+import { generateId } from '@openzeppelin/transaction-form-renderer';
 import {
   CommonFormProperties,
-  FieldType,
-  FormFieldType,
-  // FormValues,
-  // RenderFormSchema,
-  // Will be used in future implementation
-  // FormLayout,
-  // SubmitButtonConfig,
-} from '@openzeppelin/transaction-form-renderer';
-
-import { getContractAdapter } from '../adapters';
-import type {
+  ContractAdapter,
   ContractFunction,
   ContractSchema,
+  FieldType,
+  FormFieldType,
   FunctionParameter,
-} from '../core/types/ContractSchema';
-import { BuilderFormConfig } from '../core/types/FormTypes';
-import { generateId } from '../core/utils/general';
+} from '@openzeppelin/transaction-form-types';
+
+import type { BuilderFormConfig } from '../core/types/FormTypes';
 
 /**
  * Generates a default form configuration for a contract function
  *
+ * @param adapter The blockchain adapter to use for field generation
  * @param contractSchema The contract schema containing chain type and function details
  * @param functionId The ID of the function to generate a form for
  * @returns A form configuration object
  */
 export function generateFormConfig(
+  adapter: ContractAdapter,
   contractSchema: ContractSchema,
   functionId: string
 ): BuilderFormConfig {
@@ -42,9 +37,6 @@ export function generateFormConfig(
   if (!functionDetails) {
     throw new Error(`Function ${functionId} not found in contract schema`);
   }
-
-  // Get the appropriate adapter for the selected chain
-  const adapter = getContractAdapter(contractSchema.chainType);
 
   // Generate fields using the adapter
   const fields = generateFieldsFromFunction(adapter, functionDetails);
@@ -72,6 +64,7 @@ export function generateFormConfig(
     description:
       functionDetails.description ||
       `Form for interacting with the ${functionDetails.displayName} function.`,
+    contractAddress: contractSchema.address || '',
   };
 }
 
@@ -83,7 +76,7 @@ export function generateFormConfig(
  * @returns An array of form fields
  */
 export function generateFieldsFromFunction(
-  adapter: import('../adapters').ContractAdapter,
+  adapter: ContractAdapter,
   functionDetails: ContractFunction
 ): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
@@ -114,7 +107,7 @@ export function generateFieldsFromFunction(
  * @returns A form field appropriate for the complex type
  */
 function handleComplexTypeField(
-  adapter: import('../adapters').ContractAdapter,
+  adapter: ContractAdapter,
   parameter: FunctionParameter
 ): FormFieldType {
   const baseField = adapter.generateDefaultField(parameter);
@@ -166,9 +159,13 @@ function getBaseType(parameterType: string): string {
  * Fallback field generation in case the adapter fails
  *
  * @param functionDetails The contract function details
+ * @param contractAddress The contract address
  * @returns An array of basic form fields
  */
-export function generateFallbackFields(functionDetails: ContractFunction): FormFieldType[] {
+export function generateFallbackFields(
+  functionDetails: ContractFunction,
+  contractAddress: string = ''
+): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
     let fieldType: FieldType = 'text';
     let placeholder = `Enter ${input.displayName || input.name || input.type}`;
@@ -207,6 +204,7 @@ export function generateFallbackFields(functionDetails: ContractFunction): FormF
       },
       width: 'full',
       originalParameterType: input.type,
+      contractAddress,
     };
   });
 }
@@ -246,12 +244,13 @@ export function updateFormConfig(
   const updatedCommonProperties: CommonFormProperties = {
     fields: updates.fields || existingConfig.fields,
     layout: {
-      ...existingConfig.layout,
-      ...(updates.layout || {}),
+      columns: 1,
+      spacing: 'normal',
+      labelPosition: 'top',
     },
     validation: {
-      ...existingConfig.validation,
-      ...(updates.validation || {}),
+      mode: 'onChange',
+      showErrors: 'inline',
     },
     theme: {
       ...existingConfig.theme,
@@ -273,5 +272,6 @@ export function updateFormConfig(
     ...existingConfig,
     ...processedUpdates,
     ...updatedCommonProperties,
+    contractAddress: updates.contractAddress || existingConfig.contractAddress,
   };
 }

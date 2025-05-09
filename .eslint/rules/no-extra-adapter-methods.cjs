@@ -36,7 +36,6 @@ module.exports = {
     // Known interface methods from ContractAdapter
     const interfaceMethods = [
       'loadContract',
-      'loadMockContract',
       'getWritableFunctions',
       'mapParameterTypeToFieldType',
       'getCompatibleFieldTypes',
@@ -46,6 +45,18 @@ module.exports = {
       'isValidAddress',
       'getSupportedExecutionMethods',
       'validateExecutionConfig',
+      'isViewFunction',
+      'queryViewFunction',
+      'formatFunctionResult',
+      'supportsWalletConnection',
+      'getAvailableConnectors',
+      'connectWallet',
+      'disconnectWallet',
+      'getWalletConnectionStatus',
+      'onWalletConnectionChange',
+      'getExplorerUrl',
+      'getExplorerTxUrl',
+      'waitForTransactionConfirmation',
     ];
 
     // Common standard methods and properties that are allowed

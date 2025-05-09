@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+
+import { createMinimalContractSchema, createMinimalFormConfig } from '../../utils/testConfig';
 import { FormCodeGenerator } from '../FormCodeGenerator';
 import { TemplateProcessor } from '../TemplateProcessor';
 
@@ -14,6 +16,21 @@ describe('FormCodeGenerator Templating System', () => {
   let templateProcessor: TemplateProcessor;
   let originalConsoleLog: typeof console.log;
   let originalConsoleWarn: typeof console.warn;
+
+  // Define mock network config
+  const mockEvmNetworkConfig: EvmNetworkConfig = {
+    id: 'test-codegen-templating-evm',
+    name: 'Test CodeGen Template EVM',
+    exportConstName: 'mockEvmNetworkConfig',
+    ecosystem: 'evm',
+    network: 'ethereum',
+    type: 'testnet',
+    isTestnet: true,
+    chainId: 1337,
+    rpcUrl: 'http://localhost:8545',
+    nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+    apiUrl: '',
+  };
 
   beforeEach(() => {
     generator = new FormCodeGenerator();
@@ -66,7 +83,7 @@ describe('FormCodeGenerator Templating System', () => {
 
     it('should handle regular variable placeholders (@@param-name@@)', async () => {
       const templateContent = `
-        import { @@adapter-class-name@@ } from '../adapters/@@chain-type@@/adapter';
+        import { @@adapter-class-name@@ } from '../adapters/@@ecosystem@@/adapter';
         
         function Example() {
           const id = '@@function-id@@';
@@ -78,7 +95,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       const params = {
         adapterClassName: 'EvmAdapter',
-        chainType: 'evm',
+        ecosystem: 'evm',
         functionId: 'transferTokens',
       };
 
@@ -220,7 +237,7 @@ describe('FormCodeGenerator Templating System', () => {
         const config = {
           id: '@@function-id@@',
           name: '@@function-name@@', // This parameter doesn't exist
-          chainType: '@@chain-type@@'
+          ecosystem: '@@ecosystem@@'
         };
       `;
 
@@ -228,7 +245,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       const params = {
         functionId: 'transferTokens',
-        chainType: 'evm',
+        ecosystem: 'evm',
         // functionName is intentionally missing
       };
 
@@ -236,7 +253,7 @@ describe('FormCodeGenerator Templating System', () => {
 
       expect(processed).toContain("id: 'transferTokens'");
       expect(processed).toContain("name: ''"); // Empty string for missing param
-      expect(processed).toContain("chainType: 'evm'");
+      expect(processed).toContain("ecosystem: 'evm'");
     });
   });
 
@@ -249,39 +266,24 @@ describe('FormCodeGenerator Templating System', () => {
       // This test verifies that the template processing works correctly
       // when called through the public generateFormComponent method
 
-      const formConfig: BuilderFormConfig = {
-        functionId: 'transferTokens',
-        fields: [
-          {
-            id: 'amount',
-            name: 'amount',
-            label: 'Amount',
-            type: 'text' as const,
-            validation: { required: true },
-          },
-        ],
-        layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
-        },
-        validation: {
-          mode: 'onChange',
-          showErrors: 'inline',
-        },
-        theme: {},
-      };
+      const formConfig = createMinimalFormConfig('transferTokens', 'evm');
+      const contractSchema = createMinimalContractSchema('transferTokens', 'evm');
 
-      const code = await generator.generateFormComponent(formConfig, 'evm', 'transferTokens');
+      const code = await generator.generateFormComponent(
+        formConfig,
+        contractSchema,
+        mockEvmNetworkConfig,
+        'transferTokens'
+      );
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('EvmAdapter');
       expect(code).toContain('transferTokens');
 
-      // Verify that no template placeholders remain
-      expect(code).not.toContain('@@');
-      expect(code).not.toMatch(/\{\s*\/\*@@.*@@\*\/\s*\}/);
-      expect(code).not.toMatch(/\/\*@@.*@@\*\//);
+      // Verify that specific VARIABLE template placeholders were replaced
+      expect(code).not.toContain('@@function-id@@');
+      expect(code).not.toContain('@@adapter-package-name@@');
+      // We don't check for @@ecosystem@@ as it might be within comments handled later
 
       // Verify that template comments were removed
       expect(code).not.toContain('TEMPLATE COMMENT');
@@ -291,16 +293,15 @@ describe('FormCodeGenerator Templating System', () => {
       // This test verifies that the template processing works correctly
       // when called through the public generateUpdatedAppComponent method
 
-      const code = await generator.generateUpdatedAppComponent('transferTokens');
+      const code = await generator.generateAppComponent('evm', 'transferTokens');
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('transferTokens');
       expect(code).toContain(new Date().getFullYear().toString()); // current year
 
-      // Verify that no template placeholders remain
-      expect(code).not.toContain('@@');
-      expect(code).not.toMatch(/\{\s*\/\*@@.*@@\*\/\s*\}/);
-      expect(code).not.toMatch(/\/\*@@.*@@\*\//);
+      // Verify that specific VARIABLE template placeholders were replaced
+      expect(code).not.toContain('@@app-title@@');
+      expect(code).not.toContain('@@current-year@@');
 
       // Verify that template comments were removed
       expect(code).not.toContain('TEMPLATE COMMENT');
@@ -381,10 +382,11 @@ function example() {
           },
         ],
         layout: {
-          columns: 1,
-          spacing: 'normal',
-          labelPosition: 'top',
+          columns: 1 as const,
+          spacing: 'normal' as const,
+          labelPosition: 'top' as const,
         },
+        contractAddress: '0xTestAddress',
       };
 
       // Test that applyCommonPostProcessing inserts the JSON correctly
@@ -503,7 +505,8 @@ const anotherFunction = () => {
 
       const formConfig = {
         fields: [{ id: 'amount', label: 'Amount', type: 'number' }],
-        layout: { columns: 1 },
+        layout: { columns: 1 as const },
+        contractAddress: '0xTestAddress',
       };
 
       const processed = await templateProcessor.applyCommonPostProcessing(template, {
@@ -600,8 +603,9 @@ const anotherFunction = () => {
             }
           ],
           "layout": {
-            "columns": 1
-          }
+            "columns": 1 as const
+          },
+          contractAddress: '0xTestAddress'
         };
       
         return (

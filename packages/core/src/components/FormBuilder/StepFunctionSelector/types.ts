@@ -1,16 +1,21 @@
-import type { ContractFunction, ContractSchema } from '../../../core/types/ContractSchema';
+import type {
+  ContractFunction,
+  ContractSchema,
+  NetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   onFunctionSelected: (functionId: string | null) => void;
+  networkConfig?: NetworkConfig | null;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export interface FilterControlsProps {
   filterValue: string;
   setFilterValue: (value: string) => void;
-  showReadOnlyFunctions: boolean;
-  setShowReadOnlyFunctions: (show: boolean) => void;
 }
 
 export interface WritableFunctionCardProps {

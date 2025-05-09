@@ -5,3 +5,4 @@
 export * from './button-variants';
 export * from './cn';
 export * from './formUtils';
+export * from './formatting';

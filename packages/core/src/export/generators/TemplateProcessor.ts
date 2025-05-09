@@ -2,13 +2,14 @@
  * TemplateProcessor class responsible for processing code templates
  * with various placeholder formats and applying post-processing steps.
  */
+import sortImportsPlugin from '@trivago/prettier-plugin-sort-imports';
 import type { Options, Plugin } from 'prettier';
 import * as babelPlugin from 'prettier/plugins/babel';
 import * as estreePlugin from 'prettier/plugins/estree';
 import * as typescriptPlugin from 'prettier/plugins/typescript';
 import * as prettierStandalone from 'prettier/standalone';
 
-import { logger } from '../../core/utils/logger';
+import { logger } from '@openzeppelin/transaction-form-renderer';
 
 export class TemplateProcessor {
   private templates: Record<string, string> | null = null;
@@ -157,8 +158,11 @@ export class TemplateProcessor {
   public async applyCommonPostProcessing(
     processedTemplate: string,
     options?: {
+      networkConfigImportName?: string;
       adapterClassName?: string;
+      adapterPackageName?: string;
       formConfigJSON?: string;
+      contractSchemaJSON?: string;
       allFieldsConfigJSON?: string;
       executionConfigJSON?: string;
     }
@@ -180,11 +184,23 @@ export class TemplateProcessor {
     // Remove all @ts-expect-error comments - they're only needed during template development
     processedTemplate = processedTemplate.replace(/\/\/\s*@ts-expect-error.*\n/g, '');
 
-    // If adapter class name is provided, perform adapter-specific replacements
-    if (options?.adapterClassName) {
-      // Replace adapter placeholder with the actual adapter class name everywhere
+    if (options?.networkConfigImportName) {
       processedTemplate = processedTemplate.replace(
-        /AdapterPlaceholder/g,
+        /NetworkConfigPlaceholder/g,
+        options.networkConfigImportName
+      );
+
+      // Fix any possible malformed imports caused by comment-style placeholders
+      processedTemplate = processedTemplate.replace(
+        /import\s*\{\s*\{\/\*\*\/\}\s*\}\s*from/g,
+        `import { ${options.networkConfigImportName} } from`
+      );
+    }
+
+    // Replace adapter class name placeholder
+    if (options?.adapterClassName) {
+      processedTemplate = processedTemplate.replace(
+        /AdapterPlaceholder/g, // Find placeholder class name
         options.adapterClassName
       );
 
@@ -205,8 +221,21 @@ export class TemplateProcessor {
           `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
         );
       } catch (error) {
-        // Log any errors that might occur
         logger.error('TemplateProcessor', 'Failed to inject form schema:', error);
+        throw error;
+      }
+    }
+
+    // Inject ContractSchema JSON if provided
+    if (options?.contractSchemaJSON) {
+      try {
+        processedTemplate = processedTemplate.replace(
+          // Assume a similar placeholder variable assignment
+          /const contractSchema: ContractSchema = \{\}; \/\*@@CONTRACT_SCHEMA_JSON@@\*\//g,
+          `const contractSchema: ContractSchema = ${options.contractSchemaJSON};`
+        );
+      } catch (error) {
+        logger.error('TemplateProcessor', 'Failed to inject contract schema:', error);
         throw error;
       }
     }
@@ -226,7 +255,7 @@ export class TemplateProcessor {
       }
     }
 
-    // If execution config JSON is provided, inject it
+    // Inject execution config JSON if provided
     if (options?.executionConfigJSON) {
       try {
         const regex =
@@ -262,12 +291,21 @@ export class TemplateProcessor {
         arrowParens: 'always',
         bracketSpacing: true,
         quoteProps: 'as-needed', // Ensures object keys aren't quoted unless necessary
+        // Import sorting configuration
+        importOrder: ['^@openzeppelin/(.*)$', '^[./]'],
+        importOrderSeparation: true,
+        importOrderSortSpecifiers: true,
       };
 
       // Add plugins to the configuration
       const config: Options & { plugins: Plugin[] } = {
         ...prettierConfig,
-        plugins: [estreePlugin.default, typescriptPlugin.default, babelPlugin.default],
+        plugins: [
+          estreePlugin.default,
+          typescriptPlugin.default,
+          babelPlugin.default,
+          sortImportsPlugin,
+        ],
       };
 
       // Format the entire code file
@@ -314,7 +352,16 @@ export class TemplateProcessor {
     const defaultOptions: Options = {
       parser: parser,
       // Ensure estree plugin is included (it handles json-stringify)
-      plugins: [typescriptPlugin.default, estreePlugin.default, babelPlugin.default],
+      plugins: [
+        typescriptPlugin.default,
+        estreePlugin.default,
+        babelPlugin.default,
+        sortImportsPlugin,
+      ],
+      // Import sorting configuration
+      importOrder: ['^@openzeppelin/(.*)$', '^[./]'],
+      importOrderSeparation: true,
+      importOrderSortSpecifiers: true,
       // You can add more Prettier options here if needed
     };
 

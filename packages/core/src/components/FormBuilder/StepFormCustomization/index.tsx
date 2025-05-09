@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-renderer';
+import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { getContractAdapter } from '../../../adapters';
-import type { ChainType, ContractSchema } from '../../../core/types/ContractSchema';
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
+import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
+import { ActionBar } from '../../Common/ActionBar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { StepTitleWithDescription } from '../Common';
+import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
@@ -14,35 +16,37 @@ import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
-import { LayoutEditor } from './LayoutEditor';
-import { ValidationEditor } from './ValidationEditor';
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
-  selectedChain: ChainType;
+  networkConfig: NetworkConfig | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
+  onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
+  currentExecutionConfig?: ExecutionConfig;
+  onToggleContractState?: () => void;
+  isWidgetExpanded?: boolean;
 }
 
 export function StepFormCustomization({
   contractSchema,
   selectedFunction,
-  selectedChain,
+  networkConfig,
   onFormConfigUpdated,
+  onExecutionConfigUpdated,
+  currentExecutionConfig,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepFormCustomizationProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const {
-    formConfig,
-    updateField,
-    updateFormLayout,
-    updateFormValidation,
-    updateFormTitle,
-    updateFormDescription,
-  } = useFormConfig({
+  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
+
+  const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
     contractSchema,
     selectedFunction,
+    adapter,
     onFormConfigUpdated,
   });
 
@@ -53,6 +57,18 @@ export function StepFormCustomization({
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
 
+  // Auto-select the first field when the Fields tab is selected for the first time
+  useEffect(() => {
+    if (
+      activeTab === 'fields' &&
+      selectedFieldIndex === null &&
+      formConfig &&
+      formConfig.fields.length > 0
+    ) {
+      selectField(0);
+    }
+  }, [activeTab, formConfig, selectedFieldIndex, selectField]);
+
   if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig) {
     return (
       <div className="py-8 text-center">
@@ -61,35 +77,70 @@ export function StepFormCustomization({
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Customize Form</h3>
-        <p className="text-muted-foreground">
-          Customize the form fields, layout, and validation for the &quot;
-          {selectedFunctionDetails.displayName}&quot; function.
+  if (adapterLoading) {
+    return (
+      <div className="py-8 text-center">
+        <p>Loading adapter...</p>
+      </div>
+    );
+  }
+
+  if (!adapter && networkConfig) {
+    return (
+      <div className="py-8 text-center text-red-600">
+        <p>
+          Failed to load adapter for the selected network. Please try again or select a different
+          network.
         </p>
       </div>
+    );
+  }
 
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" size="sm" onClick={() => setPreviewMode(!previewMode)}>
-          {previewMode ? 'Back to Editor' : 'Preview Form'}
-        </Button>
+  if (networkConfig && !adapter) {
+    return (
+      <div className="py-8 text-center">
+        <p>Adapter not available for selected network. Please select a network.</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {networkConfig && (
+        <ActionBar
+          network={networkConfig}
+          contractAddress={contractSchema.address}
+          onToggleContractState={onToggleContractState}
+          isWidgetExpanded={isWidgetExpanded}
+          showPreviewButton={true}
+          isPreviewMode={previewMode}
+          onTogglePreview={() => setPreviewMode(!previewMode)}
+        />
+      )}
+
+      <StepTitleWithDescription
+        title="Customize"
+        description={
+          <>
+            Customize the form fields and general settings for the &quot;
+            {selectedFunctionDetails.displayName}&quot; function.
+          </>
+        }
+      />
 
       {previewMode ? (
         <FormPreview
           formConfig={formConfig}
           functionDetails={selectedFunctionDetails}
-          selectedChain={selectedChain}
+          contractSchema={contractSchema}
+          networkConfig={networkConfig}
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>
-            <TabsTrigger value="layout">Layout</TabsTrigger>
-            <TabsTrigger value="validation">Validation</TabsTrigger>
+            <TabsTrigger value="execution">Execution Method</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
@@ -113,32 +164,31 @@ export function StepFormCustomization({
 
                 <div className="col-span-2">
                   {/* Field editor */}
-                  {selectedFieldIndex !== null && formConfig.fields[selectedFieldIndex] && (
-                    <FieldEditor
-                      field={formConfig.fields[selectedFieldIndex]}
-                      onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                      adapter={getContractAdapter(selectedChain)}
-                      originalParameterType={
-                        formConfig.fields[selectedFieldIndex].originalParameterType
-                      }
-                    />
-                  )}
+                  {selectedFieldIndex !== null &&
+                    formConfig.fields[selectedFieldIndex] &&
+                    adapter && (
+                      <FieldEditor
+                        field={formConfig.fields[selectedFieldIndex]}
+                        onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                        adapter={adapter}
+                        originalParameterType={
+                          formConfig.fields[selectedFieldIndex].originalParameterType
+                        }
+                      />
+                    )}
                 </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="layout" className="mt-4 rounded-md border p-4">
-            {/* Layout configuration */}
-            <LayoutEditor layoutConfig={formConfig.layout} onUpdate={updateFormLayout} />
-          </TabsContent>
-
-          <TabsContent value="validation" className="mt-4 rounded-md border p-4">
-            {/* Validation configuration */}
-            <ValidationEditor
-              validationConfig={formConfig.validation}
-              onUpdate={updateFormValidation}
-            />
+          <TabsContent value="execution" className="mt-4 rounded-md border p-4">
+            {adapter && (
+              <ExecutionMethodSettings
+                adapter={adapter}
+                currentConfig={currentExecutionConfig}
+                onUpdateConfig={onExecutionConfigUpdated || (() => {})}
+              />
+            )}
           </TabsContent>
         </Tabs>
       )}

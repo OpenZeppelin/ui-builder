@@ -1,4 +1,4 @@
-import type { ContractFunction, ContractSchema } from '../../../types/ContractSchema';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 /**
  * Test fixtures specifically for testing EVM adapter integration
@@ -8,8 +8,8 @@ export const TEST_FIXTURES = {
   integerTypes: {
     id: 'test-integers',
     name: 'Test Integer Types',
-    address: '0x0000000000000000000000000000000000000000',
-    chainType: 'evm' as const,
+    address: '0x1234567890123456789012345678901234567890',
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-uint8',
@@ -69,8 +69,8 @@ export const TEST_FIXTURES = {
   byteTypes: {
     id: 'test-bytes',
     name: 'Test Byte Types',
-    address: '0x0000000000000000000000000000000000000000',
-    chainType: 'evm' as const,
+    address: '0x1234567890123456789012345678901234567890',
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-bytes',
@@ -113,8 +113,8 @@ export const TEST_FIXTURES = {
   arrayTypes: {
     id: 'test-arrays',
     name: 'Test Array Types',
-    address: '0x0000000000000000000000000000000000000000',
-    chainType: 'evm' as const,
+    address: '0x1234567890123456789012345678901234567890',
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-dynamic-array',
@@ -174,8 +174,8 @@ export const TEST_FIXTURES = {
   errorCases: {
     id: 'test-errors',
     name: 'Test Error Cases',
-    address: '0x0000000000000000000000000000000000000000',
-    chainType: 'evm' as const,
+    address: '0x1234567890123456789012345678901234567890',
+    ecosystem: 'evm' as const,
     functions: [
       {
         id: 'function-empty-inputs',

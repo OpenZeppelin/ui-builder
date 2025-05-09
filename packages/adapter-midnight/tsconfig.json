@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+    // Add specific compiler options for Midnight if needed
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/*.test.tsx"]
+}
