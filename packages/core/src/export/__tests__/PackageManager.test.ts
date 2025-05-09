@@ -98,7 +98,6 @@ describe('PackageManager', () => {
       expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Should also include types
       expect(evmDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
       // Check for specific runtime libs from EVM adapter config
-      expect(evmDependencies).toHaveProperty('ethers');
       expect(evmDependencies).toHaveProperty('viem');
       expect(evmDependencies).toHaveProperty('wagmi');
 
@@ -110,7 +109,8 @@ describe('PackageManager', () => {
       // Check for specific runtime libs from Solana adapter config
       expect(solanaDependencies).toHaveProperty('@solana/web3.js');
       // Check that EVM libs are NOT present
-      expect(solanaDependencies).not.toHaveProperty('ethers');
+      expect(solanaDependencies).not.toHaveProperty('viem');
+      expect(solanaDependencies).not.toHaveProperty('wagmi');
     });
 
     it('should include field-specific dependencies based on form fields', async () => {
@@ -248,7 +248,6 @@ describe('PackageManager', () => {
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter pkg
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Types pkg
       // Check for specific runtime libs from EVM adapter config
-      expect(result.dependencies).toHaveProperty('ethers');
       expect(result.dependencies).toHaveProperty('viem');
       expect(result.dependencies).toHaveProperty('wagmi');
     });
