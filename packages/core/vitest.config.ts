@@ -114,11 +114,7 @@ export default defineConfig({
   },
   // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
   ssr: {
-    noExternal: [
-      '@openzeppelin/transaction-form-renderer',
-      '@openzeppelin/transaction-form-types',
-      // Add other workspace dependencies if they cause similar issues
-    ],
+    noExternal: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
   },
   test: {
     // Include all test settings from shared config
