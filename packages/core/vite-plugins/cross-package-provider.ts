@@ -43,9 +43,6 @@ export function crossPackageModulesProviderPlugin(): Plugin {
           // Re-export known named exports
           export const formRendererConfig = _module.formRendererConfig;
           // Add other exports here if the target module has more...
-
-          // Re-export default if it exists
-          export default _module.default;
         `;
       }
       return null;

@@ -11,10 +11,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@styles/*": ["../styles/*"]
+      "@styles/*": ["../styles/*"],
+      "@openzeppelin/transaction-form-types/*": ["../types/src/*"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.stories.tsx", "dist", "node_modules"],
-  "references": [{ "path": "../styles" }]
+  "references": [{ "path": "../styles" }, { "path": "../types" }]
 }

@@ -1,24 +1,47 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { ChainType } from '../../core/types/ContractSchema';
-import { logger } from '../../core/utils/logger';
+import { logger } from '@openzeppelin/transaction-form-renderer';
+import { Ecosystem, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+
 import { FormExportSystem } from '../FormExportSystem';
-import { createMinimalFormConfig } from '../utils/testConfig';
+import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network config
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-export-snapshot-evm',
+  name: 'Test Export Snapshot EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
 
 describe('Export Snapshot Tests', () => {
   /**
    * Helper function to extract key files from the export for snapshot testing
    */
-  async function getSnapshotFiles(chainType: ChainType = 'evm', functionName: string = 'transfer') {
+  async function getSnapshotFiles(ecosystem: Ecosystem = 'evm', functionName: string = 'transfer') {
     // Create the export system and form config
     const exportSystem = new FormExportSystem();
-    const formConfig = createMinimalFormConfig(functionName, chainType);
+    const formConfig = createMinimalFormConfig(functionName, ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form with a consistent project name for snapshots
-    const result = await exportSystem.exportForm(formConfig, chainType, functionName, {
-      projectName: 'snapshot-test-project',
-    });
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      mockEvmNetworkConfig,
+      functionName,
+      {
+        projectName: 'snapshot-test-project',
+      }
+    );
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
@@ -30,7 +53,7 @@ describe('Export Snapshot Tests', () => {
       appComponent: files['src/App.tsx'],
       formComponent: files['src/components/GeneratedForm.tsx'],
       adapterIndex: files['src/adapters/index.ts'],
-      [`adapter_${chainType}`]: files[`src/adapters/${chainType}/adapter.ts`],
+      [`adapter_${ecosystem}`]: files[`src/adapters/${ecosystem}/adapter.ts`],
     };
   }
 

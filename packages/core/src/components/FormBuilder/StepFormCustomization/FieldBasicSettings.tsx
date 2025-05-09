@@ -3,14 +3,12 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import {
   BooleanField,
-  ContractAdapter,
   DynamicFormField,
-  FormFieldType,
-  FormValues,
-  SelectField,
   SelectGroupedField,
   TextField,
 } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
 
@@ -27,23 +25,13 @@ interface FieldBasicSettingsProps {
    */
   fieldTypeGroups: OptionGroup[];
 
-  /**
-   * Field width options for the select dropdown
-   */
-  fieldWidthOptions: { value: string; label: string }[];
-
   adapter?: ContractAdapter;
 }
 
 /**
  * Component for editing basic field settings like label, type, etc.
  */
-export function FieldBasicSettings({
-  control,
-  fieldTypeGroups,
-  fieldWidthOptions,
-  adapter,
-}: FieldBasicSettingsProps) {
+export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldBasicSettingsProps) {
   // TODO: Prevent wizard from advancing to the next step if `isHardcodedValueInvalid` is true.
   // This might involve lifting the validation state up or providing a callback/ref to the parent wizard.
 
@@ -88,22 +76,15 @@ export function FieldBasicSettings({
         placeholder="Select field type"
       />
 
-      <TextField
-        id="field-placeholder"
-        name="placeholder"
-        label="Placeholder Text"
-        control={control}
-        placeholder="Enter placeholder text"
-      />
-
-      <SelectField
-        id="field-width"
-        name="width"
-        label="Field Width"
-        control={control}
-        options={fieldWidthOptions}
-        placeholder="Select field width"
-      />
+      <div className="md:col-span-2">
+        <TextField
+          id="field-placeholder"
+          name="placeholder"
+          label="Placeholder Text"
+          control={control}
+          placeholder="Enter placeholder text"
+        />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 border-t pt-4 md:col-span-2 md:grid-cols-2">
         <BooleanField

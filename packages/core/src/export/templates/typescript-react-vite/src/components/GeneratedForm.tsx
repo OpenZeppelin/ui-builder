@@ -1,0 +1,54 @@
+/**
+ * ==========================================================================
+ * GeneratedForm.tsx - EXPORT SYSTEM PLACEHOLDER
+ * ==========================================================================
+ * This file serves as a structural placeholder in the base template.
+ * Its entire content will be **generated and overwritten** during the export process
+ * based on the `packages/core/src/export/codeTemplates/form-component.template.tsx` template
+ * and the user's form configuration.
+ *
+ * The final generated file will be a React component that:
+ * - Accepts `adapter` and `onSubmit` props.
+ * - Uses the `@openzeppelin/transaction-form-renderer` package.
+ * - Defines the specific `RenderFormSchema` based on the user's configuration.
+ * - Handles contract state loading via the adapter.
+ * - Renders the `TransactionForm` component.
+ * - Includes the `ContractStateWidget`.
+ * - Manages form submission and results.
+ *
+ * Example Snippet (Generated Content - simplified structure):
+ * ```tsx
+ * import { useEffect, useState } from 'react';
+ * import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm'; // Example
+ * import { TransactionForm, WalletConnectionProvider, ... } from '@openzeppelin/transaction-form-renderer';
+ * import type { RenderFormSchema, TransactionFormProps } from '@openzeppelin/transaction-form-types';
+ *
+ * // Props will likely extend TransactionFormProps
+ * interface GeneratedFormProps { ... }
+ *
+ * export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
+ *   // ... state hooks (transactionResult, contractSchema, etc.) ...
+ *
+ *   const formSchema: RenderFormSchema = { ... }; // Generated schema
+ *   const allFieldsConfig = [ ... ]; // Original field config
+ *
+ *   // ... useEffect for loading contract ...
+ *   // ... handleSubmit logic ...
+ *
+ *   return (
+ *     <WalletConnectionProvider adapter={adapter}>
+ *       // ... layout (Card, ContractStateWidget) ...
+ *       <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
+ *       // ...
+ *     </WalletConnectionProvider>
+ *   );
+ * }
+ * ```
+ * ==========================================================================
+ */
+
+// This placeholder content will be replaced.
+// Exporting a dummy function to satisfy the import in the base App.tsx.
+export function GeneratedForm() {
+  return null;
+}

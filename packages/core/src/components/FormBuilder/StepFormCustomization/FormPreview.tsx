@@ -1,26 +1,37 @@
 import { useMemo } from 'react';
 
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import {
+  Card,
+  CardContent,
+  TransactionForm,
+  WalletConnectionProvider,
+} from '@openzeppelin/transaction-form-renderer';
+import { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
-import { getContractAdapter } from '../../../adapters';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import type { ChainType, ContractFunction } from '../../../core/types/ContractSchema';
+import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-import { Card, CardContent } from '../../ui/card';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
-  selectedChain: ChainType;
+  contractSchema: ContractSchema;
+  networkConfig: NetworkConfig | null;
 }
 
 /**
  * Form preview component that renders a preview of the form being built
  * Uses the TransactionForm component from the form-renderer package
  */
-export function FormPreview({ formConfig, functionDetails, selectedChain }: FormPreviewProps) {
-  // Get the adapter for the selected chain
-  const adapter = useMemo(() => getContractAdapter(selectedChain), [selectedChain]);
+export function FormPreview({
+  formConfig,
+  functionDetails,
+  contractSchema,
+  networkConfig,
+}: FormPreviewProps) {
+  // Use the singleton adapter hook to ensure we're using shared instances
+  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
@@ -57,10 +68,18 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
     });
     console.log('Form submitted in preview mode with Parsed Inputs:', submittedInputs);
 
+    if (!adapter) {
+      console.error('Preview error: Adapter not available.');
+      return;
+    }
+
     try {
       // Format data using the adapter, passing the field config
       const functionId = renderSchema.functionId || functionDetails.id || 'unknown';
+
+      // Use the passed-in contractSchema directly
       const formattedData = adapter.formatTransactionData(
+        contractSchema,
         functionId,
         submittedInputs, // Pass the parsed submitted data
         formConfig.fields // Pass the original field configurations
@@ -73,16 +92,35 @@ export function FormPreview({ formConfig, functionDetails, selectedChain }: Form
     // In a real implementation, this would be a no-op or trigger a mock transaction
   };
 
+  if (adapterLoading) {
+    return <div className="p-4 text-center text-muted-foreground">Loading form preview...</div>;
+  }
+
+  if (!adapter) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        Form preview requires a selected and valid network to load adapter.
+      </div>
+    );
+  }
+
   return (
-    <Card className="overflow-visible">
-      <CardContent className="p-6">
-        <TransactionForm
-          schema={renderSchema}
-          adapter={adapter}
-          onSubmit={handleSubmit}
-          previewMode={true}
-        />
-      </CardContent>
-    </Card>
+    <div className="relative">
+      <div className="absolute -top-3 left-4 bg-primary text-white text-xs px-2 py-1 rounded-sm z-10">
+        Preview
+      </div>
+      <Card className="overflow-visible border-dashed border-primary/50 bg-gray-50/50">
+        <CardContent className="p-6">
+          <WalletConnectionProvider adapter={adapter}>
+            <TransactionForm
+              schema={renderSchema}
+              adapter={adapter}
+              onSubmit={handleSubmit}
+              contractSchema={contractSchema}
+            />
+          </WalletConnectionProvider>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

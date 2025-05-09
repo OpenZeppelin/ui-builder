@@ -13,9 +13,17 @@ interface WizardLayoutProps {
   steps: WizardStep[];
   initialStep?: number;
   onComplete?: () => void;
+  sidebarWidget?: ReactNode;
+  isWidgetExpanded?: boolean;
 }
 
-export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayoutProps) {
+export function WizardLayout({
+  steps,
+  initialStep = 0,
+  onComplete,
+  sidebarWidget,
+  isWidgetExpanded = false,
+}: WizardLayoutProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
@@ -39,21 +47,27 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
 
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
-      <div className="flex flex-col space-y-4">
-        <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+      <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+        </div>
 
         {/* Step progress indicators with names */}
-        <div className="flex w-full gap-2">
+        <div className="flex w-full gap-3">
           {steps.map((step, index) => (
             <div key={step.id} className="flex flex-1 flex-col items-center">
               <div
-                className={`mb-2 h-2 w-full rounded-full ${
-                  index <= currentStepIndex ? 'bg-primary' : 'bg-muted'
+                className={`mb-2 h-3 w-full rounded-full ${
+                  index <= currentStepIndex ? 'bg-primary shadow-sm' : 'bg-muted'
                 }`}
               />
               <span
-                className={`text-xs ${
-                  index === currentStepIndex ? 'text-primary font-bold' : 'text-muted-foreground'
+                className={`text-sm font-medium ${
+                  index === currentStepIndex
+                    ? 'text-primary font-bold'
+                    : index < currentStepIndex
+                      ? 'text-muted-foreground'
+                      : 'text-muted-foreground'
                 }`}
               >
                 {step.title}
@@ -63,17 +77,32 @@ export function WizardLayout({ steps, initialStep = 0, onComplete }: WizardLayou
         </div>
       </div>
 
-      {/* Step content */}
-      <div className="w-full">{currentStep.component}</div>
+      {/* Main content area with optional sidebar */}
+      <div className="flex w-full relative">
+        {/* Sidebar widget - Only show when not on the first step */}
+        {sidebarWidget && !isFirstStep && (
+          <div className={isWidgetExpanded ? 'w-80 shrink-0 mr-6' : 'shrink-0'}>
+            {sidebarWidget}
+          </div>
+        )}
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between border-t pt-6">
-        <Button variant="outline" onClick={handlePrevious} disabled={isFirstStep}>
-          Previous
-        </Button>
-        <Button onClick={handleNext} disabled={!isCurrentStepValid}>
-          {isLastStep ? 'Complete' : 'Next'}
-        </Button>
+        {/* Step content */}
+        <div className="w-full">{currentStep.component}</div>
+      </div>
+
+      <div className="mt-8 -mx-6 -mb-6 bg-muted px-6 py-4 border-t shadow-inner flex justify-between items-center rounded-b-lg">
+        <div>
+          {!isFirstStep && (
+            <Button variant="outline" onClick={handlePrevious}>
+              Previous
+            </Button>
+          )}
+        </div>
+        {!isLastStep && (
+          <Button onClick={handleNext} disabled={!isCurrentStepValid}>
+            Next
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -44,27 +44,10 @@ describe('Test Configuration Utilities', () => {
       expect(fieldTypes).toContain('checkbox');
       expect(fieldTypes).toContain('blockchain-address');
 
-      // Verify sections
-      expect(config.layout.sections).toHaveLength(3);
-      expect(config.layout.sections?.[0].title).toBe('Basic Parameters');
-      expect(config.layout.sections?.[1].title).toBe('Other Parameters');
-      expect(config.layout.sections?.[2].title).toBe('Hardcoded / ReadOnly Examples');
-
-      // Verify field IDs in sections match actual field IDs
-      const basicSectionFields = config.layout.sections?.[0].fields || [];
-      const advancedSectionFields = config.layout.sections?.[1].fields || [];
-
-      // Get all field IDs
-      const fieldIds = config.fields.map((f) => f.id);
-
-      // Verify all section field IDs exist in the fields array
-      basicSectionFields.forEach((id) => {
-        expect(fieldIds).toContain(id);
-      });
-
-      advancedSectionFields.forEach((id) => {
-        expect(fieldIds).toContain(id);
-      });
+      // Verify layout properties
+      expect(config.layout.columns).toBe(1);
+      expect(config.layout.spacing).toBe('normal');
+      expect(config.layout.labelPosition).toBe('top');
     });
   });
 

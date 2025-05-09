@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { ContractFunction, ContractSchema } from '../../../../core/types/ContractSchema';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 
 interface UseFunctionFilterResult {
   functions: ContractFunction[];
   filteredFunctions: ContractFunction[];
   writableFunctions: ContractFunction[];
-  readOnlyFunctions: ContractFunction[];
   filterValue: string;
   setFilterValue: (value: string) => void;
 }
@@ -36,15 +35,10 @@ export function useFunctionFilter(contractSchema: ContractSchema | null): UseFun
     return filteredFunctions.filter((fn) => fn.modifiesState);
   }, [filteredFunctions]);
 
-  const readOnlyFunctions = useMemo(() => {
-    return filteredFunctions.filter((fn) => !fn.modifiesState);
-  }, [filteredFunctions]);
-
   return {
     functions,
     filteredFunctions,
     writableFunctions,
-    readOnlyFunctions,
     filterValue,
     setFilterValue,
   };

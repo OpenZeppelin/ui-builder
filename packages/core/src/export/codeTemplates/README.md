@@ -11,7 +11,7 @@ The templating system supports three placeholder formats:
 The primary format for regular replacements in text, using kebab-case. These placeholders are completely replaced with their values:
 
 ```tsx
-import { @@adapter-class-name@@ } from '../adapters/@@chain-type@@/adapter';
+import { @@adapter-class-name@@ } from '../adapters/@@ecosystem@@/adapter';
 // ↓ Becomes ↓
 import { EvmAdapter } from '../adapters/evm/adapter';
 ```
@@ -68,23 +68,24 @@ This approach ensures templates remain valid TypeScript during development while
 
 The FormCodeGenerator applies a unified post-processing approach to all templates:
 
-- **Removing template-specific comments**: All content between `/*------------TEMPLATE COMMENT START------------*/` and `/*------------TEMPLATE COMMENT END------------*/` markers is removed
-- **Removing development comments**: All lines containing `@ts-expect-error` are removed
+- **Removing template-specific comments**: All content between `/*------------TEMPLATE COMMENT START------------*/` and `/*------------TEMPLATE COMMENT END------------*/` markers is removed.
+- **Removing development comments**: All lines containing `@ts-expect-error` are removed.
+- **Replacing Adapter Placeholders**: Replaces `AdapterPlaceholder` class name and `'@@adapter-package-name@@'` import paths with the correct values based on the selected chain.
 
 ## Template-Specific Post-Processing
 
-For form component templates:
+For form component templates (`form-component.template.tsx`):
 
-- Adapter class name replacement
-- Fixing imports containing comment-based placeholders
-- Form schema JSON injection
+- Form schema JSON injection (`formConfigJSON`).
+- Original field configuration JSON injection (`allFieldsConfigJSON`).
+- Execution configuration JSON injection (`executionConfigJSON`).
 
 ## Automatic Parameter Name Conversion
 
 When using any of these template formats, kebab-case is automatically converted to camelCase in the parameter lookup:
 
 - `@@adapter-class-name@@` → looks up `params.adapterClassName`
-- `@@chain-type@@` → looks up `params.chainType`
+- `@@ecosystem@@` → looks up `params.ecosystem`
 
 ## Important Notes
 
@@ -101,25 +102,36 @@ You can include comments that will be removed during post-processing using delim
 
 ## Available Templates
 
-- **form-component.template.tsx**: Template for generating a form component that handles form rendering and submission
-- **app-component.template.tsx**: Template for generating the main App component that integrates the form
+- **`main.template.tsx`**: Template for the application entry point (`src/main.tsx`).
+- **`app-component.template.tsx`**: Template for generating the main App component (`src/App.tsx`).
+- **`form-component.template.tsx`**: Template for generating the specific form component (`src/components/GeneratedForm.tsx`).
 
 ## Template Parameters
 
 Each template has specific parameters defined in `TemplateTypes.ts`:
 
-### FormComponentTemplateParams
+### `MainTemplateParams`
 
-- `adapterClassName`: The class name of the blockchain adapter to use (e.g., 'EvmAdapter')
-- `chainType`: The blockchain type (e.g., 'evm', 'solana')
-- `functionId`: The function ID (e.g., 'transferTokens')
-- `formConfigJSON`: The form configuration as a JSON string
-- `includeDebugMode`: Optional flag to include debug mode
+- `adapterClassName`: The class name of the adapter (e.g., 'EvmAdapter').
+- `adapterPackageName`: The npm package name for the adapter.
 
-### AppComponentTemplateParams
+### `AppComponentTemplateParams`
 
-- `functionId`: The function ID (e.g., 'transferTokens')
-- `currentYear`: The current year for copyright notices
+- `functionId`: The function ID (e.g., 'transferTokens').
+- `currentYear`: The current year for copyright notices.
+- `adapterClassName`: (Passed for common post-processing).
+- `adapterPackageName`: (Passed for common post-processing).
+
+### `FormComponentTemplateParams`
+
+- `adapterClassName`: The class name of the adapter.
+- `adapterPackageName`: The npm package name for the adapter.
+- `ecosystem`: The ecosystem (e.g., 'evm').
+- `functionId`: The function ID.
+- `formConfigJSON`: The generated `RenderFormSchema` as a JSON string.
+- `allFieldsConfigJSON`: The original `BuilderFormConfig.fields` array as a JSON string.
+- `executionConfigJSON`: The selected execution config as a JSON string or 'undefined'.
+- `includeDebugMode`: Optional flag to include debug mode.
 
 ## Adding New Templates
 

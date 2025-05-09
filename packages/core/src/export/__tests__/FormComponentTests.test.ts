@@ -1,16 +1,37 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ChainType } from '../../core/types/ContractSchema';
+import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+
 import { FormExportSystem } from '../FormExportSystem';
-import { createComplexFormConfig, createMinimalFormConfig } from '../utils/testConfig';
+import {
+  createComplexFormConfig,
+  createMinimalContractSchema,
+  createMinimalFormConfig,
+} from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
+
+// Define mock network config
+const mockEvmNetworkConfig: EvmNetworkConfig = {
+  id: 'test-formcomp-evm',
+  name: 'Test FormComp EVM',
+  exportConstName: 'mockEvmNetworkConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
 
 describe('Form Component Tests', () => {
   /**
    * Extract and analyze the generated form component
    */
   async function extractFormComponent(
-    chainType: ChainType,
+    ecosystem: Ecosystem,
     functionName: string = 'testFunction',
     useComplexForm: boolean = false
   ) {
@@ -19,11 +40,17 @@ describe('Form Component Tests', () => {
 
     // Create form config
     const formConfig = useComplexForm
-      ? createComplexFormConfig(functionName, chainType)
-      : createMinimalFormConfig(functionName, chainType);
+      ? createComplexFormConfig(functionName, ecosystem)
+      : createMinimalFormConfig(functionName, ecosystem);
+    const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form
-    const result = await exportSystem.exportForm(formConfig, chainType, functionName);
+    const result = await exportSystem.exportForm(
+      formConfig,
+      mockContractSchema,
+      mockEvmNetworkConfig,
+      functionName
+    );
 
     // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
@@ -61,10 +88,13 @@ describe('Form Component Tests', () => {
     it('should include adapter props in the component', async () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
-      // Check that adapter is imported specifically from the adapter directory
-      expect(formComponentCode).toMatch(/import.*from ['"]\.\.\/adapters\/evm\/adapter['"]/);
+      // Check that adapter is imported from the correct package
+      expect(formComponentCode).toMatch(
+        /import.*from ['"]@openzeppelin\/transaction-form-adapter-evm['"]/
+      );
 
-      // Check that adapter is passed to the form
+      // Check that adapter is passed as a prop with the correct type
+      expect(formComponentCode).toMatch(/adapter:\s*EvmAdapter/);
       expect(formComponentCode).toMatch(/adapter={adapter}/);
     });
 
@@ -155,17 +185,6 @@ describe('Form Component Tests', () => {
 
       // Check the component is rendered in App.tsx (with or without props)
       expect(appCode).toMatch(/<GeneratedForm/);
-    });
-
-    it('should export the adapter correctly', async () => {
-      const { files } = await extractFormComponent('evm');
-
-      const adapterIndexCode = files['src/adapters/index.ts'];
-      expect(adapterIndexCode).toBeDefined();
-
-      // Check adapter is exported
-      expect(adapterIndexCode).toMatch(/export/);
-      expect(adapterIndexCode).toMatch(/adapter/i);
     });
   });
 });

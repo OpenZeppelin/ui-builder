@@ -3,9 +3,16 @@ import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-import { BooleanField, TextField } from '../../../../form-renderer/src/components/fields';
+import {
+  BooleanField,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  TextField,
+} from '@openzeppelin/transaction-form-renderer';
+
 import { WizardLayout, WizardStep } from '../../components/Common/WizardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 
 const meta = {
   title: 'Core/Common/WizardLayout',

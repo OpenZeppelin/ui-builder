@@ -13,6 +13,23 @@ Thank you for considering contributing to Transaction Form Builder! This documen
 6. Push to your branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
+### Adding New Adapters
+
+If you are contributing support for a new blockchain ecosystem, please follow the detailed instructions in the main **[README.md under the "Adding New Adapters" section](./README.md#adding-new-adapters)**.
+
+Key steps include:
+
+1.  **Familiarize Yourself:** Read the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)** to understand the modular structure and responsibilities.
+2.  **Package Setup**: Create a new `packages/adapter-<chain-name>` package with appropriate `package.json` (depending on `@openzeppelin/transaction-form-types`) and `tsconfig.json`.
+3.  **Network Configurations**: Define `YourEcosystemNetworkConfig` objects in `src/networks/`, ensuring they provide all necessary details (RPC URLs, chain IDs, etc.). Export a combined list (e.g., `export const suiNetworks = [...]`) and individual configurations from `src/networks/index.ts`.
+4.  **Adapter Implementation**: Implement the `ContractAdapter` interface from `@openzeppelin/transaction-form-types` in `src/adapter.ts`. The constructor must accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`) and use `this.networkConfig` internally.
+5.  **Exports**: Export your adapter class and the main networks array (and ideally individual network configs) from your adapter package's `src/index.ts`.
+6.  **Ecosystem Registration**: Register your new ecosystem in `packages/core/src/core/ecosystemManager.ts` by:
+    - Adding an entry to `ecosystemRegistry` with the `AdapterClass` constructor and the `networksExportName` (the name of your exported network list).
+    - Updating the `switch` statement in `loadAdapterPackageModule` to enable dynamic import of your adapter package.
+7.  **Testing**: Add comprehensive unit and integration tests for your adapter's logic and network configurations.
+8.  **Documentation**: Update any relevant documentation.
+
 ## Pull Request Process
 
 1. Ensure your code follows the style guidelines of the project

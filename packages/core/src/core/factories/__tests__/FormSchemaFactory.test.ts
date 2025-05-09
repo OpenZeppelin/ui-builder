@@ -2,50 +2,94 @@
 import { v4 as uuidv4 } from 'uuid';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FieldType } from '@openzeppelin/transaction-form-renderer';
+import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  EvmNetworkConfig,
+  FieldType,
+  FormFieldType,
+} from '@openzeppelin/transaction-form-types';
 
-import type { ChainType, ContractSchema } from '../../types/ContractSchema';
-// Import types from core
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
 
-// Mock the adapter and other dependencies
-vi.mock('../../../adapters', () => ({
-  getContractAdapter: vi.fn(() => ({
-    mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
-      if (type === 'address') return 'blockchain-address';
-      if (type === 'uint256') return 'number';
-      if (type === 'bool') return 'checkbox';
-      if (type.startsWith('tuple')) return 'textarea';
-      if (type.includes('[')) return 'textarea';
-      return 'text';
-    }),
-    generateDefaultField: vi.fn((param) => {
-      const fieldType =
-        param.type === 'address' ? 'address' : param.type === 'uint256' ? 'number' : 'text';
+// Define mock config for this test file
+const mockTestEvmConfig: EvmNetworkConfig = {
+  id: 'test-factory-evm',
+  name: 'Test Factory EVM',
+  exportConstName: 'mockTestEvmConfig',
+  ecosystem: 'evm',
+  network: 'ethereum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1337,
+  rpcUrl: 'http://localhost:8545',
+  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
+  apiUrl: '',
+};
 
-      return {
-        id: `field-${param.name}`,
-        name: param.name,
-        label: param.displayName || param.name,
-        type: fieldType,
-        placeholder: `Enter ${param.name}`,
-        helperText: '',
-        defaultValue: fieldType === 'number' ? 0 : '',
-        validation: { required: true },
-        width: 'full',
-      };
-    }),
-    isValidAddress: vi.fn((address: string) => address.startsWith('0x') && address.length === 42),
-  })),
-}));
+// Mock adapter instance (ensure it fulfills ContractAdapter)
+const mockAdapterInstance: ContractAdapter = {
+  networkConfig: mockTestEvmConfig,
+  mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
+    if (type === 'address') return 'blockchain-address';
+    if (type === 'uint256') return 'number';
+    if (type === 'bool') return 'checkbox';
+    if (type.startsWith('tuple')) return 'textarea';
+    if (type.includes('[')) return 'textarea';
+    return 'text';
+  }),
+  generateDefaultField: vi.fn((param): FormFieldType => {
+    const fieldType = mockAdapterInstance.mapParameterTypeToFieldType(param.type) as FieldType;
+    return {
+      id: `field-${param.name}-${uuidv4()}`,
+      name: param.name,
+      label: param.displayName || param.name,
+      type: fieldType,
+      placeholder: `Enter ${param.name}`,
+      helperText: '',
+      defaultValue: fieldType === 'number' ? 0 : fieldType === 'checkbox' ? false : '',
+      validation: { required: true },
+      width: 'full',
+      originalParameterType: param.type,
+    } as FormFieldType;
+  }),
+  getCompatibleFieldTypes: vi.fn((type: string): FieldType[] => {
+    if (type === 'address') return ['blockchain-address', 'text'] as FieldType[];
+    if (type === 'uint256') return ['number', 'text'] as FieldType[];
+    return ['text'] as FieldType[];
+  }),
+  // Add dummy implementations for ALL methods in ContractAdapter
+  loadContract: vi.fn().mockResolvedValue({} as ContractSchema),
+  getWritableFunctions: vi.fn(() => []),
+  formatTransactionData: vi.fn(() => ({})),
+  signAndBroadcast: vi.fn().mockResolvedValue({ txHash: '0xmockhash' }),
+  isValidAddress: vi.fn(() => true),
+  getSupportedExecutionMethods: vi.fn().mockResolvedValue([]),
+  validateExecutionConfig: vi.fn().mockResolvedValue(true),
+  isViewFunction: vi.fn(() => false),
+  queryViewFunction: vi.fn().mockResolvedValue(undefined),
+  formatFunctionResult: vi.fn(() => ''),
+  supportsWalletConnection: vi.fn(() => false),
+  getAvailableConnectors: vi.fn().mockResolvedValue([]),
+  connectWallet: vi.fn().mockResolvedValue({ connected: false }),
+  disconnectWallet: vi.fn().mockResolvedValue({ disconnected: true }),
+  getWalletConnectionStatus: vi.fn().mockReturnValue({ isConnected: false }),
+  getExplorerUrl: vi.fn(() => null),
+  getExplorerTxUrl: vi.fn(() => null),
+  waitForTransactionConfirmation: vi.fn().mockResolvedValue({ status: 'success' }),
+  onWalletConnectionChange: vi.fn(() => () => {}),
+};
 
 describe('FormSchemaFactory', () => {
   const factory = new FormSchemaFactory();
+  const testAdapter = mockAdapterInstance; // Use the mock adapter directly
 
   const mockContractSchema: ContractSchema = {
-    chainType: 'evm' as ChainType,
+    ecosystem: 'evm' as Ecosystem,
     name: 'TestContract',
+    address: '0x1234567890123456789012345678901234567890',
     functions: [
       {
         id: 'transfer_address_uint256',
@@ -94,9 +138,9 @@ describe('FormSchemaFactory', () => {
 
   it('should generate a form schema from a contract function', () => {
     const schema = factory.generateFormSchema(
+      testAdapter,
       mockContractSchema,
-      'transfer_address_uint256',
-      'evm'
+      'transfer_address_uint256'
     );
 
     // Check basic schema properties
@@ -120,15 +164,15 @@ describe('FormSchemaFactory', () => {
 
   it('should throw an error if function is not found', () => {
     expect(() => {
-      factory.generateFormSchema(mockContractSchema, 'nonexistent_function', 'evm');
-    }).toThrow('Function nonexistent_function not found in contract schema');
+      factory.generateFormSchema(testAdapter, mockContractSchema, 'nonexistent_function');
+    }).toThrow();
   });
 
   it('should add transform functions to fields', () => {
     const schema = factory.generateFormSchema(
+      testAdapter,
       mockContractSchema,
-      'transfer_address_uint256',
-      'evm'
+      'transfer_address_uint256'
     );
 
     // Check transforms exist for address and number fields
@@ -190,6 +234,7 @@ describe('FormSchemaFactory', () => {
       ],
       layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
       validation: { mode: 'onChange', showErrors: 'inline' },
+      contractAddress: '0xTestAddress',
     };
 
     it('should filter out fields where isHidden is true', () => {

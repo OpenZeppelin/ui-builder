@@ -35,9 +35,14 @@ This project is currently in development.
 
 This project is organized as a monorepo with the following packages:
 
-- **packages/core**: The main application with the form builder UI
-- **packages/form-renderer**: The shared form rendering library (published to npm)
-- **packages/styles**: Centralized styling system with shared CSS variables and configurations
+- **packages/core**: The main application with the form builder UI and core logic.
+- **packages/form-renderer**: The shared form rendering library (published to npm).
+- **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
+- **packages/styles**: Centralized styling system with shared CSS variables and configurations.
+- **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
+- **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
+- **packages/adapter-stellar**: Adapter implementation for the Stellar network.
+- **packages/adapter-midnight**: Adapter implementation for the Midnight blockchain.
 
 ## Packages
 
@@ -56,6 +61,19 @@ Features:
 - Customizable styling options
 
 For more details, see the [Form-Renderer README](./packages/form-renderer/README.md).
+
+### Types Package
+
+The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Transaction Form Builder.
+
+Features:
+
+- Centralized type definitions
+- Organized namespaces for contracts, adapters, and forms
+- Clear separation of concerns
+- TypeScript project references for proper type checking
+
+For more details, see the [Types README](./packages/types/README.md).
 
 ### Styles Package
 
@@ -76,6 +94,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - Adapter pattern for easily adding support for new blockchains
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
+- Handles wallet connection state consistently in both core app and exported forms
 - Configure transaction execution methods (EOA, Relayer, Multisig) via adapters
 - Type-safe with TypeScript
 - Fast development with Vite
@@ -169,15 +188,11 @@ transaction-form-builder/
 │   │   │   │   ├── Common/      # Shared components across features
 │   │   │   │   └── FormBuilder/ # Form builder components
 │   │   │   ├── core/            # Chain-agnostic core functionality
-│   │   │   │   ├── types/       # Type definitions
+│   │   │   │   ├── types/       # Core-specific Type definitions (distinct from packages/types)
 │   │   │   │   ├── utils/       # Utility functions
 │   │   │   │   ├── hooks/       # Shared hooks
-│   │   │   │   └── factories/   # Schema factories
-│   │   │   ├── adapters/        # Chain-specific implementations
-│   │   │   │   ├── evm/         # Ethereum Virtual Machine adapter
-│   │   │   │   ├── midnight/    # Midnight blockchain adapter
-│   │   │   │   ├── solana/      # Solana blockchain adapter
-│   │   │   │   └── stellar/     # Stellar blockchain adapter
+│   │   │   │   ├── factories/   # Schema factories
+│   │   │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   │   │   ├── export/          # Export system
 │   │   │   │   ├── generators/  # Form code generators
 │   │   │   │   ├── codeTemplates/ # Individual file templates for generation
@@ -192,8 +207,6 @@ transaction-form-builder/
 │   │   │   │   ├── form-builder/# Stories for form builder components
 │   │   │   │   └── ui/          # Stories for UI components
 │   │   │   ├── test/            # Package-specific tests
-│   │   │   ├── mocks/           # Mock data for development and testing
-│   │   │   ├── types/           # Shared types for core package
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
 │   │   │   └── index.css        # Main CSS entry point (imports from @styles)
@@ -217,11 +230,27 @@ transaction-form-builder/
 │   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
-│   └── styles/                  # Centralized styling system
-│       ├── global.css           # Global CSS variables and base styles
-│       ├── src/                 # Source directory for styles
-│       ├── utils/               # Styling utilities
-│       └── README.md            # Styling documentation
+│   ├── types/                   # Shared TypeScript type definitions
+│   │   ├── src/
+│   │   │   ├── adapters/        # Contract adapter interfaces
+│   │   │   ├── contracts/       # Contract and blockchain types
+│   │   │   ├── forms/           # Form field and layout definitions
+│   │   │   └── index.ts         # Main entry point
+│   │   ├── tsconfig.json        # TypeScript configuration
+│   │   └── package.json         # Package configuration
+│   ├── styles/                  # Centralized styling system
+│   │   ├── global.css           # Global CSS variables and base styles
+│   │   ├── src/                 # Source directory for styles
+│   │   ├── utils/               # Styling utilities
+│   │   └── README.md            # Styling documentation
+│   ├── adapter-evm/             # NEW: EVM Adapter Package
+│   │   └── src/                 # Contains EvmAdapter implementation
+│   ├── adapter-solana/          # NEW: Solana Adapter Package
+│   │   └── src/                 # Contains SolanaAdapter implementation
+│   ├── adapter-stellar/         # NEW: Stellar Adapter Package
+│   │   └── src/                 # Contains StellarAdapter implementation
+│   └── adapter-midnight/        # NEW: Midnight Adapter Package
+│       └── src/                 # Contains MidnightAdapter implementation
 ├── tailwind.config.cjs  # Central Tailwind CSS configuration
 ├── postcss.config.cjs   # Central PostCSS configuration
 ├── components.json      # Central shadcn/ui configuration
@@ -238,14 +267,17 @@ transaction-form-builder/
 
 ## Architecture
 
-The application uses an adapter pattern to support multiple blockchain ecosystems:
+The application uses a modular, domain-driven adapter pattern to support multiple blockchain ecosystems. For a detailed explanation of the adapter architecture and module responsibilities, please see the **[Adapter Architecture Guide](./docs/ADAPTER_ARCHITECTURE.md)**.
 
-- **Core**: Chain-agnostic components, types, and utilities
-- **Adapters**: Chain-specific implementations that conform to a common interface (including methods for field mapping, transaction formatting, address validation, and discovering/validating execution methods)
-- **UI Components**: React components that use adapters to interact with different blockchains
-- **Styling System**: Centralized CSS variables and styling approach used across all packages
+**Key Components:**
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files and CSS) across package boundaries, ensuring consistency between development, testing, and exported builds.
+- **Core**: Chain-agnostic application logic, UI components, export system, and the central `ecosystemManager.ts` for managing ecosystem details, network configurations, and adapter instantiation.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are now instantiated with a specific `NetworkConfig`, making them network-aware. The core package dynamically discovers network configurations and instantiates adapters via `ecosystemManager.ts`.
+- **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
+- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface.
+- **Styling System**: Centralized CSS variables and styling approach used across all packages.
+
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The core package dynamically loads and uses adapters via the `ecosystemManager.ts`, and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 
@@ -258,7 +290,7 @@ To maintain the integrity of the adapter pattern, this project includes:
 
 These enforcement mechanisms ensure that the adapter interface remains the single source of truth for adapter implementations, preventing interface drift and maintaining architectural consistency.
 
-For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the [Adapter System documentation](./packages/core/src/adapters/README.md).
+For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the documentation within the [`packages/types/src/adapters/base.ts`](./packages/types/src/adapters/base.ts) file where the `ContractAdapter` interface is defined.
 
 ## Component Architecture
 
@@ -383,6 +415,42 @@ pnpm update-deps:major
 The project is configured with:
 
 1. **Update Dependencies workflow**: Runs weekly to check for and apply updates
+
+## Adding New Adapters
+
+To add support for a new blockchain ecosystem:
+
+1.  **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
+2.  **Define `package.json`**:
+    - Set the package name (e.g., `@openzeppelin/transaction-form-adapter-sui`).
+    - Add a dependency on `@openzeppelin/transaction-form-types` (`workspace:*`).
+    - Add any chain-specific SDKs or libraries required by the adapter.
+    - Include standard build scripts (refer to existing adapter packages).
+    - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
+3.  **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
+4.  **Implement Adapter**:
+    - Create `src/adapter.ts`.
+    - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/transaction-form-types`.
+    - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
+    - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
+5.  **Define Network Configurations**:\
+    - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
+    - Each network config must provide all necessary details for the adapter to function, such as RPC endpoints (`rpcUrl` or `rpcEndpoint`), chain identifiers (`chainId` for EVM), explorer URLs, native currency details, etc., as defined by its `YourEcosystemNetworkConfig` interface.
+    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
+6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
+7.  **Register Ecosystem in Core**:
+    - Open `packages/core/src/core/ecosystemManager.ts`.
+    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/transaction-form-adapter-sui';`).
+    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
+      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
+      - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
+    - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package module (which should export the `AdapterClass` and the `networksExportName` list).
+    - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
+8.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
+9.  **Build & Test**:
+    - Build the new adapter package (`pnpm --filter @openzeppelin/transaction-form-adapter-<chain-name> build`).
+    - Add relevant unit/integration tests.
+    - Ensure the core application (`pnpm --filter @openzeppelin/transaction-form-builder-core build`) and the export system still function correctly.
 
 ## Commit Convention
 

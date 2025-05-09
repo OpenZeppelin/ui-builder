@@ -1,7 +1,6 @@
-import type { Plugin } from 'vite';
-
 import fs from 'fs';
 import path from 'path';
+import type { Plugin } from 'vite';
 
 /**
  * @module virtual-content-loader
@@ -49,6 +48,8 @@ const virtualFiles: Record<string, string> = {
   // Template-specific CSS (add template name if multiple templates have different styles.css)
   'template-vite-styles-css-content':
     'packages/core/src/export/templates/typescript-react-vite/src/styles.css',
+  // Core Type Files (added)
+  'contract-schema-content': 'packages/types/src/contracts/schema.ts',
 };
 
 /**

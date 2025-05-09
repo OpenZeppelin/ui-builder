@@ -3,7 +3,7 @@
  */
 import { FieldError } from 'react-hook-form';
 
-import { FieldValidation } from '../../../types/FormTypes';
+import { FieldValidation } from '@openzeppelin/transaction-form-types';
 
 /**
  * Determines if a field has an error

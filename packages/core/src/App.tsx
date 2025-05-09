@@ -1,4 +1,5 @@
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
+import { AdapterProvider } from './core/hooks';
 
 function App() {
   return (
@@ -29,7 +30,9 @@ function App() {
       </header>
 
       <main className="py-8">
-        <TransactionFormBuilder />
+        <AdapterProvider>
+          <TransactionFormBuilder />
+        </AdapterProvider>
       </main>
 
       <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">

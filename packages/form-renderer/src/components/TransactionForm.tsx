@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { FormValues, TransactionFormProps } from '../types/FormTypes';
+import type {
+  FormValues,
+  TransactionFormProps,
+  TxStatus,
+} from '@openzeppelin/transaction-form-types';
 
-import { Button } from './ui/button';
+import { createDefaultFormValues } from '../utils/formUtils';
+import { logger } from '../utils/logger';
+
+import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
+import { WalletConnectButton } from './wallet/WalletConnectButton';
+import { useWalletConnection } from './wallet/useWalletConnection';
 
 import { DynamicFormField } from './DynamicFormField';
+import { TransactionStatusDisplay } from './transaction';
 
 /**
  * Transaction Form Component
@@ -16,80 +26,124 @@ import { DynamicFormField } from './DynamicFormField';
  * 1. TransactionForm receives a schema and adapter from the transaction form builder
  * 2. It sets up React Hook Form for state management and validation
  * 3. It renders fields dynamically using the DynamicFormField component
- * 4. On submission, it processes data through the adapter before passing to handlers
+ * 4. Provides wallet connection UI (demo implementation)
+ * 5. On submission, it processes data through the adapter before passing to handlers
  *
- * This component should be used in two contexts:
- * - Inside the form builder as a preview of the form being built
- * - In exported applications as the actual implementation of the form
- *
- * The field components (TextField, NumberField, AddressField, etc.) should never be
- * used directly outside of this system - they are specifically designed for use within
- * the DynamicFormField → TransactionForm architecture.
- *
- * Current implementation includes:
- * - Integration with React Hook Form for state management ✅
- * - Support for form validation from schema ✅
- * - Layout customization with sections ✅
- * - Form submission through adapter ✅
- *
- * TODO: Remaining implementation tasks:
- * 1. Implement additional field components (NumberField, AddressField, etc.)
- * 2. Connect visibility conditions to actual form values using the 'watch' function
- * 3. Complete full test coverage for all form scenarios
- * 4. Add support for complex field types (arrays, nested objects)
+ * Note: The previewMode prop is currently used only for demo purposes and does not affect
+ * the visibility of wallet connection or transaction execution UI. In the future, it will be used
+ * to enable/disable actual blockchain interactions without changing the UI structure.
  *
  * @returns The rendered form component
  */
+
 export function TransactionForm({
   schema,
+  contractSchema,
   adapter,
-  onSubmit,
-  previewMode = false,
 }: TransactionFormProps): React.ReactElement {
-  const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Transaction Lifecycle State
+  const [txStatus, setTxStatus] = useState<TxStatus>('idle');
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
+
+  // Use the wallet connection context
+  const { isConnected } = useWalletConnection();
+
+  // Derive networkConfig from the adapter instance
+  const networkConfig = adapter.networkConfig;
 
   // Initialize form with React Hook Form
   const methods = useForm<FormValues>({
     mode: schema.validation?.mode || 'onChange',
-    defaultValues: schema.defaultValues || {},
+    defaultValues: createDefaultFormValues(schema.fields, schema.defaultValues),
   });
 
   // Reset form when schema changes
   useEffect(() => {
-    methods.reset(schema.defaultValues || {});
+    methods.reset(createDefaultFormValues(schema.fields, schema.defaultValues));
+    setTxStatus('idle');
+    setTxHash(null);
+    setTxError(null);
+    setFormError(null);
   }, [schema, methods]);
 
-  // Form submission handler
+  // Form submission handler - Actual transaction logic
   const handleSubmit = async (data: FormValues): Promise<void> => {
-    setSubmitting(true);
-    setFormError(null);
+    logger.info('TransactionForm', 'Form submitted', data);
+    setTxStatus('idle'); // Reset status on new submission
+    setTxHash(null);
+    setTxError(null);
+
+    if (!adapter) {
+      logger.error('TransactionForm', 'Adapter not provided');
+      setTxError('Configuration error: Adapter not available.');
+      setTxStatus('error');
+      return;
+    }
+
+    const connectionStatus = adapter.getWalletConnectionStatus();
+    if (!connectionStatus.isConnected) {
+      logger.warn('TransactionForm', 'Wallet not connected for submission');
+      setTxError('Please connect your wallet to submit the transaction.');
+      setTxStatus('error');
+      return;
+    }
 
     try {
-      // Format data for submission using the adapter
-      const functionId = schema.functionId || 'unknown';
-      const formattedData = adapter.formatTransactionData(functionId, data, schema.fields);
+      setTxStatus('pendingSignature');
+      const formattedData = adapter.formatTransactionData(
+        contractSchema,
+        schema.functionId as string, // TODO: Ensure functionId is present
+        data,
+        schema.fields // Pass all fields config
+      );
+      logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
 
-      // Pass the formatted data to the onSubmit handler
-      if (onSubmit) {
-        // Create a FormData object if needed for the API
-        // Note: Web API FormData is different from our internal FormValues type
-        const formData = new FormData();
+      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(formattedData);
+      logger.info('TransactionForm', `Transaction submitted with hash: ${submittedTxHash}`);
+      setTxHash(submittedTxHash);
 
-        // If formattedData is an object, append its properties to the FormData
-        if (formattedData && typeof formattedData === 'object') {
-          Object.entries(formattedData as Record<string, unknown>).forEach(([key, value]) => {
-            formData.append(key, String(value));
-          });
+      // --> Start: Wait for confirmation <--
+      if (adapter.waitForTransactionConfirmation) {
+        setTxStatus('pendingConfirmation');
+        logger.info('TransactionForm', `Waiting for confirmation for tx: ${submittedTxHash}`);
+        const confirmationResult = await adapter.waitForTransactionConfirmation(submittedTxHash);
+        if (confirmationResult.status === 'success') {
+          logger.info(
+            'TransactionForm',
+            `Transaction confirmed: ${submittedTxHash}`,
+            confirmationResult.receipt
+          );
+          setTxStatus('success');
+          setTxError(null);
+        } else {
+          logger.error(
+            'TransactionForm',
+            `Transaction failed confirmation: ${submittedTxHash}`,
+            confirmationResult.error
+          );
+          setTxError(
+            confirmationResult.error?.message ?? 'Transaction failed during confirmation.'
+          );
+          setTxStatus('error');
         }
-
-        onSubmit(formData);
+      } else {
+        // If adapter doesn't support waiting, consider submission as success immediately
+        logger.warn(
+          'TransactionForm',
+          'Adapter does not support waitForTransactionConfirmation. Marking as success after submission.'
+        );
+        setTxStatus('success'); // Or maybe a different status like 'submitted'?
+        setTxError(null);
       }
+      // --> End: Wait for confirmation <--
     } catch (error) {
-      setFormError((error as Error).message || 'An error occurred during submission');
-      console.error('Form submission error:', error);
-    } finally {
-      setSubmitting(false);
+      logger.error('TransactionForm', 'Transaction error:', error);
+      setTxError(error instanceof Error ? error.message : 'An unknown error occurred.');
+      setTxStatus('error');
+      // Keep txHash if it was set before the error (e.g., during signAndBroadcast)
     }
   };
 
@@ -116,13 +170,11 @@ export function TransactionForm({
     );
   };
 
-  // Apply column layout if specified
+  // Apply fixed column layout
+  // TODO: Add support for layout customization in the UI
   const getLayoutClasses = (): string => {
-    const { layout } = schema;
-    if (!layout) return '';
-
-    const columns = layout.columns || 1;
-    return `grid grid-cols-1 md:grid-cols-${columns} gap-${layout.spacing || 4}`;
+    // Fixed layout with 1 column and normal spacing
+    return 'grid grid-cols-1 gap-4';
   };
 
   // Determine button variant based on schema configuration
@@ -149,10 +201,38 @@ export function TransactionForm({
     }
   };
 
+  const handleResetStatus = (): void => {
+    setTxStatus('idle');
+    setTxHash(null);
+    setTxError(null);
+  };
+
+  // Get explorer URL for the transaction
+  const getExplorerTxUrl = (hash: string): string | null => {
+    if (!adapter || !hash || !networkConfig) return null;
+
+    if (adapter.getExplorerTxUrl) {
+      // Call adapter method (which uses its internal networkConfig)
+      return adapter.getExplorerTxUrl(hash);
+    }
+
+    // Fallback using getExplorerUrl (also uses internal networkConfig)
+    console.warn(
+      'getExplorerTxUrl not implemented by adapter, trying getExplorerUrl as fallback (might expect address).'
+    );
+    // Ensure adapter.getExplorerUrl exists before calling
+    return adapter.getExplorerUrl ? adapter.getExplorerUrl(hash) : null;
+  };
+
   return (
     <FormProvider {...methods}>
-      {/* Title and description at the top, outside of space-y-4 container */}
-      {schema.title && <h2 className="mb-4 text-xl font-bold">{schema.title}</h2>}
+      {/* Header with wallet connection */}
+      <div className="mb-4 flex items-center justify-between">
+        {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
+        <div className="wallet-connection">
+          <WalletConnectButton />
+        </div>
+      </div>
 
       {/* Always render description container, just change content */}
       <div className="description-container mb-6">
@@ -162,28 +242,42 @@ export function TransactionForm({
       </div>
 
       <div className="flex flex-col space-y-4">
+        {/* Display General Form Error (if any) */}
         {formError && (
           <div className="form-error rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
             {formError}
           </div>
         )}
 
+        {/* Transaction Status Display - Moved OUTSIDE the form to avoid pointer-events-none */}
+        {txStatus !== 'idle' && (
+          <div className="mb-8 pointer-events-auto">
+            <TransactionStatusDisplay
+              status={txStatus}
+              txHash={txHash}
+              error={txError}
+              explorerUrl={txHash ? getExplorerTxUrl(txHash) : null}
+              onClose={handleResetStatus}
+            />
+          </div>
+        )}
+
         <form
-          onSubmit={methods.handleSubmit(handleSubmit)}
-          className={`transaction-form flex flex-col ${getLayoutClasses()}`}
+          className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus !== 'idle' ? 'opacity-70 pointer-events-none' : ''}`}
           noValidate
+          onSubmit={methods.handleSubmit(handleSubmit)}
         >
           <div className="mb-6">{renderFormContent()}</div>
 
-          {!previewMode && (
-            <div className="form-actions col-span-full">
-              <Button type="submit" disabled={submitting} variant={getButtonVariant()}>
-                {submitting
-                  ? schema.submitButton?.loadingText || 'Submitting...'
-                  : schema.submitButton?.text || 'Submit'}
-              </Button>
-            </div>
-          )}
+          {/* Form actions */}
+          <div className="form-actions mt-4 flex justify-end border-t border-gray-100 pt-4">
+            <TransactionExecuteButton
+              isWalletConnected={isConnected}
+              isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
+              isFormValid={methods.formState.isValid}
+              variant={getButtonVariant()}
+            />
+          </div>
         </form>
       </div>
     </FormProvider>

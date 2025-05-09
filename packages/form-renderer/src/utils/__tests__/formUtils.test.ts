@@ -1,16 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { ContractAdapter, FieldTransforms } from '../../types/FormTypes';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldTransforms, FormFieldType } from '@openzeppelin/transaction-form-types';
+
 import {
   composeTransforms,
   createAddressTransform,
   createBooleanTransform,
   createComplexTypeTransform,
   createCustomTransform,
-  createNumberTransform,
-  createTextTransform,
   // Will be tested in a future test
   // createTransformForFieldType,
+  createDefaultFormValues,
+  createNumberTransform,
+  createTextTransform,
+  getDefaultValueByFieldType,
 } from '../formUtils';
 
 // Mock adapter
@@ -293,6 +297,67 @@ describe('Transform Utilities', () => {
 
       expect(transform.input).toBeUndefined();
       expect(transform.output).toBeUndefined();
+    });
+  });
+});
+
+describe('getDefaultValueByFieldType', () => {
+  it('should return false for checkbox fields', () => {
+    expect(getDefaultValueByFieldType('checkbox')).toBe(false);
+  });
+
+  it('should return empty string for number fields', () => {
+    expect(getDefaultValueByFieldType('number')).toBe('');
+  });
+
+  it('should return empty string for text fields', () => {
+    expect(getDefaultValueByFieldType('text')).toBe('');
+  });
+
+  it('should return empty string for other field types', () => {
+    expect(getDefaultValueByFieldType('blockchain-address')).toBe('');
+  });
+});
+
+describe('createDefaultFormValues', () => {
+  it('should return empty object when no fields are provided', () => {
+    const result = createDefaultFormValues(undefined);
+    expect(result).toEqual({});
+  });
+
+  it('should create default values for fields', () => {
+    const fields = [
+      { id: '1', name: 'name', type: 'text', label: 'Name', validation: {} },
+      { id: '2', name: 'age', type: 'number', label: 'Age', validation: {} },
+      { id: '3', name: 'active', type: 'checkbox', label: 'Active', validation: {} },
+    ] as FormFieldType[];
+
+    const result = createDefaultFormValues(fields);
+    expect(result).toEqual({
+      name: '',
+      age: '',
+      active: false,
+    });
+  });
+
+  it('should preserve existing default values', () => {
+    const fields = [
+      { id: '1', name: 'name', type: 'text', label: 'Name', validation: {} },
+      { id: '2', name: 'age', type: 'number', label: 'Age', validation: {} },
+      { id: '3', name: 'active', type: 'checkbox', label: 'Active', validation: {} },
+    ] as FormFieldType[];
+
+    const existingDefaults = {
+      name: 'John',
+      customField: 'custom value',
+    };
+
+    const result = createDefaultFormValues(fields, existingDefaults);
+    expect(result).toEqual({
+      name: 'John',
+      age: '',
+      active: false,
+      customField: 'custom value',
     });
   });
 });

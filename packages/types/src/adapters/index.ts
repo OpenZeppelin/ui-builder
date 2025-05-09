@@ -1,0 +1,21 @@
+/**
+ * Contract adapter interfaces and types
+ * Re-exports base adapter types and defines combined types.
+ * @packageDocumentation
+ */
+import type { ContractAdapter } from './base';
+import type { ContractStateCapabilities } from './contract-state';
+
+// Re-export all types from base
+export * from './base';
+
+// Re-export contract state capabilities
+export * from './contract-state';
+
+/**
+ * Combined adapter interface with all capabilities
+ *
+ * This type represents a full-featured adapter that implements both the base
+ * ContractAdapter interface and additional capabilities like contract state querying.
+ */
+export type FullContractAdapter = ContractAdapter & ContractStateCapabilities;

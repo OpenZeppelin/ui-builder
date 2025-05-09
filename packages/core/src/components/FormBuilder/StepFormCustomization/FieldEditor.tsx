@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { ContractAdapter, FormFieldType } from '@openzeppelin/transaction-form-renderer';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FormFieldType } from '@openzeppelin/transaction-form-types';
 
 import { getFieldTypeGroups } from './utils/fieldTypeUtils';
 
@@ -74,24 +75,12 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
     return () => subscription.unsubscribe();
   }, [watch, onUpdate, field.validation, getValues]);
 
-  // Field width options
-  const widthOptions = [
-    { value: 'full', label: 'Full Width' },
-    { value: 'half', label: 'Half Width' },
-    { value: 'third', label: 'One Third' },
-  ];
-
   // Get the current type value with a fallback to the field's original type to avoid undefined
   const selectedType = watch('type') || field.type;
 
   return (
     <div className="space-y-6">
-      <FieldBasicSettings
-        control={control}
-        fieldTypeGroups={typeGroups}
-        fieldWidthOptions={widthOptions}
-        adapter={adapter}
-      />
+      <FieldBasicSettings control={control} fieldTypeGroups={typeGroups} adapter={adapter} />
 
       <TypeWarningSection
         selectedType={selectedType}

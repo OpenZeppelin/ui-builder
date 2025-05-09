@@ -1,9 +1,10 @@
+import { ActionBar } from '../../Common/ActionBar';
+import { StepTitleWithDescription } from '../Common';
+
 import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
-import { useReadOnlyVisibility } from './hooks/useReadOnlyVisibility';
 
 import { FilterControls } from './FilterControls';
-import { ReadOnlyFunctionsSection } from './ReadOnlyFunctionsSection';
 import { WritableFunctionsSection } from './WritableFunctionsSection';
 import { StepFunctionSelectorProps } from './types';
 
@@ -11,12 +12,13 @@ export function StepFunctionSelector({
   contractSchema,
   selectedFunction,
   onFunctionSelected,
+  networkConfig,
+  onToggleContractState,
+  isWidgetExpanded,
 }: StepFunctionSelectorProps) {
   // Use custom hooks to manage component logic
-  const { filteredFunctions, writableFunctions, readOnlyFunctions, filterValue, setFilterValue } =
+  const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
     useFunctionFilter(contractSchema);
-
-  const { showReadOnlyFunctions, setShowReadOnlyFunctions } = useReadOnlyVisibility(false);
 
   const { selectFunction } = useFunctionSelection(selectedFunction, onFunctionSelected);
 
@@ -30,20 +32,21 @@ export function StepFunctionSelector({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Select Contract Function</h3>
-        <p className="text-muted-foreground">
-          Choose the contract function you want to create a transaction form for. Each function will
-          have its own dedicated form.
-        </p>
-      </div>
+      {networkConfig && (
+        <ActionBar
+          network={networkConfig}
+          contractAddress={contractSchema.address}
+          onToggleContractState={onToggleContractState}
+          isWidgetExpanded={isWidgetExpanded}
+        />
+      )}
 
-      <FilterControls
-        filterValue={filterValue}
-        setFilterValue={setFilterValue}
-        showReadOnlyFunctions={showReadOnlyFunctions}
-        setShowReadOnlyFunctions={setShowReadOnlyFunctions}
+      <StepTitleWithDescription
+        title="Select Contract Function"
+        description="Choose the contract function you want to create a transaction form for. Each function will have its own dedicated form."
       />
+
+      <FilterControls filterValue={filterValue} setFilterValue={setFilterValue} />
 
       <div className="max-h-96 space-y-6 overflow-y-auto">
         <WritableFunctionsSection
@@ -51,8 +54,6 @@ export function StepFunctionSelector({
           selectedFunction={selectedFunction}
           onSelectFunction={selectFunction}
         />
-
-        {showReadOnlyFunctions && <ReadOnlyFunctionsSection functions={readOnlyFunctions} />}
 
         {/* Show a message if no functions match the filter */}
         {filteredFunctions.length === 0 && (

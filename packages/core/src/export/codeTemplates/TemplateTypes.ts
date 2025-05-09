@@ -22,9 +22,9 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   adapterClassName: string;
 
   /**
-   * The blockchain type (e.g., 'evm', 'solana')
+   * The adapter package name
    */
-  chainType: string;
+  adapterPackageName: string;
 
   /**
    * The function ID (e.g., 'transferTokens')
@@ -37,19 +37,29 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   formConfigJSON: string;
 
   /**
-   * The original FormField[] config as a JSON string
+   * The original FormFieldType[] config as a JSON string
    */
   allFieldsConfigJSON: string;
 
   /**
    * The execution configuration as a JSON string or 'undefined'
    */
-  executionConfigJSON: string | undefined;
+  executionConfigJSON: string;
 
   /**
    * Optional flag to include debug mode
    */
   includeDebugMode?: boolean;
+
+  /**
+   * The contract schema as a JSON string
+   */
+  contractSchemaJSON: string;
+
+  /**
+   * The network config import name
+   */
+  networkConfigImportName: string;
 }
 
 /**
@@ -65,4 +75,19 @@ export interface AppComponentTemplateParams extends BaseTemplateParams {
    * The current year for copyright notices
    */
   currentYear: number;
+}
+
+/**
+ * Parameters for the main.tsx template
+ */
+export interface MainTemplateParams extends BaseTemplateParams {
+  /**
+   * The class name of the adapter to use (e.g., 'EvmAdapter')
+   */
+  adapterClassName: string;
+
+  /**
+   * The adapter package name
+   */
+  adapterPackageName: string;
 }
