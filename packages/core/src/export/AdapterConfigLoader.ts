@@ -1,8 +1,7 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { AdapterConfig, Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import { getAdapterConfigExportName, getAdapterConfigLoader } from '../core/ecosystemManager';
-import type { AdapterConfig } from '../core/types/AdapterTypes';
 
 // Helper type for the type guard
 interface HasDependencies {

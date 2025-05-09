@@ -18,7 +18,7 @@ export interface AdapterConfig {
      * that use this adapter.
      *
      * Format: { packageName: versionRange }
-     * Example: { "ethers": "^6.7.0" }
+     * Example: { "viem": "^2.28.0" }
      */
     runtime: Record<string, string>;
 
@@ -29,7 +29,7 @@ export interface AdapterConfig {
      * They will be added to devDependencies in the exported package.json.
      *
      * Format: { packageName: versionRange }
-     * Example: { "@types/ethers": "^6.7.0" }
+     * Example: { "@types/viem": "^2.28.0" }
      */
     dev?: Record<string, string>;
   };
