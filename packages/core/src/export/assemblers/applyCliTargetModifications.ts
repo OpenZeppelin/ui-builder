@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 

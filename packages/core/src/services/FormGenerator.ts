@@ -6,7 +6,6 @@
  */
 import { startCase } from 'lodash';
 
-import { generateId } from '@openzeppelin/transaction-form-renderer';
 import {
   CommonFormProperties,
   ContractAdapter,
@@ -16,6 +15,7 @@ import {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
+import { generateId } from '@openzeppelin/transaction-form-utils';
 
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 

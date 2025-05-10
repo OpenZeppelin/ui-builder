@@ -1,6 +1,7 @@
 import { Wallet } from 'lucide-react';
 
-import { logger } from '../../utils/logger';
+import { logger } from '@openzeppelin/transaction-form-utils';
+
 import { Button } from '../ui/button';
 import { LoadingButton } from '../ui/loading-button';
 

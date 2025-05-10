@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { appConfigService } from '@openzeppelin/transaction-form-renderer';
+import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { Toaster } from './components/ui/toaster';
 

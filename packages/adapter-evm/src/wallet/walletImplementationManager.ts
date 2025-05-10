@@ -1,4 +1,4 @@
-import { appConfigService, logger } from '@openzeppelin/transaction-form-renderer';
+import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 import { WagmiWalletImplementation } from './wagmi-implementation';
 

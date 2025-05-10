@@ -3,35 +3,41 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Import AppRuntimeConfig for typing mock JSON
 import type { AppRuntimeConfig } from '@openzeppelin/transaction-form-types';
 
-// Assuming this is the path to your logger
-
-// Adjust path as needed
-import { logger } from '../../utils/logger';
+// Import the original logger to be mocked, and the service to be tested
 import { AppConfigService } from '../AppConfigService';
+// Adjusted path
+import { logger } from '../logger';
 
-// Mock the logger to prevent console output during tests and allow spying
-vi.mock('../../utils/logger', () => ({
-  logger: {
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+// This will be the mocked version
+
+// Mock the logger from the local path
+// This ensures that any calls to logger within AppConfigService use the mock
+vi.mock('../logger', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../logger')>();
+  return {
+    ...actual, // Spread actual to ensure other exports (like appConfigService singleton) are not lost
+    logger: {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
+  };
+});
 
 describe('AppConfigService', () => {
   let appConfigServiceInstance: AppConfigService;
   let mockViteEnv: Record<string, string | boolean | undefined>;
 
   beforeEach(() => {
+    // Each test gets a fresh instance of AppConfigService to ensure isolation
     appConfigServiceInstance = new AppConfigService();
     mockViteEnv = {}; // Reset mock env for each test
-    // Deliberately not stubbing import.meta here, pass env via initialize strategy
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals(); // Clean up global stubs
-    vi.clearAllMocks(); // Clear all Vitest mocks
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
   describe('constructor & defaultConfig', () => {
@@ -39,9 +45,10 @@ describe('AppConfigService', () => {
       const config = appConfigServiceInstance.getConfig();
       expect(config.networkServiceConfigs).toEqual({});
       expect(config.globalServiceConfigs).toEqual({});
-      expect(config.rpcEndpoints).toEqual({}); // Assuming it's initialized to {} by default now
+      expect(config.rpcEndpoints).toEqual({});
       expect(config.featureFlags).toEqual({});
       expect(config.defaultLanguage).toBe('en');
+      // AppConfigService constructor calls logger.info
       expect(logger.info).toHaveBeenCalledWith(
         'AppConfigService',
         'Service initialized with default configuration.'
@@ -115,7 +122,7 @@ describe('AppConfigService', () => {
       expect(config.defaultLanguage).toBe('en');
     });
 
-    it('should process an empty env object without warnings (other than the initial undefined check if that path was taken)', async () => {
+    it('should process an empty env object without warnings', async () => {
       const initialWarnCount = vi.mocked(logger.warn).mock.calls.length;
       await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: {} }]);
       const config = appConfigServiceInstance.getConfig();
@@ -125,7 +132,7 @@ describe('AppConfigService', () => {
     });
 
     it('should correctly merge with existing defaults (Vite env takes precedence)', async () => {
-      appConfigServiceInstance = new AppConfigService();
+      appConfigServiceInstance = new AppConfigService(); // New instance with defaults
       mockViteEnv['VITE_APP_CFG_DEFAULT_LANGUAGE'] = 'de';
       await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
       expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('de');
@@ -189,7 +196,7 @@ describe('AppConfigService', () => {
         'AppConfigService',
         'Failed to fetch config from /app.config.json: 500 Internal Server Error'
       );
-      expect(config.defaultLanguage).toBe('en');
+      expect(config.defaultLanguage).toBe('en'); // Should retain default
     });
 
     it('should skip if config file is not found (404)', async () => {
@@ -204,7 +211,7 @@ describe('AppConfigService', () => {
         'AppConfigService',
         'Optional configuration file not found at /app.config.json. Skipping.'
       );
-      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en');
+      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en'); // Should retain default
     });
 
     it('should handle invalid JSON parsing error', async () => {
@@ -221,7 +228,7 @@ describe('AppConfigService', () => {
         'Error loading or parsing config from /app.config.json:',
         expect.any(SyntaxError)
       );
-      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en');
+      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en'); // Should retain default
     });
 
     it('should handle network error during fetch', async () => {
@@ -232,7 +239,7 @@ describe('AppConfigService', () => {
         'Error loading or parsing config from /app.config.json:',
         expect.any(Error)
       );
-      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en');
+      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en'); // Should retain default
     });
   });
 
@@ -242,7 +249,7 @@ describe('AppConfigService', () => {
     beforeEach(() => {
       appConfigServiceInstance = new AppConfigService();
       mockViteEnv = {};
-      vi.stubGlobal('import.meta', { env: mockViteEnv });
+      // No longer stubbing import.meta.env, pass env via initialize strategy
       mockFetch = vi.fn();
       vi.stubGlobal('fetch', mockFetch);
     });
@@ -264,27 +271,27 @@ describe('AppConfigService', () => {
       } as unknown as Response);
 
       await appConfigServiceInstance.initialize([
-        { type: 'viteEnv', env: mockViteEnv },
-        { type: 'json', path: '/app.config.json' },
+        { type: 'viteEnv', env: mockViteEnv }, // Vite first
+        { type: 'json', path: '/app.config.json' }, // JSON second
       ]);
       const config = appConfigServiceInstance.getConfig();
 
-      expect(config.defaultLanguage).toBe('es_json');
+      expect(config.defaultLanguage).toBe('es_json'); // JSON should override
       expect(config.networkServiceConfigs?.['etherscan-mainnet']?.apiKey).toBe(
-        'json_etherscan_key'
+        'json_etherscan_key' // JSON should override
       );
     });
 
     it('Vite env vars should override defaults if JSON is not present or loaded first', async () => {
       mockViteEnv['VITE_APP_CFG_DEFAULT_LANGUAGE'] = 'en_vite';
-      mockFetch.mockResolvedValue({ ok: false, status: 404 } as unknown as Response);
+      mockFetch.mockResolvedValue({ ok: false, status: 404 } as unknown as Response); // JSON load fails
 
       await appConfigServiceInstance.initialize([
-        { type: 'json', path: '/app.config.json' },
-        { type: 'viteEnv', env: mockViteEnv },
+        { type: 'json', path: '/app.config.json' }, // JSON first (fails)
+        { type: 'viteEnv', env: mockViteEnv }, // Vite second
       ]);
       const config = appConfigServiceInstance.getConfig();
-      expect(config.defaultLanguage).toBe('en_vite');
+      expect(config.defaultLanguage).toBe('en_vite'); // Vite should override default
     });
   });
 
@@ -333,31 +340,29 @@ describe('AppConfigService', () => {
     });
 
     it('getters should warn if called before initialization', () => {
-      const freshInstance = new AppConfigService();
+      const freshInstance = new AppConfigService(); // Not initialized
       vi.mocked(logger.warn).mockClear();
 
       freshInstance.getExplorerApiKey('test');
-      expect(vi.mocked(logger.warn).mock.calls[0]).toEqual([
+      expect(logger.warn).toHaveBeenCalledWith(
         'AppConfigService',
-        'getExplorerApiKey called before initialization.',
-      ]);
+        'getExplorerApiKey called before initialization.'
+      );
 
       freshInstance.isFeatureEnabled('test');
-      expect(vi.mocked(logger.warn).mock.calls[1]).toEqual([
+      expect(logger.warn).toHaveBeenCalledWith(
         'AppConfigService',
-        'isFeatureEnabled called before initialization.',
-      ]);
+        'isFeatureEnabled called before initialization.'
+      );
 
       freshInstance.getGlobalServiceParam('test', 'test');
-      expect(logger.warn).toHaveBeenNthCalledWith(
-        3,
+      expect(logger.warn).toHaveBeenCalledWith(
         'AppConfigService',
         'getGlobalServiceParam called before initialization.'
       );
 
       freshInstance.getRpcEndpointOverride('test');
-      expect(logger.warn).toHaveBeenNthCalledWith(
-        4,
+      expect(logger.warn).toHaveBeenCalledWith(
         'AppConfigService',
         'getRpcEndpointOverride called before initialization.'
       );

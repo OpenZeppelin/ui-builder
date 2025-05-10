@@ -1,5 +1,5 @@
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { GlobalServiceConfigs, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { TemplateProcessor } from '../generators/TemplateProcessor';
 

@@ -1,7 +1,6 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import { type TransactionReceipt } from 'viem';
 
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import type {
   Connector,
   ContractAdapter,
@@ -15,6 +14,7 @@ import type {
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
 

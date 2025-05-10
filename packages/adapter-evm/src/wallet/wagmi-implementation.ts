@@ -21,8 +21,8 @@ import {
 import { PublicClient, WalletClient, http } from 'viem';
 import { base, mainnet, optimism, polygon, sepolia } from 'viem/chains';
 
-import { appConfigService, logger } from '@openzeppelin/transaction-form-renderer';
 import type { Connector } from '@openzeppelin/transaction-form-types';
+import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Defines the default set of blockchain networks (from viem/chains) that Wagmi will be configured to support.

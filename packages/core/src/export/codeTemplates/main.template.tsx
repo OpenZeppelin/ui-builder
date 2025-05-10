@@ -12,7 +12,7 @@ import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { appConfigService } from '@openzeppelin/transaction-form-renderer';
+import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
 import { App } from './App';

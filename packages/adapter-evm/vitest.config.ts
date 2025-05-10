@@ -5,13 +5,14 @@ import { sharedVitestConfig } from '../../vitest.shared.config';
 
 export default defineConfig(
   mergeConfig(sharedVitestConfig, {
-    // Package-specific overrides
+    // Package-specific overrides for adapter-evm
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
-        '@styles': path.resolve(__dirname, '../styles'),
+        // Alias for @openzeppelin/transaction-form-utils if needed by tests
         '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+        // Add other package-specific aliases here if necessary
       },
     },
+    // Add other evm-adapter specific test configurations if needed
   })
 );

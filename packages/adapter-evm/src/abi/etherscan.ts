@@ -1,5 +1,5 @@
-import { appConfigService } from '@openzeppelin/transaction-form-renderer';
 import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
 import type { AbiItem } from '../types';
 

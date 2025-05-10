@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { StyleManager } from '../StyleManager';
 import type { TemplateProcessor } from '../generators/TemplateProcessor';

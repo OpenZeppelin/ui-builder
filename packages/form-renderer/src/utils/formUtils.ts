@@ -27,13 +27,6 @@ export interface ParameterConstraints {
 }
 
 /**
- * Generate a unique ID for form fields
- */
-export function generateId(): string {
-  return `field-${Math.random().toString(36).substring(2, 9)}`;
-}
-
-/**
  * Validate a field value against validation rules
  */
 export function validateField(

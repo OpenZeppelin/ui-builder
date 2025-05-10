@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService } from '@openzeppelin/transaction-form-renderer';
 import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { resolveRpcUrl } from '../rpc';
 
@@ -23,9 +23,9 @@ const createMockConfig = (id: string, rpcUrl?: string, name?: string): EvmNetwor
   apiUrl: `https://api.${id}.com`,
 });
 
-// Mock the appConfigService
-vi.mock('@openzeppelin/transaction-form-renderer', async (importOriginal) => {
-  const original = (await importOriginal()) as Record<string, unknown>; // Cast to allow spread
+// Mock the appConfigService from the correct package
+vi.mock('@openzeppelin/transaction-form-utils', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@openzeppelin/transaction-form-utils')>(); // Ensure correct type for original
   return {
     ...original,
     logger: {

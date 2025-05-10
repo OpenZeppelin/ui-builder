@@ -1,5 +1,5 @@
-import { appConfigService, logger } from '@openzeppelin/transaction-form-renderer';
 import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // No longer need PUBLIC_RPC_FALLBACKS array or individual constants here
 

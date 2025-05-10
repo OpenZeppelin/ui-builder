@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 
-import { logger } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Optional callback for testing error handling during file extraction.

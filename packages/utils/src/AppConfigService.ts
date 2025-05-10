@@ -7,7 +7,9 @@ import type {
   RpcEndpointConfig,
 } from '@openzeppelin/transaction-form-types';
 
-import { logger } from '../utils/logger';
+import { logger } from './logger';
+
+// Changed from @openzeppelin/transaction-form-utils
 
 /**
  * Type for the strategy array in initialize method.
@@ -303,3 +305,6 @@ export class AppConfigService {
     return this.config;
   }
 }
+
+// Create a singleton instance of the AppConfigService
+export const appConfigService = new AppConfigService();

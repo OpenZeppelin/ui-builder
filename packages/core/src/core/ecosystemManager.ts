@@ -1,4 +1,3 @@
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import type {
   AdapterConfig,
   ContractAdapter,
@@ -10,6 +9,7 @@ import type {
   StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig, isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;

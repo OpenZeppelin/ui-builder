@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, mergeConfig } from 'vitest/config';
+
+import { sharedVitestConfig } from '../../vitest.shared.config';
 
 /**
  * Virtual module mocks for testing
@@ -61,75 +63,78 @@ const virtualModuleMocks: Record<string, string> = {
  * Without this plugin, tests would fail with:
  * "Failed to resolve import 'virtual:module-name' from 'src/path/to/file.ts'"
  */
-export default defineConfig({
-  plugins: [
-    // Include React plugin from shared config
-    react(),
+export default defineConfig(
+  mergeConfig(sharedVitestConfig, {
+    plugins: [
+      // Include React plugin from shared config
+      react(),
 
-    /**
-     * TEST-SPECIFIC VIRTUAL MODULE PROVIDER
-     *
-     * This plugin provides mock implementations of virtual modules
-     * used in the dev/build environment.
-     *
-     * In the real application, these modules are provided by a plugin in vite.config.ts
-     * that imports the actual files from other packages. For tests, we
-     * provide basic mock implementations here.
-     */
-    {
-      name: 'test-virtual-modules-provider',
-      resolveId(id: string) {
-        if (id in virtualModuleMocks) {
-          return `\0${id}`;
-        }
-        return null;
-      },
-      load(id: string) {
-        // Extract the original ID without the null byte prefix
-        const originalId = id.startsWith('\0') ? id.slice(1) : id;
+      /**
+       * TEST-SPECIFIC VIRTUAL MODULE PROVIDER
+       *
+       * This plugin provides mock implementations of virtual modules
+       * used in the dev/build environment.
+       *
+       * In the real application, these modules are provided by a plugin in vite.config.ts
+       * that imports the actual files from other packages. For tests, we
+       * provide basic mock implementations here.
+       */
+      {
+        name: 'test-virtual-modules-provider',
+        resolveId(id: string) {
+          if (id in virtualModuleMocks) {
+            return `\0${id}`;
+          }
+          return null;
+        },
+        load(id: string) {
+          // Extract the original ID without the null byte prefix
+          const originalId = id.startsWith('\0') ? id.slice(1) : id;
 
-        if (originalId in virtualModuleMocks) {
-          // Return the mock implementation
-          return virtualModuleMocks[originalId];
-        }
-        return null;
+          if (originalId in virtualModuleMocks) {
+            // Return the mock implementation
+            return virtualModuleMocks[originalId];
+          }
+          return null;
+        },
+      },
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@styles': path.resolve(__dirname, '../styles'),
+        '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+      },
+      dedupe: [
+        '@openzeppelin/transaction-form-renderer',
+        '@openzeppelin/transaction-form-types',
+        'react',
+        'react-dom',
+      ],
+    },
+    // Add optimizeDeps for Vite to correctly process these linked workspace packages
+    optimizeDeps: {
+      include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+    },
+    // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
+    ssr: {
+      noExternal: [
+        '@openzeppelin/transaction-form-renderer',
+        '@openzeppelin/transaction-form-types',
+      ],
+    },
+    test: {
+      // Include all test settings from shared config
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
+      passWithNoTests: true,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html', 'json-summary'],
+        reportsDirectory: './coverage',
+        exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
       },
     },
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@styles': path.resolve(__dirname, '../styles/src'),
-    },
-    dedupe: [
-      '@openzeppelin/transaction-form-renderer',
-      '@openzeppelin/transaction-form-types',
-      'react',
-      'react-dom',
-    ],
-  },
-  // Add optimizeDeps for Vite to correctly process these linked workspace packages
-  optimizeDeps: {
-    include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
-  },
-  // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
-  ssr: {
-    noExternal: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
-  },
-  test: {
-    // Include all test settings from shared config
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: [
-      path.resolve(__dirname, '../../test/setup.ts'),
-      path.resolve(__dirname, './src/test/setup.ts'),
-    ],
-    passWithNoTests: true,
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'json-summary'],
-      reportsDirectory: './coverage',
-      exclude: ['**/node_modules/**', '**/dist/**', '**/src/test/**'],
-    },
-  },
-});
+  })
+);
