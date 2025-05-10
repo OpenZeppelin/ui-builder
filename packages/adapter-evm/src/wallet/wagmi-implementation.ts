@@ -5,10 +5,10 @@
  * It's encapsulated within the EVM adapter and not exposed to the rest of the application.
  */
 import { injected, metaMask, safe, walletConnect } from '@wagmi/connectors';
-// Import functions from @wagmi/core
 import {
   type Config,
   type GetAccountReturnType,
+  type CreateConnectorFn as WagmiCreateConnectorFn,
   connect,
   createConfig,
   disconnect,
@@ -18,25 +18,44 @@ import {
   switchChain,
   watchAccount,
 } from '@wagmi/core';
-// Import types and http from viem
-import { type PublicClient, type WalletClient, http } from 'viem';
-// Only import http directly if not re-exported
-import { base, mainnet, optimism, sepolia } from 'viem/chains';
+import { PublicClient, WalletClient, http } from 'viem';
+import { base, mainnet, optimism, polygon, sepolia } from 'viem/chains';
 
-import { type Connector } from '@openzeppelin/transaction-form-types';
+import { appConfigService, logger } from '@openzeppelin/transaction-form-renderer';
+import type { Connector } from '@openzeppelin/transaction-form-types';
 
-// TODO: Make chains configurable, potentially passed from adapter instantiation
-const supportedChains = [mainnet, base, optimism, sepolia] as const; // Use 'as const' for stricter typing
+/**
+ * Defines the default set of blockchain networks (from viem/chains) that Wagmi will be configured to support.
+ * This list enables features like chain switching within Wagmi and dictates which chains' RPCs
+ * can be potentially overridden via AppConfigService if a mapping exists in `viemChainIdToAppNetworkId`.
+ * If you add a new chain here and want its RPC to be configurable, ensure a corresponding
+ * entry is also added to `viemChainIdToAppNetworkId` below.
+ */
+const defaultSupportedChains = [mainnet, sepolia, polygon, optimism, base] as const;
 
-// Get WalletConnect Project ID from environment variables
-const WALLETCONNECT_PROJECT_ID = import.meta.env?.VITE_WALLETCONNECT_PROJECT_ID;
-
-if (!WALLETCONNECT_PROJECT_ID) {
-  console.error(
-    'WagmiWalletImplementation',
-    'WalletConnect Project ID is not set. Please provide a valid ID via VITE_WALLETCONNECT_PROJECT_ID environment variable.'
-  );
-}
+/**
+ * @internal
+ * Helper map to bridge Viem's numeric chain IDs (from `defaultSupportedChains`) to
+ * our application's string-based NetworkConfig IDs (e.g., "ethereum-mainnet").
+ * This mapping is ESSENTIAL for `AppConfigService` to look up RPC URL overrides for the chains
+ * configured in Wagmi's transports.
+ *
+ * !! IMPORTANT MAINTENANCE NOTE !!
+ * If `defaultSupportedChains` is updated (e.g., a new chain is added or an existing one removed),
+ * this map MUST be updated accordingly to ensure RPC overrides continue to work correctly for those chains.
+ * The string value (e.g., 'ethereum-mainnet') must match the `id` field of the corresponding
+ * full `EvmNetworkConfig` object defined in `packages/adapter-evm/src/networks/` AND the keys
+ * used in `AppRuntimeConfig.rpcEndpoints` (set via .env or app.config.json).
+ */
+const viemChainIdToAppNetworkId: Record<number, string> = {
+  [mainnet.id]: 'ethereum-mainnet',
+  [sepolia.id]: 'ethereum-sepolia',
+  [polygon.id]: 'polygon-mainnet',
+  [optimism.id]: 'optimism-mainnet',
+  [base.id]: 'base-mainnet',
+  // Example if polygonAmoy (from viem/chains) were added to defaultSupportedChains:
+  // [polygonAmoy.id]: 'polygon-amoy', // Assuming 'polygon-amoy' is your app's NetworkConfig.id
+};
 
 /**
  * Class responsible for encapsulating Wagmi core logic for wallet interactions.
@@ -47,23 +66,67 @@ export class WagmiWalletImplementation {
   private config: Config;
   private unsubscribe?: ReturnType<typeof watchAccount>;
 
-  constructor() {
+  constructor(walletConnectProjectIdFromAppConfig?: string) {
+    const logSystem = 'WagmiWalletImplementation';
+    const baseConnectors: WagmiCreateConnectorFn[] = [injected(), metaMask(), safe()];
+
+    if (walletConnectProjectIdFromAppConfig && walletConnectProjectIdFromAppConfig.trim() !== '') {
+      baseConnectors.push(walletConnect({ projectId: walletConnectProjectIdFromAppConfig }));
+      logger.info(logSystem, `WalletConnect connector initialized with Project ID.`);
+    } else {
+      logger.warn(
+        logSystem,
+        'WalletConnect Project ID not provided. WC connector will be unavailable.'
+      );
+    }
+
+    const transportsConfig = defaultSupportedChains.reduce(
+      (acc, chainDefinition) => {
+        let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
+
+        // Use the static module-level map
+        const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
+
+        if (appNetworkIdString) {
+          const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
+          let httpRpcOverride: string | undefined;
+
+          if (typeof rpcOverrideSetting === 'string') {
+            httpRpcOverride = rpcOverrideSetting;
+          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
+            httpRpcOverride = rpcOverrideSetting.http;
+          }
+
+          if (httpRpcOverride) {
+            logger.info(
+              logSystem,
+              `Using overridden RPC for chain ${chainDefinition.name} (App Network ID: ${appNetworkIdString}): ${httpRpcOverride}`
+            );
+            rpcUrlToUse = httpRpcOverride;
+          } else {
+            logger.debug(
+              logSystem,
+              `No RPC override found for ${chainDefinition.name} (App Network ID: ${appNetworkIdString}). Using default from viem/chains: ${rpcUrlToUse}`
+            );
+          }
+        } else {
+          logger.debug(
+            logSystem,
+            `No app-specific Network ID mapping for Viem chain ${chainDefinition.name} (ID: ${chainDefinition.id}). Using its default RPC from viem/chains: ${rpcUrlToUse}`
+          );
+        }
+
+        // If rpcUrlToUse is still undefined (e.g. chainDefinition had no default and no override), http() will use Viem's internal default or error.
+        acc[chainDefinition.id] = http(rpcUrlToUse);
+        return acc;
+      },
+      {} as Record<number, ReturnType<typeof http>>
+    );
+
     this.config = createConfig({
-      chains: supportedChains,
-      connectors: [
-        injected(),
-        walletConnect({ projectId: WALLETCONNECT_PROJECT_ID }),
-        metaMask(), // Recommended to include MetaMask explicitly
-        safe(), // For Safe{Wallet} users
-      ],
-      transports: supportedChains.reduce(
-        (acc, chain) => {
-          acc[chain.id] = http(); // Use http transport for all supported chains
-          return acc;
-        },
-        {} as Record<number, ReturnType<typeof http>> // Type assertion for accumulator
-      ),
-      // TODO: Add storage option for persistence? e.g., createStorage({ storage: window.localStorage })
+      chains: defaultSupportedChains,
+      connectors: baseConnectors,
+      transports: transportsConfig,
     });
   }
 
@@ -134,16 +197,13 @@ export class WagmiWalletImplementation {
   ): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
     try {
       const connectors = this.config.connectors;
-
       let connector = connectors.find((c) => c.uid === connectorId);
-
       if (!connector) {
         connector = connectors.find((c) => c.name.toLowerCase() === connectorId.toLowerCase());
       }
-
       if (!connector) {
         const availableConnectorNames = connectors.map((c) => c.name).join(', ');
-        console.error(
+        logger.error(
           'WagmiWalletImplementation',
           `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`
         );
@@ -152,12 +212,10 @@ export class WagmiWalletImplementation {
           error: `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`,
         };
       }
-
       const result = await connect(this.config, { connector });
-      // result is of type ConnectReturnType, which includes accounts and chainId
       return { connected: true, address: result.accounts[0], chainId: result.chainId };
     } catch (error: unknown) {
-      console.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
+      logger.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
       return {
         connected: false,
         error: error instanceof Error ? error.message : 'Unknown connection error',
@@ -174,7 +232,7 @@ export class WagmiWalletImplementation {
       await disconnect(this.config);
       return { disconnected: true };
     } catch (error) {
-      console.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
+      logger.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
       return {
         disconnected: false,
         error: error instanceof Error ? error.message : 'Unknown disconnection error',
@@ -196,22 +254,15 @@ export class WagmiWalletImplementation {
    * @returns Cleanup function to unsubscribe.
    */
   public onWalletConnectionChange(
-    callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
+    callback: (status: GetAccountReturnType, prevStatus: GetAccountReturnType) => void
   ): () => void {
-    this.unsubscribe?.();
-
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
     this.unsubscribe = watchAccount(this.config, {
       onChange: callback,
     });
-
     return this.unsubscribe;
-  }
-
-  /**
-   * Cleans up the account watcher when the instance is no longer needed.
-   */
-  public cleanup(): void {
-    this.unsubscribe?.();
   }
 
   /**
@@ -220,33 +271,6 @@ export class WagmiWalletImplementation {
    * @returns A promise that resolves if the switch is successful, or rejects with an error.
    */
   public async switchNetwork(chainId: number): Promise<void> {
-    try {
-      // First, check if we are already on the correct chain.
-      // The getAccount() method returns the current chainId if connected.
-      const currentAccount = this.getWalletConnectionStatus();
-      if (currentAccount.isConnected && currentAccount.chainId === chainId) {
-        console.info('WagmiWalletImplementation', `Already on target chain ID: ${chainId}`);
-        return; // Already on the correct network
-      }
-
-      console.info('WagmiWalletImplementation', `Attempting to switch to chain ID: ${chainId}`);
-      await switchChain(this.config, { chainId });
-      console.info('WagmiWalletImplementation', `Successfully switched to chain ID: ${chainId}`);
-    } catch (error: unknown) {
-      console.error(
-        'WagmiWalletImplementation',
-        `Error switching network to chain ID ${chainId}:`,
-        error
-      );
-      // Wagmi's switchChain can throw specific error types, e.g., UserRejectedRequestError
-      // For simplicity, rethrow a generic error message.
-      // More specific error handling could be added here based on error.name or instanceof checks.
-      if (error instanceof Error && error.name === 'UserRejectedRequestError') {
-        throw new Error('Network switch rejected by user.');
-      }
-      throw new Error(
-        `Failed to switch network: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
+    await switchChain(this.config, { chainId });
   }
 }

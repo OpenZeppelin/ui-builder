@@ -12,6 +12,8 @@ import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { appConfigService } from '@openzeppelin/transaction-form-renderer';
+
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
 import { App } from './App';
 import './styles.css';
@@ -20,14 +22,22 @@ const networkConfig = NetworkConfigPlaceholder;
 // Create adapter instance at the root level to ensure consistent connection state
 const adapter = new AdapterPlaceholder(networkConfig);
 
-/**
- * Main entry point for the application
- *
- * This renders the App component into the root element, utilizing the adapter
- * initialized at the root level to ensure consistent wallet state.
- */
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App adapter={adapter} />
-  </React.StrictMode>
-);
+async function startApp() {
+  // Initialize AppConfigService, attempting to load from app.config.json first,
+  // then potentially from Vite env vars if the exported app is built with Vite and sets them.
+  // For typical exported apps, app.config.json will be the primary configuration source.
+  await appConfigService.initialize([
+    { type: 'json', path: '/app.config.json' },
+    // In a Vite project generated from this template, import.meta.env will be properly typed by Vite's client types.
+    // For the template file itself, we avoid strict typing on `env` here.
+    { type: 'viteEnv', env: import.meta.env },
+  ]);
+
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App adapter={adapter} />
+    </React.StrictMode>
+  );
+}
+
+void startApp();

@@ -12,14 +12,16 @@ export async function loadAbiFromEtherscan(
   address: string,
   networkConfig: EvmNetworkConfig
 ): Promise<ContractSchema> {
-  const serviceIdentifier = networkConfig.explorerApiIdentifier;
+  const serviceIdentifier = networkConfig.primaryExplorerApiIdentifier;
 
   if (!serviceIdentifier) {
     console.error(
       'loadAbiFromEtherscan',
-      `explorerApiIdentifier is missing in the network configuration for ${networkConfig.name} (ID: ${networkConfig.id}).`
+      `primaryExplorerApiIdentifier is missing in the EVM network configuration for ${networkConfig.name} (ID: ${networkConfig.id}).`
     );
-    throw new Error(`Explorer API identifier not configured for network: ${networkConfig.name}`);
+    throw new Error(
+      `Primary Explorer API identifier not configured for EVM network: ${networkConfig.name}`
+    );
   }
 
   const apiKey = appConfigService.getExplorerApiKey(serviceIdentifier);

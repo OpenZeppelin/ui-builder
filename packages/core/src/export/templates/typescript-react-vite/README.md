@@ -62,6 +62,59 @@ Several configuration files are included at the project root:
 - **`vite.config.ts`**: Configures the Vite build tool.
 - **`tsconfig.json`**: Configures the TypeScript compiler.
 
+## Application Configuration (`app.config.json`)
+
+This exported form application can be configured at runtime by creating a `public/app.config.json` file. An example file, `public/app.config.json.example`, is provided to guide you.
+
+To configure your application:
+
+1.  In the `public` directory of this exported project, **rename or copy `app.config.json.example` to `app.config.json`**.
+2.  Open the new `public/app.config.json` file.
+3.  Edit the file to provide your specific settings. Key sections include:
+    - `networkServiceConfigs`: For API keys used by services like block explorers (e.g., Etherscan, PolygonScan). The relevant service identifier placeholder will be pre-filled based on the network this form was exported for.
+    - `globalServiceConfigs`: For globally used service parameters, like the WalletConnect Project ID.
+    - `rpcEndpoints`: To override the default RPC URL for the blockchain network this form targets. A placeholder for the exported network's ID will be present.
+
+**Example content you might find in `public/app.config.json` (after renaming from example and before editing):**
+
+```json
+{
+  "_readme": [
+    "This is an example configuration file. To use it, rename this file to 'app.config.json' in the 'public' directory.",
+    "Then, fill in your actual API keys and custom RPC URLs as needed.",
+    "// The entry for 'etherscan-mainnet' is for the block explorer relevant to the network this form was exported for (Ethereum).", // Example note
+    "API keys and other sensitive information should be managed securely."
+  ],
+  "networkServiceConfigs": {
+    "_comment": "No specific block explorer API key is strictly required for the default functionality...",
+    "etherscan-mainnet": {
+      // Example if exported for Ethereum Mainnet
+      "apiKey": "YOUR_ETHERSCAN_MAINNET_API_KEY_HERE",
+      "_comment": "API key for the etherscan-mainnet block explorer..."
+    }
+  },
+  "globalServiceConfigs": {
+    "walletconnect": {
+      "projectId": "YOUR_WALLETCONNECT_PROJECT_ID_HERE",
+      "_comment": "WalletConnect Project ID, required if WalletConnect is used."
+    }
+  },
+  "rpcEndpoints": {
+    "ethereum-mainnet": "YOUR_ETHEREUM_MAINNET_RPC_URL_HERE_IF_NEEDED", // Example
+    "_comment_for_ethereum-mainnet": "Optional: Provide a custom RPC URL..."
+  },
+  "featureFlags": {
+    "exampleFeatureInExportedApp": true
+  },
+  "defaultLanguage": "en"
+}
+```
+
+**Important:**
+
+- Replace placeholder values (like `"YOUR_..._API_KEY_HERE"`) with your actual values in your `public/app.config.json`.
+- The application will attempt to load `/app.config.json` when it starts. If this file is not found (e.g., you haven't renamed the example), or if specific settings are missing, the application will use default behaviors (like public RPCs) and some features (like WalletConnect or dynamic ABI loading) may be impaired or unavailable.
+
 ## Using the Form
 
 The generated form can be imported and used in your components:

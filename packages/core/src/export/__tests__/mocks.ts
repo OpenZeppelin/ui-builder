@@ -1,4 +1,4 @@
-import type { AdapterConfig } from '../../core/types/AdapterTypes';
+import { AdapterConfig } from '@openzeppelin/transaction-form-types';
 
 /**
  * FormRendererConfig interface mirrors the structure from form-renderer package.

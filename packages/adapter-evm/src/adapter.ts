@@ -1,6 +1,7 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import { type TransactionReceipt } from 'viem';
 
+import { logger } from '@openzeppelin/transaction-form-renderer';
 import type {
   Connector,
   ContractAdapter,
@@ -15,7 +16,7 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { WagmiWalletImplementation } from './wallet/wagmi-implementation';
+import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
 import {
@@ -51,7 +52,6 @@ import {
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
-  private walletImplementation: WagmiWalletImplementation;
   readonly networkConfig: EvmNetworkConfig;
 
   constructor(networkConfig: EvmNetworkConfig) {
@@ -59,11 +59,9 @@ export class EvmAdapter implements ContractAdapter {
       throw new Error('EvmAdapter requires a valid EVM network configuration.');
     }
     this.networkConfig = networkConfig;
-    this.walletImplementation = new WagmiWalletImplementation();
-
-    console.log(
-      'EvmAdapter initialized for network:',
-      `${networkConfig.name} (ID: ${networkConfig.id})`
+    logger.info(
+      'EvmAdapter',
+      `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
     );
   }
 
@@ -115,7 +113,7 @@ export class EvmAdapter implements ContractAdapter {
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
-      this.walletImplementation,
+      getEvmWalletImplementation(),
       this.networkConfig.chainId
     );
   }
@@ -170,7 +168,7 @@ export class EvmAdapter implements ContractAdapter {
       this.networkConfig,
       params,
       contractSchema,
-      this.walletImplementation,
+      getEvmWalletImplementation(),
       (src) => this.loadContract(src)
     );
   }
@@ -185,26 +183,27 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  supportsWalletConnection(): boolean {
+  public supportsWalletConnection(): boolean {
     return evmSupportsWalletConnection();
   }
 
   /**
    * @inheritdoc
    */
-  async getAvailableConnectors(): Promise<Connector[]> {
-    return getEvmAvailableConnectors(this.walletImplementation);
+  public async getAvailableConnectors(): Promise<Connector[]> {
+    return getEvmAvailableConnectors(getEvmWalletImplementation());
   }
 
   /**
    * @inheritdoc
    */
-  async connectWallet(
+  public async connectWallet(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
+    const impl = getEvmWalletImplementation();
     const result = await connectAndEnsureCorrectNetwork(
       connectorId,
-      this.walletImplementation,
+      impl,
       this.networkConfig.chainId
     );
 
@@ -221,24 +220,24 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
-    return disconnectEvmWallet(this.walletImplementation);
+  public async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
+    return disconnectEvmWallet(getEvmWalletImplementation());
   }
 
   /**
    * @inheritdoc
    */
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    return getEvmWalletConnectionStatus(this.walletImplementation);
+  public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+    return getEvmWalletConnectionStatus(getEvmWalletImplementation());
   }
 
   /**
    * @inheritdoc
    */
-  onWalletConnectionChange(
+  public onWalletConnectionChange(
     callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
   ): () => void {
-    return onEvmWalletConnectionChange(this.walletImplementation, callback);
+    return onEvmWalletConnectionChange(getEvmWalletImplementation(), callback);
   }
 
   /**
@@ -266,7 +265,7 @@ export class EvmAdapter implements ContractAdapter {
     receipt?: TransactionReceipt;
     error?: Error;
   }> {
-    return waitForEvmTransactionConfirmation(txHash, this.walletImplementation);
+    return waitForEvmTransactionConfirmation(txHash, getEvmWalletImplementation());
   }
 }
 

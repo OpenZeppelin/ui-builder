@@ -9,10 +9,14 @@
 import { logger } from '@openzeppelin/transaction-form-renderer';
 import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
+import { addCoreTemplateFiles } from './assemblers/addCoreTemplateFiles';
+import { addStyleAndRootConfigFiles } from './assemblers/addStyleAndRootConfigFiles';
+import { applyCliTargetModifications } from './assemblers/applyCliTargetModifications';
+import { generateAndAddAppConfig } from './assemblers/generateAndAddAppConfig';
+import { updatePackageJsonFile } from './assemblers/updatePackageJsonFile';
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';
 
@@ -154,150 +158,28 @@ export class FormExportSystem {
     exportOptions: ExportOptions,
     customFiles: Record<string, string>
   ): Promise<Record<string, string>> {
-    const adapterPackageName = adapterPackageMap[networkConfig.ecosystem];
-    if (!adapterPackageName) {
-      throw new Error(`No adapter package configured for ecosystem: ${networkConfig.ecosystem}`);
-    }
+    logger.info('File Assembly', 'Starting file assembly process...');
 
-    // 1. Get base project template structure (will not include main.tsx anymore)
-    logger.info(
-      'File Assembly',
-      `Getting base template structure: ${exportOptions.template || 'typescript-react-vite'}...`
+    const projectFiles = await addCoreTemplateFiles(
+      this.templateManager,
+      exportOptions,
+      customFiles
     );
-    const templateFilesRaw = await this.templateManager.createProject(
-      exportOptions.template || 'typescript-react-vite',
-      {}, // Start with empty custom files
+    await addStyleAndRootConfigFiles(projectFiles, this.styleManager, this.templateProcessor);
+    await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor);
+    await updatePackageJsonFile(
+      projectFiles,
+      this.packageManager,
+      formConfig,
+      networkConfig,
+      functionId,
       exportOptions
     );
-    logger.info(
-      'File Assembly',
-      `Base template files retrieved: ${Object.keys(templateFilesRaw).length}`
-    );
-
-    // Initialize the final file collection
-    let projectFiles: Record<string, string> = { ...templateFilesRaw };
-
-    // 2. Add the generated custom components
-    // This will overwrite the placeholder files from the base template given the same file names
-    Object.assign(projectFiles, customFiles);
-
-    // 3. Add shared CSS files (global.css) and template styles.css via StyleManager
-    logger.info('File Assembly', 'Adding CSS files...');
-    const styleFiles = this.styleManager.getStyleFiles();
-    styleFiles.forEach((file) => {
-      projectFiles[file.path] = file.content;
-    });
-    logger.info('File Assembly', `Added ${styleFiles.length} CSS file(s).`);
-
-    // 4. Add root configuration files (tailwind, postcss, components) via StyleManager
-    logger.info('File Assembly', 'Adding root config files...');
-    const configFiles = this.styleManager.getConfigFiles();
-    for (const file of configFiles) {
-      // Use a loop to handle formatting
-      let finalContent = file.content;
-      if (file.path === 'tailwind.config.cjs') {
-        // Modify content first
-        finalContent = this.modifyTailwindConfigContent(file.content);
-        // Then format using TemplateProcessor
-        finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'typescript');
-      } else if (file.path === 'postcss.config.cjs') {
-        // Optionally format postcss config too if needed (using babel parser might be safer)
-        finalContent = await this.templateProcessor.formatFinalCode(finalContent, 'babel'); // Use babel parser for generic JS
-      } else if (file.path === 'components.json') {
-        // Format JSON using the dedicated method
-        finalContent = await this.templateProcessor.formatJson(file.content);
-      }
-      projectFiles[file.path] = finalContent;
-    }
-    logger.info('File Assembly', `Added and formatted ${configFiles.length} config file(s).`);
-
-    // 5. Update package.json with correct dependencies and metadata
-    logger.info('File Assembly', 'Updating package.json...');
-    const originalPackageJson = projectFiles['package.json'];
-    if (originalPackageJson) {
-      projectFiles['package.json'] = await this.packageManager.updatePackageJson(
-        originalPackageJson,
-        formConfig,
-        networkConfig.ecosystem,
-        functionId,
-        exportOptions
-      );
-      logger.info('File Assembly', 'package.json updated.');
-    } else {
-      logger.error('File Assembly', 'Error: No package.json found in template files.');
-      throw new Error('Template is missing package.json');
-    }
-
-    // 6. Conditional CSS Modification for CLI Target
-    const mainCssPath = 'src/styles.css'; // Path confirmed from template structure
-    if (exportOptions.isCliBuildTarget && projectFiles[mainCssPath]) {
-      logger.info('File Assembly', `Modifying ${mainCssPath} for CLI target...`);
-      const originalCssContent = projectFiles[mainCssPath];
-      // Simple string replacement assuming a consistent import line format
-      // Using a regex to handle potential variations in quotes and spacing
-      const modifiedCssContent = originalCssContent.replace(
-        /^\s*@import\s+['"]tailwindcss['"]\s*;?/m, // Match variations at start of line
-        "@import 'tailwindcss' source('../../../');" // Replace with required format
-      );
-
-      if (modifiedCssContent !== originalCssContent) {
-        projectFiles[mainCssPath] = modifiedCssContent;
-        logger.info('File Assembly', `${mainCssPath} updated with @source directive.`);
-      } else {
-        logger.warn(
-          'File Assembly',
-          `Could not find standard @import "tailwindcss"; line at start of ${mainCssPath} to modify.`
-        );
-      }
-    }
-
-    // 7. Format necessary JSON files for readability
+    await applyCliTargetModifications(projectFiles, exportOptions);
     await this.formatJsonFiles(projectFiles);
 
     logger.info('File Assembly', 'File assembly complete.');
     return projectFiles;
-  }
-
-  /**
-   * Modifies the content paths within tailwind.config.cjs content string.
-   * Also adds the path to the installed form-renderer package.
-   *
-   * @param originalContent The original content of tailwind.config.cjs.
-   * @returns The modified content string.
-   * @private
-   */
-  private modifyTailwindConfigContent(originalContent: string): string {
-    // Define paths relative to the EXPORTED project root
-    const newContentPaths = [
-      './index.html',
-      // IMPORTANT: This broad glob pattern solves a critical issue with Tailwind purging:
-      // When using pnpm workspace: references, Tailwind cannot correctly resolve and scan the symlinked
-      // packages in node_modules. This causes utility classes like flex, gap-2, etc. from form-renderer
-      // components to be incorrectly purged from the final CSS, breaking layouts.
-      // Using this catch-all pattern ensures all JS/TS files are scanned regardless of
-      // how the form-renderer package is referenced (workspace: or published version).
-      './**/*.{js,ts,jsx,tsx}',
-    ]
-      .map((p) => `'${p}'`)
-      .join(',\n      '); // Format for readability
-
-    // Replace the 'content: [...]' array in the config string
-    const modifiedContent = originalContent.replace(
-      /(content\s*:\s*\[)[\s\S]*?(\])/, // Regex to find 'content: [' ... ']'
-      `$1\n      ${newContentPaths}\n    $2` // Replace array content, preserving formatting
-    );
-
-    if (modifiedContent === originalContent) {
-      // Warn if replacement failed, return original content
-      logger.warn(
-        'Export System',
-        'Failed to replace content paths in tailwind.config.cjs. Check config format. Using original.'
-      );
-      return originalContent;
-    } else {
-      logger.info('Export System', 'Successfully modified tailwind.config.cjs content paths.');
-      return modifiedContent;
-    }
   }
 
   /**
