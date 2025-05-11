@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.2.0...v1.3.0) (2025-05-11)
+
+
+### Bug Fixes
+
+* **core:** merge branch 'main' into feature/plat-6614-common-configuration-architecture ([a82bf13](https://github.com/OpenZeppelin/transaction-form-builder/commit/a82bf1396e86769009458ec5b5e22a584e7a747c))
+
+
+### Features
+
+* **config:** implement runtime app cfg (phases 1 & 2) ([9aaaaa7](https://github.com/OpenZeppelin/transaction-form-builder/commit/9aaaaa75ce1aa8a90501c96676d7fd3a24c3d20a))
+* **config:** implement runtime app configuration ([c52007e](https://github.com/OpenZeppelin/transaction-form-builder/commit/c52007eaf4367dd159bee9f7fa77371f2e3d215b))
+
 # [1.2.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.1.0...v1.2.0) (2025-05-09)
 
 
