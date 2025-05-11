@@ -27,12 +27,9 @@ vi.mock('virtual:adapter-configs', () => {
     evm: {
       dependencies: {
         runtime: {
-          ethers: '^6.7.0',
           viem: '^1.10.9',
         },
-        dev: {
-          '@types/ethers': '^6.7.0',
-        },
+        dev: {},
       },
     },
     solana: {

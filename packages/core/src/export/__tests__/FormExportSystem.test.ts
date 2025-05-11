@@ -273,7 +273,6 @@ describe('FormExportSystem', () => {
             react: '^18.2.0',
             'react-dom': '^18.2.0',
             'react-hook-form': '^7.43.9',
-            ethers: '^6.7.0',
             viem: '^1.10.9',
           };
 
