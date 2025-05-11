@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import type {
   Ecosystem,
   EvmNetworkConfig,
   SolanaNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -273,7 +273,6 @@ describe('FormExportSystem', () => {
             react: '^18.2.0',
             'react-dom': '^18.2.0',
             'react-hook-form': '^7.43.9',
-            ethers: '^6.7.0',
             viem: '^1.10.9',
           };
 

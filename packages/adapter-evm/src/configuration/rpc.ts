@@ -1,48 +1,74 @@
 import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // No longer need PUBLIC_RPC_FALLBACKS array or individual constants here
 
 /**
- * Resolves the RPC URL to use based on environment variables and network config.
+ * Resolves the RPC URL for a given EVM network configuration.
+ * It prioritizes an RPC URL override from AppConfigService if available,
+ * otherwise falls back to the rpcUrl defined in the EvmNetworkConfig.
  *
- * Priority:
- * 1. VITE_RPC_URL_<NETWORK_ID> (e.g., VITE_RPC_URL_ETHEREUM_SEPOLIA)
- * 2. networkConfig.rpcUrl (which should be a public RPC for that specific network).
- *
- * @param networkConfig The network configuration object containing a default public rpcUrl.
+ * @param networkConfig - The EVM network configuration.
  * @returns The resolved RPC URL string.
- * @throws If networkConfig.rpcUrl is missing and no override is found (should not happen with proper config).
+ * @throws If no RPC URL can be resolved (neither override nor default is present and valid).
  */
 export function resolveRpcUrl(networkConfig: EvmNetworkConfig): string {
-  const env = import.meta.env;
-  const networkIdUpper = networkConfig.id.toUpperCase().replace(/-/g, '_');
-  const envVarKey = `VITE_RPC_URL_${networkIdUpper}`;
+  const logSystem = 'RpcResolver';
+  const networkId = networkConfig.id;
 
-  console.log(`[resolveRpcUrl] Received config for resolving RPC: ${networkConfig.id}`);
-  console.log('[resolveRpcUrl] Env Var Checked:', {
-    [envVarKey]: env[envVarKey],
-  });
+  // Check AppConfigService for an override
+  const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(networkId);
+  let rpcUrlFromOverride: string | undefined;
 
-  // 1. Specific Network ID Env Var (e.g., VITE_RPC_URL_ETHEREUM_SEPOLIA)
-  const specificNetworkEnvVar = env[envVarKey];
-  if (specificNetworkEnvVar) {
-    console.debug(`Using RPC URL from env var ${envVarKey}: ${specificNetworkEnvVar}`);
-    return specificNetworkEnvVar;
+  if (typeof rpcOverrideSetting === 'string') {
+    rpcUrlFromOverride = rpcOverrideSetting;
+  } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
+    rpcUrlFromOverride = rpcOverrideSetting.http;
   }
 
-  // 2. Fallback to the rpcUrl defined in the networkConfig itself
-  if (networkConfig.rpcUrl) {
-    console.debug(
-      `Using RPC URL from networkConfig for ${networkConfig.name}: ${networkConfig.rpcUrl}`
+  if (rpcUrlFromOverride) {
+    logger.info(
+      logSystem,
+      `Using overridden RPC URL for network ${networkId}: ${rpcUrlFromOverride}`
+    );
+    if (isValidHttpUrl(rpcUrlFromOverride)) {
+      return rpcUrlFromOverride;
+    } else {
+      logger.warn(
+        logSystem,
+        `Overridden RPC URL for ${networkId} is invalid: ${rpcUrlFromOverride}. Falling back.`
+      );
+    }
+  }
+
+  // Fallback to the rpcUrl in the networkConfig
+  if (networkConfig.rpcUrl && isValidHttpUrl(networkConfig.rpcUrl)) {
+    logger.debug(
+      logSystem,
+      `Using default RPC URL for network ${networkId}: ${networkConfig.rpcUrl}`
     );
     return networkConfig.rpcUrl;
   }
 
-  // This should ideally not be reached if networkConfigs always have a valid public rpcUrl
-  console.error(
-    `RPC URL is missing in networkConfig and no override env var (${envVarKey}) is set for ${networkConfig.name}`
+  logger.error(
+    logSystem,
+    `No valid RPC URL could be resolved for network ${networkId}. Checked override and networkConfig.rpcUrl.`
   );
   throw new Error(
-    `Could not resolve RPC URL for network: ${networkConfig.name}. Please ensure networkConfig.rpcUrl is set or provide the ${envVarKey} environment variable.`
+    `No valid RPC URL configured for network ${networkConfig.name} (ID: ${networkId}).`
   );
+}
+
+/**
+ * Validates if a string is a valid HTTP/HTTPS URL.
+ * @param urlString - The string to validate.
+ * @returns True if valid, false otherwise.
+ */
+function isValidHttpUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }

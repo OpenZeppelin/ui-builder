@@ -41,7 +41,3 @@ export * from './components';
 
 // Specifically re-export key components for easier top-level import
 export { DynamicFormField } from './components/DynamicFormField';
-
-// Add logger and generateId exports
-export { logger } from './utils/logger';
-export { generateId } from './utils/general';

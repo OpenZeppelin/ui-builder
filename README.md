@@ -528,3 +528,41 @@ To ensure consistency, the following packages use symlinks pointing to the root 
 
 During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported
 project.
+
+## Runtime Configuration
+
+Both the core Transaction Form Builder application and its exported forms support runtime configuration for certain parameters. This is primarily managed via an `AppConfigService` and allows customization without rebuilding the application code.
+
+### Core Application Configuration (Development)
+
+During development of the core application, configurations are typically provided via Vite environment variables defined in `.env` files (e.g., `.env.local`). These variables usually follow a prefix like `VITE_APP_CFG_...`.
+
+Key configurable items include:
+
+- **Explorer API Keys:** For services like Etherscan, PolygonScan, etc., used by adapters to fetch ABIs. Example: `VITE_APP_CFG_API_KEY_ETHERSCAN_MAINNET="your_key"`.
+- **WalletConnect Project ID:** For EVM adapter's WalletConnect functionality. Example: `VITE_APP_CFG_SERVICE_WALLETCONNECT_PROJECT_ID="your_id"`.
+- **RPC URL Overrides:** To use custom RPC endpoints instead of public defaults for specific networks. Example: `VITE_APP_CFG_RPC_ENDPOINT_ETHEREUM_MAINNET="https://your_custom_rpc.com"`.
+
+### Exported Application Configuration
+
+Exported forms include a `public/app.config.json` file. Users of the exported form should edit this file to provide their own API keys and RPC URLs.
+
+The structure of this JSON file includes sections for:
+
+- `networkServiceConfigs`: For explorer API keys, keyed by a service identifier (e.g., `"etherscan-mainnet"`).
+- `globalServiceConfigs`: For global service parameters (e.g., `walletconnect.projectId`).
+- `rpcEndpoints`: For RPC URL overrides, keyed by the network ID (e.g., `"ethereum-mainnet"`).
+
+Refer to the README included with the exported application for detailed instructions on configuring `public/app.config.json`.
+
+### Adding/Modifying Networks
+
+When adding new EVM network definitions (in `packages/adapter-evm/src/networks/`), ensure you define:
+
+- `id`: A unique string identifier (e.g., "my-custom-chain-mainnet").
+- `chainId`: The numeric EVM chain ID.
+- `rpcUrl`: A default public RPC URL.
+- `primaryExplorerApiIdentifier`: A string (e.g., "mychainscan-mainnet") that will be used as the key in `app.config.json`'s `networkServiceConfigs` if this network's explorer requires an API key for ABI fetching.
+- `apiUrl` and `explorerUrl` for the block explorer.
+
+If this network is also to be a chain-switchable target within Wagmi (for the EVM adapter), you may need to update the `defaultSupportedChains` array and the `viemChainIdToAppNetworkIdMap` in `packages/adapter-evm/src/wallet/wagmi-implementation.ts` to ensure RPC overrides from `app.config.json` apply correctly to Wagmi's transports for this chain.

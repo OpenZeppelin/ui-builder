@@ -6,9 +6,9 @@ import type {
   TransactionFormProps,
   TxStatus,
 } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { createDefaultFormValues } from '../utils/formUtils';
-import { logger } from '../utils/logger';
 
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 import { WalletConnectButton } from './wallet/WalletConnectButton';

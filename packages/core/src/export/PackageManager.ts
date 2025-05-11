@@ -36,8 +36,8 @@
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
-import { logger } from '@openzeppelin/transaction-form-renderer';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -360,6 +360,7 @@ export class PackageManager {
     const internalPackages = new Set([
       '@openzeppelin/transaction-form-renderer',
       '@openzeppelin/transaction-form-types',
+      '@openzeppelin/transaction-form-utils',
       ...Object.values(adapterPackageMap),
     ]);
 

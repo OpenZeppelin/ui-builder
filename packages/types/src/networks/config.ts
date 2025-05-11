@@ -60,6 +60,14 @@ export interface BaseNetworkConfig {
    * If not provided, the network property will be used as a fallback
    */
   icon?: string;
+
+  /**
+   * A unique identifier for the specific explorer API service used by this network.
+   * This is used by the AppConfigService to fetch the correct API key.
+   * Examples: "etherscan-mainnet", "polygonscan-mainnet", "bscscan-mainnet"
+   * Should align with keys in AppRuntimeConfig.networkServiceConfigs
+   */
+  primaryExplorerApiIdentifier?: string;
 }
 
 /**
@@ -90,12 +98,6 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
   /**
    * Optional icon name for the network (for use with @web3icons/react or similar)
    * If not provided, the network property will be used as a fallback
-   */
-  icon?: string;
-
-  /**
-   * Base URL for the Etherscan-compatible API endpoint (e.g., 'https://api.etherscan.io/api')
-   * Needed because API URL patterns vary across explorers.
    */
   apiUrl?: string;
 

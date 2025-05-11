@@ -73,7 +73,6 @@ import {
   ContractStateWidget,
   TransactionForm,
   WalletConnectionProvider,
-  logger,
 } from '@openzeppelin/transaction-form-renderer';
 import type {
   ContractSchema,
@@ -81,6 +80,7 @@ import type {
   RenderFormSchema,
   TransactionFormProps,
 } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define type for transaction result (this will be implemented in the future)
 interface TransactionResult {
@@ -345,6 +345,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
     "@openzeppelin/transaction-form-renderer": "^1.0.0",
     "@openzeppelin/transaction-form-types": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.1.0",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -389,6 +390,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
     "@openzeppelin/transaction-form-renderer": "^1.0.0",
     "@openzeppelin/transaction-form-types": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.1.0",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

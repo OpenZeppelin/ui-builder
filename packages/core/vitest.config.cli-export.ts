@@ -43,6 +43,7 @@ export default defineConfig({
         __dirname,
         '../form-renderer/src/config.ts'
       ),
+      '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
       // Note: No need for @cross-package aliases here as the real plugin resolves paths directly
     },
   },

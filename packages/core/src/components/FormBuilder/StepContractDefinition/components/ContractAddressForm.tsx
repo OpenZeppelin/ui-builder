@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { AddressField, logger } from '@openzeppelin/transaction-form-renderer';
+import { AddressField } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import {
   getEcosystemExplorerGuidance,

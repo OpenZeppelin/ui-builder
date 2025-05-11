@@ -1,39 +1,35 @@
 /**
- * Types related to blockchain adapters configuration
+ * Types related to blockchain adapters configuration.
+ * @packageDocumentation
  */
 
 /**
- * Configuration for blockchain adapters
+ * Configuration for blockchain adapters.
  * This interface defines the structure for adapter-specific configuration
- * including dependencies required by the adapter.
+ * including dependencies required by the adapter for exported projects.
  */
 export interface AdapterConfig {
   /**
-   * Dependencies configuration for this adapter
+   * Dependencies configuration for this adapter.
    */
   dependencies: {
     /**
-     * Runtime dependencies required by this adapter
-     * These dependencies will be included in the package.json of exported projects
-     * that use this adapter.
+     * Runtime dependencies required by this adapter for an exported project.
+     * These will be included in the `dependencies` section of the exported `package.json`.
      *
-     * Format: { packageName: versionRange }
-     * Example: { "viem": "^2.28.0" }
+     * @example { "viem": "^2.0.0" }
      */
     runtime: Record<string, string>;
 
     /**
-     * Development dependencies for the adapter
-     * These are typically type definitions and development tools
-     * that are not needed at runtime but help with development.
-     * They will be added to devDependencies in the exported package.json.
+     * Development dependencies for the adapter, usually type definitions.
+     * These will be included in the `devDependencies` of the exported `package.json`.
      *
-     * Format: { packageName: versionRange }
-     * Example: { "@types/viem": "^2.28.0" }
+     * @example { "@types/react": "^18.0.0" }
      */
     dev?: Record<string, string>;
   };
-
-  // Additional configuration properties can be added in the future
-  // as the adapter system evolves, without breaking existing implementations
+  // Future properties might include things like:
+  // recommendedNodeVersion?: string;
+  // setupScripts?: { name: string; script: string }[];
 }

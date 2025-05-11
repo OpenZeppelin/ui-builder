@@ -37,6 +37,7 @@ export default defineConfig({
         __dirname,
         '../form-renderer/src/config.ts'
       ),
+      '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
     },
   },
   define: {

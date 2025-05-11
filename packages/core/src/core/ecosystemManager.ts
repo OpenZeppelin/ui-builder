@@ -8,6 +8,8 @@ import type {
   SolanaNetworkConfig,
   StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { isEvmNetworkConfig, isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;
@@ -93,11 +95,11 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
 
 export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
   if (networksByEcosystemCache[ecosystem]) {
-    return networksByEcosystemCache[ecosystem] as NetworkConfig[];
+    return networksByEcosystemCache[ecosystem]!;
   }
   const meta = ecosystemRegistry[ecosystem];
   if (!meta) {
-    console.warn(`No metadata registered for ecosystem: ${ecosystem}`);
+    logger.warn('EcosystemManager', `No metadata registered for ecosystem: ${ecosystem}`);
     return [];
   }
 
@@ -105,9 +107,9 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
     const module = await loadAdapterPackageModule(ecosystem);
     const networks = (module[meta.networksExportName] as NetworkConfig[]) || [];
     if (!Array.isArray(networks)) {
-      console.error(
-        `Expected an array for ${meta.networksExportName} in adapter for ${ecosystem}, but received:`,
-        typeof networks
+      logger.error(
+        'EcosystemManager',
+        `Expected an array for ${meta.networksExportName} in ${ecosystem}, received: ${typeof networks}`
       );
       networksByEcosystemCache[ecosystem] = [];
       return [];
@@ -115,7 +117,7 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
     networksByEcosystemCache[ecosystem] = networks;
     return networks;
   } catch (error) {
-    console.error(`Error loading networks for ecosystem ${ecosystem}:`, error);
+    logger.error('EcosystemManager', `Error loading networks for ${ecosystem}:`, error);
     networksByEcosystemCache[ecosystem] = [];
     return [];
   }
@@ -133,13 +135,16 @@ export async function getAllNetworks(): Promise<NetworkConfig[]> {
     cachedAllNetworks = combinedNetworks;
     return combinedNetworks;
   } catch (error) {
-    console.error('Error loading networks from one or more adapters:', error);
+    logger.error('EcosystemManager', 'Error loading networks from one or more adapters:', error);
     cachedAllNetworks = []; // Cache empty array on error to prevent re-fetching immediately
     return [];
   }
 }
 
 export async function getNetworkById(id: string): Promise<NetworkConfig | undefined> {
+  logger.info('EcosystemManager(getNetworkById)', `Attempting to get network by ID: '${id}'`);
+
+  // Check caches first (which store static configs)
   for (const ecosystemNetworks of Object.values(networksByEcosystemCache)) {
     const network = ecosystemNetworks?.find((n) => n.id === id);
     if (network) return network;
@@ -148,7 +153,8 @@ export async function getNetworkById(id: string): Promise<NetworkConfig | undefi
     const network = cachedAllNetworks.find((n) => n.id === id);
     if (network) return network;
   }
-  const allNetworks = await getAllNetworks(); // This will populate caches if empty
+  // Fallback to loading all if not in cache
+  const allNetworks = await getAllNetworks();
   return allNetworks.find((network) => network.id === id);
 }
 
@@ -180,28 +186,42 @@ export function getAdapterConfigExportName(ecosystem: Ecosystem): string | undef
 }
 
 // --- Adapter Instantiation Logic ---
-export async function getAdapter(networkConfig: NetworkConfig): Promise<ContractAdapter> {
-  const meta = ecosystemRegistry[networkConfig.ecosystem];
+export async function getAdapter(networkConfigInput: NetworkConfig): Promise<ContractAdapter> {
+  const logSystem = 'EcosystemManager(getAdapter)';
+  logger.debug(
+    logSystem,
+    `Getting adapter for network: ${networkConfigInput.name} (ID: ${networkConfigInput.id}) using its default RPC: ${isEvmNetworkConfig(networkConfigInput) ? networkConfigInput.rpcUrl : isSolanaNetworkConfig(networkConfigInput) ? networkConfigInput.rpcEndpoint : 'N/A'}`
+  );
+
+  const meta = ecosystemRegistry[networkConfigInput.ecosystem];
   if (!meta) {
-    throw new Error(`No adapter metadata registered for ecosystem: ${networkConfig.ecosystem}`);
+    throw new Error(
+      `No adapter metadata registered for ecosystem: ${networkConfigInput.ecosystem}`
+    );
   }
 
   const AdapterClass = await meta.getAdapterClass();
 
-  switch (networkConfig.ecosystem) {
+  // Instantiate with the original, static networkConfigInput
+  // The adapter's constructor or client initialization logic will handle RPC overrides.
+  switch (networkConfigInput.ecosystem) {
     case 'evm':
-      return new (AdapterClass as EvmAdapterConstructor)(networkConfig as EvmNetworkConfig);
+      return new (AdapterClass as EvmAdapterConstructor)(networkConfigInput as EvmNetworkConfig);
     case 'solana':
-      return new (AdapterClass as SolanaAdapterConstructor)(networkConfig as SolanaNetworkConfig);
+      return new (AdapterClass as SolanaAdapterConstructor)(
+        networkConfigInput as SolanaNetworkConfig
+      );
     case 'stellar':
-      return new (AdapterClass as StellarAdapterConstructor)(networkConfig as StellarNetworkConfig);
+      return new (AdapterClass as StellarAdapterConstructor)(
+        networkConfigInput as StellarNetworkConfig
+      );
     case 'midnight':
       return new (AdapterClass as MidnightAdapterConstructor)(
-        networkConfig as MidnightNetworkConfig
+        networkConfigInput as MidnightNetworkConfig
       );
     default:
-      const unhandledEcosystem = (networkConfig as NetworkConfig).ecosystem;
-      throw new Error(`No adapter constructor for ${String(unhandledEcosystem)}`);
+      const unhandledEcosystem = (networkConfigInput as NetworkConfig).ecosystem;
+      throw new Error(`No adapter constructor logic for ${String(unhandledEcosystem)}`);
   }
 }
 
