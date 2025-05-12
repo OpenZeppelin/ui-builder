@@ -24,9 +24,19 @@ interface AppProps {
 export function App({ adapter }: AppProps) {
   return (
     <div className="app">
-      <header className="header">
-        <h1>Transaction Form for @@function-id@@</h1>
-        <p>A form for interacting with blockchain contracts</p>
+      <header className="header border-b px-6 py-3">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
+            <div className="h-5 border-l border-gray-300 mx-1"></div>
+            <div>
+              <h1 className="text-base font-medium">@@function-id@@</h1>
+              <p className="text-xs text-muted-foreground">
+                Form for interacting with blockchain contracts
+              </p>
+            </div>
+          </div>
+        </div>
       </header>
 
       <main className="main">
