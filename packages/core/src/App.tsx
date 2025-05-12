@@ -4,20 +4,19 @@ import { AdapterProvider } from './core/hooks';
 function App() {
   return (
     <div className="bg-background text-foreground min-h-screen">
-      <header className="border-b px-6 py-4">
+      <header className="border-b px-6 py-3">
         <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" height="24" width="24" className="fill-primary">
-              <path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2v10h14V7H5zm2 2h10v2H7V9zm0 4h10v2H7v-2z" />
-            </svg>
-            <span className="text-lg font-bold">Transaction Form Builder</span>
+          <div className="flex items-center gap-4">
+            <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
+            <div className="h-5 border-l border-gray-300 mx-1"></div>
+            <span className="text-base font-medium">Transaction Form Builder</span>
           </div>
 
           <div>
             <a
               href="https://github.com/OpenZeppelin/transaction-form-builder"
               target="_blank"
-              className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
               rel="noopener noreferrer"
             >
               <svg viewBox="0 0 24 24" height="16" width="16" className="fill-current">

@@ -133,9 +133,9 @@ export function TransactionFormBuilder() {
   return (
     <div className="mx-auto max-w-5xl py-8">
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold">Transaction Form Builder</h1>
+        <h1 className="mb-2 text-3xl font-bold">Build Transaction Forms</h1>
         <p className="text-muted-foreground text-lg">
-          Create custom transaction forms for your smart contracts
+          Design and export customized dApp interfaces for blockchain interactions
         </p>
       </div>
 
