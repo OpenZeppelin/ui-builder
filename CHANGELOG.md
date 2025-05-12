@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.3.0...v1.4.0) (2025-05-12)
+
+
+### Features
+
+* **ui:** add OpenZeppelin logo and improve header design ([a12305b](https://github.com/OpenZeppelin/transaction-form-builder/commit/a12305bcdb97636473a771c0cde705522f542376))
+
 # [1.3.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.2.0...v1.3.0) (2025-05-11)
 
 
