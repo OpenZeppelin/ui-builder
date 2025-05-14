@@ -3,6 +3,13 @@ import type { FieldType } from '../forms/fields';
 import type { FormFieldType } from '../forms/form-field';
 import type { NetworkConfig } from '../networks/config';
 
+import type {
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
+  UiKitConfiguration,
+} from './ui-enhancements';
+
 // Base types and interfaces for adapters will be defined here.
 
 export type ExecutionMethodType = 'eoa' | 'relayer' | 'multisig'; // Extendable
@@ -249,4 +256,48 @@ export interface ContractAdapter {
     receipt?: unknown; // Chain-specific receipt object
     error?: Error;
   }>;
+
+  // UI Facilitation Capabilities (Optional)
+  /**
+   * (Optional) Configures the UI kit to be used by this adapter instance.
+   * This setting can influence the components and providers returned by other UI facilitation methods.
+   * It's typically called by the application during initialization based on global settings or user preferences.
+   *
+   * @param config - The UI kit configuration, specifying the `kitName` (e.g., 'custom', 'rainbowkit')
+   *                 and any `kitConfig` options specific to that kit.
+   */
+  configureUiKit?(config: UiKitConfiguration): void;
+
+  /**
+   * (Optional) Returns a React component that sets up the necessary UI context for this adapter's ecosystem.
+   * For instance, an EVM adapter might return a component that provides WagmiProvider and QueryClientProvider.
+   * If a third-party UI kit is configured (via `configureUiKit`), this provider component should also
+   * compose that kit's specific provider(s) (e.g., RainbowKitProvider).
+   * The returned component is expected to accept `children` props.
+   *
+   * @returns A React functional component that accepts children, or `undefined` if UI context facilitation is not supported or not configured.
+   */
+  getEcosystemReactUiContextProvider?():
+    | React.ComponentType<EcosystemReactUiProviderProps>
+    | undefined;
+
+  /**
+   * (Optional) Returns an object containing facade React hooks for common wallet and blockchain interactions
+   * specific to this adapter's ecosystem. These hooks are designed to be used within the context
+   * established by the component from `getEcosystemReactUiContextProvider`.
+   * For an EVM adapter, these would typically wrap `wagmi/react` hooks to abstract direct library usage.
+   *
+   * @returns An object of facade hooks, or `undefined` if not supported.
+   */
+  getEcosystemReactHooks?(): EcosystemSpecificReactHooks | undefined;
+
+  /**
+   * (Optional) Returns an object containing standardized, ready-to-use wallet UI components for this ecosystem.
+   * The actual components are sourced either from a configured third-party UI kit (specified via `configureUiKit`)
+   * or are basic custom implementations provided by the adapter itself if `kitName` is 'custom' or undefined.
+   * Examples include `ConnectButton`, `AccountDisplay`, `NetworkSwitcher`.
+   *
+   * @returns An object mapping standard component names to React components, or `undefined` if not supported or configured.
+   */
+  getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;
 }

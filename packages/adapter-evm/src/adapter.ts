@@ -6,16 +6,22 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
   EvmNetworkConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
   FunctionParameter,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
+import { evmFacadeHooks } from './wallet/facade-hooks';
+import { EvmBasicUiContextProvider } from './wallet/ui-provider';
 import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
@@ -53,6 +59,7 @@ import {
  */
 export class EvmAdapter implements ContractAdapter {
   readonly networkConfig: EvmNetworkConfig;
+  private uiKitConfiguration: UiKitConfiguration = { kitName: 'custom' };
 
   constructor(networkConfig: EvmNetworkConfig) {
     if (!isEvmNetworkConfig(networkConfig)) {
@@ -266,6 +273,49 @@ export class EvmAdapter implements ContractAdapter {
     error?: Error;
   }> {
     return waitForEvmTransactionConfirmation(txHash, getEvmWalletImplementation());
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public configureUiKit(config: UiKitConfiguration): void {
+    this.uiKitConfiguration = config;
+    logger.info(
+      'EvmAdapter',
+      `UI Kit configured: ${config.kitName}`,
+      config.kitConfig ? config.kitConfig : {}
+    );
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactUiContextProvider():
+    | React.ComponentType<EcosystemReactUiProviderProps>
+    | undefined {
+    if (this.uiKitConfiguration.kitName === 'custom' || !this.uiKitConfiguration.kitName) {
+      return EvmBasicUiContextProvider;
+    }
+    logger.warn(
+      'EvmAdapter',
+      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemReactUiContextProvider. Falling back to no provider.`
+    );
+    return undefined;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactHooks(): EcosystemSpecificReactHooks | undefined {
+    return evmFacadeHooks;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined {
+    logger.warn('EvmAdapter', 'getEcosystemWalletComponents not yet implemented.');
+    return undefined;
   }
 }
 

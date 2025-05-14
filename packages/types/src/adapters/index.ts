@@ -15,6 +15,9 @@ export * from './contract-state';
 // Re-export adapter configuration types
 export * from './config';
 
+// Re-export UI enhancements
+export * from './ui-enhancements';
+
 /**
  * Combined adapter interface with all capabilities
  *
