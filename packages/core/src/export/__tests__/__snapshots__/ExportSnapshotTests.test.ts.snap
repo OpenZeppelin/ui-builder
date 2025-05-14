@@ -366,7 +366,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
   "devDependencies": {
     "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -411,7 +411,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
   "devDependencies": {
     "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.1",

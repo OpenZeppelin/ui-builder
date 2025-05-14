@@ -203,7 +203,7 @@ describe('zipInspector', () => {
 
     it('should combine multiple validation types correctly', () => {
       const files = {
-        'package.json': '{"name":"test","dependencies":{"react":"18.0.0"}}',
+        'package.json': '{"name":"test","dependencies":{"react":"19.0.0"}}',
         'app.js': 'import React from "react";',
         'README.md': '# Test Project',
       };

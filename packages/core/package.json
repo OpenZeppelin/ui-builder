@@ -53,7 +53,7 @@
     "clsx": "^2.1.1",
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.503.0",
+    "lucide-react": "^0.510.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
