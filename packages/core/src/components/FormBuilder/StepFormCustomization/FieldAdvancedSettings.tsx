@@ -1,6 +1,6 @@
 import { Control } from 'react-hook-form';
 
-import { BooleanField, TextAreaField } from '@openzeppelin/transaction-form-renderer';
+import { BooleanField, TextAreaField } from '@openzeppelin/transaction-form-ui';
 
 import { FieldEditorFormValues } from './types';
 

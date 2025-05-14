@@ -1,4 +1,4 @@
-import { truncateMiddle } from '../../utils/formatting';
+import { truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Formats a blockchain address for display by truncating the middle portion

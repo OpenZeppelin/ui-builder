@@ -9,7 +9,6 @@ core/
 ├── public/           # Static assets
 ├── src/
 │   ├── components/   # Reusable UI components
-│   │   ├── ui/       # shadcn/ui components
 │   │   ├── Common/   # Shared components across features
 │   │   └── FormBuilder/ # Form builder components
 │   ├── core/         # Chain-agnostic core functionality
@@ -46,7 +45,8 @@ core/
 This package relies on:
 
 - **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms
-- **@openzeppelin/transaction-form-renderer**: Form rendering components
+- **@openzeppelin/transaction-form-renderer**: Form rendering components and logic.
+- **@openzeppelin/transaction-form-ui**: Shared UI components (buttons, inputs, fields, etc.) used by both core and form-renderer.
 - **@openzeppelin/transaction-form-styles**: Centralized styling system
 - **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`)
 

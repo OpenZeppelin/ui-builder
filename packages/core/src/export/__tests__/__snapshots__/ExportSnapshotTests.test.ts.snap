@@ -75,11 +75,6 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   ContractStateWidget,
   TransactionForm,
   WalletConnectionProvider,
@@ -90,6 +85,13 @@ import type {
   RenderFormSchema,
   TransactionFormProps,
 } from '@openzeppelin/transaction-form-types';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define type for transaction result (this will be implemented in the future)
@@ -353,9 +355,10 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
-    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
-    "@openzeppelin/transaction-form-utils": "^0.1.0",
+    "@openzeppelin/transaction-form-ui": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.0.1",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -398,9 +401,10 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
-    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
-    "@openzeppelin/transaction-form-utils": "^0.1.0",
+    "@openzeppelin/transaction-form-ui": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.0.1",
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

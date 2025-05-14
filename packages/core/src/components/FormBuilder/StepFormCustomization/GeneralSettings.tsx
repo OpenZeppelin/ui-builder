@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { TextAreaField, TextField } from '@openzeppelin/transaction-form-renderer';
 import type { ContractFunction } from '@openzeppelin/transaction-form-types';
+import { TextAreaField, TextField } from '@openzeppelin/transaction-form-ui';
 
 interface GeneralSettingsProps {
   title: string | undefined;

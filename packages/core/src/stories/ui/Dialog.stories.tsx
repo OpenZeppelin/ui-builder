@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Button } from '../../../../form-renderer/src/components/ui/button';
-import { Input } from '../../../../form-renderer/src/components/ui/input';
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -10,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../../components/ui/dialog';
+  Input,
+} from '@openzeppelin/transaction-form-ui';
 
 const meta = {
   title: 'Core/UI/Dialog',

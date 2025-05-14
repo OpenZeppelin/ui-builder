@@ -1,9 +1,7 @@
 import { Wallet } from 'lucide-react';
 
+import { Button, LoadingButton } from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
-
-import { Button } from '../ui/button';
-import { LoadingButton } from '../ui/loading-button';
 
 import { useWalletConnection } from './useWalletConnection';
 import { formatAddress } from './utils';

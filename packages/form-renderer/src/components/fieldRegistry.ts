@@ -2,10 +2,13 @@ import React from 'react';
 
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 import { FieldType, FormValues } from '@openzeppelin/transaction-form-types';
-
-import { BaseFieldProps } from './fields/BaseField';
-
-import { AddressField, BooleanField, NumberField, TextField } from './fields';
+import {
+  AddressField,
+  BaseFieldProps,
+  BooleanField,
+  NumberField,
+  TextField,
+} from '@openzeppelin/transaction-form-ui';
 
 /**
  * Registry of field components mapped to their respective types.

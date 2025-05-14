@@ -49,8 +49,8 @@ vi.mock('virtual:adapter-configs', () => {
 vi.mock('virtual:form-renderer-config', () => {
   const formRendererConfig = {
     coreDependencies: {
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
+      react: '^19.0.0',
+      'react-dom': '^19.0.0',
       '@openzeppelin/transaction-form-renderer': '^1.0.0',
     },
     fieldDependencies: {
@@ -70,8 +70,8 @@ vi.mock('virtual:form-renderer-config', () => {
  */
 const mockFormRendererConfig: FormRendererConfig = {
   coreDependencies: {
-    react: '^18.2.0',
-    'react-dom': '^18.2.0',
+    react: '^19.0.0',
+    'react-dom': '^19.0.0',
     '@openzeppelin/transaction-form-renderer': '^1.0.0',
   },
   fieldDependencies: {
@@ -116,8 +116,8 @@ describe('PackageManager configuration loading', () => {
     it('should properly load form renderer config from constructor', async () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const dependencies = await packageManager.getDependencies(createMinimalFormConfig(), 'evm');
-      expect(dependencies).toHaveProperty('react', '^18.2.0');
-      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0');
+      expect(dependencies).toHaveProperty('react', '^19.0.0');
+      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer', 'workspace:*');
     });
 
     it('should include field-specific dependencies based on form config', async () => {

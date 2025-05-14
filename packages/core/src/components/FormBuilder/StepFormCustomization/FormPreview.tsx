@@ -1,13 +1,9 @@
 import { useMemo } from 'react';
 
-import {
-  Card,
-  CardContent,
-  TransactionForm,
-  WalletConnectionProvider,
-} from '@openzeppelin/transaction-form-renderer';
+import { TransactionForm, WalletConnectionProvider } from '@openzeppelin/transaction-form-renderer';
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
+import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
   TextField,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/transaction-form-ui';
 
 import { WizardLayout, WizardStep } from '../../components/Common/WizardLayout';
 

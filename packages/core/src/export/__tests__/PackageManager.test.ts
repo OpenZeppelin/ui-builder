@@ -21,8 +21,8 @@ describe('PackageManager', () => {
   // Mock form renderer config for testing
   const mockFormRendererConfig: MockFormRendererConfig = {
     coreDependencies: {
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
+      react: '^19.0.0',
+      'react-dom': '^19.0.0',
       'react-hook-form': '^7.43.9',
       '@openzeppelin/transaction-form-renderer': '1.0.0',
     },

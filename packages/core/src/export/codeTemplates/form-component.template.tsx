@@ -15,11 +15,6 @@ import { AdapterPlaceholder } from '@@adapter-package-name@@';
 import { useState } from 'react';
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   ContractStateWidget,
   TransactionForm,
   WalletConnectionProvider,
@@ -30,6 +25,13 @@ import type {
   RenderFormSchema,
   TransactionFormProps,
 } from '@openzeppelin/transaction-form-types';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define type for transaction result (this will be implemented in the future)

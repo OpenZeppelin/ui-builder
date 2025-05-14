@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
 import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 

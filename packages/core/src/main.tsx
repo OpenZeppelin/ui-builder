@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 
 import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
-import { Toaster } from './components/ui/toaster';
-
 import App from './App';
 import './index.css';
 
@@ -17,7 +15,6 @@ async function main() {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <App />
-      <Toaster />
     </React.StrictMode>
   );
 }

@@ -2,8 +2,8 @@ import { Download, Eye, Pencil } from 'lucide-react';
 
 import React from 'react';
 
-import { Button, LoadingButton } from '@openzeppelin/transaction-form-renderer';
 import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Button, LoadingButton } from '@openzeppelin/transaction-form-ui';
 
 import { NetworkStatusBadge } from './NetworkStatusBadge';
 import { ViewContractStateButton } from './ViewContractStateButton';
