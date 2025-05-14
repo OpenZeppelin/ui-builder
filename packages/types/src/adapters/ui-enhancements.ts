@@ -11,22 +11,34 @@ export interface UiKitConfiguration {
 }
 
 /**
+ * A generic hook function type that can be called with any parameters and returns any result.
+ * This allows us to maintain flexibility for adapter implementations while avoiding the use of 'any'.
+ */
+type GenericHook<TParams extends unknown[] = [], TResult = unknown> = (...args: TParams) => TResult;
+
+/**
  * Defines the shape of facade hooks provided by an adapter for its ecosystem.
- * These typically wrap underlying library hooks (e.g., from wagmi/react).
+ * These typically wrap underlying library hooks (e.g., from wagmi).
+ *
+ * We use generic hook signatures to allow direct use of library hooks
+ * without tightly coupling to their specific parameter and return types.
  */
 export interface EcosystemSpecificReactHooks {
-  // TODO: Replace 'unknown' with actual imported Wagmi/React hook return types or accurately defined facade types in EvmAdapter.
-  useAccount?: () => unknown;
-  useConnect?: () => unknown;
-  useDisconnect?: () => unknown;
-  useSwitchChain?: () => unknown;
-  useChainId?: () => unknown;
-  useChains?: () => unknown;
-  useBalance?: (args: unknown) => unknown;
-  useSendTransaction?: (args: unknown) => unknown;
-  useWaitForTransactionReceipt?: (args: unknown) => unknown;
-  useSignMessage?: (args: unknown) => unknown;
-  useSignTypedData?: (args: unknown) => unknown;
+  // Hooks that don't require parameters
+  useAccount?: GenericHook;
+  useConnect?: GenericHook;
+  useDisconnect?: GenericHook;
+  useSwitchChain?: GenericHook;
+  useChainId?: GenericHook;
+  useChains?: GenericHook;
+
+  // Hooks that typically require parameters
+  useBalance?: GenericHook;
+  useSendTransaction?: GenericHook;
+  useWaitForTransactionReceipt?: GenericHook;
+  useSignMessage?: GenericHook;
+  useSignTypedData?: GenericHook;
+  // Other ecosystem-specific hooks can be added as needed
 }
 
 /**
@@ -37,11 +49,21 @@ export interface EcosystemReactUiProviderProps {
 }
 
 /**
+ * Base props interface that all component props should be compatible with.
+ * Components can extend this with additional props as needed.
+ */
+export interface BaseComponentProps {
+  className?: string;
+}
+
+/**
  * Defines standardized names for commonly needed wallet UI components
  * that an adapter might provide.
  */
 export interface EcosystemWalletComponents {
-  ConnectButton?: React.ComponentType<unknown>; // Props for these components would ideally be standardized or kept minimal.
-  AccountDisplay?: React.ComponentType<unknown>;
-  NetworkSwitcher?: React.ComponentType<unknown>;
+  // Using a generic type parameter with a default of BaseComponentProps
+  // This allows components with more specific props that include at least className
+  ConnectButton?: React.ComponentType<BaseComponentProps>;
+  AccountDisplay?: React.ComponentType<BaseComponentProps>;
+  NetworkSwitcher?: React.ComponentType<BaseComponentProps>;
 }

@@ -20,6 +20,11 @@ import type {
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
+import {
+  CustomAccountDisplay,
+  CustomConnectButton,
+  CustomNetworkSwitcher,
+} from './wallet/custom-components';
 import { evmFacadeHooks } from './wallet/facade-hooks';
 import { EvmBasicUiContextProvider } from './wallet/ui-provider';
 import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
@@ -313,8 +318,19 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined {
-    logger.warn('EvmAdapter', 'getEcosystemWalletComponents not yet implemented.');
+  public getEcosystemWalletComponents(): EcosystemWalletComponents | undefined {
+    if (this.uiKitConfiguration.kitName === 'custom' || !this.uiKitConfiguration.kitName) {
+      return {
+        ConnectButton: CustomConnectButton,
+        AccountDisplay: CustomAccountDisplay,
+        NetworkSwitcher: CustomNetworkSwitcher,
+      };
+    }
+
+    logger.warn(
+      'EvmAdapter',
+      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemWalletComponents. Falling back to no components.`
+    );
     return undefined;
   }
 }

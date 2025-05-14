@@ -1,52 +1,59 @@
 import {
-  useAccount as wagmiUseAccount,
-  useBalance as wagmiUseBalance,
-  useChainId as wagmiUseChainId,
-  useChains as wagmiUseChains,
-  useConnect as wagmiUseConnect,
-  useDisconnect as wagmiUseDisconnect,
-  useSendTransaction as wagmiUseSendTransaction,
-  useSignMessage as wagmiUseSignMessage,
-  useSignTypedData as wagmiUseSignTypedData,
-  useSwitchChain as wagmiUseSwitchChain,
-  useWaitForTransactionReceipt as wagmiUseWaitForTransactionReceipt,
+  type UseAccountReturnType,
+  type UseBalanceReturnType,
+  type UseChainIdReturnType,
+  type UseChainsReturnType,
+  type UseConnectReturnType,
+  type UseDisconnectReturnType,
+  type UseSendTransactionReturnType,
+  type UseSignMessageReturnType,
+  type UseSignTypedDataReturnType,
+  type UseSwitchChainReturnType,
+  type UseWaitForTransactionReceiptReturnType,
+  useAccount,
+  useBalance,
+  useChainId,
+  useChains,
+  useConnect,
+  useDisconnect,
+  useSendTransaction,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
 } from 'wagmi';
-
-// Assuming wagmi v2+, these are from wagmi/react
 
 import type { EcosystemSpecificReactHooks } from '@openzeppelin/transaction-form-types';
 
-// TODO: Properly type the return values and arguments based on actual wagmi hook signatures
-// For now, they will infer from the imported hooks. 'args?: any' is a placeholder.
-
-export const useAccountFacade = () => wagmiUseAccount();
-export const useConnectFacade = () => wagmiUseConnect();
-export const useDisconnectFacade = () => wagmiUseDisconnect();
-export const useSwitchChainFacade = () => wagmiUseSwitchChain();
-export const useChainIdFacade = () => wagmiUseChainId();
-export const useChainsFacade = () => wagmiUseChains();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useBalanceFacade = (args?: any) => wagmiUseBalance(args);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useSendTransactionFacade = (args?: any) => wagmiUseSendTransaction(args);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useWaitForTransactionReceiptFacade = (args?: any) =>
-  wagmiUseWaitForTransactionReceipt(args);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useSignMessageFacade = (args?: any) => wagmiUseSignMessage(args);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useSignTypedDataFacade = (args?: any) => wagmiUseSignTypedData(args);
-
+/**
+ * Direct export of wagmi hooks as our facade hooks
+ * Using the EcosystemSpecificReactHooks interface which now accepts any function signatures
+ */
 export const evmFacadeHooks: EcosystemSpecificReactHooks = {
-  useAccount: useAccountFacade,
-  useConnect: useConnectFacade,
-  useDisconnect: useDisconnectFacade,
-  useSwitchChain: useSwitchChainFacade,
-  useChainId: useChainIdFacade,
-  useChains: useChainsFacade,
-  useBalance: useBalanceFacade,
-  useSendTransaction: useSendTransactionFacade,
-  useWaitForTransactionReceipt: useWaitForTransactionReceiptFacade,
-  useSignMessage: useSignMessageFacade,
-  useSignTypedData: useSignTypedDataFacade,
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+  useChainId,
+  useChains,
+  useBalance,
+  useSendTransaction,
+  useWaitForTransactionReceipt,
+  useSignMessage,
+  useSignTypedData,
+};
+
+// Re-export the wagmi hook types for convenience when consuming these hooks
+export type {
+  UseAccountReturnType,
+  UseBalanceReturnType,
+  UseChainIdReturnType,
+  UseChainsReturnType,
+  UseConnectReturnType,
+  UseDisconnectReturnType,
+  UseSendTransactionReturnType,
+  UseSignMessageReturnType,
+  UseSignTypedDataReturnType,
+  UseSwitchChainReturnType,
+  UseWaitForTransactionReceiptReturnType,
 };
