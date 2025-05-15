@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import type { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { getAllNetworks } from '../../core/ecosystemManager';
-import { useConfiguredAdapterSingleton } from '../../core/hooks';
+import { getAllNetworks } from '../../../../core/ecosystemManager';
+import { useConfiguredAdapterSingleton } from '../../../../core/hooks';
 
 // Track default network at module level for consistency
 let defaultNetworkCache: NetworkConfig | null = null;

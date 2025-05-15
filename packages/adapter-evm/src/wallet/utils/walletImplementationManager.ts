@@ -1,6 +1,6 @@
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
-import { WagmiWalletImplementation } from './wagmi-implementation';
+import { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
 
 /**
  * Singleton instance of WagmiWalletImplementation.
@@ -11,6 +11,13 @@ let walletImplementationInstance: WagmiWalletImplementation | undefined;
 let isInitializing = false;
 const LOG_SYSTEM = 'EvmWalletImplementationManager';
 
+/**
+ * Get or create the singleton instance of WagmiWalletImplementation
+ * This function loads WalletConnect configuration from the app config
+ * and initializes a wallet implementation instance.
+ *
+ * @returns The WagmiWalletImplementation singleton
+ */
 export function getEvmWalletImplementation(): WagmiWalletImplementation {
   // If already initialized, return the instance
   if (walletImplementationInstance) {

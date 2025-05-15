@@ -120,6 +120,9 @@ importers:
       '@openzeppelin/transaction-form-types':
         specifier: workspace:^
         version: link:../types
+      '@openzeppelin/transaction-form-ui':
+        specifier: workspace:^
+        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:^
         version: link:../utils

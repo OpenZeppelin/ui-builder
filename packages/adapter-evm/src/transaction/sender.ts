@@ -1,7 +1,7 @@
 import type { TransactionReceipt } from 'viem';
 
 import type { WriteContractParameters } from '../types';
-import type { WagmiWalletImplementation } from '../wallet/wagmi-implementation';
+import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 /**
  * Signs and broadcasts a transaction using the connected wallet.

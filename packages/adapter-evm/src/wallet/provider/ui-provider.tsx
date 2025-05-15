@@ -8,8 +8,8 @@ import React, { useEffect, useState } from 'react';
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { WagmiProviderInitializedContext } from './index';
-import { getEvmWalletImplementation } from './walletImplementationManager';
+import { WagmiProviderInitializedContext } from '../context/wagmi-context';
+import { getEvmWalletImplementation } from '../utils/walletImplementationManager';
 
 // Create a single QueryClient instance to be reused
 const queryClient = new QueryClient();
@@ -17,6 +17,10 @@ const queryClient = new QueryClient();
 // Track initialization log state
 let hasLoggedInitialization = false;
 
+/**
+ * Helper function to get the Wagmi configuration from the wallet implementation
+ * @returns The Wagmi config object or null if there was an error
+ */
 const getWagmiConfig = (): WagmiConfig | null => {
   try {
     const walletImplementation = getEvmWalletImplementation();
@@ -27,6 +31,10 @@ const getWagmiConfig = (): WagmiConfig | null => {
   }
 };
 
+/**
+ * React context provider for Wagmi
+ * This component sets up the Wagmi and React Query providers
+ */
 export const EvmBasicUiContextProvider: React.FC<EcosystemReactUiProviderProps> = ({
   children,
 }) => {

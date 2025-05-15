@@ -9,7 +9,7 @@ import type {
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';
 import { parseEvmInput } from '../transform';
-import type { WagmiWalletImplementation } from '../wallet/wagmi-implementation';
+import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 import { isEvmViewFunction } from './view-checker';
 

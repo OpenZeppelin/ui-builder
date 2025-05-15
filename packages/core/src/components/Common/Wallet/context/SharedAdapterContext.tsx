@@ -2,12 +2,15 @@ import { createContext } from 'react';
 
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 
-// Context to share adapter between WalletIntegration and WalletConnectionHeader
-export interface SharedAdapterContextType {
+// Create a context to share the adapter state
+export interface SharedAdapterState {
   adapter: ContractAdapter | null;
   loading: boolean;
 }
 
-const SharedAdapterContext = createContext<SharedAdapterContextType | null>(null);
+const SharedAdapterContext = createContext<SharedAdapterState>({
+  adapter: null,
+  loading: false,
+});
 
 export default SharedAdapterContext;

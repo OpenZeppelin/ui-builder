@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:^",
+    "@openzeppelin/transaction-form-ui": "workspace:^",
     "@openzeppelin/transaction-form-utils": "workspace:^",
     "@wagmi/connectors": "5.7.13",
     "@wagmi/core": "2.17.0",

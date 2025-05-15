@@ -1,4 +1,4 @@
-import { WalletConnectionHeader, WalletIntegration } from './components/Common/WalletIntegration';
+import { WalletConnectionHeader, WalletIntegration } from './components/Common/Wallet';
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
 import { AdapterProvider } from './core/hooks';
 

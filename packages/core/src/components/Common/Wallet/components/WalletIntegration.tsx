@@ -2,11 +2,12 @@ import React, { useEffect, useMemo } from 'react';
 
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import SharedAdapterContext from './SharedAdapterContext';
+import SharedAdapterContext from '../context/SharedAdapterContext';
+import { WalletUiContextProvider } from '../context/WalletUiContextProvider';
+import { useCurrentAdapter } from '../hooks/useCurrentAdapter';
+import { useSharedAdapter } from '../hooks/useSharedAdapter';
+
 import { WalletConnectionUI } from './WalletConnectionUI';
-import { WalletUiContextProvider } from './WalletUiContextProvider';
-import { useCurrentAdapter } from './useCurrentAdapter';
-import { useSharedAdapter } from './useSharedAdapter';
 
 interface WalletIntegrationProps {
   children: React.ReactNode;

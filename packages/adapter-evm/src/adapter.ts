@@ -24,10 +24,18 @@ import {
   CustomAccountDisplay,
   CustomConnectButton,
   CustomNetworkSwitcher,
-} from './wallet/custom-components';
-import { evmFacadeHooks } from './wallet/facade-hooks';
-import { EvmBasicUiContextProvider } from './wallet/ui-provider';
-import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
+} from './wallet/components';
+import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
+import { EvmBasicUiContextProvider } from './wallet/provider/ui-provider';
+import {
+  connectAndEnsureCorrectNetwork,
+  disconnectEvmWallet,
+  evmSupportsWalletConnection,
+  getEvmAvailableConnectors,
+  getEvmWalletConnectionStatus,
+  onEvmWalletConnectionChange,
+} from './wallet/utils/connection';
+import { getEvmWalletImplementation } from './wallet/utils/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
 import {
@@ -50,14 +58,6 @@ import {
 import { formatEvmFunctionResult } from './transform';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
-import {
-  connectAndEnsureCorrectNetwork,
-  disconnectEvmWallet,
-  evmSupportsWalletConnection,
-  getEvmAvailableConnectors,
-  getEvmWalletConnectionStatus,
-  onEvmWalletConnectionChange,
-} from './wallet';
 
 /**
  * EVM-specific adapter implementation
