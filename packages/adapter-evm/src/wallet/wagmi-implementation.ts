@@ -65,69 +65,72 @@ const viemChainIdToAppNetworkId: Record<number, string> = {
 export class WagmiWalletImplementation {
   private config: Config;
   private unsubscribe?: ReturnType<typeof watchAccount>;
+  private initialized: boolean = false;
 
   constructor(walletConnectProjectIdFromAppConfig?: string) {
     const logSystem = 'WagmiWalletImplementation';
-    const baseConnectors: WagmiCreateConnectorFn[] = [injected(), metaMask(), safe()];
+    try {
+      const baseConnectors: WagmiCreateConnectorFn[] = [injected(), metaMask(), safe()];
 
-    if (walletConnectProjectIdFromAppConfig && walletConnectProjectIdFromAppConfig.trim() !== '') {
-      baseConnectors.push(walletConnect({ projectId: walletConnectProjectIdFromAppConfig }));
-      logger.info(logSystem, `WalletConnect connector initialized with Project ID.`);
-    } else {
-      logger.warn(
-        logSystem,
-        'WalletConnect Project ID not provided. WC connector will be unavailable.'
+      // Add WalletConnect if project ID is available
+      if (walletConnectProjectIdFromAppConfig?.trim()) {
+        baseConnectors.push(walletConnect({ projectId: walletConnectProjectIdFromAppConfig }));
+        logger.info(logSystem, `WalletConnect connector initialized with Project ID.`);
+      } else {
+        logger.warn(
+          logSystem,
+          'WalletConnect Project ID not provided. WC connector will be unavailable.'
+        );
+      }
+
+      // Build transport configuration with RPC overrides as needed
+      const transportsConfig = defaultSupportedChains.reduce(
+        (acc, chainDefinition) => {
+          let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
+          const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
+
+          if (appNetworkIdString) {
+            const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
+            let httpRpcOverride: string | undefined;
+
+            if (typeof rpcOverrideSetting === 'string') {
+              httpRpcOverride = rpcOverrideSetting;
+            } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
+              httpRpcOverride = rpcOverrideSetting.http;
+            }
+
+            if (httpRpcOverride) {
+              logger.info(
+                logSystem,
+                `Using overridden RPC for chain ${chainDefinition.name}: ${httpRpcOverride}`
+              );
+              rpcUrlToUse = httpRpcOverride;
+            }
+          }
+
+          acc[chainDefinition.id] = http(rpcUrlToUse);
+          return acc;
+        },
+        {} as Record<number, ReturnType<typeof http>>
       );
+
+      this.config = createConfig({
+        chains: defaultSupportedChains,
+        connectors: baseConnectors,
+        transports: transportsConfig,
+      });
+      this.initialized = true;
+    } catch (error) {
+      logger.error(logSystem, 'Error creating Wagmi config:', error);
+      // Create a minimal config that won't throw errors
+      this.config = createConfig({
+        chains: [mainnet],
+        connectors: [injected()],
+        transports: {
+          [mainnet.id]: http(),
+        },
+      });
     }
-
-    const transportsConfig = defaultSupportedChains.reduce(
-      (acc, chainDefinition) => {
-        let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
-
-        // Use the static module-level map
-        const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
-
-        if (appNetworkIdString) {
-          const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
-          let httpRpcOverride: string | undefined;
-
-          if (typeof rpcOverrideSetting === 'string') {
-            httpRpcOverride = rpcOverrideSetting;
-          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
-            httpRpcOverride = rpcOverrideSetting.http;
-          }
-
-          if (httpRpcOverride) {
-            logger.info(
-              logSystem,
-              `Using overridden RPC for chain ${chainDefinition.name} (App Network ID: ${appNetworkIdString}): ${httpRpcOverride}`
-            );
-            rpcUrlToUse = httpRpcOverride;
-          } else {
-            logger.debug(
-              logSystem,
-              `No RPC override found for ${chainDefinition.name} (App Network ID: ${appNetworkIdString}). Using default from viem/chains: ${rpcUrlToUse}`
-            );
-          }
-        } else {
-          logger.debug(
-            logSystem,
-            `No app-specific Network ID mapping for Viem chain ${chainDefinition.name} (ID: ${chainDefinition.id}). Using its default RPC from viem/chains: ${rpcUrlToUse}`
-          );
-        }
-
-        // If rpcUrlToUse is still undefined (e.g. chainDefinition had no default and no override), http() will use Viem's internal default or error.
-        acc[chainDefinition.id] = http(rpcUrlToUse);
-        return acc;
-      },
-      {} as Record<number, ReturnType<typeof http>>
-    );
-
-    this.config = createConfig({
-      chains: defaultSupportedChains,
-      connectors: baseConnectors,
-      transports: transportsConfig,
-    });
   }
 
   /**
@@ -145,6 +148,10 @@ export class WagmiWalletImplementation {
    * @returns A promise resolving to the Viem WalletClient or null.
    */
   public async getWalletClient(): Promise<WalletClient | null> {
+    if (!this.initialized) {
+      return null;
+    }
+
     const accountStatus = this.getWalletConnectionStatus();
     if (!accountStatus.isConnected || !accountStatus.chainId || !accountStatus.address) {
       return null;
@@ -161,6 +168,10 @@ export class WagmiWalletImplementation {
    * @returns A promise resolving to the Viem PublicClient or null.
    */
   public getPublicClient(): PublicClient | null {
+    if (!this.initialized) {
+      return null;
+    }
+
     const accountStatus = this.getWalletConnectionStatus();
     if (!accountStatus.chainId) {
       return null;
@@ -180,6 +191,10 @@ export class WagmiWalletImplementation {
    * @returns A promise resolving to an array of available connectors.
    */
   public async getAvailableConnectors(): Promise<Connector[]> {
+    if (!this.initialized) {
+      return [];
+    }
+
     const connectors = this.config.connectors;
     return connectors.map((conn) => ({
       id: conn.uid,
@@ -195,27 +210,30 @@ export class WagmiWalletImplementation {
   public async connect(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
+    if (!this.initialized) {
+      return {
+        connected: false,
+        error: 'Wallet implementation is not properly initialized',
+      };
+    }
+
     try {
       const connectors = this.config.connectors;
-      let connector = connectors.find((c) => c.uid === connectorId);
-      if (!connector) {
-        connector = connectors.find((c) => c.name.toLowerCase() === connectorId.toLowerCase());
-      }
+      let connector =
+        connectors.find((c) => c.uid === connectorId) ||
+        connectors.find((c) => c.name.toLowerCase() === connectorId.toLowerCase());
+
       if (!connector) {
         const availableConnectorNames = connectors.map((c) => c.name).join(', ');
-        logger.error(
-          'WagmiWalletImplementation',
-          `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`
-        );
         return {
           connected: false,
-          error: `Wallet connector "${connectorId}" not found. Available connectors: ${availableConnectorNames}`,
+          error: `Connector "${connectorId}" not found. Available: ${availableConnectorNames}`,
         };
       }
+
       const result = await connect(this.config, { connector });
       return { connected: true, address: result.accounts[0], chainId: result.chainId };
     } catch (error: unknown) {
-      logger.error('WagmiWalletImplementation', 'Wagmi connect error:', error);
       return {
         connected: false,
         error: error instanceof Error ? error.message : 'Unknown connection error',
@@ -228,11 +246,17 @@ export class WagmiWalletImplementation {
    * @returns Disconnection result object.
    */
   public async disconnect(): Promise<{ disconnected: boolean; error?: string }> {
+    if (!this.initialized) {
+      return {
+        disconnected: false,
+        error: 'Wallet implementation is not properly initialized',
+      };
+    }
+
     try {
       await disconnect(this.config);
       return { disconnected: true };
     } catch (error) {
-      logger.error('WagmiWalletImplementation', 'Wagmi disconnect error:', error);
       return {
         disconnected: false,
         error: error instanceof Error ? error.message : 'Unknown disconnection error',
@@ -245,6 +269,22 @@ export class WagmiWalletImplementation {
    * @returns Account status object.
    */
   public getWalletConnectionStatus(): GetAccountReturnType {
+    if (!this.initialized) {
+      // Return a disconnected state
+      return {
+        address: undefined,
+        addresses: undefined,
+        chain: undefined,
+        chainId: undefined,
+        connector: undefined,
+        isConnected: false,
+        isConnecting: false,
+        isDisconnected: true,
+        isReconnecting: false,
+        status: 'disconnected',
+      };
+    }
+
     return getAccount(this.config);
   }
 
@@ -256,6 +296,11 @@ export class WagmiWalletImplementation {
   public onWalletConnectionChange(
     callback: (status: GetAccountReturnType, prevStatus: GetAccountReturnType) => void
   ): () => void {
+    if (!this.initialized) {
+      // Return a no-op function if not initialized
+      return () => {};
+    }
+
     if (this.unsubscribe) {
       this.unsubscribe();
     }
@@ -271,6 +316,10 @@ export class WagmiWalletImplementation {
    * @returns A promise that resolves if the switch is successful, or rejects with an error.
    */
   public async switchNetwork(chainId: number): Promise<void> {
+    if (!this.initialized) {
+      throw new Error('Wallet implementation is not properly initialized');
+    }
+
     await switchChain(this.config, { chainId });
   }
 }

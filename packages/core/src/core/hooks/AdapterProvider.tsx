@@ -13,9 +13,10 @@
  * during component rendering. Direct state updates during render are not allowed, which
  * is why adapter loading is controlled carefully.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { getAdapter } from '../ecosystemManager';
 
@@ -42,6 +43,18 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
   // Track loading states by network ID
   const [loadingNetworks, setLoadingNetworks] = useState<Set<string>>(new Set());
 
+  // Log registry status on changes
+  useEffect(() => {
+    const adapterCount = Object.keys(adapterRegistry).length;
+    if (adapterCount > 0) {
+      logger.info('AdapterProvider', `Registry contains ${adapterCount} adapters:`, {
+        networkIds: Object.keys(adapterRegistry),
+        loadingCount: loadingNetworks.size,
+        loadingNetworkIds: Array.from(loadingNetworks),
+      });
+    }
+  }, [adapterRegistry, loadingNetworks]);
+
   /**
    * Function to get or create an adapter for a network
    *
@@ -61,8 +74,12 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
 
       const networkId = networkConfig.id;
 
+      // Debug log to track adapter requests
+      logger.debug('AdapterProvider', `Adapter requested for network ${networkId}`);
+
       // If we already have this adapter, return it
       if (adapterRegistry[networkId]) {
+        logger.debug('AdapterProvider', `Using existing adapter for network ${networkId}`);
         return {
           adapter: adapterRegistry[networkId],
           isLoading: false,
@@ -71,6 +88,7 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
 
       // If we're already loading this adapter, indicate loading
       if (loadingNetworks.has(networkId)) {
+        logger.debug('AdapterProvider', `Adapter for network ${networkId} is currently loading`);
         return {
           adapter: null,
           isLoading: true,
@@ -85,21 +103,42 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
         return newSet;
       });
 
-      // Fetch the adapter
-      void getAdapter(networkConfig).then((adapter) => {
-        // Update registry with new adapter
-        setAdapterRegistry((prev) => ({
-          ...prev,
-          [networkId]: adapter,
-        }));
+      logger.info(
+        'AdapterProvider',
+        `Starting adapter initialization for network ${networkId} (${networkConfig.name})`
+      );
 
-        // Remove from loading networks
-        setLoadingNetworks((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(networkId);
-          return newSet;
+      // Fetch the adapter
+      void getAdapter(networkConfig)
+        .then((adapter) => {
+          logger.info('AdapterProvider', `Adapter for network ${networkId} loaded successfully`, {
+            type: adapter.constructor.name,
+            objectId: Object.prototype.toString.call(adapter),
+          });
+
+          // Update registry with new adapter
+          setAdapterRegistry((prev) => ({
+            ...prev,
+            [networkId]: adapter,
+          }));
+
+          // Remove from loading networks
+          setLoadingNetworks((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(networkId);
+            return newSet;
+          });
+        })
+        .catch((error) => {
+          logger.error('AdapterProvider', `Error loading adapter for network ${networkId}:`, error);
+
+          // Remove from loading networks on error
+          setLoadingNetworks((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(networkId);
+            return newSet;
+          });
         });
-      });
 
       return {
         adapter: null,

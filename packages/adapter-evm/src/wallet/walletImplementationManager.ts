@@ -8,10 +8,25 @@ import { WagmiWalletImplementation } from './wagmi-implementation';
  * particularly for elements like the WalletConnect modal.
  */
 let walletImplementationInstance: WagmiWalletImplementation | undefined;
+let isInitializing = false;
 const LOG_SYSTEM = 'EvmWalletImplementationManager';
 
 export function getEvmWalletImplementation(): WagmiWalletImplementation {
-  if (!walletImplementationInstance) {
+  // If already initialized, return the instance
+  if (walletImplementationInstance) {
+    return walletImplementationInstance;
+  }
+
+  // Prevent recursive initialization
+  if (isInitializing) {
+    logger.warn(LOG_SYSTEM, 'Recursive initialization detected, returning temporary instance');
+    return new WagmiWalletImplementation();
+  }
+
+  // Start initialization
+  isInitializing = true;
+
+  try {
     logger.info(LOG_SYSTEM, 'Initializing WagmiWalletImplementation singleton...');
 
     const currentFullConfig = appConfigService.getConfig();
@@ -22,17 +37,18 @@ export function getEvmWalletImplementation(): WagmiWalletImplementation {
     if (!projectId) {
       logger.warn(
         LOG_SYSTEM,
-        'WalletConnect Project ID not found in AppConfig. WC connector will likely be unavailable (WagmiWalletImplementation will log specifics).'
-      );
-    } else {
-      logger.info(
-        LOG_SYSTEM,
-        'WalletConnect Project ID found in AppConfig, passing to WagmiWalletImplementation.'
+        'WalletConnect Project ID not found in AppConfig. WC connector will likely be unavailable.'
       );
     }
 
     walletImplementationInstance = new WagmiWalletImplementation(projectId);
     logger.info(LOG_SYSTEM, 'WagmiWalletImplementation singleton created.');
+  } catch (error) {
+    logger.error(LOG_SYSTEM, 'Failed to initialize WagmiWalletImplementation:', error);
+    walletImplementationInstance = new WagmiWalletImplementation();
+  } finally {
+    isInitializing = false;
   }
+
   return walletImplementationInstance;
 }
