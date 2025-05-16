@@ -27,9 +27,14 @@ export interface NetworkServiceConfigs {
 
 /**
  * Generic configuration for a service parameter.
+ *
+ * This can contain:
+ * - Primitive values (string, number, boolean)
+ * - Nested objects for more complex configuration
+ * - Arrays of primitive values or objects
  */
 export interface ServiceParameterConfig {
-  [paramName: string]: string | number | boolean | undefined;
+  [paramName: string]: string | number | boolean | object | Array<unknown> | undefined;
 }
 
 /**

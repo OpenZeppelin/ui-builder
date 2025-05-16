@@ -276,10 +276,16 @@ export class AppConfigService {
     return this.config.featureFlags?.[flagName.toLowerCase()] ?? false;
   }
 
+  /**
+   * Gets a global service parameter value.
+   * @param serviceName The name of the service
+   * @param paramName The name of the parameter
+   * @returns The parameter value (can be any type including objects, arrays) or undefined if not found
+   */
   public getGlobalServiceParam(
     serviceName: string,
     paramName: string
-  ): string | number | boolean | undefined {
+  ): string | number | boolean | object | Array<unknown> | undefined {
     if (!this.isInitialized) {
       logger.warn(LOG_SYSTEM, 'getGlobalServiceParam called before initialization.');
       return undefined;
@@ -303,6 +309,90 @@ export class AppConfigService {
    */
   public getConfig(): Readonly<AppRuntimeConfig> {
     return this.config;
+  }
+
+  /**
+   * Gets a nested configuration object with type safety.
+   *
+   * This is a helper method to safely access complex nested configuration objects
+   * with proper TypeScript type checking.
+   *
+   * @param serviceName The name of the service (e.g., 'walletui')
+   * @param paramName The parameter name that contains the nested object (e.g., 'config')
+   *                  Pass an empty string to get the entire service configuration.
+   * @returns The typed nested configuration object or undefined if not found
+   *
+   * @example
+   * // Get a typed UI kit configuration:
+   * const uiConfig = appConfigService.getTypedNestedConfig<UiKitConfiguration>('walletui', 'config');
+   * if (uiConfig) {
+   *   console.log(uiConfig.kitName); // Properly typed
+   * }
+   *
+   * // Get entire service configuration:
+   * const allAnalytics = appConfigService.getTypedNestedConfig<AnalyticsConfig>('analytics', '');
+   */
+  public getTypedNestedConfig<T extends object>(
+    serviceName: string,
+    paramName: string
+  ): T | undefined {
+    if (!this.isInitialized) {
+      logger.warn(LOG_SYSTEM, 'getTypedNestedConfig called before initialization.');
+      return undefined;
+    }
+
+    try {
+      // If paramName is empty, return the entire service configuration
+      if (paramName === '') {
+        const serviceConfig = this.config.globalServiceConfigs?.[serviceName.toLowerCase()];
+        if (serviceConfig && typeof serviceConfig === 'object') {
+          return serviceConfig as T;
+        }
+        return undefined;
+      }
+
+      // Otherwise, get the specific nested parameter
+      const param = this.getGlobalServiceParam(serviceName, paramName);
+
+      if (param && typeof param === 'object') {
+        // We've confirmed it's an object, so we can safely cast it
+        return param as T;
+      }
+
+      return undefined;
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Error accessing nested configuration for ${serviceName}.${paramName}:`,
+        error
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Checks if a nested configuration exists and has a specific property.
+   *
+   * @param serviceName The name of the service
+   * @param paramName The parameter name containing the nested object
+   * @param propName The property name to check for
+   * @returns True if the property exists in the nested configuration
+   *
+   * @example
+   * if (appConfigService.hasNestedConfigProperty('walletui', 'config', 'showInjectedConnector')) {
+   *   // Do something when the property exists
+   * }
+   */
+  public hasNestedConfigProperty(
+    serviceName: string,
+    paramName: string,
+    propName: string
+  ): boolean {
+    const nestedConfig = this.getTypedNestedConfig<Record<string, unknown>>(serviceName, paramName);
+
+    return (
+      nestedConfig !== undefined && Object.prototype.hasOwnProperty.call(nestedConfig, propName)
+    );
   }
 }
 
