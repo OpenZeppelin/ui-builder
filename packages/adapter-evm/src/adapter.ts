@@ -26,6 +26,7 @@ import {
   CustomNetworkSwitcher,
 } from './wallet/components';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
+import { loadConfigFromAppConfig, setUiKitConfig } from './wallet/hooks/useUiKitConfig';
 import { EvmBasicUiContextProvider } from './wallet/provider/ui-provider';
 import {
   connectAndEnsureCorrectNetwork,
@@ -64,7 +65,7 @@ import { isValidEvmAddress } from './utils';
  */
 export class EvmAdapter implements ContractAdapter {
   readonly networkConfig: EvmNetworkConfig;
-  private uiKitConfiguration: UiKitConfiguration = { kitName: 'custom' };
+  private uiKitConfiguration: UiKitConfiguration = { kitName: 'none' };
 
   constructor(networkConfig: EvmNetworkConfig) {
     if (!isEvmNetworkConfig(networkConfig)) {
@@ -75,6 +76,12 @@ export class EvmAdapter implements ContractAdapter {
       'EvmAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
     );
+
+    // Load configuration from AppConfigService if available
+    const loaded = loadConfigFromAppConfig();
+    if (loaded) {
+      logger.info('EvmAdapter', 'Configuration loaded from AppConfigService');
+    }
   }
 
   /**
@@ -285,10 +292,19 @@ export class EvmAdapter implements ContractAdapter {
    */
   public configureUiKit(config: UiKitConfiguration): void {
     this.uiKitConfiguration = config;
+
+    // Update the shared configuration, while preserving any values loaded from AppConfigService
+    setUiKitConfig(config);
+
+    const configDisplay = {
+      kitName: config.kitName || 'none',
+      kitConfig: config.kitConfig ? JSON.stringify(config.kitConfig) : '{}',
+    };
+
     logger.info(
       'EvmAdapter',
-      `UI Kit configured: ${config.kitName}`,
-      config.kitConfig ? config.kitConfig : {}
+      `UI Kit configured: ${configDisplay.kitName}`,
+      configDisplay.kitConfig
     );
   }
 
@@ -298,20 +314,31 @@ export class EvmAdapter implements ContractAdapter {
   public getEcosystemReactUiContextProvider():
     | React.ComponentType<EcosystemReactUiProviderProps>
     | undefined {
+    // 'custom' is the default UI kit for EVM adapter
     if (this.uiKitConfiguration.kitName === 'custom' || !this.uiKitConfiguration.kitName) {
       return EvmBasicUiContextProvider;
     }
+
+    // 'none' explicitly indicates no UI components should be provided
+    if (this.uiKitConfiguration.kitName === 'none') {
+      logger.info('EvmAdapter', 'UI Kit set to "none", not providing a UI context.');
+      return undefined;
+    }
+
+    // Future UI kits like 'rainbowkit', 'connectkit', etc. would be handled here
+
     logger.warn(
       'EvmAdapter',
-      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemReactUiContextProvider. Falling back to no provider.`
+      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemReactUiContextProvider. Falling back to default implementation.`
     );
-    return undefined;
+    return EvmBasicUiContextProvider; // Default fallback for unsupported kits
   }
 
   /**
    * @inheritdoc
    */
   public getEcosystemReactHooks(): EcosystemSpecificReactHooks | undefined {
+    // Always provide hooks for EVM adapter regardless of UI kit
     return evmFacadeHooks;
   }
 
@@ -319,6 +346,7 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public getEcosystemWalletComponents(): EcosystemWalletComponents | undefined {
+    // 'custom' is the default UI kit for EVM adapter
     if (this.uiKitConfiguration.kitName === 'custom' || !this.uiKitConfiguration.kitName) {
       return {
         ConnectButton: CustomConnectButton,
@@ -327,11 +355,25 @@ export class EvmAdapter implements ContractAdapter {
       };
     }
 
+    // 'none' explicitly indicates no UI components should be provided
+    if (this.uiKitConfiguration.kitName === 'none') {
+      logger.info('EvmAdapter', 'UI Kit set to "none", not providing wallet components.');
+      return undefined;
+    }
+
+    // Future UI kits like 'rainbowkit', 'connectkit', etc. would be handled here
+
     logger.warn(
       'EvmAdapter',
-      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemWalletComponents. Falling back to no components.`
+      `UI Kit "${this.uiKitConfiguration.kitName}" not yet supported for getEcosystemWalletComponents. Falling back to default components.`
     );
-    return undefined;
+
+    // Default fallback for unsupported kits
+    return {
+      ConnectButton: CustomConnectButton,
+      AccountDisplay: CustomAccountDisplay,
+      NetworkSwitcher: CustomNetworkSwitcher,
+    };
   }
 }
 

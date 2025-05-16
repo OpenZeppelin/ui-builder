@@ -33,6 +33,55 @@ wallet/
 - **Context**: `WagmiProviderInitializedContext`
 - **Utils**: `getEvmWalletImplementation`, `SafeWagmiComponent`, connection helpers
 
+## Configuration Options
+
+The wallet UI components can be configured in two ways:
+
+### 1. Using the adapter's configureUiKit method:
+
+```tsx
+const adapter = new EvmAdapter(networkConfig);
+adapter.configureUiKit({
+  kitName: 'none', // Default internal implementation
+  kitConfig: {
+    showInjectedConnector: true, // Show the injected connector (e.g., MetaMask) in the wallet selection dialog
+  },
+});
+```
+
+### 2. Using app.config.json (recommended for exported applications):
+
+```json
+{
+  "globalServiceConfigs": {
+    "walletui": {
+      "config": {
+        "kitName": "custom",
+        "kitConfig": {
+          "showInjectedConnector": true
+        }
+      }
+    }
+  }
+}
+```
+
+The configuration is automatically loaded from AppConfigService when the module initializes.
+
+### Available Options
+
+- **kitName**: Specifies which UI kit to use:
+
+  - `'custom'`: Default for EVM adapter - uses our custom UI components
+  - `'none'`: Explicitly disables UI components (used for adapters without UI support)
+  - `'rainbowkit'`: (Future support) RainbowKit UI components
+  - `'connectkit'`: (Future support) ConnectKit UI components
+  - `'appkit'`: (Future support) AppKit UI components
+
+- **kitConfig**: Configuration object with options specific to the chosen UI kit:
+  - For the `'custom'` implementation:
+    - **showInjectedConnector**: When `true`, shows the injected connector (browser extension wallets like MetaMask) in the wallet connection dialog. Defaults to `false` (hidden).
+
 ## Usage
 
 ### Setting up the UI Provider

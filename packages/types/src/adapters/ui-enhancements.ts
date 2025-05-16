@@ -4,9 +4,9 @@ import type React from 'react';
  * Configuration for the desired UI kit to be used by an adapter.
  */
 export interface UiKitConfiguration {
-  /** Name of the chosen UI kit (e.g., 'custom', 'rainbowkit', 'connectkit', 'appkit') or 'none'. */
+  /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'none' for the default internal implementation. */
   kitName?: 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
-  /** Kit-specific configuration options (e.g., RainbowKit projectId, theme). */
+  /** Kit-specific configuration options (e.g., RainbowKit projectId, theme, or configuration for the default implementation). */
   kitConfig?: Record<string, unknown>;
 }
 

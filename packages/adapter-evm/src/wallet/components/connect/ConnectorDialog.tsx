@@ -10,7 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@openzeppelin/transaction-form-ui';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
+import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 
 /**
@@ -50,6 +52,18 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
   const { isConnected } = useAccount();
   const [connectingId, setConnectingId] = useState<string | null>(null);
 
+  // Get the complete config to log it
+  const fullConfig = useUiKitConfig();
+  const showInjectedConnector = isConfigEnabled('showInjectedConnector');
+
+  // Log the configuration to debug
+  useEffect(() => {
+    logger.debug(
+      'ConnectorDialog',
+      `Configuration loaded: ${JSON.stringify(fullConfig)}, showInjectedConnector=${showInjectedConnector}`
+    );
+  }, [fullConfig, showInjectedConnector]);
+
   // Track connection attempts for dialog closure
   useEffect(() => {
     // If we're connected and there was a connection attempt, close the dialog
@@ -71,6 +85,18 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
     }
   };
 
+  // Filter out the injected connector if showInjectedConnector is false
+  const filteredConnectors = connectors.filter((connector) => {
+    const isInjected = connector.id === 'injected';
+    if (isInjected) {
+      logger.debug(
+        'ConnectorDialog',
+        `Found injected connector: ${connector.name}, showing=${showInjectedConnector}`
+      );
+    }
+    return !(isInjected && !showInjectedConnector);
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -82,10 +108,10 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {connectors.length === 0 ? (
+          {filteredConnectors.length === 0 ? (
             <p className="text-center text-muted-foreground">No wallet connectors available.</p>
           ) : (
-            connectors.map((connector) => (
+            filteredConnectors.map((connector) => (
               <Button
                 key={connector.id}
                 onClick={() => handleConnectorSelect(connector)}

@@ -1,0 +1,12 @@
+{
+  "globalServiceConfigs": {
+    "walletui": {
+      "config": {
+        "kitName": "custom",
+        "kitConfig": {
+          "showInjectedConnector": false
+        }
+      }
+    }
+  }
+}
