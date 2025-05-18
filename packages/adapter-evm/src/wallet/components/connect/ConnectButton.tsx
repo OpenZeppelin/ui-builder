@@ -25,11 +25,14 @@ export const CustomConnectButton: React.FC<ConnectButtonProps> = ({
   hideWhenConnected = true,
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  // Track our own loading state
+  const [isPendingConnection, setIsPendingConnection] = useState(false);
 
   const unavailableButton = (
     <div className={cn('flex items-center', className)}>
-      <Button disabled={true} variant="ghost" size="sm" className="h-8 px-2 text-xs">
-        <Wallet className="h-3.5 w-3.5" />
+      <Button disabled={true} variant="outline" size="sm" className="h-8 px-2 text-xs">
+        <Wallet className="h-3.5 w-3.5 mr-1" />
+        Wallet Unavailable
       </Button>
     </div>
   );
@@ -41,6 +44,8 @@ export const CustomConnectButton: React.FC<ConnectButtonProps> = ({
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         hideWhenConnected={hideWhenConnected}
+        isPendingConnection={isPendingConnection}
+        setIsPendingConnection={setIsPendingConnection}
       />
     </SafeWagmiComponent>
   );
@@ -52,9 +57,45 @@ const ConnectButtonContent: React.FC<{
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
   hideWhenConnected: boolean;
-}> = ({ className, dialogOpen, setDialogOpen, hideWhenConnected }) => {
+  isPendingConnection: boolean;
+  setIsPendingConnection: (isPending: boolean) => void;
+}> = ({
+  className,
+  dialogOpen,
+  setDialogOpen,
+  hideWhenConnected,
+  isPendingConnection,
+  setIsPendingConnection,
+}) => {
   const { isConnected } = useAccount();
   const { isPending } = useConnect();
+
+  // Set our local pending state when wagmi's isPending changes
+  useEffect(() => {
+    if (isPending) {
+      setIsPendingConnection(true);
+    }
+  }, [isPending, setIsPendingConnection]);
+
+  // Reset pending state when connection completes
+  useEffect(() => {
+    if (isConnected) {
+      setIsPendingConnection(false);
+    }
+  }, [isConnected, setIsPendingConnection]);
+
+  // Reset pending state when dialog closes
+  useEffect(() => {
+    if (!dialogOpen) {
+      // Small delay to prevent flickering if dialog closes and immediately reopens
+      const timer = setTimeout(() => {
+        if (!dialogOpen) {
+          setIsPendingConnection(false);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [dialogOpen, setIsPendingConnection]);
 
   useEffect(() => {
     // If the button content is being hidden because the wallet is connected,
@@ -71,28 +112,42 @@ const ConnectButtonContent: React.FC<{
 
   const handleConnectClick = () => {
     if (!isConnected) {
+      setIsPendingConnection(true); // Set pending immediately on click
       setDialogOpen(true);
     }
   };
+
+  // Use combined state (wagmi's isPending or our local state)
+  const isLoading = isPending || isPendingConnection;
 
   return (
     <div className={cn('flex items-center', className)}>
       <Button
         onClick={handleConnectClick}
-        disabled={isPending || isConnected}
-        variant="ghost"
+        disabled={isLoading || isConnected}
+        variant="outline"
         size="sm"
         className="h-8 px-2 text-xs"
         title={isConnected ? 'Connected' : 'Connect Wallet'}
       >
-        {isPending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {isLoading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
         ) : (
-          <Wallet className="h-3.5 w-3.5" />
+          <Wallet className="h-3.5 w-3.5 mr-1" />
         )}
+        {isLoading ? 'Connecting...' : 'Connect Wallet'}
       </Button>
 
-      <ConnectorDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <ConnectorDialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          // If dialog is manually closed, reset pending state
+          if (!open) {
+            setIsPendingConnection(false);
+          }
+        }}
+      />
     </div>
   );
 };
