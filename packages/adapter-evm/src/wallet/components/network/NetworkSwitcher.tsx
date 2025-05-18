@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import { useAccount, useChainId, useChains, useSwitchChain } from 'wagmi';
 
 import React from 'react';
@@ -38,40 +39,46 @@ const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className })
     return null;
   }
 
-  // Find current chain info
-  const currentChain = chains.find((chain) => chain.id === currentChainId);
-
   const handleNetworkChange = (chainId: number) => {
     if (chainId !== currentChainId) {
       switchChain({ chainId });
     }
   };
 
+  // Find current chain name for display
+  const currentChainName = chains.find((chain) => chain.id === currentChainId)?.name || 'Network';
+
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
-      <div className="text-sm font-medium mb-1">Network</div>
+    <div className={cn('flex items-center', className)}>
       <Select
         value={currentChainId?.toString()}
         onValueChange={(value: string) => handleNetworkChange(Number(value))}
         disabled={isPending || !chains.length}
       >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={currentChain?.name || 'Select Network'} />
+        <SelectTrigger className="h-8 text-xs px-2 min-w-[90px] max-w-[120px]">
+          <SelectValue placeholder="Network">{currentChainName}</SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent
+          position="popper"
+          sideOffset={5}
+          align="start"
+          className="w-auto min-w-[160px] max-h-[300px]"
+        >
           {chains.map((chain) => (
-            <SelectItem key={chain.id} value={chain.id.toString()}>
+            <SelectItem key={chain.id} value={chain.id.toString()} className="text-xs py-1.5">
               {chain.name}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {isPending && <p className="text-xs text-muted-foreground mt-1">Switching network...</p>}
-
-      {error && (
-        <p className="text-xs text-red-500 mt-1">{error.message || 'Error switching network'}</p>
+      {isPending && (
+        <span className="text-xs text-muted-foreground ml-2">
+          <Loader2 className="h-3 w-3 animate-spin" />
+        </span>
       )}
+
+      {error && <span className="text-xs text-red-500 ml-2">!</span>}
     </div>
   );
 };

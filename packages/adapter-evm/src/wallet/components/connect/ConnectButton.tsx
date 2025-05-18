@@ -1,3 +1,4 @@
+import { Loader2, Wallet } from 'lucide-react';
 import { useAccount, useConnect } from 'wagmi';
 
 import React, { useState } from 'react';
@@ -18,9 +19,9 @@ export const CustomConnectButton: React.FC<BaseComponentProps> = ({ className })
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const unavailableButton = (
-    <div className={cn('flex flex-col', className)}>
-      <Button disabled={true} variant="default" size="default">
-        Wallet Unavailable
+    <div className={cn('flex items-center', className)}>
+      <Button disabled={true} variant="ghost" size="sm" className="h-8 px-2 text-xs">
+        <Wallet className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
@@ -52,14 +53,20 @@ const ConnectButtonContent: React.FC<{
   };
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div className={cn('flex items-center', className)}>
       <Button
         onClick={handleConnectClick}
         disabled={isPending || isConnected}
-        variant="default"
-        size="default"
+        variant="ghost"
+        size="sm"
+        className="h-8 px-2 text-xs"
+        title={isConnected ? 'Connected' : 'Connect Wallet'}
       >
-        {isPending ? 'Connecting...' : isConnected ? 'Connected' : 'Connect Wallet'}
+        {isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Wallet className="h-3.5 w-3.5" />
+        )}
       </Button>
 
       <ConnectorDialog open={dialogOpen} onOpenChange={setDialogOpen} />

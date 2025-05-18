@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react';
 import { useAccount, useChainId, useDisconnect } from 'wagmi';
 
 import React from 'react';
@@ -32,13 +33,19 @@ const AccountDisplayContent: React.FC<{ className?: string }> = ({ className }) 
   }
 
   return (
-    <div className={cn('flex items-center gap-4 p-2 rounded-md border', className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <div className="flex flex-col">
-        <span className="text-sm font-medium">{truncateMiddle(address)}</span>
-        <span className="text-xs text-muted-foreground">Chain ID: {chainId}</span>
+        <span className="text-xs font-medium">{truncateMiddle(address, 4, 4)}</span>
+        <span className="text-[9px] text-muted-foreground -mt-0.5">Chain ID: {chainId}</span>
       </div>
-      <Button onClick={() => disconnect()} variant="outline" size="sm">
-        Disconnect
+      <Button
+        onClick={() => disconnect()}
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 p-0"
+        title="Disconnect wallet"
+      >
+        <LogOut className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
