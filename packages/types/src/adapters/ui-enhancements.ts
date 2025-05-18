@@ -18,10 +18,38 @@ type GenericHook<TParams extends unknown[] = [], TResult = unknown> = (...args: 
 
 /**
  * Defines the shape of facade hooks provided by an adapter for its ecosystem.
- * These typically wrap underlying library hooks (e.g., from wagmi).
+ * These typically wrap underlying library hooks (e.g., from wagmi for EVM).
  *
  * We use generic hook signatures to allow direct use of library hooks
  * without tightly coupling to their specific parameter and return types.
+ *
+ * Adapters implementing these facade hooks are responsible for mapping their native
+ * library's return values to a conventional set of properties expected by consumers.
+ * This ensures that UI components using these facade hooks can remain chain-agnostic.
+ *
+ * @example For `useSwitchChain`:
+ * Consumers will expect an object like:
+ * ```typescript
+ * {
+ *   switchChain: (args: { chainId: number }) => void; // Function to initiate the switch
+ *   isPending: boolean;                             // True if the switch is in progress
+ *   error: Error | null;                            // Error object if the switch failed
+ *   // chains?: Chain[]; // Optional: array of available chains, if provided by underlying hook
+ * }
+ * ```
+ * If an adapter's underlying library uses `isLoading` instead of `isPending`,
+ * the adapter's facade implementation for `useSwitchChain` should map `isLoading` to `isPending`.
+ *
+ * @example For `useAccount`:
+ * Consumers will expect an object like:
+ * ```typescript
+ * {
+ *   isConnected: boolean;
+ *   address?: string;
+ *   chainId?: number;
+ *   // Other properties like `connector`, `status` might also be conventionally expected.
+ * }
+ * ```
  */
 export interface EcosystemSpecificReactHooks {
   // Hooks that don't require parameters

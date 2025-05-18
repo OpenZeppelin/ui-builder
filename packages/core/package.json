@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
+    "@icons-pack/react-simple-icons": "^12.8.0",
     "@openzeppelin/transaction-form-adapter-evm": "workspace:*",
     "@openzeppelin/transaction-form-adapter-midnight": "workspace:*",
     "@openzeppelin/transaction-form-adapter-solana": "workspace:*",

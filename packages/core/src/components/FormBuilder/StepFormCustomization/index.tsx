@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
-import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
+import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
@@ -41,7 +41,7 @@ export function StepFormCustomization({
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
+  const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
 
   const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
     contractSchema,
@@ -131,9 +131,8 @@ export function StepFormCustomization({
       {previewMode ? (
         <FormPreview
           formConfig={formConfig}
-          functionDetails={selectedFunctionDetails}
-          contractSchema={contractSchema}
-          networkConfig={networkConfig}
+          functionDetails={selectedFunctionDetails!}
+          contractSchema={contractSchema!}
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>

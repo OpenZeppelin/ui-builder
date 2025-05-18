@@ -1,2 +1,3 @@
 export * from './WalletConnectionUI';
-export * from './WalletIntegration';
+export * from './NetworkSwitchManager';
+export * from './WalletConnectionHeader';

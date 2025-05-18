@@ -1,33 +1,29 @@
 import { useMemo } from 'react';
 
 import { TransactionForm, WalletConnectionProvider } from '@openzeppelin/transaction-form-renderer';
-import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
+import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {
   formConfig: BuilderFormConfig;
   functionDetails: ContractFunction;
   contractSchema: ContractSchema;
-  networkConfig: NetworkConfig | null;
 }
 
 /**
  * Form preview component that renders a preview of the form being built
  * Uses the TransactionForm component from the form-renderer package
  */
-export function FormPreview({
-  formConfig,
-  functionDetails,
-  contractSchema,
-  networkConfig,
-}: FormPreviewProps) {
-  // Use the singleton adapter hook to ensure we're using shared instances
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
+export function FormPreview({ formConfig, functionDetails, contractSchema }: FormPreviewProps) {
+  const {
+    activeAdapter: adapter,
+    isAdapterLoading: adapterLoading,
+    activeNetworkConfig: networkConfig,
+  } = useWalletState();
 
   // Convert BuilderFormConfig to RenderFormSchema using the FormSchemaFactory
   const renderSchema = useMemo(() => {
@@ -43,13 +39,7 @@ export function FormPreview({
         : functionDetails.description ||
           `Form for interacting with the ${functionDetails.displayName} function.`;
 
-    const schema = formSchemaFactory.builderConfigToRenderSchema(
-      formConfig,
-      formTitle,
-      formDescription
-    );
-
-    return schema;
+    return formSchemaFactory.builderConfigToRenderSchema(formConfig, formTitle, formDescription);
   }, [formConfig, functionDetails]);
 
   // Create mock submission handler for preview
@@ -65,8 +55,13 @@ export function FormPreview({
     console.log('Form submitted in preview mode with Parsed Inputs:', submittedInputs);
 
     if (!adapter) {
-      console.error('Preview error: Adapter not available.');
+      console.error('Preview error: Adapter not available from global state.');
       return;
+    }
+    if (!networkConfig) {
+      console.error(
+        'Preview error: NetworkConfig not available from global state for preview context.'
+      );
     }
 
     try {
@@ -77,15 +72,13 @@ export function FormPreview({
       const formattedData = adapter.formatTransactionData(
         contractSchema,
         functionId,
-        submittedInputs, // Pass the parsed submitted data
-        formConfig.fields // Pass the original field configurations
+        submittedInputs,
+        formConfig.fields
       );
       console.log('Adapter formatted data (Preview):', formattedData);
     } catch (error) {
       console.error('Error formatting data in preview:', error);
     }
-
-    // In a real implementation, this would be a no-op or trigger a mock transaction
   };
 
   if (adapterLoading) {
@@ -95,7 +88,15 @@ export function FormPreview({
   if (!adapter) {
     return (
       <div className="p-4 text-center text-muted-foreground">
-        Form preview requires a selected and valid network to load adapter.
+        Form preview requires an active adapter from global state.
+      </div>
+    );
+  }
+
+  if (!networkConfig) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        Form preview requires an active network configuration from global state.
       </div>
     );
   }

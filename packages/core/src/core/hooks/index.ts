@@ -18,4 +18,7 @@
 // Export adapter context and provider
 export { AdapterProvider } from './AdapterProvider';
 export { useAdapterContext } from './useAdapterContext';
-export { useConfiguredAdapterSingleton } from './useConfiguredAdapterSingleton';
+
+// Export WalletState context, provider, and hook
+export { WalletStateProvider } from './WalletStateProvider';
+export { useWalletState, WalletStateContext } from './WalletStateContext';

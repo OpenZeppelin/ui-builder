@@ -274,13 +274,19 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 **Key Components:**
 
-- **Core**: Chain-agnostic application logic, UI components, export system, and the central `ecosystemManager.ts` for managing ecosystem details, network configurations, and adapter instantiation.
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are now instantiated with a specific `NetworkConfig`, making them network-aware. The core package dynamically discovers network configurations and instantiates adapters via `ecosystemManager.ts`. Furthermore, adapters can optionally provide UI-specific functionalities such as React context providers, facade hooks, and standardized UI components to enable richer, ecosystem-specific user experiences (e.g., for EVM wallet interactions via `wagmi/react`) while keeping the core application decoupled from underlying UI libraries.
+- **Core**: Chain-agnostic application logic, UI components, and the export system. It includes:
+  - Central providers like `AdapterProvider` (for managing adapter instances per network) and `WalletStateProvider` (for managing the globally active network, adapter, wallet status, and facade hooks from the active adapter).
+  - The `ecosystemManager.ts` for discovering network configurations and adapter capabilities.
+  - The `useWalletState()` hook, which allows components throughout the application to access global wallet state and adapter functionalities (like facade hooks) in a consistent manner.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `core` package (via `AdapterProvider` and `WalletStateProvider`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` consumes this to set up the necessary app-wide context for the active adapter.
+  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks`) for UI components to interact with wallet functionalities reactively and agnostically.
+  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 - **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
-- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface.
+- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The core package dynamically loads and uses adapters via the `ecosystemManager.ts`, and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (`AdapterProvider`, `WalletStateProvider`), and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 

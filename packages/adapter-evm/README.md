@@ -17,9 +17,11 @@ It is responsible for:
 
 ## Wallet Integration & UI
 
-All wallet integration logic, UI components, hooks, and provider setup for EVM-compatible chains are located in [`src/wallet/`](./src/wallet/).
+All wallet integration logic, UI components, facade hooks, and the UI context provider (e.g., `EvmBasicUiContextProvider` for Wagmi) for EVM-compatible chains are located in the [`src/wallet/`](./src/wallet/) module of this adapter.
 
-**For full documentation, usage examples, and the latest directory structure, see [`src/wallet/README.md`](./src/wallet/README.md).**
+The `EvmAdapter` implements the optional UI facilitation methods from the `ContractAdapter` interface (`getEcosystemReactUiContextProvider`, `getEcosystemReactHooks`, `getEcosystemWalletComponents`). These capabilities are consumed by the `core` application's `WalletStateProvider`, which manages the global wallet state and makes these hooks and components accessible to the rest of the application via the `useWalletState()` hook.
+
+**For full documentation on the `src/wallet/` module, its exports, configuration, and usage examples, see [`src/wallet/README.md`](./src/wallet/README.md).**
 
 ---
 

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 import { Button } from '@openzeppelin/transaction-form-ui';
 import { cn, logger } from '@openzeppelin/transaction-form-utils';
 
+import { useWalletState } from '@/core/hooks';
+
 interface WalletConnectionUIProps {
-  adapter: ContractAdapter | null;
   className?: string;
 }
 
@@ -13,8 +13,9 @@ interface WalletConnectionUIProps {
  * Component that displays wallet connection UI components
  * provided by the active adapter.
  */
-export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ adapter, className }) => {
+export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ className }) => {
   const [isError, setIsError] = useState(false);
+  const { activeAdapter, walletFacadeHooks } = useWalletState();
 
   // Setup error handling with useEffect
   useEffect(() => {
@@ -27,19 +28,35 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ adapter,
     };
   }, []);
 
+  useEffect(() => {
+    logger.debug('WalletConnectionUI', '[Debug] State from useWalletState:', {
+      adapterId: activeAdapter?.networkConfig.id,
+      hasFacadeHooks: !!walletFacadeHooks,
+    });
+  }, [activeAdapter, walletFacadeHooks]);
+
   // Get wallet components from adapter if available
-  if (!adapter || typeof adapter.getEcosystemWalletComponents !== 'function') {
+  if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
+    logger.debug(
+      'WalletConnectionUI',
+      '[Debug] No activeAdapter or getEcosystemWalletComponents method, rendering null.'
+    );
     return null;
   }
 
   let walletComponents;
   try {
-    walletComponents = adapter.getEcosystemWalletComponents();
+    walletComponents = activeAdapter.getEcosystemWalletComponents();
+    logger.debug('WalletConnectionUI', '[Debug] walletComponents from adapter:', walletComponents);
     if (!walletComponents) {
+      logger.debug(
+        'WalletConnectionUI',
+        '[Debug] getEcosystemWalletComponents returned null/undefined, rendering null.'
+      );
       return null;
     }
   } catch (error) {
-    logger.error('WalletConnectionUI', 'Error getting wallet components:', error);
+    logger.error('WalletConnectionUI', '[Debug] Error getting wallet components:', error);
     setIsError(true);
     return (
       <div className={cn('flex items-center gap-4', className)}>
@@ -70,13 +87,23 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ adapter,
     );
   }
 
+  // Ensure walletComponents is not null before destructuring
+  if (!walletComponents) {
+    // This case should ideally be caught above, but as a safeguard:
+    logger.debug(
+      'WalletConnectionUI',
+      '[Debug] walletComponents is null before rendering, rendering null.'
+    );
+    return null;
+  }
+
   return (
     <div className={cn('flex items-center gap-4', className)}>
+      {/* Display network switcher if available - moved before account to match typical wallet UI flow */}
+      {NetworkSwitcher && <NetworkSwitcher />}
+
       {/* Display account info if available */}
       {AccountDisplay && <AccountDisplay />}
-
-      {/* Display network switcher if available */}
-      {NetworkSwitcher && <NetworkSwitcher />}
 
       {/* Display connect button if available */}
       {ConnectButton && <ConnectButton />}

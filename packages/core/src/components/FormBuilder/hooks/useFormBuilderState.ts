@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
-import { ContractSchema, Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
-import { networkService } from '../../../core/networks/service';
+import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 import { useCompleteStepState } from './useCompleteStepState';
@@ -11,67 +10,41 @@ import { useContractDefinitionState } from './useContractDefinitionState';
 import { useContractWidgetState } from './useContractWidgetState';
 import { useFormCustomizationState } from './useFormCustomizationState';
 import { useFunctionSelectionState } from './useFunctionSelectionState';
-import { useNetworkSelectionState } from './useNetworkSelectionState';
 
 /**
  * Coordinating hook that combines all step-specific hooks and manages dependencies between steps.
  * This ensures that when earlier step values change, later step values are reset appropriately.
  */
-export function useFormBuilderState(initialNetworkConfigId: string | null = null) {
-  // --- State Hooks ---
-  const networkSelection = useNetworkSelectionState(initialNetworkConfigId);
+export function useFormBuilderState(initialNetworkConfigId?: string | null) {
+  // --- Global State from Context ---
+  const {
+    activeNetworkId,
+    setActiveNetworkId,
+    activeNetworkConfig,
+    activeAdapter,
+    isAdapterLoading,
+  } = useWalletState();
+
+  // Effect to set initial global network if provided and different
+  useEffect(() => {
+    if (initialNetworkConfigId && initialNetworkConfigId !== activeNetworkId) {
+      setActiveNetworkId(initialNetworkConfigId);
+    }
+    // This effect should only run if initialNetworkConfigId changes,
+    // or to initialize. Avoid re-running if activeNetworkId changes due to this effect.
+  }, [initialNetworkConfigId, setActiveNetworkId]);
+
+  // --- Local Step State Hooks ---
   const contractDefinition = useContractDefinitionState();
   const functionSelection = useFunctionSelectionState();
   const formCustomization = useFormCustomizationState();
   const contractWidget = useContractWidgetState();
   const completeStep = useCompleteStepState();
 
-  // State for the resolved network config
-  const [selectedNetwork, setSelectedNetwork] = useState<NetworkConfig | null>(null);
-
-  // --- Effects ---
-
-  // Effect to resolve network config when network ID changes
-  useEffect(() => {
-    let isMounted = true;
-    const resolveNetwork = async () => {
-      if (!networkSelection.selectedNetworkConfigId) {
-        setSelectedNetwork(null);
-        return;
-      }
-      try {
-        const network = await networkService.getNetworkById(
-          networkSelection.selectedNetworkConfigId
-        );
-        if (isMounted && network) {
-          setSelectedNetwork(network);
-        } else if (isMounted) {
-          setSelectedNetwork(null);
-        }
-      } catch (error) {
-        console.error('Failed to resolve network:', error);
-        if (isMounted) {
-          setSelectedNetwork(null);
-        }
-      }
-    };
-
-    void resolveNetwork();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [networkSelection.selectedNetworkConfigId]);
-
-  // Use the singleton adapter hook to get the appropriate adapter for the selected network
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(selectedNetwork);
-
   // --- Callbacks ---
-
-  // Enhanced network selection handler that resets downstream state
   const handleNetworkSelect = useCallback(
     (networkConfigId: string | null) => {
-      networkSelection.handleNetworkSelect(networkConfigId);
+      setActiveNetworkId(networkConfigId);
       // Reset downstream steps as network selection impacts everything
       contractDefinition.resetContractSchema();
       functionSelection.resetFunctionSelection();
@@ -80,7 +53,7 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
       completeStep.resetLoadingState();
     },
     [
-      networkSelection,
+      setActiveNetworkId,
       contractDefinition,
       functionSelection,
       formCustomization,
@@ -93,11 +66,8 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null) => {
       contractDefinition.handleContractSchemaLoaded(schema);
-      if (schema) {
-        contractWidget.showWidget();
-      } else {
-        contractWidget.hideWidget();
-      }
+      if (schema) contractWidget.showWidget();
+      else contractWidget.hideWidget();
     },
     [contractDefinition, contractWidget]
   );
@@ -115,49 +85,47 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
   );
 
   // --- Derived State & Props ---
-
   // Get the ecosystem from the selected network
-  const selectedEcosystem: Ecosystem | null = selectedNetwork?.ecosystem ?? null;
+  const selectedEcosystem: Ecosystem | null = activeNetworkConfig?.ecosystem ?? null;
 
   // Create sidebar widget props
   const sidebarWidget =
     contractDefinition.contractSchema &&
     contractDefinition.contractAddress &&
-    adapter &&
-    selectedNetwork
+    activeAdapter &&
+    activeNetworkConfig
       ? contractWidget.createWidgetProps(
           contractDefinition.contractSchema,
           contractDefinition.contractAddress,
-          adapter,
-          selectedNetwork
+          activeAdapter,
+          activeNetworkConfig
         )
       : null;
 
   // Create a handler that calls exportForm with the current state
   const handleExportForm = useCallback(
     (formConfig: BuilderFormConfig | null, selectedFunction: string | null) => {
-      if (!selectedNetwork || !adapter || !selectedFunction) {
+      if (!activeNetworkConfig || !activeAdapter || !selectedFunction) {
         console.error('Cannot export: Network/Adapter or Function not selected.');
         return;
       }
       // Use void to explicitly ignore the promise
       void completeStep.exportForm(
         formConfig,
-        selectedNetwork,
+        activeNetworkConfig,
         selectedFunction,
         contractDefinition.contractSchema
       );
     },
-    [completeStep, contractDefinition.contractSchema, selectedNetwork, adapter]
+    [completeStep, contractDefinition.contractSchema, activeNetworkConfig, activeAdapter]
   );
 
   // --- Return Value ---
-
   return {
-    // State from all hooks and derived state
-    selectedNetworkConfigId: networkSelection.selectedNetworkConfigId,
-    selectedNetwork,
-    selectedAdapter: adapter,
+    selectedNetworkConfigId: activeNetworkId,
+    selectedNetwork: activeNetworkConfig,
+    selectedAdapter: activeAdapter,
+    adapterLoading: isAdapterLoading,
     selectedEcosystem,
     contractSchema: contractDefinition.contractSchema,
     contractAddress: contractDefinition.contractAddress,
@@ -167,7 +135,6 @@ export function useFormBuilderState(initialNetworkConfigId: string | null = null
     isWidgetVisible: contractWidget.isWidgetVisible,
     sidebarWidget,
     exportLoading: completeStep.loading,
-    adapterLoading,
 
     // Enhanced handlers with dependencies handled
     handleNetworkSelect,

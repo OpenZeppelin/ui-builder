@@ -196,12 +196,21 @@ To support this, the `ContractAdapter` interface (in `packages/types`) can be ex
 
 ### 7.3. Interaction Pattern
 
-1.  **Configuration**: The main application (`core` or an exported app) initializes the active adapter and calls `adapter.configureUiKit(config)` based on global settings or user preferences (e.g., from `appConfigService`).
-2.  **Global Context Setup**: The root of the application calls `adapter.getEcosystemReactUiContextProvider()`. If a provider component is returned, it wraps the entire application tree. This makes the ecosystem-specific context (e.g., `wagmi` context) available app-wide.
-3.  **Using Hooks and Components**: UI components anywhere in the application (in `core`, `form-renderer`, or exported apps) can then:
-    - Access the active adapter instance.
-    - Call `adapter.getEcosystemReactHooks()` to get the facade hooks for reactive data and operations.
-    - Call `adapter.getEcosystemWalletComponents()` to obtain standardized UI components like a connect button.
+1.  **Configuration**: The main application (`core` or an exported app) initializes the active adapter. The adapter may be configured via its `configureUiKit(config)` method (e.g., by `WalletStateProvider` in `core` based on global settings or defaults) or read its configuration from a service like `AppConfigService` upon instantiation.
+2.  **Global Context Setup & State Management (`WalletStateProvider` in `core`)**:
+    - The `core` application utilizes an `AdapterProvider` to manage adapter instances (ensuring singletons per network) and a `WalletStateProvider` to manage the globally _active_ network, adapter, and related wallet state.
+    - `WalletStateProvider` determines the `activeAdapter` based on the globally selected network.
+    - It then calls `activeAdapter.getEcosystemReactUiContextProvider()`. If an adapter-specific UI context provider component is returned (e.g., `EvmBasicUiContextProvider` which includes `WagmiProvider`), `WalletStateProvider` renders this component, wrapping the relevant application tree. This makes the ecosystem-specific context (e.g., `wagmi` context) available app-wide for the facade hooks to function.
+    - `WalletStateProvider` also retrieves the `walletFacadeHooks` object by calling `activeAdapter.getEcosystemReactHooks()`.
+3.  **Using Hooks and Components via `useWalletState()`:**
+    - UI components anywhere in the application (in `core`, `form-renderer`, or exported apps) primarily use a central hook like `useWalletState()`.
+    - Through `useWalletState()`, components can access:
+      - The `activeAdapter` instance.
+      - The `walletFacadeHooks` object (e.g., `useWalletState().walletFacadeHooks`). They then call specific hooks like `walletFacadeHooks.useAccount()` or `walletFacadeHooks.useSwitchChain()`.
+      - Other global states like current network ID, connection status, etc., which are themselves often derived within `WalletStateProvider` by calling these facade hooks.
+    - To render adapter-specific UI components (like a connect button), a component would typically get the `activeAdapter` via `useWalletState()` and then call `activeAdapter.getEcosystemWalletComponents()`. These retrieved components are expected to internally use `useWalletState()` or the facade hooks for their logic.
+
+This pattern centralizes the management of the active adapter and its UI capabilities, providing a consistent way for components to consume them through a global state hook.
 
 ### 7.4. Phased Implementation Example (EVM with `wagmi`)
 

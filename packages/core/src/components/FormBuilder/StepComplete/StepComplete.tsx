@@ -79,7 +79,6 @@ export function StepComplete({
         formConfig={formConfig}
         functionDetails={selectedFunctionDetails!}
         contractSchema={contractSchema!}
-        networkConfig={networkConfig}
       />
     </div>
   );
