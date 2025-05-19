@@ -1,13 +1,29 @@
 import type React from 'react';
 
 /**
+ * Configuration for excluding specific wallet components provided by an adapter.
+ */
+export interface ComponentExclusionConfig {
+  /** Array of component keys (e.g., 'ConnectButton', 'NetworkSwitcher') to exclude. */
+  exclude?: Array<keyof EcosystemWalletComponents>;
+}
+
+/**
  * Configuration for the desired UI kit to be used by an adapter.
  */
 export interface UiKitConfiguration {
-  /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'none' for the default internal implementation. */
+  /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'custom' for adapter-provided default components or 'none' to disable adapter UI. */
   kitName?: 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
-  /** Kit-specific configuration options (e.g., RainbowKit projectId, theme, or configuration for the default implementation). */
-  kitConfig?: Record<string, unknown>;
+  /**
+   * Kit-specific configuration options.
+   * This can include general options as well as specific configurations for UI components.
+   */
+  kitConfig?: {
+    /** Generic placeholder for other kit-specific configurations. */
+    [key: string]: unknown;
+    /** Configuration for including/excluding specific wallet components. */
+    components?: ComponentExclusionConfig;
+  };
 }
 
 /**

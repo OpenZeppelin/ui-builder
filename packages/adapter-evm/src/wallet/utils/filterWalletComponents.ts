@@ -1,0 +1,55 @@
+import type { EcosystemWalletComponents } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
+
+/**
+ * Filters a set of wallet components based on an exclusion list.
+ *
+ * @param allPossibleComponents - An object containing all potential components for a kit.
+ * @param exclusions - An array of component keys to exclude.
+ * @param kitName - The name of the kit being filtered (for logging purposes).
+ * @returns The filtered EcosystemWalletComponents object, or undefined if all components are excluded.
+ */
+export function filterWalletComponents(
+  allPossibleComponents: EcosystemWalletComponents,
+  exclusions: Array<keyof EcosystemWalletComponents>,
+  kitName: string = 'custom' // Default to custom for logging context
+): EcosystemWalletComponents | undefined {
+  if (!allPossibleComponents || Object.keys(allPossibleComponents).length === 0) {
+    logger.debug('filterWalletComponents', `No components provided to filter for kit: ${kitName}.`);
+    return undefined;
+  }
+
+  if (exclusions.length === 0) {
+    logger.debug(
+      'filterWalletComponents',
+      `Providing all components for kit: ${kitName}.`,
+      allPossibleComponents
+    );
+    return allPossibleComponents;
+  }
+
+  const filteredComponents: Partial<EcosystemWalletComponents> = {};
+  let componentCount = 0;
+  for (const key in allPossibleComponents) {
+    const componentKey = key as keyof EcosystemWalletComponents;
+    if (!exclusions.includes(componentKey)) {
+      if (allPossibleComponents[componentKey]) {
+        // Ensure the component actually exists before adding
+        filteredComponents[componentKey] = allPossibleComponents[componentKey];
+        componentCount++;
+      }
+    }
+  }
+
+  if (componentCount > 0) {
+    logger.debug(
+      'filterWalletComponents',
+      `Providing filtered components for kit: ${kitName} after exclusions (${exclusions.join(', ')}).`,
+      filteredComponents
+    );
+    return filteredComponents as EcosystemWalletComponents;
+  }
+
+  logger.info('filterWalletComponents', `All components were excluded for kit: ${kitName}.`);
+  return undefined;
+}

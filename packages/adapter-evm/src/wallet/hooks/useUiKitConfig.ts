@@ -91,8 +91,9 @@ export function setUiKitConfig(config: UiKitConfiguration): void {
   };
 
   logger.info(
-    'useUiKitConfig',
-    `UI Kit configuration updated: kitName=${uiKitConfig.kitName}, showInjectedConnector=${uiKitConfig.kitConfig?.showInjectedConnector}`
+    'EvmAdapter',
+    `UI Kit configured for adapter instance: ${uiKitConfig.kitName}`,
+    uiKitConfig.kitConfig ? JSON.stringify(uiKitConfig.kitConfig) : '(no specific kitConfig)'
   );
 }
 
