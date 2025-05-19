@@ -66,38 +66,35 @@ export function getResolvedWalletComponents(
     return undefined;
   }
 
-  const allCustomComponents: EcosystemWalletComponents = {
-    ConnectButton: CustomConnectButton,
-    AccountDisplay: CustomAccountDisplay,
-    NetworkSwitcher: CustomNetworkSwitcher,
-  };
+  // Only provide components for 'custom' kit
+  if (currentKitName === 'custom') {
+    const allCustomComponents: EcosystemWalletComponents = {
+      ConnectButton: CustomConnectButton,
+      AccountDisplay: CustomAccountDisplay,
+      NetworkSwitcher: CustomNetworkSwitcher,
+    };
 
-  let exclusions: Array<keyof EcosystemWalletComponents> = [];
-  const kitCfg = uiKitConfiguration.kitConfig;
-  if (kitCfg && typeof kitCfg === 'object' && 'components' in kitCfg) {
-    const componentsCfg = kitCfg.components;
-    if (
-      componentsCfg &&
-      typeof componentsCfg === 'object' &&
-      'exclude' in componentsCfg &&
-      Array.isArray(componentsCfg.exclude)
-    ) {
-      exclusions = (componentsCfg.exclude as Array<keyof EcosystemWalletComponents>) || [];
+    let exclusions: Array<keyof EcosystemWalletComponents> = [];
+    const kitCfg = uiKitConfiguration.kitConfig;
+    if (kitCfg && typeof kitCfg === 'object' && 'components' in kitCfg) {
+      const componentsCfg = kitCfg.components;
+      if (
+        componentsCfg &&
+        typeof componentsCfg === 'object' &&
+        'exclude' in componentsCfg &&
+        Array.isArray(componentsCfg.exclude)
+      ) {
+        exclusions = (componentsCfg.exclude as Array<keyof EcosystemWalletComponents>) || [];
+      }
     }
-  }
 
-  // For 'custom' kit or as a fallback for other currently unsupported kits that aren't 'none'
-  if (
-    currentKitName === 'custom' ||
-    (currentKitName !== 'rainbowkit' &&
-      currentKitName !== 'connectkit' &&
-      currentKitName !== 'appkit')
-  ) {
     return filterWalletComponents(allCustomComponents, exclusions, currentKitName);
   }
 
   // Placeholder for future specific kit logic (e.g., RainbowKit components might not use this filter directly)
   // if (currentKitName === 'rainbowkit') { /* return RainbowKit components */ }
+  // if (currentKitName === 'connectkit') { /* return ConnectKit components */ }
+  // if (currentKitName === 'appkit') { /* return AppKit components */ }
 
   logger.warn(
     'uiKitService',
