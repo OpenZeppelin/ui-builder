@@ -58,7 +58,10 @@ adapter.configureUiKit({
       "config": {
         "kitName": "custom",
         "kitConfig": {
-          "showInjectedConnector": true
+          "showInjectedConnector": true,
+          "components": {
+            "exclude": ["NetworkSwitcher"]
+          }
         }
       }
     }
@@ -72,15 +75,16 @@ The configuration is automatically loaded from AppConfigService when the module 
 
 - **kitName**: Specifies which UI kit to use:
 
-  - `'custom'`: Default for EVM adapter - uses our custom UI components
-  - `'none'`: Explicitly disables UI components (used for adapters without UI support)
+  - `'custom'`: Default for EVM adapter - uses our custom UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`).
+  - `'none'`: Explicitly disables UI components and UI context provider.
   - `'rainbowkit'`: (Future support) RainbowKit UI components
   - `'connectkit'`: (Future support) ConnectKit UI components
   - `'appkit'`: (Future support) AppKit UI components
 
 - **kitConfig**: Configuration object with options specific to the chosen UI kit:
   - For the `'custom'` implementation:
-    - **showInjectedConnector**: When `true`, shows the injected connector (browser extension wallets like MetaMask) in the wallet connection dialog. Defaults to `false` (hidden).
+    - **`showInjectedConnector?: boolean`**: When `true`, shows the injected connector in the wallet connection dialog. Defaults to `false` (hidden).
+    - **`components?: { exclude?: Array<'ConnectButton' | 'AccountDisplay' | 'NetworkSwitcher'> }`**: Optional. Allows specifying an array of component names to _exclude_ from being provided by `getEcosystemWalletComponents`. For example, to hide the default network switcher, you could set `kitConfig: { components: { exclude: ['NetworkSwitcher'] } }`.
 
 ## Usage
 

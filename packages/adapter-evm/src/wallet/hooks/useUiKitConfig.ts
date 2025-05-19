@@ -107,9 +107,22 @@ export function isConfigEnabled(key: string): boolean {
 }
 
 /**
- * Hook to access the UI kit configuration
- * @returns The current UI kit configuration
+ * Hook to access the UI kit configuration.
+ * The configuration is typically loaded at module initialization and when `setUiKitConfig` is called.
+ * @returns The current UI kit configuration (module-level singleton).
  */
 export function useUiKitConfig(): UiKitConfiguration {
+  // The module-level `uiKitConfig` is updated by `loadConfigFromAppConfig` (called at module load)
+  // and `setUiKitConfig` (called by adapter's configureUiKit).
+  // Thus, this hook can simply return the current state of the module-level singleton.
   return uiKitConfig;
+}
+
+/**
+ * Getter function to access the current module-level UI kit configuration directly.
+ * Useful for initializing adapter instance configurations.
+ * @returns The current module-level UI kit configuration.
+ */
+export function getUiKitConfig(): UiKitConfiguration {
+  return { ...uiKitConfig }; // Return a copy to prevent direct mutation of the singleton
 }

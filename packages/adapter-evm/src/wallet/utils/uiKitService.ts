@@ -76,8 +76,10 @@ export function getResolvedWalletComponents(
 
     let exclusions: Array<keyof EcosystemWalletComponents> = [];
     const kitCfg = uiKitConfiguration.kitConfig;
+    logger.info('uiKitService', `Kit config: ${JSON.stringify(kitCfg)}.`);
     if (kitCfg && typeof kitCfg === 'object' && 'components' in kitCfg) {
       const componentsCfg = kitCfg.components;
+      logger.info('uiKitService', `Components config: ${JSON.stringify(componentsCfg)}.`);
       if (
         componentsCfg &&
         typeof componentsCfg === 'object' &&

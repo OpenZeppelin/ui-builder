@@ -159,7 +159,7 @@ These capabilities are defined in `packages/types/src/adapters/ui-enhancements.t
 
 - **`configureUiKit?(config: UiKitConfiguration): void;`**
 
-  - Allows the consuming application (typically via a central provider like `WalletStateProvider` in `core`) to inform the adapter about the desired UI kit (e.g., 'custom' for adapter-provided basic components, or names of third-party kits like 'rainbowkit') and pass any kit-specific configuration.
+  - Allows the consuming application (typically via a central provider like `WalletStateProvider` in `core`) to inform the adapter about the desired UI kit (e.g., 'custom' for adapter-provided basic components, or names of third-party kits like 'rainbowkit') and pass any kit-specific configuration. The `kitConfig` can include general options for the chosen kit, as well as a `components: { exclude: Array<keyof EcosystemWalletComponents> }` field to selectively prevent the adapter from providing certain default UI components (like `NetworkSwitcher` or `AccountDisplay`).
 
 - **`getEcosystemReactUiContextProvider?(): React.ComponentType<EcosystemReactUiProviderProps> | undefined;`**
 

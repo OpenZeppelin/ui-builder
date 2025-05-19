@@ -21,7 +21,11 @@ import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
-import { loadConfigFromAppConfig, setUiKitConfig } from './wallet/hooks/useUiKitConfig';
+import {
+  getUiKitConfig,
+  loadConfigFromAppConfig,
+  setUiKitConfig,
+} from './wallet/hooks/useUiKitConfig';
 import { getResolvedUiContextProvider, getResolvedWalletComponents } from './wallet/utils';
 import {
   connectAndEnsureCorrectNetwork,
@@ -73,10 +77,10 @@ export class EvmAdapter implements ContractAdapter {
     );
 
     loadConfigFromAppConfig();
-    this.uiKitConfiguration = { kitName: 'custom' };
+    this.uiKitConfiguration = getUiKitConfig();
     logger.info(
       'EvmAdapter',
-      'Initial uiKitConfiguration for instance set to:',
+      'Initial uiKitConfiguration for instance synchronized with global/default:',
       this.uiKitConfiguration
     );
   }
@@ -288,9 +292,16 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public configureUiKit(config: UiKitConfiguration): void {
+    const currentInstanceConfig = this.uiKitConfiguration;
+
+    const newResolvedKitConfig = {
+      ...(currentInstanceConfig.kitConfig || {}),
+      ...(config.kitConfig || {}),
+    };
+
     this.uiKitConfiguration = {
-      kitName: config.kitName || 'custom',
-      kitConfig: config.kitConfig,
+      kitName: config.kitName || currentInstanceConfig.kitName || 'custom',
+      kitConfig: Object.keys(newResolvedKitConfig).length > 0 ? newResolvedKitConfig : undefined,
     };
     setUiKitConfig(this.uiKitConfiguration);
   }

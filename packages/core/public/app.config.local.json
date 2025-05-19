@@ -4,7 +4,10 @@
       "config": {
         "kitName": "custom",
         "kitConfig": {
-          "showInjectedConnector": false
+          "showInjectedConnector": false,
+          "components": {
+            "exclude": ["NetworkSwitcher"]
+          }
         }
       }
     }
