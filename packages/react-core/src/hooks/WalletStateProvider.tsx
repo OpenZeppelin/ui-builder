@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
   ContractAdapter,
@@ -8,15 +8,17 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { getNetworkById } from '../ecosystemManager';
-
 import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 import { useAdapterContext } from './useAdapterContext';
 
 export interface WalletStateProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   /** Optional initial network ID to set as active when the provider mounts. */
   initialNetworkId?: string | null;
+  /** Function to retrieve a NetworkConfig object by its ID. */
+  getNetworkConfigById: (
+    networkId: string
+  ) => Promise<NetworkConfig | null | undefined> | NetworkConfig | null | undefined;
 }
 
 /**
@@ -38,6 +40,7 @@ export interface WalletStateProviderProps {
 export function WalletStateProvider({
   children,
   initialNetworkId = null,
+  getNetworkConfigById,
 }: WalletStateProviderProps) {
   // State for the ID of the globally selected network.
   const [currentGlobalNetworkId, setCurrentGlobalNetworkIdState] = useState<string | null>(
@@ -68,8 +71,7 @@ export function WalletStateProvider({
     async function fetchNetworkConfig() {
       if (currentGlobalNetworkId) {
         try {
-          // getNetworkById might be synchronous, but wrapping in Promise.resolve for future-proofing if it becomes async.
-          const config = await Promise.resolve(getNetworkById(currentGlobalNetworkId));
+          const config = await Promise.resolve(getNetworkConfigById(currentGlobalNetworkId));
           if (isActive) {
             if (config) {
               setCurrentGlobalNetworkConfig(config);
@@ -103,7 +105,7 @@ export function WalletStateProvider({
     return () => {
       isActive = false;
     };
-  }, [currentGlobalNetworkId]);
+  }, [currentGlobalNetworkId, getNetworkConfigById]);
 
   // Effect to load the active adapter and its UI capabilities when currentGlobalNetworkConfig changes.
   useEffect(() => {

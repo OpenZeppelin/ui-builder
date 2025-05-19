@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { TransactionForm, WalletConnectionProvider } from '@openzeppelin/transaction-form-renderer';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
-import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 interface FormPreviewProps {

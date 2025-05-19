@@ -38,6 +38,7 @@
     "@openzeppelin/transaction-form-types": "workspace:*",
     "@openzeppelin/transaction-form-ui": "workspace:*",
     "@openzeppelin/transaction-form-utils": "workspace:^",
+    "@openzeppelin/transaction-form-react-core": "workspace:^",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.6",

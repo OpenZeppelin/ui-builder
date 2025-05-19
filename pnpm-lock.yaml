@@ -250,6 +250,9 @@ importers:
       '@openzeppelin/transaction-form-adapter-stellar':
         specifier: workspace:*
         version: link:../adapter-stellar
+      '@openzeppelin/transaction-form-react-core':
+        specifier: workspace:^
+        version: link:../react-core
       '@openzeppelin/transaction-form-renderer':
         specifier: workspace:*
         version: link:../form-renderer
@@ -567,6 +570,61 @@ importers:
       vitest:
         specifier: ^3.0.8
         version: 3.1.2(@types/debug@4.1.12)(@types/node@22.15.2)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1)
+
+  packages/react-core:
+    dependencies:
+      '@openzeppelin/transaction-form-types':
+        specifier: workspace:^
+        version: link:../types
+      '@openzeppelin/transaction-form-utils':
+        specifier: workspace:^
+        version: link:../utils
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.17.46
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.1.2
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.1.2(@types/react@19.1.2)
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.26.0
+        version: 8.31.0(@typescript-eslint/parser@8.31.0(eslint@9.25.1(jiti@2.4.2))(typescript@5.8.3))(eslint@9.25.1(jiti@2.4.2))(typescript@5.8.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.26.0
+        version: 8.31.0(eslint@9.25.1(jiti@2.4.2))(typescript@5.8.3)
+      eslint:
+        specifier: ^9.22.0
+        version: 9.25.1(jiti@2.4.2)
+      eslint-config-prettier:
+        specifier: ^10.1.1
+        version: 10.1.2(eslint@9.25.1(jiti@2.4.2))
+      prettier:
+        specifier: ^3.2.5
+        version: 3.5.3
+      react:
+        specifier: ^19.0.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.1.0(react@19.1.0)
+      rollup-plugin-peer-deps-external:
+        specifier: ^2.2.4
+        version: 2.2.4(rollup@4.40.0)
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.3
+      vite:
+        specifier: ^6.2.5
+        version: 6.3.3(@types/node@20.17.46)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1)
+      vite-plugin-dts:
+        specifier: ^3.8.1
+        version: 3.9.1(@types/node@20.17.46)(rollup@4.40.0)(typescript@5.8.3)(vite@6.3.3(@types/node@20.17.46)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1))
+      vitest:
+        specifier: ^3.0.8
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@20.17.46)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1)
 
   packages/styles: {}
 
@@ -7002,6 +7060,11 @@ packages:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
+
+  rollup-plugin-peer-deps-external@2.2.4:
+    resolution: {integrity: sha512-AWdukIM1+k5JDdAqV/Cxd+nejvno2FVLVeZ74NKggm3Q5s9cbbcOgUPGdbxPi4BXu7xGaZ8HG12F+thImYu/0g==}
+    peerDependencies:
+      rollup: '*'
 
   rollup@4.40.0:
     resolution: {integrity: sha512-Noe455xmA96nnqH5piFtLobsGbCij7Tu+tb3c1vYjNbTkfzGqXqQXG3wJaYXkRZuQ0vEYN4bhwg7QnIrqB5B+w==}
@@ -15684,6 +15747,10 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
+
+  rollup-plugin-peer-deps-external@2.2.4(rollup@4.40.0):
+    dependencies:
+      rollup: 4.40.0
 
   rollup@4.40.0:
     dependencies:

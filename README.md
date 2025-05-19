@@ -36,6 +36,7 @@ This project is currently in development.
 This project is organized as a monorepo with the following packages:
 
 - **packages/core**: The main application with the form builder UI and core logic.
+- **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@core` and exported apps.
 - **packages/form-renderer**: The shared form rendering library (published to npm), responsible for dynamically rendering forms based on schemas and an active adapter.
 - **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `core` and `form-renderer` to ensure a consistent look and feel.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
@@ -187,10 +188,10 @@ transaction-form-builder/
 │   │   │   ├── components/      # UI components (application-specific or composed)
 │   │   │   │   ├── Common/      # Shared components across features within core
 │   │   │   │   └── FormBuilder/ # Form builder specific components
-│   │   │   ├── core/            # Chain-agnostic core functionality
-│   │   │   │   ├── types/       # Core-specific Type definitions
-│   │   │   │   ├── utils/       # Utility functions
-│   │   │   │   ├── hooks/       # Shared hooks
+│   │   │   ├── core/            # Chain-agnostic core functionality specific to this app
+│   │   │   │   ├── types/       # Core-app-specific Type definitions
+│   │   │   │   ├── utils/       # Core-app-specific utility functions
+│   │   │   │   ├── hooks/       # Core-app-specific hooks (if any, shared React hooks are in react-core)
 │   │   │   │   ├── factories/   # Schema factories
 │   │   │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   │   │   ├── export/          # Export system
@@ -208,7 +209,13 @@ transaction-form-builder/
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   ├── vite.config.ts       # Vite configuration
 │   │   └── ...                  # Other configuration files
-│   ├── form-renderer/           # Shared form rendering library
+│   ├── react-core/        # Shared React core providers and hooks
+│   │   ├── src/
+│   │   │   └── hooks/       # Contains AdapterProvider, WalletStateProvider, useWalletState, etc.
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── form-renderer/       # Shared form rendering library
 │   │   ├── src/
 │   │   │   ├── components/      # Form rendering specific components (TransactionForm, DynamicFormField)
 │   │   │   │   ├── ContractStateWidget/
@@ -275,18 +282,16 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 **Key Components:**
 
 - **Core**: Chain-agnostic application logic, UI components, and the export system. It includes:
-  - Central providers like `AdapterProvider` (for managing adapter instances per network) and `WalletStateProvider` (for managing the globally active network, adapter, wallet status, and facade hooks from the active adapter).
   - The `ecosystemManager.ts` for discovering network configurations and adapter capabilities.
-  - The `useWalletState()` hook, which allows components throughout the application to access global wallet state and adapter functionalities (like facade hooks) in a consistent manner.
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `core` package (via `AdapterProvider` and `WalletStateProvider`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
-  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` consumes this to set up the necessary app-wide context for the active adapter.
-  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks`) for UI components to interact with wallet functionalities reactively and agnostically.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `core` package (via providers from `@openzeppelin/transaction-form-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/transaction-form-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
+  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/transaction-form-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 - **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
 - **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (`AdapterProvider`, `WalletStateProvider`), and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/transaction-form-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 

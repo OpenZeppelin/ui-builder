@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
 import { useCompleteStepState } from './useCompleteStepState';

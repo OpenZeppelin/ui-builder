@@ -1,0 +1,73 @@
+{
+  "name": "@openzeppelin/transaction-form-react-core",
+  "version": "0.1.0",
+  "description": "Core React context providers and hooks for Transaction Form Builder UI capabilities",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo .turbo",
+    "dev": "vite build --watch",
+    "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "context",
+    "blockchain",
+    "form",
+    "typescript",
+    "openzeppelin"
+  ],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/transaction-form-types": "workspace:^",
+    "@openzeppelin/transaction-form-utils": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "prettier": "^3.2.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.5",
+    "vite-plugin-dts": "^3.8.1",
+    "vitest": "^3.0.8"
+  }
+}

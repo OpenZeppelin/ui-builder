@@ -1,14 +1,18 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
+import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
+
 import { WalletConnectionHeader } from './components/Common/Wallet';
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
-import { AdapterProvider, WalletStateProvider } from './core/hooks';
+import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 function App() {
   return (
-    <AdapterProvider>
-      {/* TODO: Make initialNetworkId configurable via config service */}
-      <WalletStateProvider initialNetworkId="ethereum-mainnet">
+    <AdapterProvider resolveAdapter={getAdapter}>
+      <WalletStateProvider
+        initialNetworkId="ethereum-mainnet"
+        getNetworkConfigById={getNetworkById}
+      >
         <div className="bg-background text-foreground min-h-screen">
           <header className="border-b px-6 py-3">
             <div className="container mx-auto flex items-center justify-between">

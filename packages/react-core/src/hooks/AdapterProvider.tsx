@@ -13,17 +13,17 @@
  * during component rendering. Direct state updates during render are not allowed, which
  * is why adapter loading is controlled carefully.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
-
-import { getAdapter } from '../ecosystemManager';
 
 import { AdapterContext, AdapterContextValue, AdapterRegistry } from './AdapterContext';
 
 export interface AdapterProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
+  /** Function to resolve/create an adapter instance for a given NetworkConfig. */
+  resolveAdapter: (networkConfig: NetworkConfig) => Promise<ContractAdapter>;
 }
 
 /**
@@ -36,7 +36,7 @@ export interface AdapterProviderProps {
  * 3. Provides a function to get or load adapters for specific networks
  * 4. Ensures adapter instances are reused when possible
  */
-export function AdapterProvider({ children }: AdapterProviderProps) {
+export function AdapterProvider({ children, resolveAdapter }: AdapterProviderProps) {
   // Registry to store adapter instances by network ID
   const [adapterRegistry, setAdapterRegistry] = useState<AdapterRegistry>({});
 
@@ -108,8 +108,8 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
         `Starting adapter initialization for network ${networkId} (${networkConfig.name})`
       );
 
-      // Fetch the adapter
-      void getAdapter(networkConfig)
+      // Use the passed-in resolveAdapter function
+      void resolveAdapter(networkConfig)
         .then((adapter) => {
           logger.info('AdapterProvider', `Adapter for network ${networkId} loaded successfully`, {
             type: adapter.constructor.name,
@@ -145,7 +145,7 @@ export function AdapterProvider({ children }: AdapterProviderProps) {
         isLoading: true,
       };
     },
-    [adapterRegistry, loadingNetworks]
+    [adapterRegistry, loadingNetworks, resolveAdapter]
   );
 
   // Memoize context value to prevent unnecessary re-renders

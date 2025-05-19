@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
-import { useWalletState } from '../../../core/hooks';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
