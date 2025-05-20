@@ -1,12 +1,7 @@
 import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import {
-  getAdapter,
-  getAllNetworks,
-  getNetworkById,
-  getNetworksByEcosystem,
-} from '../ecosystemManager';
+import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
 
 /**
  * Service class for managing and retrieving network configurations and their associated adapters.
@@ -18,14 +13,6 @@ import {
 export class NetworkService {
   // Cache to promote adapter reuse outside React context
   private adapterCache: Record<string, ContractAdapter> = {};
-
-  /**
-   * Get all available network configurations using lazy loading.
-   * @returns A promise that resolves to an array of all network configurations.
-   */
-  async getAllNetworks(): Promise<NetworkConfig[]> {
-    return getAllNetworks();
-  }
 
   /**
    * Get network configurations for a specific ecosystem using lazy loading.
