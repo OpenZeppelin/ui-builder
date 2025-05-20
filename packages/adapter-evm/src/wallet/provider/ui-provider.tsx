@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Config as WagmiConfig } from '@wagmi/core';
 import { WagmiProvider } from 'wagmi';
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -38,50 +38,30 @@ const getWagmiConfig = (): WagmiConfig | null => {
 export const EvmBasicUiContextProvider: React.FC<EcosystemReactUiProviderProps> = ({
   children,
 }) => {
-  // Use state to safely handle async config initialization
-  const [config, setConfig] = useState<WagmiConfig | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [providerInitialized, setProviderInitialized] = useState(false);
-
-  // Initialize provider once on mount
-  useEffect(() => {
-    // Skip if already initialized or has error
-    if (providerInitialized || error) {
-      return;
-    }
-
+  // Obtain Wagmi config synchronously to ensure provider is available on first render.
+  const config = useMemo<WagmiConfig | null>(() => {
     try {
       const wagmiConfig = getWagmiConfig();
-      setConfig(wagmiConfig);
 
       if (!wagmiConfig) {
         logger.warn(
           'EvmBasicUiContextProvider',
           'WagmiConfig not available. Wallet features may not work properly.'
         );
-      } else {
-        // Mark as initialized only when we have a valid config
-        setProviderInitialized(true);
-
-        // Only log initialization once
-        if (!hasLoggedInitialization) {
-          logger.info('EvmBasicUiContextProvider', 'WagmiProvider successfully initialized');
-          hasLoggedInitialization = true;
-        }
+      } else if (!hasLoggedInitialization) {
+        logger.info('EvmBasicUiContextProvider', 'WagmiProvider successfully initialized');
+        hasLoggedInitialization = true;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error initializing WagmiProvider'));
-      logger.error('EvmBasicUiContextProvider', 'Error initializing WagmiProvider:', err);
-    }
-  }, [providerInitialized, error]);
 
-  // If we have an error or no config, render without the providers to avoid crashing
-  if (error || !config) {
-    logger.warn(
-      'EvmBasicUiContextProvider',
-      'Rendering without WagmiProvider due to missing config'
-    );
-    // Still provide the context with value false
+      return wagmiConfig;
+    } catch (error) {
+      logger.error('EvmBasicUiContextProvider', 'Failed to obtain WagmiConfig:', error);
+      return null;
+    }
+  }, []);
+
+  // If config is not available, render children without WagmiProvider to avoid crashing.
+  if (!config) {
     return (
       <WagmiProviderInitializedContext.Provider value={false}>
         {children}
@@ -92,7 +72,8 @@ export const EvmBasicUiContextProvider: React.FC<EcosystemReactUiProviderProps> 
   return (
     <WagmiProvider config={config} reconnectOnMount={true}>
       <QueryClientProvider client={queryClient}>
-        <WagmiProviderInitializedContext.Provider value={providerInitialized}>
+        {/* We expose that the provider has been successfully initialised */}
+        <WagmiProviderInitializedContext.Provider value={true}>
           {children}
         </WagmiProviderInitializedContext.Provider>
       </QueryClientProvider>
