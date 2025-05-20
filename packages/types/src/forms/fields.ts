@@ -121,7 +121,9 @@ export interface TransactionFormProps {
   adapter: FullContractAdapter;
 
   /**
-   * Optional callback when form is submitted
+   * Optional flag indicating if a wallet is currently connected.
+   * Used to control UI elements like the submit button.
+   * If not provided, components might assume not connected or use other means if available.
    */
-  onSubmit?: (data: FormData) => void;
+  isWalletConnected?: boolean;
 }

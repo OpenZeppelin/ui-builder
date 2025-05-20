@@ -135,7 +135,6 @@ export class WagmiWalletImplementation {
 
   /**
    * Retrieves the current Wagmi configuration.
-   * Used by WalletConnectionProvider to initialize WagmiProvider.
    */
   public getConfig(): Config {
     return this.config;

@@ -6,7 +6,11 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-import { WalletConnectionHeader, useWalletState } from '@openzeppelin/transaction-form-react-core';
+import {
+  WalletConnectionHeader,
+  useDerivedAccountStatus,
+  useWalletState,
+} from '@openzeppelin/transaction-form-react-core';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
@@ -19,6 +23,7 @@ import GeneratedForm from './components/GeneratedForm';
  */
 export function App() {
   const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
 
   if (isAdapterLoading) {
     return <div className="app-loading">Loading adapter...</div>;
@@ -51,12 +56,7 @@ export function App() {
 
       <main className="main">
         <div className="container">
-          <GeneratedForm
-            adapter={activeAdapter}
-            onSubmit={(data: FormData) => {
-              console.log('Transaction submitted:', data);
-            }}
-          />
+          <GeneratedForm adapter={activeAdapter} isWalletConnected={isWalletConnectedForForm} />
         </div>
       </main>
 

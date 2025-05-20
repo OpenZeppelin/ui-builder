@@ -9,12 +9,11 @@ import { createTransformForFieldType } from '@openzeppelin/transaction-form-rend
 import type {
   ContractAdapter,
   ContractSchema,
-  FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
-import {
+  FieldValidation,
   FormFieldType,
   FormLayout,
   FormValues,
+  FunctionParameter,
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-types';
 
@@ -81,61 +80,75 @@ export class FormSchemaFactory {
    * This is useful for previewing a form in the builder
    *
    * @param builderConfig The BuilderFormConfig created in the form builder
-   * @param functionName The name of the function (for title and button text)
-   * @param functionDescription Optional description for the form
+   * @param formTitle The title of the form
+   * @param formDescription Optional description for the form
    * @returns A complete RenderFormSchema for rendering
    */
   builderConfigToRenderSchema(
     builderConfig: BuilderFormConfig,
-    functionName: string,
-    functionDescription?: string
+    formTitle: string,
+    formDescription?: string
   ): RenderFormSchema {
-    // Filter fields and map properties for the RenderFormSchema
-    const renderFields = builderConfig.fields
-      .filter((field) => !field.isHidden) // Filter out hidden fields
-      .map((field) => {
-        const { validation, isHardcoded, hardcodedValue, ...restOfField } = field;
-        const outputField: Partial<FormFieldType> = { ...restOfField }; // Start with rest
+    const processedFields: FormFieldType[] = builderConfig.fields.map((field) => {
+      const outputField: FormFieldType = {
+        id: field.id,
+        name: field.name,
+        label: field.label,
+        type: field.type,
+        placeholder: field.placeholder,
+        helperText: field.helperText,
+        defaultValue: field.defaultValue,
+        validation:
+          field.validation && Object.keys(field.validation).length > 0
+            ? field.validation
+            : ({} as FieldValidation),
+        options: field.options,
+        width: field.width,
+        transforms: field.transforms,
+        visibleWhen: field.visibleWhen,
+        originalParameterType: field.originalParameterType,
+        isHidden: field.isHidden,
+        isHardcoded: field.isHardcoded,
+        hardcodedValue: field.hardcodedValue,
+        isReadOnly: field.isReadOnly,
+      };
 
-        // Include validation only if it exists and has keys
-        if (validation && Object.keys(validation).length > 0) {
-          outputField.validation = validation;
-        }
+      if (field.isHardcoded && !field.isHidden && outputField.defaultValue === undefined) {
+        outputField.defaultValue = field.hardcodedValue;
+      }
 
-        // Handle hardcoded fields that are NOT hidden
-        if (isHardcoded) {
-          outputField.defaultValue = hardcodedValue; // Set defaultValue
-          // isReadOnly is copied via restOfField
-        }
+      return outputField;
+    });
 
-        return outputField as FormFieldType; // Cast to final type
-      });
-
-    // Create defaultValues object for RHF from hardcoded fields
-    const defaultValues: FormValues = {};
-    builderConfig.fields.forEach((field) => {
+    const defaultValuesForRHF: FormValues = {};
+    processedFields.forEach((field) => {
       if (field.isHardcoded && field.hardcodedValue !== undefined) {
-        // Use the field's name (parameter name) as the key
-        defaultValues[field.name] = field.hardcodedValue;
+        defaultValuesForRHF[field.name] = field.hardcodedValue;
+      } else if (field.defaultValue !== undefined) {
+        defaultValuesForRHF[field.name] = field.defaultValue;
       }
     });
 
-    // Explicitly exclude executionConfig when spreading builderConfig
-    const { executionConfig: _executionConfig, ...restOfBuilderConfig } = builderConfig;
+    const {
+      executionConfig: _executionConfig,
+      fields: _fields,
+      ...restOfBuilderConfig
+    } = builderConfig;
 
     return {
-      ...restOfBuilderConfig, // Spread the rest of the config
+      ...restOfBuilderConfig,
       id: `form-${builderConfig.functionId}`,
-      title: functionName,
-      description: functionDescription || '',
-      fields: renderFields,
+      title: formTitle,
+      description: formDescription || builderConfig.description || '',
+      fields: processedFields,
       submitButton: {
-        text: `Execute ${functionName}`,
+        text: `Execute ${formTitle}`,
         loadingText: 'Processing...',
         variant: 'primary' as const,
       },
-      defaultValues: defaultValues,
+      defaultValues: Object.keys(defaultValuesForRHF).length > 0 ? defaultValuesForRHF : undefined,
       contractAddress: builderConfig.contractAddress,
+      functionId: builderConfig.functionId,
     };
   }
 

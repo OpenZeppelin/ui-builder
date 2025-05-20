@@ -1,7 +1,10 @@
-import { type Connector, useAccount, useConnect } from 'wagmi';
-
 import React, { useEffect, useState } from 'react';
 
+import {
+  useDerivedAccountStatus,
+  useDerivedConnectStatus,
+} from '@openzeppelin/transaction-form-react-core';
+import type { Connector } from '@openzeppelin/transaction-form-types';
 import {
   Button,
   Dialog,
@@ -48,8 +51,14 @@ export const ConnectorDialog: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
 
 // Inner content that uses wagmi hooks
 const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenChange }) => {
-  const { connect, connectors, error: connectError, isPending } = useConnect();
-  const { isConnected } = useAccount();
+  const {
+    connect,
+    connectors,
+    error: connectError,
+    isConnecting,
+    pendingConnector,
+  } = useDerivedConnectStatus();
+  const { isConnected } = useDerivedAccountStatus();
   const [connectingId, setConnectingId] = useState<string | null>(null);
 
   // Get the complete config to log it
@@ -60,9 +69,9 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
   useEffect(() => {
     logger.debug(
       'ConnectorDialog',
-      `Configuration loaded: ${JSON.stringify(fullConfig)}, showInjectedConnector=${showInjectedConnector}`
+      `Config: ${JSON.stringify(fullConfig)}, showInjected: ${showInjectedConnector}, isConnectingHook: ${isConnecting}, pendingConnectorHook: ${pendingConnector?.id}`
     );
-  }, [fullConfig, showInjectedConnector]);
+  }, [fullConfig, showInjectedConnector, isConnecting, pendingConnector]);
 
   // Track connection attempts for dialog closure
   useEffect(() => {
@@ -73,16 +82,23 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
     }
   }, [isConnected, connectingId, onOpenChange]);
 
-  const handleConnectorSelect = (connector: Connector) => {
-    try {
-      setConnectingId(connector.id);
-      // Just start the connection - dialog will close via the effect when connected
-      connect({ connector });
-      // Note: The dialog closing is now handled by the useEffect above
-    } catch (err) {
-      console.error('Connection error:', err);
-      setConnectingId(null);
-    }
+  // If connect function itself is not available (e.g., adapter doesn't provide useConnect facade hook)
+  if (!connect) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+          </DialogHeader>
+          <p>Wallet connection function is not available.</p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  const handleConnectorSelect = (selectedConnector: Connector) => {
+    setConnectingId(selectedConnector.id);
+    connect({ connector: selectedConnector });
   };
 
   // Filter out the injected connector if showInjectedConnector is false
@@ -115,12 +131,12 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
               <Button
                 key={connector.id}
                 onClick={() => handleConnectorSelect(connector)}
-                disabled={isPending && connectingId === connector.id}
+                disabled={isConnecting && connectingId === connector.id}
                 variant="outline"
                 className="flex justify-between items-center w-full py-6"
               >
                 <span>{connector.name}</span>
-                {isPending && connectingId === connector.id && (
+                {isConnecting && connectingId === connector.id && (
                   <span className="ml-2 text-xs">Connecting...</span>
                 )}
               </Button>

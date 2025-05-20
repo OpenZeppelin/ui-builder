@@ -9,40 +9,19 @@
 /*------------TEMPLATE COMMENT START------------*/
 // This import will be replaced at generation time
 /*------------TEMPLATE COMMENT END------------*/
-// @ts-expect-error - This is a placeholder for the correct adapter import
+// @ts-expect-error - Adapter import placeholder
 import { AdapterPlaceholder } from '@@adapter-package-name@@';
 
 import { useState } from 'react';
 
-import {
-  ContractStateWidget,
-  TransactionForm,
-  WalletConnectionProvider,
-} from '@openzeppelin/transaction-form-renderer';
-import type {
-  ContractSchema,
-  FormFieldType,
-  RenderFormSchema,
-  TransactionFormProps,
-} from '@openzeppelin/transaction-form-types';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@openzeppelin/transaction-form-ui';
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
-// Define type for transaction result (this will be implemented in the future)
-interface TransactionResult {
-  txHash?: string;
-  error?: string;
-}
-
-// Define props for the component, extending TransactionFormProps but making schemas optional as they are injected by the generator
-interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'contractSchema'> {
+// Props for GeneratedForm
+interface GeneratedFormProps {
   adapter: AdapterPlaceholder;
+  isWalletConnected?: boolean;
 }
 
 /**
@@ -52,34 +31,30 @@ interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'cont
  * It uses the shared form-renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
-export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
-  const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
-  // const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedFormProps) {
+  // TODO: Enable this useEffect as a fallback?
+  // If the adapter supports runtime schema loading (e.g., via Etherscan)
+  // and the injected schema is missing or invalid, this could attempt to load it.
+  /*
+  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+  */
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, _setLoadError] = useState<Error | null>(null);
-
   // Form schema generated from the builder and transformed by FormSchemaFactory
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty object that will be replaced at generation time with a properly
   // transformed RenderFormSchema that includes all necessary properties
   /*------------TEMPLATE COMMENT END------------*/
-  // @ts-expect-error - This is a placeholder for the correct form schema import
-  const formSchema: RenderFormSchema = {};
+  // @ts-expect-error - Placeholder
+  const formSchema: RenderFormSchema = {}; /*@@FORM_SCHEMA_JSON@@*/
 
   // Contract schema injected by generator (loaded or uploaded by the user)
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty object that will be replaced at generation time with a properly
   // transformed ContractSchema that includes all necessary properties
   /*------------TEMPLATE COMMENT END------------*/
-  // @ts-expect-error - This is a placeholder for the correct contract schema import
+  // @ts-expect-error - Placeholder
   const contractSchema: ContractSchema = {}; /*@@CONTRACT_SCHEMA_JSON@@*/
-
-  // Original field configurations (including hidden, hardcoded values)
-  /*------------TEMPLATE COMMENT START------------*/
-  // This is an empty array that will be replaced at generation time with the
-  // original, unfiltered FormFieldType[] configuration.
-  /*------------TEMPLATE COMMENT END------------*/
-  const allFieldsConfig: FormFieldType[] = [];
 
   // Execution configuration selected in the builder
   /*------------TEMPLATE COMMENT START------------*/
@@ -126,108 +101,35 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
     setIsWidgetVisible((prev: boolean) => !prev);
   };
 
-  // Handle form submission
-  const handleSubmit = (formData: FormData) => {
-    // Log the execution config (will be used for signing/broadcasting logic later)
-    console.log('Using Execution Config:', executionConfig);
-
-    // Convert FormData to Record<string, unknown> for adapter
-    const submittedInputs: Record<string, unknown> = {};
-    formData.forEach((value, key) => {
-      submittedInputs[key] = value;
-    });
-
-    if (!schemaToUse) {
-      console.error('handleSubmit: Contract schema is not available!');
-      setTransactionResult({ error: 'Contract schema not loaded.' });
-      return;
-    }
-
-    try {
-      const functionId = '@@function-id@@';
-      const formattedData = adapter.formatTransactionData(
-        schemaToUse,
-        functionId,
-        submittedInputs,
-        allFieldsConfig
-      );
-
-      // --- Integration with onSubmit prop ---
-      if (onSubmit) {
-        // We might need to reconsider passing raw FormData if onSubmit expects the formatted data
-        // For now, assume onSubmit handles the interaction
-        onSubmit(formData);
-        setTransactionResult({ txHash: '0x_SUBMITTED_VIA_PROP' }); // Indicate submission via prop
-      } else {
-        // --- Default submission logic (if no onSubmit provided) ---
-        // This would typically involve signing and broadcasting
-        console.log('Formatted data:', formattedData);
-        // const result = await adapter.signAndBroadcast(formattedData);
-        // setTransactionResult(result);
-        // For template testing:
-        setTransactionResult({ txHash: '0x_MOCK_TX_HASH' });
-        logger.info('GeneratedForm', 'Mock submission successful!');
-      }
-    } catch (error) {
-      logger.error('GeneratedForm', 'Submission error:', error);
-      // TODO: Set an error state to display to the user
-      setTransactionResult({ error: (error as Error).message });
-    }
-  };
-
   return (
-    <WalletConnectionProvider adapter={adapter}>
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Card>
-            <CardHeader>
-              {/* Render title unconditionally; React handles empty strings */}
-              <CardTitle>{/*@@formSchema.title@@*/}</CardTitle>
-              {/* Render description unconditionally */}
-              <CardDescription>{/*@@formSchema.description@@*/}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {transactionResult && (
-                <div className="transaction-result rounded-md bg-green-50 p-4 text-green-800">
-                  <h3 className="font-medium">Transaction Successful!</h3>
-                  <p className="mt-2 text-sm">
-                    Transaction Hash: {transactionResult.txHash || 'N/A'}
-                  </p>
-                </div>
-              )}
-              {/* Check the actual contractAddress variable at runtime */}
-              {contractAddress ? (
-                <TransactionForm
-                  schema={formSchema}
-                  contractSchema={schemaToUse}
-                  adapter={adapter}
-                  onSubmit={handleSubmit}
-                />
-              ) : (
-                <div className="text-destructive-foreground rounded-md bg-destructive p-4">
-                  <h3 className="font-medium">Configuration Error</h3>
-                  <p className="mt-2 text-sm">Missing contract address in the form schema.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {contractAddress && (
-          <div className="w-[300px] flex-shrink-0">
-            <div className="sticky top-4">
-              <ContractStateWidget
-                contractSchema={schemaToUse}
-                contractAddress={contractAddress}
-                adapter={adapter}
-                isVisible={isWidgetVisible}
-                onToggle={toggleWidget}
-                error={loadError}
-              />
-            </div>
-          </div>
-        )}
+    <div className="flex gap-4">
+      <div className="flex-1">
+        <Card>
+          <CardContent className="space-y-4">
+            <TransactionForm
+              schema={formSchema}
+              contractSchema={contractSchema}
+              adapter={adapter}
+              isWalletConnected={isWalletConnected}
+            />
+          </CardContent>
+        </Card>
       </div>
-    </WalletConnectionProvider>
+
+      {contractAddress && (
+        <div className="w-[300px] flex-shrink-0">
+          <div className="sticky top-4">
+            <ContractStateWidget
+              contractSchema={schemaToUse}
+              contractAddress={contractAddress}
+              adapter={adapter}
+              isVisible={isWidgetVisible}
+              onToggle={toggleWidget}
+              error={loadError}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

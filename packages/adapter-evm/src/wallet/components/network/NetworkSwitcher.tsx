@@ -1,8 +1,13 @@
 import { Loader2 } from 'lucide-react';
-import { useAccount, useChainId, useChains, useSwitchChain } from 'wagmi';
+import type { Chain } from 'viem';
 
 import React from 'react';
 
+import {
+  useDerivedAccountStatus,
+  useDerivedChainInfo,
+  useDerivedSwitchChainStatus,
+} from '@openzeppelin/transaction-form-react-core';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
 import {
   Select,
@@ -30,12 +35,11 @@ export const CustomNetworkSwitcher: React.FC<BaseComponentProps> = ({ className 
 
 // Inner component that uses wagmi hooks
 const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className }) => {
-  const currentChainId = useChainId();
-  const chains = useChains();
-  const { switchChain, isPending, error } = useSwitchChain();
-  const { isConnected } = useAccount();
+  const { isConnected } = useDerivedAccountStatus();
+  const { currentChainId, availableChains } = useDerivedChainInfo();
+  const { switchChain, isSwitching: isPending, error } = useDerivedSwitchChainStatus();
 
-  if (!isConnected || chains.length === 0) {
+  if (!isConnected || !switchChain || availableChains.length === 0) {
     return null;
   }
 
@@ -45,15 +49,15 @@ const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className })
     }
   };
 
-  // Find current chain name for display
-  const currentChainName = chains.find((chain) => chain.id === currentChainId)?.name || 'Network';
+  const currentChain = availableChains.find((chain) => (chain as Chain).id === currentChainId);
+  const currentChainName = (currentChain as Chain)?.name || 'Network';
 
   return (
     <div className={cn('flex items-center', className)}>
       <Select
-        value={currentChainId?.toString()}
+        value={currentChainId?.toString() ?? ''}
         onValueChange={(value: string) => handleNetworkChange(Number(value))}
-        disabled={isPending || !chains.length}
+        disabled={isPending || availableChains.length === 0}
       >
         <SelectTrigger className="h-8 text-xs px-2 min-w-[90px] max-w-[120px]">
           <SelectValue placeholder="Network">{currentChainName}</SelectValue>
@@ -64,9 +68,13 @@ const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className })
           align="start"
           className="w-auto min-w-[160px] max-h-[300px]"
         >
-          {chains.map((chain) => (
-            <SelectItem key={chain.id} value={chain.id.toString()} className="text-xs py-1.5">
-              {chain.name}
+          {availableChains.map((chain) => (
+            <SelectItem
+              key={(chain as Chain).id}
+              value={(chain as Chain).id.toString()}
+              className="text-xs py-1.5"
+            >
+              {(chain as Chain).name}
             </SelectItem>
           ))}
         </SelectContent>

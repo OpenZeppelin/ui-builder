@@ -3,3 +3,4 @@ export { AppConfigService, appConfigService, type ConfigLoadStrategy } from './A
 export { generateId } from './generateId';
 export { cn } from './cn';
 export { truncateMiddle } from './formatting';
+export { isRecordWithProperties } from './typeguards';

@@ -1,8 +1,11 @@
 import { Loader2, Wallet } from 'lucide-react';
-import { useAccount, useConnect } from 'wagmi';
 
 import React, { useEffect, useState } from 'react';
 
+import {
+  useDerivedAccountStatus,
+  useDerivedConnectStatus,
+} from '@openzeppelin/transaction-form-react-core';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
 import { Button } from '@openzeppelin/transaction-form-ui';
 import { cn } from '@openzeppelin/transaction-form-utils';
@@ -25,8 +28,6 @@ export const CustomConnectButton: React.FC<ConnectButtonProps> = ({
   hideWhenConnected = true,
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  // Track our own loading state
-  const [isPendingConnection, setIsPendingConnection] = useState(false);
 
   const unavailableButton = (
     <div className={cn('flex items-center', className)}>
@@ -44,107 +45,83 @@ export const CustomConnectButton: React.FC<ConnectButtonProps> = ({
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         hideWhenConnected={hideWhenConnected}
-        isPendingConnection={isPendingConnection}
-        setIsPendingConnection={setIsPendingConnection}
       />
     </SafeWagmiComponent>
   );
 };
 
-// Inner component that uses wagmi hooks
 const ConnectButtonContent: React.FC<{
   className?: string;
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
   hideWhenConnected: boolean;
-  isPendingConnection: boolean;
-  setIsPendingConnection: (isPending: boolean) => void;
-}> = ({
-  className,
-  dialogOpen,
-  setDialogOpen,
-  hideWhenConnected,
-  isPendingConnection,
-  setIsPendingConnection,
-}) => {
-  const { isConnected } = useAccount();
-  const { isPending } = useConnect();
+}> = ({ className, dialogOpen, setDialogOpen, hideWhenConnected }) => {
+  const { isConnected } = useDerivedAccountStatus();
+  const { isConnecting: isHookConnecting, error: connectError } = useDerivedConnectStatus();
 
-  // Set our local pending state when wagmi's isPending changes
-  useEffect(() => {
-    if (isPending) {
-      setIsPendingConnection(true);
-    }
-  }, [isPending, setIsPendingConnection]);
-
-  // Reset pending state when connection completes
-  useEffect(() => {
-    if (isConnected) {
-      setIsPendingConnection(false);
-    }
-  }, [isConnected, setIsPendingConnection]);
-
-  // Reset pending state when dialog closes
-  useEffect(() => {
-    if (!dialogOpen) {
-      // Small delay to prevent flickering if dialog closes and immediately reopens
-      const timer = setTimeout(() => {
-        if (!dialogOpen) {
-          setIsPendingConnection(false);
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [dialogOpen, setIsPendingConnection]);
+  // Local state to indicate the button has been clicked and dialog is open, awaiting user selection
+  const [isManuallyInitiated, setIsManuallyInitiated] = useState(false);
 
   useEffect(() => {
-    // If the button content is being hidden because the wallet is connected,
-    // ensure the dialog is closed.
     if (isConnected && hideWhenConnected) {
       setDialogOpen(false);
+      setIsManuallyInitiated(false); // Reset if dialog closes due to connection
     }
   }, [isConnected, hideWhenConnected, setDialogOpen]);
 
-  // Hide the button if connected and hideWhenConnected is true
-  if (isConnected && hideWhenConnected) {
-    return null;
-  }
+  // If dialog is closed, reset manual initiation state
+  useEffect(() => {
+    if (!dialogOpen) {
+      setIsManuallyInitiated(false);
+    }
+  }, [dialogOpen]);
+
+  // If wagmi hook reports it's connecting, we no longer need our manual pending state
+  useEffect(() => {
+    if (isHookConnecting) {
+      setIsManuallyInitiated(false);
+    }
+  }, [isHookConnecting]);
 
   const handleConnectClick = () => {
     if (!isConnected) {
-      setIsPendingConnection(true); // Set pending immediately on click
+      setIsManuallyInitiated(true); // User clicked, show pending on button
       setDialogOpen(true);
     }
   };
 
-  // Use combined state (wagmi's isPending or our local state)
-  const isLoading = isPending || isPendingConnection;
+  if (isConnected && hideWhenConnected) {
+    return null;
+  }
+
+  // Button shows loading if either hook reports connecting OR if user just clicked to open dialog
+  const showButtonLoading = isHookConnecting || isManuallyInitiated;
 
   return (
     <div className={cn('flex items-center', className)}>
       <Button
         onClick={handleConnectClick}
-        disabled={isLoading || isConnected}
+        disabled={showButtonLoading || isConnected}
         variant="outline"
         size="sm"
         className="h-8 px-2 text-xs"
-        title={isConnected ? 'Connected' : 'Connect Wallet'}
+        title={isConnected ? 'Connected' : connectError?.message || 'Connect Wallet'}
       >
-        {isLoading ? (
+        {showButtonLoading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
         ) : (
           <Wallet className="h-3.5 w-3.5 mr-1" />
         )}
-        {isLoading ? 'Connecting...' : 'Connect Wallet'}
+        {showButtonLoading ? 'Connecting...' : 'Connect Wallet'}
       </Button>
 
       <ConnectorDialog
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          // If dialog is manually closed, reset pending state
+          // If dialog is closed manually by user before selection, reset manual initiation
           if (!open) {
-            setIsPendingConnection(false);
+            setIsManuallyInitiated(false);
           }
         }}
       />

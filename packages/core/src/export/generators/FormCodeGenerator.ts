@@ -113,7 +113,6 @@ export class FormCodeGenerator {
       functionId,
       formConfigJSON: JSON.stringify(renderSchema, null, 2),
       contractSchemaJSON: JSON.stringify(contractSchema, null, 2),
-      allFieldsConfigJSON: JSON.stringify(formConfig.fields, null, 2),
       executionConfigJSON: executionConfig ? JSON.stringify(executionConfig, null, 2) : 'undefined',
       includeDebugMode: false,
     };
@@ -122,15 +121,18 @@ export class FormCodeGenerator {
     let processedTemplate = await this.templateProcessor.processTemplate('form-component', params);
 
     // Apply common post-processing with form-specific options
-    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(processedTemplate, {
+    const postProcessParams: Partial<FormComponentTemplateParams> = {
       adapterClassName,
       adapterPackageName,
       networkConfigImportName,
       formConfigJSON: params.formConfigJSON,
       contractSchemaJSON: params.contractSchemaJSON,
       executionConfigJSON: params.executionConfigJSON,
-      allFieldsConfigJSON: params.allFieldsConfigJSON,
-    });
+    };
+    processedTemplate = await this.templateProcessor.applyCommonPostProcessing(
+      processedTemplate,
+      postProcessParams
+    );
 
     // Format the entire code with Prettier
     processedTemplate = await this.templateProcessor.formatFinalCode(processedTemplate);

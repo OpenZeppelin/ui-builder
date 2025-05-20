@@ -77,8 +77,7 @@ export function WalletStateProvider({
               setCurrentGlobalNetworkConfig(config);
               logger.info(
                 'WalletStateProvider',
-                `Derived network config for ID: ${currentGlobalNetworkId}`,
-                config
+                `Derived network config for ID: ${currentGlobalNetworkId}`
               );
             } else {
               logger.warn(
@@ -160,7 +159,8 @@ export function WalletStateProvider({
     }
   }, []); // Empty dependency array as it only uses setters from useState.
 
-  // Memoize the context value provided to consumers.
+  // The context value now only provides the raw walletFacadeHooks object.
+  // Consumers are responsible for calling specific hooks from it and handling their results.
   const contextValue = useMemo<WalletStateContextValue>(
     () => ({
       activeNetworkId: currentGlobalNetworkId,
