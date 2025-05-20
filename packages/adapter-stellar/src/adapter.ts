@@ -77,18 +77,13 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   // --- Transaction Formatting & Execution --- //
-  formatTransactionData(
+  public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
+    fields: FormFieldType[]
   ): unknown {
-    return formatStellarTransactionData(
-      contractSchema,
-      functionId,
-      submittedInputs,
-      allFieldsConfig
-    );
+    return formatStellarTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
     return signAndBroadcastStellarTransaction(transactionData);

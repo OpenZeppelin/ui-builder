@@ -118,13 +118,13 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  formatTransactionData(
+  public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
-  ): unknown {
-    return formatEvmTransactionData(contractSchema, functionId, submittedInputs, allFieldsConfig);
+    fields: FormFieldType[]
+  ): WriteContractParameters {
+    return formatEvmTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
 
   /**

@@ -163,7 +163,6 @@ export class TemplateProcessor {
       adapterPackageName?: string;
       formConfigJSON?: string;
       contractSchemaJSON?: string;
-      allFieldsConfigJSON?: string;
       executionConfigJSON?: string;
     }
   ): Promise<string> {
@@ -236,21 +235,6 @@ export class TemplateProcessor {
         );
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject contract schema:', error);
-        throw error;
-      }
-    }
-
-    // Inject allFieldsConfig JSON if provided
-    if (options?.allFieldsConfigJSON) {
-      try {
-        processedTemplate = processedTemplate.replace(
-          // Match the placeholder variable assignment
-          /const allFieldsConfig: FormFieldType\[\] = \[];/g,
-          // Replace with the actual JSON string
-          `const allFieldsConfig: FormFieldType[] = ${options.allFieldsConfigJSON};`
-        );
-      } catch (error) {
-        logger.error('TemplateProcessor', 'Failed to inject allFieldsConfig:', error);
         throw error;
       }
     }

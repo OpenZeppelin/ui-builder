@@ -7,7 +7,7 @@ export function formatStellarTransactionData(
   _contractSchema: ContractSchema,
   _functionId: string,
   _submittedInputs: Record<string, unknown>,
-  _allFieldsConfig: FormFieldType[]
+  _fields: FormFieldType[]
 ): unknown {
   console.warn('StellarAdapter.formatTransactionData not implemented, returning placeholder data.');
   // Placeholder implementation

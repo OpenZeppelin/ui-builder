@@ -76,18 +76,13 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   // --- Transaction Formatting & Execution --- //
-  formatTransactionData(
+  public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
+    fields: FormFieldType[]
   ): unknown {
-    return formatMidnightTransactionData(
-      contractSchema,
-      functionId,
-      submittedInputs,
-      allFieldsConfig
-    );
+    return formatMidnightTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
   async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
     return signAndBroadcastMidnightTransaction(transactionData);

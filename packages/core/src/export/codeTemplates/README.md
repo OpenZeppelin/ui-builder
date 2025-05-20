@@ -77,7 +77,6 @@ The FormCodeGenerator applies a unified post-processing approach to all template
 For form component templates (`form-component.template.tsx`):
 
 - Form schema JSON injection (`formConfigJSON`).
-- Original field configuration JSON injection (`allFieldsConfigJSON`).
 - Execution configuration JSON injection (`executionConfigJSON`).
 
 ## Automatic Parameter Name Conversion
@@ -129,7 +128,6 @@ Each template has specific parameters defined in `TemplateTypes.ts`:
 - `ecosystem`: The ecosystem (e.g., 'evm').
 - `functionId`: The function ID.
 - `formConfigJSON`: The generated `RenderFormSchema` as a JSON string.
-- `allFieldsConfigJSON`: The original `BuilderFormConfig.fields` array as a JSON string.
 - `executionConfigJSON`: The selected execution config as a JSON string or 'undefined'.
 - `includeDebugMode`: Optional flag to include debug mode.
 
@@ -139,3 +137,58 @@ Each template has specific parameters defined in `TemplateTypes.ts`:
 2. Use any of the supported placeholder formats (variable, JSX comment, or inline comment)
 3. Create corresponding parameter types in `TemplateTypes.ts`
 4. Update the FormCodeGenerator to support the new template and add any necessary post-processing steps
+
+### `form-component.template.tsx`
+
+Generates the main `GeneratedForm.tsx` component in the exported application. This component wraps the `@openzeppelin/transaction-form-renderer`'s `TransactionForm`.
+
+**Key Injections:**
+
+- Adapter import path and class name (e.g., `EvmAdapter` from `@openzeppelin/transaction-form-adapter-evm`).
+- `RenderFormSchema` JSON (`formSchema`).
+- `ContractSchema` JSON (`contractSchema`).
+- `ExecutionConfig` JSON (`executionConfig`).
+
+This template is responsible for setting up the form with the correct schema and adapter, and integrating the `ContractStateWidget`.
+
+### `app-component.template.tsx`
+
+### Available Template Variables for `processTemplate`
+
+The `processTemplate` method uses a simple `@@variable-name@@` syntax. The `TemplateProcessor` converts `variable-name` (kebab-case) to `variableName` (camelCase) when looking up values in the provided parameters object.
+
+**Commonly used variables:**
+
+- `adapter-package-name`: e.g., `@openzeppelin/transaction-form-adapter-evm`
+- `adapter-class-name`: e.g., `EvmAdapter`
+- `chain-name`: e.g., `Ethereum`
+- `default-network-json`: JSON string of the default `NetworkConfig` for the selected chain.
+- `ecosystem-identifier`: e.g., `evm`
+- `function-id`: The unique ID of the function the form is for.
+- `app-title`: Title for the generated application.
+
+### Post-Processing Injections (`applyCommonPostProcessing`)
+
+After initial template variable replacement, `applyCommonPostProcessing` handles more complex injections:
+
+- Adapter class name (again, to catch specific placeholders like `AdapterPlaceholder`).
+- Network config import name (e.g., `mainnet`, `sepolia`).
+- `RenderFormSchema` JSON injection (`formSchema`).
+- `ContractSchema` JSON injection (`contractSchema`).
+- `ExecutionConfig` JSON injection (`executionConfig`).
+
+This method also cleans up template comments and formats the code using Prettier.
+
+### Available Template Variables for `generate` method
+
+When using the `generate` method of the `FormCodeGenerator` class, you can provide the following parameters in the `options` object. These are used to inject data into the code templates.
+
+- `adapterPackageName`: The npm package name of the adapter (e.g., `@openzeppelin/transaction-form-adapter-evm`).
+- `adapterClassName`: The class name of the adapter (e.g., `EvmAdapter`).
+- `chainName`: The user-friendly name of the chain (e.g., `Ethereum Mainnet`).
+- `defaultNetworkJson`: A JSON string representing the default `NetworkConfig` for the selected chain.
+- `ecosystemIdentifier`: The ecosystem identifier (e.g., `evm`).
+- `functionId`: The function ID.
+- `formConfigJSON`: The generated `RenderFormSchema` as a JSON string.
+- `executionConfigJSON`: The selected execution config as a JSON string or 'undefined'.
+- `includeDebugMode`: Optional flag to include debug mode.

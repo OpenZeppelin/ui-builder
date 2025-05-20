@@ -87,14 +87,14 @@ export interface ContractAdapter {
    * @param contractSchema - The schema of the contract containing the function.
    * @param functionId - The ID of the function being called
    * @param submittedInputs - The data submitted from the rendered form fields
-   * @param allFieldsConfig - The configuration for all fields
+   * @param fields - The configuration for all fields
    * @returns The formatted data payload for the blockchain transaction, suitable for signAndBroadcast.
    */
   formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
+    fields: FormFieldType[]
   ): unknown;
 
   /**
