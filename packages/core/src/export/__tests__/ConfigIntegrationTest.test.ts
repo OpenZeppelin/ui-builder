@@ -245,26 +245,22 @@ describe('PackageManager Integration Tests', () => {
       expect(result.license).toBe('MIT');
     });
 
-    it('should not add empty devDependencies section if none exist', async () => {
+    it('should not add devDependencies section if EVM adapter and form fields contribute no dev dependencies', async () => {
       const packageManager = new PackageManager(testFormRendererConfig);
-      // Use a form config that doesn't introduce its own dev deps (like 'text')
       const formConfig = createFormConfig(['text']);
-      // Base JSON without devDependencies key initially
       const baseJsonNoDev = JSON.stringify({ name: 'no-dev', dependencies: {} });
 
       const updatedJson = await packageManager.updatePackageJson(
         baseJsonNoDev,
         formConfig,
-        'evm', // Use EVM which DOES have dev deps in its config
-        'devDepsTest',
+        'evm',
+        'noDevDepsTest',
         { env: 'local' }
       );
       const result = JSON.parse(updatedJson);
 
-      // Check that devDependencies IS present because the EVM adapter added one
-      expect(result.hasOwnProperty('devDependencies')).toBe(true);
-      // Specifically check for the dependency added by the EVM adapter config
-      expect(result.devDependencies).toHaveProperty('@types/lodash');
+      // Now expect devDependencies to NOT be present as EVM adapter config no longer adds @types/lodash
+      expect(result.hasOwnProperty('devDependencies')).toBe(false);
     });
   });
 });

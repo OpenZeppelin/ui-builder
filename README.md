@@ -209,9 +209,10 @@ transaction-form-builder/
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   ├── vite.config.ts       # Vite configuration
 │   │   └── ...                  # Other configuration files
-│   ├── react-core/        # Shared React core providers and hooks
+│   ├── react-core/        # Shared React core providers, hooks, and UI components
 │   │   ├── src/
-│   │   │   └── hooks/       # Contains AdapterProvider, WalletStateProvider, useWalletState, etc.
+│   │   │   ├── hooks/       # Contains AdapterProvider, WalletStateProvider, useWalletState, etc.
+│   │   │   └── components/  # Contains WalletConnectionHeader, WalletConnectionUI
 │   │   ├── README.md
 │   │   ├── package.json
 │   │   └── tsconfig.json

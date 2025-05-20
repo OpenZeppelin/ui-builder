@@ -17,6 +17,12 @@ import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
 
+// TODO: Implement UI controls within this step (e.g., in GeneralSettings or a new section)
+// to allow users to configure UiKitConfiguration options (kitName, showInjectedConnector,
+// and component exclusions like hiding NetworkSwitcher, ConnectButton, AccountDisplay).
+// These settings would then be stored, likely in `formConfig` (if form-specific)
+// or a higher-level builder state, and ultimately passed into `ExportOptions.uiKitConfiguration`.
+
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;

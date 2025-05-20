@@ -47,11 +47,13 @@
   "license": "MIT",
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:^",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/transaction-form-utils": "workspace:^",
+    "@openzeppelin/transaction-form-ui": "workspace:^"
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 
-import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { logger } from '@openzeppelin/transaction-form-utils';
+
+import { useWalletState } from '../hooks/WalletStateContext';
 
 import { WalletConnectionUI } from './WalletConnectionUI';
 

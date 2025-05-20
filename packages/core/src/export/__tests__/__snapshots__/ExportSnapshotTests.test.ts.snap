@@ -15,20 +15,30 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
+"import { WalletConnectionHeader, useWalletState } from '@openzeppelin/transaction-form-react-core';
 
 import GeneratedForm from './components/GeneratedForm';
-
-interface AppProps {
-  adapter: EvmAdapter;
-}
 
 /**
  * App Component
  *
  * Main application component that wraps the form.
+ * Uses useWalletState to get the active adapter.
  */
-export function App({ adapter }: AppProps) {
+export function App() {
+  const { activeAdapter, isAdapterLoading } = useWalletState();
+
+  if (isAdapterLoading) {
+    return <div className="app-loading">Loading adapter...</div>;
+  }
+  if (!activeAdapter) {
+    return (
+      <div className="app-error">
+        Adapter not available. Please ensure network is selected and supported.
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="header border-b px-6 py-3">
@@ -43,16 +53,16 @@ export function App({ adapter }: AppProps) {
               </p>
             </div>
           </div>
+          <WalletConnectionHeader />
         </div>
       </header>
 
       <main className="main">
         <div className="container">
           <GeneratedForm
-            adapter={adapter}
+            adapter={activeAdapter}
             onSubmit={(data: FormData) => {
               console.log('Transaction submitted:', data);
-              // Don't return a Promise, this function should be void
             }}
           />
         </div>
@@ -355,11 +365,13 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
+    "@openzeppelin/transaction-form-react-core": "^0.0.1",
     "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
     "@openzeppelin/transaction-form-ui": "^0.0.1",
     "@openzeppelin/transaction-form-utils": "^0.0.1",
-    "lodash": "^4.17.21",
+    "@tanstack/react-query": "^5.0.0",
+    "@wagmi/core": "^2.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -367,7 +379,6 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
@@ -401,11 +412,13 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
+    "@openzeppelin/transaction-form-react-core": "^0.0.1",
     "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
     "@openzeppelin/transaction-form-ui": "^0.0.1",
     "@openzeppelin/transaction-form-utils": "^0.0.1",
-    "lodash": "^4.17.21",
+    "@tanstack/react-query": "^5.0.0",
+    "@wagmi/core": "^2.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -413,7 +426,6 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",

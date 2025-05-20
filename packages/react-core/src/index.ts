@@ -11,3 +11,7 @@ export { WalletStateProvider, type WalletStateProviderProps } from './hooks/Wall
 // Consumer Hooks
 export { useAdapterContext } from './hooks/useAdapterContext';
 export { useWalletState } from './hooks/WalletStateContext';
+
+// UI Components
+export { WalletConnectionHeader } from './components/WalletConnectionHeader';
+export { WalletConnectionUI } from './components/WalletConnectionUI';

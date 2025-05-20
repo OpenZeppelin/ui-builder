@@ -1,8 +1,11 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
-import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
+import {
+  AdapterProvider,
+  WalletConnectionHeader,
+  WalletStateProvider,
+} from '@openzeppelin/transaction-form-react-core';
 
-import { WalletConnectionHeader } from './components/Common/Wallet';
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
