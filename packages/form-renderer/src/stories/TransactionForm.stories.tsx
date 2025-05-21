@@ -129,10 +129,6 @@ export const Advanced: Story = {
   args: {
     schema: advancedSchema,
     adapter: mockAdapter,
-    onSubmit: (formData) => {
-      console.log('Form submitted:', formData);
-      alert('Form submitted successfully!');
-    },
   },
 };
 
@@ -180,10 +176,6 @@ export const WithValidation: Story = {
       submitButton: { text: 'Submit Validated', loadingText: 'Validating...' },
     },
     adapter: mockAdapter,
-    onSubmit: (formData) => {
-      console.log('Form submitted:', formData);
-      alert('Form submitted successfully!');
-    },
   },
 };
 
@@ -289,9 +281,5 @@ export const PreviewState: Story = {
     adapter: mockAdapter,
     schema: _basicSchema,
     contractSchema: mockContractSchemaInstance,
-    onSubmit: (data: FormData) => {
-      console.log('Form submitted:', data);
-      alert('Form submitted successfully!');
-    },
   },
 };
