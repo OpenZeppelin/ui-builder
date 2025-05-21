@@ -36,10 +36,13 @@ export const CustomNetworkSwitcher: React.FC<BaseComponentProps> = ({ className 
 // Inner component that uses wagmi hooks
 const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className }) => {
   const { isConnected } = useDerivedAccountStatus();
-  const { currentChainId, availableChains } = useDerivedChainInfo();
+  const { currentChainId, availableChains: unknownChains } = useDerivedChainInfo();
   const { switchChain, isSwitching: isPending, error } = useDerivedSwitchChainStatus();
 
-  if (!isConnected || !switchChain || availableChains.length === 0) {
+  // Cast to Chain[] for use within this EVM-specific component
+  const typedAvailableChains = unknownChains as Chain[];
+
+  if (!isConnected || !switchChain || typedAvailableChains.length === 0) {
     return null;
   }
 
@@ -49,15 +52,15 @@ const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className })
     }
   };
 
-  const currentChain = availableChains.find((chain) => (chain as Chain).id === currentChainId);
-  const currentChainName = (currentChain as Chain)?.name || 'Network';
+  const currentChain = typedAvailableChains.find((chain) => chain.id === currentChainId);
+  const currentChainName = currentChain?.name || 'Network';
 
   return (
     <div className={cn('flex items-center', className)}>
       <Select
         value={currentChainId?.toString() ?? ''}
         onValueChange={(value: string) => handleNetworkChange(Number(value))}
-        disabled={isPending || availableChains.length === 0}
+        disabled={isPending || typedAvailableChains.length === 0}
       >
         <SelectTrigger className="h-8 text-xs px-2 min-w-[90px] max-w-[120px]">
           <SelectValue placeholder="Network">{currentChainName}</SelectValue>
@@ -68,13 +71,9 @@ const NetworkSwitcherContent: React.FC<{ className?: string }> = ({ className })
           align="start"
           className="w-auto min-w-[160px] max-h-[300px]"
         >
-          {availableChains.map((chain) => (
-            <SelectItem
-              key={(chain as Chain).id}
-              value={(chain as Chain).id.toString()}
-              className="text-xs py-1.5"
-            >
-              {(chain as Chain).name}
+          {typedAvailableChains.map((chain) => (
+            <SelectItem key={chain.id} value={chain.id.toString()} className="text-xs py-1.5">
+              {chain.name}
             </SelectItem>
           ))}
         </SelectContent>

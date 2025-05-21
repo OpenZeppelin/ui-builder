@@ -102,7 +102,7 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
   };
 
   // Filter out the injected connector if showInjectedConnector is false
-  const filteredConnectors = connectors.filter((connector) => {
+  const filteredConnectors = connectors.filter((connector: Connector) => {
     const isInjected = connector.id === 'injected';
     if (isInjected) {
       logger.debug(
@@ -127,7 +127,7 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
           {filteredConnectors.length === 0 ? (
             <p className="text-center text-muted-foreground">No wallet connectors available.</p>
           ) : (
-            filteredConnectors.map((connector) => (
+            filteredConnectors.map((connector: Connector) => (
               <Button
                 key={connector.id}
                 onClick={() => handleConnectorSelect(connector)}

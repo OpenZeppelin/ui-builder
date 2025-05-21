@@ -44,7 +44,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openzeppelin/transaction-form-types": "workspace:*"
+    "@openzeppelin/transaction-form-types": "workspace:*",
+    "@openzeppelin/transaction-form-utils": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.8.2",

@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:*",
+    "@openzeppelin/transaction-form-utils": "workspace:^",
     "@solana/web3.js": "^1.78.5",
     "@solana/spl-token": "^0.3.8",
     "@solana/wallet-adapter-react": "^0.15.35",
