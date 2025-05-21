@@ -26,8 +26,6 @@ function App() {
               </div>
 
               <div className="flex items-center gap-4">
-                <WalletConnectionHeader />
-
                 <a
                   href="https://github.com/OpenZeppelin/transaction-form-builder"
                   target="_blank"
@@ -35,8 +33,10 @@ function App() {
                   rel="noopener noreferrer"
                 >
                   <SiGithub size={16} />
-                  GitHub
                 </a>
+                <div className="border-l pl-4">
+                  <WalletConnectionHeader />
+                </div>
               </div>
             </div>
           </header>
