@@ -1,8 +1,19 @@
+import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
+
+const SYSTEM_LOG_TAG = 'adapter-solana';
 // Placeholder
 export async function signAndBroadcastSolanaTransaction(
-  _transactionData: unknown
+  _transactionData: unknown,
+  executionConfig?: ExecutionConfig
 ): Promise<{ txHash: string }> {
-  console.warn('signAndBroadcastSolanaTransaction not implemented');
+  logger.warn(SYSTEM_LOG_TAG, 'signAndBroadcastSolanaTransaction not implemented');
+  logger.info(
+    SYSTEM_LOG_TAG,
+    'Solana signAndBroadcast called with executionConfig:',
+    executionConfig
+  );
+  // TODO: Use executionConfig
   return { txHash: 'solana_placeholder_tx' };
 }
 

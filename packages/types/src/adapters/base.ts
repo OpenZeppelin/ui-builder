@@ -100,7 +100,10 @@ export interface ContractAdapter {
   /**
    * Sign and broadcast a transaction
    */
-  signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }>;
+  signAndBroadcast: (
+    transactionData: unknown,
+    executionConfig?: ExecutionConfig
+  ) => Promise<{ txHash: string }>;
 
   /**
    * Validate a blockchain address for this chain

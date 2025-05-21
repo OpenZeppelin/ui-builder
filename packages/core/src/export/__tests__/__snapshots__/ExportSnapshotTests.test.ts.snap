@@ -85,7 +85,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 
 import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
 import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
-import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractSchema,
+  ExecutionConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 // Props for GeneratedForm
@@ -174,7 +178,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   };
 
   // Execution configuration selected in the builder
-  const executionConfig: unknown | undefined = {
+  const executionConfig: ExecutionConfig | undefined = {
     method: 'eoa',
     allowAny: true,
   };
@@ -227,6 +231,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
               contractSchema={contractSchema}
               adapter={adapter}
               isWalletConnected={isWalletConnected}
+              executionConfig={executionConfig}
             />
           </CardContent>
         </Card>

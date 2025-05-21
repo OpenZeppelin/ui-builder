@@ -15,7 +15,11 @@ import { AdapterPlaceholder } from '@@adapter-package-name@@';
 import { useState } from 'react';
 
 import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
-import type { ContractSchema, RenderFormSchema } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractSchema,
+  ExecutionConfig,
+  RenderFormSchema,
+} from '@openzeppelin/transaction-form-types';
 import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 // Props for GeneratedForm
@@ -61,7 +65,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   // This will be replaced at generation time with the stringified ExecutionConfig or 'undefined'.
   // Use 'unknown' for the placeholder type. Assign undefined and use comment marker for replacement.
   /*------------TEMPLATE COMMENT END------------*/
-  const executionConfig: unknown | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
+  const executionConfig: ExecutionConfig | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
   // TODO (Export Integration): Use executionConfig at runtime to determine
   // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
@@ -111,6 +115,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
               contractSchema={contractSchema}
               adapter={adapter}
               isWalletConnected={isWalletConnected}
+              executionConfig={executionConfig}
             />
           </CardContent>
         </Card>

@@ -76,6 +76,7 @@ export function FormPreview({ formConfig, functionDetails, contractSchema }: For
             adapter={adapter}
             contractSchema={contractSchema}
             isWalletConnected={isWalletConnected}
+            executionConfig={formConfig.executionConfig}
           />
         </CardContent>
       </Card>

@@ -90,8 +90,11 @@ export class SolanaAdapter implements ContractAdapter {
     return formatSolanaTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
 
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    return signAndBroadcastSolanaTransaction(transactionData);
+  async signAndBroadcast(
+    transactionData: unknown,
+    executionConfig?: ExecutionConfig
+  ): Promise<{ txHash: string }> {
+    return signAndBroadcastSolanaTransaction(transactionData, executionConfig);
   }
 
   isValidAddress(address: string): boolean {

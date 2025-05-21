@@ -13,6 +13,7 @@ import { createDefaultFormValues } from '../utils/formUtils';
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
 import { DynamicFormField } from './DynamicFormField';
+import { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
 import { TransactionStatusDisplay } from './transaction';
 
 /**
@@ -39,8 +40,10 @@ export function TransactionForm({
   contractSchema,
   adapter,
   isWalletConnected = false,
+  executionConfig,
 }: TransactionFormProps): React.ReactElement {
   const [formError, setFormError] = useState<string | null>(null);
+  const [executionConfigError, setExecutionConfigError] = useState<string | null>(null);
 
   // Transaction Lifecycle State
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
@@ -63,23 +66,48 @@ export function TransactionForm({
     setTxHash(null);
     setTxError(null);
     setFormError(null);
+    setExecutionConfigError(null);
   }, [schema, methods]);
 
+  // Effect to validate executionConfig
+  useEffect(() => {
+    const validateExecConfig = async (): Promise<void> => {
+      if (executionConfig && adapter && adapter.validateExecutionConfig) {
+        try {
+          logger.info('TransactionForm', 'Re-validating execution config:', executionConfig);
+          const validationResult = await adapter.validateExecutionConfig(executionConfig);
+          if (typeof validationResult === 'string') {
+            setExecutionConfigError(`Execution Configuration Error: ${validationResult}`);
+          } else {
+            setExecutionConfigError(null);
+          }
+        } catch (error) {
+          logger.error('TransactionForm', 'Error reactive exec config validation:', error);
+          setExecutionConfigError(
+            `Exec Config Validation Failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      } else {
+        setExecutionConfigError(null);
+      }
+    };
+    void validateExecConfig();
+  }, [executionConfig, adapter, isWalletConnected]);
+
   const executeTransaction = async (data: FormValues): Promise<void> => {
-    logger.info('TransactionForm', 'Internal form submission', data);
+    logger.info('TransactionForm', 'Internal form submission attempt', data);
     setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
 
     if (!adapter) {
-      logger.error('TransactionForm', 'Adapter not provided for internal submit.');
+      logger.error('TransactionForm', 'Adapter not provided.');
       setTxError('Configuration error: Adapter not available.');
       setTxStatus('error');
       return;
     }
-
     if (!isWalletConnected) {
-      logger.warn('TransactionForm', 'Wallet not connected for internal submit.');
+      logger.warn('TransactionForm', 'Wallet not connected for submission.');
       setTxError('Please connect your wallet to submit the transaction.');
       setTxStatus('error');
       return;
@@ -95,7 +123,10 @@ export function TransactionForm({
       );
       logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
 
-      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(formattedData);
+      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(
+        formattedData,
+        executionConfig
+      );
       logger.info('TransactionForm', `Transaction submitted with hash: ${submittedTxHash}`);
       setTxHash(submittedTxHash);
 
@@ -134,7 +165,7 @@ export function TransactionForm({
       }
       // --> End: Wait for confirmation <--
     } catch (error) {
-      logger.error('TransactionForm', 'Transaction error during internal submit:', error);
+      logger.error('TransactionForm', 'Transaction error during submission process:', error);
       setTxError(error instanceof Error ? error.message : 'An unknown error occurred.');
       setTxStatus('error');
     }
@@ -259,14 +290,26 @@ export function TransactionForm({
         >
           <div className="mb-6">{renderFormContent()}</div>
 
-          {/* Form actions */}
-          <div className="form-actions mt-4 flex justify-end border-t border-gray-100 pt-4">
-            <TransactionExecuteButton
-              isWalletConnected={isWalletConnected}
-              isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
-              isFormValid={methods.formState.isValid}
-              variant={getButtonVariant()}
-            />
+          {/* Execution Config Display - Placed above the form actions */}
+          {executionConfig && (
+            <div className="w-full">
+              <ExecutionConfigDisplay
+                executionConfig={executionConfig}
+                error={executionConfigError}
+              />
+            </div>
+          )}
+
+          {/* Form actions - Button only */}
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <div className="flex justify-end">
+              <TransactionExecuteButton
+                isWalletConnected={isWalletConnected}
+                isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
+                isFormValid={methods.formState.isValid && executionConfigError === null}
+                variant={getButtonVariant()}
+              />
+            </div>
           </div>
         </form>
       </div>

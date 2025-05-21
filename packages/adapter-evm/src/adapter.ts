@@ -130,11 +130,15 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+  async signAndBroadcast(
+    transactionData: unknown,
+    executionConfig?: ExecutionConfig
+  ): Promise<{ txHash: string }> {
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
       getEvmWalletImplementation(),
-      this.networkConfig.chainId
+      this.networkConfig.chainId,
+      executionConfig
     );
   }
 
@@ -163,7 +167,8 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    return validateEvmExecutionConfig(config);
+    const walletStatus = this.getWalletConnectionStatus();
+    return validateEvmExecutionConfig(config, walletStatus);
   }
 
   /**

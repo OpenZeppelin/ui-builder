@@ -1,4 +1,5 @@
 export * from './accordion';
+export * from './address-display';
 export * from './alert';
 export * from './button';
 export * from './card';

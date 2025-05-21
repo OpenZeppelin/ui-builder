@@ -1,11 +1,23 @@
+import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
+
+const SYSTEM_LOG_TAG = 'adapter-stellar';
+
 /**
  * Sign and broadcast a transaction
  *
  * TODO: Implement proper Stellar transaction signing in future phases
  */
 export function signAndBroadcastStellarTransaction(
-  _transactionData: unknown
+  _transactionData: unknown,
+  executionConfig?: ExecutionConfig
 ): Promise<{ txHash: string }> {
+  logger.info(
+    SYSTEM_LOG_TAG,
+    'Stellar signAndBroadcast called with executionConfig:',
+    executionConfig
+  );
+  // TODO: Use executionConfig
   return Promise.resolve({ txHash: 'stellar_placeholder_tx' });
 }
 

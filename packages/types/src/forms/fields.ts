@@ -1,4 +1,4 @@
-import type { FullContractAdapter } from '../adapters';
+import type { ContractAdapter, ExecutionConfig } from '../adapters/base';
 import type { ContractSchema } from '../contracts/schema';
 
 import type { RenderFormSchema } from './schema';
@@ -118,7 +118,7 @@ export interface TransactionFormProps {
    * The chain-specific adapter instance, pre-configured for a specific network.
    * It should contain the networkConfig internally.
    */
-  adapter: FullContractAdapter;
+  adapter: ContractAdapter;
 
   /**
    * Optional flag indicating if a wallet is currently connected.
@@ -126,4 +126,9 @@ export interface TransactionFormProps {
    * If not provided, components might assume not connected or use other means if available.
    */
   isWalletConnected?: boolean;
+
+  /**
+   * Execution configuration for the transaction
+   */
+  executionConfig?: ExecutionConfig;
 }

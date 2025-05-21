@@ -243,8 +243,8 @@ export class TemplateProcessor {
     if (options?.executionConfigJSON) {
       try {
         const regex =
-          /const executionConfig: unknown \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
-        const replacement = `const executionConfig: unknown | undefined = ${options.executionConfigJSON};`;
+          /const executionConfig: ExecutionConfig \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
+        const replacement = `const executionConfig: ExecutionConfig | undefined = ${options.executionConfigJSON};`;
         processedTemplate = processedTemplate.replace(regex, replacement);
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject execution config:', error);

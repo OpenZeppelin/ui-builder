@@ -49,7 +49,12 @@ export function StepFormCustomization({
 
   const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
 
-  const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
+  const {
+    formConfig: baseFormConfigFromHook,
+    updateField,
+    updateFormTitle,
+    updateFormDescription,
+  } = useFormConfig({
     contractSchema,
     selectedFunction,
     adapter,
@@ -63,19 +68,31 @@ export function StepFormCustomization({
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
 
-  // Auto-select the first field when the Fields tab is selected for the first time
+  const formConfigForPreview = useMemo(() => {
+    if (!baseFormConfigFromHook) return null;
+    return {
+      ...baseFormConfigFromHook,
+      executionConfig: currentExecutionConfig,
+    };
+  }, [baseFormConfigFromHook, currentExecutionConfig]);
+
   useEffect(() => {
     if (
       activeTab === 'fields' &&
       selectedFieldIndex === null &&
-      formConfig &&
-      formConfig.fields.length > 0
+      baseFormConfigFromHook &&
+      baseFormConfigFromHook.fields.length > 0
     ) {
       selectField(0);
     }
-  }, [activeTab, formConfig, selectedFieldIndex, selectField]);
+  }, [activeTab, baseFormConfigFromHook, selectedFieldIndex, selectField]);
 
-  if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig) {
+  if (
+    !contractSchema ||
+    !selectedFunction ||
+    !selectedFunctionDetails ||
+    !(previewMode ? formConfigForPreview : baseFormConfigFromHook)
+  ) {
     return (
       <div className="py-8 text-center">
         <p>Please select a contract function first.</p>
@@ -136,7 +153,7 @@ export function StepFormCustomization({
 
       {previewMode ? (
         <FormPreview
-          formConfig={formConfig}
+          formConfig={formConfigForPreview!}
           functionDetails={selectedFunctionDetails!}
           contractSchema={contractSchema!}
         />
@@ -149,41 +166,43 @@ export function StepFormCustomization({
           </TabsList>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
-            <GeneralSettings
-              title={formConfig.title}
-              description={formConfig.description}
-              onUpdateTitle={updateFormTitle}
-              onUpdateDescription={updateFormDescription}
-              selectedFunctionDetails={selectedFunctionDetails}
-            />
+            {baseFormConfigFromHook && (
+              <GeneralSettings
+                title={baseFormConfigFromHook.title}
+                description={baseFormConfigFromHook.description}
+                onUpdateTitle={updateFormTitle}
+                onUpdateDescription={updateFormDescription}
+                selectedFunctionDetails={selectedFunctionDetails}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="fields" className="mt-4 rounded-md border p-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <FieldSelectorList
-                  fields={formConfig.fields}
-                  selectedFieldIndex={selectedFieldIndex}
-                  onSelectField={selectField}
-                />
-
-                <div className="col-span-2">
-                  {/* Field editor */}
-                  {selectedFieldIndex !== null &&
-                    formConfig.fields[selectedFieldIndex] &&
-                    adapter && (
-                      <FieldEditor
-                        field={formConfig.fields[selectedFieldIndex]}
-                        onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                        adapter={adapter}
-                        originalParameterType={
-                          formConfig.fields[selectedFieldIndex].originalParameterType
-                        }
-                      />
-                    )}
+            {baseFormConfigFromHook && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <FieldSelectorList
+                    fields={baseFormConfigFromHook.fields}
+                    selectedFieldIndex={selectedFieldIndex}
+                    onSelectField={selectField}
+                  />
+                  <div className="col-span-2">
+                    {selectedFieldIndex !== null &&
+                      baseFormConfigFromHook.fields[selectedFieldIndex] &&
+                      adapter && (
+                        <FieldEditor
+                          field={baseFormConfigFromHook.fields[selectedFieldIndex]}
+                          onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                          adapter={adapter}
+                          originalParameterType={
+                            baseFormConfigFromHook.fields[selectedFieldIndex].originalParameterType
+                          }
+                        />
+                      )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="execution" className="mt-4 rounded-md border p-4">
