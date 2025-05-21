@@ -66,8 +66,6 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   // Use 'unknown' for the placeholder type. Assign undefined and use comment marker for replacement.
   /*------------TEMPLATE COMMENT END------------*/
   const executionConfig: ExecutionConfig | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
-  // TODO (Export Integration): Use executionConfig at runtime to determine
-  // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
   const contractAddress = formSchema.contractAddress;
 
