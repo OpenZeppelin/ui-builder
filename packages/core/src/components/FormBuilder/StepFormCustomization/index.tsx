@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
-import { useConfiguredAdapterSingleton } from '../../../core/hooks/useConfiguredAdapterSingleton';
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 
@@ -16,6 +16,12 @@ import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
+
+// TODO: Implement UI controls within this step (e.g., in GeneralSettings or a new section)
+// to allow users to configure UiKitConfiguration options (kitName, showInjectedConnector,
+// and component exclusions like hiding NetworkSwitcher, ConnectButton, AccountDisplay).
+// These settings would then be stored, likely in `formConfig` (if form-specific)
+// or a higher-level builder state, and ultimately passed into `ExportOptions.uiKitConfiguration`.
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
@@ -41,9 +47,14 @@ export function StepFormCustomization({
   const [activeTab, setActiveTab] = useState('general');
   const [previewMode, setPreviewMode] = useState(false);
 
-  const { adapter, isLoading: adapterLoading } = useConfiguredAdapterSingleton(networkConfig);
+  const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
 
-  const { formConfig, updateField, updateFormTitle, updateFormDescription } = useFormConfig({
+  const {
+    formConfig: baseFormConfigFromHook,
+    updateField,
+    updateFormTitle,
+    updateFormDescription,
+  } = useFormConfig({
     contractSchema,
     selectedFunction,
     adapter,
@@ -57,19 +68,31 @@ export function StepFormCustomization({
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
 
-  // Auto-select the first field when the Fields tab is selected for the first time
+  const formConfigForPreview = useMemo(() => {
+    if (!baseFormConfigFromHook) return null;
+    return {
+      ...baseFormConfigFromHook,
+      executionConfig: currentExecutionConfig,
+    };
+  }, [baseFormConfigFromHook, currentExecutionConfig]);
+
   useEffect(() => {
     if (
       activeTab === 'fields' &&
       selectedFieldIndex === null &&
-      formConfig &&
-      formConfig.fields.length > 0
+      baseFormConfigFromHook &&
+      baseFormConfigFromHook.fields.length > 0
     ) {
       selectField(0);
     }
-  }, [activeTab, formConfig, selectedFieldIndex, selectField]);
+  }, [activeTab, baseFormConfigFromHook, selectedFieldIndex, selectField]);
 
-  if (!contractSchema || !selectedFunction || !selectedFunctionDetails || !formConfig) {
+  if (
+    !contractSchema ||
+    !selectedFunction ||
+    !selectedFunctionDetails ||
+    !(previewMode ? formConfigForPreview : baseFormConfigFromHook)
+  ) {
     return (
       <div className="py-8 text-center">
         <p>Please select a contract function first.</p>
@@ -130,10 +153,9 @@ export function StepFormCustomization({
 
       {previewMode ? (
         <FormPreview
-          formConfig={formConfig}
-          functionDetails={selectedFunctionDetails}
-          contractSchema={contractSchema}
-          networkConfig={networkConfig}
+          formConfig={formConfigForPreview!}
+          functionDetails={selectedFunctionDetails!}
+          contractSchema={contractSchema!}
         />
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -144,41 +166,43 @@ export function StepFormCustomization({
           </TabsList>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
-            <GeneralSettings
-              title={formConfig.title}
-              description={formConfig.description}
-              onUpdateTitle={updateFormTitle}
-              onUpdateDescription={updateFormDescription}
-              selectedFunctionDetails={selectedFunctionDetails}
-            />
+            {baseFormConfigFromHook && (
+              <GeneralSettings
+                title={baseFormConfigFromHook.title}
+                description={baseFormConfigFromHook.description}
+                onUpdateTitle={updateFormTitle}
+                onUpdateDescription={updateFormDescription}
+                selectedFunctionDetails={selectedFunctionDetails}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="fields" className="mt-4 rounded-md border p-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <FieldSelectorList
-                  fields={formConfig.fields}
-                  selectedFieldIndex={selectedFieldIndex}
-                  onSelectField={selectField}
-                />
-
-                <div className="col-span-2">
-                  {/* Field editor */}
-                  {selectedFieldIndex !== null &&
-                    formConfig.fields[selectedFieldIndex] &&
-                    adapter && (
-                      <FieldEditor
-                        field={formConfig.fields[selectedFieldIndex]}
-                        onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                        adapter={adapter}
-                        originalParameterType={
-                          formConfig.fields[selectedFieldIndex].originalParameterType
-                        }
-                      />
-                    )}
+            {baseFormConfigFromHook && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <FieldSelectorList
+                    fields={baseFormConfigFromHook.fields}
+                    selectedFieldIndex={selectedFieldIndex}
+                    onSelectField={selectField}
+                  />
+                  <div className="col-span-2">
+                    {selectedFieldIndex !== null &&
+                      baseFormConfigFromHook.fields[selectedFieldIndex] &&
+                      adapter && (
+                        <FieldEditor
+                          field={baseFormConfigFromHook.fields[selectedFieldIndex]}
+                          onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                          adapter={adapter}
+                          originalParameterType={
+                            baseFormConfigFromHook.fields[selectedFieldIndex].originalParameterType
+                          }
+                        />
+                      )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="execution" className="mt-4 rounded-md border p-4">

@@ -14,13 +14,14 @@
   "dependencies": {
     "@openzeppelin/transaction-form-renderer": "^1.0.0",
     "@openzeppelin/transaction-form-utils": "^0.1.0",
+    "@openzeppelin/transaction-form-ui": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2"
   },
   "devDependencies": {
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.1",

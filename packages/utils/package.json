@@ -44,7 +44,9 @@
   "license": "MIT",
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:^",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
@@ -55,7 +57,7 @@
     "eslint-config-prettier": "^10.1.1",
     "prettier": "^3.2.5",
     "typescript": "^5.8.2",
-    "vite": "^5.2.8",
+    "vite": "^6.2.5",
     "vite-plugin-dts": "^3.8.1",
     "vitest": "^3.0.8"
   }

@@ -9,7 +9,7 @@ import { EvmAdapter } from '../adapter';
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 
 // Mock the WagmiWalletImplementation to isolate EvmAdapter logic
-vi.mock('../wallet/wagmi-implementation', () => {
+vi.mock('../wallet/implementation/wagmi-implementation', () => {
   // --- Mock implementations for WagmiWalletImplementation methods ---
   const mockGetAvailableConnectors = vi.fn().mockResolvedValue([
     { id: 'injected', name: 'Browser Wallet' },

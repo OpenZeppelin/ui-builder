@@ -163,7 +163,6 @@ export class TemplateProcessor {
       adapterPackageName?: string;
       formConfigJSON?: string;
       contractSchemaJSON?: string;
-      allFieldsConfigJSON?: string;
       executionConfigJSON?: string;
     }
   ): Promise<string> {
@@ -240,27 +239,12 @@ export class TemplateProcessor {
       }
     }
 
-    // Inject allFieldsConfig JSON if provided
-    if (options?.allFieldsConfigJSON) {
-      try {
-        processedTemplate = processedTemplate.replace(
-          // Match the placeholder variable assignment
-          /const allFieldsConfig: FormFieldType\[\] = \[];/g,
-          // Replace with the actual JSON string
-          `const allFieldsConfig: FormFieldType[] = ${options.allFieldsConfigJSON};`
-        );
-      } catch (error) {
-        logger.error('TemplateProcessor', 'Failed to inject allFieldsConfig:', error);
-        throw error;
-      }
-    }
-
     // Inject execution config JSON if provided
     if (options?.executionConfigJSON) {
       try {
         const regex =
-          /const executionConfig: unknown \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
-        const replacement = `const executionConfig: unknown | undefined = ${options.executionConfigJSON};`;
+          /const executionConfig: ExecutionConfig \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
+        const replacement = `const executionConfig: ExecutionConfig | undefined = ${options.executionConfigJSON};`;
         processedTemplate = processedTemplate.replace(regex, replacement);
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject execution config:', error);

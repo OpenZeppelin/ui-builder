@@ -7,9 +7,8 @@ import type {
   ContractSchema,
   FullContractAdapter,
 } from '@openzeppelin/transaction-form-types';
-
-import { cn } from '../../../utils/cn';
-import { Button } from '../../ui/button';
+import { Button } from '@openzeppelin/transaction-form-ui';
+import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { FunctionResult } from './FunctionResult';
 

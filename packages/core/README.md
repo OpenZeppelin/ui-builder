@@ -9,13 +9,12 @@ core/
 ├── public/           # Static assets
 ├── src/
 │   ├── components/   # Reusable UI components
-│   │   ├── ui/       # shadcn/ui components
 │   │   ├── Common/   # Shared components across features
 │   │   └── FormBuilder/ # Form builder components
-│   ├── core/         # Chain-agnostic core functionality
+│   ├── core/         # Chain-agnostic core functionality specific to this app
 │   │   ├── types/    # Local type definitions (shared types in @openzeppelin/transaction-form-types)
 │   │   ├── utils/    # Utility functions
-│   │   ├── hooks/    # Shared hooks
+│   │   ├── hooks/    # Core-app-specific hooks (if any; shared providers/hooks like WalletStateProvider are in @openzeppelin/transaction-form-react-core)
 │   │   ├── factories/ # Schema factories
 │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   ├── export/       # Export system
@@ -45,8 +44,10 @@ core/
 
 This package relies on:
 
+- **@openzeppelin/transaction-form-react-core**: For core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) managing global wallet/network state and adapter interactions.
 - **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms
-- **@openzeppelin/transaction-form-renderer**: Form rendering components
+- **@openzeppelin/transaction-form-renderer**: Form rendering components and logic.
+- **@openzeppelin/transaction-form-ui**: Shared UI components (buttons, inputs, fields, etc.) used by both core and form-renderer.
 - **@openzeppelin/transaction-form-styles**: Centralized styling system
 - **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`)
 
@@ -105,13 +106,17 @@ pnpm test
 
 ## Architecture
 
-The core package uses an adapter pattern to support multiple blockchain ecosystems:
+The core package uses an adapter pattern to support multiple blockchain ecosystems, leveraging shared providers and types:
 
-- **Core**: Chain-agnostic components, types, services, and utilities. Manages ecosystem details, network configurations, and adapter instantiation via `src/core/ecosystemManager.ts`. The `ecosystemManager.getAdapter()` function is asynchronous, and UI components typically obtain configured adapter instances either through the `useConfiguredAdapter` hook for direct use, or via props from higher-level state management hooks (like `useFormBuilderState`) which handle the asynchronous loading.
-- **Adapters (`@openzeppelin/transaction-form-adapter-*`)**: Separate packages containing chain-specific implementations conforming to the `ContractAdapter` interface (defined in `@openzeppelin/transaction-form-types`). Adapters are now instantiated with a specific `NetworkConfig` making them network-aware.
-- **UI Components**: React components within this package that utilize the centrally managed, network-configured adapters to interact with different blockchains.
+- **Core**: Chain-agnostic application logic, UI components, and the export system. It consumes providers and hooks (like `AdapterProvider`, `WalletStateProvider`, `useWalletState`) from the `@openzeppelin/transaction-form-react-core` package to manage global wallet/network state and adapter interactions.
+  - `ecosystemManager.ts`: Handles discovery of network configurations and adapter capabilities, providing functions like `getAdapter` and `getNetworkById` which are passed as props to the providers from `@openzeppelin/transaction-form-react-core`.
+- **Adapters (`@openzeppelin/transaction-form-adapter-*`)**: Separate packages implementing the `ContractAdapter` interface. They are instantiated and managed via `AdapterProvider` (from `@openzeppelin/transaction-form-react-core`). Their UI facilitation capabilities are orchestrated by `WalletStateProvider` (from `@openzeppelin/transaction-form-react-core`):
+  - **React UI Context Provider**: (e.g., for `wagmi` on EVM) Rendered by `WalletStateProvider` to establish the necessary environment for facade hooks.
+  - **Facade Hooks**: (e.g., `useAccount`, `useSwitchChain`) Provided by the adapter and exposed via `useWalletState().walletFacadeHooks` for reactive wallet interactions.
+  - **Standardized UI Components**: (e.g., `ConnectButton`) Retrieved via `useWalletState().activeAdapter.getEcosystemWalletComponents()` and are expected to use the facade hooks internally.
+- **UI Components**: React components within this package (e.g., `WalletConnectionHeader`, `TransactionFormBuilder`, `NetworkSwitchManager`) utilize `useWalletState()` to access the active adapter, its facade hooks, and global wallet/network state to interact with different blockchains and manage UI accordingly.
 - **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/transaction-form-styles` package.
 
-This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts` without modifying core application logic significantly.
+This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts`. The provider model (from `@openzeppelin/transaction-form-react-core`) ensures consistent state and adapter access throughout the application.
 
-For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters).
+For more detailed documentation about the adapter pattern, see the main project [README.md](../../README.md#adding-new-adapters) and the [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.MD).

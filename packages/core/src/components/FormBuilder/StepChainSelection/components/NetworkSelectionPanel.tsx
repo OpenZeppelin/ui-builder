@@ -2,8 +2,8 @@ import { Search } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
-import { Input } from '@openzeppelin/transaction-form-renderer';
 import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Input } from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';

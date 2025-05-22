@@ -19,6 +19,7 @@ export function useCompleteStepState() {
       networkConfig: NetworkConfig | null,
       selectedFunction: string | null,
       contractSchema: ContractSchema | null
+      // TODO: Add a parameter here for uiKitConfiguration from builder UI state
     ) => {
       if (!formConfig || !selectedFunction || !contractSchema || !networkConfig) {
         console.error('exportForm: Missing required configuration for export.');
@@ -29,12 +30,20 @@ export function useCompleteStepState() {
       const exportSystem = new FormExportSystem();
 
       try {
+        // TODO: When UI for UiKitConfiguration is implemented in the builder,
+        // pass the actual uiKitConfiguration object here in the ExportOptions.
+        // For now, it will be undefined or use a placeholder if needed by exportSystem.
+        const exportOptions = {
+          ecosystem: networkConfig.ecosystem,
+          // uiKitConfiguration: gatheredUiKitConfiguration, // This would come from builder state
+        };
+
         const result = await exportSystem.exportForm(
           formConfig,
           contractSchema,
           networkConfig,
           selectedFunction,
-          { ecosystem: networkConfig.ecosystem }
+          exportOptions
         );
 
         if (result.data instanceof Blob) {

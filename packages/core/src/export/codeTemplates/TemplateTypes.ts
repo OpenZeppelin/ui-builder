@@ -37,21 +37,6 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
   formConfigJSON: string;
 
   /**
-   * The original FormFieldType[] config as a JSON string
-   */
-  allFieldsConfigJSON: string;
-
-  /**
-   * The execution configuration as a JSON string or 'undefined'
-   */
-  executionConfigJSON: string;
-
-  /**
-   * Optional flag to include debug mode
-   */
-  includeDebugMode?: boolean;
-
-  /**
    * The contract schema as a JSON string
    */
   contractSchemaJSON: string;
@@ -60,6 +45,17 @@ export interface FormComponentTemplateParams extends BaseTemplateParams {
    * The network config import name
    */
   networkConfigImportName: string;
+
+  /**
+   * The execution configuration as a JSON string or 'undefined'.
+   * This is intended for future use by the generated form to handle different execution methods.
+   */
+  executionConfigJSON: string;
+
+  /**
+   * Optional flag to include debug mode
+   */
+  includeDebugMode?: boolean;
 }
 
 /**

@@ -20,7 +20,7 @@ describe('PackageManager Integration Tests', () => {
   const testFormRendererConfig: TestFormRendererConfig = {
     coreDependencies: {
       'core-lib': '^1.0.0', // Mock external core dep
-      react: '^18.2.0',
+      react: '^19.0.0',
       // Add renderer and types packages here as they are expected by PackageManager
       '@openzeppelin/transaction-form-renderer': '^1.0.0', // Use a placeholder caret version
       '@openzeppelin/transaction-form-types': '^0.1.0', // Use a placeholder caret version
@@ -87,8 +87,8 @@ describe('PackageManager Integration Tests', () => {
       // EVM
       const evmDeps = await packageManager.getDependencies(formConfig, 'evm');
       expect(evmDeps).toHaveProperty('core-lib', '^1.0.0'); // From mock renderer config
-      expect(evmDeps).toHaveProperty('react', '^18.2.0'); // From mock renderer config
-      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0'); // FROM MOCK CORE DEPS
+      expect(evmDeps).toHaveProperty('react', '^19.0.0'); // From mock renderer config
+      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', 'workspace:*'); // Added by PM
       expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
       expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm', 'workspace:*'); // Added by PM
       expect(evmDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
@@ -96,8 +96,8 @@ describe('PackageManager Integration Tests', () => {
       // Solana
       const solanaDeps = await packageManager.getDependencies(formConfig, 'solana');
       expect(solanaDeps).toHaveProperty('core-lib', '^1.0.0');
-      expect(solanaDeps).toHaveProperty('react', '^18.2.0');
-      expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', '^1.0.0'); // FROM MOCK CORE DEPS
+      expect(solanaDeps).toHaveProperty('react', '^19.0.0');
+      expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-renderer', 'workspace:*'); // Added by PM
       expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
       expect(solanaDeps).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana',
@@ -142,8 +142,7 @@ describe('PackageManager Integration Tests', () => {
       const formConfig = createFormConfig(['text']);
       const deps = await packageManager.getDependencies(formConfig, 'evm');
 
-      // getDependencies uses mock for renderer, adds others explicitly
-      expect(deps['@openzeppelin/transaction-form-renderer']).toBe('^1.0.0'); // From mock
+      expect(deps['@openzeppelin/transaction-form-renderer']).toBe('workspace:*'); // Added by PM
       expect(deps['@openzeppelin/transaction-form-types']).toBe('workspace:*'); // Added by PM
       expect(deps['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*'); // Added by PM
     });
@@ -181,7 +180,7 @@ describe('PackageManager Integration Tests', () => {
 
       // Check merged runtime deps
       expect(result.dependencies).toHaveProperty('core-lib', '^1.0.0'); // From mock
-      expect(result.dependencies).toHaveProperty('react', '^18.2.0'); // Updated from mock
+      expect(result.dependencies).toHaveProperty('react', '^19.0.0'); // Updated from mock
       expect(result.dependencies).toHaveProperty('date-picker', '^2.0.0'); // From field
       // Check for caret versions (default 'production' env applies versioning)
       expect(result.dependencies).toHaveProperty(
@@ -246,26 +245,22 @@ describe('PackageManager Integration Tests', () => {
       expect(result.license).toBe('MIT');
     });
 
-    it('should not add empty devDependencies section if none exist', async () => {
+    it('should not add devDependencies section if EVM adapter and form fields contribute no dev dependencies', async () => {
       const packageManager = new PackageManager(testFormRendererConfig);
-      // Use a form config that doesn't introduce its own dev deps (like 'text')
       const formConfig = createFormConfig(['text']);
-      // Base JSON without devDependencies key initially
       const baseJsonNoDev = JSON.stringify({ name: 'no-dev', dependencies: {} });
 
       const updatedJson = await packageManager.updatePackageJson(
         baseJsonNoDev,
         formConfig,
-        'evm', // Use EVM which DOES have dev deps in its config
-        'devDepsTest',
+        'evm',
+        'noDevDepsTest',
         { env: 'local' }
       );
       const result = JSON.parse(updatedJson);
 
-      // Check that devDependencies IS present because the EVM adapter added one
-      expect(result.hasOwnProperty('devDependencies')).toBe(true);
-      // Specifically check for the dependency added by the EVM adapter config
-      expect(result.devDependencies).toHaveProperty('@types/lodash');
+      // Now expect devDependencies to NOT be present as EVM adapter config no longer adds @types/lodash
+      expect(result.hasOwnProperty('devDependencies')).toBe(false);
     });
   });
 });

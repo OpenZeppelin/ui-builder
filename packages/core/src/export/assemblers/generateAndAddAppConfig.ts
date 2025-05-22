@@ -1,4 +1,8 @@
-import type { GlobalServiceConfigs, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  GlobalServiceConfigs,
+  NetworkConfig,
+  UiKitConfiguration,
+} from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { TemplateProcessor } from '../generators/TemplateProcessor';
@@ -53,8 +57,65 @@ function _generateRpcEndpointsConfigSection(
   return rpcConfig;
 }
 
-function _generateGlobalServiceConfigPlaceholders(): GlobalServiceConfigs {
+function _buildWalletUiServiceConfigPlaceholders(uiKitConfiguration?: UiKitConfiguration): {
+  config: UiKitConfiguration;
+  _comment: string;
+} {
+  const exampleDefaults: UiKitConfiguration = {
+    kitName: 'custom',
+    kitConfig: {
+      showInjectedConnector: true,
+      components: {
+        exclude: ['NetworkSwitcher'],
+      },
+    },
+  };
+
+  const kitName = uiKitConfiguration?.kitName || exampleDefaults.kitName || 'custom';
+
+  const baseKitConfig = exampleDefaults.kitConfig || {};
+  const providedKitConfig = uiKitConfiguration?.kitConfig || {};
+
+  const baseExclude = baseKitConfig.components?.exclude || [];
+  const providedExclude = providedKitConfig.components?.exclude || [];
+  const finalExclusions = Array.from(new Set([...baseExclude, ...providedExclude]));
+
+  let finalKitConfigObject: UiKitConfiguration['kitConfig'] = {
+    ...baseKitConfig,
+    ...providedKitConfig,
+  };
+
+  if (finalExclusions.length > 0) {
+    finalKitConfigObject.components = { exclude: finalExclusions };
+  } else {
+    if (
+      finalKitConfigObject.components &&
+      Object.keys(finalKitConfigObject.components).length === 1 &&
+      'exclude' in finalKitConfigObject.components
+    ) {
+      delete finalKitConfigObject.components;
+    }
+  }
+
+  if (Object.keys(finalKitConfigObject).length === 0) {
+    finalKitConfigObject = undefined;
+  }
+
   return {
+    config: {
+      kitName,
+      kitConfig: finalKitConfigObject,
+    },
+    _comment:
+      "Optional: Configure the Wallet UI Kit. `kitName` can be 'custom' or 'none'. `kitConfig` provides kit-specific options. For 'custom' kit, properties like `showInjectedConnector` (boolean) and `components.exclude` (Array of 'ConnectButton', 'AccountDisplay', 'NetworkSwitcher') are available.",
+  };
+}
+
+function _generateGlobalServiceConfigPlaceholders(
+  uiKitConfiguration?: UiKitConfiguration
+): GlobalServiceConfigs {
+  return {
+    walletui: _buildWalletUiServiceConfigPlaceholders(uiKitConfiguration),
     walletconnect: {
       projectId: 'YOUR_WALLETCONNECT_PROJECT_ID_HERE',
       _comment: 'WalletConnect Project ID, required if you intend to use WalletConnect.',
@@ -69,23 +130,26 @@ function _generateGlobalServiceConfigPlaceholders(): GlobalServiceConfigs {
  * @param projectFiles - The current map of project files to be modified.
  * @param networkConfig - The NetworkConfig for the currently exported network.
  * @param templateProcessor - Instance of TemplateProcessor for JSON formatting.
+ * @param uiKitConfig - The UiKitConfiguration for the currently exported network.
  */
 export async function generateAndAddAppConfig(
   projectFiles: Record<string, string>,
   networkConfig: NetworkConfig,
-  templateProcessor: TemplateProcessor
+  templateProcessor: TemplateProcessor,
+  uiKitConfig?: UiKitConfiguration
 ): Promise<void> {
   const appConfigExamplePath = 'public/app.config.json.example';
-  const logSystem = 'File Assembly (generateAndAddAppConfig)';
+  const logSystem = LOG_SYSTEM_MAIN;
 
-  const explorerInfo = _generateExplorerApiConfigSection(networkConfig, LOG_SYSTEM_MAIN);
+  const explorerInfo = _generateExplorerApiConfigSection(networkConfig, logSystem);
   const rpcEndpointsConfig = _generateRpcEndpointsConfigSection(networkConfig);
-  const globalServicePlaceholders = _generateGlobalServiceConfigPlaceholders();
+  const globalServicePlaceholders = _generateGlobalServiceConfigPlaceholders(uiKitConfig);
 
   const appConfigContent = {
     _readme: [
       "This is an example configuration file. To use it, rename this file to 'app.config.json' in the 'public' directory.",
-      'Then, fill in your actual API keys and custom RPC URLs as needed.',
+      'Then, fill in your actual API keys, WalletConnect Project ID, and custom RPC URLs as needed.',
+      'The baked-in defaults for this exported form will be used if this file is not renamed or if specific settings are omitted.',
       explorerInfo.specificNote,
       'API keys and other sensitive information should be managed securely.',
     ],
@@ -97,7 +161,6 @@ export async function generateAndAddAppConfig(
     rpcEndpoints: rpcEndpointsConfig,
     featureFlags: {
       exampleFeatureInExportedApp: true,
-      anotherFeature: false,
     },
     defaultLanguage: 'en',
   };

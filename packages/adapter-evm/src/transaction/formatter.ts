@@ -21,14 +21,14 @@ interface WriteContractParameters {
  * @param contractSchema The contract schema.
  * @param functionId The ID of the function being called.
  * @param submittedInputs The raw data submitted from the form.
- * @param allFieldsConfig The configuration for all fields.
+ * @param fields The fields of the form schema.
  * @returns The formatted data payload suitable for signAndBroadcast.
  */
 export function formatEvmTransactionData(
   contractSchema: ContractSchema,
   functionId: string,
   submittedInputs: Record<string, unknown>,
-  allFieldsConfig: FormFieldType[]
+  fields: FormFieldType[]
 ): WriteContractParameters {
   console.log(`Formatting EVM transaction data for function: ${functionId}`);
 
@@ -42,9 +42,9 @@ export function formatEvmTransactionData(
   // --- Step 2: Iterate and Select Values --- //
   const orderedRawValues: unknown[] = [];
   for (const expectedArg of expectedArgs) {
-    const fieldConfig = allFieldsConfig.find((field) => field.name === expectedArg.name);
+    const fieldConfig = fields.find((field: FormFieldType) => field.name === expectedArg.name);
     if (!fieldConfig) {
-      throw new Error(`Configuration missing for argument: ${expectedArg.name}`);
+      throw new Error(`Configuration missing for argument: ${expectedArg.name} in provided fields`);
     }
     let value: unknown;
     if (fieldConfig.isHardcoded) {

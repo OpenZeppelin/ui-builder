@@ -1,0 +1,15 @@
+{
+  "globalServiceConfigs": {
+    "walletui": {
+      "config": {
+        "kitName": "custom",
+        "kitConfig": {
+          "showInjectedConnector": false,
+          "components": {
+            "exclude": ["NetworkSwitcher"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,10 +7,14 @@ import type {
   ContractSchema,
   FullContractAdapter,
 } from '@openzeppelin/transaction-form-types';
-
-import { truncateMiddle } from '../../utils/formatting';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@openzeppelin/transaction-form-ui';
+import { truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 

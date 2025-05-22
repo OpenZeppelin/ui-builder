@@ -6,17 +6,36 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
   EvmNetworkConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
   FunctionParameter,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { getEvmWalletImplementation } from './wallet/walletImplementationManager';
+import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
+import {
+  getUiKitConfig,
+  loadConfigFromAppConfig,
+  setUiKitConfig,
+} from './wallet/hooks/useUiKitConfig';
+import { getResolvedUiContextProvider, getResolvedWalletComponents } from './wallet/utils';
+import {
+  connectAndEnsureCorrectNetwork,
+  disconnectEvmWallet,
+  evmSupportsWalletConnection,
+  getEvmAvailableConnectors,
+  getEvmWalletConnectionStatus,
+  onEvmWalletConnectionChange,
+} from './wallet/utils/connection';
+import { getEvmWalletImplementation } from './wallet/utils/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
 import {
@@ -39,20 +58,13 @@ import {
 import { formatEvmFunctionResult } from './transform';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
-import {
-  connectAndEnsureCorrectNetwork,
-  disconnectEvmWallet,
-  evmSupportsWalletConnection,
-  getEvmAvailableConnectors,
-  getEvmWalletConnectionStatus,
-  onEvmWalletConnectionChange,
-} from './wallet';
 
 /**
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
   readonly networkConfig: EvmNetworkConfig;
+  private uiKitConfiguration: UiKitConfiguration;
 
   constructor(networkConfig: EvmNetworkConfig) {
     if (!isEvmNetworkConfig(networkConfig)) {
@@ -62,6 +74,14 @@ export class EvmAdapter implements ContractAdapter {
     logger.info(
       'EvmAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
+    );
+
+    loadConfigFromAppConfig();
+    this.uiKitConfiguration = getUiKitConfig();
+    logger.info(
+      'EvmAdapter',
+      'Initial uiKitConfiguration for instance synchronized with global/default:',
+      this.uiKitConfiguration
     );
   }
 
@@ -98,23 +118,27 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  formatTransactionData(
+  public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
-  ): unknown {
-    return formatEvmTransactionData(contractSchema, functionId, submittedInputs, allFieldsConfig);
+    fields: FormFieldType[]
+  ): WriteContractParameters {
+    return formatEvmTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
 
   /**
    * @inheritdoc
    */
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
+  async signAndBroadcast(
+    transactionData: unknown,
+    executionConfig?: ExecutionConfig
+  ): Promise<{ txHash: string }> {
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
       getEvmWalletImplementation(),
-      this.networkConfig.chainId
+      this.networkConfig.chainId,
+      executionConfig
     );
   }
 
@@ -143,7 +167,8 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    return validateEvmExecutionConfig(config);
+    const walletStatus = this.getWalletConnectionStatus();
+    return validateEvmExecutionConfig(config, walletStatus);
   }
 
   /**
@@ -266,6 +291,48 @@ export class EvmAdapter implements ContractAdapter {
     error?: Error;
   }> {
     return waitForEvmTransactionConfirmation(txHash, getEvmWalletImplementation());
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public configureUiKit(config: UiKitConfiguration): void {
+    const currentInstanceConfig = this.uiKitConfiguration;
+
+    const newResolvedKitConfig = {
+      ...(currentInstanceConfig.kitConfig || {}),
+      ...(config.kitConfig || {}),
+    };
+
+    this.uiKitConfiguration = {
+      kitName: config.kitName || currentInstanceConfig.kitName || 'custom',
+      kitConfig: Object.keys(newResolvedKitConfig).length > 0 ? newResolvedKitConfig : undefined,
+    };
+    setUiKitConfig(this.uiKitConfiguration);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactUiContextProvider():
+    | React.ComponentType<EcosystemReactUiProviderProps>
+    | undefined {
+    return getResolvedUiContextProvider(this.uiKitConfiguration);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactHooks(): EcosystemSpecificReactHooks | undefined {
+    // Always provide hooks for EVM adapter regardless of UI kit
+    return evmFacadeHooks;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemWalletComponents(): EcosystemWalletComponents | undefined {
+    return getResolvedWalletComponents(this.uiKitConfiguration);
   }
 }
 

@@ -15,20 +15,35 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
+"import {
+  WalletConnectionHeader,
+  useDerivedAccountStatus,
+  useWalletState,
+} from '@openzeppelin/transaction-form-react-core';
 
 import GeneratedForm from './components/GeneratedForm';
-
-interface AppProps {
-  adapter: EvmAdapter;
-}
 
 /**
  * App Component
  *
  * Main application component that wraps the form.
+ * Uses useWalletState to get the active adapter.
  */
-export function App({ adapter }: AppProps) {
+export function App() {
+  const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
+
+  if (isAdapterLoading) {
+    return <div className="app-loading">Loading adapter...</div>;
+  }
+  if (!activeAdapter) {
+    return (
+      <div className="app-error">
+        Adapter not available. Please ensure network is selected and supported.
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="header border-b px-6 py-3">
@@ -43,18 +58,13 @@ export function App({ adapter }: AppProps) {
               </p>
             </div>
           </div>
+          <WalletConnectionHeader />
         </div>
       </header>
 
       <main className="main">
         <div className="container">
-          <GeneratedForm
-            adapter={adapter}
-            onSubmit={(data: FormData) => {
-              console.log('Transaction submitted:', data);
-              // Don't return a Promise, this function should be void
-            }}
-          />
+          <GeneratedForm adapter={activeAdapter} isWalletConnected={isWalletConnectedForForm} />
         </div>
       </main>
 
@@ -74,33 +84,18 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 "import { useState } from 'react';
 
 import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  ContractStateWidget,
-  TransactionForm,
-  WalletConnectionProvider,
-} from '@openzeppelin/transaction-form-renderer';
+import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
 import type {
   ContractSchema,
-  FormFieldType,
+  ExecutionConfig,
   RenderFormSchema,
-  TransactionFormProps,
 } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
-// Define type for transaction result (this will be implemented in the future)
-interface TransactionResult {
-  txHash?: string;
-  error?: string;
-}
-
-// Define props for the component, extending TransactionFormProps but making schemas optional as they are injected by the generator
-interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'contractSchema'> {
+// Props for GeneratedForm
+interface GeneratedFormProps {
   adapter: EvmAdapter;
+  isWalletConnected?: boolean;
 }
 
 /**
@@ -110,28 +105,18 @@ interface GeneratedFormProps extends Omit<TransactionFormProps, 'schema' | 'cont
  * It uses the shared form-renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
-export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps) {
-  const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
-  // const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedFormProps) {
+  // TODO: Enable this useEffect as a fallback?
+  // If the adapter supports runtime schema loading (e.g., via Etherscan)
+  // and the injected schema is missing or invalid, this could attempt to load it.
+  /*
+  const [contractSchema, setContractSchema] = useState<ContractSchema | null>(null);
+  */
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, _setLoadError] = useState<Error | null>(null);
-
   // Form schema generated from the builder and transformed by FormSchemaFactory
   const formSchema: RenderFormSchema = {
     functionId: 'transfer',
-    fields: [
-      {
-        id: '[id]',
-        type: 'text',
-        name: 'testParam',
-        label: 'Test Parameter',
-        helperText: 'Description for Test Parameter',
-        placeholder: 'Enter test parameter',
-        validation: {
-          required: true,
-        },
-      },
-    ],
     layout: {
       columns: 1,
       spacing: 'normal',
@@ -146,13 +131,25 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
     id: 'form-transfer',
     title: 'Transfer',
     description: 'Form for interacting with the Transfer function.',
+    fields: [
+      {
+        id: '[id]',
+        name: 'testParam',
+        label: 'Test Parameter',
+        type: 'text',
+        placeholder: 'Enter test parameter',
+        helperText: 'Description for Test Parameter',
+        validation: {
+          required: true,
+        },
+      },
+    ],
     submitButton: {
       text: 'Execute Transfer',
       loadingText: 'Processing...',
       variant: 'primary',
     },
-    defaultValues: {},
-  };
+  }; /*@@FORM_SCHEMA_JSON@@*/
 
   // Contract schema injected by generator (loaded or uploaded by the user)
   const contractSchema: ContractSchema = {
@@ -180,28 +177,11 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
     ],
   };
 
-  // Original field configurations (including hidden, hardcoded values)
-  const allFieldsConfig: FormFieldType[] = [
-    {
-      id: '[id]',
-      type: 'text',
-      name: 'testParam',
-      label: 'Test Parameter',
-      validation: {
-        required: true,
-      },
-      helperText: 'Description for Test Parameter',
-      placeholder: 'Enter test parameter',
-    },
-  ];
-
   // Execution configuration selected in the builder
-  const executionConfig: unknown | undefined = {
+  const executionConfig: ExecutionConfig | undefined = {
     method: 'eoa',
     allowAny: true,
   };
-  // TODO (Export Integration): Use executionConfig at runtime to determine
-  // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
   const contractAddress = formSchema.contractAddress;
 
@@ -239,109 +219,37 @@ export default function GeneratedForm({ onSubmit, adapter }: GeneratedFormProps)
     setIsWidgetVisible((prev: boolean) => !prev);
   };
 
-  // Handle form submission
-  const handleSubmit = (formData: FormData) => {
-    // Log the execution config (will be used for signing/broadcasting logic later)
-    console.log('Using Execution Config:', executionConfig);
-
-    // Convert FormData to Record<string, unknown> for adapter
-    const submittedInputs: Record<string, unknown> = {};
-    formData.forEach((value, key) => {
-      submittedInputs[key] = value;
-    });
-
-    if (!schemaToUse) {
-      console.error('handleSubmit: Contract schema is not available!');
-      setTransactionResult({ error: 'Contract schema not loaded.' });
-      return;
-    }
-
-    try {
-      const functionId = 'transfer';
-      const formattedData = adapter.formatTransactionData(
-        schemaToUse,
-        functionId,
-        submittedInputs,
-        allFieldsConfig
-      );
-
-      // --- Integration with onSubmit prop ---
-      if (onSubmit) {
-        // We might need to reconsider passing raw FormData if onSubmit expects the formatted data
-        // For now, assume onSubmit handles the interaction
-        onSubmit(formData);
-        setTransactionResult({ txHash: '0x_SUBMITTED_VIA_PROP' }); // Indicate submission via prop
-      } else {
-        // --- Default submission logic (if no onSubmit provided) ---
-        // This would typically involve signing and broadcasting
-        console.log('Formatted data:', formattedData);
-        // const result = await adapter.signAndBroadcast(formattedData);
-        // setTransactionResult(result);
-        // For template testing:
-        setTransactionResult({ txHash: '0x_MOCK_TX_HASH' });
-        logger.info('GeneratedForm', 'Mock submission successful!');
-      }
-    } catch (error) {
-      logger.error('GeneratedForm', 'Submission error:', error);
-      // TODO: Set an error state to display to the user
-      setTransactionResult({ error: (error as Error).message });
-    }
-  };
-
   return (
-    <WalletConnectionProvider adapter={adapter}>
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Card>
-            <CardHeader>
-              {/* Render title unconditionally; React handles empty strings */}
-              <CardTitle>{/*@@formSchema.title@@*/}</CardTitle>
-              {/* Render description unconditionally */}
-              <CardDescription>{/*@@formSchema.description@@*/}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {transactionResult && (
-                <div className="transaction-result rounded-md bg-green-50 p-4 text-green-800">
-                  <h3 className="font-medium">Transaction Successful!</h3>
-                  <p className="mt-2 text-sm">
-                    Transaction Hash: {transactionResult.txHash || 'N/A'}
-                  </p>
-                </div>
-              )}
-              {/* Check the actual contractAddress variable at runtime */}
-              {contractAddress ? (
-                <TransactionForm
-                  schema={formSchema}
-                  contractSchema={schemaToUse}
-                  adapter={adapter}
-                  onSubmit={handleSubmit}
-                />
-              ) : (
-                <div className="text-destructive-foreground rounded-md bg-destructive p-4">
-                  <h3 className="font-medium">Configuration Error</h3>
-                  <p className="mt-2 text-sm">Missing contract address in the form schema.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {contractAddress && (
-          <div className="w-[300px] flex-shrink-0">
-            <div className="sticky top-4">
-              <ContractStateWidget
-                contractSchema={schemaToUse}
-                contractAddress={contractAddress}
-                adapter={adapter}
-                isVisible={isWidgetVisible}
-                onToggle={toggleWidget}
-                error={loadError}
-              />
-            </div>
-          </div>
-        )}
+    <div className="flex gap-4">
+      <div className="flex-1">
+        <Card>
+          <CardContent className="space-y-4">
+            <TransactionForm
+              schema={formSchema}
+              contractSchema={contractSchema}
+              adapter={adapter}
+              isWalletConnected={isWalletConnected}
+              executionConfig={executionConfig}
+            />
+          </CardContent>
+        </Card>
       </div>
-    </WalletConnectionProvider>
+
+      {contractAddress && (
+        <div className="w-[300px] flex-shrink-0">
+          <div className="sticky top-4">
+            <ContractStateWidget
+              contractSchema={schemaToUse}
+              contractAddress={contractAddress}
+              adapter={adapter}
+              isVisible={isWidgetVisible}
+              onToggle={toggleWidget}
+              error={loadError}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 "
@@ -353,10 +261,13 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
-    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@openzeppelin/transaction-form-react-core": "^0.0.1",
+    "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
-    "@openzeppelin/transaction-form-utils": "^0.1.0",
-    "lodash": "^4.17.21",
+    "@openzeppelin/transaction-form-ui": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.0.1",
+    "@tanstack/react-query": "^5.0.0",
+    "@wagmi/core": "^2.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -364,9 +275,8 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -398,10 +308,13 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^0.0.1",
-    "@openzeppelin/transaction-form-renderer": "^1.0.0",
+    "@openzeppelin/transaction-form-react-core": "^0.0.1",
+    "@openzeppelin/transaction-form-renderer": "^0.0.1",
     "@openzeppelin/transaction-form-types": "^0.0.1",
-    "@openzeppelin/transaction-form-utils": "^0.1.0",
-    "lodash": "^4.17.21",
+    "@openzeppelin/transaction-form-ui": "^0.0.1",
+    "@openzeppelin/transaction-form-utils": "^0.0.1",
+    "@tanstack/react-query": "^5.0.0",
+    "@wagmi/core": "^2.17.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
@@ -409,9 +322,8 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.1",

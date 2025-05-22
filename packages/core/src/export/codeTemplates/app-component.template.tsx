@@ -6,22 +6,36 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-// @ts-expect-error - This import will be processed during code generation
-import { AdapterPlaceholder } from '@@adapter-package-name@@';
+import {
+  WalletConnectionHeader,
+  useDerivedAccountStatus,
+  useWalletState,
+} from '@openzeppelin/transaction-form-react-core';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
-
-interface AppProps {
-  adapter: AdapterPlaceholder;
-}
 
 /**
  * App Component
  *
  * Main application component that wraps the form.
+ * Uses useWalletState to get the active adapter.
  */
-export function App({ adapter }: AppProps) {
+export function App() {
+  const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
+
+  if (isAdapterLoading) {
+    return <div className="app-loading">Loading adapter...</div>;
+  }
+  if (!activeAdapter) {
+    return (
+      <div className="app-error">
+        Adapter not available. Please ensure network is selected and supported.
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="header border-b px-6 py-3">
@@ -36,18 +50,13 @@ export function App({ adapter }: AppProps) {
               </p>
             </div>
           </div>
+          <WalletConnectionHeader />
         </div>
       </header>
 
       <main className="main">
         <div className="container">
-          <GeneratedForm
-            adapter={adapter}
-            onSubmit={(data: FormData) => {
-              console.log('Transaction submitted:', data);
-              // Don't return a Promise, this function should be void
-            }}
-          />
+          <GeneratedForm adapter={activeAdapter} isWalletConnected={isWalletConnectedForForm} />
         </div>
       </main>
 

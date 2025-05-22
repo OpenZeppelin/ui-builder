@@ -1,7 +1,7 @@
 import React from 'react';
 import { useController } from 'react-hook-form';
 
-import { Label } from '@openzeppelin/transaction-form-renderer';
+import { Label } from '@openzeppelin/transaction-form-ui';
 
 import type { PrimaryMethodSelectorProps } from '../types';
 

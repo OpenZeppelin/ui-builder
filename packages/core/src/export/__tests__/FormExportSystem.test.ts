@@ -101,9 +101,9 @@ describe('FormExportSystem', () => {
         .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
           // Simulate dependency logic: return base + adapter with correct versions
           const baseDeps = {
-            react: '^18.2.0', // Correct version for assertion
-            '@openzeppelin/transaction-form-renderer': '^1.0.0', // Use consistent placeholder version
-            '@openzeppelin/transaction-form-types': '^0.1.0', // Use consistent placeholder version
+            react: '^19.0.0', // Correct version for assertion
+            '@openzeppelin/transaction-form-renderer': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/transaction-form-types': 'workspace:*', // Use consistent placeholder version
           };
           const adapterDep = `@openzeppelin/transaction-form-adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
@@ -208,7 +208,7 @@ describe('FormExportSystem', () => {
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       // Check a base dependency from the mock config is still present
-      expect(result.dependencies).toHaveProperty('react', '^18.2.0');
+      expect(result.dependencies).toHaveProperty('react', '^19.0.0');
     });
 
     it('should use the correct dependencies for different blockchain types', async () => {
@@ -270,8 +270,8 @@ describe('FormExportSystem', () => {
         // Mock getDependencies to return different dependencies based on field types
         vi.spyOn(mocks.packageManager, 'getDependencies').mockImplementation(async () => {
           const deps: Record<string, string> = {
-            react: '^18.2.0',
-            'react-dom': '^18.2.0',
+            react: '^19.0.0',
+            'react-dom': '^19.0.0',
             'react-hook-form': '^7.43.9',
             viem: '^1.10.9',
           };

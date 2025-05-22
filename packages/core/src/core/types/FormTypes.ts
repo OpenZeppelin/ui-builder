@@ -35,6 +35,9 @@ export interface BuilderFormConfig extends CommonFormProperties {
    */
   description?: string;
 
+  /**
+   * The execution configuration for the form
+   */
   executionConfig?: ExecutionConfig;
 }
 

@@ -1,4 +1,6 @@
 /**
+ * TODO: check and verify that we still need this file...
+ *
  * Form Renderer Configuration
  *
  * This file defines the dependencies required for different field types
@@ -13,8 +15,8 @@ import type { FormRendererConfig } from './types/FormRendererConfig';
 export const formRendererConfig: FormRendererConfig = {
   // Core dependencies required by all exported forms
   coreDependencies: {
-    react: '^18.2.0',
-    'react-dom': '^18.2.0',
+    react: '^19.0.0',
+    'react-dom': '^19.0.0',
     'react-hook-form': '^7.45.4',
     '@radix-ui/react-label': '^2.0.2',
     '@radix-ui/react-slot': '^1.0.2',
@@ -23,6 +25,7 @@ export const formRendererConfig: FormRendererConfig = {
     'tailwind-merge': '^1.14.0',
     '@openzeppelin/transaction-form-renderer': '^0.1.0',
     '@openzeppelin/transaction-form-types': '^0.1.0',
+    '@openzeppelin/transaction-form-utils': '^0.1.0',
   },
 
   // Field-specific dependencies

@@ -11,10 +11,9 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 import { createDefaultFormValues } from '../utils/formUtils';
 
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
-import { WalletConnectButton } from './wallet/WalletConnectButton';
-import { useWalletConnection } from './wallet/useWalletConnection';
 
 import { DynamicFormField } from './DynamicFormField';
+import { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
 import { TransactionStatusDisplay } from './transaction';
 
 /**
@@ -40,16 +39,16 @@ export function TransactionForm({
   schema,
   contractSchema,
   adapter,
+  isWalletConnected = false,
+  executionConfig,
 }: TransactionFormProps): React.ReactElement {
   const [formError, setFormError] = useState<string | null>(null);
+  const [executionConfigError, setExecutionConfigError] = useState<string | null>(null);
 
   // Transaction Lifecycle State
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
-
-  // Use the wallet connection context
-  const { isConnected } = useWalletConnection();
 
   // Derive networkConfig from the adapter instance
   const networkConfig = adapter.networkConfig;
@@ -67,25 +66,48 @@ export function TransactionForm({
     setTxHash(null);
     setTxError(null);
     setFormError(null);
+    setExecutionConfigError(null);
   }, [schema, methods]);
 
-  // Form submission handler - Actual transaction logic
-  const handleSubmit = async (data: FormValues): Promise<void> => {
-    logger.info('TransactionForm', 'Form submitted', data);
-    setTxStatus('idle'); // Reset status on new submission
+  // Effect to validate executionConfig
+  useEffect(() => {
+    const validateExecConfig = async (): Promise<void> => {
+      if (executionConfig && adapter && adapter.validateExecutionConfig) {
+        try {
+          logger.info('TransactionForm', 'Re-validating execution config:', executionConfig);
+          const validationResult = await adapter.validateExecutionConfig(executionConfig);
+          if (typeof validationResult === 'string') {
+            setExecutionConfigError(`Execution Configuration Error: ${validationResult}`);
+          } else {
+            setExecutionConfigError(null);
+          }
+        } catch (error) {
+          logger.error('TransactionForm', 'Error reactive exec config validation:', error);
+          setExecutionConfigError(
+            `Exec Config Validation Failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      } else {
+        setExecutionConfigError(null);
+      }
+    };
+    void validateExecConfig();
+  }, [executionConfig, adapter, isWalletConnected]);
+
+  const executeTransaction = async (data: FormValues): Promise<void> => {
+    logger.info('TransactionForm', 'Internal form submission attempt', data);
+    setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
 
     if (!adapter) {
-      logger.error('TransactionForm', 'Adapter not provided');
+      logger.error('TransactionForm', 'Adapter not provided.');
       setTxError('Configuration error: Adapter not available.');
       setTxStatus('error');
       return;
     }
-
-    const connectionStatus = adapter.getWalletConnectionStatus();
-    if (!connectionStatus.isConnected) {
-      logger.warn('TransactionForm', 'Wallet not connected for submission');
+    if (!isWalletConnected) {
+      logger.warn('TransactionForm', 'Wallet not connected for submission.');
       setTxError('Please connect your wallet to submit the transaction.');
       setTxStatus('error');
       return;
@@ -95,13 +117,16 @@ export function TransactionForm({
       setTxStatus('pendingSignature');
       const formattedData = adapter.formatTransactionData(
         contractSchema,
-        schema.functionId as string, // TODO: Ensure functionId is present
+        schema.functionId as string,
         data,
-        schema.fields // Pass all fields config
+        schema.fields
       );
       logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
 
-      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(formattedData);
+      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(
+        formattedData,
+        executionConfig
+      );
       logger.info('TransactionForm', `Transaction submitted with hash: ${submittedTxHash}`);
       setTxHash(submittedTxHash);
 
@@ -140,10 +165,9 @@ export function TransactionForm({
       }
       // --> End: Wait for confirmation <--
     } catch (error) {
-      logger.error('TransactionForm', 'Transaction error:', error);
+      logger.error('TransactionForm', 'Transaction error during submission process:', error);
       setTxError(error instanceof Error ? error.message : 'An unknown error occurred.');
       setTxStatus('error');
-      // Keep txHash if it was set before the error (e.g., during signAndBroadcast)
     }
   };
 
@@ -177,6 +201,7 @@ export function TransactionForm({
     return 'grid grid-cols-1 gap-4';
   };
 
+  // TODO: temporary, refactor to use the button component from the ui package
   // Determine button variant based on schema configuration
   const getButtonVariant = ():
     | 'default'
@@ -226,12 +251,8 @@ export function TransactionForm({
 
   return (
     <FormProvider {...methods}>
-      {/* Header with wallet connection */}
       <div className="mb-4 flex items-center justify-between">
         {schema.title && <h2 className="text-xl font-bold">{schema.title}</h2>}
-        <div className="wallet-connection">
-          <WalletConnectButton />
-        </div>
       </div>
 
       {/* Always render description container, just change content */}
@@ -265,18 +286,30 @@ export function TransactionForm({
         <form
           className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus !== 'idle' ? 'opacity-70 pointer-events-none' : ''}`}
           noValidate
-          onSubmit={methods.handleSubmit(handleSubmit)}
+          onSubmit={methods.handleSubmit(executeTransaction)}
         >
           <div className="mb-6">{renderFormContent()}</div>
 
-          {/* Form actions */}
-          <div className="form-actions mt-4 flex justify-end border-t border-gray-100 pt-4">
-            <TransactionExecuteButton
-              isWalletConnected={isConnected}
-              isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
-              isFormValid={methods.formState.isValid}
-              variant={getButtonVariant()}
-            />
+          {/* Execution Config Display - Placed above the form actions */}
+          {executionConfig && (
+            <div className="w-full">
+              <ExecutionConfigDisplay
+                executionConfig={executionConfig}
+                error={executionConfigError}
+              />
+            </div>
+          )}
+
+          {/* Form actions - Button only */}
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <div className="flex justify-end">
+              <TransactionExecuteButton
+                isWalletConnected={isWalletConnected}
+                isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
+                isFormValid={methods.formState.isValid && executionConfigError === null}
+                variant={getButtonVariant()}
+              />
+            </div>
           </div>
         </form>
       </div>

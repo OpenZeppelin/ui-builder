@@ -229,6 +229,10 @@ export class PackageManager {
     if (adapterPackageName) {
       combined[adapterPackageName] = 'workspace:*'; // Use workspace protocol for now
       combined['@openzeppelin/transaction-form-types'] = 'workspace:*';
+      combined['@openzeppelin/transaction-form-ui'] = 'workspace:*';
+      combined['@openzeppelin/transaction-form-utils'] = 'workspace:*';
+      combined['@openzeppelin/transaction-form-renderer'] = 'workspace:*';
+      combined['@openzeppelin/transaction-form-react-core'] = 'workspace:*';
     }
 
     return combined;
@@ -361,6 +365,8 @@ export class PackageManager {
       '@openzeppelin/transaction-form-renderer',
       '@openzeppelin/transaction-form-types',
       '@openzeppelin/transaction-form-utils',
+      '@openzeppelin/transaction-form-ui',
+      '@openzeppelin/transaction-form-react-core',
       ...Object.values(adapterPackageMap),
     ]);
 

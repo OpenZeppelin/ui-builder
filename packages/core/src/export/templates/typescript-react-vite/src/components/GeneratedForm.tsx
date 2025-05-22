@@ -20,7 +20,7 @@
  * ```tsx
  * import { useEffect, useState } from 'react';
  * import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm'; // Example
- * import { TransactionForm, WalletConnectionProvider, ... } from '@openzeppelin/transaction-form-renderer';
+ * import { TransactionForm, ... } from '@openzeppelin/transaction-form-renderer';
  * import type { RenderFormSchema, TransactionFormProps } from '@openzeppelin/transaction-form-types';
  *
  * // Props will likely extend TransactionFormProps
@@ -30,17 +30,14 @@
  *   // ... state hooks (transactionResult, contractSchema, etc.) ...
  *
  *   const formSchema: RenderFormSchema = { ... }; // Generated schema
- *   const allFieldsConfig = [ ... ]; // Original field config
  *
  *   // ... useEffect for loading contract ...
  *   // ... handleSubmit logic ...
  *
  *   return (
- *     <WalletConnectionProvider adapter={adapter}>
  *       // ... layout (Card, ContractStateWidget) ...
  *       <TransactionForm schema={formSchema} adapter={adapter} onSubmit={handleSubmit} />
  *       // ...
- *     </WalletConnectionProvider>
  *   );
  * }
  * ```

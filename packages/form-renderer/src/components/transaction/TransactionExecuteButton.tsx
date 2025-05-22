@@ -1,5 +1,4 @@
-import { ButtonProps } from '../ui/button';
-import { LoadingButton } from '../ui/loading-button';
+import { ButtonProps, LoadingButton } from '@openzeppelin/transaction-form-ui';
 
 export interface TransactionExecuteButtonProps {
   /**

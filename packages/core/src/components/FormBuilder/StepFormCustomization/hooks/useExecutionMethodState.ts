@@ -30,7 +30,7 @@ interface UseExecutionMethodStateReturn {
   isValid: boolean;
   validationError: string | null;
   // Expose validator for testing
-  validateExecutionConfig: (config: ExecutionConfig | undefined) => Promise<void>;
+  validateExecutionConfig: (config: ExecutionConfig | undefined) => void;
 }
 
 export function useExecutionMethodState({
@@ -46,12 +46,16 @@ export function useExecutionMethodState({
     defaultValues: {
       executionMethodType: currentConfig?.method,
       eoaOption:
-        currentConfig?.method === 'eoa'
-          ? currentConfig.allowAny === false
-            ? 'specific'
-            : 'any'
-          : undefined,
-      specificEoaAddress: currentConfig?.method === 'eoa' ? currentConfig.specificAddress : '',
+        currentConfig?.method === 'eoa' && currentConfig.allowAny === false
+          ? 'specific'
+          : currentConfig?.method === 'eoa' // Default to 'any' if EOA, else undefined
+            ? 'any'
+            : undefined,
+      // Always provide a string, defaults to empty string
+      specificEoaAddress:
+        currentConfig?.method === 'eoa' && currentConfig.specificAddress
+          ? currentConfig.specificAddress
+          : '',
     },
   });
   const { watch, reset, setValue, getValues } = formMethods;
@@ -64,50 +68,43 @@ export function useExecutionMethodState({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   //---------------------------------------------------------------------------
-  // Validation Logic
+  // Validation Logic (for Builder UI)
   //---------------------------------------------------------------------------
-  const validateExecutionConfig = useCallback(
-    async (configToValidate: ExecutionConfig | undefined): Promise<void> => {
-      let isValidResult = false;
-      let errorResult: string | null = null;
+  const validateExecutionConfigForBuilder = useCallback(
+    // Removed async as we are not calling adapter.validateExecutionConfig here
+    (configToValidate: ExecutionConfig | undefined): void => {
+      let isValidForBuilder = false;
+      let errorForBuilder: string | null = null;
 
       if (!adapter) {
-        errorResult = 'Adapter not available.';
+        errorForBuilder = 'Adapter not available.';
       } else if (!configToValidate) {
-        errorResult = 'Please select an execution method.';
+        errorForBuilder = 'Please select an execution method.';
       } else if (configToValidate.method === 'eoa') {
-        if (!configToValidate.allowAny && !configToValidate.specificAddress) {
-          errorResult = 'Please provide the specific EOA address.';
+        const eoaConfig = configToValidate;
+        if (!eoaConfig.allowAny) {
+          if (!eoaConfig.specificAddress) {
+            errorForBuilder = 'Please provide the specific EOA address.';
+          } else if (!adapter.isValidAddress(eoaConfig.specificAddress)) {
+            errorForBuilder = `Invalid EOA address format: ${eoaConfig.specificAddress}`;
+          }
         }
       } else if (configToValidate.method === 'relayer') {
-        errorResult = null; // Placeholder
+        // Placeholder: For builder UI, relayer is valid if selected (further details might be validated later)
+        errorForBuilder = null;
       } else if (configToValidate.method === 'multisig') {
-        errorResult = null; // Placeholder
+        // Placeholder: For builder UI, multisig is valid if selected
+        errorForBuilder = null;
       }
 
-      if (!errorResult && adapter && configToValidate) {
-        try {
-          const adapterValidationResult = await adapter.validateExecutionConfig(configToValidate);
-          if (adapterValidationResult === true) {
-            isValidResult = true;
-            errorResult = null;
-          } else {
-            isValidResult = false;
-            errorResult = adapterValidationResult;
-          }
-        } catch (error) {
-          isValidResult = false;
-          errorResult = 'An unexpected error occurred during validation.';
-          console.error('Validation error:', error);
-        }
-      } else {
-        isValidResult = false;
+      if (!errorForBuilder) {
+        isValidForBuilder = true;
       }
 
-      setIsValid(isValidResult);
-      setValidationError(errorResult);
+      setIsValid(isValidForBuilder);
+      setValidationError(errorForBuilder);
 
-      onUpdateConfig(configToValidate, isValidResult);
+      onUpdateConfig(configToValidate, isValidForBuilder);
     },
     [adapter, onUpdateConfig]
   );
@@ -150,9 +147,9 @@ export function useExecutionMethodState({
     } else {
       setSupportedMethods([]);
       reset({
-        executionMethodType: undefined,
-        eoaOption: undefined,
-        specificEoaAddress: undefined,
+        executionMethodType: undefined, // Or a sensible default like 'eoa' if always one selected
+        eoaOption: 'any', // Default to 'any'
+        specificEoaAddress: '', // Reset to empty string
       });
       onUpdateConfig(undefined, false); // Update parent config
     }
@@ -165,13 +162,12 @@ export function useExecutionMethodState({
   useEffect(() => {
     let configToValidate = ensureCompleteConfig(currentConfig || {});
 
-    // If no config exists yet, create a default one (EOA)
     if (!configToValidate) {
       configToValidate = ensureCompleteConfig({ method: 'eoa', allowAny: true });
     }
 
-    void validateExecutionConfig(configToValidate);
-  }, [currentConfig, validateExecutionConfig]);
+    validateExecutionConfigForBuilder(configToValidate);
+  }, [currentConfig, validateExecutionConfigForBuilder]);
 
   // Effect 3: Watch for user form input changes and trigger validation
   useEffect(() => {
@@ -183,13 +179,17 @@ export function useExecutionMethodState({
       const newConfig = ensureCompleteConfig({
         method: formData.executionMethodType,
         allowAny: formData.eoaOption === 'any',
-        specificAddress: formData.specificEoaAddress || undefined,
+        // Ensure specificEoaAddress is undefined if empty string, to match ExecutionConfig type if needed
+        // Or ensure ExecutionConfig specificAddress can be an empty string if that's acceptable
+        // For now, let's keep it as is, as ensureCompleteConfig might handle it.
+        // The key is that RHF field should not be undefined.
+        specificAddress: formData.specificEoaAddress, // Keep as string from form
       });
-      void validateExecutionConfig(newConfig);
+      validateExecutionConfigForBuilder(newConfig);
     };
     const subscription = watch(watchCallback);
     return () => subscription.unsubscribe();
-  }, [watch, validateExecutionConfig]);
+  }, [watch, validateExecutionConfigForBuilder]);
 
   //---------------------------------------------------------------------------
   // Return Value
@@ -201,6 +201,7 @@ export function useExecutionMethodState({
     watchedEoaOption,
     isValid,
     validationError,
-    validateExecutionConfig,
+    // Expose validator for testing - this should now be the builder-specific one
+    validateExecutionConfig: validateExecutionConfigForBuilder,
   };
 }

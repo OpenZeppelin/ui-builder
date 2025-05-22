@@ -293,6 +293,147 @@ describe('AppConfigService', () => {
       const config = appConfigServiceInstance.getConfig();
       expect(config.defaultLanguage).toBe('en_vite'); // Vite should override default
     });
+
+    it('should handle a full realistic configuration with all supported options', async () => {
+      // Create a complete JSON configuration representing a real-world scenario
+      const fullJsonConfig: Partial<AppRuntimeConfig> = {
+        defaultLanguage: 'en',
+        networkServiceConfigs: {
+          'etherscan-mainnet': { apiKey: 'main_etherscan_api_key' },
+          'etherscan-goerli': { apiKey: 'test_etherscan_api_key' },
+          'polygonscan-mainnet': { apiKey: 'polygon_api_key' },
+        },
+        globalServiceConfigs: {
+          walletui: {
+            config: {
+              kitName: 'custom',
+              kitConfig: {
+                showInjectedConnector: true,
+                showNetworkSelector: true,
+                darkMode: false,
+              },
+            },
+          },
+          walletconnect: {
+            projectId: 'wc_project_id_123',
+            relay: {
+              url: 'wss://relay.walletconnect.com',
+            },
+            metadata: {
+              name: 'My App',
+              description: 'App using OpenZeppelin Transaction Form',
+            },
+          },
+          analytics: {
+            enabled: true,
+            provider: 'segment',
+            apiKey: 'analytics_key_456',
+            options: {
+              anonymizeIp: true,
+            },
+          },
+        },
+        rpcEndpoints: {
+          'ethereum-mainnet': 'https://eth-mainnet.custom-rpc.com',
+          'ethereum-goerli': 'https://eth-goerli.custom-rpc.com',
+          'polygon-mainnet': 'https://polygon-mainnet.custom-rpc.com',
+        },
+        featureFlags: {
+          enable_new_ui: true,
+          enable_experimental_features: false,
+          show_debug_tools: false,
+        },
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => fullJsonConfig,
+      } as unknown as Response);
+
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.prod.json' }]);
+
+      // Verify we can access all configuration types correctly
+
+      // 1. Basic config
+      expect(appConfigServiceInstance.getConfig().defaultLanguage).toBe('en');
+
+      // 2. Explorer API keys
+      expect(appConfigServiceInstance.getExplorerApiKey('etherscan-mainnet')).toBe(
+        'main_etherscan_api_key'
+      );
+      expect(appConfigServiceInstance.getExplorerApiKey('etherscan-goerli')).toBe(
+        'test_etherscan_api_key'
+      );
+      expect(appConfigServiceInstance.getExplorerApiKey('polygonscan-mainnet')).toBe(
+        'polygon_api_key'
+      );
+
+      // 3. RPC endpoints
+      expect(appConfigServiceInstance.getRpcEndpointOverride('ethereum-mainnet')).toBe(
+        'https://eth-mainnet.custom-rpc.com'
+      );
+      expect(appConfigServiceInstance.getRpcEndpointOverride('ethereum-goerli')).toBe(
+        'https://eth-goerli.custom-rpc.com'
+      );
+      expect(appConfigServiceInstance.getRpcEndpointOverride('polygon-mainnet')).toBe(
+        'https://polygon-mainnet.custom-rpc.com'
+      );
+
+      // 4. Feature flags
+      expect(appConfigServiceInstance.isFeatureEnabled('enable_new_ui')).toBe(true);
+      expect(appConfigServiceInstance.isFeatureEnabled('enable_experimental_features')).toBe(false);
+      expect(appConfigServiceInstance.isFeatureEnabled('show_debug_tools')).toBe(false);
+      expect(appConfigServiceInstance.isFeatureEnabled('non_existent_flag')).toBe(false);
+
+      // 5. Global service params - simple
+      expect(appConfigServiceInstance.getGlobalServiceParam('walletconnect', 'projectId')).toBe(
+        'wc_project_id_123'
+      );
+
+      // 6. Nested config with type safety
+      type WalletUiConfig = {
+        kitName: string;
+        kitConfig?: {
+          showInjectedConnector?: boolean;
+          showNetworkSelector?: boolean;
+          darkMode?: boolean;
+        };
+      };
+
+      const walletConfig = appConfigServiceInstance.getTypedNestedConfig<WalletUiConfig>(
+        'walletui',
+        'config'
+      );
+
+      expect(walletConfig).toBeDefined();
+      expect(walletConfig?.kitName).toBe('custom');
+      expect(walletConfig?.kitConfig?.showInjectedConnector).toBe(true);
+      expect(walletConfig?.kitConfig?.showNetworkSelector).toBe(true);
+      expect(walletConfig?.kitConfig?.darkMode).toBe(false);
+
+      // 7. Deeper nested config
+      type RelayConfig = { url: string };
+      const relayConfig = appConfigServiceInstance.getTypedNestedConfig<RelayConfig>(
+        'walletconnect',
+        'relay'
+      );
+
+      expect(relayConfig).toBeDefined();
+      expect(relayConfig?.url).toBe('wss://relay.walletconnect.com');
+
+      // 8. Accessing entire config sections
+      const entireAnalyticsConfig = appConfigServiceInstance.getTypedNestedConfig('analytics', '');
+
+      expect(entireAnalyticsConfig).toEqual({
+        enabled: true,
+        provider: 'segment',
+        apiKey: 'analytics_key_456',
+        options: {
+          anonymizeIp: true,
+        },
+      });
+    });
   });
 
   describe('getter methods', () => {
@@ -339,6 +480,106 @@ describe('AppConfigService', () => {
       ).toBeUndefined();
     });
 
+    it('getTypedNestedConfig should return typed nested configuration', async () => {
+      // Setup a configuration with nested objects
+      const jsonConfig = {
+        globalServiceConfigs: {
+          walletui: {
+            config: {
+              kitName: 'custom',
+              kitConfig: {
+                showInjectedConnector: true,
+              },
+            },
+          },
+          otherservice: {
+            nestedParam: {
+              value: 42,
+            },
+          },
+        },
+      };
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => jsonConfig,
+      } as unknown as Response);
+
+      vi.stubGlobal('fetch', mockFetch);
+
+      // Re-initialize with the JSON config
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+
+      // Test retrieving a complex nested config with type
+      type WalletUiConfig = {
+        kitName: string;
+        kitConfig?: {
+          showInjectedConnector?: boolean;
+        };
+      };
+
+      const walletConfig = appConfigServiceInstance.getTypedNestedConfig<WalletUiConfig>(
+        'walletui',
+        'config'
+      );
+
+      expect(walletConfig).toBeDefined();
+      expect(walletConfig?.kitName).toBe('custom');
+      expect(walletConfig?.kitConfig?.showInjectedConnector).toBe(true);
+
+      // Test retrieving a different nested config
+      type OtherConfig = { value: number };
+      const otherConfig = appConfigServiceInstance.getTypedNestedConfig<OtherConfig>(
+        'otherservice',
+        'nestedParam'
+      );
+
+      expect(otherConfig).toBeDefined();
+      expect(otherConfig?.value).toBe(42);
+
+      // Test retrieving non-existent config
+      const nonExistentConfig = appConfigServiceInstance.getTypedNestedConfig(
+        'nonexistent',
+        'config'
+      );
+
+      expect(nonExistentConfig).toBeUndefined();
+    });
+
+    it('getTypedNestedConfig should handle missing nested paths', async () => {
+      // Setup a configuration with only partial paths
+      const jsonConfig = {
+        globalServiceConfigs: {
+          emptyservice: {},
+          partialservice: {
+            config: null,
+          },
+        },
+      };
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => jsonConfig,
+      } as unknown as Response);
+
+      vi.stubGlobal('fetch', mockFetch);
+
+      // Re-initialize with the JSON config
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+
+      // Test with service that exists but has no properties
+      const emptyConfig = appConfigServiceInstance.getTypedNestedConfig('emptyservice', 'config');
+      expect(emptyConfig).toBeUndefined();
+
+      // Test with service that has config key but it's null
+      const nullConfig = appConfigServiceInstance.getTypedNestedConfig('partialservice', 'config');
+      expect(nullConfig).toBeUndefined();
+    });
+
     it('getters should warn if called before initialization', () => {
       const freshInstance = new AppConfigService(); // Not initialized
       vi.mocked(logger.warn).mockClear();
@@ -367,7 +608,13 @@ describe('AppConfigService', () => {
         'getRpcEndpointOverride called before initialization.'
       );
 
-      expect(logger.warn).toHaveBeenCalledTimes(4);
+      freshInstance.getTypedNestedConfig('test', 'config');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'AppConfigService',
+        'getTypedNestedConfig called before initialization.'
+      );
+
+      expect(logger.warn).toHaveBeenCalledTimes(5);
     });
   });
 });

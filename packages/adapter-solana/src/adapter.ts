@@ -81,22 +81,20 @@ export class SolanaAdapter implements ContractAdapter {
     return generateSolanaDefaultField(parameter);
   }
 
-  formatTransactionData(
+  public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
     submittedInputs: Record<string, unknown>,
-    allFieldsConfig: FormFieldType[]
+    fields: FormFieldType[]
   ): unknown {
-    return formatSolanaTransactionData(
-      contractSchema,
-      functionId,
-      submittedInputs,
-      allFieldsConfig
-    );
+    return formatSolanaTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
 
-  async signAndBroadcast(transactionData: unknown): Promise<{ txHash: string }> {
-    return signAndBroadcastSolanaTransaction(transactionData);
+  async signAndBroadcast(
+    transactionData: unknown,
+    executionConfig?: ExecutionConfig
+  ): Promise<{ txHash: string }> {
+    return signAndBroadcastSolanaTransaction(transactionData, executionConfig);
   }
 
   isValidAddress(address: string): boolean {

@@ -8,7 +8,6 @@ import type {
   SolanaNetworkConfig,
   StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
-import { isEvmNetworkConfig, isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Define specific constructor types for each adapter
@@ -71,7 +70,6 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
 };
 
 // --- Network Discovery Logic (adapted from networks/registry.ts) ---
-let cachedAllNetworks: NetworkConfig[] | null = null;
 const networksByEcosystemCache: Partial<Record<Ecosystem, NetworkConfig[]>> = {};
 
 async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<string, unknown>> {
@@ -94,9 +92,11 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
 }
 
 export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
+  // Check cache first
   if (networksByEcosystemCache[ecosystem]) {
     return networksByEcosystemCache[ecosystem]!;
   }
+
   const meta = ecosystemRegistry[ecosystem];
   if (!meta) {
     logger.warn('EcosystemManager', `No metadata registered for ecosystem: ${ecosystem}`);
@@ -114,6 +114,7 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
       networksByEcosystemCache[ecosystem] = [];
       return [];
     }
+    // Cache the networks
     networksByEcosystemCache[ecosystem] = networks;
     return networks;
   } catch (error) {
@@ -123,39 +124,112 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
   }
 }
 
-export async function getAllNetworks(): Promise<NetworkConfig[]> {
-  if (cachedAllNetworks) return cachedAllNetworks;
-
-  const ecosystems = Object.keys(ecosystemRegistry) as Ecosystem[];
-  const promises = ecosystems.map(getNetworksByEcosystem);
-
-  try {
-    const results = await Promise.all(promises);
-    const combinedNetworks = results.flat();
-    cachedAllNetworks = combinedNetworks;
-    return combinedNetworks;
-  } catch (error) {
-    logger.error('EcosystemManager', 'Error loading networks from one or more adapters:', error);
-    cachedAllNetworks = []; // Cache empty array on error to prevent re-fetching immediately
-    return [];
-  }
-}
-
+/**
+ * Retrieves a specific network configuration by its unique ID.
+ *
+ * This function employs a two-step caching and lookup strategy to efficiently find the network
+ * configuration while ensuring adapters are loaded dynamically and only when necessary:
+ *
+ * 1.  **Ecosystem-Specific Cache Check (`networksByEcosystemCache`):**
+ *     It first iterates through `networksByEcosystemCache`. This cache stores arrays of
+ *     `NetworkConfig` objects, keyed by their `Ecosystem`. This cache is populated whenever
+ *     `getNetworksByEcosystem` is called for a particular ecosystem (which involves dynamically
+ *     importing the corresponding adapter package if it hasn't been loaded yet).
+ *     If the network ID is found in any of these already-loaded ecosystem caches, the function
+ *     returns the network config immediately, avoiding redundant lookups or module loading.
+ *
+ * 2.  **Sequential Ecosystem Iteration and On-Demand Loading:**
+ *     If the network ID is not found in any pre-populated ecosystem-specific cache, the function
+ *     iterates through all registered ecosystems defined in `ecosystemRegistry`.
+ *     For each ecosystem in this list:
+ *     a.  It first checks `networksByEcosystemCache` again for that specific ecosystem. This handles
+ *         cases where the cache might have been populated by a concurrent operation or a previous
+ *         step within the same broader application flow but wasn't iterated over in step 1 (e.g., if
+ *         step 1 iterated `Object.keys(networksByEcosystemCache)` before this specific ecosystem was added).
+ *     b.  If the networks for the current ecosystem are not in `networksByEcosystemCache`, it calls
+ *         `await getNetworksByEcosystem(ecosystem)`. This function is responsible for:
+ *         - Dynamically importing the adapter package for that ecosystem (e.g., `/adapter-evm`).
+ *           This is the core of the dynamic loading behavior, ensuring adapter code is fetched only when
+ *           its ecosystem is being actively queried.
+ *         - Extracting the network configurations from the loaded module.
+ *         - Populating `networksByEcosystemCache[ecosystem]` with these networks for future lookups.
+ *     c.  Once the networks for the current ecosystem are available (either from cache or newly loaded),
+ *         it searches for the target network ID within that list.
+ *     d.  If found, the network configuration is returned, and the process stops.
+ *
+ * This approach ensures that:
+ * - We leverage existing cached data as much as possible.
+ * - We only load adapter modules (and their associated network lists) for ecosystems that are
+ *   actually relevant to the `id` being searched, or for ecosystems whose networks have been
+ *   explicitly requested elsewhere via `getNetworksByEcosystem`.
+ */
 export async function getNetworkById(id: string): Promise<NetworkConfig | undefined> {
   logger.info('EcosystemManager(getNetworkById)', `Attempting to get network by ID: '${id}'`);
 
-  // Check caches first (which store static configs)
-  for (const ecosystemNetworks of Object.values(networksByEcosystemCache)) {
-    const network = ecosystemNetworks?.find((n) => n.id === id);
-    if (network) return network;
+  // 1. Check all existing populated ecosystem-specific caches
+  // These caches are populated by calls to getNetworksByEcosystem
+  for (const ecosystemKey of Object.keys(networksByEcosystemCache)) {
+    const ecosystem = ecosystemKey as Ecosystem;
+    const cachedNetworksForEcosystem = networksByEcosystemCache[ecosystem];
+    if (cachedNetworksForEcosystem) {
+      const network = cachedNetworksForEcosystem.find((n) => n.id === id);
+      if (network) {
+        logger.info(
+          'EcosystemManager(getNetworkById)',
+          `Network ID '${id}' found in already populated cache for ecosystem: ${ecosystem}.`
+        );
+        return network;
+      }
+    }
   }
-  if (cachedAllNetworks) {
-    const network = cachedAllNetworks.find((n) => n.id === id);
-    if (network) return network;
+
+  // 2. If not found in existing caches, iterate through all registered ecosystems.
+  // For each ecosystem, load its networks if not already cached via networksByEcosystemCache, then search.
+  logger.info(
+    'EcosystemManager(getNetworkById)',
+    `Network ID '${id}' not found in existing caches. Sequentially checking/loading ecosystems.`
+  );
+  const allEcosystems = Object.keys(ecosystemRegistry) as Ecosystem[];
+
+  for (const ecosystem of allEcosystems) {
+    // Attempt to retrieve from cache first for this specific ecosystem
+    let networksForEcosystem = networksByEcosystemCache[ecosystem];
+
+    if (!networksForEcosystem) {
+      // If not in cache, load them. getNetworksByEcosystem will populate the cache.
+      logger.info(
+        'EcosystemManager(getNetworkById)',
+        `Cache miss for ${ecosystem}. Loading networks for ecosystem: ${ecosystem} to find ID '${id}'.`
+      );
+      networksForEcosystem = await getNetworksByEcosystem(ecosystem);
+    } else {
+      // This case means the ecosystem's networks were already in networksByEcosystemCache,
+      // but the ID wasn't found in the first loop. This can happen if the first loop iterated
+      // over Object.keys(networksByEcosystemCache) which might not yet include this `ecosystem`
+      // if it's being processed for the first time in this broader loop.
+      // No need to re-log if already loaded, the first loop would have caught it if the ID was present.
+      // However, it's crucial to use these already loaded networks for the search.
+      logger.info(
+        'EcosystemManager(getNetworkById)',
+        `Using already loaded networks for ecosystem: ${ecosystem} (from networksByEcosystemCache) to find ID '${id}'.`
+      );
+    }
+
+    const foundNetwork = networksForEcosystem?.find((n) => n.id === id);
+    if (foundNetwork) {
+      logger.info(
+        'EcosystemManager(getNetworkById)',
+        `Network ID '${id}' found in ecosystem: ${ecosystem}.`
+      );
+      return foundNetwork;
+    }
   }
-  // Fallback to loading all if not in cache
-  const allNetworks = await getAllNetworks();
-  return allNetworks.find((network) => network.id === id);
+
+  logger.warn(
+    'EcosystemManager(getNetworkById)',
+    `Network with ID '${id}' not found after checking/loading all ecosystems.`
+  );
+  return undefined;
 }
 
 // --- Adapter Config Loaders Map ---
@@ -186,11 +260,14 @@ export function getAdapterConfigExportName(ecosystem: Ecosystem): string | undef
 }
 
 // --- Adapter Instantiation Logic ---
+
 export async function getAdapter(networkConfigInput: NetworkConfig): Promise<ContractAdapter> {
   const logSystem = 'EcosystemManager(getAdapter)';
-  logger.debug(
+  const networkId = networkConfigInput.id;
+
+  logger.info(
     logSystem,
-    `Getting adapter for network: ${networkConfigInput.name} (ID: ${networkConfigInput.id}) using its default RPC: ${isEvmNetworkConfig(networkConfigInput) ? networkConfigInput.rpcUrl : isSolanaNetworkConfig(networkConfigInput) ? networkConfigInput.rpcEndpoint : 'N/A'}`
+    `Creating new adapter for network: ${networkConfigInput.name} (ID: ${networkId}) using its default RPC.`
   );
 
   const meta = ecosystemRegistry[networkConfigInput.ecosystem];

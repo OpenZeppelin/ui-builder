@@ -4,7 +4,7 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 
@@ -88,6 +88,12 @@ export interface ExportOptions extends TemplateOptions {
    * Whether the export target is intended for build/serve via the CLI in the monorepo context
    */
   isCliBuildTarget?: boolean;
+
+  /**
+   * UI Kit configuration chosen by the user in the builder UI.
+   * TODO: Implement UI in FormBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
+   */
+  uiKitConfiguration?: UiKitConfiguration;
 }
 
 /**

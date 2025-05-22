@@ -44,13 +44,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openzeppelin/transaction-form-types": "workspace:*"
+    "@openzeppelin/transaction-form-types": "workspace:*",
+    "@openzeppelin/transaction-form-utils": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.8.2",
     "eslint": "^9.22.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
+    "react": "^19.0.0"
   }
 }

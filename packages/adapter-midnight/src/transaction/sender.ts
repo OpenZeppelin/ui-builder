@@ -1,11 +1,23 @@
+import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
+
+const SYSTEM_LOG_TAG = 'adapter-midnight';
+
 /**
  * Sign and broadcast a transaction
  *
  * TODO: Implement proper Midnight transaction signing in future phases
  */
 export function signAndBroadcastMidnightTransaction(
-  _transactionData: unknown
+  _transactionData: unknown,
+  executionConfig?: ExecutionConfig
 ): Promise<{ txHash: string }> {
+  logger.info(
+    SYSTEM_LOG_TAG,
+    'Midnight signAndBroadcast called with executionConfig:',
+    executionConfig
+  );
+  // TODO: Use executionConfig
   return Promise.resolve({ txHash: 'midnight_placeholder_tx' });
 }
 

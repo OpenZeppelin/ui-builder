@@ -1,24 +1,18 @@
 import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
-import {
-  getAdapter,
-  getAllNetworks,
-  getNetworkById,
-  getNetworksByEcosystem,
-} from '../ecosystemManager';
+import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
 
 /**
  * Service class for managing and retrieving network configurations and their associated adapters.
  * Uses lazy-loading registry.
+ *
+ * IMPORTANT: Components should generally use the AdapterProvider/AdapterContext pattern
+ * for adapter access rather than calling this service directly.
  */
 export class NetworkService {
-  /**
-   * Get all available network configurations using lazy loading.
-   * @returns A promise that resolves to an array of all network configurations.
-   */
-  async getAllNetworks(): Promise<NetworkConfig[]> {
-    return getAllNetworks();
-  }
+  // Cache to promote adapter reuse outside React context
+  private adapterCache: Record<string, ContractAdapter> = {};
 
   /**
    * Get network configurations for a specific ecosystem using lazy loading.
@@ -42,6 +36,8 @@ export class NetworkService {
    * Retrieves both the network configuration and the corresponding contract adapter
    * for a given network configuration ID.
    *
+   * CAUTION: For non-React contexts only. React components should use AdapterContext instead.
+   *
    * @param networkConfigId The unique ID of the network configuration.
    * @returns A promise resolving to an object containing the network config and adapter, or null if either is not found.
    */
@@ -50,15 +46,32 @@ export class NetworkService {
   ): Promise<{ network: NetworkConfig; adapter: ContractAdapter } | null> {
     const network = await this.getNetworkById(networkConfigId);
     if (!network) {
-      console.error(`Network configuration not found for ID: ${networkConfigId}`);
+      logger.error('NetworkService', `Network configuration not found for ID: ${networkConfigId}`);
       return null;
     }
 
+    // Check the cache first
+    if (this.adapterCache[networkConfigId]) {
+      return {
+        network,
+        adapter: this.adapterCache[networkConfigId],
+      };
+    }
+
     try {
+      // Note: In React components, use AdapterContext pattern instead of this
       const adapter = await getAdapter(network);
+
+      // Cache the adapter
+      this.adapterCache[networkConfigId] = adapter;
+
       return { network, adapter };
     } catch (error) {
-      console.error(`Adapter could not be created for ecosystem: ${network.ecosystem}`, error);
+      logger.error(
+        'NetworkService',
+        `Adapter could not be created for ecosystem: ${network.ecosystem}`,
+        error
+      );
       return null;
     }
   }

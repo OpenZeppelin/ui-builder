@@ -57,6 +57,10 @@ module.exports = {
       'getExplorerUrl',
       'getExplorerTxUrl',
       'waitForTransactionConfirmation',
+      'configureUiKit',
+      'getEcosystemReactUiContextProvider',
+      'getEcosystemReactHooks',
+      'getEcosystemWalletComponents',
     ];
 
     // Common standard methods and properties that are allowed

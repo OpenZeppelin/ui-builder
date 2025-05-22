@@ -1,70 +1,83 @@
-import type { TransactionReceipt } from 'viem';
+import type { GetAccountReturnType } from '@wagmi/core';
+import type { TransactionReceipt, WalletClient } from 'viem';
+
+import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { WriteContractParameters } from '../types';
-import type { WagmiWalletImplementation } from '../wallet/wagmi-implementation';
+import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
-/**
- * Signs and broadcasts a transaction using the connected wallet.
- */
-export async function signAndBroadcastEvmTransaction(
-  transactionData: WriteContractParameters,
+const SYSTEM_LOG_TAG = 'adapter-evm-sender';
+
+// --- Helper Functions ---
+
+async function _ensureCorrectNetworkOrSwitch(
   walletImplementation: WagmiWalletImplementation,
   targetChainId: number
-): Promise<{ txHash: string }> {
-  console.log('Attempting to sign and broadcast EVM transaction:', transactionData);
-  console.log('Target chain ID for transaction:', targetChainId);
-
-  // 0. Check and switch network if necessary
+): Promise<GetAccountReturnType> {
   const initialAccountStatus = walletImplementation.getWalletConnectionStatus();
   if (!initialAccountStatus.isConnected || !initialAccountStatus.chainId) {
-    console.error(
-      'signAndBroadcast: Wallet not connected or chainId unavailable before network check.'
+    logger.error(
+      SYSTEM_LOG_TAG,
+      'Wallet not connected or chainId unavailable before network check.'
     );
     throw new Error('Wallet not connected or chain ID is unavailable.');
   }
 
   if (initialAccountStatus.chainId !== targetChainId) {
-    console.info(
-      `Wallet is on chain ${initialAccountStatus.chainId}, but transaction targets chain ${targetChainId}. Attempting to switch.`
+    logger.info(
+      SYSTEM_LOG_TAG,
+      `Wallet on chain ${initialAccountStatus.chainId}, target ${targetChainId}. Switching...`
     );
     try {
       await walletImplementation.switchNetwork(targetChainId);
-      // After attempting switch, re-check the status
       const postSwitchAccountStatus = walletImplementation.getWalletConnectionStatus();
       if (postSwitchAccountStatus.chainId !== targetChainId) {
-        // This case should ideally be caught by switchNetwork throwing an error, but double check.
-        console.error(
-          `Failed to switch to target chain ${targetChainId}. Current chain: ${postSwitchAccountStatus.chainId}`
+        logger.error(
+          SYSTEM_LOG_TAG,
+          `Failed to switch to target chain ${targetChainId}. Current: ${postSwitchAccountStatus.chainId}`
         );
-        throw new Error(
-          `Failed to switch to the required network (target: ${targetChainId}). Please switch manually.`
-        );
+        throw new Error(`Failed to switch to the required network (target: ${targetChainId}).`);
       }
-      console.info(`Successfully switched to target chain ${targetChainId}.`);
+      logger.info(SYSTEM_LOG_TAG, `Successfully switched to target chain ${targetChainId}.`);
+      return postSwitchAccountStatus;
     } catch (error) {
-      console.error('Network switch failed:', error);
-      // Re-throw the error from switchNetwork which might include "User rejected"
+      logger.error(SYSTEM_LOG_TAG, 'Network switch failed:', error);
       throw error;
     }
   }
+  logger.info(SYSTEM_LOG_TAG, 'Wallet already on target chain.');
+  return initialAccountStatus;
+}
 
-  // 1. Get the Wallet Client
+async function _getAuthenticatedWalletClient(
+  walletImplementation: WagmiWalletImplementation
+): Promise<{
+  walletClient: WalletClient;
+  accountStatus: GetAccountReturnType;
+}> {
   const walletClient = await walletImplementation.getWalletClient();
   if (!walletClient) {
-    console.error('signAndBroadcast: Wallet client not available. Is wallet connected?');
+    logger.error(SYSTEM_LOG_TAG, 'Wallet client not available. Is wallet connected?');
     throw new Error('Wallet is not connected or client is unavailable.');
   }
 
-  // 2. Get the connected account
   const accountStatus = walletImplementation.getWalletConnectionStatus();
   if (!accountStatus.isConnected || !accountStatus.address) {
-    console.error('signAndBroadcast: Account not available. Is wallet connected?');
+    logger.error(SYSTEM_LOG_TAG, 'Account not available. Is wallet connected?');
     throw new Error('Wallet is not connected or account address is unavailable.');
   }
+  return { walletClient, accountStatus };
+}
 
+async function _executeEoaTransaction(
+  transactionData: WriteContractParameters,
+  walletClient: WalletClient,
+  accountStatus: GetAccountReturnType
+): Promise<{ txHash: string }> {
+  logger.info(SYSTEM_LOG_TAG, 'Using EOA execution strategy.');
   try {
-    // 3. Call viem's writeContract
-    console.log('Calling walletClient.writeContract with:', {
+    logger.debug(SYSTEM_LOG_TAG, 'Calling walletClient.writeContract with:', {
       account: accountStatus.address,
       address: transactionData.address,
       abi: transactionData.abi,
@@ -73,9 +86,8 @@ export async function signAndBroadcastEvmTransaction(
       value: transactionData.value,
       chain: walletClient.chain,
     });
-
     const hash = await walletClient.writeContract({
-      account: accountStatus.address,
+      account: accountStatus.address!,
       address: transactionData.address,
       abi: transactionData.abi,
       functionName: transactionData.functionName,
@@ -83,13 +95,50 @@ export async function signAndBroadcastEvmTransaction(
       value: transactionData.value,
       chain: walletClient.chain,
     });
-
-    console.log('Transaction initiated successfully. Hash:', hash);
+    logger.info(SYSTEM_LOG_TAG, 'EOA Transaction initiated. Hash:', hash);
     return { txHash: hash };
   } catch (error: unknown) {
-    console.error('Error during writeContract call:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown transaction error';
-    throw new Error(`Transaction failed: ${errorMessage}`);
+    logger.error(SYSTEM_LOG_TAG, 'Error during EOA writeContract call:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown EOA transaction error';
+    throw new Error(`Transaction failed (EOA): ${errorMessage}`);
+  }
+}
+
+// --- Main Exported Function ---
+
+export async function signAndBroadcastEvmTransaction(
+  transactionData: WriteContractParameters,
+  walletImplementation: WagmiWalletImplementation,
+  targetChainId: number,
+  executionConfig?: ExecutionConfig
+): Promise<{ txHash: string }> {
+  logger.info(SYSTEM_LOG_TAG, 'Sign & Broadcast EVM Tx:', {
+    data: transactionData,
+    targetChainId,
+    execConfig: executionConfig,
+  });
+
+  const currentMethod = executionConfig?.method || 'eoa';
+
+  await _ensureCorrectNetworkOrSwitch(walletImplementation, targetChainId);
+  const { walletClient, accountStatus } = await _getAuthenticatedWalletClient(walletImplementation);
+
+  switch (currentMethod) {
+    case 'eoa':
+      return _executeEoaTransaction(transactionData, walletClient, accountStatus);
+
+    case 'relayer':
+      logger.warn(SYSTEM_LOG_TAG, 'Relayer execution method not yet implemented.');
+      throw new Error('Relayer execution method not yet implemented.');
+
+    case 'multisig':
+      logger.warn(SYSTEM_LOG_TAG, 'Multisig execution method not yet implemented.');
+      throw new Error('Multisig execution method not yet implemented.');
+
+    default:
+      const exhaustiveCheck: never = currentMethod;
+      logger.error(SYSTEM_LOG_TAG, `Unsupported execution method encountered: ${exhaustiveCheck}`);
+      throw new Error(`Unsupported execution method: ${exhaustiveCheck}`);
   }
 }
 
@@ -104,7 +153,7 @@ export async function waitForEvmTransactionConfirmation(
   receipt?: TransactionReceipt;
   error?: Error;
 }> {
-  console.info('waitForEvmTransactionConfirmation', `Waiting for tx: ${txHash}`);
+  logger.info(SYSTEM_LOG_TAG, `Waiting for tx: ${txHash}`);
   try {
     // Get the public client
     const publicClient = walletImplementation.getPublicClient();
@@ -117,21 +166,17 @@ export async function waitForEvmTransactionConfirmation(
       hash: txHash as `0x${string}`,
     });
 
-    console.info('waitForEvmTransactionConfirmation', 'Received receipt:', receipt);
+    logger.info(SYSTEM_LOG_TAG, 'Received receipt:', receipt);
 
     // Check the status field in the receipt
     if (receipt.status === 'success') {
       return { status: 'success', receipt };
     } else {
-      console.error('waitForEvmTransactionConfirmation', 'Transaction reverted:', receipt);
+      logger.error(SYSTEM_LOG_TAG, 'Transaction reverted:', receipt);
       return { status: 'error', receipt, error: new Error('Transaction reverted.') };
     }
   } catch (error) {
-    console.error(
-      'waitForEvmTransactionConfirmation',
-      'Error waiting for transaction confirmation:',
-      error
-    );
+    logger.error(SYSTEM_LOG_TAG, 'Error waiting for transaction confirmation:', error);
     return {
       status: 'error',
       error: error instanceof Error ? error : new Error(String(error)),

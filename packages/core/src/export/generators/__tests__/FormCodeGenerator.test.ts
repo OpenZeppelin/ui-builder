@@ -219,7 +219,6 @@ describe('FormCodeGenerator', () => {
           functionId: 'testFunction',
           formConfigJSON: expect.any(String),
           contractSchemaJSON: expect.any(String),
-          allFieldsConfigJSON: expect.any(String),
           executionConfigJSON: expect.any(String),
           includeDebugMode: false,
         })

@@ -3,10 +3,8 @@ import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import React from 'react';
 
 import type { TxStatus } from '@openzeppelin/transaction-form-types';
-
-import { cn } from '../../utils/cn';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Button } from '../ui/button';
+import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/transaction-form-ui';
+import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { TransactionHashDisplay } from './TransactionHashDisplay';
 

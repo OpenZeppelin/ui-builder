@@ -36,7 +36,9 @@ This project is currently in development.
 This project is organized as a monorepo with the following packages:
 
 - **packages/core**: The main application with the form builder UI and core logic.
-- **packages/form-renderer**: The shared form rendering library (published to npm).
+- **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@core` and exported apps.
+- **packages/form-renderer**: The shared form rendering library (published to npm), responsible for dynamically rendering forms based on schemas and an active adapter.
+- **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `core` and `form-renderer` to ensure a consistent look and feel.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations.
 - **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
@@ -183,73 +185,82 @@ transaction-form-builder/
 │   ├── core/            # Main application
 │   │   ├── public/      # Static assets
 │   │   ├── src/
-│   │   │   ├── components/      # UI components
-│   │   │   │   ├── ui/          # shadcn/ui components
-│   │   │   │   ├── Common/      # Shared components across features
-│   │   │   │   └── FormBuilder/ # Form builder components
-│   │   │   ├── core/            # Chain-agnostic core functionality
-│   │   │   │   ├── types/       # Core-specific Type definitions (distinct from packages/types)
-│   │   │   │   ├── utils/       # Utility functions
-│   │   │   │   ├── hooks/       # Shared hooks
+│   │   │   ├── components/      # UI components (application-specific or composed)
+│   │   │   │   ├── Common/      # Shared components across features within core
+│   │   │   │   └── FormBuilder/ # Form builder specific components
+│   │   │   ├── core/            # Chain-agnostic core functionality specific to this app
+│   │   │   │   ├── types/       # Core-app-specific Type definitions
+│   │   │   │   ├── utils/       # Core-app-specific utility functions
+│   │   │   │   ├── hooks/       # Core-app-specific hooks (if any, shared React hooks are in react-core)
 │   │   │   │   ├── factories/   # Schema factories
 │   │   │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
 │   │   │   ├── export/          # Export system
 │   │   │   │   ├── generators/  # Form code generators
 │   │   │   │   ├── codeTemplates/ # Individual file templates for generation
 │   │   │   │   ├── templates/   # Base project structures for export
-│   │   │   │   │   ├── typescript-react-vite/  # React + Vite template structure
-│   │   │   │   │   └── ...                     # Future template structures
-│   │   │   │   ├── cli/         # CLI tool for exporting forms
-│   │   │   │   ├── ...          # Other export utilities
+│   │   │   │   └── ...          # Other export utilities
 │   │   │   ├── services/        # Core services
-│   │   │   ├── stories/         # Centralized Storybook stories
-│   │   │   │   ├── common/      # Stories for common components
-│   │   │   │   ├── form-builder/# Stories for form builder components
-│   │   │   │   └── ui/          # Stories for UI components
-│   │   │   ├── test/            # Package-specific tests
+│   │   │   ├── stories/         # Centralized Storybook stories (for core-specific components)
 │   │   │   ├── App.tsx          # Main application component
 │   │   │   ├── main.tsx         # Application entry point
-│   │   │   └── index.css        # Main CSS entry point (imports from @styles)
-│   │   ├── vite-plugins/      # Custom Vite plugins (e.g., virtual modules)
+│   │   │   └── index.css        # Main CSS entry point
+│   │   ├── vite-plugins/      # Custom Vite plugins
 │   │   ├── index.html           # HTML template
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   ├── vite.config.ts       # Vite configuration
 │   │   └── ...                  # Other configuration files
-│   ├── form-renderer/           # Shared form rendering library
+│   ├── react-core/        # Shared React core providers, hooks, and UI components
 │   │   ├── src/
-│   │   │   ├── components/      # Form rendering components
-│   │   │   │   ├── fields/      # Form field components
-│   │   │   │   ├── layout/      # Form layout components
-│   │   │   │   └── ui/          # UI components
+│   │   │   ├── hooks/       # Contains AdapterProvider, WalletStateProvider, useWalletState, etc.
+│   │   │   └── components/  # Contains WalletConnectionHeader, WalletConnectionUI
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── form-renderer/       # Shared form rendering library
+│   │   ├── src/
+│   │   │   ├── components/      # Form rendering specific components (TransactionForm, DynamicFormField)
+│   │   │   │   ├── ContractStateWidget/
+│   │   │   │   ├── transaction/
+│   │   │   │   └── wallet/
 │   │   │   ├── hooks/           # Form rendering hooks
-│   │   │   ├── types/           # Type definitions
-│   │   │   ├── utils/           # Utility functions
-│   │   │   ├── stories/         # Form renderer specific stories
+│   │   │   ├── types/           # Type definitions specific to form-renderer
+│   │   │   ├── utils/           # Utility functions specific to form-renderer
+│   │   │   ├── stories/         # Stories for form-renderer specific components (e.g., TransactionForm)
 │   │   │   ├── test/            # Package-specific tests
-│   │   │   └── index.ts         # Public API exports
+│   │   │   └── index.ts         # Public API exports (re-exports from @openzeppelin/transaction-form-ui for components)
 │   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
+│   ├── ui/                      # NEW: Shared UI Components Package
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── ui/          # Basic UI primitives (Button, Input, Card, etc.)
+│   │   │   │   └── fields/      # Reusable form field components (AddressField, TextField, etc.)
+│   │   │   ├── utils/           # UI-specific utilities (e.g., buttonVariants)
+│   │   │   ├── stories/         # Stories for all shared UI and field components
+│   │   │   └── index.ts         # Public API exports for the UI package
+│   │   ├── tsconfig.json
+│   │   └── package.json
 │   ├── types/                   # Shared TypeScript type definitions
 │   │   ├── src/
 │   │   │   ├── adapters/        # Contract adapter interfaces
 │   │   │   ├── contracts/       # Contract and blockchain types
 │   │   │   ├── forms/           # Form field and layout definitions
 │   │   │   └── index.ts         # Main entry point
-│   │   ├── tsconfig.json        # TypeScript configuration
-│   │   └── package.json         # Package configuration
+│   │   ├── tsconfig.json
+│   │   └── package.json
 │   ├── styles/                  # Centralized styling system
 │   │   ├── global.css           # Global CSS variables and base styles
 │   │   ├── src/                 # Source directory for styles
 │   │   ├── utils/               # Styling utilities
 │   │   └── README.md            # Styling documentation
-│   ├── adapter-evm/             # NEW: EVM Adapter Package
+│   ├── adapter-evm/             # EVM Adapter Package
 │   │   └── src/                 # Contains EvmAdapter implementation
-│   ├── adapter-solana/          # NEW: Solana Adapter Package
+│   ├── adapter-solana/          # Solana Adapter Package
 │   │   └── src/                 # Contains SolanaAdapter implementation
-│   ├── adapter-stellar/         # NEW: Stellar Adapter Package
+│   ├── adapter-stellar/         # Stellar Adapter Package
 │   │   └── src/                 # Contains StellarAdapter implementation
-│   └── adapter-midnight/        # NEW: Midnight Adapter Package
+│   └── adapter-midnight/        # Midnight Adapter Package
 │       └── src/                 # Contains MidnightAdapter implementation
 ├── tailwind.config.cjs  # Central Tailwind CSS configuration
 ├── postcss.config.cjs   # Central PostCSS configuration
@@ -271,13 +282,17 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 **Key Components:**
 
-- **Core**: Chain-agnostic application logic, UI components, export system, and the central `ecosystemManager.ts` for managing ecosystem details, network configurations, and adapter instantiation.
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are now instantiated with a specific `NetworkConfig`, making them network-aware. The core package dynamically discovers network configurations and instantiates adapters via `ecosystemManager.ts`.
+- **Core**: Chain-agnostic application logic, UI components, and the export system. It includes:
+  - The `ecosystemManager.ts` for discovering network configurations and adapter capabilities.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `core` package (via providers from `@openzeppelin/transaction-form-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/transaction-form-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
+  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/transaction-form-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
+  - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 - **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
-- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface.
+- **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The core package dynamically loads and uses adapters via the `ecosystemManager.ts`, and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/transaction-form-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ### Adapter Pattern Enforcement
 
@@ -298,13 +313,9 @@ The project follows a structured component architecture centered around form ren
 
 ### Form Renderer Components
 
-The form-renderer package provides a set of specialized components:
+The form-renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/transaction-form-ui` package.
 
-- **TransactionForm**: The main entry point for rendering transaction forms
-- **DynamicFormField**: Renders appropriate field components based on field type
-- **Field Components**: Specialized field implementations (TextField, NumberField, AddressField, etc.)
-
-These components are designed to work exclusively with React Hook Form and should not be used standalone. All field components should be rendered through the DynamicFormField component, which handles field type mapping and validation integration.
+These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
 
 ### Storybook Integration
 

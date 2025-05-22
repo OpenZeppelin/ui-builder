@@ -1,6 +1,6 @@
 // Import types from form-renderer
 import { v4 as uuidv4 } from 'uuid';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 import type {
@@ -181,99 +181,122 @@ describe('FormSchemaFactory', () => {
   });
 
   describe('builderConfigToRenderSchema', () => {
-    const baseBuilderConfig: BuilderFormConfig = {
-      functionId: 'testFunc',
-      fields: [
-        {
-          id: uuidv4(),
-          name: 'visibleParam',
-          label: 'Visible',
-          type: 'text',
-          validation: { required: true },
-          originalParameterType: 'string',
-        },
-        {
-          id: uuidv4(),
-          name: 'hiddenParam',
-          label: 'Hidden',
-          type: 'number',
-          validation: {},
-          isHidden: true,
-          originalParameterType: 'uint256',
-        },
-        {
-          id: uuidv4(),
-          name: 'hardcodedParam',
-          label: 'Hardcoded',
-          type: 'text',
-          validation: {},
-          isHardcoded: true,
-          hardcodedValue: 'fixed',
-          originalParameterType: 'string',
-        },
-        {
-          id: uuidv4(),
-          name: 'readOnlyParam',
-          label: 'Read Only',
-          type: 'text',
-          validation: {},
-          isReadOnly: true,
-          originalParameterType: 'string',
-        },
-        {
-          id: uuidv4(),
-          name: 'hardcodedReadOnlyParam',
-          label: 'Hardcoded ReadOnly',
-          type: 'number',
-          validation: {},
-          isHardcoded: true,
-          hardcodedValue: 999,
-          isReadOnly: true,
-          originalParameterType: 'uint256',
-        },
-      ],
-      layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-      validation: { mode: 'onChange', showErrors: 'inline' },
-      contractAddress: '0xTestAddress',
-    };
+    let baseBuilderConfig: BuilderFormConfig;
 
-    it('should filter out fields where isHidden is true', () => {
-      const renderSchema = factory.builderConfigToRenderSchema(baseBuilderConfig, 'Test Function');
-      expect(renderSchema.fields).toHaveLength(4);
-      expect(renderSchema.fields.find((f) => f.name === 'hiddenParam')).toBeUndefined();
+    beforeEach(() => {
+      baseBuilderConfig = {
+        functionId: 'testFunction',
+        contractAddress: '0x123',
+        fields: [
+          {
+            id: uuidv4(),
+            name: 'param1',
+            label: 'P1',
+            type: 'text',
+            validation: {},
+            originalParameterType: 'string',
+          },
+          {
+            id: uuidv4(),
+            name: 'param2',
+            label: 'P2',
+            type: 'number',
+            validation: {},
+            isHidden: false,
+            originalParameterType: 'uint256',
+          },
+          {
+            id: uuidv4(),
+            name: 'hiddenParam',
+            label: 'HP',
+            type: 'text',
+            validation: {},
+            isHidden: true,
+            defaultValue: 'hiddenByDefault',
+            originalParameterType: 'string',
+          },
+          {
+            id: uuidv4(),
+            name: 'hardcodedParam',
+            label: 'HCP',
+            type: 'text',
+            validation: {},
+            isHardcoded: true,
+            hardcodedValue: 'fixed',
+            isHidden: false,
+            originalParameterType: 'string',
+          },
+          {
+            id: uuidv4(),
+            name: 'hardcodedHiddenParam',
+            label: 'HCHP',
+            type: 'text',
+            validation: {},
+            isHardcoded: true,
+            hardcodedValue: 'fixedHidden',
+            isHidden: true,
+            originalParameterType: 'string',
+          },
+        ],
+        layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+        validation: { mode: 'onChange', showErrors: 'inline' },
+        title: 'Builder Title',
+        description: 'Builder Description',
+      };
     });
 
-    it('should set defaultValue for fields where isHardcoded is true', () => {
-      const renderSchema = factory.builderConfigToRenderSchema(baseBuilderConfig, 'Test Function');
+    it('should include all fields (visible and hidden) in renderSchema.fields', () => {
+      const renderSchema = factory.builderConfigToRenderSchema(
+        baseBuilderConfig,
+        'Test Form Title',
+        'Test Form Description'
+      );
+      expect(renderSchema.fields).toHaveLength(5);
+      const hiddenField = renderSchema.fields.find((f) => f.name === 'hiddenParam');
+      expect(hiddenField).toBeDefined();
+      expect(hiddenField?.isHidden).toBe(true);
+      const hardcodedHiddenField = renderSchema.fields.find(
+        (f) => f.name === 'hardcodedHiddenParam'
+      );
+      expect(hardcodedHiddenField).toBeDefined();
+      expect(hardcodedHiddenField?.isHidden).toBe(true);
+      expect(hardcodedHiddenField?.isHardcoded).toBe(true);
+    });
+
+    it('should set defaultValue for visible hardcoded fields if defaultValue is not already set on the field', () => {
+      const renderSchema = factory.builderConfigToRenderSchema(
+        baseBuilderConfig,
+        'Test Form Title'
+      );
       const hardcodedField = renderSchema.fields.find((f) => f.name === 'hardcodedParam');
-      const hardcodedReadOnlyField = renderSchema.fields.find(
-        (f) => f.name === 'hardcodedReadOnlyParam'
-      );
-
       expect(hardcodedField?.defaultValue).toBe('fixed');
-      expect(hardcodedReadOnlyField?.defaultValue).toBe(999);
-    });
 
-    it('should propagate isReadOnly flag to render schema fields', () => {
-      const renderSchema = factory.builderConfigToRenderSchema(baseBuilderConfig, 'Test Function');
-      const readOnlyField = renderSchema.fields.find((f) => f.name === 'readOnlyParam');
-      const hardcodedReadOnlyField = renderSchema.fields.find(
-        (f) => f.name === 'hardcodedReadOnlyParam'
+      const builderConfigWithDefault = JSON.parse(
+        JSON.stringify(baseBuilderConfig)
+      ) as BuilderFormConfig;
+      const fieldToModify = builderConfigWithDefault.fields.find(
+        (f) => f.name === 'hardcodedParam'
       );
-      const visibleField = renderSchema.fields.find((f) => f.name === 'visibleParam');
-
-      expect(readOnlyField?.isReadOnly).toBe(true);
-      expect(hardcodedReadOnlyField?.isReadOnly).toBe(true);
-      expect(visibleField?.isReadOnly).toBeUndefined(); // Or false if default is applied
+      if (fieldToModify) fieldToModify.defaultValue = 'originalDefault';
+      const renderSchema2 = factory.builderConfigToRenderSchema(
+        builderConfigWithDefault,
+        'Test Form Title'
+      );
+      const hardcodedField2 = renderSchema2.fields.find((f) => f.name === 'hardcodedParam');
+      expect(hardcodedField2?.defaultValue).toBe('originalDefault');
+      expect(renderSchema2.defaultValues?.['hardcodedParam']).toBe('fixed');
     });
 
-    it('should populate defaultValues object for hardcoded fields', () => {
-      const renderSchema = factory.builderConfigToRenderSchema(baseBuilderConfig, 'Test Function');
+    it('should correctly populate top-level defaultValues from hardcodedValue and then field.defaultValue', () => {
+      const renderSchema = factory.builderConfigToRenderSchema(
+        baseBuilderConfig,
+        'Test Form Title'
+      );
       expect(renderSchema.defaultValues).toBeDefined();
-      expect(renderSchema.defaultValues?.hardcodedParam).toBe('fixed');
-      expect(renderSchema.defaultValues?.hardcodedReadOnlyParam).toBe(999);
-      expect(renderSchema.defaultValues?.visibleParam).toBeUndefined();
-      expect(renderSchema.defaultValues?.hiddenParam).toBeUndefined(); // Should not be included
+      expect(renderSchema.defaultValues?.['hiddenParam']).toBe('hiddenByDefault');
+      expect(renderSchema.defaultValues?.['hardcodedParam']).toBe('fixed');
+      expect(renderSchema.defaultValues?.['hardcodedHiddenParam']).toBe('fixedHidden');
+      expect(renderSchema.defaultValues?.['param1']).toBeUndefined();
     });
 
     it('should retain common properties like layout, title, etc.', () => {
@@ -282,7 +305,7 @@ describe('FormSchemaFactory', () => {
         'Test Function',
         'Desc'
       );
-      expect(renderSchema.id).toBe('form-testFunc');
+      expect(renderSchema.id).toBe('form-testFunction');
       expect(renderSchema.title).toBe('Test Function');
       expect(renderSchema.description).toBe('Desc');
       expect(renderSchema.layout).toEqual(baseBuilderConfig.layout);

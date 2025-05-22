@@ -29,7 +29,7 @@ type Story = StoryObj<typeof ChainTileSelector>;
 export const Default: Story = {
   args: {
     initialEcosystem: 'evm',
-    onNetworkSelect: (networkId: string) => console.log('Selected network:', networkId),
+    onNetworkSelect: (networkId: string | null) => console.log('Selected network:', networkId),
   },
 };
 
@@ -46,7 +46,7 @@ export const Interactive = () => {
       <ChainTileSelector
         initialEcosystem={selectedEcosystem}
         selectedNetworkId={selectedNetworkId}
-        onNetworkSelect={(networkId: string) => {
+        onNetworkSelect={(networkId: string | null) => {
           console.log('Network selected:', networkId);
           setSelectedNetworkId(networkId);
         }}

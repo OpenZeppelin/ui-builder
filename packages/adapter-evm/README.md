@@ -10,10 +10,22 @@ It is responsible for:
 - Mapping EVM-specific data types to the form field types used by the form builder.
 - Parsing user input (including complex types like structs and arrays) into EVM-compatible transaction data, according to the `EvmNetworkConfig`.
 - Formatting results from view function calls.
-- Interacting with EVM wallets (via Wagmi/Viem) for signing and broadcasting transactions on the configured network.
+- Interacting with EVM wallets (via Wagmi/Viem) for signing and broadcasting transactions on the configured network, using the wallet module (see below).
 - Providing other EVM-specific configurations and validation (e.g., for execution methods).
 
-## Usage
+---
+
+## Wallet Integration & UI
+
+All wallet integration logic, UI components, facade hooks, and the UI context provider (e.g., `EvmBasicUiContextProvider` for Wagmi) for EVM-compatible chains are located in the [`src/wallet/`](./src/wallet/) module of this adapter.
+
+The `EvmAdapter` implements the optional UI facilitation methods from the `ContractAdapter` interface (`getEcosystemReactUiContextProvider`, `getEcosystemReactHooks`, `getEcosystemWalletComponents`). These capabilities are consumed by the `core` application's `WalletStateProvider`, which manages the global wallet state and makes these hooks and components accessible to the rest of the application via the `useWalletState()` hook.
+
+**For full documentation on the `src/wallet/` module, its exports, configuration, and usage examples, see [`src/wallet/README.md`](./src/wallet/README.md).**
+
+---
+
+## Usage (Adapter Instantiation)
 
 The `EvmAdapter` class is instantiated with a specific `EvmNetworkConfig` object, making it aware of the target network from its creation:
 
@@ -56,7 +68,7 @@ The `EvmAdapter`, when performing operations like view function queries (specifi
 
 ### Wagmi `defaultSupportedChains` and RPC Overrides
 
-The `src/wallet/wagmi-implementation.ts` file configures Wagmi with a `defaultSupportedChains` array (e.g., Mainnet, Sepolia, Polygon). For RPC overrides from `AppConfigService` to apply to these chains within Wagmi's transports, a mapping is maintained in `viemChainIdToAppNetworkIdMap` (name updated for clarity) within `wagmi-implementation.ts`. If new chains are added to `defaultSupportedChains` and their RPCs need to be overridable, this internal map must also be updated to link the Viem chain ID to your application's string-based network ID (e.g., `[polygon.id]: 'polygon-mainnet'`).
+The `src/wallet/implementation/wagmi-implementation.ts` file configures Wagmi with a `defaultSupportedChains` array (e.g., Mainnet, Sepolia, Polygon). For RPC overrides from `AppConfigService` to apply to these chains within Wagmi's transports, a mapping is maintained in `viemChainIdToAppNetworkId` within `wagmi-implementation.ts`. If new chains are added to `defaultSupportedChains` and their RPCs need to be overridable, this internal map must also be updated to link the Viem chain ID to your application's string-based network ID (e.g., `[polygon.id]: 'polygon-mainnet'`).
 
 ## Network Configurations
 

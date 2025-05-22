@@ -2,7 +2,8 @@ import { FileText } from 'lucide-react';
 
 import React from 'react';
 
-import { Button, truncateMiddle } from '@openzeppelin/transaction-form-renderer';
+import { Button } from '@openzeppelin/transaction-form-ui';
+import { truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
 interface ViewContractStateButtonProps {
   contractAddress: string | null;

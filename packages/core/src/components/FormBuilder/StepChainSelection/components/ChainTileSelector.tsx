@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
+import { getNetworksByEcosystem } from '../../../../core/ecosystemManager';
 import { getEcosystemDescription, getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
 import { StepTitleWithDescription } from '../../Common';
@@ -21,7 +23,7 @@ const networkMapping = {
 };
 
 interface ChainTileSelectorProps {
-  onNetworkSelect: (networkConfigId: string) => void;
+  onNetworkSelect: (networkConfigId: string | null) => void;
   initialEcosystem?: Ecosystem;
   selectedNetworkId?: string | null;
 }
@@ -70,11 +72,19 @@ export function ChainTileSelector({
 
   // Handle selection of a blockchain ecosystem
   const handleSelectEcosystem = useCallback(
-    (ecosystem: Ecosystem) => {
+    async (ecosystem: Ecosystem) => {
       setSelectedEcosystem(ecosystem);
       setValue('ecosystem', ecosystem);
+
+      try {
+        const networksInEcosystem = await getNetworksByEcosystem(ecosystem);
+        onNetworkSelect(networksInEcosystem[0].id);
+      } catch (error) {
+        logger.error('ChainTileSelector', `Error auto-selecting network for ${ecosystem}:`, error);
+        onNetworkSelect(null); // Clear selection on error
+      }
     },
-    [setValue]
+    [setValue, onNetworkSelect]
   );
 
   // Handle network selection
@@ -140,7 +150,9 @@ export function ChainTileSelector({
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => handleSelectEcosystem(option.value)}
+                  onClick={() => {
+                    void handleSelectEcosystem(option.value);
+                  }}
                   className={`hover:bg-muted flex items-center gap-3 rounded-md border p-3 text-left transition-all ${
                     isSelected
                       ? 'border-primary bg-primary/5 ring-primary/20 ring-1'
