@@ -18,11 +18,14 @@ import {
   switchChain,
   watchAccount,
 } from '@wagmi/core';
-import { PublicClient, WalletClient, http } from 'viem';
+import { type Chain, PublicClient, WalletClient, http } from 'viem';
 import { base, mainnet, optimism, polygon, sepolia } from 'viem/chains';
 
-import type { Connector } from '@openzeppelin/transaction-form-types';
+import type { Connector, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
+
+import { getWagmiConfigForRainbowKit } from '../rainbowkit';
+import { type WagmiConfigChains } from '../types';
 
 /**
  * Defines the default set of blockchain networks (from viem/chains) that Wagmi will be configured to support.
@@ -31,7 +34,7 @@ import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
  * If you add a new chain here and want its RPC to be configurable, ensure a corresponding
  * entry is also added to `viemChainIdToAppNetworkId` below.
  */
-const defaultSupportedChains = [mainnet, sepolia, polygon, optimism, base] as const;
+const defaultSupportedChains: readonly Chain[] = [mainnet, sepolia, polygon, optimism, base];
 
 /**
  * @internal
@@ -66,6 +69,7 @@ export class WagmiWalletImplementation {
   private config: Config;
   private unsubscribe?: ReturnType<typeof watchAccount>;
   private initialized: boolean = false;
+  private uiKitConfiguration?: UiKitConfiguration;
 
   constructor(walletConnectProjectIdFromAppConfig?: string) {
     const logSystem = 'WagmiWalletImplementation';
@@ -115,7 +119,8 @@ export class WagmiWalletImplementation {
       );
 
       this.config = createConfig({
-        chains: defaultSupportedChains,
+        // Cast is necessary because defaultSupportedChains is Chain[] but createConfig expects a non-empty tuple.
+        chains: defaultSupportedChains as unknown as WagmiConfigChains,
         connectors: baseConnectors,
         transports: transportsConfig,
       });
@@ -124,13 +129,51 @@ export class WagmiWalletImplementation {
       logger.error(logSystem, 'Error creating Wagmi config:', error);
       // Create a minimal config that won't throw errors
       this.config = createConfig({
-        chains: [mainnet],
+        chains: [mainnet] as unknown as WagmiConfigChains, // Ensure this also matches the tuple type
         connectors: [injected()],
         transports: {
           [mainnet.id]: http(),
         },
       });
     }
+  }
+
+  /**
+   * Configure UI kit settings
+   * @param config The UI kit configuration
+   */
+  public configureUiKit(config: UiKitConfiguration): void {
+    this.uiKitConfiguration = config;
+    logger.info('WagmiWalletImplementation', `UI kit configured: ${config.kitName}`);
+  }
+
+  /**
+   * Retrieves the appropriate Wagmi configuration based on the active UI kit.
+   * For RainbowKit, this delegates to the specialized service in the rainbowkit directory.
+   *
+   * @returns A promise resolving to the Config object or null if not initialized
+   */
+  public async getConfigForRainbowKit(): Promise<Config | null> {
+    if (!this.initialized) {
+      return null;
+    }
+
+    // If RainbowKit is configured, delegate to the specialized service
+    if (this.uiKitConfiguration?.kitName === 'rainbowkit') {
+      const rainbowKitWagmiConfig = await getWagmiConfigForRainbowKit(
+        this.uiKitConfiguration,
+        defaultSupportedChains as unknown as WagmiConfigChains,
+        viemChainIdToAppNetworkId,
+        appConfigService.getRpcEndpointOverride.bind(appConfigService)
+      );
+
+      if (rainbowKitWagmiConfig) {
+        return rainbowKitWagmiConfig;
+      }
+    }
+
+    // For other kits or if RainbowKit config creation failed, return the default config
+    return this.config;
   }
 
   /**

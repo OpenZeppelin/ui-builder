@@ -1,4 +1,4 @@
-import type React from 'react';
+import React from 'react';
 
 import type {
   EcosystemReactUiProviderProps,
@@ -9,11 +9,24 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../components';
 import { EvmBasicUiContextProvider } from '../provider';
+import {
+  createRainbowKitComponents,
+  createRainbowKitUIProvider,
+  validateRainbowKitConfig,
+} from '../rainbowkit';
 
 // Assuming this is the default custom provider
-import { filterWalletComponents } from './filterWalletComponents';
+import { filterWalletComponents, getComponentExclusionsFromConfig } from './filterWalletComponents';
 
 /** Service for resolving UI kit specific components and providers for the EVM adapter. */
+
+/**
+ * IMPORTANT NOTE FOR RAINBOWKIT USERS:
+ * If 'rainbowkit' is chosen as the `kitName`, the consuming application (e.g., `core` or an exported app)
+ * MUST globally import RainbowKit's CSS file for styles to be applied correctly:
+ * `import '@rainbow-me/rainbowkit/styles.css';`
+ * This is typically done in the main application entry point (e.g., App.tsx, main.tsx).
+ */
 
 /**
  * Determines the UI Context Provider component based on UI kit configuration.
@@ -36,8 +49,19 @@ export function getResolvedUiContextProvider(
     return undefined;
   }
 
-  // Placeholder for future specific kit logic (e.g., RainbowKit)
-  // if (currentKitName === 'rainbowkit') { /* return RainbowKit provider wrapper */ }
+  if (currentKitName === 'rainbowkit') {
+    const validation = validateRainbowKitConfig(uiKitConfiguration.kitConfig);
+
+    if (!validation.isValid) {
+      logger.warn(
+        'uiKitService',
+        `Invalid RainbowKit configuration: ${validation.error}. Falling back to EvmBasicUiContextProvider.`
+      );
+      return EvmBasicUiContextProvider;
+    }
+
+    return createRainbowKitUIProvider(uiKitConfiguration);
+  }
 
   logger.warn(
     'uiKitService',
@@ -66,6 +90,12 @@ export function getResolvedWalletComponents(
     return undefined;
   }
 
+  const exclusions = getComponentExclusionsFromConfig(uiKitConfiguration.kitConfig);
+  logger.info(
+    'uiKitService',
+    `Extracted component exclusions for ${currentKitName}: ${exclusions.join(', ') || 'none'}.`
+  );
+
   // Only provide components for 'custom' kit
   if (currentKitName === 'custom') {
     const allCustomComponents: EcosystemWalletComponents = {
@@ -73,31 +103,26 @@ export function getResolvedWalletComponents(
       AccountDisplay: CustomAccountDisplay,
       NetworkSwitcher: CustomNetworkSwitcher,
     };
-
-    let exclusions: Array<keyof EcosystemWalletComponents> = [];
-    const kitCfg = uiKitConfiguration.kitConfig;
-    logger.info('uiKitService', `Kit config: ${JSON.stringify(kitCfg)}.`);
-    if (kitCfg && typeof kitCfg === 'object' && 'components' in kitCfg) {
-      const componentsCfg = kitCfg.components;
-      logger.info('uiKitService', `Components config: ${JSON.stringify(componentsCfg)}.`);
-      if (
-        componentsCfg &&
-        typeof componentsCfg === 'object' &&
-        'exclude' in componentsCfg &&
-        Array.isArray(componentsCfg.exclude)
-      ) {
-        exclusions = (componentsCfg.exclude as Array<keyof EcosystemWalletComponents>) || [];
-      }
-    }
-
     return filterWalletComponents(allCustomComponents, exclusions, currentKitName);
   }
 
-  // Placeholder for future specific kit logic (e.g., RainbowKit components might not use this filter directly)
-  // if (currentKitName === 'rainbowkit') { /* return RainbowKit components */ }
+  if (currentKitName === 'rainbowkit') {
+    const validation = validateRainbowKitConfig(uiKitConfiguration.kitConfig);
+
+    if (!validation.isValid) {
+      logger.warn(
+        'uiKitService',
+        `Invalid RainbowKit configuration: ${validation.error}. No components provided.`
+      );
+      return undefined;
+    }
+
+    // Get RainbowKit components and apply any exclusions
+    const rainbowKitComponents = createRainbowKitComponents();
+    return filterWalletComponents(rainbowKitComponents, exclusions, currentKitName);
+  }
   // if (currentKitName === 'connectkit') { /* return ConnectKit components */ }
   // if (currentKitName === 'appkit') { /* return AppKit components */ }
-
   logger.warn(
     'uiKitService',
     `UI Kit "${currentKitName}" for getResolvedWalletComponents not explicitly supported. No components provided.`

@@ -78,6 +78,7 @@ The configuration is automatically loaded from AppConfigService when the module 
   - `'custom'`: Default for EVM adapter - uses our custom UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`).
   - `'none'`: Explicitly disables UI components and UI context provider.
   - `'rainbowkit'`: (Future support) RainbowKit UI components
+    - **IMPORTANT**: When using `rainbowkit`, the consuming application MUST import its styles: `import '@rainbow-me/rainbowkit/styles.css';` (typically in your main `App.tsx` or `main.tsx`).
   - `'connectkit'`: (Future support) ConnectKit UI components
   - `'appkit'`: (Future support) AppKit UI components
 

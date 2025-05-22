@@ -17,15 +17,23 @@ export interface ComponentExclusionConfig {
 export interface UiKitConfiguration {
   /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'custom' for adapter-provided default components or 'none' to disable adapter UI. */
   kitName?: 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
+
   /**
    * Kit-specific configuration options.
-   * This can include general options as well as specific configurations for UI components.
+   * This is an open-ended object to allow adapters to define their own configuration.
+   * The adapter is responsible for validating and type-checking these values.
    */
   kitConfig?: {
-    /** Generic placeholder for other kit-specific configurations (e.g., WalletConnect projectId for some kits). */
-    [key: string]: unknown;
-    /** Optional configuration for including/excluding specific adapter-provided UI components. */
+    /** Whether to show the injected connector (e.g., MetaMask) in the wallet connection dialog */
+    showInjectedConnector?: boolean;
+
+    /** Configuration for including/excluding specific adapter-provided UI components */
     components?: ComponentExclusionConfig;
+
+    /**
+     * Other kit-specific configurations handled by the adapter implementation
+     */
+    [key: string]: unknown;
   };
 }
 

@@ -1,4 +1,7 @@
-import type { EcosystemWalletComponents } from '@openzeppelin/transaction-form-types';
+import type {
+  EcosystemWalletComponents,
+  UiKitConfiguration,
+} from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
@@ -56,4 +59,33 @@ export function filterWalletComponents(
 
   logger.info('filterWalletComponents', `All components were excluded for kit: ${kitName}.`);
   return undefined;
+}
+
+/**
+ * Extracts the component exclusion list from a UI kit configuration object.
+ *
+ * @param kitConfig - The `kitConfig` object from `UiKitConfiguration`.
+ * @returns An array of component keys to exclude, or an empty array if none are specified or config is invalid.
+ */
+export function getComponentExclusionsFromConfig(
+  kitConfig: UiKitConfiguration['kitConfig']
+): Array<keyof EcosystemWalletComponents> {
+  if (kitConfig && typeof kitConfig === 'object' && 'components' in kitConfig) {
+    const componentsCfg = kitConfig.components;
+    if (
+      componentsCfg &&
+      typeof componentsCfg === 'object' &&
+      'exclude' in componentsCfg &&
+      Array.isArray(componentsCfg.exclude)
+    ) {
+      // Ensure all elements are valid keys of EcosystemWalletComponents
+      // This provides a bit more type safety at runtime if the config comes from an untyped source
+      return componentsCfg.exclude.filter(
+        (key): key is keyof EcosystemWalletComponents =>
+          typeof key === 'string' &&
+          ('ConnectButton' === key || 'AccountDisplay' === key || 'NetworkSwitcher' === key)
+      ) as Array<keyof EcosystemWalletComponents>;
+    }
+  }
+  return [];
 }
