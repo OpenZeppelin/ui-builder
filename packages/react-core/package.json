@@ -67,7 +67,6 @@
     "prettier": "^3.2.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
     "typescript": "^5.8.2",
     "vite": "^6.2.5",
     "vite-plugin-dts": "^3.8.1",

@@ -1,5 +1,5 @@
 import path from 'path';
-import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+// import peerDepsExternal from 'rollup-plugin-peer-deps-external'; // Removed
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
@@ -7,7 +7,7 @@ import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
-    peerDepsExternal(), // Add this plugin
+    // peerDepsExternal(), // Removed
     dts({
       insertTypesEntry: true,
       outDir: 'dist',
@@ -28,11 +28,14 @@ export default defineConfig({
         'react-dom',
         '@openzeppelin/transaction-form-types',
         '@openzeppelin/transaction-form-utils',
+        '@openzeppelin/transaction-form-ui', // This is a direct dep, but good to keep external if it's also a peer of others or to avoid duplication
+        '@tanstack/react-query', // This is a peerDependency
       ],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          '@tanstack/react-query': 'ReactQuery', // Added global for UMD if needed
         },
       },
     },
