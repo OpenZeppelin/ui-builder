@@ -182,8 +182,6 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
     method: 'eoa',
     allowAny: true,
   };
-  // TODO (Export Integration): Use executionConfig at runtime to determine
-  // how to sign/broadcast (e.g., standard EOA signing, Safe interaction, relayer API).
 
   const contractAddress = formSchema.contractAddress;
 
