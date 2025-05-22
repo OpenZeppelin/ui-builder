@@ -1,3 +1,32 @@
+# [1.5.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.4.0...v1.5.0) (2025-05-22)
+
+
+### Bug Fixes
+
+* **adapter:** ensure WagmiProvider initializes synchronously ([6b2a29c](https://github.com/OpenZeppelin/transaction-form-builder/commit/6b2a29c2ec7f14f7e8853053c09545dd1b9ead94))
+* **adapter:** improve connect button loading state tracking ([a91f171](https://github.com/OpenZeppelin/transaction-form-builder/commit/a91f1710b1490a296f91e3446ef4c5d9ce624c37))
+* **adapter:** linting issues ([eb113a1](https://github.com/OpenZeppelin/transaction-form-builder/commit/eb113a1d7488f289ae33e1afaa357deebf893db5))
+* **adapter:** prevent connector dialog from opening on disconnect ([b8209ec](https://github.com/OpenZeppelin/transaction-form-builder/commit/b8209ecaf7558a172cd35e30913f693e98d7d5ff))
+* **core:** build issues ([263d32e](https://github.com/OpenZeppelin/transaction-form-builder/commit/263d32e3303951ee3ecb6f4f4754abd7905e73cb))
+* **core:** build issues ([8f049a5](https://github.com/OpenZeppelin/transaction-form-builder/commit/8f049a5374fa1875b93913528fa947b416cd361d))
+* **core:** dynamic adapter loading via getNetworkById ([6ec72b1](https://github.com/OpenZeppelin/transaction-form-builder/commit/6ec72b1330503545952dc3b070e87e03fa67a1e2))
+* **core:** missing null ([d73760e](https://github.com/OpenZeppelin/transaction-form-builder/commit/d73760e0d8fea8d752ca7c16e3578600d8b0fe4d))
+* **export:** update test snapshots ([b7c2023](https://github.com/OpenZeppelin/transaction-form-builder/commit/b7c20233101aa06ce03c2ab49127b2e4712baf7f))
+
+
+### Features
+
+* **adapter:** add component exclusion to UiKitConfiguration and update docs ([5790413](https://github.com/OpenZeppelin/transaction-form-builder/commit/5790413385aa0381af645f7bdd31319bd96169cd))
+* **adapter:** add wagmi UI context provider and facade hooks framework ([53acaf1](https://github.com/OpenZeppelin/transaction-form-builder/commit/53acaf1d37169790500f1cfca0e22b364f398c89))
+* **adapter:** implement custom wallet UI components for EVM adapter ([259569f](https://github.com/OpenZeppelin/transaction-form-builder/commit/259569ff2fe08129d0934b5adfe46e37337a0109))
+* **adapter:** implement Wagmi integration with shared adapter context ([06fe072](https://github.com/OpenZeppelin/transaction-form-builder/commit/06fe072f7436f238b6bb8b2d413a7be646efb1f5))
+* **adapter:** improve wallet components UI for compact spaces ([f363278](https://github.com/OpenZeppelin/transaction-form-builder/commit/f363278be52f3339af8e7c45fb31253533c35e65))
+* **adapter:** support uikit app config ([4902a9e](https://github.com/OpenZeppelin/transaction-form-builder/commit/4902a9e3648d864a0d0c700f8cb1ade581f6618a))
+* **core:** auto select first network in ecosystem ([7747023](https://github.com/OpenZeppelin/transaction-form-builder/commit/7747023e01c1e66f6b53ab081142357cd65659d5))
+* **core:** handle execution config fully ([0a1d66f](https://github.com/OpenZeppelin/transaction-form-builder/commit/0a1d66f75ade018e37f696f4bba9df091bf7f595))
+* **export:** align export system with react-core providers and UI kit config ([e441bbe](https://github.com/OpenZeppelin/transaction-form-builder/commit/e441bbe25d4f0c75357e2938d75164f26bda159d))
+* **utils:** add suport for nested objects in app configs ([ab53bd6](https://github.com/OpenZeppelin/transaction-form-builder/commit/ab53bd650a43ebf3ef02a38096e8e9ebc67b99db))
+
 # [1.4.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.3.0...v1.4.0) (2025-05-12)
 
 
