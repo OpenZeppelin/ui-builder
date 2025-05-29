@@ -577,3 +577,15 @@ When adding new EVM network definitions (in `packages/adapter-evm/src/networks/`
 - `apiUrl` and `explorerUrl` for the block explorer.
 
 If this network is also to be a chain-switchable target within Wagmi (for the EVM adapter), you may need to update the `defaultSupportedChains` array and the `viemChainIdToAppNetworkIdMap` in `packages/adapter-evm/src/wallet/wagmi-implementation.ts` to ensure RPC overrides from `app.config.json` apply correctly to Wagmi's transports for this chain.
+
+### Advanced EVM Wallet Integration & UI Customization
+
+The `@openzeppelin/transaction-form-adapter-evm` package offers robust integration with EVM wallets, leveraging the `wagmi` library. It features an enhanced architecture for UI kit integration, providing:
+
+- **Stable UI Rendering**: A new internal architecture (`EvmUiKitManager` and `EvmWalletUiRoot`) significantly reduces UI flickering during network switches when using supported UI kits.
+- **Support for UI Kits (e.g., RainbowKit)**: Easily integrate popular Wagmi-based UI kits like RainbowKit.
+- **Flexible Configuration**: Configure your chosen UI kit through a layered system involving global application settings (via `app.config.json` or environment variables), detailed kit-specific parameters in user-authored native TypeScript configuration files (e.g., `src/config/wallet/rainbowkit.config.ts`), and programmatic overrides.
+- **Automatic Asset Loading**: For supported kits like RainbowKit, necessary CSS and JavaScript assets are loaded dynamically by the adapter.
+- **Custom UI Option**: Retains support for a default set of custom-styled wallet components if no third-party kit is preferred.
+
+**For comprehensive details on configuring the EVM adapter's wallet module, setting up UI kits like RainbowKit, understanding the configuration flow, and the pattern for extending support to other UI kits, please refer to the dedicated [EVM Adapter Wallet Module README](./packages/adapter-evm/src/wallet/README.md).**

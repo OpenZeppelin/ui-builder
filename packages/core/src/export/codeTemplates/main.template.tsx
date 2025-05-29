@@ -40,8 +40,9 @@ const resolveAdapter = async (nc: NetworkConfig): Promise<AdapterPlaceholder> =>
   }
   // This path should ideally not be reached in a single-form export context
   // if nc.id always matches exportedNetworkConfig.id.
-  console.error(
-    `[ExportedApp] Adapter resolution failed: NetworkConfig ID mismatch. Expected ${exportedNetworkConfig.id}, got ${nc.id}`
+  logger.error(
+    'ExportedApp',
+    `Adapter resolution failed: NetworkConfig ID mismatch. Expected ${exportedNetworkConfig.id}, got ${nc.id}`
   );
   // Fallback or error handling: Re-throw or return a dummy/null adapter if absolutely necessary,
   // but this indicates a fundamental issue in how the exported app is configured or used.
@@ -60,6 +61,29 @@ const getNetworkConfigById = (id: string) => {
   return null;
 };
 
+/**
+ * Generic configuration module loader.
+ * This function can load any configuration module by relative path
+ * without needing to know what specific UI kit or purpose it serves.
+ * The adapter is responsible for specifying the exact path it needs.
+ */
+const loadAppConfigModule = async (
+  relativePath: string
+): Promise<Record<string, unknown> | null> => {
+  try {
+    // Vite's dynamic import needs a path that it can statically analyze to some extent.
+    // For files directly in `src/config/wallet/`, this should work.
+    // The path provided by the adapter will be like './config/wallet/rainbowkit.config'
+    // Vite will resolve this relative to the location of *this file* (main.tsx in the exported app's src).
+    // If relativePath is './config/wallet/rainbowkit.config', Vite interprets it as `src/config/wallet/rainbowkit.config.ts`
+    const module = await import(/* @vite-ignore */ relativePath);
+    return module.default || module;
+  } catch {
+    // It's expected that a native config file might not exist, so return null, don't throw.
+    return null;
+  }
+};
+
 async function startApp() {
   // Initialize AppConfigService, attempting to load from app.config.json first,
   // then potentially from Vite env vars if the exported app is built with Vite and sets them.
@@ -75,6 +99,7 @@ async function startApp() {
         <WalletStateProvider
           initialNetworkId={exportedNetworkConfig.id}
           getNetworkConfigById={getNetworkConfigById}
+          loadConfigModule={loadAppConfigModule}
         >
           <App />
         </WalletStateProvider>

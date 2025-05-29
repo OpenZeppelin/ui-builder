@@ -5,11 +5,26 @@ import type {
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   NetworkConfig,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 import { useAdapterContext } from './useAdapterContext';
+
+// Extended adapter interface that includes the callback-based configureUiKit method
+interface ExtendedContractAdapter extends ContractAdapter {
+  configureUiKit?(
+    config: UiKitConfiguration,
+    options?: {
+      loadUiKitNativeConfig?: (kitName: string) => Promise<Record<string, unknown> | null>;
+    }
+  ): void | Promise<void>;
+  lastFullUiKitConfiguration?: UiKitConfiguration | null;
+  getEcosystemReactUiContextProvider?():
+    | React.ComponentType<EcosystemReactUiProviderProps>
+    | undefined;
+}
 
 export interface WalletStateProviderProps {
   children: ReactNode;
@@ -19,6 +34,12 @@ export interface WalletStateProviderProps {
   getNetworkConfigById: (
     networkId: string
   ) => Promise<NetworkConfig | null | undefined> | NetworkConfig | null | undefined;
+  /**
+   * Optional generic function to load configuration modules by path.
+   * This allows the adapter to load its own kit-specific configs without
+   * the consuming app needing to know about specific UI kit types.
+   */
+  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>;
 }
 
 /**
@@ -41,6 +62,7 @@ export function WalletStateProvider({
   children,
   initialNetworkId = null,
   getNetworkConfigById,
+  loadConfigModule,
 }: WalletStateProviderProps) {
   // State for the ID of the globally selected network.
   const [currentGlobalNetworkId, setCurrentGlobalNetworkIdState] = useState<string | null>(
@@ -58,9 +80,9 @@ export function WalletStateProvider({
   const [walletFacadeHooks, setWalletFacadeHooks] = useState<EcosystemSpecificReactHooks | null>(
     null
   );
-  // State to hold the UI context provider component from the active adapter (e.g., EvmBasicUiContextProvider).
-  const [AdapterUiContextProvider, setAdapterUiContextProvider] =
-    useState<React.ComponentType<EcosystemReactUiProviderProps> | null>(null);
+  // State to hold the Component Type
+  const [AdapterUiContextProviderToRender, setAdapterUiContextProviderToRender] =
+    useState<React.ComponentType<EcosystemReactUiProviderProps> | null>(() => null);
 
   // Consume AdapterContext to get the function for fetching adapter instances.
   const { getAdapterForNetwork } = useAdapterContext();
@@ -75,24 +97,11 @@ export function WalletStateProvider({
           if (isActive) {
             if (config) {
               setCurrentGlobalNetworkConfig(config);
-              logger.info(
-                'WalletStateProvider',
-                `Derived network config for ID: ${currentGlobalNetworkId}`
-              );
             } else {
-              logger.warn(
-                'WalletStateProvider',
-                `No network config found for ID: ${currentGlobalNetworkId}`
-              );
               setCurrentGlobalNetworkConfig(null);
             }
           }
-        } catch (error) {
-          logger.error(
-            'WalletStateProvider',
-            `Error fetching network config for ID: ${currentGlobalNetworkId}`,
-            error
-          );
+        } catch {
           if (isActive) setCurrentGlobalNetworkConfig(null);
         }
       } else {
@@ -108,38 +117,78 @@ export function WalletStateProvider({
 
   // Effect to load the active adapter and its UI capabilities when currentGlobalNetworkConfig changes.
   useEffect(() => {
-    if (currentGlobalNetworkConfig) {
-      logger.info(
-        'WalletStateProvider',
-        `Fetching adapter for global network: ${currentGlobalNetworkConfig.id}`
-      );
-      // getAdapterForNetwork is synchronous and returns current state from AdapterProvider registry.
-      const { adapter, isLoading } = getAdapterForNetwork(currentGlobalNetworkConfig);
-      setGlobalActiveAdapter(adapter);
-      setIsGlobalAdapterLoading(isLoading);
+    let isMounted = true;
+    async function configureAdapterAndSetUi() {
+      if (currentGlobalNetworkConfig) {
+        const { adapter: newAdapter, isLoading: newIsLoading } = getAdapterForNetwork(
+          currentGlobalNetworkConfig
+        ) as { adapter: ExtendedContractAdapter | null; isLoading: boolean };
 
-      if (adapter && !isLoading) {
-        // Once adapter is loaded, configure its UI kit (e.g., to 'custom').
-        if (typeof adapter.configureUiKit === 'function') {
-          adapter.configureUiKit({ kitName: 'custom' });
-          logger.info(
-            'WalletStateProvider',
-            `Configured UI kit for adapter: ${adapter.networkConfig.id}`
-          );
+        if (isMounted) {
+          setGlobalActiveAdapter(newAdapter);
+          setIsGlobalAdapterLoading(newIsLoading);
+
+          if (newAdapter && !newIsLoading) {
+            try {
+              // Ensure the adapter (and thus the EvmUiKitManager) is configured.
+
+              if (typeof newAdapter.configureUiKit === 'function') {
+                logger.info(
+                  '[WSP EFFECT] Calling configureUiKit for adapter:',
+                  newAdapter?.networkConfig?.id
+                );
+                // Pass an empty object for programmaticOverrides unless WalletStateProvider
+                // itself has specific overrides it wants to enforce.
+                await newAdapter.configureUiKit({} as Partial<UiKitConfiguration>, {
+                  loadUiKitNativeConfig: loadConfigModule,
+                });
+                logger.info(
+                  '[WSP EFFECT] configureUiKit completed for adapter:',
+                  newAdapter?.networkConfig?.id
+                );
+              }
+
+              const ProviderComponent = newAdapter.getEcosystemReactUiContextProvider?.();
+              setAdapterUiContextProviderToRender(
+                ProviderComponent ? () => ProviderComponent : null
+              );
+
+              setWalletFacadeHooks(newAdapter.getEcosystemReactHooks?.() || null);
+              logger.info(
+                '[WalletStateProvider]',
+                'UI provider and hooks set after adapter processing.'
+              );
+            } catch (error) {
+              logger.error('[WalletStateProvider]', 'Error during adapter UI setup:', error);
+              if (isMounted) {
+                setAdapterUiContextProviderToRender(null);
+                setWalletFacadeHooks(null);
+              }
+            }
+          } else if (!newAdapter && !newIsLoading) {
+            // Adapter is null and not loading, clear UI specific state
+            setAdapterUiContextProviderToRender(null);
+            setWalletFacadeHooks(null);
+          }
+          // If newIsLoading is true, retain previous AdapterUiContextProviderToRender and hooks
+          // to prevent UI flicker, EvmWalletUiRoot will handle its loading state internally.
         }
-        // Extract facade hooks and UI context provider from the adapter.
-        setWalletFacadeHooks(adapter.getEcosystemReactHooks?.() || null);
-        const UiProvider = adapter.getEcosystemReactUiContextProvider?.();
-        setAdapterUiContextProvider(UiProvider ? () => UiProvider : null); // Store component type for rendering.
+      } else {
+        // No network config - clear everything
+        if (isMounted) {
+          setGlobalActiveAdapter(null);
+          setIsGlobalAdapterLoading(false);
+          setAdapterUiContextProviderToRender(null);
+          setWalletFacadeHooks(null);
+        }
       }
-    } else {
-      // If no global network config, clear all adapter-related state.
-      setGlobalActiveAdapter(null);
-      setIsGlobalAdapterLoading(false);
-      setWalletFacadeHooks(null);
-      setAdapterUiContextProvider(null);
     }
-  }, [currentGlobalNetworkConfig, getAdapterForNetwork]);
+
+    void configureAdapterAndSetUi();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentGlobalNetworkConfig, getAdapterForNetwork, loadConfigModule]);
 
   /**
    * Callback to set the globally active network ID.
@@ -155,7 +204,9 @@ export function WalletStateProvider({
       setGlobalActiveAdapter(null);
       setIsGlobalAdapterLoading(false);
       setWalletFacadeHooks(null);
-      setAdapterUiContextProvider(null);
+      // Do not clear AdapterUiContextProviderToRender here, let the effect handle it
+      // based on whether it's a loading transition or an actual clearing.
+      // setAdapterUiContextProviderToRender(() => null);
     }
   }, []); // Empty dependency array as it only uses setters from useState.
 
@@ -180,13 +231,25 @@ export function WalletStateProvider({
     ]
   );
 
-  // Conditionally wrap children with the adapter-specific UI context provider (e.g., WagmiProvider)
-  // if the active adapter provides one. This enables the facade hooks.
-  const childrenToRender = AdapterUiContextProvider ? (
-    <AdapterUiContextProvider>{children}</AdapterUiContextProvider>
-  ) : (
-    children
-  );
+  const ActualProviderToRender = AdapterUiContextProviderToRender;
+  let childrenToRender: ReactNode;
+
+  if (ActualProviderToRender) {
+    // EvmWalletUiRoot (and similar for other adapters) no longer needs uiKitConfiguration prop
+    // as it manages its own configuration internally via the EvmUiKitManager or equivalent.
+    logger.info(
+      '[WSP RENDER]',
+      'Rendering adapter-provided UI context provider:',
+      ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent'
+    );
+    childrenToRender = <ActualProviderToRender>{children}</ActualProviderToRender>;
+  } else {
+    logger.info(
+      '[WSP RENDER]',
+      'No adapter UI context provider to render. Rendering direct children.'
+    );
+    childrenToRender = children;
+  }
 
   return (
     <WalletStateContext.Provider value={contextValue}>

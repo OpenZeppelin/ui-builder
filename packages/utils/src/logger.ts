@@ -14,7 +14,7 @@ class Logger {
   private static instance: Logger;
   private options: LoggerOptions = {
     enabled: true,
-    level: 'info',
+    level: 'debug',
   };
 
   private constructor() {}

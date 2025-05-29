@@ -4,96 +4,6 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 /**
  * RainbowKit configuration options definition
  */
-export interface RainbowKitConfig {
-  /**
-   * The name of your application. This will be displayed in the RainbowKit UI.
-   */
-  appName: string;
-
-  /**
-   * WalletConnect Cloud Project ID. Required for WalletConnect v2 functionality.
-   * Obtain from https://cloud.walletconnect.com/
-   */
-  projectId: string;
-
-  /**
-   * Theme options for RainbowKit. Can be used with darkTheme() or lightTheme() functions.
-   * The structure of this object should match what RainbowKit's theme functions expect.
-   * Example: `{ accentColor: '#FF007A', borderRadius: 'small' }`
-   */
-  themeOptions?: Record<string, unknown>;
-
-  /**
-   * Optional theme name to apply. Defaults to dark theme if themeOptions are provided but no name.
-   * If themeOptions are not provided, no specific theme is applied by default (RainbowKit default).
-   */
-  themeName?: 'light' | 'dark';
-
-  /**
-   * Initial chain to connect to. Should be one of the chains supported by the adapter.
-   */
-  initialChain?: number;
-
-  /**
-   * Whether to enable server-side rendering support.
-   */
-  ssr?: boolean;
-
-  /**
-   * Modal size configuration.
-   */
-  modalSize?: 'compact' | 'wide';
-
-  /**
-   * Configuration for including/excluding specific adapter-provided UI components.
-   */
-  components?: {
-    exclude?: string[];
-  };
-}
-
-/**
- * Helper type for dynamic imports of RainbowKit components
- * Using any for component types to avoid TypeScript errors with dynamic imports
- */
-export interface RainbowKitImports {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  RainbowKitProvider: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getDefaultConfig: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  darkTheme?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  lightTheme?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ConnectButton: any;
-}
-
-/**
- * Try to dynamically import the RainbowKit package and required components.
- *
- * @returns Promise resolving to the imported components or null if import fails
- */
-export async function tryImportRainbowKit(): Promise<RainbowKitImports | null> {
-  try {
-    // Dynamic import of RainbowKit components
-    const { RainbowKitProvider, getDefaultConfig, darkTheme, lightTheme, ConnectButton } =
-      await import('@rainbow-me/rainbowkit');
-
-    logger.info('rainbowkit/utils', 'Successfully imported RainbowKit components');
-
-    return {
-      RainbowKitProvider,
-      getDefaultConfig,
-      darkTheme,
-      lightTheme,
-      ConnectButton,
-    };
-  } catch (error) {
-    logger.error('rainbowkit/utils', 'Failed to import RainbowKit components:', error);
-    return null;
-  }
-}
 
 /**
  * Validates the RainbowKit configuration to ensure required fields are present.
@@ -106,29 +16,61 @@ export function validateRainbowKitConfig(kitConfig?: UiKitConfiguration['kitConf
   missingFields?: string[];
   error?: string;
 } {
+  // Detailed log to inspect the received kitConfig
+  logger.debug(
+    'validateRainbowKitConfig',
+    'Received kitConfig for validation:',
+    JSON.stringify(kitConfig)
+  );
+
   if (!kitConfig) {
+    logger.warn('validateRainbowKitConfig', 'Validation failed: No kitConfig provided.');
     return { isValid: false, error: 'No kitConfig provided for RainbowKit' };
   }
 
-  const missingFields: string[] = [];
+  // kitConfig is the fully resolved configuration object which should contain wagmiParams and providerProps.
+  // Access wagmiParams from within kitConfig.
+  const wagmiParamsFromKitConfig = (kitConfig as Record<string, unknown>).wagmiParams as
+    | Record<string, unknown>
+    | undefined;
 
-  // Check if kitConfig is a RainbowKitConfig by checking for required fields
-  if (!('appName' in kitConfig)) {
-    missingFields.push('appName');
+  if (
+    !wagmiParamsFromKitConfig ||
+    typeof wagmiParamsFromKitConfig !== 'object' ||
+    wagmiParamsFromKitConfig === null
+  ) {
+    logger.warn(
+      'validateRainbowKitConfig',
+      'Validation failed: kitConfig.wagmiParams is missing or invalid.',
+      { wagmiParamsFromKitConfig }
+    );
+    return { isValid: false, error: 'kitConfig.wagmiParams is missing or not a valid object' };
   }
 
-  if (!('projectId' in kitConfig)) {
-    missingFields.push('projectId');
+  const missingFields: string[] = [];
+  if (
+    !('appName' in wagmiParamsFromKitConfig) ||
+    typeof wagmiParamsFromKitConfig.appName !== 'string'
+  ) {
+    missingFields.push('wagmiParams.appName');
+  }
+  if (
+    !('projectId' in wagmiParamsFromKitConfig) ||
+    typeof wagmiParamsFromKitConfig.projectId !== 'string'
+  ) {
+    missingFields.push('wagmiParams.projectId');
   }
 
   if (missingFields.length > 0) {
+    const errorMsg = `Missing or invalid required fields in wagmiParams: ${missingFields.join(', ')}`;
+    logger.warn('validateRainbowKitConfig', 'Validation failed:', errorMsg, { missingFields });
     return {
       isValid: false,
       missingFields,
-      error: `Missing or invalid required fields for RainbowKit configuration: ${missingFields.join(', ')}`,
+      error: errorMsg,
     };
   }
-
+  logger.debug('validateRainbowKitConfig', 'Validation successful.');
   return { isValid: true };
 }
 
@@ -136,62 +78,19 @@ export function validateRainbowKitConfig(kitConfig?: UiKitConfiguration['kitConf
  * Extracts and type-guards a RainbowKit configuration from a UiKitConfiguration
  *
  * @param config The UI kit configuration
- * @returns The RainbowKit configuration or undefined if invalid or not RainbowKit
+ * @returns The raw kitConfig Record<string, unknown> or undefined.
  */
-export function getRainbowKitConfig(config: UiKitConfiguration): RainbowKitConfig | undefined {
+export function getRawUserNativeConfig(
+  config: UiKitConfiguration
+): Record<string, unknown> | undefined {
   if (config.kitName !== 'rainbowkit' || !config.kitConfig) {
     return undefined;
   }
-
-  const rawKitConfig = config.kitConfig; // This is UiKitConfiguration['kitConfig']
-
-  const validation = validateRainbowKitConfig(rawKitConfig);
-  if (!validation.isValid) {
-    // Log the validation error for better debugging if needed
-    logger.warn('rainbowkit/utils', `RainbowKit config validation failed: ${validation.error}`);
-    return undefined;
+  // kitConfig is already expected to be Record<string, unknown> or undefined by UiKitConfiguration type.
+  // We just ensure it's not null and is an object here for safety if it were `any` somewhere up the chain.
+  if (typeof config.kitConfig === 'object' && config.kitConfig !== null) {
+    return config.kitConfig as Record<string, unknown>;
   }
-
-  // Now that validation has passed, we know appName and projectId are strings.
-  const result: RainbowKitConfig = {
-    appName: rawKitConfig.appName as string,
-    projectId: rawKitConfig.projectId as string,
-  };
-
-  // Copy optional properties if present and of expected type
-  if (rawKitConfig.themeOptions && typeof rawKitConfig.themeOptions === 'object') {
-    result.themeOptions = rawKitConfig.themeOptions as Record<string, unknown>;
-  }
-
-  if (
-    rawKitConfig.themeName &&
-    (rawKitConfig.themeName === 'light' || rawKitConfig.themeName === 'dark')
-  ) {
-    result.themeName = rawKitConfig.themeName as 'light' | 'dark';
-  }
-
-  if (typeof rawKitConfig.initialChain === 'number') {
-    result.initialChain = rawKitConfig.initialChain;
-  }
-
-  if (typeof rawKitConfig.ssr === 'boolean') {
-    result.ssr = rawKitConfig.ssr;
-  }
-
-  if (rawKitConfig.modalSize === 'compact' || rawKitConfig.modalSize === 'wide') {
-    result.modalSize = rawKitConfig.modalSize as 'compact' | 'wide';
-  }
-
-  // Handle components.exclude carefully as components itself is optional in kitConfig
-  const componentsConfig = rawKitConfig.components;
-  if (componentsConfig && typeof componentsConfig === 'object' && componentsConfig.exclude) {
-    const excludeArray = componentsConfig.exclude;
-    if (Array.isArray(excludeArray)) {
-      result.components = {
-        exclude: excludeArray.filter((item) => typeof item === 'string'),
-      };
-    }
-  }
-
-  return result;
+  logger.warn('rainbowkit/utils', 'kitConfig for RainbowKit is not a valid object.');
+  return undefined;
 }

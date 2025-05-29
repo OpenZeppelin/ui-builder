@@ -268,8 +268,15 @@ export interface ContractAdapter {
    *
    * @param config - The UI kit configuration, specifying the `kitName` (e.g., 'custom', 'rainbowkit')
    *                 and any `kitConfig` options specific to that kit.
+   * @param options - Optional additional options including callback functions for loading configs
    */
-  configureUiKit?(config: UiKitConfiguration): void;
+  configureUiKit?(
+    config: UiKitConfiguration,
+    options?: {
+      /** Optional generic function to load configuration modules by path from the consuming app's source. */
+      loadUiKitNativeConfig?: (relativePath: string) => Promise<Record<string, unknown> | null>;
+    }
+  ): void | Promise<void>;
 
   /**
    * (Optional) Returns a React component that sets up the necessary UI context for this adapter's ecosystem.

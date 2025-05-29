@@ -18,20 +18,18 @@ import { isEvmViewFunction } from './view-checker';
  * Prioritizes connected wallet client if on the correct chain.
  * Otherwise, creates a dedicated client using the resolved RPC URL for the target network.
  */
-function getPublicClientForQuery(
+async function getPublicClientForQuery(
   walletImplementation: WagmiWalletImplementation,
   networkConfig: EvmNetworkConfig
-): PublicClient {
+): Promise<PublicClient> {
   const accountStatus = walletImplementation.getWalletConnectionStatus();
   const walletChainId = accountStatus.chainId ? Number(accountStatus.chainId) : undefined;
   const isConnectedToCorrectChain =
     accountStatus.isConnected && walletChainId === networkConfig.chainId;
 
   if (isConnectedToCorrectChain) {
-    // Use wallet's client only if connected to the *correct* chain
-    const clientFromWallet = walletImplementation.getPublicClient();
+    const clientFromWallet = await walletImplementation.getPublicClient();
     if (clientFromWallet) {
-      // Check if client was successfully obtained
       console.log(
         `Using connected wallet's public client (Chain ID: ${walletChainId}) for query on ${networkConfig.name}.`
       );
@@ -124,7 +122,7 @@ export async function queryEvmViewFunction(
     }
 
     // --- Get Public Client --- //
-    const publicClient = getPublicClientForQuery(walletImplementation, networkConfig);
+    const publicClient = await getPublicClientForQuery(walletImplementation, networkConfig);
 
     // --- Get Schema & Function Details --- //
     // loadContractFn (bound to adapter instance) uses internal networkConfig

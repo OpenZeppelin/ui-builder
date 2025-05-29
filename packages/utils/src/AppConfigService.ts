@@ -112,6 +112,16 @@ export class AppConfigService {
               `Could not determine service and param from key (missing underscore separator): ${key}`
             );
           }
+        } else if (key === `${VITE_ENV_PREFIX}WALLETCONNECT_PROJECT_ID`) {
+          // Directly handle the VITE_APP_CFG_WALLETCONNECT_PROJECT_ID case
+          if (!loadedGlobalServiceConfigs.walletconnect) {
+            loadedGlobalServiceConfigs.walletconnect = {};
+          }
+          loadedGlobalServiceConfigs.walletconnect.projectId = value;
+          logger.debug(
+            LOG_SYSTEM,
+            `Parsed WalletConnect Project ID directly from key: ${key}, value: ${value}`
+          );
         } else if (key.startsWith(`${VITE_ENV_PREFIX}RPC_ENDPOINT_`)) {
           const networkIdSuffix = key.substring(`${VITE_ENV_PREFIX}RPC_ENDPOINT_`.length);
           const networkId = networkIdSuffix.toLowerCase().replace(/_/g, '-');

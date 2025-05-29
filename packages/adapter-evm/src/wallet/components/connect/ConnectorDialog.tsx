@@ -13,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@openzeppelin/transaction-form-ui';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
@@ -66,12 +65,7 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
   const showInjectedConnector = isConfigEnabled('showInjectedConnector');
 
   // Log the configuration to debug
-  useEffect(() => {
-    logger.debug(
-      'ConnectorDialog',
-      `Config: ${JSON.stringify(fullConfig)}, showInjected: ${showInjectedConnector}, isConnectingHook: ${isConnecting}, pendingConnectorHook: ${pendingConnector?.id}`
-    );
-  }, [fullConfig, showInjectedConnector, isConnecting, pendingConnector]);
+  useEffect(() => {}, [fullConfig, showInjectedConnector, isConnecting, pendingConnector]);
 
   // Track connection attempts for dialog closure
   useEffect(() => {
@@ -104,12 +98,6 @@ const ConnectorDialogContent: React.FC<ConnectorDialogProps> = ({ open, onOpenCh
   // Filter out the injected connector if showInjectedConnector is false
   const filteredConnectors = connectors.filter((connector: Connector) => {
     const isInjected = connector.id === 'injected';
-    if (isInjected) {
-      logger.debug(
-        'ConnectorDialog',
-        `Found injected connector: ${connector.name}, showing=${showInjectedConnector}`
-      );
-    }
     return !(isInjected && !showInjectedConnector);
   });
 

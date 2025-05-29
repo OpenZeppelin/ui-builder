@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { Button } from '@openzeppelin/transaction-form-ui';
+import { cn, logger } from '@openzeppelin/transaction-form-utils';
 
 import { CustomConnectButton } from '../components';
+import { WagmiProviderInitializedContext } from '../context/wagmi-context';
+
+const MIN_COMPONENT_LOADING_DISPLAY_MS = 1000; // 1 second artificial delay
 
 /**
  * Creates a lazy-loaded RainbowKit ConnectButton component.
@@ -11,27 +17,43 @@ import { CustomConnectButton } from '../components';
  * @returns A React component that dynamically imports the RainbowKit ConnectButton
  */
 export const RainbowKitConnectButton: React.FC<BaseComponentProps> = (props) => {
-  // Use any for dynamic component to avoid TypeScript errors
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [Component, setComponent] = useState<any>(null);
+  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingComponent, setIsLoadingComponent] = useState(true);
+  const [showComponentLoadingOverride, setShowComponentLoadingOverride] = useState(false);
+  const componentLoadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isWagmiProviderReady = useContext(WagmiProviderInitializedContext);
 
   useEffect(() => {
     let isMounted = true;
+    setIsLoadingComponent(true);
+    setShowComponentLoadingOverride(true); // Start showing override immediately
 
-    // Using dynamic import with a module function to handle typing better
+    if (componentLoadingTimerRef.current) {
+      clearTimeout(componentLoadingTimerRef.current);
+    }
+    componentLoadingTimerRef.current = setTimeout(() => {
+      if (isMounted) {
+        setShowComponentLoadingOverride(false);
+      }
+      componentLoadingTimerRef.current = null;
+    }, MIN_COMPONENT_LOADING_DISPLAY_MS);
+
     const loadComponent = async () => {
       try {
         const rainbowKit = await import('@rainbow-me/rainbowkit');
         if (isMounted) {
-          setComponent(() => rainbowKit.ConnectButton);
-          setIsLoading(false);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setComponent(() => rainbowKit.ConnectButton as React.ComponentType<any>);
+          // Actual component loading is done, but override might still be active
+          setIsLoadingComponent(false);
         }
       } catch (err) {
         if (isMounted) {
           setError(err instanceof Error ? err : new Error(String(err)));
-          setIsLoading(false);
+          setIsLoadingComponent(false); // Finished loading (with an error)
           logger.error('RainbowKitConnectButton', 'Failed to load RainbowKit ConnectButton:', err);
         }
       }
@@ -41,20 +63,50 @@ export const RainbowKitConnectButton: React.FC<BaseComponentProps> = (props) => 
 
     return () => {
       isMounted = false;
+      if (componentLoadingTimerRef.current) {
+        clearTimeout(componentLoadingTimerRef.current);
+      }
     };
-  }, []);
+  }, []); // Effect for dynamic import runs once
+
+  const renderLoadingPlaceholder = (message: string) => (
+    <Button
+      disabled={true}
+      variant="outline"
+      size="sm"
+      className={cn('h-8 px-2 text-xs', props.className)}
+    >
+      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+      {message}
+    </Button>
+  );
 
   if (error) {
     logger.warn(
       'RainbowKitConnectButton',
-      'Error loading RainbowKit ConnectButton. Displaying fallback button.'
+      'Error loading RainbowKit ConnectButton. Displaying fallback CustomConnectButton.'
     );
     return <CustomConnectButton {...props} />;
   }
 
-  if (isLoading || !Component) {
-    // Render a placeholder while loading
-    return <div className={props.className}>Loading wallet connect...</div>;
+  // Show "Loading Wallet..." if component is still factually loading OR if the override is active
+  if (isLoadingComponent || showComponentLoadingOverride) {
+    return renderLoadingPlaceholder('Loading Wallet...');
+  }
+  // At this point, component import has finished (successfully or not handled by error state)
+  // AND the minimum display time for "Loading Wallet..." has passed.
+
+  // Now check if the provider context is ready
+  if (!isWagmiProviderReady) {
+    // No separate delay for this message; it appears if context isn't ready after component load delay.
+    return renderLoadingPlaceholder('Initializing Provider...');
+  }
+
+  // Component should be non-null here if no error and not isLoadingComponent
+  if (!Component) {
+    // This case should ideally not be hit if logic is correct, but as a safeguard:
+    logger.warn('RainbowKitConnectButton', 'Component is null after loading phase, falling back.');
+    return <CustomConnectButton {...props} />;
   }
 
   return <Component {...props} />;

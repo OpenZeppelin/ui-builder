@@ -4,64 +4,73 @@ This directory contains the wallet integration layer for the EVM adapter, provid
 
 ## Purpose
 
-- **UI Environment Provider**: Sets up the Wagmi context and React Query provider for EVM wallet interactions.
-- **Facade Hooks**: Exposes a standardized set of React hooks for wallet/account/network management, wrapping `wagmi` hooks.
-- **Custom Wallet UI Components**: Provides chain-agnostic, design-system-compliant wallet UI components (Connect Button, Account Display, Network Switcher) for use in the core app, form-renderer, and exported forms.
-- **Utilities**: Contains helpers for wallet connection, singleton management, and safe usage of Wagmi hooks.
+- **UI Environment Provision**: Sets up a stable UI environment for EVM wallet interactions. The adapter exports `EvmWalletUiRoot`, a React component that internally uses a singleton `EvmUiKitManager` to manage the `WagmiConfig`, UI kit assets (like RainbowKit's provider and CSS), and overall state. This root component ensures `WagmiProvider` and `QueryClientProvider` are always rendered, aiming to prevent UI flicker during network or configuration changes.
+- **Facade Hooks**: Exposes a standardized set of React hooks (`evmFacadeHooks`) for wallet, account, and network management, wrapping `wagmi` core hooks. These are primarily consumed via `useWalletState()` from `@openzeppelin/transaction-form-react-core`.
+- **UI Kit Integration**: Supports third-party UI kits like RainbowKit, as well as a default set of custom-styled wallet UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`).
+- **Configuration**: Provides a flexible, layered configuration system allowing applications to define UI kit preferences and kit-specific parameters through global application configuration (`AppConfigService`), user-authored native TypeScript configuration files, and programmatic overrides.
 
 ## Directory Structure
 
 ```
 wallet/
-├── components/         # Custom wallet UI components (ConnectButton, AccountDisplay, NetworkSwitcher)
+├── components/         # Core UI root (`EvmWalletUiRoot`) and custom wallet UI components
+│   ├── EvmWalletUiRoot.tsx
 │   ├── account/
 │   ├── connect/
 │   └── network/
-├── context/            # React context for Wagmi provider initialization
-├── hooks/              # Facade hooks and provider state hooks
-├── implementation/     # Internal Wagmi implementation (not exported)
-├── provider/           # UI context provider for Wagmi + React Query
-├── utils/              # Connection logic, singleton manager, safe wrappers
-└── index.ts            # Barrel export for wallet module
+├── context/            # React context (e.g., `WagmiProviderInitializedContext`)
+├── evmUiKitManager.ts  # Singleton manager for UI kit state, WagmiConfig, and assets
+├── hooks/              # Facade hooks (`facade-hooks.ts`), config access (`useUiKitConfig.ts` - for baseline)
+├── implementation/     # Internal Wagmi core logic (`wagmi-implementation.ts`)
+├── rainbowkit/         # RainbowKit-specific modules
+│   ├── rainbowkitAssetManager.ts # Handles dynamic loading of RainbowKit JS & CSS
+│   ├── config-service.ts         # Creates RainbowKit-specific WagmiConfig, caching
+│   ├── components.tsx            # Lazy-loaded RainbowKitConnectButton wrapper
+│   └── componentFactory.ts       # Provides RainbowKit components to the adapter
+├── services/           # Utility services (e.g., `configResolutionService.ts`)
+├── utils/              # General wallet utilities, connection logic, singleton manager for Wagmi impl.
+└── index.ts            # Barrel export for key wallet module parts (excluding internal singletons like EvmUiKitManager)
 ```
 
-## Key Exports
+## Key Components & Concepts
 
-- **UI Components**: `CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`
-- **Facade Hooks**: `evmFacadeHooks` (see `hooks/facade-hooks.ts`)
-- **Provider**: `EvmBasicUiContextProvider` (see `provider/ui-provider.tsx`)
-- **Context**: `WagmiProviderInitializedContext`
-- **Utils**: `getEvmWalletImplementation`, `SafeWagmiComponent`, connection helpers
+- **`EvmAdapter` UI Methods**:
+  - `getEcosystemReactUiContextProvider()`: Returns the `EvmWalletUiRoot` component.
+  - `configureUiKit(programmaticOverrides, options)`: Configures the desired UI kit (`kitName`, `kitConfig`) and triggers the `EvmUiKitManager`.
+  - `getEcosystemWalletComponents()`: Returns UI components (e.g., ConnectButton) for the active kit.
+  - `getEcosystemReactHooks()`: Returns `evmFacadeHooks`.
+- **`EvmUiKitManager`**: Singleton, manages `WagmiConfig`, selected UI kit (e.g., RainbowKit), its assets (provider component, CSS status), and initialization/error states. Not directly used by consuming apps.
+- **`EvmWalletUiRoot`**: Stable React component. Subscribes to `EvmUiKitManager`. Always renders `WagmiProvider` & `QueryClientProvider`. Conditionally renders the active UI kit's specific provider (e.g., RainbowKit's) inside. Provides `WagmiProviderInitializedContext`.
+- **User Native Configuration Files**: For kits like RainbowKit, users provide detailed configuration in `src/config/wallet/[kitName].config.ts`.
+- **`loadConfigModule` Prop**: Passed by the application to `WalletStateProvider`, enabling the adapter to dynamically load the user-native config files.
 
-## Configuration Options
+## Configuration
 
-The wallet UI components can be configured in two ways:
+The EVM adapter's wallet UI and behavior are configured through a layered system:
 
-### 1. Using the adapter's configureUiKit method:
+### 1. Application-Level Configuration (via `AppConfigService`)
 
-```tsx
-const adapter = new EvmAdapter(networkConfig);
-adapter.configureUiKit({
-  kitName: 'none', // Default internal implementation
-  kitConfig: {
-    showInjectedConnector: true, // Show the injected connector (e.g., MetaMask) in the wallet selection dialog
-  },
-});
-```
+This is the baseline configuration, typically set in `app.config.json` (for exported apps) or Vite environment variables (for the core `@openzeppelin/transaction-form-builder` app).
 
-### 2. Using app.config.json (recommended for exported applications):
+**Path in `app.config.json`**: `globalServiceConfigs.walletui.config`
+
+**Example `app.config.json` snippet:**
 
 ```json
 {
   "globalServiceConfigs": {
     "walletui": {
+      "_comment": "Optional: Configure the Wallet UI Kit...",
       "config": {
-        "kitName": "custom",
+        "kitName": "rainbowkit", // or "custom", "none"
         "kitConfig": {
+          // Baseline/default kit-specific options, e.g., for custom kit:
           "showInjectedConnector": true,
           "components": {
             "exclude": ["NetworkSwitcher"]
           }
+          // For RainbowKit, AppConfigService might provide a default projectId if not in native file,
+          // but wagmiParams & providerProps are best defined in the native .ts file.
         }
       }
     }
@@ -69,113 +78,130 @@ adapter.configureUiKit({
 }
 ```
 
-The configuration is automatically loaded from AppConfigService when the module initializes.
+- **`kitName`**: Determines the UI kit. Supported: `'rainbowkit'`, `'custom'` (default), `'none'`.
+- **`kitConfig`**: An object for kit-specific baseline settings.
 
-### Available Options
+### 2. User-Native Kit-Specific Configuration File (Recommended for Detailed Kit Setup)
 
-- **kitName**: Specifies which UI kit to use:
+For UI kits requiring detailed setup (like RainbowKit), applications should provide a TypeScript configuration file in their `src` directory following this convention:
+`src/config/wallet/[kitName].config.ts`
 
-  - `'custom'`: Default for EVM adapter - uses our custom UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`).
-  - `'none'`: Explicitly disables UI components and UI context provider.
-  - `'rainbowkit'`: (Future support) RainbowKit UI components
-    - **IMPORTANT**: When using `rainbowkit`, the consuming application MUST import its styles: `import '@rainbow-me/rainbowkit/styles.css';` (typically in your main `App.tsx` or `main.tsx`).
-  - `'connectkit'`: (Future support) ConnectKit UI components
-  - `'appkit'`: (Future support) AppKit UI components
-
-- **kitConfig**: Configuration object with options specific to the chosen UI kit:
-  - For the `'custom'` implementation:
-    - **`showInjectedConnector?: boolean`**: When `true`, shows the injected connector in the wallet connection dialog. Defaults to `false` (hidden).
-    - **`components?: { exclude?: Array<'ConnectButton' | 'AccountDisplay' | 'NetworkSwitcher'> }`**: Optional. Allows specifying an array of component names to _exclude_ from being provided by `getEcosystemWalletComponents`. For example, to hide the default network switcher, you could set `kitConfig: { components: { exclude: ['NetworkSwitcher'] } }`.
-
-## Usage
-
-The UI capabilities of the EVM Adapter (UI Context Provider, Facade Hooks, Custom UI Components) are primarily designed to be consumed through the `core` application's centralized state management when the `EvmAdapter` is the active adapter.
-
-### 1. UI Context Setup (Orchestrated by `core`)
-
-The `EvmAdapter` provides its `EvmBasicUiContextProvider` (which sets up Wagmi and React Query) via the `getEcosystemReactUiContextProvider` method of the `ContractAdapter` interface.
-
-In the main application (`packages/core`):
-
-- The `WalletStateProvider` (using `useWalletState` hook context) identifies the `EvmAdapter` as the active adapter.
-- It then calls `activeAdapter.getEcosystemReactUiContextProvider()` and renders the returned `EvmBasicUiContextProvider` to wrap the application tree.
-  This setup ensures that the necessary Wagmi context is available for the facade hooks and custom UI components to function correctly.
-
-_Direct usage like `<EvmBasicUiContextProvider>{...}</EvmBasicUiContextProvider>` by a consuming application is generally not needed, as this is handled by `WalletStateProvider`._
-
-### 2. Using Facade Hooks (via `useWalletState` in `core`)
-
-While `evmFacadeHooks` (an object containing all `wagmi` hook facades like `useAccount`, `useConnect`, etc.) is exported directly from this package (`@openzeppelin/transaction-form-adapter-evm/wallet`), the primary way to access these hooks within the `core` application is via `useWalletState()`:
+**Example for RainbowKit (`src/config/wallet/rainbowkit.config.ts`):**
 
 ```typescript
-// In a component within packages/core
-import { useWalletState } from '@/core/hooks'; // Or correct path to core hooks
+// Example: src/config/wallet/rainbowkit.config.ts
+// Users should import types from '@rainbow-me/rainbowkit' for their config for type safety.
+// import type { RainbowKitProviderProps } from '@rainbow-me/rainbowkit';
+// import { mainnet } from 'viem/chains'; // etc.
 
-function MyWalletComponent() {
-  const { walletFacadeHooks } = useWalletState();
+const rainbowKitAppConfig = {
+  // Parameters for RainbowKit's getDefaultConfig() from '@rainbow-me/rainbowkit'
+  wagmiParams: {
+    appName: 'My Awesome dApp',
+    projectId: 'YOUR_WALLETCONNECT_PROJECT_ID', // Essential for WalletConnect via RainbowKit
+    // chains: [], // Note: `chains` and `transports` will be overridden by the adapter based on its networkConfig
+    // Other options like `wallets`, `ssr`, etc., can be set here.
+  },
+  // Props for the <RainbowKitProvider {...} /> component
+  providerProps: {
+    // theme: darkTheme(),
+    // initialChain: mainnet,
+    // modalSize: 'compact',
+    // appInfo: { appName: 'My dApp', learnMoreUrl: 'https://learnmore.example' }
+  }, // as RainbowKitProviderProps (or a subset for type safety)
+};
 
-  if (!walletFacadeHooks) {
-    return <p>Wallet features not available for the current adapter.</p>;
-  }
-
-  // Now use the specific hooks from the walletFacadeHooks object
-  // Call the hook once to get its result, then destructure. Provide defaults if hook or properties are missing.
-  const accountInfo = walletFacadeHooks.useAccount ? walletFacadeHooks.useAccount() : {};
-  const { isConnected = false, address } = accountInfo as { isConnected?: boolean; address?: string };
-
-  const connectInfo = walletFacadeHooks.useConnect ? walletFacadeHooks.useConnect() : {};
-  const { connect = () => {}, connectors = [] } = connectInfo as { connect?: () => void; connectors?: any[] };
-  // etc.
-
-  // Example usage:
-  if (isConnected) {
-    console.log('Connected address:', address);
-  }
-
-  // ... component logic ...
-}
+export default rainbowKitAppConfig;
 ```
 
-_Exported standalone applications that bundle only the `EvmAdapter` might import `evmFacadeHooks` directly if they don't use the full `WalletStateProvider` from `@core` (though ideally, exported apps would also have a similar provider setup)._
+- **`wagmiParams`**: Contains parameters for RainbowKit's `getDefaultConfig()` (e.g., `appName`, `projectId`). The adapter will use these but will override `chains` and `transports` based on its own `networkConfig` and `AppConfigService` RPC overrides.
+- **`providerProps`**: Contains props to be spread onto the `<RainbowKitProvider />` component (e.g., `theme`, `modalSize`).
 
-### 3. Using Wallet UI Components (via `activeAdapter` in `core`)
+### 3. `loadConfigModule` (Application-Provided Importer)
 
-The custom UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`) are made available by `EvmAdapter` via the `getEcosystemWalletComponents` method.
+The consuming application (via the `loadConfigModule` prop on `WalletStateProvider` in `react-core`) must provide a function that can dynamically import the user-native kit-specific configuration file described above. The adapter uses this callback to load the file.
 
-In the `core` application, these are typically accessed as follows:
+**Example from `packages/core/src/App.tsx` or exported app's `main.tsx`:**
 
 ```typescript
-// In a component like WalletConnectionUI.tsx within packages/core
-import { useWalletState } from '@/core/hooks';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
-function HeaderWalletDisplay() {
-  const { activeAdapter } = useWalletState();
+const loadAppConfigModule = async (
+  relativePath: string
+): Promise<Record<string, unknown> | null> => {
+  try {
+    // Vite resolves paths like './config/wallet/rainbowkit.config' relative to this file.
+    logger.info('[App] loadAppConfigModule', `Attempting to load: ${relativePath}`);
+    const module = await import(/* @vite-ignore */ relativePath);
+    logger.info('[App] loadAppConfigModule', `Successfully loaded: ${relativePath}`, module);
+    return module.default || module;
+  } catch (error) {
+    logger.warn('[App] loadAppConfigModule', `Failed to load ${relativePath}:`, error);
+    return null; // Expected if file is optional and doesn't exist
+  }
+};
 
-  if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
-    return null; // Or some fallback UI
+// This function is then passed to <WalletStateProvider loadConfigModule={loadAppConfigModule} />
+```
+
+### 4. Programmatic Overrides (via `EvmAdapter.configureUiKit`)
+
+Applications can also call `adapter.configureUiKit(programmaticUiKitConfig, { loadUiKitNativeConfig: loadAppConfigModule })` at runtime to provide specific overrides.
+
+### Configuration Precedence
+
+1.  **Programmatic Overrides**: Settings passed directly to `configureUiKit` (for `kitName` or other top-level `UiKitConfiguration` flags, and `kitConfig` properties).
+2.  **User-Native `.ts` File**: Content from files like `src/config/wallet/rainbowkit.config.ts` (for `kitConfig` properties).
+3.  **`AppConfigService` (`app.config.json` / Env Vars)**: Baseline settings (for `kitName` and `kitConfig` properties).
+4.  **Adapter Defaults**: Internal defaults (e.g., `kitName: 'custom'`).
+
+## Automatic CSS Loading (RainbowKit)
+
+When `kitName` is configured to `'rainbowkit'`, the `EvmAdapter` (via `EvmUiKitManager` and `rainbowkitAssetManager.ts`) will automatically attempt to dynamically import and inject RainbowKit's required CSS (`@rainbow-me/rainbowkit/styles.css`). **Manual import of this CSS file in the application's entry point is no longer necessary.**
+
+## Usage within Application
+
+The primary way to interact with wallet functionalities and UI components is through `@openzeppelin/transaction-form-react-core`:
+
+- **`WalletStateProvider`**: Wraps the application (or relevant parts) to provide wallet context.
+- **`useWalletState()`**: Hook to access `activeAdapter`, `activeNetworkConfig`, `walletFacadeHooks`, `isAdapterLoading`, etc.
+- **Derived Hooks** (e.g., `useDerivedAccountStatus`, `useDerivedConnectStatus`): Provide convenient, memoized state from facade hooks.
+
+**Example: Rendering Wallet UI in a Header**
+
+```typescript
+import {
+  useWalletState,
+  useDerivedAccountStatus,
+} from '@openzeppelin/transaction-form-react-core';
+
+function WalletConnectionHeader() {
+  const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { isConnected } = useDerivedAccountStatus();
+
+  if (isAdapterLoading && !activeAdapter) {
+    return <div>Loading Wallet Adapter...</div>;
   }
 
-  const walletComponents = activeAdapter.getEcosystemWalletComponents();
-  if (!walletComponents) return null;
+  if (!activeAdapter?.supportsWalletConnection()) {
+    return null; // Or message indicating wallet connection not supported
+  }
 
-  const { ConnectButton, AccountDisplay, NetworkSwitcher } = walletComponents;
+  const walletComponents = activeAdapter.getEcosystemWalletComponents?.();
+  const ConnectButton = walletComponents?.ConnectButton;
+  const AccountDisplay = walletComponents?.AccountDisplay;
 
   return (
-    <div className="wallet-ui-container">
-      {NetworkSwitcher && <NetworkSwitcher />}
-      {AccountDisplay && <AccountDisplay />}
-      {ConnectButton && <ConnectButton />}
+    <div>
+      {isConnected && AccountDisplay ? <AccountDisplay /> : null}
+      {!isConnected && ConnectButton ? <ConnectButton /> : null}
+      {/* Add NetworkSwitcher if needed and available */}
     </div>
   );
 }
 ```
 
-These custom components (`CustomConnectButton`, etc.) are designed to internally use `useWalletState()` to get access to `walletFacadeHooks` for their functionality.
-
-_Direct import of these components (e.g., `import { CustomConnectButton } from '@openzeppelin/transaction-form-adapter-evm/wallet'`) is also possible but bypasses the adapter's role in providing them via `getEcosystemWalletComponents`, which is the more chain-agnostic pattern when multiple adapters might be in play._
-
 ## Notes
 
-- All wallet UI components and hooks are designed to be chain-agnostic and follow the project's design system and form styling standards.
-- The internal Wagmi implementation is encapsulated and not exposed outside the adapter.
-- For more details on the architecture and integration, see the main project README and the WAGMI implementation plan.
+- The internal Wagmi implementation (`WagmiWalletImplementation`) and UI kit state management (`EvmUiKitManager`) are encapsulated within this adapter.
+- For adding support for new UI kits, refer to the pattern established by the RainbowKit integration. See [Adding New UI Kits](./ADDING_NEW_UI_KITS.md) for detailed instructions.
