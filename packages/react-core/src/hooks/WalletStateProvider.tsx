@@ -43,6 +43,46 @@ export interface WalletStateProviderProps {
 }
 
 /**
+ * Configures the adapter's UI kit and returns the UI provider component and hooks.
+ */
+async function configureAdapterUiKit(
+  adapter: ExtendedContractAdapter,
+  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>
+): Promise<{
+  providerComponent: React.ComponentType<EcosystemReactUiProviderProps> | null;
+  hooks: EcosystemSpecificReactHooks | null;
+}> {
+  try {
+    // Ensure the adapter (and thus the EvmUiKitManager) is configured.
+    if (typeof adapter.configureUiKit === 'function') {
+      logger.info(
+        '[WSP configureAdapterUiKit] Calling configureUiKit for adapter:',
+        adapter?.networkConfig?.id
+      );
+      // Pass an empty object for programmaticOverrides unless WalletStateProvider
+      // itself has specific overrides it wants to enforce.
+      await adapter.configureUiKit({} as Partial<UiKitConfiguration>, {
+        loadUiKitNativeConfig: loadConfigModule,
+      });
+      logger.info(
+        '[WSP configureAdapterUiKit] configureUiKit completed for adapter:',
+        adapter?.networkConfig?.id
+      );
+    }
+
+    const providerComponent = adapter.getEcosystemReactUiContextProvider?.() || null;
+    const hooks = adapter.getEcosystemReactHooks?.() || null;
+
+    logger.info('[WSP configureAdapterUiKit]', 'UI provider and hooks retrieved successfully.');
+
+    return { providerComponent, hooks };
+  } catch (error) {
+    logger.error('[WSP configureAdapterUiKit]', 'Error during adapter UI setup:', error);
+    throw error; // Re-throw to be handled by caller
+  }
+}
+
+/**
  * @name WalletStateProvider
  * @description This provider is a central piece of the application's state management for wallet and network interactions.
  * It is responsible for:
@@ -89,105 +129,94 @@ export function WalletStateProvider({
 
   // Effect to derive the full NetworkConfig object when currentGlobalNetworkId changes.
   useEffect(() => {
-    let isActive = true; // Prevents state updates on unmounted component.
+    const abortController = new AbortController();
+
     async function fetchNetworkConfig() {
-      if (currentGlobalNetworkId) {
-        try {
-          const config = await Promise.resolve(getNetworkConfigById(currentGlobalNetworkId));
-          if (isActive) {
-            if (config) {
-              setCurrentGlobalNetworkConfig(config);
-            } else {
-              setCurrentGlobalNetworkConfig(null);
-            }
-          }
-        } catch {
-          if (isActive) setCurrentGlobalNetworkConfig(null);
-        }
-      } else {
+      if (!currentGlobalNetworkId) {
         // If currentGlobalNetworkId is null, clear the config.
-        if (isActive) setCurrentGlobalNetworkConfig(null);
+        if (!abortController.signal.aborted) {
+          setCurrentGlobalNetworkConfig(null);
+        }
+        return;
+      }
+
+      try {
+        const config = await Promise.resolve(getNetworkConfigById(currentGlobalNetworkId));
+        if (!abortController.signal.aborted) {
+          setCurrentGlobalNetworkConfig(config || null);
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          logger.error('[WSP fetchNetworkConfig]', 'Failed to fetch network config:', error);
+          setCurrentGlobalNetworkConfig(null);
+        }
       }
     }
+
     void fetchNetworkConfig();
-    return () => {
-      isActive = false;
-    };
+    return () => abortController.abort();
   }, [currentGlobalNetworkId, getNetworkConfigById]);
 
   // Effect to load the active adapter and its UI capabilities when currentGlobalNetworkConfig changes.
   useEffect(() => {
-    let isMounted = true;
-    async function configureAdapterAndSetUi() {
-      if (currentGlobalNetworkConfig) {
-        const { adapter: newAdapter, isLoading: newIsLoading } = getAdapterForNetwork(
-          currentGlobalNetworkConfig
-        ) as { adapter: ExtendedContractAdapter | null; isLoading: boolean };
+    const abortController = new AbortController();
 
-        if (isMounted) {
-          setGlobalActiveAdapter(newAdapter);
-          setIsGlobalAdapterLoading(newIsLoading);
-
-          if (newAdapter && !newIsLoading) {
-            try {
-              // Ensure the adapter (and thus the EvmUiKitManager) is configured.
-
-              if (typeof newAdapter.configureUiKit === 'function') {
-                logger.info(
-                  '[WSP EFFECT] Calling configureUiKit for adapter:',
-                  newAdapter?.networkConfig?.id
-                );
-                // Pass an empty object for programmaticOverrides unless WalletStateProvider
-                // itself has specific overrides it wants to enforce.
-                await newAdapter.configureUiKit({} as Partial<UiKitConfiguration>, {
-                  loadUiKitNativeConfig: loadConfigModule,
-                });
-                logger.info(
-                  '[WSP EFFECT] configureUiKit completed for adapter:',
-                  newAdapter?.networkConfig?.id
-                );
-              }
-
-              const ProviderComponent = newAdapter.getEcosystemReactUiContextProvider?.();
-              setAdapterUiContextProviderToRender(
-                ProviderComponent ? () => ProviderComponent : null
-              );
-
-              setWalletFacadeHooks(newAdapter.getEcosystemReactHooks?.() || null);
-              logger.info(
-                '[WalletStateProvider]',
-                'UI provider and hooks set after adapter processing.'
-              );
-            } catch (error) {
-              logger.error('[WalletStateProvider]', 'Error during adapter UI setup:', error);
-              if (isMounted) {
-                setAdapterUiContextProviderToRender(null);
-                setWalletFacadeHooks(null);
-              }
-            }
-          } else if (!newAdapter && !newIsLoading) {
-            // Adapter is null and not loading, clear UI specific state
-            setAdapterUiContextProviderToRender(null);
-            setWalletFacadeHooks(null);
-          }
-          // If newIsLoading is true, retain previous AdapterUiContextProviderToRender and hooks
-          // to prevent UI flicker, EvmWalletUiRoot will handle its loading state internally.
-        }
-      } else {
+    async function loadAdapterAndConfigureUi() {
+      if (!currentGlobalNetworkConfig) {
         // No network config - clear everything
-        if (isMounted) {
+        if (!abortController.signal.aborted) {
           setGlobalActiveAdapter(null);
           setIsGlobalAdapterLoading(false);
           setAdapterUiContextProviderToRender(null);
           setWalletFacadeHooks(null);
         }
+        return;
       }
+
+      const { adapter: newAdapter, isLoading: newIsLoading } = getAdapterForNetwork(
+        currentGlobalNetworkConfig
+      ) as { adapter: ExtendedContractAdapter | null; isLoading: boolean };
+
+      if (abortController.signal.aborted) return;
+
+      setGlobalActiveAdapter(newAdapter);
+      setIsGlobalAdapterLoading(newIsLoading);
+
+      if (newAdapter && !newIsLoading) {
+        try {
+          const { providerComponent, hooks } = await configureAdapterUiKit(
+            newAdapter,
+            loadConfigModule
+          );
+
+          if (!abortController.signal.aborted) {
+            setAdapterUiContextProviderToRender(providerComponent ? () => providerComponent : null);
+            setWalletFacadeHooks(hooks);
+          }
+        } catch (error) {
+          if (!abortController.signal.aborted) {
+            logger.error(
+              '[WSP loadAdapterAndConfigureUi]',
+              'Error during adapter UI setup:',
+              error
+            );
+            setAdapterUiContextProviderToRender(null);
+            setWalletFacadeHooks(null);
+          }
+        }
+      } else if (!newAdapter && !newIsLoading) {
+        // Adapter is null and not loading, clear UI specific state
+        if (!abortController.signal.aborted) {
+          setAdapterUiContextProviderToRender(null);
+          setWalletFacadeHooks(null);
+        }
+      }
+      // If newIsLoading is true, retain previous AdapterUiContextProviderToRender and hooks
+      // to prevent UI flicker, EvmWalletUiRoot will handle its loading state internally.
     }
 
-    void configureAdapterAndSetUi();
-    return () => {
-      isMounted = false;
-    };
+    void loadAdapterAndConfigureUi();
+    return () => abortController.abort();
   }, [currentGlobalNetworkConfig, getAdapterForNetwork, loadConfigModule]);
 
   /**
