@@ -2,13 +2,31 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Modifies the content paths within tailwind.config.cjs content string.
- * Ensures that Tailwind scans all necessary files in the exported project, including
- * those from the form-renderer package, to prevent incorrect purging of utility classes.
+ * For Tailwind v4, this is a no-op since content paths are automatically detected.
+ * For Tailwind v3 and earlier, this ensures that Tailwind scans all necessary files
+ * in the exported project, including those from the form-renderer package.
  *
  * @param originalContent - The original content of tailwind.config.cjs.
- * @returns The modified content string.
+ * @returns The modified content string (or original for Tailwind v4).
  */
 export function modifyTailwindConfigContentForExport(originalContent: string): string {
+  // Check if this is a Tailwind v4 config
+  // v4 configs typically have comments about automatic content detection
+  // or lack a content property entirely
+  const isTailwindV4 =
+    originalContent.includes('Content paths are automatically detected by Tailwind v4') ||
+    originalContent.includes('Tailwind v4') ||
+    !originalContent.match(/(content\s*:\s*\[)([\s\S]*?)(\])/);
+
+  if (isTailwindV4) {
+    logger.info(
+      'TailwindUtils',
+      'Detected Tailwind v4 config. Content paths are automatically detected, no modification needed.'
+    );
+    return originalContent;
+  }
+
+  // For Tailwind v3 or earlier, we need to modify the content paths
   const newContentPaths = [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}', // Scan app's src directory
@@ -29,14 +47,14 @@ export function modifyTailwindConfigContentForExport(originalContent: string): s
 
   if (modifiedContent === originalContent) {
     logger.warn(
-      'TailwindUtils', // Changed system for logger
+      'TailwindUtils',
       'Failed to replace content paths in tailwind.config.cjs. Check config format. Using original content.'
     );
     return originalContent;
   }
   logger.info(
     'TailwindUtils',
-    'Successfully modified tailwind.config.cjs content paths for export.'
+    'Successfully modified tailwind.config.cjs content paths for export (Tailwind v3).'
   );
   return modifiedContent;
 }
