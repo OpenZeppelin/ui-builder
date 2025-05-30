@@ -49,15 +49,31 @@ export function TransactionFormBuilder() {
   // Store the latest selected network ID
   const latestNetworkIdRef = useRef<string | null>(null);
 
+  // Track if we've initialized the network switch for the first time
+  const hasInitializedNetworkRef = useRef(false);
+
   // Custom handler for network selection that directly signals a network switch
   const handleNetworkSelection = (networkId: string | null) => {
     logger.info('TransactionFormBuilder', `🔀 Network selected: ${networkId}`);
 
     // If there's a previous network and we're selecting a new one, set it as the network to switch to
-    if (networkId && latestNetworkIdRef.current !== networkId) {
+    // OR if this is the first network selection (initial load)
+    if (
+      networkId &&
+      (latestNetworkIdRef.current !== networkId || !hasInitializedNetworkRef.current)
+    ) {
       setNetworkToSwitchTo(networkId);
       setIsAdapterReady(false); // Reset the adapter ready flag
       logger.info('TransactionFormBuilder', `🎯 Setting network to switch to: ${networkId}`);
+
+      // Mark that we've initialized if this is the first selection
+      if (!hasInitializedNetworkRef.current) {
+        hasInitializedNetworkRef.current = true;
+        logger.info(
+          'TransactionFormBuilder',
+          '🚀 Initial network selection - triggering wallet switch'
+        );
+      }
     }
 
     // Update our cached latest network ID

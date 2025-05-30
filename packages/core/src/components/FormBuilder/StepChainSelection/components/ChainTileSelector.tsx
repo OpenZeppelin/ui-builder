@@ -1,6 +1,6 @@
 import { NetworkIcon } from '@web3icons/react';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
@@ -34,6 +34,9 @@ export function ChainTileSelector({
   selectedNetworkId = null,
 }: ChainTileSelectorProps) {
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
+
+  // Track if we've done the initial auto-selection
+  const hasAutoSelectedRef = useRef(false);
 
   // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({
@@ -101,6 +104,48 @@ export function ChainTileSelector({
       setSelectedEcosystem(initialEcosystem);
     }
   }, [initialEcosystem, selectedEcosystem, selectedNetworkId]);
+
+  // Auto-select the first network when initial ecosystem is set
+  useEffect(() => {
+    // Only auto-select if:
+    // 1. We have a selected ecosystem
+    // 2. We haven't done the initial auto-selection yet
+    if (selectedEcosystem && !hasAutoSelectedRef.current) {
+      hasAutoSelectedRef.current = true;
+
+      async function autoSelectFirstNetwork(ecosystem: Ecosystem) {
+        try {
+          const networksInEcosystem = await getNetworksByEcosystem(ecosystem);
+          if (networksInEcosystem.length > 0) {
+            const firstNetworkId = networksInEcosystem[0].id;
+
+            // If no network is selected, or if the selected network is different, trigger selection
+            if (!selectedNetworkId || selectedNetworkId !== firstNetworkId) {
+              logger.info(
+                'ChainTileSelector',
+                `Auto-selecting first network for initial ecosystem ${ecosystem}: ${firstNetworkId}`
+              );
+              onNetworkSelect(firstNetworkId);
+            } else {
+              // Even if the network is already selected, trigger the selection to ensure wallet switches
+              logger.info(
+                'ChainTileSelector',
+                `Re-triggering selection for already selected network ${firstNetworkId} to ensure wallet sync`
+              );
+              onNetworkSelect(firstNetworkId);
+            }
+          }
+        } catch (error) {
+          logger.error(
+            'ChainTileSelector',
+            `Error auto-selecting initial network for ${ecosystem}:`,
+            error
+          );
+        }
+      }
+      void autoSelectFirstNetwork(selectedEcosystem);
+    }
+  }, [selectedEcosystem, selectedNetworkId, onNetworkSelect]);
 
   // If we have a selectedNetworkId and no ecosystem, we need to fetch the network to determine its ecosystem
   useEffect(() => {
