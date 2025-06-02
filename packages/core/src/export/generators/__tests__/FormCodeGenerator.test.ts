@@ -289,20 +289,76 @@ describe('FormCodeGenerator', () => {
       const formConfig = createMinimalFormConfig('invalidForm', 'evm');
       const contractSchema = createMinimalContractSchema('invalidForm', 'evm');
 
-      const invalidFormConfig = {
-        ...formConfig,
-        fields: [],
-        id: '',
-      };
+      // Override mock to return an invalid schema that should fail validation
+      vi.mocked(formSchemaFactory.builderConfigToRenderSchema).mockImplementationOnce(
+        () =>
+          ({
+            id: 'form-invalidForm',
+            // title: '', // Missing title - this should cause validation to fail
+            fields: [],
+            layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+            validation: { mode: 'onChange', showErrors: 'inline' },
+            contractAddress: '0xtest',
+            // submitButton is missing - this should also cause validation to fail
+          }) as unknown as RenderFormSchema
+      );
 
       await expect(
         generator.generateFormComponent(
-          invalidFormConfig as BuilderFormConfig, // Use simple cast
+          formConfig,
           contractSchema,
           mockEvmNetworkConfig,
           'invalidForm'
         )
       ).rejects.toThrow('Invalid RenderFormSchema');
+    });
+
+    it('should handle functions without parameters (empty fields array)', async () => {
+      const generator = new FormCodeGenerator();
+      const formConfig = createMinimalFormConfig('emptyFunction', 'evm');
+      // Create a form config with no fields (function without parameters)
+      formConfig.fields = [];
+
+      const contractSchema = createMinimalContractSchema('emptyFunction', 'evm');
+      // Ensure the function has no inputs
+      const functionDetails = contractSchema.functions.find((f) => f.id === 'emptyFunction');
+      if (functionDetails) {
+        functionDetails.inputs = [];
+        functionDetails.displayName = 'Empty Function';
+        functionDetails.description = 'Function with no parameters';
+      }
+
+      // Mock the schema factory to return a valid schema with empty fields
+      vi.mocked(formSchemaFactory.builderConfigToRenderSchema).mockImplementationOnce(
+        (formConfig, title, desc) => ({
+          id: `form-${formConfig.functionId}`,
+          title: title,
+          description: desc || '',
+          fields: [], // Empty fields array for function without parameters
+          layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+          validation: { mode: 'onChange', showErrors: 'inline' },
+          submitButton: { text: 'Submit', loadingText: 'Loading...' },
+          contractAddress: formConfig.contractAddress,
+          defaultValues: {},
+          functionId: formConfig.functionId,
+          theme: {},
+        })
+      );
+
+      // This should not throw an error
+      const result = await generator.generateFormComponent(
+        formConfig,
+        contractSchema,
+        mockEvmNetworkConfig,
+        'emptyFunction'
+      );
+
+      expect(result).toBeDefined();
+      expect(formSchemaFactory.builderConfigToRenderSchema).toHaveBeenCalledWith(
+        formConfig,
+        'Empty Function',
+        'Function with no parameters'
+      );
     });
   });
 
