@@ -1,3 +1,17 @@
+# [1.6.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.5.0...v1.6.0) (2025-06-02)
+
+
+### Bug Fixes
+
+* **core:** trigger wallet network switch on initial load based on the network config ([24e4240](https://github.com/OpenZeppelin/transaction-form-builder/commit/24e4240c11936213f34657c4ae8518a1988aa46c))
+* **export:** handle Tailwind v4 config in export process to prevent content path warning ([2b3d927](https://github.com/OpenZeppelin/transaction-form-builder/commit/2b3d9272e5d00b07a2d1ce2659da1ed951846bbc))
+
+
+### Features
+
+* **adapter:** implement full rainbowkit integration with extensibility ([cb88cf6](https://github.com/OpenZeppelin/transaction-form-builder/commit/cb88cf6424b2d7ab1f0e089083ce8d0c750d0d78))
+* **adapter:** implement RainbowKit UI provider and component integration ([3bc2eaa](https://github.com/OpenZeppelin/transaction-form-builder/commit/3bc2eaa5ba16c2864ed1696bc977da00959c8509))
+
 # [1.5.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.4.0...v1.5.0) (2025-05-22)
 
 
