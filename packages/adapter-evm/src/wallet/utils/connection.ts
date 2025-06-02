@@ -1,144 +1,152 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 
 import type { Connector } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
-import type { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
+import {
+  getEvmWalletImplementation,
+  getInitializedEvmWalletImplementation,
+} from './walletImplementationManager';
+
+const LOG_SYSTEM = 'adapter-evm-connection';
 
 /**
  * Indicates if this adapter implementation supports wallet connection.
  */
 export function evmSupportsWalletConnection(): boolean {
-  // Currently hardcoded for Wagmi implementation
+  // For now, assume EVM always supports wallet connection if wagmi can be initialized.
+  // This might depend on walletConnectProjectId being available for WalletConnect to be viable.
   return true;
 }
 
 /**
  * Gets the list of available wallet connectors supported by this adapter's implementation.
  */
-export async function getEvmAvailableConnectors(
-  walletImplementation: WagmiWalletImplementation
-): Promise<Connector[]> {
-  return walletImplementation.getAvailableConnectors();
+export async function getEvmAvailableConnectors(): Promise<Connector[]> {
+  const impl = await getEvmWalletImplementation();
+  if (!impl) {
+    logger.warn(LOG_SYSTEM, 'getEvmAvailableConnectors: Wallet implementation not ready.');
+    return [];
+  }
+  return impl.getAvailableConnectors();
 }
 
 /**
- * Connects to a wallet using the specified connector and ensures the wallet
- * is switched to the target network if necessary.
+ * Initiates the wallet connection process for a specific connector and ensures the network is correct.
  *
- * @param connectorId The ID of the connector to use.
- * @param walletImplementation The wallet interaction implementation (e.g., Wagmi).
- * @param targetChainId The desired chain ID for the connection.
- * @returns A promise with connection status, address, chainId, error, and network switch status.
+ * @param connectorId - The ID of the connector to use.
+ * @param targetChainId - The desired chain ID to switch to after connection.
+ * @returns An object containing connection status, address, and any error.
  */
 export async function connectAndEnsureCorrectNetwork(
   connectorId: string,
-  walletImplementation: WagmiWalletImplementation,
   targetChainId: number
-): Promise<{
-  connected: boolean;
-  address?: string;
-  chainId?: number;
-  error?: string;
-  switchedNetwork?: boolean;
-}> {
-  const connectResult = await walletImplementation.connect(connectorId);
-
-  if (connectResult.connected && connectResult.address && connectResult.chainId) {
-    // Wallet connected successfully, now check if it's on the correct network.
-    if (connectResult.chainId !== targetChainId) {
-      console.info(
-        `connectAndEnsureCorrectNetwork: Wallet connected to chain ${connectResult.chainId}, but target is ${targetChainId}. Attempting switch.`
-      );
-      try {
-        await walletImplementation.switchNetwork(targetChainId);
-        // After successful switch, re-fetch connection status to confirm the new chainId.
-        const postSwitchStatus = walletImplementation.getWalletConnectionStatus();
-        if (postSwitchStatus.chainId === targetChainId) {
-          console.info(
-            `connectAndEnsureCorrectNetwork: Successfully switched to target chain ${targetChainId}.`
-          );
-          return {
-            connected: true,
-            address: connectResult.address, // Address remains the same from initial connect
-            chainId: postSwitchStatus.chainId, // Reflect the new chainId
-            switchedNetwork: true,
-          };
-        } else {
-          console.warn(
-            `connectAndEnsureCorrectNetwork: Network switch appeared to succeed but wallet is still on chain ${postSwitchStatus.chainId}.`
-          );
-          await walletImplementation.disconnect(); // Disconnect as state is inconsistent
-          return {
-            connected: false,
-            error: `Failed to confirm switch to the required network (target: ${targetChainId}). Connection aborted.`,
-            switchedNetwork: true, // Switch was attempted
-          };
-        }
-      } catch (switchError) {
-        console.error('connectAndEnsureCorrectNetwork: Network switch failed:', switchError);
-        await walletImplementation.disconnect(); // Disconnect if switch fails
-        return {
-          connected: false,
-          error: `Wallet connected, but failed to switch to the required network (target: ${targetChainId}). Connection aborted. Reason: ${switchError instanceof Error ? switchError.message : 'Unknown error'}`,
-          switchedNetwork: false, // Switch attempted but failed
-        };
-      }
-    } else {
-      // Already on the correct network
-      console.info(
-        `connectAndEnsureCorrectNetwork: Wallet connected and already on the target chain ${targetChainId}.`
-      );
-      return {
-        connected: true,
-        address: connectResult.address,
-        chainId: connectResult.chainId,
-        switchedNetwork: false,
-      };
-    }
-  } else if (connectResult.error) {
-    // Initial connection failed
-    return { connected: false, error: connectResult.error, switchedNetwork: false };
+): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
+  const impl = await getEvmWalletImplementation();
+  if (!impl) {
+    logger.error(LOG_SYSTEM, 'connectAndEnsureCorrectNetwork: Wallet implementation not ready.');
+    return { connected: false, error: 'Wallet system not initialized.' };
   }
 
-  // Fallback for unexpected scenarios (e.g., connected but no address/chainId from initial connect)
-  return {
-    connected: false,
-    error: 'Wallet connection attempt resulted in an unexpected state.',
-    switchedNetwork: false,
-  };
+  const connectionResult = await impl.connect(connectorId);
+  if (!connectionResult.connected || !connectionResult.address || !connectionResult.chainId) {
+    return { connected: false, error: connectionResult.error || 'Connection failed' };
+  }
+
+  if (connectionResult.chainId !== targetChainId) {
+    logger.info(
+      LOG_SYSTEM,
+      `Connected to chain ${connectionResult.chainId}, but target is ${targetChainId}. Attempting switch.`
+    );
+    try {
+      await impl.switchNetwork(targetChainId);
+      const postSwitchStatus = impl.getWalletConnectionStatus();
+      if (postSwitchStatus.chainId !== targetChainId) {
+        const switchError = `Failed to switch to target network ${targetChainId}. Current: ${postSwitchStatus.chainId}`;
+        logger.error(LOG_SYSTEM, switchError);
+        // Attempt to disconnect to leave a clean state if switch fails
+        try {
+          await impl.disconnect();
+        } catch (e) {
+          logger.warn(LOG_SYSTEM, 'Failed to disconnect after network switch failure.', e);
+        }
+        return { connected: false, error: switchError };
+      }
+      logger.info(LOG_SYSTEM, `Successfully switched to target chain ${targetChainId}.`);
+      return { ...connectionResult, chainId: postSwitchStatus.chainId }; // Return updated chainId
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(LOG_SYSTEM, 'Network switch failed:', errorMessage);
+      // Attempt to disconnect to leave a clean state if switch fails
+      try {
+        await impl.disconnect();
+      } catch (e) {
+        logger.warn(LOG_SYSTEM, 'Failed to disconnect after network switch failure.', e);
+      }
+      return { connected: false, error: `Network switch failed: ${errorMessage}` };
+    }
+  }
+  return connectionResult;
 }
 
 /**
- * Disconnects the currently connected wallet.
+ * Disconnects the currently connected EVM wallet.
  */
-export async function disconnectEvmWallet(
-  walletImplementation: WagmiWalletImplementation
-): Promise<{ disconnected: boolean; error?: string }> {
-  return walletImplementation.disconnect();
+export async function disconnectEvmWallet(): Promise<{
+  disconnected: boolean;
+  error?: string;
+}> {
+  const impl = await getEvmWalletImplementation();
+  if (!impl) {
+    logger.warn(LOG_SYSTEM, 'disconnectEvmWallet: Wallet implementation not ready.');
+    return { disconnected: false, error: 'Wallet system not initialized.' };
+  }
+  return impl.disconnect();
 }
 
 /**
  * Gets the current wallet connection status.
+ * This function might need to become async if getEvmWalletImplementation is async
+ * and the status depends on an initialized instance.
+ * For now, assuming getWalletConnectionStatus on the impl is synchronous after init.
  */
-export function getEvmWalletConnectionStatus(walletImplementation: WagmiWalletImplementation): {
-  isConnected: boolean;
-  address?: string;
-  chainId?: string;
-} {
-  const status = walletImplementation.getWalletConnectionStatus();
-  return {
-    isConnected: status.isConnected,
-    address: status.address,
-    chainId: status.chainId?.toString(), // Ensure string format for interface
-  };
+export function getEvmWalletConnectionStatus(): GetAccountReturnType {
+  const impl = getInitializedEvmWalletImplementation();
+  if (!impl) {
+    logger.warn(
+      LOG_SYSTEM,
+      'getEvmWalletConnectionStatus: Wallet implementation not ready. Returning default disconnected state.'
+    );
+    return {
+      isConnected: false,
+      isConnecting: false,
+      isDisconnected: true,
+      isReconnecting: false,
+      status: 'disconnected',
+      address: undefined,
+      addresses: undefined,
+      chainId: undefined,
+      chain: undefined,
+      connector: undefined,
+    };
+  }
+  return impl.getWalletConnectionStatus();
 }
 
 /**
  * Subscribes to wallet connection changes.
  */
 export function onEvmWalletConnectionChange(
-  walletImplementation: WagmiWalletImplementation,
   callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
 ): () => void {
+  // Return type is now synchronous () => void
+  const walletImplementation = getInitializedEvmWalletImplementation(); // Use sync getter
+  if (!walletImplementation) {
+    logger.warn(
+      'onEvmWalletConnectionChange',
+      'Wallet implementation not initialized. Cannot subscribe to changes. Returning no-op.'
+    );
+    return () => {}; // Return a no-op unsubscribe function
+  }
   return walletImplementation.onWalletConnectionChange(callback);
 }

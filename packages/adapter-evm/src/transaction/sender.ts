@@ -156,13 +156,13 @@ export async function waitForEvmTransactionConfirmation(
   logger.info(SYSTEM_LOG_TAG, `Waiting for tx: ${txHash}`);
   try {
     // Get the public client
-    const publicClient = walletImplementation.getPublicClient();
-    if (!publicClient) {
+    const resolvedPublicClient = await walletImplementation.getPublicClient();
+    if (!resolvedPublicClient) {
       throw new Error('Public client not available to wait for transaction.');
     }
 
     // Wait for the transaction receipt
-    const receipt = await publicClient.waitForTransactionReceipt({
+    const receipt = await resolvedPublicClient.waitForTransactionReceipt({
       hash: txHash as `0x${string}`,
     });
 

@@ -13,16 +13,21 @@ import {
   createConfig,
   disconnect,
   getAccount,
-  getPublicClient as getWagmiPublicClient,
+  getPublicClient as getWagmiCorePublicClient,
   getWalletClient as getWagmiWalletClient,
   switchChain,
   watchAccount,
 } from '@wagmi/core';
-import { PublicClient, WalletClient, http } from 'viem';
+import { type Chain, PublicClient, WalletClient, http } from 'viem';
 import { base, mainnet, optimism, polygon, sepolia } from 'viem/chains';
 
-import type { Connector } from '@openzeppelin/transaction-form-types';
+import type { Connector, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
+
+import { getWagmiConfigForRainbowKit } from '../rainbowkit';
+import { type WagmiConfigChains } from '../types';
+
+const LOG_SYSTEM = 'WagmiWalletImplementation'; // Define LOG_SYSTEM here
 
 /**
  * Defines the default set of blockchain networks (from viem/chains) that Wagmi will be configured to support.
@@ -31,7 +36,7 @@ import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
  * If you add a new chain here and want its RPC to be configurable, ensure a corresponding
  * entry is also added to `viemChainIdToAppNetworkId` below.
  */
-const defaultSupportedChains = [mainnet, sepolia, polygon, optimism, base] as const;
+const defaultSupportedChains: readonly Chain[] = [mainnet, sepolia, polygon, optimism, base];
 
 /**
  * @internal
@@ -60,265 +65,418 @@ const viemChainIdToAppNetworkId: Record<number, string> = {
 /**
  * Class responsible for encapsulating Wagmi core logic for wallet interactions.
  * This class should not be used directly by UI components. The EvmAdapter
- * exposes a standardized interface.
+ * exposes a standardized interface for wallet operations.
+ * It manages Wagmi Config instances and provides methods for wallet actions.
  */
 export class WagmiWalletImplementation {
-  private config: Config;
+  private defaultInstanceConfig: Config | null = null;
+  private activeWagmiConfig: Config | null = null; // To be set by EvmUiKitManager
   private unsubscribe?: ReturnType<typeof watchAccount>;
   private initialized: boolean = false;
+  private walletConnectProjectId?: string;
 
-  constructor(walletConnectProjectIdFromAppConfig?: string) {
-    const logSystem = 'WagmiWalletImplementation';
-    try {
-      const baseConnectors: WagmiCreateConnectorFn[] = [injected(), metaMask(), safe()];
+  /**
+   * Constructs the WagmiWalletImplementation.
+   * Configuration for Wagmi is deferred until actually needed or set externally.
+   * @param walletConnectProjectIdFromAppConfig - Optional WalletConnect Project ID from global app configuration.
+   * @param initialUiKitConfig - Optional initial UI kit configuration, primarily for logging the anticipated kit.
+   */
+  constructor(
+    walletConnectProjectIdFromAppConfig?: string,
+    initialUiKitConfig?: UiKitConfiguration
+  ) {
+    this.walletConnectProjectId = walletConnectProjectIdFromAppConfig;
+    logger.info(
+      LOG_SYSTEM,
+      'Constructor called. Initial anticipated kitName:',
+      initialUiKitConfig?.kitName
+    );
+    this.initialized = true;
+    logger.info(
+      LOG_SYSTEM,
+      'WagmiWalletImplementation instance initialized (Wagmi config creation deferred).'
+    );
+    // No config created here by default anymore.
+  }
 
-      // Add WalletConnect if project ID is available
-      if (walletConnectProjectIdFromAppConfig?.trim()) {
-        baseConnectors.push(walletConnect({ projectId: walletConnectProjectIdFromAppConfig }));
-        logger.info(logSystem, `WalletConnect connector initialized with Project ID.`);
-      } else {
-        logger.warn(
-          logSystem,
-          'WalletConnect Project ID not provided. WC connector will be unavailable.'
-        );
-      }
+  /**
+   * Sets the externally determined, currently active WagmiConfig instance.
+   * This is typically called by EvmUiKitManager after it has resolved the appropriate
+   * config for the selected UI kit (e.g., RainbowKit's config or a default custom config).
+   * @param config - The Wagmi Config object to set as active, or null to clear it.
+   */
+  public setActiveWagmiConfig(config: Config | null): void {
+    logger.info(
+      LOG_SYSTEM,
+      'setActiveWagmiConfig called with config:',
+      config ? 'Valid Config' : 'Null'
+    );
+    this.activeWagmiConfig = config;
 
-      // Build transport configuration with RPC overrides as needed
-      const transportsConfig = defaultSupportedChains.reduce(
-        (acc, chainDefinition) => {
-          let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
-          const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
-
-          if (appNetworkIdString) {
-            const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
-            let httpRpcOverride: string | undefined;
-
-            if (typeof rpcOverrideSetting === 'string') {
-              httpRpcOverride = rpcOverrideSetting;
-            } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
-              httpRpcOverride = rpcOverrideSetting.http;
-            }
-
-            if (httpRpcOverride) {
-              logger.info(
-                logSystem,
-                `Using overridden RPC for chain ${chainDefinition.name}: ${httpRpcOverride}`
-              );
-              rpcUrlToUse = httpRpcOverride;
-            }
-          }
-
-          acc[chainDefinition.id] = http(rpcUrlToUse);
-          return acc;
-        },
-        {} as Record<number, ReturnType<typeof http>>
+    // If the activeWagmiConfig instance has changed and there was an existing direct subscription
+    // via onWalletConnectionChange, that subscription was bound to the *previous* config instance.
+    // It might now be stale or not receive updates reflecting the new config context.
+    // Consumers relying on onWalletConnectionChange for live updates across fundamental config changes
+    // (e.g., switching UI kits or major network group changes affecting the config instance)
+    // may need to re-invoke onWalletConnectionChange to get a new subscription bound to the new config.
+    // UI components should primarily rely on useWalletState and derived hooks for reactivity,
+    // which will naturally update with the new adapter/config context.
+    if (this.unsubscribe) {
+      logger.warn(
+        LOG_SYSTEM,
+        'setActiveWagmiConfig: Active WagmiConfig instance has changed. Existing direct watchAccount subscription (via onWalletConnectionChange) may be stale and operating on an old config instance.'
       );
+    }
+  }
 
-      this.config = createConfig({
-        chains: defaultSupportedChains,
+  /**
+   * Creates a default WagmiConfig instance on demand.
+   * This configuration includes standard connectors (injected, MetaMask, Safe)
+   * and WalletConnect if a project ID is available.
+   * Used as a fallback or for 'custom' UI kit mode.
+   * @returns A Wagmi Config object.
+   */
+  private createDefaultConfig(): Config {
+    const baseConnectors: WagmiCreateConnectorFn[] = [injected(), metaMask(), safe()];
+    if (this.walletConnectProjectId?.trim()) {
+      baseConnectors.push(walletConnect({ projectId: this.walletConnectProjectId }));
+      logger.info(LOG_SYSTEM, 'WalletConnect connector added to DEFAULT config.');
+    } else {
+      logger.warn(
+        LOG_SYSTEM,
+        'WalletConnect Project ID not provided; WC connector unavailable for DEFAULT config.'
+      );
+    }
+    const transportsConfig = defaultSupportedChains.reduce(
+      (acc, chainDefinition) => {
+        let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
+        const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
+        if (appNetworkIdString) {
+          const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
+          let httpRpcOverride: string | undefined;
+          if (typeof rpcOverrideSetting === 'string') {
+            httpRpcOverride = rpcOverrideSetting;
+          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
+            httpRpcOverride = rpcOverrideSetting.http;
+          }
+          if (httpRpcOverride) {
+            logger.info(
+              LOG_SYSTEM,
+              `Using overridden RPC for chain ${chainDefinition.name} (default config): ${httpRpcOverride}`
+            );
+            rpcUrlToUse = httpRpcOverride;
+          }
+        }
+        acc[chainDefinition.id] = http(rpcUrlToUse);
+        return acc;
+      },
+      {} as Record<number, ReturnType<typeof http>>
+    );
+    try {
+      const defaultConfig = createConfig({
+        chains: defaultSupportedChains as unknown as WagmiConfigChains,
         connectors: baseConnectors,
         transports: transportsConfig,
       });
-      this.initialized = true;
+      logger.info(LOG_SYSTEM, 'Default Wagmi config created successfully on demand.');
+      return defaultConfig;
     } catch (error) {
-      logger.error(logSystem, 'Error creating Wagmi config:', error);
-      // Create a minimal config that won't throw errors
-      this.config = createConfig({
-        chains: [mainnet],
+      logger.error(LOG_SYSTEM, 'Error creating default Wagmi config on demand:', error);
+      return createConfig({
+        chains: [mainnet] as unknown as WagmiConfigChains,
         connectors: [injected()],
-        transports: {
-          [mainnet.id]: http(),
-        },
+        transports: { [mainnet.id]: http() },
       });
     }
   }
 
   /**
-   * Retrieves the current Wagmi configuration.
+   * Retrieves or creates the WagmiConfig specifically for RainbowKit.
+   * This delegates to `getWagmiConfigForRainbowKit` service which handles caching
+   * and uses RainbowKit's `getDefaultConfig`.
+   * @param currentAdapterUiKitConfig - The fully resolved UI kit configuration for the adapter.
+   * @returns A Promise resolving to the RainbowKit-specific Wagmi Config object, or null if creation fails or not RainbowKit.
    */
-  public getConfig(): Config {
-    return this.config;
+  public async getConfigForRainbowKit(
+    currentAdapterUiKitConfig: UiKitConfiguration
+  ): Promise<Config | null> {
+    if (!this.initialized) {
+      logger.error(
+        LOG_SYSTEM,
+        'getConfigForRainbowKit called before implementation initialization.'
+      );
+      return null;
+    }
+    if (currentAdapterUiKitConfig?.kitName !== 'rainbowkit') {
+      logger.warn(
+        LOG_SYSTEM,
+        'getConfigForRainbowKit called, but kitName is not rainbowkit. Returning null.'
+      );
+      return null;
+    }
+    logger.info(
+      LOG_SYSTEM,
+      'getConfigForRainbowKit: Kit is RainbowKit. Proceeding to create/get config. CurrentAdapterUiKitConfig:',
+      currentAdapterUiKitConfig
+    );
+    const rainbowKitWagmiConfig = await getWagmiConfigForRainbowKit(
+      currentAdapterUiKitConfig,
+      defaultSupportedChains as WagmiConfigChains,
+      viemChainIdToAppNetworkId,
+      appConfigService.getRpcEndpointOverride.bind(appConfigService)
+    );
+    if (rainbowKitWagmiConfig) {
+      logger.info(LOG_SYSTEM, 'Returning RainbowKit-specific Wagmi config for provider.');
+      return rainbowKitWagmiConfig;
+    }
+    logger.warn(LOG_SYSTEM, 'RainbowKit specific Wagmi config creation failed.');
+    return null;
   }
 
   /**
-   * Gets the Viem Wallet Client instance for the currently connected account and chain.
-   * Returns null if not connected.
-   *
-   * @returns A promise resolving to the Viem WalletClient or null.
+   * Determines and returns the WagmiConfig to be used by EvmUiKitManager during its configuration process.
+   * If RainbowKit is specified in the passed uiKitConfig, it attempts to get its specific config.
+   * Otherwise, it falls back to creating/returning a default instance config.
+   * @param uiKitConfig - The fully resolved UiKitConfiguration that the manager is currently processing.
+   * @returns A Promise resolving to the determined Wagmi Config object.
    */
-  public async getWalletClient(): Promise<WalletClient | null> {
+  public async getActiveConfigForManager(uiKitConfig: UiKitConfiguration): Promise<Config> {
     if (!this.initialized) {
-      return null;
+      logger.error(
+        LOG_SYSTEM,
+        'getActiveConfigForManager called before initialization! Creating fallback.'
+      );
+      return createConfig({
+        chains: [mainnet] as unknown as WagmiConfigChains,
+        transports: { [mainnet.id]: http() },
+      });
     }
 
-    const accountStatus = this.getWalletConnectionStatus();
-    if (!accountStatus.isConnected || !accountStatus.chainId || !accountStatus.address) {
+    if (uiKitConfig?.kitName === 'rainbowkit') {
+      const rkConfig = await this.getConfigForRainbowKit(uiKitConfig);
+      if (rkConfig) return rkConfig;
+      logger.warn(
+        LOG_SYSTEM,
+        'getActiveConfigForManager: RainbowKit config failed, falling back to default.'
+      );
+    }
+
+    if (!this.defaultInstanceConfig) {
+      this.defaultInstanceConfig = this.createDefaultConfig();
+    }
+    return this.defaultInstanceConfig;
+  }
+
+  /**
+   * @deprecated Prefer using methods that rely on the externally set `activeWagmiConfig`
+   * or methods that determine contextually appropriate config like `getActiveConfigForManager` (for manager use)
+   * or ensure `activeWagmiConfig` is set before calling wagmi actions.
+   * This method returns the internally cached default config or the active one if set.
+   * @returns The current default or active Wagmi Config object.
+   */
+  public getConfig(): Config {
+    logger.warn(
+      LOG_SYSTEM,
+      'getConfig() is deprecated. Internal calls should use activeWagmiConfig if set, or ensure default is created.'
+    );
+    if (this.activeWagmiConfig) return this.activeWagmiConfig;
+    if (!this.defaultInstanceConfig) {
+      this.defaultInstanceConfig = this.createDefaultConfig();
+    }
+    return this.defaultInstanceConfig!;
+  }
+
+  /**
+   * Gets the current wallet connection status (isConnected, address, chainId, etc.).
+   * This is a synchronous operation and uses the `activeWagmiConfig` if set by `EvmUiKitManager`,
+   * otherwise falls back to the default instance config (created on demand).
+   * For UI reactivity to connection changes, `onWalletConnectionChange` or derived hooks are preferred.
+   * @returns The current account status from Wagmi.
+   */
+  public getWalletConnectionStatus(): GetAccountReturnType {
+    logger.debug(LOG_SYSTEM, 'getWalletConnectionStatus called.');
+    const configToUse =
+      this.activeWagmiConfig ||
+      this.defaultInstanceConfig ||
+      (this.defaultInstanceConfig = this.createDefaultConfig());
+    if (!configToUse) {
+      logger.error(LOG_SYSTEM, 'No config available for getWalletConnectionStatus!');
+      // Return a valid GetAccountReturnType for a disconnected state
+      return {
+        isConnected: false,
+        isConnecting: false,
+        isDisconnected: true,
+        isReconnecting: false,
+        status: 'disconnected',
+        address: undefined,
+        addresses: undefined,
+        chainId: undefined,
+        chain: undefined,
+        connector: undefined,
+      };
+    }
+    return getAccount(configToUse);
+  }
+
+  /**
+   * Subscribes to account and connection status changes from Wagmi.
+   * The subscription is bound to the `activeWagmiConfig` if available at the time of call,
+   * otherwise to the default instance config. If `activeWagmiConfig` changes later,
+   * this specific subscription might become stale (see warning in `setActiveWagmiConfig`).
+   * @param callback - Function to call when connection status changes.
+   * @returns A function to unsubscribe from the changes.
+   */
+  public onWalletConnectionChange(
+    callback: (status: GetAccountReturnType, prevStatus: GetAccountReturnType) => void
+  ): () => void {
+    if (!this.initialized) {
+      logger.warn(LOG_SYSTEM, 'onWalletConnectionChange called before initialization. No-op.');
+      return () => {};
+    }
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      logger.debug(LOG_SYSTEM, 'Previous watchAccount unsubscribed.');
+    }
+    const configToUse =
+      this.activeWagmiConfig ||
+      this.defaultInstanceConfig ||
+      (this.defaultInstanceConfig = this.createDefaultConfig());
+    if (!configToUse) {
+      logger.error(
+        LOG_SYSTEM,
+        'No config available for onWalletConnectionChange! Subscription not set.'
+      );
+      return () => {};
+    }
+    this.unsubscribe = watchAccount(configToUse, { onChange: callback });
+    logger.info(
+      LOG_SYSTEM,
+      'watchAccount subscription established/re-established using config:',
+      configToUse === this.activeWagmiConfig ? 'activeExternal' : 'defaultInstance'
+    );
+    return this.unsubscribe;
+  }
+
+  // Methods that perform actions should use the most current activeWagmiConfig
+  /**
+   * Gets the Viem Wallet Client for the currently connected account and chain, using the active Wagmi config.
+   * @returns A Promise resolving to the Viem WalletClient or null if not connected or config not active.
+   */
+  public async getWalletClient(): Promise<WalletClient | null> {
+    if (!this.initialized || !this.activeWagmiConfig) {
+      logger.warn(
+        LOG_SYSTEM,
+        'getWalletClient: Not initialized or no activeWagmiConfig. Returning null.'
+      );
       return null;
     }
-    return getWagmiWalletClient(this.config, {
+    const accountStatus = getAccount(this.activeWagmiConfig);
+    if (!accountStatus.isConnected || !accountStatus.chainId || !accountStatus.address) return null;
+    return getWagmiWalletClient(this.activeWagmiConfig, {
       chainId: accountStatus.chainId,
       account: accountStatus.address,
     });
   }
 
   /**
-   * Gets the Viem Public Client instance for the currently connected chain.
-   *
-   * @returns A promise resolving to the Viem PublicClient or null.
+   * Gets the Viem Public Client for the currently connected chain, using the active Wagmi config.
+   * Note: Direct public client retrieval from WagmiConfig is complex in v2. This is a placeholder.
+   * Prefer using Wagmi actions like readContract, simulateContract which use the public client internally.
+   * @returns A Promise resolving to the Viem PublicClient or null.
    */
-  public getPublicClient(): PublicClient | null {
-    if (!this.initialized) {
+  public async getPublicClient(): Promise<PublicClient | null> {
+    if (!this.initialized || !this.activeWagmiConfig) {
+      logger.warn(
+        LOG_SYSTEM,
+        'getPublicClient: Not initialized or no activeWagmiConfig. Returning null.'
+      );
       return null;
     }
 
-    const accountStatus = this.getWalletConnectionStatus();
-    if (!accountStatus.chainId) {
+    const accountStatus = getAccount(this.activeWagmiConfig); // Get current chain from the active config
+    const currentChainId = accountStatus.chainId;
+
+    if (!currentChainId) {
+      logger.warn(
+        LOG_SYSTEM,
+        'getPublicClient: No connected chainId available from accountStatus. Returning null.'
+      );
       return null;
     }
-    // Note: getPublicClient is synchronous in wagmi v2
-    // Explicitly cast the return type. Addresses a TS error ("Two different types with this name exist...")
-    // that can occur in pnpm monorepos where TypeScript might resolve the PublicClient type
-    // from both the direct 'viem' import and the instance potentially used internally by '@wagmi/core'.
-    // This cast asserts their compatibility.
-    return getWagmiPublicClient(this.config, {
-      chainId: accountStatus.chainId,
-    }) as PublicClient;
+
+    try {
+      // Use the getPublicClient action from wagmi/core
+      // It requires the config and optionally a chainId. If no chainId, it uses the config's primary/first chain.
+      // It's better to be explicit with the current chainId.
+      const publicClient = getWagmiCorePublicClient(this.activeWagmiConfig, {
+        chainId: currentChainId,
+      });
+      if (publicClient) {
+        logger.info(
+          LOG_SYSTEM,
+          `getPublicClient: Successfully retrieved public client for chainId ${currentChainId}.`
+        );
+        return publicClient;
+      }
+      logger.warn(
+        LOG_SYSTEM,
+        `getPublicClient: getWagmiCorePublicClient returned undefined/null for chainId ${currentChainId}.`
+      );
+      return null;
+    } catch (error) {
+      logger.error(LOG_SYSTEM, 'Error getting public client from wagmi/core:', error);
+      return null;
+    }
   }
 
   /**
-   * Gets the list of available wallet connectors configured in Wagmi.
-   * @returns A promise resolving to an array of available connectors.
+   * Gets the list of available wallet connectors from the active Wagmi config.
+   * @returns A Promise resolving to an array of available connectors.
    */
   public async getAvailableConnectors(): Promise<Connector[]> {
-    if (!this.initialized) {
-      return [];
-    }
-
-    const connectors = this.config.connectors;
-    return connectors.map((conn) => ({
-      id: conn.uid,
-      name: conn.name,
-    }));
+    if (!this.initialized || !this.activeWagmiConfig) return [];
+    return this.activeWagmiConfig.connectors.map((co) => ({ id: co.uid, name: co.name }));
   }
 
   /**
-   * Initiates the connection process for a specific connector.
-   * @param connectorId The ID or name of the connector to use.
-   * @returns Connection result object including chainId if successful.
+   * Initiates the connection process for a specific connector using the active Wagmi config.
+   * @param connectorId - The ID of the connector to use.
+   * @returns A Promise with connection result including address and chainId if successful.
    */
   public async connect(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
-    if (!this.initialized) {
-      return {
-        connected: false,
-        error: 'Wallet implementation is not properly initialized',
-      };
-    }
-
-    try {
-      const connectors = this.config.connectors;
-      let connector =
-        connectors.find((c) => c.uid === connectorId) ||
-        connectors.find((c) => c.name.toLowerCase() === connectorId.toLowerCase());
-
-      if (!connector) {
-        const availableConnectorNames = connectors.map((c) => c.name).join(', ');
-        return {
-          connected: false,
-          error: `Connector "${connectorId}" not found. Available: ${availableConnectorNames}`,
-        };
-      }
-
-      const result = await connect(this.config, { connector });
-      return { connected: true, address: result.accounts[0], chainId: result.chainId };
-    } catch (error: unknown) {
-      return {
-        connected: false,
-        error: error instanceof Error ? error.message : 'Unknown connection error',
-      };
-    }
+    if (!this.initialized || !this.activeWagmiConfig)
+      throw new Error('Wallet not initialized or no active config');
+    const connectorToUse = this.activeWagmiConfig.connectors.find(
+      (cn) => cn.id === connectorId || cn.uid === connectorId
+    );
+    if (!connectorToUse) throw new Error(`Connector ${connectorId} not found`);
+    const res = await connect(this.activeWagmiConfig, { connector: connectorToUse });
+    return { connected: true, address: res.accounts[0], chainId: res.chainId };
   }
 
   /**
-   * Disconnects the currently connected wallet.
-   * @returns Disconnection result object.
+   * Disconnects the currently connected wallet using the active Wagmi config.
+   * @returns A Promise with disconnection result.
    */
   public async disconnect(): Promise<{ disconnected: boolean; error?: string }> {
-    if (!this.initialized) {
-      return {
-        disconnected: false,
-        error: 'Wallet implementation is not properly initialized',
-      };
-    }
-
-    try {
-      await disconnect(this.config);
-      return { disconnected: true };
-    } catch (error) {
-      return {
-        disconnected: false,
-        error: error instanceof Error ? error.message : 'Unknown disconnection error',
-      };
-    }
+    if (!this.initialized || !this.activeWagmiConfig)
+      return { disconnected: false, error: 'Wallet not initialized or no active config' };
+    await disconnect(this.activeWagmiConfig);
+    return { disconnected: true };
   }
 
   /**
-   * Gets the current connection status and account details.
-   * @returns Account status object.
-   */
-  public getWalletConnectionStatus(): GetAccountReturnType {
-    if (!this.initialized) {
-      // Return a disconnected state
-      return {
-        address: undefined,
-        addresses: undefined,
-        chain: undefined,
-        chainId: undefined,
-        connector: undefined,
-        isConnected: false,
-        isConnecting: false,
-        isDisconnected: true,
-        isReconnecting: false,
-        status: 'disconnected',
-      };
-    }
-
-    return getAccount(this.config);
-  }
-
-  /**
-   * Subscribes to account connection changes.
-   * @param callback Function to call when connection status changes.
-   * @returns Cleanup function to unsubscribe.
-   */
-  public onWalletConnectionChange(
-    callback: (status: GetAccountReturnType, prevStatus: GetAccountReturnType) => void
-  ): () => void {
-    if (!this.initialized) {
-      // Return a no-op function if not initialized
-      return () => {};
-    }
-
-    if (this.unsubscribe) {
-      this.unsubscribe();
-    }
-    this.unsubscribe = watchAccount(this.config, {
-      onChange: callback,
-    });
-    return this.unsubscribe;
-  }
-
-  /**
-   * Prompts the user to switch to the specified network (chain).
-   * @param chainId The target chain ID to switch to.
-   * @returns A promise that resolves if the switch is successful, or rejects with an error.
+   * Prompts the user to switch to the specified network using the active Wagmi config.
+   * @param chainId - The target chain ID to switch to.
+   * @returns A Promise that resolves if the switch is successful, or rejects with an error.
    */
   public async switchNetwork(chainId: number): Promise<void> {
-    if (!this.initialized) {
-      throw new Error('Wallet implementation is not properly initialized');
-    }
-
-    await switchChain(this.config, { chainId });
+    if (!this.initialized || !this.activeWagmiConfig)
+      throw new Error('Wallet not initialized or no active config');
+    await switchChain(this.activeWagmiConfig, { chainId });
   }
+
+  // ... (rest of class, ensure all wagmi/core actions use this.activeWagmiConfig if available and appropriate)
 }

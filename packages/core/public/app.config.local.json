@@ -2,11 +2,11 @@
   "globalServiceConfigs": {
     "walletui": {
       "config": {
-        "kitName": "custom",
+        "kitName": "rainbowkit",
         "kitConfig": {
           "showInjectedConnector": false,
           "components": {
-            "exclude": ["NetworkSwitcher"]
+            "exclude": []
           }
         }
       }

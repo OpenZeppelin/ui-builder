@@ -14,86 +14,40 @@ const defaultConfig: UiKitConfiguration = {
 // Singleton instance of the UI kit configuration
 let uiKitConfig: UiKitConfiguration = { ...defaultConfig };
 
-/**
- * Loads wallet UI configuration from AppConfigService
- * @returns True if configuration was loaded from AppConfigService, false otherwise
- */
-export function loadConfigFromAppConfig(): boolean {
-  try {
-    logger.debug('useUiKitConfig', 'Loading configuration from AppConfigService...');
+export function loadInitialConfigFromAppService(): UiKitConfiguration {
+  logger.debug('useUiKitConfig', 'Attempting to load initial config from AppConfigService...');
+  const configObj = appConfigService.getTypedNestedConfig<UiKitConfiguration>('walletui', 'config');
 
-    // Use the new typed helper method to get the config
-    const configObj = appConfigService.getTypedNestedConfig<UiKitConfiguration>(
-      'walletui',
-      'config'
-    );
-
-    // Log the configuration
-    logger.debug('useUiKitConfig', 'Configuration from AppConfigService:', configObj);
-
-    // Check if we received a valid configuration
-    if (configObj) {
-      // Update our configuration with the loaded values
-      uiKitConfig = {
-        // Use values from the loaded config or fall back to defaults
-        kitName: configObj.kitName || defaultConfig.kitName,
-        kitConfig: {
-          ...defaultConfig.kitConfig,
-          // Add any values from the loaded kitConfig
-          ...(configObj.kitConfig || {}),
-        },
-      };
-
-      logger.info(
-        'useUiKitConfig',
-        `UI Kit configuration loaded from AppConfigService: kitName=${uiKitConfig.kitName}, showInjectedConnector=${uiKitConfig.kitConfig?.showInjectedConnector}`
-      );
-
-      return true;
-    }
-
-    logger.debug('useUiKitConfig', 'No valid configuration found in AppConfigService');
-    return false;
-  } catch (error) {
-    logger.warn(
+  if (configObj && configObj.kitName) {
+    logger.info(
       'useUiKitConfig',
-      'Error loading UI kit configuration from AppConfigService:',
-      error
+      `Loaded initial config from AppConfigService: kitName=${configObj.kitName}`,
+      configObj.kitConfig
     );
-    return false;
+    // Merge with defaults to ensure all base keys are present if AppConfigService only provides partial config
+    return {
+      kitName: configObj.kitName,
+      kitConfig: { ...defaultConfig.kitConfig, ...(configObj.kitConfig || {}) },
+    };
   }
+  logger.debug(
+    'useUiKitConfig',
+    'No initial config found in AppConfigService, using module default.'
+  );
+  return { ...defaultConfig };
 }
-
-// Try to initialize configuration from AppConfigService when the module loads
-// This may not succeed if AppConfigService isn't initialized yet
-loadConfigFromAppConfig();
 
 /**
  * Updates the UI kit configuration
- * @param config The new configuration to set
+ * @param config The new configuration to set. This should be the fully resolved
+ *               config from the adapter, potentially including user-native settings.
  */
 export function setUiKitConfig(config: UiKitConfiguration): void {
-  // First try to load from AppConfigService to ensure we have the latest config
-  loadConfigFromAppConfig();
-
-  // Then apply the provided configuration, but keep existing kitConfig values
-  // that were loaded from AppConfigService if they're not being explicitly overridden
-  const existingKitConfig = uiKitConfig.kitConfig || {};
-  const newKitConfig = config.kitConfig || {};
-
-  uiKitConfig = {
-    kitName: config.kitName || uiKitConfig.kitName || defaultConfig.kitName,
-    kitConfig: {
-      ...defaultConfig.kitConfig,
-      ...existingKitConfig,
-      ...newKitConfig,
-    },
-  };
-
+  uiKitConfig = { ...config }; // Store a copy of the provided config
   logger.info(
-    'EvmAdapter',
-    `UI Kit configured for adapter instance: ${uiKitConfig.kitName}`,
-    uiKitConfig.kitConfig ? JSON.stringify(uiKitConfig.kitConfig) : '(no specific kitConfig)'
+    'useUiKitConfig:setUiKitConfig',
+    `Global uiKitConfig was SET to: kitName=${uiKitConfig.kitName}`,
+    `kitConfig: ${JSON.stringify(uiKitConfig.kitConfig)}`
   );
 }
 
@@ -112,7 +66,7 @@ export function isConfigEnabled(key: string): boolean {
  * @returns The current UI kit configuration (module-level singleton).
  */
 export function useUiKitConfig(): UiKitConfiguration {
-  // The module-level `uiKitConfig` is updated by `loadConfigFromAppConfig` (called at module load)
+  // The module-level `uiKitConfig` is updated by `loadInitialConfigFromAppService` (called at module load)
   // and `setUiKitConfig` (called by adapter's configureUiKit).
   // Thus, this hook can simply return the current state of the module-level singleton.
   return uiKitConfig;
@@ -124,5 +78,7 @@ export function useUiKitConfig(): UiKitConfiguration {
  * @returns The current module-level UI kit configuration.
  */
 export function getUiKitConfig(): UiKitConfiguration {
-  return { ...uiKitConfig }; // Return a copy to prevent direct mutation of the singleton
+  // Return the direct reference to the singleton. Setters should ensure immutability if needed elsewhere.
+  // For this flow, setUiKitConfig is the explicit mutator.
+  return uiKitConfig;
 }

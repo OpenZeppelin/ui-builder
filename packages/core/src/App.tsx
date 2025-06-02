@@ -10,11 +10,35 @@ import { TransactionFormBuilder } from './components/FormBuilder/TransactionForm
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 function App() {
+  /**
+   * Generic configuration module loader.
+   * This function can load any configuration module by relative path
+   * without needing to know what specific UI kit or purpose it serves.
+   * The adapter is responsible for specifying the exact path it needs.
+   */
+  const loadConfigModule = async (
+    relativePath: string
+  ): Promise<Record<string, unknown> | null> => {
+    try {
+      const configModule = await import(/* @vite-ignore */ relativePath);
+      const config = configModule.default;
+
+      if (config && typeof config === 'object' && !Array.isArray(config)) {
+        return config as Record<string, unknown>;
+      }
+      return null;
+    } catch {
+      // Expected if the config file doesn't exist
+      return null;
+    }
+  };
+
   return (
     <AdapterProvider resolveAdapter={getAdapter}>
       <WalletStateProvider
         initialNetworkId="ethereum-mainnet"
         getNetworkConfigById={getNetworkById}
+        loadConfigModule={loadConfigModule}
       >
         <div className="bg-background text-foreground min-h-screen">
           <header className="border-b px-6 py-3">

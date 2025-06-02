@@ -1,61 +1,66 @@
+import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 import { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
 
-/**
- * Singleton instance of WagmiWalletImplementation.
- * This ensures that there's only one instance handling wallet state and configuration,
- * particularly for elements like the WalletConnect modal.
- */
 let walletImplementationInstance: WagmiWalletImplementation | undefined;
-let isInitializing = false;
+let walletImplementationPromise: Promise<WagmiWalletImplementation> | undefined;
+
 const LOG_SYSTEM = 'EvmWalletImplementationManager';
 
 /**
- * Get or create the singleton instance of WagmiWalletImplementation
- * This function loads WalletConnect configuration from the app config
- * and initializes a wallet implementation instance.
+ * Get or create the singleton instance of WagmiWalletImplementation.
+ * This function ensures that the initialization logic runs only once.
  *
- * @returns The WagmiWalletImplementation singleton
+ * @returns A Promise resolving to the WagmiWalletImplementation singleton
  */
-export function getEvmWalletImplementation(): WagmiWalletImplementation {
-  // If already initialized, return the instance
+export async function getEvmWalletImplementation(): Promise<WagmiWalletImplementation> {
   if (walletImplementationInstance) {
     return walletImplementationInstance;
   }
 
-  // Prevent recursive initialization
-  if (isInitializing) {
-    logger.warn(LOG_SYSTEM, 'Recursive initialization detected, returning temporary instance');
-    return new WagmiWalletImplementation();
+  if (walletImplementationPromise) {
+    return walletImplementationPromise;
   }
 
-  // Start initialization
-  isInitializing = true;
-
-  try {
-    logger.info(LOG_SYSTEM, 'Initializing WagmiWalletImplementation singleton...');
-
-    const currentFullConfig = appConfigService.getConfig();
-    const globalServices = currentFullConfig?.globalServiceConfigs;
-    const wcConfig = globalServices?.['walletconnect'];
-    const projectId = wcConfig?.['projectId'] as string | undefined;
-
-    if (!projectId) {
-      logger.warn(
-        LOG_SYSTEM,
-        'WalletConnect Project ID not found in AppConfig. WC connector will likely be unavailable.'
+  walletImplementationPromise = (async () => {
+    try {
+      logger.info(LOG_SYSTEM, 'Initializing WagmiWalletImplementation singleton (async)... ');
+      // Get appName and projectId from appConfigService for RainbowKit
+      // This assumes appConfigService is initialized before this manager is first called.
+      const initialUiKitConfig = appConfigService.getTypedNestedConfig<UiKitConfiguration>(
+        'walletui',
+        'config'
       );
+
+      const wcProjectId = appConfigService.getGlobalServiceParam('walletconnect', 'projectId') as
+        | string
+        | undefined;
+
+      // Pass initialUiKitConfig to the constructor
+      const instance = new WagmiWalletImplementation(wcProjectId, initialUiKitConfig);
+      logger.info(LOG_SYSTEM, 'WagmiWalletImplementation singleton created (async).');
+      walletImplementationInstance = instance;
+      return instance;
+    } catch (error) {
+      logger.error(LOG_SYSTEM, 'Failed to initialize WagmiWalletImplementation (async):', error);
+      const fallbackInstance = new WagmiWalletImplementation();
+      walletImplementationInstance = fallbackInstance;
+      return fallbackInstance;
     }
+  })();
 
-    walletImplementationInstance = new WagmiWalletImplementation(projectId);
-    logger.info(LOG_SYSTEM, 'WagmiWalletImplementation singleton created.');
-  } catch (error) {
-    logger.error(LOG_SYSTEM, 'Failed to initialize WagmiWalletImplementation:', error);
-    walletImplementationInstance = new WagmiWalletImplementation();
-  } finally {
-    isInitializing = false;
+  return walletImplementationPromise;
+}
+
+// Optional: A synchronous getter for cases where the instance is known to be initialized.
+// Use with caution, prefer the async getter.
+export function getInitializedEvmWalletImplementation(): WagmiWalletImplementation | undefined {
+  if (!walletImplementationInstance) {
+    logger.warn(
+      LOG_SYSTEM,
+      'getInitializedEvmWalletImplementation called before instance was ready.'
+    );
   }
-
   return walletImplementationInstance;
 }
