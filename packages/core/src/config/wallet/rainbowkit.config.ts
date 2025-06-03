@@ -1,5 +1,5 @@
 // packages/core/src/config/wallet/rainbowkit.config.ts
-import type { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { type RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 
 // For WalletConnect project ID, appName, wallets, ssr options for getDefaultConfig
 // RainbowKit doesn't export a single neat type for all getDefaultConfig options other than `chains` and `transports`.
@@ -38,7 +38,7 @@ const rainbowKitAppConfig = {
     ssr: false,
   },
   providerProps: {
-    // theme: darkTheme(), // Example: uncomment and import darkTheme
+    theme: darkTheme(), // Example: uncomment and import darkTheme
     // initialChain: mainnet, // Example: uncomment and import mainnet from viem/chains
     modalSize: 'compact',
     showRecentTransactions: true,
