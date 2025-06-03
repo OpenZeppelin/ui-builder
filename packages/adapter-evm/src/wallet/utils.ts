@@ -1,5 +1,6 @@
 import type {
   EcosystemWalletComponents,
+  NativeConfigLoader,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -26,7 +27,7 @@ export function getResolvedWalletComponents(
 export async function resolveAndInitializeKitConfig(
   kitName?: string, // kitName is used to construct the path to the conventional config file
   programmaticKitConfig?: Record<string, unknown>,
-  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>
+  loadConfigModule?: NativeConfigLoader
 ): Promise<Record<string, unknown> | null> {
   logger.debug(
     'resolveAndInitializeKitConfig',
@@ -42,14 +43,16 @@ export async function resolveAndInitializeKitConfig(
   // Only attempt to load a native config if a kitName is provided and a loader function exists.
   // And the kitName is not 'custom' or 'none' as those typically don't have dedicated native config files.
   if (kitName && kitName !== 'custom' && kitName !== 'none' && loadConfigModule) {
-    // Construct the conventional path to the kit's native configuration file.
-    // Example: ./config/wallet/rainbowkit.config (module resolution will handle .ts, .js, etc.)
-    const conventionalConfigPath = `./config/wallet/${kitName}.config`;
+    const conventionalConfigPath = `./config/wallet/${kitName}.config.ts`;
 
     try {
       userNativeConfig = await loadConfigModule(conventionalConfigPath);
     } catch (error) {
-      logger.debug('resolveAndInitializeKitConfig', 'Caught error from loadConfigModule:', error);
+      logger.warn(
+        'resolveAndInitializeKitConfig',
+        `Call to load native config for ${kitName} from ${conventionalConfigPath} failed. Error:`,
+        error
+      );
     }
   }
 

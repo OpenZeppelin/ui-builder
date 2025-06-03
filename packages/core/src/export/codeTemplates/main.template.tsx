@@ -13,7 +13,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
-import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { NativeConfigLoader, NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
@@ -61,25 +61,30 @@ const getNetworkConfigById = (id: string) => {
   return null;
 };
 
+// Use Vite's import.meta.glob to find all potential kit config files.
+// Expecting them to be .ts files as per convention.
+const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
+
 /**
- * Generic configuration module loader.
- * This function can load any configuration module by relative path
- * without needing to know what specific UI kit or purpose it serves.
- * The adapter is responsible for specifying the exact path it needs.
+ * Dynamically loads kit-specific native configuration files from the exported
+ * application's `src/config/wallet/` directory using Vite's import.meta.glob.
+ * @param relativePath - The conventional relative path (e.g., './config/wallet/rainbowkit.config.ts').
+ * @returns A Promise resolving to the configuration object or null if not found/error.
  */
-const loadAppConfigModule = async (
-  relativePath: string
-): Promise<Record<string, unknown> | null> => {
-  try {
-    // Vite's dynamic import needs a path that it can statically analyze to some extent.
-    // For files directly in `src/config/wallet/`, this should work.
-    // The path provided by the adapter will be like './config/wallet/rainbowkit.config'
-    // Vite will resolve this relative to the location of *this file* (main.tsx in the exported app's src).
-    // If relativePath is './config/wallet/rainbowkit.config', Vite interprets it as `src/config/wallet/rainbowkit.config.ts`
-    const module = await import(/* @vite-ignore */ relativePath);
-    return module.default || module;
-  } catch {
-    // It's expected that a native config file might not exist, so return null, don't throw.
+const loadAppConfigModule: NativeConfigLoader = async (relativePath: string) => {
+  const importerToCall = kitConfigImporters[relativePath];
+
+  if (importerToCall) {
+    try {
+      const module = (await importerToCall()) as { default?: Record<string, unknown> } & Record<
+        string,
+        unknown
+      >;
+      return module.default || module;
+    } catch {
+      return null;
+    }
+  } else {
     return null;
   }
 };

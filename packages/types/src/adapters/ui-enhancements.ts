@@ -122,3 +122,5 @@ export interface EcosystemWalletComponents {
   AccountDisplay?: React.ComponentType<BaseComponentProps>;
   NetworkSwitcher?: React.ComponentType<BaseComponentProps>;
 }
+
+export type NativeConfigLoader = (relativePath: string) => Promise<Record<string, unknown> | null>;
