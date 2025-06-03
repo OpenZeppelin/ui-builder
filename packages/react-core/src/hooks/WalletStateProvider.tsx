@@ -4,6 +4,7 @@ import type {
   ContractAdapter,
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
+  NativeConfigLoader,
   NetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
@@ -35,11 +36,12 @@ export interface WalletStateProviderProps {
     networkId: string
   ) => Promise<NetworkConfig | null | undefined> | NetworkConfig | null | undefined;
   /**
-   * Optional generic function to load configuration modules by path.
-   * This allows the adapter to load its own kit-specific configs without
-   * the consuming app needing to know about specific UI kit types.
+   * Optional generic function to load configuration modules by relative path.
+   * The adapter is responsible for constructing the conventional path (e.g., './config/wallet/[kitName].config').
+   * @param relativePath The conventional relative path to the configuration module.
+   * @returns A Promise resolving to the configuration object (expected to have a default export) or null.
    */
-  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>;
+  loadConfigModule?: NativeConfigLoader;
 }
 
 /**

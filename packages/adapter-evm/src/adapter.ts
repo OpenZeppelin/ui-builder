@@ -17,6 +17,7 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  NativeConfigLoader,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -323,7 +324,7 @@ export class EvmAdapter implements ContractAdapter {
   public async configureUiKit(
     programmaticOverrides: Partial<UiKitConfiguration> = {},
     options?: {
-      loadUiKitNativeConfig?: (relativePath: string) => Promise<Record<string, unknown> | null>;
+      loadUiKitNativeConfig?: NativeConfigLoader;
     }
   ): Promise<void> {
     const currentAppServiceConfig = loadInitialConfigFromAppService();

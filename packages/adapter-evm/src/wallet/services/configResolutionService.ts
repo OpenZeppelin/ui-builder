@@ -1,4 +1,4 @@
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { NativeConfigLoader, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { resolveAndInitializeKitConfig } from '../utils';
@@ -17,7 +17,7 @@ export async function resolveFullUiKitConfiguration(
   initialAppServiceKitName: UiKitConfiguration['kitName'],
   currentAppServiceConfig: UiKitConfiguration, // This is the result of loadInitialConfigFromAppService()
   options?: {
-    loadUiKitNativeConfig?: (relativePath: string) => Promise<Record<string, unknown> | null>;
+    loadUiKitNativeConfig?: NativeConfigLoader;
   }
 ): Promise<UiKitConfiguration> {
   logger.debug(

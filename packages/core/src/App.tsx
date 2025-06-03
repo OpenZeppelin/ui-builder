@@ -1,44 +1,47 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
+import { useCallback } from 'react';
+
 import {
   AdapterProvider,
   WalletConnectionHeader,
   WalletStateProvider,
 } from '@openzeppelin/transaction-form-react-core';
+import type { NativeConfigLoader } from '@openzeppelin/transaction-form-types';
 
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
-function App() {
-  /**
-   * Generic configuration module loader.
-   * This function can load any configuration module by relative path
-   * without needing to know what specific UI kit or purpose it serves.
-   * The adapter is responsible for specifying the exact path it needs.
-   */
-  const loadConfigModule = async (
-    relativePath: string
-  ): Promise<Record<string, unknown> | null> => {
-    try {
-      const configModule = await import(/* @vite-ignore */ relativePath);
-      const config = configModule.default;
+// Use Vite's import.meta.glob to find all potential kit config files.
+// Expecting them to be .ts files as per convention.
+const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
 
-      if (config && typeof config === 'object' && !Array.isArray(config)) {
-        return config as Record<string, unknown>;
+function App() {
+  const loadAppConfigModule: NativeConfigLoader = useCallback(async (relativePath: string) => {
+    // relativePath is now expected to be like './config/wallet/rainbowkit.config.ts'
+    const importerToCall = kitConfigImporters[relativePath];
+
+    if (importerToCall) {
+      try {
+        const module = (await importerToCall()) as { default?: Record<string, unknown> } & Record<
+          string,
+          unknown
+        >;
+        return module.default || module;
+      } catch {
+        return null;
       }
-      return null;
-    } catch {
-      // Expected if the config file doesn't exist
+    } else {
       return null;
     }
-  };
+  }, []);
 
   return (
     <AdapterProvider resolveAdapter={getAdapter}>
       <WalletStateProvider
         initialNetworkId="ethereum-mainnet"
         getNetworkConfigById={getNetworkById}
-        loadConfigModule={loadConfigModule}
+        loadConfigModule={loadAppConfigModule}
       >
         <div className="bg-background text-foreground min-h-screen">
           <header className="border-b px-6 py-3">
