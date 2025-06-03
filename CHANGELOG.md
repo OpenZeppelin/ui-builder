@@ -1,3 +1,11 @@
+## [1.6.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.0...v1.6.1) (2025-06-03)
+
+
+### Bug Fixes
+
+* **core:** resolve JavaScript heap out of memory in CI builds ([f45f9a3](https://github.com/OpenZeppelin/transaction-form-builder/commit/f45f9a31b5edce95e987308457c9f9b8afffd7c2))
+* **export:** allow exporting forms without fields ([ab98f90](https://github.com/OpenZeppelin/transaction-form-builder/commit/ab98f90686606d4f8cf79ff0c1491b8708d9eccc))
+
 # [1.6.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.5.0...v1.6.0) (2025-06-02)
 
 
