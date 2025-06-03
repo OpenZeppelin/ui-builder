@@ -33,6 +33,8 @@ jobs:
 
       - name: Build all packages
         run: pnpm -r build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Type check
         run: pnpm tsc --noEmit
@@ -44,3 +46,5 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'

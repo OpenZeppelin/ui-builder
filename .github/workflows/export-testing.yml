@@ -41,6 +41,8 @@ jobs:
       # Add this build step to ensure all workspace packages are built before testing
       - name: Build all packages
         run: pnpm -r build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       # Run only export-related tests
       - name: Run export tests

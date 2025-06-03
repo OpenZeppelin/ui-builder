@@ -45,4 +45,6 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Disable husky hooks during semantic-release
           HUSKY: 0
+          # Increase memory limit for potential build steps during release
+          NODE_OPTIONS: '--max-old-space-size=8192'
         run: pnpm semantic-release

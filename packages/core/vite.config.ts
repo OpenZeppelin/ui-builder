@@ -45,5 +45,22 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // Optimize build for memory usage
+    rollupOptions: {
+      output: {
+        // Split chunks to reduce memory usage during build
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-accordion', '@radix-ui/react-checkbox', '@radix-ui/react-dialog'],
+          web3: ['viem', 'wagmi', '@tanstack/react-query'],
+        },
+      },
+      // Reduce memory usage during rollup processing
+      maxParallelFileOps: 2,
+    },
+    // Increase chunk size warning limit to reduce warnings
+    chunkSizeWarningLimit: 1000,
+    // Reduce source map generation to save memory
+    sourcemap: false,
   },
 });

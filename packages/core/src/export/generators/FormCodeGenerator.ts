@@ -168,8 +168,9 @@ export class FormCodeGenerator {
         errors.push('Missing submitButton.loadingText property');
       }
     }
-    if (!schema.fields || !Array.isArray(schema.fields) || schema.fields.length === 0) {
-      errors.push('Missing or empty fields array');
+    // Fields array must exist and be an array, but can be empty for functions without parameters
+    if (!schema.fields || !Array.isArray(schema.fields)) {
+      errors.push('Missing or invalid fields array');
     }
 
     // If there are any errors, throw an exception
