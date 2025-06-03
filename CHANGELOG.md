@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.1...v1.6.2) (2025-06-03)
+
+
+### Bug Fixes
+
+* **core:** dynamic prod build dynamic config imports ([7a0e017](https://github.com/OpenZeppelin/transaction-form-builder/commit/7a0e0172add305fe44453ff4f1b094a5590c90ed))
+
 ## [1.6.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.0...v1.6.1) (2025-06-03)
 
 
