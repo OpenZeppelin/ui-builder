@@ -282,6 +282,7 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
             <>
               <Input
                 {...field}
+                value={field.value ?? ''}
                 id={id}
                 placeholder={placeholder}
                 type="text"
