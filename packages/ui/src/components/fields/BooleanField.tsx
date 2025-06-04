@@ -90,11 +90,9 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
 
             // For boolean values
             if (typeof value === 'boolean') {
-              // If required and false, return error
-              if (validation?.required && value === false) {
-                return 'This field is required';
-              }
-
+              // If required, it means a boolean value (true or false) must be present.
+              // The check for undefined/null above handles the case where it's not set.
+              // So, if it's a boolean (true or false), it passes the required check here.
               return validateBooleanValue(value);
             }
 
