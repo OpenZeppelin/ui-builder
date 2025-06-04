@@ -142,6 +142,9 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
             if (typeof value === 'string') {
               // Parse the validated string to a number
               const parsedNum = parseFloat(value);
+              if (isNaN(parsedNum)) {
+                return 'Invalid number'; // Explicitly return error for NaN
+              }
               return validateNumericValue(parsedNum);
             }
 
@@ -195,6 +198,44 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
 
           // Handle keyboard events
           const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+            // Allow only numeric characters, backspace, delete, tab, escape, enter, arrows, period, hyphen
+            // This is a basic filter; more complex scenarios might need a more robust solution
+            const allowedKeys = [
+              '0',
+              '1',
+              '2',
+              '3',
+              '4',
+              '5',
+              '6',
+              '7',
+              '8',
+              '9',
+              'Backspace',
+              'Delete',
+              'Tab',
+              'Escape',
+              'Enter',
+              'ArrowLeft',
+              'ArrowRight',
+              'ArrowUp',
+              'ArrowDown',
+              '.',
+              '-',
+            ];
+
+            // Allow Ctrl/Cmd+A, C, V, X, Z for common editing operations
+            if (
+              (e.ctrlKey || e.metaKey) &&
+              ['a', 'c', 'v', 'x', 'z'].includes(e.key.toLowerCase())
+            ) {
+              return;
+            }
+
+            if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+              e.preventDefault();
+            }
+
             // Handle escape key to clear input
             if (e.key === 'Escape') {
               handleEscapeKey(field.onChange, field.value)(e);
