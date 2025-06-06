@@ -3,6 +3,9 @@ import EvmAdapter from './adapter';
 // Re-export the main adapter class
 export { EvmAdapter };
 
+// Export RainbowKit customization types
+export * from './wallet/rainbowkit/types';
+
 // Optionally re-export types if they need to be accessible directly
 // export * from './types';
 

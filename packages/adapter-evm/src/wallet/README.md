@@ -109,6 +109,29 @@ const rainbowKitAppConfig = {
     // modalSize: 'compact',
     // appInfo: { appName: 'My dApp', learnMoreUrl: 'https://learnmore.example' }
   }, // as RainbowKitProviderProps (or a subset for type safety)
+
+  // Enhanced UI customizations using RainbowKit's native prop types
+  customizations: {
+    connectButton: {
+      // Uses RainbowKit's native ConnectButton props - no custom types needed!
+      // Refer to RainbowKit docs: https://www.rainbowkit.com/docs/connect-button
+
+      chainStatus: 'none', // Hide network switcher dropdown
+      accountStatus: 'full', // Show full account info when connected
+      label: 'Connect Wallet', // Custom connect button text
+      showBalance: true, // Show/hide balance display
+
+      // Responsive configurations are also supported:
+      // showBalance: {
+      //   smallScreen: false,
+      //   largeScreen: true,
+      // },
+      // accountStatus: {
+      //   smallScreen: 'avatar',
+      //   largeScreen: 'full',
+      // },
+    },
+  },
 };
 
 export default rainbowKitAppConfig;
@@ -116,6 +139,23 @@ export default rainbowKitAppConfig;
 
 - **`wagmiParams`**: Contains parameters for RainbowKit's `getDefaultConfig()` (e.g., `appName`, `projectId`). The adapter will use these but will override `chains` and `transports` based on its own `networkConfig` and `AppConfigService` RPC overrides.
 - **`providerProps`**: Contains props to be spread onto the `<RainbowKitProvider />` component (e.g., `theme`, `modalSize`).
+- **`customizations`**: Enhanced UI customizations that leverage RainbowKit's native prop types directly. This section allows you to configure the ConnectButton component using RainbowKit's official props.
+
+#### RainbowKit ConnectButton Customizations
+
+The `customizations.connectButton` section supports all native RainbowKit ConnectButton props:
+
+- **`chainStatus`**: Controls network switcher visibility
+  - `'full'`: Show full chain name and icon (default)
+  - `'icon'`: Show only chain icon
+  - `'name'`: Show only chain name
+  - `'none'`: Hide network switcher completely
+- **`accountStatus`**: Controls account info display when connected
+  - `'full'`: Show full account info (default)
+  - `'avatar'`: Show only avatar
+  - `'address'`: Show only address
+- **`label`**: Custom text for the connect button when disconnected
+- **`showBalance`**: Show/hide balance in the button (boolean or responsive object)
 
 ### 3. `loadConfigModule` (Application-Provided Importer)
 

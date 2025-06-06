@@ -6,7 +6,7 @@
         "kitConfig": {
           "showInjectedConnector": false,
           "components": {
-            "exclude": []
+            "exclude": ["NetworkSwitcher"]
           }
         }
       }
