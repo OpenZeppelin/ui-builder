@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.2...v1.7.0) (2025-06-06)
+
+
+### Features
+
+* **adapter:** add native prop-based ConnectButton customizations ([ca35f99](https://github.com/OpenZeppelin/transaction-form-builder/commit/ca35f992af82989e9d8350d7d84bdad36bb2f00d))
+
 ## [1.6.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.1...v1.6.2) (2025-06-03)
 
 
