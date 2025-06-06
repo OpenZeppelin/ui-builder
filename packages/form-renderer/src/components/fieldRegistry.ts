@@ -4,9 +4,13 @@ import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 import { FieldType, FormValues } from '@openzeppelin/transaction-form-types';
 import {
   AddressField,
+  ArrayField,
+  ArrayObjectField,
   BaseFieldProps,
   BooleanField,
   NumberField,
+  ObjectField,
+  TextAreaField,
   TextField,
 } from '@openzeppelin/transaction-form-ui';
 
@@ -25,10 +29,13 @@ export const fieldComponents: Record<
   checkbox: BooleanField,
   radio: () => React.createElement('div', null, 'Radio field not implemented yet'),
   select: () => React.createElement('div', null, 'Select field not implemented yet'),
-  textarea: () => React.createElement('div', null, 'Textarea field not implemented yet'),
+  textarea: TextAreaField,
   date: () => React.createElement('div', null, 'Date field not implemented yet'),
   email: () => React.createElement('div', null, 'Email field not implemented yet'),
   password: () => React.createElement('div', null, 'Password field not implemented yet'),
   amount: () => React.createElement('div', null, 'Amount field not implemented yet'),
+  array: ArrayField,
+  object: ObjectField,
+  'array-object': ArrayObjectField,
   hidden: () => null, // Return null for hidden type
 };

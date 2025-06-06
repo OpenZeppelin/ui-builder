@@ -5,21 +5,25 @@ import { EVM_TYPE_TO_FIELD_TYPE } from './constants';
 /**
  * Map a blockchain-specific parameter type to a default form field type.
  * @param parameterType The blockchain parameter type (e.g., 'uint256', 'address', 'tuple')
- * @returns The appropriate default form field type (e.g., 'number', 'blockchain-address', 'textarea')
+ * @returns The appropriate default form field type (e.g., 'number', 'blockchain-address', 'object')
  */
 export function mapEvmParamTypeToFieldType(parameterType: string): FieldType {
+  // Check if this is an array of tuples/objects
+  if (parameterType.match(/^tuple\[\d*\]$/)) {
+    return 'array-object';
+  }
+
   // Check if this is an array type (ends with [] or [number])
   if (parameterType.match(/\[\d*\]$/)) {
-    // All array types should use textarea for JSON input
-    return 'textarea';
+    return 'array';
   }
 
   // Extract the base type from array types (e.g., uint256[] -> uint256)
   const baseType = parameterType.replace(/\[\d*\]/g, '');
 
-  // Handle tuples (structs) - use textarea for JSON input
+  // Handle tuples (structs) - use object for composite types
   if (baseType.startsWith('tuple')) {
-    return 'textarea';
+    return 'object';
   }
 
   // Map common EVM types to appropriate field types
@@ -32,13 +36,21 @@ export function mapEvmParamTypeToFieldType(parameterType: string): FieldType {
  * @returns Array of compatible form field types.
  */
 export function getEvmCompatibleFieldTypes(parameterType: string): FieldType[] {
-  // Handle array and tuple types - allow JSON input via textarea or basic text
-  if (parameterType.match(/\[\d*\]$/)) {
-    return ['textarea', 'text'];
+  // Handle array of objects
+  if (parameterType.match(/^tuple\[\d*\]$/)) {
+    return ['array-object', 'textarea', 'text'];
   }
+
+  // Handle array types - allow array field or fallback to textarea/text
+  if (parameterType.match(/\[\d*\]$/)) {
+    return ['array', 'textarea', 'text'];
+  }
+
   const baseType = parameterType.replace(/\[\d*\]/g, '');
+
+  // Handle tuples/objects
   if (baseType.startsWith('tuple')) {
-    return ['textarea', 'text'];
+    return ['object', 'textarea', 'text'];
   }
 
   // Define compatibility map for base types

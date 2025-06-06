@@ -3,13 +3,11 @@
  *
  * Utilities for form field transformations, validation, and more.
  * These functions handle converting between UI and blockchain data formats.
- * TODO: review this file and check if all of these functions are still needed
  */
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 import {
   FieldTransforms,
   FieldType,
-  FieldValue,
   FormFieldType,
   FormValues,
 } from '@openzeppelin/transaction-form-types';
@@ -166,95 +164,52 @@ export function createTextTransform(): FieldTransforms<string> {
 }
 
 /**
- * Creates a transform for a specific field type
+ * Creates a transform function based on field type
  *
- * @param fieldType The type of field
- * @param _blockchainType The blockchain parameter type (e.g., 'uint256', 'address', 'bool[]')
- *                        Used for specialized transforms based on blockchain type information
- * @param adapter The blockchain adapter
+ * @param fieldType The type of field to create transforms for
+ * @param adapter Optional adapter for address validation
  * @returns Transform functions for the field type
  */
-export function createTransformForFieldType<T extends FieldType>(
-  fieldType: T,
-  _blockchainType: string,
-  adapter: ContractAdapter
-): FieldTransforms<FieldValue<T>> {
-  // Implementation with a type-safe approach using run-time checking
+// TODO: Refine the return type of this function using conditional types
+// to provide more specific FieldTransforms<T> based on the fieldType.
+// For example, createTransformForFieldType('text') should ideally return FieldTransforms<string>.
+// Currently, it returns FieldTransforms<unknown>, which is type-safe but loses specificity.
+export function createTransformForFieldType(
+  fieldType: FieldType,
+  adapter?: ContractAdapter
+): FieldTransforms<unknown> {
   switch (fieldType) {
     case 'blockchain-address':
-      return createAddressTransform(adapter) as unknown as FieldTransforms<FieldValue<T>>;
+      if (!adapter) {
+        throw new Error(
+          `createTransformForFieldType: Adapter is required for 'blockchain-address' field type but was not provided.`
+        );
+      }
+      return createAddressTransform(adapter) as FieldTransforms<unknown>;
     case 'number':
     case 'amount':
-      return createNumberTransform() as unknown as FieldTransforms<FieldValue<T>>;
+      return createNumberTransform() as FieldTransforms<unknown>;
     case 'checkbox':
-      return createBooleanTransform() as unknown as FieldTransforms<FieldValue<T>>;
-    case 'textarea':
-      return createComplexTypeTransform() as unknown as FieldTransforms<FieldValue<T>>;
+      return createBooleanTransform() as FieldTransforms<unknown>;
     case 'text':
-    case 'select':
-    case 'radio':
     case 'email':
     case 'password':
+    case 'textarea':
+      return createTextTransform() as FieldTransforms<unknown>;
+    case 'array':
+      return createArrayTransform() as FieldTransforms<unknown>;
+    case 'object':
+      return createObjectTransform() as FieldTransforms<unknown>;
+    case 'array-object':
+      return createArrayObjectTransform() as FieldTransforms<unknown>;
     default:
-      return createTextTransform() as unknown as FieldTransforms<FieldValue<T>>;
+      // For unhandled field types, log a warning and fallback to complex type (JSON) transform.
+      // Ideally, all common ABI types should be mapped by the adapter to specific FieldTypes.
+      console.warn(
+        `createTransformForFieldType: No specific transform for fieldType "${fieldType as string}". Falling back to createComplexTypeTransform. Ensure adapter maps all expected ABI types to specific FieldTypes.`
+      );
+      return createComplexTypeTransform();
   }
-}
-
-/**
- * Composes multiple transforms into a single transform
- *
- * @param transforms Array of transforms to compose
- * @returns A composed transform
- */
-export function composeTransforms<T>(
-  // Transforms can have different generic types, but we use unknown as a more type-safe alternative to any
-  ...transforms: Array<FieldTransforms<unknown>>
-): FieldTransforms<T> {
-  return {
-    input: (value: T): unknown => {
-      let result: unknown = value;
-      // Apply transforms in order for input (UI display)
-      for (const transform of transforms) {
-        if (transform.input) {
-          // We need to cast to unknown here because transforms can be of different types
-          result = transform.input(result);
-        }
-      }
-      return result;
-    },
-    output: (value: unknown): T => {
-      let result = value;
-      // Apply transforms in reverse order for output (blockchain submission)
-      for (const transform of [...transforms].reverse()) {
-        if (transform.output) {
-          result = transform.output(result);
-
-          // Special handling for NaN values
-          if (typeof result === 'number' && isNaN(result)) {
-            return 0 as unknown as T;
-          }
-        }
-      }
-      return result as T;
-    },
-  };
-}
-
-/**
- * Creates a custom transform with specific input and output functions
- *
- * @param inputFn Function to transform from blockchain to UI
- * @param outputFn Function to transform from UI to blockchain
- * @returns A custom transform
- */
-export function createCustomTransform<T>(
-  input?: (value: T) => unknown,
-  output?: (value: unknown) => T
-): FieldTransforms<T> {
-  return {
-    input,
-    output,
-  };
 }
 
 /**
@@ -320,4 +275,143 @@ export function createDefaultFormValues(
   });
 
   return defaults;
+}
+
+/**
+ * Creates a transform for array fields
+ *
+ * @returns Transform functions for array fields
+ */
+export function createArrayTransform(): FieldTransforms<unknown[]> {
+  return {
+    input: (value: unknown[]): string => {
+      // Blockchain to UI: Convert array to JSON string.
+      // The type system expects `value` to be `unknown[]` here.
+      // A truly empty or uninitialized array state should be represented by an empty array `[]`.
+      if (!Array.isArray(value)) {
+        // This case should ideally not be hit if types are followed,
+        // but as a safeguard, return empty array string.
+        console.warn('createArrayTransform input received non-array value:', value);
+        return '[]';
+      }
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        // Handle potential stringify errors (e.g., circular refs, though less likely with unknown[])
+        return '[]';
+      }
+    },
+    output: (value: unknown): unknown[] => {
+      // UI to Blockchain: Convert UI string (e.g., JSON) back to array
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return []; // Default to empty array on parse error
+        }
+      }
+      // If it's already an array (e.g. from direct manipulation if not using string input), pass through
+      return Array.isArray(value) ? value : [];
+    },
+  };
+}
+
+/**
+ * Creates a transform for object fields
+ *
+ * @returns Transform functions for object fields
+ */
+export function createObjectTransform(): FieldTransforms<Record<string, unknown>> {
+  return {
+    input: (value: Record<string, unknown>): string => {
+      // Blockchain to UI: Convert object to JSON string for display/editing
+      // The type system expects `value` to be Record<string, unknown> here.
+      // An empty or uninitialized object state should be represented by an empty object `{}`.
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        // This case should ideally not be hit if types are strictly followed.
+        console.warn('createObjectTransform input received non-object or null value:', value);
+        return '{}'; // Default to empty object string
+      }
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return '{}'; // Default to empty object string on error
+      }
+    },
+    output: (value: unknown): Record<string, unknown> => {
+      // UI to Blockchain: Convert UI string (e.g., JSON) back to object
+      if (typeof value === 'string') {
+        if (!value.trim()) return {}; // Handle empty string input from UI
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return parsed;
+          }
+          return {}; // Parsed but not an object
+        } catch {
+          return {}; // Default to empty object on parse error
+        }
+      }
+      // If it's already an object (e.g. from direct manipulation if not using string input), pass through
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value as Record<string, unknown>;
+      }
+      return {};
+    },
+  };
+}
+
+/**
+ * Creates a transform for array-object fields
+ *
+ * @returns Transform functions for array-object fields
+ */
+export function createArrayObjectTransform(): FieldTransforms<Record<string, unknown>[]> {
+  return {
+    input: (value: Record<string, unknown>[]): string => {
+      // Blockchain to UI: Convert array of objects to JSON string
+      if (!Array.isArray(value)) {
+        // This case should ideally not be hit if types are strictly followed.
+        // However, if it occurs at runtime, log a warning and return default.
+        console.warn('createArrayObjectTransform input received non-array value:', value);
+        return '[]';
+      }
+      try {
+        // Ensure all items are actual objects before stringifying
+        const validItems = value.filter(
+          (item) => item && typeof item === 'object' && !Array.isArray(item)
+        );
+        return JSON.stringify(validItems, null, 2);
+      } catch {
+        return '[]'; // Default to empty array string on error
+      }
+    },
+    output: (value: unknown): Record<string, unknown>[] => {
+      // UI to Blockchain: Convert UI string (JSON) back to array of objects
+      if (typeof value === 'string') {
+        if (!value.trim()) return []; // Handle empty string from UI
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            return parsed.filter(
+              (item): item is Record<string, unknown> =>
+                item && typeof item === 'object' && !Array.isArray(item)
+            );
+          }
+          return []; // Parsed but not an array
+        } catch {
+          return []; // Default to empty array on parse error
+        }
+      }
+      // If it's already an array of objects (e.g. from direct manipulation)
+      if (Array.isArray(value)) {
+        return value.filter(
+          (item): item is Record<string, unknown> =>
+            item && typeof item === 'object' && !Array.isArray(item)
+        );
+      }
+      return [];
+    },
+  };
 }

@@ -4,3 +4,4 @@ export { generateId } from './generateId';
 export { cn } from './cn';
 export { truncateMiddle } from './formatting';
 export { isRecordWithProperties } from './typeguards';
+export { getDefaultValueForType } from './fieldDefaults';

@@ -3,26 +3,12 @@ import { startCase } from 'lodash';
 import type {
   FieldType,
   FieldValidation,
-  FieldValue,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
+import { getDefaultValueForType } from '@openzeppelin/transaction-form-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
-
-// Placeholder - Needs specific logic
-function getDefaultValueForType<T extends FieldType>(fieldType: T): FieldValue<T> {
-  // Return a default value compatible with most basic types (string/number/bool etc.)
-  // Specific adapters might refine this.
-  switch (fieldType) {
-    case 'checkbox':
-      return false as FieldValue<T>;
-    case 'number':
-      return 0 as FieldValue<T>;
-    default:
-      return '' as FieldValue<T>;
-  }
-}
 
 // Placeholder - Needs specific logic
 function getDefaultValidationForType(_parameterType: string): FieldValidation {

@@ -126,6 +126,7 @@ export function TextAreaField<TFieldValues extends FieldValues = FieldValues>({
                 rows={rows}
                 maxLength={maxLength}
                 className={validationClasses}
+                value={field.value ?? ''}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 onKeyDown={handleEscapeKey((value) => {

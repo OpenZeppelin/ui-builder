@@ -3,7 +3,7 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/transaction-form-renderer';
 import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
-import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
+import { FormFieldType } from '@openzeppelin/transaction-form-types';
 import { BooleanField, SelectGroupedField, TextField } from '@openzeppelin/transaction-form-ui';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
@@ -21,13 +21,27 @@ interface FieldBasicSettingsProps {
    */
   fieldTypeGroups: OptionGroup[];
 
+  /**
+   * The adapter for chain-specific type mapping and validation
+   */
   adapter?: ContractAdapter;
+
+  /**
+   * The original field being edited.
+   * Contains all field properties including components, elementType, etc.
+   */
+  field: FormFieldType;
 }
 
 /**
  * Component for editing basic field settings like label, type, etc.
  */
-export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldBasicSettingsProps) {
+export function FieldBasicSettings({
+  control,
+  fieldTypeGroups,
+  adapter,
+  field,
+}: FieldBasicSettingsProps) {
   // TODO: Prevent wizard from advancing to the next step if `isHardcodedValueInvalid` is true.
   // This might involve lifting the validation state up or providing a callback/ref to the parent wizard.
 
@@ -49,8 +63,18 @@ export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldB
       type: fieldType,
       // Make hardcoded value required only if the main field is marked as required
       validation: isFieldRequired ? { required: true } : {},
+      // Add the missing properties based on the original field's structure
+      ...((fieldType === 'object' || fieldType === 'array-object') && field.components
+        ? { components: field.components }
+        : {}),
+      ...(fieldType === 'array' && field.elementType
+        ? {
+            elementType: field.elementType,
+            elementFieldConfig: field.elementFieldConfig,
+          }
+        : {}),
     }),
-    [fieldType, isFieldRequired]
+    [fieldType, isFieldRequired, field.components, field.elementType, field.elementFieldConfig]
   );
 
   return (
@@ -105,7 +129,7 @@ export function FieldBasicSettings({ control, fieldTypeGroups, adapter }: FieldB
           <DynamicFormField
             key={`hardcoded-${fieldType}`}
             field={hardcodedFieldConfig}
-            control={control as unknown as Control<FormValues>}
+            control={control}
             adapter={adapter}
           />
           <BooleanField

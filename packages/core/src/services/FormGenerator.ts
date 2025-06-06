@@ -112,31 +112,57 @@ function handleComplexTypeField(
 ): FormFieldType {
   const baseField = adapter.generateDefaultField(parameter);
 
-  // Arrays - We default to using a textarea where the user can input a JSON array
-  if (parameter.type.includes('[')) {
-    return {
+  // Arrays of objects/tuples
+  if (parameter.type.match(/^tuple\[\d*\]$/)) {
+    const result = {
       ...baseField,
-      type: 'textarea',
-      helperText: `${baseField.helperText || ''} Enter as a JSON array.`.trim(),
-      placeholder: `Enter array of ${getBaseType(parameter.type)}`,
+      type: 'array-object' as FieldType,
+      helperText: `${baseField.helperText || ''} Add items to the array.`.trim(),
+      placeholder: undefined, // Not applicable for array-object
       validation: {
         ...baseField.validation,
-        pattern: '^\\[.*\\]$', // Basic pattern to validate JSON array format
       },
+      // Pass the component information for nested structure
+      components: parameter.components,
+    };
+
+    return result;
+  }
+
+  // Simple arrays - check if it's an array of simple types
+  if (parameter.type.includes('[')) {
+    const baseType = getBaseType(parameter.type);
+    const elementType = adapter.generateDefaultField({
+      ...parameter,
+      type: baseType,
+      name: 'element',
+    }).type;
+
+    return {
+      ...baseField,
+      type: 'array',
+      helperText: `${baseField.helperText || ''} Add ${baseType} values to the array.`.trim(),
+      placeholder: undefined, // Not applicable for array
+      validation: {
+        ...baseField.validation,
+      },
+      // Pass element type information
+      elementType,
     };
   }
 
-  // Tuples - We use a textarea where the user can input a JSON object
+  // Objects/Tuples - use object field for better UX
   if (parameter.type.startsWith('tuple')) {
     return {
       ...baseField,
-      type: 'textarea',
-      helperText: `${baseField.helperText || ''} Enter as a JSON object.`.trim(),
-      placeholder: 'Enter object values as JSON',
+      type: 'object',
+      helperText: `${baseField.helperText || ''} Fill in the object properties.`.trim(),
+      placeholder: undefined, // Not applicable for object
       validation: {
         ...baseField.validation,
-        pattern: '^\\{.*\\}$', // Basic pattern to validate JSON object format
       },
+      // Pass the component information for nested structure
+      components: parameter.components,
     };
   }
 

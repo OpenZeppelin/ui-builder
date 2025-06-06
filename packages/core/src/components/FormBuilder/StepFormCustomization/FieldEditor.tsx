@@ -38,34 +38,72 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
     [adapter, originalParameterType]
   );
 
+  // Track previous field to detect meaningful changes
+  const previousFieldRef = React.useRef(field);
+
+  // Helper function to check if field has meaningful changes
+  const hasFieldChangedExceptHardcodedValue = (
+    currentField: FormFieldType,
+    previousField: FormFieldType
+  ): boolean => {
+    return Object.keys(currentField).some((key) => {
+      if (key === 'hardcodedValue') return false;
+      return currentField[key as keyof FormFieldType] !== previousField[key as keyof FormFieldType];
+    });
+  };
+
   // Reset form when field changes - use a deep reset to ensure all values are properly refreshed
   React.useEffect(() => {
-    const newValues = initializeFormValues(field);
-    reset(newValues);
-  }, [field, reset]);
+    const previousField = previousFieldRef.current;
+
+    // Only reset if there's a meaningful change
+    if (hasFieldChangedExceptHardcodedValue(field, previousField)) {
+      // Get current form values before reset
+      const currentValues = getValues();
+      const newValues = initializeFormValues(field);
+
+      // Preserve the current hardcodedValue if we're actively editing it
+      // This prevents losing user input when the parent re-renders
+      if (field.isHardcoded && currentValues.hardcodedValue !== undefined) {
+        newValues.hardcodedValue = currentValues.hardcodedValue;
+      }
+
+      reset(newValues);
+    }
+
+    // Update the ref for next comparison
+    previousFieldRef.current = field;
+  }, [field, reset, getValues]);
 
   // Watch for changes and update fields
   React.useEffect(() => {
     const subscription = watch((value, { name, type: eventType }) => {
       // Skip updates if we're just seeing validation changes for hardcodedValue
-      // This prevents wiping out error state when validation happens
       if (name === 'hardcodedValue' && eventType === undefined) {
-        return; // Do nothing when validation updates come through
+        return;
       }
 
       if (name && value) {
-        // Defensive handling for fields that should never be undefined
+        // Skip if type is undefined
         if (name === 'type' && value[name] === undefined) {
-          return; // Don't update if type is somehow undefined
+          return;
         }
 
-        // Special handling for nested validation updates
-        if (name === 'validation.required') {
-          // Get current validation state and send upwards
+        // Handle special cases that need full form values
+        if (
+          name === 'hardcodedValue' ||
+          name?.startsWith('hardcodedValue.') ||
+          name === 'validation.required'
+        ) {
           const currentValues = getValues();
-          onUpdate({ validation: currentValues.validation });
+
+          if (name === 'hardcodedValue' || name?.startsWith('hardcodedValue.')) {
+            onUpdate({ hardcodedValue: currentValues.hardcodedValue });
+          } else {
+            onUpdate({ validation: currentValues.validation });
+          }
         } else {
-          // For other fields, send the simple change
+          // For other fields, send the simple change immediately
           const change = { [name]: value[name] } as Partial<FormFieldType>;
           onUpdate(change);
         }
@@ -73,14 +111,19 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, onUpdate, field.validation, getValues]);
+  }, [watch, onUpdate, getValues]);
 
   // Get the current type value with a fallback to the field's original type to avoid undefined
   const selectedType = watch('type') || field.type;
 
   return (
     <div className="space-y-6">
-      <FieldBasicSettings control={control} fieldTypeGroups={typeGroups} adapter={adapter} />
+      <FieldBasicSettings
+        control={control}
+        fieldTypeGroups={typeGroups}
+        adapter={adapter}
+        field={field}
+      />
 
       <TypeWarningSection
         selectedType={selectedType}

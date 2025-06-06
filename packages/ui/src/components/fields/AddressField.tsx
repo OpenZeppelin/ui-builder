@@ -138,6 +138,7 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 data-slot="input"
+                value={field.value ?? ''}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 disabled={isReadOnly}
