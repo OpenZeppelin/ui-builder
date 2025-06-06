@@ -68,7 +68,7 @@ describe('resolveAndInitializeKitConfig', () => {
 
   describe('with kitName and loadConfigModule provided', () => {
     const kitName = 'rainbowkit';
-    const conventionalPath = `./config/wallet/${kitName}.config`;
+    const conventionalPath = `./config/wallet/${kitName}.config.ts`;
 
     it('should return userNativeConfig if loadConfigModule succeeds and no programmaticConfig', async () => {
       const nativeConfig = { nativeSetting: 'nativeValue' };
@@ -141,7 +141,7 @@ describe('resolveAndInitializeKitConfig', () => {
 
   it('should correctly use kitName in conventional path for loading', async () => {
     const kitName = 'anotherkit';
-    const expectedPath = `./config/wallet/${kitName}.config`;
+    const expectedPath = `./config/wallet/${kitName}.config.ts`;
     mockLoadConfigModule.mockResolvedValue({ some: 'data' });
     await resolveAndInitializeKitConfig(kitName, undefined, mockLoadConfigModule);
     expect(mockLoadConfigModule).toHaveBeenCalledWith(expectedPath);

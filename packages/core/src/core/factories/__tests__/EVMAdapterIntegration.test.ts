@@ -318,18 +318,11 @@ describe('EVM Adapter Integration Tests', () => {
       // Validate the array field
       expect(formSchema.fields).toHaveLength(1);
       const arrayField = formSchema.fields[0];
-      // Now array types should be properly mapped to textarea
-      expect(arrayField.type).toBe('textarea');
+      // Array types should be properly mapped to array
+      expect(arrayField.type).toBe('array');
 
-      // Test transforms
-      if (arrayField.transforms?.input && arrayField.transforms?.output) {
-        // Input transform (blockchain -> UI)
-        expect(arrayField.transforms.input([1, 2, 3])).toBe(JSON.stringify([1, 2, 3], null, 2));
-
-        // Output transform (UI -> blockchain)
-        expect(arrayField.transforms.output('[1,2,3]')).toEqual([1, 2, 3]);
-        expect(arrayField.transforms.output('invalid-json')).toBeNull();
-      }
+      // Array field should have proper elementType for the array elements
+      expect(arrayField.elementType).toBeDefined();
     });
 
     it('should handle complex struct parameters', async () => {
@@ -342,35 +335,14 @@ describe('EVM Adapter Integration Tests', () => {
 
       const formSchema = factory.generateFormSchema(adapter, inputTesterSchema, structFunction.id);
 
-      // Verify that complex struct parameters are mapped to textarea fields
+      // Verify that complex struct parameters are mapped to object fields
       expect(formSchema.fields).toHaveLength(1);
       const structField = formSchema.fields[0];
-      expect(structField.type).toBe('textarea');
+      expect(structField.type).toBe('object');
 
-      // Test that the transforms can handle JSON conversion
-      if (structField.transforms?.input && structField.transforms?.output) {
-        const complexObject = {
-          isToggled: true,
-          title: 'Test Book',
-          author: 'Test Author',
-          book_id: 12345,
-          addr: '0x1234567890123456789012345678901234567890',
-          tags: ['fiction', 'fantasy'],
-          meta: {
-            subtitle: 'Test Subtitle',
-            pages: 300,
-          },
-        };
-
-        // Input transform (blockchain -> UI)
-        expect(structField.transforms.input(complexObject)).toBe(
-          JSON.stringify(complexObject, null, 2)
-        );
-
-        // Output transform (UI -> blockchain)
-        const jsonString = JSON.stringify(complexObject);
-        expect(structField.transforms.output(jsonString)).toEqual(complexObject);
-      }
+      // Object field should have components defined for its properties
+      expect(structField.components).toBeDefined();
+      expect(structField.components!.length).toBeGreaterThan(0);
     });
   });
 
@@ -457,7 +429,7 @@ describe('EVM Adapter Integration Tests', () => {
 
       expect(dynamicArraySchema.fields).toHaveLength(1);
       const dynamicArrayField = dynamicArraySchema.fields[0];
-      expect(dynamicArrayField.type).toBe('textarea'); // Dynamic arrays should be textarea
+      expect(dynamicArrayField.type).toBe('array'); // Dynamic arrays should be array
 
       // Test fixed array
       const fixedArrayFunction = arrayFixture.functions.find(
@@ -472,19 +444,11 @@ describe('EVM Adapter Integration Tests', () => {
 
       expect(fixedArraySchema.fields).toHaveLength(1);
       const fixedArrayField = fixedArraySchema.fields[0];
-      expect(fixedArrayField.type).toBe('textarea'); // Fixed arrays should also be textarea
+      expect(fixedArrayField.type).toBe('array'); // Fixed arrays should also be array
 
-      // Transform validation for both types
-      if (dynamicArrayField.transforms?.output && fixedArrayField.transforms?.output) {
-        // For dynamic array
-        expect(dynamicArrayField.transforms.output('[1,2,3]')).toEqual([1, 2, 3]);
-        expect(dynamicArrayField.transforms.output('[]')).toEqual([]);
-        expect(dynamicArrayField.transforms.output('invalid-json')).toBeNull();
-
-        // For fixed array
-        expect(fixedArrayField.transforms.output('[1,2,3]')).toEqual([1, 2, 3]);
-        expect(fixedArrayField.transforms.output('[1]')).toEqual([1]); // No length validation in transform
-      }
+      // Array fields should have elementType defined
+      expect(dynamicArrayField.elementType).toBeDefined();
+      expect(fixedArrayField.elementType).toBeDefined();
     });
   });
 
