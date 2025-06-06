@@ -8,6 +8,9 @@ import { cn, logger } from '@openzeppelin/transaction-form-utils';
 
 import { CustomConnectButton } from '../components';
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
+import { evmUiKitManager } from '../evmUiKitManager';
+
+import { extractRainbowKitCustomizations } from './types';
 
 const MIN_COMPONENT_LOADING_DISPLAY_MS = 1000; // 1 second artificial delay
 
@@ -23,8 +26,17 @@ export const RainbowKitConnectButton: React.FC<BaseComponentProps> = (props) => 
   const [isLoadingComponent, setIsLoadingComponent] = useState(true);
   const [showComponentLoadingOverride, setShowComponentLoadingOverride] = useState(false);
   const componentLoadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [managerState, setManagerState] = useState(evmUiKitManager.getState());
 
   const isWagmiProviderReady = useContext(WagmiProviderInitializedContext);
+
+  // Subscribe to UI kit manager state changes
+  useEffect(() => {
+    const unsubscribe = evmUiKitManager.subscribe(() => {
+      setManagerState(evmUiKitManager.getState());
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -109,5 +121,22 @@ export const RainbowKitConnectButton: React.FC<BaseComponentProps> = (props) => 
     return <CustomConnectButton {...props} />;
   }
 
-  return <Component {...props} />;
+  // Extract custom configuration from the manager state
+  const kitConfig = managerState.currentFullUiKitConfig?.kitConfig;
+  const customizations = extractRainbowKitCustomizations(kitConfig);
+  const connectButtonConfig = customizations?.connectButton;
+
+  // Merge props: base props + custom configuration + any overrides from props
+  // This allows the config to set defaults while still allowing prop overrides
+  const finalProps = {
+    ...connectButtonConfig, // Apply custom configuration from config
+    ...props, // Allow props to override configuration
+  };
+
+  logger.debug('RainbowKitConnectButton', 'Rendering with configuration:', {
+    configFromFile: connectButtonConfig,
+    finalProps: finalProps,
+  });
+
+  return <Component {...finalProps} />;
 };

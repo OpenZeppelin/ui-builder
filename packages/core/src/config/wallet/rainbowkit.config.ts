@@ -1,6 +1,9 @@
 // packages/core/src/config/wallet/rainbowkit.config.ts
 import { type RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 
+// Import the custom configuration types from the EVM adapter
+import type { RainbowKitCustomizations } from '@openzeppelin/transaction-form-adapter-evm';
+
 // For WalletConnect project ID, appName, wallets, ssr options for getDefaultConfig
 // RainbowKit doesn't export a single neat type for all getDefaultConfig options other than `chains` and `transports`.
 // Users can refer to RainbowKit docs for available options for getDefaultConfig.
@@ -19,6 +22,7 @@ import { type RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
  *                   The adapter will override `chains` and `transports`.
  *  - `providerProps`: An object with props for the `<RainbowKitProvider />` component
  *                     (e.g., `theme`, `locale`, `modalSize`, `initialChain`, `appInfo`).
+ *  - `customizations`: Additional UI customizations that use RainbowKit's native prop types
  */
 
 // Infer props type from RainbowKitProvider for stronger typing on the user's side for providerProps.
@@ -48,6 +52,30 @@ const rainbowKitAppConfig = {
       learnMoreUrl: 'https://openzeppelin.com',
     },
   } as Partial<InferredRainbowKitProviderProps>, // User can cast or ensure their object matches
+
+  /**
+   * Custom UI enhancements using RainbowKit's native prop types
+   * These options extend RainbowKit's functionality using their own type system
+   * Refer to RainbowKit docs for available props: https://www.rainbowkit.com/docs/connect-button
+   */
+  customizations: {
+    connectButton: {
+      // Use RainbowKit's native props directly - no custom types needed!
+      chainStatus: 'none', // Hide the network switcher dropdown
+      // accountStatus: 'full', // Default behavior - can be 'full', 'avatar', 'address'
+      // label: 'Connect Wallet', // Custom connect button text
+      // showBalance: true, // Show/hide balance - can be boolean or responsive object
+      // Example responsive configuration:
+      // showBalance: {
+      //   smallScreen: false,
+      //   largeScreen: true,
+      // },
+      // accountStatus: {
+      //   smallScreen: 'avatar',
+      //   largeScreen: 'full',
+      // },
+    },
+  } as RainbowKitCustomizations,
 };
 
 export default rainbowKitAppConfig;
