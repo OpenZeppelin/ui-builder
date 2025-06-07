@@ -1,3 +1,19 @@
+# [1.8.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.7.0...v1.8.0) (2025-06-07)
+
+
+### Bug Fixes
+
+* **tests:** update EVM adapter tests for correct field type expectations ([aa433ad](https://github.com/OpenZeppelin/transaction-form-builder/commit/aa433ad028d103fcd7c6c1ac00a0e3907e68ddc1))
+* **ui:** ensure that the Input component is always treated as a controlled component ([b6cb92f](https://github.com/OpenZeppelin/transaction-form-builder/commit/b6cb92fc84923f6accfb49d62d4c1db77f42dc66))
+* **ui:** explicitly prevent input of non-digits in the number field ([3b3b1f8](https://github.com/OpenZeppelin/transaction-form-builder/commit/3b3b1f880ada507dc2c2a2763c590ad64414fc2e))
+* **ui:** required boolean field should accept true of false ([a2237cc](https://github.com/OpenZeppelin/transaction-form-builder/commit/a2237cc7235872409eef6f58fd288796348a0fe4))
+
+
+### Features
+
+* **core:** change the rainbowkit config ([ef2f3be](https://github.com/OpenZeppelin/transaction-form-builder/commit/ef2f3be800efd6fed961caeb2edcf128d42e31f1))
+* **form:** implement full support for complex nested field types ([2353ed0](https://github.com/OpenZeppelin/transaction-form-builder/commit/2353ed0a4b71e1035519869084f24d35dfa4bf4d))
+
 # [1.7.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.6.2...v1.7.0) (2025-06-06)
 
 
