@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.8.0...v1.8.1) (2025-06-07)
+
+
+### Bug Fixes
+
+* **core:** remove unreachable adapter warning ([ea1b01e](https://github.com/OpenZeppelin/transaction-form-builder/commit/ea1b01efce14ea80a947b7f2d47906265c98be65))
+
 # [1.8.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.7.0...v1.8.0) (2025-06-07)
 
 
