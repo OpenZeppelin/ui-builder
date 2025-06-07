@@ -149,7 +149,7 @@
 * **core:** improve wizard validation with step-based requirements ([bb42afa](https://github.com/OpenZeppelin/transaction-form-builder/commit/bb42afa3439b236241cf97bb8af91094700f1ab4))
 * **core:** pass network config accross adapter and core app ([c2671eb](https://github.com/OpenZeppelin/transaction-form-builder/commit/c2671ebb60f4e6bd8ba42de8ba84bd754627d341))
 * **core:** refactor export step to 'Complete', add loader, and use shared LoadingButton ([d6d22e0](https://github.com/OpenZeppelin/transaction-form-builder/commit/d6d22e0909a6e18b7fd0d50bb3dc0eb78b19c247))
-* **core:** remove contract mocks and moking UI ([d230eb1](https://github.com/OpenZeppelin/transaction-form-builder/commit/d230eb1578d73a62348063997eee17d71deb7665))
+* **core:** remove contract mocks and mocking UI ([d230eb1](https://github.com/OpenZeppelin/transaction-form-builder/commit/d230eb1578d73a62348063997eee17d71deb7665))
 * **core:** remove Field Width option from customization ([6eb6b4a](https://github.com/OpenZeppelin/transaction-form-builder/commit/6eb6b4ac97573559ca26ff31c48f91b15cfc938d))
 * **core:** remove layout customization functionality ([cf33cca](https://github.com/OpenZeppelin/transaction-form-builder/commit/cf33cca3d8f97a58a5a3628df35a058811f45201))
 * **core:** select first field in field customization tab ([0cc2f0f](https://github.com/OpenZeppelin/transaction-form-builder/commit/0cc2f0fef2353b9fbe9b2f7833b67998a50a928f))
@@ -162,7 +162,7 @@
 * **form:** add transaction confirmation waiting step ([7865454](https://github.com/OpenZeppelin/transaction-form-builder/commit/7865454b8d1042e09a1611bddeedf7c60e8c0128))
 * **form:** improve transaction status display ([2fb011a](https://github.com/OpenZeppelin/transaction-form-builder/commit/2fb011a6a8de5f0e4c8c4268b77b369eabce6581))
 * **form:** include the contract state widget in the exported form ([9f86289](https://github.com/OpenZeppelin/transaction-form-builder/commit/9f86289db175baa25936a69f5f5aa1e300ce075b))
-* **form:** show loading indicator in transction execute button ([739e577](https://github.com/OpenZeppelin/transaction-form-builder/commit/739e577b53ccd697df1589ffc4314848556637a8))
+* **form:** show loading indicator in transaction execute button ([739e577](https://github.com/OpenZeppelin/transaction-form-builder/commit/739e577b53ccd697df1589ffc4314848556637a8))
 * **form:** show loading indicator in wallet button ([3768883](https://github.com/OpenZeppelin/transaction-form-builder/commit/3768883f1e434d096c53a4e6bd50f2b2befcaba0))
 * **form:** transaction execution ([aad7248](https://github.com/OpenZeppelin/transaction-form-builder/commit/aad7248ba6efef54befb99790370728dce95c51a))
 * **form:** wip add wallet connection and transaction execution ui skeleton ([5fe2f81](https://github.com/OpenZeppelin/transaction-form-builder/commit/5fe2f810baacd9781cfd7d1bf418221b28f512ec))
@@ -180,7 +180,7 @@
 * **ui:** move contract state widget to the left ([982586e](https://github.com/OpenZeppelin/transaction-form-builder/commit/982586e471a89c895c9fb41e85a90a27892acede))
 * **ui:** remove load contract button ([a62013e](https://github.com/OpenZeppelin/transaction-form-builder/commit/a62013e77c8511b1ef763e1f0d6009c5007ec5cc))
 * **ui:** remove read-only functions display functionality ([a70e83d](https://github.com/OpenZeppelin/transaction-form-builder/commit/a70e83ddb3c44d0cc0c91f03f42120cd6c59f318))
-* **ui:** remove unecessary element ([60cf2d3](https://github.com/OpenZeppelin/transaction-form-builder/commit/60cf2d30faf981f6fc846a7df4337328b2a947d0))
+* **ui:** remove unnecessary element ([60cf2d3](https://github.com/OpenZeppelin/transaction-form-builder/commit/60cf2d30faf981f6fc846a7df4337328b2a947d0))
 
 # [1.1.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.0.4...v1.1.0) (2025-04-14)
 
