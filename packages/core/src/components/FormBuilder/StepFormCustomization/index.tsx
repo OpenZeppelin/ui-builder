@@ -119,10 +119,10 @@ export function StepFormCustomization({
     );
   }
 
-  if (networkConfig && !adapter) {
+  if (!adapter) {
     return (
       <div className="py-8 text-center">
-        <p>Adapter not available for selected network. Please select a network.</p>
+        <p>Adapter not available. Please ensure network is selected and supported.</p>
       </div>
     );
   }
