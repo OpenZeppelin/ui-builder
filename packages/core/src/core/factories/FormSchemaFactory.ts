@@ -17,6 +17,7 @@ import type {
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-types';
 
+import { generateFieldsFromFunction } from '../../services/FormGenerator';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
 
@@ -111,6 +112,9 @@ export class FormSchemaFactory {
         isHardcoded: field.isHardcoded,
         hardcodedValue: field.hardcodedValue,
         isReadOnly: field.isReadOnly,
+        components: field.components,
+        elementType: field.elementType,
+        elementFieldConfig: field.elementFieldConfig,
       };
 
       if (field.isHardcoded && !field.isHidden && outputField.defaultValue === undefined) {
@@ -161,23 +165,26 @@ export class FormSchemaFactory {
    * @returns An array of form fields with transforms
    */
   private generateFields(inputs: FunctionParameter[], adapter: ContractAdapter): FormFieldType[] {
-    return inputs.map((input) => {
-      // Get the field type
-      const fieldType = adapter.mapParameterTypeToFieldType(input.type);
+    // Use generateFieldsFromFunction to properly handle complex types
+    const functionDetails = {
+      inputs,
+      // These fields are not used by generateFieldsFromFunction
+      id: '',
+      name: '',
+      displayName: '',
+      type: 'function' as const,
+      outputs: [],
+      modifiesState: false,
+      stateMutability: 'view' as const,
+    };
 
-      // Use the adapter's default field generation
-      const field = adapter.generateDefaultField(input);
+    const fields = generateFieldsFromFunction(adapter, functionDetails);
 
-      // Enhance the field with transforms and ensure correct type
-      return {
-        ...field,
-        type: fieldType, // Ensure the type is set correctly
-        // Add transforms using the utility function
-        transforms: createTransformForFieldType(fieldType, input.type, adapter),
-        // Store the original parameter type for compatibility checks
-        originalParameterType: input.type,
-      };
-    });
+    // Enhance fields with transforms
+    return fields.map((field) => ({
+      ...field,
+      transforms: createTransformForFieldType(field.type, adapter),
+    }));
   }
 
   /**

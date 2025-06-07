@@ -1,3 +1,5 @@
+import { FunctionParameter } from '../contracts/schema';
+
 import { FieldCondition, FieldTransforms, FieldType, FieldValue } from './fields';
 import { FieldValidation } from './validation';
 
@@ -96,4 +98,20 @@ export interface FormFieldType<T extends FieldType = FieldType> {
    * @default false
    */
   isReadOnly?: boolean;
+
+  /**
+   * Components/properties for object and array-object field types.
+   * Defines the structure of nested objects.
+   */
+  components?: FunctionParameter[];
+
+  /**
+   * Element type for array fields (e.g., 'text', 'number', 'blockchain-address')
+   */
+  elementType?: FieldType;
+
+  /**
+   * Base configuration for array element fields
+   */
+  elementFieldConfig?: Partial<FormFieldType>;
 }

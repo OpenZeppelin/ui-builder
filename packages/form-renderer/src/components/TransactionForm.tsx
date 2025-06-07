@@ -59,6 +59,9 @@ export function TransactionForm({
     defaultValues: createDefaultFormValues(schema.fields, schema.defaultValues),
   });
 
+  // Destructure necessary parts of formState to ensure re-renders
+  const { isValid } = methods.formState;
+
   // Reset form when schema changes
   useEffect(() => {
     methods.reset(createDefaultFormValues(schema.fields, schema.defaultValues));
@@ -302,11 +305,11 @@ export function TransactionForm({
 
           {/* Form actions - Button only */}
           <div className="mt-4 border-t border-gray-100 pt-4">
-            <div className="flex justify-end">
+            <div className="flex justify-end items-center gap-2">
               <TransactionExecuteButton
                 isWalletConnected={isWalletConnected}
                 isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
-                isFormValid={methods.formState.isValid && executionConfigError === null}
+                isFormValid={isValid && executionConfigError === null}
                 variant={getButtonVariant()}
               />
             </div>

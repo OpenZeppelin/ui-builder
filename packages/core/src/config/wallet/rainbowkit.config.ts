@@ -1,5 +1,5 @@
 // packages/core/src/config/wallet/rainbowkit.config.ts
-import { type RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import { type RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 // Import the custom configuration types from the EVM adapter
 import type { RainbowKitCustomizations } from '@openzeppelin/transaction-form-adapter-evm';
@@ -42,11 +42,11 @@ const rainbowKitAppConfig = {
     ssr: false,
   },
   providerProps: {
-    theme: darkTheme(), // Example: uncomment and import darkTheme
+    // theme: darkTheme(), // Example: uncomment and import darkTheme
     // initialChain: mainnet, // Example: uncomment and import mainnet from viem/chains
-    modalSize: 'compact',
+    // modalSize: 'compact',
     showRecentTransactions: true,
-    coolMode: true,
+    // coolMode: true,
     appInfo: {
       appName: 'Transaction Form Builder',
       learnMoreUrl: 'https://openzeppelin.com',

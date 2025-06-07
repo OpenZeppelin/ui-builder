@@ -62,8 +62,22 @@ export function formatEvmTransactionData(
 
   // --- Step 3: Parse/Transform Values using the imported parser --- //
   const transformedArgs = expectedArgs.map((param, index) => {
-    const rawValue = orderedRawValues[index];
-    return parseEvmInput(param, rawValue, false);
+    let valueToParse = orderedRawValues[index];
+
+    // If the ABI parameter type is an array (e.g., 'tuple[]', 'address[]')
+    // AND it has components (indicating its elements are tuples/structs)
+    // AND the raw value from the form is an array (not already a string),
+    // then stringify it for parseEvmInput.
+    if (
+      param.type.endsWith('[]') &&
+      param.components && // `components` is the key indicator for tuples/structs
+      param.components.length > 0 &&
+      Array.isArray(valueToParse)
+    ) {
+      valueToParse = JSON.stringify(valueToParse);
+    }
+
+    return parseEvmInput(param, valueToParse, false);
   });
 
   // --- Step 4 & 5: Prepare Return Object --- //

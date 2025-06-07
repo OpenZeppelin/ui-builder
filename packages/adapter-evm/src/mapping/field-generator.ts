@@ -7,27 +7,11 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
+import { getDefaultValueForType } from '@openzeppelin/transaction-form-utils';
 
 import { isValidEvmAddress } from '../utils';
 
 import { mapEvmParamTypeToFieldType } from './type-mapper';
-
-/**
- * Get a default value for a field type
- */
-function getDefaultValueForType<T extends FieldType>(fieldType: T): FieldValue<T> {
-  switch (fieldType) {
-    case 'checkbox':
-      return false as FieldValue<T>;
-    case 'number':
-    case 'amount':
-      return 0 as FieldValue<T>;
-    case 'blockchain-address':
-      return '' as FieldValue<T>;
-    default:
-      return '' as FieldValue<T>;
-  }
-}
 
 /**
  * Get default validation rules for a parameter type
@@ -61,7 +45,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
   parameter: FunctionParameter
 ): FormFieldType<T> {
   const fieldType = mapEvmParamTypeToFieldType(parameter.type) as T;
-  return {
+  const baseField: FormFieldType<T> = {
     id: `field-${Math.random().toString(36).substring(2, 9)}`,
     name: parameter.name || parameter.type, // Use type if name missing
     label: startCase(parameter.displayName || parameter.name || parameter.type),
@@ -72,4 +56,15 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     validation: getDefaultValidationForType(parameter.type),
     width: 'full',
   };
+
+  // Preserve components for object and array-object types
+  if (parameter.components && (fieldType === 'object' || fieldType === 'array-object')) {
+    const result = {
+      ...baseField,
+      components: parameter.components,
+    };
+    return result;
+  }
+
+  return baseField;
 }

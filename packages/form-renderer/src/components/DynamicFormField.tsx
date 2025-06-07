@@ -115,6 +115,60 @@ export function DynamicFormField({
   // Get field-specific props based on type
   const fieldSpecificProps = getFieldSpecificProps(field);
 
+  // Add render functions for complex fields
+  const enhancedProps = {
+    ...fieldSpecificProps,
+    // For array fields, provide a render function for elements
+    ...(field.type === 'array' && {
+      renderElement: (elementField: FormFieldType, index: number): React.ReactElement => (
+        <DynamicFormField
+          key={`${field.id}-element-${index}`}
+          field={{
+            ...elementField,
+            // Inherit isReadOnly from parent field
+            isReadOnly: elementField.isReadOnly ?? field.isReadOnly,
+          }}
+          control={control}
+          adapter={adapter}
+        />
+      ),
+    }),
+    // For object fields, provide a render function for properties
+    ...(field.type === 'object' && {
+      renderProperty: (propertyField: FormFieldType, propertyName: string): React.ReactElement => (
+        <DynamicFormField
+          key={`${field.id}-property-${propertyName}`}
+          field={{
+            ...propertyField,
+            // Inherit isReadOnly from parent field
+            isReadOnly: propertyField.isReadOnly ?? field.isReadOnly,
+          }}
+          control={control}
+          adapter={adapter}
+        />
+      ),
+    }),
+    // For array-object fields, provide a render function for properties
+    ...(field.type === 'array-object' && {
+      renderProperty: (
+        propertyField: FormFieldType,
+        itemIndex: number,
+        propertyName: string
+      ): React.ReactElement => (
+        <DynamicFormField
+          key={`${field.id}-item-${itemIndex}-property-${propertyName}`}
+          field={{
+            ...propertyField,
+            // Inherit isReadOnly from parent field
+            isReadOnly: propertyField.isReadOnly ?? field.isReadOnly,
+          }}
+          control={control}
+          adapter={adapter}
+        />
+      ),
+    }),
+  };
+
   // Pass all necessary props directly to the field component
   // Each specific field component knows how to handle its own props based on field type
   return (
@@ -129,7 +183,7 @@ export function DynamicFormField({
       name={field.name}
       adapter={adapter}
       isReadOnly={field.isReadOnly}
-      {...fieldSpecificProps}
+      {...enhancedProps}
     />
   );
 }
@@ -145,6 +199,31 @@ function getFieldSpecificProps(field: FormFieldType): Record<string, unknown> {
         min: field.validation?.min,
         max: field.validation?.max,
         step: field.options?.find((opt) => opt.label === 'step')?.value,
+      };
+    case 'array':
+      // Extract array-specific props
+      return {
+        elementType: field.elementType || 'text',
+        minItems: field.validation?.min,
+        maxItems: field.validation?.max,
+        elementFieldConfig: field.elementFieldConfig,
+      };
+    case 'object':
+      // Extract object-specific props
+      return {
+        components: field.components || [],
+        showCard: true,
+      };
+    case 'array-object':
+      // Extract array-object-specific props
+      const components = field.components || [];
+
+      return {
+        components,
+        minItems: field.validation?.min,
+        maxItems: field.validation?.max,
+        collapsible: true,
+        defaultCollapsed: false,
       };
     case 'blockchain-address':
       // Add address-specific props

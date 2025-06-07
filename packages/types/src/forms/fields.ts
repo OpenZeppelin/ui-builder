@@ -23,6 +23,9 @@ export type FieldType =
   | 'password'
   | 'blockchain-address' // Blockchain address with validation
   | 'amount' // Token amount with decimals handling
+  | 'array' // Array inputs with add/remove functionality
+  | 'object' // Composite/nested object inputs
+  | 'array-object' // Arrays of objects
   | 'hidden';
 
 /**
@@ -43,7 +46,13 @@ export type FieldValue<T extends FieldType> = T extends
         ? Date
         : T extends 'select' | 'radio'
           ? string
-          : unknown;
+          : T extends 'array'
+            ? unknown[]
+            : T extends 'object'
+              ? Record<string, unknown>
+              : T extends 'array-object'
+                ? Record<string, unknown>[]
+                : unknown;
 
 /**
  * Shared condition interface for both validation and visibility rules
