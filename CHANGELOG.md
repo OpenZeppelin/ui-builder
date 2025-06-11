@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.8.1...v1.9.0) (2025-06-11)
+
+
+### Features
+
+* **adapter:** implement wallet connection feature for midnight lace wallet ([c8a2670](https://github.com/OpenZeppelin/transaction-form-builder/commit/c8a2670e330c808b8f1f04017023174ddb082670))
+
 ## [1.8.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.8.0...v1.8.1) (2025-06-07)
 
 
