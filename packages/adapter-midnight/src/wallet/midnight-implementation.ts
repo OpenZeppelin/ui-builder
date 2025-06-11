@@ -4,6 +4,8 @@ import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api'
 // CIP-30 style API (window.midnight.lace). It's responsible for all direct
 // communication with the wallet extension.
 
+let enabledApi: DAppConnectorWalletAPI | null = null;
+
 /**
  * Checks if the wallet is already enabled (i.e., if the dApp has permission).
  * This method should not trigger a UI pop-up.
@@ -17,28 +19,36 @@ export const isEnabled = (): Promise<boolean> => {
 };
 
 /**
- * Calls the wallet's enable() method.
- * This resolves immediately with a "pre-flight" API object that is not
- * fully authorized until the user approves the connection in the UI.
- * The `.state()` method of the returned object is the part that will
- * actually wait for user approval.
- *
- * @returns A Promise that resolves with the pre-flight Lace wallet API object.
+ * Calls the wallet's enable() method. This function is blocking and will
+ * resolve or reject only after the user interacts with the connection popup.
+ * On success, it stores the resulting API object in a module-level variable.
+ * @returns The enabled Lace wallet API object.
  */
-export const connect = (): Promise<DAppConnectorWalletAPI> => {
+export const connect = async (): Promise<DAppConnectorWalletAPI> => {
   if (typeof window === 'undefined' || !window.midnight?.mnLace) {
-    // Return a rejected promise for consistency
     return Promise.reject(new Error('Lace wallet not found.'));
   }
-  return window.midnight.mnLace.enable();
+
+  const api = await window.midnight.mnLace.enable();
+  enabledApi = api;
+  return api;
 };
 
 /**
- * Disconnect is a no-op in this implementation, as all state is managed
- * within the React provider.
+ * Disconnects by clearing the stored API object. This is critical for
+ * ensuring the next connection attempt requires user approval.
  */
 export const disconnect = (): void => {
-  // No action needed here.
+  enabledApi = null;
+};
+
+/**
+ * Synchronously returns the currently connected Lace API instance.
+ * This is the non-blocking function used by the polling mechanism.
+ * @returns The Lace API object or `null` if not connected.
+ */
+export const getApi = (): DAppConnectorWalletAPI | null => {
+  return enabledApi;
 };
 
 // Functions below are not yet implemented and are placeholders.

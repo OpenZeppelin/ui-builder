@@ -125,6 +125,7 @@ export const MidnightWalletProvider: React.FC<EcosystemReactUiProviderProps> = (
   }, [isConnecting, isInitializing, cleanupTimer]);
 
   const handleDisconnect = useCallback(async () => {
+    implementation.disconnect();
     setApi(null);
     setAddress(undefined);
     setError(null);
