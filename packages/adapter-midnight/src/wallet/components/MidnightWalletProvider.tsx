@@ -29,6 +29,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { MidnightWalletContext } from '../context/MidnightWalletContext';
 import * as implementation from '../midnight-implementation';
@@ -70,7 +71,7 @@ export const MidnightWalletProvider: React.FC<EcosystemReactUiProviderProps> = (
           setAddress(state.address);
         }
       } catch (err) {
-        console.warn('Auto-reconnect failed:', err);
+        logger.warn('MidnightWalletProvider', 'Auto-reconnect failed:', err);
       } finally {
         setIsInitializing(false);
       }
