@@ -2,49 +2,31 @@
 
 This package provides the `ContractAdapter` implementation for the Midnight Network for the Transaction Form Builder.
 
-**Note:** While the basic structure is in place, including network configuration definitions, the core adapter logic for Midnight-specific operations is currently a placeholder. Functionality will be added in future development phases as the Midnight Network and its tooling evolve.
+## Current Status: Wallet Connection Implemented
 
-It is intended to be responsible for:
+This adapter has a fully implemented wallet connection feature, allowing users to connect to the Lace (Midnight) browser extension. The core contract interaction methods (`loadContract`, `formatTransactionData`, `signAndBroadcast`, etc.) are currently placeholder stubs and will be implemented in future phases.
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
-- Defining and exporting specific Midnight network configurations as `MidnightNetworkConfig` objects. These are located in `src/networks/` and will include details relevant to Midnight (e.g., node endpoints, specific chain parameters, explorer URLs).
-- Loading Midnight contract metadata (details TBD based on Midnight's tooling).
-- Mapping Midnight-specific data types to the form field types.
-- Parsing user input into Midnight-compatible transactions, according to the `MidnightNetworkConfig`.
-- Formatting results from contract queries.
-- Interacting with Midnight wallets for signing and sending transactions on the configured network.
-- Providing other Midnight-specific configurations and validation.
+### Key Implemented Features
+
+- **Wallet Connection**: Supports connecting to the `mnLace` wallet instance injected into the `window` object.
+- **Auto-reconnection**: Automatically reconnects to the user's wallet on page reload if they have not explicitly disconnected.
+- **Robust Connection Logic**: Implements a state-polling mechanism to handle the wallet's unconventional API, which resolves before user approval and has internal race conditions.
+- **Explicit Disconnect Handling**: Uses `localStorage` to respect user disconnections across sessions, which is the standard workaround for CIP-30 style wallets.
+- **Custom UI Components**: Provides custom, theme-consistent `ConnectButton` and `AccountDisplay` components.
 
 ## Usage
 
-Once fully implemented, the `MidnightAdapter` class will be instantiated with a specific `MidnightNetworkConfig` object:
+The `MidnightAdapter` is consumed by the `core` application's `WalletStateProvider`. It exposes a React context provider (`MidnightWalletProvider`) and a set of facade hooks that are automatically used by the main application UI.
 
 ```typescript
+// In the core application's adapter factory:
 import { MidnightAdapter } from '@openzeppelin/transaction-form-adapter-midnight';
-// Example: import { midnightDevnet } from '@openzeppelin/transaction-form-adapter-midnight';
-import { MidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { midnightTestnet } from '@openzeppelin/transaction-form-adapter-midnight';
 
-// For type access if needed
-
-// Placeholder: Actual network config objects would be imported from './networks'
-const placeholderNetworkConfig: MidnightNetworkConfig = {
-  id: 'midnight-devnet',
-  name: 'Midnight Devnet',
-  ecosystem: 'midnight',
-  network: 'midnight',
-  type: 'devnet',
-  isTestnet: true,
-  explorerUrl: 'https://explorer.midnight.network/devnet', // Hypothetical URL
-  // ... any other MidnightNetworkConfig fields (e.g., nodeEndpoint)
-};
-
-const midnightAdapter = new MidnightAdapter(placeholderNetworkConfig);
-
-// Use midnightAdapter for operations on the configured Midnight network
+const networkConfig = midnightTestnet;
+const midnightAdapter = new MidnightAdapter(networkConfig);
 ```
-
-Network configurations for Midnight networks will be defined and exported from `src/networks/index.ts` within this package. The full list will be exported as `midnightNetworks`.
 
 ## Internal Structure
 
-This adapter will follow the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the `src/networks/` directory for managing its network configurations.
+This adapter follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md). All wallet-related logic can be found in the `src/wallet/` directory.

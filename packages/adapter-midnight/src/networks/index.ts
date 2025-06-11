@@ -1,19 +1,12 @@
 import { MidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
 
-import { midnightMainnet } from './mainnet';
-import { midnightDevnet } from './testnet';
-
-// All mainnet networks
-export const midnightMainnetNetworks: MidnightNetworkConfig[] = [midnightMainnet];
+import { midnightTestnet } from './testnet';
 
 // All testnet/devnet networks
-export const midnightTestnetNetworks: MidnightNetworkConfig[] = [midnightDevnet];
+export const midnightTestnetNetworks: MidnightNetworkConfig[] = [midnightTestnet];
 
-// All Midnight networks
-export const midnightNetworks: MidnightNetworkConfig[] = [
-  ...midnightMainnetNetworks,
-  ...midnightTestnetNetworks,
-];
+// All Midnight networks - for now, this is just testnets
+export const midnightNetworks: MidnightNetworkConfig[] = [...midnightTestnetNetworks];
 
 // Export individual networks as well
-export { midnightMainnet, midnightDevnet };
+export { midnightTestnet };

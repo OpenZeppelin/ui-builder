@@ -7,6 +7,11 @@
  */
 export const midnightAdapterConfig = {
   /**
+   * Default app name to display in the wallet connection UI.
+   */
+  appName: 'OpenZeppelin Transaction Form Builder',
+
+  /**
    * Dependencies required by the Midnight adapter
    * These will be included in exported projects that use this adapter
    */
@@ -26,6 +31,8 @@ export const midnightAdapterConfig = {
       // Additional utilities for Midnight
       'js-sha256': '^0.9.0',
       'bn.js': '^5.2.1',
+
+      '@midnight-ntwrk/dapp-connector-api': '^3.0.0',
     },
 
     // Development dependencies

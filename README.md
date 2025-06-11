@@ -578,6 +578,18 @@ When adding new EVM network definitions (in `packages/adapter-evm/src/networks/`
 
 If this network is also to be a chain-switchable target within Wagmi (for the EVM adapter), you may need to update the `defaultSupportedChains` array and the `viemChainIdToAppNetworkIdMap` in `packages/adapter-evm/src/wallet/wagmi-implementation.ts` to ensure RPC overrides from `app.config.json` apply correctly to Wagmi's transports for this chain.
 
+### Midnight Wallet Integration
+
+The `@openzeppelin/transaction-form-adapter-midnight` package handles integration with the Midnight ecosystem, specifically the Lace wallet. Integrating with the Midnight wallet requires special handling due to its unique, non-blocking connection flow, which differs from many other wallet APIs.
+
+Key characteristics of the Midnight wallet integration:
+
+- **Non-Blocking `enable()`**: The wallet's `enable()` method resolves immediately, returning a "pre-flight" API object before the user has granted or denied connection permissions.
+- **State Polling**: To manage this, the adapter implements a state-polling mechanism. After `enable()` is called, the adapter repeatedly checks the wallet's state until the user approves the connection.
+- **Explicit Disconnect Handling**: The wallet's API does not provide a programmatic `disconnect` function. The adapter simulates disconnection by setting a flag in `localStorage` to prevent automatic reconnection in subsequent sessions, respecting the user's intent to disconnect.
+
+This implementation ensures a robust and user-friendly connection experience despite the underlying API's unconventional behavior. For a detailed look at the implementation, see the `MidnightWalletProvider.tsx` component within the adapter package.
+
 ### Advanced EVM Wallet Integration & UI Customization
 
 The `@openzeppelin/transaction-form-adapter-evm` package offers robust integration with EVM wallets, leveraging the `wagmi` library. It features an enhanced architecture for UI kit integration, providing:

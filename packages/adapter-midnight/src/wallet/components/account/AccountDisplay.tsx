@@ -2,33 +2,32 @@ import { LogOut } from 'lucide-react';
 
 import React from 'react';
 
-import {
-  useDerivedAccountStatus,
-  useDerivedDisconnect,
-} from '@openzeppelin/transaction-form-react-core';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
 import { Button } from '@openzeppelin/transaction-form-ui';
 import { cn, truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
-import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
+import { useAccount, useDisconnect } from '../../hooks/facade-hooks';
+import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';
 
 /**
- * A component that displays the connected account address and chain ID.
+ * A component that displays the connected account address and network.
  * Also includes a disconnect button.
  */
 export const CustomAccountDisplay: React.FC<BaseComponentProps> = ({ className }) => {
-  // Use the SafeWagmiComponent with null fallback
+  // Use the SafeMidnightComponent with null fallback
   return (
-    <SafeWagmiComponent fallback={null}>
+    <SafeMidnightComponent fallback={null}>
       <AccountDisplayContent className={className} />
-    </SafeWagmiComponent>
+    </SafeMidnightComponent>
   );
 };
 
-// Inner component that uses derived hooks
+/**
+ * The inner component that contains the actual UI and uses the hooks.
+ */
 const AccountDisplayContent: React.FC<{ className?: string }> = ({ className }) => {
-  const { isConnected, address, chainId } = useDerivedAccountStatus();
-  const { disconnect } = useDerivedDisconnect();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
 
   if (!isConnected || !address || !disconnect) {
     return null;
@@ -38,9 +37,7 @@ const AccountDisplayContent: React.FC<{ className?: string }> = ({ className }) 
     <div className={cn('flex items-center gap-2', className)}>
       <div className="flex flex-col">
         <span className="text-xs font-medium">{truncateMiddle(address, 4, 4)}</span>
-        <span className="text-[9px] text-muted-foreground -mt-0.5">
-          {chainId ? `Chain ID: ${chainId}` : 'Chain ID: N/A'}
-        </span>
+        <span className="text-[9px] text-muted-foreground -mt-0.5">Midnight Network</span>
       </div>
       <Button
         onClick={() => disconnect()}

@@ -2,6 +2,14 @@
 
 This directory contains the wallet integration layer for the EVM adapter, providing all wallet-related UI, hooks, context, and utilities for EVM-compatible chains using the `wagmi` library.
 
+## Architectural Approach: UI Kit Extensibility
+
+The EVM ecosystem is mature and features a wide variety of wallet libraries and UI kits (e.g., RainbowKit, ConnectKit, Web3Modal). To accommodate this, the `EvmAdapter`'s wallet module is designed to be highly extensible. It uses a singleton manager (`EvmUiKitManager`) to dynamically configure and load different UI kits at runtime.
+
+This architecture allows applications to switch between different wallet UIs (like RainbowKit or a set of custom-styled components) through configuration, without changing the application code.
+
+**Note:** This complex, manager-based architecture is specific to the needs of the EVM ecosystem. Other adapters for ecosystems with a single, primary wallet (like the `MidnightAdapter` for the Lace wallet) can use a much simpler, more direct implementation. The `MidnightWalletProvider` serves as a good example of a minimal implementation without UI kit management.
+
 ## Purpose
 
 - **UI Environment Provision**: Sets up a stable UI environment for EVM wallet interactions. The adapter exports `EvmWalletUiRoot`, a React component that internally uses a singleton `EvmUiKitManager` to manage the `WagmiConfig`, UI kit assets (like RainbowKit's provider and CSS), and overall state. This root component ensures `WagmiProvider` and `QueryClientProvider` are always rendered, aiming to prevent UI flicker during network or configuration changes.
