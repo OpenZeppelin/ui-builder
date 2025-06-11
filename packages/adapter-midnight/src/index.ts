@@ -7,9 +7,7 @@ export { default } from './adapter'; // Default export for convenience
 export { MidnightAdapter } from './adapter';
 export {
   midnightNetworks,
-  midnightMainnetNetworks,
   midnightTestnetNetworks,
   // Individual networks
-  midnightMainnet,
-  midnightDevnet,
+  midnightTestnet,
 } from './networks';

@@ -3,6 +3,9 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
@@ -11,36 +14,22 @@ import type {
   MidnightNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Import functions from modules
-import {
-  getMidnightSupportedExecutionMethods,
-  validateMidnightExecutionConfig,
-} from './configuration/execution';
-import { getMidnightExplorerAddressUrl, getMidnightExplorerTxUrl } from './configuration/explorer';
 
-import { loadMidnightContract } from './definition';
-import {
-  generateMidnightDefaultField,
-  getMidnightCompatibleFieldTypes,
-  mapMidnightParameterTypeToFieldType,
-} from './mapping';
-import { isMidnightViewFunction, queryMidnightViewFunction } from './query';
-import { formatMidnightTransactionData, signAndBroadcastMidnightTransaction } from './transaction';
-import { formatMidnightFunctionResult } from './transform';
-import { isValidAddress as isMidnightValidAddress } from './utils';
-import {
-  connectMidnightWallet,
-  disconnectMidnightWallet,
-  getMidnightAvailableConnectors,
-  getMidnightWalletConnectionStatus,
-  supportsMidnightWalletConnection,
-} from './wallet';
+import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
+import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
+import { ConnectButton } from './wallet/components/connect/ConnectButton';
+import * as connection from './wallet/connection';
+import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 /**
- * Midnight-specific adapter implementation using explicit method delegation.
+ * Midnight-specific adapter.
  *
- * NOTE: Contains placeholder implementations for most functionalities.
+ * Implements the full ContractAdapter interface to integrate with the core application.
+ * Wallet-related functionalities are implemented, while contract-specific methods
+ * are placeholders to be built out in later phases.
  */
 export class MidnightAdapter implements ContractAdapter {
   readonly networkConfig: MidnightNetworkConfig;
@@ -50,111 +39,141 @@ export class MidnightAdapter implements ContractAdapter {
       throw new Error('MidnightAdapter requires a valid Midnight network configuration.');
     }
     this.networkConfig = networkConfig;
-    console.log(`MidnightAdapter initialized for network: ${this.networkConfig.name}`);
-  }
-
-  // --- Contract Loading --- //
-  async loadContract(source: string): Promise<ContractSchema> {
-    return loadMidnightContract(source);
-  }
-
-  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
-    return contractSchema.functions.filter((fn) => fn.modifiesState);
-  }
-
-  // --- Type Mapping & Field Generation --- //
-  mapParameterTypeToFieldType(parameterType: string): FieldType {
-    return mapMidnightParameterTypeToFieldType(parameterType);
-  }
-  getCompatibleFieldTypes(parameterType: string): FieldType[] {
-    return getMidnightCompatibleFieldTypes(parameterType);
-  }
-  generateDefaultField<T extends FieldType = FieldType>(
-    parameter: FunctionParameter
-  ): FormFieldType<T> {
-    return generateMidnightDefaultField(parameter);
-  }
-
-  // --- Transaction Formatting & Execution --- //
-  public formatTransactionData(
-    contractSchema: ContractSchema,
-    functionId: string,
-    submittedInputs: Record<string, unknown>,
-    fields: FormFieldType[]
-  ): unknown {
-    return formatMidnightTransactionData(contractSchema, functionId, submittedInputs, fields);
-  }
-  async signAndBroadcast(
-    transactionData: unknown,
-    executionConfig?: ExecutionConfig
-  ): Promise<{ txHash: string }> {
-    return signAndBroadcastMidnightTransaction(transactionData, executionConfig);
-  }
-
-  // Optional method: waitForTransactionConfirmation? is omitted as imported function is undefined
-
-  // --- View Function Querying --- //
-  isViewFunction(functionDetails: ContractFunction): boolean {
-    return isMidnightViewFunction(functionDetails);
-  }
-  async queryViewFunction(
-    contractAddress: string,
-    functionId: string,
-    params: unknown[] = [],
-    contractSchema?: ContractSchema
-  ): Promise<unknown> {
-    return queryMidnightViewFunction(
-      contractAddress,
-      functionId,
-      this.networkConfig,
-      params,
-      contractSchema
+    logger.info(
+      'MidnightAdapter',
+      `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
     );
   }
-  formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
-    return formatMidnightFunctionResult(decodedValue, functionDetails);
+
+  public getEcosystemReactUiContextProvider(): React.FC<EcosystemReactUiProviderProps> {
+    return MidnightWalletProvider;
   }
 
-  // --- Wallet Interaction --- //
-  supportsWalletConnection(): boolean {
-    return supportsMidnightWalletConnection();
+  public getEcosystemReactHooks(): EcosystemSpecificReactHooks {
+    return midnightFacadeHooks;
   }
-  async getAvailableConnectors(): Promise<Connector[]> {
-    return getMidnightAvailableConnectors();
+
+  public getEcosystemWalletComponents(): EcosystemWalletComponents {
+    return {
+      ConnectButton,
+      AccountDisplay: CustomAccountDisplay,
+    };
   }
-  async connectWallet(
-    connectorId: string
+
+  public supportsWalletConnection(): boolean {
+    return connection.supportsMidnightWalletConnection();
+  }
+
+  public async getAvailableConnectors(): Promise<Connector[]> {
+    return connection.getMidnightAvailableConnectors();
+  }
+
+  public connectWallet(
+    _connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
-    return connectMidnightWallet(connectorId);
-  }
-  async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
-    return disconnectMidnightWallet();
-  }
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    return getMidnightWalletConnectionStatus();
-  }
-  // Optional method: onWalletConnectionChange? is omitted as imported function is undefined
-
-  // --- Configuration & Metadata --- //
-  async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
-    return getMidnightSupportedExecutionMethods();
-  }
-  async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    return validateMidnightExecutionConfig(config);
-  }
-  getExplorerUrl(address: string): string | null {
-    return getMidnightExplorerAddressUrl(address, this.networkConfig);
-  }
-  getExplorerTxUrl?(txHash: string): string | null {
-    if (getMidnightExplorerTxUrl) {
-      return getMidnightExplorerTxUrl(txHash, this.networkConfig);
-    }
-    return null;
+    logger.warn(
+      'MidnightAdapter',
+      'The `connectWallet` method is not supported. Use the `ConnectButton` component from `getEcosystemWalletComponents()` instead.'
+    );
+    return Promise.resolve({ connected: false, error: 'Method not supported.' });
   }
 
-  // --- Validation --- //
-  isValidAddress(address: string): boolean {
-    return isMidnightValidAddress(address);
+  public disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
+    return connection.disconnectMidnightWallet();
+  }
+
+  public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+    // This method is required by the ContractAdapter interface.
+    // In our React-based UI, the connection status is managed reactively by the
+    // MidnightWalletProvider. This function provides a non-reactive, one-time
+    // status check, which is not the source of truth for the UI components.
+    return {
+      isConnected: false,
+      address: undefined,
+      chainId: this.networkConfig.id,
+    };
+  }
+
+  // --- Placeholder Implementations ---
+
+  public async loadContract(_source: string): Promise<ContractSchema> {
+    throw new Error('loadContract not implemented for MidnightAdapter.');
+  }
+
+  public getWritableFunctions(contractSchema: ContractSchema): ContractFunction[] {
+    return contractSchema.functions.filter((fn) => !fn.modifiesState);
+  }
+
+  public mapParameterTypeToFieldType(_parameterType: string): FieldType {
+    return 'text';
+  }
+
+  public getCompatibleFieldTypes(_parameterType: string): FieldType[] {
+    return ['text'];
+  }
+
+  public generateDefaultField(parameter: FunctionParameter): FormFieldType {
+    return {
+      id: parameter.name,
+      name: parameter.name,
+      label: parameter.name,
+      type: this.mapParameterTypeToFieldType(parameter.type),
+      validation: {},
+    };
+  }
+
+  public formatTransactionData(
+    _contractSchema: ContractSchema,
+    _functionId: string,
+    _submittedInputs: Record<string, unknown>,
+    _fields: FormFieldType[]
+  ): unknown {
+    throw new Error('formatTransactionData not implemented for MidnightAdapter.');
+  }
+
+  public async signAndBroadcast(
+    _transactionData: unknown,
+    _executionConfig?: ExecutionConfig
+  ): Promise<{ txHash: string }> {
+    throw new Error('signAndBroadcast not implemented for MidnightAdapter.');
+  }
+
+  public isViewFunction(functionDetails: ContractFunction): boolean {
+    return !functionDetails.modifiesState;
+  }
+
+  public async queryViewFunction(
+    _contractAddress: string,
+    _functionId: string,
+    _params: unknown[],
+    _contractSchema?: ContractSchema
+  ): Promise<unknown> {
+    throw new Error('queryViewFunction not implemented for MidnightAdapter.');
+  }
+
+  public formatFunctionResult(decodedValue: unknown): string {
+    return JSON.stringify(decodedValue, null, 2);
+  }
+
+  public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
+    return []; // Placeholder
+  }
+
+  public async validateExecutionConfig(_config: ExecutionConfig): Promise<true | string> {
+    return true; // No config to validate yet
+  }
+
+  public getExplorerUrl(_address: string): string | null {
+    return null; // No official explorer yet
+  }
+
+  public getExplorerTxUrl(_txHash: string): string | null {
+    return null; // No official explorer yet
+  }
+
+  public isValidAddress(_address: string): boolean {
+    // Placeholder - add real Bech32m validation later
+    return true;
   }
 }
 

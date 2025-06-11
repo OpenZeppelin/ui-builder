@@ -45,11 +45,14 @@
   },
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:*",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/transaction-form-utils": "workspace:^",
+    "@openzeppelin/transaction-form-react-core": "workspace:^",
+    "@midnight-ntwrk/dapp-connector-api": "^3.0.0"
   },
   "devDependencies": {
     "typescript": "^5.8.2",
-    "eslint": "^9.22.0"
+    "eslint": "^9.22.0",
+    "@types/react": "19.1.6"
   },
   "peerDependencies": {
     "react": "^19.0.0"

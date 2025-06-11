@@ -32,7 +32,7 @@ export const CustomConnectButton: React.FC<ConnectButtonProps> = ({
   const unavailableButton = (
     <div className={cn('flex items-center', className)}>
       <Button disabled={true} variant="outline" size="sm" className="h-8 px-2 text-xs">
-        <Wallet className="h-3.5 w-3.5 mr-1" />
+        <Wallet className="size-3.5 mr-1" />
         Wallet Unavailable
       </Button>
     </div>
@@ -108,9 +108,9 @@ const ConnectButtonContent: React.FC<{
         title={isConnected ? 'Connected' : connectError?.message || 'Connect Wallet'}
       >
         {showButtonLoading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+          <Loader2 className="size-3.5 animate-spin mr-1" />
         ) : (
-          <Wallet className="h-3.5 w-3.5 mr-1" />
+          <Wallet className="size-3.5 mr-1" />
         )}
         {showButtonLoading ? 'Connecting...' : 'Connect Wallet'}
       </Button>

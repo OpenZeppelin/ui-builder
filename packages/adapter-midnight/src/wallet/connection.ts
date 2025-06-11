@@ -1,41 +1,34 @@
 import type { Connector } from '@openzeppelin/transaction-form-types';
 
+// This file will contain facade functions that provide a clean, high-level API
+// for wallet connection operations. It will use the raw functions from
+// midnight-implementation.ts to orchestrate connecting, disconnecting, and
+// checking wallet status.
+
 /**
- * Indicates if this adapter supports wallet connection
- * @returns Whether wallet connection is supported by this adapter
+ * Checks if a Midnight-compatible wallet (Lace) is available.
+ * @returns `true` if the wallet extension is detected.
  */
-export function supportsMidnightWalletConnection(): boolean {
-  return false; // Midnight adapter does not support wallet connection yet
-}
+export const supportsMidnightWalletConnection = (): boolean => {
+  return typeof window !== 'undefined' && !!window.midnight?.mnLace;
+};
 
-export async function getMidnightAvailableConnectors(): Promise<Connector[]> {
-  return [];
-}
+/**
+ * Returns a list of available Midnight wallet connectors.
+ * @returns An array of `Connector` objects, currently only Lace.
+ */
+export const getMidnightAvailableConnectors = async (): Promise<Connector[]> => {
+  if (!supportsMidnightWalletConnection()) {
+    return [];
+  }
+  return [{ id: 'mnLace', name: 'Lace (Midnight)' }];
+};
 
-export async function connectMidnightWallet(
-  _connectorId: string
-): Promise<{ connected: boolean; address?: string; error?: string }> {
-  return { connected: false, error: 'Midnight adapter does not support wallet connection.' };
-}
-
+/**
+ * Disconnects from the Midnight wallet.
+ */
 export async function disconnectMidnightWallet(): Promise<{
   disconnected: boolean;
-  error?: string;
 }> {
-  return { disconnected: false, error: 'Midnight adapter does not support wallet connection.' };
+  return { disconnected: true };
 }
-
-/**
- * @inheritdoc
- */
-export function getMidnightWalletConnectionStatus(): {
-  isConnected: boolean;
-  address?: string;
-  chainId?: string;
-} {
-  // Stub implementation: Always return disconnected status
-  return { isConnected: false };
-}
-
-// Placeholder for optional connection change listener
-export const onMidnightWalletConnectionChange: undefined = undefined;

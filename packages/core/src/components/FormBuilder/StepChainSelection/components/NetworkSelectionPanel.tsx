@@ -51,9 +51,10 @@ export function NetworkSelectionPanel({
       ('chainId' in network && network.chainId?.toString().includes(searchQuery))
   );
 
-  // Group networks by type (mainnet/testnet)
+  // Group networks by type (mainnet/testnet/devnet)
   const mainnetNetworks = filteredNetworks.filter((n) => n.type === 'mainnet');
   const testnetNetworks = filteredNetworks.filter((n) => n.type === 'testnet');
+  const devnetNetworks = filteredNetworks.filter((n) => n.type === 'devnet');
 
   return (
     <div className="space-y-4">
@@ -94,6 +95,15 @@ export function NetworkSelectionPanel({
             <NetworkGroup
               title="Testnet Networks"
               networks={testnetNetworks}
+              onNetworkSelected={onNetworkSelected}
+              selectedNetworkId={selectedNetworkId}
+            />
+          )}
+
+          {devnetNetworks.length > 0 && (
+            <NetworkGroup
+              title="Devnet Networks"
+              networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
             />
