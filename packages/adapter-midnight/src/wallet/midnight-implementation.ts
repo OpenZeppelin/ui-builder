@@ -19,10 +19,14 @@ export const isEnabled = (): Promise<boolean> => {
 };
 
 /**
- * Calls the wallet's enable() method. This function is blocking and will
- * resolve or reject only after the user interacts with the connection popup.
- * On success, it stores the resulting API object in a module-level variable.
- * @returns The enabled Lace wallet API object.
+ * Calls the wallet's enable() method to initiate a connection.
+ *
+ * DEVELOPER NOTE: This method is non-blocking and resolves *immediately*
+ * with a "pre-flight" API object. It does not wait for user approval.
+ * The `MidnightWalletProvider` handles the subsequent state polling required
+ * to confirm the connection is fully established.
+ *
+ * @returns A Promise that resolves with the pre-flight Lace wallet API object.
  */
 export const connect = async (): Promise<DAppConnectorWalletAPI> => {
   if (typeof window === 'undefined' || !window.midnight?.mnLace) {
