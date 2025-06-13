@@ -1,3 +1,16 @@
+# [1.10.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.9.0...v1.10.0) (2025-06-13)
+
+
+### Bug Fixes
+
+* **adapter:** add getContractDefinitionInputs to rest of the adapters ([250bc8e](https://github.com/OpenZeppelin/transaction-form-builder/commit/250bc8ef37b5aafec59141ee0ddb1ca7b689068f))
+* **core:** reset to avoid stale inputs ([363bec6](https://github.com/OpenZeppelin/transaction-form-builder/commit/363bec6e725ffd4ec04afd9cdb987cc9298acc4d))
+
+
+### Features
+
+* **adapter:** implement schema-driven contract definition UI ([d8a686c](https://github.com/OpenZeppelin/transaction-form-builder/commit/d8a686cbf9dafabfa8bcf4f410c64f480e92a44a))
+
 # [1.9.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.8.1...v1.9.0) (2025-06-11)
 
 
