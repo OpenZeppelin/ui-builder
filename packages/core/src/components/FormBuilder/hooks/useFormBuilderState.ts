@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { ContractSchema, Ecosystem } from '@openzeppelin/transaction-form-types';
+import { ContractSchema, Ecosystem, FormValues } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 
@@ -62,14 +62,14 @@ export function useFormBuilderState(initialNetworkConfigId?: string | null) {
     ]
   );
 
-  // Create enhanced contract schema loaded handler that shows widget
+  // Create enhanced contract schema loaded handler
   const handleContractSchemaLoaded = useCallback(
-    (schema: ContractSchema | null) => {
-      contractDefinition.handleContractSchemaLoaded(schema);
-      if (schema) contractWidget.showWidget();
-      else contractWidget.hideWidget();
+    (schema: ContractSchema | null, formValues?: FormValues) => {
+      contractDefinition.handleContractSchemaLoaded(schema, formValues);
+      // Let the widget state hook handle visibility based on view functions
+      // Don't force show/hide here
     },
-    [contractDefinition, contractWidget]
+    [contractDefinition]
   );
 
   // Create enhanced function selection handler that resets downstream state
@@ -129,6 +129,7 @@ export function useFormBuilderState(initialNetworkConfigId?: string | null) {
     selectedEcosystem,
     contractSchema: contractDefinition.contractSchema,
     contractAddress: contractDefinition.contractAddress,
+    contractFormValues: contractDefinition.contractFormValues,
     selectedFunction: functionSelection.selectedFunction,
     formConfig: formCustomization.formConfig,
     isExecutionStepValid: formCustomization.isExecutionStepValid,
