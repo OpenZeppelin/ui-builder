@@ -83,8 +83,9 @@ export function StepContractDefinition({
 
   const handleClearContract = useCallback(() => {
     setLoadedSchema(null);
+    reset({});
     onContractSchemaLoaded(null);
-  }, [onContractSchemaLoaded]);
+  }, [onContractSchemaLoaded, reset]);
 
   const handleLoadContract = useCallback(
     async (data: FormValues) => {
