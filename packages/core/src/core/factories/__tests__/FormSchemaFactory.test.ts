@@ -80,6 +80,7 @@ const mockAdapterInstance: ContractAdapter = {
   getExplorerTxUrl: vi.fn(() => null),
   waitForTransactionConfirmation: vi.fn().mockResolvedValue({ status: 'success' }),
   onWalletConnectionChange: vi.fn(() => () => {}),
+  getContractDefinitionInputs: vi.fn(() => []),
 };
 
 describe('FormSchemaFactory', () => {

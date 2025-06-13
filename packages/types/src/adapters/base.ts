@@ -1,13 +1,13 @@
-import type { ContractFunction, ContractSchema, FunctionParameter } from '../contracts/schema';
-import type { FieldType } from '../forms/fields';
-import type { FormFieldType } from '../forms/form-field';
-import type { NetworkConfig } from '../networks/config';
+import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
+import { type FieldType } from '../forms';
+import { type FormFieldType } from '../forms/form-field';
+import { type NetworkConfig } from '../networks';
 
-import type {
-  EcosystemReactUiProviderProps,
-  EcosystemSpecificReactHooks,
-  EcosystemWalletComponents,
-  UiKitConfiguration,
+import {
+  type EcosystemReactUiProviderProps,
+  type EcosystemSpecificReactHooks,
+  type EcosystemWalletComponents,
+  type UiKitConfiguration,
 } from './ui-enhancements';
 
 // Base types and interfaces for adapters will be defined here.
@@ -64,7 +64,7 @@ export interface ContractAdapter {
    * @param source - The contract address or JSON ABI string.
    * @returns A promise resolving to the ContractSchema.
    */
-  loadContract(source: string): Promise<ContractSchema>;
+  loadContract(source: string | Record<string, unknown>): Promise<ContractSchema>;
 
   /**
    * Get only the functions that modify state (writable functions)
@@ -310,4 +310,11 @@ export interface ContractAdapter {
    * @returns An object mapping standard component names to React components, or `undefined` if not supported or configured.
    */
   getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;
+
+  /**
+   * Returns a schema for the inputs required to define a contract.
+   * This allows adapters to specify what information they need (e.g., address, ABI, artifacts).
+   * @returns An array of FormFieldType objects representing the required inputs.
+   */
+  getContractDefinitionInputs(): FormFieldType[];
 }

@@ -1,11 +1,12 @@
 import { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
 
 export interface StepContractDefinitionProps {
-  onContractSchemaLoaded: (schema: ContractSchema | null) => void;
+  onContractSchemaLoaded: (schema: ContractSchema | null, formValues?: FormValues) => void;
   adapter: ContractAdapter | null;
   networkConfig: NetworkConfig | null;
   existingContractSchema?: ContractSchema | null;
+  existingFormValues?: FormValues | null;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
 }
