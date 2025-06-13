@@ -7,6 +7,7 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
+  FormValues,
   FunctionParameter,
   StellarNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
@@ -19,7 +20,6 @@ import {
 } from './configuration/execution';
 import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './configuration/explorer';
 
-import { loadStellarContract } from './definition';
 import {
   generateStellarDefaultField,
   getStellarCompatibleFieldTypes,
@@ -55,8 +55,35 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   // --- Contract Loading --- //
-  async loadContract(source: string): Promise<ContractSchema> {
-    return loadStellarContract(source);
+  public getContractDefinitionInputs(): FormFieldType[] {
+    return [
+      {
+        id: 'contractAddress',
+        name: 'contractAddress',
+        label: 'Contract ID',
+        type: 'text',
+        validation: { required: true },
+        placeholder: 'G...',
+        helperText: 'Enter the Stellar contract ID.',
+      },
+    ];
+  }
+
+  async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+    // Stellar doesn't have a standardized on-chain contract interface like an ABI.
+    // The 'source' would need to be a custom JSON descriptor provided by the user.
+    // This is a placeholder for a more complex implementation.
+    if (typeof artifacts.contractAddress !== 'string') {
+      throw new Error('A contract address must be provided.');
+    }
+
+    return {
+      name: 'StellarContract',
+      address: artifacts.contractAddress,
+      ecosystem: 'stellar',
+      functions: [],
+      events: [],
+    };
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
