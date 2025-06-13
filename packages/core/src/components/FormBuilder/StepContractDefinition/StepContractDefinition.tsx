@@ -9,19 +9,11 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { loadContractDefinition } from '../../../services/ContractLoader';
 import { ActionBar } from '../../Common/ActionBar';
+import { useDebounce } from '../hooks';
 
 import { ContractPreview } from './components/ContractPreview';
 
 import { StepContractDefinitionProps } from './types';
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debouncedValue;
-}
 
 export function StepContractDefinition({
   onContractSchemaLoaded,
