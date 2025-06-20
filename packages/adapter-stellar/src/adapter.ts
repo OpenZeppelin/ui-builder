@@ -1,4 +1,5 @@
 import type {
+  AvailableUiKit,
   Connector,
   ContractAdapter,
   ContractFunction,
@@ -166,6 +167,16 @@ export class StellarAdapter implements ContractAdapter {
   // --- Validation --- //
   isValidAddress(address: string): boolean {
     return isStellarValidAddress(address);
+  }
+
+  public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    return [
+      {
+        id: 'custom',
+        name: 'OpenZeppelin Custom',
+        configFields: [],
+      },
+    ];
   }
 }
 

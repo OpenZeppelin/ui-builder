@@ -1,7 +1,11 @@
 import { useEffect, useMemo } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import {
+  ContractSchema,
+  NetworkConfig,
+  UiKitConfiguration,
+} from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
@@ -10,6 +14,7 @@ import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 
+import { UiKitSettings } from './components/UiKitSettings';
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 
@@ -18,21 +23,22 @@ import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
 
-// TODO: Implement UI controls within this step (e.g., in GeneralSettings or a new section)
-// to allow users to configure UiKitConfiguration options (kitName, showInjectedConnector,
-// and component exclusions like hiding NetworkSwitcher, ConnectButton, AccountDisplay).
-// These settings would then be stored, likely in `formConfig` (if form-specific)
-// or a higher-level builder state, and ultimately passed into `ExportOptions.uiKitConfiguration`.
+// TODO: Enhance the UiKitSettings component to support more advanced options from UiKitConfiguration,
+// such as `showInjectedConnector` and component exclusions (e.g., hiding NetworkSwitcher).
+// This data is already being stored in `formConfig.uiKitConfig` and just needs the UI controls.
+// The final `uiKitConfig` also needs to be wired into the export system via `ExportOptions.uiKitConfiguration`.
 
 interface StepFormCustomizationProps {
   contractSchema: ContractSchema | null;
   selectedFunction: string | null;
   networkConfig: NetworkConfig | null;
-  onFormConfigUpdated: (config: BuilderFormConfig) => void;
+  onFormConfigUpdated: (config: Partial<BuilderFormConfig>) => void;
   onExecutionConfigUpdated?: (execConfig: ExecutionConfig | undefined, isValid: boolean) => void;
   currentExecutionConfig?: ExecutionConfig;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
+  onUiKitConfigUpdated: (config: UiKitConfiguration) => void;
+  currentUiKitConfig?: UiKitConfiguration;
 }
 
 export function StepFormCustomization({
@@ -44,6 +50,8 @@ export function StepFormCustomization({
   currentExecutionConfig,
   onToggleContractState,
   isWidgetExpanded,
+  onUiKitConfigUpdated,
+  currentUiKitConfig,
 }: StepFormCustomizationProps) {
   const [{ activeTab, previewMode }, setUiState] = useWizardStepUiState('stepCustomize', {
     activeTab: 'general',
@@ -166,10 +174,11 @@ export function StepFormCustomization({
         />
       ) : (
         <Tabs value={activeTab} onValueChange={(newTab) => setUiState({ activeTab: newTab })}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>
             <TabsTrigger value="execution">Execution Method</TabsTrigger>
+            <TabsTrigger value="uikit">UI Kit</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
@@ -218,6 +227,16 @@ export function StepFormCustomization({
                 adapter={adapter}
                 currentConfig={currentExecutionConfig}
                 onUpdateConfig={onExecutionConfigUpdated || (() => {})}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="uikit" className="mt-4 rounded-md border p-4">
+            {adapter && (
+              <UiKitSettings
+                adapter={adapter}
+                onUpdateConfig={onUiKitConfigUpdated}
+                currentConfig={currentUiKitConfig}
               />
             )}
           </TabsContent>

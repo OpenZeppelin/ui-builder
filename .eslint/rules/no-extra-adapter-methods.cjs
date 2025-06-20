@@ -61,6 +61,7 @@ module.exports = {
       'getEcosystemReactUiContextProvider',
       'getEcosystemReactHooks',
       'getEcosystemWalletComponents',
+      'getAvailableUiKits',
     ];
 
     // Common standard methods and properties that are allowed

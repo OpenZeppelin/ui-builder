@@ -4,6 +4,7 @@ import {
   Ecosystem,
   ExecutionConfig,
   FormValues,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 
 export interface BuilderFormConfig extends CommonFormProperties {
@@ -12,6 +13,7 @@ export interface BuilderFormConfig extends CommonFormProperties {
   title?: string;
   description?: string;
   executionConfig?: ExecutionConfig;
+  uiKitConfig?: UiKitConfiguration;
 }
 
 export interface FormBuilderState {

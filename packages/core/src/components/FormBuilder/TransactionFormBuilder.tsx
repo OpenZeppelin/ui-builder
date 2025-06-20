@@ -42,6 +42,7 @@ export function TransactionFormBuilder() {
     handleExecutionConfigUpdated,
     toggleWidget,
     exportForm,
+    handleUiKitConfigUpdated,
   } = useFormBuilderState();
 
   // Track network switching state
@@ -216,6 +217,8 @@ export function TransactionFormBuilder() {
           currentExecutionConfig={formConfig?.executionConfig}
           onToggleContractState={toggleWidget}
           isWidgetExpanded={isWidgetVisible}
+          onUiKitConfigUpdated={handleUiKitConfigUpdated}
+          currentUiKitConfig={formConfig?.uiKitConfig}
         />
       ),
       isValid: isExecutionStepValid,

@@ -1,5 +1,7 @@
 import type React from 'react';
 
+import type { FormFieldType } from '../forms';
+
 /**
  * Configuration for excluding specific wallet components provided by an adapter for its 'custom' kit.
  */
@@ -11,12 +13,14 @@ export interface ComponentExclusionConfig {
   exclude?: Array<keyof EcosystemWalletComponents>;
 }
 
+export type UiKitName = 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
+
 /**
  * Configuration for the desired UI kit to be used by an adapter.
  */
 export interface UiKitConfiguration {
   /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'custom' for adapter-provided default components or 'none' to disable adapter UI. */
-  kitName?: 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
+  kitName?: UiKitName;
 
   /**
    * Kit-specific configuration options.
@@ -124,3 +128,15 @@ export interface EcosystemWalletComponents {
 }
 
 export type NativeConfigLoader = (relativePath: string) => Promise<Record<string, unknown> | null>;
+
+/**
+ * Describes an available UI kit that can be configured for an adapter.
+ */
+export interface AvailableUiKit {
+  /** A unique identifier for the kit (e.g., 'rainbowkit', 'custom'). */
+  id: string;
+  /** The user-friendly display name of the kit (e.g., 'RainbowKit'). */
+  name: string;
+  /** An array of form field definitions required to configure this kit. */
+  configFields: FormFieldType[];
+}

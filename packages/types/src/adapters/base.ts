@@ -4,6 +4,7 @@ import type { FormFieldType } from '../forms/form-field';
 import type { NetworkConfig } from '../networks/config';
 
 import type {
+  AvailableUiKit,
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   EcosystemWalletComponents,
@@ -310,4 +311,11 @@ export interface ContractAdapter {
    * @returns An object mapping standard component names to React components, or `undefined` if not supported or configured.
    */
   getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;
+
+  /**
+   * Gets the list of available UI kits supported by this adapter.
+   *
+   * @returns A promise resolving to an array of available UiKit objects.
+   */
+  getAvailableUiKits(): Promise<AvailableUiKit[]>;
 }

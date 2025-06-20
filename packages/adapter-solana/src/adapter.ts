@@ -1,4 +1,5 @@
 import type {
+  AvailableUiKit,
   Connector,
   ContractAdapter,
   ContractFunction,
@@ -190,6 +191,16 @@ export class SolanaAdapter implements ContractAdapter {
     // Throwing is safer if the interface implies support when implemented.
     // Let's return success for placeholder.
     return { status: 'success' };
+  }
+
+  public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    return [
+      {
+        id: 'custom',
+        name: 'OpenZeppelin Custom',
+        configFields: [],
+      },
+    ];
   }
 }
 

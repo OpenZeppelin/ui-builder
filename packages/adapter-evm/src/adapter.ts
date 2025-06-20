@@ -4,6 +4,7 @@ import { type TransactionReceipt } from 'viem';
 import React from 'react';
 
 import type {
+  AvailableUiKit,
   Connector,
   ContractAdapter,
   ContractFunction,
@@ -382,6 +383,31 @@ export class EvmAdapter implements ContractAdapter {
     }
     // If manager has a config, use that for resolving components.
     return getResolvedWalletComponents(currentManagerState.currentFullUiKitConfig);
+  }
+
+  public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    return [
+      {
+        id: 'custom',
+        name: 'OpenZeppelin Custom',
+        configFields: [],
+      },
+      {
+        id: 'rainbowkit',
+        name: 'RainbowKit',
+        configFields: [
+          {
+            id: 'appName',
+            name: 'appName',
+            label: 'Application Name',
+            type: 'text',
+            validation: { required: true },
+            placeholder: 'My dApp',
+            helperText: 'The name of your application, which will be displayed in the wallet.',
+          },
+        ],
+      },
+    ];
   }
 }
 

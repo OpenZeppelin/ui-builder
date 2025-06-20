@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { ContractSchema, ExecutionConfig, FormValues } from '@openzeppelin/transaction-form-types';
+import {
+  ContractSchema,
+  ExecutionConfig,
+  FormValues,
+  UiKitConfiguration,
+} from '@openzeppelin/transaction-form-types';
 
 import { type BuilderFormConfig, formBuilderStore } from './formBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
@@ -13,8 +18,13 @@ import { useContractWidgetState } from './useContractWidgetState';
  */
 export function useFormBuilderState() {
   const state = useSyncExternalStore(formBuilderStore.subscribe, formBuilderStore.getState);
-  const { setActiveNetworkId, activeNetworkConfig, activeAdapter, isAdapterLoading } =
-    useWalletState();
+  const {
+    setActiveNetworkId,
+    activeNetworkConfig,
+    activeAdapter,
+    isAdapterLoading,
+    reconfigureActiveAdapterUiKit,
+  } = useWalletState();
 
   // Initialize the store with the active network from the wallet context on first load.
   useEffect(() => {
@@ -70,6 +80,17 @@ export function useFormBuilderState() {
     []
   );
 
+  const handleUiKitConfigUpdated = useCallback(
+    (uiKitConfig: UiKitConfiguration) => {
+      formBuilderStore.updateState((s) => ({
+        formConfig: s.formConfig ? { ...s.formConfig, uiKitConfig } : null,
+      }));
+      // Also trigger the global reconfiguration to update the header, etc.
+      reconfigureActiveAdapterUiKit(uiKitConfig);
+    },
+    [reconfigureActiveAdapterUiKit]
+  );
+
   // Other hooks that manage transient/UI state can remain here
   const contractWidget = useContractWidgetState();
   const completeStep = useCompleteStepState();
@@ -110,5 +131,6 @@ export function useFormBuilderState() {
     handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
     exportForm: handleExportForm,
+    handleUiKitConfigUpdated,
   };
 }
