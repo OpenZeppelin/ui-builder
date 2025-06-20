@@ -3,6 +3,7 @@ import { NetworkIcon } from '@web3icons/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
@@ -34,6 +35,7 @@ export function ChainTileSelector({
   selectedNetworkId = null,
 }: ChainTileSelectorProps) {
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
+  const { activeNetworkId } = useWalletState();
 
   // Track if we've done the initial auto-selection
   const hasAutoSelectedRef = useRef(false);
@@ -110,7 +112,8 @@ export function ChainTileSelector({
     // Only auto-select if:
     // 1. We have a selected ecosystem
     // 2. We haven't done the initial auto-selection yet
-    if (selectedEcosystem && !hasAutoSelectedRef.current) {
+    // 3. There is no globally active network already
+    if (selectedEcosystem && !hasAutoSelectedRef.current && !activeNetworkId) {
       hasAutoSelectedRef.current = true;
 
       async function autoSelectFirstNetwork(ecosystem: Ecosystem) {
@@ -145,7 +148,7 @@ export function ChainTileSelector({
       }
       void autoSelectFirstNetwork(selectedEcosystem);
     }
-  }, [selectedEcosystem, selectedNetworkId, onNetworkSelect]);
+  }, [selectedEcosystem, selectedNetworkId, onNetworkSelect, activeNetworkId]);
 
   // If we have a selectedNetworkId and no ecosystem, we need to fetch the network to determine its ecosystem
   useEffect(() => {

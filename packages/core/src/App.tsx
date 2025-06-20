@@ -44,7 +44,6 @@ function App() {
           <main className="py-8">
             <TransactionFormBuilder />
           </main>
-
           <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
             <div className="container mx-auto">
               <p>© {new Date().getFullYear()} OpenZeppelin Transaction Form Builder</p>

@@ -1,8 +1,11 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import { TransactionFormBuilder } from '../../components/FormBuilder/TransactionFormBuilder';
+import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
 
-const meta = {
+import { TransactionFormBuilder } from '../../components/FormBuilder/TransactionFormBuilder';
+import { getAdapter, getNetworkById } from '../../core/ecosystemManager';
+
+const meta: Meta<typeof TransactionFormBuilder> = {
   title: 'Core/FormBuilder/TransactionFormBuilder',
   component: TransactionFormBuilder,
   parameters: {
@@ -14,12 +17,22 @@ const meta = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <AdapterProvider resolveAdapter={getAdapter}>
+        <WalletStateProvider
+          initialNetworkId="ethereum-mainnet"
+          getNetworkConfigById={getNetworkById}
+        >
+          <Story />
+        </WalletStateProvider>
+      </AdapterProvider>
+    ),
+  ],
   tags: ['autodocs'],
-} satisfies Meta<typeof TransactionFormBuilder>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {},
-};
+export const Default: Story = {};

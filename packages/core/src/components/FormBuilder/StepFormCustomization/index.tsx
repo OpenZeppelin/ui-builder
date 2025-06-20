@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -8,6 +8,7 @@ import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/For
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
 import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
+import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
@@ -44,8 +45,10 @@ export function StepFormCustomization({
   onToggleContractState,
   isWidgetExpanded,
 }: StepFormCustomizationProps) {
-  const [activeTab, setActiveTab] = useState('general');
-  const [previewMode, setPreviewMode] = useState(false);
+  const [{ activeTab, previewMode }, setUiState] = useWizardStepUiState('stepCustomize', {
+    activeTab: 'general',
+    previewMode: false,
+  });
 
   const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
 
@@ -86,6 +89,10 @@ export function StepFormCustomization({
       selectField(0);
     }
   }, [activeTab, baseFormConfigFromHook, selectedFieldIndex, selectField]);
+
+  const handleTogglePreview = () => {
+    setUiState({ previewMode: !previewMode });
+  };
 
   if (
     !contractSchema ||
@@ -137,7 +144,7 @@ export function StepFormCustomization({
           isWidgetExpanded={isWidgetExpanded}
           showPreviewButton={true}
           isPreviewMode={previewMode}
-          onTogglePreview={() => setPreviewMode(!previewMode)}
+          onTogglePreview={handleTogglePreview}
         />
       )}
 
@@ -158,7 +165,7 @@ export function StepFormCustomization({
           contractSchema={contractSchema!}
         />
       ) : (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(newTab) => setUiState({ activeTab: newTab })}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="fields">Fields</TabsTrigger>

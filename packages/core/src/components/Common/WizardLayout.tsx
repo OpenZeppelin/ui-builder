@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 
 import { Button } from '@openzeppelin/transaction-form-ui';
 
@@ -11,20 +11,21 @@ export interface WizardStep {
 
 interface WizardLayoutProps {
   steps: WizardStep[];
-  initialStep?: number;
   onComplete?: () => void;
   sidebarWidget?: ReactNode;
   isWidgetExpanded?: boolean;
+  currentStepIndex: number;
+  onStepChange: (index: number) => void;
 }
 
 export function WizardLayout({
   steps,
-  initialStep = 0,
   onComplete,
   sidebarWidget,
   isWidgetExpanded = false,
+  currentStepIndex,
+  onStepChange,
 }: WizardLayoutProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
 
@@ -33,12 +34,12 @@ export function WizardLayout({
       onComplete?.();
       return;
     }
-    setCurrentStepIndex((prev) => prev + 1);
+    onStepChange(currentStepIndex + 1);
   };
 
   const handlePrevious = () => {
     if (!isFirstStep) {
-      setCurrentStepIndex((prev) => prev - 1);
+      onStepChange(currentStepIndex - 1);
     }
   };
 

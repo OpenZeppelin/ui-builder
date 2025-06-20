@@ -167,7 +167,9 @@ export function useExecutionMethodState({
     }
 
     validateExecutionConfigForBuilder(configToValidate);
-  }, [currentConfig, validateExecutionConfigForBuilder]);
+    // Depend on the serialized value of currentConfig to prevent infinite loops
+    // from object reference changes.
+  }, [JSON.stringify(currentConfig), validateExecutionConfigForBuilder]);
 
   // Effect 3: Watch for user form input changes and trigger validation
   useEffect(() => {
