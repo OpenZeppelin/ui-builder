@@ -8,6 +8,8 @@ import {
 } from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
+import { ensureCompleteConfig } from '@/components/FormBuilder/StepFormCustomization/utils/executionUtils';
+
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
@@ -86,6 +88,18 @@ export function StepFormCustomization({
       executionConfig: currentExecutionConfig,
     };
   }, [baseFormConfigFromHook, currentExecutionConfig]);
+
+  // Ensure execution config validation happens on mount if no config exists
+  useEffect(() => {
+    if (adapter && onExecutionConfigUpdated && !currentExecutionConfig) {
+      // Create a default EOA config and validate it
+      const defaultConfig = ensureCompleteConfig({ method: 'eoa', allowAny: true });
+      if (defaultConfig) {
+        // For the initial validation, we know EOA with allowAny is always valid
+        onExecutionConfigUpdated(defaultConfig, true);
+      }
+    }
+  }, [adapter, currentExecutionConfig, onExecutionConfigUpdated]);
 
   useEffect(() => {
     if (
