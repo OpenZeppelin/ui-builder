@@ -81,6 +81,7 @@ const mockAdapterInstance: ContractAdapter = {
   waitForTransactionConfirmation: vi.fn().mockResolvedValue({ status: 'success' }),
   onWalletConnectionChange: vi.fn(() => () => {}),
   getAvailableUiKits: vi.fn().mockResolvedValue([]),
+  getContractDefinitionInputs: vi.fn(() => []),
 };
 
 describe('FormSchemaFactory', () => {

@@ -1,6 +1,11 @@
 import { isAddress } from 'viem';
 
-import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractSchema,
+  EvmNetworkConfig,
+  FormValues,
+} from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { AbiItem } from '../types';
 
@@ -28,20 +33,49 @@ async function loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
 }
 
 /**
- * Loads contract schema by detecting if the source is an address (fetch from Etherscan)
- * or a JSON string (parse directly).
- *
- * Requires networkConfig when source is an address.
+ * Loads contract schema from artifacts provided by the UI, prioritizing manual ABI input.
  */
 export async function loadEvmContract(
-  source: string,
+  artifacts: FormValues,
   networkConfig: EvmNetworkConfig
 ): Promise<ContractSchema> {
-  if (isAddress(source)) {
-    console.info(`Detected address: ${source}. Attempting Etherscan ABI fetch...`);
-    return loadAbiFromEtherscan(source, networkConfig);
-  } else {
-    console.info('Input is not an address. Attempting to parse as JSON ABI...');
-    return loadAbiFromJson(source);
+  const { contractAddress, abiJson } = artifacts;
+
+  if (!contractAddress || typeof contractAddress !== 'string' || !isAddress(contractAddress)) {
+    throw new Error('A valid contract address is required.');
+  }
+
+  // 1. Prioritize manual ABI input if provided.
+  if (abiJson && typeof abiJson === 'string' && abiJson.trim().startsWith('[')) {
+    logger.info('loadEvmContract', 'Manual ABI provided. Attempting to parse...');
+    try {
+      const schema = await loadAbiFromJson(abiJson);
+      // Attach the address to the schema from the separate address field.
+      return { ...schema, address: contractAddress };
+    } catch (error) {
+      logger.error('loadEvmContract', 'Failed to parse manually provided ABI:', error);
+      // If manual ABI is provided but invalid, it's a hard error.
+      throw new Error(`The provided ABI JSON is invalid: ${(error as Error).message}`);
+    }
+  }
+
+  // 2. If no manual ABI, fall back to fetching from Etherscan.
+  logger.info(
+    'loadEvmContract',
+    `No manual ABI detected. Attempting Etherscan fetch for address: ${contractAddress}...`
+  );
+  try {
+    const schema = await loadAbiFromEtherscan(contractAddress, networkConfig);
+    logger.info(
+      'loadEvmContract',
+      `Successfully fetched ABI from Etherscan for ${contractAddress}.`
+    );
+    return schema;
+  } catch (error) {
+    logger.warn('loadEvmContract', `Etherscan ABI fetch failed for ${contractAddress}:`, error);
+    // 3. If both manual ABI is missing and Etherscan fails, throw an error.
+    throw new Error(
+      'Could not fetch ABI from block explorer. Please verify the address or provide the contract ABI JSON manually.'
+    );
   }
 }

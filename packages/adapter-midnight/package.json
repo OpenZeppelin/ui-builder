@@ -41,7 +41,9 @@
     "lint:fix": "eslint . --fix",
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "pnpm build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:*",

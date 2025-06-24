@@ -4,45 +4,29 @@
  * Handles loading contract definitions across different blockchain platforms.
  * Uses the appropriate adapter based on the selected chain type.
  */
-import { ContractAdapter, ContractSchema } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
- * Loads a contract definition using the provided chain adapter and network configuration.
- * Handles both File objects (ABI JSON upload) and strings (address or ABI JSON string).
+ * Loads a contract definition using the provided chain adapter.
+ * It passes the artifacts object from the contract definition form directly to the adapter.
  *
  * @param adapter The specific contract adapter instance configured for the target network.
- * @param contractDefinition A contract address string, a JSON ABI string, or a File object containing a JSON ABI.
+ * @param artifacts A FormValues object containing the necessary data (address, ABI, custom artifacts, etc.).
  * @returns A Promise resolving to the ContractSchema or null if loading fails.
  */
 export async function loadContractDefinition(
   adapter: ContractAdapter,
-  contractDefinition: string | File
+  artifacts: FormValues
 ): Promise<ContractSchema | null> {
-  logger.info('ContractLoader', `Loading contract definition...`);
+  logger.info('ContractLoader', `Loading contract definition with provided artifacts...`);
   try {
-    let sourceString: string;
-
-    if (contractDefinition instanceof File) {
-      logger.info('ContractLoader', 'Input is a File, reading content...');
-      sourceString = await contractDefinition.text();
-      // Basic check for file type (though adapter should handle invalid JSON)
-      if (!contractDefinition.type || !contractDefinition.type.includes('json')) {
-        logger.warn(
-          'ContractLoader',
-          'Uploaded file does not appear to be JSON, attempting to parse anyway.'
-        );
-      }
-    } else {
-      // Input is already a string (address or JSON ABI)
-      sourceString = contractDefinition.trim(); // Trim whitespace
-      if (!sourceString) {
-        throw new Error('Contract definition input is empty.');
-      }
+    if (!artifacts || Object.keys(artifacts).length === 0) {
+      throw new Error('Contract definition input is empty.');
     }
 
     logger.info('ContractLoader', 'Delegating to adapter.loadContract...');
-    const schema = await adapter.loadContract(sourceString);
+    const schema = await adapter.loadContract(artifacts);
     logger.info('ContractLoader', 'Schema loaded successfully by adapter.');
     return schema;
   } catch (error) {

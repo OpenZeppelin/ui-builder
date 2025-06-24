@@ -26,6 +26,7 @@ export function TransactionFormBuilder() {
     selectedAdapter,
     selectedEcosystem,
     contractSchema,
+    contractFormValues,
     selectedFunction,
     formConfig,
     isExecutionStepValid,
@@ -183,6 +184,7 @@ export function TransactionFormBuilder() {
           adapter={selectedAdapter}
           networkConfig={selectedNetwork}
           existingContractSchema={contractSchema}
+          existingFormValues={contractFormValues}
           onToggleContractState={toggleWidget}
           isWidgetExpanded={isWidgetVisible}
         />

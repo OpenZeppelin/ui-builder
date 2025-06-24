@@ -8,8 +8,8 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
+  FormValues,
   FunctionParameter,
-  NetworkConfig,
   SolanaNetworkConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -21,7 +21,6 @@ import {
   validateSolanaExecutionConfig,
 } from './configuration';
 // Import implementations from modules
-import { loadSolanaContract } from './definition';
 import {
   generateSolanaDefaultField,
   getSolanaCompatibleFieldTypes,
@@ -59,8 +58,21 @@ export class SolanaAdapter implements ContractAdapter {
     console.log(`SolanaAdapter initialized for network: ${this.networkConfig.name}`);
   }
 
-  async loadContract(source: string, _networkConfig?: NetworkConfig): Promise<ContractSchema> {
-    return loadSolanaContract(source);
+  async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+    // Solana contracts (programs) don't have a standardized on-chain ABI.
+    // The 'source' would likely be an IDL JSON provided by the user.
+    // This is a placeholder for a more complex implementation.
+    if (typeof artifacts.contractAddress !== 'string') {
+      throw new Error('A program ID must be provided.');
+    }
+
+    return {
+      name: 'SolanaProgram',
+      address: artifacts.contractAddress,
+      ecosystem: 'solana',
+      functions: [],
+      events: [],
+    };
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
@@ -126,8 +138,8 @@ export class SolanaAdapter implements ContractAdapter {
       this.networkConfig,
       params,
       contractSchema,
-      undefined,
-      (src) => this.loadContract(src)
+      null, // walletContext is not needed for view functions
+      (source: string) => this.loadContract({ contractAddress: source })
     );
   }
 
@@ -199,6 +211,19 @@ export class SolanaAdapter implements ContractAdapter {
         id: 'custom',
         name: 'OpenZeppelin Custom',
         configFields: [],
+      },
+    ];
+  }
+
+  public getContractDefinitionInputs(): FormFieldType[] {
+    return [
+      {
+        id: 'contractAddress',
+        name: 'contractAddress',
+        label: 'Program ID',
+        type: 'text',
+        validation: { required: true },
+        placeholder: 'Enter Solana program ID',
       },
     ];
   }

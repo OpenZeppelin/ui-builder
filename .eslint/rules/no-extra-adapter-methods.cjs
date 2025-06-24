@@ -63,6 +63,7 @@ module.exports = {
       'getEcosystemWalletComponents',
       'getAvailableUiKits',
       'getExportableWalletConfigFiles',
+      'getContractDefinitionInputs',
     ];
 
     // Common standard methods and properties that are allowed

@@ -17,6 +17,7 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
+  FormValues,
   FunctionParameter,
   NativeConfigLoader,
   UiKitConfiguration,
@@ -104,8 +105,8 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  async loadContract(source: string): Promise<ContractSchema> {
-    return loadEvmContract(source, this.networkConfig);
+  public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+    return loadEvmContract(artifacts, this.networkConfig);
   }
 
   /**
@@ -162,7 +163,7 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
+  public getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
     return contractSchema.functions.filter((fn) => fn.modifiesState);
   }
 
@@ -212,7 +213,7 @@ export class EvmAdapter implements ContractAdapter {
       params,
       contractSchema,
       walletImplementation,
-      (src) => this.loadContract(src)
+      (src) => this.loadContract({ contractAddress: src })
     );
   }
 
@@ -427,6 +428,35 @@ export class EvmAdapter implements ContractAdapter {
       return generateRainbowKitExportables(uiKitConfig);
     }
     return {};
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getContractDefinitionInputs(): FormFieldType[] {
+    return [
+      {
+        id: 'contractAddress',
+        name: 'contractAddress',
+        label: 'Contract Address',
+        type: 'text',
+        validation: { required: true },
+        placeholder: '0x1234...abcd',
+        helperText:
+          'Enter the deployed contract address. For verified contracts, the ABI will be fetched automatically from the block explorer.',
+      },
+      {
+        id: 'abiJson',
+        name: 'abiJson',
+        label: 'Contract ABI (Optional)',
+        type: 'textarea',
+        validation: { required: false },
+        placeholder:
+          '[{"inputs":[],"name":"myFunction","outputs":[],"stateMutability":"nonpayable","type":"function"}]',
+        helperText:
+          "If the contract is not verified on the block explorer, paste the contract's ABI JSON here. You can find this in your contract's compilation artifacts or deployment files.",
+      },
+    ];
   }
 }
 
