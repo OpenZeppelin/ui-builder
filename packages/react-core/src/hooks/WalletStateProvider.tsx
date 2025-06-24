@@ -199,6 +199,9 @@ export function WalletStateProvider({
           );
 
           if (!abortController.signal.aborted) {
+            // We use the functional update form `() => providerComponent` here to ensure
+            // that React sets the state to the component type itself, rather than trying
+            // to execute the component function as if it were a state updater.
             setAdapterUiContextProviderToRender(() => providerComponent);
             setWalletFacadeHooks(hooks);
           }
