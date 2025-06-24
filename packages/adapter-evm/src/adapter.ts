@@ -397,6 +397,7 @@ export class EvmAdapter implements ContractAdapter {
       {
         id: 'rainbowkit',
         name: 'RainbowKit',
+        linkToDocs: 'https://www.rainbowkit.com/docs/installation',
         configFields: [
           {
             id: 'appName',

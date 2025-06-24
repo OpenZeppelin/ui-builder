@@ -10,7 +10,7 @@ import {
   UiKitConfiguration,
   UiKitName,
 } from '@openzeppelin/transaction-form-types';
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button, ExternalLink } from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
@@ -93,7 +93,14 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
   // Generate configuration content for the selected kit
   const configContent = selectedKit ? (
     <div className="space-y-4">
-      <h4 className="text-base font-medium mb-2">{selectedKit.name} Configuration</h4>
+      <div className="flex items-center justify-between">
+        <h4 className="text-base font-medium">{selectedKit.name} Configuration</h4>
+        {selectedKit.linkToDocs && (
+          <ExternalLink href={selectedKit.linkToDocs} className="text-sm">
+            View Docs
+          </ExternalLink>
+        )}
+      </div>
 
       {selectedKit.configFields.length > 0 ? (
         <div className="space-y-4">

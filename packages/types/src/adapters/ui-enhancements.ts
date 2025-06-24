@@ -139,4 +139,6 @@ export interface AvailableUiKit {
   name: string;
   /** An array of form field definitions required to configure this kit. */
   configFields: FormFieldType[];
+  /** An optional link to the documentation for the UI kit. */
+  linkToDocs?: string;
 }
