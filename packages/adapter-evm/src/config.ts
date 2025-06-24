@@ -5,7 +5,9 @@
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const evmAdapterConfig = {
+import type { AdapterConfig } from '@openzeppelin/transaction-form-types';
+
+export const evmAdapterConfig: AdapterConfig = {
   /**
    * Dependencies required by the EVM adapter
    * These will be included in exported projects that use this adapter
@@ -28,6 +30,16 @@ export const evmAdapterConfig = {
     // Development dependencies
     dev: {
       // '@types/lodash': '^4.17.16',
+      '@types/lodash': '^4.17.5',
+    },
+  },
+  uiKits: {
+    rainbowkit: {
+      dependencies: {
+        runtime: {
+          '@rainbow-me/rainbowkit': '^2.2.8',
+        },
+      },
     },
   },
 };

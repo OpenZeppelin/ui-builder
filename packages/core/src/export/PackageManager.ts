@@ -36,7 +36,7 @@
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
 import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { adapterPackageMap } from '../core/ecosystemManager';
@@ -219,10 +219,14 @@ export class PackageManager {
     // Get adapter-specific runtime dependencies
     const ecosystemDependencies = await this.getChainDependencies(ecosystem);
 
+    // Get UI kit specific dependencies
+    const uiKitDependencies = await this.getUiKitDependencies(ecosystem, formConfig.uiKitConfig);
+
     const combined = {
       ...this.getCoreDependencies(),
       ...this.getFieldDependencies(formConfig),
       ...ecosystemDependencies, // Include adapter's runtime dependencies
+      ...uiKitDependencies,
     };
 
     // Add the adapter package itself if available
@@ -236,6 +240,27 @@ export class PackageManager {
     }
 
     return combined;
+  }
+
+  /**
+   * Get UI kit-specific runtime dependencies from adapter config
+   * @param ecosystem The ecosystem
+   * @param uiKitConfig The UI kit configuration
+   * @returns Record of package names to version ranges
+   */
+  private async getUiKitDependencies(
+    ecosystem: Ecosystem,
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>> {
+    if (!uiKitConfig?.kitName) {
+      return {};
+    }
+    const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
+    const kitName = uiKitConfig.kitName;
+    if (!adapterConfig || !adapterConfig.uiKits || !adapterConfig.uiKits[kitName]) {
+      return {};
+    }
+    return adapterConfig.uiKits[kitName].dependencies.runtime;
   }
 
   /**

@@ -245,22 +245,46 @@ describe('PackageManager Integration Tests', () => {
       expect(result.license).toBe('MIT');
     });
 
-    it('should not add devDependencies section if EVM adapter and form fields contribute no dev dependencies', async () => {
+    it('should only add devDependencies if contributed by adapters or fields', async () => {
       const packageManager = new PackageManager(testFormRendererConfig);
-      const formConfig = createFormConfig(['text']);
+      const formConfig = createFormConfig(['text']); // This field has no dev deps
       const baseJsonNoDev = JSON.stringify({ name: 'no-dev', dependencies: {} });
 
       const updatedJson = await packageManager.updatePackageJson(
         baseJsonNoDev,
         formConfig,
-        'evm',
-        'noDevDepsTest',
+        'evm', // The EVM adapter now adds @types/lodash
+        'devDepsTest',
         { env: 'local' }
       );
       const result = JSON.parse(updatedJson);
 
-      // Now expect devDependencies to NOT be present as EVM adapter config no longer adds @types/lodash
-      expect(result.hasOwnProperty('devDependencies')).toBe(false);
+      // Expect devDependencies to BE present because the EVM adapter adds @types/lodash
+      expect(result.hasOwnProperty('devDependencies')).toBe(true);
+      expect(result.devDependencies).toHaveProperty('@types/lodash');
+    });
+
+    it('should include UI kit dependencies when a UI kit is configured', async () => {
+      const packageManager = new PackageManager(testFormRendererConfig);
+      const formConfig: BuilderFormConfig = {
+        ...createFormConfig(['text'], 'uiKitTest'),
+        uiKitConfig: {
+          kitName: 'rainbowkit',
+          kitConfig: {}, // Empty config is fine for this test
+        },
+      };
+
+      const updatedJson = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'uiKitTest',
+        { env: 'local' }
+      );
+      const result = JSON.parse(updatedJson);
+
+      // Check for RainbowKit dependency
+      expect(result.dependencies).toHaveProperty('@rainbow-me/rainbowkit');
     });
   });
 });

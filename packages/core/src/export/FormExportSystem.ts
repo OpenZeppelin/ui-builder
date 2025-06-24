@@ -6,17 +6,17 @@
  * and ZipGenerator to produce a downloadable ZIP archive containing a
  * standalone form project.
  */
-import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import {
+  ContractAdapter,
+  ContractSchema,
+  NetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
+import { getAdapter } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
-import { addCoreTemplateFiles } from './assemblers/addCoreTemplateFiles';
-import { addStyleAndRootConfigFiles } from './assemblers/addStyleAndRootConfigFiles';
-import { applyCliTargetModifications } from './assemblers/applyCliTargetModifications';
-import { generateAndAddAppConfig } from './assemblers/generateAndAddAppConfig';
-import { updatePackageJsonFile } from './assemblers/updatePackageJsonFile';
 import { FormCodeGenerator } from './generators/FormCodeGenerator';
 import { TemplateProcessor } from './generators/TemplateProcessor';
 
@@ -24,6 +24,14 @@ import { PackageManager } from './PackageManager';
 import { StyleManager } from './StyleManager';
 import { TemplateManager } from './TemplateManager';
 import { ZipGenerator, type ZipProgress } from './ZipGenerator';
+import {
+  addCoreTemplateFiles,
+  addStyleAndRootConfigFiles,
+  applyCliTargetModifications,
+  generateAdapterSpecificFiles,
+  generateAndAddAppConfig,
+  updatePackageJsonFile,
+} from './assemblers';
 
 // Define an interface for constructor dependencies (optional)
 interface FormExportSystemDependencies {
@@ -90,6 +98,9 @@ export class FormExportSystem {
       logger.info('Export System', 'Starting export process...');
       logger.info('Export System', 'Options:', exportOptions);
 
+      // Get the adapter instance for the selected network
+      const adapter = await getAdapter(networkConfig);
+
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');
       const mainTsxCode = await this.formCodeGenerator.generateMainTsx(networkConfig);
@@ -118,7 +129,8 @@ export class FormExportSystem {
         networkConfig,
         functionId,
         exportOptions,
-        customFiles
+        customFiles,
+        adapter
       );
       logger.info('Export System', `Project files assembled: ${Object.keys(projectFiles).length}`);
 
@@ -156,7 +168,8 @@ export class FormExportSystem {
     networkConfig: NetworkConfig,
     functionId: string,
     exportOptions: ExportOptions,
-    customFiles: Record<string, string>
+    customFiles: Record<string, string>,
+    adapter: ContractAdapter
   ): Promise<Record<string, string>> {
     logger.info('File Assembly', 'Starting file assembly process...');
 
@@ -166,7 +179,8 @@ export class FormExportSystem {
       customFiles
     );
     await addStyleAndRootConfigFiles(projectFiles, this.styleManager, this.templateProcessor);
-    await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor);
+    await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor, formConfig);
+    await generateAdapterSpecificFiles(projectFiles, adapter, formConfig);
     await updatePackageJsonFile(
       projectFiles,
       this.packageManager,

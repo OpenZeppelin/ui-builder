@@ -35,6 +35,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
 
   const { control, getValues, reset } = useForm<FormValues>({
     defaultValues: currentConfig?.kitConfig || {},
+    mode: 'onChange',
   });
 
   useEffect(() => {

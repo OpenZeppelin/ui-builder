@@ -1,0 +1,141 @@
+import React from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
+
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+
+import { BaseFieldProps } from './BaseField';
+import {
+  ErrorMessage,
+  getAccessibilityProps,
+  getValidationStateClasses,
+  handleEscapeKey,
+  validateField,
+} from './utils';
+
+const URL_REGEX = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
+
+/**
+ * URL input field component specifically designed for React Hook Form integration.
+ */
+export function UrlField<TFieldValues extends FieldValues = FieldValues>({
+  id,
+  label,
+  placeholder,
+  helperText,
+  control,
+  name,
+  width = 'full',
+  validation,
+  isReadOnly,
+}: BaseFieldProps<TFieldValues>): React.ReactElement {
+  const isRequired = !!validation?.required;
+  const errorId = `${id}-error`;
+  const descriptionId = `${id}-description`;
+
+  return (
+    <div
+      className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
+    >
+      {label && (
+        <Label htmlFor={id}>
+          {label} {isRequired && <span className="text-destructive">*</span>}
+        </Label>
+      )}
+
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: (value) => {
+            // Check required field explicitly first
+            if (value === undefined || value === null || value === '') {
+              return validation?.required ? 'This field is required' : true;
+            }
+
+            // Perform standard validations (min, max, pattern, etc.) if they exist
+            const standardValidationResult = validateField(value, validation);
+            if (standardValidationResult !== true) {
+              return standardValidationResult;
+            }
+
+            // Perform URL-specific validation
+            if (typeof value === 'string' && value && !URL_REGEX.test(value)) {
+              return 'Please enter a valid URL (e.g., https://example.com)';
+            }
+
+            // If all checks pass
+            return true;
+          },
+        }}
+        disabled={isReadOnly}
+        render={({ field, fieldState: { error } }) => {
+          const hasError = !!error;
+          const validationClasses = getValidationStateClasses(error);
+
+          // Handle input change with validation
+          const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+            const value = e.target.value;
+            field.onChange(value);
+
+            // Trigger validation if the field is required and empty
+            if (isRequired && value === '') {
+              setTimeout(() => field.onBlur(), 0);
+            }
+          };
+
+          // Add keyboard accessibility for clearing the field with Escape
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+            if (e.key === 'Escape') {
+              handleEscapeKey(field.onChange, field.value)(e);
+
+              // If required, trigger validation after clearing
+              if (isRequired) {
+                setTimeout(() => field.onBlur(), 0);
+              }
+            }
+          };
+
+          // Get accessibility attributes
+          const accessibilityProps = getAccessibilityProps({
+            id,
+            hasError,
+            isRequired,
+            hasHelperText: !!helperText,
+          });
+
+          return (
+            <>
+              <Input
+                {...field}
+                id={id}
+                type="url"
+                placeholder={placeholder || 'https://example.com'}
+                className={validationClasses}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                data-slot="input"
+                value={field.value ?? ''}
+                {...accessibilityProps}
+                aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
+                disabled={isReadOnly}
+              />
+
+              {/* Display helper text */}
+              {helperText && (
+                <div id={descriptionId} className="text-muted-foreground text-sm">
+                  {helperText}
+                </div>
+              )}
+
+              {/* Display error message */}
+              <ErrorMessage error={error} id={errorId} />
+            </>
+          );
+        }}
+      />
+    </div>
+  );
+}
+
+UrlField.displayName = 'UrlField';

@@ -318,4 +318,14 @@ export interface ContractAdapter {
    * @returns A promise resolving to an array of available UiKit objects.
    */
   getAvailableUiKits(): Promise<AvailableUiKit[]>;
+
+  /**
+   * Generates adapter-specific wallet configuration files for export.
+   *
+   * @param uiKitConfig The selected UI kit configuration from the builder.
+   * @returns A promise resolving to a record of file paths to their content.
+   */
+  getExportableWalletConfigFiles?(
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>>;
 }

@@ -62,6 +62,7 @@ module.exports = {
       'getEcosystemReactHooks',
       'getEcosystemWalletComponents',
       'getAvailableUiKits',
+      'getExportableWalletConfigFiles',
     ];
 
     // Common standard methods and properties that are allowed

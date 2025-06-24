@@ -26,6 +26,8 @@ export type FieldType =
   | 'array' // Array inputs with add/remove functionality
   | 'object' // Composite/nested object inputs
   | 'array-object' // Arrays of objects
+  | 'url'
+  | 'select-grouped'
   | 'hidden';
 
 /**

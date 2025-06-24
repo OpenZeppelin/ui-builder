@@ -81,6 +81,11 @@ export function StepFormCustomization({
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
 
+  const handleUiKitConfigUpdate = (config: UiKitConfiguration) => {
+    onUiKitConfigUpdated(config);
+    onFormConfigUpdated({ uiKitConfig: config });
+  };
+
   const formConfigForPreview = useMemo(() => {
     if (!baseFormConfigFromHook) return null;
     return {
@@ -249,7 +254,7 @@ export function StepFormCustomization({
             {adapter && (
               <UiKitSettings
                 adapter={adapter}
-                onUpdateConfig={onUiKitConfigUpdated}
+                onUpdateConfig={handleUiKitConfigUpdate}
                 currentConfig={currentUiKitConfig}
               />
             )}

@@ -29,6 +29,7 @@ import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 import type { WagmiWalletImplementation } from './wallet/implementation/wagmi-implementation';
+import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
 import { getResolvedWalletComponents } from './wallet/utils';
 import {
@@ -405,9 +406,27 @@ export class EvmAdapter implements ContractAdapter {
             placeholder: 'My dApp',
             helperText: 'The name of your application, which will be displayed in the wallet.',
           },
+          {
+            id: 'learnMoreUrl',
+            name: 'learnMoreUrl',
+            label: 'Learn More URL (Optional)',
+            type: 'url',
+            validation: {},
+            placeholder: 'https://my-dapp.com',
+            helperText: 'A URL where users can learn more about your application.',
+          },
         ],
       },
     ];
+  }
+
+  public async getExportableWalletConfigFiles(
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>> {
+    if (uiKitConfig?.kitName === 'rainbowkit') {
+      return generateRainbowKitExportables(uiKitConfig);
+    }
+    return {};
   }
 }
 

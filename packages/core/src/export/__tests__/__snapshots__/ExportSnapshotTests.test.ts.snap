@@ -275,6 +275,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
@@ -322,6 +323,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
