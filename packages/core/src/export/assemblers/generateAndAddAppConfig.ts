@@ -127,7 +127,7 @@ export async function generateAndAddAppConfig(
     );
     logger.info(logSystem, `Generated and added ${appConfigExamplePath}.`);
 
-    if (uiKitConfig && uiKitConfig.kitName && uiKitConfig.kitName !== 'custom') {
+    if (uiKitConfig && uiKitConfig.kitName && !['custom', 'none'].includes(uiKitConfig.kitName)) {
       const activeAppConfigPath = 'public/app.config.json';
       const activeAppConfigContent = {
         globalServiceConfigs: {
