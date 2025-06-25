@@ -86,7 +86,6 @@
     "typescript": "^5.8.2",
     "vite": "^6.2.5",
     "vite-plugin-dts": "^3.8.1",
-    "vite-plugin-svgr": "^4.3.0",
     "vitest": "^3.0.8"
   },
   "peerDependencies": {

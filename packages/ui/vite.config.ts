@@ -1,11 +1,9 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
   plugins: [
-    svgr(),
     // @ts-expect-error - incompatible types between vite-plugin-dts and vite
     dts({
       insertTypesEntry: true,

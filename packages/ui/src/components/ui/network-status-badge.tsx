@@ -76,7 +76,7 @@ export function NetworkStatusBadge({
     >
       {/* Network icon - reusing same icon component from NetworkMiniTile */}
       {network.ecosystem === 'midnight' ? (
-        <MidnightLogoSvg width={ICON_SIZE} height={ICON_SIZE} />
+        <img src={MidnightLogoSvg} alt="Midnight" width={ICON_SIZE} height={ICON_SIZE} />
       ) : iconName ? (
         <NetworkIcon name={iconName} size={ICON_SIZE} variant="branded" />
       ) : (
