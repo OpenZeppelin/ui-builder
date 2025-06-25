@@ -729,12 +729,18 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.4(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@web3icons/react':
+        specifier: ^4.0.13
+        version: 4.0.13(react@19.1.0)(typescript@5.8.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       lucide-react:
         specifier: ^0.510.0
         version: 0.510.0(react@19.1.0)
@@ -751,6 +757,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.0.13
         version: 4.1.4(vite@6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.1))
+      '@types/lodash':
+        specifier: ^4.17.16
+        version: 4.17.16
       '@types/node':
         specifier: ^22.13.9
         version: 22.15.2

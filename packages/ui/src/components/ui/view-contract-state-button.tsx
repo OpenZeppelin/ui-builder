@@ -2,14 +2,19 @@ import { FileText } from 'lucide-react';
 
 import React from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-ui';
 import { truncateMiddle } from '@openzeppelin/transaction-form-utils';
+
+import { Button } from './button';
 
 interface ViewContractStateButtonProps {
   contractAddress: string | null;
   onToggle: () => void;
 }
 
+/**
+ * ViewContractStateButton - A button to toggle the contract state widget
+ * Shows the contract address in a truncated format
+ */
 export function ViewContractStateButton({
   contractAddress,
   onToggle,
