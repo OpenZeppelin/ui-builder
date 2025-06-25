@@ -1,6 +1,5 @@
 {
   "name": "@openzeppelin/transaction-form-builder-core",
-  "private": true,
   "version": "1.0.3",
   "type": "module",
   "bin": {
@@ -26,6 +25,9 @@
     "export-form": "node src/export/cli/export-form.cjs",
     "storybook": "cd ../.. && pnpm storybook",
     "build-storybook": "cd ../.. && pnpm build-storybook"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
