@@ -1,3 +1,21 @@
+# [1.11.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.10.0...v1.11.0) (2025-06-25)
+
+
+### Bug Fixes
+
+* **core:** check for none condition too in uikit ([df5f496](https://github.com/OpenZeppelin/transaction-form-builder/commit/df5f496d8df7f6907a32633ade3103e34d49e9ac))
+* **core:** merge branch 'main' into feature/plat-6737-ui-kit-selector-in-the-form-builder-wizard ([325d7cf](https://github.com/OpenZeppelin/transaction-form-builder/commit/325d7cfe5f551910aaf7dad25ff59e71b9ae8741))
+* **core:** resolve build issues ([ed53f14](https://github.com/OpenZeppelin/transaction-form-builder/commit/ed53f149e00b95c8f4d37ac5837707e40f216729))
+* **core:** set default execution method to unblock step validation ([539fc9d](https://github.com/OpenZeppelin/transaction-form-builder/commit/539fc9dd3b4be4446911342f5a113c085a48c9c3))
+
+
+### Features
+
+* **core:** add ui kit selection in customize step ([0bf4f60](https://github.com/OpenZeppelin/transaction-form-builder/commit/0bf4f601e22de6360506b41096081414da5552ab))
+* **core:** add view docs for ui kit ([b1515b2](https://github.com/OpenZeppelin/transaction-form-builder/commit/b1515b2f20ee48946078ee549843fdea07e37bcd))
+* **core:** simplify rainbowkit config ui ([017de49](https://github.com/OpenZeppelin/transaction-form-builder/commit/017de491bdd0adc44642d6f82da43b0fd08f95cb))
+* **export:** finalize uikit selector logic to work e2e ([3801273](https://github.com/OpenZeppelin/transaction-form-builder/commit/3801273cc66b01fe3da9da1b5ab97ec76b432e54))
+
 # [1.10.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.9.0...v1.10.0) (2025-06-13)
 
 
