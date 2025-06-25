@@ -8,6 +8,7 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
 import { type EvmUiKitManagerState, evmUiKitManager } from '../evmUiKitManager';
+import type { RainbowKitKitConfig, RainbowKitProviderProps } from '../rainbowkit';
 
 // Create a single QueryClient instance to be reused by EvmWalletUiRoot instances.
 // This should be stable across re-renders of EvmWalletUiRoot itself.
@@ -66,14 +67,16 @@ export const EvmWalletUiRoot: React.FC<EcosystemReactUiProviderProps> = ({ child
     isKitAssetsLoaded
   ) {
     const DynKitProvider = kitProviderComponent;
-    const providerProps = currentFullUiKitConfig.kitConfig?.providerProps || {};
+    const kitConfig: RainbowKitKitConfig = currentFullUiKitConfig.kitConfig || {};
+
+    // Pass through all provider props from the parsed config
+    const providerProps: RainbowKitProviderProps = kitConfig.providerProps || {};
+
     logger.info(
       'EvmWalletUiRoot',
       'Wrapping children with dynamically loaded KitProvider (RainbowKit).'
     );
-    finalChildren = (
-      <DynKitProvider {...(providerProps as Record<string, unknown>)}>{children}</DynKitProvider>
-    );
+    finalChildren = <DynKitProvider {...providerProps}>{children}</DynKitProvider>;
   } else if (currentFullUiKitConfig?.kitName === 'rainbowkit' && !isWagmiContextEffectivelyReady) {
     logger.info(
       'EvmWalletUiRoot',

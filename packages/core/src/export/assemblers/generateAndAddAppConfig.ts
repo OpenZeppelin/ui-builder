@@ -5,6 +5,7 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
+import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import type { TemplateProcessor } from '../generators/TemplateProcessor';
 
 const LOG_SYSTEM_MAIN = 'File Assembly (generateAndAddAppConfig)';
@@ -57,65 +58,24 @@ function _generateRpcEndpointsConfigSection(
   return rpcConfig;
 }
 
-function _buildWalletUiServiceConfigPlaceholders(uiKitConfiguration?: UiKitConfiguration): {
-  config: UiKitConfiguration;
+function _buildWalletUiServiceConfig(uiKitConfig?: UiKitConfiguration): {
+  config: { kitName?: string };
   _comment: string;
 } {
-  const exampleDefaults: UiKitConfiguration = {
-    kitName: 'custom',
-    kitConfig: {
-      showInjectedConnector: true,
-      components: {
-        exclude: ['NetworkSwitcher'],
-      },
-    },
-  };
-
-  const kitName = uiKitConfiguration?.kitName || exampleDefaults.kitName || 'custom';
-
-  const baseKitConfig = exampleDefaults.kitConfig || {};
-  const providedKitConfig = uiKitConfiguration?.kitConfig || {};
-
-  const baseExclude = baseKitConfig.components?.exclude || [];
-  const providedExclude = providedKitConfig.components?.exclude || [];
-  const finalExclusions = Array.from(new Set([...baseExclude, ...providedExclude]));
-
-  let finalKitConfigObject: UiKitConfiguration['kitConfig'] = {
-    ...baseKitConfig,
-    ...providedKitConfig,
-  };
-
-  if (finalExclusions.length > 0) {
-    finalKitConfigObject.components = { exclude: finalExclusions };
-  } else {
-    if (
-      finalKitConfigObject.components &&
-      Object.keys(finalKitConfigObject.components).length === 1 &&
-      'exclude' in finalKitConfigObject.components
-    ) {
-      delete finalKitConfigObject.components;
-    }
-  }
-
-  if (Object.keys(finalKitConfigObject).length === 0) {
-    finalKitConfigObject = undefined;
-  }
-
   return {
     config: {
-      kitName,
-      kitConfig: finalKitConfigObject,
+      kitName: uiKitConfig?.kitName || 'custom',
     },
     _comment:
-      "Optional: Configure the Wallet UI Kit. `kitName` can be 'custom' or 'none'. `kitConfig` provides kit-specific options. For 'custom' kit, properties like `showInjectedConnector` (boolean) and `components.exclude` (Array of 'ConnectButton', 'AccountDisplay', 'NetworkSwitcher') are available.",
+      "Defines the UI kit to use. E.g., 'custom', 'rainbowkit', or 'none'. The exported app will load the corresponding config from src/config/wallet/[kitName].config.ts.",
   };
 }
 
 function _generateGlobalServiceConfigPlaceholders(
-  uiKitConfiguration?: UiKitConfiguration
+  uiKitConfig?: UiKitConfiguration
 ): GlobalServiceConfigs {
   return {
-    walletui: _buildWalletUiServiceConfigPlaceholders(uiKitConfiguration),
+    walletui: _buildWalletUiServiceConfig(uiKitConfig),
     walletconnect: {
       projectId: 'YOUR_WALLETCONNECT_PROJECT_ID_HERE',
       _comment: 'WalletConnect Project ID, required if you intend to use WalletConnect.',
@@ -126,20 +86,16 @@ function _generateGlobalServiceConfigPlaceholders(
 /**
  * Generates the content for public/app.config.json in the exported project,
  * tailoring it to the specific network the form was exported for.
- *
- * @param projectFiles - The current map of project files to be modified.
- * @param networkConfig - The NetworkConfig for the currently exported network.
- * @param templateProcessor - Instance of TemplateProcessor for JSON formatting.
- * @param uiKitConfig - The UiKitConfiguration for the currently exported network.
  */
 export async function generateAndAddAppConfig(
   projectFiles: Record<string, string>,
   networkConfig: NetworkConfig,
   templateProcessor: TemplateProcessor,
-  uiKitConfig?: UiKitConfiguration
+  formConfig: BuilderFormConfig
 ): Promise<void> {
   const appConfigExamplePath = 'public/app.config.json.example';
   const logSystem = LOG_SYSTEM_MAIN;
+  const uiKitConfig = formConfig.uiKitConfig;
 
   const explorerInfo = _generateExplorerApiConfigSection(networkConfig, logSystem);
   const rpcEndpointsConfig = _generateRpcEndpointsConfigSection(networkConfig);
@@ -170,10 +126,27 @@ export async function generateAndAddAppConfig(
       JSON.stringify(appConfigContent, null, 2)
     );
     logger.info(logSystem, `Generated and added ${appConfigExamplePath}.`);
+
+    if (uiKitConfig && uiKitConfig.kitName && !['custom', 'none'].includes(uiKitConfig.kitName)) {
+      const activeAppConfigPath = 'public/app.config.json';
+      const activeAppConfigContent = {
+        globalServiceConfigs: {
+          walletui: {
+            config: {
+              kitName: uiKitConfig.kitName,
+            },
+          },
+        },
+      };
+      projectFiles[activeAppConfigPath] = await templateProcessor.formatJson(
+        JSON.stringify(activeAppConfigContent, null, 2)
+      );
+      logger.info(logSystem, `Generated active ${activeAppConfigPath} for selected UI kit.`);
+    }
   } catch (formattingError) {
     logger.warn(
       logSystem,
-      `Failed to format generated ${appConfigExamplePath}, using raw string.`,
+      `Failed to format generated config files, using raw string.`,
       formattingError
     );
     projectFiles[appConfigExamplePath] = JSON.stringify(appConfigContent, null, 2);

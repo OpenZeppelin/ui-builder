@@ -1,149 +1,136 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { ContractSchema, Ecosystem, FormValues } from '@openzeppelin/transaction-form-types';
+import {
+  ContractSchema,
+  ExecutionConfig,
+  FormValues,
+  UiKitConfiguration,
+} from '@openzeppelin/transaction-form-types';
 
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-
+import { type BuilderFormConfig, formBuilderStore } from './formBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
-import { useContractDefinitionState } from './useContractDefinitionState';
 import { useContractWidgetState } from './useContractWidgetState';
-import { useFormCustomizationState } from './useFormCustomizationState';
-import { useFunctionSelectionState } from './useFunctionSelectionState';
 
 /**
- * Coordinating hook that combines all step-specific hooks and manages dependencies between steps.
- * This ensures that when earlier step values change, later step values are reset appropriately.
+ * Coordinating hook that uses an external store to manage builder state.
+ * This ensures state persists across component re-mounts.
  */
-export function useFormBuilderState(initialNetworkConfigId?: string | null) {
-  // --- Global State from Context ---
+export function useFormBuilderState() {
+  const state = useSyncExternalStore(formBuilderStore.subscribe, formBuilderStore.getState);
   const {
-    activeNetworkId,
     setActiveNetworkId,
     activeNetworkConfig,
     activeAdapter,
     isAdapterLoading,
+    reconfigureActiveAdapterUiKit,
   } = useWalletState();
 
-  // Effect to set initial global network if provided and different
+  // Initialize the store with the active network from the wallet context on first load.
   useEffect(() => {
-    if (initialNetworkConfigId && initialNetworkConfigId !== activeNetworkId) {
-      setActiveNetworkId(initialNetworkConfigId);
-    }
-    // This effect should only run if initialNetworkConfigId changes,
-    // or to initialize. Avoid re-running if activeNetworkId changes due to this effect.
-  }, [initialNetworkConfigId, setActiveNetworkId]);
+    formBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
+  }, []); // Run only once
 
-  // --- Local Step State Hooks ---
-  const contractDefinition = useContractDefinitionState();
-  const functionSelection = useFunctionSelectionState();
-  const formCustomization = useFormCustomizationState();
-  const contractWidget = useContractWidgetState();
-  const completeStep = useCompleteStepState();
-
-  // --- Callbacks ---
   const handleNetworkSelect = useCallback(
     (networkConfigId: string | null) => {
       setActiveNetworkId(networkConfigId);
-      // Reset downstream steps as network selection impacts everything
-      contractDefinition.resetContractSchema();
-      functionSelection.resetFunctionSelection();
-      formCustomization.resetFormConfig();
-      contractWidget.resetWidget();
-      completeStep.resetLoadingState();
+      formBuilderStore.updateState(() => ({
+        selectedNetworkConfigId: networkConfigId,
+        selectedEcosystem: activeNetworkConfig?.ecosystem ?? null,
+      }));
+      formBuilderStore.resetDownstreamSteps('network');
     },
-    [
-      setActiveNetworkId,
-      contractDefinition,
-      functionSelection,
-      formCustomization,
-      contractWidget,
-      completeStep,
-    ]
+    [setActiveNetworkId, activeNetworkConfig]
   );
 
-  // Create enhanced contract schema loaded handler
+  const onStepChange = useCallback((index: number) => {
+    formBuilderStore.updateState(() => ({ currentStepIndex: index }));
+  }, []);
+
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
-      contractDefinition.handleContractSchemaLoaded(schema, formValues);
-      // Let the widget state hook handle visibility based on view functions
-      // Don't force show/hide here
+      formBuilderStore.updateState(() => ({
+        contractSchema: schema,
+        contractAddress: schema?.address ?? null,
+        contractFormValues: formValues || null,
+      }));
+      formBuilderStore.resetDownstreamSteps('contract');
     },
-    [contractDefinition]
+    []
   );
 
-  // Create enhanced function selection handler that resets downstream state
-  const handleFunctionSelected = useCallback(
-    (functionId: string | null) => {
-      functionSelection.handleFunctionSelected(functionId);
-      if (functionId === null) {
-        formCustomization.resetFormConfig();
-        completeStep.resetLoadingState();
-      }
+  const handleFunctionSelected = useCallback((functionId: string | null) => {
+    formBuilderStore.updateState(() => ({ selectedFunction: functionId }));
+    formBuilderStore.resetDownstreamSteps('function');
+  }, []);
+
+  const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
+    formBuilderStore.updateState((s) => ({
+      formConfig: s.formConfig ? { ...s.formConfig, ...config } : (config as BuilderFormConfig),
+    }));
+  }, []);
+
+  const handleExecutionConfigUpdated = useCallback(
+    (execConfig: ExecutionConfig | undefined, isValid: boolean) => {
+      formBuilderStore.updateState((s) => ({
+        formConfig: s.formConfig ? { ...s.formConfig, executionConfig: execConfig } : null,
+        isExecutionStepValid: isValid,
+      }));
     },
-    [functionSelection, formCustomization, completeStep]
+    []
   );
 
-  // --- Derived State & Props ---
-  // Get the ecosystem from the selected network
-  const selectedEcosystem: Ecosystem | null = activeNetworkConfig?.ecosystem ?? null;
+  const handleUiKitConfigUpdated = useCallback(
+    (uiKitConfig: UiKitConfiguration) => {
+      formBuilderStore.updateState((s) => ({
+        formConfig: s.formConfig ? { ...s.formConfig, uiKitConfig } : null,
+      }));
+      // Also trigger the global reconfiguration to update the header, etc.
+      reconfigureActiveAdapterUiKit(uiKitConfig);
+    },
+    [reconfigureActiveAdapterUiKit]
+  );
 
-  // Create sidebar widget props
+  // Other hooks that manage transient/UI state can remain here
+  const contractWidget = useContractWidgetState();
+  const completeStep = useCompleteStepState();
+
   const sidebarWidget =
-    contractDefinition.contractSchema &&
-    contractDefinition.contractAddress &&
-    activeAdapter &&
-    activeNetworkConfig
+    state.contractSchema && state.contractAddress && activeAdapter && activeNetworkConfig
       ? contractWidget.createWidgetProps(
-          contractDefinition.contractSchema,
-          contractDefinition.contractAddress,
+          state.contractSchema,
+          state.contractAddress,
           activeAdapter,
           activeNetworkConfig
         )
       : null;
 
-  // Create a handler that calls exportForm with the current state
-  const handleExportForm = useCallback(
-    (formConfig: BuilderFormConfig | null, selectedFunction: string | null) => {
-      if (!activeNetworkConfig || !activeAdapter || !selectedFunction) {
-        console.error('Cannot export: Network/Adapter or Function not selected.');
-        return;
-      }
-      // Use void to explicitly ignore the promise
-      void completeStep.exportForm(
-        formConfig,
-        activeNetworkConfig,
-        selectedFunction,
-        contractDefinition.contractSchema
-      );
-    },
-    [completeStep, contractDefinition.contractSchema, activeNetworkConfig, activeAdapter]
-  );
+  const handleExportForm = useCallback(() => {
+    if (!activeNetworkConfig || !activeAdapter || !state.selectedFunction) return;
+    void completeStep.exportForm(
+      state.formConfig,
+      activeNetworkConfig,
+      state.selectedFunction,
+      state.contractSchema
+    );
+  }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
-  // --- Return Value ---
   return {
-    selectedNetworkConfigId: activeNetworkId,
+    ...state,
     selectedNetwork: activeNetworkConfig,
     selectedAdapter: activeAdapter,
     adapterLoading: isAdapterLoading,
-    selectedEcosystem,
-    contractSchema: contractDefinition.contractSchema,
-    contractAddress: contractDefinition.contractAddress,
-    contractFormValues: contractDefinition.contractFormValues,
-    selectedFunction: functionSelection.selectedFunction,
-    formConfig: formCustomization.formConfig,
-    isExecutionStepValid: formCustomization.isExecutionStepValid,
-    isWidgetVisible: contractWidget.isWidgetVisible,
     sidebarWidget,
     exportLoading: completeStep.loading,
-
-    // Enhanced handlers with dependencies handled
+    isWidgetVisible: contractWidget.isWidgetVisible,
+    onStepChange,
     handleNetworkSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
-    handleFormConfigUpdated: formCustomization.handleFormConfigUpdated,
-    handleExecutionConfigUpdated: formCustomization.handleExecutionConfigUpdated,
+    handleFormConfigUpdated,
+    handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
     exportForm: handleExportForm,
+    handleUiKitConfigUpdated,
   };
 }

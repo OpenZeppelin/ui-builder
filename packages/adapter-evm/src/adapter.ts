@@ -4,6 +4,7 @@ import { type TransactionReceipt } from 'viem';
 import React from 'react';
 
 import type {
+  AvailableUiKit,
   Connector,
   ContractAdapter,
   ContractFunction,
@@ -29,6 +30,8 @@ import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 import type { WagmiWalletImplementation } from './wallet/implementation/wagmi-implementation';
+import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
+import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
 import { getResolvedWalletComponents } from './wallet/utils';
 import {
@@ -385,6 +388,44 @@ export class EvmAdapter implements ContractAdapter {
     return getResolvedWalletComponents(currentManagerState.currentFullUiKitConfig);
   }
 
+  public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    const rainbowkitDefaultCode = generateRainbowKitConfigFile({});
+
+    return [
+      {
+        id: 'custom',
+        name: 'OpenZeppelin Custom',
+        configFields: [],
+      },
+      {
+        id: 'rainbowkit',
+        name: 'RainbowKit',
+        linkToDocs: 'https://www.rainbowkit.com/docs/installation#configure',
+        description: `Configure RainbowKit for your exported application. This code will be saved as <code class="bg-muted px-1 py-0.5 rounded text-xs">rainbowkit.config.ts</code>.<br/><br/>
+<strong>Export Only:</strong> This configuration is <em>only used in exported apps</em>. The preview always uses the default RainbowKit configuration.<br/><br/>
+<strong>Available options:</strong><br/>
+• <code>wagmiParams</code>: Configure app name, projectId, wallets, etc.<br/>
+• <code>providerProps</code>: Set theme, modal size, and other UI options<br/><br/>
+Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" target="_blank" rel="noopener" class="text-primary underline">cloud.walletconnect.com</a>`,
+        hasCodeEditor: true,
+        defaultCode: rainbowkitDefaultCode,
+        configFields: [],
+      },
+    ];
+  }
+
+  public async getExportableWalletConfigFiles(
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>> {
+    if (uiKitConfig?.kitName === 'rainbowkit') {
+      return generateRainbowKitExportables(uiKitConfig);
+    }
+    return {};
+  }
+
+  /**
+   * @inheritdoc
+   */
   public getContractDefinitionInputs(): FormFieldType[] {
     return [
       {

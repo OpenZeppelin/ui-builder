@@ -16,7 +16,7 @@ import { useAdapterContext } from './useAdapterContext';
 // Extended adapter interface that includes the callback-based configureUiKit method
 interface ExtendedContractAdapter extends ContractAdapter {
   configureUiKit?(
-    config: UiKitConfiguration,
+    config: Partial<UiKitConfiguration>,
     options?: {
       loadUiKitNativeConfig?: (kitName: string) => Promise<Record<string, unknown> | null>;
     }
@@ -49,7 +49,8 @@ export interface WalletStateProviderProps {
  */
 async function configureAdapterUiKit(
   adapter: ExtendedContractAdapter,
-  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>
+  loadConfigModule?: (relativePath: string) => Promise<Record<string, unknown> | null>,
+  programmaticOverrides: Partial<UiKitConfiguration> = {}
 ): Promise<{
   providerComponent: React.ComponentType<EcosystemReactUiProviderProps> | null;
   hooks: EcosystemSpecificReactHooks | null;
@@ -61,9 +62,7 @@ async function configureAdapterUiKit(
         '[WSP configureAdapterUiKit] Calling configureUiKit for adapter:',
         adapter?.networkConfig?.id
       );
-      // Pass an empty object for programmaticOverrides unless WalletStateProvider
-      // itself has specific overrides it wants to enforce.
-      await adapter.configureUiKit({} as Partial<UiKitConfiguration>, {
+      await adapter.configureUiKit(programmaticOverrides, {
         loadUiKitNativeConfig: loadConfigModule,
       });
       logger.info(
@@ -124,7 +123,14 @@ export function WalletStateProvider({
   );
   // State to hold the Component Type
   const [AdapterUiContextProviderToRender, setAdapterUiContextProviderToRender] =
-    useState<React.ComponentType<EcosystemReactUiProviderProps> | null>(() => null);
+    useState<React.ComponentType<EcosystemReactUiProviderProps> | null>(null);
+
+  // New state to act as a manual trigger for re-configuring the UI kit.
+  const [uiKitConfigVersion, setUiKitConfigVersion] = useState(0);
+  // State to hold programmatic overrides for the next reconfiguration.
+  const [programmaticUiKitConfig, setProgrammaticUiKitConfig] = useState<
+    Partial<UiKitConfiguration> | undefined
+  >(undefined);
 
   // Consume AdapterContext to get the function for fetching adapter instances.
   const { getAdapterForNetwork } = useAdapterContext();
@@ -188,11 +194,15 @@ export function WalletStateProvider({
         try {
           const { providerComponent, hooks } = await configureAdapterUiKit(
             newAdapter,
-            loadConfigModule
+            loadConfigModule,
+            programmaticUiKitConfig
           );
 
           if (!abortController.signal.aborted) {
-            setAdapterUiContextProviderToRender(providerComponent ? () => providerComponent : null);
+            // We use the functional update form `() => providerComponent` here to ensure
+            // that React sets the state to the component type itself, rather than trying
+            // to execute the component function as if it were a state updater.
+            setAdapterUiContextProviderToRender(() => providerComponent);
             setWalletFacadeHooks(hooks);
           }
         } catch (error) {
@@ -219,7 +229,13 @@ export function WalletStateProvider({
 
     void loadAdapterAndConfigureUi();
     return () => abortController.abort();
-  }, [currentGlobalNetworkConfig, getAdapterForNetwork, loadConfigModule]);
+  }, [
+    currentGlobalNetworkConfig,
+    getAdapterForNetwork,
+    loadConfigModule,
+    uiKitConfigVersion,
+    programmaticUiKitConfig,
+  ]);
 
   /**
    * Callback to set the globally active network ID.
@@ -241,6 +257,23 @@ export function WalletStateProvider({
     }
   }, []); // Empty dependency array as it only uses setters from useState.
 
+  /**
+   * Callback to explicitly trigger a re-configuration of the active adapter's UI kit.
+   * This is useful when a UI kit setting changes (e.g., via a wizard) without a network change.
+   */
+  const reconfigureActiveAdapterUiKit = useCallback(
+    (uiKitConfig?: Partial<UiKitConfiguration>) => {
+      logger.info(
+        'WalletStateProvider',
+        'Explicitly triggering UI kit re-configuration by bumping version.',
+        uiKitConfig
+      );
+      setProgrammaticUiKitConfig(uiKitConfig);
+      setUiKitConfigVersion((v) => v + 1);
+    },
+    [setProgrammaticUiKitConfig, setUiKitConfigVersion]
+  );
+
   // The context value now only provides the raw walletFacadeHooks object.
   // Consumers are responsible for calling specific hooks from it and handling their results.
   const contextValue = useMemo<WalletStateContextValue>(
@@ -251,6 +284,7 @@ export function WalletStateProvider({
       activeAdapter: globalActiveAdapter,
       isAdapterLoading: isGlobalAdapterLoading,
       walletFacadeHooks,
+      reconfigureActiveAdapterUiKit,
     }),
     [
       currentGlobalNetworkId,
@@ -259,6 +293,7 @@ export function WalletStateProvider({
       globalActiveAdapter,
       isGlobalAdapterLoading,
       walletFacadeHooks,
+      reconfigureActiveAdapterUiKit,
     ]
   );
 

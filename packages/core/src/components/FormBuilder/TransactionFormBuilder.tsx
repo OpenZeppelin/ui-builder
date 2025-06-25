@@ -33,6 +33,8 @@ export function TransactionFormBuilder() {
     isWidgetVisible,
     sidebarWidget: widgetData,
     exportLoading,
+    currentStepIndex,
+    onStepChange,
 
     handleNetworkSelect,
     handleContractSchemaLoaded,
@@ -41,6 +43,7 @@ export function TransactionFormBuilder() {
     handleExecutionConfigUpdated,
     toggleWidget,
     exportForm,
+    handleUiKitConfigUpdated,
   } = useFormBuilderState();
 
   // Track network switching state
@@ -216,6 +219,8 @@ export function TransactionFormBuilder() {
           currentExecutionConfig={formConfig?.executionConfig}
           onToggleContractState={toggleWidget}
           isWidgetExpanded={isWidgetVisible}
+          onUiKitConfigUpdated={handleUiKitConfigUpdated}
+          currentUiKitConfig={formConfig?.uiKitConfig}
         />
       ),
       isValid: isExecutionStepValid,
@@ -229,7 +234,7 @@ export function TransactionFormBuilder() {
           formConfig={formConfig}
           contractSchema={contractSchema}
           onExport={() => {
-            void exportForm(formConfig, selectedFunction);
+            void exportForm();
           }}
           exportLoading={exportLoading}
           functionDetails={
@@ -266,6 +271,8 @@ export function TransactionFormBuilder() {
           steps={steps}
           sidebarWidget={sidebarWidget}
           isWidgetExpanded={isWidgetVisible}
+          currentStepIndex={currentStepIndex}
+          onStepChange={onStepChange}
         />
       </div>
     </div>

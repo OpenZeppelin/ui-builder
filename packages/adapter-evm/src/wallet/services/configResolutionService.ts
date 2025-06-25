@@ -28,6 +28,7 @@ export async function resolveFullUiKitConfiguration(
       initialAppServiceKitName,
       currentAppServiceConfig,
       hasLoadNativeCallback: !!options?.loadUiKitNativeConfig,
+      hasCustomCode: !!programmaticOverrides.customCode,
     }
   );
 
@@ -37,6 +38,7 @@ export async function resolveFullUiKitConfiguration(
     currentAppServiceConfig.kitName ||
     'custom';
 
+  // Resolve from native config file (if loader is provided)
   const resolvedUserNativeAndProgrammaticKitConfig = await resolveAndInitializeKitConfig(
     effectiveKitName,
     programmaticOverrides.kitConfig,
@@ -48,12 +50,10 @@ export async function resolveFullUiKitConfiguration(
     kitConfig: {
       ...(currentAppServiceConfig.kitConfig || {}),
       ...(resolvedUserNativeAndProgrammaticKitConfig || {}),
+      // customCode is NOT applied to runtime config
     },
-    ...(Object.fromEntries(
-      Object.entries(programmaticOverrides).filter(
-        ([key]) => key !== 'kitName' && key !== 'kitConfig'
-      )
-    ) as Partial<Omit<UiKitConfiguration, 'kitName' | 'kitConfig'>>),
+    // Pass through customCode for export purposes only
+    customCode: programmaticOverrides.customCode,
   };
 
   logger.debug(

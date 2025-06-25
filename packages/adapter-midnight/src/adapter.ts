@@ -1,4 +1,5 @@
 import type {
+  AvailableUiKit,
   Connector,
   ContractAdapter,
   ContractFunction,
@@ -256,6 +257,16 @@ export class MidnightAdapter implements ContractAdapter {
   public isValidAddress(_address: string): boolean {
     // Placeholder - add real Bech32m validation later
     return true;
+  }
+
+  async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    return [
+      {
+        id: 'custom',
+        name: 'OpenZeppelin Custom',
+        configFields: [],
+      },
+    ];
   }
 }
 

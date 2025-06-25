@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -199,6 +199,19 @@ export const Default: Story = {
   args: {
     steps: stepsWithComponents,
     onComplete: () => alert('Wizard completed!'),
+    currentStepIndex: 0,
+    onStepChange: () => {},
+  },
+  render: function Render(args) {
+    const [currentStepIndex, setCurrentStepIndex] = useState(args.currentStepIndex || 0);
+
+    return (
+      <WizardLayout
+        {...args}
+        currentStepIndex={currentStepIndex}
+        onStepChange={setCurrentStepIndex}
+      />
+    );
   },
 };
 
@@ -223,21 +236,29 @@ const simpleSteps: WizardStep[] = [
 
 export const InCard: Story = {
   args: {
-    // These args are required by the type system but will be overridden in the render function
     steps: simpleSteps,
     onComplete: () => alert('Wizard in card completed!'),
+    currentStepIndex: 0,
+    onStepChange: () => {},
   },
   parameters: {
     layout: 'centered',
   },
-  render: () => (
-    <Card className="w-[600px]">
-      <CardHeader>
-        <CardTitle>Wizard Example</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <WizardLayout steps={simpleSteps} onComplete={() => alert('Wizard in card completed!')} />
-      </CardContent>
-    </Card>
-  ),
+  render: function Render(args) {
+    const [currentStepIndex, setCurrentStepIndex] = useState(args.currentStepIndex || 0);
+    return (
+      <Card className="w-[600px]">
+        <CardHeader>
+          <CardTitle>Wizard Example</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WizardLayout
+            {...args}
+            currentStepIndex={currentStepIndex}
+            onStepChange={setCurrentStepIndex}
+          />
+        </CardContent>
+      </Card>
+    );
+  },
 };

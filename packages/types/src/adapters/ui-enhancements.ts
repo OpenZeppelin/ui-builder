@@ -1,5 +1,7 @@
 import type React from 'react';
 
+import type { FormFieldType, FormValues } from '../forms';
+
 /**
  * Configuration for excluding specific wallet components provided by an adapter for its 'custom' kit.
  */
@@ -16,25 +18,16 @@ export interface ComponentExclusionConfig {
  */
 export interface UiKitConfiguration {
   /** Name of the chosen UI kit (e.g., 'rainbowkit', 'connectkit'). Use 'custom' for adapter-provided default components or 'none' to disable adapter UI. */
-  kitName?: 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
+  kitName: UiKitName;
 
   /**
    * Kit-specific configuration options.
    * This is an open-ended object to allow adapters to define their own configuration.
    * The adapter is responsible for validating and type-checking these values.
    */
-  kitConfig?: {
-    /** Whether to show the injected connector (e.g., MetaMask) in the wallet connection dialog */
-    showInjectedConnector?: boolean;
+  kitConfig: FormValues;
 
-    /** Configuration for including/excluding specific adapter-provided UI components */
-    components?: ComponentExclusionConfig;
-
-    /**
-     * Other kit-specific configurations handled by the adapter implementation
-     */
-    [key: string]: unknown;
-  };
+  customCode?: string;
 }
 
 /**
@@ -124,3 +117,40 @@ export interface EcosystemWalletComponents {
 }
 
 export type NativeConfigLoader = (relativePath: string) => Promise<Record<string, unknown> | null>;
+
+/**
+ * Describes a UI kit available for a specific adapter, providing all necessary
+ * metadata for the form builder to render its configuration options.
+ */
+export interface AvailableUiKit {
+  /** A unique identifier for the UI kit (e.g., 'rainbowkit'). */
+  id: string;
+
+  /** The display name of the UI kit (e.g., 'RainbowKit'). */
+  name: string;
+
+  /** An optional link to the UI kit's documentation. */
+  linkToDocs?: string;
+
+  /**
+   * An optional description of the UI kit and its configuration.
+   * This can contain HTML for formatting (e.g., code blocks, links).
+   */
+  description?: string;
+
+  /** An array of form fields required to configure the UI kit. */
+  configFields: FormFieldType[];
+
+  /**
+   * If true, indicates that this UI kit supports advanced configuration via a code editor.
+   * @default false
+   */
+  hasCodeEditor?: boolean;
+
+  /**
+   * The default boilerplate code to display if `hasCodeEditor` is true.
+   */
+  defaultCode?: string;
+}
+
+export type UiKitName = 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';

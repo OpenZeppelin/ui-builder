@@ -29,6 +29,15 @@ export interface AdapterConfig {
      */
     dev?: Record<string, string>;
   };
+  uiKits?: Record<
+    string,
+    {
+      dependencies: {
+        runtime: Record<string, string>;
+        dev?: Record<string, string>;
+      };
+    }
+  >;
   // Future properties might include things like:
   // recommendedNodeVersion?: string;
   // setupScripts?: { name: string; script: string }[];

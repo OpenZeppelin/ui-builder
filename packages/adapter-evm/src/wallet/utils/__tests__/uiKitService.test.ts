@@ -31,7 +31,7 @@ describe('uiKitService', () => {
     };
 
     it('should return undefined for "none" kit', () => {
-      const config: UiKitConfiguration = { kitName: 'none' };
+      const config: UiKitConfiguration = { kitName: 'none', kitConfig: {} };
       const result = getResolvedWalletComponents(config);
       expect(result).toBeUndefined();
       expect(logger.info).toHaveBeenCalledWith(
@@ -41,7 +41,7 @@ describe('uiKitService', () => {
     });
 
     it('should return all components for "custom" kit without exclusions', () => {
-      const config: UiKitConfiguration = { kitName: 'custom' };
+      const config: UiKitConfiguration = { kitName: 'custom', kitConfig: {} };
       const result = getResolvedWalletComponents(config);
       expect(result).toEqual(allCustomComponents);
     });
@@ -88,6 +88,7 @@ describe('uiKitService', () => {
     it('should handle undefined kitConfig', () => {
       const config: UiKitConfiguration = {
         kitName: 'custom',
+        kitConfig: {},
       };
       const result = getResolvedWalletComponents(config);
       expect(result).toEqual(allCustomComponents);

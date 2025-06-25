@@ -3,11 +3,12 @@ import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 
-import {
-  type EcosystemReactUiProviderProps,
-  type EcosystemSpecificReactHooks,
-  type EcosystemWalletComponents,
-  type UiKitConfiguration,
+import type {
+  AvailableUiKit,
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
+  UiKitConfiguration,
 } from './ui-enhancements';
 
 // Base types and interfaces for adapters will be defined here.
@@ -312,8 +313,26 @@ export interface ContractAdapter {
   getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;
 
   /**
+   * Gets the list of available UI kits supported by this adapter.
+   *
+   * @returns A promise resolving to an array of available UiKit objects.
+   */
+  getAvailableUiKits(): Promise<AvailableUiKit[]>;
+
+  /**
+   * Generates adapter-specific wallet configuration files for export.
+   *
+   * @param uiKitConfig The selected UI kit configuration from the builder.
+   * @returns A promise resolving to a record of file paths to their content.
+   */
+  getExportableWalletConfigFiles?(
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>>;
+
+  /**
    * Returns a schema for the inputs required to define a contract.
    * This allows adapters to specify what information they need (e.g., address, ABI, artifacts).
+   *
    * @returns An array of FormFieldType objects representing the required inputs.
    */
   getContractDefinitionInputs(): FormFieldType[];
