@@ -82,7 +82,22 @@ export function StepFormCustomization({
   }, [contractSchema, selectedFunction]);
 
   const handleUiKitConfigUpdate = (config: UiKitConfiguration) => {
-    onUiKitConfigUpdated(config);
+    // For runtime UI updates, exclude customCode to prevent reinitialization
+    const runtimeConfig: UiKitConfiguration = {
+      kitName: config.kitName,
+      kitConfig: config.kitConfig,
+      // Intentionally omit customCode for runtime
+    };
+
+    // Only trigger UI update if runtime config actually changed
+    if (
+      currentUiKitConfig?.kitName !== runtimeConfig.kitName ||
+      JSON.stringify(currentUiKitConfig?.kitConfig) !== JSON.stringify(runtimeConfig.kitConfig)
+    ) {
+      onUiKitConfigUpdated(runtimeConfig);
+    }
+
+    // Always save the full config (including customCode) for export
     onFormConfigUpdated({ uiKitConfig: config });
   };
 

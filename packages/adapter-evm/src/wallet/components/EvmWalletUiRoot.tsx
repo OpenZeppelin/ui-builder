@@ -69,15 +69,8 @@ export const EvmWalletUiRoot: React.FC<EcosystemReactUiProviderProps> = ({ child
     const DynKitProvider = kitProviderComponent;
     const kitConfig: RainbowKitKitConfig = currentFullUiKitConfig.kitConfig || {};
 
-    // Transform the flat kitConfig into the nested structure RainbowKitProvider expects
-    const providerProps: RainbowKitProviderProps = {
-      ...kitConfig.providerProps,
-      appInfo: {
-        ...kitConfig.providerProps?.appInfo,
-        ...(kitConfig.appName && { appName: kitConfig.appName }),
-        ...(kitConfig.learnMoreUrl && { learnMoreUrl: kitConfig.learnMoreUrl }),
-      },
-    };
+    // Pass through all provider props from the parsed config
+    const providerProps: RainbowKitProviderProps = kitConfig.providerProps || {};
 
     logger.info(
       'EvmWalletUiRoot',

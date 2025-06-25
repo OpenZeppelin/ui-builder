@@ -1,3 +1,5 @@
+import CodeEditor from '@uiw/react-textarea-code-editor';
+
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -10,7 +12,7 @@ import {
   UiKitConfiguration,
   UiKitName,
 } from '@openzeppelin/transaction-form-types';
-import { Button, ExternalLink } from '@openzeppelin/transaction-form-ui';
+import { ExternalLink } from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
@@ -29,9 +31,10 @@ interface UiKitOption extends SelectableOption {
 
 export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitSettingsProps) {
   const [availableKits, setAvailableKits] = useState<AvailableUiKit[]>([]);
-  const [selectedKitId, setSelectedKitId] = useState<string | null>(null);
+  const [selectedKitId, setSelectedKitId] = useState<UiKitName | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [customCode, setCustomCode] = useState<string>('');
 
   const { control, getValues, reset } = useForm<FormValues>({
     defaultValues: currentConfig?.kitConfig || {},
@@ -52,12 +55,22 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
         setAvailableKits(kits);
 
         // Set default selection
-        const defaultKitId = currentConfig?.kitName || (kits.length > 0 ? kits[0].id : null);
+        const defaultKitId: UiKitName | null =
+          currentConfig?.kitName || (kits.length > 0 ? (kits[0].id as UiKitName) : null);
         setSelectedKitId(defaultKitId);
 
         // Reset form with current config
         if (currentConfig?.kitConfig) {
           reset(currentConfig.kitConfig);
+        }
+
+        const selectedKitData = kits.find((k) => k.id === defaultKitId);
+        if (currentConfig?.customCode && selectedKitData?.hasCodeEditor) {
+          setCustomCode(currentConfig.customCode);
+        } else if (selectedKitData?.defaultCode) {
+          setCustomCode(selectedKitData.defaultCode);
+        } else {
+          setCustomCode('');
         }
       } catch (error) {
         logger.error('UiKitSettings', 'Failed to fetch available UI kits:', error);
@@ -69,16 +82,6 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
     }
     void fetchKits();
   }, [adapter, currentConfig, reset]);
-
-  const isUiKitName = (id: string): id is UiKitName => {
-    return ['rainbowkit', 'connectkit', 'appkit', 'custom', 'none'].includes(id);
-  };
-
-  const handleApply = () => {
-    if (!selectedKitId || !isUiKitName(selectedKitId)) return;
-    const formValues = getValues();
-    onUpdateConfig({ kitName: selectedKitId, kitConfig: formValues });
-  };
 
   const selectedKit = availableKits.find((kit) => kit.id === selectedKitId);
 
@@ -102,7 +105,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
         )}
       </div>
 
-      {selectedKit.configFields.length > 0 ? (
+      {selectedKit.configFields.length > 0 && (
         <div className="space-y-4">
           {selectedKit.configFields.map((field) => (
             <div key={field.id} className="pt-2">
@@ -110,7 +113,9 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
             </div>
           ))}
         </div>
-      ) : (
+      )}
+
+      {!selectedKit.hasCodeEditor && selectedKit.configFields.length === 0 && (
         <div className="py-4">
           <p className="text-muted-foreground text-sm">
             This UI kit requires no additional configuration.
@@ -118,9 +123,53 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
         </div>
       )}
 
-      <div className="flex justify-end pt-4">
-        <Button onClick={handleApply}>Apply Configuration</Button>
-      </div>
+      {selectedKit.hasCodeEditor && (
+        <div className={selectedKit.configFields.length === 0 ? '' : 'pt-4'}>
+          {selectedKit.description && (
+            <p
+              className="text-muted-foreground text-sm mb-4"
+              dangerouslySetInnerHTML={{ __html: selectedKit.description }}
+            />
+          )}
+          <CodeEditor
+            value={customCode}
+            language="typescript"
+            placeholder="Enter your custom configuration code here."
+            onChange={(e) => {
+              const newCode = e.target.value;
+              setCustomCode(newCode);
+
+              // Update configuration with custom code
+              // Parent component will handle separating runtime vs export config
+              if (selectedKitId) {
+                const formValues = getValues();
+                const kit = availableKits.find((k) => k.id === selectedKitId);
+                if (kit?.hasCodeEditor) {
+                  onUpdateConfig({
+                    kitName: selectedKitId,
+                    kitConfig: formValues,
+                    customCode: newCode,
+                  });
+                }
+              }
+            }}
+            padding={15}
+            style={{
+              fontSize: 12,
+              backgroundColor: '#f5f5f5',
+              fontFamily:
+                'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+              borderRadius: '0.25rem',
+              border: '1px solid #e2e8f0',
+              minHeight: '300px',
+            }}
+            data-color-mode="light"
+          />
+          <p className="text-muted-foreground text-xs mt-2">
+            💡 Changes are saved automatically as you type.
+          </p>
+        </div>
+      )}
     </div>
   ) : undefined;
 
@@ -135,7 +184,22 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
       <OptionSelector
         options={selectorOptions}
         selectedId={selectedKitId}
-        onSelect={setSelectedKitId}
+        onSelect={(id) => {
+          setSelectedKitId(id as UiKitName);
+          const kit = availableKits.find((k) => k.id === id);
+          const newCode = kit?.defaultCode || '';
+          setCustomCode(newCode);
+
+          // Update configuration immediately when kit is selected
+          const formValues = getValues();
+          const newConfig: UiKitConfiguration = {
+            kitName: id as UiKitName,
+            kitConfig: formValues,
+            customCode: kit?.hasCodeEditor ? newCode : undefined,
+          };
+
+          onUpdateConfig(newConfig);
+        }}
         configContent={configContent}
         isLoading={isLoading}
         loadingMessage="Loading available UI kits..."

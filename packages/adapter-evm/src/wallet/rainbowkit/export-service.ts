@@ -12,6 +12,7 @@ export function generateRainbowKitExportables(
   uiKitConfig: UiKitConfiguration
 ): Record<string, string> {
   const filePath = 'src/config/wallet/rainbowkit.config.ts';
-  const content = generateRainbowKitConfigFile(uiKitConfig.kitConfig);
+  const content = uiKitConfig.customCode || generateRainbowKitConfigFile(uiKitConfig.kitConfig);
+
   return { [filePath]: content };
 }

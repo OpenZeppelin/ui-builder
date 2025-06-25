@@ -30,6 +30,7 @@ import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 import type { WagmiWalletImplementation } from './wallet/implementation/wagmi-implementation';
+import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
 import { getResolvedWalletComponents } from './wallet/utils';
@@ -388,6 +389,8 @@ export class EvmAdapter implements ContractAdapter {
   }
 
   public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
+    const rainbowkitDefaultCode = generateRainbowKitConfigFile({});
+
     return [
       {
         id: 'custom',
@@ -397,27 +400,16 @@ export class EvmAdapter implements ContractAdapter {
       {
         id: 'rainbowkit',
         name: 'RainbowKit',
-        linkToDocs: 'https://www.rainbowkit.com/docs/installation',
-        configFields: [
-          {
-            id: 'appName',
-            name: 'appName',
-            label: 'Application Name',
-            type: 'text',
-            validation: { required: true },
-            placeholder: 'My dApp',
-            helperText: 'The name of your application, which will be displayed in the wallet.',
-          },
-          {
-            id: 'learnMoreUrl',
-            name: 'learnMoreUrl',
-            label: 'Learn More URL (Optional)',
-            type: 'url',
-            validation: {},
-            placeholder: 'https://my-dapp.com',
-            helperText: 'A URL where users can learn more about your application.',
-          },
-        ],
+        linkToDocs: 'https://www.rainbowkit.com/docs/installation#configure',
+        description: `Configure RainbowKit for your exported application. This code will be saved as <code class="bg-muted px-1 py-0.5 rounded text-xs">rainbowkit.config.ts</code>.<br/><br/>
+<strong>Export Only:</strong> This configuration is <em>only used in exported apps</em>. The preview always uses the default RainbowKit configuration.<br/><br/>
+<strong>Available options:</strong><br/>
+• <code>wagmiParams</code>: Configure app name, projectId, wallets, etc.<br/>
+• <code>providerProps</code>: Set theme, modal size, and other UI options<br/><br/>
+Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" target="_blank" rel="noopener" class="text-primary underline">cloud.walletconnect.com</a>`,
+        hasCodeEditor: true,
+        defaultCode: rainbowkitDefaultCode,
+        configFields: [],
       },
     ];
   }

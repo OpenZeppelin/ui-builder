@@ -16,7 +16,7 @@ import { useAdapterContext } from './useAdapterContext';
 // Extended adapter interface that includes the callback-based configureUiKit method
 interface ExtendedContractAdapter extends ContractAdapter {
   configureUiKit?(
-    config: UiKitConfiguration,
+    config: Partial<UiKitConfiguration>,
     options?: {
       loadUiKitNativeConfig?: (kitName: string) => Promise<Record<string, unknown> | null>;
     }
