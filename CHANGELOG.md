@@ -1,3 +1,16 @@
+# [1.12.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.11.0...v1.12.0) (2025-06-25)
+
+
+### Bug Fixes
+
+* **core:** regenerate pnpm-lock.yaml to sync with package.json dependencies ([93d54d2](https://github.com/OpenZeppelin/transaction-form-builder/commit/93d54d23a8790dfb915de5d546cf27d793cdd07b))
+
+
+### Features
+
+* **form:** remove externalToggleMode from contract state widget ([b546f8c](https://github.com/OpenZeppelin/transaction-form-builder/commit/b546f8c7d3783e86dab5898b6c4e8b0c8f41393e))
+* **ui:** polish exported app UI to match core form builder ([36dff14](https://github.com/OpenZeppelin/transaction-form-builder/commit/36dff147fd658d829553a9e7ad3fb85959824055))
+
 # [1.11.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.10.0...v1.11.0) (2025-06-25)
 
 
