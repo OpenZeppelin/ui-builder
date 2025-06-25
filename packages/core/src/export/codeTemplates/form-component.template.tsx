@@ -14,7 +14,11 @@ import { AdapterPlaceholder } from '@@adapter-package-name@@';
 
 import { useState } from 'react';
 
-import { ContractStateWidget, TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import {
+  ContractActionBar,
+  ContractStateWidget,
+  TransactionForm,
+} from '@openzeppelin/transaction-form-renderer';
 import type {
   ContractSchema,
   ExecutionConfig,
@@ -104,35 +108,50 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   };
 
   return (
-    <div className="flex gap-4">
-      <div className="flex-1">
-        <Card>
-          <CardContent className="space-y-4">
-            <TransactionForm
-              schema={formSchema}
-              contractSchema={contractSchema}
-              adapter={adapter}
-              isWalletConnected={isWalletConnected}
-              executionConfig={executionConfig}
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {contractAddress && (
-        <div className="w-[300px] flex-shrink-0">
-          <div className="sticky top-4">
-            <ContractStateWidget
-              contractSchema={schemaToUse}
-              contractAddress={contractAddress}
-              adapter={adapter}
-              isVisible={isWidgetVisible}
-              onToggle={toggleWidget}
-              error={loadError}
-            />
-          </div>
-        </div>
+    <div className="space-y-6">
+      {/* Contract Action Bar - consistent with core app */}
+      {adapter.networkConfig && (
+        <ContractActionBar
+          networkConfig={adapter.networkConfig}
+          contractAddress={contractAddress}
+          onToggleContractState={toggleWidget}
+          isWidgetExpanded={isWidgetVisible}
+        />
       )}
+
+      <div className="flex gap-4">
+        {/* Contract State Widget on the left side - matching core app layout */}
+        {contractAddress && isWidgetVisible && (
+          <div className="w-[300px] flex-shrink-0">
+            <div className="sticky top-4">
+              <ContractStateWidget
+                contractSchema={schemaToUse}
+                contractAddress={contractAddress}
+                adapter={adapter}
+                isVisible={isWidgetVisible}
+                onToggle={toggleWidget}
+                error={loadError}
+                externalToggleMode={true}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Main form on the right side */}
+        <div className="flex-1">
+          <Card>
+            <CardContent className="space-y-4">
+              <TransactionForm
+                schema={formSchema}
+                contractSchema={contractSchema}
+                adapter={adapter}
+                isWalletConnected={isWalletConnected}
+                executionConfig={executionConfig}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

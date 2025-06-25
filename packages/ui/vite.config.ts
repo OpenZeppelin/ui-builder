@@ -1,9 +1,11 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
   plugins: [
+    svgr(),
     // @ts-expect-error - incompatible types between vite-plugin-dts and vite
     dts({
       insertTypesEntry: true,
@@ -35,8 +37,10 @@ export default defineConfig({
         '@radix-ui/react-tabs',
         '@radix-ui/react-toast',
         '@radix-ui/react-tooltip',
+        '@web3icons/react',
         'class-variance-authority',
         'clsx',
+        'lodash',
         'lucide-react',
         'tailwind-merge',
         'tailwindcss-animate',

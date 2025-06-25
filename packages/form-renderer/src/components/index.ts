@@ -13,6 +13,7 @@ export { TransactionExecuteButton } from './transaction/TransactionExecuteButton
 
 // Contract components
 export { ContractStateWidget } from './ContractStateWidget';
+export { ContractActionBar } from './ContractActionBar';
 
 // Execution config display
 export { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
