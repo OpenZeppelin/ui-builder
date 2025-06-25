@@ -131,7 +131,6 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
                 isVisible={isWidgetVisible}
                 onToggle={toggleWidget}
                 error={loadError}
-                externalToggleMode={true}
               />
             </div>
           </div>

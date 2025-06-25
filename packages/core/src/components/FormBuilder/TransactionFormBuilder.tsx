@@ -157,7 +157,6 @@ export function TransactionFormBuilder() {
         adapter={widgetData.adapter}
         isVisible={widgetData.isVisible}
         onToggle={widgetData.onToggle}
-        externalToggleMode={true}
       />
     </div>
   ) : null;
