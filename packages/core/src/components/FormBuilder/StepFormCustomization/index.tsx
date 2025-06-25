@@ -8,8 +8,6 @@ import {
 } from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
-import { ensureCompleteConfig } from '@/components/FormBuilder/StepFormCustomization/utils/executionUtils';
-
 import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
@@ -19,6 +17,7 @@ import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 import { UiKitSettings } from './components/UiKitSettings';
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
+import { ensureCompleteConfig } from './utils/executionUtils';
 
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
