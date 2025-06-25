@@ -1,10 +1,12 @@
 {
-  "name": "@openzeppelin/transaction-form-builder-styles",
-  "version": "0.1.0",
+  "name": "@openzeppelin/transaction-form-styles",
+  "version": "1.0.3",
   "description": "Centralized styling system for Transaction Form Builder",
-  "private": true,
   "type": "module",
   "main": "global.css",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "clean": "echo 'No build artifacts to clean'",
     "build": "echo 'No build step needed for styles'",

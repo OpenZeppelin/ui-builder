@@ -1,7 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-adapter-midnight",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
   "description": "Midnight Adapter for Transaction Form Builder",
   "keywords": [
     "openzeppelin",
@@ -23,8 +22,7 @@
     "src"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
