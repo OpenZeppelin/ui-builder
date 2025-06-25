@@ -36,13 +36,12 @@ function NetworkTypeBadge({ type }: { type: string }): React.ReactElement {
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-medium flex-shrink-0 text-xs 
-                  ${
-                    isTestnetLike
-                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                  }
-                 `}
+      className={cn(
+        'inline-flex items-center justify-center rounded-full font-medium flex-shrink-0 text-xs',
+        isTestnetLike
+          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+          : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+      )}
       style={{
         width: BADGE_SIZE,
         height: BADGE_SIZE,
