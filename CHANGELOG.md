@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.12.0...v1.13.0) (2025-06-25)
+
+
+### Features
+
+* **release:** configure packages for GitHub registry ([dcb6b15](https://github.com/OpenZeppelin/transaction-form-builder/commit/dcb6b15aeaed638d8f115294341d46743e4e1581))
+
 # [1.12.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.11.0...v1.12.0) (2025-06-25)
 
 
