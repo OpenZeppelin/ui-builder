@@ -1,5 +1,56 @@
 import path from 'path';
+import type { OutputBundle, OutputOptions, Plugin } from 'vite';
 import dts from 'vite-plugin-dts';
+
+// Custom plugin to fix directory imports for ES modules
+function fixDirectoryImports(): Plugin {
+  return {
+    name: 'fix-directory-imports',
+    generateBundle(options: OutputOptions, bundle: OutputBundle) {
+      // Only apply to ES format
+      if (options.format !== 'es') return;
+
+      for (const fileName in bundle) {
+        const chunk = bundle[fileName];
+        if (chunk.type === 'chunk' && chunk.code) {
+          // Replace directory imports with explicit index.js imports
+          chunk.code = chunk.code.replace(
+            /from\s+['"](\.\/[^'"]+)['"];/g,
+            (match: string, importPath: string) => {
+              // Skip if already has an extension
+              if (importPath.includes('.')) return match;
+              // Add /index.js to directory imports
+              return match.replace(importPath, `${importPath}/index.js`);
+            }
+          );
+
+          // Also handle export * from syntax
+          chunk.code = chunk.code.replace(
+            /export\s+\*\s+from\s+['"](\.\/[^'"]+)['"];/g,
+            (match: string, importPath: string) => {
+              // Skip if already has an extension
+              if (importPath.includes('.')) return match;
+              // Add /index.js to directory imports
+              return match.replace(importPath, `${importPath}/index.js`);
+            }
+          );
+
+          // Fix imports that should be re-exports
+          // Look for patterns where we have import './something' that should be export * from './something'
+          if (fileName.endsWith('index.js')) {
+            chunk.code = chunk.code.replace(
+              /^import\s+['"](\.\/[^'"]+)['"];$/gm,
+              (match: string, importPath: string) => {
+                // Convert side-effect imports to re-exports for index files
+                return `export * from '${importPath}';`;
+              }
+            );
+          }
+        }
+      }
+    },
+  };
+}
 
 export function createLibraryConfig(options: {
   packageDir: string;
@@ -26,9 +77,10 @@ export function createLibraryConfig(options: {
         insertTypesEntry: true,
         outDir: 'dist',
         tsconfigPath: './tsconfig.json',
-        rollupTypes: true,
+        rollupTypes: false,
         copyDtsFiles: true,
       }),
+      fixDirectoryImports(),
     ],
     build: {
       lib: {
@@ -52,6 +104,7 @@ export function createLibraryConfig(options: {
           /^node:/,
           ...external,
         ],
+        treeshake: false, // Disable tree shaking to preserve all exports
         output: [
           {
             format: 'es',
