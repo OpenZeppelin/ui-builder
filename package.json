@@ -79,6 +79,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/react": "^19.0.10",
+    "@types/node": "^22.13.9",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "commitizen": "^4.3.1",
