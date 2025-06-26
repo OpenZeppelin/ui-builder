@@ -1,3 +1,20 @@
+## [1.13.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.0...v1.13.1) (2025-06-26)
+
+
+### Bug Fixes
+
+* **adapter:** missing ui dep ([d46fe93](https://github.com/OpenZeppelin/transaction-form-builder/commit/d46fe9376db353c5e78f953cf877a575f24aeab1))
+* **config:** attempt to simplify shared vite config ([9ea878e](https://github.com/OpenZeppelin/transaction-form-builder/commit/9ea878ec547c294d93e2fcc9f1fda0ae7ed7e6d6))
+* **config:** attempt two ([e141c75](https://github.com/OpenZeppelin/transaction-form-builder/commit/e141c752f2b2db18f3080112d07b66334525023b))
+* **config:** correct vite config for dev server ([4728c71](https://github.com/OpenZeppelin/transaction-form-builder/commit/4728c71392fd097f15934dbd58d762155db60648))
+* **config:** ensure clean build every time ([c92eba4](https://github.com/OpenZeppelin/transaction-form-builder/commit/c92eba477db39d8f92a9fa32ed0f20a114cc4551))
+* **config:** migrate all packages to Vite for ES module compatibility ([55fcc07](https://github.com/OpenZeppelin/transaction-form-builder/commit/55fcc073659589c6297f83381e98c1afd86d0074))
+* **config:** resolve ES module imports and type exports ([92e74ac](https://github.com/OpenZeppelin/transaction-form-builder/commit/92e74aca3e9bdf00cd20418172b0e0e8bf32399a))
+* **config:** unify node types package version ([3eb17ba](https://github.com/OpenZeppelin/transaction-form-builder/commit/3eb17ba0618be1197f0fe086f7b1d86bbeb9e980))
+* **export:** template typing issues breaking builds ([e33c5ad](https://github.com/OpenZeppelin/transaction-form-builder/commit/e33c5adfe0101ca682c9c89d8436230c9bb926a9))
+* **tests:** remove unused variables ([d29bc16](https://github.com/OpenZeppelin/transaction-form-builder/commit/d29bc16cd53df43a868be69cb2dd6f26f57eaa57))
+* **tests:** update export tests to match new component architecture ([23063bc](https://github.com/OpenZeppelin/transaction-form-builder/commit/23063bcde8e8a542fcd1b9b61924da71542787f7))
+
 # [1.13.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.12.0...v1.13.0) (2025-06-25)
 
 
