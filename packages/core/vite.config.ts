@@ -57,10 +57,10 @@ export default defineConfig({
       },
       // Reduce memory usage during rollup processing
       maxParallelFileOps: 2,
-      // Exclude template files from being processed
+      // Exclude template files from being processed as modules
       external: (id) => {
         // Exclude template files from being processed as modules
-        return id.includes('/templates/') && id.includes('.tsx');
+        return id.includes('/templates/') || id.includes('/codeTemplates/');
       },
     },
     // Increase chunk size warning limit to reduce warnings
@@ -70,9 +70,8 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: [
-      // Exclude template files from dependency optimization
-      '**/templates/**/*.tsx',
-      '**/codeTemplates/**/*.tsx',
+      // The patterns that caused errors have been removed.
+      // If the dev server has issues resolving these, we may need a more advanced solution.
     ],
   },
 });
