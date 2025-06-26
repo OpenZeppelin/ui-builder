@@ -276,9 +276,9 @@ describe('FormCodeGenerator Templating System', () => {
         'transferTokens'
       );
 
-      // Verify that template placeholders were correctly replaced
-      expect(code).toContain('EvmAdapter');
-      expect(code).toContain('transferTokens');
+      // Verify that the component is structured to accept a generic adapter
+      expect(code).toContain('adapter: ContractAdapter');
+      expect(code).toContain("functionId: 'transferTokens'");
 
       // Verify that specific VARIABLE template placeholders were replaced
       expect(code).not.toContain('@@function-id@@');

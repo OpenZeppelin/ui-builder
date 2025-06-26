@@ -83,13 +83,13 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
 "import { useState } from 'react';
 
-import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm';
 import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
 } from '@openzeppelin/transaction-form-renderer';
 import type {
+  ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
@@ -98,7 +98,7 @@ import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
-  adapter: EvmAdapter;
+  adapter: ContractAdapter;
   isWalletConnected?: boolean;
 }
 
@@ -293,6 +293,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.12",
     "@types/lodash": "^4.17.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -341,6 +342,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "wagmi": "^2.15.0",
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.12",
     "@types/lodash": "^4.17.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
