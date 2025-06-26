@@ -35,6 +35,8 @@ module.exports = {
   create(context) {
     // Known interface methods from ContractAdapter
     const interfaceMethods = [
+      'networkConfig',
+      'initialAppServiceKitName',
       'loadContract',
       'getWritableFunctions',
       'mapParameterTypeToFieldType',

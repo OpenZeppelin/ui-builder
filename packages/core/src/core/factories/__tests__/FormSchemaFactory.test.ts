@@ -31,6 +31,7 @@ const mockTestEvmConfig: EvmNetworkConfig = {
 
 // Mock adapter instance (ensure it fulfills ContractAdapter)
 const mockAdapterInstance: ContractAdapter = {
+  initialAppServiceKitName: 'custom',
   networkConfig: mockTestEvmConfig,
   mapParameterTypeToFieldType: vi.fn((type: string): FieldType => {
     if (type === 'address') return 'blockchain-address';

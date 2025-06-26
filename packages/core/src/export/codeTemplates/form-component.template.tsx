@@ -6,12 +6,6 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-/*------------TEMPLATE COMMENT START------------*/
-// This import will be replaced at generation time
-/*------------TEMPLATE COMMENT END------------*/
-// @ts-expect-error - Adapter import placeholder
-import { AdapterPlaceholder } from '@@adapter-package-name@@';
-
 import { useState } from 'react';
 
 import {
@@ -20,6 +14,7 @@ import {
   TransactionForm,
 } from '@openzeppelin/transaction-form-renderer';
 import type {
+  ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
@@ -28,7 +23,7 @@ import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
-  adapter: AdapterPlaceholder;
+  adapter: ContractAdapter;
   isWalletConnected?: boolean;
 }
 

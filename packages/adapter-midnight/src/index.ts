@@ -11,3 +11,6 @@ export {
   // Individual networks
   midnightTestnet,
 } from './networks';
+
+// Export adapter configuration
+export { midnightAdapterConfig } from './config';

@@ -11,8 +11,10 @@ import type {
   FormValues,
   FunctionParameter,
   SolanaNetworkConfig,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import {
   getSolanaExplorerAddressUrl,
@@ -48,6 +50,7 @@ import {
  */
 export class SolanaAdapter implements ContractAdapter {
   readonly networkConfig: SolanaNetworkConfig;
+  readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
   // private walletImplementation: SolanaWalletImplementation; // Example
 
   constructor(networkConfig: SolanaNetworkConfig) {
@@ -55,7 +58,11 @@ export class SolanaAdapter implements ContractAdapter {
       throw new Error('SolanaAdapter requires a valid Solana network configuration.');
     }
     this.networkConfig = networkConfig;
-    console.log(`SolanaAdapter initialized for network: ${this.networkConfig.name}`);
+    this.initialAppServiceKitName = 'custom';
+    logger.info(
+      'SolanaAdapter',
+      `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
+    );
   }
 
   async loadContract(artifacts: FormValues): Promise<ContractSchema> {

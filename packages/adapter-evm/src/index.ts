@@ -21,4 +21,5 @@ export {
   // ... other individual network exports
 } from './networks';
 
-// Export other adapter-specific items if any
+// Export adapter configuration
+export { evmAdapterConfig } from './config';

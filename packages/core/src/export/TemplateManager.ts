@@ -12,10 +12,14 @@ type TemplateRegistry = Record<string, Record<string, string>>;
 
 // Template files are loaded lazily using Vite's import.meta.glob
 // This allows code-splitting so the template files are only loaded when needed
-const templateFiles = import.meta.glob<string>('./templates/**/*', {
-  query: '?raw',
-  import: 'default',
-}) as Record<string, () => Promise<string>>;
+// We exclude .ts and .tsx files as they contain placeholder syntax that breaks the build
+const templateFiles = import.meta.glob<string>(
+  ['./templates/**/*', '!./templates/**/*.ts', '!./templates/**/*.tsx'],
+  {
+    query: '?raw',
+    import: 'default',
+  }
+) as Record<string, () => Promise<string>>;
 
 // For testing purposes - make file paths available to tests
 export const templateFilePaths = Object.keys(templateFiles);

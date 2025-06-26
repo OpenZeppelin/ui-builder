@@ -12,3 +12,6 @@ export {
   stellarPublic,
   stellarTestnet,
 } from './networks';
+
+// Export adapter configuration
+export { stellarAdapterConfig } from './config';
