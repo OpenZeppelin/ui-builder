@@ -116,6 +116,8 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **Storybook 8**: Component documentation and visual testing
 - **Semantic Release**: Automated versioning and releases
 - **ESLint 9**: Modern linting with improved TypeScript support
+- **tsup**: Fast, modern bundler for TypeScript libraries
+- **Vite**: Used for the core application's dev server
 
 ## Getting Started
 
@@ -269,8 +271,6 @@ transaction-form-builder/
 ├── .eslint/             # Custom ESLint plugins and rules
 ├── tsconfig.base.json   # Base TypeScript configuration for all packages
 ├── tsconfig.json        # Root TypeScript configuration
-├── vitest.shared.config.ts # Shared Vitest configuration
-├── eslint.config.cjs    # Shared ESLint configuration
 ├── pnpm-workspace.yaml  # PNPM workspace configuration
 ├── package.json         # Root package configuration
 └── ...                  # Other configuration files
@@ -296,15 +296,14 @@ This architecture allows for easy extension to support additional blockchain eco
 
 ## Build System
 
-The project uses a standardized Vite-based build system for all library packages, ensuring proper ES module output with correct import extensions:
+The project uses a standardized `tsup`-based build system for all library packages, ensuring proper ES module output with correct import extensions:
 
-- **Shared Vite Configuration**: A centralized `vite.shared.config.ts` provides consistent build settings for all packages
-- **ES Module Support**: All packages output both ES modules (`.js`) and CommonJS (`.cjs`) formats
-- **Proper Import Extensions**: The build system automatically ensures ES module imports include `.js` extensions, preventing issues in modern JavaScript environments
-- **Optimized Output**: Libraries use `preserveModules` to maintain file structure for better tree-shaking
-- **TypeScript Declarations**: Automatic generation of TypeScript declaration files using `vite-plugin-dts`
+- **tsup**: All library packages are built using `tsup` to generate both ES modules (`.js`) and CommonJS (`.cjs`) formats.
+- **TypeScript**: The TypeScript compiler (`tsc`) is used alongside `tsup` to generate declaration files (`.d.ts`).
+- **ES Module Support**: The dual-format build ensures packages can be consumed in both modern and legacy JavaScript environments.
+- **Optimized Output**: Builds are configured for optimal tree-shaking and performance.
 
-Each package inherits from the shared configuration while allowing customization for specific needs. This ensures consistency across the monorepo while maintaining flexibility for individual package requirements.
+Each package contains its own `tsup.config.ts` and the `build` script in its `package.json` orchestrates the two-stage build process. This ensures consistency and reliability across the monorepo.
 
 ### Adapter Pattern Enforcement
 

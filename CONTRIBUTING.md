@@ -80,19 +80,20 @@ pnpm dev
 
 ## Build System
 
-All library packages in this monorepo use Vite for building. Key points to remember:
+All library packages in this monorepo use `tsup` for building. Key points to remember:
 
-- **Shared Configuration**: Packages use the `vite.shared.config.ts` at the root for consistent builds
-- **ES Modules**: All packages output both ES modules and CommonJS formats
-- **Import Extensions**: The build system automatically handles adding `.js` extensions to imports
-- **Building Packages**: Run `pnpm build` at the root to build all packages, or `pnpm --filter <package-name> build` for specific packages
-- **TypeScript**: Each package has its own `tsconfig.json` that extends the base configuration
+- **tsup Configuration**: Each package has its own `tsup.config.ts` file.
+- **Two-Stage Build**: The `build` script in each package's `package.json` first runs `tsup` to bundle the code, then runs `tsc --emitDeclarationOnly` to generate TypeScript declaration files.
+- **ES Modules**: All packages output both ES modules and CommonJS formats.
+- **Building Packages**: Run `pnpm build` at the root to build all packages, or `pnpm --filter <package-name> build` for a specific package.
+- **TypeScript**: Each package has its own `tsconfig.json` that extends the base configuration.
 
 When creating new packages:
 
-1. Add a `vite.config.ts` that imports and uses the shared configuration
-2. Ensure your `package.json` has proper `exports` configuration for both ESM and CJS
-3. Set `"type": "module"` in your `package.json`
+1. Create a `tsup.config.ts` file for the package.
+2. Update the `build` script in `package.json` to be `tsup && tsc --emitDeclarationOnly --outDir dist`.
+3. Ensure your `package.json` has proper `exports` configuration for both ESM and CJS.
+4. Set `"type": "module"` in your `package.json`.
 
 ## Commit Messages
 

@@ -294,13 +294,13 @@ The system applies a semantic versioning strategy to dependencies:
 
 ### Configuration Discovery
 
-The Package Management System automatically discovers the form-renderer configuration using Vite's `import.meta.glob`. The exported `formRendererConfig` constant name is expected by the system.
+The Package Management System automatically discovers the form-renderer configuration. The exported `formRendererConfig` constant name is expected by the system.
 
 ## Development
 
 ### Build System
 
-This package uses Vite for building, following the monorepo's standardized build configuration. This ensures proper ES module output with correct import extensions.
+This package uses `tsup` for building, following the monorepo's standardized build configuration. This ensures proper ES module output with correct import extensions.
 
 ```bash
 # Install dependencies
@@ -315,12 +315,11 @@ pnpm test
 
 ### Build Output
 
-The Vite build process creates the following outputs in the `dist/` directory:
+The build process, which uses `tsup` and `tsc`, creates the following outputs in the `dist/` directory:
 
 - `index.js` - ES module with proper `.js` extensions in imports
 - `index.cjs` - CommonJS build for compatibility
-- `index.d.ts` - TypeScript declaration files
-- Individual module files preserving the source structure
+- `index.d.ts` - TypeScript declaration files for the entire package.
 
 **Note:** No CSS is generated or included in the `dist` output.
 
