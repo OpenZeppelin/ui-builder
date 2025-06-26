@@ -2,52 +2,38 @@ import path from 'path';
 import type { OutputBundle, OutputOptions, Plugin } from 'vite';
 import dts from 'vite-plugin-dts';
 
-// Custom plugin to fix directory imports for ES modules
-function fixDirectoryImports(): Plugin {
+// Plugin to ensure ES modules use explicit .js extensions
+function esModuleImportFixer(): Plugin {
   return {
-    name: 'fix-directory-imports',
+    name: 'es-module-import-fixer',
     generateBundle(options: OutputOptions, bundle: OutputBundle) {
-      // Only apply to ES format
       if (options.format !== 'es') return;
 
-      for (const fileName in bundle) {
-        const chunk = bundle[fileName];
+      Object.values(bundle).forEach((chunk) => {
         if (chunk.type === 'chunk' && chunk.code) {
-          // Replace directory imports with explicit index.js imports
+          // Fix all relative imports/exports to use explicit extensions
           chunk.code = chunk.code.replace(
-            /from\s+['"](\.\/[^'"]+)['"];/g,
-            (match: string, importPath: string) => {
+            /((?:from|import|export\s+\*\s+from)\s+['"])(\.\/[^'"]+)(['"])/g,
+            (match, prefix, importPath, suffix) => {
               // Skip if already has an extension
-              if (importPath.includes('.')) return match;
+              if (importPath.match(/\.\w+$/)) return match;
+              // Check if the path exists as a file with common extensions
+              const hasKnownExtension = importPath.match(/\.(js|ts|jsx|tsx|mjs|cjs)$/);
+              if (hasKnownExtension) return match;
               // Add /index.js to directory imports
-              return match.replace(importPath, `${importPath}/index.js`);
+              return `${prefix}${importPath}/index.js${suffix}`;
             }
           );
 
-          // Also handle export * from syntax
-          chunk.code = chunk.code.replace(
-            /export\s+\*\s+from\s+['"](\.\/[^'"]+)['"];/g,
-            (match: string, importPath: string) => {
-              // Skip if already has an extension
-              if (importPath.includes('.')) return match;
-              // Add /index.js to directory imports
-              return match.replace(importPath, `${importPath}/index.js`);
-            }
-          );
-
-          // Fix imports that should be re-exports
-          // Look for patterns where we have import './something' that should be export * from './something'
-          if (fileName.endsWith('index.js')) {
+          // Convert side-effect imports to re-exports in index files
+          if (chunk.fileName.endsWith('index.js')) {
             chunk.code = chunk.code.replace(
-              /^import\s+['"](\.\/[^'"]+)['"];$/gm,
-              (match: string, importPath: string) => {
-                // Convert side-effect imports to re-exports for index files
-                return `export * from '${importPath}';`;
-              }
+              /^import\s+['"](.\/[^'"]+)['"];$/gm,
+              "export * from '$1';"
             );
           }
         }
-      }
+      });
     },
   };
 }
@@ -59,74 +45,57 @@ export function createLibraryConfig(options: {
 }) {
   const { packageDir, entry = 'src/index.ts', external = [] } = options;
 
-  // Handle single entry or multiple entries
-  const resolvedEntry =
-    typeof entry === 'string'
-      ? path.resolve(packageDir, entry)
-      : Object.entries(entry).reduce(
-          (acc, [key, value]) => {
-            acc[key] = path.resolve(packageDir, value);
-            return acc;
-          },
-          {} as Record<string, string>
-        );
+  // Normalize entry to always be an object
+  const entries = typeof entry === 'string' ? { index: entry } : entry;
+
+  const resolvedEntries = Object.entries(entries).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: path.resolve(packageDir, value),
+    }),
+    {}
+  );
 
   return {
     plugins: [
       dts({
         insertTypesEntry: true,
         outDir: 'dist',
-        tsconfigPath: './tsconfig.json',
-        rollupTypes: false,
-        copyDtsFiles: true,
+        rollupTypes: false, // Keep directory structure for types
       }),
-      fixDirectoryImports(),
+      esModuleImportFixer(),
     ],
     build: {
       lib: {
-        entry: resolvedEntry,
+        entry: resolvedEntries,
         formats: ['es', 'cjs'],
-        fileName: (format: string, entryName: string) => {
-          const ext = format === 'es' ? 'js' : 'cjs';
-          return entryName === 'index' ? `index.${ext}` : `${entryName}/index.${ext}`;
-        },
       },
       rollupOptions: {
-        // Ensure external packages are not bundled
         external: [
-          '@openzeppelin/transaction-form-types',
-          '@openzeppelin/transaction-form-utils',
-          '@openzeppelin/transaction-form-react-core',
-          '@openzeppelin/transaction-form-ui',
+          // Match all @openzeppelin packages
+          /^@openzeppelin\//,
+          // React-related
           'react',
           'react-dom',
           'react/jsx-runtime',
+          // Node built-ins
           /^node:/,
+          // Additional externals
           ...external,
         ],
-        treeshake: false, // Disable tree shaking to preserve all exports
-        output: [
-          {
-            format: 'es',
-            preserveModules: true,
-            preserveModulesRoot: 'src',
-            entryFileNames: '[name].js',
-            chunkFileNames: '[name].js',
-            exports: 'named',
-          },
-          {
-            format: 'cjs',
-            preserveModules: true,
-            preserveModulesRoot: 'src',
-            entryFileNames: '[name].cjs',
-            chunkFileNames: '[name].cjs',
-            exports: 'named',
-          },
-        ],
+        treeshake: false, // Preserve all exports for libraries
+        output: ['es', 'cjs'].map((format) => ({
+          format,
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          entryFileNames: `[name].${format === 'es' ? 'js' : 'cjs'}`,
+          chunkFileNames: `[name].${format === 'es' ? 'js' : 'cjs'}`,
+          exports: 'named',
+        })),
       },
       sourcemap: true,
       target: 'esnext',
-      minify: false, // Don't minify library code
+      minify: false,
     },
     resolve: {
       alias: {
