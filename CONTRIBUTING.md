@@ -78,6 +78,22 @@ pnpm dev
   - Run `pnpm format` to format all code before committing
   - When making CSS changes with Tailwind, use the `fix-all` script: `pnpm fix-all`
 
+## Build System
+
+All library packages in this monorepo use Vite for building. Key points to remember:
+
+- **Shared Configuration**: Packages use the `vite.shared.config.ts` at the root for consistent builds
+- **ES Modules**: All packages output both ES modules and CommonJS formats
+- **Import Extensions**: The build system automatically handles adding `.js` extensions to imports
+- **Building Packages**: Run `pnpm build` at the root to build all packages, or `pnpm --filter <package-name> build` for specific packages
+- **TypeScript**: Each package has its own `tsconfig.json` that extends the base configuration
+
+When creating new packages:
+
+1. Add a `vite.config.ts` that imports and uses the shared configuration
+2. Ensure your `package.json` has proper `exports` configuration for both ESM and CJS
+3. Set `"type": "module"` in your `package.json`
+
 ## Commit Messages
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). See our [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.

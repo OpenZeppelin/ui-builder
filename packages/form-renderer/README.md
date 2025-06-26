@@ -300,13 +300,13 @@ The Package Management System automatically discovers the form-renderer configur
 
 ### Build System
 
-This package uses a custom build system that generates both ESM and CommonJS output for maximum compatibility.
+This package uses Vite for building, following the monorepo's standardized build configuration. This ensures proper ES module output with correct import extensions.
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Build the package (generates JS outputs only)
+# Build the package (generates both ESM and CJS outputs)
 pnpm build
 
 # Run tests
@@ -315,14 +315,12 @@ pnpm test
 
 ### Build Output
 
-The build process creates the following outputs in the `dist/` directory:
+The Vite build process creates the following outputs in the `dist/` directory:
 
-- `index.js` - ESM module
-- `index.cjs` - CommonJS entry point (selects dev/prod)
-- `index.dev.cjs` - CommonJS development build
-- `index.prod.cjs` - CommonJS production build
+- `index.js` - ES module with proper `.js` extensions in imports
+- `index.cjs` - CommonJS build for compatibility
 - `index.d.ts` - TypeScript declaration files
-- `package.json` - Package manifest for the `dist` directory (defines exports)
+- Individual module files preserving the source structure
 
 **Note:** No CSS is generated or included in the `dist` output.
 

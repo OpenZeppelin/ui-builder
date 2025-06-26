@@ -29,6 +29,14 @@ export interface AdapterConfig {
      */
     dev?: Record<string, string>;
   };
+  /**
+   * Overrides for transitive dependencies.
+   * These will be included in the `overrides` section of the exported `package.json`.
+   * This is useful for resolving peer dependency conflicts (e.g., with React 19).
+   *
+   * @example { "use-sync-external-store": "^1.2.0" }
+   */
+  overrides?: Record<string, string>;
   uiKits?: Record<
     string,
     {
@@ -36,6 +44,10 @@ export interface AdapterConfig {
         runtime: Record<string, string>;
         dev?: Record<string, string>;
       };
+      /**
+       * UI Kit-specific overrides for transitive dependencies.
+       */
+      overrides?: Record<string, string>;
     }
   >;
   // Future properties might include things like:

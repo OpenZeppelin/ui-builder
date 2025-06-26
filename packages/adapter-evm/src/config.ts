@@ -33,12 +33,20 @@ export const evmAdapterConfig: AdapterConfig = {
       '@types/lodash': '^4.17.5',
     },
   },
+  overrides: {
+    'use-sync-external-store': '^1.2.0',
+    valtio: '^1.13.2',
+  },
   uiKits: {
     rainbowkit: {
       dependencies: {
         runtime: {
           '@rainbow-me/rainbowkit': '^2.2.8',
         },
+      },
+      overrides: {
+        '@paulmillr/qr': 'npm:qr@^0.5.0',
+        '@walletconnect/modal': '^2.7.1',
       },
     },
   },

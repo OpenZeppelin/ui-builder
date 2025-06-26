@@ -108,7 +108,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 - **React**: UI library supporting both React 18 and 19 with modern hooks API
 - **TypeScript 5.8+**: Enhanced type safety with template literal types
-- **Vite 6**: Fast, modern build tool and dev server
+- **Vite 6**: Fast, modern build tool and dev server with standardized library builds
 - **Tailwind CSS v4**: Next-gen utility-first CSS framework with OKLCH color format
 - **shadcn/ui**: Unstyled, accessible component system built on Radix UI
 - **pnpm (v9 or higher)**: Fast, disk-efficient package manager
@@ -293,6 +293,18 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/transaction-form-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+
+## Build System
+
+The project uses a standardized Vite-based build system for all library packages, ensuring proper ES module output with correct import extensions:
+
+- **Shared Vite Configuration**: A centralized `vite.shared.config.ts` provides consistent build settings for all packages
+- **ES Module Support**: All packages output both ES modules (`.js`) and CommonJS (`.cjs`) formats
+- **Proper Import Extensions**: The build system automatically ensures ES module imports include `.js` extensions, preventing issues in modern JavaScript environments
+- **Optimized Output**: Libraries use `preserveModules` to maintain file structure for better tree-shaking
+- **TypeScript Declarations**: Automatic generation of TypeScript declaration files using `vite-plugin-dts`
+
+Each package inherits from the shared configuration while allowing customization for specific needs. This ensures consistency across the monorepo while maintaining flexibility for individual package requirements.
 
 ### Adapter Pattern Enforcement
 

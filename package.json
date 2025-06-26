@@ -38,10 +38,11 @@
     "release:form-renderer": "pnpm --filter=@openzeppelin/transaction-form-renderer publish",
     "commit": "git-cz",
     "update-deps": "pnpm update --latest",
-    "update-deps:major": "npx npm-check-updates -u && pnpm install",
+    "update-deps:major": "pnpm update --latest",
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
     "outdated": "pnpm outdated",
-    "export-form": "node packages/core/src/export/cli/export-form.cjs"
+    "export-form": "node packages/core/src/export/cli/export-form.cjs",
+    "preinstall": "npx only-allow pnpm"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -100,7 +101,11 @@
   },
   "pnpm": {
     "overrides": {
-      "@wagmi/core": "^2.17.0"
+      "@wagmi/core": "^2.17.0",
+      "use-sync-external-store": "^1.2.0",
+      "valtio": "^1.13.2",
+      "@paulmillr/qr": "npm:qr@^0.5.0",
+      "@walletconnect/modal": "2.7.0"
     }
   }
 }
