@@ -287,6 +287,34 @@ export class PackageManager {
   }
 
   /**
+   * Get the combined overrides needed for a form
+   *
+   * @param formConfig The form configuration
+   * @param ecosystem The ecosystem
+   * @returns Record of dependency packages and versions
+   */
+  private async getOverrides(
+    formConfig: BuilderFormConfig,
+    ecosystem: Ecosystem
+  ): Promise<Record<string, string>> {
+    const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
+    if (!adapterConfig) {
+      return {};
+    }
+
+    const adapterOverrides = adapterConfig.overrides || {};
+
+    const uiKitConfig = formConfig.uiKitConfig;
+    const kitName = uiKitConfig?.kitName;
+    const uiKitOverrides = (kitName && adapterConfig.uiKits?.[kitName]?.overrides) || {};
+
+    return {
+      ...adapterOverrides,
+      ...uiKitOverrides,
+    };
+  }
+
+  /**
    * Updates the package.json content with correct dependencies, metadata, and scripts.
    *
    * @param originalContent Original package.json content string
@@ -313,6 +341,7 @@ export class PackageManager {
       // Get all dependencies
       const dependencies = await this.getDependencies(formConfig, ecosystem);
       const devDependencies = await this.getDevDependencies(formConfig, ecosystem);
+      const overrides = await this.getOverrides(formConfig, ecosystem);
 
       // Merge dependencies
       const finalDependencies = {
@@ -357,6 +386,11 @@ export class PackageManager {
 
       if (options.license) {
         packageJson.license = options.license;
+      }
+
+      // Add overrides if any exist
+      if (Object.keys(overrides).length > 0) {
+        packageJson.overrides = overrides;
       }
 
       // Add upgrade instructions if workspace dependencies are present

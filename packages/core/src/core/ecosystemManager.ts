@@ -40,7 +40,7 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
     getAdapterClass: async () =>
       (await import('@openzeppelin/transaction-form-adapter-evm'))
         .EvmAdapter as EvmAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-evm/dist/config.js',
+    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-evm',
     adapterConfigExportName: 'evmAdapterConfig',
   },
   solana: {
@@ -48,7 +48,7 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
     getAdapterClass: async () =>
       (await import('@openzeppelin/transaction-form-adapter-solana'))
         .SolanaAdapter as SolanaAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-solana/dist/config.js',
+    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-solana',
     adapterConfigExportName: 'solanaAdapterConfig',
   },
   stellar: {
@@ -56,7 +56,7 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
     getAdapterClass: async () =>
       (await import('@openzeppelin/transaction-form-adapter-stellar'))
         .StellarAdapter as StellarAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-stellar/dist/config.js',
+    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-stellar',
     adapterConfigExportName: 'stellarAdapterConfig',
   },
   midnight: {
@@ -64,7 +64,7 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
     getAdapterClass: async () =>
       (await import('@openzeppelin/transaction-form-adapter-midnight'))
         .MidnightAdapter as MidnightAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-midnight/dist/config.js',
+    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-midnight',
     adapterConfigExportName: 'midnightAdapterConfig',
   },
 };
@@ -243,13 +243,13 @@ export function getAdapterConfigLoader(
   // the switch uses static paths for Vite compatibility.
   switch (ecosystem) {
     case 'evm':
-      return () => import('@openzeppelin/transaction-form-adapter-evm/dist/config.js');
+      return () => import('@openzeppelin/transaction-form-adapter-evm');
     case 'solana':
-      return () => import('@openzeppelin/transaction-form-adapter-solana/dist/config.js');
+      return () => import('@openzeppelin/transaction-form-adapter-solana');
     case 'stellar':
-      return () => import('@openzeppelin/transaction-form-adapter-stellar/dist/config.js');
+      return () => import('@openzeppelin/transaction-form-adapter-stellar');
     case 'midnight':
-      return () => import('@openzeppelin/transaction-form-adapter-midnight/dist/config.js');
+      return () => import('@openzeppelin/transaction-form-adapter-midnight');
     default:
       return undefined;
   }

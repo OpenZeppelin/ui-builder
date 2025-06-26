@@ -78,6 +78,23 @@ pnpm dev
   - Run `pnpm format` to format all code before committing
   - When making CSS changes with Tailwind, use the `fix-all` script: `pnpm fix-all`
 
+## Build System
+
+All library packages in this monorepo use `tsup` for building. Key points to remember:
+
+- **tsup Configuration**: Each package has its own `tsup.config.ts` file.
+- **Two-Stage Build**: The `build` script in each package's `package.json` first runs `tsup` to bundle the code, then runs `tsc --emitDeclarationOnly` to generate TypeScript declaration files.
+- **ES Modules**: All packages output both ES modules and CommonJS formats.
+- **Building Packages**: Run `pnpm build` at the root to build all packages, or `pnpm --filter <package-name> build` for a specific package.
+- **TypeScript**: Each package has its own `tsconfig.json` that extends the base configuration.
+
+When creating new packages:
+
+1. Create a `tsup.config.ts` file for the package.
+2. Update the `build` script in `package.json` to be `tsup && tsc --emitDeclarationOnly --outDir dist`.
+3. Ensure your `package.json` has proper `exports` configuration for both ESM and CJS.
+4. Set `"type": "module"` in your `package.json`.
+
 ## Commit Messages
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). See our [COMMIT_CONVENTION.md](./COMMIT_CONVENTION.md) for more details.

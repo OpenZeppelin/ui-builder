@@ -88,13 +88,10 @@ describe('Form Component Tests', () => {
     it('should include adapter props in the component', async () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
-      // Check that adapter is imported from the correct package
-      expect(formComponentCode).toMatch(
-        /import.*from ['"]@openzeppelin\/transaction-form-adapter-evm['"]/
-      );
+      // Check that the component accepts a generic `ContractAdapter` prop
+      expect(formComponentCode).toMatch(/adapter:\s*ContractAdapter/);
 
-      // Check that adapter is passed as a prop with the correct type
-      expect(formComponentCode).toMatch(/adapter:\s*EvmAdapter/);
+      // Check that the adapter prop is used in the TransactionForm
       expect(formComponentCode).toMatch(/adapter={adapter}/);
     });
 

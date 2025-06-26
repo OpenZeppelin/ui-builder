@@ -13,7 +13,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
-import type { NativeConfigLoader, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  NativeConfigLoader,
+  NetworkConfig,
+} from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
@@ -34,9 +38,10 @@ const exportedNetworkConfig = NetworkConfigPlaceholder;
  */
 /*------------TEMPLATE COMMENT END------------*/
 // Function to resolve the single adapter for the exported app.
-const resolveAdapter = async (nc: NetworkConfig): Promise<AdapterPlaceholder> => {
+const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
   if (nc.id === exportedNetworkConfig.id) {
-    return new AdapterPlaceholder(nc);
+    // The network config type matches what the adapter expects at generation time
+    return new AdapterPlaceholder(nc as typeof exportedNetworkConfig);
   }
   // This path should ideally not be reached in a single-form export context
   // if nc.id always matches exportedNetworkConfig.id.

@@ -11,8 +11,10 @@ import type {
   FormValues,
   FunctionParameter,
   StellarNetworkConfig,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isStellarNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Import functions from modules
 import {
@@ -46,13 +48,18 @@ import {
  */
 export class StellarAdapter implements ContractAdapter {
   readonly networkConfig: StellarNetworkConfig;
+  readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
 
   constructor(networkConfig: StellarNetworkConfig) {
     if (!isStellarNetworkConfig(networkConfig)) {
       throw new Error('StellarAdapter requires a valid Stellar network configuration.');
     }
     this.networkConfig = networkConfig;
-    console.log(`StellarAdapter initialized for network: ${this.networkConfig.name}`);
+    this.initialAppServiceKitName = 'custom';
+    logger.info(
+      'StellarAdapter',
+      `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
+    );
   }
 
   // --- Contract Loading --- //

@@ -73,7 +73,7 @@ import { isValidEvmAddress } from './utils';
  */
 export class EvmAdapter implements ContractAdapter {
   readonly networkConfig: EvmNetworkConfig;
-  private initialAppServiceKitName: UiKitConfiguration['kitName'];
+  readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
 
   constructor(networkConfig: EvmNetworkConfig) {
     if (!isEvmNetworkConfig(networkConfig)) {

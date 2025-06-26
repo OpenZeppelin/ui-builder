@@ -16,20 +16,15 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "noEmit": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "emitDeclarationOnly": true,
-    "noEmit": false,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vite/client", "node"]
+    "types": ["vite/client"]
   },
-  "exclude": ["**/node_modules/**", "**/dist/**"]
+  "include": ["src"]
 }

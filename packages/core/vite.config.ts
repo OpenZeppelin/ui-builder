@@ -57,10 +57,21 @@ export default defineConfig({
       },
       // Reduce memory usage during rollup processing
       maxParallelFileOps: 2,
+      // Exclude template files from being processed as modules
+      external: (id) => {
+        // Exclude template files from being processed as modules
+        return id.includes('/templates/') || id.includes('/codeTemplates/');
+      },
     },
     // Increase chunk size warning limit to reduce warnings
     chunkSizeWarningLimit: 1000,
     // Reduce source map generation to save memory
     sourcemap: false,
+  },
+  optimizeDeps: {
+    exclude: [
+      // The patterns that caused errors have been removed.
+      // If the dev server has issues resolving these, we may need a more advanced solution.
+    ],
   },
 });

@@ -14,6 +14,7 @@ import type {
   FormValues,
   FunctionParameter,
   MidnightNetworkConfig,
+  UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -34,6 +35,7 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
  */
 export class MidnightAdapter implements ContractAdapter {
   readonly networkConfig: MidnightNetworkConfig;
+  readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
   private artifacts: FormValues = {};
 
   constructor(networkConfig: MidnightNetworkConfig) {
@@ -41,6 +43,7 @@ export class MidnightAdapter implements ContractAdapter {
       throw new Error('MidnightAdapter requires a valid Midnight network configuration.');
     }
     this.networkConfig = networkConfig;
+    this.initialAppServiceKitName = 'custom';
     logger.info(
       'MidnightAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`

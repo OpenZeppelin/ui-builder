@@ -20,6 +20,7 @@
     "react-hook-form": "^7.54.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.12",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",

@@ -108,7 +108,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 - **React**: UI library supporting both React 18 and 19 with modern hooks API
 - **TypeScript 5.8+**: Enhanced type safety with template literal types
-- **Vite 6**: Fast, modern build tool and dev server
+- **Vite 6**: Fast, modern build tool and dev server with standardized library builds
 - **Tailwind CSS v4**: Next-gen utility-first CSS framework with OKLCH color format
 - **shadcn/ui**: Unstyled, accessible component system built on Radix UI
 - **pnpm (v9 or higher)**: Fast, disk-efficient package manager
@@ -116,6 +116,8 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **Storybook 8**: Component documentation and visual testing
 - **Semantic Release**: Automated versioning and releases
 - **ESLint 9**: Modern linting with improved TypeScript support
+- **tsup**: Fast, modern bundler for TypeScript libraries
+- **Vite**: Used for the core application's dev server
 
 ## Getting Started
 
@@ -269,8 +271,6 @@ transaction-form-builder/
 ├── .eslint/             # Custom ESLint plugins and rules
 ├── tsconfig.base.json   # Base TypeScript configuration for all packages
 ├── tsconfig.json        # Root TypeScript configuration
-├── vitest.shared.config.ts # Shared Vitest configuration
-├── eslint.config.cjs    # Shared ESLint configuration
 ├── pnpm-workspace.yaml  # PNPM workspace configuration
 ├── package.json         # Root package configuration
 └── ...                  # Other configuration files
@@ -293,6 +293,17 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the core application logic. The `core` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/transaction-form-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+
+## Build System
+
+The project uses a standardized `tsup`-based build system for all library packages, ensuring proper ES module output with correct import extensions:
+
+- **tsup**: All library packages are built using `tsup` to generate both ES modules (`.js`) and CommonJS (`.cjs`) formats.
+- **TypeScript**: The TypeScript compiler (`tsc`) is used alongside `tsup` to generate declaration files (`.d.ts`).
+- **ES Module Support**: The dual-format build ensures packages can be consumed in both modern and legacy JavaScript environments.
+- **Optimized Output**: Builds are configured for optimal tree-shaking and performance.
+
+Each package contains its own `tsup.config.ts` and the `build` script in its `package.json` orchestrates the two-stage build process. This ensures consistency and reliability across the monorepo.
 
 ### Adapter Pattern Enforcement
 

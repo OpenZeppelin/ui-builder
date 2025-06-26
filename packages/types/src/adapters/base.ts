@@ -59,6 +59,14 @@ export interface ContractAdapter {
   readonly networkConfig: NetworkConfig;
 
   /**
+   * The initial kitName from AppConfigService at the time of adapter construction.
+   * This provides a baseline kitName preference from the application's static/global configuration.
+   * It defaults to 'custom' if no specific kitName is found in AppConfigService.
+   * This value is stored on the instance to inform the first call to configureUiKit if no programmatic overrides are given.
+   */
+  readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
+
+  /**
    * Load a contract from a source (address or JSON ABI string).
    * The adapter instance should be pre-configured with the necessary network context.
    *

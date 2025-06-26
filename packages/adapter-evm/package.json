@@ -15,7 +15,7 @@
   "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
   "homepage": "https://github.com/OpenZeppelin/transaction-form-builder#readme",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -35,7 +35,7 @@
     "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -72,5 +72,17 @@
     "react": "^19.0.0",
     "viem": "^2.28.0",
     "wagmi": "^2.15.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/config.js": {
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js",
+      "require": "./dist/config.cjs"
+    }
   }
 }

@@ -11,31 +11,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./adapters": {
-      "types": "./dist/adapters/index.d.ts",
-      "import": "./dist/adapters/index.js",
-      "require": "./dist/adapters/index.cjs"
-    },
-    "./adapters/base": {
-      "types": "./dist/adapters/base.d.ts",
-      "import": "./dist/adapters/base.js",
-      "require": "./dist/adapters/base.cjs"
-    },
-    "./adapters/contract-state": {
-      "types": "./dist/adapters/contract-state.d.ts",
-      "import": "./dist/adapters/contract-state.js",
-      "require": "./dist/adapters/contract-state.cjs"
-    },
-    "./contracts": {
-      "types": "./dist/contracts/index.d.ts",
-      "import": "./dist/contracts/index.js",
-      "require": "./dist/contracts/index.cjs"
-    },
-    "./forms": {
-      "types": "./dist/forms/index.d.ts",
-      "import": "./dist/forms/index.js",
-      "require": "./dist/forms/index.cjs"
     }
   },
   "sideEffects": false,
@@ -47,7 +22,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc --outDir dist --declaration",
+    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run --passWithNoTests",

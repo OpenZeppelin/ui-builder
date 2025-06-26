@@ -13,3 +13,6 @@ export {
   solanaDevnet,
   solanaTestnet,
 } from './networks';
+
+// Export adapter configuration
+export { solanaAdapterConfig } from './config';
