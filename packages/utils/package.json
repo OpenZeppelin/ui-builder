@@ -22,7 +22,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run --passWithNoTests",
@@ -56,8 +56,6 @@
     "eslint-config-prettier": "^10.1.1",
     "prettier": "^3.2.5",
     "typescript": "^5.8.2",
-    "vite": "^6.2.5",
-    "vite-plugin-dts": "^3.8.1",
     "vitest": "^3.0.8"
   }
 }

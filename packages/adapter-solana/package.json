@@ -33,7 +33,7 @@
     "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -53,9 +53,7 @@
   },
   "devDependencies": {
     "eslint": "^9.22.0",
-    "typescript": "^5.8.2",
-    "vite": "^6.2.5",
-    "vite-plugin-dts": "^3.8.1"
+    "typescript": "^5.8.2"
   },
   "peerDependencies": {
     "react": "^19.0.0"
