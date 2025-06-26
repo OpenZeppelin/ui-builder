@@ -86,7 +86,7 @@ describe('Form Component Tests', () => {
     });
 
     it('should include adapter props in the component', async () => {
-      const { formComponentCode, files } = await extractFormComponent('evm');
+      const { formComponentCode } = await extractFormComponent('evm');
 
       // Check that the component accepts a generic `ContractAdapter` prop
       expect(formComponentCode).toMatch(/adapter:\s*ContractAdapter/);
