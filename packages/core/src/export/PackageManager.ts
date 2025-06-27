@@ -436,7 +436,11 @@ export class PackageManager {
       } else if (internalPackages.has(pkgName)) {
         // For production, use the centrally-managed version
         const managedVersion = packageVersions[pkgName as keyof typeof packageVersions] || version;
-        updatedDependencies[pkgName] = `^${managedVersion}`;
+        if (managedVersion.startsWith('^') || managedVersion === 'workspace:*') {
+          updatedDependencies[pkgName] = managedVersion;
+        } else {
+          updatedDependencies[pkgName] = `^${managedVersion}`;
+        }
       } else {
         updatedDependencies[pkgName] = version;
       }
