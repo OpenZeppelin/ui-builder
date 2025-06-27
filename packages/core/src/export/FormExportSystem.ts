@@ -27,7 +27,6 @@ import { ZipGenerator, type ZipProgress } from './ZipGenerator';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
-  applyCliTargetModifications,
   generateAdapterSpecificFiles,
   generateAndAddAppConfig,
   updatePackageJsonFile,
@@ -189,7 +188,6 @@ export class FormExportSystem {
       functionId,
       exportOptions
     );
-    await applyCliTargetModifications(projectFiles, exportOptions);
     await this.formatJsonFiles(projectFiles);
 
     logger.info('File Assembly', 'File assembly complete.');

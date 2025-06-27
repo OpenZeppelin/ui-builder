@@ -47,6 +47,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // Enable debug mode via environment variable
 const DEBUG = process.env.DEBUG === 'true';
@@ -356,6 +357,93 @@ function exportFormSimple(options) {
     console.log(
       `  ${colors.bold}Serve the project:${colors.reset} export-form serve ${extractDir}\n`
     );
+
+    // --- Automatically configure the project for local development ---
+    if (options.env === 'local') {
+      console.log(`\n${colors.blue}Configuring for local development...${colors.reset}`);
+      try {
+        // 1. Configure package.json with overrides
+        const packageJsonPath = path.join(extractDir, 'package.json');
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+        const packageOverrides = {
+          '@openzeppelin/transaction-form-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
+          '@openzeppelin/transaction-form-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
+          '@openzeppelin/transaction-form-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          '@openzeppelin/transaction-form-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
+          '@openzeppelin/transaction-form-renderer': `file:${path.join(monorepoRoot, 'packages/form-renderer')}`,
+          '@openzeppelin/transaction-form-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
+          '@openzeppelin/transaction-form-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
+          '@openzeppelin/transaction-form-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
+          '@openzeppelin/transaction-form-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
+          '@openzeppelin/tailwind-config': `file:${path.join(monorepoRoot, 'packages/tailwind-config')}`,
+        };
+
+        packageJson.pnpm = {
+          ...(packageJson.pnpm || {}),
+          overrides: {
+            ...(packageJson.pnpm?.overrides || {}),
+            ...packageOverrides,
+          },
+        };
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+        console.log(
+          `${colors.green}✓ package.json configured with local overrides.${colors.reset}`
+        );
+
+        // 2. Configure vite.config.ts for the EVM hanging issue
+        const viteConfigPath = path.join(extractDir, 'vite.config.ts');
+        if (fs.existsSync(viteConfigPath)) {
+          let viteConfig = fs.readFileSync(viteConfigPath, 'utf8');
+          const optimizeDepsString = `
+  optimizeDeps: {
+    include: ['@openzeppelin/transaction-form-adapter-evm'],
+  },`;
+          if (!viteConfig.includes('optimizeDeps')) {
+            viteConfig = viteConfig.replace(/(\s*plugins:.*,)/, `$1\n${optimizeDepsString}`);
+            fs.writeFileSync(viteConfigPath, viteConfig);
+            console.log(
+              `${colors.green}✓ vite.config.ts configured for EVM adapter.${colors.reset}`
+            );
+          }
+        }
+      } catch (error) {
+        console.error(
+          `${colors.red}Failed to configure project for local development:${colors.reset}`,
+          error
+        );
+      }
+    }
+
+    // --- Move project to a temporary directory for isolated testing if in local env ---
+    if (options.env === 'local') {
+      const tempDir = path.join(os.homedir(), 'transfer-form-test');
+      console.log(
+        `\n${colors.blue}Moving project to a test directory for isolated testing...${colors.reset}`
+      );
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+        fs.renameSync(extractDir, tempDir);
+        console.log(`${colors.green}✓ Project moved to:${colors.reset} ${tempDir}`);
+        console.log(`\n${colors.cyan}Next steps:${colors.reset}`);
+        console.log(`  1. cd ${tempDir}`);
+        console.log(`  2. pnpm install`);
+        console.log(`  3. pnpm dev`);
+      } catch (error) {
+        console.error(
+          `${colors.red}Failed to move project to temporary directory:${colors.reset}`,
+          error
+        );
+        console.log(
+          `${colors.yellow}You may need to manually move the directory:${colors.reset} ${extractDir}`
+        );
+      }
+    } else {
+      console.log(`\n${colors.green}✓ Files extracted to:${colors.reset} ${extractDir}`);
+      console.log(`\n${colors.cyan}Next steps:${colors.reset}`);
+      console.log(`  Build the project: export-form build ${extractDir}`);
+      console.log(`  Serve the project: export-form serve ${extractDir}`);
+    }
 
     return extractDir;
   } catch (error) {
