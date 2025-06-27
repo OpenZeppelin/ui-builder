@@ -3,8 +3,10 @@ import { useCallback, useState } from 'react';
 import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-import { FormExportSystem } from '../../../export';
 import { downloadBlob } from '../StepComplete/utils';
+
+// Lazy load FormExportSystem to prevent templates from loading on initial page load
+const FormExportSystemPromise = import('../../../export').then((module) => module.FormExportSystem);
 
 /**
  * Custom hook to handle the state and actions for the complete step.
@@ -27,15 +29,14 @@ export function useCompleteStepState() {
       }
 
       setLoading(true);
-      const exportSystem = new FormExportSystem();
 
       try {
-        // TODO: When UI for UiKitConfiguration is implemented in the builder,
-        // pass the actual uiKitConfiguration object here in the ExportOptions.
-        // For now, it will be undefined or use a placeholder if needed by exportSystem.
+        // Dynamically import FormExportSystem only when needed
+        const FormExportSystem = await FormExportSystemPromise;
+        const exportSystem = new FormExportSystem();
+
         const exportOptions = {
           ecosystem: networkConfig.ecosystem,
-          // uiKitConfiguration: gatheredUiKitConfiguration, // This would come from builder state
         };
 
         const result = await exportSystem.exportForm(
