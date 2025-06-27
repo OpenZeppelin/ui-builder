@@ -1,3 +1,15 @@
+# [1.14.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.2...v1.14.0) (2025-06-27)
+
+
+### Bug Fixes
+
+* **export:** use eager loading for template files to fix production export ([8a1a2cb](https://github.com/OpenZeppelin/transaction-form-builder/commit/8a1a2cbffc8e4f7102450ea05f9b6d81aa9aaca5))
+
+
+### Features
+
+* **export:** implement code splitting for export functionality ([8a4ecdc](https://github.com/OpenZeppelin/transaction-form-builder/commit/8a4ecdcd9ebd17c836a702d43ec011dfe5a02394))
+
 ## [1.13.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.1...v1.13.2) (2025-06-27)
 
 
