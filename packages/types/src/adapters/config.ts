@@ -37,6 +37,11 @@ export interface AdapterConfig {
    * @example { "use-sync-external-store": "^1.2.0" }
    */
   overrides?: Record<string, string>;
+
+  /**
+   * Optional UI kits that can be used with this adapter.
+   * Each UI kit can specify its own set of dependencies and overrides.
+   */
   uiKits?: Record<
     string,
     {
