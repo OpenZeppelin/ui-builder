@@ -35,17 +35,12 @@ describe('StyleManager', () => {
       const configFiles = styleManager.getConfigFiles();
 
       expect(configFiles).toBeInstanceOf(Array);
-      expect(configFiles).toHaveLength(3); // tailwind, postcss, components
+      expect(configFiles).toHaveLength(2); // tailwind, components
 
       // Check tailwind.config.cjs - align with mock string
       const tailwindConfig = configFiles.find((f) => f.path === 'tailwind.config.cjs');
       expect(tailwindConfig).toBeDefined();
       expect(tailwindConfig?.content).toBe('{/* Mock Tailwind */}');
-
-      // Check postcss.config.cjs - align with mock string
-      const postcssConfig = configFiles.find((f) => f.path === 'postcss.config.cjs');
-      expect(postcssConfig).toBeDefined();
-      expect(postcssConfig?.content).toBe('{/* Mock PostCSS */}');
 
       // Check components.json - align with mock string
       const componentsJson = configFiles.find((f) => f.path === 'components.json');

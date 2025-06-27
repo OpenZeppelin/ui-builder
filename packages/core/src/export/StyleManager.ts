@@ -8,7 +8,6 @@
  */
 import componentsJsonContent from 'virtual:components-json-content';
 import globalCssContent from 'virtual:global-css-content';
-import postcssConfigContent from 'virtual:postcss-config-content';
 import tailwindConfigContent from 'virtual:tailwind-config-content';
 import templateStylesCssContent from 'virtual:template-vite-styles-css-content';
 
@@ -54,10 +53,6 @@ export class StyleManager {
       {
         path: 'tailwind.config.cjs', // Destination path at the root
         content: tailwindConfigContent,
-      },
-      {
-        path: 'postcss.config.cjs',
-        content: postcssConfigContent,
       },
       {
         path: 'components.json',

@@ -1,21 +1,19 @@
 /* Define layer order first - this is critical for predictability */
 @layer base, components, utilities;
 
-/* Import Tailwind directives - Needed for core-specific utilities AND scanning form-renderer + global styles */
-/* `source` is the Tailwind 4 specific way of declaring the base path so it works in the monorepo: 
-https://tailwindcss.com/docs/detecting-classes-in-source-files#setting-your-base-path*/
+/* 
+  Import Tailwind directives.
+  The `source()` function is a Tailwind v4 feature that sets the base path for
+  automatic content detection. By setting it to the monorepo root, Tailwind
+  can discover all necessary files in all packages, including `ui` and `form-renderer`.
+*/
 @import 'tailwindcss' source('../../');
 
 /*
   Import global theme variables and base styles from the styles package.
-  Ensure the path is correct relative to this file.
-  Using the alias defined in vite.config.ts
+  The path alias is configured in vite.config.ts.
 */
 @import '@styles/global.css';
-
-/*
-  REMOVED WORKAROUND: The core build process MUST scan form-renderer source.
-*/
 
 /* Core-specific styles or overrides can be added here, preferably in layers */
 @layer components {
