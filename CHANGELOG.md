@@ -1,3 +1,11 @@
+## [1.13.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.1...v1.13.2) (2025-06-27)
+
+
+### Bug Fixes
+
+* **config:** resolve build hanging and style issues ([e5c9ef7](https://github.com/OpenZeppelin/transaction-form-builder/commit/e5c9ef7d3281ef118e203f053d2c42ea984687fd))
+* **config:** resolve build hanging and style issues ([8d21a8f](https://github.com/OpenZeppelin/transaction-form-builder/commit/8d21a8f706545cd04ec34b7a9f63559a1106ee43))
+
 ## [1.13.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.0...v1.13.1) (2025-06-26)
 
 
