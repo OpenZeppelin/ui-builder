@@ -37,21 +37,16 @@
     "semantic-release": "semantic-release",
     "release:form-renderer": "pnpm --filter=@openzeppelin/transaction-form-renderer publish",
     "commit": "git-cz",
-    "update-deps": "pnpm update --latest",
-    "update-deps:major": "pnpm update --latest",
+    "update-deps": "pnpm update -r",
+    "update-deps:major": "pnpm update -r --latest",
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
-    "outdated": "pnpm outdated",
+    "update-export-versions": "node scripts/update-export-versions.cjs",
+    "outdated": "pnpm outdated -r",
     "export-form": "node packages/core/src/export/cli/export-form.cjs",
     "preinstall": "npx only-allow pnpm"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write --config .prettierrc",
-      "eslint --fix --quiet --config eslint.config.cjs"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write --config .prettierrc"
-    ]
+    "*.{js,jsx,ts,tsx,cjs,mjs}": "pnpm fix-all"
   },
   "config": {
     "commitizen": {
@@ -59,55 +54,56 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
-    "@commitlint/cz-commitlint": "^19.8.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@commitlint/cz-commitlint": "^19.8.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^11.0.1",
-    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/github": "^11.0.3",
+    "@semantic-release/npm": "^12.0.2",
     "@semantic-release/release-notes-generator": "^14.0.3",
-    "@storybook/addon-controls": "^8.6.7",
-    "@storybook/addon-essentials": "^8.6.7",
-    "@storybook/addon-interactions": "^8.6.7",
-    "@storybook/addon-links": "^8.6.7",
-    "@storybook/blocks": "^8.6.7",
-    "@storybook/react": "^8.6.7",
-    "@storybook/react-vite": "^8.6.7",
-    "@tailwindcss/postcss": "^4.0.12",
+    "@storybook/addon-controls": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-links": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@tailwindcss/postcss": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.3",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/react": "^19.0.10",
-    "@types/node": "^22.13.9",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@types/node": "^22.15.33",
+    "@types/react": "^19.1.8",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
     "commitizen": "^4.3.1",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsdoc": "^50.6.8",
-    "eslint-plugin-storybook": "^0.11.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^50.8.0",
+    "eslint-plugin-storybook": "^0.11.6",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
-    "lint-staged": "^15.4.3",
-    "prettier": "^3.5.3",
-    "prettier-plugin-tailwindcss": "^0.6.11",
-    "semantic-release": "^24.2.3",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.13",
+    "semantic-release": "^24.2.5",
     "tsup": "^8.5.0",
-    "vite": "^6.2.5"
+    "vite": "^6.3.5"
   },
   "engines": {
     "node": ">=20.11.1"
   },
-  "dependencies": {
-    "jszip": "^3.10.1"
-  },
+  "packageManager": "pnpm@9.10.0",
   "pnpm": {
     "overrides": {
-      "@wagmi/core": "^2.17.0",
       "use-sync-external-store": "^1.2.0",
       "valtio": "^1.13.2",
       "@paulmillr/qr": "npm:qr@^0.5.0",
-      "@walletconnect/modal": "2.7.0"
+      "@walletconnect/modal": "2.7.0",
+      "@types/react": "^19.1.8"
     }
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
   }
 }

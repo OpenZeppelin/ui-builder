@@ -44,18 +44,18 @@
   "license": "MIT",
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:^",
-    "uuid": "^9.0.1",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.3.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
-    "eslint": "^9.22.0",
-    "eslint-config-prettier": "^10.1.1",
-    "prettier": "^3.2.5",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.8"
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }

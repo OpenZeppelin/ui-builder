@@ -169,11 +169,12 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - `pnpm storybook` - Start Storybook development server
 - `pnpm build-storybook` - Build Storybook for production
 - `pnpm commit` - Run commitizen for guided commits
-- `pnpm update-deps` - Update dependencies to their latest versions
+- `pnpm update-deps` - Update all monorepo dependencies to their latest versions
 - `pnpm update-deps:major` - Update dependencies including major versions
 - `pnpm check-deps` - Check for deprecated dependencies
-- `pnpm outdated` - List outdated dependencies
+- `pnpm outdated` - List outdated dependencies across the monorepo
 - `pnpm export-form [cmd] [opts]` - Export a standalone form project (see `pnpm export-form --help`)
+- `pnpm update-export-versions` - Update the hardcoded versions of internal packages used in exported forms
 
 ## Project Structure
 
@@ -409,6 +410,18 @@ This project uses several tools to manage dependencies effectively:
 - **update-deps script**: Easily update all dependencies to their latest versions
 - **Dependencies workflow**: Regular checks for outdated dependencies
 - **Update Dependencies workflow**: Weekly automated updates
+
+### Exported Package Versions
+
+The versions of internal `@openzeppelin/` packages used in exported forms are centrally managed in the `packages/core/src/export/versions.ts` file. This ensures that all exported projects use stable, tested, and reproducible dependency versions.
+
+To update these versions to the latest published releases, run the following command from the root of the monorepo:
+
+```bash
+pnpm update-export-versions
+```
+
+This script will fetch the latest versions from the npm registry and update the `versions.ts` file automatically.
 
 ### Checking for Outdated Dependencies
 
