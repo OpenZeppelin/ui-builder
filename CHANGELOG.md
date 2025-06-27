@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.0...v1.14.1) (2025-06-27)
+
+
+### Bug Fixes
+
+* **core:** remove template exclusion from vite build config ([5394f25](https://github.com/OpenZeppelin/transaction-form-builder/commit/5394f25cc06b2423e5c04c8a6e408aea8a7741ba))
+
 # [1.14.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.13.2...v1.14.0) (2025-06-27)
 
 
