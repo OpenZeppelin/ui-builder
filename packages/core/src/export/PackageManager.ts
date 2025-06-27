@@ -44,6 +44,7 @@ import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
 import { AdapterConfigLoader } from './AdapterConfigLoader';
+import { packageVersions } from './versions';
 
 /**
  * PackageManager is responsible for managing dependencies in exported form projects.
@@ -433,12 +434,9 @@ export class PackageManager {
       if (internalPackages.has(pkgName) && env === 'local') {
         updatedDependencies[pkgName] = 'workspace:*';
       } else if (internalPackages.has(pkgName)) {
-        // Use ^ version from config (assuming config provides a base version)
-        // Or default to workspace if version isn't available (shouldn't happen often)
-        const baseVersion = version === 'workspace:*' ? '0.0.1' : version; // Fallback needed?
-        updatedDependencies[pkgName] = baseVersion.startsWith('^')
-          ? baseVersion
-          : `^${baseVersion}`;
+        // For production, use the centrally-managed version
+        const managedVersion = packageVersions[pkgName as keyof typeof packageVersions] || version;
+        updatedDependencies[pkgName] = `^${managedVersion}`;
       } else {
         updatedDependencies[pkgName] = version;
       }

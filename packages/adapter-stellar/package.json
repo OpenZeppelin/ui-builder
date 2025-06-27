@@ -46,8 +46,8 @@
     "@openzeppelin/transaction-form-utils": "workspace:^"
   },
   "devDependencies": {
-    "eslint": "^9.22.0",
-    "typescript": "^5.8.2"
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "react": "^19.0.0"

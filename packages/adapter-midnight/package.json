@@ -44,16 +44,16 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
+    "@openzeppelin/transaction-form-react-core": "workspace:^",
     "@openzeppelin/transaction-form-types": "workspace:*",
     "@openzeppelin/transaction-form-ui": "workspace:*",
-    "@openzeppelin/transaction-form-utils": "workspace:^",
-    "@openzeppelin/transaction-form-react-core": "workspace:^",
-    "@midnight-ntwrk/dapp-connector-api": "^3.0.0"
+    "@openzeppelin/transaction-form-utils": "workspace:^"
   },
   "devDependencies": {
     "@types/react": "19.1.6",
-    "eslint": "^9.22.0",
-    "typescript": "^5.8.2"
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "react": "^19.0.0"
