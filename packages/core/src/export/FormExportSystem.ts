@@ -17,13 +17,14 @@ import { getAdapter } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
-import { FormCodeGenerator } from './generators/FormCodeGenerator';
-import { TemplateProcessor } from './generators/TemplateProcessor';
+// Lazy import types for dependency management
+import type { FormCodeGenerator } from './generators/FormCodeGenerator';
+import type { TemplateProcessor } from './generators/TemplateProcessor';
 
-import { PackageManager } from './PackageManager';
-import { StyleManager } from './StyleManager';
-import { TemplateManager } from './TemplateManager';
-import { ZipGenerator, type ZipProgress } from './ZipGenerator';
+import type { PackageManager } from './PackageManager';
+import type { StyleManager } from './StyleManager';
+import type { TemplateManager } from './TemplateManager';
+import type { ZipGenerator, ZipProgress } from './ZipGenerator';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
@@ -48,25 +49,78 @@ interface FormExportSystemDependencies {
  * and style management.
  */
 export class FormExportSystem {
-  private templateManager: TemplateManager;
-  private formCodeGenerator: FormCodeGenerator;
-  private packageManager: PackageManager;
-  private styleManager: StyleManager;
-  private zipGenerator: ZipGenerator;
-  private templateProcessor: TemplateProcessor;
+  private templateManager: TemplateManager | undefined;
+  private formCodeGenerator: FormCodeGenerator | undefined;
+  private packageManager: PackageManager | undefined;
+  private styleManager: StyleManager | undefined;
+  private zipGenerator: ZipGenerator | undefined;
+  private templateProcessor: TemplateProcessor | undefined;
+  private dependencies: FormExportSystemDependencies;
+  private initialized = false;
 
   /**
-   * Creates a new FormExportSystem instance, initializing all necessary managers.
-   * Accepts optional dependencies for testing purposes.
+   * Creates a new FormExportSystem instance.
+   * Dependencies are lazy-loaded when first needed to enable code splitting.
    */
   constructor(dependencies: FormExportSystemDependencies = {}) {
-    // Use provided instances or create new ones
-    this.templateManager = dependencies.templateManager ?? new TemplateManager();
-    this.formCodeGenerator = dependencies.formCodeGenerator ?? new FormCodeGenerator();
-    this.packageManager = dependencies.packageManager ?? new PackageManager();
-    this.styleManager = dependencies.styleManager ?? new StyleManager();
-    this.zipGenerator = dependencies.zipGenerator ?? new ZipGenerator();
-    this.templateProcessor = dependencies.templateProcessor ?? new TemplateProcessor({});
+    // Store provided dependencies for testing
+    this.dependencies = dependencies;
+  }
+
+  /**
+   * Lazy initialization of dependencies.
+   * This ensures modules are only loaded when export is actually used.
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+
+    logger.info('Export System', 'Lazy loading export dependencies...');
+
+    // Use provided dependencies or lazy load the modules
+    if (this.dependencies.templateManager) {
+      this.templateManager = this.dependencies.templateManager;
+    } else {
+      const { TemplateManager } = await import('./TemplateManager');
+      this.templateManager = new TemplateManager();
+    }
+
+    if (this.dependencies.formCodeGenerator) {
+      this.formCodeGenerator = this.dependencies.formCodeGenerator;
+    } else {
+      const { FormCodeGenerator } = await import('./generators/FormCodeGenerator');
+      this.formCodeGenerator = new FormCodeGenerator();
+    }
+
+    if (this.dependencies.packageManager) {
+      this.packageManager = this.dependencies.packageManager;
+    } else {
+      const { PackageManager } = await import('./PackageManager');
+      this.packageManager = new PackageManager();
+    }
+
+    if (this.dependencies.styleManager) {
+      this.styleManager = this.dependencies.styleManager;
+    } else {
+      const { StyleManager } = await import('./StyleManager');
+      this.styleManager = new StyleManager();
+    }
+
+    if (this.dependencies.zipGenerator) {
+      this.zipGenerator = this.dependencies.zipGenerator;
+    } else {
+      const { ZipGenerator } = await import('./ZipGenerator');
+      this.zipGenerator = new ZipGenerator();
+    }
+
+    if (this.dependencies.templateProcessor) {
+      this.templateProcessor = this.dependencies.templateProcessor;
+    } else {
+      const { TemplateProcessor } = await import('./generators/TemplateProcessor');
+      this.templateProcessor = new TemplateProcessor({});
+    }
+
+    this.initialized = true;
+    logger.info('Export System', 'Export dependencies loaded successfully.');
   }
 
   /**
@@ -87,6 +141,9 @@ export class FormExportSystem {
     functionId: string,
     options: Partial<ExportOptions> = {}
   ): Promise<ExportResult> {
+    // Ensure all dependencies are loaded
+    await this.ensureInitialized();
+
     // Ensure ecosystem is set in options from networkConfig
     const exportOptions: ExportOptions = {
       ecosystem: networkConfig.ecosystem,
@@ -102,12 +159,12 @@ export class FormExportSystem {
 
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');
-      const mainTsxCode = await this.formCodeGenerator.generateMainTsx(networkConfig);
-      const appComponentCode = await this.formCodeGenerator.generateAppComponent(
+      const mainTsxCode = await this.formCodeGenerator!.generateMainTsx(networkConfig);
+      const appComponentCode = await this.formCodeGenerator!.generateAppComponent(
         networkConfig.ecosystem,
         functionId
       );
-      const formComponentCode = await this.formCodeGenerator.generateFormComponent(
+      const formComponentCode = await this.formCodeGenerator!.generateFormComponent(
         formConfig,
         contractSchema,
         networkConfig,
@@ -140,7 +197,7 @@ export class FormExportSystem {
       logger.info('Export System', `ZIP file generated: ${zipResult.fileName}`);
 
       // 5. Prepare and return the final export result
-      const dependencies = await this.packageManager.getDependencies(
+      const dependencies = await this.packageManager!.getDependencies(
         formConfig,
         networkConfig.ecosystem
       );
@@ -173,16 +230,16 @@ export class FormExportSystem {
     logger.info('File Assembly', 'Starting file assembly process...');
 
     const projectFiles = await addCoreTemplateFiles(
-      this.templateManager,
+      this.templateManager!,
       exportOptions,
       customFiles
     );
-    await addStyleAndRootConfigFiles(projectFiles, this.styleManager, this.templateProcessor);
-    await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor, formConfig);
+    await addStyleAndRootConfigFiles(projectFiles, this.styleManager!, this.templateProcessor!);
+    await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor!, formConfig);
     await generateAdapterSpecificFiles(projectFiles, adapter, formConfig);
     await updatePackageJsonFile(
       projectFiles,
-      this.packageManager,
+      this.packageManager!,
       formConfig,
       networkConfig,
       functionId,
@@ -203,7 +260,7 @@ export class FormExportSystem {
     const jsonFiles = Object.keys(files).filter((path) => path.endsWith('.json'));
     for (const path of jsonFiles) {
       try {
-        files[path] = await this.templateProcessor.formatJson(files[path]);
+        files[path] = await this.templateProcessor!.formatJson(files[path]);
       } catch (error) {
         logger.warn('File Assembly', `Failed to format ${path}, using unformatted version:`, error);
       }
@@ -225,7 +282,7 @@ export class FormExportSystem {
   ) {
     logger.info('Export System', `Creating ZIP file with ${Object.keys(files).length} files`);
 
-    return this.zipGenerator.createZipFile(files, fileName, {
+    return this.zipGenerator!.createZipFile(files, fileName, {
       onProgress,
       compressionLevel: 6, // Moderate compression
     });

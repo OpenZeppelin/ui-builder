@@ -23,8 +23,9 @@ const templateFiles = import.meta.glob<string>(
   {
     query: '?raw',
     import: 'default',
+    eager: true, // Load at build time to avoid runtime fetch issues in production
   }
-) as Record<string, () => Promise<string>>;
+) as Record<string, string>; // Changed from Record<string, () => Promise<string>> since eager returns strings directly
 
 // For testing purposes - make file paths available to tests
 export const templateFilePaths = Object.keys(templateFiles);
@@ -104,7 +105,7 @@ export class TemplateManager {
         if (filePathMatch) {
           const relativePath = filePathMatch[1];
           // Load the file content asynchronously
-          const content = await templateFiles[path]();
+          const content = templateFiles[path];
           registry[templateName][relativePath] = content;
         }
       }
