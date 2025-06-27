@@ -15,7 +15,9 @@ export class TemplateProcessor {
   private templates: Record<string, string> | null = null;
   private initializing: Promise<void> | null = null;
 
-  constructor(private templateFiles: Record<string, () => Promise<string>>) {}
+  constructor(
+    private templateFiles: Record<string, string> | Record<string, () => Promise<string>>
+  ) {}
 
   /**
    * Ensure templates are loaded
@@ -52,8 +54,15 @@ export class TemplateProcessor {
       const match = path.match(/\/codeTemplates\/([^.]+)\.template\.tsx$/);
       if (match) {
         const templateName = match[1];
-        // Load the template content asynchronously
-        templates[templateName] = await this.templateFiles[path]();
+        // Check if it's a function (lazy loaded) or string (eager loaded)
+        const fileContent = this.templateFiles[path];
+        if (typeof fileContent === 'function') {
+          // Load the template content asynchronously (lazy loaded)
+          templates[templateName] = await fileContent();
+        } else {
+          // Use the content directly (eager loaded)
+          templates[templateName] = fileContent;
+        }
       }
     }
 
