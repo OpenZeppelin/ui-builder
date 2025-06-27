@@ -1,3 +1,12 @@
+## [1.14.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.1...v1.14.2) (2025-06-27)
+
+
+### Bug Fixes
+
+* **core:** prevent duplicate carets in package versions ([a64c0c7](https://github.com/OpenZeppelin/transaction-form-builder/commit/a64c0c7efc59cec02d3507de238390b513d6f2db))
+* **export:** apply latest dependency versions to exported app ([2f38de2](https://github.com/OpenZeppelin/transaction-form-builder/commit/2f38de2f4385628a3a645b59019479a0077f4ebd))
+* **export:** update snapshot tests ([141f561](https://github.com/OpenZeppelin/transaction-form-builder/commit/141f561927d51ee9af51a11b4ff5d9073d3230dc))
+
 ## [1.14.1](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.0...v1.14.1) (2025-06-27)
 
 
