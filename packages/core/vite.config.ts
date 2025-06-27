@@ -57,11 +57,6 @@ export default defineConfig({
       },
       // Reduce memory usage during rollup processing
       maxParallelFileOps: 2,
-      // Exclude template files from being processed as modules
-      external: (id) => {
-        // Exclude template files from being processed as modules
-        return id.includes('/templates/') || id.includes('/codeTemplates/');
-      },
     },
     // Increase chunk size warning limit to reduce warnings
     chunkSizeWarningLimit: 1000,
