@@ -44,11 +44,11 @@ export function useExecutionMethodState({
   const formMethods = useForm<ExecutionMethodFormData>({
     mode: 'onChange',
     defaultValues: {
-      executionMethodType: currentConfig?.method,
+      executionMethodType: currentConfig?.method || 'eoa', // Default to 'eoa' if no config
       eoaOption:
         currentConfig?.method === 'eoa' && currentConfig.allowAny === false
           ? 'specific'
-          : currentConfig?.method === 'eoa' // Default to 'any' if EOA, else undefined
+          : currentConfig?.method === 'eoa' || !currentConfig // Default to 'any' if EOA or no config
             ? 'any'
             : undefined,
       // Always provide a string, defaults to empty string
@@ -147,7 +147,7 @@ export function useExecutionMethodState({
     } else {
       setSupportedMethods([]);
       reset({
-        executionMethodType: undefined, // Or a sensible default like 'eoa' if always one selected
+        executionMethodType: 'eoa', // Default to 'eoa' even when no adapter
         eoaOption: 'any', // Default to 'any'
         specificEoaAddress: '', // Reset to empty string
       });
