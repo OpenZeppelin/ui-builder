@@ -1,3 +1,10 @@
+## [1.14.3](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.2...v1.14.3) (2025-06-30)
+
+
+### Bug Fixes
+
+* **export:** exclude uiKitConfig from the form renderer schema ([44980ea](https://github.com/OpenZeppelin/transaction-form-builder/commit/44980ea1545dec5b7287f73ba5fbf1e00e5cf6d2))
+
 ## [1.14.2](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.1...v1.14.2) (2025-06-27)
 
 
