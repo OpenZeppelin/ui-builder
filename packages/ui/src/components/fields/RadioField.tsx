@@ -87,7 +87,7 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
       className={`flex flex-col gap-2 ${width === 'full' ? 'w-full' : width === 'half' ? 'w-1/2' : 'w-1/3'}`}
     >
       {label && (
-        <Label htmlFor={radioGroupId}>
+        <Label htmlFor={radioGroupId} className="text-sm font-medium">
           {label} {isRequired && <span className="text-destructive">*</span>}
         </Label>
       )}
@@ -129,34 +129,91 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
               <div
                 id={radioGroupId}
                 role="radiogroup"
-                className={`flex ${layout === 'vertical' ? 'flex-col gap-2' : 'flex-row gap-4'}`}
+                className={`flex ${layout === 'vertical' ? 'flex-col gap-3' : 'flex-row flex-wrap gap-4'}`}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 {...groupAccessibilityProps}
               >
                 {options.map((option, index) => {
                   const optionId = `${id}-option-${index}`;
+                  const isSelected = field.value === option.value;
+                  const isDisabled = option.disabled;
+
                   return (
-                    <div key={option.value} className="flex items-center space-x-2">
+                    <label
+                      key={option.value}
+                      htmlFor={optionId}
+                      className={`group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-all duration-150 ${
+                        isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/50'
+                      } ${isSelected && !hasError ? 'bg-primary/5' : ''}`}
+                    >
                       <input
                         type="radio"
                         id={optionId}
                         value={option.value}
-                        disabled={option.disabled}
-                        checked={field.value === option.value}
+                        disabled={isDisabled}
+                        checked={isSelected}
                         onChange={() => field.onChange(option.value)}
-                        className={`text-primary focus:ring-primary h-4 w-4 cursor-pointer rounded-full border-gray-300 focus:ring-2 ${hasError ? 'border-destructive' : ''}`}
+                        className="sr-only"
+                        aria-describedby={hasError ? errorId : undefined}
                       />
-                      <Label htmlFor={optionId} className="cursor-pointer text-sm font-normal">
+
+                      {/* Custom Radio Button */}
+                      <div className="relative flex h-5 w-5 items-center justify-center">
+                        <div
+                          className={`absolute h-5 w-5 rounded-full border-2 transition-all duration-150 ${
+                            isSelected
+                              ? hasError
+                                ? 'border-destructive bg-destructive/10'
+                                : 'border-primary bg-primary/10'
+                              : hasError
+                                ? 'border-destructive/50'
+                                : 'border-muted-foreground/40 group-hover:border-muted-foreground/60'
+                          } ${!isDisabled && 'group-hover:scale-105'}`}
+                        />
+
+                        {/* Inner dot for selected state */}
+                        <div
+                          className={`absolute h-2 w-2 rounded-full transition-all duration-150 ${
+                            isSelected
+                              ? hasError
+                                ? 'bg-destructive scale-100 opacity-100'
+                                : 'bg-primary scale-100 opacity-100'
+                              : 'scale-0 opacity-0'
+                          }`}
+                        />
+                      </div>
+
+                      {/* Label text */}
+                      <span
+                        className={`text-sm transition-colors duration-150 ${
+                          isDisabled
+                            ? 'text-muted-foreground'
+                            : isSelected
+                              ? hasError
+                                ? 'text-destructive font-medium'
+                                : 'text-foreground font-medium'
+                              : 'text-foreground'
+                        }`}
+                      >
                         {option.label}
-                      </Label>
-                    </div>
+                      </span>
+
+                      {/* Focus ring */}
+                      <div
+                        className={`absolute -inset-1 rounded-lg ring-2 ring-primary ring-offset-2 ring-offset-background transition-opacity duration-150 ${
+                          isSelected && !isDisabled
+                            ? 'opacity-0 focus-within:opacity-100'
+                            : 'opacity-0'
+                        }`}
+                      />
+                    </label>
                   );
                 })}
               </div>
 
               {/* Display helper text */}
               {helperText && (
-                <div id={descriptionId} className="text-muted-foreground text-sm">
+                <div id={descriptionId} className="text-sm text-muted-foreground">
                   {helperText}
                 </div>
               )}
