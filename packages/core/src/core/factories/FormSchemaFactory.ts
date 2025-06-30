@@ -136,6 +136,10 @@ export class FormSchemaFactory {
     const {
       executionConfig: _executionConfig,
       fields: _fields,
+      // exclude uiKitConfig from the schema, we don't need it for the form renderer.
+      // The config is added to the object dynamically for use during export,
+      // but should not be part of the final schema passed to the form renderer.
+      uiKitConfig: _uiKitConfig,
       ...restOfBuilderConfig
     } = builderConfig;
 
