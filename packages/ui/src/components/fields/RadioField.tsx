@@ -142,7 +142,7 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
                     <label
                       key={option.value}
                       htmlFor={optionId}
-                      className={`group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-all duration-150 ${
+                      className={`group relative flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 transition-all duration-150 ${
                         isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/50'
                       } ${isSelected && !hasError ? 'bg-primary/5' : ''}`}
                     >
@@ -158,9 +158,9 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
                       />
 
                       {/* Custom Radio Button */}
-                      <div className="relative flex h-5 w-5 items-center justify-center">
+                      <div className="relative flex size-4 items-center justify-center">
                         <div
-                          className={`absolute h-5 w-5 rounded-full border-2 transition-all duration-150 ${
+                          className={`absolute size-4 rounded-full border-2 transition-all duration-150 ${
                             isSelected
                               ? hasError
                                 ? 'border-destructive bg-destructive/10'
@@ -173,7 +173,7 @@ export function RadioField<TFieldValues extends FieldValues = FieldValues>({
 
                         {/* Inner dot for selected state */}
                         <div
-                          className={`absolute h-2 w-2 rounded-full transition-all duration-150 ${
+                          className={`absolute size-1.5 rounded-full transition-all duration-150 ${
                             isSelected
                               ? hasError
                                 ? 'bg-destructive scale-100 opacity-100'
