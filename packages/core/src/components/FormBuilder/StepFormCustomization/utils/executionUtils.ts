@@ -1,4 +1,4 @@
-import type { EoaExecutionConfig, ExecutionConfig } from '../../../../core/types/FormTypes';
+import type { EoaExecutionConfig, ExecutionConfig } from '@openzeppelin/transaction-form-types';
 
 /**
  * Helper to ensure the config object has the correct structure based on the method.

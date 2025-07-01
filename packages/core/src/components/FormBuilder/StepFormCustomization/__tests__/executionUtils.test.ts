@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ExecutionMethodType } from '../../../../core/types/FormTypes';
+import { ExecutionMethodType } from '@openzeppelin/transaction-form-types';
+
 import { ensureCompleteConfig } from '../utils/executionUtils';
 
 describe('ensureCompleteConfig', () => {
