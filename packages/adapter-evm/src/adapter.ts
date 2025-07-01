@@ -20,6 +20,7 @@ import type {
   FormValues,
   FunctionParameter,
   NativeConfigLoader,
+  RelayerDetails,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -450,6 +451,11 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
           "If the contract is not verified on the block explorer, paste the contract's ABI JSON here. You can find this in your contract's compilation artifacts or deployment files.",
       },
     ];
+  }
+
+  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
+    console.warn('getRelayers is not implemented for the Evm adapter yet.');
+    return Promise.resolve([]);
   }
 }
 

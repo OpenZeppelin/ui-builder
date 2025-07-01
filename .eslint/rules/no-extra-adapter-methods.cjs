@@ -66,6 +66,7 @@ module.exports = {
       'getAvailableUiKits',
       'getExportableWalletConfigFiles',
       'getContractDefinitionInputs',
+      'getRelayers',
     ];
 
     // Common standard methods and properties that are allowed

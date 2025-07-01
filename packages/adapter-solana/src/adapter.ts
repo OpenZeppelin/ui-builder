@@ -10,6 +10,7 @@ import type {
   FormFieldType,
   FormValues,
   FunctionParameter,
+  RelayerDetails,
   SolanaNetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
@@ -233,6 +234,11 @@ export class SolanaAdapter implements ContractAdapter {
         placeholder: 'Enter Solana program ID',
       },
     ];
+  }
+
+  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
+    console.warn('getRelayers is not implemented for the Solana adapter yet.');
+    return Promise.resolve([]);
   }
 }
 

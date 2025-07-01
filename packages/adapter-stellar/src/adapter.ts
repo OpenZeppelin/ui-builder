@@ -10,6 +10,7 @@ import type {
   FormFieldType,
   FormValues,
   FunctionParameter,
+  RelayerDetails,
   StellarNetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
@@ -211,6 +212,11 @@ export class StellarAdapter implements ContractAdapter {
         configFields: [],
       },
     ];
+  }
+
+  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
+    console.warn('getRelayers is not implemented for the Stellar adapter yet.');
+    return Promise.resolve([]);
   }
 }
 

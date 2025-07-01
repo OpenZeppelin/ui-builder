@@ -1,4 +1,10 @@
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
+import type {
+  EoaExecutionConfig,
+  MultisigExecutionConfig,
+  RelayerDetails,
+  RelayerExecutionConfig,
+} from '../execution';
 import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
@@ -20,20 +26,6 @@ export interface ExecutionMethodDetail {
   name: string;
   description?: string;
   disabled?: boolean;
-}
-
-export interface EoaExecutionConfig {
-  method: 'eoa';
-  allowAny: boolean;
-  specificAddress?: string;
-}
-
-export interface RelayerExecutionConfig {
-  method: 'relayer';
-}
-
-export interface MultisigExecutionConfig {
-  method: 'multisig';
 }
 
 export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
@@ -111,7 +103,8 @@ export interface ContractAdapter {
    */
   signAndBroadcast: (
     transactionData: unknown,
-    executionConfig?: ExecutionConfig
+    executionConfig?: ExecutionConfig,
+    runtimeApiKey?: string
   ) => Promise<{ txHash: string }>;
 
   /**
@@ -344,4 +337,13 @@ export interface ContractAdapter {
    * @returns An array of FormFieldType objects representing the required inputs.
    */
   getContractDefinitionInputs(): FormFieldType[];
+
+  /**
+   * Gets the list of available relayers for a specific service.
+   *
+   * @param serviceUrl The URL of the relayer service.
+   * @param accessToken The access token for the relayer service.
+   * @returns A promise that resolves to an array of relayer details.
+   */
+  getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]>;
 }

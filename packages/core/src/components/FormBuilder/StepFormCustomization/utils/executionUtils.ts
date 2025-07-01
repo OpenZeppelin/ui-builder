@@ -1,4 +1,9 @@
-import type { EoaExecutionConfig, ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  EoaExecutionConfig,
+  ExecutionConfig,
+  RelayerDetails,
+  RelayerExecutionConfig,
+} from '@openzeppelin/transaction-form-types';
 
 /**
  * Helper to ensure the config object has the correct structure based on the method.
@@ -17,8 +22,12 @@ export function ensureCompleteConfig(
       specificAddress: config.specificAddress,
     };
   } else if (partialConfig.method === 'relayer') {
-    // TODO: Implement structure for relayer
-    return { method: 'relayer' };
+    const config = partialConfig as Partial<RelayerExecutionConfig>;
+    return {
+      method: 'relayer',
+      serviceUrl: config.serviceUrl || '',
+      relayer: config.relayer || ({} as RelayerDetails), // Provide a default empty object
+    };
   } else if (partialConfig.method === 'multisig') {
     // TODO: Implement structure for multisig
     return { method: 'multisig' };
