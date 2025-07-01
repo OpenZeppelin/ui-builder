@@ -73,7 +73,18 @@ export function useFormBuilderState() {
   const handleExecutionConfigUpdated = useCallback(
     (execConfig: ExecutionConfig | undefined, isValid: boolean) => {
       formBuilderStore.updateState((s) => ({
-        formConfig: s.formConfig ? { ...s.formConfig, executionConfig: execConfig } : null,
+        formConfig: s.formConfig
+          ? { ...s.formConfig, executionConfig: execConfig }
+          : s.selectedFunction && s.contractAddress
+            ? {
+                functionId: s.selectedFunction,
+                contractAddress: s.contractAddress,
+                fields: [],
+                layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+                validation: { mode: 'onChange', showErrors: 'inline' },
+                executionConfig: execConfig,
+              }
+            : s.formConfig,
         isExecutionStepValid: isValid,
       }));
     },
