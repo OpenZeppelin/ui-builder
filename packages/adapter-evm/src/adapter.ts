@@ -62,6 +62,8 @@ import {
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
 import {
   formatEvmTransactionData,
+  getEvmRelayers,
+  sendTransactionViaRelayer,
   signAndBroadcastEvmTransaction,
   waitForEvmTransactionConfirmation,
 } from './transaction';
@@ -149,10 +151,22 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  async signAndBroadcast(
+  public async signAndBroadcast(
     transactionData: unknown,
-    executionConfig?: ExecutionConfig
+    executionConfig?: ExecutionConfig,
+    runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
+    if (executionConfig?.method === 'relayer') {
+      if (!runtimeApiKey) {
+        throw new Error('API Key is required for Relayer execution.');
+      }
+      return sendTransactionViaRelayer(
+        transactionData as WriteContractParameters,
+        executionConfig,
+        runtimeApiKey
+      );
+    }
+
     const walletImplementation: WagmiWalletImplementation = await getEvmWalletImplementation();
     return signAndBroadcastEvmTransaction(
       transactionData as WriteContractParameters,
@@ -160,6 +174,13 @@ export class EvmAdapter implements ContractAdapter {
       this.networkConfig.chainId,
       executionConfig
     );
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
+    return getEvmRelayers(serviceUrl, accessToken, this.networkConfig);
   }
 
   /**
@@ -451,11 +472,6 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
           "If the contract is not verified on the block explorer, paste the contract's ABI JSON here. You can find this in your contract's compilation artifacts or deployment files.",
       },
     ];
-  }
-
-  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
-    console.warn('getRelayers is not implemented for the Evm adapter yet.');
-    return Promise.resolve([]);
   }
 }
 
