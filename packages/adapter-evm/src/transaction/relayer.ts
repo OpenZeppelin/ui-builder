@@ -7,7 +7,7 @@ import {
   Configuration,
   type EvmTransactionRequest,
   RelayersApi,
-} from '@openzeppelin/relayer-sdk/dist/src';
+} from '@openzeppelin/relayer-sdk';
 import {
   EvmNetworkConfig,
   NetworkType,
