@@ -8,6 +8,7 @@ import type {
 import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
+import { TransactionStatusUpdate } from '../transactions';
 
 import type {
   AvailableUiKit,
@@ -103,7 +104,8 @@ export interface ContractAdapter {
    */
   signAndBroadcast: (
     transactionData: unknown,
-    executionConfig?: ExecutionConfig,
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ) => Promise<{ txHash: string }>;
 

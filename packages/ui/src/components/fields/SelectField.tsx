@@ -144,11 +144,21 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
                     maxWidth: 'var(--radix-select-trigger-width)',
                   }}
                 >
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {options.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No options available
+                    </div>
+                  ) : (
+                    options.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
 

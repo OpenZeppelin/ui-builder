@@ -6,6 +6,7 @@ import { TitledSection } from '../../../Common/TitledSection';
 import type { PrimaryMethodSelectorProps } from '../types';
 
 import { EoaConfiguration } from './EoaConfiguration';
+import { RelayerConfiguration } from './RelayerConfiguration';
 
 interface ExecutionMethodOption extends SelectableOption {
   value: string;
@@ -17,6 +18,7 @@ export function PrimaryMethodSelector({
   options,
   watchedEoaOption,
   adapter,
+  setValue,
 }: PrimaryMethodSelectorProps): React.ReactElement {
   // Use controller from react-hook-form to manage the selected value
   const { field } = useController({
@@ -60,12 +62,7 @@ export function PrimaryMethodSelector({
 
     if (field.value === 'relayer') {
       return (
-        <div className="h-full flex flex-col items-center justify-center py-8">
-          <p className="text-muted-foreground text-center text-sm">
-            OpenZeppelin transaction relayer configuration options will be available here in a
-            future update.
-          </p>
-        </div>
+        <RelayerConfiguration control={control} adapter={adapter || null} setValue={setValue} />
       );
     }
 

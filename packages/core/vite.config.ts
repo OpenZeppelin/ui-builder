@@ -69,4 +69,15 @@ export default defineConfig({
       // If the dev server has issues resolving these, we may need a more advanced solution.
     ],
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        // Proxy all /api/* requests to the relayer service
+        // This resolves CORS issues in development by routing requests through Vite's proxy
+      },
+    },
+  },
 });

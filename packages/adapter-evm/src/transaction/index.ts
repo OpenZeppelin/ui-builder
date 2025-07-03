@@ -1,4 +1,6 @@
 // Barrel file for transaction module
-export * from './formatter';
-export * from './sender';
+export * from './execution-strategy';
 export * from './relayer';
+export * from './sender';
+export * from './formatter';
+export * from './eoa';

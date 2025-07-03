@@ -1,130 +1,239 @@
 // This file will contain the business logic for interacting with the Relayer SDK
 import { encodeFunctionData } from 'viem';
 
-// Using the dist/src import directory until this is fixed: https://github.com/OpenZeppelin/openzeppelin-relayer-sdk/issues/100
 import {
   type ApiResponseRelayerResponseData,
   Configuration,
   type EvmTransactionRequest,
+  type EvmTransactionResponse,
   RelayersApi,
+  Speed,
 } from '@openzeppelin/relayer-sdk';
 import {
   EvmNetworkConfig,
+  ExecutionConfig,
   NetworkType,
   RelayerDetails,
   RelayerExecutionConfig,
+  TransactionStatusUpdate,
 } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { WriteContractParameters } from '../types';
+import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
+
+import { ExecutionStrategy } from './execution-strategy';
 
 /**
- * Fetches and filters relayers for a specific EVM network from the OpenZeppelin Relayer service.
- * This function handles pagination to retrieve all available relayers.
- *
- * @param serviceUrl The base URL of the relayer service.
- * @param accessToken The session-based API key for authentication.
- * @param networkConfig The EVM network configuration to filter relayers by.
- * @returns A promise that resolves to an array of compatible relayer details.
- * @throws If the API call fails or returns an unsuccessful response.
+ * Implements the ExecutionStrategy for the OpenZeppelin Relayer.
+ * This strategy sends the transaction to the relayer service, which then handles
+ * gas payment, signing, and broadcasting. It includes a polling mechanism to wait
+ * for the transaction to be mined and return the final hash.
  */
-export async function getEvmRelayers(
-  serviceUrl: string,
-  accessToken: string,
-  networkConfig: EvmNetworkConfig
-): Promise<RelayerDetails[]> {
-  const sdkConfig = new Configuration({
-    basePath: serviceUrl,
-    accessToken,
-  });
-  const relayersApi = new RelayersApi(sdkConfig);
+export class RelayerExecutionStrategy implements ExecutionStrategy {
+  public async execute(
+    transactionData: WriteContractParameters,
+    executionConfig: ExecutionConfig,
+    _walletImplementation: WagmiWalletImplementation,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<{ txHash: string }> {
+    const relayerConfig = executionConfig as RelayerExecutionConfig;
 
-  let allRelayers: ApiResponseRelayerResponseData[] = [];
-  let currentPage = 1;
-  let totalItems = 0;
-  let hasMore = true;
-
-  // TODO: Create a more robust page loading mechanism.
-  // This could be a separate utility function that handles the pagination logic
-  // and can be reused. It could also include features like parallel requests
-  // or a more sophisticated way of determining the total number of pages.
-  do {
-    const { data } = await relayersApi.listRelayers(currentPage, 100); // Fetch 100 per page
-
-    if (!data.success || !data.data) {
-      throw new Error(`Failed to fetch relayers on page ${currentPage}.`);
+    if (!runtimeApiKey) {
+      throw new Error('API Key is required for Relayer execution.');
     }
 
-    allRelayers = [...allRelayers, ...data.data];
-    totalItems = data.pagination?.total_items || 0;
+    const { transactionId } = await this.sendTransactionViaRelayer(
+      transactionData,
+      relayerConfig,
+      runtimeApiKey
+    );
 
-    if (allRelayers.length >= totalItems) {
-      hasMore = false;
-    } else {
-      currentPage++;
-    }
-  } while (hasMore);
+    onStatusChange('pendingRelayer', { transactionId });
 
-  // Filter for EVM relayers compatible with the adapter's current network
-  return allRelayers
-    .filter(
-      (r: ApiResponseRelayerResponseData) =>
-        r.network_type === 'evm' && r.network === networkConfig.network
-    )
-    .map((r: ApiResponseRelayerResponseData) => ({
-      relayerId: r.id,
-      name: r.name,
-      address: r.address,
-      network: r.network,
-      networkType: r.network_type as unknown as NetworkType,
-      paused: r.paused,
-    }));
-}
+    const sdkConfig = new Configuration({
+      basePath: this.getRelayerSdkBasePath(relayerConfig.serviceUrl),
+      accessToken: runtimeApiKey,
+    });
 
-/**
- * Encodes transaction data and sends it through the specified OpenZeppelin Relayer.
- *
- * @param transactionData The contract write parameters, including ABI, function name, and args.
- * @param executionConfig The relayer-specific execution configuration, including the service URL and target relayer.
- * @param runtimeApiKey The session-only API key provided by the user at the time of execution.
- * @returns A promise that resolves to an object containing the transaction hash.
- * @throws If the relayer API returns an error or fails to provide a transaction hash.
- */
-export async function sendTransactionViaRelayer(
-  transactionData: WriteContractParameters,
-  executionConfig: RelayerExecutionConfig,
-  runtimeApiKey: string
-): Promise<{ txHash: string }> {
-  // 1. ABI-encode the transaction data
-  const data = encodeFunctionData({
-    abi: transactionData.abi,
-    functionName: transactionData.functionName,
-    args: transactionData.args,
-  });
+    const txHash = await this.pollForTransactionHash(
+      relayerConfig.relayer.relayerId,
+      transactionId,
+      sdkConfig
+    );
 
-  // 2. Construct the request for the Relayer SDK
-  const relayerTxRequest: EvmTransactionRequest = {
-    to: transactionData.address,
-    data,
-    value: Number(transactionData.value || 0), // Convert bigint to number
-    gas_limit: 210000, // Using a sensible default
-  };
-
-  // 3. Instantiate SDK and send transaction
-  const sdkConfig = new Configuration({
-    basePath: executionConfig.serviceUrl,
-    accessToken: runtimeApiKey,
-  });
-  const relayersApi = new RelayersApi(sdkConfig);
-
-  const result = await relayersApi.sendTransaction(
-    executionConfig.relayer.relayerId,
-    relayerTxRequest
-  );
-
-  if (!result.data.success || !result.data.data?.hash) {
-    throw new Error(`Relayer API failed to return a transaction hash. Error: ${result.data.error}`);
+    return { txHash };
   }
 
-  // 4. Return the transaction hash
-  return { txHash: result.data.data.hash };
+  /**
+   * Determines the appropriate base path for the relayer SDK configuration.
+   * In development with localhost, it returns a relative path to leverage Vite's proxy,
+   * avoiding CORS issues. In other environments, it returns the full serviceUrl.
+   * @param serviceUrl The full service URL of the relayer.
+   * @returns The base path to be used for the SDK's configuration.
+   */
+  private getRelayerSdkBasePath(serviceUrl: string): string {
+    return typeof window !== 'undefined' &&
+      window.location.hostname === 'localhost' &&
+      serviceUrl.includes('localhost:8080')
+      ? '' // Use relative path for Vite proxy
+      : serviceUrl;
+  }
+
+  /**
+   * Fetches and filters relayers for a specific EVM network from the OpenZeppelin Relayer service.
+   * This function handles pagination to retrieve all available relayers.
+   *
+   * @param serviceUrl The base URL of the relayer service.
+   * @param accessToken The session-based API key for authentication.
+   * @param networkConfig The EVM network configuration to filter relayers by.
+   * @returns A promise that resolves to an array of compatible relayer details.
+   * @throws If the API call fails or returns an unsuccessful response.
+   */
+  public async getEvmRelayers(
+    serviceUrl: string,
+    accessToken: string,
+    networkConfig: EvmNetworkConfig
+  ): Promise<RelayerDetails[]> {
+    logger.info('[Relayer] Getting relayers with access token', accessToken);
+    const sdkConfig = new Configuration({
+      basePath: this.getRelayerSdkBasePath(serviceUrl),
+      accessToken,
+    });
+    const relayersApi = new RelayersApi(sdkConfig);
+
+    let allRelayers: ApiResponseRelayerResponseData[] = [];
+    let currentPage = 1;
+    let totalItems = 0;
+    let hasMore = true;
+
+    do {
+      const { data } = await relayersApi.listRelayers(currentPage, 100);
+
+      if (!data.success || !data.data) {
+        throw new Error(`Failed to fetch relayers on page ${currentPage}.`);
+      }
+
+      allRelayers = [...allRelayers, ...data.data];
+      totalItems = data.pagination?.total_items || 0;
+
+      if (allRelayers.length >= totalItems) {
+        hasMore = false;
+      } else {
+        currentPage++;
+      }
+    } while (hasMore);
+
+    return allRelayers
+      .filter(
+        (r: ApiResponseRelayerResponseData) =>
+          r.network_type === 'evm' && networkConfig.id.includes(r.network)
+      )
+      .map((r: ApiResponseRelayerResponseData) => ({
+        relayerId: r.id,
+        name: r.name,
+        address: r.address,
+        network: r.network,
+        networkType: r.network_type as unknown as NetworkType,
+        paused: r.paused,
+      }));
+  }
+
+  /**
+   * Submits a transaction to the relayer service for asynchronous processing.
+   * @param transactionData The contract write parameters.
+   * @param executionConfig The relayer-specific execution configuration.
+   * @param runtimeApiKey The user's session-only API key.
+   * @returns A promise that resolves to an object containing the transaction ID assigned by the relayer.
+   */
+  private async sendTransactionViaRelayer(
+    transactionData: WriteContractParameters,
+    executionConfig: RelayerExecutionConfig,
+    runtimeApiKey: string
+  ): Promise<{ transactionId: string }> {
+    const data = encodeFunctionData({
+      abi: transactionData.abi,
+      functionName: transactionData.functionName,
+      args: transactionData.args,
+    });
+
+    const relayerTxRequest: EvmTransactionRequest = {
+      to: transactionData.address,
+      data,
+      value: Number(transactionData.value || 0),
+      gas_limit: 210000,
+      speed: Speed.FAST,
+    };
+
+    const sdkConfig = new Configuration({
+      basePath: this.getRelayerSdkBasePath(executionConfig.serviceUrl),
+      accessToken: runtimeApiKey,
+    });
+    const relayersApi = new RelayersApi(sdkConfig);
+
+    const result = await relayersApi.sendTransaction(
+      executionConfig.relayer.relayerId,
+      relayerTxRequest
+    );
+
+    if (!result.data.success || !result.data.data?.id) {
+      throw new Error(`Relayer API failed to return a transaction ID. Error: ${result.data.error}`);
+    }
+
+    return { transactionId: result.data.data.id };
+  }
+
+  /**
+   * Polls the relayer for a transaction's status until it is mined and has a hash, or fails.
+   * @param relayerId The ID of the relayer processing the transaction.
+   * @param transactionId The ID of the transaction to poll.
+   * @param sdkConfig The SDK configuration containing the necessary authentication.
+   * @returns A promise that resolves to the final transaction hash.
+   * @throws If the transaction fails or polling times out.
+   */
+  private async pollForTransactionHash(
+    relayerId: string,
+    transactionId: string,
+    sdkConfig: Configuration
+  ): Promise<string> {
+    const relayersApi = new RelayersApi(sdkConfig);
+    const POLLING_INTERVAL = 2000;
+    const POLLING_TIMEOUT = 60000;
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < POLLING_TIMEOUT) {
+      const { data } = await relayersApi.getTransactionById(relayerId, transactionId);
+
+      if (!data.success || !data.data) {
+        throw new Error(`Failed to get transaction status for ID: ${transactionId}`);
+      }
+
+      const txResponse = data.data as EvmTransactionResponse;
+
+      if (txResponse.status === 'mined' || txResponse.status === 'confirmed') {
+        if (!txResponse.hash) {
+          throw new Error(
+            `Transaction is confirmed but no hash was returned for ID: ${transactionId}`
+          );
+        }
+        return txResponse.hash;
+      }
+
+      if (
+        txResponse.status === 'failed' ||
+        txResponse.status === 'canceled' ||
+        txResponse.status === 'expired'
+      ) {
+        throw new Error(
+          `Transaction ${txResponse.status}: ${txResponse.status_reason || 'No reason provided.'}`
+        );
+      }
+
+      // Continue polling for 'pending' or 'sent' statuses
+      await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL));
+    }
+
+    throw new Error(`Polling for transaction hash timed out for ID: ${transactionId}`);
+  }
 }

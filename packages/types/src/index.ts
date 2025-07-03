@@ -14,4 +14,4 @@ export * from './execution';
 export * from './forms';
 export * from './networks';
 export * from './transactions';
-export * from './config/app-config';
+export * from './config';

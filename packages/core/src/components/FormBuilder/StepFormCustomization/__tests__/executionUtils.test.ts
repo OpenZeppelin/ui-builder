@@ -52,7 +52,11 @@ describe('ensureCompleteConfig', () => {
 
   it('should return basic relayer config', () => {
     const result = ensureCompleteConfig({ method: 'relayer' });
-    expect(result).toEqual({ method: 'relayer' });
+    expect(result).toEqual({
+      method: 'relayer',
+      serviceUrl: '',
+      relayer: {},
+    });
   });
 
   it('should return basic multisig config', () => {

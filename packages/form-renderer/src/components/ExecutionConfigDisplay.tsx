@@ -1,8 +1,13 @@
 import { AlertCircle, Info, Key, Shield, User } from 'lucide-react';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
-import type { EoaExecutionConfig, ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  EoaExecutionConfig,
+  ExecutionConfig,
+  RelayerExecutionConfig,
+} from '@openzeppelin/transaction-form-types';
 import {
   AddressDisplay,
   Alert,
@@ -13,12 +18,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  PasswordField,
 } from '@openzeppelin/transaction-form-ui';
 import { cn } from '@openzeppelin/transaction-form-utils';
 
 interface ExecutionConfigDisplayProps {
   executionConfig: ExecutionConfig;
   error?: string | null;
+  onRuntimeApiKeyChange?: (apiKey: string) => void;
+}
+
+interface ApiKeyFormData {
+  runtimeApiKey: string;
 }
 
 const EoaConfigDetails: React.FC<{ config: EoaExecutionConfig }> = ({ config }) => (
@@ -52,6 +63,29 @@ const EoaConfigDetails: React.FC<{ config: EoaExecutionConfig }> = ({ config }) 
   </div>
 );
 
+const RelayerConfigDetails: React.FC<{ config: RelayerExecutionConfig }> = ({ config }) => (
+  <div className="space-y-4">
+    <div className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
+      <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+      <div>
+        <h4 className="text-sm font-medium mb-1">OpenZeppelin Relayer</h4>
+        <p className="text-sm text-muted-foreground">
+          Transaction will be sent via the selected OpenZeppelin Relayer.
+        </p>
+      </div>
+    </div>
+
+    <div className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
+      <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+      <div>
+        <h4 className="text-sm font-medium mb-1">Relayer Details</h4>
+        <p className="text-sm text-muted-foreground">Name: {config.relayer.name}</p>
+        <AddressDisplay className="mt-2" address={config.relayer.address} />
+      </div>
+    </div>
+  </div>
+);
+
 // TODO: Implement display for RelayerExecutionConfig and MultisigExecutionConfig
 // const RelayerConfigDetails: React.FC<{ config: RelayerExecutionConfig }> = ...
 // const MultisigConfigDetails: React.FC<{ config: MultisigExecutionConfig }> = ...
@@ -59,7 +93,22 @@ const EoaConfigDetails: React.FC<{ config: EoaExecutionConfig }> = ({ config }) 
 export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
   executionConfig,
   error,
+  onRuntimeApiKeyChange,
 }) => {
+  // Create a local form for the API key
+  const { control, watch } = useForm<ApiKeyFormData>({
+    defaultValues: {
+      runtimeApiKey: '',
+    },
+  });
+
+  const runtimeApiKey = watch('runtimeApiKey');
+
+  // Notify parent component when API key changes
+  useEffect(() => {
+    onRuntimeApiKeyChange?.(runtimeApiKey);
+  }, [runtimeApiKey, onRuntimeApiKeyChange]);
+
   let content: React.ReactNode;
   let methodIcon: React.ReactNode;
 
@@ -68,11 +117,11 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
       content = <EoaConfigDetails config={executionConfig as EoaExecutionConfig} />;
       methodIcon = <User className="h-3.5 w-3.5 text-primary" />;
       break;
-    // TODO: Add cases for 'relayer' and 'multisig' with appropriate icons
-    // case 'relayer':
-    //   content = <RelayerConfigDetails config={executionConfig as RelayerExecutionConfig} />;
-    //   methodIcon = <Shield className="h-3.5 w-3.5 text-primary" />;
-    //   break;
+    case 'relayer':
+      content = <RelayerConfigDetails config={executionConfig as RelayerExecutionConfig} />;
+      methodIcon = <Shield className="h-3.5 w-3.5 text-primary" />;
+      break;
+    // TODO: Add cases for 'multisig' with appropriate icons
     // case 'multisig':
     //   content = <MultisigConfigDetails config={executionConfig as MultisigExecutionConfig} />;
     //   methodIcon = <Users className="h-3.5 w-3.5 text-primary" />;
@@ -124,6 +173,17 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
         </DialogHeader>
 
         <div className="py-4">{content}</div>
+
+        {executionConfig.method === 'relayer' && (
+          <PasswordField
+            id="runtime-api-key"
+            label="Relayer API Key"
+            name="runtimeApiKey"
+            control={control}
+            placeholder="Enter your API key"
+            helperText="This key is required to send the transaction and is not stored."
+          />
+        )}
 
         {error && (
           <div className="mb-2">

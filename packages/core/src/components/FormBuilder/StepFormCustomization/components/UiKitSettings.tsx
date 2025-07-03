@@ -96,7 +96,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
   // Generate configuration content for the selected kit
   const configContent = selectedKit ? (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <h4 className="text-base font-medium">{selectedKit.name} Configuration</h4>
         {selectedKit.linkToDocs && (
           <ExternalLink href={selectedKit.linkToDocs} className="text-sm">

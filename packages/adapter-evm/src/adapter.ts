@@ -21,6 +21,7 @@ import type {
   FunctionParameter,
   NativeConfigLoader,
   RelayerDetails,
+  TransactionStatusUpdate,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -30,7 +31,6 @@ import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
-import type { WagmiWalletImplementation } from './wallet/implementation/wagmi-implementation';
 import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
@@ -61,10 +61,10 @@ import {
 } from './mapping';
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
 import {
+  EoaExecutionStrategy,
+  ExecutionStrategy,
+  RelayerExecutionStrategy,
   formatEvmTransactionData,
-  getEvmRelayers,
-  sendTransactionViaRelayer,
-  signAndBroadcastEvmTransaction,
   waitForEvmTransactionConfirmation,
 } from './transaction';
 import { formatEvmFunctionResult } from './transform';
@@ -153,34 +153,38 @@ export class EvmAdapter implements ContractAdapter {
    */
   public async signAndBroadcast(
     transactionData: unknown,
-    executionConfig?: ExecutionConfig,
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
-    if (executionConfig?.method === 'relayer') {
-      if (!runtimeApiKey) {
-        throw new Error('API Key is required for Relayer execution.');
-      }
-      return sendTransactionViaRelayer(
-        transactionData as WriteContractParameters,
-        executionConfig,
-        runtimeApiKey
-      );
+    const walletImplementation = await getEvmWalletImplementation();
+    let strategy: ExecutionStrategy;
+
+    switch (executionConfig.method) {
+      case 'relayer':
+        strategy = new RelayerExecutionStrategy();
+        break;
+      case 'eoa':
+      default:
+        strategy = new EoaExecutionStrategy();
+        break;
     }
 
-    const walletImplementation: WagmiWalletImplementation = await getEvmWalletImplementation();
-    return signAndBroadcastEvmTransaction(
+    return strategy.execute(
       transactionData as WriteContractParameters,
+      executionConfig,
       walletImplementation,
-      this.networkConfig.chainId,
-      executionConfig
+      onStatusChange,
+      runtimeApiKey
     );
   }
 
   /**
    * @inheritdoc
    */
-  public getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
-    return getEvmRelayers(serviceUrl, accessToken, this.networkConfig);
+  public async getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
+    const relayerStrategy = new RelayerExecutionStrategy();
+    return relayerStrategy.getEvmRelayers(serviceUrl, accessToken, this.networkConfig);
   }
 
   /**

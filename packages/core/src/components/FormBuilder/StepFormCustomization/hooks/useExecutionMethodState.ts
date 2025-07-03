@@ -9,7 +9,12 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 
 import type { ExecutionMethodFormData } from '../types';
-import { ensureCompleteConfig } from '../utils';
+import {
+  ensureCompleteConfig,
+  executionMethodValidatorMap,
+  generateDefaultExecutionMethodFormValues,
+  mapFormDataToExecutionConfig,
+} from '../utils';
 
 //---------------------------------------------------------------------------
 // Hook Definition
@@ -43,25 +48,13 @@ export function useExecutionMethodState({
   //---------------------------------------------------------------------------
   const formMethods = useForm<ExecutionMethodFormData>({
     mode: 'onChange',
-    defaultValues: {
-      executionMethodType: currentConfig?.method || 'eoa', // Default to 'eoa' if no config
-      eoaOption:
-        currentConfig?.method === 'eoa' && currentConfig.allowAny === false
-          ? 'specific'
-          : currentConfig?.method === 'eoa' || !currentConfig // Default to 'any' if EOA or no config
-            ? 'any'
-            : undefined,
-      // Always provide a string, defaults to empty string
-      specificEoaAddress:
-        currentConfig?.method === 'eoa' && currentConfig.specificAddress
-          ? currentConfig.specificAddress
-          : '',
-    },
+    defaultValues: generateDefaultExecutionMethodFormValues(currentConfig),
   });
   const { watch, reset, setValue, getValues } = formMethods;
 
   const watchedMethodType = watch('executionMethodType');
   const watchedEoaOption = watch('eoaOption');
+  const watchedSelectedRelayerDetails = watch('selectedRelayerDetails');
 
   const [supportedMethods, setSupportedMethods] = useState<ExecutionMethodDetail[]>([]);
   const [isValid, setIsValid] = useState<boolean>(false);
@@ -71,40 +64,26 @@ export function useExecutionMethodState({
   // Validation Logic (for Builder UI)
   //---------------------------------------------------------------------------
   const validateExecutionConfigForBuilder = useCallback(
-    // Removed async as we are not calling adapter.validateExecutionConfig here
     (configToValidate: ExecutionConfig | undefined): void => {
-      let isValidForBuilder = false;
       let errorForBuilder: string | null = null;
 
       if (!adapter) {
-        errorForBuilder = 'Adapter not available.';
+        errorForBuilder = 'Adapter is not available.';
       } else if (!configToValidate) {
         errorForBuilder = 'Please select an execution method.';
-      } else if (configToValidate.method === 'eoa') {
-        const eoaConfig = configToValidate;
-        if (!eoaConfig.allowAny) {
-          if (!eoaConfig.specificAddress) {
-            errorForBuilder = 'Please provide the specific EOA address.';
-          } else if (!adapter.isValidAddress(eoaConfig.specificAddress)) {
-            errorForBuilder = `Invalid EOA address format: ${eoaConfig.specificAddress}`;
-          }
+      } else {
+        const validator = executionMethodValidatorMap[configToValidate.method];
+        if (validator) {
+          errorForBuilder = validator(configToValidate, adapter);
+        } else {
+          errorForBuilder = `Unknown execution method: ${configToValidate.method}`;
         }
-      } else if (configToValidate.method === 'relayer') {
-        // Placeholder: For builder UI, relayer is valid if selected (further details might be validated later)
-        errorForBuilder = null;
-      } else if (configToValidate.method === 'multisig') {
-        // Placeholder: For builder UI, multisig is valid if selected
-        errorForBuilder = null;
       }
 
-      if (!errorForBuilder) {
-        isValidForBuilder = true;
-      }
-
-      setIsValid(isValidForBuilder);
+      setIsValid(!errorForBuilder);
       setValidationError(errorForBuilder);
 
-      onUpdateConfig(configToValidate, isValidForBuilder);
+      onUpdateConfig(configToValidate, !errorForBuilder);
     },
     [adapter, onUpdateConfig]
   );
@@ -177,21 +156,34 @@ export function useExecutionMethodState({
       if (type === undefined) {
         return;
       }
-      const formData = value as ExecutionMethodFormData;
-      const newConfig = ensureCompleteConfig({
-        method: formData.executionMethodType,
-        allowAny: formData.eoaOption === 'any',
-        // Ensure specificEoaAddress is undefined if empty string, to match ExecutionConfig type if needed
-        // Or ensure ExecutionConfig specificAddress can be an empty string if that's acceptable
-        // For now, let's keep it as is, as ensureCompleteConfig might handle it.
-        // The key is that RHF field should not be undefined.
-        specificAddress: formData.specificEoaAddress, // Keep as string from form
-      });
+      const mappedConfig = mapFormDataToExecutionConfig(value as ExecutionMethodFormData);
+      const newConfig = ensureCompleteConfig(mappedConfig);
       validateExecutionConfigForBuilder(newConfig);
     };
     const subscription = watch(watchCallback);
     return () => subscription.unsubscribe();
   }, [watch, validateExecutionConfigForBuilder]);
+
+  // Effect 4: Watch specifically for selectedRelayerDetails changes
+  useEffect(() => {
+    if (watchedMethodType === 'relayer' && watchedSelectedRelayerDetails) {
+      // Build the relayer config with the updated details
+      const currentValues = getValues();
+      const configData = {
+        method: 'relayer' as const,
+        serviceUrl: currentValues.relayerServiceUrl || '',
+        relayer: watchedSelectedRelayerDetails,
+      };
+
+      const newConfig = ensureCompleteConfig(configData);
+      validateExecutionConfigForBuilder(newConfig);
+    }
+  }, [
+    watchedSelectedRelayerDetails,
+    watchedMethodType,
+    getValues,
+    validateExecutionConfigForBuilder,
+  ]);
 
   //---------------------------------------------------------------------------
   // Return Value
