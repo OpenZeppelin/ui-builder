@@ -35,7 +35,7 @@
     "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

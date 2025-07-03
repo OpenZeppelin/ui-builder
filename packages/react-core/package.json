@@ -22,8 +22,8 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo .turbo",
+    "build": "tsup",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsup --watch",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run --passWithNoTests",
