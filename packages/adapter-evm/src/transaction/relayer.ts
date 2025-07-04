@@ -182,7 +182,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
   ): Promise<string> {
     const relayersApi = new RelayersApi(sdkConfig);
     const POLLING_INTERVAL = 2000;
-    const POLLING_TIMEOUT = 60000;
+    const POLLING_TIMEOUT = 300000; // 5 minutes in milliseconds
     const startTime = Date.now();
 
     while (Date.now() - startTime < POLLING_TIMEOUT) {
