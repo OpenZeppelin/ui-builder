@@ -52,7 +52,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     onStatusChange('pendingRelayer', { transactionId });
 
     const sdkConfig = new Configuration({
-      basePath: this.getRelayerSdkBasePath(relayerConfig.serviceUrl),
+      basePath: relayerConfig.serviceUrl,
       accessToken: runtimeApiKey,
     });
 
@@ -63,21 +63,6 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     );
 
     return { txHash };
-  }
-
-  /**
-   * Determines the appropriate base path for the relayer SDK configuration.
-   * In development with localhost, it returns a relative path to leverage Vite's proxy,
-   * avoiding CORS issues. In other environments, it returns the full serviceUrl.
-   * @param serviceUrl The full service URL of the relayer.
-   * @returns The base path to be used for the SDK's configuration.
-   */
-  private getRelayerSdkBasePath(serviceUrl: string): string {
-    return typeof window !== 'undefined' &&
-      window.location.hostname === 'localhost' &&
-      serviceUrl.includes('localhost:8080')
-      ? '' // Use relative path for Vite proxy
-      : serviceUrl;
   }
 
   /**
@@ -97,7 +82,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
   ): Promise<RelayerDetails[]> {
     logger.info('[Relayer] Getting relayers with access token', accessToken);
     const sdkConfig = new Configuration({
-      basePath: this.getRelayerSdkBasePath(serviceUrl),
+      basePath: serviceUrl,
       accessToken,
     });
     const relayersApi = new RelayersApi(sdkConfig);
@@ -165,7 +150,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     };
 
     const sdkConfig = new Configuration({
-      basePath: this.getRelayerSdkBasePath(executionConfig.serviceUrl),
+      basePath: executionConfig.serviceUrl,
       accessToken: runtimeApiKey,
     });
     const relayersApi = new RelayersApi(sdkConfig);
