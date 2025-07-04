@@ -3,13 +3,14 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
-import { RelayerDetails } from '@openzeppelin/transaction-form-types';
+import { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/transaction-form-types';
 import {
   Alert,
   AlertDescription,
   Button,
   ExternalLink,
   PasswordField,
+  RelayerDetailsCard,
   SelectField,
   UrlField,
 } from '@openzeppelin/transaction-form-ui';
@@ -31,6 +32,10 @@ export function RelayerConfiguration({
   const [fetchedRelayers, setFetchedRelayers] = useState<RelayerDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [enhancedRelayerDetails, setEnhancedRelayerDetails] = useState<RelayerDetailsRich | null>(
+    null
+  );
+  const [loadingEnhancedDetails, setLoadingEnhancedDetails] = useState(false);
 
   // Create a local form for the API key
   const { control: localControl, watch } = useForm<RelayerFormData>({
@@ -59,6 +64,27 @@ export function RelayerConfiguration({
     }
   }, [selectedRelayerId, fetchedRelayers, setValue]);
 
+  // Fetch enhanced details when a relayer is selected
+  useEffect(() => {
+    if (selectedRelayerId && sessionApiKey && relayerServiceUrl && adapter?.getRelayer) {
+      setLoadingEnhancedDetails(true);
+      adapter
+        .getRelayer(relayerServiceUrl, sessionApiKey, selectedRelayerId)
+        .then((details) => {
+          setEnhancedRelayerDetails(details);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch enhanced relayer details:', err);
+          setEnhancedRelayerDetails(null);
+        })
+        .finally(() => {
+          setLoadingEnhancedDetails(false);
+        });
+    } else {
+      setEnhancedRelayerDetails(null);
+    }
+  }, [selectedRelayerId, sessionApiKey, relayerServiceUrl, adapter]);
+
   const handleFetchRelayers = async () => {
     if (!adapter) {
       setError('Adapter is not available.');
@@ -73,6 +99,7 @@ export function RelayerConfiguration({
     setIsLoading(true);
     setError(null);
     setFetchedRelayers([]);
+    setEnhancedRelayerDetails(null);
     setValue('selectedRelayer', '', { shouldValidate: true });
     setValue('selectedRelayerDetails', undefined, { shouldValidate: true });
 
@@ -163,6 +190,14 @@ export function RelayerConfiguration({
         validation={{ required: true }}
         placeholder="Select a relayer from the list"
       />
+
+      {selectedRelayerId && fetchedRelayers.length > 0 && (
+        <RelayerDetailsCard
+          details={fetchedRelayers.find((r) => r.relayerId === selectedRelayerId)!}
+          enhancedDetails={enhancedRelayerDetails}
+          loading={loadingEnhancedDetails}
+        />
+      )}
     </div>
   );
 }

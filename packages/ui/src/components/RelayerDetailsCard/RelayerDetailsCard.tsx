@@ -74,7 +74,12 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
           </div>
 
           {/* Relayer Address */}
-          <AddressDisplay className="mb-3" address={displayDetails.address} />
+          <AddressDisplay
+            className="mb-3"
+            address={displayDetails.address}
+            truncate={false}
+            showCopyButton
+          />
 
           {/* Additional Details */}
           <div className="space-y-1 pt-2 border-t border-slate-200">
