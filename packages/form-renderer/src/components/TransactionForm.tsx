@@ -11,10 +11,10 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { createDefaultFormValues } from '../utils/formUtils';
 
+import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
 import { DynamicFormField } from './DynamicFormField';
-import { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
 import { TransactionStatusDisplay } from './transaction';
 
 /**
@@ -315,6 +315,7 @@ export function TransactionForm({
             <div className="w-full">
               <ExecutionConfigDisplay
                 executionConfig={executionConfig}
+                adapter={adapter}
                 error={executionConfigError}
                 onRuntimeApiKeyChange={setRuntimeApiKey}
               />

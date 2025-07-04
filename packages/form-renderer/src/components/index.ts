@@ -16,4 +16,4 @@ export { ContractStateWidget } from './ContractStateWidget';
 export { ContractActionBar } from './ContractActionBar';
 
 // Execution config display
-export { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
+export { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
