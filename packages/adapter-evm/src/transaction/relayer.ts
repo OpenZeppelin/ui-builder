@@ -12,7 +12,6 @@ import {
 import {
   EvmNetworkConfig,
   ExecutionConfig,
-  NetworkType,
   RelayerDetails,
   RelayerExecutionConfig,
   TransactionStatusUpdate,
@@ -135,7 +134,6 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
         name: r.name,
         address: r.address,
         network: r.network,
-        networkType: r.network_type as unknown as NetworkType,
         paused: r.paused,
       }));
   }
