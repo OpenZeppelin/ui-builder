@@ -21,15 +21,18 @@ export const ExecutionMethodTrigger: React.FC<ExecutionMethodTriggerProps> = ({
 }) => {
   // Get the appropriate icon for the execution method
   const getMethodIcon = (method: string): React.ReactNode => {
+    // Determine icon color based on validation state
+    const iconColorClass = !isValid ? 'text-red-500' : 'text-primary';
+
     switch (method) {
       case 'eoa':
-        return <User className="size-3.5 text-primary" />;
+        return <User className={`size-3.5 ${iconColorClass}`} />;
       case 'relayer':
-        return <Shield className="size-3.5 text-primary" />;
+        return <Shield className={`size-3.5 ${iconColorClass}`} />;
       case 'multisig':
-        return <Users className="size-3.5 text-primary" />;
+        return <Users className={`size-3.5 ${iconColorClass}`} />;
       default:
-        return <Key className="size-3.5 text-muted" />;
+        return <Key className={`size-3.5 ${!isValid ? 'text-red-500' : 'text-muted'}`} />;
     }
   };
 
@@ -43,6 +46,13 @@ export const ExecutionMethodTrigger: React.FC<ExecutionMethodTriggerProps> = ({
           : 'border-slate-200 bg-white text-slate-700',
         className
       )}
+      style={
+        !isValid
+          ? {
+              animation: 'subtle-pulse-scale 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          : undefined
+      }
     >
       <div className="flex items-center gap-1.5">
         {getMethodIcon(executionConfig.method)}
@@ -64,6 +74,24 @@ export const ExecutionMethodTrigger: React.FC<ExecutionMethodTriggerProps> = ({
           {error}
         </div>
       )}
+
+      {/* Custom keyframe animation */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          @keyframes subtle-pulse-scale {
+            0%, 100% {
+              opacity: 0.65;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.02);
+            }
+          }
+        `,
+        }}
+      />
     </DialogTrigger>
   );
 };
