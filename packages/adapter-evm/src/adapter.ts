@@ -21,6 +21,7 @@ import type {
   FunctionParameter,
   NativeConfigLoader,
   RelayerDetails,
+  RelayerDetailsRich,
   TransactionStatusUpdate,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
@@ -185,6 +186,18 @@ export class EvmAdapter implements ContractAdapter {
   public async getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
     const relayerStrategy = new RelayerExecutionStrategy();
     return relayerStrategy.getEvmRelayers(serviceUrl, accessToken, this.networkConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string
+  ): Promise<RelayerDetailsRich> {
+    const relayerStrategy = new RelayerExecutionStrategy();
+    return relayerStrategy.getEvmRelayer(serviceUrl, accessToken, relayerId, this.networkConfig);
   }
 
   /**

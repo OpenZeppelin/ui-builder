@@ -6,6 +6,14 @@ export interface RelayerDetails {
   paused: boolean;
 }
 
+export interface RelayerDetailsRich extends RelayerDetails {
+  systemDisabled: boolean;
+  balance?: string;
+  nonce?: string;
+  pendingTransactionsCount?: number;
+  lastConfirmedTransactionTimestamp?: string;
+}
+
 export interface RelayerExecutionConfig {
   method: 'relayer';
   serviceUrl: string;

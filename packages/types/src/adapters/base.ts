@@ -3,6 +3,7 @@ import type {
   EoaExecutionConfig,
   MultisigExecutionConfig,
   RelayerDetails,
+  RelayerDetailsRich,
   RelayerExecutionConfig,
 } from '../execution';
 import { type FieldType } from '../forms';
@@ -348,4 +349,18 @@ export interface ContractAdapter {
    * @returns A promise that resolves to an array of relayer details.
    */
   getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]>;
+
+  /**
+   * Gets detailed information about a specific relayer including balance and status.
+   *
+   * @param serviceUrl The URL of the relayer service.
+   * @param accessToken The access token for the relayer service.
+   * @param relayerId The unique identifier of the relayer.
+   * @returns A promise that resolves to enhanced relayer details including balance, status, and other metrics.
+   */
+  getRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string
+  ): Promise<RelayerDetailsRich>;
 }

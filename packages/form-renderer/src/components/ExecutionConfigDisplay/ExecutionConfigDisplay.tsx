@@ -1,12 +1,13 @@
 import { AlertCircle } from 'lucide-react';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import type {
   ContractAdapter,
   EoaExecutionConfig,
   ExecutionConfig,
+  RelayerDetailsRich,
   RelayerExecutionConfig,
 } from '@openzeppelin/transaction-form-types';
 import {
@@ -52,6 +53,15 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
 
   const runtimeApiKey = watch('runtimeApiKey');
 
+  // State for dialog open/close
+  const [isOpen, setIsOpen] = useState(false);
+
+  // State for enhanced relayer details
+  const [enhancedRelayerDetails, setEnhancedRelayerDetails] = useState<RelayerDetailsRich | null>(
+    null
+  );
+  const [relayerDetailsLoading, setRelayerDetailsLoading] = useState(false);
+
   // Use the validation hook to determine if the execution config is valid
   const { isValid, error: validationError } = useExecutionValidation({
     executionConfig,
@@ -64,13 +74,41 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
     onRuntimeApiKeyChange?.(runtimeApiKey);
   }, [runtimeApiKey, onRuntimeApiKeyChange]);
 
+  // Fetch enhanced relayer details when dialog opens and it's a relayer execution
+  useEffect(() => {
+    if (isOpen && executionConfig.method === 'relayer' && runtimeApiKey && adapter?.getRelayer) {
+      const relayerConfig = executionConfig as RelayerExecutionConfig;
+      setRelayerDetailsLoading(true);
+
+      adapter
+        .getRelayer(relayerConfig.serviceUrl, runtimeApiKey, relayerConfig.relayer.relayerId)
+        .then((details) => {
+          setEnhancedRelayerDetails(details);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch enhanced relayer details:', err);
+          // Keep using basic details if enhanced fetch fails
+          setEnhancedRelayerDetails(null);
+        })
+        .finally(() => {
+          setRelayerDetailsLoading(false);
+        });
+    }
+  }, [isOpen, executionConfig, runtimeApiKey, adapter]);
+
   // Determine the content to display based on execution method
   const getExecutionContent = (): React.ReactNode => {
     switch (executionConfig.method) {
       case 'eoa':
         return <EoaConfigDetails config={executionConfig as EoaExecutionConfig} />;
       case 'relayer':
-        return <RelayerConfigDetails config={executionConfig as RelayerExecutionConfig} />;
+        return (
+          <RelayerConfigDetails
+            config={executionConfig as RelayerExecutionConfig}
+            enhancedDetails={enhancedRelayerDetails}
+            loading={relayerDetailsLoading}
+          />
+        );
       // TODO: Add cases for 'multisig' when implemented
       // case 'multisig':
       //   return <MultisigConfigDetails config={executionConfig as MultisigExecutionConfig} />;
@@ -83,7 +121,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
   const displayError = validationError || error || undefined;
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex justify-end w-full">
         <ExecutionMethodTrigger
           executionConfig={executionConfig}

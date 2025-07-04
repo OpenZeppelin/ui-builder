@@ -1,5 +1,5 @@
 // This file will contain the business logic for interacting with the Relayer SDK
-import { encodeFunctionData } from 'viem';
+import { encodeFunctionData, formatEther } from 'viem';
 
 import {
   type ApiResponseRelayerResponseData,
@@ -13,6 +13,7 @@ import {
   EvmNetworkConfig,
   ExecutionConfig,
   RelayerDetails,
+  RelayerDetailsRich,
   RelayerExecutionConfig,
   TransactionStatusUpdate,
 } from '@openzeppelin/transaction-form-types';
@@ -121,6 +122,103 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
         network: r.network,
         paused: r.paused,
       }));
+  }
+
+  /**
+   * Fetches comprehensive information about a specific relayer including balance and status.
+   * This function combines multiple SDK API calls to provide rich relayer details.
+   *
+   * @param serviceUrl The base URL of the relayer service.
+   * @param accessToken The session-based API key for authentication.
+   * @param relayerId The unique identifier of the relayer.
+   * @param networkConfig The EVM network configuration to get the native currency symbol.
+   * @returns A promise that resolves to enhanced relayer details including balance and status.
+   * @throws If any API call fails or returns an unsuccessful response.
+   */
+  public async getEvmRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string,
+    networkConfig: EvmNetworkConfig
+  ): Promise<RelayerDetailsRich> {
+    logger.info('[Relayer] Getting detailed relayer info', relayerId);
+
+    const sdkConfig = new Configuration({
+      basePath: serviceUrl,
+      accessToken,
+    });
+    const relayersApi = new RelayersApi(sdkConfig);
+
+    try {
+      // Fetch basic relayer details, balance, and status in parallel
+      const [relayerResponse, balanceResponse, statusResponse] = await Promise.all([
+        relayersApi.getRelayer(relayerId),
+        relayersApi.getRelayerBalance(relayerId).catch((err) => {
+          logger.warn('[Relayer] Failed to fetch balance', err);
+          return null;
+        }),
+        relayersApi.getRelayerStatus(relayerId).catch((err) => {
+          logger.warn('[Relayer] Failed to fetch status', err);
+          return null;
+        }),
+      ]);
+
+      if (!relayerResponse.data.success || !relayerResponse.data.data) {
+        throw new Error(`Failed to fetch relayer details for ID: ${relayerId}`);
+      }
+
+      const relayerData = relayerResponse.data.data;
+
+      // Build enhanced relayer details object
+      const enhancedDetails: RelayerDetailsRich = {
+        relayerId: relayerData.id,
+        name: relayerData.name,
+        address: relayerData.address,
+        network: relayerData.network,
+        paused: relayerData.paused,
+        systemDisabled: relayerData.system_disabled,
+      };
+
+      // Add balance if available
+      if (balanceResponse?.data?.success && balanceResponse.data.data?.balance) {
+        try {
+          // Format balance from wei to native currency
+          const balanceInWei = BigInt(balanceResponse.data.data.balance);
+          const balanceInEth = formatEther(balanceInWei);
+          const currencySymbol = networkConfig.nativeCurrency.symbol;
+          enhancedDetails.balance = `${balanceInEth} ${currencySymbol}`;
+        } catch (error) {
+          logger.warn('[Relayer] Failed to format balance, using raw value', String(error));
+          enhancedDetails.balance = String(balanceResponse.data.data.balance);
+        }
+      }
+
+      // Add status details if available
+      if (statusResponse?.data?.success && statusResponse.data.data) {
+        const statusData = statusResponse.data.data;
+        if (statusData.network_type === 'evm') {
+          if (statusData.nonce !== undefined && statusData.nonce !== null) {
+            enhancedDetails.nonce = String(statusData.nonce);
+          }
+          if (statusData.pending_transactions_count !== undefined) {
+            enhancedDetails.pendingTransactionsCount = statusData.pending_transactions_count;
+          }
+          if (statusData.last_confirmed_transaction_timestamp) {
+            enhancedDetails.lastConfirmedTransactionTimestamp =
+              statusData.last_confirmed_transaction_timestamp;
+          }
+        }
+      }
+
+      logger.info('[Relayer] Retrieved enhanced relayer details', JSON.stringify(enhancedDetails));
+      return enhancedDetails;
+    } catch (error) {
+      logger.error(
+        '[Relayer] Failed to get relayer details',
+        error instanceof Error ? error.message : String(error)
+      );
+      throw error;
+    }
   }
 
   /**

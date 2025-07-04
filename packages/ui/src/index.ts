@@ -22,3 +22,6 @@ export * from './components/ui/view-contract-state-button';
 
 // Export field components
 export * from './components/fields';
+
+// Export other components
+export * from './components/RelayerDetailsCard';

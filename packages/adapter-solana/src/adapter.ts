@@ -11,6 +11,7 @@ import type {
   FormValues,
   FunctionParameter,
   RelayerDetails,
+  RelayerDetailsRich,
   SolanaNetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
@@ -239,6 +240,15 @@ export class SolanaAdapter implements ContractAdapter {
   public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
     console.warn('getRelayers is not implemented for the Solana adapter yet.');
     return Promise.resolve([]);
+  }
+
+  public async getRelayer(
+    _serviceUrl: string,
+    _accessToken: string,
+    _relayerId: string
+  ): Promise<RelayerDetailsRich> {
+    console.warn('getRelayer is not implemented for the Solana adapter yet.');
+    return Promise.resolve({} as RelayerDetailsRich);
   }
 }
 
