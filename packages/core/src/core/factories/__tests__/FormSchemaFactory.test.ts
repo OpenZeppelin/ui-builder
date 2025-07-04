@@ -10,6 +10,7 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  RelayerDetailsRich,
 } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
@@ -85,6 +86,7 @@ const mockAdapterInstance: ContractAdapter = {
   getAvailableUiKits: vi.fn().mockResolvedValue([]),
   getContractDefinitionInputs: vi.fn(() => []),
   getRelayers: vi.fn().mockResolvedValue([]),
+  getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
 };
 
 describe('FormSchemaFactory', () => {
