@@ -79,7 +79,6 @@ adapter-<chain>/
 ## 4. Module Responsibilities
 
 - **`adapter.ts`:**
-
   - Contains the main class (e.g., `EvmAdapter`) that `implements ContractAdapter`.
   - Constructor accepts a specific `NetworkConfig` (e.g., `EvmNetworkConfig`) and stores it.
   - Should be lean, acting primarily as an orchestrator.
@@ -88,54 +87,50 @@ adapter-<chain>/
   - Delegates the implementation of `ContractAdapter` interface methods to the imported functions/classes, passing necessary state (like `this.networkConfig`, `walletImplementation`) or instance methods.
 
 - **`networks/`:**
-
   - **Purpose:** Defines and exports the specific `NetworkConfig` objects for this adapter's ecosystem (e.g., `ethereumMainnet`, `polygonAmoy`).
   - **Key Exports:** Individual named `NetworkConfig` constants, and a combined array of all configurations (e.g., `evmNetworks`).
 
 - **`[chain-specific-def]/` (e.g., `abi/`, `idl/`):**
-
-  - **Purpose:** Handles loading and parsing the chain's native contract interface definition format (ABI, IDL, etc.) and transforming it into the common `ContractSchema` defined in `packages/types`. May use `networkConfig` (e.g., `apiUrl` for Etherscan).
+  - **Purpose:** Handles loading and parsing the chain's native contract interface definition format (ABI, IDL, etc.) and transforming it into the common `ContractSchema` defined in `packages/types`. (e.g., `abi/` for EVM, handling loading from JSON or Etherscan-compatible explorers using the `apiUrl` from `networkConfig`).
   - **Key Exports:** A primary function (e.g., `loadEvmContract`) called by `Adapter.loadContract`. Might also export the transformer (e.g., `transformAbiToSchema`).
   - **Flexibility:** This directory name is flexible to reflect the chain's specific definition format.
 
 - **`mapping/`:**
-
   - **Purpose:** Handles the logic for mapping blockchain-specific parameter types to the standard `FieldType` used by the form builder, determining compatible field types, and generating default `FormFieldType` configurations.
   - **Key Exports:** `map[Chain]ParamTypeToFieldType`, `get[Chain]CompatibleFieldTypes`, `generate[Chain]DefaultField`.
 
 - **`transform/`:**
-
-  - **Purpose:** Handles the serialization and deserialization of data between user-friendly formats (strings, JSON strings) and the formats required by the blockchain/client libraries (e.g., `BigInt`, hex strings, typed objects).
+  - **Purpose:** Handles the serialization and deserialization of data between user-friendly formats (strings, JSON strings) and the formats required by the blockchain/client libraries. (e.g., for EVM, this includes parsing JSON strings for array/tuple inputs and serializing `BigInt` values for display).
   - **Key Exports:** `parse[Chain]Input`, `format[Chain]FunctionResult`.
 
 - **`transaction/`:**
-
-  - **Purpose:** Contains logic specifically related to preparing and executing state-changing transactions. Uses `networkConfig` for details like Chain ID.
-  - **Key Exports:** `format[Chain]TransactionData`, `signAndBroadcast[Chain]Transaction`, `waitFor[Chain]TransactionConfirmation`.
+  - **Purpose:** Contains all logic related to preparing, signing, and broadcasting state-changing transactions. It uses the **Execution Strategy Pattern** to support multiple submission methods (e.g., EOA, Relayer), making the system extensible.
+  - **Key Exports:**
+    - `format[Chain]TransactionData`: A function to prepare transaction data from user inputs.
+    - `signAndBroadcast[Chain]Transaction`: The main entry point for executing a transaction, which internally uses the strategy pattern.
+    - `waitFor[Chain]TransactionConfirmation`: An optional function to await transaction finality.
+    - `execution-strategy.ts`: Defines the core `ExecutionStrategy` interface.
+    - Strategy implementations like `eoa.ts` and `relayer.ts`.
+    - React components for configuring execution method options.
 
 - **`query/`:**
-
   - **Purpose:** Handles the logic for querying read-only (view/pure) contract functions. Uses `networkConfig` to connect to the correct RPC endpoint.
   - **Key Exports:** `query[Chain]ViewFunction`, `is[Chain]ViewFunction`.
 
 - **`wallet/`:**
-
-  - **Purpose:** Encapsulates all direct interaction with wallet connection libraries (e.g., Wagmi, WalletConnect, Solana Wallet Adapter). May use `networkConfig` to initialize or configure the library.
+  - **Purpose:** Encapsulates all direct interaction with wallet connection libraries (e.g., Wagmi, WalletConnect, Solana Wallet Adapter). (In `adapter-evm`, this module encapsulates `wagmi/core` for all wallet interactions). May use `networkConfig` to initialize or configure the library.
   - **Key Exports:** `connect[Chain]Wallet`, `disconnect[Chain]Wallet`, `get[Chain]WalletConnectionStatus`, etc.
   - **Internal Implementation:** Often contains a class (e.g., `WagmiWalletImplementation`) that manages the library specifics. The exported functions act as a facade.
   - **Note on Non-Standard APIs:** Some wallet APIs may have unconventional connection flows (e.g., returning a promise before user approval is complete). In such cases, the adapter may need to implement creative solutions, such as state-polling, to provide a reliable user experience. The `MidnightAdapter` serves as an example of this pattern.
 
 - **`configuration/`:**
-
   - **Purpose:** Provides configuration metadata about the adapter and chain. Uses `networkConfig` for network-specific details like explorer URLs.
   - **Key Exports:** `get[Chain]SupportedExecutionMethods`, `validate[Chain]ExecutionConfig`, `get[Chain]ExplorerAddressUrl`, `get[Chain]ExplorerTxUrl`.
 
 - **`utils/`:**
-
   - **Purpose:** Contains general utility functions specific to the needs of this adapter (e.g., formatting helpers, JSON helpers).
 
 - **`types.ts`:**
-
   - **Purpose:** Defines any internal TypeScript types used only within this specific adapter package.
 
 ## 5. Data Flow Example (EVM View Query)
@@ -162,61 +157,113 @@ graph LR
     FormatAdapter -- Returns formatted string --> UI;
 ```
 
-## 6. Enforcement & Contribution
+## 6. The Execution Strategy Pattern
+
+A key architectural feature of the adapter system is the **Execution Strategy pattern**, used to handle different methods of transaction submission (e.g., EOA, Relayer, Multisig). This pattern is implemented within each adapter's `transaction/` module.
+
+### 6.1. Rationale
+
+Instead of creating a monolithic `signAndBroadcast` function with complex conditional logic for each execution method, the pattern decouples the high-level task from the specific implementation details. This makes the system more modular, easier to test, and simpler to extend with new execution methods in the future.
+
+### 6.2. Core Components
+
+1.  **`ExecutionStrategy` Interface**: A common interface (e.g., defined in `src/transaction/execution-strategy.ts`) that all concrete strategy classes must implement. It defines a single, primary method:
+    ```typescript
+    interface ExecutionStrategy {
+      execute(): Promise<TransactionResult>;
+      // ...required params: functionId, params, contractAddress, etc.
+    }
+    ```
+2.  **Concrete Strategy Classes**: Separate classes for each execution method, each implementing the `ExecutionStrategy` interface.
+    - `EoaExecutionStrategy`: Handles the standard flow of signing and broadcasting a transaction using the user's connected wallet.
+    - `RelayerExecutionStrategy`: Implements the logic for sending a transaction to the OpenZeppelin Relayer service, including polling for the final transaction hash.
+3.  **Strategy Factory**: A function within the adapter (or its `transaction` module) that takes the user-provided `ExecutionConfig` and returns an instance of the corresponding strategy class.
+    ```typescript
+    function createExecutionStrategy(config: ExecutionConfig): ExecutionStrategy {
+      switch (config.method) {
+        case 'eoa':
+          return new EoaExecutionStrategy(...);
+        case 'relayer':
+          return new RelayerExecutionStrategy(...);
+        default:
+          throw new Error('Unsupported execution method');
+      }
+    }
+    ```
+
+### 6.3. Flow in `Adapter.signAndBroadcast`
+
+The main `signAndBroadcast` method in `adapter.ts` becomes a lean orchestrator:
+
+1.  It receives the `ExecutionConfig` along with other transaction details.
+2.  It calls the `createExecutionStrategy` factory to get the appropriate strategy instance.
+3.  It calls the `execute()` method on the returned strategy instance.
+4.  It returns the result from the strategy's `execute()` method.
+
+This design keeps the main adapter class clean and delegates the complex, method-specific logic to the individual strategy classes, adhering to the single-responsibility principle.
+
+## 7. Runtime Configuration
+
+A robust adapter should allow its network-dependent configurations to be overridden at runtime. This is crucial for flexibility, allowing both the core development environment and exported applications to use custom settings (like private RPC endpoints or API keys) without modifying the adapter's source code.
+
+This project uses a centralized service (`@openzeppelin/transaction-form-utils/appConfigService`) for this purpose.
+
+### 7.1. Pattern
+
+- **Centralized Service**: The `appConfigService` is responsible for loading configuration from different sources:
+  - **Vite Environment Variables**: For the core development application (e.g., `VITE_APP_CFG_...`).
+  - **`app.config.json`**: For exported, standalone applications.
+- **Adapter Integration**: Adapter modules that require configurable values (e.g., the `query` module for RPC URLs or the `abi` module for Etherscan API keys) should use this service to retrieve them.
+- **Precedence**: The service provides a clear precedence: a runtime value from the service always overrides the default value hardcoded in the adapter's `NetworkConfig` object.
+
+### 7.2. Example: Resolving an RPC URL
+
+The `resolveRpcUrl` utility in the EVM adapter demonstrates this pattern:
+
+1.  It first asks `appConfigService` for an RPC override for the given network ID.
+2.  If an override exists and is valid, it's used.
+3.  If not, it falls back to the default `rpcUrl` from the `networkConfig` object passed to the adapter.
+4.  If neither is available, it throws an error.
+
+This ensures that developers and end-users have a reliable way to configure critical network parameters.
+
+## 8. Enforcement & Contribution
 
 - Please refer to this document when developing new adapters or refactoring existing ones.
 - The `CONTRIBUTING.md` guide contains steps for adding new adapters following this architecture.
-- A scaffolding script (`pnpm create-adapter <chain-name>`) may be available to generate the basic structure.
+- A scaffolding script (`pnpm create-adapter <chain-name>`) may be available to generate the basic structure (TODO: add this)
 - Code reviews should verify adherence to this modular structure.
 - The `no-extra-adapter-methods` ESLint rule helps enforce interface compliance at the `adapter.ts` level.
 
 By following this structure, we aim for a cleaner, more testable, and easier-to-manage adapter system as the project grows.
 
-## 7. Adapter UI Facilitation Capabilities (Optional)
+## 9. Adapter UI Facilitation Capabilities (Optional)
 
-Beyond the core data and logic operations defined by the `ContractAdapter` interface, adapters can now optionally take on an expanded role to facilitate richer, ecosystem-specific user experiences, particularly for UI interactions within React environments. This approach allows the main application (`core`, `form-renderer`, and exported apps) to leverage advanced UI patterns and libraries (like `wagmi/react` for EVM) without being directly coupled to them.
+Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the core application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
 
-### 7.1. Rationale
+### 9.1. Rationale
 
-Many blockchain ecosystems have mature libraries that offer not only headless functionalities but also powerful React hooks and UI components for wallet interactions, state management, and data display (e.g., `wagmi/react` and UI kits like RainbowKit for EVM). To enable their use while preserving the chain-agnostic nature of our core packages, the adapter for a specific ecosystem can serve as a gateway, providing these UI enhancements in an abstracted manner.
+Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the core app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
 
-### 7.2. New Optional Methods on `ContractAdapter`
+### 9.2. Case Study: EVM Adapter UI Kit Management
 
-To support this, the `ContractAdapter` interface (in `packages/types`) can be extended with the following optional methods:
+The EVM adapter provides a sophisticated implementation of this pattern to handle different wallet connection UIs (e.g., RainbowKit, a custom modal). This serves as a reference for how other complex adapters could be built.
 
-- **`configureUiKit?(config: UiKitConfiguration): void;`**
-  - Allows the consuming application to inform the adapter about the desired UI kit (e.g., 'custom', 'rainbowkit') and provide any kit-specific configuration.
-- **`getEcosystemReactUiContextProvider?(): React.ComponentType<EcosystemReactUiProviderProps> | undefined;`**
-  - Returns a React component that, when rendered, sets up the entire necessary UI context for the adapter's ecosystem. For EVM, this component would internally render `<WagmiProvider>` and, if a third-party kit is configured (Phase 2), it would also compose that kit's provider (e.g., `<RainbowKitProvider>`).
-- **`getEcosystemReactHooks?(): EcosystemSpecificReactHooks | undefined;`**
-  - Returns an object containing facade React hooks for common wallet and blockchain interactions specific to the ecosystem. For EVM, these facade hooks would internally call `wagmi/react` hooks (e.g., a facade `useAccount` calls `wagmiUseAccount()`). This keeps direct `wagmi/react` imports out of `core` and `form-renderer`.
-- **`getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;`**
-  - Returns an object containing standardized, ready-to-use wallet UI components (e.g., `ConnectButton`, `AccountDisplay`). These components are sourced either from the configured third-party UI kit or are basic custom implementations provided by the adapter that use the facade hooks.
+**Key Components of the Pattern:**
 
-(Note: The specific types `UiKitConfiguration`, `EcosystemReactUiProviderProps`, `EcosystemSpecificReactHooks`, and `EcosystemWalletComponents` would be defined in `packages/types`.)
+1.  **`EvmUiKitManager` (Singleton)**: This central manager is the brain of the UI system. It is a single instance responsible for:
+    - Holding the active `WagmiConfig` object.
+    - Managing the state of the selected UI kit (e.g., 'rainbowkit' or 'custom').
+    - Triggering the dynamic, lazy-loading of UI kit assets (JavaScript and CSS).
+2.  **`EvmWalletUiRoot` (Stable Provider Component)**: The adapter's `getEcosystemReactUiContextProvider` method returns this single, stable component. Its role is to:
+    - Subscribe to state changes from the `EvmUiKitManager`.
+    - Always render the necessary base providers (`WagmiProvider`, `QueryClientProvider`).
+    - Conditionally render the currently active UI kit's specific provider (e.g., `<RainbowKitProvider>`) inside the base providers.
+    - This approach prevents the entire React tree from unmounting when the UI kit changes, eliminating UI flicker.
+3.  **Asset Managers (`...AssetManager.ts`)**: For each supported UI kit, a dedicated asset manager (e.g., `rainbowkitAssetManager.ts`) is created. Its job is to handle the dynamic `import()` of the third-party library's provider component and its associated CSS. It ensures assets are fetched only once.
+4.  **Layered Configuration**: The system uses a layered approach to determine the final UI kit configuration, providing maximum flexibility:
+    - **Baseline**: `AppConfigService` provides a baseline configuration from `app.config.json` or environment variables.
+    - **User-Native Code**: For complex kits like RainbowKit, the consuming application can provide a native `rainbowkit.config.ts` file, which is dynamically loaded by the adapter via a callback.
+    - **Programmatic Override**: The application can call the adapter's `configureUiKit()` method at runtime to override any setting.
 
-### 7.3. Interaction Pattern
-
-1.  **Configuration**: The main application (`core` or an exported app) initializes the active adapter. The adapter may be configured via its `configureUiKit(config)` method (e.g., by `WalletStateProvider` in `core` based on global settings or defaults) or read its configuration from a service like `AppConfigService` upon instantiation.
-2.  **Global Context Setup & State Management (`WalletStateProvider` from `@openzeppelin/transaction-form-react-core`)**:
-    - Applications (like `@core` or exported apps) utilize `AdapterProvider` (from `@openzeppelin/transaction-form-react-core`) to manage adapter instances ... and `WalletStateProvider` (from `@openzeppelin/transaction-form-react-core`) to manage the globally _active_ network, adapter, and related wallet state.
-    - `WalletStateProvider` determines the `activeAdapter` ...
-    - It then calls `activeAdapter.getEcosystemReactUiContextProvider()`...
-    - `WalletStateProvider` also retrieves the `walletFacadeHooks` object by calling `activeAdapter.getEcosystemReactHooks()`.
-3.  **Using Hooks and Components via `useWalletState()` (from `@openzeppelin/transaction-form-react-core`):** - UI components ... primarily use a central hook like `useWalletState()` (from `@openzeppelin/transaction-form-react-core`). - Through `useWalletState()`, components can access: - The `activeAdapter` instance. - The `walletFacadeHooks` object (e.g., `useWalletState().walletFacadeHooks`). ...
-    This pattern centralizes the management of the active adapter and its UI capabilities, providing a consistent way for components to consume them through a global state hook provided by the `@openzeppelin/transaction-form-react-core` package.
-
-### 7.4. Phased Implementation Example (EVM with `wagmi`)
-
-- **Phase 1 (Foundational)**: The `EvmAdapter` implements these methods to provide a base `<WagmiProvider>` context, a set of essential facade hooks (for account, connect/disconnect, balance, etc.), and basic custom-styled UI components that use these facade hooks.
-- **Phase 2 (Third-Party Kits)**: The `EvmAdapter` is enhanced so that `configureUiKit` can accept preferences for kits like RainbowKit. The `getEcosystemReactUiContextProvider` will then compose RainbowKit's provider, and `getEcosystemWalletComponents` will return RainbowKit's components.
-
-### 7.5. Impact on Module Responsibilities (e.g., `wallet/`)
-
-Within an adapter package like `packages/adapter-evm`, the `src/wallet/` directory would be the natural place to house the implementations for:
-
-- The UI context provider component (e.g., `ui-provider.tsx`).
-- The facade hooks implementation (e.g., `facade-hooks.ts`).
-- The basic custom UI components (e.g., `custom-components.tsx`).
-
-This approach centralizes ecosystem-specific UI logic within the adapter, maintaining a clean separation of concerns and allowing the core application to remain agnostic of the specific libraries used by each adapter for its UI enhancements.
+This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the core application to simply request the UI components and hooks it needs without knowing the specific implementation details.

@@ -8,35 +8,33 @@ The main application for the Transaction Form Builder monorepo. This package con
 core/
 ├── public/           # Static assets
 ├── src/
-│   ├── components/   # Reusable UI components
-│   │   ├── Common/   # Shared components across features
-│   │   └── FormBuilder/ # Form builder components
-│   ├── core/         # Chain-agnostic core functionality specific to this app
-│   │   ├── types/    # Local type definitions (shared types in @openzeppelin/transaction-form-types)
-│   │   ├── utils/    # Utility functions
-│   │   ├── hooks/    # Core-app-specific hooks (if any; shared providers/hooks like WalletStateProvider are in @openzeppelin/transaction-form-react-core)
-│   │   ├── factories/ # Schema factories
-│   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
-│   ├── export/       # Export system
-│   │   ├── generators/ # Form code generators
-│   │   ├── codeTemplates/ # Code template files for generation
-│   │   ├── templates/ # Base project structures for export
-│   │   │   ├── typescript-react-vite/ # React + Vite template structure
-│   │   │   └── ...   # Future template structures
-│   │   ├── cli/      # CLI tool for exporting
-│   │   └── ...       # Other export utilities
-│   ├── services/     # Core services
-│   ├── stories/      # Centralized Storybook stories
-│   │   ├── common/   # Stories for common components
-│   │   ├── form-builder/ # Stories for form builder components
-│   │   └── ui/       # Stories for UI components
-│   ├── test/         # Test setup and utilities
-│   ├── App.tsx       # Main application component
-│   ├── main.tsx      # Application entry point
-│   └── index.css     # Imports centralized styling from styles package
-├── index.html        # HTML template
-├── tsconfig.json     # TypeScript configuration
-├── vite.config.ts    # Vite configuration
+│   ├── assets/       # Static assets like images and icons used within the app
+│   ├── components/   # Application-specific React components
+│   │   ├── Common/   # Components shared across the application (e.g., Header, WizardLayout)
+│   │   └── FormBuilder/ # Components that make up the multi-step form builder wizard
+│   ├── config/       # User-facing configuration files (e.g., for UI kits like RainbowKit)
+│   ├── core/         # Core application logic and type definitions
+│   │   ├── chains/
+│   │   ├── ecosystems/
+│   │   ├── factories/
+│   │   ├── networks/
+│   │   └── ecosystemManager.ts # Central hub for loading and managing adapters
+│   ├── docs/         # Internal documentation files relevant to the core package
+│   ├── export/       # The complete form export system
+│   │   ├── assemblers/
+│   │   ├── cli/
+│   │   ├── generators/
+│   │   ├── templates/
+│   │   └── ...
+│   ├── services/     # Application-level services (e.g., ContractLoader)
+│   ├── stories/      # Storybook stories for core components
+│   ├── test/         # Vitest test setup and configuration for this package
+│   ├── types/        # TypeScript type declaration files for virtual modules/environment
+│   ├── App.tsx       # Main application component and layout
+│   └── main.tsx      # Application entry point
+├── index.html        # HTML template for Vite
+├── tsconfig.json     # TypeScript configuration for the package
+├── vite.config.ts    # Vite configuration for the package
 └── ...               # Other configuration files
 ```
 
@@ -44,12 +42,13 @@ core/
 
 This package relies on:
 
-- **@openzeppelin/transaction-form-react-core**: For core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) managing global wallet/network state and adapter interactions.
-- **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms
-- **@openzeppelin/transaction-form-renderer**: Form rendering components and logic.
-- **@openzeppelin/transaction-form-ui**: Shared UI components (buttons, inputs, fields, etc.) used by both core and form-renderer.
-- **@openzeppelin/transaction-form-styles**: Centralized styling system
-- **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`)
+- **@openzeppelin/transaction-form-react-core**: For core React context providers and hooks (`AdapterProvider`, `WalletStateProvider`, `useWalletState`).
+- **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms.
+- **@openzeppelin/transaction-form-renderer**: The shared library for rendering the final transaction form.
+- **@openzeppelin/transaction-form-ui**: The shared library for all common UI and form field components.
+- **@openzeppelin/transaction-form-styles**: The centralized styling system.
+- **@openzeppelin/transaction-form-utils**: Shared utility functions like the logger and `appConfigService`.
+- **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`).
 
 ## Styling
 
