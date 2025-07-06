@@ -2,6 +2,16 @@ name: Publish Packages to GitHub Registry
 
 on:
   workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'The type of version bump to apply before publishing.'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   publish:
@@ -41,6 +51,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump package versions
+        run: pnpm -r exec -- pnpm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
 
       - name: Publish to GitHub Packages
         run: pnpm -r publish --no-git-checks
