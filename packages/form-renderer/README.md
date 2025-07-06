@@ -327,13 +327,13 @@ The build process, which uses `tsup` and `tsc`, creates the following outputs in
 
 > **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is ready for production release.
 
-This package will be automatically published to npm when changes are merged to the main branch, using GitHub Actions and semantic-release, once enabled. The workflow is in place but currently only runs build and test steps without publishing.
+This package is published to the GitHub Package Registry as part of the monorepo's release process using Changesets.
 
 The release workflow (when enabled):
 
 1. Runs when code is pushed to the main branch or via manual trigger
 2. Runs tests and builds the package
-3. Uses semantic-release to determine the next version based on commit messages
+3. Uses changesets to determine the next version based on changeset files
 4. Publishes to npm with appropriate tags
 5. Creates a GitHub release with generated release notes
 

@@ -21,7 +21,6 @@ This project is currently in development.
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![Storybook](https://img.shields.io/badge/Storybook-FF4785?logo=storybook&logoColor=white)](https://storybook.js.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -115,7 +114,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **pnpm (v9 or higher)**: Fast, disk-efficient package manager
 - **Vitest**: Testing framework integrated with Vite
 - **Storybook 8**: Component documentation and visual testing
-- **Semantic Release**: Automated versioning and releases
+- **Changesets**: Automated versioning and package releases
 - **ESLint 9**: Modern linting with improved TypeScript support
 - **tsup**: Fast, modern bundler for TypeScript libraries
 - **Vite**: Used for the core application's dev server
@@ -171,6 +170,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - `pnpm storybook` - Start Storybook development server
 - `pnpm build-storybook` - Build Storybook for production
 - `pnpm commit` - Run commitizen for guided commits
+- `pnpm changeset` - Create a changeset for your changes
 - `pnpm update-deps` - Update all monorepo dependencies to their latest versions
 - `pnpm update-deps:major` - Update dependencies including major versions
 - `pnpm check-deps` - Check for deprecated dependencies
@@ -518,7 +518,7 @@ This project uses GitHub Actions for continuous integration and delivery:
 
 - **CI Workflow**: Runs tests, linting, and type checking for all packages
 - **Coverage Workflow**: Generates and uploads test coverage reports
-- **Release Workflow**: Manages semantic versioning and releases for the main application
+- **Release Workflow**: Manages versioning and releases using Changesets
 - **Form-Renderer Publish Workflow**: Builds and tests the form-renderer package automatically when changes are merged to main
 - **Security Workflow**: Checks for security vulnerabilities
 - **Dependencies Workflow**: Checks for outdated dependencies
@@ -526,21 +526,32 @@ This project uses GitHub Actions for continuous integration and delivery:
 
 ### Package Publishing
 
-> **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is
-> ready for production release.
+The project uses [Changesets](https://github.com/changesets/changesets) for managing package versions and releases. All packages in the monorepo are published to the GitHub Package Registry.
 
-The form-renderer package will be automatically published to npm when changes are merged to the main branch once publishing is enabled. Currently,
-the workflow only builds and tests the package without publishing.
+The publishing process:
 
-The publishing process (when enabled):
+1. Developers create changesets for their changes using `pnpm changeset`
+2. Changesets are committed alongside the code changes
+3. When changes are pushed to the main branch, the GitHub Action:
+   - Creates a "Version Packages" PR that aggregates all changesets
+   - Updates package versions according to the changesets
+   - Updates changelogs for affected packages
+4. When the Version Packages PR is merged:
+   - Packages are automatically published to the GitHub Package Registry
+   - Git tags are created for each published package version
+   - GitHub releases are created with changelogs
 
-1. Runs when code is pushed to the main branch or via manual trigger
-2. Runs tests and builds the package
-3. Uses semantic-release to determine the next version based on commit messages
-4. Publishes to npm with appropriate tags
-5. Creates a GitHub release with generated release notes
+To create a changeset for your changes:
 
-Manual releases can be triggered through the GitHub Actions interface with a version parameter when needed during development.
+```bash
+pnpm changeset
+```
+
+This will prompt you to:
+
+- Select which packages have changed
+- Specify the type of change (major, minor, patch)
+- Provide a description of the changes for the changelog
 
 ## Monorepo Configuration
 
