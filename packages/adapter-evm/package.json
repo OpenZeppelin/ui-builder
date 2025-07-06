@@ -1,6 +1,7 @@
 {
   "name": "@openzeppelin/transaction-form-adapter-evm",
-  "version": "1.0.3",
+  "version": "1.15.0",
+  "private": false,
   "description": "EVM Adapter for Transaction Form Builder",
   "keywords": [
     "openzeppelin",

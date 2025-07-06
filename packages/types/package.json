@@ -1,7 +1,8 @@
 {
   "name": "@openzeppelin/transaction-form-types",
-  "version": "1.0.3",
-  "description": "Shared types for Transaction Form Builder",
+  "version": "1.15.0",
+  "private": false,
+  "description": "Shared TypeScript type definitions for the OpenZeppelin Transaction Form Builder ecosystem.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

@@ -1,7 +1,8 @@
 {
   "name": "@openzeppelin/transaction-form-ui",
-  "version": "1.0.3",
-  "description": "UI components for Transaction Form Builder",
+  "version": "1.15.0",
+  "private": false,
+  "description": "Shared React UI components for the OpenZeppelin Transaction Form Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

@@ -1,7 +1,8 @@
 {
   "name": "@openzeppelin/transaction-form-renderer",
-  "version": "1.0.3",
-  "description": "Shared form renderer for Transaction Form Builder",
+  "version": "1.15.0",
+  "private": false,
+  "description": "A specialized library for rendering customizable transaction forms for blockchain applications.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

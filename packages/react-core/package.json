@@ -1,7 +1,8 @@
 {
   "name": "@openzeppelin/transaction-form-react-core",
-  "version": "1.0.3",
-  "description": "Core React context providers and hooks for Transaction Form Builder UI capabilities",
+  "version": "1.15.0",
+  "private": false,
+  "description": "Core React context providers and hooks for the OpenZeppelin Transaction Form Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
