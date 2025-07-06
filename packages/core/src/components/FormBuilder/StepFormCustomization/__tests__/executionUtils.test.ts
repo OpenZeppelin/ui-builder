@@ -56,6 +56,7 @@ describe('ensureCompleteConfig', () => {
       method: 'relayer',
       serviceUrl: '',
       relayer: {},
+      transactionOptions: { speed: 'fast' },
     });
   });
 
