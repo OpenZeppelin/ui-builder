@@ -1,17 +1,17 @@
-name: Publish Packages to GitHub Registry
+name: Release
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Setup pnpm
@@ -24,25 +24,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-
-      - name: Fix NPM config for public OZ packages
-        run: sed -i '/@openzeppelin:registry=https:\/\/npm.pkg.github.com\//d' ${{ env.NPM_CONFIG_USERCONFIG }}
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build all packages
-        run: pnpm -r build
+      - name: Create Release Pull Request or Publish to GitHub
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm -r publish --no-git-checks
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
-
-      - name: Set up Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Publish to GitHub Packages
-        run: pnpm -r publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc

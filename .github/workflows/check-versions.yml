@@ -1,0 +1,42 @@
+name: Check Version Sync
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.9.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Update export versions
+        run: pnpm run update-export-versions
+
+      - name: Check for changes
+        run: |
+          if ! git diff --exit-code packages/core/src/export/versions.ts; then
+            echo "❌ Error: versions.ts is out of sync with package.json versions"
+            echo "Please run 'pnpm run update-export-versions' and commit the changes"
+            exit 1
+          fi
+          echo "✅ versions.ts is synchronized with package.json versions"

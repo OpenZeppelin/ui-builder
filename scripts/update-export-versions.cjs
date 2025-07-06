@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const versionsFilePath = path.resolve(__dirname, '../packages/core/src/export/versions.ts');
 
@@ -17,34 +16,58 @@ const packagesToUpdate = [
   '@openzeppelin/transaction-form-utils',
 ];
 
-const getLatestVersion = (packageName) => {
+/**
+ * Gets the version of a package directly from its package.json in the workspace.
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/transaction-form-types').
+ * @returns {string | null} The version string or null if not found.
+ */
+const getWorkspaceVersion = (packageName) => {
   try {
-    const version = execSync(`npm view ${packageName} version`).toString().trim();
-    console.log(`✅ Fetched latest version for ${packageName}: ${version}`);
+    // Derives the directory name from the package name.
+    // e.g., '@openzeppelin/transaction-form-types' -> 'types'
+    // e.g., '@openzeppelin/transaction-form-adapter-evm' -> 'adapter-evm'
+    const nameWithoutScope = packageName.split('/')[1];
+    let packageDirName = nameWithoutScope.replace('transaction-form-', '');
+
+    // Handle special case for form-renderer
+    if (packageName === '@openzeppelin/transaction-form-renderer') {
+      packageDirName = 'form-renderer';
+    }
+
+    const packageJsonPath = path.resolve(__dirname, '../packages', packageDirName, 'package.json');
+
+    if (!fs.existsSync(packageJsonPath)) {
+      console.error(`❌ Could not find package.json for ${packageName} at: ${packageJsonPath}`);
+      return null;
+    }
+
+    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonContent);
+    const version = packageJson.version;
+    console.log(`✅ Found workspace version for ${packageName}: ${version}`);
     return version;
   } catch (error) {
-    console.error(`❌ Failed to fetch version for ${packageName}.`);
-    // Return null to indicate failure
+    console.error(`❌ Failed to read workspace version for ${packageName}.`, error);
     return null;
   }
 };
 
 const updateVersionsFile = () => {
-  console.log('🚀 Starting to update package versions...');
+  console.log('🚀 Synchronizing versions.ts with local workspace package versions...');
 
   let fileContent = fs.readFileSync(versionsFilePath, 'utf8');
   let versionsUpdated = false;
 
   for (const pkg of packagesToUpdate) {
-    const latestVersion = getLatestVersion(pkg);
-    if (latestVersion) {
+    const workspaceVersion = getWorkspaceVersion(pkg);
+    if (workspaceVersion) {
       // Regex to find the package line and update its version
       const regex = new RegExp(`('${pkg}':\\s*')([^']+)(')`);
       const currentVersionMatch = fileContent.match(regex);
 
-      if (currentVersionMatch && currentVersionMatch[2] !== latestVersion) {
-        fileContent = fileContent.replace(regex, `$1${latestVersion}$3`);
-        console.log(`   Updating ${pkg} to ${latestVersion}`);
+      if (currentVersionMatch && currentVersionMatch[2] !== workspaceVersion) {
+        fileContent = fileContent.replace(regex, `$1${workspaceVersion}$3`);
+        console.log(`   Updating ${pkg} to ${workspaceVersion}`);
         versionsUpdated = true;
       }
     }
@@ -52,9 +75,9 @@ const updateVersionsFile = () => {
 
   if (versionsUpdated) {
     fs.writeFileSync(versionsFilePath, fileContent, 'utf8');
-    console.log('\n🎉 Successfully updated versions.ts!');
+    console.log('\n🎉 Successfully synchronized versions.ts!');
   } else {
-    console.log('\n✅ All versions are already up to date.');
+    console.log('\n✅ All versions in versions.ts are already up to date.');
   }
 };
 
