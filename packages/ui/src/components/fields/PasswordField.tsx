@@ -76,7 +76,7 @@ export function PasswordField<TFieldValues extends FieldValues = FieldValues>({
   };
 
   // Toggle password visibility
-  const togglePasswordVisibility = () => {
+  const togglePasswordVisibility = (): void => {
     setShowPassword((prev) => !prev);
   };
 
