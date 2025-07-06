@@ -38,13 +38,5 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
+          files: ./packages/*/coverage/lcov.info
           fail_ci_if_error: false
-
-      - name: Generate coverage badges
-        uses: jpb06/jest-badges-action@latest
-        with:
-          coverage-summary-path: ./coverage/coverage-summary.json
-          branches: main
-          commit-message: 'docs(tests): update coverage badges'
-          output-folder: ./badges

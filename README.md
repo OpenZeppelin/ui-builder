@@ -9,8 +9,7 @@ This project is currently in development.
 [![CI](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/ci.yml)
 [![Coverage](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/OpenZeppelin/transaction-form-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/transaction-form-builder)
-[![Release](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/release.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/release.yml)
-[![Form-Renderer](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish-form-renderer.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish-form-renderer.yml)
+[![Publish](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish.yml)
 [![Security](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml)
 [![Dependencies](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml)
 [![Dependency Review](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml)
@@ -527,6 +526,8 @@ This project uses GitHub Actions for continuous integration and delivery:
 ### Package Publishing
 
 The project uses [Changesets](https://github.com/changesets/changesets) for managing package versions and releases. All packages in the monorepo are published to the GitHub Package Registry.
+
+> **Note**: Currently, packages are published to the GitHub Package Registry only. Once the project becomes public, we will enable publishing to the npm public registry to make the packages more widely accessible.
 
 The publishing process:
 
