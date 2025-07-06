@@ -7,9 +7,9 @@
 
 export const packageVersions = {
   '@openzeppelin/transaction-form-adapter-evm': '1.15.0',
-  '@openzeppelin/transaction-form-adapter-midnight': '0.1.0',
-  '@openzeppelin/transaction-form-adapter-solana': '0.1.0',
-  '@openzeppelin/transaction-form-adapter-stellar': '0.1.0',
+  '@openzeppelin/transaction-form-adapter-midnight': '0.2.0',
+  '@openzeppelin/transaction-form-adapter-solana': '0.2.0',
+  '@openzeppelin/transaction-form-adapter-stellar': '0.2.0',
   '@openzeppelin/transaction-form-react-core': '1.15.0',
   '@openzeppelin/transaction-form-renderer': '1.15.0',
   '@openzeppelin/transaction-form-types': '1.15.0',

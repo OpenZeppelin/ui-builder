@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-adapter-stellar",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Stellar Adapter for Transaction Form Builder",
   "keywords": [
     "openzeppelin",
