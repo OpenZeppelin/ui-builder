@@ -55,6 +55,7 @@ export function useExecutionMethodState({
   const watchedMethodType = watch('executionMethodType');
   const watchedEoaOption = watch('eoaOption');
   const watchedSelectedRelayerDetails = watch('selectedRelayerDetails');
+  const watchedTransactionOptions = watch('transactionOptions');
 
   const [supportedMethods, setSupportedMethods] = useState<ExecutionMethodDetail[]>([]);
   const [isValid, setIsValid] = useState<boolean>(false);
@@ -164,7 +165,7 @@ export function useExecutionMethodState({
     return () => subscription.unsubscribe();
   }, [watch, validateExecutionConfigForBuilder]);
 
-  // Effect 4: Watch specifically for selectedRelayerDetails changes
+  // Effect 4: Watch specifically for selectedRelayerDetails and transactionOptions changes
   useEffect(() => {
     if (watchedMethodType === 'relayer' && watchedSelectedRelayerDetails) {
       // Build the relayer config with the updated details
@@ -173,6 +174,7 @@ export function useExecutionMethodState({
         method: 'relayer' as const,
         serviceUrl: currentValues.relayerServiceUrl || '',
         relayer: watchedSelectedRelayerDetails,
+        transactionOptions: currentValues.transactionOptions || {},
       };
 
       const newConfig = ensureCompleteConfig(configData);
@@ -180,6 +182,7 @@ export function useExecutionMethodState({
     }
   }, [
     watchedSelectedRelayerDetails,
+    watchedTransactionOptions,
     watchedMethodType,
     getValues,
     validateExecutionConfigForBuilder,

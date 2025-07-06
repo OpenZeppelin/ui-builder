@@ -30,6 +30,7 @@ export interface ExecutionMethodFormData {
   relayerServiceUrl?: string;
   selectedRelayer?: string;
   selectedRelayerDetails?: RelayerDetails;
+  transactionOptions?: Record<string, unknown>;
 }
 
 /**

@@ -8,6 +8,8 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { RelayerDetailsCard } from '@openzeppelin/transaction-form-ui';
 
+import { ExecutionConfigCard } from './ExecutionConfigCard';
+
 interface RelayerConfigDetailsProps {
   config: RelayerExecutionConfig;
   enhancedDetails?: RelayerDetailsRich | null;
@@ -43,6 +45,9 @@ export const RelayerConfigDetails: React.FC<RelayerConfigDetailsProps> = ({
           <p className="text-xs text-muted-foreground font-mono break-all">{config.serviceUrl}</p>
         </div>
       </div>
+
+      {/* Execution Configuration */}
+      <ExecutionConfigCard config={config} />
     </div>
   );
 };

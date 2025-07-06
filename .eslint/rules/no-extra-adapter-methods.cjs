@@ -68,6 +68,7 @@ module.exports = {
       'getContractDefinitionInputs',
       'getRelayers',
       'getRelayer',
+      'getRelayerOptionsComponent',
     ];
 
     // Common standard methods and properties that are allowed

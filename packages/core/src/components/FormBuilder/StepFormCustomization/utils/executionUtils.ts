@@ -79,6 +79,7 @@ export function generateDefaultExecutionMethodFormValues(
     relayerServiceUrl: '',
     selectedRelayer: '',
     selectedRelayerDetails: undefined,
+    transactionOptions: {},
   };
 
   if (currentConfig?.method === 'eoa') {
@@ -88,6 +89,10 @@ export function generateDefaultExecutionMethodFormValues(
     defaults.relayerServiceUrl = currentConfig.serviceUrl || '';
     defaults.selectedRelayer = currentConfig.relayer?.relayerId || '';
     defaults.selectedRelayerDetails = currentConfig.relayer;
+    defaults.transactionOptions =
+      currentConfig.transactionOptions && Object.keys(currentConfig.transactionOptions).length > 0
+        ? currentConfig.transactionOptions
+        : { speed: 'fast' };
   }
 
   return defaults;
@@ -109,6 +114,7 @@ export function mapFormDataToExecutionConfig(
     specificEoaAddress,
     relayerServiceUrl,
     selectedRelayerDetails,
+    transactionOptions,
   } = formData;
 
   switch (executionMethodType) {
@@ -123,6 +129,10 @@ export function mapFormDataToExecutionConfig(
         method: 'relayer',
         serviceUrl: relayerServiceUrl,
         relayer: selectedRelayerDetails ? selectedRelayerDetails : undefined,
+        transactionOptions:
+          transactionOptions && Object.keys(transactionOptions).length > 0
+            ? transactionOptions
+            : { speed: 'fast' },
       };
     case 'multisig':
       return { method: 'multisig' };
@@ -140,11 +150,20 @@ const executionMethodConfigMap: Record<
     allowAny: (config as EoaExecutionConfig).allowAny ?? true,
     specificAddress: (config as EoaExecutionConfig).specificAddress,
   }),
-  relayer: (config) => ({
-    method: 'relayer',
-    serviceUrl: (config as RelayerExecutionConfig).serviceUrl || '',
-    relayer: (config as RelayerExecutionConfig).relayer || ({} as RelayerDetails),
-  }),
+  relayer: (config) => {
+    const relayerConfig = config as RelayerExecutionConfig;
+    const transactionOptions =
+      relayerConfig.transactionOptions && Object.keys(relayerConfig.transactionOptions).length > 0
+        ? relayerConfig.transactionOptions
+        : { speed: 'fast' };
+
+    return {
+      method: 'relayer',
+      serviceUrl: relayerConfig.serviceUrl || '',
+      relayer: relayerConfig.relayer || ({} as RelayerDetails),
+      transactionOptions,
+    };
+  },
   multisig: (_config) => ({
     method: 'multisig',
   }),

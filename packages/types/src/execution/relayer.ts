@@ -18,4 +18,6 @@ export interface RelayerExecutionConfig {
   method: 'relayer';
   serviceUrl: string;
   relayer: RelayerDetails;
+  // Chain-agnostic options - adapters will define their specific types
+  transactionOptions?: Record<string, unknown>;
 }

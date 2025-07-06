@@ -363,4 +363,18 @@ export interface ContractAdapter {
     accessToken: string,
     relayerId: string
   ): Promise<RelayerDetailsRich>;
+
+  /**
+   * (Optional) Returns a React component for configuring relayer transaction options.
+   * This component should render chain-specific transaction options (e.g., gas settings for EVM).
+   * The component will receive props for getting and setting the transaction options.
+   *
+   * @returns A React component for relayer options configuration, or undefined if not supported.
+   */
+  getRelayerOptionsComponent?():
+    | React.ComponentType<{
+        options: Record<string, unknown>;
+        onChange: (options: Record<string, unknown>) => void;
+      }>
+    | undefined;
 }

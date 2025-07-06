@@ -63,6 +63,7 @@ import {
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
 import {
   EoaExecutionStrategy,
+  EvmRelayerOptions,
   ExecutionStrategy,
   RelayerExecutionStrategy,
   formatEvmTransactionData,
@@ -198,6 +199,19 @@ export class EvmAdapter implements ContractAdapter {
   ): Promise<RelayerDetailsRich> {
     const relayerStrategy = new RelayerExecutionStrategy();
     return relayerStrategy.getEvmRelayer(serviceUrl, accessToken, relayerId, this.networkConfig);
+  }
+
+  /**
+   * Returns a React component for configuring EVM-specific relayer transaction options.
+   * @returns The EVM relayer options component
+   */
+  public getRelayerOptionsComponent():
+    | React.ComponentType<{
+        options: Record<string, unknown>;
+        onChange: (options: Record<string, unknown>) => void;
+      }>
+    | undefined {
+    return EvmRelayerOptions;
   }
 
   /**

@@ -25,6 +25,24 @@ import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implem
 import { ExecutionStrategy } from './execution-strategy';
 
 /**
+ * EVM-specific transaction options for the OpenZeppelin Relayer.
+ * These options map directly to the EvmTransactionRequest parameters in the SDK.
+ */
+export interface EvmRelayerTransactionOptions {
+  // Basic options that most users will want to configure
+  speed?: Speed;
+  gasLimit?: number;
+
+  // Advanced options for fine-grained control
+  gasPrice?: number;
+  maxFeePerGas?: number;
+  maxPriorityFeePerGas?: number;
+
+  // Transaction expiration
+  validUntil?: string; // ISO 8601 date string
+}
+
+/**
  * Implements the ExecutionStrategy for the OpenZeppelin Relayer.
  * This strategy sends the transaction to the relayer service, which then handles
  * gas payment, signing, and broadcasting. It includes a polling mechanism to wait
@@ -239,12 +257,28 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
       args: transactionData.args,
     });
 
+    // Type-safe extraction of EVM-specific options
+    const evmOptions = executionConfig.transactionOptions as
+      | EvmRelayerTransactionOptions
+      | undefined;
+
     const relayerTxRequest: EvmTransactionRequest = {
       to: transactionData.address,
       data,
       value: Number(transactionData.value || 0),
-      gas_limit: 210000,
-      speed: Speed.FAST,
+      gas_limit: evmOptions?.gasLimit ?? 210000, // SDK requires gas_limit, so we must provide a default
+      // Note: The OpenZeppelin Relayer API requires exactly one gas pricing strategy to be provided.
+      // Valid options are: speed, gas_price, or both max_fee_per_gas + max_priority_fee_per_gas.
+      // If none are provided, the API will return a 400 Bad Request error.
+      // Only include speed if explicitly set in options
+      ...(evmOptions?.speed !== undefined && { speed: evmOptions.speed }),
+      // Include optional parameters only if provided
+      ...(evmOptions?.gasPrice !== undefined && { gas_price: evmOptions.gasPrice }),
+      ...(evmOptions?.maxFeePerGas !== undefined && { max_fee_per_gas: evmOptions.maxFeePerGas }),
+      ...(evmOptions?.maxPriorityFeePerGas !== undefined && {
+        max_priority_fee_per_gas: evmOptions.maxPriorityFeePerGas,
+      }),
+      ...(evmOptions?.validUntil !== undefined && { valid_until: evmOptions.validUntil }),
     };
 
     const sdkConfig = new Configuration({
