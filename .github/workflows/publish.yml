@@ -26,6 +26,9 @@ jobs:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
 
+      - name: Fix NPM config for public OZ packages
+        run: sed -i '/@openzeppelin:registry=https:\/\/npm.pkg.github.com\//d' ${{ env.NPM_CONFIG_USERCONFIG }}
+
       - name: Install dependencies
         run: pnpm install
 
