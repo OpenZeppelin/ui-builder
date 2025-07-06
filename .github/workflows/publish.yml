@@ -28,6 +28,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Create .npmrc
+        run: |
+          cat << EOF > "$HOME/.npmrc"
+          @openzeppelin:registry=https://npm.pkg.github.com
+          //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+          EOF
+        env:
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release Pull Request or Publish to GitHub
         id: changesets
         uses: changesets/action@v1
@@ -36,4 +45,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
