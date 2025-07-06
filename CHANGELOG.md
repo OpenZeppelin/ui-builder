@@ -1,3 +1,28 @@
+# [1.15.0](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.3...v1.15.0) (2025-07-06)
+
+
+### Bug Fixes
+
+* **config:** resolve pnpm --filter build issues with tsup configuration ([18bcea3](https://github.com/OpenZeppelin/transaction-form-builder/commit/18bcea32a1bee8981085bad2d161bf091bc6278f))
+* **config:** tsconfig errors ([985b1ed](https://github.com/OpenZeppelin/transaction-form-builder/commit/985b1ed3394e135116c5fadaf700cb933c5598ce))
+* **core:** execution method not rendering on mount ([0d19975](https://github.com/OpenZeppelin/transaction-form-builder/commit/0d1997573402f05fa1d7a8c62d9576f18db69dbe))
+* **core:** preselect EOA as a default execution method in UI ([dc20318](https://github.com/OpenZeppelin/transaction-form-builder/commit/dc20318f20809faa49a048928085b4b4e82351bf))
+* **core:** tests ([6f7d94e](https://github.com/OpenZeppelin/transaction-form-builder/commit/6f7d94e2a53a5102e362500e7e4a0c2b6d8e6d94))
+* **core:** tests ([24a2f04](https://github.com/OpenZeppelin/transaction-form-builder/commit/24a2f042be2ba53e6bf89ce6f5590859983bdee8))
+
+
+### Features
+
+* **adapter:** implement relayer execution logic ([0a98565](https://github.com/OpenZeppelin/transaction-form-builder/commit/0a98565edf33323df77900b77ac6ce595eae4dd1))
+* **core:** complete basic relayers integration ([f4e9dda](https://github.com/OpenZeppelin/transaction-form-builder/commit/f4e9ddae6b952e73c27f788b53d3aba5286adc64))
+* **core:** complete relayer integration ([8980288](https://github.com/OpenZeppelin/transaction-form-builder/commit/89802882b260aa9c8925942c9e3faec289bda31b))
+* **core:** lay groundwork for relayer execution method ([dfba652](https://github.com/OpenZeppelin/transaction-form-builder/commit/dfba6526961749373da222903ff99a245a6e3877))
+* **core:** show relayer details card in form builder relayer configuration step ([8ba9cd4](https://github.com/OpenZeppelin/transaction-form-builder/commit/8ba9cd45b01155f3aab9e2948fdf4d9560ff6eb6))
+* **form:** make the invalid execution method trigger more prominent ([3788256](https://github.com/OpenZeppelin/transaction-form-builder/commit/3788256a02c1b670f62f5c4a9d33f7e3ebddecd2))
+* **ui:** add relayer details card with balance and other data ([77b32bc](https://github.com/OpenZeppelin/transaction-form-builder/commit/77b32bc7a601d9b3906d964ba2ad21c5db451816))
+* **ui:** adjust radio field size ([695e0e4](https://github.com/OpenZeppelin/transaction-form-builder/commit/695e0e4d434c7b89da00facc24ce74ded55633b0))
+* **ui:** improve radio field looks ([5f26caf](https://github.com/OpenZeppelin/transaction-form-builder/commit/5f26caf9d180310f6d02055e86b7e36e0c5b4cec))
+
 ## [1.14.3](https://github.com/OpenZeppelin/transaction-form-builder/compare/v1.14.2...v1.14.3) (2025-06-30)
 
 
