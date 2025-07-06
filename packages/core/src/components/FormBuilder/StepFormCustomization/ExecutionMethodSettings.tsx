@@ -40,6 +40,7 @@ export function ExecutionMethodSettings({
         options={primaryMethodOptions}
         watchedEoaOption={watchedEoaOption}
         adapter={adapter}
+        setValue={formMethods.setValue}
       />
 
       {/* Display validation error if present */}

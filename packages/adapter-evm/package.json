@@ -35,7 +35,7 @@
     "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -46,6 +46,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@openzeppelin/relayer-sdk": "1.1.0",
     "@openzeppelin/transaction-form-react-core": "workspace:^",
     "@openzeppelin/transaction-form-types": "workspace:^",
     "@openzeppelin/transaction-form-ui": "workspace:^",

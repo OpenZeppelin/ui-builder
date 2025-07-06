@@ -10,8 +10,28 @@ It is responsible for:
 - Mapping EVM-specific data types to the form field types used by the form builder.
 - Parsing user input (including complex types like structs and arrays) into EVM-compatible transaction data, according to the `EvmNetworkConfig`.
 - Formatting results from view function calls.
-- Interacting with EVM wallets (via Wagmi/Viem) for signing and broadcasting transactions on the configured network, using the wallet module (see below).
-- Providing other EVM-specific configurations and validation (e.g., for execution methods).
+- **Transaction Execution**: Handling the signing and broadcasting of transactions via different strategies (EOA, Relayer).
+- Interacting with EVM wallets (via Wagmi/Viem) using the `wallet` module.
+- Providing other EVM-specific configurations and validation for execution methods.
+
+---
+
+## Transaction Execution
+
+The EVM adapter uses an **Execution Strategy** pattern to handle transaction submissions. This decouples the core `signAndBroadcast` logic from the specific implementation of each execution method.
+
+### Supported Strategies
+
+1.  **EOA (Externally Owned Account)**: The default method. It directly uses the user's connected wallet (via Wagmi) to sign and broadcast the transaction.
+2.  **Relayer**: Allows for gasless transactions by sending the transaction to the OpenZeppelin Relayer service. This strategy uses the `@openzeppelin/relayer-sdk`.
+
+The adapter selects the appropriate strategy at runtime based on the `ExecutionConfig` provided by the user.
+
+### Configuration
+
+In the Transaction Form Builder, the execution method is configured in the "Customize" step. The UI provides options to select between `EOA` and `Relayer` and configure their specific parameters (e.g., Relayer API credentials, EOA address restrictions).
+
+This configuration is then passed to the `EvmAdapter`'s `signAndBroadcast` method, which uses a factory to instantiate the correct execution strategy.
 
 ---
 
@@ -22,6 +42,34 @@ All wallet integration logic, UI components, facade hooks, and the UI context pr
 The `EvmAdapter` implements the optional UI facilitation methods from the `ContractAdapter` interface (`getEcosystemReactUiContextProvider`, `getEcosystemReactHooks`, `getEcosystemWalletComponents`). These capabilities are consumed by the `core` application's `WalletStateProvider`, which manages the global wallet state and makes these hooks and components accessible to the rest of the application via the `useWalletState()` hook.
 
 **For full documentation on the `src/wallet/` module, its exports, configuration, and usage examples, see [`src/wallet/README.md`](./src/wallet/README.md).**
+
+---
+
+This adapter generally follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md).
+
+## Module Structure
+
+The adapter is organized into several key modules:
+
+```
+adapter-evm/
+└── src/
+    ├── abi/         # ABI fetching and parsing utilities
+    ├── config/      # Adapter-specific configuration types and defaults
+    ├── mapping/     # Logic for mapping ABI types to form field types
+    ├── networks/    # Definitions for supported EVM networks (mainnets, testnets)
+    ├── query/       # Logic for executing read-only view function calls
+    ├── transaction/ # Core logic for transaction creation, signing, and broadcasting
+    │   ├── components/ # React components for execution method configuration (e.g., Relayer options)
+    │   ├── eoa.ts      # EOA (Externally Owned Account) execution strategy
+    │   ├── relayer.ts  # Relayer execution strategy and SDK interaction
+    │   ├── execution-strategy.ts # Core interface for all execution strategies
+    │   └── ...
+    ├── validation/  # Validation logic for addresses and execution configurations
+    ├── wallet/      # Wallet connection management via Wagmi (see wallet/README.md)
+    ├── adapter.ts   # Main EvmAdapter class implementation
+    └── index.ts     # Public exports for the package
+```
 
 ---
 
@@ -77,7 +125,3 @@ Network configurations for various EVM chains (mainnets and testnets) are export
 - `id`: A unique string identifier for the network (e.g., "ethereum-mainnet").
 - `primaryExplorerApiIdentifier`: A string key (e.g., "etherscan-mainnet") used by `AppConfigService` to fetch a specific API key for this network's explorer from `networkServiceConfigs`.
 - It also includes a default public `rpcUrl`, Chain ID, `apiUrl` for explorers, `explorerUrl`, and native currency information.
-
-## Internal Structure
-
-This adapter generally follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the addition of the `src/networks/` directory for managing network configurations.

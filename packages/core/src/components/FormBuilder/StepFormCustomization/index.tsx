@@ -3,15 +3,15 @@ import { useEffect, useMemo } from 'react';
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import {
   ContractSchema,
+  ExecutionConfig,
   NetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
 
-import type { BuilderFormConfig, ExecutionConfig } from '../../../core/types/FormTypes';
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
-import { ExecutionMethodSettings } from '../StepFormCustomization/ExecutionMethodSettings';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 
 import { UiKitSettings } from './components/UiKitSettings';
@@ -19,6 +19,7 @@ import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 import { ensureCompleteConfig } from './utils/executionUtils';
 
+import { ExecutionMethodSettings } from './ExecutionMethodSettings';
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';

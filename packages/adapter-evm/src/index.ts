@@ -1,7 +1,5 @@
-import EvmAdapter from './adapter';
-
 // Re-export the main adapter class
-export { EvmAdapter };
+export { EvmAdapter } from './adapter';
 
 // Export RainbowKit customization types
 export * from './wallet/rainbowkit/types';
@@ -23,3 +21,6 @@ export {
 
 // Export adapter configuration
 export { evmAdapterConfig } from './config';
+
+export type { WriteContractParameters } from './types';
+export type { EvmRelayerTransactionOptions } from './transaction/relayer';

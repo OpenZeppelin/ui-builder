@@ -1,9 +1,11 @@
-import type { Control } from 'react-hook-form';
+import type { Control, UseFormReturn } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import type {
+  ContractAdapter,
+  ExecutionMethodType,
+  RelayerDetails,
+} from '@openzeppelin/transaction-form-types';
 import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
-
-import type { ExecutionMethodType } from '../../../core/types/FormTypes';
 
 /**
  * Form values interface for the field editor form
@@ -25,6 +27,10 @@ export interface ExecutionMethodFormData {
   executionMethodType: ExecutionMethodType | undefined;
   eoaOption?: 'any' | 'specific';
   specificEoaAddress?: string;
+  relayerServiceUrl?: string;
+  selectedRelayer?: string;
+  selectedRelayerDetails?: RelayerDetails;
+  transactionOptions?: Record<string, unknown>;
 }
 
 /**
@@ -36,10 +42,17 @@ export interface EoaConfigurationProps {
   watchedEoaOption: 'any' | 'specific' | undefined;
 }
 
+export interface RelayerConfigurationProps {
+  control: Control<ExecutionMethodFormData>;
+  adapter: ContractAdapter | null;
+  setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
+}
+
 export interface PrimaryMethodSelectorProps {
   control: Control<ExecutionMethodFormData>;
   adapterAvailable: boolean;
   options: { value: string; label: string; disabled?: boolean }[];
   watchedEoaOption?: 'any' | 'specific' | undefined;
   adapter?: ContractAdapter | null;
+  setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
 }

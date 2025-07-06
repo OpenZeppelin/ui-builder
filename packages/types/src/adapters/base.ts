@@ -1,7 +1,15 @@
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
+import type {
+  EoaExecutionConfig,
+  MultisigExecutionConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+} from '../execution';
 import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
+import { TransactionStatusUpdate } from '../transactions';
 
 import type {
   AvailableUiKit,
@@ -20,20 +28,6 @@ export interface ExecutionMethodDetail {
   name: string;
   description?: string;
   disabled?: boolean;
-}
-
-export interface EoaExecutionConfig {
-  method: 'eoa';
-  allowAny: boolean;
-  specificAddress?: string;
-}
-
-export interface RelayerExecutionConfig {
-  method: 'relayer';
-}
-
-export interface MultisigExecutionConfig {
-  method: 'multisig';
 }
 
 export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
@@ -111,7 +105,9 @@ export interface ContractAdapter {
    */
   signAndBroadcast: (
     transactionData: unknown,
-    executionConfig?: ExecutionConfig
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ) => Promise<{ txHash: string }>;
 
   /**
@@ -344,4 +340,41 @@ export interface ContractAdapter {
    * @returns An array of FormFieldType objects representing the required inputs.
    */
   getContractDefinitionInputs(): FormFieldType[];
+
+  /**
+   * Gets the list of available relayers for a specific service.
+   *
+   * @param serviceUrl The URL of the relayer service.
+   * @param accessToken The access token for the relayer service.
+   * @returns A promise that resolves to an array of relayer details.
+   */
+  getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]>;
+
+  /**
+   * Gets detailed information about a specific relayer including balance and status.
+   *
+   * @param serviceUrl The URL of the relayer service.
+   * @param accessToken The access token for the relayer service.
+   * @param relayerId The unique identifier of the relayer.
+   * @returns A promise that resolves to enhanced relayer details including balance, status, and other metrics.
+   */
+  getRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string
+  ): Promise<RelayerDetailsRich>;
+
+  /**
+   * (Optional) Returns a React component for configuring relayer transaction options.
+   * This component should render chain-specific transaction options (e.g., gas settings for EVM).
+   * The component will receive props for getting and setting the transaction options.
+   *
+   * @returns A React component for relayer options configuration, or undefined if not supported.
+   */
+  getRelayerOptionsComponent?():
+    | React.ComponentType<{
+        options: Record<string, unknown>;
+        onChange: (options: Record<string, unknown>) => void;
+      }>
+    | undefined;
 }

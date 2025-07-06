@@ -4,16 +4,17 @@ import { FormProvider, useForm } from 'react-hook-form';
 import type {
   FormValues,
   TransactionFormProps,
+  TransactionStatusUpdate,
   TxStatus,
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { createDefaultFormValues } from '../utils/formUtils';
 
+import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
 import { DynamicFormField } from './DynamicFormField';
-import { ExecutionConfigDisplay } from './ExecutionConfigDisplay';
 import { TransactionStatusDisplay } from './transaction';
 
 /**
@@ -44,6 +45,7 @@ export function TransactionForm({
 }: TransactionFormProps): React.ReactElement {
   const [formError, setFormError] = useState<string | null>(null);
   const [executionConfigError, setExecutionConfigError] = useState<string | null>(null);
+  const [runtimeApiKey, setRuntimeApiKey] = useState('');
 
   // Transaction Lifecycle State
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
@@ -126,22 +128,37 @@ export function TransactionForm({
       );
       logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
 
-      const { txHash: submittedTxHash } = await adapter.signAndBroadcast(
+      const onStatusChange = (status: string, details: TransactionStatusUpdate): void => {
+        logger.info('TransactionForm', `Status Update: ${status}`, details);
+        setTxStatus(status as TxStatus);
+        if (details.transactionId) {
+          setTxHash(details.transactionId); // Show relayer ID
+        }
+        if (details.txHash) {
+          setTxHash(details.txHash); // Show final hash
+        }
+      };
+
+      // The initial status is set by the strategy via the callback
+      const { txHash: finalTxHash } = await adapter.signAndBroadcast(
         formattedData,
-        executionConfig
+        executionConfig || { method: 'eoa', allowAny: true },
+        onStatusChange,
+        runtimeApiKey
       );
-      logger.info('TransactionForm', `Transaction submitted with hash: ${submittedTxHash}`);
-      setTxHash(submittedTxHash);
+
+      logger.info('TransactionForm', `Transaction submitted with final hash: ${finalTxHash}`);
+      setTxHash(finalTxHash);
 
       // --> Start: Wait for confirmation <--
       if (adapter.waitForTransactionConfirmation) {
         setTxStatus('pendingConfirmation');
-        logger.info('TransactionForm', `Waiting for confirmation for tx: ${submittedTxHash}`);
-        const confirmationResult = await adapter.waitForTransactionConfirmation(submittedTxHash);
+        logger.info('TransactionForm', `Waiting for confirmation for tx: ${finalTxHash}`);
+        const confirmationResult = await adapter.waitForTransactionConfirmation(finalTxHash);
         if (confirmationResult.status === 'success') {
           logger.info(
             'TransactionForm',
-            `Transaction confirmed: ${submittedTxHash}`,
+            `Transaction confirmed: ${finalTxHash}`,
             confirmationResult.receipt
           );
           setTxStatus('success');
@@ -149,7 +166,7 @@ export function TransactionForm({
         } else {
           logger.error(
             'TransactionForm',
-            `Transaction failed confirmation: ${submittedTxHash}`,
+            `Transaction failed confirmation: ${finalTxHash}`,
             confirmationResult.error
           );
           setTxError(
@@ -298,7 +315,9 @@ export function TransactionForm({
             <div className="w-full">
               <ExecutionConfigDisplay
                 executionConfig={executionConfig}
+                adapter={adapter}
                 error={executionConfigError}
+                onRuntimeApiKeyChange={setRuntimeApiKey}
               />
             </div>
           )}

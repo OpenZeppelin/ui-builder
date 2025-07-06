@@ -14,6 +14,8 @@ import type {
   FormValues,
   FunctionParameter,
   MidnightNetworkConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -270,6 +272,20 @@ export class MidnightAdapter implements ContractAdapter {
         configFields: [],
       },
     ];
+  }
+
+  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
+    console.warn('getRelayers is not implemented for the Midnight adapter yet.');
+    return Promise.resolve([]);
+  }
+
+  public async getRelayer(
+    _serviceUrl: string,
+    _accessToken: string,
+    _relayerId: string
+  ): Promise<RelayerDetailsRich> {
+    console.warn('getRelayer is not implemented for the Midnight adapter yet.');
+    return Promise.resolve({} as RelayerDetailsRich);
   }
 }
 

@@ -22,7 +22,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
     "test": "vitest run --passWithNoTests",

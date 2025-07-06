@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ExecutionMethodType } from '../../../../core/types/FormTypes';
+import { ExecutionMethodType } from '@openzeppelin/transaction-form-types';
+
 import { ensureCompleteConfig } from '../utils/executionUtils';
 
 describe('ensureCompleteConfig', () => {
@@ -51,7 +52,12 @@ describe('ensureCompleteConfig', () => {
 
   it('should return basic relayer config', () => {
     const result = ensureCompleteConfig({ method: 'relayer' });
-    expect(result).toEqual({ method: 'relayer' });
+    expect(result).toEqual({
+      method: 'relayer',
+      serviceUrl: '',
+      relayer: {},
+      transactionOptions: { speed: 'fast' },
+    });
   });
 
   it('should return basic multisig config', () => {

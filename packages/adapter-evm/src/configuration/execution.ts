@@ -7,7 +7,7 @@ import type {
 } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { isValidEvmAddress } from '../utils';
+import { validateEoaConfig, validateRelayerConfig } from '../validation';
 
 const SYSTEM_LOG_TAG = 'adapter-evm-execution-config';
 
@@ -31,43 +31,11 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
     },
     {
       type: 'relayer',
-      name: 'Relayer (Placeholder)',
-      description: 'Execute via a OpenZeppelin transaction relayer (not yet implemented).',
+      name: 'OpenZeppelin Relayer',
+      description: 'Execute via a OpenZeppelin open source transaction relayer service.',
       disabled: false,
     },
   ]);
-}
-
-/**
- * Validates EOA execution configuration.
- */
-async function _validateEoaConfig(
-  config: EoaExecutionConfig,
-  walletStatus: { isConnected: boolean; address?: string; chainId?: string }
-): Promise<true | string> {
-  if (!config.allowAny) {
-    if (!config.specificAddress) {
-      return "EOA execution selected, but no specific address was provided when 'allowAny' is false.";
-    }
-    if (!isValidEvmAddress(config.specificAddress)) {
-      return `Invalid specific EOA address format: ${config.specificAddress}`;
-    }
-    if (walletStatus.isConnected && walletStatus.address) {
-      if (walletStatus.address.toLowerCase() !== config.specificAddress.toLowerCase()) {
-        return (
-          `Connected wallet address (${walletStatus.address}) does not match the required specific EOA address ` +
-          `(${config.specificAddress}). Please connect the correct wallet.`
-        );
-      }
-    } else if (walletStatus.isConnected && !walletStatus.address) {
-      logger.warn(
-        SYSTEM_LOG_TAG,
-        'Wallet is connected but address is unavailable for EOA validation.'
-      );
-      return 'Connected wallet address is not available for validation against specific EOA.';
-    }
-  }
-  return true;
 }
 
 /**
@@ -83,18 +51,6 @@ async function _validateMultisigConfig(
 }
 
 /**
- * Validates Relayer execution configuration (placeholder).
- */
-async function _validateRelayerConfig(
-  _config: RelayerExecutionConfig,
-  _walletStatus: { isConnected: boolean; address?: string; chainId?: string }
-): Promise<true | string> {
-  logger.info(SYSTEM_LOG_TAG, 'Relayer execution config validation: Not yet implemented.');
-  // TODO: Add validation for relayer URL, API key presence (if applicable), etc.
-  return true; // Placeholder
-}
-
-/**
  * Validates the complete execution configuration object against the
  * requirements and capabilities of the EVM adapter.
  */
@@ -106,11 +62,11 @@ export async function validateEvmExecutionConfig(
 
   switch (config.method) {
     case 'eoa':
-      return _validateEoaConfig(config as EoaExecutionConfig, walletStatus);
+      return validateEoaConfig(config as EoaExecutionConfig, walletStatus);
+    case 'relayer':
+      return validateRelayerConfig(config as RelayerExecutionConfig);
     case 'multisig':
       return _validateMultisigConfig(config as MultisigExecutionConfig, walletStatus);
-    case 'relayer':
-      return _validateRelayerConfig(config as RelayerExecutionConfig, walletStatus);
     default: {
       const unknownMethod = (config as ExecutionConfig).method;
       logger.warn(

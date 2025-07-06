@@ -65,9 +65,15 @@ types/
 │   ├── common/             # Common types shared across namespaces
 │   │   ├── ecosystem.ts    # NetworkEcosystem enum/type
 │   │   └── index.ts        # Re-exports common types
+│   ├── config/             # Types for runtime application configuration
+│   │   └── app-config.ts   # Defines AppRuntimeConfig and related types
 │   ├── contracts/          # Contract schema related types
 │   │   ├── schema.ts       # ContractSchema, ContractFunction etc.
 │   │   └── index.ts        # Re-exports contract types
+│   ├── execution/          # Types for transaction execution methods
+│   │   ├── eoa.ts
+│   │   ├── relayer.ts
+│   │   └── ...
 │   ├── forms/              # Form field, layout, schema, and validation definitions
 │   │   ├── fields.ts       # Base FieldType definitions
 │   │   ├── form-field.ts   # FormField definition
@@ -96,11 +102,19 @@ types/
 Interfaces for blockchain-specific adapters:
 
 - `ContractAdapter`: The core interface defining methods for loading contracts, mapping types, querying state, formatting data, validating addresses, handling transactions, and interacting with wallets. It can also now optionally provide methods to facilitate richer, ecosystem-specific UI experiences, such as:
+  - `signAndBroadcast`: The core method for submitting a transaction, now using an `ExecutionConfig` to determine the submission strategy (e.g., `EOA` or `Relayer`).
+  - `getRelayers?`: An optional method to fetch a list of available relayers for the adapter's ecosystem.
+  - `getRelayer?`: An optional method to fetch detailed information about a specific relayer.
+  - `getRelayerOptionsComponent?`: An optional method that returns a React component for configuring relayer-specific options (e.g., custom gas settings).
   - `configureUiKit?`: To inform the adapter about a desired UI kit (e.g., for wallet connection modals) and its configuration. The `kitConfig` within this configuration can include an optional `components: { exclude: [...] }` property to prevent specific default UI components (like `NetworkSwitcher`) from being provided by the adapter.
   - `getEcosystemReactUiContextProvider?`: To obtain a React component that sets up necessary UI context (like WagmiProvider for EVM).
   - `getEcosystemReactHooks?`: To get a set of facade React hooks for common wallet operations, abstracting direct library hook usage. Adapters implementing this should aim to return objects from these hooks with conventionally named properties (e.g., `{ isConnected, address, chainId }` for an account hook, or `{ switchChain, isPending, error }` for a network switching hook) to ensure consistent consumption.
   - `getEcosystemWalletComponents?`: To retrieve standardized UI components (e.g., Connect Button) sourced from the configured UI kit or a basic custom implementation provided by the adapter.
     These optional methods allow the main application to leverage advanced UI patterns of specific ecosystems (like EVM with `wagmi/react`) while remaining decoupled from the underlying libraries.
+
+### Config Types (`./src/config`)
+
+- `AppRuntimeConfig`: Defines the shape of the `app.config.json` file used by exported applications to configure runtime settings like RPC endpoints and API keys.
 
 ### Common Types (`./src/common`)
 
@@ -136,11 +150,15 @@ Types for defining specific blockchain network configurations:
 - Type guard functions (e.g., `isEvmNetworkConfig(config)`) to safely narrow down the `NetworkConfig` union type.
 - (These are primarily defined within `config.ts`)
 
+### Execution Types (`./src/execution`)
+
+- Types related to transaction execution strategies, such as `EoaExecutionConfig`, `RelayerExecutionConfig`, and `RelayerDetails`.
+
 ### Transaction Types (`./src/transactions`)
 
 Types related to the status of transaction submissions:
 
-- `TransactionStatus`: Enum or type defining possible states (Idle, Signing, Broadcasting, PendingConfirmation, Success, Error).
+- `TransactionStatus`: Enum or type defining possible states (Idle, Signing, Broadcasting, PendingConfirmation, **PendingRelayer**, Success, Error).
 - `TransactionProgress`: Interface potentially holding details like transaction hash, error messages, explorer links.
 
 ## Integration with Other Packages

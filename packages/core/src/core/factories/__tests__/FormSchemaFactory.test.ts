@@ -9,6 +9,8 @@ import type {
   EvmNetworkConfig,
   FieldType,
   FormFieldType,
+  FunctionParameter,
+  RelayerDetailsRich,
 } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
@@ -41,7 +43,7 @@ const mockAdapterInstance: ContractAdapter = {
     if (type.includes('[')) return 'textarea';
     return 'text';
   }),
-  generateDefaultField: vi.fn((param): FormFieldType => {
+  generateDefaultField: vi.fn((param: FunctionParameter): FormFieldType => {
     const fieldType = mockAdapterInstance.mapParameterTypeToFieldType(param.type) as FieldType;
     return {
       id: `field-${param.name}-${uuidv4()}`,
@@ -83,6 +85,8 @@ const mockAdapterInstance: ContractAdapter = {
   onWalletConnectionChange: vi.fn(() => () => {}),
   getAvailableUiKits: vi.fn().mockResolvedValue([]),
   getContractDefinitionInputs: vi.fn(() => []),
+  getRelayers: vi.fn().mockResolvedValue([]),
+  getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
 };
 
 describe('FormSchemaFactory', () => {

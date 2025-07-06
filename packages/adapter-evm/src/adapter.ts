@@ -20,6 +20,9 @@ import type {
   FormValues,
   FunctionParameter,
   NativeConfigLoader,
+  RelayerDetails,
+  RelayerDetailsRich,
+  TransactionStatusUpdate,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -29,7 +32,6 @@ import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
-import type { WagmiWalletImplementation } from './wallet/implementation/wagmi-implementation';
 import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
@@ -60,8 +62,11 @@ import {
 } from './mapping';
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
 import {
+  EoaExecutionStrategy,
+  EvmRelayerOptions,
+  ExecutionStrategy,
+  RelayerExecutionStrategy,
   formatEvmTransactionData,
-  signAndBroadcastEvmTransaction,
   waitForEvmTransactionConfirmation,
 } from './transaction';
 import { formatEvmFunctionResult } from './transform';
@@ -148,17 +153,65 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  async signAndBroadcast(
+  public async signAndBroadcast(
     transactionData: unknown,
-    executionConfig?: ExecutionConfig
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
-    const walletImplementation: WagmiWalletImplementation = await getEvmWalletImplementation();
-    return signAndBroadcastEvmTransaction(
+    const walletImplementation = await getEvmWalletImplementation();
+    let strategy: ExecutionStrategy;
+
+    switch (executionConfig.method) {
+      case 'relayer':
+        strategy = new RelayerExecutionStrategy();
+        break;
+      case 'eoa':
+      default:
+        strategy = new EoaExecutionStrategy();
+        break;
+    }
+
+    return strategy.execute(
       transactionData as WriteContractParameters,
+      executionConfig,
       walletImplementation,
-      this.networkConfig.chainId,
-      executionConfig
+      onStatusChange,
+      runtimeApiKey
     );
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
+    const relayerStrategy = new RelayerExecutionStrategy();
+    return relayerStrategy.getEvmRelayers(serviceUrl, accessToken, this.networkConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string
+  ): Promise<RelayerDetailsRich> {
+    const relayerStrategy = new RelayerExecutionStrategy();
+    return relayerStrategy.getEvmRelayer(serviceUrl, accessToken, relayerId, this.networkConfig);
+  }
+
+  /**
+   * Returns a React component for configuring EVM-specific relayer transaction options.
+   * @returns The EVM relayer options component
+   */
+  public getRelayerOptionsComponent():
+    | React.ComponentType<{
+        options: Record<string, unknown>;
+        onChange: (options: Record<string, unknown>) => void;
+      }>
+    | undefined {
+    return EvmRelayerOptions;
   }
 
   /**

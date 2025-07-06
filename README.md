@@ -41,6 +41,7 @@ This project is organized as a monorepo with the following packages:
 - **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `core` and `form-renderer` to ensure a consistent look and feel.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations.
+- **packages/utils**: Shared, framework-agnostic utility functions (e.g., logger, app configuration service).
 - **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
 - **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
 - **packages/adapter-stellar**: Adapter implementation for the Stellar network.
@@ -97,7 +98,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
 - Handles wallet connection state consistently in both core app and exported forms
-- Configure transaction execution methods (EOA, Relayer, Multisig) via adapters
+- Configure transaction execution methods (EOA, Relayer, Multisig) via a powerful Execution Strategy pattern
 - Type-safe with TypeScript
 - Fast development with Vite
 - Component documentation with Storybook
@@ -118,6 +119,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **ESLint 9**: Modern linting with improved TypeScript support
 - **tsup**: Fast, modern bundler for TypeScript libraries
 - **Vite**: Used for the core application's dev server
+- **@openzeppelin/relayer-sdk**: For gasless transaction support via the Relayer execution method.
 
 ## Getting Started
 

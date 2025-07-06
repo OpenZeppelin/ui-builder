@@ -70,7 +70,7 @@ export function TransactionStatusDisplay({
 
   if (status === 'pendingSignature') {
     title = 'Pending Signature';
-    icon = <Loader2 className="h-5 w-5 animate-spin text-primary" />;
+    icon = <Loader2 className="size-5 animate-spin text-primary" />;
     content = (
       <div>
         <p>Please check your connected wallet to sign the transaction.</p>
@@ -80,7 +80,7 @@ export function TransactionStatusDisplay({
     variant = 'default';
   } else if (status === 'pendingConfirmation') {
     title = 'Processing Transaction';
-    icon = <Loader2 className="h-5 w-5 animate-spin text-primary" />;
+    icon = <Loader2 className="size-5 animate-spin text-primary" />;
     content = (
       <div>
         <p>Waiting for the transaction to be confirmed on the blockchain...</p>
@@ -88,9 +88,22 @@ export function TransactionStatusDisplay({
       </div>
     );
     variant = 'default';
+  } else if (status === 'pendingRelayer') {
+    title = 'Waiting for Relayer';
+    icon = <Loader2 className="size-5 animate-spin text-primary" />;
+    content = (
+      <div>
+        <p>
+          The transaction is pending with the relayer and will be submitted to the blockchain
+          shortly.
+        </p>
+        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
+      </div>
+    );
+    variant = 'default';
   } else if (status === 'success') {
     title = 'Transaction Successful';
-    icon = <CheckCircle className="h-5 w-5 text-green-600" />;
+    icon = <CheckCircle className="size-5 text-green-600" />;
     content = (
       <div>
         <p>Your transaction has been confirmed.</p>
@@ -100,7 +113,7 @@ export function TransactionStatusDisplay({
     variant = 'success';
   } else if (status === 'error') {
     title = 'Transaction Failed';
-    icon = <AlertCircle className="h-5 w-5 text-destructive" />;
+    icon = <AlertCircle className="size-5 text-destructive" />;
     content = (
       <div>
         {formatErrorWithHash(error || 'An unknown error occurred.')}
