@@ -46,6 +46,12 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
     currentField: FormFieldType,
     previousField: FormFieldType
   ): boolean => {
+    // Check if field IDs are different (switching between different fields)
+    if (currentField.id !== previousField.id) {
+      return true;
+    }
+
+    // Check all properties except hardcodedValue for changes
     return Object.keys(currentField).some((key) => {
       if (key === 'hardcodedValue') return false;
       return currentField[key as keyof FormFieldType] !== previousField[key as keyof FormFieldType];
@@ -62,9 +68,10 @@ export function FieldEditor({ field, onUpdate, adapter, originalParameterType }:
       const currentValues = getValues();
       const newValues = initializeFormValues(field);
 
-      // Preserve the current hardcodedValue if we're actively editing it
-      // This prevents losing user input when the parent re-renders
-      if (field.isHardcoded && currentValues.hardcodedValue !== undefined) {
+      // Only preserve the current hardcodedValue if we're on the same field (not switching fields)
+      // This prevents losing user input when the parent re-renders the same field
+      const isSameField = field.id === previousField.id;
+      if (isSameField && field.isHardcoded && currentValues.hardcodedValue !== undefined) {
         newValues.hardcodedValue = currentValues.hardcodedValue;
       }
 
