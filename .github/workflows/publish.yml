@@ -22,7 +22,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  packages: write
+  packages: write # ✅ Includes both read and write permissions
   pull-requests: write
   issues: write
 
@@ -52,6 +52,29 @@ jobs:
       - name: Configure npm authentication for private registry
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      - name: Debug - Check package registry access
+        run: |
+          echo "🔍 Testing GITHUB_TOKEN permissions..."
+          echo "Token (first 10 chars): ${GITHUB_TOKEN:0:10}..."
+
+          # Test if we can list packages from the org
+          echo "📦 Testing package registry access..."
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/orgs/openzeppelin/packages?package_type=npm" || echo "❌ Failed to list org packages"
+
+          # Test specific package access
+          echo "🎯 Testing specific package access..."
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/orgs/openzeppelin/packages/npm/relayer-sdk" || echo "❌ Failed to access relayer-sdk"
+
+          # Test with npm client
+          echo "📥 Testing npm install access..."
+          npm view @openzeppelin/relayer-sdk@1.1.0 --registry=https://npm.pkg.github.com/ --_authToken=$GITHUB_TOKEN || echo "❌ npm view failed"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install
