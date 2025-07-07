@@ -50,10 +50,26 @@ export const useEvmRelayerOptions = ({ options, onChange }: UseEvmRelayerOptions
   const isEip1559 = Boolean(formValues.maxFeePerGas || formValues.maxPriorityFeePerGas);
   const gasType = isEip1559 ? 'eip1559' : 'legacy';
 
-  // Notify parent of changes, but skip initial mount
+  // Handle initial mount - ensure the default speed value is communicated to parent
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
+
+      // Only notify parent if we have a default speed value that wasn't already in options
+      if (initialOptions.speed && !options.speed) {
+        const newOptions: EvmRelayerTransactionOptions = {};
+        if (initialOptions.speed) newOptions.speed = initialOptions.speed;
+        if (initialOptions.gasLimit) newOptions.gasLimit = initialOptions.gasLimit;
+
+        onChange(newOptions as Record<string, unknown>);
+      }
+      return;
+    }
+  }, []);
+
+  // Notify parent of changes after initial mount
+  useEffect(() => {
+    if (isInitialMount.current) {
       return;
     }
 
