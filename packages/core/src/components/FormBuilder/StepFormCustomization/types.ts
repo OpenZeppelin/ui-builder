@@ -55,4 +55,5 @@ export interface PrimaryMethodSelectorProps {
   watchedEoaOption?: 'any' | 'specific' | undefined;
   adapter?: ContractAdapter | null;
   setValue: UseFormReturn<ExecutionMethodFormData>['setValue'];
+  isWidgetExpanded?: boolean;
 }
