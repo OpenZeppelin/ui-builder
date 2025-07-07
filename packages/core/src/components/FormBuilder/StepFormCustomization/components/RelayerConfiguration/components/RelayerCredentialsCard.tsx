@@ -51,7 +51,7 @@ export function RelayerCredentialsCard({
   return (
     <Card className={!isActive && isComplete ? 'opacity-60' : ''}>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-2">
             <div
               className={`rounded-md p-0.5 ${
@@ -76,46 +76,52 @@ export function RelayerCredentialsCard({
 
       {(isActive || !isComplete) && (
         <CardContent className="space-y-4">
-          <UrlField
-            id="relayer-service-url"
-            label="Relayer Service URL"
-            name="relayerServiceUrl"
-            control={control}
-            validation={{ required: true }}
-            placeholder="https://your-relayer.openzeppelin.com"
-            helperText="Base URL of your OpenZeppelin Relayer service instance"
-          />
+          <div className="w-full">
+            <UrlField
+              id="relayer-service-url"
+              label="Relayer Service URL"
+              name="relayerServiceUrl"
+              control={control}
+              validation={{ required: true }}
+              placeholder="https://your-relayer.openzeppelin.com"
+              helperText="Base URL of your OpenZeppelin Relayer service instance"
+            />
+          </div>
 
-          <PasswordField
-            id="relayer-api-key"
-            label="API Key"
-            name="sessionApiKey"
-            control={localControl}
-            validation={{ required: true }}
-            placeholder="Enter your API key"
-            helperText="Session-only authentication key (not persisted)"
-          />
+          <div className="w-full">
+            <PasswordField
+              id="relayer-api-key"
+              label="API Key"
+              name="sessionApiKey"
+              control={localControl}
+              validation={{ required: true }}
+              placeholder="Enter your API key"
+              helperText="Session-only authentication key (not persisted)"
+            />
+          </div>
 
-          <Button
-            onClick={onFetchRelayers}
-            disabled={isLoading || !sessionApiKey || !relayerServiceUrl}
-            type="button"
-            className="w-full"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Fetching relayers...
-              </>
-            ) : (
-              'Fetch Available Relayers'
-            )}
-          </Button>
+          <div className="w-full">
+            <Button
+              onClick={onFetchRelayers}
+              disabled={isLoading || !sessionApiKey || !relayerServiceUrl}
+              type="button"
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Fetching relayers...
+                </>
+              ) : (
+                'Fetch Available Relayers'
+              )}
+            </Button>
+          </div>
 
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="break-words">{error}</AlertDescription>
             </Alert>
           )}
         </CardContent>
