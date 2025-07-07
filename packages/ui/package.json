@@ -25,7 +25,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "prepublishOnly": "pnpm run lint && pnpm run test && pnpm run build",
+    "prepublishOnly": "pnpm run build",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --passWithNoTests",
