@@ -76,8 +76,28 @@ const updateVersionsFile = () => {
   if (versionsUpdated) {
     fs.writeFileSync(versionsFilePath, fileContent, 'utf8');
     console.log('\n🎉 Successfully synchronized versions.ts!');
+    updateSnapshots();
   } else {
     console.log('\n✅ All versions in versions.ts are already up to date.');
+  }
+};
+
+const updateSnapshots = () => {
+  console.log('📸 Updating test snapshots due to version changes...');
+  const { execSync } = require('child_process');
+
+  try {
+    // Update snapshots for the core package where the export tests are located
+    execSync('pnpm --filter=@openzeppelin/transaction-form-builder-core test -u', {
+      cwd: path.resolve(__dirname, '..'),
+      stdio: 'inherit',
+    });
+    console.log('✅ Snapshots updated successfully!');
+  } catch (error) {
+    console.error('❌ Failed to update snapshots:', error.message);
+    console.log(
+      '⚠️  Please run "pnpm --filter=@openzeppelin/transaction-form-builder-core test -u" manually'
+    );
   }
 };
 
