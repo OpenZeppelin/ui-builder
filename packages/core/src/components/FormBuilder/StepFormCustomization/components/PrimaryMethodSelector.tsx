@@ -1,3 +1,5 @@
+import { Shield, User, Users } from 'lucide-react';
+
 import React from 'react';
 import { useController } from 'react-hook-form';
 
@@ -19,6 +21,7 @@ export function PrimaryMethodSelector({
   watchedEoaOption,
   adapter,
   setValue,
+  isWidgetExpanded = false,
 }: PrimaryMethodSelectorProps): React.ReactElement {
   // Use controller from react-hook-form to manage the selected value
   const { field } = useController({
@@ -34,6 +37,13 @@ export function PrimaryMethodSelector({
     disabled: option.disabled,
     value: option.value,
   }));
+
+  // Icon mapping for execution methods
+  const executionMethodIcons = {
+    eoa: <User className="size-4" />,
+    relayer: <Shield className="size-4" />,
+    multisig: <Users className="size-4" />,
+  };
 
   // Generate configuration content for the selected method
   const configContent = (() => {
@@ -81,6 +91,8 @@ export function PrimaryMethodSelector({
         selectedId={field.value || null}
         onSelect={field.onChange}
         configContent={configContent}
+        isCollapsed={isWidgetExpanded}
+        iconMap={executionMethodIcons}
       />
     </TitledSection>
   );

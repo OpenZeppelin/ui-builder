@@ -261,6 +261,7 @@ export function StepFormCustomization({
                 adapter={adapter}
                 currentConfig={currentExecutionConfig}
                 onUpdateConfig={onExecutionConfigUpdated || (() => {})}
+                isWidgetExpanded={isWidgetExpanded}
               />
             )}
           </TabsContent>

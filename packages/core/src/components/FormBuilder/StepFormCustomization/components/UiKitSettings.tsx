@@ -96,10 +96,12 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
   // Generate configuration content for the selected kit
   const configContent = selectedKit ? (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
-        <h4 className="text-base font-medium">{selectedKit.name} Configuration</h4>
+      <div className="flex items-start justify-between gap-4">
+        <h4 className="text-base font-medium flex-1 min-w-0 truncate">
+          {selectedKit.name} Configuration
+        </h4>
         {selectedKit.linkToDocs && (
-          <ExternalLink href={selectedKit.linkToDocs} className="text-sm">
+          <ExternalLink href={selectedKit.linkToDocs} className="text-sm flex-shrink-0">
             View Docs
           </ExternalLink>
         )}
