@@ -42,18 +42,23 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
   };
 
   return (
-    <div className={cn('flex items-start space-x-3 p-3 bg-slate-50 rounded-md', className)}>
-      <Info className="size-5 text-primary mt-0.5 flex-shrink-0" />
-      <div className="space-y-3 flex-1">
+    <div
+      className={cn(
+        'flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3 p-3 bg-slate-50 rounded-md',
+        className
+      )}
+    >
+      <Info className="size-5 text-primary mt-0.5 flex-shrink-0 hidden sm:block" />
+      <div className="space-y-3 flex-1 min-w-0">
         <div>
           <h4 className="text-sm font-medium mb-2">Relayer Details</h4>
 
           {/* Relayer Name and Status */}
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-foreground">{displayDetails.name}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-1 sm:space-y-0">
+            <p className="text-sm font-medium text-foreground truncate">{displayDetails.name}</p>
             <span
               className={cn(
-                'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium self-start',
                 displayDetails.paused || enhancedDetails?.systemDisabled
                   ? 'bg-red-100 text-red-800'
                   : 'bg-green-100 text-green-800'
@@ -74,28 +79,35 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
           </div>
 
           {/* Relayer Address */}
-          <AddressDisplay
-            className="mb-3"
-            address={displayDetails.address}
-            truncate={false}
-            showCopyButton
-          />
+          <div className="mb-3">
+            <AddressDisplay
+              className="w-full sm:w-auto"
+              address={displayDetails.address}
+              truncate={true}
+              startChars={6}
+              endChars={4}
+              showCopyButton
+            />
+          </div>
 
           {/* Additional Details */}
           <div className="space-y-1 pt-2 border-t border-slate-200">
             <div className="flex items-center gap-2">
-              <Network className="size-3.5 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
+              <Network className="size-3.5 text-muted-foreground flex-shrink-0" />
+              <p className="text-xs text-muted-foreground truncate">
                 <span className="font-medium">Network:</span> {displayDetails.network}
               </p>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium">Relayer ID:</span>{' '}
-              <code className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded">
-                {displayDetails.relayerId}
-              </code>
-            </p>
+            <div className="flex items-start gap-2">
+              <Hash className="size-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-muted-foreground min-w-0 flex-1">
+                <span className="font-medium">Relayer ID:</span>{' '}
+                <code className="font-mono text-xs bg-slate-100 px-1 py-0.5 rounded break-all">
+                  {displayDetails.relayerId}
+                </code>
+              </div>
+            </div>
           </div>
 
           {/* Enhanced Details Section */}
@@ -111,8 +123,8 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
               {/* Balance */}
               {enhancedDetails.balance && (
                 <div className="flex items-center gap-2 text-xs">
-                  <DollarSign className="size-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground">
+                  <DollarSign className="size-3.5 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground truncate">
                     <span className="font-medium">Balance:</span> {enhancedDetails.balance}
                   </span>
                 </div>
@@ -121,7 +133,7 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
               {/* Nonce */}
               {enhancedDetails.nonce && (
                 <div className="flex items-center gap-2 text-xs">
-                  <Hash className="size-3.5 text-muted-foreground" />
+                  <Hash className="size-3.5 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="font-medium">Nonce:</span> {enhancedDetails.nonce}
                   </span>
@@ -131,7 +143,7 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
               {/* Pending Transactions */}
               {enhancedDetails.pendingTransactionsCount !== undefined && (
                 <div className="flex items-center gap-2 text-xs">
-                  <Timer className="size-3.5 text-muted-foreground" />
+                  <Timer className="size-3.5 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">
                     <span className="font-medium">Pending Transactions:</span>{' '}
                     {enhancedDetails.pendingTransactionsCount}
@@ -142,11 +154,11 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
               {/* Last Transaction */}
               {enhancedDetails.lastConfirmedTransactionTimestamp && (
                 <div className="flex items-start gap-2 text-xs">
-                  <CheckCircle className="size-3.5 text-muted-foreground mt-0.5" />
-                  <div className="text-muted-foreground">
+                  <CheckCircle className="size-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div className="text-muted-foreground min-w-0 flex-1">
                     <span className="font-medium">Last Transaction:</span>
                     <br />
-                    <span className="text-xs">
+                    <span className="text-xs break-words">
                       {formatTimestamp(enhancedDetails.lastConfirmedTransactionTimestamp)}
                     </span>
                   </div>
@@ -161,9 +173,11 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
           <div className="bg-red-50 border border-red-200 rounded-md p-2">
             <p className="text-xs text-red-700 flex items-start gap-1">
               <AlertCircle className="size-3 mt-0.5 flex-shrink-0" />
-              {enhancedDetails?.systemDisabled
-                ? 'This relayer has been disabled by the system and cannot process transactions.'
-                : 'This relayer is currently paused and cannot process transactions.'}
+              <span className="min-w-0 flex-1">
+                {enhancedDetails?.systemDisabled
+                  ? 'This relayer has been disabled by the system and cannot process transactions.'
+                  : 'This relayer is currently paused and cannot process transactions.'}
+              </span>
             </p>
           </div>
         )}

@@ -49,7 +49,7 @@ export function RelayerSelectionCard({
   return (
     <Card className={!isActive && isComplete ? 'opacity-60' : ''}>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-2">
             <div
               className={`rounded-md p-0.5 ${
@@ -74,22 +74,27 @@ export function RelayerSelectionCard({
 
       {(isActive || !isComplete) && (
         <CardContent className="space-y-4">
-          <SelectField
-            id="selected-relayer"
-            label="Available Relayers"
-            name="selectedRelayer"
-            control={control}
-            options={relayerOptions}
-            validation={{ required: true }}
-            placeholder="Choose a relayer"
-          />
+          <div className="w-full">
+            <SelectField
+              id="selected-relayer"
+              label="Available Relayers"
+              name="selectedRelayer"
+              control={control}
+              options={relayerOptions}
+              validation={{ required: true }}
+              placeholder="Choose a relayer"
+            />
+          </div>
 
           {selectedRelayerId && (
-            <RelayerDetailsCard
-              details={fetchedRelayers.find((r) => r.relayerId === selectedRelayerId)!}
-              enhancedDetails={enhancedDetails}
-              loading={loadingEnhancedDetails}
-            />
+            <div className="w-full">
+              <RelayerDetailsCard
+                details={fetchedRelayers.find((r) => r.relayerId === selectedRelayerId)!}
+                enhancedDetails={enhancedDetails}
+                loading={loadingEnhancedDetails}
+                className="w-full"
+              />
+            </div>
           )}
         </CardContent>
       )}

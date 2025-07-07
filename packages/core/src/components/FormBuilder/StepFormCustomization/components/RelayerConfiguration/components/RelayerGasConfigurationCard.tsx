@@ -37,7 +37,7 @@ export function RelayerGasConfigurationCard({
   return (
     <Card className={isActive ? '' : ''}>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-2">
             <div
               className={`rounded-md p-0.5 ${
@@ -52,16 +52,6 @@ export function RelayerGasConfigurationCard({
             </div>
             <CardTitle className="text-base">Gas Configuration</CardTitle>
           </div>
-          {!isActive && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-sm">
-                <Zap className="h-3.5 w-3.5 text-green-600" />
-                <span className="text-green-600 font-medium">Fast Speed</span>
-              </div>
-              <span className="text-muted-foreground text-sm">•</span>
-              <span className="text-muted-foreground text-sm">Ready</span>
-            </div>
-          )}
         </div>
         <CardDescription className="mt-1">
           {isActive
@@ -75,10 +65,10 @@ export function RelayerGasConfigurationCard({
           <div className="space-y-3">
             <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4">
               <div className="flex items-start gap-3">
-                <div className="rounded-full bg-green-100 dark:bg-green-900/50 p-1.5 mt-0.5">
+                <div className="rounded-full bg-green-100 dark:bg-green-900/50 p-1.5 mt-0.5 flex-shrink-0">
                   <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 space-y-1 min-w-0">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100">
                     Fast Speed Preset Active
                   </p>
@@ -89,16 +79,16 @@ export function RelayerGasConfigurationCard({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Button
                 variant="outline"
                 onClick={() => onSetupStepChange('configuration')}
-                className="flex-1"
+                className="w-full sm:flex-1"
                 type="button"
               >
                 Customize Gas Settings
               </Button>
-              <p className="text-xs text-muted-foreground">(Optional)</p>
+              <p className="text-xs text-muted-foreground self-start sm:self-center">(Optional)</p>
             </div>
           </div>
         </CardContent>
