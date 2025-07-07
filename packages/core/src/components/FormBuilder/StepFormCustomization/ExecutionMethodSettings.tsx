@@ -13,12 +13,14 @@ export interface ExecutionMethodSettingsProps {
   currentConfig?: ExecutionConfig;
   onUpdateConfig: (config: ExecutionConfig | undefined, isValid: boolean) => void;
   adapter: ContractAdapter | null;
+  isWidgetExpanded?: boolean;
 }
 
 export function ExecutionMethodSettings({
   currentConfig,
   onUpdateConfig,
   adapter,
+  isWidgetExpanded = false,
 }: ExecutionMethodSettingsProps): React.ReactElement {
   // Use the custom hook to manage state and logic
   const { formMethods, supportedMethods, watchedEoaOption, validationError } =
@@ -41,6 +43,7 @@ export function ExecutionMethodSettings({
         watchedEoaOption={watchedEoaOption}
         adapter={adapter}
         setValue={formMethods.setValue}
+        isWidgetExpanded={isWidgetExpanded}
       />
 
       {/* Display validation error if present */}

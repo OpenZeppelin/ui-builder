@@ -1,4 +1,8 @@
+import { CircleHelp } from 'lucide-react';
+
 import { ReactNode } from 'react';
+
+import { Button } from '@openzeppelin/transaction-form-ui';
 
 export interface SelectableOption {
   id: string;
@@ -59,6 +63,16 @@ interface OptionSelectorProps<T extends SelectableOption> {
     columns?: number;
     gap?: number;
   };
+
+  /**
+   * Whether the left panel should be displayed in collapsed (compact) mode
+   */
+  isCollapsed?: boolean;
+
+  /**
+   * Optional mapping of option IDs to React icons for collapsed mode
+   */
+  iconMap?: Record<string, ReactNode>;
 }
 
 export function OptionSelector<T extends SelectableOption>({
@@ -72,6 +86,8 @@ export function OptionSelector<T extends SelectableOption>({
   emptyContent,
   noSelectionContent,
   layout = { columns: 3, gap: 4 },
+  isCollapsed = false,
+  iconMap,
 }: OptionSelectorProps<T>) {
   if (isLoading) {
     return (
@@ -89,7 +105,7 @@ export function OptionSelector<T extends SelectableOption>({
     );
   }
 
-  const gridClass = `grid grid-cols-${layout.columns || 3} gap-${layout.gap || 4}`;
+  const selectedOption = options.find((opt) => opt.id === selectedId);
 
   const defaultNoSelectionContent = (
     <div className="h-full flex flex-col items-center justify-center py-8">
@@ -100,29 +116,77 @@ export function OptionSelector<T extends SelectableOption>({
   );
 
   const columns = layout.columns || 3;
+  const gridClass = `grid gap-${layout.gap || 4}`;
+
+  // Function to get icon for an option
+  const getOptionIcon = (option: T): ReactNode => {
+    if (iconMap && iconMap[option.id]) {
+      return iconMap[option.id];
+    }
+    // Fallback to first letter or default icon
+    return <CircleHelp className="size-4" />;
+  };
 
   return (
-    <div className={gridClass}>
+    <div
+      className={`${gridClass} ${isCollapsed ? 'grid-cols-[auto_1fr]' : `grid-cols-${columns}`}`}
+    >
       {/* Option Selector (left panel) */}
-      <div className="rounded-md border overflow-hidden">
-        {options.map((option) => (
-          <div
-            key={option.id}
-            className={`
-              px-4 py-3 border-b last:border-0 cursor-pointer text-sm
-              ${selectedId === option.id ? 'bg-primary/5 font-medium' : 'hover:bg-muted/50'}
-              ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-            onClick={() => !option.disabled && onSelect(option.id)}
-          >
-            {option.label}
+      <div
+        className={`rounded-md border overflow-hidden transition-all duration-300 ${isCollapsed ? 'w-12' : ''}`}
+      >
+        {isCollapsed ? (
+          // Collapsed mode - show only icons
+          <div className="flex flex-col">
+            {options.map((option) => {
+              const isSelected = selectedId === option.id;
+              return (
+                <Button
+                  key={option.id}
+                  variant={isSelected ? 'default' : 'ghost'}
+                  size="sm"
+                  className={`
+                    w-full h-12 p-2 rounded-none border-b last:border-0 
+                    ${isSelected ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50'}
+                    ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
+                  onClick={() => !option.disabled && onSelect(option.id)}
+                  disabled={option.disabled}
+                  title={option.label}
+                >
+                  {getOptionIcon(option)}
+                </Button>
+              );
+            })}
           </div>
-        ))}
+        ) : (
+          // Normal mode - show full option labels
+          options.map((option) => (
+            <div
+              key={option.id}
+              className={`
+                px-4 py-3 border-b last:border-0 cursor-pointer text-sm transition-colors
+                ${selectedId === option.id ? 'bg-primary/5 font-medium' : 'hover:bg-muted/50'}
+                ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+              onClick={() => !option.disabled && onSelect(option.id)}
+            >
+              {option.label}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Configuration area (right panel) */}
-      <div className={`col-span-${columns - 1} rounded-md border p-4`}>
-        {configContent || noSelectionContent || defaultNoSelectionContent}
+      <div className={`col-span-${isCollapsed ? 1 : columns - 1} rounded-md border p-4 relative`}>
+        {isCollapsed && selectedOption && (
+          <div className="absolute top-2 left-2 text-xs text-muted-foreground font-medium">
+            {selectedOption.label}
+          </div>
+        )}
+        <div className={isCollapsed ? 'pt-6' : ''}>
+          {configContent || noSelectionContent || defaultNoSelectionContent}
+        </div>
       </div>
     </div>
   );
