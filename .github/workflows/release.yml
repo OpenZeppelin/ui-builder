@@ -1,3 +1,16 @@
+# PRIVATE REGISTRY RELEASE WORKFLOW
+# ==================================
+# This workflow currently publishes packages to GitHub's private registry.
+# All @openzeppelin packages (including dependencies) are resolved from the private registry
+# due to organization-level scoping in .npmrc.
+#
+# TRANSITION TO PUBLIC RELEASE:
+# When ready to publish publicly, update this workflow to:
+# 1. Remove GITHUB_TOKEN usage for package publishing
+# 2. Use NPM_TOKEN for publishing to npm
+# 3. Update semantic-release configuration to target npm registry
+# 4. Ensure .npmrc is updated (see .npmrc comments)
+
 name: Release
 
 on:
@@ -34,14 +47,13 @@ jobs:
         run: pnpm audit
         continue-on-error: true
 
-      # You need to set up the GITHUB_TOKEN and NPM_TOKEN secrets in your repository settings
-      # GITHUB_TOKEN: automatically provided by GitHub Actions, needs write permissions for contents and packages
-      # NPM_TOKEN: create and add to repository secrets if you plan to publish to npm
+      # CURRENT: Publishing to GitHub private registry
+      # FUTURE: When going public, update to use NPM_TOKEN for npm registry
       - name: Release
         env:
-          # Use the built-in GitHub token for GitHub operations
+          # Use the built-in GitHub token for GitHub operations and private registry publishing
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Add NPM_TOKEN to repository secrets if publishing to npm
+          # NPM_TOKEN: Will be needed when transitioning to public npm publishing
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Disable husky hooks during semantic-release
           HUSKY: 0
