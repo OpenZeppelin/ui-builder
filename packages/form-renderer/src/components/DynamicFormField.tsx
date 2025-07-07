@@ -41,6 +41,11 @@ function useShouldRenderField(field: FormFieldType, control: Control<FormValues>
   // This will reactively update when form values change
   const formValues = useWatch({ control });
 
+  // If the field is explicitly hidden, don't render it
+  if (field.isHidden) {
+    return false;
+  }
+
   // If there are no visible conditions, always render
   if (!field.visibleWhen) {
     return true;
