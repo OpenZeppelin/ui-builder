@@ -1,5 +1,5 @@
 ---
-'@openzeppelin/transaction-form-core': patch
+'@openzeppelin/transaction-form-builder-core': patch
 ---
 
 Fix checkbox state reset when switching between fields

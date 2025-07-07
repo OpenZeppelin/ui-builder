@@ -1,5 +1,5 @@
 ---
-'@openzeppelin/transaction-form-core': patch
+'@openzeppelin/transaction-form-builder-core': patch
 '@openzeppelin/transaction-form-ui': patch
 ---
 

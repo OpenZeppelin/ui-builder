@@ -1,5 +1,5 @@
 ---
-'@openzeppelin/transaction-form-core': minor
+'@openzeppelin/transaction-form-builder-core': minor
 ---
 
 Add auto-collapsible OptionSelector with icon support and responsive layout fixes
