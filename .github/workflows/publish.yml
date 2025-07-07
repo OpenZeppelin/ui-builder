@@ -108,3 +108,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY: 0 # Disable husky hooks for automated changeset commits
