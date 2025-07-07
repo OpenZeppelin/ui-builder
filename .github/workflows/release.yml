@@ -40,6 +40,10 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Configure npm authentication for private registry
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
       - name: Install dependencies
         run: pnpm install
 
