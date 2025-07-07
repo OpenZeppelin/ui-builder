@@ -1,3 +1,9 @@
+# PRIVATE REGISTRY VERSION CHECK WORKFLOW
+# =======================================
+# This workflow requires authentication for the GitHub private registry.
+# All @openzeppelin packages (including dependencies) are resolved from the private registry
+# due to organization-level scoping in .npmrc.
+
 name: Check Version Sync
 
 on:
