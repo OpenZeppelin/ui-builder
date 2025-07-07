@@ -8,6 +8,9 @@ jobs:
   lint:
     name: Lint Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +25,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+
+      - name: Configure npm authentication for private registry
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install
