@@ -1,4 +1,4 @@
-import type { UserRpcProviderConfig } from '../config';
+import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type {
   EoaExecutionConfig,
@@ -396,6 +396,28 @@ export interface ContractAdapter {
    * @returns A promise resolving to connection test results
    */
   testRpcConnection?(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }>;
+
+  /**
+   * (Optional) Validates a user-provided explorer configuration.
+   * Chain-specific validation logic to ensure the explorer URLs and API key are valid.
+   *
+   * @param explorerConfig - The explorer configuration to validate
+   * @returns A promise resolving to true if valid, false otherwise
+   */
+  validateExplorerConfig?(explorerConfig: UserExplorerConfig): Promise<boolean>;
+
+  /**
+   * (Optional) Tests the connection to an explorer API.
+   * Performs a health check on the explorer API to verify the API key works and measure latency.
+   *
+   * @param explorerConfig - The explorer configuration to test
+   * @returns A promise resolving to connection test results
+   */
+  testExplorerConnection?(explorerConfig: UserExplorerConfig): Promise<{
     success: boolean;
     latency?: number;
     error?: string;

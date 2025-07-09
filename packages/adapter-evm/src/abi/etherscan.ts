@@ -1,6 +1,7 @@
 import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { appConfigService } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
+import { resolveExplorerConfig } from '../configuration/explorer';
 import type { AbiItem } from '../types';
 
 import { transformAbiToSchema } from './transformer';
@@ -12,55 +13,45 @@ export async function loadAbiFromEtherscan(
   address: string,
   networkConfig: EvmNetworkConfig
 ): Promise<ContractSchema> {
-  const serviceIdentifier = networkConfig.primaryExplorerApiIdentifier;
+  const explorerConfig = resolveExplorerConfig(networkConfig);
 
-  if (!serviceIdentifier) {
-    console.error(
+  if (!explorerConfig.apiUrl) {
+    logger.error(
       'loadAbiFromEtherscan',
-      `primaryExplorerApiIdentifier is missing in the EVM network configuration for ${networkConfig.name} (ID: ${networkConfig.id}).`
+      `API URL is missing for ${networkConfig.name} (ID: ${networkConfig.id}).`
     );
+    throw new Error(`Explorer API URL is not configured for network: ${networkConfig.name}`);
+  }
+
+  if (!explorerConfig.apiKey) {
+    logger.error('loadAbiFromEtherscan', `API key is missing for ${networkConfig.name} explorer.`);
     throw new Error(
-      `Primary Explorer API identifier not configured for EVM network: ${networkConfig.name}`
+      `API key for ${networkConfig.name} explorer is not configured. Please configure your explorer API key.`
     );
   }
 
-  const apiKey = appConfigService.getExplorerApiKey(serviceIdentifier);
-
-  if (!apiKey) {
-    console.error(
-      'loadAbiFromEtherscan',
-      `API key for service '${serviceIdentifier}' is missing in AppConfigService.`
-    );
-    throw new Error(`API key for ${networkConfig.name} explorer is not configured.`);
-  }
-
-  const apiBaseUrl = networkConfig.apiUrl;
-
-  if (!apiBaseUrl) {
-    console.error(
-      'loadAbiFromEtherscan',
-      `API URL (apiUrl) is missing in the network configuration for ${networkConfig.name} (ID: ${networkConfig.id}).`
-    );
-    throw new Error(
-      `Etherscan-compatible API URL is not configured for network: ${networkConfig.name}`
-    );
-  }
-
-  const url = `${apiBaseUrl}?module=contract&action=getabi&address=${address}&apikey=${apiKey}`;
+  const url = `${explorerConfig.apiUrl}?module=contract&action=getabi&address=${address}&apikey=${explorerConfig.apiKey}`;
 
   let response: Response;
   try {
-    console.info(
-      `Fetching ABI from ${apiBaseUrl} for address: ${address} using service ID: ${serviceIdentifier}`
+    logger.info(
+      'loadAbiFromEtherscan',
+      `Fetching ABI from ${explorerConfig.apiUrl} for address: ${address}`
     );
     response = await fetch(url);
   } catch (networkError) {
-    console.error('Network error fetching ABI from Etherscan-compatible API:', networkError);
+    logger.error(
+      'loadAbiFromEtherscan',
+      `Network error fetching ABI from Explorer API: ${networkError}`
+    );
     throw new Error(`Network error fetching ABI: ${(networkError as Error).message}`);
   }
 
   if (!response.ok) {
-    console.error(`Explorer API request failed with status: ${response.status} for URL: ${url}`);
+    logger.error(
+      'loadAbiFromEtherscan',
+      `Explorer API request failed with status: ${response.status}`
+    );
     throw new Error(`Explorer API request failed: ${response.status} ${response.statusText}`);
   }
 
@@ -68,14 +59,17 @@ export async function loadAbiFromEtherscan(
   try {
     apiResult = await response.json();
   } catch (jsonError) {
-    console.error('Failed to parse Explorer API response as JSON:', jsonError);
+    logger.error(
+      'loadAbiFromEtherscan',
+      `Failed to parse Explorer API response as JSON: ${jsonError}`
+    );
     throw new Error('Invalid JSON response received from Explorer API.');
   }
 
   if (apiResult.status !== '1') {
-    console.warn(
-      'Explorer API error:',
-      `Status ${apiResult.status}, Message: ${apiResult.message}, Result: ${apiResult.result}`
+    logger.warn(
+      'loadAbiFromEtherscan',
+      `Explorer API error: Status ${apiResult.status}, Message: ${apiResult.message}, Result: ${apiResult.result}`
     );
     if (apiResult.result?.includes('Contract source code not verified')) {
       throw new Error(
@@ -92,12 +86,16 @@ export async function loadAbiFromEtherscan(
       throw new Error('Parsed ABI from Explorer API is not an array.');
     }
   } catch (error) {
-    console.error('Failed to parse ABI JSON string from Explorer API result:', error);
+    logger.error(
+      'loadAbiFromEtherscan',
+      `Failed to parse ABI JSON string from Explorer API result: ${error}`
+    );
     throw new Error(`Invalid ABI JSON received from Explorer API: ${(error as Error).message}`);
   }
 
-  console.info(
-    `Successfully parsed ABI for ${networkConfig.name} (service: ${serviceIdentifier}) with ${abi.length} items.`
+  logger.info(
+    'loadAbiFromEtherscan',
+    `Successfully parsed ABI for ${networkConfig.name} with ${abi.length} items.`
   );
   // TODO: Fetch contract name?
   const contractName = `Contract_${address.substring(0, 6)}`;

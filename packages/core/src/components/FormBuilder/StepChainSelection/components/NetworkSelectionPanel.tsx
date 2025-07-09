@@ -10,8 +10,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  ExplorerSettingsPanel,
   Input,
   RpcSettingsPanel,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
@@ -141,20 +146,36 @@ export function NetworkSelectionPanel({
       >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>RPC Provider Settings</DialogTitle>
-            <DialogDescription>
-              Configure a custom RPC provider for {rpcSettingsNetwork?.name}
-            </DialogDescription>
+            <DialogTitle>Network Settings</DialogTitle>
+            <DialogDescription>Configure settings for {rpcSettingsNetwork?.name}</DialogDescription>
           </DialogHeader>
           {rpcSettingsNetwork && activeAdapter && (
-            <RpcSettingsPanel
-              adapter={activeAdapter}
-              networkId={rpcSettingsNetwork.id}
-              onSettingsChanged={() => {
-                handleCloseRpcSettings();
-                // Components will automatically refresh via the RPC change event system
-              }}
-            />
+            <Tabs defaultValue="rpc" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
+                <TabsTrigger value="explorer">Explorer</TabsTrigger>
+              </TabsList>
+              <TabsContent value="rpc">
+                <RpcSettingsPanel
+                  adapter={activeAdapter}
+                  networkId={rpcSettingsNetwork.id}
+                  onSettingsChanged={() => {
+                    handleCloseRpcSettings();
+                    // Components will automatically refresh via the RPC change event system
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="explorer">
+                <ExplorerSettingsPanel
+                  adapter={activeAdapter}
+                  networkId={rpcSettingsNetwork.id}
+                  onSettingsChanged={() => {
+                    handleCloseRpcSettings();
+                    // Components will automatically refresh via the RPC change event system
+                  }}
+                />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>

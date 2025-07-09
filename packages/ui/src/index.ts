@@ -28,3 +28,4 @@ export * from './components/RelayerDetailsCard';
 
 // Export RPC components
 export * from './components/rpc';
+export * from './components/explorer/ExplorerSettingsPanel';

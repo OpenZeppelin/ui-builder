@@ -24,6 +24,7 @@ import type {
   RelayerDetailsRich,
   TransactionStatusUpdate,
   UiKitConfiguration,
+  UserExplorerConfig,
   UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -54,8 +55,10 @@ import {
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   getEvmSupportedExecutionMethods,
+  testEvmExplorerConnection,
   testEvmRpcConnection,
   validateEvmExecutionConfig,
+  validateEvmExplorerConfig,
   validateEvmRpcEndpoint,
 } from './configuration';
 import {
@@ -524,6 +527,24 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
     error?: string;
   }> {
     return testEvmRpcConnection(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateExplorerConfig(explorerConfig: UserExplorerConfig): Promise<boolean> {
+    return validateEvmExplorerConfig(explorerConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testExplorerConnection(explorerConfig: UserExplorerConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }> {
+    return testEvmExplorerConnection(explorerConfig, this.networkConfig);
   }
 }
 
