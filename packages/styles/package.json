@@ -11,8 +11,8 @@
   "scripts": {
     "clean": "echo 'No build artifacts to clean'",
     "build": "echo 'No build step needed for styles'",
-    "lint": "eslint 'utils/**/*.{js,cjs}' --report-unused-disable-directives --max-warnings 0 --config ../../eslint.config.cjs",
-    "lint:fix": "eslint 'utils/**/*.{js,cjs}' --fix --config ../../eslint.config.cjs",
+    "lint": "echo 'No JavaScript files to lint in styles package'",
+    "lint:fix": "echo 'No JavaScript files to lint in styles package'",
     "format": "prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
     "format:check": "prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
     "test": "echo 'No tests for styles package'"

@@ -61,6 +61,51 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Keyframes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.4s var(--ease-out) forwards;
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.2s var(--ease-out);
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 0.2s var(--ease-out);
+  }
+}
+
 /* Light theme */
 :root {
   /* Base colors */
