@@ -1,3 +1,8 @@
+import {
+  testStellarRpcConnection,
+  validateStellarRpcEndpoint,
+} from 'packages/adapter-stellar/src/configuration';
+
 import type {
   AvailableUiKit,
   Connector,
@@ -14,6 +19,7 @@ import type {
   RelayerDetailsRich,
   StellarNetworkConfig,
   UiKitConfiguration,
+  UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isStellarNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -227,6 +233,26 @@ export class StellarAdapter implements ContractAdapter {
   ): Promise<RelayerDetailsRich> {
     console.warn('getRelayer is not implemented for the Stellar adapter yet.');
     return Promise.resolve({} as RelayerDetailsRich);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {
+    // TODO: Implement Stellar-specific RPC validation when needed
+    return validateStellarRpcEndpoint(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }> {
+    // TODO: Implement Stellar-specific RPC validation when needed
+    return testStellarRpcConnection(rpcConfig);
   }
 }
 

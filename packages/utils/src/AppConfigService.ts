@@ -5,6 +5,7 @@ import type {
   NetworkServiceConfigs,
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
+  UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 
 import { logger } from './logger';
@@ -305,7 +306,9 @@ export class AppConfigService {
     return serviceParams?.[paramName];
   }
 
-  public getRpcEndpointOverride(networkId: string): string | RpcEndpointConfig | undefined {
+  public getRpcEndpointOverride(
+    networkId: string
+  ): string | RpcEndpointConfig | UserRpcProviderConfig | undefined {
     if (!this.isInitialized) {
       logger.warn(LOG_SYSTEM, 'getRpcEndpointOverride called before initialization.');
     }

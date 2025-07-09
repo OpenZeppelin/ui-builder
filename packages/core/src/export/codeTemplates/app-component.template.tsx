@@ -7,7 +7,7 @@
  */
 /*------------TEMPLATE COMMENT END------------*/
 import {
-  WalletConnectionHeader,
+  WalletConnectionWithSettings,
   useDerivedAccountStatus,
   useWalletState,
 } from '@openzeppelin/transaction-form-react-core';
@@ -50,7 +50,7 @@ export function App() {
               </p>
             </div>
           </div>
-          <WalletConnectionHeader />
+          <WalletConnectionWithSettings />
         </div>
       </header>
 

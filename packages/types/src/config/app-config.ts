@@ -63,11 +63,27 @@ export interface RpcEndpointConfig {
 }
 
 /**
+ * Configuration for a user-provided RPC provider.
+ * This allows users to configure their own RPC endpoints with API keys.
+ */
+export interface UserRpcProviderConfig {
+  /** The RPC endpoint URL */
+  url: string;
+  /** Optional API key for providers that require authentication */
+  apiKey?: string;
+  /** User-friendly name for this configuration (e.g., "My Alchemy Key") */
+  name?: string;
+  /** Whether this is a custom user-provided configuration */
+  isCustom: boolean;
+}
+
+/**
  * A collection of RPC endpoint overrides, keyed by network ID (e.g., networkConfig.id).
- * Values can be a simple string (assumed to be HTTP) or an RpcEndpointConfig object.
+ * Values can be a simple string (assumed to be HTTP), an RpcEndpointConfig object,
+ * or a UserRpcProviderConfig for user-configured endpoints.
  */
 export interface NetworkSpecificRpcEndpoints {
-  [networkId: string]: string | RpcEndpointConfig | undefined;
+  [networkId: string]: string | RpcEndpointConfig | UserRpcProviderConfig | undefined;
 }
 
 /**

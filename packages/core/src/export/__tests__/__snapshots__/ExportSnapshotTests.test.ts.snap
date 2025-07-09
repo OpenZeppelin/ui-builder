@@ -16,7 +16,7 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
 "import {
-  WalletConnectionHeader,
+  WalletConnectionWithSettings,
   useDerivedAccountStatus,
   useWalletState,
 } from '@openzeppelin/transaction-form-react-core';
@@ -58,7 +58,7 @@ export function App() {
               </p>
             </div>
           </div>
-          <WalletConnectionHeader />
+          <WalletConnectionWithSettings />
         </div>
       </header>
 

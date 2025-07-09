@@ -14,6 +14,7 @@ import type {
   RelayerDetailsRich,
   SolanaNetworkConfig,
   UiKitConfiguration,
+  UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -22,7 +23,9 @@ import {
   getSolanaExplorerAddressUrl,
   getSolanaExplorerTxUrl,
   getSolanaSupportedExecutionMethods,
+  testSolanaRpcConnection,
   validateSolanaExecutionConfig,
+  validateSolanaRpcEndpoint,
 } from './configuration';
 // Import implementations from modules
 import {
@@ -249,6 +252,26 @@ export class SolanaAdapter implements ContractAdapter {
   ): Promise<RelayerDetailsRich> {
     console.warn('getRelayer is not implemented for the Solana adapter yet.');
     return Promise.resolve({} as RelayerDetailsRich);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {
+    // TODO: Implement Solana-specific RPC validation when needed
+    return validateSolanaRpcEndpoint(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async testRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }> {
+    // TODO: Implement Solana-specific RPC validation when needed
+    return testSolanaRpcConnection(rpcConfig);
   }
 }
 

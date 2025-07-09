@@ -1,3 +1,8 @@
+import {
+  testMidnightRpcConnection,
+  validateMidnightRpcEndpoint,
+} from 'packages/adapter-midnight/src/configuration';
+
 import type {
   AvailableUiKit,
   Connector,
@@ -17,6 +22,7 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   UiKitConfiguration,
+  UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -286,6 +292,26 @@ export class MidnightAdapter implements ContractAdapter {
   ): Promise<RelayerDetailsRich> {
     console.warn('getRelayer is not implemented for the Midnight adapter yet.');
     return Promise.resolve({} as RelayerDetailsRich);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {
+    // TODO: Implement Midnight-specific RPC validation when needed
+    return validateMidnightRpcEndpoint(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }> {
+    // TODO: Implement Midnight-specific RPC validation when needed
+    return testMidnightRpcConnection(rpcConfig);
   }
 }
 

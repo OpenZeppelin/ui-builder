@@ -25,3 +25,6 @@ export * from './components/fields';
 
 // Export other components
 export * from './components/RelayerDetailsCard';
+
+// Export RPC components
+export * from './components/rpc';

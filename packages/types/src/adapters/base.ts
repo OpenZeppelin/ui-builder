@@ -1,3 +1,4 @@
+import type { UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type {
   EoaExecutionConfig,
@@ -377,4 +378,26 @@ export interface ContractAdapter {
         onChange: (options: Record<string, unknown>) => void;
       }>
     | undefined;
+
+  /**
+   * (Optional) Validates an RPC endpoint configuration.
+   * Chain-specific validation logic to ensure the RPC URL and configuration are valid.
+   *
+   * @param rpcConfig - The RPC provider configuration to validate
+   * @returns A promise resolving to true if valid, false otherwise
+   */
+  validateRpcEndpoint?(rpcConfig: UserRpcProviderConfig): Promise<boolean>;
+
+  /**
+   * (Optional) Tests the connection to an RPC endpoint.
+   * Performs a health check on the RPC endpoint to verify connectivity and measure latency.
+   *
+   * @param rpcConfig - The RPC provider configuration to test
+   * @returns A promise resolving to connection test results
+   */
+  testRpcConnection?(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }>;
 }

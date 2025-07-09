@@ -156,8 +156,13 @@ export class WagmiWalletImplementation {
           let httpRpcOverride: string | undefined;
           if (typeof rpcOverrideSetting === 'string') {
             httpRpcOverride = rpcOverrideSetting;
-          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
-            httpRpcOverride = rpcOverrideSetting.http;
+          } else if (typeof rpcOverrideSetting === 'object') {
+            // Handle both RpcEndpointConfig and UserRpcProviderConfig
+            if ('http' in rpcOverrideSetting && rpcOverrideSetting.http) {
+              httpRpcOverride = rpcOverrideSetting.http;
+            } else if ('url' in rpcOverrideSetting && rpcOverrideSetting.url) {
+              httpRpcOverride = rpcOverrideSetting.url;
+            }
           }
           if (httpRpcOverride) {
             logger.info(
@@ -188,6 +193,38 @@ export class WagmiWalletImplementation {
         transports: { [mainnet.id]: http() },
       });
     }
+  }
+
+  /**
+   * Wrapper function to convert AppConfigService RPC overrides to the format expected by RainbowKit.
+   * @param networkId - The network ID to get RPC override for
+   * @returns RPC configuration in the format expected by RainbowKit
+   */
+  private getRpcOverrideForRainbowKit(
+    networkId: string
+  ): string | { http?: string; ws?: string } | undefined {
+    const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(networkId);
+
+    if (typeof rpcOverrideSetting === 'string') {
+      return rpcOverrideSetting;
+    } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting !== null) {
+      // Check for UserRpcProviderConfig first
+      if ('url' in rpcOverrideSetting && typeof rpcOverrideSetting.url === 'string') {
+        // It's a UserRpcProviderConfig - convert url to http
+        return {
+          http: rpcOverrideSetting.url,
+        };
+      } else if ('http' in rpcOverrideSetting || 'ws' in rpcOverrideSetting) {
+        // It's an RpcEndpointConfig
+        const config = rpcOverrideSetting as { http?: string; ws?: string };
+        return {
+          http: config.http,
+          ws: config.ws,
+        };
+      }
+    }
+
+    return undefined;
   }
 
   /**
@@ -223,7 +260,7 @@ export class WagmiWalletImplementation {
       currentAdapterUiKitConfig,
       defaultSupportedChains as WagmiConfigChains,
       viemChainIdToAppNetworkId,
-      appConfigService.getRpcEndpointOverride.bind(appConfigService)
+      this.getRpcOverrideForRainbowKit.bind(this)
     );
     if (rainbowKitWagmiConfig) {
       logger.info(LOG_SYSTEM, 'Returning RainbowKit-specific Wagmi config for provider.');

@@ -1,9 +1,18 @@
-import { Search } from 'lucide-react';
+import { Search, Settings } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
+import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import { Input } from '@openzeppelin/transaction-form-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  RpcSettingsPanel,
+} from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
@@ -24,6 +33,8 @@ export function NetworkSelectionPanel({
   const [networks, setNetworks] = useState<NetworkConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [rpcSettingsNetwork, setRpcSettingsNetwork] = useState<NetworkConfig | null>(null);
+  const { activeAdapter } = useWalletState();
 
   // Fetch networks for the selected ecosystem
   useEffect(() => {
@@ -55,6 +66,15 @@ export function NetworkSelectionPanel({
   const mainnetNetworks = filteredNetworks.filter((n) => n.type === 'mainnet');
   const testnetNetworks = filteredNetworks.filter((n) => n.type === 'testnet');
   const devnetNetworks = filteredNetworks.filter((n) => n.type === 'devnet');
+
+  const handleOpenRpcSettings = (network: NetworkConfig, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent network selection
+    setRpcSettingsNetwork(network);
+  };
+
+  const handleCloseRpcSettings = () => {
+    setRpcSettingsNetwork(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -88,6 +108,7 @@ export function NetworkSelectionPanel({
               networks={mainnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              onOpenRpcSettings={handleOpenRpcSettings}
             />
           )}
 
@@ -97,6 +118,7 @@ export function NetworkSelectionPanel({
               networks={testnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              onOpenRpcSettings={handleOpenRpcSettings}
             />
           )}
 
@@ -106,10 +128,36 @@ export function NetworkSelectionPanel({
               networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              onOpenRpcSettings={handleOpenRpcSettings}
             />
           )}
         </div>
       )}
+
+      {/* RPC Settings Dialog */}
+      <Dialog
+        open={!!rpcSettingsNetwork}
+        onOpenChange={(open) => !open && handleCloseRpcSettings()}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>RPC Provider Settings</DialogTitle>
+            <DialogDescription>
+              Configure a custom RPC provider for {rpcSettingsNetwork?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {rpcSettingsNetwork && activeAdapter && (
+            <RpcSettingsPanel
+              adapter={activeAdapter}
+              networkId={rpcSettingsNetwork.id}
+              onSettingsChanged={() => {
+                handleCloseRpcSettings();
+                // Components will automatically refresh via the RPC change event system
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -119,6 +167,7 @@ interface NetworkGroupProps {
   networks: NetworkConfig[];
   onNetworkSelected: (networkConfigId: string) => void;
   selectedNetworkId?: string | null;
+  onOpenRpcSettings: (network: NetworkConfig, event: React.MouseEvent) => void;
 }
 
 function NetworkGroup({
@@ -126,20 +175,31 @@ function NetworkGroup({
   networks,
   onNetworkSelected,
   selectedNetworkId,
+  onOpenRpcSettings,
 }: NetworkGroupProps) {
   return (
     <div className="space-y-3">
       <h4 className="font-medium text-sm">{title}</h4>
       {/* Horizontally scrollable container for many networks */}
       <div className="overflow-x-auto pb-2">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-w-max">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-w-max">
           {networks.map((network) => (
-            <NetworkMiniTile
-              key={network.id}
-              network={network}
-              isSelected={network.id === selectedNetworkId}
-              onSelect={() => onNetworkSelected(network.id)}
-            />
+            <div key={network.id} className="relative group">
+              <NetworkMiniTile
+                network={network}
+                isSelected={network.id === selectedNetworkId}
+                onSelect={() => onNetworkSelected(network.id)}
+              />
+              {/* RPC Settings button - positioned inside the card bounds */}
+              <button
+                type="button"
+                onClick={(e) => onOpenRpcSettings(network, e)}
+                className="absolute top-2 right-2 p-1 rounded bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent/80"
+                title="Configure RPC settings"
+              >
+                <Settings size={14} className="text-muted-foreground" />
+              </button>
+            </div>
           ))}
         </div>
       </div>
