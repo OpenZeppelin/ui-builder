@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-adapter-midnight",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Midnight Adapter for Transaction Form Builder",
   "keywords": [
     "openzeppelin",
