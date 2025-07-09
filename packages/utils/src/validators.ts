@@ -2,12 +2,10 @@
  * URL validation utilities
  */
 
-// Comprehensive URL regex that validates various URL formats
-const URL_REGEX = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
 
 /**
  * Validates if a string is a valid URL (supports http, https, and ftp protocols).
- * This is a more comprehensive validation than just checking URL constructor.
+ * Relies solely on the URL constructor for validation.
  *
  * @param urlString - The string to validate
  * @returns True if the URL is valid, false otherwise
