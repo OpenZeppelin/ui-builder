@@ -125,11 +125,15 @@ export function validateEvmRpcEndpoint(rpcConfig: UserRpcProviderConfig): boolea
 }
 
 /**
- * Tests the connection to an EVM RPC endpoint.
+ * Tests the connection to an EVM RPC endpoint with a timeout.
  * @param rpcConfig - The RPC provider configuration to test
+ * @param timeoutMs - Timeout in milliseconds (default: 5000ms)
  * @returns Connection test results including success status, latency, and any errors
  */
-export async function testEvmRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
+export async function testEvmRpcConnection(
+  rpcConfig: UserRpcProviderConfig,
+  timeoutMs: number = 5000
+): Promise<{
   success: boolean;
   latency?: number;
   error?: string;
@@ -137,6 +141,10 @@ export async function testEvmRpcConnection(rpcConfig: UserRpcProviderConfig): Pr
   if (!rpcConfig.url) {
     return { success: false, error: 'RPC URL is required' };
   }
+
+  // Create an AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const startTime = Date.now();
@@ -153,6 +161,7 @@ export async function testEvmRpcConnection(rpcConfig: UserRpcProviderConfig): Pr
         params: [],
         id: 1,
       }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -169,9 +178,21 @@ export async function testEvmRpcConnection(rpcConfig: UserRpcProviderConfig): Pr
     return { success: true, latency };
   } catch (error) {
     logger.error('testEvmRpcConnection', 'Connection test failed:', error);
+
+    // Check if the error was due to timeout
+    if (error instanceof Error && error.name === 'AbortError') {
+      return {
+        success: false,
+        error: `Connection timeout after ${timeoutMs}ms`,
+      };
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Connection failed',
     };
+  } finally {
+    // Clear the timeout
+    clearTimeout(timeoutId);
   }
 }
