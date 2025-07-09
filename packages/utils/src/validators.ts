@@ -2,7 +2,6 @@
  * URL validation utilities
  */
 
-
 /**
  * Validates if a string is a valid URL (supports http, https, and ftp protocols).
  * Relies solely on the URL constructor for validation.
@@ -19,8 +18,7 @@ export function isValidUrl(urlString: string): boolean {
     // First check with URL constructor for basic validity
     new URL(urlString);
 
-    // Then apply our regex for more strict validation
-    return URL_REGEX.test(urlString);
+    return true;
   } catch {
     return false;
   }
