@@ -69,6 +69,8 @@ module.exports = {
       'getRelayers',
       'getRelayer',
       'getRelayerOptionsComponent',
+      'validateRpcEndpoint',
+      'testRpcConnection',
     ];
 
     // Common standard methods and properties that are allowed

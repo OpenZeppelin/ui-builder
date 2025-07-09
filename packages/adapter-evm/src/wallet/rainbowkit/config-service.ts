@@ -141,8 +141,14 @@ export async function createRainbowKitWagmiConfig(
 
           if (typeof rpcOverrideSetting === 'string') {
             httpRpcOverride = rpcOverrideSetting;
-          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting?.http) {
-            httpRpcOverride = rpcOverrideSetting.http;
+          } else if (typeof rpcOverrideSetting === 'object') {
+            // Handle both RpcEndpointConfig and UserRpcProviderConfig
+            if (rpcOverrideSetting?.http) {
+              httpRpcOverride = rpcOverrideSetting.http;
+            } else if ('url' in rpcOverrideSetting && rpcOverrideSetting.url) {
+              // Handle UserRpcProviderConfig
+              httpRpcOverride = rpcOverrideSetting.url as string;
+            }
           }
 
           if (httpRpcOverride) {

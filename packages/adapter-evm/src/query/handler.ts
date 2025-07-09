@@ -5,6 +5,7 @@ import type {
   EvmNetworkConfig,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
+import { userRpcConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';
@@ -15,13 +16,23 @@ import { isEvmViewFunction } from './view-checker';
 
 /**
  * Private helper to get a PublicClient instance for view queries.
- * Prioritizes connected wallet client if on the correct chain.
+ * Prioritizes custom RPC configuration, then connected wallet client if on the correct chain.
  * Otherwise, creates a dedicated client using the resolved RPC URL for the target network.
  */
 async function getPublicClientForQuery(
   walletImplementation: WagmiWalletImplementation,
   networkConfig: EvmNetworkConfig
 ): Promise<PublicClient> {
+  // First check if there's a custom RPC configuration
+  const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
+
+  if (customRpcConfig) {
+    // Always create a new client with custom RPC when configured
+    const resolvedRpc = resolveRpcUrl(networkConfig);
+    return createPublicClientWithRpc(networkConfig, resolvedRpc);
+  }
+
+  // If no custom RPC, check if wallet is connected to correct chain
   const accountStatus = walletImplementation.getWalletConnectionStatus();
   const walletChainId = accountStatus.chainId ? Number(accountStatus.chainId) : undefined;
   const isConnectedToCorrectChain =
@@ -30,9 +41,6 @@ async function getPublicClientForQuery(
   if (isConnectedToCorrectChain) {
     const clientFromWallet = await walletImplementation.getPublicClient();
     if (clientFromWallet) {
-      console.log(
-        `Using connected wallet's public client (Chain ID: ${walletChainId}) for query on ${networkConfig.name}.`
-      );
       return clientFromWallet;
     } else {
       console.warn(
@@ -46,7 +54,13 @@ async function getPublicClientForQuery(
   console.log(
     `Wallet not connected/on wrong chain OR failed to get wallet client. Creating dedicated public client for query on ${networkConfig.name} using RPC: ${resolvedRpc}`
   );
+  return createPublicClientWithRpc(networkConfig, resolvedRpc);
+}
 
+/**
+ * Helper to create a public client with a specific RPC URL
+ */
+function createPublicClientWithRpc(networkConfig: EvmNetworkConfig, rpcUrl: string): PublicClient {
   let chainForViem: Chain;
   if (networkConfig.viemChain) {
     chainForViem = networkConfig.viemChain;
@@ -77,7 +91,7 @@ async function getPublicClientForQuery(
   try {
     const publicClient = createPublicClient({
       chain: chainForViem,
-      transport: http(resolvedRpc),
+      transport: http(rpcUrl),
     });
     return publicClient;
   } catch (error) {

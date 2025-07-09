@@ -1,6 +1,8 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
+import { getInvalidUrlMessage, isValidUrl } from '@openzeppelin/transaction-form-utils';
+
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
@@ -12,8 +14,6 @@ import {
   handleEscapeKey,
   validateField,
 } from './utils';
-
-const URL_REGEX = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
 
 /**
  * URL input field component specifically designed for React Hook Form integration.
@@ -59,9 +59,9 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
               return standardValidationResult;
             }
 
-            // Perform URL-specific validation
-            if (typeof value === 'string' && value && !URL_REGEX.test(value)) {
-              return 'Please enter a valid URL (e.g., https://example.com)';
+            // Perform URL-specific validation using the shared validator
+            if (typeof value === 'string' && value && !isValidUrl(value)) {
+              return getInvalidUrlMessage();
             }
 
             // If all checks pass

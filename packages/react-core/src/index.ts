@@ -29,3 +29,4 @@ export { useDerivedDisconnect, type DerivedDisconnectStatus } from './hooks/useD
 // UI Components
 export { WalletConnectionHeader } from './components/WalletConnectionHeader';
 export { WalletConnectionUI } from './components/WalletConnectionUI';
+export { WalletConnectionWithSettings } from './components/WalletConnectionWithSettings';

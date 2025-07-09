@@ -24,6 +24,7 @@ import type {
   RelayerDetailsRich,
   TransactionStatusUpdate,
   UiKitConfiguration,
+  UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
@@ -53,7 +54,9 @@ import {
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   getEvmSupportedExecutionMethods,
+  testEvmRpcConnection,
   validateEvmExecutionConfig,
+  validateEvmRpcEndpoint,
 } from './configuration';
 import {
   generateEvmDefaultField,
@@ -503,6 +506,24 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
           "If the contract is not verified on the block explorer, paste the contract's ABI JSON here. You can find this in your contract's compilation artifacts or deployment files.",
       },
     ];
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {
+    return validateEvmRpcEndpoint(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }> {
+    return testEvmRpcConnection(rpcConfig);
   }
 }
 

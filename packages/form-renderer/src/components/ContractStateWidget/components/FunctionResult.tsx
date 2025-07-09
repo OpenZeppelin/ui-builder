@@ -1,6 +1,7 @@
 import { JSX } from 'react';
 
 import type { ContractFunction } from '@openzeppelin/transaction-form-types';
+import { cn } from '@openzeppelin/transaction-form-utils';
 
 interface FunctionResultProps {
   functionDetails: ContractFunction;
@@ -37,9 +38,11 @@ export function FunctionResult({
         <div className="text-xs text-muted-foreground italic animate-pulse">Loading...</div>
       ) : hasResult ? (
         <pre
-          className={`text-xs p-1 max-h-24 bg-muted overflow-auto rounded whitespace-pre-wrap break-all ${
-            isError ? 'text-destructive' : ''
-          }`}
+          className={cn(
+            'text-xs p-1 max-h-24 bg-muted overflow-auto rounded whitespace-pre-wrap break-all',
+            'animate-fade-in',
+            isError && 'text-destructive'
+          )}
         >
           {formattedResult}
         </pre>
