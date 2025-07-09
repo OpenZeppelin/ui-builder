@@ -5,7 +5,7 @@ import type {
   EvmNetworkConfig,
   FunctionParameter,
 } from '@openzeppelin/transaction-form-types';
-import { userRpcConfigService } from '@openzeppelin/transaction-form-utils';
+import { logger, userRpcConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';
@@ -43,7 +43,8 @@ async function getPublicClientForQuery(
     if (clientFromWallet) {
       return clientFromWallet;
     } else {
-      console.warn(
+      logger.warn(
+        'getPublicClientForQuery',
         `Could not get public client from connected wallet for chain ${walletChainId}. Falling back.`
       );
     }

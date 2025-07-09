@@ -1,6 +1,7 @@
 import { NetworkIcon } from '@web3icons/react';
 
 import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { cn } from '@openzeppelin/transaction-form-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { ICON_SIZE, getNetworkIconName } from '../utils/utils';
@@ -21,9 +22,10 @@ export function NetworkMiniTile({ network, isSelected, onSelect }: NetworkMiniTi
     <button
       type="button"
       onClick={onSelect}
-      className={`hover:bg-muted flex flex-col rounded-md border p-3 text-left transition-all w-full ${
+      className={cn(
+        'hover:bg-muted flex flex-col rounded-md border p-3 text-left transition-all w-full',
         isSelected ? 'border-primary bg-primary/5 ring-primary/20 ring-1' : 'border-border bg-card'
-      }`}
+      )}
       aria-selected={isSelected}
       // Add a more descriptive title for accessibility and hover
       title={`${network.name}${network.type === 'testnet' || network.type === 'devnet' ? ` (${network.type})` : ''} - ${network.ecosystem.toUpperCase()}`}

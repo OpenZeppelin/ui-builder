@@ -6,7 +6,7 @@ import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import type { ContractAdapter, UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
-import { userRpcConfigService } from '@openzeppelin/transaction-form-utils';
+import { logger, userRpcConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,7 @@ export function RpcSettingsPanel({
         setValue('rpcUrl', config.url);
       }
     } catch (error) {
-      console.error('Error loading RPC configuration:', error);
+      logger.error('RpcSettingsPanel', 'Error loading RPC configuration:', error);
     }
   }, [networkId, setValue]);
 
@@ -179,7 +179,6 @@ export function RpcSettingsPanel({
           label="RPC Endpoint URL"
           placeholder="https://eth-mainnet.g.alchemy.com/v2/your-api-key"
           helperText="Enter your complete RPC endpoint URL including any API keys"
-          validation={{}}
         />
       </div>
 
