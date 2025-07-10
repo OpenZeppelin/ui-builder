@@ -112,7 +112,7 @@ export function validateEvmExplorerConfig(explorerConfig: UserExplorerConfig): b
   }
 
   // Basic API key validation (not empty)
-  if (explorerConfig.apiKey && explorerConfig.apiKey.trim().length === 0) {
+  if (explorerConfig.apiKey !== undefined && explorerConfig.apiKey.trim().length === 0) {
     return false;
   }
 
