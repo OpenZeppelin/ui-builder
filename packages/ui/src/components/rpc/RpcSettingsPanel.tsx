@@ -154,19 +154,12 @@ export function RpcSettingsPanel({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>RPC Endpoint Configuration</AlertTitle>
-        <AlertDescription className="space-y-2">
-          <p>RPC endpoints are prioritized in the following order:</p>
-          <ol className="list-decimal list-inside text-sm space-y-1 ml-2">
-            <li>User&apos;s connected wallet RPC (e.g., MetaMask custom RPC)</li>
-            <li>Custom RPC endpoints (configured here)</li>
-            <li>Application-configured endpoints</li>
-            <li>Default network endpoints</li>
-          </ol>
-          <p className="text-sm mt-3">
-            <strong>Why use custom RPCs?</strong> Setting your own RPC endpoint ensures better
-            reliability, faster response times, and higher rate limits. Public endpoints may be
-            rate-limited or experience congestion during high traffic periods.
+        <AlertTitle className="text-sm">RPC Endpoint Configuration</AlertTitle>
+        <AlertDescription className="space-y-1 text-xs">
+          <p className="mt-2">
+            Setting your own RPC endpoint ensures better reliability, faster response times, and
+            higher rate limits. Public endpoints may be rate-limited or experience congestion during
+            high traffic periods.
           </p>
         </AlertDescription>
       </Alert>

@@ -1,4 +1,6 @@
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { UserExplorerConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Gets a blockchain explorer URL for an address on Stellar.
@@ -38,4 +40,31 @@ export function getStellarExplorerTxUrl(
   // Construct the URL, assuming a standard /tx/ path for Stellar explorers
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
   return `${baseUrl}/tx/${txHash}`;
+}
+
+/**
+ * Validates an explorer configuration for Stellar networks.
+ * @param explorerConfig - The explorer configuration to validate
+ * @returns True if the configuration is valid, false otherwise
+ */
+export function validateStellarExplorerConfig(_explorerConfig: UserExplorerConfig): boolean {
+  // TODO: Implement Stellar-specific explorer validation when needed
+  logger.info('validateStellarExplorerConfig', 'Stellar explorer validation not yet implemented');
+  return true;
+}
+
+/**
+ * Tests the connection to a Stellar explorer API.
+ * @param explorerConfig - The explorer configuration to test
+ * @returns Connection test results including success status, latency, and any errors
+ */
+export async function testStellarExplorerConnection(_explorerConfig: UserExplorerConfig): Promise<{
+  success: boolean;
+  latency?: number;
+  error?: string;
+}> {
+  // TODO: Implement explorer connection testing for Stellar
+  // Could use a health check endpoint if available
+  logger.info('testStellarExplorerConnection', 'TODO: Implement explorer connection testing');
+  return { success: true };
 }

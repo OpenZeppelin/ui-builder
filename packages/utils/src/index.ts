@@ -1,6 +1,7 @@
 export * from './logger';
 export * from './AppConfigService';
 export * from './UserRpcConfigService';
+export * from './UserExplorerConfigService';
 export * from './fieldDefaults';
 export * from './typeguards';
 export * from './cn';

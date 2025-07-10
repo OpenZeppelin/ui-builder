@@ -3,9 +3,9 @@ import { RefreshCw } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 
 import type {
+  ContractAdapter,
   ContractFunction,
   ContractSchema,
-  FullContractAdapter,
 } from '@openzeppelin/transaction-form-types';
 import { Button } from '@openzeppelin/transaction-form-ui';
 import {
@@ -21,7 +21,7 @@ import { FunctionResult } from './FunctionResult';
 interface ViewFunctionsPanelProps {
   functions: ContractFunction[];
   contractAddress: string;
-  adapter: FullContractAdapter;
+  adapter: ContractAdapter;
   contractSchema: ContractSchema;
   className?: string;
 }

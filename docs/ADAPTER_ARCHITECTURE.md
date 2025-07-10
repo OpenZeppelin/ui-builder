@@ -227,6 +227,49 @@ The `resolveRpcUrl` utility in the EVM adapter demonstrates this pattern:
 
 This ensures that developers and end-users have a reliable way to configure critical network parameters.
 
+### 7.3. User-Provided RPC Configuration
+
+Just as API keys can be customized, the architecture also allows users to provide their own custom RPC endpoints for any network. This is essential for users who need to connect to private nodes, use paid RPC services for higher reliability, or simply wish to avoid public endpoints.
+
+This feature is implemented using a pattern almost identical to the `appConfigService` override, but is designed for user-facing configuration that is persisted locally in the browser:
+
+1.  **`UserRpcConfigService`**: A dedicated service in `@openzeppelin/transaction-form-utils` that handles saving, retrieving, and managing user-defined RPC endpoints in `localStorage`.
+2.  **Adapter Integration**: Each adapter must respect these user-provided endpoints. The `resolveRpcUrl` utility in the EVM adapter is a perfect example of this. It establishes a clear priority for which RPC endpoint to use.
+3.  **UI Component**: The `RpcSettingsPanel` in the `packages/ui` library provides a user interface for adding, testing, and saving custom RPC endpoints.
+
+### 7.4. Example: Resolving an RPC URL
+
+The `resolveRpcUrl` utility in the EVM adapter demonstrates a layered approach to ensure maximum flexibility. It resolves the final RPC URL to be used with the following order of precedence:
+
+1.  **User Custom RPC**: It first checks `UserRpcConfigService` for a custom RPC endpoint saved by the user for the current network. If a valid one exists, it is used immediately.
+2.  **Application Config Override**: If no user-configured RPC is found, it then checks `appConfigService` for an RPC override (from `app.config.json` or environment variables).
+3.  **Default Network RPC**: Finally, if neither of the above is present, it falls back to the default `rpcUrl` hardcoded in the adapter's `NetworkConfig` object.
+
+This layered approach guarantees that user preferences are prioritized, while still providing sensible fallbacks for developers and application deployers.
+
+### 7.5. User-Provided Explorer Configuration
+
+To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the Transaction Form Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
+
+This system is parallel to the RPC configuration and follows a similar pattern:
+
+1.  **`UserExplorerConfig` Interface**: A standardized interface in `packages/types` defines the shape of a user's custom explorer configuration.
+2.  **`UserExplorerConfigService`**: A centralized service in `@openzeppelin/transaction-form-utils` manages the storage and retrieval of these configurations from `localStorage`.
+3.  **Adapter-Level Integration**: Each adapter is responsible for handling this user-provided configuration.
+    - It must implement `validateExplorerConfig` and `testExplorerConnection` methods on the `ContractAdapter` interface. These functions are used by the UI to allow users to verify their custom settings before saving them.
+    - Adapter modules that interact with block explorers (e.g., for fetching contract ABIs or constructing explorer URLs) must be updated to prioritize the user's configuration.
+4.  **UI Component**: A dedicated UI component, `ExplorerSettingsPanel` (in `packages/ui`), provides the user interface for inputting and managing these configurations.
+
+**Example: Resolving an Explorer API URL in the EVM Adapter**
+
+The logic for fetching a contract ABI from Etherscan (or a compatible explorer) in the EVM adapter (`packages/adapter-evm/src/abi/etherscan.ts`) exemplifies the pattern:
+
+1.  It first checks if a `UserExplorerConfig` is available for the current network.
+2.  If a user config exists and is valid, its `apiUrl` and `apiKey` are used for the request.
+3.  If not, it falls back to the default `explorer.apiUrl` and corresponding key (retrieved via `appConfigService`) from the adapter's `NetworkConfig` object.
+
+This layered approach ensures that the application remains functional out-of-the-box while giving advanced users the power to customize its network interactions to suit their needs.
+
 ## 8. Enforcement & Contribution
 
 - Please refer to this document when developing new adapters or refactoring existing ones.

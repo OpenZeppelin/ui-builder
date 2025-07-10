@@ -78,6 +78,23 @@ export interface UserRpcProviderConfig {
 }
 
 /**
+ * Configuration for a user-provided block explorer.
+ * This allows users to configure their own explorer endpoints and API keys.
+ */
+export interface UserExplorerConfig {
+  /** The explorer base URL (e.g., "https://etherscan.io") */
+  explorerUrl?: string;
+  /** The explorer API URL (e.g., "https://api.etherscan.io/api") */
+  apiUrl?: string;
+  /** API key for the explorer service */
+  apiKey?: string;
+  /** User-friendly name for this configuration (e.g., "My Etherscan API") */
+  name?: string;
+  /** Whether this is a custom user-provided configuration */
+  isCustom: boolean;
+}
+
+/**
  * A collection of RPC endpoint overrides, keyed by network ID (e.g., networkConfig.id).
  * Values can be a simple string (assumed to be HTTP), an RpcEndpointConfig object,
  * or a UserRpcProviderConfig for user-configured endpoints.

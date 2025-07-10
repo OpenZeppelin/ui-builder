@@ -88,7 +88,7 @@ const updateSnapshots = () => {
 
   try {
     // Update snapshots for the core package where the export tests are located
-    execSync('pnpm --filter=@openzeppelin/transaction-form-builder-core test -u', {
+    execSync('pnpm --filter @openzeppelin/transaction-form-builder-core test -- -u', {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'inherit',
     });

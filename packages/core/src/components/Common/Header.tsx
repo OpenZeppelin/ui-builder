@@ -1,11 +1,17 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
 import { WalletConnectionHeader } from '@openzeppelin/transaction-form-react-core';
+import { appConfigService } from '@openzeppelin/transaction-form-utils';
+
+import { DevToolsDropdown } from './DevToolsDropdown';
 
 /**
  * Application header component containing the logo, title, GitHub link, and wallet connection.
  */
 export const Header = () => {
+  // Check if dev tools should be shown
+  const showDevTools = appConfigService.isFeatureEnabled('show_dev_tools');
+
   return (
     <header className="border-b px-6 py-3 min-h-14">
       <div className="container mx-auto flex items-center justify-between">
@@ -16,17 +22,22 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Dev Tools Dropdown */}
+          {showDevTools && <DevToolsDropdown />}
+
+          {/* GitHub Link */}
           <a
             href="https://github.com/OpenZeppelin/transaction-form-builder"
             target="_blank"
-            className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
             rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title="View on GitHub"
           >
-            <SiGithub size={16} />
+            <SiGithub size={20} />
           </a>
-          <div className="border-l pl-4">
-            <WalletConnectionHeader />
-          </div>
+
+          {/* Wallet Connection */}
+          <WalletConnectionHeader />
         </div>
       </div>
     </header>

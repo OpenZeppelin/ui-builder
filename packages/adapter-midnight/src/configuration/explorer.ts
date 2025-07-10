@@ -1,4 +1,6 @@
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { UserExplorerConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Gets a blockchain explorer URL for an address on Midnight.
@@ -40,4 +42,30 @@ export function getMidnightExplorerTxUrl(
   // Example construction (adjust path as needed for Midnight)
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
   return `${baseUrl}/tx/${txHash}`; // Assuming similar path to others
+}
+
+/**
+ * Validates an explorer configuration for Midnight networks.
+ * @param explorerConfig - The explorer configuration to validate
+ * @returns True if the configuration is valid, false otherwise
+ */
+export function validateMidnightExplorerConfig(_explorerConfig: UserExplorerConfig): boolean {
+  // TODO: Implement Midnight-specific explorer validation when needed
+  logger.info('validateMidnightExplorerConfig', 'Midnight explorer validation not yet implemented');
+  return true;
+}
+
+/**
+ * Tests the connection to a Midnight explorer API.
+ * @param explorerConfig - The explorer configuration to test
+ * @returns Connection test results including success status, latency, and any errors
+ */
+export async function testMidnightExplorerConnection(_explorerConfig: UserExplorerConfig): Promise<{
+  success: boolean;
+  latency?: number;
+  error?: string;
+}> {
+  // TODO: Implement explorer connection testing for Midnight
+  logger.info('testMidnightExplorerConnection', 'TODO: Implement explorer connection testing');
+  return { success: true };
 }
