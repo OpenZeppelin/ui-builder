@@ -1,7 +1,7 @@
 {
   "name": "@openzeppelin/transaction-form-builder-core",
   "private": true,
-  "version": "1.18.0",
+  "version": "1.18.1",
   "type": "module",
   "bin": {
     "export-form": "src/export/cli/export-form.cjs"
