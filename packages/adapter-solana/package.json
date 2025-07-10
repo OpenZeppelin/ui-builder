@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-adapter-solana",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Solana Adapter for Transaction Form Builder",
   "keywords": [
     "openzeppelin",

@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-utils",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "private": false,
   "description": "Shared, framework-agnostic utility functions for the OpenZeppelin Transaction Form Builder.",
   "type": "module",
