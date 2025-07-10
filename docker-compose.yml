@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      secrets:
+        - npm_token
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+secrets:
+  # This secret is used during the Docker build process to authenticate
+  # with the GitHub private package registry. It reads the token from
+  # the .npm_token file in the project root.
+  npm_token:
+    file: ./.npm_token

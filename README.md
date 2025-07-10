@@ -149,6 +149,22 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 4. Open your browser and navigate to `http://localhost:5173`
 
+### Running with Docker (Recommended)
+
+For a consistent and reliable development environment, it is highly recommended to run the application using Docker. This avoids potential issues with local Node.js, pnpm, or operating system configurations.
+
+1.  **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
+
+2.  **Create a GitHub Personal Access Token**: The project uses private packages from the GitHub Package Registry. To authenticate, you need to create a [Personal Access Token (PAT)](https://github.com/settings/tokens) with the `read:packages` scope.
+
+3.  **Create a `.npm_token` file**: In the root of the project, create a file named `.npm_token` and paste your PAT into it. This file is listed in `.gitignore` and will not be committed.
+
+4.  **Build and Run the Container**:
+    ```bash
+    docker-compose up --build
+    ```
+    This command will build the Docker image and start the application. Once it's running, you can access it at `http://localhost:3000`.
+
 ## Available Scripts
 
 - `pnpm dev` - Start the development server
