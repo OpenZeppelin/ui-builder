@@ -1,4 +1,6 @@
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { UserExplorerConfig } from '@openzeppelin/transaction-form-types';
+import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Gets a blockchain explorer URL for a Solana address.
@@ -31,4 +33,30 @@ export function getSolanaExplorerTxUrl(
   // Construct the URL, assuming a standard /tx/ path
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
   return `${baseUrl}/tx/${txHash}`;
+}
+
+/**
+ * Validates an explorer configuration for Solana networks.
+ * @param explorerConfig - The explorer configuration to validate
+ * @returns True if the configuration is valid, false otherwise
+ */
+export function validateSolanaExplorerConfig(_explorerConfig: UserExplorerConfig): boolean {
+  // TODO: Implement Solana-specific explorer validation when needed
+  logger.info('validateSolanaExplorerConfig', 'Solana explorer validation not yet implemented');
+  return true;
+}
+
+/**
+ * Tests the connection to a Solana explorer API.
+ * @param explorerConfig - The explorer configuration to test
+ * @returns Connection test results including success status, latency, and any errors
+ */
+export async function testSolanaExplorerConnection(_explorerConfig: UserExplorerConfig): Promise<{
+  success: boolean;
+  latency?: number;
+  error?: string;
+}> {
+  // TODO: Implement explorer connection testing for Solana
+  logger.info('testSolanaExplorerConnection', 'TODO: Implement explorer connection testing');
+  return { success: true };
 }

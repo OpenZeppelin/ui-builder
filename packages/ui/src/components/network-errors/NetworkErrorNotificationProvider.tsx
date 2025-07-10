@@ -2,10 +2,10 @@
 
 import { toast } from 'sonner';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { NetworkErrorContext } from './NetworkErrorContext';
-import type { NetworkError, NetworkErrorContextValue, NetworkErrorType } from './useNetworkErrors';
+import type { NetworkError, NetworkErrorType } from './useNetworkErrors';
 
 interface NetworkErrorNotificationProviderProps {
   children: React.ReactNode;
@@ -43,7 +43,10 @@ export function NetworkErrorNotificationProvider({
         timestamp: now,
       };
 
-      setErrors((prev) => [...prev, error]);
+      setErrors((prev) => {
+        const newErrors = [...prev, error];
+        return newErrors;
+      });
 
       // Show toast notification with action button
       const typeLabel = type === 'rpc' ? 'RPC' : 'Explorer';
@@ -78,14 +81,31 @@ export function NetworkErrorNotificationProvider({
     errorDedupeRef.current.clear();
   }, []);
 
-  const value: NetworkErrorContextValue = {
-    errors,
-    reportNetworkError,
-    clearError,
-    clearAllErrors,
-    onOpenNetworkSettings: openNetworkSettingsHandler,
-    setOpenNetworkSettingsHandler: (handler) => setOpenNetworkSettingsHandler(() => handler),
-  };
+  const stableSetHandler = useCallback(
+    (handler: (networkId: string, defaultTab?: 'rpc' | 'explorer') => void) => {
+      setOpenNetworkSettingsHandler(() => handler);
+    },
+    []
+  );
+
+  const value = useMemo(
+    () => ({
+      errors,
+      reportNetworkError,
+      clearError,
+      clearAllErrors,
+      onOpenNetworkSettings: openNetworkSettingsHandler,
+      setOpenNetworkSettingsHandler: stableSetHandler,
+    }),
+    [
+      errors,
+      reportNetworkError,
+      clearError,
+      clearAllErrors,
+      openNetworkSettingsHandler,
+      stableSetHandler,
+    ]
+  );
 
   return <NetworkErrorContext.Provider value={value}>{children}</NetworkErrorContext.Provider>;
 }
