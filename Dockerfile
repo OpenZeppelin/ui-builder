@@ -38,6 +38,9 @@ RUN pnpm --filter @openzeppelin/transaction-form-builder-core build
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner
 
+# Set NODE_ENV to production for the final runtime image
+ENV NODE_ENV=production
+
 WORKDIR /app
 
 # Install 'serve' to run the static application
