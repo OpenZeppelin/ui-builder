@@ -1,0 +1,26 @@
+# Git
+.git
+.github
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Node
+node_modules
+.npmrc
+npm-debug.log*
+
+# Build artifacts
+dist
+coverage
+.next
+.vercel
+
+# Editor/OS files
+.vscode
+.idea
+.DS_Store
+*.log 

@@ -103,6 +103,12 @@ pnpm --filter @openzeppelin/transaction-form-builder-core test
 pnpm test
 ```
 
+### Running with Docker (Recommended)
+
+For the most consistent and reliable development experience, it is highly recommended to run the entire application using Docker from the **root of the monorepo**. This avoids potential issues with local Node.js, pnpm, or operating system configurations.
+
+Please see the instructions in the [main project README](../../README.md#running-with-docker-recommended) for details on how to set up and run the application with Docker.
+
 ## Architecture
 
 The core package uses an adapter pattern to support multiple blockchain ecosystems, leveraging shared providers and types:

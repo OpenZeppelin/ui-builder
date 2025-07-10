@@ -87,3 +87,5 @@ $RECYCLE.BIN/
 /AGENT.md
 
 .config/
+
+.npm_token

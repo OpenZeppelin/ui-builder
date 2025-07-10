@@ -15,6 +15,7 @@
     "fix-symlinks": "node scripts/manage-symlinks.js fix",
     "create-symlinks": "node scripts/manage-symlinks.js create",
     "dev": "pnpm --filter=@openzeppelin/transaction-form-builder-core dev",
+    "docker:dev": "docker-compose up --build",
     "build": "pnpm clean && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
