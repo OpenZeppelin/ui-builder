@@ -11,5 +11,8 @@
         }
       }
     }
+  },
+  "featureFlags": {
+    "show_dev_tools": true
   }
 }

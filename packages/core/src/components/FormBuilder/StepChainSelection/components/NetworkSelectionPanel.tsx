@@ -1,6 +1,6 @@
 import { Search, Settings } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -17,6 +17,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  useNetworkErrors,
 } from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
@@ -39,7 +40,33 @@ export function NetworkSelectionPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [rpcSettingsNetwork, setRpcSettingsNetwork] = useState<NetworkConfig | null>(null);
+  const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
   const { activeAdapter } = useWalletState();
+  const { setOpenNetworkSettingsHandler } = useNetworkErrors();
+
+  // Create a stable callback for opening network settings
+  const openNetworkSettings = useCallback(
+    async (networkId: string, tab: 'rpc' | 'explorer' = 'rpc') => {
+      try {
+        // Find the network by ID
+        const allNetworks = await networkService.getNetworksByEcosystem(ecosystem);
+        const network = allNetworks.find((n) => n.id === networkId);
+
+        if (network) {
+          setRpcSettingsNetwork(network);
+          setDefaultTab(tab);
+        }
+      } catch (error) {
+        console.error('Failed to open network settings:', error);
+      }
+    },
+    [ecosystem]
+  );
+
+  // Register handler for opening network settings from error notifications
+  useEffect(() => {
+    setOpenNetworkSettingsHandler(() => void openNetworkSettings);
+  }, [openNetworkSettings, setOpenNetworkSettingsHandler]);
 
   // Fetch networks for the selected ecosystem
   useEffect(() => {
@@ -150,7 +177,7 @@ export function NetworkSelectionPanel({
             <DialogDescription>Configure settings for {rpcSettingsNetwork?.name}</DialogDescription>
           </DialogHeader>
           {rpcSettingsNetwork && activeAdapter && (
-            <Tabs defaultValue="rpc" className="w-full">
+            <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
                 <TabsTrigger value="explorer">Explorer</TabsTrigger>
@@ -201,28 +228,29 @@ function NetworkGroup({
   return (
     <div className="space-y-3">
       <h4 className="font-medium text-sm">{title}</h4>
-      {/* Horizontally scrollable container for many networks */}
-      <div className="overflow-x-auto pb-2">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 min-w-max">
-          {networks.map((network) => (
-            <div key={network.id} className="relative group">
-              <NetworkMiniTile
-                network={network}
-                isSelected={network.id === selectedNetworkId}
-                onSelect={() => onNetworkSelected(network.id)}
-              />
-              {/* RPC Settings button - positioned inside the card bounds */}
-              <button
-                type="button"
-                onClick={(e) => onOpenRpcSettings(network, e)}
-                className="absolute top-2 right-2 p-1 rounded bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-accent/80"
-                title="Configure RPC settings"
-              >
-                <Settings size={14} className="text-muted-foreground" />
-              </button>
-            </div>
-          ))}
-        </div>
+      {/* Flex container with natural card widths */}
+      <div className="flex flex-wrap gap-3">
+        {networks.map((network) => (
+          <div key={network.id} className="relative group">
+            <NetworkMiniTile
+              network={network}
+              isSelected={network.id === selectedNetworkId}
+              onSelect={() => onNetworkSelected(network.id)}
+            />
+            {/* Settings button - positioned slightly outside top-right corner */}
+            <button
+              type="button"
+              onClick={(e) => onOpenRpcSettings(network, e)}
+              className="absolute -top-2 -right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
+                         opacity-0 group-hover:opacity-100 transition-all duration-200 
+                         hover:bg-muted border border-border
+                         shadow-md z-10"
+              title="Configure network settings"
+            >
+              <Settings size={14} className="text-muted-foreground" />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
