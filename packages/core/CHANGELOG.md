@@ -1,5 +1,23 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 1.18.0
+
+### Minor Changes
+
+- [#39](https://github.com/OpenZeppelin/transaction-form-builder/pull/39) [`f507dcd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/f507dcdc6cab173c812f9111c9c57d523d20740a) Thanks [@pasevin](https://github.com/pasevin)! - Supports block explorer configuration in the UI
+
+### Patch Changes
+
+- Updated dependencies [[`f507dcd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/f507dcdc6cab173c812f9111c9c57d523d20740a)]:
+  - @openzeppelin/transaction-form-adapter-midnight@0.3.0
+  - @openzeppelin/transaction-form-adapter-stellar@0.3.0
+  - @openzeppelin/transaction-form-adapter-solana@0.3.0
+  - @openzeppelin/transaction-form-renderer@1.17.0
+  - @openzeppelin/transaction-form-adapter-evm@1.17.0
+  - @openzeppelin/transaction-form-types@1.17.0
+  - @openzeppelin/transaction-form-utils@1.17.0
+  - @openzeppelin/transaction-form-ui@1.17.0
+
 ## 1.17.0
 
 ### Minor Changes
