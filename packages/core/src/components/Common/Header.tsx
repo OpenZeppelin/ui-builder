@@ -16,8 +16,9 @@ export const Header = () => {
     <header className="border-b px-6 py-3 min-h-14">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin" className="h-8 w-8" />
-          <h1 className="text-xl font-semibold">Transaction Form Builder</h1>
+          <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
+          <div className="h-5 border-l border-gray-300 mx-1"></div>
+          <span className="text-base font-medium">Transaction Form Builder</span>
         </div>
 
         <div className="flex items-center gap-4">
