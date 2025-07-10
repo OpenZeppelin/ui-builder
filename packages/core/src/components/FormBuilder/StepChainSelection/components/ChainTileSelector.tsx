@@ -9,19 +9,20 @@ import { logger } from '@openzeppelin/transaction-form-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { getNetworksByEcosystem } from '../../../../core/ecosystemManager';
-import { getEcosystemDescription, getEcosystemName } from '../../../../core/ecosystems/registry';
+import {
+  getEcosystemDescription,
+  getEcosystemName,
+  getEcosystemNetworkIconName,
+} from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
+import {
+  getEcosystemFeatureConfig,
+  getVisibleEcosystems,
+  isEcosystemEnabled,
+} from '../../../../utils/ecosystem-feature-flags';
 import { StepTitleWithDescription } from '../../Common';
 
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
-
-// Mapping of our chain types to web3icons network names
-const networkMapping = {
-  evm: 'ethereum',
-  stellar: 'stellar',
-  solana: 'solana',
-  // We don't use network mapping for midnight since we have a custom SVG
-};
 
 interface ChainTileSelectorProps {
   onNetworkSelect: (networkConfigId: string | null) => void;
@@ -47,37 +48,30 @@ export function ChainTileSelector({
     },
   });
 
-  // Define ecosystem options
-  const ecosystemOptions = [
-    {
-      value: 'evm' as const,
-      label: getEcosystemName('evm'),
-      network: networkMapping.evm,
-      customIcon: null,
-    },
-    {
-      value: 'midnight' as const,
-      label: getEcosystemName('midnight'),
-      network: null,
-      customIcon: true, // Used to indicate we need to use the imported SVG
-    },
-    {
-      value: 'stellar' as const,
-      label: getEcosystemName('stellar'),
-      network: networkMapping.stellar,
-      customIcon: null,
-    },
-    {
-      value: 'solana' as const,
-      label: getEcosystemName('solana'),
-      network: networkMapping.solana,
-      customIcon: null,
-    },
-  ];
+  // Define ecosystem options based on visible ecosystems
+  const ecosystemOptions = getVisibleEcosystems().map((ecosystem) => {
+    const config = getEcosystemFeatureConfig(ecosystem);
+
+    return {
+      value: ecosystem,
+      label: getEcosystemName(ecosystem),
+      network: getEcosystemNetworkIconName(ecosystem) || null,
+      customIcon: ecosystem === 'midnight',
+      enabled: config.enabled,
+      disabledLabel: config.disabledLabel,
+      disabledDescription: config.disabledDescription,
+    };
+  });
 
   // Handle selection of a blockchain ecosystem
   const handleSelectEcosystem = useCallback(
     async (ecosystem: Ecosystem) => {
+      // Check if ecosystem is enabled
+      if (!isEcosystemEnabled(ecosystem)) {
+        logger.info('ChainTileSelector', `Ecosystem ${ecosystem} is disabled, ignoring selection`);
+        return;
+      }
+
       setSelectedEcosystem(ecosystem);
       setValue('ecosystem', ecosystem);
 
@@ -100,10 +94,19 @@ export function ChainTileSelector({
     [onNetworkSelect]
   );
 
-  // Initialize with the default ecosystem
+  // Initialize with the default ecosystem if it's enabled
   useEffect(() => {
     if (!selectedEcosystem && !selectedNetworkId) {
-      setSelectedEcosystem(initialEcosystem);
+      // Only set initial ecosystem if it's enabled
+      if (isEcosystemEnabled(initialEcosystem)) {
+        setSelectedEcosystem(initialEcosystem);
+      } else {
+        // If initial ecosystem is disabled, find the first enabled one
+        const enabledEcosystems = getVisibleEcosystems().filter(isEcosystemEnabled);
+        if (enabledEcosystems.length > 0) {
+          setSelectedEcosystem(enabledEcosystems[0]);
+        }
+      }
     }
   }, [initialEcosystem, selectedEcosystem, selectedNetworkId]);
 
@@ -193,33 +196,76 @@ export function ChainTileSelector({
           <div className="flex flex-col space-y-2">
             {ecosystemOptions.map((option) => {
               const isSelected = selectedEcosystem === option.value;
+              const isDisabled = !option.enabled;
 
               return (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => {
-                    void handleSelectEcosystem(option.value);
+                    if (!isDisabled) {
+                      void handleSelectEcosystem(option.value);
+                    }
                   }}
-                  className={`hover:bg-muted flex items-center gap-3 rounded-md border p-3 text-left transition-all ${
-                    isSelected
-                      ? 'border-primary bg-primary/5 ring-primary/20 ring-1'
-                      : 'border-border bg-card'
+                  disabled={isDisabled}
+                  className={`flex items-center gap-3 rounded-md border p-3 text-left transition-all ${
+                    isDisabled
+                      ? 'cursor-not-allowed opacity-60 border-border bg-muted'
+                      : `hover:bg-muted ${
+                          isSelected
+                            ? 'border-primary bg-primary/5 ring-primary/20 ring-1'
+                            : 'border-border bg-card'
+                        }`
                   }`}
                   aria-selected={isSelected}
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full">
                     {option.value === 'midnight' ? (
-                      <img src={MidnightLogoSvg} alt="Midnight" width={20} height={20} />
+                      <img
+                        src={MidnightLogoSvg}
+                        alt="Midnight"
+                        width={20}
+                        height={20}
+                        className={isDisabled ? 'opacity-50' : ''}
+                      />
+                    ) : option.network ? (
+                      <NetworkIcon
+                        name={option.network}
+                        size={24}
+                        variant="branded"
+                        className={isDisabled ? 'opacity-50' : ''}
+                      />
                     ) : (
-                      <NetworkIcon name={option.network} size={24} variant="branded" />
+                      <div
+                        className={`h-6 w-6 rounded-full bg-muted flex items-center justify-center ${isDisabled ? 'opacity-50' : ''}`}
+                      >
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {option.label.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
                     )}
                   </div>
-                  <span
-                    className={`font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}
-                  >
-                    {option.label}
-                  </span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-medium ${
+                          isSelected && !isDisabled ? 'text-primary' : 'text-foreground'
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                      {isDisabled && option.disabledLabel && (
+                        <span className="text-xs px-2 py-1 bg-muted-foreground/20 rounded-full text-muted-foreground">
+                          {option.disabledLabel}
+                        </span>
+                      )}
+                    </div>
+                    {isDisabled && option.disabledDescription && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {option.disabledDescription}
+                      </p>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -240,7 +286,7 @@ export function ChainTileSelector({
 
         {/* Network Selection Panel - Right Side */}
         <div className="flex-1 min-w-0">
-          {selectedEcosystem ? (
+          {selectedEcosystem && isEcosystemEnabled(selectedEcosystem) ? (
             <div className="space-y-4">
               <div className="flex flex-col space-y-2">
                 <h3 className="text-base font-medium">Select Network</h3>
@@ -254,7 +300,11 @@ export function ChainTileSelector({
             </div>
           ) : (
             <div className="flex h-40 items-center justify-center rounded-md border border-dashed text-muted-foreground">
-              <p>Select a blockchain ecosystem to view available networks</p>
+              <p>
+                {selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
+                  ? `${getEcosystemName(selectedEcosystem)} support is coming soon`
+                  : 'Select a blockchain ecosystem to view available networks'}
+              </p>
             </div>
           )}
         </div>

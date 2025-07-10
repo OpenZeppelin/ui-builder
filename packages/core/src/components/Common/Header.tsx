@@ -37,7 +37,9 @@ export const Header = () => {
           </a>
 
           {/* Wallet Connection */}
-          <WalletConnectionHeader />
+          <div className="border-l pl-4">
+            <WalletConnectionHeader />
+          </div>
         </div>
       </div>
     </header>
