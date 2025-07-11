@@ -1,10 +1,11 @@
-import { CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/transaction-form-renderer';
 import type { ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { loadContractDefinition } from '../../../services/ContractLoader';
@@ -155,7 +156,13 @@ export function StepContractDefinition({
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading contract...</p>}
 
-      {error && <p className="pt-1 text-sm text-destructive">{error}</p>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Contract Loading Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {loadedSchema && !error && (
         <div className="mt-4 rounded-md border border-green-200 bg-green-50 p-4">
