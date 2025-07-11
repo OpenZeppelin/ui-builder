@@ -1,5 +1,19 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 1.19.0
+
+### Minor Changes
+
+- [`ac72bfd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/ac72bfddf5e16b75b82a9d33713b37b97dc71f88) Thanks [@pasevin](https://github.com/pasevin)! - deduplicates code
+
+### Patch Changes
+
+- Updated dependencies [[`ac72bfd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/ac72bfddf5e16b75b82a9d33713b37b97dc71f88)]:
+  - @openzeppelin/transaction-form-react-core@1.17.0
+  - @openzeppelin/transaction-form-ui@1.18.0
+  - @openzeppelin/transaction-form-adapter-midnight@0.3.1
+  - @openzeppelin/transaction-form-renderer@1.17.1
+
 ## 1.18.1
 
 ### Patch Changes
