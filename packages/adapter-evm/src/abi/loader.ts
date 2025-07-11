@@ -73,9 +73,8 @@ export async function loadEvmContract(
     return schema;
   } catch (error) {
     logger.warn('loadEvmContract', `Etherscan ABI fetch failed for ${contractAddress}:`, error);
-    // 3. If both manual ABI is missing and Etherscan fails, throw an error.
-    throw new Error(
-      'Could not fetch ABI from block explorer. Please verify the address or provide the contract ABI JSON manually.'
-    );
+    // 3. If both manual ABI is missing and Etherscan fails, re-throw the specific error.
+    // This preserves important details like missing API keys or network issues.
+    throw error;
   }
 }
