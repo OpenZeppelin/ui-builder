@@ -4,21 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  ExplorerSettingsPanel,
-  Input,
-  RpcSettingsPanel,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  useNetworkErrors,
-} from '@openzeppelin/transaction-form-ui';
+import { Input, NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
@@ -39,7 +25,7 @@ export function NetworkSelectionPanel({
   const [networks, setNetworks] = useState<NetworkConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [rpcSettingsNetwork, setRpcSettingsNetwork] = useState<NetworkConfig | null>(null);
+  const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
   const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
   const { activeAdapter } = useWalletState();
   const { setOpenNetworkSettingsHandler } = useNetworkErrors();
@@ -53,7 +39,7 @@ export function NetworkSelectionPanel({
         const network = allNetworks.find((n) => n.id === networkId);
 
         if (network) {
-          setRpcSettingsNetwork(network);
+          setSettingsNetwork(network);
           setDefaultTab(tab);
         }
       } catch (error) {
@@ -65,7 +51,9 @@ export function NetworkSelectionPanel({
 
   // Register handler for opening network settings from error notifications
   useEffect(() => {
-    setOpenNetworkSettingsHandler(() => void openNetworkSettings);
+    setOpenNetworkSettingsHandler((networkId: string, defaultTab?: 'rpc' | 'explorer') => {
+      void openNetworkSettings(networkId, defaultTab);
+    });
   }, [openNetworkSettings, setOpenNetworkSettingsHandler]);
 
   // Fetch networks for the selected ecosystem
@@ -99,13 +87,13 @@ export function NetworkSelectionPanel({
   const testnetNetworks = filteredNetworks.filter((n) => n.type === 'testnet');
   const devnetNetworks = filteredNetworks.filter((n) => n.type === 'devnet');
 
-  const handleOpenRpcSettings = (network: NetworkConfig, event: React.MouseEvent) => {
+  const handleOpenNetworkSettings = (network: NetworkConfig, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent network selection
-    setRpcSettingsNetwork(network);
+    setSettingsNetwork(network);
   };
 
-  const handleCloseRpcSettings = () => {
-    setRpcSettingsNetwork(null);
+  const handleCloseNetworkSettings = () => {
+    setSettingsNetwork(null);
   };
 
   return (
@@ -140,7 +128,7 @@ export function NetworkSelectionPanel({
               networks={mainnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
-              onOpenRpcSettings={handleOpenRpcSettings}
+              onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
 
@@ -150,7 +138,7 @@ export function NetworkSelectionPanel({
               networks={testnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
-              onOpenRpcSettings={handleOpenRpcSettings}
+              onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
 
@@ -160,52 +148,20 @@ export function NetworkSelectionPanel({
               networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
-              onOpenRpcSettings={handleOpenRpcSettings}
+              onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
         </div>
       )}
 
-      {/* RPC Settings Dialog */}
-      <Dialog
-        open={!!rpcSettingsNetwork}
-        onOpenChange={(open) => !open && handleCloseRpcSettings()}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Network Settings</DialogTitle>
-            <DialogDescription>Configure settings for {rpcSettingsNetwork?.name}</DialogDescription>
-          </DialogHeader>
-          {rpcSettingsNetwork && activeAdapter && (
-            <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
-                <TabsTrigger value="explorer">Explorer</TabsTrigger>
-              </TabsList>
-              <TabsContent value="rpc">
-                <RpcSettingsPanel
-                  adapter={activeAdapter}
-                  networkId={rpcSettingsNetwork.id}
-                  onSettingsChanged={() => {
-                    handleCloseRpcSettings();
-                    // Components will automatically refresh via the RPC change event system
-                  }}
-                />
-              </TabsContent>
-              <TabsContent value="explorer">
-                <ExplorerSettingsPanel
-                  adapter={activeAdapter}
-                  networkId={rpcSettingsNetwork.id}
-                  onSettingsChanged={() => {
-                    handleCloseRpcSettings();
-                    // Components will automatically refresh via the RPC change event system
-                  }}
-                />
-              </TabsContent>
-            </Tabs>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Network Settings Dialog */}
+      <NetworkSettingsDialog
+        isOpen={!!settingsNetwork}
+        onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
+        networkConfig={settingsNetwork}
+        adapter={activeAdapter}
+        defaultTab={defaultTab}
+      />
     </div>
   );
 }
@@ -215,7 +171,7 @@ interface NetworkGroupProps {
   networks: NetworkConfig[];
   onNetworkSelected: (networkConfigId: string) => void;
   selectedNetworkId?: string | null;
-  onOpenRpcSettings: (network: NetworkConfig, event: React.MouseEvent) => void;
+  onOpenNetworkSettings: (network: NetworkConfig, event: React.MouseEvent) => void;
 }
 
 function NetworkGroup({
@@ -223,7 +179,7 @@ function NetworkGroup({
   networks,
   onNetworkSelected,
   selectedNetworkId,
-  onOpenRpcSettings,
+  onOpenNetworkSettings,
 }: NetworkGroupProps) {
   return (
     <div className="space-y-3">
@@ -240,7 +196,7 @@ function NetworkGroup({
             {/* Settings button - positioned slightly outside top-right corner */}
             <button
               type="button"
-              onClick={(e) => onOpenRpcSettings(network, e)}
+              onClick={(e) => onOpenNetworkSettings(network, e)}
               className="absolute -top-2 -right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
                          opacity-0 group-hover:opacity-100 transition-all duration-200 
                          hover:bg-muted border border-border
