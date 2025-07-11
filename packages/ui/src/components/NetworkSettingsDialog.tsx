@@ -37,7 +37,7 @@ export const NetworkSettingsDialog: React.FC<NetworkSettingsDialogProps> = ({
   defaultTab = 'rpc',
   onSettingsChanged,
 }) => {
-  const handleSettingsChanged = () => {
+  const handleSettingsChanged = (): void => {
     onSettingsChanged?.();
     onOpenChange(false);
   };
