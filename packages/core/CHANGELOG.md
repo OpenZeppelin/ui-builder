@@ -1,5 +1,14 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 1.18.1
+
+### Patch Changes
+
+- [#42](https://github.com/OpenZeppelin/transaction-form-builder/pull/42) [`2d9a867`](https://github.com/OpenZeppelin/transaction-form-builder/commit/2d9a86741f1b7cd71ca8e45f36e26ceef9d5b809) Thanks [@pasevin](https://github.com/pasevin)! - docker support
+
+- Updated dependencies [[`2d9a867`](https://github.com/OpenZeppelin/transaction-form-builder/commit/2d9a86741f1b7cd71ca8e45f36e26ceef9d5b809)]:
+  - @openzeppelin/transaction-form-adapter-evm@1.17.1
+
 ## 1.18.0
 
 ### Minor Changes
