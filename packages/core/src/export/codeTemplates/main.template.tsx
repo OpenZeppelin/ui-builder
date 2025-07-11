@@ -18,6 +18,7 @@ import type {
   NativeConfigLoader,
   NetworkConfig,
 } from '@openzeppelin/transaction-form-types';
+import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/transaction-form-ui';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
@@ -105,15 +106,18 @@ async function startApp() {
 
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <AdapterProvider resolveAdapter={resolveAdapter}>
-        <WalletStateProvider
-          initialNetworkId={exportedNetworkConfig.id}
-          getNetworkConfigById={getNetworkConfigById}
-          loadConfigModule={loadAppConfigModule}
-        >
-          <App />
-        </WalletStateProvider>
-      </AdapterProvider>
+      <NetworkErrorNotificationProvider>
+        <AdapterProvider resolveAdapter={resolveAdapter}>
+          <WalletStateProvider
+            initialNetworkId={exportedNetworkConfig.id}
+            getNetworkConfigById={getNetworkConfigById}
+            loadConfigModule={loadAppConfigModule}
+          >
+            <App />
+          </WalletStateProvider>
+        </AdapterProvider>
+        <Toaster position="top-right" />
+      </NetworkErrorNotificationProvider>
     </React.StrictMode>
   );
 }
