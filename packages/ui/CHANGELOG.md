@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-ui
 
+## 1.18.0
+
+### Minor Changes
+
+- [`ac72bfd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/ac72bfddf5e16b75b82a9d33713b37b97dc71f88) Thanks [@pasevin](https://github.com/pasevin)! - deduplicates code
+
 ## 1.17.0
 
 ### Minor Changes

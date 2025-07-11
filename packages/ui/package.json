@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/transaction-form-ui",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "private": false,
   "description": "Shared React UI components for the OpenZeppelin Transaction Form Builder.",
   "type": "module",
