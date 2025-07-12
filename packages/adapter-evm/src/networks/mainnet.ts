@@ -1,4 +1,4 @@
-import { mainnet as viemMainnet, polygon as viemPolygon } from 'viem/chains';
+import { base as viemBase, mainnet as viemMainnet, polygon as viemPolygon } from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
@@ -44,6 +44,28 @@ export const polygonMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemPolygon,
+};
+
+export const baseMainnet: EvmNetworkConfig = {
+  id: 'base-mainnet',
+  exportConstName: 'baseMainnet',
+  name: 'Base',
+  ecosystem: 'evm',
+  network: 'base',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 8453,
+  rpcUrl: viemBase.rpcUrls.default.http[0],
+  explorerUrl: 'https://basescan.org',
+  apiUrl: 'https://api.basescan.org/api',
+  primaryExplorerApiIdentifier: 'basescan-mainnet',
+  icon: 'base',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemBase,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

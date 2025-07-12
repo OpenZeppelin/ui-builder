@@ -14,8 +14,10 @@ export {
   // Individual networks
   ethereumMainnet,
   polygonMainnet,
+  baseMainnet,
   ethereumSepolia,
   polygonAmoy,
+  baseSepolia,
   // ... other individual network exports
 } from './networks';
 

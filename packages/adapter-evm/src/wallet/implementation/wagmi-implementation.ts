@@ -19,48 +19,72 @@ import {
   watchAccount,
 } from '@wagmi/core';
 import { type Chain, PublicClient, WalletClient, http } from 'viem';
-import { base, mainnet, optimism, polygon, sepolia } from 'viem/chains';
 
 import type { Connector, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
+import { evmNetworks } from '../../networks';
 import { getWagmiConfigForRainbowKit } from '../rainbowkit';
 import { type WagmiConfigChains } from '../types';
 
 const LOG_SYSTEM = 'WagmiWalletImplementation'; // Define LOG_SYSTEM here
 
 /**
- * Defines the default set of blockchain networks (from viem/chains) that Wagmi will be configured to support.
- * This list enables features like chain switching within Wagmi and dictates which chains' RPCs
- * can be potentially overridden via AppConfigService if a mapping exists in `viemChainIdToAppNetworkId`.
- * If you add a new chain here and want its RPC to be configurable, ensure a corresponding
- * entry is also added to `viemChainIdToAppNetworkId` below.
+ * Generates the supported chains for Wagmi from the EVM network configurations.
+ * Only includes networks that have a viemChain property (ensuring wagmi compatibility).
+ * This ensures that wagmi only supports networks that are defined in mainnet.ts and testnet.ts.
  */
-const defaultSupportedChains: readonly Chain[] = [mainnet, sepolia, polygon, optimism, base];
+const getSupportedChainsFromNetworks = (): readonly Chain[] => {
+  const chains = evmNetworks
+    .filter((network) => network.viemChain) // Only include networks with viemChain
+    .map((network) => network.viemChain!)
+    .filter((chain, index, self) => self.findIndex((c) => c.id === chain.id) === index); // Remove duplicates
+
+  logger.info(
+    LOG_SYSTEM,
+    `Generated supported chains from network configurations: ${chains.length} chains`,
+    chains.map((c) => ({ id: c.id, name: c.name }))
+  );
+
+  return chains;
+};
 
 /**
- * @internal
- * Helper map to bridge Viem's numeric chain IDs (from `defaultSupportedChains`) to
- * our application's string-based NetworkConfig IDs (e.g., "ethereum-mainnet").
- * This mapping is ESSENTIAL for `AppConfigService` to look up RPC URL overrides for the chains
- * configured in Wagmi's transports.
- *
- * !! IMPORTANT MAINTENANCE NOTE !!
- * If `defaultSupportedChains` is updated (e.g., a new chain is added or an existing one removed),
- * this map MUST be updated accordingly to ensure RPC overrides continue to work correctly for those chains.
- * The string value (e.g., 'ethereum-mainnet') must match the `id` field of the corresponding
- * full `EvmNetworkConfig` object defined in `packages/adapter-evm/src/networks/` AND the keys
- * used in `AppRuntimeConfig.rpcEndpoints` (set via .env or app.config.json).
+ * Generates the mapping from Viem chain IDs to application network IDs.
+ * This mapping is auto-generated from the EVM network configurations.
  */
-const viemChainIdToAppNetworkId: Record<number, string> = {
-  [mainnet.id]: 'ethereum-mainnet',
-  [sepolia.id]: 'ethereum-sepolia',
-  [polygon.id]: 'polygon-mainnet',
-  [optimism.id]: 'optimism-mainnet',
-  [base.id]: 'base-mainnet',
-  // Example if polygonAmoy (from viem/chains) were added to defaultSupportedChains:
-  // [polygonAmoy.id]: 'polygon-amoy', // Assuming 'polygon-amoy' is your app's NetworkConfig.id
+const getChainIdToNetworkIdMapping = (): Record<number, string> => {
+  const mapping = evmNetworks
+    .filter((network) => network.viemChain) // Only include networks with viemChain
+    .reduce(
+      (acc, network) => {
+        acc[network.chainId] = network.id;
+        return acc;
+      },
+      {} as Record<number, string>
+    );
+
+  logger.info(
+    LOG_SYSTEM,
+    'Generated chain ID to network ID mapping from network configurations:',
+    mapping
+  );
+
+  return mapping;
 };
+
+/**
+ * The supported chains for Wagmi, dynamically generated from network configurations.
+ * This ensures consistency between adapter networks and wagmi-supported networks.
+ */
+const defaultSupportedChains: readonly Chain[] = getSupportedChainsFromNetworks();
+
+/**
+ * Auto-generated mapping from Viem chain IDs to application network IDs.
+ * This mapping is essential for AppConfigService to look up RPC URL overrides.
+ * It's automatically synchronized with the networks defined in mainnet.ts and testnet.ts.
+ */
+const viemChainIdToAppNetworkId: Record<number, string> = getChainIdToNetworkIdMapping();
 
 /**
  * Class responsible for encapsulating Wagmi core logic for wallet interactions.
@@ -188,9 +212,9 @@ export class WagmiWalletImplementation {
     } catch (error) {
       logger.error(LOG_SYSTEM, 'Error creating default Wagmi config on demand:', error);
       return createConfig({
-        chains: [mainnet] as unknown as WagmiConfigChains,
+        chains: [evmNetworks[0].viemChain!] as unknown as WagmiConfigChains, // Fallback to first network's chain
         connectors: [injected()],
-        transports: { [mainnet.id]: http() },
+        transports: { [evmNetworks[0].viemChain!.id]: http() }, // Fallback to first network's chain
       });
     }
   }
@@ -284,8 +308,8 @@ export class WagmiWalletImplementation {
         'getActiveConfigForManager called before initialization! Creating fallback.'
       );
       return createConfig({
-        chains: [mainnet] as unknown as WagmiConfigChains,
-        transports: { [mainnet.id]: http() },
+        chains: [evmNetworks[0].viemChain!] as unknown as WagmiConfigChains, // Fallback to first network's chain
+        transports: { [evmNetworks[0].viemChain!.id]: http() }, // Fallback to first network's chain
       });
     }
 

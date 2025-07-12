@@ -1,4 +1,8 @@
-import { polygonAmoy as viemPolygonAmoy, sepolia as viemSepolia } from 'viem/chains';
+import {
+  baseSepolia as viemBaseSepolia,
+  polygonAmoy as viemPolygonAmoy,
+  sepolia as viemSepolia,
+} from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
@@ -44,6 +48,28 @@ export const polygonAmoy: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemPolygonAmoy,
+};
+
+export const baseSepolia: EvmNetworkConfig = {
+  id: 'base-sepolia',
+  exportConstName: 'baseSepolia',
+  name: 'Base Sepolia',
+  ecosystem: 'evm',
+  network: 'base',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 84532,
+  rpcUrl: viemBaseSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.basescan.org',
+  apiUrl: 'https://api-sepolia.basescan.org/api',
+  primaryExplorerApiIdentifier: 'basescan-sepolia',
+  icon: 'base',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemBaseSepolia,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)
