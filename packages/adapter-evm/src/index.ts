@@ -15,10 +15,12 @@ export {
   ethereumMainnet,
   arbitrumMainnet,
   polygonMainnet,
+  polygonZkEvmMainnet,
   baseMainnet,
   ethereumSepolia,
   arbitrumSepolia,
   polygonAmoy,
+  polygonZkEvmCardona,
   baseSepolia,
   // ... other individual network exports
 } from './networks';

@@ -2,6 +2,7 @@ import {
   arbitrumSepolia as viemArbitrumSepolia,
   baseSepolia as viemBaseSepolia,
   polygonAmoy as viemPolygonAmoy,
+  polygonZkEvmCardona as viemPolygonZkEvmCardona,
   sepolia as viemSepolia,
 } from 'viem/chains';
 
@@ -71,6 +72,28 @@ export const polygonAmoy: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemPolygonAmoy,
+};
+
+export const polygonZkEvmCardona: EvmNetworkConfig = {
+  id: 'polygon-zkevm-cardona',
+  exportConstName: 'polygonZkEvmCardona',
+  name: 'Polygon zkEVM Cardona',
+  ecosystem: 'evm',
+  network: 'polygon-zkevm',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 2442,
+  rpcUrl: viemPolygonZkEvmCardona.rpcUrls.default.http[0],
+  explorerUrl: 'https://cardona-zkevm.polygonscan.com',
+  apiUrl: 'https://api-cardona-zkevm.polygonscan.com/api',
+  primaryExplorerApiIdentifier: 'polygonscan-cardona',
+  icon: 'polygon',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemPolygonZkEvmCardona,
 };
 
 export const baseSepolia: EvmNetworkConfig = {
