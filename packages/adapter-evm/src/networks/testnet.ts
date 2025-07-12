@@ -1,4 +1,5 @@
 import {
+  arbitrumSepolia as viemArbitrumSepolia,
   baseSepolia as viemBaseSepolia,
   polygonAmoy as viemPolygonAmoy,
   sepolia as viemSepolia,
@@ -9,7 +10,7 @@ import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 export const ethereumSepolia: EvmNetworkConfig = {
   id: 'ethereum-sepolia',
   exportConstName: 'ethereumSepolia',
-  name: 'Ethereum Sepolia',
+  name: 'Sepolia',
   ecosystem: 'evm',
   network: 'ethereum',
   type: 'testnet',
@@ -28,6 +29,28 @@ export const ethereumSepolia: EvmNetworkConfig = {
   viemChain: viemSepolia,
 };
 
+export const arbitrumSepolia: EvmNetworkConfig = {
+  id: 'arbitrum-sepolia',
+  exportConstName: 'arbitrumSepolia',
+  name: 'Arbitrum Sepolia',
+  ecosystem: 'evm',
+  network: 'arbitrum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 421614,
+  rpcUrl: viemArbitrumSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.arbiscan.io',
+  apiUrl: 'https://api-sepolia.arbiscan.io/api',
+  primaryExplorerApiIdentifier: 'arbiscan-sepolia',
+  icon: 'arbitrum',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemArbitrumSepolia,
+};
+
 export const polygonAmoy: EvmNetworkConfig = {
   id: 'polygon-amoy',
   exportConstName: 'polygonAmoy',
@@ -43,7 +66,7 @@ export const polygonAmoy: EvmNetworkConfig = {
   primaryExplorerApiIdentifier: 'polygonscan-amoy',
   icon: 'polygon',
   nativeCurrency: {
-    name: 'Matic',
+    name: 'MATIC',
     symbol: 'MATIC',
     decimals: 18,
   },
@@ -65,7 +88,7 @@ export const baseSepolia: EvmNetworkConfig = {
   primaryExplorerApiIdentifier: 'basescan-sepolia',
   icon: 'base',
   nativeCurrency: {
-    name: 'Ether',
+    name: 'Sepolia Ether',
     symbol: 'ETH',
     decimals: 18,
   },

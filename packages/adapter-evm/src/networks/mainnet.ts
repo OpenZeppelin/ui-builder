@@ -1,4 +1,9 @@
-import { base as viemBase, mainnet as viemMainnet, polygon as viemPolygon } from 'viem/chains';
+import {
+  arbitrum as viemArbitrum,
+  base as viemBase,
+  mainnet as viemMainnet,
+  polygon as viemPolygon,
+} from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
@@ -66,6 +71,28 @@ export const baseMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBase,
+};
+
+export const arbitrumMainnet: EvmNetworkConfig = {
+  id: 'arbitrum-mainnet',
+  exportConstName: 'arbitrumMainnet',
+  name: 'Arbitrum One',
+  ecosystem: 'evm',
+  network: 'arbitrum',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 42161,
+  rpcUrl: viemArbitrum.rpcUrls.default.http[0],
+  explorerUrl: 'https://arbiscan.io',
+  apiUrl: 'https://api.arbiscan.io/api',
+  primaryExplorerApiIdentifier: 'arbiscan-mainnet',
+  icon: 'arbitrum',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemArbitrum,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

@@ -13,9 +13,11 @@ export {
   evmTestnetNetworks,
   // Individual networks
   ethereumMainnet,
+  arbitrumMainnet,
   polygonMainnet,
   baseMainnet,
   ethereumSepolia,
+  arbitrumSepolia,
   polygonAmoy,
   baseSepolia,
   // ... other individual network exports
