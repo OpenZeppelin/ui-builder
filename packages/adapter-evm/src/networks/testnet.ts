@@ -1,5 +1,6 @@
 import {
   arbitrumSepolia as viemArbitrumSepolia,
+  avalancheFuji as viemAvalancheFuji,
   baseSepolia as viemBaseSepolia,
   bscTestnet as viemBscTestnet,
   optimismSepolia as viemOptimismSepolia,
@@ -162,6 +163,28 @@ export const optimismSepolia: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemOptimismSepolia,
+};
+
+export const avalancheFuji: EvmNetworkConfig = {
+  id: 'avalanche-fuji',
+  exportConstName: 'avalancheFuji',
+  name: 'Avalanche Fuji C-Chain',
+  ecosystem: 'evm',
+  network: 'avalanche',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 43113,
+  rpcUrl: viemAvalancheFuji.rpcUrls.default.http[0],
+  explorerUrl: 'https://subnets-test.avax.network/c-chain',
+  apiUrl: 'https://api.avascan.info/v2',
+  primaryExplorerApiIdentifier: 'avascan-fuji',
+  icon: 'avalanche',
+  nativeCurrency: {
+    name: 'Avalanche',
+    symbol: 'AVAX',
+    decimals: 18,
+  },
+  viemChain: viemAvalancheFuji,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

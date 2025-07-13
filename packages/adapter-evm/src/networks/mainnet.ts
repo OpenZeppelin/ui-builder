@@ -1,5 +1,6 @@
 import {
   arbitrum as viemArbitrum,
+  avalanche as viemAvalanche,
   base as viemBase,
   bsc as viemBsc,
   mainnet as viemMainnet,
@@ -162,6 +163,28 @@ export const optimismMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemOptimism,
+};
+
+export const avalancheMainnet: EvmNetworkConfig = {
+  id: 'avalanche-mainnet',
+  exportConstName: 'avalancheMainnet',
+  name: 'Avalanche C-Chain',
+  ecosystem: 'evm',
+  network: 'avalanche',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 43114,
+  rpcUrl: viemAvalanche.rpcUrls.default.http[0],
+  explorerUrl: 'https://subnets.avax.network/c-chain',
+  apiUrl: 'https://api.avascan.info/v2',
+  primaryExplorerApiIdentifier: 'avascan-mainnet',
+  icon: 'avalanche',
+  nativeCurrency: {
+    name: 'Avalanche',
+    symbol: 'AVAX',
+    decimals: 18,
+  },
+  viemChain: viemAvalanche,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

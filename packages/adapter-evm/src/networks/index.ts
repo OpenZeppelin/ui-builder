@@ -2,6 +2,7 @@ import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 import {
   arbitrumMainnet,
+  avalancheMainnet,
   baseMainnet,
   bscMainnet,
   ethereumMainnet,
@@ -11,6 +12,7 @@ import {
 } from './mainnet';
 import {
   arbitrumSepolia,
+  avalancheFuji,
   baseSepolia,
   bscTestnet,
   ethereumSepolia,
@@ -28,6 +30,7 @@ export const evmMainnetNetworks: EvmNetworkConfig[] = [
   polygonZkEvmMainnet,
   bscMainnet,
   optimismMainnet,
+  avalancheMainnet,
   // Other mainnet networks...
 ];
 
@@ -40,6 +43,7 @@ export const evmTestnetNetworks: EvmNetworkConfig[] = [
   polygonZkEvmCardona,
   bscTestnet,
   optimismSepolia,
+  avalancheFuji,
   // Other testnet networks...
 ];
 
@@ -52,6 +56,7 @@ export const evmNetworks: EvmNetworkConfig[] = [...evmMainnetNetworks, ...evmTes
 export {
   // Mainnet networks
   arbitrumMainnet,
+  avalancheMainnet,
   baseMainnet,
   bscMainnet,
   ethereumMainnet,
@@ -60,6 +65,7 @@ export {
   polygonZkEvmMainnet,
   // Testnet networks
   arbitrumSepolia,
+  avalancheFuji,
   baseSepolia,
   bscTestnet,
   ethereumSepolia,
