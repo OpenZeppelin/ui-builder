@@ -7,6 +7,7 @@ import {
   optimism as viemOptimism,
   polygon as viemPolygon,
   polygonZkEvm as viemPolygonZkEvm,
+  scroll as viemScroll,
   zksync as viemZkSync,
 } from 'viem/chains';
 
@@ -208,6 +209,28 @@ export const zkSyncEraMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemZkSync,
+};
+
+export const scrollMainnet: EvmNetworkConfig = {
+  id: 'scroll-mainnet',
+  exportConstName: 'scrollMainnet',
+  name: 'Scroll',
+  ecosystem: 'evm',
+  network: 'scroll',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 534352,
+  rpcUrl: viemScroll.rpcUrls.default.http[0],
+  explorerUrl: 'https://scrollscan.com',
+  apiUrl: 'https://api.scrollscan.com/api',
+  primaryExplorerApiIdentifier: 'scrollscan-mainnet',
+  icon: 'scroll',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemScroll,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

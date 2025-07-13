@@ -6,6 +6,7 @@ import {
   optimismSepolia as viemOptimismSepolia,
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
+  scrollSepolia as viemScrollSepolia,
   sepolia as viemSepolia,
   zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
 } from 'viem/chains';
@@ -208,6 +209,28 @@ export const zkSyncEraSepolia: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemZkSyncSepoliaTestnet,
+};
+
+export const scrollSepolia: EvmNetworkConfig = {
+  id: 'scroll-sepolia',
+  exportConstName: 'scrollSepolia',
+  name: 'Scroll Sepolia',
+  ecosystem: 'evm',
+  network: 'scroll',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 534351,
+  rpcUrl: viemScrollSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.scrollscan.dev',
+  apiUrl: 'https://api-sepolia.scrollscan.dev/api',
+  primaryExplorerApiIdentifier: 'scrollscan-sepolia',
+  icon: 'scroll',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemScrollSepolia,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)
