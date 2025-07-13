@@ -7,6 +7,7 @@ import {
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
   sepolia as viemSepolia,
+  zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
 } from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -185,6 +186,28 @@ export const avalancheFuji: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemAvalancheFuji,
+};
+
+export const zkSyncEraSepolia: EvmNetworkConfig = {
+  id: 'zksync-era-sepolia',
+  exportConstName: 'zkSyncEraSepolia',
+  name: 'ZkSync Era Sepolia',
+  ecosystem: 'evm',
+  network: 'zksync-era',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 300,
+  rpcUrl: viemZkSyncSepoliaTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.explorer.zksync.io',
+  apiUrl: 'https://block-explorer-api.sepolia.zksync.dev/api',
+  primaryExplorerApiIdentifier: 'zksync-era-sepolia',
+  icon: 'zksync',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemZkSyncSepoliaTestnet,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

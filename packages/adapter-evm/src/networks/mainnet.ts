@@ -7,6 +7,7 @@ import {
   optimism as viemOptimism,
   polygon as viemPolygon,
   polygonZkEvm as viemPolygonZkEvm,
+  zksync as viemZkSync,
 } from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
@@ -185,6 +186,28 @@ export const avalancheMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemAvalanche,
+};
+
+export const zkSyncEraMainnet: EvmNetworkConfig = {
+  id: 'zksync-era-mainnet',
+  exportConstName: 'zkSyncEraMainnet',
+  name: 'ZkSync Era',
+  ecosystem: 'evm',
+  network: 'zksync-era',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 324,
+  rpcUrl: viemZkSync.rpcUrls.default.http[0],
+  explorerUrl: 'https://explorer.zksync.io',
+  apiUrl: 'https://block-explorer-api.mainnet.zksync.io/api',
+  primaryExplorerApiIdentifier: 'zksync-era-mainnet',
+  icon: 'zksync',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemZkSync,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

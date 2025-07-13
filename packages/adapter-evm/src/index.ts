@@ -20,6 +20,7 @@ export {
   bscMainnet,
   optimismMainnet,
   avalancheMainnet,
+  zkSyncEraMainnet,
   ethereumSepolia,
   arbitrumSepolia,
   polygonAmoy,
@@ -28,6 +29,7 @@ export {
   bscTestnet,
   optimismSepolia,
   avalancheFuji,
+  zkSyncEraSepolia,
   // ... other individual network exports
 } from './networks';
 
