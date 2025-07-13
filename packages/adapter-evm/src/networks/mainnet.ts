@@ -3,6 +3,7 @@ import {
   base as viemBase,
   bsc as viemBsc,
   mainnet as viemMainnet,
+  optimism as viemOptimism,
   polygon as viemPolygon,
   polygonZkEvm as viemPolygonZkEvm,
 } from 'viem/chains';
@@ -139,6 +140,28 @@ export const bscMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBsc,
+};
+
+export const optimismMainnet: EvmNetworkConfig = {
+  id: 'optimism-mainnet',
+  exportConstName: 'optimismMainnet',
+  name: 'OP Mainnet',
+  ecosystem: 'evm',
+  network: 'optimism',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 10,
+  rpcUrl: viemOptimism.rpcUrls.default.http[0],
+  explorerUrl: 'https://optimistic.etherscan.io',
+  apiUrl: 'https://api-optimistic.etherscan.io/api',
+  primaryExplorerApiIdentifier: 'optimistic-etherscan-mainnet',
+  icon: 'optimism',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemOptimism,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

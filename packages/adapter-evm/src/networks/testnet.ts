@@ -2,6 +2,7 @@ import {
   arbitrumSepolia as viemArbitrumSepolia,
   baseSepolia as viemBaseSepolia,
   bscTestnet as viemBscTestnet,
+  optimismSepolia as viemOptimismSepolia,
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
   sepolia as viemSepolia,
@@ -139,6 +140,28 @@ export const bscTestnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBscTestnet,
+};
+
+export const optimismSepolia: EvmNetworkConfig = {
+  id: 'optimism-sepolia',
+  exportConstName: 'optimismSepolia',
+  name: 'OP Sepolia',
+  ecosystem: 'evm',
+  network: 'optimism',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 11155420,
+  rpcUrl: viemOptimismSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia-optimism.etherscan.io',
+  apiUrl: 'https://api-sepolia-optimism.etherscan.io/api',
+  primaryExplorerApiIdentifier: 'optimistic-etherscan-sepolia',
+  icon: 'optimism',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemOptimismSepolia,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

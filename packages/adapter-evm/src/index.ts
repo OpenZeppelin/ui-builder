@@ -17,13 +17,15 @@ export {
   polygonMainnet,
   polygonZkEvmMainnet,
   baseMainnet,
+  bscMainnet,
+  optimismMainnet,
   ethereumSepolia,
   arbitrumSepolia,
   polygonAmoy,
   polygonZkEvmCardona,
   baseSepolia,
-  bscMainnet,
   bscTestnet,
+  optimismSepolia,
   // ... other individual network exports
 } from './networks';
 
