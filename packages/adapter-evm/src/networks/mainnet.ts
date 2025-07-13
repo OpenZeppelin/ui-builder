@@ -1,6 +1,7 @@
 import {
   arbitrum as viemArbitrum,
   base as viemBase,
+  bsc as viemBsc,
   mainnet as viemMainnet,
   polygon as viemPolygon,
   polygonZkEvm as viemPolygonZkEvm,
@@ -116,6 +117,28 @@ export const baseMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBase,
+};
+
+export const bscMainnet: EvmNetworkConfig = {
+  id: 'bsc-mainnet',
+  exportConstName: 'bscMainnet',
+  name: 'BNB Smart Chain',
+  ecosystem: 'evm',
+  network: 'bsc',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 56,
+  rpcUrl: viemBsc.rpcUrls.default.http[0],
+  explorerUrl: 'https://bscscan.com',
+  apiUrl: 'https://api.bscscan.com/api',
+  primaryExplorerApiIdentifier: 'bscscan-mainnet',
+  icon: 'bsc',
+  nativeCurrency: {
+    name: 'BNB',
+    symbol: 'BNB',
+    decimals: 18,
+  },
+  viemChain: viemBsc,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

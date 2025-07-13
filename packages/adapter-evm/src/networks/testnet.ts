@@ -1,6 +1,7 @@
 import {
   arbitrumSepolia as viemArbitrumSepolia,
   baseSepolia as viemBaseSepolia,
+  bscTestnet as viemBscTestnet,
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
   sepolia as viemSepolia,
@@ -116,6 +117,28 @@ export const baseSepolia: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBaseSepolia,
+};
+
+export const bscTestnet: EvmNetworkConfig = {
+  id: 'bsc-testnet',
+  exportConstName: 'bscTestnet',
+  name: 'BSC Testnet',
+  ecosystem: 'evm',
+  network: 'bsc',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 97,
+  rpcUrl: viemBscTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://testnet.bscscan.com',
+  apiUrl: 'https://api-testnet.bscscan.com/api',
+  primaryExplorerApiIdentifier: 'bscscan-testnet',
+  icon: 'bsc',
+  nativeCurrency: {
+    name: 'BNB',
+    symbol: 'BNB',
+    decimals: 18,
+  },
+  viemChain: viemBscTestnet,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

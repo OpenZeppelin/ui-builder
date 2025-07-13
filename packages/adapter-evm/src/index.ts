@@ -22,6 +22,8 @@ export {
   polygonAmoy,
   polygonZkEvmCardona,
   baseSepolia,
+  bscMainnet,
+  bscTestnet,
   // ... other individual network exports
 } from './networks';
 
