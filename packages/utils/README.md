@@ -1,4 +1,4 @@
-# @openzeppelin/transaction-form-utils
+# @openzeppelin/contracts-ui-builder-utils
 
 This package provides a set of shared, framework-agnostic utility functions used across the entire Transaction Form Builder ecosystem.
 
@@ -19,5 +19,5 @@ The goal of this package is to centralize common logic that is not tied to any s
 This package is a core part of the monorepo and is automatically linked via `pnpm` workspaces. For external use, it would be installed from the project's package registry.
 
 ```bash
-pnpm add @openzeppelin/transaction-form-utils
+pnpm add @openzeppelin/contracts-ui-builder-utils
 ```

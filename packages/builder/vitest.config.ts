@@ -103,7 +103,10 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@styles': path.resolve(__dirname, '../styles'),
-        '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+        '@openzeppelin/contracts-ui-builder-utils': path.resolve(
+          __dirname,
+          '../utils/src/index.ts'
+        ),
       },
       dedupe: [
         '@openzeppelin/contracts-ui-builder-renderer',

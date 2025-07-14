@@ -172,7 +172,7 @@ The consuming application (via the `loadConfigModule` prop on `WalletStateProvid
 **Example from `packages/builder/src/App.tsx` or exported app's `main.tsx`:**
 
 ```typescript
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 const loadAppConfigModule = async (
   relativePath: string

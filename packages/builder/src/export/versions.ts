@@ -14,5 +14,5 @@ export const packageVersions = {
   '@openzeppelin/contracts-ui-builder-renderer': '1.17.1',
   '@openzeppelin/transaction-form-types': '1.17.0',
   '@openzeppelin/contracts-ui-builder-ui': '1.18.0',
-  '@openzeppelin/transaction-form-utils': '1.17.0',
+  '@openzeppelin/contracts-ui-builder-utils': '1.17.0',
 };

@@ -9,7 +9,7 @@ import * as estreePlugin from 'prettier/plugins/estree';
 import * as typescriptPlugin from 'prettier/plugins/typescript';
 import * as prettierStandalone from 'prettier/standalone';
 
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 export class TemplateProcessor {
   private templates: Record<string, string> | null = null;

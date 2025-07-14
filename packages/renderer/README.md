@@ -268,7 +268,7 @@ export const rendererConfig: RendererConfig = {
     '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
     '@openzeppelin/contracts-ui-builder-ui': '^1.0.0',
     '@openzeppelin/transaction-form-types': '^1.0.0',
-    '@openzeppelin/transaction-form-utils': '^1.0.0',
+    '@openzeppelin/contracts-ui-builder-utils': '^1.0.0',
   },
 };
 ```

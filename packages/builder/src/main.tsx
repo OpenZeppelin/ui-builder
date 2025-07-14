@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { appConfigService } from '@openzeppelin/transaction-form-utils';
+import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import App from './App';
 import './index.css';

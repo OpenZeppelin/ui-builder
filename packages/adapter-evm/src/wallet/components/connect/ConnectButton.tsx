@@ -3,12 +3,12 @@ import { Loader2, Wallet } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   useDerivedAccountStatus,
   useDerivedConnectStatus,
 } from '@openzeppelin/transaction-form-react-core';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

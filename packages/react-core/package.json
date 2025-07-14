@@ -49,7 +49,7 @@
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",

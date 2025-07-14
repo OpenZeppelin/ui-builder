@@ -1,6 +1,6 @@
 import { afterAll, beforeAll } from 'vitest';
 
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Disable logging before all tests
 beforeAll(() => {

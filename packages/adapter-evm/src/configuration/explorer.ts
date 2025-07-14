@@ -1,9 +1,12 @@
 import {
+  appConfigService,
+  userExplorerConfigService,
+} from '@openzeppelin/contracts-ui-builder-utils';
+import {
   EvmNetworkConfig,
   NetworkConfig,
   UserExplorerConfig,
 } from '@openzeppelin/transaction-form-types';
-import { appConfigService, userExplorerConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { isValidEvmAddress } from '../utils';
 

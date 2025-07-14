@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@openzeppelin/transaction-form-types": "workspace:*",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
   },
   "devDependencies": {
     "eslint": "^9.29.0",

@@ -10,13 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   useDerivedAccountStatus,
   useDerivedChainInfo,
   useDerivedSwitchChainStatus,
 } from '@openzeppelin/transaction-form-react-core';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

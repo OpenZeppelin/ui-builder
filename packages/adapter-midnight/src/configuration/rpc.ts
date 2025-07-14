@@ -1,5 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Validates an RPC endpoint configuration for Midnight networks.

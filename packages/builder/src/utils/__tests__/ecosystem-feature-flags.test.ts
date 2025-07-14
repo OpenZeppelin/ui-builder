@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService } from '@openzeppelin/transaction-form-utils';
+import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   getEcosystemFeatureConfig,
@@ -11,7 +11,7 @@ import {
 } from '../ecosystem-feature-flags';
 
 // Mock the appConfigService
-vi.mock('@openzeppelin/transaction-form-utils', () => ({
+vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
   appConfigService: {
     isFeatureEnabled: vi.fn().mockReturnValue(false),
   },

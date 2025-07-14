@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Modifies the content paths within tailwind.config.cjs content string.

@@ -256,7 +256,7 @@ function exportFormSimple(options) {
           '@openzeppelin/transaction-form-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/transaction-form-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
           '@openzeppelin/contracts-ui-builder-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
-          '@openzeppelin/transaction-form-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
+          '@openzeppelin/contracts-ui-builder-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
         };
         packageJson.pnpm = {
           ...(packageJson.pnpm || {}),

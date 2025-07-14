@@ -1,5 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 const SYSTEM_LOG_TAG = 'adapter-midnight';
 

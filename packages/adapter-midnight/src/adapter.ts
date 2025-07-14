@@ -3,6 +3,7 @@ import {
   validateMidnightRpcEndpoint,
 } from 'packages/adapter-midnight/src/configuration';
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   AvailableUiKit,
   Connector,
@@ -25,7 +26,6 @@ import type {
   UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { parseMidnightContractInterface } from './utils/schema-parser';
 import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';

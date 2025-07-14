@@ -2,7 +2,7 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 const TooltipProvider = TooltipPrimitive.Provider;
 

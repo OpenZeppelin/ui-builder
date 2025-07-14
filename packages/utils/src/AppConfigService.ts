@@ -10,7 +10,7 @@ import type {
 
 import { logger } from './logger';
 
-// Changed from @openzeppelin/transaction-form-utils
+// Changed from @openzeppelin/contracts-ui-builder-utils
 
 /**
  * Type for the strategy array in initialize method.

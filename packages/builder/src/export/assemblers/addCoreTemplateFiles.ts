@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { TemplateManager } from '../TemplateManager';

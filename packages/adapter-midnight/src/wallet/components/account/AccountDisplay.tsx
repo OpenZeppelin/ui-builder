@@ -3,8 +3,8 @@ import { LogOut } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { cn, truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
 import { useAccount, useDisconnect } from '../../hooks/facade-hooks';
 import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';

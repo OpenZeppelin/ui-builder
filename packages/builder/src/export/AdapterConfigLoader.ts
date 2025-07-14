@@ -1,5 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { AdapterConfig, Ecosystem } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { getAdapterConfigExportName, getAdapterConfigLoader } from '../core/ecosystemManager';
 

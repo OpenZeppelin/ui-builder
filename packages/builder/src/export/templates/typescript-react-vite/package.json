@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-ui-builder-renderer": "^1.0.0",
-    "@openzeppelin/transaction-form-utils": "^0.1.0",
+    "@openzeppelin/contracts-ui-builder-utils": "^0.1.0",
     "@openzeppelin/contracts-ui-builder-ui": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

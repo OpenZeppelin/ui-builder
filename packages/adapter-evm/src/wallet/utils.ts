@@ -1,9 +1,9 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   EcosystemWalletComponents,
   NativeConfigLoader,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Import the actual service functions instead of using placeholders
 import { getResolvedWalletComponents as getWalletComponentsFromService } from './utils/uiKitService';

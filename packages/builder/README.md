@@ -47,7 +47,7 @@ This package relies on:
 - **@openzeppelin/contracts-ui-builder-renderer**: The shared library for rendering the final transaction form and other components.
 - **@openzeppelin/contracts-ui-builder-ui**: The shared library for all common UI and form field components.
 - **@openzeppelin/transaction-form-styles**: The centralized styling system.
-- **@openzeppelin/transaction-form-utils**: Shared utility functions like the logger and `appConfigService`.
+- **@openzeppelin/contracts-ui-builder-utils**: Shared utility functions like the logger and `appConfigService`.
 - **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`).
 
 ## Styling

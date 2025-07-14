@@ -5,8 +5,8 @@ import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ContractAdapter, UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
-import { logger, userRpcConfigService } from '@openzeppelin/transaction-form-utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

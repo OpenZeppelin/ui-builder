@@ -7,8 +7,8 @@ import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/transaction-
 import { UiKitSettings } from '../components/UiKitSettings';
 
 // Mock the logger with partial mocking to keep other exports
-vi.mock('@openzeppelin/transaction-form-utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@openzeppelin/transaction-form-utils')>();
+vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openzeppelin/contracts-ui-builder-utils')>();
   return {
     ...actual,
     logger: {

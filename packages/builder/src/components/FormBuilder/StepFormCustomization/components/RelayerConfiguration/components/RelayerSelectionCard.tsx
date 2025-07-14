@@ -12,8 +12,8 @@ import {
   RelayerDetailsCard,
   SelectField,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
 import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/transaction-form-types';
-import { truncateMiddle } from '@openzeppelin/transaction-form-utils';
 
 import type { ExecutionMethodFormData } from '../../../types';
 

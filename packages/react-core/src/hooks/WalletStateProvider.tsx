@@ -1,5 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   ContractAdapter,
   EcosystemReactUiProviderProps,
@@ -8,7 +9,6 @@ import type {
   NetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 import { useAdapterContext } from './useAdapterContext';

@@ -5,7 +5,7 @@ import { Check, ChevronRight, Circle } from 'lucide-react';
 
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 

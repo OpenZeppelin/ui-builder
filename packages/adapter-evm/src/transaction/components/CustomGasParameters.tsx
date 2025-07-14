@@ -11,7 +11,7 @@ import {
   BooleanField,
   NumberField,
 } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EvmRelayerFormData } from './useEvmRelayerOptions';
 

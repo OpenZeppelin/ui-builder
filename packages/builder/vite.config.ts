@@ -34,7 +34,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@styles': path.resolve(__dirname, '../styles'),
       '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
-      '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+      '@openzeppelin/contracts-ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
     },
   },
   define: {

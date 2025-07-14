@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { ContractStateWidget } from '../../../../renderer/dist';
 import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';

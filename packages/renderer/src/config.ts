@@ -25,7 +25,7 @@ export const rendererConfig: RendererConfig = {
     'tailwind-merge': '^1.14.0',
     '@openzeppelin/contracts-ui-builder-renderer': '^0.1.0',
     '@openzeppelin/transaction-form-types': '^0.1.0',
-    '@openzeppelin/transaction-form-utils': '^0.1.0',
+    '@openzeppelin/contracts-ui-builder-utils': '^0.1.0',
   },
 
   // Field-specific dependencies

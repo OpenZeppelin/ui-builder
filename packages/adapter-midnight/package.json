@@ -48,7 +48,7 @@
     "@openzeppelin/transaction-form-react-core": "workspace:^",
     "@openzeppelin/transaction-form-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
   },
   "devDependencies": {
     "@types/react": "19.1.6",

@@ -2,7 +2,7 @@ import { Copy } from 'lucide-react';
 
 import * as React from 'react';
 
-import { cn, truncateMiddle } from '@openzeppelin/transaction-form-utils';
+import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface AddressDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   /**

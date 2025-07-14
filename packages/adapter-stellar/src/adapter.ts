@@ -3,6 +3,7 @@ import {
   validateStellarRpcEndpoint,
 } from 'packages/adapter-stellar/src/configuration';
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   AvailableUiKit,
   Connector,
@@ -22,7 +23,6 @@ import type {
   UserRpcProviderConfig,
 } from '@openzeppelin/transaction-form-types';
 import { isStellarNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 // Import functions from modules
 import {

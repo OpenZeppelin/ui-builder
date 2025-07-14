@@ -1,5 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { NativeConfigLoader, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { resolveAndInitializeKitConfig } from '../utils';
 

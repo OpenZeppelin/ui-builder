@@ -1,5 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
 

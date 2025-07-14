@@ -3,18 +3,18 @@ import { RefreshCw } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import type {
-  ContractAdapter,
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/transaction-form-types';
 import {
   type RpcConfigEvent,
   cn,
   logger,
   rateLimitedBatch,
   userRpcConfigService,
-} from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-utils';
+import type {
+  ContractAdapter,
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/transaction-form-types';
 
 import { FunctionResult } from './FunctionResult';
 

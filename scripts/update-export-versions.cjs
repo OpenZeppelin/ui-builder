@@ -13,7 +13,7 @@ const packagesToUpdate = [
   '@openzeppelin/contracts-ui-builder-renderer',
   '@openzeppelin/transaction-form-types',
   '@openzeppelin/contracts-ui-builder-ui',
-  '@openzeppelin/transaction-form-utils',
+  '@openzeppelin/contracts-ui-builder-utils',
 ];
 
 /**

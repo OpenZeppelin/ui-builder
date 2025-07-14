@@ -1,5 +1,5 @@
+import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
-import { appConfigService } from '@openzeppelin/transaction-form-utils';
 
 import {
   type EcosystemFeatureConfig,

@@ -35,7 +35,7 @@ It is a foundational package intended to be used by the main `@openzeppelin/tran
 
 This package is typically used as a workspace dependency (e.g., `"@openzeppelin/transaction-form-react-core": "workspace:^"`) within the Transaction Form Builder monorepo.
 
-It has peer dependencies on `react` and `react-dom`, and direct dependencies on `@openzeppelin/transaction-form-types` and `@openzeppelin/transaction-form-utils`.
+It has peer dependencies on `react` and `react-dom`, and direct dependencies on `@openzeppelin/transaction-form-types` and `@openzeppelin/contracts-ui-builder-utils`.
 
 ## Usage Example (Application Setup)
 

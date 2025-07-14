@@ -1,6 +1,6 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import type { UserExplorerConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 /**
  * Gets a blockchain explorer URL for an address on Stellar.

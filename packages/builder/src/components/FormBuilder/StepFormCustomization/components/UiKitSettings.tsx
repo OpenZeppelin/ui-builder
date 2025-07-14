@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   AvailableUiKit,
   ContractAdapter,
@@ -12,7 +13,6 @@ import {
   UiKitConfiguration,
   UiKitName,
 } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { DynamicFormField } from '../../../../../../renderer/dist';
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';

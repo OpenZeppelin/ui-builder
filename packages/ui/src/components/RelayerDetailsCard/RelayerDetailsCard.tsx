@@ -11,8 +11,8 @@ import {
 
 import React from 'react';
 
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/transaction-form-types';
-import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { AddressDisplay } from '../ui/address-display';
 

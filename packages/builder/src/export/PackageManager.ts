@@ -35,8 +35,8 @@
  */
 import { rendererConfig } from 'virtual:renderer-config';
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import type { RendererConfig } from '../../../renderer/dist';
 import { adapterPackageMap } from '../core/ecosystemManager';
@@ -232,7 +232,7 @@ export class PackageManager {
       combined[adapterPackageName] = 'workspace:*'; // Use workspace protocol for now
       combined['@openzeppelin/transaction-form-types'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-ui'] = 'workspace:*';
-      combined['@openzeppelin/transaction-form-utils'] = 'workspace:*';
+      combined['@openzeppelin/contracts-ui-builder-utils'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-renderer'] = 'workspace:*';
       combined['@openzeppelin/transaction-form-react-core'] = 'workspace:*';
     }
@@ -421,7 +421,7 @@ export class PackageManager {
     const internalPackages = new Set([
       '@openzeppelin/contracts-ui-builder-renderer',
       '@openzeppelin/transaction-form-types',
-      '@openzeppelin/transaction-form-utils',
+      '@openzeppelin/contracts-ui-builder-utils',
       '@openzeppelin/contracts-ui-builder-ui',
       '@openzeppelin/transaction-form-react-core',
       ...Object.values(adapterPackageMap),

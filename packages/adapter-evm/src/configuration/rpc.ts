@@ -1,10 +1,10 @@
-import type { EvmNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
 import {
   appConfigService,
   isValidUrl,
   logger,
   userRpcConfigService,
-} from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-utils';
+import type { EvmNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
 
 /**
  * Builds a complete RPC URL from a user RPC provider configuration.
