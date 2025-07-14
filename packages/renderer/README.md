@@ -211,7 +211,7 @@ The form-renderer package includes a configuration system that defines dependenc
 Create a `config.ts` file in the form-renderer package:
 
 ```typescript
-// packages/form-renderer/src/config.ts
+// packages/renderer/src/config.ts
 import type { FormRendererConfig } from './types/FormRendererConfig';
 
 /**

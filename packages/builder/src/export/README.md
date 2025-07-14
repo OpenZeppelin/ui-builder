@@ -132,7 +132,7 @@ The PackageManager handles dependency management for exported projects:
 Configurations are loaded automatically at build time from:
 
 - `/adapters/*/config.ts`: For chain-specific dependencies
-- `/form-renderer/src/config.ts`: For field-specific dependencies
+- `/renderer/src/config.ts`: For field-specific dependencies
 
 ## Export Options
 
@@ -224,7 +224,7 @@ across different execution environments (Vite dev, Vite build, Vitest), we use c
   (configs, shared CSS, template CSS) using `fs.readFileSync` during the build/test setup
   and makes it available via `virtual:` imports (e.g., `virtual:tailwind-config-content`).
 - **`vite-plugins/cross-package-provider.ts`**: Handles virtual modules that need to import _code_
-  from other packages (like `virtual:form-renderer-config`) by generating intermediate modules
+  from other packages (like `virtual:renderer-config`) by generating intermediate modules
   that use Vite aliases.
 
 Type definitions for these virtual modules are in `src/types/virtual-modules.d.ts`.

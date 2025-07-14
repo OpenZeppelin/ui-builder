@@ -8,8 +8,8 @@ const config: StorybookConfig = {
     '../packages/builder/src/**/*.mdx',
 
     // Form renderer package stories
-    '../packages/form-renderer/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../packages/form-renderer/src/**/*.mdx',
+    '../packages/renderer/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../packages/renderer/src/**/*.mdx',
   ],
   addons: [
     '@storybook/addon-links',

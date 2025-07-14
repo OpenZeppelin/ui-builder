@@ -4,7 +4,7 @@ This guide explains how to import files across package boundaries in our monorep
 
 ## The Problem
 
-When using `import.meta.glob` to dynamically import files across package boundaries (e.g., from `packages/builder` to `packages/form-renderer`), Vite's development server has limitations that prevent it from correctly resolving these imports. This results in errors like:
+When using `import.meta.glob` to dynamically import files across package boundaries (e.g., from `packages/builder` to `packages/renderer`), Vite's development server has limitations that prevent it from correctly resolving these imports. This results in errors like:
 
 ```
 Export failed: No form renderer configuration file found
@@ -38,7 +38,7 @@ Add your virtual module to the `crossPackageModules` object:
 ```typescript
 const crossPackageModules: Record<string, string> = {
   // Existing modules
-  'virtual:form-renderer-config': '../form-renderer/src/config.ts',
+  'virtual:renderer-config': '../renderer/src/config.ts',
 
   // Add your new module
   'virtual:my-new-module': '../other-package/src/my-file.ts',
@@ -51,7 +51,7 @@ Then add a corresponding alias in the `resolve.alias` section:
 resolve: {
   alias: {
     // Existing aliases
-    '@cross-package/form-renderer-config': path.resolve(__dirname, '../form-renderer/src/config.ts'),
+    '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
 
     // Add your new alias
     '@cross-package/my-new-module': path.resolve(__dirname, '../other-package/src/my-file.ts'),
@@ -82,7 +82,7 @@ Add a mock implementation for tests in `packages/builder/vitest.config.ts`:
 ```typescript
 const virtualModuleMocks: Record<string, string> = {
   // Existing mocks
-  'virtual:form-renderer-config': `
+  'virtual:renderer-config': `
     export const formRendererConfig = {
       coreDependencies: {},
       fieldDependencies: {}
@@ -111,7 +111,7 @@ import { myExport } from 'virtual:my-new-module';
 The original implementation using `import.meta.glob`:
 
 ```typescript
-const formRendererConfigFile = import.meta.glob('../../form-renderer/src/config.ts', {
+const formRendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
   eager: true,
 }) as GlobImportResult;
 
@@ -123,7 +123,7 @@ The new implementation using a virtual module:
 
 ```typescript
 // This works in both development and production
-import { formRendererConfig } from 'virtual:form-renderer-config';
+import { formRendererConfig } from 'virtual:renderer-config';
 ```
 
 ## Troubleshooting

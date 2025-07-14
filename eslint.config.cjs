@@ -170,7 +170,7 @@ const baseConfig = [
 
   // JSDoc rules for libraries
   {
-    files: ['packages/form-renderer/src/**/*.ts', 'packages/form-renderer/src/**/*.tsx'],
+    files: ['packages/renderer/src/**/*.ts', 'packages/renderer/src/**/*.tsx'],
     plugins: {
       jsdoc: jsdocPlugin,
     },

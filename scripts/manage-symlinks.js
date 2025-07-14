@@ -22,12 +22,12 @@ const __dirname = path.dirname(__filename);
 const CONFIG_FILES = ['tailwind.config.cjs', 'postcss.config.cjs', 'components.json'];
 
 // Packages that need symlinks
-const PACKAGES = ['packages/builder', 'packages/form-renderer'];
+const PACKAGES = ['packages/builder', 'packages/renderer'];
 
 // Map of relative paths from each package to the root
 const ROOT_PATHS = {
   'packages/builder': '../..',
-  'packages/form-renderer': '../..',
+  'packages/renderer': '../..',
 };
 
 // Check if a path is a symlink

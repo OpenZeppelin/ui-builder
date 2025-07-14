@@ -8,7 +8,7 @@
 /**
  * VIRTUAL MODULE IMPORT
  *
- * This import uses a virtual module provided by the 'form-renderer-config-provider'
+ * This import uses a virtual module provided by the 'renderer-config-provider'
  * Vite plugin defined in vite.config.ts.
  *
  * WHY THIS APPROACH:
@@ -16,7 +16,7 @@
  * this configuration file across package boundaries:
  *
  * ```
- * const formRendererConfigFile = import.meta.glob('../../form-renderer/src/config.ts', {
+ * const formRendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
  *   eager: true,
  * }) as GlobImportResult;
  * ```
@@ -33,12 +33,12 @@
  * implementation of this module. Most tests provide their own mock via the constructor
  * parameters, but the virtual module is necessary to satisfy this import statement.
  */
-import { formRendererConfig } from 'virtual:form-renderer-config';
+import { formRendererConfig } from 'virtual:renderer-config';
 
-import type { FormRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
+import type { FormRendererConfig } from '../../../renderer/dist';
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';

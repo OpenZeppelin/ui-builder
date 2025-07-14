@@ -19,7 +19,7 @@
 /**
  * FORM RENDERER CONFIGURATION VIRTUAL MODULE
  *
- * This module declaration makes TypeScript aware of the 'virtual:form-renderer-config' import,
+ * This module declaration makes TypeScript aware of the 'virtual:renderer-config' import,
  * which is provided by the 'cross-package-modules-provider' plugin in vite.config.ts.
  *
  * WHY IT'S NEEDED:
@@ -34,7 +34,7 @@
  * This module is imported by packages/builder/src/export/PackageManager.ts to access
  * the form-renderer configuration for dependency management during form export.
  */
-declare module 'virtual:form-renderer-config' {
+declare module 'virtual:renderer-config' {
   export { formRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer/config';
 }
 

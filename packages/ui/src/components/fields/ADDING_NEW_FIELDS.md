@@ -36,7 +36,7 @@ export type FieldType =
 If your field requires a new UI component not already available, create it first using Radix UI primitives:
 
 ```typescript
-// packages/form-renderer/src/components/ui/your-component.tsx
+// packages/renderer/src/components/ui/your-component.tsx
 
 import * as React from 'react';
 import * as YourPrimitive from '@radix-ui/react-your-primitive';
@@ -246,14 +246,14 @@ Here's an example of creating a SelectField:
 1. Create the UI component (e.g., using Radix UI):
 
    ```tsx
-   // packages/form-renderer/src/components/ui/select.tsx
+   // packages/renderer/src/components/ui/select.tsx
    import * as SelectPrimitive from '@radix-ui/react-select';
 
    import * as React from 'react';
 
    import { cn } from '@openzeppelin/transaction-form-utils';
 
-   // packages/form-renderer/src/components/ui/select.tsx
+   // packages/renderer/src/components/ui/select.tsx
 
    const Select = SelectPrimitive.Root;
 
@@ -285,7 +285,7 @@ Here's an example of creating a SelectField:
 2. Create the field component incorporating the UI component:
 
    ```tsx
-   // packages/form-renderer/src/components/fields/SelectField.tsx
+   // packages/renderer/src/components/fields/SelectField.tsx
    import React from 'react';
    import { Controller, FieldValues } from 'react-hook-form';
 

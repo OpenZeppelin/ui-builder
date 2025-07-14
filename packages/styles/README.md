@@ -77,7 +77,7 @@ Each package that contains UI elements needing Tailwind processing (like `builde
 
 ```
 packages/builder/tailwind.config.cjs -> ../../tailwind.config.cjs
-packages/form-renderer/tailwind.config.cjs -> ../../tailwind.config.cjs
+packages/renderer/tailwind.config.cjs -> ../../tailwind.config.cjs
 packages/ui/tailwind.config.cjs -> ../../tailwind.config.cjs
 ```
 

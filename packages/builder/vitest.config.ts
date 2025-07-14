@@ -15,7 +15,7 @@ import { sharedVitestConfig } from '../../vitest.shared.config';
  */
 const virtualModuleMocks: Record<string, string> = {
   // Module ID -> mock implementation
-  'virtual:form-renderer-config': `
+  'virtual:renderer-config': `
     export const formRendererConfig = {
       coreDependencies: {},
       fieldDependencies: {}

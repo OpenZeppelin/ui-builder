@@ -35,7 +35,7 @@ This project is organized as a monorepo with the following packages:
 
 - **packages/builder**: The main application with the form builder UI and core logic.
 - **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
-- **packages/form-renderer**: The shared form rendering library (published to npm), responsible for dynamically rendering forms based on schemas and an active adapter.
+- **packages/renderer**: The shared form rendering library (published to npm), responsible for dynamically rendering forms based on schemas and an active adapter.
 - **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `form-renderer` to ensure a consistent look and feel.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations.
@@ -61,7 +61,7 @@ Features:
 - Support for both ESM and CommonJS environments
 - Customizable styling options
 
-For more details, see the [Form-Renderer README](./packages/form-renderer/README.md).
+For more details, see the [Form-Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 

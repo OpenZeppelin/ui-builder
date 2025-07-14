@@ -33,10 +33,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@styles': path.resolve(__dirname, '../styles'),
-      '@cross-package/form-renderer-config': path.resolve(
-        __dirname,
-        '../form-renderer/src/config.ts'
-      ),
+      '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
       '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
     },
   },

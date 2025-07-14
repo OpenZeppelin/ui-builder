@@ -16,9 +16,9 @@
 // Mock declarations must come before imports
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FormRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
+import type { FormRendererConfig } from '../../../../renderer/dist';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -46,7 +46,7 @@ vi.mock('virtual:adapter-configs', () => {
   return { adapterConfigs };
 });
 
-vi.mock('virtual:form-renderer-config', () => {
+vi.mock('virtual:renderer-config', () => {
   const formRendererConfig = {
     coreDependencies: {
       react: '^19.0.0',

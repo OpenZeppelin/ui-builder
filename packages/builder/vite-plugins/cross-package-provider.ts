@@ -4,7 +4,7 @@ import type { Plugin } from 'vite';
  * Configuration for cross-package virtual modules (which require alias resolution)
  */
 const crossPackageModules: Record<string, string> = {
-  'virtual:form-renderer-config': '../form-renderer/src/config.ts',
+  'virtual:renderer-config': '../renderer/src/config.ts',
   // Add more alias-based virtual modules here if needed
 };
 
@@ -12,15 +12,15 @@ const crossPackageModules: Record<string, string> = {
  * Plugin to provide cross-package module imports via aliases.
  *
  * This plugin intercepts imports for specified virtual modules
- * (like 'virtual:form-renderer-config') and returns a small module
+ * (like 'virtual:renderer-config') and returns a small module
  * that imports the actual target file using a Vite alias (like
- * '@cross-package/form-renderer-config').
+ * '@cross-package/renderer-config').
  *
  * This is necessary because direct cross-package imports can be unreliable
  * in Vite's dev server.
  *
  * Requires corresponding aliases to be defined in the main vite config's
- * `resolve.alias` section (e.g., '@cross-package/form-renderer-config': path.resolve(...)).
+ * `resolve.alias` section (e.g., '@cross-package/renderer-config': path.resolve(...)).
  */
 export function crossPackageModulesProviderPlugin(): Plugin {
   return {

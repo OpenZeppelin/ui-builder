@@ -2,7 +2,7 @@
 export default {
   content: [
     '../packages/builder/src/**/*.{js,ts,jsx,tsx}',
-    '../packages/form-renderer/src/**/*.{js,ts,jsx,tsx}',
+    '../packages/renderer/src/**/*.{js,ts,jsx,tsx}',
     './preview.tsx',
   ],
   theme: {
