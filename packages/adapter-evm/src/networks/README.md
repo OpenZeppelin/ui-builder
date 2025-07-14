@@ -67,6 +67,97 @@ Network configurations for various EVM chains (mainnets and testnets) are export
 - `nativeCurrency`: Native currency information (name, symbol, decimals)
 - `viemChain`: The corresponding viem chain object (required for wagmi compatibility)
 
-## Internal Structure
+## Adding a New Network
 
-// ... (existing internal structure section) ...
+Follow these steps to add support for a new EVM network:
+
+### 1. Verify Viem Chain Support
+
+First, ensure the network is available in `viem/chains`:
+
+```typescript
+import { myNewChain } from 'viem/chains';
+```
+
+If the chain is not available in viem, it cannot be added as wagmi requires viem chain objects.
+
+### 2. Add Network Configuration
+
+Add the network configuration to the appropriate file:
+
+- **Mainnet networks**: Add to `src/networks/mainnet.ts`
+- **Testnet networks**: Add to `src/networks/testnet.ts`
+
+Example configuration:
+
+```typescript
+import { myNewChain, myNewChainTestnet } from 'viem/chains';
+
+export const myNewNetworkMainnet: EvmNetworkConfig = {
+  id: 'mynewnetwork-mainnet',
+  name: 'My New Network',
+  ecosystem: 'evm',
+  chainId: 12345,
+  rpcUrl: 'https://rpc.mynewnetwork.io',
+  explorerUrl: 'https://explorer.mynewnetwork.io',
+  apiUrl: 'https://api.explorer.mynewnetwork.io/api',
+  primaryExplorerApiIdentifier: 'mynewnetwork-mainnet',
+  icon: 'mynewnetwork',
+  nativeCurrency: {
+    name: 'My Token',
+    symbol: 'MTK',
+    decimals: 18,
+  },
+  viemChain: myNewChain,
+};
+```
+
+### 3. Update Network Arrays and Exports
+
+In the same file (`mainnet.ts` or `testnet.ts`), add your network to the appropriate array:
+
+```typescript
+export const evmMainnetNetworks: EvmNetworkConfig[] = [
+  // ... existing networks ...
+  myNewNetworkMainnet,
+];
+```
+
+### 4. Export from Index
+
+Add your network to `src/networks/index.ts`:
+
+```typescript
+export {
+  // ... existing exports ...
+  myNewNetworkMainnet,
+  myNewNetworkTestnet,
+} from './mainnet';
+// or from './testnet' for testnets
+```
+
+### 5. Export from Package Root
+
+Add your network to the main package export in `src/index.ts`:
+
+```typescript
+export {
+  // ... existing exports ...
+  myNewNetworkMainnet,
+  myNewNetworkTestnet,
+} from './networks';
+```
+
+### 6. Test Integration
+
+Run the adapter tests to verify wagmi integration:
+
+```bash
+pnpm --filter @openzeppelin/transaction-form-adapter-evm test
+```
+
+The tests will verify that:
+
+- Your network is properly recognized by wagmi
+- Chain ID mappings are correctly generated
+- All supported chains are accessible
