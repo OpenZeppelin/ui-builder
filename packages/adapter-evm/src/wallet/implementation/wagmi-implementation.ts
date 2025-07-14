@@ -212,9 +212,9 @@ export class WagmiWalletImplementation {
     } catch (error) {
       logger.error(LOG_SYSTEM, 'Error creating default Wagmi config on demand:', error);
       return createConfig({
-        chains: [evmNetworks[0].viemChain!] as unknown as WagmiConfigChains, // Fallback to first network's chain
+        chains: [defaultSupportedChains[0]] as unknown as WagmiConfigChains,
         connectors: [injected()],
-        transports: { [evmNetworks[0].viemChain!.id]: http() }, // Fallback to first network's chain
+        transports: { [defaultSupportedChains[0].id]: http() },
       });
     }
   }
@@ -308,8 +308,8 @@ export class WagmiWalletImplementation {
         'getActiveConfigForManager called before initialization! Creating fallback.'
       );
       return createConfig({
-        chains: [evmNetworks[0].viemChain!] as unknown as WagmiConfigChains, // Fallback to first network's chain
-        transports: { [evmNetworks[0].viemChain!.id]: http() }, // Fallback to first network's chain
+        chains: [defaultSupportedChains[0]] as unknown as WagmiConfigChains,
+        transports: { [defaultSupportedChains[0].id]: http() },
       });
     }
 
