@@ -46,7 +46,7 @@ This package relies on:
 - **@openzeppelin/contracts-ui-builder-types**: Shared type definitions for contracts, adapters, and forms.
 - **@openzeppelin/contracts-ui-builder-renderer**: The shared library for rendering the final transaction form and other components.
 - **@openzeppelin/contracts-ui-builder-ui**: The shared library for all common UI and form field components.
-- **@openzeppelin/transaction-form-styles**: The centralized styling system.
+- **@openzeppelin/contracts-ui-builder-styles**: The centralized styling system.
 - **@openzeppelin/contracts-ui-builder-utils**: Shared utility functions like the logger and `appConfigService`.
 - **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`).
 
@@ -120,7 +120,7 @@ The builder package uses an adapter pattern to support multiple blockchain ecosy
   - **Facade Hooks**: (e.g., `useAccount`, `useSwitchChain`, `connect`, `disconnect`) Provided by the adapter and exposed via `useWalletState().walletFacadeHooks` for reactive wallet interactions.
   - **Standardized UI Components**: (e.g., `ConnectButton`) Retrieved via `useWalletState().activeAdapter.getEcosystemWalletComponents()` and are expected to use the facade hooks internally.
 - **UI Components**: React components within this package (e.g., `WalletConnectionHeader`, `TransactionFormBuilder`, `NetworkSwitchManager`) utilize `useWalletState()` to access the active adapter, its facade hooks, and global wallet/network state to interact with different blockchains and manage UI accordingly.
-- **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/transaction-form-styles` package.
+- **Styling System**: Centralized CSS variables and styling approach from the `@openzeppelin/contracts-ui-builder-styles` package.
 
 This architecture allows for easy extension to support additional blockchain ecosystems by creating new adapter packages and registering them in `ecosystemManager.ts`. The provider model (from `@openzeppelin/transaction-form-react-core`) ensures consistent state and adapter access throughout the application.
 

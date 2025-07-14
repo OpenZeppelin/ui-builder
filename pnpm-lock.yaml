@@ -269,6 +269,9 @@ importers:
       '@openzeppelin/contracts-ui-builder-renderer':
         specifier: workspace:*
         version: link:../renderer
+      '@openzeppelin/contracts-ui-builder-styles':
+        specifier: workspace:*
+        version: link:../styles
       '@openzeppelin/contracts-ui-builder-types':
         specifier: workspace:*
         version: link:../types
@@ -293,9 +296,6 @@ importers:
       '@openzeppelin/transaction-form-react-core':
         specifier: workspace:*
         version: link:../react-core
-      '@openzeppelin/transaction-form-styles':
-        specifier: workspace:*
-        version: link:../styles
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

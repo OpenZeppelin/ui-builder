@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/transaction-form-styles",
+  "name": "@openzeppelin/contracts-ui-builder-styles",
   "version": "1.16.0",
   "private": false,
   "description": "Centralized styling system for the OpenZeppelin Transaction Form Builder.",
