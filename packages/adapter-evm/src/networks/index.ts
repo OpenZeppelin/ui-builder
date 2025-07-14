@@ -6,6 +6,7 @@ import {
   baseMainnet,
   bscMainnet,
   ethereumMainnet,
+  lineaMainnet,
   optimismMainnet,
   polygonMainnet,
   polygonZkEvmMainnet,
@@ -18,6 +19,7 @@ import {
   baseSepolia,
   bscTestnet,
   ethereumSepolia,
+  lineaSepolia,
   optimismSepolia,
   polygonAmoy,
   polygonZkEvmCardona,
@@ -35,6 +37,7 @@ export const evmMainnetNetworks: EvmNetworkConfig[] = [
   bscMainnet,
   optimismMainnet,
   avalancheMainnet,
+  lineaMainnet,
   scrollMainnet,
   zkSyncEraMainnet,
   // Other mainnet networks...
@@ -50,6 +53,7 @@ export const evmTestnetNetworks: EvmNetworkConfig[] = [
   bscTestnet,
   optimismSepolia,
   avalancheFuji,
+  lineaSepolia,
   scrollSepolia,
   zkSyncEraSepolia,
   // Other testnet networks...
@@ -71,6 +75,7 @@ export {
   bscMainnet,
   optimismMainnet,
   avalancheMainnet,
+  lineaMainnet,
   scrollMainnet,
   zkSyncEraMainnet,
   // Testnet networks
@@ -82,6 +87,7 @@ export {
   bscTestnet,
   optimismSepolia,
   avalancheFuji,
+  lineaSepolia,
   scrollSepolia,
   zkSyncEraSepolia,
 };

@@ -3,6 +3,7 @@ import {
   avalanche as viemAvalanche,
   base as viemBase,
   bsc as viemBsc,
+  linea as viemLinea,
   mainnet as viemMainnet,
   optimism as viemOptimism,
   polygon as viemPolygon,
@@ -231,6 +232,28 @@ export const scrollMainnet: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemScroll,
+};
+
+export const lineaMainnet: EvmNetworkConfig = {
+  id: 'linea-mainnet',
+  exportConstName: 'lineaMainnet',
+  name: 'Linea',
+  ecosystem: 'evm',
+  network: 'linea',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 59144,
+  rpcUrl: viemLinea.rpcUrls.default.http[0],
+  explorerUrl: 'https://lineascan.build',
+  apiUrl: 'https://api.lineascan.build/api',
+  primaryExplorerApiIdentifier: 'lineascan-mainnet',
+  icon: 'linea',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemLinea,
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

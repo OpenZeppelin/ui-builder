@@ -3,6 +3,7 @@ import {
   avalancheFuji as viemAvalancheFuji,
   baseSepolia as viemBaseSepolia,
   bscTestnet as viemBscTestnet,
+  lineaSepolia as viemLineaSepolia,
   optimismSepolia as viemOptimismSepolia,
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
@@ -231,6 +232,28 @@ export const scrollSepolia: EvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemScrollSepolia,
+};
+
+export const lineaSepolia: EvmNetworkConfig = {
+  id: 'linea-sepolia',
+  exportConstName: 'lineaSepolia',
+  name: 'Linea Sepolia',
+  ecosystem: 'evm',
+  network: 'linea',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 59141,
+  rpcUrl: viemLineaSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.lineascan.build',
+  apiUrl: 'https://api-sepolia.lineascan.build/api',
+  primaryExplorerApiIdentifier: 'lineascan-sepolia',
+  icon: 'linea',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemLineaSepolia,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

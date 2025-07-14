@@ -20,6 +20,7 @@ export {
   bscMainnet,
   optimismMainnet,
   avalancheMainnet,
+  lineaMainnet,
   scrollMainnet,
   zkSyncEraMainnet,
   ethereumSepolia,
@@ -30,6 +31,7 @@ export {
   bscTestnet,
   optimismSepolia,
   avalancheFuji,
+  lineaSepolia,
   scrollSepolia,
   zkSyncEraSepolia,
   // ... other individual network exports
