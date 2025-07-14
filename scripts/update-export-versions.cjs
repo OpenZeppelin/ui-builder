@@ -10,7 +10,7 @@ const packagesToUpdate = [
   '@openzeppelin/transaction-form-adapter-solana',
   '@openzeppelin/transaction-form-adapter-stellar',
   '@openzeppelin/transaction-form-react-core',
-  '@openzeppelin/transaction-form-renderer',
+  '@openzeppelin/contracts-ui-builder-renderer',
   '@openzeppelin/transaction-form-types',
   '@openzeppelin/transaction-form-ui',
   '@openzeppelin/transaction-form-utils',
@@ -30,7 +30,7 @@ const getWorkspaceVersion = (packageName) => {
     let packageDirName = nameWithoutScope.replace('transaction-form-', '');
 
     // Handle special case for form-renderer
-    if (packageName === '@openzeppelin/transaction-form-renderer') {
+    if (packageName === '@openzeppelin/contracts-ui-builder-renderer') {
       packageDirName = 'form-renderer';
     }
 

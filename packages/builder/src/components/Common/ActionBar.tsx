@@ -2,7 +2,7 @@ import { Download, Eye, Pencil } from 'lucide-react';
 
 import React from 'react';
 
-import { ContractActionBar } from '@openzeppelin/transaction-form-renderer';
+import { ContractActionBar } from '@openzeppelin/contracts-ui-builder-renderer';
 import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
 import { Button, LoadingButton } from '@openzeppelin/transaction-form-ui';
 

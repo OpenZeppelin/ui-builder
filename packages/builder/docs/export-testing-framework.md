@@ -220,7 +220,9 @@ it('should export with workspace dependencies for local development', async () =
   const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
 
   const packageJson = JSON.parse(files['package.json']);
-  expect(packageJson.dependencies['@openzeppelin/transaction-form-renderer']).toBe('workspace:*');
+  expect(packageJson.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe(
+    'workspace:*'
+  );
 });
 
 it('should export with published dependencies for production', async () => {
@@ -230,7 +232,7 @@ it('should export with published dependencies for production', async () => {
   const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
 
   const packageJson = JSON.parse(files['package.json']);
-  expect(packageJson.dependencies['@openzeppelin/transaction-form-renderer']).toBe('latest');
+  expect(packageJson.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe('latest');
 });
 ```
 

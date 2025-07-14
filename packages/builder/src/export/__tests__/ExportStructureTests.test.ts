@@ -100,7 +100,7 @@ describe('Export Structure Tests', () => {
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
       // Check for the form-renderer package as well
-      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
+      expect(dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
     });
 
     // REMOVED TESTS for includeAdapters true/false as the src/adapters dir is gone

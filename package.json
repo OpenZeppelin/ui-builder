@@ -35,7 +35,6 @@
     "test:coverage": "pnpm -r test:coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "release:form-renderer": "pnpm --filter=@openzeppelin/transaction-form-renderer publish",
     "commit": "git-cz",
     "update-deps": "pnpm update -r",
     "update-deps:major": "pnpm update -r --latest",

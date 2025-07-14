@@ -12,7 +12,7 @@ import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/contracts-ui-builder-renderer';
 import type {
   ContractAdapter,
   ContractSchema,

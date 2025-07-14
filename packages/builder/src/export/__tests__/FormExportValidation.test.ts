@@ -50,8 +50,8 @@ describe('FormExportValidation', () => {
           try {
             const pkg = JSON.parse(content);
             const deps = pkg.dependencies || {};
-            if (!deps['@openzeppelin/transaction-form-renderer'])
-              return 'Missing @openzeppelin/transaction-form-renderer dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
+              return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
             if (!deps['@openzeppelin/transaction-form-types'])
               return 'Missing @openzeppelin/transaction-form-types dependency';
             if (!deps['@openzeppelin/transaction-form-adapter-evm'])
@@ -124,8 +124,8 @@ describe('FormExportValidation', () => {
           try {
             const pkg = JSON.parse(content);
             const deps = pkg.dependencies || {};
-            if (!deps['@openzeppelin/transaction-form-renderer'])
-              return 'Missing @openzeppelin/transaction-form-renderer dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
+              return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
             if (!deps['@openzeppelin/transaction-form-types'])
               return 'Missing @openzeppelin/transaction-form-types dependency';
             if (!deps['@openzeppelin/transaction-form-adapter-solana'])

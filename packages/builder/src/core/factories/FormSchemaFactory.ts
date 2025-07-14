@@ -5,7 +5,7 @@
  * This factory is responsible for generating schemas that can be used to render forms
  * while delegating chain-specific logic to the appropriate adapter.
  */
-import { createTransformForFieldType } from '@openzeppelin/transaction-form-renderer';
+import { createTransformForFieldType } from '@openzeppelin/contracts-ui-builder-renderer';
 import type {
   ContractAdapter,
   ContractSchema,

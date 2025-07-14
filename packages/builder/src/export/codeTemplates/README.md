@@ -140,7 +140,7 @@ Each template has specific parameters defined in `TemplateTypes.ts`:
 
 ### `form-component.template.tsx`
 
-Generates the main `GeneratedForm.tsx` component in the exported application. This component wraps the `@openzeppelin/transaction-form-renderer`'s `TransactionForm`.
+Generates the main `GeneratedForm.tsx` component in the exported application. This component wraps the `@openzeppelin/contracts-ui-builder-renderer`'s `TransactionForm`.
 
 **Key Injections:**
 

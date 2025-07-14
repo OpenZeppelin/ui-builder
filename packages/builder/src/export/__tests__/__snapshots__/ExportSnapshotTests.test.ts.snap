@@ -87,7 +87,7 @@ import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
-} from '@openzeppelin/transaction-form-renderer';
+} from '@openzeppelin/contracts-ui-builder-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
@@ -280,7 +280,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^1.17.1",
     "@openzeppelin/transaction-form-react-core": "^1.17.0",
-    "@openzeppelin/transaction-form-renderer": "^1.17.1",
+    "@openzeppelin/contracts-ui-builder-renderer": "^1.17.1",
     "@openzeppelin/transaction-form-types": "^1.17.0",
     "@openzeppelin/transaction-form-ui": "^1.18.0",
     "@openzeppelin/transaction-form-utils": "^1.17.0",
@@ -313,7 +313,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-form-renderer": "npm update @openzeppelin/transaction-form-renderer",
+    "update-form-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
   },
 }
 `;
@@ -327,7 +327,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
   "dependencies": {
     "@openzeppelin/transaction-form-adapter-evm": "^1.17.1",
     "@openzeppelin/transaction-form-react-core": "^1.17.0",
-    "@openzeppelin/transaction-form-renderer": "^1.17.1",
+    "@openzeppelin/contracts-ui-builder-renderer": "^1.17.1",
     "@openzeppelin/transaction-form-types": "^1.17.0",
     "@openzeppelin/transaction-form-ui": "^1.18.0",
     "@openzeppelin/transaction-form-utils": "^1.17.0",
@@ -360,7 +360,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-form-renderer": "npm update @openzeppelin/transaction-form-renderer",
+    "update-form-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
   },
 }
 `;

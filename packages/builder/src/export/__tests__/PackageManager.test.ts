@@ -24,7 +24,7 @@ describe('PackageManager', () => {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
       'react-hook-form': '^7.43.9',
-      '@openzeppelin/transaction-form-renderer': '1.0.0',
+      '@openzeppelin/contracts-ui-builder-renderer': '1.0.0',
     },
     fieldDependencies: {
       text: { runtimeDependencies: {} },
@@ -86,7 +86,7 @@ describe('PackageManager', () => {
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
       expect(dependencies).toHaveProperty('react-hook-form');
-      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
+      expect(dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
     });
 
     it('should include the correct adapter package dependency', async () => {
@@ -262,7 +262,9 @@ describe('PackageManager', () => {
         { env: 'local' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe(
+        'workspace:*'
+      );
       expect(result.dependencies['@openzeppelin/transaction-form-types']).toBe('workspace:*');
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
     });
@@ -277,7 +279,7 @@ describe('PackageManager', () => {
         { env: 'production' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/transaction-form-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/^\^/);
       expect(result.dependencies['@openzeppelin/transaction-form-types']).toMatch(/^\^/);
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toMatch(/^\^/);
     });

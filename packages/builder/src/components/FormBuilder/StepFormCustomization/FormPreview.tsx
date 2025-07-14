@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
+import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
 import { useDerivedAccountStatus, useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
 import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 

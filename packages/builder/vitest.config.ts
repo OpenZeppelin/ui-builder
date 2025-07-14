@@ -106,7 +106,7 @@ export default defineConfig(
         '@openzeppelin/transaction-form-utils': path.resolve(__dirname, '../utils/src/index.ts'),
       },
       dedupe: [
-        '@openzeppelin/transaction-form-renderer',
+        '@openzeppelin/contracts-ui-builder-renderer',
         '@openzeppelin/transaction-form-types',
         'react',
         'react-dom',
@@ -114,12 +114,15 @@ export default defineConfig(
     },
     // Add optimizeDeps for Vite to correctly process these linked workspace packages
     optimizeDeps: {
-      include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+      include: [
+        '@openzeppelin/contracts-ui-builder-renderer',
+        '@openzeppelin/transaction-form-types',
+      ],
     },
     // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
     ssr: {
       noExternal: [
-        '@openzeppelin/transaction-form-renderer',
+        '@openzeppelin/contracts-ui-builder-renderer',
         '@openzeppelin/transaction-form-types',
       ],
     },

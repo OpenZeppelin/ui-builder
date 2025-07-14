@@ -47,7 +47,7 @@ vi.mock('../../PackageManager', () => {
           // Simulate adding dependencies based on ecosystem
           packageJson.dependencies = {
             ...(packageJson.dependencies || {}),
-            '@openzeppelin/transaction-form-renderer': '^1.0.0',
+            '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
             '@openzeppelin/transaction-form-types': '^0.1.0',
             [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
@@ -58,7 +58,7 @@ vi.mock('../../PackageManager', () => {
       .fn()
       .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
         return {
-          '@openzeppelin/transaction-form-renderer': '^1.0.0',
+          '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
           '@openzeppelin/transaction-form-types': '^0.1.0',
           [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1',
         };
@@ -107,7 +107,7 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
               packageJson.name = options?.projectName || 'default-test-name';
               packageJson.dependencies = {
                 ...(packageJson.dependencies || {}),
-                '@openzeppelin/transaction-form-renderer': '^1.0.0',
+                '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
                 '@openzeppelin/transaction-form-types': '^0.1.0',
                 [`@openzeppelin/transaction-form-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };

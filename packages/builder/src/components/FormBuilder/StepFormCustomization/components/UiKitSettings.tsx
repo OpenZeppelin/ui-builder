@@ -3,7 +3,7 @@ import CodeEditor from '@uiw/react-textarea-code-editor';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { DynamicFormField } from '@openzeppelin/transaction-form-renderer';
+import { DynamicFormField } from '@openzeppelin/contracts-ui-builder-renderer';
 import {
   AvailableUiKit,
   ContractAdapter,

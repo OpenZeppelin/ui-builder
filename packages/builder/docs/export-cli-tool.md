@@ -222,7 +222,6 @@ For better Git compatibility and to prevent unwanted files from being tracked:
 The CLI handles dependencies differently based on the target environment:
 
 1. For `--env local` (default):
-
    - @openzeppelin packages use `workspace:*` syntax
    - Dependencies are resolved through the monorepo using pnpm
    - Ideal for testing local changes to the renderer and other packages
@@ -289,7 +288,7 @@ Direct test runs will clean up files, while the CLI preserves them.
 If you're getting errors about missing workspace dependencies:
 
 ```
-ERROR: No matching version found for @openzeppelin/transaction-form-renderer@workspace:*
+ERROR: No matching version found for @openzeppelin/contracts-ui-builder-renderer@workspace:*
 ```
 
 Make sure you're:

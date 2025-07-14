@@ -49,7 +49,7 @@ This project is organized as a monorepo with the following packages:
 
 ### Form-Renderer Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-renderer)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
 
 The `form-renderer` package provides a reusable library for rendering transaction forms. It's published to npm and can be used independently of the main application.
 
@@ -355,7 +355,7 @@ The project uses Storybook 8 for component documentation and development:
 pnpm storybook
 
 # Or start Storybook for a specific package
-pnpm --filter=@openzeppelin/transaction-form-renderer storybook
+pnpm --filter=@openzeppelin/contracts-ui-builder-renderer storybook
 ```
 
 Storybook stories are organized to:

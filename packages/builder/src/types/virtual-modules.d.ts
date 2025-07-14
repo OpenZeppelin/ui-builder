@@ -35,7 +35,7 @@
  * the form-renderer configuration for dependency management during form export.
  */
 declare module 'virtual:form-renderer-config' {
-  export { formRendererConfig } from '@openzeppelin/transaction-form-renderer/config';
+  export { formRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer/config';
 }
 
 /**
@@ -67,13 +67,13 @@ declare module 'virtual:form-renderer-config' {
  * Declaration merging for FormRendererConfig types
  *
  * This declaration allows importing types like FormRendererConfig using the
- * deep import path `@openzeppelin/transaction-form-renderer/types/FormRendererConfig`.
+ * deep import path `@openzeppelin/contracts-ui-builder-renderer/types/FormRendererConfig`.
  * It re-exports the types from the main
- * `@openzeppelin/transaction-form-renderer/types` module, ensuring type compatibility.
+ * `@openzeppelin/contracts-ui-builder-renderer/types` module, ensuring type compatibility.
  */
-declare module '@openzeppelin/transaction-form-renderer/types/FormRendererConfig' {
+declare module '@openzeppelin/contracts-ui-builder-renderer/types/FormRendererConfig' {
   // Re-export necessary types from the actual implementation
-  export * from '@openzeppelin/transaction-form-renderer/types';
+  export * from '@openzeppelin/contracts-ui-builder-renderer/types';
 }
 
 // Add declarations for the raw config content virtual modules

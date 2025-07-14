@@ -23,7 +23,7 @@ export const formRendererConfig: FormRendererConfig = {
     'class-variance-authority': '^0.7.0',
     clsx: '^2.0.0',
     'tailwind-merge': '^1.14.0',
-    '@openzeppelin/transaction-form-renderer': '^0.1.0',
+    '@openzeppelin/contracts-ui-builder-renderer': '^0.1.0',
     '@openzeppelin/transaction-form-types': '^0.1.0',
     '@openzeppelin/transaction-form-utils': '^0.1.0',
   },

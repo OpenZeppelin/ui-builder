@@ -252,12 +252,11 @@ function exportFormSimple(options) {
           '@openzeppelin/transaction-form-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
           '@openzeppelin/transaction-form-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
           '@openzeppelin/transaction-form-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/transaction-form-renderer': `file:${path.join(monorepoRoot, 'packages/form-renderer')}`,
+          '@openzeppelin/contracts-ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/form-renderer')}`,
           '@openzeppelin/transaction-form-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/transaction-form-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
           '@openzeppelin/transaction-form-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
           '@openzeppelin/transaction-form-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
-          '@openzeppelin/tailwind-config': `file:${path.join(monorepoRoot, 'packages/tailwind-config')}`,
         };
         packageJson.pnpm = {
           ...(packageJson.pnpm || {}),

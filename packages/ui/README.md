@@ -4,7 +4,7 @@ This package provides a comprehensive set of shared React UI components for the 
 
 ## Overview
 
-The primary goal of `@openzeppelin/transaction-form-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the Transaction Form Builder, such as `@openzeppelin/transaction-form-builder` and `@openzeppelin/transaction-form-renderer` and adapter packages.
+The primary goal of `@openzeppelin/transaction-form-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the Transaction Form Builder, such as `@openzeppelin/transaction-form-builder` and `@openzeppelin/contracts-ui-builder-renderer` and adapter packages.
 
 All components are built with React, TypeScript, and styled with Tailwind CSS, following the shadcn/ui patterns and design principles established in the root configuration of the monorepo.
 
@@ -13,7 +13,7 @@ All components are built with React, TypeScript, and styled with Tailwind CSS, f
 This package includes, but is not limited to:
 
 - **Basic UI Primitives**: `Button`, `LoadingButton`, `Input`, `Label`, `Textarea`, `Card` (and its parts), `Dialog` (and its parts), `Alert` (and its parts), `Checkbox`, `RadioGroup`, `Select` (and its parts), `Progress`, `Tabs`, `Tooltip`, etc.
-- **Field Components**: These are specialized components designed for use within `react-hook-form` and are typically rendered via `DynamicFormField` in `@openzeppelin/transaction-form-renderer`.
+- **Field Components**: These are specialized components designed for use within `react-hook-form` and are typically rendered via `DynamicFormField` in `@openzeppelin/contracts-ui-builder-renderer`.
   - `AddressField`
   - `AmountField`
   - `BaseField` (a foundational component for creating new field types)

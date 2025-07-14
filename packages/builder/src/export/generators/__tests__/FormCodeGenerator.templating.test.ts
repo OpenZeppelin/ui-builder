@@ -588,7 +588,7 @@ const anotherFunction = () => {
     it('should format a complete React component with a form schema', async () => {
       const unformattedCode = `
       import { useState } from 'react';
-      import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+      import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
       
       export default function GeneratedForm() {
         const formSchema = {

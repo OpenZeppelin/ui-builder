@@ -35,7 +35,7 @@
  */
 import { formRendererConfig } from 'virtual:form-renderer-config';
 
-import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
+import type { FormRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
@@ -236,7 +236,7 @@ export class PackageManager {
       combined['@openzeppelin/transaction-form-types'] = 'workspace:*';
       combined['@openzeppelin/transaction-form-ui'] = 'workspace:*';
       combined['@openzeppelin/transaction-form-utils'] = 'workspace:*';
-      combined['@openzeppelin/transaction-form-renderer'] = 'workspace:*';
+      combined['@openzeppelin/contracts-ui-builder-renderer'] = 'workspace:*';
       combined['@openzeppelin/transaction-form-react-core'] = 'workspace:*';
     }
 
@@ -422,7 +422,7 @@ export class PackageManager {
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
     const internalPackages = new Set([
-      '@openzeppelin/transaction-form-renderer',
+      '@openzeppelin/contracts-ui-builder-renderer',
       '@openzeppelin/transaction-form-types',
       '@openzeppelin/transaction-form-utils',
       '@openzeppelin/transaction-form-ui',
@@ -458,7 +458,7 @@ export class PackageManager {
 
     // Add a script to update the form-renderer package
     (packageJson.scripts as Record<string, string>)['update-form-renderer'] =
-      'npm update @openzeppelin/transaction-form-renderer';
+      'npm update @openzeppelin/contracts-ui-builder-renderer';
 
     // Add a script to check for outdated dependencies
     (packageJson.scripts as Record<string, string>)['check-deps'] = 'npm outdated';

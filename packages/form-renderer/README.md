@@ -1,7 +1,7 @@
 # Form Renderer Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-renderer)
-[![License](https://img.shields.io/npm/l/@openzeppelin/transaction-form-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
+[![License](https://img.shields.io/npm/l/@openzeppelin/contracts-ui-builder-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
 
 A specialized library for rendering customizable transaction forms for blockchain applications. Part of the Transaction Form Builder ecosystem.
 
@@ -9,13 +9,13 @@ A specialized library for rendering customizable transaction forms for blockchai
 
 ```bash
 # Using npm
-npm install @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
+npm install @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
 
 # Using yarn
-yarn add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
+yarn add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
 
 # Using pnpm
-pnpm add @openzeppelin/transaction-form-renderer @openzeppelin/transaction-form-types
+pnpm add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
 ```
 
 ## Features
@@ -39,7 +39,7 @@ When using this package, you should also install `@openzeppelin/transaction-form
 
 ```tsx
 // Example of importing types
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
 import type {
   ContractAdapter,
   FormValues,
@@ -62,7 +62,7 @@ This ensures that the necessary utility classes used by the components from `@op
 ## Usage
 
 ```tsx
-import { TransactionForm } from '@openzeppelin/transaction-form-renderer';
+import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
 // UI and Field components are now typically imported directly from @openzeppelin/transaction-form-ui if needed outside the form
 // import { Button, TextField } from '@openzeppelin/transaction-form-ui';
 import type {
@@ -187,7 +187,7 @@ This package provides core form rendering logic and utilities. For UI components
 A pre-configured singleton instance of the Logger utility for consistent application logging.
 
 ```typescript
-import { logger } from '@openzeppelin/transaction-form-renderer';
+import { logger } from '@openzeppelin/contracts-ui-builder-renderer';
 
 logger.info('MyComponent', 'Component loaded');
 ```
@@ -197,7 +197,7 @@ logger.info('MyComponent', 'Component loaded');
 A utility function to generate unique IDs (UUID v4) for form elements or other components.
 
 ```typescript
-import { generateId } from '@openzeppelin/transaction-form-renderer';
+import { generateId } from '@openzeppelin/contracts-ui-builder-renderer';
 
 const uniqueFieldId = generateId('field_');
 ```
@@ -265,7 +265,7 @@ export const formRendererConfig: FormRendererConfig = {
     react: '^19.0.0',
     'react-dom': '^19.0.0',
     'react-hook-form': '^7.43.9',
-    '@openzeppelin/transaction-form-renderer': '^1.0.0',
+    '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
     '@openzeppelin/transaction-form-ui': '^1.0.0',
     '@openzeppelin/transaction-form-types': '^1.0.0',
     '@openzeppelin/transaction-form-utils': '^1.0.0',

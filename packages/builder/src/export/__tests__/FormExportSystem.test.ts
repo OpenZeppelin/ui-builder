@@ -102,7 +102,7 @@ describe('FormExportSystem', () => {
           // Simulate dependency logic: return base + adapter with correct versions
           const baseDeps = {
             react: '^19.0.0', // Correct version for assertion
-            '@openzeppelin/transaction-form-renderer': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/contracts-ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
             '@openzeppelin/transaction-form-types': 'workspace:*', // Use consistent placeholder version
           };
           const adapterDep = `@openzeppelin/transaction-form-adapter-${ecosystem}`;
@@ -204,7 +204,7 @@ describe('FormExportSystem', () => {
 
       // Verify dependencies contain types, renderer, and EVM adapter packages
       // Check PRESENCE only, as applyVersioningStrategy might change value
-      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       // Check a base dependency from the mock config is still present

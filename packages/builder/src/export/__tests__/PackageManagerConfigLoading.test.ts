@@ -16,7 +16,7 @@
 // Mock declarations must come before imports
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FormRendererConfig } from '@openzeppelin/transaction-form-renderer';
+import type { FormRendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -51,7 +51,7 @@ vi.mock('virtual:form-renderer-config', () => {
     coreDependencies: {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
-      '@openzeppelin/transaction-form-renderer': '^1.0.0',
+      '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
     },
     fieldDependencies: {
       text: { runtimeDependencies: {} },
@@ -72,7 +72,7 @@ const mockFormRendererConfig: FormRendererConfig = {
   coreDependencies: {
     react: '^19.0.0',
     'react-dom': '^19.0.0',
-    '@openzeppelin/transaction-form-renderer': '^1.0.0',
+    '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
   },
   fieldDependencies: {
     text: { runtimeDependencies: {} },
@@ -117,7 +117,10 @@ describe('PackageManager configuration loading', () => {
       const packageManager = new PackageManager(mockFormRendererConfig);
       const dependencies = await packageManager.getDependencies(createMinimalFormConfig(), 'evm');
       expect(dependencies).toHaveProperty('react', '^19.0.0');
-      expect(dependencies).toHaveProperty('@openzeppelin/transaction-form-renderer', 'workspace:*');
+      expect(dependencies).toHaveProperty(
+        '@openzeppelin/contracts-ui-builder-renderer',
+        'workspace:*'
+      );
     });
 
     it('should include field-specific dependencies based on form config', async () => {
