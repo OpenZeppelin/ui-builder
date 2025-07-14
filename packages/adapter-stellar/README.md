@@ -1,6 +1,6 @@
 # Stellar Adapter (`@openzeppelin/contracts-ui-builder-adapter-stellar`)
 
-This package provides the `ContractAdapter` implementation for the Stellar network for the Transaction Form Builder.
+This package provides the `ContractAdapter` implementation for the Stellar network for the Contracts UI Builder.
 
 **Note:** While the basic structure is in place, including network configuration definitions, the core adapter logic for Stellar-specific operations is currently a placeholder and will be implemented in future development phases.
 

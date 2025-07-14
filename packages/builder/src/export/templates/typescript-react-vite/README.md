@@ -1,8 +1,8 @@
-# Transaction Form
+# Contracts UI Builder Generated App
 
 {{ PROJECT_DESCRIPTION }}
 
-This project was generated using the [OpenZeppelin Transaction Form Builder](https://contracts-ui-builder.openzeppelin.com/).
+This project was generated using the [OpenZeppelin Contracts UI Builder](https://contracts-ui-builder.openzeppelin.com/).
 
 ## Getting Started
 

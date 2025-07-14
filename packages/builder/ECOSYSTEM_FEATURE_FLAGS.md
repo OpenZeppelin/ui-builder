@@ -1,6 +1,6 @@
 # Ecosystem Feature Flags
 
-This document explains how to use ecosystem feature flags to control which blockchain ecosystems are available in the Transaction Form Builder.
+This document explains how to use ecosystem feature flags to control which blockchain ecosystems are available in the Contracts UI Builder.
 
 ## Default Configuration
 

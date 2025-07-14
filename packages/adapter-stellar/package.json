@@ -1,7 +1,7 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-stellar",
   "version": "0.3.0",
-  "description": "Stellar Adapter for Transaction Form Builder",
+  "description": "Stellar Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",

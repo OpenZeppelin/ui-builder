@@ -1,6 +1,6 @@
-# Transaction Form Export CLI
+# Contracts UI Builder Export CLI
 
-This is the command-line tool for exporting, building, and testing transaction forms.
+This is the command-line tool for exporting, building, and testing contracts UI builder applications.
 
 ## Documentation
 

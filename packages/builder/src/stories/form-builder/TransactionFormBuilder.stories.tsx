@@ -16,7 +16,7 @@ const meta: Meta<typeof TransactionFormBuilder> = {
     docs: {
       description: {
         component:
-          'The main transaction form builder component that guides users through the process of creating a custom form for blockchain transactions.',
+          'The main Contracts UI Builder component that guides users through the process of creating a custom form for blockchain transactions.',
       },
     },
   },

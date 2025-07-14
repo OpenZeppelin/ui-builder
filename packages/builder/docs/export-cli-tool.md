@@ -15,7 +15,7 @@ The Export CLI tool enables developers to:
 
 ### Installation
 
-The CLI tool is included with the Transaction Form Builder package. You can use it directly with pnpm:
+The CLI tool is included with the Contracts UI Builder package. You can use it directly with pnpm:
 
 ```bash
 pnpm export-app

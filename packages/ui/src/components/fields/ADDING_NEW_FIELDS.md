@@ -1,6 +1,6 @@
 # Adding New Field Components
 
-This document outlines the step-by-step process for adding new field components to the Transaction Form Builder system.
+This document outlines the step-by-step process for adding new field components to the Contracts UI Builder system.
 
 ## Architecture Overview
 

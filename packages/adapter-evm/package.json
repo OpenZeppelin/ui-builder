@@ -2,7 +2,7 @@
   "name": "@openzeppelin/contracts-ui-builder-adapter-evm",
   "version": "1.18.0",
   "private": false,
-  "description": "EVM Adapter for Transaction Form Builder",
+  "description": "EVM Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",

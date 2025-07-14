@@ -1,7 +1,7 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-midnight",
   "version": "0.3.1",
-  "description": "Midnight Adapter for Transaction Form Builder",
+  "description": "Midnight Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",

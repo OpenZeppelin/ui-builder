@@ -30,7 +30,7 @@ type InferredRainbowKitProviderProps = React.ComponentProps<typeof RainbowKitPro
 
 const rainbowKitAppConfig = {
   wagmiParams: {
-    appName: 'Transaction Form Builder (Core Dev)',
+    appName: 'Contracts UI Builder (Core Dev)',
     projectId: '9f7100fc84f2327968f7bb11d38a4c2b', // <<< WALLETCONNECT PROJECT ID
     // Example for custom wallet list (users should import types like `WalletList` or `Wallet` from RK if they use this)
     // wallets: [
@@ -48,7 +48,7 @@ const rainbowKitAppConfig = {
     showRecentTransactions: true,
     // coolMode: true,
     appInfo: {
-      appName: 'Transaction Form Builder',
+      appName: 'Contracts UI Builder',
       learnMoreUrl: 'https://openzeppelin.com',
     },
   } as Partial<InferredRainbowKitProviderProps>, // User can cast or ensure their object matches

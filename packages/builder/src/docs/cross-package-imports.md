@@ -1,4 +1,4 @@
-# Cross-Package Imports in the Transaction Form Builder
+# Cross-Package Imports in the Contracts UI Builder
 
 This guide explains how to import files across package boundaries in our monorepo, including the special virtual module solution that addresses limitations in Vite's development server.
 

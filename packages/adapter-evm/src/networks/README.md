@@ -1,6 +1,6 @@
 # EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
 
-This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Transaction Form Builder.
+This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Contracts UI Builder.
 
 It is responsible for:
 // ... (existing responsibilities) ...

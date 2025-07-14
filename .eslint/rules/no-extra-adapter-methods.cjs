@@ -1,6 +1,6 @@
 /**
  * @fileoverview Rule to enforce that adapter classes only implement methods defined in the ContractAdapter interface
- * @author Transaction Form Builder Team
+ * @author Contracts UI Builder Team
  *
  * IMPORTANT: This is the central location for this rule in the monorepo.
  * It is referenced from both the root ESLint configuration and the builder package configuration.

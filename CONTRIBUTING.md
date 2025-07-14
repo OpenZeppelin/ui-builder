@@ -1,6 +1,6 @@
-# Contributing to Transaction Form Builder
+# Contributing to Contracts UI Builder
 
-Thank you for considering contributing to Transaction Form Builder! This document outlines the process for contributing to the project.
+Thank you for considering contributing to Contracts UI Builder! This document outlines the process for contributing to the project.
 
 ## Development Process
 

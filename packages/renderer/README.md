@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
 [![License](https://img.shields.io/npm/l/@openzeppelin/contracts-ui-builder-renderer.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE)
 
-A specialized library for rendering customizable transaction form and other components for blockchain applications. Part of the Transaction Form Builder ecosystem.
+A specialized library for rendering customizable transaction form and other components for blockchain applications. Part of the Contracts UI Builder ecosystem.
 
 ## Installation
 
@@ -29,7 +29,7 @@ pnpm add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/contracts-ui-
 
 ## Type System
 
-This package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These types include:
+This package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the Contracts UI Builder ecosystem. These types include:
 
 - Form field and component definitions
 - Layout and validation schemas

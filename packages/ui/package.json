@@ -2,7 +2,7 @@
   "name": "@openzeppelin/contracts-ui-builder-ui",
   "version": "1.18.0",
   "private": false,
-  "description": "Shared React UI components for the OpenZeppelin Transaction Form Builder.",
+  "description": "Shared React UI components for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

@@ -1,10 +1,10 @@
 # @openzeppelin/contracts-ui-builder-ui
 
-This package provides a comprehensive set of shared React UI components for the OpenZeppelin Transaction Form Builder ecosystem. It serves as the central library for all common UI elements, including basic primitives, form field components, and their associated utilities.
+This package provides a comprehensive set of shared React UI components for the OpenZeppelin Contracts UI Builder ecosystem. It serves as the central library for all common UI elements, including basic primitives, form field components, and their associated utilities.
 
 ## Overview
 
-The primary goal of `@openzeppelin/contracts-ui-builder-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the Transaction Form Builder, such as `@openzeppelin/contracts-ui-builder` and `@openzeppelin/contracts-ui-builder-renderer` and adapter packages.
+The primary goal of `@openzeppelin/contracts-ui-builder-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the Contracts UI Builder, such as `@openzeppelin/contracts-ui-builder` and `@openzeppelin/contracts-ui-builder-renderer` and adapter packages.
 
 All components are built with React, TypeScript, and styled with Tailwind CSS, following the shadcn/ui patterns and design principles established in the root configuration of the monorepo.
 

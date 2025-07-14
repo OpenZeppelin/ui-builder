@@ -1,8 +1,8 @@
 # @openzeppelin/contracts-ui-builder-react-core
 
-This package provides core React Context providers and hooks for the OpenZeppelin Transaction Form Builder ecosystem. It centralizes the management of global wallet state, active network selection, active adapter instances, and the consumption of adapter-specific UI capabilities (like facade hooks and UI context providers).
+This package provides core React Context providers and hooks for the OpenZeppelin Contracts UI Builder ecosystem. It centralizes the management of global wallet state, active network selection, active adapter instances, and the consumption of adapter-specific UI capabilities (like facade hooks and UI context providers).
 
-It is a foundational package intended to be used by the main `@openzeppelin/transaction-form-core` application and can also be leveraged by exported standalone applications to ensure consistent wallet and adapter integration patterns.
+It is a foundational package intended to be used by the main `@openzeppelin/contracts-ui-builder-app` application and can also be leveraged by exported standalone applications to ensure consistent wallet and adapter integration patterns.
 
 ## Core Responsibilities
 
@@ -33,7 +33,7 @@ It is a foundational package intended to be used by the main `@openzeppelin/tran
 
 ## Installation
 
-This package is typically used as a workspace dependency (e.g., `"@openzeppelin/contracts-ui-builder-react-core": "workspace:^"`) within the Transaction Form Builder monorepo.
+This package is typically used as a workspace dependency (e.g., `"@openzeppelin/contracts-ui-builder-react-core": "workspace:^"`) within the Contracts UI Builder monorepo.
 
 It has peer dependencies on `react` and `react-dom`, and direct dependencies on `@openzeppelin/contracts-ui-builder-types` and `@openzeppelin/contracts-ui-builder-utils`.
 

@@ -27,7 +27,7 @@ const getWorkspaceVersion = (packageName) => {
     // e.g., '@openzeppelin/contracts-ui-builder-types' -> 'types'
     // e.g., '@openzeppelin/contracts-ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
-    let packageDirName = nameWithoutScope.replace('transaction-form-', '');
+    let packageDirName = nameWithoutScope.replace('contracts-ui-builder-', '');
 
     // Handle special case for renderer
     if (packageName === '@openzeppelin/contracts-ui-builder-renderer') {

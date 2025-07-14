@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import type { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
- * Hook for managing contract definition state in the Transaction Form Builder.
+ * Hook for managing contract definition state in the Contracts UI Builder.
  * Used in the second step of the form building process.
  */
 export function useContractDefinitionState() {

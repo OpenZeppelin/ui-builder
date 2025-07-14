@@ -1,6 +1,6 @@
 # Contract Adapter Interface
 
-This directory contains the base interface and type definitions for the contract adapter system. The adapter pattern allows the Transaction Form Builder to support multiple blockchains while keeping the builder application chain-agnostic.
+This directory contains the base interface and type definitions for the contract adapter system. The adapter pattern allows the Contracts UI Builder to support multiple blockchains while keeping the builder application chain-agnostic.
 
 ## ContractAdapter Interface
 

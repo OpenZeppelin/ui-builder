@@ -4,10 +4,10 @@ import {
   useDerivedAccountStatus,
   useWalletState,
 } from '@openzeppelin/contracts-ui-builder-react-core';
+import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
 import type { ContractFunction, ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 import { Card, CardContent } from '@openzeppelin/contracts-ui-builder-ui';
 
-import { TransactionForm } from '../../../../../renderer/dist';
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 

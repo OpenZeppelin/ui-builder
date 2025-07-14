@@ -61,7 +61,7 @@ export function App() {
       </main>
 
       <footer className="footer">
-        <p>Generated with OpenZeppelin Transaction Form Builder</p>
+        <p>Generated with OpenZeppelin Contracts UI Builder</p>
         <p>© @@current-year@@ OpenZeppelin</p>
       </footer>
     </div>

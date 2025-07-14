@@ -1,6 +1,6 @@
 # EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
 
-This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Transaction Form Builder.
+This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Contracts UI Builder.
 
 It is responsible for:
 
@@ -29,7 +29,7 @@ The adapter selects the appropriate strategy at runtime based on the `ExecutionC
 
 ### Configuration
 
-In the Transaction Form Builder, the execution method is configured in the "Customize" step. The UI provides options to select between `EOA` and `Relayer` and configure their specific parameters (e.g., Relayer API credentials, EOA address restrictions).
+In the Contracts UI Builder, the execution method is configured in the "Customize" step. The UI provides options to select between `EOA` and `Relayer` and configure their specific parameters (e.g., Relayer API credentials, EOA address restrictions).
 
 This configuration is then passed to the `EvmAdapter`'s `signAndBroadcast` method, which uses a factory to instantiate the correct execution strategy.
 

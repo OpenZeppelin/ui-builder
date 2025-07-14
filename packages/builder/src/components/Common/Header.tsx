@@ -18,7 +18,7 @@ export const Header = () => {
         <div className="flex items-center gap-4">
           <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
           <div className="h-5 border-l border-gray-300 mx-1"></div>
-          <span className="text-base font-medium">Transaction Form Builder</span>
+          <span className="text-base font-medium">Contracts UI Builder</span>
         </div>
 
         <div className="flex items-center gap-4">

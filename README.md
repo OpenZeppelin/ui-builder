@@ -1,4 +1,4 @@
-# Transaction Form Builder 🧩
+# Contracts UI Builder 🧩
 
 > A modern web application for building and customizing transaction forms for blockchain applications.
 
@@ -65,7 +65,7 @@ For more details, see the [Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 
-The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Transaction Form Builder.
+The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Contracts UI Builder.
 
 Features:
 

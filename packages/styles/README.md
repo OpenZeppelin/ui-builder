@@ -1,6 +1,6 @@
 # Centralized Styling System
 
-This package contains the centralized styling system for the Transaction Form Builder monorepo. It uses Tailwind CSS 4.0 with OKLCH colors and follows the new-york style from shadcn/ui.
+This package contains the centralized styling system for the Contracts UI Builder monorepo. It uses Tailwind CSS 4.0 with OKLCH colors and follows the new-york style from shadcn/ui.
 
 ## Structure
 

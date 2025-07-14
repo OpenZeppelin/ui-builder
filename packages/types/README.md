@@ -1,12 +1,12 @@
-# Transaction Form Types
+# Contracts UI Builder Types
 
-This package contains shared TypeScript type definitions for the OpenZeppelin Transaction Form Builder ecosystem.
+This package contains shared TypeScript type definitions for the OpenZeppelin Contracts UI Builder ecosystem.
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
 
 ## Purpose
 
-This package serves as the single source of truth for all shared types used across the Transaction Form Builder packages, including:
+This package serves as the single source of truth for all shared types used across the Contracts UI Builder packages, including:
 
 - Contract and blockchain related types
 - Form field and layout definitions

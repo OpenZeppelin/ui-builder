@@ -1,8 +1,8 @@
-# Transaction Form Builder - Export System
+# Contracts UI Builder - Export System
 
 ## Overview
 
-The Export System is a key component of the Transaction Form Builder that allows users to export customized blockchain transaction forms as standalone applications. It generates complete, ready-to-use React applications that implement the user's form configuration using the shared renderer package.
+The Export System is a key component of the Contracts UI Builder that allows users to export customized blockchain transaction forms as standalone applications. It generates complete, ready-to-use React applications that implement the user's form configuration using the shared renderer package.
 
 ## Architecture
 

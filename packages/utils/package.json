@@ -2,7 +2,7 @@
   "name": "@openzeppelin/contracts-ui-builder-utils",
   "version": "1.17.0",
   "private": false,
-  "description": "Shared, framework-agnostic utility functions for the OpenZeppelin Transaction Form Builder.",
+  "description": "Shared, framework-agnostic utility functions for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

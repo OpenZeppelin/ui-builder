@@ -51,7 +51,7 @@ function App() {
             </main>
             <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
               <div className="container mx-auto">
-                <p>© {new Date().getFullYear()} OpenZeppelin Transaction Form Builder</p>
+                <p>© {new Date().getFullYear()} OpenZeppelin Contracts UI Builder</p>
                 <p className="mt-1">
                   A proof of concept for building transaction forms for blockchain applications
                 </p>

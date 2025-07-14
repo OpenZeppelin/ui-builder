@@ -6,7 +6,7 @@ import { TemplateManager } from '../TemplateManager';
 const mockTemplateContent = {
   'package.json': JSON.stringify(
     {
-      name: 'transaction-form',
+      name: 'contracts-ui-builder',
       private: true,
       version: '0.0.0',
       type: 'module',

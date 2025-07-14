@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 /**
- * Hook for managing network selection state in the Transaction Form Builder.
+ * Hook for managing network selection state in the Contracts UI Builder.
  * Tracks the selected network configuration ID.
  */
 export function useNetworkSelectionState(initialNetworkConfigId: string | null = null) {
