@@ -1,7 +1,5 @@
 import React from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
-import { FieldType, FormValues } from '@openzeppelin/transaction-form-types';
 import {
   AddressField,
   AmountField,
@@ -18,7 +16,9 @@ import {
   TextAreaField,
   TextField,
   UrlField,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { FieldType, FormValues } from '@openzeppelin/transaction-form-types';
 
 /**
  * Registry of field components mapped to their respective types.

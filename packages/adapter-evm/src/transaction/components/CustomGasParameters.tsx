@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
   BooleanField,
   NumberField,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { EvmRelayerFormData } from './useEvmRelayerOptions';

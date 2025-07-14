@@ -3,8 +3,8 @@ import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
 import type { ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
-import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/transaction-form-ui';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { DynamicFormField } from '../../../../../renderer/dist';

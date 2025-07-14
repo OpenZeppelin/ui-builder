@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn, logger } from '@openzeppelin/transaction-form-utils';
 
 import { useWalletState } from '../hooks/WalletStateContext';

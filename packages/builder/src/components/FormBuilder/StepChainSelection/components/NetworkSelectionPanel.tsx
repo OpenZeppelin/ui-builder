@@ -2,9 +2,13 @@ import { Search, Settings } from 'lucide-react';
 
 import { useCallback, useEffect, useState } from 'react';
 
+import {
+  Input,
+  NetworkSettingsDialog,
+  useNetworkErrors,
+} from '@openzeppelin/contracts-ui-builder-ui';
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import { Input, NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/transaction-form-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';

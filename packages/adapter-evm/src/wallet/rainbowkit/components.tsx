@@ -2,8 +2,8 @@ import { Loader2 } from 'lucide-react';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { Button } from '@openzeppelin/transaction-form-ui';
 import { cn, logger } from '@openzeppelin/transaction-form-utils';
 
 import { CustomConnectButton } from '../components';

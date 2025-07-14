@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  useDerivedAccountStatus,
-  useDerivedConnectStatus,
-} from '@openzeppelin/transaction-form-react-core';
-import type { Connector } from '@openzeppelin/transaction-form-types';
-import {
   Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import {
+  useDerivedAccountStatus,
+  useDerivedConnectStatus,
+} from '@openzeppelin/transaction-form-react-core';
+import type { Connector } from '@openzeppelin/transaction-form-types';
 
 import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';

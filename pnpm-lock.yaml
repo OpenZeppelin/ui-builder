@@ -112,6 +112,9 @@ importers:
 
   packages/adapter-evm:
     dependencies:
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:^
+        version: link:../ui
       '@openzeppelin/relayer-sdk':
         specifier: 1.1.0
         version: 1.1.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -121,9 +124,6 @@ importers:
       '@openzeppelin/transaction-form-types':
         specifier: workspace:^
         version: link:../types
-      '@openzeppelin/transaction-form-ui':
-        specifier: workspace:^
-        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:^
         version: link:../utils
@@ -176,15 +176,15 @@ importers:
       '@midnight-ntwrk/dapp-connector-api':
         specifier: ^3.0.0
         version: 3.0.0(rxjs@7.8.2)
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:*
+        version: link:../ui
       '@openzeppelin/transaction-form-react-core':
         specifier: workspace:^
         version: link:../react-core
       '@openzeppelin/transaction-form-types':
         specifier: workspace:*
         version: link:../types
-      '@openzeppelin/transaction-form-ui':
-        specifier: workspace:*
-        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:^
         version: link:../utils
@@ -269,6 +269,9 @@ importers:
       '@openzeppelin/contracts-ui-builder-renderer':
         specifier: workspace:*
         version: link:../renderer
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:*
+        version: link:../ui
       '@openzeppelin/transaction-form-adapter-evm':
         specifier: workspace:*
         version: link:../adapter-evm
@@ -290,9 +293,6 @@ importers:
       '@openzeppelin/transaction-form-types':
         specifier: workspace:*
         version: link:../types
-      '@openzeppelin/transaction-form-ui':
-        specifier: workspace:*
-        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:^
         version: link:../utils
@@ -474,12 +474,12 @@ importers:
 
   packages/react-core:
     dependencies:
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:^
+        version: link:../ui
       '@openzeppelin/transaction-form-types':
         specifier: workspace:^
         version: link:../types
-      '@openzeppelin/transaction-form-ui':
-        specifier: workspace:^
-        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:^
         version: link:../utils
@@ -529,12 +529,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^4.1.3
         version: 4.1.3(react-hook-form@7.60.0(react@19.1.0))
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:*
+        version: link:../ui
       '@openzeppelin/transaction-form-types':
         specifier: workspace:*
         version: link:../types
-      '@openzeppelin/transaction-form-ui':
-        specifier: workspace:*
-        version: link:../ui
       '@openzeppelin/transaction-form-utils':
         specifier: workspace:*
         version: link:../utils

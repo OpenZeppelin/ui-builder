@@ -12,7 +12,7 @@ const packagesToUpdate = [
   '@openzeppelin/transaction-form-react-core',
   '@openzeppelin/contracts-ui-builder-renderer',
   '@openzeppelin/transaction-form-types',
-  '@openzeppelin/transaction-form-ui',
+  '@openzeppelin/contracts-ui-builder-ui',
   '@openzeppelin/transaction-form-utils',
 ];
 

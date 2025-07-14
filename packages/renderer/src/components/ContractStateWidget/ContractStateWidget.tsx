@@ -2,18 +2,18 @@ import { FileText, Loader2, Minimize2 } from 'lucide-react';
 
 import { JSX, useEffect, useState } from 'react';
 
-import type {
-  ContractFunction,
-  ContractSchema,
-  FullContractAdapter,
-} from '@openzeppelin/transaction-form-types';
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import type {
+  ContractFunction,
+  ContractSchema,
+  FullContractAdapter,
+} from '@openzeppelin/transaction-form-types';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 

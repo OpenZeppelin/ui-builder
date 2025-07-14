@@ -1,4 +1,4 @@
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { WritableFunctionCardProps } from './types';
 

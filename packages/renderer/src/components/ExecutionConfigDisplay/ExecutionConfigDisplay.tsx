@@ -3,13 +3,6 @@ import { AlertCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type {
-  ContractAdapter,
-  EoaExecutionConfig,
-  ExecutionConfig,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
 import {
   Alert,
   AlertDescription,
@@ -19,7 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
   PasswordField,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import type {
+  ContractAdapter,
+  EoaExecutionConfig,
+  ExecutionConfig,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+} from '@openzeppelin/transaction-form-types';
 
 import { EoaConfigDetails } from './components/EoaConfigDetails';
 import { ExecutionMethodTrigger } from './components/ExecutionMethodTrigger';

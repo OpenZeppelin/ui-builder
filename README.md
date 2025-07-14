@@ -247,7 +247,7 @@ transaction-form-builder/
 │   │   │   ├── utils/           # Utility functions specific to renderer
 │   │   │   ├── stories/         # Stories for renderer specific components (e.g., TransactionForm)
 │   │   │   ├── test/            # Package-specific tests
-│   │   │   └── index.ts         # Public API exports (re-exports from @openzeppelin/transaction-form-ui for components)
+│   │   │   └── index.ts         # Public API exports (re-exports from @openzeppelin/contracts-ui-builder-ui for components)
 │   │   ├── scripts/             # Build scripts
 │   │   ├── tsconfig.json        # TypeScript configuration
 │   │   └── package.json         # Package configuration
@@ -342,7 +342,7 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/transaction-form-ui` package.
+The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/contracts-ui-builder-ui` package.
 
 These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
 

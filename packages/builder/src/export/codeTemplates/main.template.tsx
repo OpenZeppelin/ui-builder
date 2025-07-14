@@ -12,13 +12,13 @@ import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
 import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
 import type {
   ContractAdapter,
   NativeConfigLoader,
   NetworkConfig,
 } from '@openzeppelin/transaction-form-types';
-import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/transaction-form-ui';
 import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import

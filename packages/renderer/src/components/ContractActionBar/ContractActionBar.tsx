@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NetworkStatusBadge, ViewContractStateButton } from '@openzeppelin/contracts-ui-builder-ui';
 import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
-import { NetworkStatusBadge, ViewContractStateButton } from '@openzeppelin/transaction-form-ui';
 
 interface ContractActionBarProps {
   networkConfig: NetworkConfig | null;

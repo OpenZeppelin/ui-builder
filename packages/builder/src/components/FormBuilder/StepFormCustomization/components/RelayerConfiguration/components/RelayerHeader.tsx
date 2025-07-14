@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ExternalLink } from '@openzeppelin/transaction-form-ui';
+import { ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
 
 export function RelayerHeader(): React.ReactElement {
   return (

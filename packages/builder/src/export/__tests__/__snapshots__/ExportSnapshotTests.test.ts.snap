@@ -88,13 +88,13 @@ import {
   ContractStateWidget,
   TransactionForm,
 } from '@openzeppelin/contracts-ui-builder-renderer';
+import { Card, CardContent } from '@openzeppelin/contracts-ui-builder-ui';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
 } from '@openzeppelin/transaction-form-types';
-import { Card, CardContent } from '@openzeppelin/transaction-form-ui';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -279,10 +279,10 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/contracts-ui-builder-renderer": "^1.17.1",
+    "@openzeppelin/contracts-ui-builder-ui": "^1.18.0",
     "@openzeppelin/transaction-form-adapter-evm": "^1.17.1",
     "@openzeppelin/transaction-form-react-core": "^1.17.0",
     "@openzeppelin/transaction-form-types": "^1.17.0",
-    "@openzeppelin/transaction-form-ui": "^1.18.0",
     "@openzeppelin/transaction-form-utils": "^1.17.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.17.0",
@@ -326,10 +326,10 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/contracts-ui-builder-renderer": "^1.17.1",
+    "@openzeppelin/contracts-ui-builder-ui": "^1.18.0",
     "@openzeppelin/transaction-form-adapter-evm": "^1.17.1",
     "@openzeppelin/transaction-form-react-core": "^1.17.0",
     "@openzeppelin/transaction-form-types": "^1.17.0",
-    "@openzeppelin/transaction-form-ui": "^1.18.0",
     "@openzeppelin/transaction-form-utils": "^1.17.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.17.0",

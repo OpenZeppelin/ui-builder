@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Label } from '@openzeppelin/transaction-form-ui';
+import { Label } from '@openzeppelin/contracts-ui-builder-ui';
 
 interface TitledSectionProps {
   /**

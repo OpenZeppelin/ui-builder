@@ -45,7 +45,7 @@ This package relies on:
 - **@openzeppelin/transaction-form-react-core**: For core React context providers and hooks (`AdapterProvider`, `WalletStateProvider`, `useWalletState`).
 - **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms.
 - **@openzeppelin/contracts-ui-builder-renderer**: The shared library for rendering the final transaction form and other components.
-- **@openzeppelin/transaction-form-ui**: The shared library for all common UI and form field components.
+- **@openzeppelin/contracts-ui-builder-ui**: The shared library for all common UI and form field components.
 - **@openzeppelin/transaction-form-styles**: The centralized styling system.
 - **@openzeppelin/transaction-form-utils**: Shared utility functions like the logger and `appConfigService`.
 - **@openzeppelin/transaction-form-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`).

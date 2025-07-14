@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/transaction-form-ui",
+  "name": "@openzeppelin/contracts-ui-builder-ui",
   "version": "1.18.0",
   "private": false,
   "description": "Shared React UI components for the OpenZeppelin Transaction Form Builder.",

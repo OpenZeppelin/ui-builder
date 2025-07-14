@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   Input,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
 
 const meta = {
   title: 'Builder/UI/Dialog',

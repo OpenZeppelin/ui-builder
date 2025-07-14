@@ -2,7 +2,6 @@ import { CheckCircle, Zap } from 'lucide-react';
 
 import React from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 import {
   Button,
   Card,
@@ -10,7 +9,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
 
 interface RelayerGasConfigurationCardProps {
   isActive: boolean;

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
 export interface WizardStep {
   id: string;

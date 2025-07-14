@@ -2,12 +2,12 @@ import { RefreshCw } from 'lucide-react';
 
 import { JSX, useCallback, useEffect, useState } from 'react';
 
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
 } from '@openzeppelin/transaction-form-types';
-import { Button } from '@openzeppelin/transaction-form-ui';
 import {
   type RpcConfigEvent,
   cn,

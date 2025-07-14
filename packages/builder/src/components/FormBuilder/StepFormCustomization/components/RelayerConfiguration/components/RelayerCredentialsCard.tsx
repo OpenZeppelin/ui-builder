@@ -13,7 +13,7 @@ import {
   CardTitle,
   PasswordField,
   UrlField,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
 
 import type { ExecutionMethodFormData } from '../../../types';
 

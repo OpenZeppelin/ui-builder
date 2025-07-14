@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 // Example component from the builder package
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
 const meta: Meta<typeof Button> = {
   title: 'Builder/Examples/Button',

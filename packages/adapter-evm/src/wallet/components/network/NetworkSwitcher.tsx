@@ -4,18 +4,18 @@ import type { Chain } from 'viem';
 import React from 'react';
 
 import {
-  useDerivedAccountStatus,
-  useDerivedChainInfo,
-  useDerivedSwitchChainStatus,
-} from '@openzeppelin/transaction-form-react-core';
-import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@openzeppelin/transaction-form-ui';
+} from '@openzeppelin/contracts-ui-builder-ui';
+import {
+  useDerivedAccountStatus,
+  useDerivedChainInfo,
+  useDerivedSwitchChainStatus,
+} from '@openzeppelin/transaction-form-react-core';
+import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
 import { cn } from '@openzeppelin/transaction-form-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
