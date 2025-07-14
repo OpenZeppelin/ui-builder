@@ -1,5 +1,16 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 1.20.0
+
+### Minor Changes
+
+- [#46](https://github.com/OpenZeppelin/transaction-form-builder/pull/46) [`777a246`](https://github.com/OpenZeppelin/transaction-form-builder/commit/777a246fa3c4112ee91fd2a0279e86267d0574e5) Thanks [@pasevin](https://github.com/pasevin)! - Add support for 9 major EVM networks
+
+### Patch Changes
+
+- Updated dependencies [[`777a246`](https://github.com/OpenZeppelin/transaction-form-builder/commit/777a246fa3c4112ee91fd2a0279e86267d0574e5)]:
+  - @openzeppelin/transaction-form-adapter-evm@1.18.0
+
 ## 1.19.0
 
 ### Minor Changes
