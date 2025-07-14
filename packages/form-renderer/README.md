@@ -51,7 +51,7 @@ import type {
 
 This package renders forms using UI components and field components sourced from the `@openzeppelin/transaction-form-ui` package. **This `form-renderer` package itself does not ship with pre-compiled CSS or contain UI component implementations directly.**
 
-Styling relies on the consuming application (like `packages/core` or an exported project) to:
+Styling relies on the consuming application (like `packages/builder` or an exported project) to:
 
 1.  **Include Tailwind CSS** in its build process.
 2.  **Configure Tailwind** to scan the `@openzeppelin/transaction-form-ui` package's source files within `node_modules` (Tailwind v4 does this automatically for dependencies) and also its own source files.

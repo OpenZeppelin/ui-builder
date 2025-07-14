@@ -169,7 +169,7 @@ The `customizations.connectButton` section supports all native RainbowKit Connec
 
 The consuming application (via the `loadConfigModule` prop on `WalletStateProvider` in `react-core`) must provide a function that can dynamically import the user-native kit-specific configuration file described above. The adapter uses this callback to load the file.
 
-**Example from `packages/core/src/App.tsx` or exported app's `main.tsx`:**
+**Example from `packages/builder/src/App.tsx` or exported app's `main.tsx`:**
 
 ```typescript
 import { logger } from '@openzeppelin/transaction-form-utils';

@@ -3,7 +3,7 @@
  * @author Transaction Form Builder Team
  *
  * IMPORTANT: This is the central location for this rule in the monorepo.
- * It is referenced from both the root ESLint configuration and the core package configuration.
+ * It is referenced from both the root ESLint configuration and the builder package configuration.
  * Do not duplicate this rule in package-specific directories.
  */
 

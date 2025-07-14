@@ -5,7 +5,7 @@ module.exports = {
   // Configure content scanning for *this package only*.
   content: [
     './src/**/*.{js,ts,jsx,tsx}', // Scan source files in form-renderer
-    // DO NOT scan core or other packages here.
+    // DO NOT scan builder or other packages here.
   ],
   // darkMode is inherited from the preset.
   // theme extensions are inherited from the preset.

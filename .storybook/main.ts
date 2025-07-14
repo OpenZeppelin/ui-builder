@@ -1,12 +1,11 @@
 import type { StorybookConfig } from '@storybook/react-vite';
-
 import path from 'path';
 
 const config: StorybookConfig = {
   stories: [
-    // Core package stories
-    '../packages/core/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../packages/core/src/**/*.mdx',
+    // Builder package stories
+    '../packages/builder/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../packages/builder/src/**/*.mdx',
 
     // Form renderer package stories
     '../packages/form-renderer/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
@@ -39,8 +38,8 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      // Core package aliases
-      '@': path.resolve(__dirname, '../packages/core/src'),
+      // Builder package aliases
+      '@': path.resolve(__dirname, '../packages/builder/src'),
       // Styles package alias
       '@styles': path.resolve(__dirname, '../packages/styles'),
     };

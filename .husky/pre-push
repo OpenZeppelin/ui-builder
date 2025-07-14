@@ -34,10 +34,10 @@ echo "🔍 Checking export versions synchronization..."
 pnpm run update-export-versions
 
 # Check if versions.ts was modified
-if ! git diff --exit-code packages/core/src/export/versions.ts; then
+if ! git diff --exit-code packages/builder/src/export/versions.ts; then
   echo "⚠️  Warning: versions.ts was updated. The file has been synchronized."
   echo "📝 Please add the updated versions.ts to your commit:"
-  echo "   git add packages/core/src/export/versions.ts"
+  echo "   git add packages/builder/src/export/versions.ts"
   echo "   git commit --amend --no-edit"
   echo ""
   echo "❌ Push aborted to allow you to include the version updates."

@@ -282,11 +282,11 @@ By following this structure, we aim for a cleaner, more testable, and easier-to-
 
 ## 9. Adapter UI Facilitation Capabilities (Optional)
 
-Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the core application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
+Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the builder application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
 
 ### 9.1. Rationale
 
-Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the core app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
+Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the builder app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
 
 ### 9.2. Case Study: EVM Adapter UI Kit Management
 
@@ -309,4 +309,4 @@ The EVM adapter provides a sophisticated implementation of this pattern to handl
     - **User-Native Code**: For complex kits like RainbowKit, the consuming application can provide a native `rainbowkit.config.ts` file, which is dynamically loaded by the adapter via a callback.
     - **Programmatic Override**: The application can call the adapter's `configureUiKit()` method at runtime to override any setting.
 
-This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the core application to simply request the UI components and hooks it needs without knowing the specific implementation details.
+This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the builder application to simply request the UI components and hooks it needs without knowing the specific implementation details.

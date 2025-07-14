@@ -1,8 +1,8 @@
 import type { Preview } from '@storybook/react';
 
-// Import the UNIFIED CSS entry point from the core package.
+// Import the UNIFIED CSS entry point from the builder package.
 // This now includes Tailwind base, components, utilities, AND the theme variables.
-import '../packages/core/src/index.css';
+import '../packages/builder/src/index.css';
 
 const preview: Preview = {
   parameters: {
@@ -16,7 +16,7 @@ const preview: Preview = {
     options: {
       // Sort stories by package name first, then by component name
       storySort: {
-        order: ['Core', 'Form Renderer', 'Styles', 'Templates'],
+        order: ['Builder', 'Form Renderer', 'Styles', 'Templates'],
         method: 'alphabetical',
       },
     },

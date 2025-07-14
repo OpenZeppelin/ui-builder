@@ -94,4 +94,4 @@ function MyWalletComponent() {
 }
 ```
 
-This package aims to decouple the core application logic from the direct management of adapter instances and their UI contexts, promoting a cleaner and more maintainable architecture.
+This package aims to decouple the builder application logic from the direct management of adapter instances and their UI contexts, promoting a cleaner and more maintainable architecture.

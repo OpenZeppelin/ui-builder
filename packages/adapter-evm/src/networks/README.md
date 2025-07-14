@@ -15,11 +15,11 @@ It is responsible for:
 
 The `EvmNetworkConfig` objects defined in `src/networks/` (e.g., `ethereumMainnet`) each specify a default public `rpcUrl`.
 
-This default RPC URL can be overridden at runtime by the consuming application (either the core Transaction Form Builder app or an exported form) through the central `AppConfigService`. This service loads configurations from environment variables (for the core app) or a `public/app.config.json` file (for exported apps).
+This default RPC URL can be overridden at runtime by the consuming application (either the main Contracts UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
 
 To override an RPC URL, the application's configuration should define an entry in the `rpcEndpoints` section, keyed by the network's string ID (e.g., `"ethereum-mainnet"`). For example:
 
-In `.env` for the core app:
+In `.env` for the builder app:
 `VITE_APP_CFG_RPC_ENDPOINT_ETHEREUM_MAINNET="https://your-custom-mainnet-rpc.io/key"`
 
 In `public/app.config.json` for an exported app:

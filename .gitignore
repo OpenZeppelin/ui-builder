@@ -22,7 +22,7 @@ coverage/
 *.tsbuildinfo
 
 # Test reports
-packages/core/test-results/
+packages/builder/test-results/
 
 # Test exports
 exports/

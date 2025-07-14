@@ -39,7 +39,7 @@ This configuration is then passed to the `EvmAdapter`'s `signAndBroadcast` metho
 
 All wallet integration logic, UI components, facade hooks, and the UI context provider (e.g., `EvmBasicUiContextProvider` for Wagmi) for EVM-compatible chains are located in the [`src/wallet/`](./src/wallet/) module of this adapter.
 
-The `EvmAdapter` implements the optional UI facilitation methods from the `ContractAdapter` interface (`getEcosystemReactUiContextProvider`, `getEcosystemReactHooks`, `getEcosystemWalletComponents`). These capabilities are consumed by the `core` application's `WalletStateProvider`, which manages the global wallet state and makes these hooks and components accessible to the rest of the application via the `useWalletState()` hook.
+The `EvmAdapter` implements the optional UI facilitation methods from the `ContractAdapter` interface (`getEcosystemReactUiContextProvider`, `getEcosystemReactHooks`, `getEcosystemWalletComponents`). These capabilities are consumed by the `builder` application's `WalletStateProvider`, which manages the global wallet state and makes these hooks and components accessible to the rest of the application via the `useWalletState()` hook.
 
 **For full documentation on the `src/wallet/` module, its exports, configuration, and usage examples, see [`src/wallet/README.md`](./src/wallet/README.md).**
 
@@ -94,11 +94,11 @@ Network configurations for various EVM chains (mainnets and testnets) are export
 
 The `EvmNetworkConfig` objects defined in `src/networks/` (e.g., `ethereumMainnet`) each specify a default public `rpcUrl`.
 
-This default RPC URL can be overridden at runtime by the consuming application (either the core Transaction Form Builder app or an exported form) through the central `AppConfigService`. This service loads configurations from environment variables (for the core app) or a `public/app.config.json` file (for exported apps).
+This default RPC URL can be overridden at runtime by the consuming application (either the main Contracts UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
 
 To override an RPC URL, the application's configuration should define an entry in the `rpcEndpoints` section, keyed by the network's string ID (e.g., `"ethereum-mainnet"`). For example:
 
-In `.env` for the core app:
+In `.env` for the builder app:
 `VITE_APP_CFG_RPC_ENDPOINT_ETHEREUM_MAINNET="https://your-custom-mainnet-rpc.io/key"`
 
 In `public/app.config.json` for an exported app:

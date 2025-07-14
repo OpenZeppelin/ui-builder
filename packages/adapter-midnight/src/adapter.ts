@@ -37,7 +37,7 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 /**
  * Midnight-specific adapter.
  *
- * Implements the full ContractAdapter interface to integrate with the core application.
+ * Implements the full ContractAdapter interface to integrate with the builder application.
  * Wallet-related functionalities are implemented, while contract-specific methods
  * are placeholders to be built out in later phases.
  */

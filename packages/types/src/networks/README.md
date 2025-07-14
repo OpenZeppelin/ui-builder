@@ -8,7 +8,7 @@ The Transaction Form Builder supports multiple blockchain ecosystems (EVM, Solan
 
 1. Network configurations are defined in their respective adapter packages
 2. Each adapter exports its network configurations
-3. The core app discovers and aggregates these configurations
+3. The builder app discovers and aggregates these configurations
 
 This approach ensures that network details live alongside the code that knows how to use them.
 
@@ -78,18 +78,18 @@ And re-export them from the adapter's main entry point:
 export { evmNetworks, evmMainnetNetworks, evmTestnetNetworks } from './networks';
 ```
 
-### 4. Core App Network Discovery
+### 4. Builder App Network Discovery
 
-The core application, specifically the `ecosystemManager.ts` module, dynamically discovers and aggregates network configurations from all registered adapter packages. This is achieved by:
+The builder application, specifically the `ecosystemManager.ts` module, dynamically discovers and aggregates network configurations from all registered adapter packages. This is achieved by:
 
 1.  Maintaining an `ecosystemRegistry` that maps each `Ecosystem` to its metadata, including the conventional export name for its network list (e.g., `evmNetworks`).
 2.  Dynamically importing the main module of each adapter package (e.g., `@openzeppelin/transaction-form-adapter-evm`).
 3.  Accessing the exported network list from the imported module using the conventional name (e.g., `module.evmNetworks`).
 
-This allows the core to remain decoupled from the specifics of each adapter package while still being able to gather all network configurations.
+This allows the builder to remain decoupled from the specifics of each adapter package while still being able to gather all network configurations.
 
 ```typescript
-// Simplified conceptual example from core/src/core/ecosystemManager.ts
+// Simplified conceptual example from builder/src/core/ecosystemManager.ts
 
 // Centralized configuration for each ecosystem
 const ecosystemRegistry = {
@@ -179,5 +179,5 @@ export const {ecosystem}Networks = [
 1. **True Separation of Concerns**: Adapters own their network definitions
 2. **Simpler Maintenance**: Add/update a network by changing just the relevant adapter
 3. **Knowledge Co-location**: Network details live with the code that knows how to use them
-4. **Chain-Agnosticism**: Core remains agnostic, only knowing about networks through adapters
+4. **Chain-Agnosticism**: Builder remains agnostic, only knowing about networks through adapters
 5. **Type Safety**: Discriminated unions ensure type safety when accessing ecosystem-specific properties

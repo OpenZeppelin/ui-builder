@@ -124,7 +124,7 @@ export interface ContractEvent {
  * This is a generalized, internal model used by the Transaction Form Builder.
  * Blockchain-specific adapters are responsible for parsing a contract's native interface
  * (e.g., an EVM ABI JSON, Solana IDL) and transforming it into this `ContractSchema` structure.
- * The goal is to provide a consistent data model for the core application to work with,
+ * The goal is to provide a consistent data model for the builder application to work with,
  * abstracting away the specifics of different blockchain ecosystems.
  */
 export interface ContractSchema {
@@ -135,7 +135,7 @@ export interface ContractSchema {
 
   /**
    * The blockchain ecosystem this contract belongs to (e.g., 'evm', 'solana').
-   * This helps the core application select the appropriate adapter and interpret types.
+   * This helps the builder application select the appropriate adapter and interpret types.
    */
   ecosystem: Ecosystem;
 

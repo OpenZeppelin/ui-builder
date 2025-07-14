@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const versionsFilePath = path.resolve(__dirname, '../packages/core/src/export/versions.ts');
+const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export/versions.ts');
 
 // List of internal packages to update
 const packagesToUpdate = [
@@ -87,8 +87,8 @@ const updateSnapshots = () => {
   const { execSync } = require('child_process');
 
   try {
-    // Update snapshots for the core package where the export tests are located
-    execSync('pnpm --filter @openzeppelin/transaction-form-builder-core test -- -u', {
+    // Update snapshots for the builder package where the export tests are located
+    execSync('pnpm --filter @openzeppelin/transaction-form-builder-app test -- -u', {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'inherit',
     });
@@ -96,7 +96,7 @@ const updateSnapshots = () => {
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
     console.log(
-      '⚠️  Please run "pnpm --filter=@openzeppelin/transaction-form-builder-core test -u" manually'
+      '⚠️  Please run "pnpm --filter=@openzeppelin/transaction-form-builder-app test -u" manually'
     );
   }
 };

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Symlink Management Script
  *
@@ -11,7 +10,6 @@
  *   node scripts/manage-symlinks.js fix     # Fix broken symlinks
  *   node scripts/manage-symlinks.js create  # Create all symlinks (will overwrite)
  */
-
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,11 +22,11 @@ const __dirname = path.dirname(__filename);
 const CONFIG_FILES = ['tailwind.config.cjs', 'postcss.config.cjs', 'components.json'];
 
 // Packages that need symlinks
-const PACKAGES = ['packages/core', 'packages/form-renderer'];
+const PACKAGES = ['packages/builder', 'packages/form-renderer'];
 
 // Map of relative paths from each package to the root
 const ROOT_PATHS = {
-  'packages/core': '../..',
+  'packages/builder': '../..',
   'packages/form-renderer': '../..',
 };
 

@@ -10,11 +10,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/core/src/export/**'
+      - 'packages/builder/src/export/**'
   pull_request:
     branches: [main]
     paths:
-      - 'packages/core/src/export/**'
+      - 'packages/builder/src/export/**'
 
 jobs:
   test-exports:
@@ -59,12 +59,12 @@ jobs:
 
       # Run only export-related tests
       - name: Run export tests
-        run: pnpm --filter @openzeppelin/transaction-form-builder-core test src/export/__tests__/
+        run: pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/
 
       # Generate test report for better CI visibility
       - name: Generate test report
         if: success() || failure()
-        run: pnpm --filter @openzeppelin/transaction-form-builder-core test:report
+        run: pnpm --filter @openzeppelin/transaction-form-builder-app test:report
 
       # Upload test results as artifacts
       - name: Upload test results
@@ -72,5 +72,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: export-test-results
-          path: packages/core/test-results
+          path: packages/builder/test-results
           retention-days: 5

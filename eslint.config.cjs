@@ -49,7 +49,7 @@ const baseConfig = [
       '**/*.md',
       '**/tsconfig.tsbuildinfo',
       '**/dist/',
-      'packages/core/test-results/',
+      'packages/builder/test-results/',
       '*.snap',
       '*.lock',
       '*.log',

@@ -163,9 +163,9 @@ Types related to the status of transaction submissions:
 
 ## Integration with Other Packages
 
-This package is a dependency for both the core and form-renderer packages:
+This package is a dependency for both the builder and form-renderer packages:
 
-- **Core Package**: Uses these types for its adapter implementations, form generation, and export functionality
+- **Builder Package**: Uses these types for its adapter implementations, form generation, and export functionality
 - **Form Renderer Package**: Uses these types for form field rendering and validation
 
 ## Development

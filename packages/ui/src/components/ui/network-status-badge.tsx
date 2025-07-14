@@ -56,7 +56,7 @@ function NetworkTypeBadge({ type }: { type: string }): React.ReactElement {
 
 /**
  * NetworkStatusBadge - Displays network information in a compact badge format
- * Shows the network icon, ecosystem, name, and type - exactly as in the core app
+ * Shows the network icon, ecosystem, name, and type - exactly as in the builder app
  */
 export function NetworkStatusBadge({
   network,

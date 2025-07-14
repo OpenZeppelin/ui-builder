@@ -13,8 +13,8 @@ This package contains the centralized styling system for the Transaction Form Bu
 This monorepo utilizes a consistent styling approach driven by the consuming application:
 
 1.  **Centralized Theme:** This `@styles` package provides the single source of truth for theme variables (colors, spacing, radius) and base styles in `global.css`.
-2.  **Centralized Configuration:** Root-level `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are used via symlinks in consuming packages (`core`, exported apps).
-3.  **Consumer-Driven Build:** The main application (`packages/core`) or exported applications are responsible for the Tailwind CSS build process.
+2.  **Centralized Configuration:** Root-level `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are used via symlinks in consuming packages (`builder`, exported apps).
+3.  **Consumer-Driven Build:** The main application (`packages/builder`) or exported applications are responsible for the Tailwind CSS build process.
 4.  **Automatic Content Scanning:** Tailwind v4 automatically scans the source code of the application _and its dependencies_ (like `@openzeppelin/transaction-form-ui` and `@openzeppelin/transaction-form-renderer`) for utility class usage.
 5.  **CSS Generation:** The consumer app's build generates the final CSS file, including base styles from `global.css`, theme variables, and all necessary utility classes used throughout the application and its dependencies.
 
@@ -73,10 +73,10 @@ The root directory contains these key configuration files:
 
 ### Package Integration
 
-Each package that contains UI elements needing Tailwind processing (like `core`, `form-renderer`, and the new `ui` package) has symbolic links to these root configurations, ensuring consistent styling and behavior:
+Each package that contains UI elements needing Tailwind processing (like `builder`, `form-renderer`, and the new `ui` package) has symbolic links to these root configurations, ensuring consistent styling and behavior:
 
 ```
-packages/core/tailwind.config.cjs -> ../../tailwind.config.cjs
+packages/builder/tailwind.config.cjs -> ../../tailwind.config.cjs
 packages/form-renderer/tailwind.config.cjs -> ../../tailwind.config.cjs
 packages/ui/tailwind.config.cjs -> ../../tailwind.config.cjs
 ```
@@ -85,7 +85,7 @@ packages/ui/tailwind.config.cjs -> ../../tailwind.config.cjs
 
 During the export process:
 
-1. Template files in the core package are used to create standalone projects
+1. Template files in the builder package are used to create standalone projects
 2. Symlinks are resolved to create standalone configuration files
 3. The styles from this package are included in the exported project
 4. The result is a self-contained project with proper styling

@@ -1,6 +1,6 @@
 # Contract Adapter Interface
 
-This directory contains the base interface and type definitions for the contract adapter system. The adapter pattern allows the Transaction Form Builder to support multiple blockchains while keeping the core application chain-agnostic.
+This directory contains the base interface and type definitions for the contract adapter system. The adapter pattern allows the Transaction Form Builder to support multiple blockchains while keeping the builder application chain-agnostic.
 
 ## ContractAdapter Interface
 
@@ -153,29 +153,26 @@ getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?:
 
 ## UI Facilitation Capabilities (Optional)
 
-In addition to the core contract interaction and wallet connection methods, the `ContractAdapter` interface supports optional methods that allow adapters to provide enhanced UI facilitation for richer, ecosystem-specific user experiences. These methods enable the core application and UI components to leverage underlying libraries (like `wagmi/react` for EVM) in a chain-agnostic manner.
+In addition to the core contract interaction and wallet connection methods, the `ContractAdapter` interface supports optional methods that allow adapters to provide enhanced UI facilitation for richer, ecosystem-specific user experiences. These methods enable the builder application and UI components to leverage underlying libraries (like `wagmi/react` for EVM) in a chain-agnostic manner.
 
 These capabilities are defined in `packages/types/src/adapters/ui-enhancements.ts` and include:
 
 - **`configureUiKit?(config: UiKitConfiguration): void;`**
-
-  - Allows the consuming application (typically via a central provider like `WalletStateProvider` in `core`) to inform the adapter about the desired UI kit (e.g., 'custom' for adapter-provided basic components, or names of third-party kits like 'rainbowkit') and pass any kit-specific configuration. The `kitConfig` can include general options for the chosen kit, as well as a `components: { exclude: Array<keyof EcosystemWalletComponents> }` field to selectively prevent the adapter from providing certain default UI components (like `NetworkSwitcher` or `AccountDisplay`).
+  - Allows the consuming application (typically via a central provider like `WalletStateProvider` in `builder`) to inform the adapter about the desired UI kit (e.g., 'custom' for adapter-provided basic components, or names of third-party kits like 'rainbowkit') and pass any kit-specific configuration. The `kitConfig` can include general options for the chosen kit, as well as a `components: { exclude: Array<keyof EcosystemWalletComponents> }` field to selectively prevent the adapter from providing certain default UI components (like `NetworkSwitcher` or `AccountDisplay`).
 
 - **`getEcosystemReactUiContextProvider?(): React.ComponentType<EcosystemReactUiProviderProps> | undefined;`**
-
   - Adapters can return a React component that, when rendered, sets up the entire necessary UI context for that adapter's ecosystem. For example, an EVM adapter would return a component that internally renders `<WagmiProvider>` (and potentially a `<QueryClientProvider>`). This context is essential for the facade React hooks to function.
 
 - **`getEcosystemReactHooks?(): EcosystemSpecificReactHooks | undefined;`**
-
-  - Returns an object containing facade React hooks for common wallet and blockchain interactions. Consumers (like `NetworkSwitchManager` or UI components in `core`) use these hooks for reactive state and actions.
+  - Returns an object containing facade React hooks for common wallet and blockchain interactions. Consumers (like `NetworkSwitchManager` or UI components in `builder`) use these hooks for reactive state and actions.
   - **Convention for Hook Return Objects:** Adapters implementing this should ensure their facade hooks return objects with conventionally named properties for common states and actions. For example:
     - A `useAccount` facade should aim to return `{ isConnected: boolean, address?: string, chainId?: number, ... }`.
     - A `useSwitchChain` facade should aim to return `{ switchChain: Function, isPending: boolean, error: Error | null, ... }`.
     - If the underlying library uses different property names (e.g., `isLoading` instead of `isPending`), the adapter's facade implementation is responsible for mapping to the conventional names to ensure consistent consumption by chain-agnostic components.
 
 - **`getEcosystemWalletComponents?(): EcosystemWalletComponents | undefined;`**
-  - Returns an object mapping standardized names (e.g., `ConnectButton`, `AccountDisplay`, `NetworkSwitcher`) to React components. These components are sourced either from a configured third-party UI kit or are basic custom implementations provided by the adapter itself. These components are expected to internally use the facade hooks provided by `getEcosystemReactHooks` (typically accessed via a global state hook like `useWalletState` in the `core` application).
+  - Returns an object mapping standardized names (e.g., `ConnectButton`, `AccountDisplay`, `NetworkSwitcher`) to React components. These components are sourced either from a configured third-party UI kit or are basic custom implementations provided by the adapter itself. These components are expected to internally use the facade hooks provided by `getEcosystemReactHooks` (typically accessed via a global state hook like `useWalletState` in the `builder` application).
 
-By implementing these optional methods, adapters can offer a deeply integrated and reactive UI experience while allowing the core application to remain decoupled from the specifics of any particular wallet library or UI kit.
+By implementing these optional methods, adapters can offer a deeply integrated and reactive UI experience while allowing the builder application to remain decoupled from the specifics of any particular wallet library or UI kit.
 
-For details on how the `core` application consumes these capabilities (e.g., via `WalletStateProvider` and `useWalletState()`), see the main [Adapter Architecture Guide](../../../docs/ADAPTER_ARCHITECTURE.md).
+For details on how the `builder` application consumes these capabilities (e.g., via `WalletStateProvider` and `useWalletState()`), see the main [Adapter Architecture Guide](../../../docs/ADAPTER_ARCHITECTURE.md).
