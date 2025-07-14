@@ -41,7 +41,7 @@
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
     "update-export-versions": "node scripts/update-export-versions.cjs",
     "outdated": "pnpm outdated -r",
-    "export-form": "node packages/builder/src/export/cli/export-form.cjs",
+    "export-app": "node packages/builder/src/export/cli/export-app.cjs",
     "preinstall": "npx only-allow pnpm",
     "changeset": "changeset"
   },

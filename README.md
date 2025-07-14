@@ -190,7 +190,7 @@ For a consistent and reliable development environment, it is highly recommended 
 - `pnpm update-deps:major` - Update dependencies including major versions
 - `pnpm check-deps` - Check for deprecated dependencies
 - `pnpm outdated` - List outdated dependencies across the monorepo
-- `pnpm export-form [cmd] [opts]` - Export a standalone form project (see `pnpm export-form --help`)
+- `pnpm export-app [cmd] [opts]` - Export a standalone form project (see `pnpm export-app --help`)
 - `pnpm update-export-versions` - Update the hardcoded versions of internal packages used in exported forms
 
 ## Project Structure

@@ -1,6 +1,6 @@
 # Export CLI Tool
 
-The `export-form` CLI tool provides a convenient way to export, build, and test transaction forms without manual UI interaction. This document explains how to use the CLI for various form export operations.
+The `export-app` CLI tool provides a convenient way to export, build, and test transaction forms without manual UI interaction. This document explains how to use the CLI for various form export operations.
 
 ## Overview
 
@@ -18,13 +18,13 @@ The Export CLI tool enables developers to:
 The CLI tool is included with the Transaction Form Builder package. You can use it directly with pnpm:
 
 ```bash
-pnpm export-form
+pnpm export-app
 ```
 
 For a list of available commands and options:
 
 ```bash
-pnpm export-form --help
+pnpm export-app --help
 ```
 
 ### Basic Usage
@@ -33,16 +33,16 @@ Here are some common use cases:
 
 ```bash
 # Export a basic EVM transfer form for local development
-pnpm export-form export
+pnpm export-app export
 
 # Export a Solana staking form
-pnpm export-form export --chain solana --func stake
+pnpm export-app export --chain solana --func stake
 
 # Export a complex form with multiple fields
-pnpm export-form export --complex
+pnpm export-app export --complex
 
 # Export a form for production use
-pnpm export-form export --env production --output prod-form
+pnpm export-app export --env production --output prod-form
 ```
 
 ## Environment Options
@@ -70,7 +70,7 @@ The CLI supports two target environments for exports:
 Exports a form with the specified configuration.
 
 ```bash
-pnpm export-form export [options]
+pnpm export-app export [options]
 ```
 
 Options:
@@ -87,7 +87,7 @@ Options:
 Example:
 
 ```bash
-pnpm export-form export --chain solana --func stake --output solana-stake-form --complex --env production
+pnpm export-app export --chain solana --func stake --output solana-stake-form --complex --env production
 ```
 
 This will:
@@ -102,13 +102,13 @@ This will:
 Builds an exported form by installing dependencies and running the build process.
 
 ```bash
-pnpm export-form build <directory>
+pnpm export-app build <directory>
 ```
 
 Example:
 
 ```bash
-pnpm export-form build ./exports/transfer-form
+pnpm export-app build ./exports/transfer-form
 ```
 
 This will:
@@ -121,13 +121,13 @@ This will:
 Starts a local development server to test an exported form.
 
 ```bash
-pnpm export-form serve <directory>
+pnpm export-app serve <directory>
 ```
 
 Example:
 
 ```bash
-pnpm export-form serve ./exports/transfer-form
+pnpm export-app serve ./exports/transfer-form
 ```
 
 This will:
@@ -141,13 +141,13 @@ This will:
 Verifies an exported form's structure and content.
 
 ```bash
-pnpm export-form verify <directory>
+pnpm export-app verify <directory>
 ```
 
 Example:
 
 ```bash
-pnpm export-form verify ./exports/transfer-form
+pnpm export-app verify ./exports/transfer-form
 ```
 
 This will check:
@@ -165,10 +165,10 @@ For developing and testing against local packages:
 
 ```bash
 # Export a form for local development
-pnpm export-form export --output local-dev
+pnpm export-app export --output local-dev
 
 # Serve the form with workspace dependencies
-pnpm export-form serve ./exports/local-dev/transfer-form
+pnpm export-app serve ./exports/local-dev/transfer-form
 ```
 
 ### Production Deployment Workflow
@@ -177,10 +177,10 @@ For creating forms that can be shared or deployed:
 
 ```bash
 # Export a form for production
-pnpm export-form export --env production --output prod-deploy
+pnpm export-app export --env production --output prod-deploy
 
 # Build the form for production
-pnpm export-form build ./exports/prod-deploy/transfer-form
+pnpm export-app build ./exports/prod-deploy/transfer-form
 ```
 
 ### Testing Multiple Chain Types
@@ -189,14 +189,14 @@ To compare forms for different chains:
 
 ```bash
 # Export EVM form
-pnpm export-form export --chain evm --func transfer --output evm-transfer
+pnpm export-app export --chain evm --func transfer --output evm-transfer
 
 # Export Solana form
-pnpm export-form export --chain solana --func transfer --output solana-transfer
+pnpm export-app export --chain solana --func transfer --output solana-transfer
 
 # Verify both forms
-pnpm export-form verify ./exports/evm-transfer/transfer-form
-pnpm export-form verify ./exports/solana-transfer/transfer-form
+pnpm export-app verify ./exports/evm-transfer/transfer-form
+pnpm export-app verify ./exports/solana-transfer/transfer-form
 ```
 
 ## Implementation Details
@@ -274,8 +274,8 @@ If files are missing after export, make sure you're using the CLI commands prope
 
 ```bash
 # Correct usage
-pnpm export-form export --output my-form
-pnpm export-form build ./exports/my-form/transfer-form
+pnpm export-app export --output my-form
+pnpm export-app build ./exports/my-form/transfer-form
 
 # Incorrect usage (running test directly)
 pnpm test src/export/__tests__/export-cli-wrapper.test.ts
@@ -302,7 +302,7 @@ Make sure you're:
 To debug an export with verbose output:
 
 ```bash
-pnpm export-form export --verbose --output debug-form
+pnpm export-app export --verbose --output debug-form
 ```
 
 Then examine the output files to identify issues.
@@ -320,5 +320,5 @@ Then examine the output files to identify issues.
 
 - [Export Testing Framework Documentation](./export-testing-framework.md)
 - [Export System Implementation](../src/export/FormExportSystem.ts)
-- [CLI Source Code](../src/export/cli/export-form.cjs)
+- [CLI Source Code](../src/export/cli/export-app.cjs)
 - [CLI Documentation](../src/export/cli/README.md)

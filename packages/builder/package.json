@@ -4,7 +4,7 @@
   "version": "1.20.0",
   "type": "module",
   "bin": {
-    "export-form": "src/export/cli/export-form.cjs"
+    "export-app": "src/export/cli/export-app.cjs"
   },
   "scripts": {
     "dev": "vite",
@@ -23,7 +23,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:report": "vitest run --reporter=json --outputFile=./test-results/export-tests.json src/export/__tests__/",
-    "export-form": "node src/export/cli/export-form.cjs",
+    "export-app": "node src/export/cli/export-app.cjs",
     "storybook": "cd ../.. && pnpm storybook",
     "build-storybook": "cd ../.. && pnpm build-storybook"
   },

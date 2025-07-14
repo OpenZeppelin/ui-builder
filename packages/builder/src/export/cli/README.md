@@ -12,31 +12,31 @@ For complete documentation on using this CLI tool, please refer to:
 
 ```bash
 # Display help
-export-form --help
+export-app --help
 
 # Export a form for production
-export-form export
+export-app export
 
 # Export a form configured for local development
-export-form export --env local
+export-app export --env local
 
 # Build an exported form
-export-form build <directory>
+export-app build <directory>
 
 # Serve a production-exported form
-export-form serve <directory>
+export-app serve <directory>
 
 # Verify an exported form
-export-form verify <directory>
+export-app verify <directory>
 ```
 
 ## Local Development and Testing
 
-When testing local changes to the form builder or its packages, the standard `export-form export` command generates a production-ready application that expects to fetch published packages from npm. To test against your local, unpublished code, you must use the `--env local` flag.
+When testing local changes to the form builder or its packages, the standard `export-app export` command generates a production-ready application that expects to fetch published packages from npm. To test against your local, unpublished code, you must use the `--env local` flag.
 
 ### `--env local` Workflow
 
-The `export-form export --env local` command is specifically designed to streamline local development. It automatically:
+The `export-app export --env local` command is specifically designed to streamline local development. It automatically:
 
 1. Exports the form application.
 2. Modifies the exported `package.json` to use `pnpm overrides`, pointing to your local monorepo packages with **absolute paths**.
@@ -50,7 +50,7 @@ To test your local changes, follow these steps:
 1. **Export for local development:**
 
    ```bash
-   pnpm export-form export --env local
+   pnpm export-app export --env local
    ```
 
 2. **Follow the CLI instructions:** The command will output the exact path to the prepared test directory. Navigate into it:
@@ -69,6 +69,6 @@ This manual process of running `pnpm install` and `pnpm dev` in the isolated dir
 
 ## Development
 
-This CLI tool is implemented using CommonJS to ensure compatibility with node environments. The main entry point is `export-form.cjs` which is referenced in the package.json `bin` field to make it available as a CLI command.
+This CLI tool is implemented using CommonJS to ensure compatibility with node environments. The main entry point is `export-app.cjs` which is referenced in the package.json `bin` field to make it available as a CLI command.
 
 For development and maintenance, please follow the project's contribution guidelines.

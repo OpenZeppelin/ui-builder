@@ -63,32 +63,32 @@ debug(`Found monorepo root: ${monorepoRoot}`);
 
 function showHelp() {
   console.log(`
-${colors.bold}${colors.cyan}Transaction Form Export CLI${colors.reset}
-A utility for exporting, building, and testing transaction forms.
+${colors.bold}${colors.cyan}Contracts UI Builder Export CLI${colors.reset}
+A utility for exporting, building, and testing Contracts UI Builder apps.
 ${colors.bold}Usage:${colors.reset}
-  export-form [command] [options]
+  export-app [command] [options]
 ${colors.bold}Commands:${colors.reset}
-  export       Export a form with specified configuration
-  build        Build an exported form
-  serve        Start a local server to test an exported form
-  verify       Verify form functionality
+  export       Export a Contracts UI Builder app with specified configuration
+  build        Build an exported Contracts UI Builder app
+  serve        Start a local server to test an exported Contracts UI Builder app
+  verify       Verify Contracts UI Builder app functionality
 ${colors.bold}Options:${colors.reset}
   --help, -h                 Show this help information
   --chain, -c [type]         Chain type (evm, solana, stellar) (default: evm)
   --func, -f [name]          Function name (default: transfer)
-  --output, -o [name]        Subdirectory name within ./exports (default: transfer-form)
+  --output, -o [name]        Subdirectory name within ./exports (default: transfer-app)
   --adapters, -a [boolean]   Include blockchain adapters (default: true)
   --template, -t [name]      Template to use (default: typescript-react-vite)
-  --complex, -x              Use complex form with multiple fields
+  --complex, -x              Use complex app with multiple fields
   --verbose, -v              Enable verbose output
   --env, -e [env]            Target environment: 'local' or 'production' (default: local)
 ${colors.bold}Examples:${colors.reset}
-  export-form export
-  export-form export -c solana -f stake -o stake-form
-  export-form export --env production -o prod-form
-  export-form build ./exports/transfer-form
-  export-form serve ./exports/transfer-form
-  export-form export -x
+  export-app export
+  export-app export -c solana -f stake -o stake-app
+  export-app export --env production -o prod-app
+  export-app build ./exports/transfer-app
+  export-app serve ./exports/transfer-app
+  export-app export -x
 `);
 }
 
@@ -160,9 +160,11 @@ function execInDir(command, dir, stdio = 'inherit') {
   }
 }
 
-function exportFormSimple(options) {
+function exportAppSimple(options) {
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Exporting Transaction Form${colors.reset}\n`);
+    console.log(
+      `\n${colors.bold}${colors.cyan}Exporting Contracts UI Builder App${colors.reset}\n`
+    );
     const userCurrentDir = process.cwd();
     const outputDir = path.resolve(userCurrentDir, options.output);
     fs.mkdirSync(outputDir, { recursive: true });
@@ -175,7 +177,7 @@ function exportFormSimple(options) {
       `  Include Adapters: ${options.adapters ? colors.green + 'Yes' : colors.yellow + 'No'}${colors.reset}`
     );
     console.log(
-      `  Form Complexity: ${options.complex ? colors.blue + 'Complex' : colors.blue + 'Simple'}${colors.reset}`
+      `  App Complexity: ${options.complex ? colors.blue + 'Complex' : colors.blue + 'Simple'}${colors.reset}`
     );
     console.log(`  Output Directory: ${colors.blue}${outputDir}${colors.reset}`);
     console.log(`  Environment:      ${colors.blue}${options.env}${colors.reset}\n`);
@@ -278,7 +280,7 @@ function exportFormSimple(options) {
     }
 
     if (options.env === 'local') {
-      const tempDir = path.join(os.homedir(), 'transfer-form-test');
+      const tempDir = path.join(os.homedir(), 'contracts-ui-builder-app-test');
       console.log(
         `\n${colors.blue}Moving project to a test directory for isolated testing...${colors.reset}`
       );
@@ -302,8 +304,8 @@ function exportFormSimple(options) {
     } else {
       console.log(`\n${colors.green}✓ Files extracted to:${colors.reset} ${extractDir}`);
       console.log(`\n${colors.cyan}Next steps:${colors.reset}`);
-      console.log(`  Build the project: export-form build ${extractDir}`);
-      console.log(`  Serve the project: export-form serve ${extractDir}`);
+      console.log(`  Build the project: export-app build ${extractDir}`);
+      console.log(`  Serve the project: export-app serve ${extractDir}`);
     }
     return extractDir;
   } catch (error) {
@@ -312,14 +314,14 @@ function exportFormSimple(options) {
   }
 }
 
-function buildExportedForm(options) {
+function buildExportedApp(options) {
   const targetDir = resolveTargetDir(options.targetDir || '.', process.cwd());
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
     process.exit(1);
   }
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Building Transaction Form${colors.reset}\n`);
+    console.log(`\n${colors.bold}${colors.cyan}Building Contracts UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm install', targetDir);
     console.log(`${colors.blue}Running 'pnpm build' in ${targetDir}...${colors.reset}`);
@@ -331,14 +333,14 @@ function buildExportedForm(options) {
   }
 }
 
-function serveExportedForm(options) {
+function serveExportedApp(options) {
   const targetDir = resolveTargetDir(options.targetDir || '.', monorepoRoot);
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
     process.exit(1);
   }
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Serving Transaction Form${colors.reset}\n`);
+    console.log(`\n${colors.bold}${colors.cyan}Serving Contracts UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm install', targetDir);
     console.log(`${colors.blue}Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
@@ -349,7 +351,7 @@ function serveExportedForm(options) {
   }
 }
 
-function verifyExportedForm(options) {
+function verifyExportedApp(options) {
   const targetDir = resolveTargetDir(options.targetDir || '.', process.cwd());
   if (!fs.existsSync(targetDir)) {
     console.error(`${colors.red}Error:${colors.reset} Directory does not exist: ${targetDir}`);
@@ -360,7 +362,9 @@ function verifyExportedForm(options) {
     process.exit(1);
   }
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Verifying Transaction Form${colors.reset}\n`);
+    console.log(
+      `\n${colors.bold}${colors.cyan}Verifying Contracts UI Builder App${colors.reset}\n`
+    );
     console.log(`${colors.blue}Running tests for:${colors.reset} ${targetDir}`);
     if (!fs.existsSync(path.join(targetDir, 'node_modules'))) {
       console.log(`${colors.yellow}Installing dependencies first...${colors.reset}`);
@@ -382,16 +386,16 @@ function main() {
   }
   switch (command) {
     case 'export':
-      exportFormSimple(options);
+      exportAppSimple(options);
       break;
     case 'build':
-      buildExportedForm(options);
+      buildExportedApp(options);
       break;
     case 'serve':
-      serveExportedForm(options);
+      serveExportedApp(options);
       break;
     case 'verify':
-      verifyExportedForm(options);
+      verifyExportedApp(options);
       break;
     default:
       console.error(`${colors.red}Unknown command: ${command}${colors.reset}`);
