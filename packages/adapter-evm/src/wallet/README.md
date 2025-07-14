@@ -58,7 +58,7 @@ The EVM adapter's wallet UI and behavior are configured through a layered system
 
 ### 1. Application-Level Configuration (via `AppConfigService`)
 
-This is the baseline configuration, typically set in `app.config.json` (for exported apps) or Vite environment variables (for the core `@openzeppelin/transaction-form-builder` app).
+This is the baseline configuration, typically set in `app.config.json` (for exported apps) or Vite environment variables (for the builder `@openzeppelin/transaction-form-builder-app` app).
 
 **Path in `app.config.json`**: `globalServiceConfigs.walletui.config`
 
