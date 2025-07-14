@@ -1,6 +1,14 @@
 // This file will contain the business logic for interacting with the Relayer SDK
 import { encodeFunctionData, formatEther } from 'viem';
 
+import {
+  EvmNetworkConfig,
+  ExecutionConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+  TransactionStatusUpdate,
+} from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   type ApiResponseRelayerResponseData,
@@ -10,14 +18,6 @@ import {
   RelayersApi,
   Speed,
 } from '@openzeppelin/relayer-sdk';
-import {
-  EvmNetworkConfig,
-  ExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-  TransactionStatusUpdate,
-} from '@openzeppelin/contracts-ui-builder-types';
 
 import { WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   ComponentExclusionConfig,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../../components';
 import { getResolvedWalletComponents } from '../uiKitService';

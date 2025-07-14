@@ -1,6 +1,10 @@
 import { capitalize } from 'lodash';
 
-import { Ecosystem, NetworkConfig, RenderFormSchema } from '@openzeppelin/contracts-ui-builder-types';
+import {
+  Ecosystem,
+  NetworkConfig,
+  RenderFormSchema,
+} from '@openzeppelin/contracts-ui-builder-types';
 import type { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 
 import { adapterPackageMap } from '../../core/ecosystemManager';

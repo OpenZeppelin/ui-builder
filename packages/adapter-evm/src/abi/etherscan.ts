@@ -1,5 +1,5 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ContractSchema, EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { resolveExplorerConfig } from '../configuration/explorer';
 import type { AbiItem } from '../types';

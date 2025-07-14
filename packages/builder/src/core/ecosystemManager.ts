@@ -1,4 +1,3 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   AdapterConfig,
   ContractAdapter,
@@ -9,6 +8,7 @@ import type {
   SolanaNetworkConfig,
   StellarNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;

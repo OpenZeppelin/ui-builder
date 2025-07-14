@@ -1,8 +1,8 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import type { TransactionReceipt, WalletClient } from 'viem';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { WriteContractParameters } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';

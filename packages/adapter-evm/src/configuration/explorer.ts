@@ -1,12 +1,12 @@
 import {
-  appConfigService,
-  userExplorerConfigService,
-} from '@openzeppelin/contracts-ui-builder-utils';
-import {
   EvmNetworkConfig,
   NetworkConfig,
   UserExplorerConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import {
+  appConfigService,
+  userExplorerConfigService,
+} from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
 

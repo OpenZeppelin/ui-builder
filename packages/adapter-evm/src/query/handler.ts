@@ -1,11 +1,11 @@
 import { type Chain, type PublicClient, createPublicClient, http, isAddress } from 'viem';
 
-import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   ContractSchema,
   EvmNetworkConfig,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';

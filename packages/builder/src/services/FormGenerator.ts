@@ -6,7 +6,6 @@
  */
 import { startCase } from 'lodash';
 
-import { generateId } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   CommonFormProperties,
   ContractAdapter,
@@ -16,6 +15,7 @@ import {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { generateId } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 

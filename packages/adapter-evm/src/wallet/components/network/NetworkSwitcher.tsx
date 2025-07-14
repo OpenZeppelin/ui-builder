@@ -3,6 +3,7 @@ import type { Chain } from 'viem';
 
 import React from 'react';
 
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 import {
   Select,
   SelectContent,
@@ -16,7 +17,6 @@ import {
   useDerivedChainInfo,
   useDerivedSwitchChainStatus,
 } from '@openzeppelin/transaction-form-react-core';
-import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

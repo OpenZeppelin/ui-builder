@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 import {
   Button,
   Dialog,
@@ -12,7 +13,6 @@ import {
   useDerivedAccountStatus,
   useDerivedConnectStatus,
 } from '@openzeppelin/transaction-form-react-core';
-import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 
 import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';

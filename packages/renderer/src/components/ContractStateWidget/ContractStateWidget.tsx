@@ -2,6 +2,11 @@ import { FileText, Loader2, Minimize2 } from 'lucide-react';
 
 import { JSX, useEffect, useState } from 'react';
 
+import type {
+  ContractFunction,
+  ContractSchema,
+  FullContractAdapter,
+} from '@openzeppelin/contracts-ui-builder-types';
 import {
   Button,
   Card,
@@ -9,11 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@openzeppelin/contracts-ui-builder-ui';
-import type {
-  ContractFunction,
-  ContractSchema,
-  FullContractAdapter,
-} from '@openzeppelin/contracts-ui-builder-types';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 

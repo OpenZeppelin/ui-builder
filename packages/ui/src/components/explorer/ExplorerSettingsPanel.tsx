@@ -5,8 +5,8 @@ import { AlertTriangle, CheckCircle2, Info, Loader2, XCircle } from 'lucide-reac
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

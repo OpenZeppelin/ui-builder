@@ -1,5 +1,9 @@
+import {
+  ContractAdapter,
+  Ecosystem,
+  NetworkConfig,
+} from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { getAdapter, getNetworkById, getNetworksByEcosystem } from '../ecosystemManager';
 

@@ -2,6 +2,11 @@ import { RefreshCw } from 'lucide-react';
 
 import { JSX, useCallback, useEffect, useState } from 'react';
 
+import type {
+  ContractAdapter,
+  ContractFunction,
+  ContractSchema,
+} from '@openzeppelin/contracts-ui-builder-types';
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import {
   type RpcConfigEvent,
@@ -10,11 +15,6 @@ import {
   rateLimitedBatch,
   userRpcConfigService,
 } from '@openzeppelin/contracts-ui-builder-utils';
-import type {
-  ContractAdapter,
-  ContractFunction,
-  ContractSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
 
 import { FunctionResult } from './FunctionResult';
 

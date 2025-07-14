@@ -3,8 +3,8 @@ import { capitalize } from 'lodash';
 
 import React from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
 

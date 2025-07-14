@@ -2,9 +2,9 @@ import { Loader2, Wallet } from 'lucide-react';
 
 import React from 'react';
 
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { useAccount, useConnect } from '../../hooks/facade-hooks';
 import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';

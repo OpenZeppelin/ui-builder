@@ -1,4 +1,3 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   EoaExecutionConfig,
   ExecutionConfig,
@@ -6,6 +5,7 @@ import type {
   MultisigExecutionConfig,
   RelayerExecutionConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
 

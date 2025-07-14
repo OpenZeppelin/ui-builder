@@ -1,12 +1,12 @@
 import { startCase } from 'lodash';
 
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   FieldType,
   FieldValidation,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 

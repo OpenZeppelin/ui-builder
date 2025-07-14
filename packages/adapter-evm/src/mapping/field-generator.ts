@@ -1,6 +1,5 @@
 import { startCase } from 'lodash';
 
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   FieldType,
   FieldValidation,
@@ -8,6 +7,7 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
 

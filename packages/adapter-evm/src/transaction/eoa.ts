@@ -1,12 +1,12 @@
 import { GetAccountReturnType } from '@wagmi/core';
 import { WalletClient } from 'viem';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   EoaExecutionConfig,
   ExecutionConfig,
   TransactionStatusUpdate,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { WriteContractParameters } from '../types';
 import { validateEoaConfig } from '../validation';

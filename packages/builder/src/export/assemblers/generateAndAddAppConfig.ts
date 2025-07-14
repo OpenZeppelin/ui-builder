@@ -1,9 +1,9 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   GlobalServiceConfigs,
   NetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import type { TemplateProcessor } from '../generators/TemplateProcessor';

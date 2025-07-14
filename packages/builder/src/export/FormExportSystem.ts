@@ -6,12 +6,12 @@
  * and ZipGenerator to produce a downloadable ZIP archive containing a
  * standalone form project.
  */
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   ContractAdapter,
   ContractSchema,
   NetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getAdapter } from '../core/ecosystemManager';
 import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';

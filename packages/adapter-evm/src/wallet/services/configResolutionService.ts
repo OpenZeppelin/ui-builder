@@ -1,5 +1,8 @@
+import type {
+  NativeConfigLoader,
+  UiKitConfiguration,
+} from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { NativeConfigLoader, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 import { resolveAndInitializeKitConfig } from '../utils';
 

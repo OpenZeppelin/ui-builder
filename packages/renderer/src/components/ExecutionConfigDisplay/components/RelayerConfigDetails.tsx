@@ -2,11 +2,11 @@ import { Network, Shield } from 'lucide-react';
 
 import React from 'react';
 
-import { RelayerDetailsCard } from '@openzeppelin/contracts-ui-builder-ui';
 import type {
   RelayerDetailsRich,
   RelayerExecutionConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { RelayerDetailsCard } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { ExecutionConfigCard } from './ExecutionConfigCard';
 

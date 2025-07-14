@@ -2,9 +2,9 @@ import { AlertCircle, Info, Key, Shield, User, Users } from 'lucide-react';
 
 import React from 'react';
 
+import type { ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { DialogTrigger } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 interface ExecutionMethodTriggerProps {
   executionConfig: ExecutionConfig;

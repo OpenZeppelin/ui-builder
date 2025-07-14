@@ -1,11 +1,11 @@
 import { isAddress } from 'viem';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   ContractSchema,
   EvmNetworkConfig,
   FormValues,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { AbiItem } from '../types';
 
