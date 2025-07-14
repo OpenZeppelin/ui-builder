@@ -27,7 +27,7 @@ export const Header = () => {
 
           {/* GitHub Link */}
           <a
-            href="https://github.com/OpenZeppelin/transaction-form-builder"
+            href="https://github.com/OpenZeppelin/contracts-ui-builder"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground transition-colors"

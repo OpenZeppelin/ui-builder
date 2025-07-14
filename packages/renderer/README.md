@@ -1,7 +1,7 @@
 # Renderer Package
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
-[![License](https://img.shields.io/npm/l/@openzeppelin/contracts-ui-builder-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
+[![License](https://img.shields.io/npm/l/@openzeppelin/contracts-ui-builder-renderer.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE)
 
 A specialized library for rendering customizable transaction form and other components for blockchain applications. Part of the Transaction Form Builder ecosystem.
 
@@ -368,4 +368,4 @@ Breaking changes should be indicated by adding `BREAKING CHANGE:` in the commit 
 
 ## License
 
-[MIT](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE) © OpenZeppelin
+[MIT](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE) © OpenZeppelin

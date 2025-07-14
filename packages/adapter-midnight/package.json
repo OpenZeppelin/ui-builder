@@ -11,7 +11,7 @@
     "midnight"
   ],
   "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
-  "homepage": "https://github.com/OpenZeppelin/transaction-form-builder#readme",
+  "homepage": "https://github.com/OpenZeppelin/contracts-ui-builder#readme",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -26,11 +26,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder.git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder.git",
     "directory": "packages/adapter-midnight"
   },
   "bugs": {
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder/issues"
   },
   "scripts": {
     "build": "tsup",

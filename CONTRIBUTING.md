@@ -42,10 +42,10 @@ Key steps include:
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/transaction-form-builder.git
+git clone https://github.com/your-username/contracts-ui-builder.git
 
 # Navigate to the project directory
-cd transaction-form-builder
+cd contracts-ui-builder
 
 # Install dependencies
 pnpm install

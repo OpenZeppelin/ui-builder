@@ -6,14 +6,14 @@
 
 This project is currently in development.
 
-[![CI](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/ci.yml)
-[![Coverage](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/coverage.yml)
-[![codecov](https://codecov.io/gh/OpenZeppelin/transaction-form-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/transaction-form-builder)
-[![Publish](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/publish.yml)
-[![Security](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/security.yml)
-[![Dependencies](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependencies.yml)
-[![Dependency Review](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/dependency-review.yml)
-[![Update Dependencies](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/transaction-form-builder/actions/workflows/update-dependencies.yml)
+[![CI](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml)
+[![Coverage](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder)
+[![Publish](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml)
+[![Security](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/security.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/security.yml)
+[![Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml)
+[![Dependency Review](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml)
+[![Update Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml)
 
 <!-- TODO: Add license badge when we have a license -->
 <!-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) -->
@@ -27,7 +27,7 @@ This project is currently in development.
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/transaction-form-builder/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/contracts-ui-builder/maintainability)
 
 ## Monorepo Structure
 
@@ -131,8 +131,8 @@ For more details, see the [Styles README](./packages/styles/README.md).
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/OpenZeppelin/transaction-form-builder.git
-   cd transaction-form-builder
+   git clone https://github.com/OpenZeppelin/contracts-ui-builder.git
+   cd contracts-ui-builder
    ```
 
 2. Install dependencies:
@@ -196,7 +196,7 @@ For a consistent and reliable development environment, it is highly recommended 
 ## Project Structure
 
 ```
-transaction-form-builder/
+contracts-ui-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
 ├── .husky/              # Git hooks

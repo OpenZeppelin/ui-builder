@@ -192,4 +192,4 @@ pnpm test
 
 ## License
 
-[MIT](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE) © OpenZeppelin
+[MIT](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE) © OpenZeppelin
