@@ -1,4 +1,4 @@
-# Stellar Adapter (`@openzeppelin/transaction-form-adapter-stellar`)
+# Stellar Adapter (`@openzeppelin/contracts-ui-builder-adapter-stellar`)
 
 This package provides the `ContractAdapter` implementation for the Stellar network for the Transaction Form Builder.
 
@@ -20,9 +20,9 @@ It is intended to be responsible for:
 Once fully implemented, the `StellarAdapter` class will be instantiated with a specific `StellarNetworkConfig` object:
 
 ```typescript
-// Example: import { stellarPubnet } from '@openzeppelin/transaction-form-adapter-stellar';
+// Example: import { stellarPubnet } from '@openzeppelin/contracts-ui-builder-adapter-stellar';
+import { StellarAdapter } from '@openzeppelin/contracts-ui-builder-adapter-stellar';
 import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { StellarAdapter } from '@openzeppelin/transaction-form-adapter-stellar';
 
 // For type access if needed
 

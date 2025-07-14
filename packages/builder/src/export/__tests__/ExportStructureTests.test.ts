@@ -113,7 +113,9 @@ describe('Export Structure Tests', () => {
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      expect(packageJson.dependencies).toHaveProperty(
+        '@openzeppelin/contracts-ui-builder-adapter-evm'
+      );
     });
 
     it('should include correct dependencies for Solana exports', async () => {
@@ -123,7 +125,7 @@ describe('Export Structure Tests', () => {
       const packageJson = JSON.parse(files['package.json']);
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-solana'
+        '@openzeppelin/contracts-ui-builder-adapter-solana'
       );
     });
 

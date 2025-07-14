@@ -248,10 +248,10 @@ function exportFormSimple(options) {
         const packageJsonPath = path.join(extractDir, 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const packageOverrides = {
-          '@openzeppelin/transaction-form-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
-          '@openzeppelin/transaction-form-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
-          '@openzeppelin/transaction-form-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
-          '@openzeppelin/transaction-form-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
+          '@openzeppelin/contracts-ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
+          '@openzeppelin/contracts-ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
+          '@openzeppelin/contracts-ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          '@openzeppelin/contracts-ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
           '@openzeppelin/contracts-ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
           '@openzeppelin/contracts-ui-builder-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/contracts-ui-builder-types': `file:${path.join(monorepoRoot, 'packages/types')}`,

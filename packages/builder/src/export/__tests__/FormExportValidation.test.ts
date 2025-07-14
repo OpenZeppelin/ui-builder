@@ -57,8 +57,8 @@ describe('FormExportValidation', () => {
               return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
             if (!deps['@openzeppelin/contracts-ui-builder-types'])
               return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
-            if (!deps['@openzeppelin/transaction-form-adapter-evm'])
-              return 'Missing @openzeppelin/transaction-form-adapter-evm dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-adapter-evm'])
+              return 'Missing @openzeppelin/contracts-ui-builder-adapter-evm dependency';
             return true;
           } catch (e) {
             return `Invalid JSON in package.json: ${String(e)}`;
@@ -83,7 +83,9 @@ describe('FormExportValidation', () => {
     const packageJson = JSON.parse(files['package.json']);
     expect(packageJson).toHaveProperty('name');
     expect(packageJson).toHaveProperty('dependencies');
-    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+    expect(packageJson.dependencies).toHaveProperty(
+      '@openzeppelin/contracts-ui-builder-adapter-evm'
+    );
     expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
   });
 
@@ -131,8 +133,8 @@ describe('FormExportValidation', () => {
               return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
             if (!deps['@openzeppelin/contracts-ui-builder-types'])
               return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
-            if (!deps['@openzeppelin/transaction-form-adapter-solana'])
-              return 'Missing @openzeppelin/transaction-form-adapter-solana dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-adapter-solana'])
+              return 'Missing @openzeppelin/contracts-ui-builder-adapter-solana dependency';
             return true;
           } catch (e) {
             return `Invalid JSON in package.json: ${String(e)}`;

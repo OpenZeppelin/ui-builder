@@ -474,7 +474,7 @@ To add support for a new blockchain ecosystem:
 
 1.  **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
 2.  **Define `package.json`**:
-    - Set the package name (e.g., `@openzeppelin/transaction-form-adapter-sui`).
+    - Set the package name (e.g., `@openzeppelin/contracts-ui-builder-adapter-sui`).
     - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
     - Add any chain-specific SDKs or libraries required by the adapter.
     - Include standard build scripts (refer to existing adapter packages).
@@ -492,7 +492,7 @@ To add support for a new blockchain ecosystem:
 6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
 7.  **Register Ecosystem in Builder**:
     - Open `packages/builder/src/core/ecosystemManager.ts`.
-    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/transaction-form-adapter-sui';`).
+    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/contracts-ui-builder-adapter-sui';`).
     - Add a new entry to the `ecosystemRegistry` object. This entry defines:
       - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
       - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
@@ -500,7 +500,7 @@ To add support for a new blockchain ecosystem:
     - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
 8.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
 9.  **Build & Test**:
-    - Build the new adapter package (`pnpm --filter @openzeppelin/transaction-form-adapter-<chain-name> build`).
+    - Build the new adapter package (`pnpm --filter @openzeppelin/contracts-ui-builder-adapter-<chain-name> build`).
     - Add relevant unit/integration tests.
     - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
 
@@ -634,7 +634,7 @@ If this network is also to be a chain-switchable target within Wagmi (for the EV
 
 ### Midnight Wallet Integration
 
-The `@openzeppelin/transaction-form-adapter-midnight` package handles integration with the Midnight ecosystem, specifically the Lace wallet. Integrating with the Midnight wallet requires special handling due to its unique, non-blocking connection flow, which differs from many other wallet APIs.
+The `@openzeppelin/contracts-ui-builder-adapter-midnight` package handles integration with the Midnight ecosystem, specifically the Lace wallet. Integrating with the Midnight wallet requires special handling due to its unique, non-blocking connection flow, which differs from many other wallet APIs.
 
 Key characteristics of the Midnight wallet integration:
 
@@ -646,7 +646,7 @@ This implementation ensures a robust and user-friendly connection experience des
 
 ### Advanced EVM Wallet Integration & UI Customization
 
-The `@openzeppelin/transaction-form-adapter-evm` package offers robust integration with EVM wallets, leveraging the `wagmi` library. It features an enhanced architecture for UI kit integration, providing:
+The `@openzeppelin/contracts-ui-builder-adapter-evm` package offers robust integration with EVM wallets, leveraging the `wagmi` library. It features an enhanced architecture for UI kit integration, providing:
 
 - **Stable UI Rendering**: A new internal architecture (`EvmUiKitManager` and `EvmWalletUiRoot`) significantly reduces UI flickering during network switches when using supported UI kits.
 - **Support for UI Kits (e.g., RainbowKit)**: Easily integrate popular Wagmi-based UI kits like RainbowKit.

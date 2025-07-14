@@ -17,7 +17,7 @@
  * ```tsx
  * import React from 'react';
  * import ReactDOM from 'react-dom/client';
- * import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm'; // Example
+ * import { EvmAdapter } from '@openzeppelin/contracts-ui-builder-adapter-evm'; // Example
  * import { App } from './App';
  * import './styles.css';
  *

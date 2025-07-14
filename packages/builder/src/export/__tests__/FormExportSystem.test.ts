@@ -105,7 +105,7 @@ describe('FormExportSystem', () => {
             '@openzeppelin/contracts-ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
             '@openzeppelin/contracts-ui-builder-types': 'workspace:*', // Use consistent placeholder version
           };
-          const adapterDep = `@openzeppelin/transaction-form-adapter-${ecosystem}`;
+          const adapterDep = `@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
         }),
       updatePackageJson: vi
@@ -206,7 +206,7 @@ describe('FormExportSystem', () => {
       // Check PRESENCE only, as applyVersioningStrategy might change value
       expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
       expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm');
       // Check a base dependency from the mock config is still present
       expect(result.dependencies).toHaveProperty('react', '^19.0.0');
     });
@@ -239,11 +239,11 @@ describe('FormExportSystem', () => {
         funcId
       );
       expect(solanaResult.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-solana',
+        '@openzeppelin/contracts-ui-builder-adapter-solana',
         'workspace:*'
       );
       expect(solanaResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-evm'
+        '@openzeppelin/contracts-ui-builder-adapter-evm'
       );
 
       // Test with EVM config (use the mock defined at top level)
@@ -254,11 +254,11 @@ describe('FormExportSystem', () => {
         funcId
       );
       expect(evmResult.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-evm',
+        '@openzeppelin/contracts-ui-builder-adapter-evm',
         'workspace:*'
       );
       expect(evmResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-solana'
+        '@openzeppelin/contracts-ui-builder-adapter-solana'
       );
     });
 

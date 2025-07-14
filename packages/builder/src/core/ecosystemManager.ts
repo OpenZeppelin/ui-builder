@@ -38,33 +38,33 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
   evm: {
     networksExportName: 'evmNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/transaction-form-adapter-evm'))
+      (await import('@openzeppelin/contracts-ui-builder-adapter-evm'))
         .EvmAdapter as EvmAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-evm',
+    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-evm',
     adapterConfigExportName: 'evmAdapterConfig',
   },
   solana: {
     networksExportName: 'solanaNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/transaction-form-adapter-solana'))
+      (await import('@openzeppelin/contracts-ui-builder-adapter-solana'))
         .SolanaAdapter as SolanaAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-solana',
+    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-solana',
     adapterConfigExportName: 'solanaAdapterConfig',
   },
   stellar: {
     networksExportName: 'stellarNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/transaction-form-adapter-stellar'))
+      (await import('@openzeppelin/contracts-ui-builder-adapter-stellar'))
         .StellarAdapter as StellarAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-stellar',
+    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-stellar',
     adapterConfigExportName: 'stellarAdapterConfig',
   },
   midnight: {
     networksExportName: 'midnightNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/transaction-form-adapter-midnight'))
+      (await import('@openzeppelin/contracts-ui-builder-adapter-midnight'))
         .MidnightAdapter as MidnightAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/transaction-form-adapter-midnight',
+    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-midnight',
     adapterConfigExportName: 'midnightAdapterConfig',
   },
 };
@@ -76,13 +76,13 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
   // This robust switch is good for Vite compatibility
   switch (ecosystem) {
     case 'evm':
-      return import('@openzeppelin/transaction-form-adapter-evm');
+      return import('@openzeppelin/contracts-ui-builder-adapter-evm');
     case 'solana':
-      return import('@openzeppelin/transaction-form-adapter-solana');
+      return import('@openzeppelin/contracts-ui-builder-adapter-solana');
     case 'stellar':
-      return import('@openzeppelin/transaction-form-adapter-stellar');
+      return import('@openzeppelin/contracts-ui-builder-adapter-stellar');
     case 'midnight':
-      return import('@openzeppelin/transaction-form-adapter-midnight');
+      return import('@openzeppelin/contracts-ui-builder-adapter-midnight');
     default:
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
@@ -243,13 +243,13 @@ export function getAdapterConfigLoader(
   // the switch uses static paths for Vite compatibility.
   switch (ecosystem) {
     case 'evm':
-      return () => import('@openzeppelin/transaction-form-adapter-evm');
+      return () => import('@openzeppelin/contracts-ui-builder-adapter-evm');
     case 'solana':
-      return () => import('@openzeppelin/transaction-form-adapter-solana');
+      return () => import('@openzeppelin/contracts-ui-builder-adapter-solana');
     case 'stellar':
-      return () => import('@openzeppelin/transaction-form-adapter-stellar');
+      return () => import('@openzeppelin/contracts-ui-builder-adapter-stellar');
     case 'midnight':
-      return () => import('@openzeppelin/transaction-form-adapter-midnight');
+      return () => import('@openzeppelin/contracts-ui-builder-adapter-midnight');
     default:
       return undefined;
   }
@@ -304,8 +304,8 @@ export async function getAdapter(networkConfigInput: NetworkConfig): Promise<Con
 
 // --- Adapter Package Name Map ---
 export const adapterPackageMap: Record<Ecosystem, string> = {
-  evm: '@openzeppelin/transaction-form-adapter-evm',
-  solana: '@openzeppelin/transaction-form-adapter-solana',
-  stellar: '@openzeppelin/transaction-form-adapter-stellar',
-  midnight: '@openzeppelin/transaction-form-adapter-midnight',
+  evm: '@openzeppelin/contracts-ui-builder-adapter-evm',
+  solana: '@openzeppelin/contracts-ui-builder-adapter-solana',
+  stellar: '@openzeppelin/contracts-ui-builder-adapter-stellar',
+  midnight: '@openzeppelin/contracts-ui-builder-adapter-midnight',
 };

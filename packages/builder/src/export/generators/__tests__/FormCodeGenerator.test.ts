@@ -16,8 +16,8 @@ import { FormCodeGenerator } from '../FormCodeGenerator';
 // Mock adapterRegistry before other imports that might use it indirectly
 vi.mock('../../../core/adapterRegistry', () => {
   const adapterPackageMap = {
-    evm: '@openzeppelin/transaction-form-adapter-evm',
-    solana: '@openzeppelin/transaction-form-adapter-solana',
+    evm: '@openzeppelin/contracts-ui-builder-adapter-evm',
+    solana: '@openzeppelin/contracts-ui-builder-adapter-solana',
     // Add other real chains if needed by tests
   };
 
@@ -49,7 +49,7 @@ vi.mock('../../PackageManager', () => {
             ...(packageJson.dependencies || {}),
             '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
             '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-            [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
+            [`@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
         }
@@ -60,7 +60,7 @@ vi.mock('../../PackageManager', () => {
         return {
           '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
           '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-          [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1',
+          [`@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
     getDevDependencies: vi
@@ -109,7 +109,8 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
                 ...(packageJson.dependencies || {}),
                 '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
                 '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-                [`@openzeppelin/transaction-form-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
+                [`@openzeppelin/contracts-ui-builder-adapter-${options.ecosystem || 'evm'}`]:
+                  '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);
             }
@@ -214,7 +215,7 @@ describe('FormCodeGenerator', () => {
         'form-component',
         expect.objectContaining({
           adapterClassName: 'EvmAdapter',
-          adapterPackageName: '@openzeppelin/transaction-form-adapter-evm',
+          adapterPackageName: '@openzeppelin/contracts-ui-builder-adapter-evm',
           networkConfigImportName: 'mockEvmNetworkConfig', // From the mock config exportConstName
           functionId: 'testFunction',
           formConfigJSON: expect.any(String),

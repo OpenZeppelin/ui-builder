@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/transaction-form-adapter-evm",
+  "name": "@openzeppelin/contracts-ui-builder-adapter-evm",
   "version": "1.18.0",
   "private": false,
   "description": "EVM Adapter for Transaction Form Builder",

@@ -15,7 +15,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 // Import ecosystemManager utils
 import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';
 // Import others as needed for different ecosystem tests
-// import { solanaDevnet } from '@openzeppelin/transaction-form-adapter-solana';
+// import { solanaDevnet } from '@openzeppelin/contracts-ui-builder-adapter-solana';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { ZipProgress } from '../ZipGenerator';

@@ -1,4 +1,4 @@
-# EVM Adapter (`@openzeppelin/transaction-form-adapter-evm`)
+# EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
 
 This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Transaction Form Builder.
 
@@ -78,7 +78,7 @@ adapter-evm/
 The `EvmAdapter` class is instantiated with a specific `EvmNetworkConfig` object, making it aware of the target network from its creation:
 
 ```typescript
-import { EvmAdapter, ethereumSepolia } from '@openzeppelin/transaction-form-adapter-evm';
+import { EvmAdapter, ethereumSepolia } from '@openzeppelin/contracts-ui-builder-adapter-evm';
 
 // Or any other exported EvmNetworkConfig
 

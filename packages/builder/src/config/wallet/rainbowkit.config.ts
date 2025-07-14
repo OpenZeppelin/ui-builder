@@ -2,7 +2,7 @@
 import { type RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 // Import the custom configuration types from the EVM adapter
-import type { RainbowKitCustomizations } from '@openzeppelin/transaction-form-adapter-evm';
+import type { RainbowKitCustomizations } from '@openzeppelin/contracts-ui-builder-adapter-evm';
 
 // For WalletConnect project ID, appName, wallets, ssr options for getDefaultConfig
 // RainbowKit doesn't export a single neat type for all getDefaultConfig options other than `chains` and `transports`.

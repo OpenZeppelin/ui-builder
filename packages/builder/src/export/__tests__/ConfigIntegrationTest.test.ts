@@ -90,8 +90,11 @@ describe('PackageManager Integration Tests', () => {
       expect(evmDeps).toHaveProperty('react', '^19.0.0'); // From mock renderer config
       expect(evmDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer', 'workspace:*'); // Added by PM
       expect(evmDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*'); // Added by PM
-      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm', 'workspace:*'); // Added by PM
-      expect(evmDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
+      expect(evmDeps).toHaveProperty(
+        '@openzeppelin/contracts-ui-builder-adapter-evm',
+        'workspace:*'
+      ); // Added by PM
+      expect(evmDeps).not.toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-solana');
 
       // Solana
       const solanaDeps = await packageManager.getDependencies(formConfig, 'solana');
@@ -103,10 +106,10 @@ describe('PackageManager Integration Tests', () => {
       ); // Added by PM
       expect(solanaDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*'); // Added by PM
       expect(solanaDeps).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-solana',
+        '@openzeppelin/contracts-ui-builder-adapter-solana',
         'workspace:*'
       ); // Added by PM
-      expect(solanaDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      expect(solanaDeps).not.toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm');
     });
 
     it('should include field-specific dependencies based on form fields', async () => {
@@ -134,7 +137,7 @@ describe('PackageManager Integration Tests', () => {
 
       // Core/Adapter checks remain - Check for PRESENCE and workspace:*
       expect(advancedDeps).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-evm',
+        '@openzeppelin/contracts-ui-builder-adapter-evm',
         'workspace:*'
       );
       expect(mixedDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*');
@@ -147,7 +150,7 @@ describe('PackageManager Integration Tests', () => {
 
       expect(deps['@openzeppelin/contracts-ui-builder-renderer']).toBe('workspace:*'); // Added by PM
       expect(deps['@openzeppelin/contracts-ui-builder-types']).toBe('workspace:*'); // Added by PM
-      expect(deps['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*'); // Added by PM
+      expect(deps['@openzeppelin/contracts-ui-builder-adapter-evm']).toBe('workspace:*'); // Added by PM
     });
   });
 
@@ -187,7 +190,7 @@ describe('PackageManager Integration Tests', () => {
       expect(result.dependencies).toHaveProperty('date-picker', '^2.0.0'); // From field
       // Check for caret versions (default 'production' env applies versioning)
       expect(result.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-evm',
+        '@openzeppelin/contracts-ui-builder-adapter-evm',
         expect.stringMatching(/^\^/)
       );
       expect(result.dependencies).toHaveProperty(

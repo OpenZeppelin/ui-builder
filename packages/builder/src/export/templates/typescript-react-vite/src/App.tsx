@@ -15,7 +15,7 @@
  *
  * Example Snippet (Generated Content - simplified):
  * ```tsx
- * import { EvmAdapter } from '@openzeppelin/transaction-form-adapter-evm'; // Example
+ * import { EvmAdapter } from '@openzeppelin/contracts-ui-builder-adapter-evm'; // Example
  * import GeneratedForm from './components/GeneratedForm';
  *
  * interface AppProps {

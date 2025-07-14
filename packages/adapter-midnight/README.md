@@ -1,4 +1,4 @@
-# Midnight Adapter (`@openzeppelin/transaction-form-adapter-midnight`)
+# Midnight Adapter (`@openzeppelin/contracts-ui-builder-adapter-midnight`)
 
 This package provides the `ContractAdapter` implementation for the Midnight Network for the Transaction Form Builder.
 
@@ -20,8 +20,8 @@ The `MidnightAdapter` is consumed by the `builder` application's `WalletStatePro
 
 ```typescript
 // In the builder application's adapter factory:
-import { MidnightAdapter } from '@openzeppelin/transaction-form-adapter-midnight';
-import { midnightTestnet } from '@openzeppelin/transaction-form-adapter-midnight';
+import { MidnightAdapter } from '@openzeppelin/contracts-ui-builder-adapter-midnight';
+import { midnightTestnet } from '@openzeppelin/contracts-ui-builder-adapter-midnight';
 
 const networkConfig = midnightTestnet;
 const midnightAdapter = new MidnightAdapter(networkConfig);

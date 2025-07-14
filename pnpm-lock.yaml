@@ -266,6 +266,18 @@ importers:
       '@icons-pack/react-simple-icons':
         specifier: ^12.9.0
         version: 12.9.0(react@19.1.0)
+      '@openzeppelin/contracts-ui-builder-adapter-evm':
+        specifier: workspace:*
+        version: link:../adapter-evm
+      '@openzeppelin/contracts-ui-builder-adapter-midnight':
+        specifier: workspace:*
+        version: link:../adapter-midnight
+      '@openzeppelin/contracts-ui-builder-adapter-solana':
+        specifier: workspace:*
+        version: link:../adapter-solana
+      '@openzeppelin/contracts-ui-builder-adapter-stellar':
+        specifier: workspace:*
+        version: link:../adapter-stellar
       '@openzeppelin/contracts-ui-builder-react-core':
         specifier: workspace:*
         version: link:../react-core
@@ -284,18 +296,6 @@ importers:
       '@openzeppelin/contracts-ui-builder-utils':
         specifier: workspace:^
         version: link:../utils
-      '@openzeppelin/transaction-form-adapter-evm':
-        specifier: workspace:*
-        version: link:../adapter-evm
-      '@openzeppelin/transaction-form-adapter-midnight':
-        specifier: workspace:*
-        version: link:../adapter-midnight
-      '@openzeppelin/transaction-form-adapter-solana':
-        specifier: workspace:*
-        version: link:../adapter-solana
-      '@openzeppelin/transaction-form-adapter-stellar':
-        specifier: workspace:*
-        version: link:../adapter-stellar
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

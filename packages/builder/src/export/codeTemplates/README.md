@@ -144,7 +144,7 @@ Generates the main `GeneratedForm.tsx` component in the exported application. Th
 
 **Key Injections:**
 
-- Adapter import path and class name (e.g., `EvmAdapter` from `@openzeppelin/transaction-form-adapter-evm`).
+- Adapter import path and class name (e.g., `EvmAdapter` from `@openzeppelin/contracts-ui-builder-adapter-evm`).
 - `RenderFormSchema` JSON (`formSchema`).
 - `ContractSchema` JSON (`contractSchema`).
 - `ExecutionConfig` JSON (`executionConfig`).
@@ -159,7 +159,7 @@ The `processTemplate` method uses a simple `@@variable-name@@` syntax. The `Temp
 
 **Commonly used variables:**
 
-- `adapter-package-name`: e.g., `@openzeppelin/transaction-form-adapter-evm`
+- `adapter-package-name`: e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`
 - `adapter-class-name`: e.g., `EvmAdapter`
 - `chain-name`: e.g., `Ethereum`
 - `default-network-json`: JSON string of the default `NetworkConfig` for the selected chain.
@@ -183,7 +183,7 @@ This method also cleans up template comments and formats the code using Prettier
 
 When using the `generate` method of the `FormCodeGenerator` class, you can provide the following parameters in the `options` object. These are used to inject data into the code templates.
 
-- `adapterPackageName`: The npm package name of the adapter (e.g., `@openzeppelin/transaction-form-adapter-evm`).
+- `adapterPackageName`: The npm package name of the adapter (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`).
 - `adapterClassName`: The class name of the adapter (e.g., `EvmAdapter`).
 - `chainName`: The user-friendly name of the chain (e.g., `Ethereum Mainnet`).
 - `defaultNetworkJson`: A JSON string representing the default `NetworkConfig` for the selected chain.

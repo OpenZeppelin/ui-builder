@@ -110,7 +110,7 @@ const networkConfig: EvmNetworkConfig = {
 };
 
 // Simple adapter implementation for demonstration.
-// Real applications use adapters like @openzeppelin/transaction-form-adapter-evm
+// Real applications use adapters like @openzeppelin/contracts-ui-builder-adapter-evm
 // crucially, the adapter instance should be configured for the specific networkConfig
 const adapter: ContractAdapter = {
   // Adapter methods should use the networkConfig passed during instantiation

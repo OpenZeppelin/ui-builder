@@ -5,10 +5,10 @@ const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export
 
 // List of internal packages to update
 const packagesToUpdate = [
-  '@openzeppelin/transaction-form-adapter-evm',
-  '@openzeppelin/transaction-form-adapter-midnight',
-  '@openzeppelin/transaction-form-adapter-solana',
-  '@openzeppelin/transaction-form-adapter-stellar',
+  '@openzeppelin/contracts-ui-builder-adapter-evm',
+  '@openzeppelin/contracts-ui-builder-adapter-midnight',
+  '@openzeppelin/contracts-ui-builder-adapter-solana',
+  '@openzeppelin/contracts-ui-builder-adapter-stellar',
   '@openzeppelin/contracts-ui-builder-react-core',
   '@openzeppelin/contracts-ui-builder-renderer',
   '@openzeppelin/contracts-ui-builder-types',
@@ -25,7 +25,7 @@ const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
     // e.g., '@openzeppelin/contracts-ui-builder-types' -> 'types'
-    // e.g., '@openzeppelin/transaction-form-adapter-evm' -> 'adapter-evm'
+    // e.g., '@openzeppelin/contracts-ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
     let packageDirName = nameWithoutScope.replace('transaction-form-', '');
 

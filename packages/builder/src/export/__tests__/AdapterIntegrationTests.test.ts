@@ -73,7 +73,9 @@ describe('Adapter Integration Tests', () => {
 
       // Check required packages are present
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
+      expect(packageJson.dependencies).toHaveProperty(
+        '@openzeppelin/contracts-ui-builder-adapter-evm'
+      );
 
       // Optional: Check if specific SDKs (like ethers) are NOT directly listed if they are peer/sub-dependencies
       // expect(packageJson.dependencies).not.toHaveProperty('ethers');
@@ -85,7 +87,7 @@ describe('Adapter Integration Tests', () => {
       // Check required packages are present
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-adapter-solana'
+        '@openzeppelin/contracts-ui-builder-adapter-solana'
       );
 
       // Optional: Check specific SDKs are NOT directly listed
