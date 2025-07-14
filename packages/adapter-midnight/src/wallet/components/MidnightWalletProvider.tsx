@@ -29,7 +29,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { EcosystemReactUiProviderProps } from '@openzeppelin/transaction-form-types';
+import type { EcosystemReactUiProviderProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { MidnightWalletContext } from '../context/MidnightWalletContext';
 import * as implementation from '../midnight-implementation';

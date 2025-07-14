@@ -43,7 +43,7 @@ builder/
 This package relies on:
 
 - **@openzeppelin/transaction-form-react-core**: For core React context providers and hooks (`AdapterProvider`, `WalletStateProvider`, `useWalletState`).
-- **@openzeppelin/transaction-form-types**: Shared type definitions for contracts, adapters, and forms.
+- **@openzeppelin/contracts-ui-builder-types**: Shared type definitions for contracts, adapters, and forms.
 - **@openzeppelin/contracts-ui-builder-renderer**: The shared library for rendering the final transaction form and other components.
 - **@openzeppelin/contracts-ui-builder-ui**: The shared library for all common UI and form field components.
 - **@openzeppelin/transaction-form-styles**: The centralized styling system.
@@ -63,7 +63,7 @@ For more details on the styling system, see the [Styles README](../styles/README
 
 ## Type System
 
-The builder package uses type definitions from the `@openzeppelin/transaction-form-types` package, which serves as the single source of truth for types used across the Contracts UI Builder ecosystem. These include:
+The builder package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the Contracts UI Builder ecosystem. These include:
 
 - **Contract Types**: Definitions for blockchain contracts and their schemas
 - **Adapter Types**: Interfaces for chain-specific adapters

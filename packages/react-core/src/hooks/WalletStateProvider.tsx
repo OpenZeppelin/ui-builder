@@ -8,7 +8,7 @@ import type {
   NativeConfigLoader,
   NetworkConfig,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 import { useAdapterContext } from './useAdapterContext';

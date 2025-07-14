@@ -13,7 +13,7 @@ import type {
   ContractFunction,
   ContractSchema,
   FullContractAdapter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 

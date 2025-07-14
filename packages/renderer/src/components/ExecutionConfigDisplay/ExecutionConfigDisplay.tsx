@@ -19,7 +19,7 @@ import type {
   ExecutionConfig,
   RelayerDetailsRich,
   RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { EoaConfigDetails } from './components/EoaConfigDetails';
 import { ExecutionMethodTrigger } from './components/ExecutionMethodTrigger';

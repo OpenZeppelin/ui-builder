@@ -5,7 +5,7 @@ import type {
   ExecutionMethodDetail,
   MultisigExecutionConfig,
   RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
 

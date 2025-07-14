@@ -14,7 +14,7 @@ import type {
   FormValues,
   FunctionParameter,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { createTransformForFieldType } from '../../../../renderer/dist';
 import { generateFieldsFromFunction } from '../../services/FormGenerator';

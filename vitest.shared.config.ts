@@ -7,13 +7,13 @@ export const sharedVitestConfig = defineConfig({
   optimizeDeps: {
     include: [
       '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/transaction-form-types',
+      '@openzeppelin/contracts-ui-builder-types',
     ],
   },
   ssr: {
     noExternal: [
       '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/transaction-form-types',
+      '@openzeppelin/contracts-ui-builder-types',
     ],
   },
   test: {

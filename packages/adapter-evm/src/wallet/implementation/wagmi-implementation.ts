@@ -21,7 +21,7 @@ import {
 import { type Chain, PublicClient, WalletClient, http } from 'viem';
 
 import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { Connector, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { Connector, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 import { evmNetworks } from '../../networks';
 import { getWagmiConfigForRainbowKit } from '../rainbowkit';

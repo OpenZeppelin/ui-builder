@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 

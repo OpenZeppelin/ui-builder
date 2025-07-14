@@ -6,7 +6,7 @@ import {
   EvmNetworkConfig,
   NetworkConfig,
   UserExplorerConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { isValidEvmAddress } from '../utils';
 

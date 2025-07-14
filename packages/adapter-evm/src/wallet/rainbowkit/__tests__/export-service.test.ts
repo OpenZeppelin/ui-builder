@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 import { generateRainbowKitExportables } from '../export-service';
 

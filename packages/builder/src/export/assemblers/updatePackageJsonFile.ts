@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';

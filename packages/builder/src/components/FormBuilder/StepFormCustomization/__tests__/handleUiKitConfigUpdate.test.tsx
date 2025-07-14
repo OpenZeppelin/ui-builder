@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 describe('handleUiKitConfigUpdate', () => {
   it('should only trigger runtime UI update when kitName or kitConfig changes', () => {

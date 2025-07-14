@@ -4,7 +4,7 @@ import React from 'react';
 
 import { DialogTrigger } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import type { ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 interface ExecutionMethodTriggerProps {
   executionConfig: ExecutionConfig;

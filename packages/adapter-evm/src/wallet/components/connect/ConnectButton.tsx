@@ -8,7 +8,7 @@ import {
   useDerivedAccountStatus,
   useDerivedConnectStatus,
 } from '@openzeppelin/transaction-form-react-core';
-import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

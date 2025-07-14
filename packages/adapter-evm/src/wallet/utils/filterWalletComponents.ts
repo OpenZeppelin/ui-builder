@@ -2,7 +2,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   EcosystemWalletComponents,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Filters a set of wallet components based on an exclusion list.

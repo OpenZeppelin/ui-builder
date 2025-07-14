@@ -5,7 +5,7 @@ import type {
   EcosystemSpecificReactHooks,
   NetworkConfig,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 export interface WalletStateContextValue {
   // Globally selected network state

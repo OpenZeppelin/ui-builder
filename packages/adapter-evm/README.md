@@ -4,7 +4,7 @@ This package provides the `ContractAdapter` implementation for EVM-compatible bl
 
 It is responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
 - Defining and exporting specific EVM network configurations (e.g., Ethereum Mainnet, Sepolia Testnet) as `EvmNetworkConfig` objects. These are located in `src/networks/` and include details like RPC URLs, Chain IDs, explorer URLs, and native currency information.
 - Loading contract ABIs (from JSON strings or via Etherscan, using the `apiUrl` from the provided `EvmNetworkConfig`).
 - Mapping EVM-specific data types to the form field types used by the form builder.

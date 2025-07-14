@@ -2,7 +2,7 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { useState } from 'react';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/index';
 

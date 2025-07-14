@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/transaction-form-types';
+import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
 import { UiKitSettings } from '../components/UiKitSettings';
 

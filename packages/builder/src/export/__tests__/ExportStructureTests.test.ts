@@ -4,7 +4,7 @@ import type {
   EvmNetworkConfig,
   NetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -112,7 +112,7 @@ describe('Export Structure Tests', () => {
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
     });
 
@@ -121,7 +121,7 @@ describe('Export Structure Tests', () => {
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana'
       );

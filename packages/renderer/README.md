@@ -9,33 +9,33 @@ A specialized library for rendering customizable transaction form and other comp
 
 ```bash
 # Using npm
-npm install @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
+npm install @openzeppelin/contracts-ui-builder-renderer @openzeppelin/contracts-ui-builder-types
 
 # Using yarn
-yarn add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
+yarn add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/contracts-ui-builder-types
 
 # Using pnpm
-pnpm add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-form-types
+pnpm add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/contracts-ui-builder-types
 ```
 
 ## Features
 
 - Lightweight app rendering components
 - Framework-agnostic design
-- TypeScript support with full type definitions (via @openzeppelin/transaction-form-types)
+- TypeScript support with full type definitions (via @openzeppelin/contracts-ui-builder-types)
 - Support for both ESM and CommonJS environments
 - Customizable styling options
 - Optimized for blockchain transaction data
 
 ## Type System
 
-This package uses type definitions from the `@openzeppelin/transaction-form-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These types include:
+This package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the Transaction Form Builder ecosystem. These types include:
 
 - Form field and component definitions
 - Layout and validation schemas
 - Adapter interfaces for blockchain interactions
 
-When using this package, you should also install `@openzeppelin/transaction-form-types` to ensure proper type checking in your application.
+When using this package, you should also install `@openzeppelin/contracts-ui-builder-types` to ensure proper type checking in your application.
 
 ```tsx
 // Example of importing types
@@ -44,7 +44,7 @@ import type {
   ContractAdapter,
   FormValues,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 ```
 
 ## Component Styling
@@ -70,7 +70,7 @@ import type {
   EvmNetworkConfig,
   NetworkConfig,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // Example form schema
 const schema: RenderFormSchema = {
@@ -267,7 +267,7 @@ export const rendererConfig: RendererConfig = {
     'react-hook-form': '^7.43.9',
     '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
     '@openzeppelin/contracts-ui-builder-ui': '^1.0.0',
-    '@openzeppelin/transaction-form-types': '^1.0.0',
+    '@openzeppelin/contracts-ui-builder-types': '^1.0.0',
     '@openzeppelin/contracts-ui-builder-utils': '^1.0.0',
   },
 };

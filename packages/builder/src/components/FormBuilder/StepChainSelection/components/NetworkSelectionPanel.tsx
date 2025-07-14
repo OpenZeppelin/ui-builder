@@ -8,7 +8,7 @@ import {
   useNetworkErrors,
 } from '@openzeppelin/contracts-ui-builder-ui';
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';

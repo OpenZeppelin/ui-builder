@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
-import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { resolveRpcUrl } from '../rpc';
 

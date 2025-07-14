@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 
-import { FullContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import { FullContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 
 import { useWizardStepUiState } from './useWizardStepUiState';
 

@@ -12,7 +12,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@styles/*": ["../styles/*"],
-      "@openzeppelin/transaction-form-types/*": ["../types/src/*"]
+      "@openzeppelin/contracts-ui-builder-types/*": ["../types/src/*"]
     }
   },
   "include": ["src/**/*"],

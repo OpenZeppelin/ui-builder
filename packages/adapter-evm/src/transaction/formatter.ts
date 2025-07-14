@@ -1,7 +1,7 @@
 import { isAddress } from 'viem';
 import type { Abi } from 'viem';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 import { createAbiFunctionItem } from '../abi';
 import { parseEvmInput } from '../transform';

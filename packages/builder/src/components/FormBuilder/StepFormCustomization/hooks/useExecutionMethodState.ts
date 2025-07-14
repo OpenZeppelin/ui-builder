@@ -6,7 +6,7 @@ import type {
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import type { ExecutionMethodFormData } from '../types';
 import {

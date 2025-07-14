@@ -10,7 +10,7 @@ import path from 'path';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { Ecosystem, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // Import ecosystemManager utils
 import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';

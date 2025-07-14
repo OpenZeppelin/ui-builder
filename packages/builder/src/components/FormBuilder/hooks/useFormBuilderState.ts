@@ -6,7 +6,7 @@ import {
   ExecutionConfig,
   FormValues,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { type BuilderFormConfig, formBuilderStore } from './formBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';

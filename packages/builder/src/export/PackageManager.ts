@@ -35,8 +35,8 @@
  */
 import { rendererConfig } from 'virtual:renderer-config';
 
+import { Ecosystem, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 
 import type { RendererConfig } from '../../../renderer/dist';
 import { adapterPackageMap } from '../core/ecosystemManager';
@@ -230,7 +230,7 @@ export class PackageManager {
     // Add the adapter package itself if available
     if (adapterPackageName) {
       combined[adapterPackageName] = 'workspace:*'; // Use workspace protocol for now
-      combined['@openzeppelin/transaction-form-types'] = 'workspace:*';
+      combined['@openzeppelin/contracts-ui-builder-types'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-ui'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-utils'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-renderer'] = 'workspace:*';
@@ -420,7 +420,7 @@ export class PackageManager {
     const updatedDependencies: Record<string, string> = {};
     const internalPackages = new Set([
       '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/transaction-form-types',
+      '@openzeppelin/contracts-ui-builder-types',
       '@openzeppelin/contracts-ui-builder-utils',
       '@openzeppelin/contracts-ui-builder-ui',
       '@openzeppelin/transaction-form-react-core',

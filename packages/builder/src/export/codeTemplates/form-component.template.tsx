@@ -19,7 +19,7 @@ import type {
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {

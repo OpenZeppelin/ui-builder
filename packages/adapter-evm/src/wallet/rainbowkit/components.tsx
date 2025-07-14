@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn, logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { CustomConnectButton } from '../components';
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';

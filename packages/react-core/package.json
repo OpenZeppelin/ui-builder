@@ -47,7 +47,7 @@
   "author": "OpenZeppelin",
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/transaction-form-types": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
   },

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { useWalletState } from '@openzeppelin/transaction-form-react-core';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { getNetworksByEcosystem } from '../../../../core/ecosystemManager';

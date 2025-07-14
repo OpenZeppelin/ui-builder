@@ -1,4 +1,4 @@
-import type { FieldType, FieldValue } from '@openzeppelin/transaction-form-types';
+import type { FieldType, FieldValue } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Get a default value for a field type.

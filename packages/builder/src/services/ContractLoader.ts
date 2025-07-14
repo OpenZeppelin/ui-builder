@@ -5,7 +5,7 @@
  * Uses the appropriate adapter based on the selected chain type.
  */
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Loads a contract definition using the provided chain adapter.

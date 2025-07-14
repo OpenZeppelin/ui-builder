@@ -3,7 +3,6 @@ import { type TransactionReceipt } from 'viem';
 
 import React from 'react';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   AvailableUiKit,
   Connector,
@@ -27,8 +26,9 @@ import type {
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isEvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';

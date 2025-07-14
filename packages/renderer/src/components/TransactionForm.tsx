@@ -7,7 +7,7 @@ import type {
   TransactionFormProps,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { createDefaultFormValues } from '../utils/formUtils';
 

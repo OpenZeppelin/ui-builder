@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { TxStatus } from '@openzeppelin/transaction-form-types';
+import type { TxStatus } from '@openzeppelin/contracts-ui-builder-types';
 
 import { TransactionHashDisplay } from './TransactionHashDisplay';
 

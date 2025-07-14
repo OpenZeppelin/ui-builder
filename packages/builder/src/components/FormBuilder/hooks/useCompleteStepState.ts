@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { ContractSchema, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { downloadBlob } from '../StepComplete/utils';

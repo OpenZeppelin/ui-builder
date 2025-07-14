@@ -6,7 +6,7 @@ import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ContractAdapter, UserRpcProviderConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter, UserRpcProviderConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

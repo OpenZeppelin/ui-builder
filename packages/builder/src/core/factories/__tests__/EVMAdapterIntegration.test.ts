@@ -4,7 +4,7 @@ import type {
   ContractAdapter,
   ContractSchema,
   EvmNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { getAdapter } from '../../ecosystemManager';
 import { FormSchemaFactory } from '../FormSchemaFactory';

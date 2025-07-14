@@ -19,7 +19,7 @@ import type {
   ContractAdapter,
   NativeConfigLoader,
   NetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
 import { App } from './App';

@@ -1,4 +1,4 @@
-import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/transaction-form-types';
+import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/contracts-ui-builder-types';
 
 import { isValidAddress } from '../utils';
 

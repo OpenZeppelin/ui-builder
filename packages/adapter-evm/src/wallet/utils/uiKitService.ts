@@ -2,7 +2,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   EcosystemWalletComponents,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../components';
 import { createRainbowKitComponents, validateRainbowKitConfig } from '../rainbowkit';

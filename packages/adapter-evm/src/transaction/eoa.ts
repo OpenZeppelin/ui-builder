@@ -6,7 +6,7 @@ import {
   EoaExecutionConfig,
   ExecutionConfig,
   TransactionStatusUpdate,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { WriteContractParameters } from '../types';
 import { validateEoaConfig } from '../validation';

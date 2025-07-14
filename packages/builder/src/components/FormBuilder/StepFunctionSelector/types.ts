@@ -2,7 +2,7 @@ import type {
   ContractFunction,
   ContractSchema,
   NetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;

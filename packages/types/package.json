@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/transaction-form-types",
+  "name": "@openzeppelin/contracts-ui-builder-types",
   "version": "1.17.0",
   "private": false,
   "description": "Shared TypeScript type definitions for the OpenZeppelin Transaction Form Builder ecosystem.",

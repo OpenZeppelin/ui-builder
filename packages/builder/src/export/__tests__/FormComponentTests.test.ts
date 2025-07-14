@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import {

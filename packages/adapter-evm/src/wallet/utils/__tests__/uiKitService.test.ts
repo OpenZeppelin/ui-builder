@@ -4,7 +4,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   ComponentExclusionConfig,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../../components';
 import { getResolvedWalletComponents } from '../uiKitService';

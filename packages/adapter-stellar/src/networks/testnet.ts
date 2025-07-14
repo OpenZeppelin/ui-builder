@@ -1,4 +1,4 @@
-import { StellarNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // Placeholder for Stellar Testnet
 export const stellarTestnet: StellarNetworkConfig = {

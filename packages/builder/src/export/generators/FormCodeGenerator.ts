@@ -1,7 +1,7 @@
 import { capitalize } from 'lodash';
 
-import { Ecosystem, NetworkConfig, RenderFormSchema } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, NetworkConfig, RenderFormSchema } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 
 import { adapterPackageMap } from '../../core/ecosystemManager';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';

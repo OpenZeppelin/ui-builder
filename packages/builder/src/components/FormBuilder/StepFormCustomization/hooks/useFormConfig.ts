@@ -4,7 +4,7 @@ import type {
   ContractAdapter,
   ContractSchema,
   FormFieldType,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {

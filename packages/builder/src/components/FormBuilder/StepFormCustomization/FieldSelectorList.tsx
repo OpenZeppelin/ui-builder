@@ -1,12 +1,12 @@
 import { Braces, FormInput, Tag } from 'lucide-react';
 
+import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@openzeppelin/contracts-ui-builder-ui';
-import type { FormFieldType } from '@openzeppelin/transaction-form-types';
 
 interface FieldSelectorListProps {
   /**

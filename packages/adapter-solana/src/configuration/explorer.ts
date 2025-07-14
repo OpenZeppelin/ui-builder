@@ -1,6 +1,6 @@
+import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { NetworkConfig } from '@openzeppelin/transaction-form-types';
-import type { UserExplorerConfig } from '@openzeppelin/transaction-form-types';
 
 /**
  * Gets a blockchain explorer URL for a Solana address.

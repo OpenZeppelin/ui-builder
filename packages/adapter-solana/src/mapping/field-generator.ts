@@ -6,7 +6,7 @@ import type {
   FieldValidation,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 

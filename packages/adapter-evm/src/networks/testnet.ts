@@ -12,7 +12,7 @@ import {
   zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
 } from 'viem/chains';
 
-import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 export const ethereumSepolia: EvmNetworkConfig = {
   id: 'ethereum-sepolia',

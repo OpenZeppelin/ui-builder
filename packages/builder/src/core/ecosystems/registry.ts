@@ -1,4 +1,4 @@
-import type { Ecosystem } from '@openzeppelin/transaction-form-types';
+import type { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Configuration for ecosystem feature flags

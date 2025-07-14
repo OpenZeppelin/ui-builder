@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import type { EvmNetworkConfig, SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import type {
+  EvmNetworkConfig,
+  SolanaNetworkConfig,
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -52,8 +55,8 @@ describe('FormExportValidation', () => {
             const deps = pkg.dependencies || {};
             if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
               return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
-            if (!deps['@openzeppelin/transaction-form-types'])
-              return 'Missing @openzeppelin/transaction-form-types dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-types'])
+              return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
             if (!deps['@openzeppelin/transaction-form-adapter-evm'])
               return 'Missing @openzeppelin/transaction-form-adapter-evm dependency';
             return true;
@@ -81,7 +84,7 @@ describe('FormExportValidation', () => {
     expect(packageJson).toHaveProperty('name');
     expect(packageJson).toHaveProperty('dependencies');
     expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
-    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
   });
 
   it('should export a valid Solana project structure', async () => {
@@ -126,8 +129,8 @@ describe('FormExportValidation', () => {
             const deps = pkg.dependencies || {};
             if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
               return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
-            if (!deps['@openzeppelin/transaction-form-types'])
-              return 'Missing @openzeppelin/transaction-form-types dependency';
+            if (!deps['@openzeppelin/contracts-ui-builder-types'])
+              return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
             if (!deps['@openzeppelin/transaction-form-adapter-solana'])
               return 'Missing @openzeppelin/transaction-form-adapter-solana dependency';
             return true;

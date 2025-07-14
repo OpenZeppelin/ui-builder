@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
-import { FormFieldType } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 import { getFieldTypeGroups } from './utils/fieldTypeUtils';
 

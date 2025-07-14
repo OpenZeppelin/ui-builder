@@ -6,7 +6,7 @@ import { RelayerDetailsCard } from '@openzeppelin/contracts-ui-builder-ui';
 import type {
   RelayerDetailsRich,
   RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { ExecutionConfigCard } from './ExecutionConfigCard';
 

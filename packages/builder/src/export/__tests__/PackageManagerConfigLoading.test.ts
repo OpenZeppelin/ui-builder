@@ -16,7 +16,7 @@
 // Mock declarations must come before imports
 import { describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { RendererConfig } from '../../../../renderer/dist';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -164,7 +164,7 @@ describe('PackageManager configuration loading', () => {
         { env: 'local' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/transaction-form-types']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toBe('workspace:*');
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
     });
 

@@ -4,8 +4,8 @@ import type {
   ContractAdapter,
   ExecutionMethodType,
   RelayerDetails,
-} from '@openzeppelin/transaction-form-types';
-import { FormFieldType, FormValues } from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { FormFieldType, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Form values interface for the field editor form

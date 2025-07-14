@@ -1,4 +1,4 @@
-import { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Generates the content for a `rainbowkit.config.ts` file for an exported project.

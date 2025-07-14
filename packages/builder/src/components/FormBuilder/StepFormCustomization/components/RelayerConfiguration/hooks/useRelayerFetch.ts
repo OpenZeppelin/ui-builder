@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { ContractAdapter, RelayerDetails } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter, RelayerDetails } from '@openzeppelin/contracts-ui-builder-types';
 
 interface UseRelayerFetchParams {
   adapter: ContractAdapter | null;

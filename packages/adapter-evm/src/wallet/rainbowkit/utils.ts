@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * RainbowKit configuration options definition

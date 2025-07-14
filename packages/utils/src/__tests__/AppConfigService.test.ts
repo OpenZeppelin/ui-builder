@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Import AppRuntimeConfig for typing mock JSON
-import type { AppRuntimeConfig } from '@openzeppelin/transaction-form-types';
+import type { AppRuntimeConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // Import the original logger to be mocked, and the service to be tested
 import { AppConfigService } from '../AppConfigService';

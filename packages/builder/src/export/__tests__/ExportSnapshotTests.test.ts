@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { Ecosystem, EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { Ecosystem, EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';

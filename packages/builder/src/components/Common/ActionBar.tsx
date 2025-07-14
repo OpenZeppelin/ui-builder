@@ -3,8 +3,8 @@ import { Download, Eye, Pencil } from 'lucide-react';
 import React from 'react';
 
 import { ContractActionBar } from '@openzeppelin/contracts-ui-builder-renderer';
+import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { Button, LoadingButton } from '@openzeppelin/contracts-ui-builder-ui';
-import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
 
 interface ActionBarProps {
   network: NetworkConfig | null;

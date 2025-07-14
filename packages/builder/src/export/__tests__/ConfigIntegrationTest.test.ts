@@ -23,7 +23,7 @@ describe('PackageManager Integration Tests', () => {
       react: '^19.0.0',
       // Add renderer and types packages here as they are expected by PackageManager
       '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0', // Use a placeholder caret version
-      '@openzeppelin/transaction-form-types': '^0.1.0', // Use a placeholder caret version
+      '@openzeppelin/contracts-ui-builder-types': '^0.1.0', // Use a placeholder caret version
     },
     fieldDependencies: {
       text: {
@@ -89,7 +89,7 @@ describe('PackageManager Integration Tests', () => {
       expect(evmDeps).toHaveProperty('core-lib', '^1.0.0'); // From mock renderer config
       expect(evmDeps).toHaveProperty('react', '^19.0.0'); // From mock renderer config
       expect(evmDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer', 'workspace:*'); // Added by PM
-      expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
+      expect(evmDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*'); // Added by PM
       expect(evmDeps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm', 'workspace:*'); // Added by PM
       expect(evmDeps).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
 
@@ -101,7 +101,7 @@ describe('PackageManager Integration Tests', () => {
         '@openzeppelin/contracts-ui-builder-renderer',
         'workspace:*'
       ); // Added by PM
-      expect(solanaDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*'); // Added by PM
+      expect(solanaDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*'); // Added by PM
       expect(solanaDeps).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana',
         'workspace:*'
@@ -137,7 +137,7 @@ describe('PackageManager Integration Tests', () => {
         '@openzeppelin/transaction-form-adapter-evm',
         'workspace:*'
       );
-      expect(mixedDeps).toHaveProperty('@openzeppelin/transaction-form-types', 'workspace:*');
+      expect(mixedDeps).toHaveProperty('@openzeppelin/contracts-ui-builder-types', 'workspace:*');
     });
 
     it('should use workspace protocol for internal packages', async () => {
@@ -146,7 +146,7 @@ describe('PackageManager Integration Tests', () => {
       const deps = await packageManager.getDependencies(formConfig, 'evm');
 
       expect(deps['@openzeppelin/contracts-ui-builder-renderer']).toBe('workspace:*'); // Added by PM
-      expect(deps['@openzeppelin/transaction-form-types']).toBe('workspace:*'); // Added by PM
+      expect(deps['@openzeppelin/contracts-ui-builder-types']).toBe('workspace:*'); // Added by PM
       expect(deps['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*'); // Added by PM
     });
   });
@@ -191,7 +191,7 @@ describe('PackageManager Integration Tests', () => {
         expect.stringMatching(/^\^/)
       );
       expect(result.dependencies).toHaveProperty(
-        '@openzeppelin/transaction-form-types',
+        '@openzeppelin/contracts-ui-builder-types',
         expect.stringMatching(/^\^/)
       );
       expect(result.dependencies).toHaveProperty(

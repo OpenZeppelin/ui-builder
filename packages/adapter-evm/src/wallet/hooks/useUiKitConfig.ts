@@ -1,5 +1,5 @@
 import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Default configuration when no specific configuration is provided

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { ContractAdapter, ExecutionConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter, ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 export interface ValidationResult {
   isValid: boolean;

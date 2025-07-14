@@ -2,7 +2,7 @@ import type {
   ContractSchema,
   MidnightNetworkConfig,
   NetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Queries a view function on a contract

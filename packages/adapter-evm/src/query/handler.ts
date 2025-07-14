@@ -5,7 +5,7 @@ import type {
   ContractSchema,
   EvmNetworkConfig,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';

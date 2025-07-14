@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { NetworkConfig } from '@openzeppelin/transaction-form-types';
-import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
+import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';

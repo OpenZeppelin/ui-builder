@@ -3,7 +3,7 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Generate default field configuration for a Stellar function parameter

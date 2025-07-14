@@ -6,7 +6,7 @@ import type {
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { logger } from './logger';
 

@@ -48,7 +48,7 @@
   - @openzeppelin/transaction-form-adapter-solana@0.3.0
   - @openzeppelin/transaction-form-renderer@1.17.0
   - @openzeppelin/transaction-form-adapter-evm@1.17.0
-  - @openzeppelin/transaction-form-types@1.17.0
+  - @openzeppelin/contracts-ui-builder-types@1.17.0
   - @openzeppelin/transaction-form-utils@1.17.0
   - @openzeppelin/transaction-form-ui@1.17.0
 
@@ -65,7 +65,7 @@
   - @openzeppelin/transaction-form-adapter-evm@1.16.0
   - @openzeppelin/transaction-form-react-core@1.16.0
   - @openzeppelin/transaction-form-styles@1.16.0
-  - @openzeppelin/transaction-form-types@1.16.0
+  - @openzeppelin/contracts-ui-builder-types@1.16.0
   - @openzeppelin/transaction-form-utils@1.16.0
   - @openzeppelin/transaction-form-ui@1.16.0
   - @openzeppelin/transaction-form-adapter-midnight@0.2.2

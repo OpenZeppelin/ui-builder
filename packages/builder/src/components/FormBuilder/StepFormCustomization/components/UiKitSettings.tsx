@@ -3,8 +3,6 @@ import CodeEditor from '@uiw/react-textarea-code-editor';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   AvailableUiKit,
   ContractAdapter,
@@ -12,7 +10,9 @@ import {
   FormValues,
   UiKitConfiguration,
   UiKitName,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DynamicFormField } from '../../../../../../renderer/dist';
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
 import { useNetworkErrors } from './useNetworkErrors';
 

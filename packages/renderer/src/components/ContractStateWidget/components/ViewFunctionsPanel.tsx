@@ -14,7 +14,7 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { FunctionResult } from './FunctionResult';
 

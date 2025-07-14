@@ -1,4 +1,4 @@
-import type { ContractFunction, ContractSchema } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Test fixtures specifically for testing EVM adapter integration

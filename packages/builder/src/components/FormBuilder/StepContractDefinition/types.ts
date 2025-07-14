@@ -1,5 +1,5 @@
-import { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
-import type { ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
 export interface StepContractDefinitionProps {
   onContractSchemaLoaded: (schema: ContractSchema | null, formValues?: FormValues) => void;

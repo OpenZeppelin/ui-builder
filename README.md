@@ -475,14 +475,14 @@ To add support for a new blockchain ecosystem:
 1.  **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
 2.  **Define `package.json`**:
     - Set the package name (e.g., `@openzeppelin/transaction-form-adapter-sui`).
-    - Add a dependency on `@openzeppelin/transaction-form-types` (`workspace:*`).
+    - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
     - Add any chain-specific SDKs or libraries required by the adapter.
     - Include standard build scripts (refer to existing adapter packages).
     - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
 3.  **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
 4.  **Implement Adapter**:
     - Create `src/adapter.ts`.
-    - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/transaction-form-types`.
+    - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/contracts-ui-builder-types`.
     - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
     - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
 5.  **Define Network Configurations**:\

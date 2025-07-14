@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
@@ -95,7 +95,7 @@ describe('PackageManager', () => {
       const evmDependencies = await packageManager.getDependencies(formConfig, 'evm');
       // Check for core adapter package
       expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
-      expect(evmDependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Should also include types
+      expect(evmDependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Should also include types
       expect(evmDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
       // Check for specific runtime libs from EVM adapter config
       expect(evmDependencies).toHaveProperty('viem');
@@ -104,7 +104,7 @@ describe('PackageManager', () => {
       const solanaDependencies = await packageManager.getDependencies(formConfig, 'solana');
       // Check for core adapter package
       expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-solana');
-      expect(solanaDependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(solanaDependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(solanaDependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       // Check for specific runtime libs from Solana adapter config
       expect(solanaDependencies).toHaveProperty('@solana/web3.js');
@@ -139,7 +139,7 @@ describe('PackageManager', () => {
       );
       expect(dependencies).toHaveProperty('react'); // Core deps still present
       expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter package not included
-      expect(dependencies).not.toHaveProperty('@openzeppelin/transaction-form-types'); // Types package not included for unknown chain
+      expect(dependencies).not.toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Types package not included for unknown chain
     });
   });
 
@@ -246,7 +246,7 @@ describe('PackageManager', () => {
       expect(result.dependencies).toHaveProperty('react'); // Core
       expect(result.dependencies).toHaveProperty('react-datepicker'); // Field
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm'); // Adapter pkg
-      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types'); // Types pkg
+      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Types pkg
       // Check for specific runtime libs from EVM adapter config
       expect(result.dependencies).toHaveProperty('viem');
       expect(result.dependencies).toHaveProperty('wagmi');
@@ -265,7 +265,7 @@ describe('PackageManager', () => {
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe(
         'workspace:*'
       );
-      expect(result.dependencies['@openzeppelin/transaction-form-types']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toBe('workspace:*');
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toBe('workspace:*');
     });
 
@@ -280,7 +280,7 @@ describe('PackageManager', () => {
       );
       const result = JSON.parse(updated);
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/^\^/);
-      expect(result.dependencies['@openzeppelin/transaction-form-types']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/^\^/);
       expect(result.dependencies['@openzeppelin/transaction-form-adapter-evm']).toMatch(/^\^/);
     });
 

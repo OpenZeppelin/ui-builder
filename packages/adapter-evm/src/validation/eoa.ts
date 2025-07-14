@@ -1,5 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { EoaExecutionConfig } from '@openzeppelin/transaction-form-types';
+import { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { isValidEvmAddress } from '../utils';
 

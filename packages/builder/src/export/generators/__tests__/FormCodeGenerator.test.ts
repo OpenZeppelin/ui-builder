@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/transaction-form-types';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import type {
   EvmNetworkConfig,
   FormFieldType,
   RenderFormSchema,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../../core/types/ExportTypes';
@@ -48,7 +48,7 @@ vi.mock('../../PackageManager', () => {
           packageJson.dependencies = {
             ...(packageJson.dependencies || {}),
             '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-            '@openzeppelin/transaction-form-types': '^0.1.0',
+            '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
             [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
@@ -59,7 +59,7 @@ vi.mock('../../PackageManager', () => {
       .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
         return {
           '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-          '@openzeppelin/transaction-form-types': '^0.1.0',
+          '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
           [`@openzeppelin/transaction-form-adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
@@ -108,7 +108,7 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
               packageJson.dependencies = {
                 ...(packageJson.dependencies || {}),
                 '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-                '@openzeppelin/transaction-form-types': '^0.1.0',
+                '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
                 [`@openzeppelin/transaction-form-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);

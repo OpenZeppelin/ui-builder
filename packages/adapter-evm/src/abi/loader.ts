@@ -5,7 +5,7 @@ import type {
   ContractSchema,
   EvmNetworkConfig,
   FormValues,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import type { AbiItem } from '../types';
 

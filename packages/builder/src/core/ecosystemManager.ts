@@ -8,7 +8,7 @@ import type {
   NetworkConfig,
   SolanaNetworkConfig,
   StellarNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;

@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/transaction-form-types';
+import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 // Placeholder
 export const SOLANA_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {

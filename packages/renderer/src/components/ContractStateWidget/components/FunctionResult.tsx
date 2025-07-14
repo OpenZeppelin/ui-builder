@@ -1,7 +1,7 @@
 import { JSX } from 'react';
 
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ContractFunction } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
 
 interface FunctionResultProps {
   functionDetails: ContractFunction;

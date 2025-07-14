@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
-import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { useAccount, useConnect } from '../../hooks/facade-hooks';
 import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';

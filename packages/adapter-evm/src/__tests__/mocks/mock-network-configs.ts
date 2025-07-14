@@ -1,4 +1,4 @@
-import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Mock EVM Network Configuration for testing purposes.

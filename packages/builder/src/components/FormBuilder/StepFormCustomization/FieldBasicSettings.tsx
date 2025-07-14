@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Control, useFormState, useWatch } from 'react-hook-form';
 
+import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 import { BooleanField, SelectGroupedField, TextField } from '@openzeppelin/contracts-ui-builder-ui';
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
-import { FormFieldType } from '@openzeppelin/transaction-form-types';
 
 import { DynamicFormField } from '../../../../../renderer/dist';
 

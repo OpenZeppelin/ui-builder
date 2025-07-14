@@ -131,7 +131,7 @@ Here's a template for implementing network configurations in an adapter:
 
 ```typescript
 // In adapter-{ecosystem}/src/networks/mainnet.ts
-import { {Ecosystem}NetworkConfig } from '@openzeppelin/transaction-form-types';
+import { {Ecosystem}NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 export const {network}Mainnet: {Ecosystem}NetworkConfig = {
   id: '{network}-mainnet',

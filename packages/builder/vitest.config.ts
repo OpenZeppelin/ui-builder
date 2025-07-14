@@ -110,7 +110,7 @@ export default defineConfig(
       },
       dedupe: [
         '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/transaction-form-types',
+        '@openzeppelin/contracts-ui-builder-types',
         'react',
         'react-dom',
       ],
@@ -119,14 +119,14 @@ export default defineConfig(
     optimizeDeps: {
       include: [
         '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/transaction-form-types',
+        '@openzeppelin/contracts-ui-builder-types',
       ],
     },
     // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
     ssr: {
       noExternal: [
         '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/transaction-form-types',
+        '@openzeppelin/contracts-ui-builder-types',
       ],
     },
     test: {

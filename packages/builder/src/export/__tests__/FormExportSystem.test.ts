@@ -1,11 +1,11 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type {
   Ecosystem,
   EvmNetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -103,7 +103,7 @@ describe('FormExportSystem', () => {
           const baseDeps = {
             react: '^19.0.0', // Correct version for assertion
             '@openzeppelin/contracts-ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
-            '@openzeppelin/transaction-form-types': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/contracts-ui-builder-types': 'workspace:*', // Use consistent placeholder version
           };
           const adapterDep = `@openzeppelin/transaction-form-adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
@@ -205,7 +205,7 @@ describe('FormExportSystem', () => {
       // Verify dependencies contain types, renderer, and EVM adapter packages
       // Check PRESENCE only, as applyVersioningStrategy might change value
       expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(result.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
       // Check a base dependency from the mock config is still present
       expect(result.dependencies).toHaveProperty('react', '^19.0.0');

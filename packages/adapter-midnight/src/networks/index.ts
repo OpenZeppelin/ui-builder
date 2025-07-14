@@ -1,4 +1,4 @@
-import { MidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { MidnightNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { midnightTestnet } from './testnet';
 

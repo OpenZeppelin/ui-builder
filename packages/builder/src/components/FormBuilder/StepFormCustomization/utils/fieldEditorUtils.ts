@@ -1,5 +1,5 @@
 import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
-import { FormFieldType } from '@openzeppelin/transaction-form-types';
+import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 import { FieldEditorFormValues } from '../types';
 

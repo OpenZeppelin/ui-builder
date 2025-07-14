@@ -12,7 +12,7 @@ export const packageVersions = {
   '@openzeppelin/transaction-form-adapter-stellar': '0.3.0',
   '@openzeppelin/transaction-form-react-core': '1.17.0',
   '@openzeppelin/contracts-ui-builder-renderer': '1.17.1',
-  '@openzeppelin/transaction-form-types': '1.17.0',
+  '@openzeppelin/contracts-ui-builder-types': '1.17.0',
   '@openzeppelin/contracts-ui-builder-ui': '1.18.0',
   '@openzeppelin/contracts-ui-builder-utils': '1.17.0',
 };

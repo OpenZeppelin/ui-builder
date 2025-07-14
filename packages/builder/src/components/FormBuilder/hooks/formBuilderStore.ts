@@ -5,7 +5,7 @@ import {
   ExecutionConfig,
   FormValues,
   UiKitConfiguration,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 export interface BuilderFormConfig extends CommonFormProperties {
   functionId: string;

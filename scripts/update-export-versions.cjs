@@ -11,20 +11,20 @@ const packagesToUpdate = [
   '@openzeppelin/transaction-form-adapter-stellar',
   '@openzeppelin/transaction-form-react-core',
   '@openzeppelin/contracts-ui-builder-renderer',
-  '@openzeppelin/transaction-form-types',
+  '@openzeppelin/contracts-ui-builder-types',
   '@openzeppelin/contracts-ui-builder-ui',
   '@openzeppelin/contracts-ui-builder-utils',
 ];
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/transaction-form-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/contracts-ui-builder-types').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/transaction-form-types' -> 'types'
+    // e.g., '@openzeppelin/contracts-ui-builder-types' -> 'types'
     // e.g., '@openzeppelin/transaction-form-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
     let packageDirName = nameWithoutScope.replace('transaction-form-', '');

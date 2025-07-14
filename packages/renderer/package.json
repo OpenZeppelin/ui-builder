@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
-    "@openzeppelin/transaction-form-types": "workspace:*",
+    "@openzeppelin/contracts-ui-builder-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:*",
     "@radix-ui/react-checkbox": "^1.3.2",

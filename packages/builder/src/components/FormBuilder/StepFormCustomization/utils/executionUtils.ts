@@ -5,7 +5,7 @@ import type {
   ExecutionMethodType,
   RelayerDetails,
   RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { ExecutionMethodFormData } from '../types';
 

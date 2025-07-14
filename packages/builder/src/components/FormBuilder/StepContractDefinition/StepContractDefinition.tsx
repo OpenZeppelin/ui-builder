@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 
 import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ContractSchema, FormValues } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
 import { DynamicFormField } from '../../../../../renderer/dist';
 import { loadContractDefinition } from '../../../services/ContractLoader';

@@ -4,7 +4,7 @@ import type {
   EvmNetworkConfig,
   NetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { FormExportSystem } from '../FormExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -72,7 +72,7 @@ describe('Adapter Integration Tests', () => {
       const { packageJson } = await getExportedPackageJson(mockEvmNetworkConfig);
 
       // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
 
       // Optional: Check if specific SDKs (like ethers) are NOT directly listed if they are peer/sub-dependencies
@@ -83,7 +83,7 @@ describe('Adapter Integration Tests', () => {
       const { packageJson } = await getExportedPackageJson(mockSolanaNetworkConfig);
 
       // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/transaction-form-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
       expect(packageJson.dependencies).toHaveProperty(
         '@openzeppelin/transaction-form-adapter-solana'
       );

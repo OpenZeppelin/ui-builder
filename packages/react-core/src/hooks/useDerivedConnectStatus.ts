@@ -1,5 +1,5 @@
 import { isRecordWithProperties } from '@openzeppelin/contracts-ui-builder-utils';
-import type { Connector } from '@openzeppelin/transaction-form-types';
+import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 
 import { useWalletState } from './WalletStateContext';
 

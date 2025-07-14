@@ -4,7 +4,7 @@ import type {
   ContractFunction,
   ContractSchema,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import type { AbiItem } from '../types';
 import { formatInputName, formatMethodName } from '../utils';

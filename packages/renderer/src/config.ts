@@ -24,7 +24,7 @@ export const rendererConfig: RendererConfig = {
     clsx: '^2.0.0',
     'tailwind-merge': '^1.14.0',
     '@openzeppelin/contracts-ui-builder-renderer': '^0.1.0',
-    '@openzeppelin/transaction-form-types': '^0.1.0',
+    '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
     '@openzeppelin/contracts-ui-builder-utils': '^0.1.0',
   },
 

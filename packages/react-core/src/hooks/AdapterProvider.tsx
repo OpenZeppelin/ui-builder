@@ -16,7 +16,7 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { ContractAdapter, NetworkConfig } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { AdapterContext, AdapterContextValue, AdapterRegistry } from './AdapterContext';
 

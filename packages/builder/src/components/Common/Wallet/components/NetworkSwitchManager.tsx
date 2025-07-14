@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   useDerivedAccountStatus,
   useDerivedSwitchChainStatus,
 } from '@openzeppelin/transaction-form-react-core';
-import { ContractAdapter } from '@openzeppelin/transaction-form-types';
 
 /**
  * Component that handles wallet network switching based on the selected network.

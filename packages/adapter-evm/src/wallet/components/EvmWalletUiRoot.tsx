@@ -4,7 +4,7 @@ import { type Config as WagmiConfig, WagmiProvider } from 'wagmi';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import type { EcosystemReactUiProviderProps } from '@openzeppelin/transaction-form-types';
+import type { EcosystemReactUiProviderProps } from '@openzeppelin/contracts-ui-builder-types';
 
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
 import { type EvmUiKitManagerState, evmUiKitManager } from '../evmUiKitManager';
