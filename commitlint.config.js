@@ -54,6 +54,7 @@ export default {
         'adapter-stellar',
         'adapter-midnight',
         'styles',
+        'common',
       ],
     ],
     'scope-empty': [2, 'never'],
