@@ -1,11 +1,23 @@
-import { polygonAmoy as viemPolygonAmoy, sepolia as viemSepolia } from 'viem/chains';
+import {
+  arbitrumSepolia as viemArbitrumSepolia,
+  avalancheFuji as viemAvalancheFuji,
+  baseSepolia as viemBaseSepolia,
+  bscTestnet as viemBscTestnet,
+  lineaSepolia as viemLineaSepolia,
+  optimismSepolia as viemOptimismSepolia,
+  polygonAmoy as viemPolygonAmoy,
+  polygonZkEvmCardona as viemPolygonZkEvmCardona,
+  scrollSepolia as viemScrollSepolia,
+  sepolia as viemSepolia,
+  zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
+} from 'viem/chains';
 
 import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
 
 export const ethereumSepolia: EvmNetworkConfig = {
   id: 'ethereum-sepolia',
   exportConstName: 'ethereumSepolia',
-  name: 'Ethereum Sepolia',
+  name: 'Sepolia',
   ecosystem: 'evm',
   network: 'ethereum',
   type: 'testnet',
@@ -24,6 +36,28 @@ export const ethereumSepolia: EvmNetworkConfig = {
   viemChain: viemSepolia,
 };
 
+export const arbitrumSepolia: EvmNetworkConfig = {
+  id: 'arbitrum-sepolia',
+  exportConstName: 'arbitrumSepolia',
+  name: 'Arbitrum Sepolia',
+  ecosystem: 'evm',
+  network: 'arbitrum',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 421614,
+  rpcUrl: viemArbitrumSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.arbiscan.io',
+  apiUrl: 'https://api-sepolia.arbiscan.io/api',
+  primaryExplorerApiIdentifier: 'arbiscan-sepolia',
+  icon: 'arbitrum',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemArbitrumSepolia,
+};
+
 export const polygonAmoy: EvmNetworkConfig = {
   id: 'polygon-amoy',
   exportConstName: 'polygonAmoy',
@@ -39,11 +73,187 @@ export const polygonAmoy: EvmNetworkConfig = {
   primaryExplorerApiIdentifier: 'polygonscan-amoy',
   icon: 'polygon',
   nativeCurrency: {
-    name: 'Matic',
+    name: 'MATIC',
     symbol: 'MATIC',
     decimals: 18,
   },
   viemChain: viemPolygonAmoy,
+};
+
+export const polygonZkEvmCardona: EvmNetworkConfig = {
+  id: 'polygon-zkevm-cardona',
+  exportConstName: 'polygonZkEvmCardona',
+  name: 'Polygon zkEVM Cardona',
+  ecosystem: 'evm',
+  network: 'polygon-zkevm',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 2442,
+  rpcUrl: viemPolygonZkEvmCardona.rpcUrls.default.http[0],
+  explorerUrl: 'https://cardona-zkevm.polygonscan.com',
+  apiUrl: 'https://api-cardona-zkevm.polygonscan.com/api',
+  primaryExplorerApiIdentifier: 'polygonscan-cardona',
+  icon: 'polygon',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemPolygonZkEvmCardona,
+};
+
+export const baseSepolia: EvmNetworkConfig = {
+  id: 'base-sepolia',
+  exportConstName: 'baseSepolia',
+  name: 'Base Sepolia',
+  ecosystem: 'evm',
+  network: 'base',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 84532,
+  rpcUrl: viemBaseSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.basescan.org',
+  apiUrl: 'https://api-sepolia.basescan.org/api',
+  primaryExplorerApiIdentifier: 'basescan-sepolia',
+  icon: 'base',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemBaseSepolia,
+};
+
+export const bscTestnet: EvmNetworkConfig = {
+  id: 'bsc-testnet',
+  exportConstName: 'bscTestnet',
+  name: 'BSC Testnet',
+  ecosystem: 'evm',
+  network: 'bsc',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 97,
+  rpcUrl: viemBscTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://testnet.bscscan.com',
+  apiUrl: 'https://api-testnet.bscscan.com/api',
+  primaryExplorerApiIdentifier: 'bscscan-testnet',
+  icon: 'bsc',
+  nativeCurrency: {
+    name: 'BNB',
+    symbol: 'BNB',
+    decimals: 18,
+  },
+  viemChain: viemBscTestnet,
+};
+
+export const optimismSepolia: EvmNetworkConfig = {
+  id: 'optimism-sepolia',
+  exportConstName: 'optimismSepolia',
+  name: 'OP Sepolia',
+  ecosystem: 'evm',
+  network: 'optimism',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 11155420,
+  rpcUrl: viemOptimismSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia-optimism.etherscan.io',
+  apiUrl: 'https://api-sepolia-optimism.etherscan.io/api',
+  primaryExplorerApiIdentifier: 'optimistic-etherscan-sepolia',
+  icon: 'optimism',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemOptimismSepolia,
+};
+
+export const avalancheFuji: EvmNetworkConfig = {
+  id: 'avalanche-fuji',
+  exportConstName: 'avalancheFuji',
+  name: 'Avalanche Fuji C-Chain',
+  ecosystem: 'evm',
+  network: 'avalanche',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 43113,
+  rpcUrl: viemAvalancheFuji.rpcUrls.default.http[0],
+  explorerUrl: 'https://subnets-test.avax.network/c-chain',
+  apiUrl: 'https://api.avascan.info/v2',
+  primaryExplorerApiIdentifier: 'avascan-fuji',
+  icon: 'avalanche',
+  nativeCurrency: {
+    name: 'Avalanche',
+    symbol: 'AVAX',
+    decimals: 18,
+  },
+  viemChain: viemAvalancheFuji,
+};
+
+export const zkSyncEraSepolia: EvmNetworkConfig = {
+  id: 'zksync-era-sepolia',
+  exportConstName: 'zkSyncEraSepolia',
+  name: 'ZkSync Era Sepolia',
+  ecosystem: 'evm',
+  network: 'zksync-era',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 300,
+  rpcUrl: viemZkSyncSepoliaTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.explorer.zksync.io',
+  apiUrl: 'https://block-explorer-api.sepolia.zksync.dev/api',
+  primaryExplorerApiIdentifier: 'zksync-era-sepolia',
+  icon: 'zksync',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemZkSyncSepoliaTestnet,
+};
+
+export const scrollSepolia: EvmNetworkConfig = {
+  id: 'scroll-sepolia',
+  exportConstName: 'scrollSepolia',
+  name: 'Scroll Sepolia',
+  ecosystem: 'evm',
+  network: 'scroll',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 534351,
+  rpcUrl: viemScrollSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.scrollscan.dev',
+  apiUrl: 'https://api-sepolia.scrollscan.dev/api',
+  primaryExplorerApiIdentifier: 'scrollscan-sepolia',
+  icon: 'scroll',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemScrollSepolia,
+};
+
+export const lineaSepolia: EvmNetworkConfig = {
+  id: 'linea-sepolia',
+  exportConstName: 'lineaSepolia',
+  name: 'Linea Sepolia',
+  ecosystem: 'evm',
+  network: 'linea',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 59141,
+  rpcUrl: viemLineaSepolia.rpcUrls.default.http[0],
+  explorerUrl: 'https://sepolia.lineascan.build',
+  apiUrl: 'https://api-sepolia.lineascan.build/api',
+  primaryExplorerApiIdentifier: 'lineascan-sepolia',
+  icon: 'linea',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  viemChain: viemLineaSepolia,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)

@@ -13,9 +13,27 @@ export {
   evmTestnetNetworks,
   // Individual networks
   ethereumMainnet,
+  arbitrumMainnet,
   polygonMainnet,
+  polygonZkEvmMainnet,
+  baseMainnet,
+  bscMainnet,
+  optimismMainnet,
+  avalancheMainnet,
+  lineaMainnet,
+  scrollMainnet,
+  zkSyncEraMainnet,
   ethereumSepolia,
+  arbitrumSepolia,
   polygonAmoy,
+  polygonZkEvmCardona,
+  baseSepolia,
+  bscTestnet,
+  optimismSepolia,
+  avalancheFuji,
+  lineaSepolia,
+  scrollSepolia,
+  zkSyncEraSepolia,
   // ... other individual network exports
 } from './networks';
 
