@@ -32,8 +32,8 @@ RUN --mount=type=secret,id=npm_token \
            rm .npmrc'
 
 # Build the builder application
-# The filter @openzeppelin/transaction-form-builder-app targets the specific package we want to build
-RUN pnpm --filter @openzeppelin/transaction-form-builder-app build
+# The filter @openzeppelin/contracts-ui-builder-app targets the specific package we want to build
+RUN pnpm --filter @openzeppelin/contracts-ui-builder-app build
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner

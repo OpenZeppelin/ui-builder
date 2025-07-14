@@ -30,13 +30,13 @@ The framework consists of several components:
 To run all export tests:
 
 ```bash
-pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/
+pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/
 ```
 
 To run a specific test suite:
 
 ```bash
-pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/ExportStructureTests.test.ts
+pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ExportStructureTests.test.ts
 ```
 
 ## Test Categories
@@ -149,13 +149,13 @@ Example: If a user specifies `--output my-form`, the export will go to `./export
 To update snapshots when expected changes occur:
 
 ```bash
-pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/ExportSnapshotTests.test.ts -- -u
+pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ExportSnapshotTests.test.ts -- -u
 ```
 
 For specific test files, use the same pattern with the appropriate test file:
 
 ```bash
-pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/YourTestFile.test.ts -- -u
+pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/YourTestFile.test.ts -- -u
 ```
 
 ### Creating New Snapshots

@@ -59,12 +59,12 @@ jobs:
 
       # Run only export-related tests
       - name: Run export tests
-        run: pnpm --filter @openzeppelin/transaction-form-builder-app test src/export/__tests__/
+        run: pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/
 
       # Generate test report for better CI visibility
       - name: Generate test report
         if: success() || failure()
-        run: pnpm --filter @openzeppelin/transaction-form-builder-app test:report
+        run: pnpm --filter @openzeppelin/contracts-ui-builder-app test:report
 
       # Upload test results as artifacts
       - name: Upload test results

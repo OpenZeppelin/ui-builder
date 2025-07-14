@@ -77,7 +77,7 @@ By using the shared types package, we ensure consistency across all packages and
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/transaction-form-builder-app dev
+pnpm --filter @openzeppelin/contracts-ui-builder-app dev
 
 # Or from within the builder package directory
 pnpm dev
@@ -87,7 +87,7 @@ pnpm dev
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/transaction-form-builder-app build
+pnpm --filter @openzeppelin/contracts-ui-builder-app build
 
 # Or from within the builder package directory
 pnpm build
@@ -97,7 +97,7 @@ pnpm build
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/transaction-form-builder-app test
+pnpm --filter @openzeppelin/contracts-ui-builder-app test
 
 # Or from within the builder package directory
 pnpm test

@@ -502,7 +502,7 @@ To add support for a new blockchain ecosystem:
 9.  **Build & Test**:
     - Build the new adapter package (`pnpm --filter @openzeppelin/transaction-form-adapter-<chain-name> build`).
     - Add relevant unit/integration tests.
-    - Ensure the builder application (`pnpm --filter @openzeppelin/transaction-form-builder-app build`) and the export system still function correctly.
+    - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
 
 ## Commit Convention
 
