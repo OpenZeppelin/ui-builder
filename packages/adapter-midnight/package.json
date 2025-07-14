@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
-    "@openzeppelin/transaction-form-react-core": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^"

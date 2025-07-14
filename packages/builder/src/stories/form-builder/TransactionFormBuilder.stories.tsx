@@ -1,6 +1,9 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
+import {
+  AdapterProvider,
+  WalletStateProvider,
+} from '@openzeppelin/contracts-ui-builder-react-core';
 
 import { TransactionFormBuilder } from '../../components/FormBuilder/TransactionFormBuilder';
 import { getAdapter, getNetworkById } from '../../core/ecosystemManager';

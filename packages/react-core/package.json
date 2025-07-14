@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/transaction-form-react-core",
+  "name": "@openzeppelin/contracts-ui-builder-react-core",
   "version": "1.17.0",
   "private": false,
   "description": "Core React context providers and hooks for the OpenZeppelin Transaction Form Builder.",

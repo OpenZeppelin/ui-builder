@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@openzeppelin/relayer-sdk": "1.1.0",
-    "@openzeppelin/transaction-form-react-core": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
     "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^",

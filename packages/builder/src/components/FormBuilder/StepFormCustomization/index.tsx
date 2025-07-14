@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 
+import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
   ContractSchema,
   ExecutionConfig,
@@ -7,7 +8,6 @@ import {
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/contracts-ui-builder-ui';
-import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';

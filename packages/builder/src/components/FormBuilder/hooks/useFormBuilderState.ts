@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
+import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
   ContractSchema,
   ExecutionConfig,
   FormValues,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 
 import { type BuilderFormConfig, formBuilderStore } from './formBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';

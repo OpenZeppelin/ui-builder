@@ -9,7 +9,7 @@ const packagesToUpdate = [
   '@openzeppelin/transaction-form-adapter-midnight',
   '@openzeppelin/transaction-form-adapter-solana',
   '@openzeppelin/transaction-form-adapter-stellar',
-  '@openzeppelin/transaction-form-react-core',
+  '@openzeppelin/contracts-ui-builder-react-core',
   '@openzeppelin/contracts-ui-builder-renderer',
   '@openzeppelin/contracts-ui-builder-types',
   '@openzeppelin/contracts-ui-builder-ui',

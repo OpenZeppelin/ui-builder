@@ -3,9 +3,9 @@ import { NetworkIcon } from '@web3icons/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-import { useWalletState } from '@openzeppelin/transaction-form-react-core';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { getNetworksByEcosystem } from '../../../../core/ecosystemManager';

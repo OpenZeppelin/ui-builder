@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
 
+import {
+  AdapterProvider,
+  WalletStateProvider,
+} from '@openzeppelin/contracts-ui-builder-react-core';
 import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-types';
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
-import { AdapterProvider, WalletStateProvider } from '@openzeppelin/transaction-form-react-core';
 
 import { Header } from './components/Common/Header';
 import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';

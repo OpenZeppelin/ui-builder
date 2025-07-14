@@ -234,7 +234,7 @@ export class PackageManager {
       combined['@openzeppelin/contracts-ui-builder-ui'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-utils'] = 'workspace:*';
       combined['@openzeppelin/contracts-ui-builder-renderer'] = 'workspace:*';
-      combined['@openzeppelin/transaction-form-react-core'] = 'workspace:*';
+      combined['@openzeppelin/contracts-ui-builder-react-core'] = 'workspace:*';
     }
 
     return combined;
@@ -423,7 +423,7 @@ export class PackageManager {
       '@openzeppelin/contracts-ui-builder-types',
       '@openzeppelin/contracts-ui-builder-utils',
       '@openzeppelin/contracts-ui-builder-ui',
-      '@openzeppelin/transaction-form-react-core',
+      '@openzeppelin/contracts-ui-builder-react-core',
       ...Object.values(adapterPackageMap),
     ]);
 

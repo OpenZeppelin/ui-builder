@@ -13,7 +13,7 @@ This architecture allows applications to switch between different wallet UIs (li
 ## Purpose
 
 - **UI Environment Provision**: Sets up a stable UI environment for EVM wallet interactions. The adapter exports `EvmWalletUiRoot`, a React component that internally uses a singleton `EvmUiKitManager` to manage the `WagmiConfig`, UI kit assets (like RainbowKit's provider and CSS), and overall state. This root component ensures `WagmiProvider` and `QueryClientProvider` are always rendered, aiming to prevent UI flicker during network or configuration changes.
-- **Facade Hooks**: Exposes a standardized set of React hooks (`evmFacadeHooks`) for wallet, account, and network management, wrapping `wagmi` core hooks. These are primarily consumed via `useWalletState()` from `@openzeppelin/transaction-form-react-core`.
+- **Facade Hooks**: Exposes a standardized set of React hooks (`evmFacadeHooks`) for wallet, account, and network management, wrapping `wagmi` core hooks. These are primarily consumed via `useWalletState()` from `@openzeppelin/contracts-ui-builder-react-core`.
 - **UI Kit Integration**: Supports third-party UI kits like RainbowKit, as well as a default set of custom-styled wallet UI components (`CustomConnectButton`, `CustomAccountDisplay`, `CustomNetworkSwitcher`).
 - **Configuration**: Provides a flexible, layered configuration system allowing applications to define UI kit preferences and kit-specific parameters through global application configuration (`AppConfigService`), user-authored native TypeScript configuration files, and programmatic overrides.
 
@@ -209,7 +209,7 @@ When `kitName` is configured to `'rainbowkit'`, the `EvmAdapter` (via `EvmUiKitM
 
 ## Usage within Application
 
-The primary way to interact with wallet functionalities and UI components is through `@openzeppelin/transaction-form-react-core`:
+The primary way to interact with wallet functionalities and UI components is through `@openzeppelin/contracts-ui-builder-react-core`:
 
 - **`WalletStateProvider`**: Wraps the application (or relevant parts) to provide wallet context.
 - **`useWalletState()`**: Hook to access `activeAdapter`, `activeNetworkConfig`, `walletFacadeHooks`, `isAdapterLoading`, etc.
@@ -221,7 +221,7 @@ The primary way to interact with wallet functionalities and UI components is thr
 import {
   useWalletState,
   useDerivedAccountStatus,
-} from '@openzeppelin/transaction-form-react-core';
+} from '@openzeppelin/contracts-ui-builder-react-core';
 
 function WalletConnectionHeader() {
   const { activeAdapter, isAdapterLoading } = useWalletState();

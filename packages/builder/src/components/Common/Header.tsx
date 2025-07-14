@@ -1,7 +1,7 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
+import { WalletConnectionHeader } from '@openzeppelin/contracts-ui-builder-react-core';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
-import { WalletConnectionHeader } from '@openzeppelin/transaction-form-react-core';
 
 import { DevToolsDropdown } from './DevToolsDropdown';
 

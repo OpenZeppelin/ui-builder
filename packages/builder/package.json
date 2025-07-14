@@ -37,7 +37,7 @@
     "@openzeppelin/transaction-form-adapter-midnight": "workspace:*",
     "@openzeppelin/transaction-form-adapter-solana": "workspace:*",
     "@openzeppelin/transaction-form-adapter-stellar": "workspace:*",
-    "@openzeppelin/transaction-form-react-core": "workspace:*",
+    "@openzeppelin/contracts-ui-builder-react-core": "workspace:*",
     "@openzeppelin/contracts-ui-builder-renderer": "workspace:*",
     "@openzeppelin/contracts-ui-builder-styles": "workspace:*",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",

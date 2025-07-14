@@ -10,7 +10,7 @@ import {
   WalletConnectionWithSettings,
   useDerivedAccountStatus,
   useWalletState,
-} from '@openzeppelin/transaction-form-react-core';
+} from '@openzeppelin/contracts-ui-builder-react-core';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
