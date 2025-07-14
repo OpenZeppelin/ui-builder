@@ -16,7 +16,7 @@ interface FormPreviewProps {
 
 /**
  * Form preview component that renders a preview of the form being built
- * Uses the TransactionForm component from the form-renderer package
+ * Uses the TransactionForm component from the renderer package
  */
 export function FormPreview({ formConfig, functionDetails, contractSchema }: FormPreviewProps) {
   const {

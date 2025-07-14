@@ -1,15 +1,15 @@
 /**
- * Types related to form-renderer configuration
+ * Types related to renderer configuration
  */
 
 /**
- * Configuration for the form-renderer package
- * This interface defines dependencies and settings for the form-renderer
+ * Configuration for the renderer package
+ * This interface defines dependencies and settings for the renderer
  * that will be used when exporting form projects.
  */
-export interface FormRendererConfig {
+export interface RendererConfig {
   /**
-   * Core dependencies required for all form renderer projects
+   * Core dependencies required for all renderer projects
    */
   coreDependencies: Record<string, string>;
 
@@ -32,7 +32,7 @@ export interface FormRendererConfig {
   >;
 
   // Additional configuration properties can be added in the future
-  // as form-renderer evolves, without breaking existing implementations
+  // as renderer evolves, without breaking existing implementations
 }
 
 /**

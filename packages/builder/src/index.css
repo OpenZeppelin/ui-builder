@@ -5,7 +5,7 @@
   Import Tailwind directives.
   The `source()` function is a Tailwind v4 feature that sets the base path for
   automatic content detection. By setting it to the monorepo root, Tailwind
-  can discover all necessary files in all packages, including `ui` and `form-renderer`.
+  can discover all necessary files in all packages, including `ui` and `renderer`.
 */
 @import 'tailwindcss' source('../../');
 

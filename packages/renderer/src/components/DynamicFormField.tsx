@@ -87,7 +87,7 @@ function useShouldRenderField(field: FormFieldType, control: Control<FormValues>
  * Dynamic Form Field Component
  *
  * Renders the appropriate field component based on the field type defined in the form schema.
- * This component is part of the form rendering system architecture where:
+ * This component is part of the app rendering system architecture where:
  * 1. Form schemas are generated from contract functions using adapters
  * 2. The schemas are rendered using the TransactionForm component
  * 3. TransactionForm uses DynamicFormField to render appropriate field components based on the schema

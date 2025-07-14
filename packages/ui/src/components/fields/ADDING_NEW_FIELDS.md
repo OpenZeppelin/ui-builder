@@ -6,7 +6,7 @@ This document outlines the step-by-step process for adding new field components 
 
 The form system follows a layered architecture:
 
-1. **TransactionForm**: Top-level form renderer
+1. **TransactionForm**: Top-level renderer
 2. **DynamicFormField**: Selects appropriate field component based on field type
 3. **Field Components**: Type-specific field components (TextField, NumberField, etc.)
 4. **UI Components**: Radix UI based components

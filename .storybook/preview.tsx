@@ -16,7 +16,7 @@ const preview: Preview = {
     options: {
       // Sort stories by package name first, then by component name
       storySort: {
-        order: ['Builder', 'Form Renderer', 'Styles', 'Templates'],
+        order: ['Builder', 'Renderer', 'Styles', 'Templates'],
         method: 'alphabetical',
       },
     },

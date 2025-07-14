@@ -42,10 +42,10 @@ export type Connector = {
 };
 
 /**
- * Minimal adapter interface for the form renderer and contract interaction
+ * Minimal adapter interface for the renderer and contract interaction
  *
  * This is the base interface that all chain-specific adapters must implement.
- * It defines the core functionality needed for form rendering and contract interaction.
+ * It defines the core functionality needed for app rendering and contract interaction.
  */
 export interface ContractAdapter {
   /**

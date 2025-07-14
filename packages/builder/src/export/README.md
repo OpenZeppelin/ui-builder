@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Export System is a key component of the Transaction Form Builder that allows users to export customized blockchain transaction forms as standalone applications. It generates complete, ready-to-use React applications that implement the user's form configuration using the shared form-renderer package.
+The Export System is a key component of the Transaction Form Builder that allows users to export customized blockchain transaction forms as standalone applications. It generates complete, ready-to-use React applications that implement the user's form configuration using the shared renderer package.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ graph TD
 2.  **FormCodeGenerator**: Generates React components (`main.tsx`, `App.tsx`, `GeneratedForm.tsx`) using code templates and the user's configuration.
 3.  **TemplateManager**: Manages base project template files (structure, static assets, placeholder components).
 4.  **TemplateProcessor**: Processes code templates with placeholder substitution and formatting.
-5.  **PackageManager**: Manages dependencies for the exported project (builder, adapter, form-renderer).
+5.  **PackageManager**: Manages dependencies for the exported project (builder, adapter, renderer).
 6.  **ZipGenerator**: Creates a downloadable ZIP file of the project.
 7.  **StyleManager**: Gathers necessary shared CSS files (`global.css`) and configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) for inclusion in the export.
 
@@ -110,13 +110,13 @@ The code generation system (`FormCodeGenerator`) produces the content for:
 
 1.  **`main.tsx`**: The application entry point, initializing the adapter.
 2.  **`App.tsx`**: The main application component, passing the adapter down.
-3.  **`GeneratedForm.tsx`**: The specific form component rendering the UI using `form-renderer`.
+3.  **`GeneratedForm.tsx`**: The specific form component rendering the UI using `renderer`.
 
 ### Form Component Generation
 
 The FormCodeGenerator creates a form component that:
 
-- Imports the TransactionForm component from the form-renderer package
+- Imports the TransactionForm component from the renderer package
 - Uses the appropriate blockchain adapter
 - Includes the form schema with all fields and validation
 - Handles form submission and error states
@@ -125,7 +125,7 @@ The FormCodeGenerator creates a form component that:
 
 The PackageManager handles dependency management for exported projects:
 
-1. **Core Dependencies**: Always included (React, form-renderer package)
+1. **Core Dependencies**: Always included (React, renderer package)
 2. **Chain-specific Dependencies**: Based on the selected blockchain (ethers for EVM, etc.)
 3. **Field-specific Dependencies**: Based on the field types used in the form
 
@@ -202,7 +202,7 @@ pnpm test:export
 
 Common issues:
 
-1. **Missing dependencies**: Check adapter and form-renderer configurations
+1. **Missing dependencies**: Check adapter and renderer configurations
 2. **Template not found**: Ensure the template exists in the templates directory
 3. **Export failures**: Check console for detailed error messages
 

@@ -1,7 +1,7 @@
 /**
- * FormRendererConfig interface mirrors the structure from form-renderer package.
+ * RendererConfig interface mirrors the structure from renderer package.
  */
-interface FormRendererConfig {
+interface RendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<
     string,
@@ -13,9 +13,9 @@ interface FormRendererConfig {
 }
 
 /**
- * Mock form renderer configuration that defines dependencies for specific field types.
+ * Mock renderer configuration that defines dependencies for specific field types.
  */
-export const mockFormRendererConfig: FormRendererConfig = {
+export const mockRendererConfig: RendererConfig = {
   coreDependencies: {
     react: '^19.0.0',
     'react-dom': '^19.0.0',

@@ -18,15 +18,15 @@ import { FormCodeGenerator } from '../generators/FormCodeGenerator';
 import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 
-// Mock FormRendererConfig (define before use)
-interface MockFormRendererConfig {
+// Mock RendererConfig (define before use)
+interface MockRendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<
     string,
     { runtimeDependencies: Record<string, string>; devDependencies?: Record<string, string> }
   >;
 }
-const mockFormRendererConfig: MockFormRendererConfig = {
+const mockRendererConfig: MockRendererConfig = {
   coreDependencies: {
     /* ... */
   },
@@ -134,7 +134,7 @@ describe('FormExportSystem', () => {
             return JSON.stringify(packageJson, null, 2);
           }
         ),
-      loadFormRendererConfig: vi.fn().mockResolvedValue(mockFormRendererConfig),
+      loadRendererConfig: vi.fn().mockResolvedValue(mockRendererConfig),
     } as unknown as PackageManager;
 
     // Mock ZipGenerator

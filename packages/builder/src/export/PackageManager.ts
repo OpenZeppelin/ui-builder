@@ -2,7 +2,7 @@
  * PackageManager
  *
  * This class is responsible for managing dependencies in exported form projects.
- * It loads configuration from adapters and form-renderer to determine which
+ * It loads configuration from adapters and renderer to determine which
  * dependencies to include in the package.json of exported projects.
  */
 /**
@@ -16,14 +16,14 @@
  * this configuration file across package boundaries:
  *
  * ```
- * const formRendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
+ * const rendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
  *   eager: true,
  * }) as GlobImportResult;
  * ```
  *
  * However, in development mode (pnpm dev), import.meta.glob cannot reliably
  * resolve paths that cross package boundaries in a monorepo, causing the error:
- * "Export failed: No form renderer configuration file found"
+ * "Export failed: No renderer configuration file found"
  *
  * The virtual module approach works consistently in both development and production
  * environments while preserving all the build-time optimization benefits.
@@ -33,12 +33,12 @@
  * implementation of this module. Most tests provide their own mock via the constructor
  * parameters, but the virtual module is necessary to satisfy this import statement.
  */
-import { formRendererConfig } from 'virtual:renderer-config';
+import { rendererConfig } from 'virtual:renderer-config';
 
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/transaction-form-types';
 import { logger } from '@openzeppelin/transaction-form-utils';
 
-import type { FormRendererConfig } from '../../../renderer/dist';
+import type { RendererConfig } from '../../../renderer/dist';
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
@@ -48,67 +48,64 @@ import { packageVersions } from './versions';
 
 /**
  * PackageManager is responsible for managing dependencies in exported form projects.
- * It dynamically loads configuration files from adapters and the form-renderer
+ * It dynamically loads configuration files from adapters and the renderer
  * package to determine the dependencies required for different chain types and
  * field types.
  */
 export class PackageManager {
-  private formRendererConfig: FormRendererConfig;
+  private rendererConfig: RendererConfig;
   private adapterConfigLoader: AdapterConfigLoader;
 
   /**
    * Creates a new PackageManager instance
-   * @param mockFormRendererConfig Optional form renderer config for testing
+   * @param mockRendererConfig Optional renderer config for testing
    * @param mockAdapterConfigLoader Optional adapter config loader for testing
    */
-  constructor(
-    mockFormRendererConfig?: FormRendererConfig,
-    mockAdapterConfigLoader?: AdapterConfigLoader
-  ) {
-    this.formRendererConfig = mockFormRendererConfig || this.loadFormRendererConfig();
+  constructor(mockRendererConfig?: RendererConfig, mockAdapterConfigLoader?: AdapterConfigLoader) {
+    this.rendererConfig = mockRendererConfig || this.loadRendererConfig();
     this.adapterConfigLoader = mockAdapterConfigLoader || new AdapterConfigLoader();
   }
 
   /**
-   * Load form-renderer configuration
+   * Load renderer configuration
    *
-   * This method loads the form-renderer configuration that defines
+   * This method loads the renderer configuration that defines
    * which dependencies are needed for different field types.
    *
-   * NOTE: This implementation uses the formRendererConfig imported
+   * NOTE: This implementation uses the rendererConfig imported
    * from the virtual module rather than trying to discover it via
    * import.meta.glob, which doesn't work reliably across package
    * boundaries in development mode.
    *
-   * @returns The form-renderer configuration
+   * @returns The renderer configuration
    */
-  private loadFormRendererConfig(): FormRendererConfig {
+  private loadRendererConfig(): RendererConfig {
     // Use the imported config from the virtual module
-    if (!formRendererConfig) {
-      throw new Error('No form renderer configuration file found');
+    if (!rendererConfig) {
+      throw new Error('No renderer configuration file found');
     }
 
     // Validate the config object has required properties
-    if (!this.isFormRendererConfig(formRendererConfig)) {
+    if (!this.isRendererConfig(rendererConfig)) {
       throw new Error(
-        'Invalid form renderer configuration. ' +
-          'The export "formRendererConfig" is missing required properties'
+        'Invalid renderer configuration. ' +
+          'The export "rendererConfig" is missing required properties'
       );
     }
 
-    return formRendererConfig;
+    return rendererConfig;
   }
 
   /**
-   * Check if an object appears to be a FormRendererConfig
+   * Check if an object appears to be a RendererConfig
    * @param obj The object to check
-   * @returns True if the object has the required FormRendererConfig properties
+   * @returns True if the object has the required RendererConfig properties
    */
-  private isFormRendererConfig(obj: unknown): obj is FormRendererConfig {
+  private isRendererConfig(obj: unknown): obj is RendererConfig {
     if (!obj || typeof obj !== 'object') return false;
 
-    // Check for properties required in FormRendererConfig
-    const candidate = obj as Partial<FormRendererConfig>;
+    // Check for properties required in RendererConfig
+    const candidate = obj as Partial<RendererConfig>;
     return (
       candidate.fieldDependencies !== undefined &&
       candidate.coreDependencies !== undefined &&
@@ -118,11 +115,11 @@ export class PackageManager {
   }
 
   /**
-   * Get core dependencies from form-renderer config
+   * Get core dependencies from renderer config
    * @returns Record of package names to version ranges
    */
   private getCoreDependencies(): Record<string, string> {
-    return this.formRendererConfig.coreDependencies;
+    return this.rendererConfig.coreDependencies;
   }
 
   /**
@@ -152,7 +149,7 @@ export class PackageManager {
   }
 
   /**
-   * Get field-specific runtime dependencies from form-renderer config
+   * Get field-specific runtime dependencies from renderer config
    * @param formConfig The form configuration
    * @returns Record of package names to version ranges
    */
@@ -164,7 +161,7 @@ export class PackageManager {
 
     // Add dependencies for each field type
     for (const fieldType of fieldTypes) {
-      const fieldDeps = this.formRendererConfig.fieldDependencies[fieldType];
+      const fieldDeps = this.rendererConfig.fieldDependencies[fieldType];
 
       if (fieldDeps) {
         // Extract runtime dependencies
@@ -176,7 +173,7 @@ export class PackageManager {
   }
 
   /**
-   * Get field-specific development dependencies from form-renderer config
+   * Get field-specific development dependencies from renderer config
    * @param formConfig The form configuration
    * @returns Record of package names to version ranges
    */
@@ -193,7 +190,7 @@ export class PackageManager {
 
     // Add dev dependencies for each field type
     for (const fieldType of fieldTypes) {
-      const fieldDeps = this.formRendererConfig.fieldDependencies[fieldType];
+      const fieldDeps = this.rendererConfig.fieldDependencies[fieldType];
 
       if (fieldDeps && fieldDeps.devDependencies) {
         // Merge dev dependencies
@@ -456,8 +453,8 @@ export class PackageManager {
     // Add a comment about how to update dependencies
     packageJson.scripts = packageJson.scripts || {};
 
-    // Add a script to update the form-renderer package
-    (packageJson.scripts as Record<string, string>)['update-form-renderer'] =
+    // Add a script to update the renderer package
+    (packageJson.scripts as Record<string, string>)['update-renderer'] =
       'npm update @openzeppelin/contracts-ui-builder-renderer';
 
     // Add a script to check for outdated dependencies

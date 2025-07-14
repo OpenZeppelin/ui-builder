@@ -2,7 +2,7 @@
  * Form Type Definitions for the Builder Package
  *
  * NOTE: This file contains only types specific to the builder package.
- * Common form types are imported directly from the form-renderer package
+ * Common form types are imported directly from the renderer package
  * when needed, rather than being re-exported here.
  * If you see that the types must be used in multiple packages, please consider
  * adding them to the @openzeppelin/transaction-form-types package instead.
@@ -16,7 +16,7 @@ import type {
 
 /**
  * Configuration input used during form creation and editing in the builder
- * This is specific to the builder package and extends CommonFormProperties from form-renderer
+ * This is specific to the builder package and extends CommonFormProperties from renderer
  */
 export interface BuilderFormConfig extends CommonFormProperties {
   /**

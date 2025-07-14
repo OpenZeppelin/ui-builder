@@ -29,9 +29,9 @@ const getWorkspaceVersion = (packageName) => {
     const nameWithoutScope = packageName.split('/')[1];
     let packageDirName = nameWithoutScope.replace('transaction-form-', '');
 
-    // Handle special case for form-renderer
+    // Handle special case for renderer
     if (packageName === '@openzeppelin/contracts-ui-builder-renderer') {
-      packageDirName = 'form-renderer';
+      packageDirName = 'renderer';
     }
 
     const packageJsonPath = path.resolve(__dirname, '../packages', packageDirName, 'package.json');

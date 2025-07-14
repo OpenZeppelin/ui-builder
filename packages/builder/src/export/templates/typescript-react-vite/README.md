@@ -164,4 +164,4 @@ This will create a production-ready build in the `dist/` directory.
 - [React Documentation](https://react.dev/)
 - [Vite Documentation](https://vitejs.dev/)
 - [OpenZeppelin Docs](https://docs.openzeppelin.com/)
-- [Transaction Form Renderer Documentation](https://github.com/OpenZeppelin/transaction-form-builder)
+- [Transaction Renderer Documentation](https://github.com/OpenZeppelin/transaction-form-builder)

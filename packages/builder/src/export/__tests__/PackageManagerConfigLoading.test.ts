@@ -18,7 +18,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Ecosystem } from '@openzeppelin/transaction-form-types';
 
-import type { FormRendererConfig } from '../../../../renderer/dist';
+import type { RendererConfig } from '../../../../renderer/dist';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -47,7 +47,7 @@ vi.mock('virtual:adapter-configs', () => {
 });
 
 vi.mock('virtual:renderer-config', () => {
-  const formRendererConfig = {
+  const rendererConfig = {
     coreDependencies: {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
@@ -61,14 +61,14 @@ vi.mock('virtual:renderer-config', () => {
       },
     },
   };
-  return { formRendererConfig };
+  return { rendererConfig };
 });
 
 /**
- * Mock form renderer configuration that defines dependencies for specific field types.
- * This mimics what would be loaded from the form-renderer package's config.
+ * Mock renderer configuration that defines dependencies for specific field types.
+ * This mimics what would be loaded from the renderer package's config.
  */
-const mockFormRendererConfig: FormRendererConfig = {
+const mockRendererConfig: RendererConfig = {
   coreDependencies: {
     react: '^19.0.0',
     'react-dom': '^19.0.0',
@@ -113,8 +113,8 @@ describe('PackageManager configuration loading', () => {
    * the mocked import.meta.glob.
    */
   describe('Using constructor injection', () => {
-    it('should properly load form renderer config from constructor', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+    it('should properly load renderer config from constructor', async () => {
+      const packageManager = new PackageManager(mockRendererConfig);
       const dependencies = await packageManager.getDependencies(createMinimalFormConfig(), 'evm');
       expect(dependencies).toHaveProperty('react', '^19.0.0');
       expect(dependencies).toHaveProperty(
@@ -124,14 +124,14 @@ describe('PackageManager configuration loading', () => {
     });
 
     it('should include field-specific dependencies based on form config', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig(['text', 'date']);
       const dependencies = await packageManager.getDependencies(formConfig, 'evm');
       expect(dependencies).toHaveProperty('react-datepicker', '^4.14.0');
     });
 
     it('should properly update package.json with dependencies', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig(['date']);
       const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
       const updated = await packageManager.updatePackageJson(
@@ -146,14 +146,14 @@ describe('PackageManager configuration loading', () => {
     });
 
     it('should handle dev dependencies correctly', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig(['date']);
       const devDependencies = await packageManager.getDevDependencies(formConfig, 'evm');
       expect(devDependencies).toHaveProperty('@types/react-datepicker', '^4.11.2');
     });
 
     it('should apply correct versioning for local environment', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
       const updated = await packageManager.updatePackageJson(
@@ -169,7 +169,7 @@ describe('PackageManager configuration loading', () => {
     });
 
     it('should include upgrade instructions in package.json', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({});
       const updated = await packageManager.updatePackageJson(
@@ -179,11 +179,11 @@ describe('PackageManager configuration loading', () => {
         'testFunction'
       );
       const result = JSON.parse(updated);
-      expect(result.scripts).toHaveProperty('update-form-renderer');
+      expect(result.scripts).toHaveProperty('update-renderer');
     });
 
     it('should handle custom dependencies from export options', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig();
       const basePackageJson = JSON.stringify({});
       const customDeps = { 'custom-dep': '^1.0.0' };
@@ -209,7 +209,7 @@ describe('PackageManager configuration loading', () => {
 
   describe('Error handling', () => {
     it('should handle unknown chain types gracefully', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig();
       const deps = await packageManager.getDependencies(formConfig, 'unknown' as Ecosystem);
       expect(deps).toHaveProperty('react');
@@ -217,7 +217,7 @@ describe('PackageManager configuration loading', () => {
     });
 
     it('should handle unknown field types gracefully', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig(['unknown-type']);
       const deps = await packageManager.getDependencies(formConfig, 'evm');
       expect(deps).toHaveProperty('@openzeppelin/transaction-form-adapter-evm');
@@ -225,7 +225,7 @@ describe('PackageManager configuration loading', () => {
     });
 
     it('should handle malformed package.json gracefully', async () => {
-      const packageManager = new PackageManager(mockFormRendererConfig);
+      const packageManager = new PackageManager(mockRendererConfig);
       const malformedJson = 'not-a-json';
       const formConfig = createMinimalFormConfig();
       await expect(

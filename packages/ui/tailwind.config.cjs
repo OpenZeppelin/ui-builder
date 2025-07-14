@@ -4,7 +4,7 @@ module.exports = {
   presets: [require('../../tailwind.config.cjs')],
   // Configure content scanning for *this package only*.
   content: [
-    './src/**/*.{js,ts,jsx,tsx}', // Scan source files in form-renderer
+    './src/**/*.{js,ts,jsx,tsx}', // Scan source files in renderer
     // DO NOT scan builder or other packages here.
   ],
   // darkMode is inherited from the preset.

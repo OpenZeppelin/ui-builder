@@ -41,7 +41,7 @@ export function crossPackageModulesProviderPlugin(): Plugin {
         return `
           import * as _module from '${aliasKey}';
           // Re-export known named exports
-          export const formRendererConfig = _module.formRendererConfig;
+          export const rendererConfig = _module.rendererConfig;
           // Add other exports here if the target module has more...
         `;
       }

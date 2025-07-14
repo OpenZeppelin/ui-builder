@@ -1,9 +1,9 @@
-# Form Renderer Package
+# Renderer Package
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
 [![License](https://img.shields.io/npm/l/@openzeppelin/contracts-ui-builder-renderer.svg)](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE)
 
-A specialized library for rendering customizable transaction forms for blockchain applications. Part of the Transaction Form Builder ecosystem.
+A specialized library for rendering customizable transaction form and other components for blockchain applications. Part of the Transaction Form Builder ecosystem.
 
 ## Installation
 
@@ -20,7 +20,7 @@ pnpm add @openzeppelin/contracts-ui-builder-renderer @openzeppelin/transaction-f
 
 ## Features
 
-- Lightweight form rendering components
+- Lightweight app rendering components
 - Framework-agnostic design
 - TypeScript support with full type definitions (via @openzeppelin/transaction-form-types)
 - Support for both ESM and CommonJS environments
@@ -49,7 +49,7 @@ import type {
 
 ## Component Styling
 
-This package renders forms using UI components and field components sourced from the `@openzeppelin/transaction-form-ui` package. **This `form-renderer` package itself does not ship with pre-compiled CSS or contain UI component implementations directly.**
+This package renders forms using UI components and field components sourced from the `@openzeppelin/transaction-form-ui` package. **This `renderer` package itself does not ship with pre-compiled CSS or contain UI component implementations directly.**
 
 Styling relies on the consuming application (like `packages/builder` or an exported project) to:
 
@@ -180,7 +180,7 @@ The main component for rendering transaction forms. It internally uses `DynamicF
 
 ### Utilities
 
-This package provides core form rendering logic and utilities. For UI components (Buttons, Inputs, Cards, etc.) and Field components (AddressField, TextField, etc.), please refer to the `@openzeppelin/transaction-form-ui` package.
+This package provides core app rendering logic and utilities. For UI components (Buttons, Inputs, Cards, etc.) and Field components (AddressField, TextField, etc.), please refer to the `@openzeppelin/transaction-form-ui` package.
 
 #### `logger`
 
@@ -204,20 +204,20 @@ const uniqueFieldId = generateId('field_');
 
 ## Configuration System
 
-The form-renderer package includes a configuration system that defines dependencies and other settings. This configuration is used when forms are exported to ensure proper dependencies are included in the generated project.
+The renderer package includes a configuration system that defines dependencies and other settings. This configuration is used when forms are exported to ensure proper dependencies are included in the generated project.
 
-### Form Renderer Configuration File
+### Renderer Configuration File
 
-Create a `config.ts` file in the form-renderer package:
+Create a `config.ts` file in the renderer package:
 
 ```typescript
 // packages/renderer/src/config.ts
-import type { FormRendererConfig } from './types/FormRendererConfig';
+import type { RendererConfig } from './types/RendererConfig';
 
 /**
- * Configuration for the form-renderer package
+ * Configuration for the renderer package
  */
-export const formRendererConfig: FormRendererConfig = {
+export const rendererConfig: RendererConfig = {
   /**
    * Dependencies for specific field types
    * Only dependencies for fields used in a form will be included in exports
@@ -258,7 +258,7 @@ export const formRendererConfig: FormRendererConfig = {
   },
 
   /**
-   * Core dependencies required by form-renderer
+   * Core dependencies required by renderer
    * These will be included in all exported projects
    */
   coreDependencies: {
@@ -275,7 +275,7 @@ export const formRendererConfig: FormRendererConfig = {
 
 ### Dependency Management
 
-The FormRendererConfig is used by the export system to:
+The RendererConfig is used by the export system to:
 
 1. Include core dependencies required by all forms
 2. Add field-specific dependencies based on the fields used in a form
@@ -289,12 +289,12 @@ When a user exports a form, the system analyzes the fields used in the form and 
 
 The system applies a semantic versioning strategy to dependencies:
 
-1. For form-renderer packages, it uses caret ranges (^) to allow minor and patch updates
+1. For renderer packages, it uses caret ranges (^) to allow minor and patch updates
 2. This enables exported forms to receive updates without needing to re-export the entire form
 
 ### Configuration Discovery
 
-The Package Management System automatically discovers the form-renderer configuration. The exported `formRendererConfig` constant name is expected by the system.
+The Package Management System automatically discovers the renderer configuration. The exported `rendererConfig` constant name is expected by the system.
 
 ## Development
 

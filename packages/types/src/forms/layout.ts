@@ -1,5 +1,5 @@
 /**
- * Layout configuration for form rendering (fixed values)
+ * Layout configuration for app rendering (fixed values)
  */
 export interface FormLayout {
   /**

@@ -1,5 +1,5 @@
 /**
- * PostCSS Configuration for `form-renderer` standalone build.
+ * PostCSS Configuration for `renderer` standalone build.
  * It references the plugins defined in the root config.
  */
 module.exports = {

@@ -31,7 +31,7 @@ interface GeneratedFormProps {
  * Generated Transaction Form for @@function-id@@
  *
  * This component renders a form for interacting with a blockchain contract.
- * It uses the shared form-renderer package which ensures consistent behavior
+ * It uses the shared renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
 export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedFormProps) {

@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 
-// TODO: review and delete this file in favor of the form-renderer package
+// TODO: review and delete this file in favor of the renderer package
 export const buttonVariants = cva(
   'ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
   {

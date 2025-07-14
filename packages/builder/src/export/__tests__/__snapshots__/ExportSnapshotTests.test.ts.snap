@@ -106,7 +106,7 @@ interface GeneratedFormProps {
  * Generated Transaction Form for transfer
  *
  * This component renders a form for interacting with a blockchain contract.
- * It uses the shared form-renderer package which ensures consistent behavior
+ * It uses the shared renderer package which ensures consistent behavior
  * with the preview in the form builder.
  */
 export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedFormProps) {
@@ -313,7 +313,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-form-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
   },
 }
 `;
@@ -360,7 +360,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-form-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
   },
 }
 `;

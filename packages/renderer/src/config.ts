@@ -1,18 +1,18 @@
 /**
  * TODO: check and verify that we still need this file...
  *
- * Form Renderer Configuration
+ * Renderer Configuration
  *
  * This file defines the dependencies required for different field types
- * and core dependencies for the form renderer.
+ * and core dependencies for the renderer.
  */
-import type { FormRendererConfig } from './types/FormRendererConfig';
+import type { RendererConfig } from './types/RendererConfig';
 
 /**
- * Configuration for the form renderer package
+ * Configuration for the renderer package
  * Used by the export system to determine dependencies for exported forms
  */
-export const formRendererConfig: FormRendererConfig = {
+export const rendererConfig: RendererConfig = {
   // Core dependencies required by all exported forms
   coreDependencies: {
     react: '^19.0.0',

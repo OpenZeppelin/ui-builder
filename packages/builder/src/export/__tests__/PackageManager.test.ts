@@ -5,8 +5,8 @@ import { Ecosystem } from '@openzeppelin/transaction-form-types';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
-// Mock FormRendererConfig since we can't import it directly
-interface MockFormRendererConfig {
+// Mock RendererConfig since we can't import it directly
+interface MockRendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<
     string,
@@ -18,8 +18,8 @@ interface MockFormRendererConfig {
 }
 
 describe('PackageManager', () => {
-  // Mock form renderer config for testing
-  const mockFormRendererConfig: MockFormRendererConfig = {
+  // Mock renderer config for testing
+  const mockRendererConfig: MockRendererConfig = {
     coreDependencies: {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
@@ -76,7 +76,7 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
+      packageManager = new PackageManager(mockRendererConfig as MockRendererConfig);
     });
 
     it('should include core dependencies for all forms', async () => {
@@ -147,7 +147,7 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
+      packageManager = new PackageManager(mockRendererConfig as MockRendererConfig);
     });
 
     it('should include field-specific dev dependencies', async () => {
@@ -165,7 +165,7 @@ describe('PackageManager', () => {
     let packageManager: PackageManager;
 
     beforeEach(() => {
-      packageManager = new PackageManager(mockFormRendererConfig as MockFormRendererConfig);
+      packageManager = new PackageManager(mockRendererConfig as MockRendererConfig);
     });
 
     // Create test package.json content
@@ -316,7 +316,7 @@ describe('PackageManager', () => {
       const result = JSON.parse(updated);
 
       // Should add helper scripts
-      expect(result.scripts).toHaveProperty('update-form-renderer');
+      expect(result.scripts).toHaveProperty('update-renderer');
       expect(result.scripts).toHaveProperty('check-deps');
     });
   });

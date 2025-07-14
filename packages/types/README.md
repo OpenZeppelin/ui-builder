@@ -136,7 +136,7 @@ Types for form structure, rendering, and handling:
 
 - `FieldType`: Types of form fields (text, number, boolean, address, select, etc.).
 - `FormField`: Complete definition of a form field including ID, type, label, validation, etc.
-- `RenderFormSchema`: The schema used by the form-renderer package.
+- `RenderFormSchema`: The schema used by the renderer package.
 - `BuilderFormConfig`: The configuration used by the form builder UI.
 - `FieldValidation`: Validation rules for form fields.
 - `FormValues`: Type representing the collected data from a form submission.
@@ -163,10 +163,10 @@ Types related to the status of transaction submissions:
 
 ## Integration with Other Packages
 
-This package is a dependency for both the builder and form-renderer packages:
+This package is a dependency for both the builder and renderer packages:
 
 - **Builder Package**: Uses these types for its adapter implementations, form generation, and export functionality
-- **Form Renderer Package**: Uses these types for form field rendering and validation
+- **Renderer Package**: Uses these types for form field rendering and validation
 
 ## Development
 

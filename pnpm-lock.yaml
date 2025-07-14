@@ -343,7 +343,7 @@ importers:
         version: 3.1.1(@babel/runtime@7.27.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@web3icons/react':
         specifier: ^4.0.16
-        version: 4.0.17(react@19.1.0)(typescript@5.8.3)
+        version: 4.0.19(react@19.1.0)(typescript@5.8.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -696,7 +696,7 @@ importers:
         version: 1.2.7(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@web3icons/react':
         specifier: ^4.0.16
-        version: 4.0.17(react@19.1.0)(typescript@5.8.3)
+        version: 4.0.19(react@19.1.0)(typescript@5.8.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -3521,13 +3521,13 @@ packages:
   '@walletconnect/window-metadata@1.0.1':
     resolution: {integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==}
 
-  '@web3icons/common@0.11.14':
-    resolution: {integrity: sha512-TEqInrR1fCW9V6bI5AbmZjxsTGbyF7jF0XJS9dsS3PAokVnkGGNKAP8J2wiqyFZ7kZSpcnnNLqarsliIvEUSIA==}
+  '@web3icons/common@0.11.15':
+    resolution: {integrity: sha512-ahTk6hf3tSXDplWwaM2TKqemKWhSeb1Wajg9t5rJ4tR29gOUx7s3yxXEkMgRwow0svg9ZHtrJOoVuttgl9KNBw==}
     peerDependencies:
       typescript: ^5.0.0
 
-  '@web3icons/react@4.0.17':
-    resolution: {integrity: sha512-es05+Oy+mb1wnFossmdK2orTI0rb5BMUUBdRchrTgtlPS9zrDgGtTNwYNciQFfKOSx0AQtwwzdBYmDSAxduagw==}
+  '@web3icons/react@4.0.19':
+    resolution: {integrity: sha512-+FqWm9+1SqIuf0H7PCZl5l0bpZWUgAW8ORIhjaGbOiD0U/gwH9L3DWbVHISq3VxIgB24H4tm1mygHBm0KF8vGw==}
     peerDependencies:
       react: ^18.2.0
 
@@ -12358,13 +12358,13 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  '@web3icons/common@0.11.14(typescript@5.8.3)':
+  '@web3icons/common@0.11.15(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
-  '@web3icons/react@4.0.17(react@19.1.0)(typescript@5.8.3)':
+  '@web3icons/react@4.0.19(react@19.1.0)(typescript@5.8.3)':
     dependencies:
-      '@web3icons/common': 0.11.14(typescript@5.8.3)
+      '@web3icons/common': 0.11.15(typescript@5.8.3)
       react: 19.1.0
     transitivePeerDependencies:
       - typescript

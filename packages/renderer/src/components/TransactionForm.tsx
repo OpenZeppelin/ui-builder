@@ -20,8 +20,8 @@ import { TransactionStatusDisplay } from './transaction';
 /**
  * Transaction Form Component
  *
- * This is the main entry point for the form rendering system. It represents the top level of
- * the form rendering architecture:
+ * This is the main entry point for the app rendering system. It represents the top level of
+ * the app rendering architecture:
  *
  * 1. TransactionForm receives a schema and adapter from the transaction form builder
  * 2. It sets up React Hook Form for state management and validation

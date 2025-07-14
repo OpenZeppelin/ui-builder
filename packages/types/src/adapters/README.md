@@ -15,7 +15,7 @@ The `ContractAdapter` interface defines the methods that must be implemented by 
 
 ### Wallet Connection Methods
 
-The adapter interface includes methods for wallet connection functionality, allowing form-renderer components to work with any supported blockchain wallet in a chain-agnostic way:
+The adapter interface includes methods for wallet connection functionality, allowing renderer components to work with any supported blockchain wallet in a chain-agnostic way:
 
 #### `supportsWalletConnection(): boolean`
 

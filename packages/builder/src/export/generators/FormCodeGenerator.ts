@@ -24,7 +24,7 @@ const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx'
 
 /**
  * FormCodeGenerator class responsible for generating React components
- * that use the shared form-renderer package.
+ * that use the shared renderer package.
  *
  * Current implementation:
  * - Generates only the form component code
@@ -41,7 +41,7 @@ export class FormCodeGenerator {
   }
 
   /**
-   * Generate a React component for a form that uses the shared form-renderer package.
+   * Generate a React component for a form that uses the shared renderer package.
    * Uses a consistent import path that works in both development and production
    * thanks to pnpm workspace resolution.
    *

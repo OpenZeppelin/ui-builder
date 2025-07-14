@@ -7,7 +7,7 @@ This guide explains how to import files across package boundaries in our monorep
 When using `import.meta.glob` to dynamically import files across package boundaries (e.g., from `packages/builder` to `packages/renderer`), Vite's development server has limitations that prevent it from correctly resolving these imports. This results in errors like:
 
 ```
-Export failed: No form renderer configuration file found
+Export failed: No renderer configuration file found
 ```
 
 ## Our Solution: Virtual Modules
@@ -83,7 +83,7 @@ Add a mock implementation for tests in `packages/builder/vitest.config.ts`:
 const virtualModuleMocks: Record<string, string> = {
   // Existing mocks
   'virtual:renderer-config': `
-    export const formRendererConfig = {
+    export const rendererConfig = {
       coreDependencies: {},
       fieldDependencies: {}
     };
@@ -106,24 +106,24 @@ Import from the virtual module in your code:
 import { myExport } from 'virtual:my-new-module';
 ```
 
-## Example: The Form Renderer Config
+## Example: The Renderer Config
 
 The original implementation using `import.meta.glob`:
 
 ```typescript
-const formRendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
+const rendererConfigFile = import.meta.glob('../../renderer/src/config.ts', {
   eager: true,
 }) as GlobImportResult;
 
 // This works in production but fails in development
-const formRendererConfig = this.getConfigFromGlobResult(formRendererConfigFile);
+const rendererConfig = this.getConfigFromGlobResult(rendererConfigFile);
 ```
 
 The new implementation using a virtual module:
 
 ```typescript
 // This works in both development and production
-import { formRendererConfig } from 'virtual:renderer-config';
+import { rendererConfig } from 'virtual:renderer-config';
 ```
 
 ## Troubleshooting

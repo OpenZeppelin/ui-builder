@@ -4,7 +4,7 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
 // Define explicit types for our test configs
-interface TestFormRendererConfig {
+interface TestRendererConfig {
   coreDependencies: Record<string, string>;
   fieldDependencies: Record<
     string,
@@ -16,8 +16,8 @@ interface TestFormRendererConfig {
 }
 
 describe('PackageManager Integration Tests', () => {
-  // Create a test form renderer configuration
-  const testFormRendererConfig: TestFormRendererConfig = {
+  // Create a test renderer configuration
+  const testRendererConfig: TestRendererConfig = {
     coreDependencies: {
       'core-lib': '^1.0.0', // Mock external core dep
       react: '^19.0.0',
@@ -81,7 +81,7 @@ describe('PackageManager Integration Tests', () => {
 
   describe('getDependencies', () => {
     it('should include core, renderer, types, and specific adapter package based on chain type', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['text']); // Basic form
 
       // EVM
@@ -110,7 +110,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should include field-specific dependencies based on form fields', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
 
       const basicFormConfig = createFormConfig(['text', 'number']);
       const advancedFormConfig = createFormConfig(['date', 'select']);
@@ -141,7 +141,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should use workspace protocol for internal packages', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['text']);
       const deps = await packageManager.getDependencies(formConfig, 'evm');
 
@@ -165,7 +165,7 @@ describe('PackageManager Integration Tests', () => {
     );
 
     it('should merge dependencies correctly, preserving existing ones and applying strategy', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['date', 'text'], 'mergeTest');
 
       const updatedJson = await packageManager.updatePackageJson(
@@ -204,7 +204,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should update basic package metadata (name, description)', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['text'], 'metadataTest');
 
       const updatedJson = await packageManager.updatePackageJson(
@@ -223,7 +223,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should apply custom metadata from export options', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['text'], 'customMeta');
 
       const updatedJson = await packageManager.updatePackageJson(
@@ -249,7 +249,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should only add devDependencies if contributed by adapters or fields', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig = createFormConfig(['text']); // This field has no dev deps
       const baseJsonNoDev = JSON.stringify({ name: 'no-dev', dependencies: {} });
 
@@ -268,7 +268,7 @@ describe('PackageManager Integration Tests', () => {
     });
 
     it('should include UI kit dependencies when a UI kit is configured', async () => {
-      const packageManager = new PackageManager(testFormRendererConfig);
+      const packageManager = new PackageManager(testRendererConfig);
       const formConfig: BuilderFormConfig = {
         ...createFormConfig(['text'], 'uiKitTest'),
         uiKitConfig: {

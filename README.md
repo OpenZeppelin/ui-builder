@@ -35,8 +35,8 @@ This project is organized as a monorepo with the following packages:
 
 - **packages/builder**: The main application with the form builder UI and core logic.
 - **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
-- **packages/renderer**: The shared form rendering library (published to npm), responsible for dynamically rendering forms based on schemas and an active adapter.
-- **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `form-renderer` to ensure a consistent look and feel.
+- **packages/renderer**: The shared app rendering library (published to npm), responsible for dynamically rendering forms and other components based on schemas and an active adapter.
+- **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `renderer` to ensure a consistent look and feel.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations.
 - **packages/utils**: Shared, framework-agnostic utility functions (e.g., logger, app configuration service).
@@ -47,21 +47,21 @@ This project is organized as a monorepo with the following packages:
 
 ## Packages
 
-### Form-Renderer Package
+### Renderer Package
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
 
-The `form-renderer` package provides a reusable library for rendering transaction forms. It's published to npm and can be used independently of the main application.
+The `renderer` package provides a reusable library for rendering transaction forms and other components. It's published to npm and can be used independently of the main application.
 
 Features:
 
-- Lightweight form rendering components
+- Lightweight app rendering components
 - Framework-agnostic design
 - TypeScript support with full type definitions
 - Support for both ESM and CommonJS environments
 - Customizable styling options
 
-For more details, see the [Form-Renderer README](./packages/renderer/README.md).
+For more details, see the [Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 
@@ -236,16 +236,16 @@ transaction-form-builder/
 │   │   ├── README.md
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   ├── form-renderer/       # Shared form rendering library
+│   ├── renderer/            # Shared app rendering library
 │   │   ├── src/
-│   │   │   ├── components/  # Form rendering specific components (TransactionForm, DynamicFormField)
+│   │   │   ├── components/  # App rendering specific components (TransactionForm, DynamicFormField)
 │   │   │   │   ├── ContractStateWidget/
 │   │   │   │   ├── transaction/
 │   │   │   │   └── wallet/
-│   │   │   ├── hooks/           # Form rendering hooks
-│   │   │   ├── types/           # Type definitions specific to form-renderer
-│   │   │   ├── utils/           # Utility functions specific to form-renderer
-│   │   │   ├── stories/         # Stories for form-renderer specific components (e.g., TransactionForm)
+│   │   │   ├── hooks/           # App rendering hooks
+│   │   │   ├── types/           # Type definitions specific to renderer
+│   │   │   ├── utils/           # Utility functions specific to renderer
+│   │   │   ├── stories/         # Stories for renderer specific components (e.g., TransactionForm)
 │   │   │   ├── test/            # Package-specific tests
 │   │   │   └── index.ts         # Public API exports (re-exports from @openzeppelin/transaction-form-ui for components)
 │   │   ├── scripts/             # Build scripts
@@ -306,7 +306,7 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/transaction-form-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/transaction-form-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
-- **Form Renderer**: Shared library containing form rendering components and common utilities (like logging).
+- **Renderer**: Shared library containing app rendering components and common utilities (like logging).
 - **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
@@ -338,11 +338,11 @@ For more detailed documentation about the adapter pattern, implementation guidel
 
 ## Component Architecture
 
-The project follows a structured component architecture centered around form rendering:
+The project follows a structured component architecture centered around app rendering:
 
-### Form Renderer Components
+### Renderer Components
 
-The form-renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/transaction-form-ui` package.
+The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/transaction-form-ui` package.
 
 These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
 
@@ -365,7 +365,7 @@ Storybook stories are organized to:
 - Provide interactive examples for development
 - Serve as visual regression tests
 
-Stories are located in the `stories` directory of each package, with form-renderer components having the most comprehensive documentation.
+Stories are located in the `stories` directory of each package, with renderer components having the most comprehensive documentation.
 
 ## Code Style
 
@@ -534,7 +534,7 @@ This project uses GitHub Actions for continuous integration and delivery:
 - **CI Workflow**: Runs tests, linting, and type checking for all packages
 - **Coverage Workflow**: Generates and uploads test coverage reports
 - **Release Workflow**: Manages versioning and releases using Changesets
-- **Form-Renderer Publish Workflow**: Builds and tests the form-renderer package automatically when changes are merged to main
+- **Renderer Publish Workflow**: Builds and tests the renderer package automatically when changes are merged to main
 - **Security Workflow**: Checks for security vulnerabilities
 - **Dependencies Workflow**: Checks for outdated dependencies
 - **Update Dependencies Workflow**: Automatically updates dependencies
@@ -588,7 +588,7 @@ monorepo.
 To ensure consistency, the following packages use symlinks pointing to the root configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`):
 
 - **Builder Package**: Links to root configuration files.
-- **Form Renderer Package**: Links to root configuration files.
+- **Renderer Package**: Links to root configuration files.
 - **Styles Package**: Links to root configuration files.
 
 During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported

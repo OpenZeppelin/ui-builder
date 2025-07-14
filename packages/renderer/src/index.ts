@@ -1,11 +1,11 @@
 /**
- * Transaction Form Renderer
+ * Transaction Renderer
  *
- * A shared form rendering library for blockchain transaction forms
+ * A shared app rendering library for blockchain transaction forms
  */
 
 // Export types from FormTypes
-export type { FormRendererConfig } from './types/FormRendererConfig';
+export type { RendererConfig } from './types/RendererConfig';
 
 // Export internal components to avoid name conflicts
 export { TransactionForm } from './components/TransactionForm';

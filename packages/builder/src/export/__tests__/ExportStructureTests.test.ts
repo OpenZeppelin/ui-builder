@@ -99,7 +99,7 @@ describe('Export Structure Tests', () => {
       const dependencies = packageJson.dependencies;
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
-      // Check for the form-renderer package as well
+      // Check for the renderer package as well
       expect(dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
     });
 
