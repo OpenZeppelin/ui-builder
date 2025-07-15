@@ -136,9 +136,15 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      lucide-react:
+        specifier: ^0.510.0
+        version: 0.510.0(react@19.1.0)
       react:
         specifier: ^19.0.0
         version: 19.1.0
+      react-hook-form:
+        specifier: ^7.60.0
+        version: 7.60.0(react@19.1.0)
     devDependencies:
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.8
@@ -188,6 +194,9 @@ importers:
       '@openzeppelin/contracts-ui-builder-utils':
         specifier: workspace:^
         version: link:../utils
+      lucide-react:
+        specifier: ^0.510.0
+        version: 0.510.0(react@19.1.0)
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -228,6 +237,9 @@ importers:
       bs58:
         specifier: ^5.0.0
         version: 5.0.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -366,7 +378,7 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
       react-hook-form:
-        specifier: ^7.58.1
+        specifier: ^7.60.0
         version: 7.60.0(react@19.1.0)
       sonner:
         specifier: ^2.0.5
@@ -486,6 +498,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.83.0(react@19.1.0)
+      lucide-react:
+        specifier: ^0.510.0
+        version: 0.510.0(react@19.1.0)
     devDependencies:
       '@types/react':
         specifier: ^19.1.8
@@ -566,7 +581,7 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
       react-hook-form:
-        specifier: ^7.58.1
+        specifier: ^7.60.0
         version: 7.60.0(react@19.1.0)
       tailwind-merge:
         specifier: ^3.3.1
@@ -712,6 +727,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-hook-form:
+        specifier: ^7.60.0
+        version: 7.60.0(react@19.1.0)
       sonner:
         specifier: ^2.0.5
         version: 2.0.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
