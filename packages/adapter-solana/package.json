@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-solana",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Solana Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",

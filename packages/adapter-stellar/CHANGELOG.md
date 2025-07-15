@@ -1,5 +1,12 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037)]:
+  - @openzeppelin/contracts-ui-builder-types@0.1.2
+
 ## 0.3.0
 
 ### Minor Changes
