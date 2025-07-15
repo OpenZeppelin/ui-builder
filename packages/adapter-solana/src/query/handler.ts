@@ -2,7 +2,7 @@ import type {
   ContractSchema,
   NetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // Assuming we might reuse some types temporarily
 // Placeholder type for wallet implementation

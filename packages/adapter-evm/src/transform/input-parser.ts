@@ -1,6 +1,6 @@
 import { getAddress, isAddress } from 'viem';
 
-import type { FunctionParameter } from '@openzeppelin/transaction-form-types';
+import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Recursively parses a raw input value based on its expected ABI type definition.

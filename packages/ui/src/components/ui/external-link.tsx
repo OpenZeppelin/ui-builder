@@ -2,7 +2,7 @@ import { ExternalLinkIcon } from 'lucide-react';
 
 import React from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 // TODO: Add props
 // interface ExternalLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {

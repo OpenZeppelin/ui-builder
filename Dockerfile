@@ -1,7 +1,7 @@
 # Build stage
 FROM node:20-slim AS builder
 
-WORKDIR /app
+WORKDIR /builder
 
 # Set NODE_ENV to development to ensure devDependencies are installed for the build
 ENV NODE_ENV=development
@@ -31,9 +31,9 @@ RUN --mount=type=secret,id=npm_token \
            pnpm install --frozen-lockfile && \
            rm .npmrc'
 
-# Build the core application
-# The filter @openzeppelin/transaction-form-builder-core targets the specific package we want to build
-RUN pnpm --filter @openzeppelin/transaction-form-builder-core build
+# Build the builder application
+# The filter @openzeppelin/contracts-ui-builder-app targets the specific package we want to build
+RUN pnpm --filter @openzeppelin/contracts-ui-builder-app build
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner
@@ -41,14 +41,14 @@ FROM node:20-slim AS runner
 # Set NODE_ENV to production for the final runtime image
 ENV NODE_ENV=production
 
-WORKDIR /app
+WORKDIR /builder
 
 # Install 'serve' to run the static application
 RUN npm install -g serve
 
 # Copy the built application from the builder stage
 # This corresponds to the 'publish' directory in your previous netlify.toml
-COPY --from=builder /app/packages/core/dist ./dist
+COPY --from=builder /builder/packages/builder/dist ./dist
 
 # Expose the port the app will run on
 EXPOSE 3000

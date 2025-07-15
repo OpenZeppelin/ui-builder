@@ -1,4 +1,4 @@
-import type { FunctionParameter } from '@openzeppelin/transaction-form-types';
+import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
 
 // Placeholder
 export function parseSolanaInput(

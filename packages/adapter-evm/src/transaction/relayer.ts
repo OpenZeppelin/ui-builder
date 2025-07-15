@@ -2,6 +2,15 @@
 import { encodeFunctionData, formatEther } from 'viem';
 
 import {
+  EvmNetworkConfig,
+  ExecutionConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+  TransactionStatusUpdate,
+} from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import {
   type ApiResponseRelayerResponseData,
   Configuration,
   type EvmTransactionRequest,
@@ -9,15 +18,6 @@ import {
   RelayersApi,
   Speed,
 } from '@openzeppelin/relayer-sdk';
-import {
-  EvmNetworkConfig,
-  ExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-  TransactionStatusUpdate,
-} from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
 import { WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';

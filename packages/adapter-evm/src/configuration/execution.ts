@@ -4,8 +4,8 @@ import type {
   ExecutionMethodDetail,
   MultisigExecutionConfig,
   RelayerExecutionConfig,
-} from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
 

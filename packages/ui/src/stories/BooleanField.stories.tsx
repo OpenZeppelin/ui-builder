@@ -52,7 +52,7 @@ const BooleanFieldWrapper = (args: BooleanFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/BooleanField',
+  title: 'Renderer/Components/Fields/BooleanField',
   component: BooleanFieldWrapper,
   parameters: {
     layout: 'centered',

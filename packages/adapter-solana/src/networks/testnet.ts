@@ -1,4 +1,4 @@
-import { SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { SolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // Placeholder for Solana Devnet
 export const solanaDevnet: SolanaNetworkConfig = {

@@ -12,7 +12,7 @@ import {
   zksync as viemZkSync,
 } from 'viem/chains';
 
-import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 export const ethereumMainnet: EvmNetworkConfig = {
   id: 'ethereum-mainnet',

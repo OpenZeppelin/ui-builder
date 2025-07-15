@@ -10,7 +10,7 @@
 
 ## Reporting a Vulnerability
 
-We take the security of Transaction Form Builder seriously. If you believe you've found a security vulnerability, please follow these steps:
+We take the security of Contracts UI Builder seriously. If you believe you've found a security vulnerability, please follow these steps:
 
 1. **Do not disclose the vulnerability publicly**
 2. **Email us** at [security@example.com](mailto:security@example.com) with details about the vulnerability
@@ -29,4 +29,4 @@ We take the security of Transaction Form Builder seriously. If you believe you'v
 - We will keep you informed of our progress towards resolving the issue
 - After the vulnerability is fixed, we will publish a security advisory detailing the vulnerability, the impact, and crediting you (unless you prefer to remain anonymous) -->
 
-Thank you for helping keep Transaction Form Builder and our users safe!
+Thank you for helping keep Contracts UI Builder and our users safe!

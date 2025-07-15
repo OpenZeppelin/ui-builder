@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/transaction-form-styles",
-  "version": "1.16.0",
+  "name": "@openzeppelin/contracts-ui-builder-styles",
+  "version": "0.1.1",
   "private": false,
-  "description": "Centralized styling system for the OpenZeppelin Transaction Form Builder.",
+  "description": "Centralized styling system for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
   "main": "global.css",
   "publishConfig": {

@@ -15,9 +15,9 @@ import type {
   SolanaNetworkConfig,
   UiKitConfiguration,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isSolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isSolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   getSolanaExplorerAddressUrl,

@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/transaction-form-types';
+import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Map a Stellar-specific parameter type to a form field type

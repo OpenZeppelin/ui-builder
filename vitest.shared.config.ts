@@ -5,10 +5,16 @@ import { defineConfig } from 'vitest/config';
 export const sharedVitestConfig = defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+    include: [
+      '@openzeppelin/contracts-ui-builder-renderer',
+      '@openzeppelin/contracts-ui-builder-types',
+    ],
   },
   ssr: {
-    noExternal: ['@openzeppelin/transaction-form-renderer', '@openzeppelin/transaction-form-types'],
+    noExternal: [
+      '@openzeppelin/contracts-ui-builder-renderer',
+      '@openzeppelin/contracts-ui-builder-types',
+    ],
   },
   test: {
     globals: true,

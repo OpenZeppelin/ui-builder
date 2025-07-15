@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { LoadingButton } from '../components/ui/loading-button';
 
 const meta = {
-  title: 'Form Renderer/UI/LoadingButton',
+  title: 'Renderer/UI/LoadingButton',
   component: LoadingButton,
   parameters: {
     layout: 'centered',

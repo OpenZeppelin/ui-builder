@@ -67,7 +67,7 @@ const RadioFieldWrapper = (args: RadioFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/RadioField',
+  title: 'Renderer/Components/Fields/RadioField',
   component: RadioFieldWrapper,
   parameters: {
     layout: 'centered',

@@ -5,10 +5,10 @@ import React, { useEffect, useState } from 'react';
 import {
   useDerivedAccountStatus,
   useDerivedConnectStatus,
-} from '@openzeppelin/transaction-form-react-core';
-import type { BaseComponentProps } from '@openzeppelin/transaction-form-types';
-import { Button } from '@openzeppelin/transaction-form-ui';
-import { cn } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-react-core';
+import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

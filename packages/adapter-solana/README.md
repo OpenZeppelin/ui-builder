@@ -1,12 +1,12 @@
-# Solana Adapter (`@openzeppelin/transaction-form-adapter-solana`)
+# Solana Adapter (`@openzeppelin/contracts-ui-builder-adapter-solana`)
 
-This package provides the `ContractAdapter` implementation for the Solana blockchain for the Transaction Form Builder.
+This package provides the `ContractAdapter` implementation for the Solana blockchain for the Contracts UI Builder.
 
 **Note:** While the basic structure is in place, including network configuration definitions, the core adapter logic for Solana-specific operations is currently a placeholder and will be implemented in future development phases.
 
 It is intended to be responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
 - Defining and exporting specific Solana network configurations (e.g., Mainnet Beta, Devnet, Testnet) as `SolanaNetworkConfig` objects. These are located in `src/networks/` and include details like RPC endpoints, cluster information, explorer URLs, and commitment levels.
 - Loading Solana program IDLs (Instruction Description Language).
 - Mapping Solana-specific data types to the form field types.
@@ -20,9 +20,9 @@ It is intended to be responsible for:
 Once fully implemented, the `SolanaAdapter` class will be instantiated with a specific `SolanaNetworkConfig` object:
 
 ```typescript
-import { SolanaAdapter } from '@openzeppelin/transaction-form-adapter-solana';
-// Example: import { solanaMainnetBeta } from '@openzeppelin/transaction-form-adapter-solana';
-import { SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+// Example: import { solanaMainnetBeta } from '@openzeppelin/contracts-ui-builder-adapter-solana';
+import { SolanaAdapter } from '@openzeppelin/contracts-ui-builder-adapter-solana';
+import { SolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // For type access if needed
 

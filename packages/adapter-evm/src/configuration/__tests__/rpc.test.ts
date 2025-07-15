@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { appConfigService } from '@openzeppelin/transaction-form-utils';
+import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { resolveRpcUrl } from '../rpc';
 
@@ -24,8 +24,9 @@ const createMockConfig = (id: string, rpcUrl?: string, name?: string): EvmNetwor
 });
 
 // Mock the appConfigService from the correct package
-vi.mock('@openzeppelin/transaction-form-utils', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@openzeppelin/transaction-form-utils')>(); // Ensure correct type for original
+vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import('@openzeppelin/contracts-ui-builder-utils')>(); // Ensure correct type for original
   return {
     ...original,
     logger: {

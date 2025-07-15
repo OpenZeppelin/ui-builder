@@ -1,4 +1,4 @@
 [build]
 base = "/"
 command = "pnpm install-deps && pnpm build"
-publish = "packages/core/dist"
+publish = "packages/builder/dist"

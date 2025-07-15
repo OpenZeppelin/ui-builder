@@ -1,4 +1,4 @@
-import type { ContractFunction } from '@openzeppelin/transaction-form-types';
+import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Determines if a function is a view/pure function (read-only).

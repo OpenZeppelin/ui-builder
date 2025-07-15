@@ -1,12 +1,12 @@
-# Transaction Form Types
+# Contracts UI Builder Types
 
-This package contains shared TypeScript type definitions for the OpenZeppelin Transaction Form Builder ecosystem.
+This package contains shared TypeScript type definitions for the OpenZeppelin Contracts UI Builder ecosystem.
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/transaction-form-types.svg)](https://www.npmjs.com/package/@openzeppelin/transaction-form-types)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
 
 ## Purpose
 
-This package serves as the single source of truth for all shared types used across the Transaction Form Builder packages, including:
+This package serves as the single source of truth for all shared types used across the Contracts UI Builder packages, including:
 
 - Contract and blockchain related types
 - Form field and layout definitions
@@ -18,13 +18,13 @@ By centralizing type definitions, we ensure consistency across all packages and 
 
 ```bash
 # Using npm
-npm install @openzeppelin/transaction-form-types
+npm install @openzeppelin/contracts-ui-builder-types
 
 # Using yarn
-yarn add @openzeppelin/transaction-form-types
+yarn add @openzeppelin/contracts-ui-builder-types
 
 # Using pnpm
-pnpm add @openzeppelin/transaction-form-types
+pnpm add @openzeppelin/contracts-ui-builder-types
 ```
 
 ## Usage
@@ -33,16 +33,16 @@ The package is organized into namespaces for better organization and to prevent 
 
 ```typescript
 // Import everything
-import { adapters, contracts, forms } from '@openzeppelin/transaction-form-types';
+import { adapters, contracts, forms } from '@openzeppelin/contracts-ui-builder-types';
 
 // Import specific namespaces
-import * as contracts from '@openzeppelin/transaction-form-types';
-import * as adapters from '@openzeppelin/transaction-form-types';
-import * as forms from '@openzeppelin/transaction-form-types';
+import * as contracts from '@openzeppelin/contracts-ui-builder-types';
+import * as adapters from '@openzeppelin/contracts-ui-builder-types';
+import * as forms from '@openzeppelin/contracts-ui-builder-types';
 
 // Import specific types from their respective namespaces
-import { ContractAdapter } from '@openzeppelin/transaction-form-types';
-import { FieldType, FormFieldType } from '@openzeppelin/transaction-form-types';
+import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import { FieldType, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 // Example usage in a function
 function validateField(field: forms.FormFieldType): boolean {
@@ -136,8 +136,8 @@ Types for form structure, rendering, and handling:
 
 - `FieldType`: Types of form fields (text, number, boolean, address, select, etc.).
 - `FormField`: Complete definition of a form field including ID, type, label, validation, etc.
-- `RenderFormSchema`: The schema used by the form-renderer package.
-- `BuilderFormConfig`: The configuration used by the form builder UI.
+- `RenderFormSchema`: The schema used by the renderer package.
+- `BuilderFormConfig`: The configuration used by the builder app UI.
 - `FieldValidation`: Validation rules for form fields.
 - `FormValues`: Type representing the collected data from a form submission.
 
@@ -163,10 +163,10 @@ Types related to the status of transaction submissions:
 
 ## Integration with Other Packages
 
-This package is a dependency for both the core and form-renderer packages:
+This package is a dependency for both the builder and renderer packages:
 
-- **Core Package**: Uses these types for its adapter implementations, form generation, and export functionality
-- **Form Renderer Package**: Uses these types for form field rendering and validation
+- **Builder Package**: Uses these types for its adapter implementations, form generation, and export functionality
+- **Renderer Package**: Uses these types for form field rendering and validation
 
 ## Development
 
@@ -174,7 +174,7 @@ This package is a dependency for both the core and form-renderer packages:
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/transaction-form-types build
+pnpm --filter @openzeppelin/contracts-ui-builder-types build
 
 # Or from within the types package directory
 pnpm build
@@ -184,7 +184,7 @@ pnpm build
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/transaction-form-types test
+pnpm --filter @openzeppelin/contracts-ui-builder-types test
 
 # Or from within the types package directory
 pnpm test
@@ -192,4 +192,4 @@ pnpm test
 
 ## License
 
-[MIT](https://github.com/OpenZeppelin/transaction-form-builder/blob/main/LICENSE) © OpenZeppelin
+[MIT](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE) © OpenZeppelin

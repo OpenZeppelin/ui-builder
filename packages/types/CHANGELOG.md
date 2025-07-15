@@ -1,4 +1,4 @@
-# @openzeppelin/transaction-form-types
+# @openzeppelin/contracts-ui-builder-types
 
 ## 1.17.0
 

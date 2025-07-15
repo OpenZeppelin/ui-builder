@@ -23,9 +23,9 @@ import type {
   RelayerDetailsRich,
   UiKitConfiguration,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isMidnightNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isMidnightNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { parseMidnightContractInterface } from './utils/schema-parser';
 import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
@@ -37,7 +37,7 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 /**
  * Midnight-specific adapter.
  *
- * Implements the full ContractAdapter interface to integrate with the core application.
+ * Implements the full ContractAdapter interface to integrate with the builder application.
  * Wallet-related functionalities are implemented, while contract-specific methods
  * are placeholders to be built out in later phases.
  */

@@ -3,7 +3,7 @@ import { type VariantProps } from 'class-variance-authority';
 
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { buttonVariants } from '../../utils/button-variants';
 

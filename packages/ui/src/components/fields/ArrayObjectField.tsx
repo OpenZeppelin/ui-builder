@@ -8,7 +8,7 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';

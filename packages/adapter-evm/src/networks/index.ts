@@ -1,4 +1,4 @@
-import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import {
   arbitrumMainnet,

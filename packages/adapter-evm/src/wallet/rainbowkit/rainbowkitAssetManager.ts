@@ -1,6 +1,6 @@
 import type React from 'react';
 
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 export interface RainbowKitAssets {
   ProviderComponent: React.ComponentType<React.PropsWithChildren<unknown>> | null;

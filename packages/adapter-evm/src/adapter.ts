@@ -26,9 +26,9 @@ import type {
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isEvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';

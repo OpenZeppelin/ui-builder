@@ -9,7 +9,7 @@ export const midnightAdapterConfig = {
   /**
    * Default app name to display in the wallet connection UI.
    */
-  appName: 'OpenZeppelin Transaction Form Builder',
+  appName: 'OpenZeppelin Contracts UI Builder',
 
   /**
    * Dependencies required by the Midnight adapter

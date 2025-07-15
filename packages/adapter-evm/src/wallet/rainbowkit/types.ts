@@ -33,7 +33,7 @@ export interface RainbowKitProviderProps {
 /**
  * Represents the shape of the `kitConfig` object we use internally when the
  * selected kit is RainbowKit. It has a flat structure for `appName` and `learnMoreUrl`
- * for easier handling in our form builder, and can also contain pre-existing providerProps.
+ * for easier handling in our builder app, and can also contain pre-existing providerProps.
  */
 export type RainbowKitKitConfig = Partial<AppInfo> & {
   providerProps?: RainbowKitProviderProps;

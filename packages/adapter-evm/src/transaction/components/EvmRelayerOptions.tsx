@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/transaction-form-ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { AdvancedInfo } from './AdvancedInfo';
 import { CustomGasParameters } from './CustomGasParameters';

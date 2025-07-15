@@ -9,7 +9,7 @@ import type { RenderFormSchema } from './schema';
 export type FormValues = Record<string, unknown>;
 
 /**
- * Field types supported by the form renderer
+ * Field types supported by the renderer
  */
 export type FieldType =
   | 'text'

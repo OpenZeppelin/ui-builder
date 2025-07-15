@@ -1,7 +1,7 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 
 // Keep for callback type consistency?
-import type { Connector } from '@openzeppelin/transaction-form-types';
+import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 
 // Assuming a Solana Wallet Implementation type might exist later
 // import type { SolanaWalletImplementation } from './implementation';

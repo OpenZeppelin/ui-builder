@@ -92,7 +92,7 @@ const AddressFieldWrapper = (args: AddressFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/AddressField',
+  title: 'Renderer/Components/Fields/AddressField',
   component: AddressFieldWrapper,
   parameters: {
     layout: 'centered',

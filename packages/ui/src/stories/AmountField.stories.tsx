@@ -60,7 +60,7 @@ const AmountFieldWrapper = (args: AmountFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/AmountField',
+  title: 'Renderer/Components/Fields/AmountField',
   component: AmountFieldWrapper,
   parameters: {
     layout: 'centered',

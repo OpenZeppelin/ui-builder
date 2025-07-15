@@ -23,7 +23,7 @@ import {
   useWaitForTransactionReceipt,
 } from 'wagmi';
 
-import type { EcosystemSpecificReactHooks } from '@openzeppelin/transaction-form-types';
+import type { EcosystemSpecificReactHooks } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Direct export of wagmi hooks as our facade hooks

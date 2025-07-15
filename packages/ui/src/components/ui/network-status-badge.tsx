@@ -3,8 +3,8 @@ import { capitalize } from 'lodash';
 
 import React from 'react';
 
-import type { NetworkConfig } from '@openzeppelin/transaction-form-types';
-import { cn } from '@openzeppelin/transaction-form-utils';
+import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
 
@@ -56,7 +56,7 @@ function NetworkTypeBadge({ type }: { type: string }): React.ReactElement {
 
 /**
  * NetworkStatusBadge - Displays network information in a compact badge format
- * Shows the network icon, ecosystem, name, and type - exactly as in the core app
+ * Shows the network icon, ecosystem, name, and type - exactly as in the builder app
  */
 export function NetworkStatusBadge({
   network,

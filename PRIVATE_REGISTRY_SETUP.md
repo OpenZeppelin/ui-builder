@@ -15,7 +15,7 @@ This project uses **organization-level scoping** in `.npmrc` to route all `@open
 The original problem was that we couldn't use per-package registry scoping like:
 
 ```
-@openzeppelin/transaction-form-builder-core:registry=https://npm.pkg.github.com/
+@openzeppelin/contracts-ui-builder-app:registry=https://npm.pkg.github.com/
 @openzeppelin/relayer-sdk:registry=https://registry.npmjs.org/
 ```
 

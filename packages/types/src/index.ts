@@ -1,8 +1,8 @@
 /**
- * Transaction Form Types
+ * Contracts UI Builder Types
  *
  * This is the main entry point for all shared type definitions used across
- * the Transaction Form Builder ecosystem.
+ * the Contracts UI Builder ecosystem.
  *
  */
 
