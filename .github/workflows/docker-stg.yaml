@@ -69,6 +69,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.lowercase }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          secrets: |
+            npm_token=${{ secrets.NPM_TOKEN }}
       
       - name: Attest
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 #v2.2.3
