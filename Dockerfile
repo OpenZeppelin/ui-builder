@@ -4,7 +4,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Set NODE_ENV to development to ensure devDependencies are installed for the build
-# ENV NODE_ENV=development
+ENV NODE_ENV=development
 
 # Install build dependencies required for native Node.js modules
 # node-gyp (used by some dependencies) requires python and build-essential
@@ -25,18 +25,16 @@ COPY . .
 # TRANSITION TO PUBLIC RELEASE:
 # If packages are moved to the public npm registry, this authentication
 # step may no longer be necessary and can be removed.
-# RUN --mount=type=secret,id=npm_token \
-#     sh -c 'echo "@openzeppelin:registry=https://npm.pkg.github.com" > .npmrc && \
-#            echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/npm_token)" >> .npmrc && \
-#            pnpm install --frozen-lockfile && \
-#            rm .npmrc'
-
 RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
-     sh -c '
-         pnpm config set @openzeppelin:registry https://npm.pkg.github.com \
-         pnpm config set //npm.pkg.github.com/:_authToken "$NPM_TOKEN"
-         pnpm install --frozen-lockfile
-     '
+    sh -c 'echo "@openzeppelin:registry=https://npm.pkg.github.com" > .npmrc && \
+           echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc && \
+           pnpm install --frozen-lockfile && \
+           rm .npmrc'
+
+# RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
+#     pnpm config set @openzeppelin:registry https://npm.pkg.github.com \
+#     pnpm config set //npm.pkg.github.com/:_authToken "$NPM_TOKEN" \
+#     pnpm install --frozen-lockfile
 
 # Build the core application
 # The filter @openzeppelin/transaction-form-builder-core targets the specific package we want to build
