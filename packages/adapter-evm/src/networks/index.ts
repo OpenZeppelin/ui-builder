@@ -1,4 +1,4 @@
-import { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { TypedEvmNetworkConfig } from '../types';
 
 import {
   arbitrumMainnet,
@@ -24,11 +24,11 @@ import {
   polygonAmoy,
   polygonZkEvmCardona,
   scrollSepolia,
-  zkSyncEraSepolia,
+  zksyncSepoliaTestnet,
 } from './testnet';
 
 // All mainnet networks
-export const evmMainnetNetworks: EvmNetworkConfig[] = [
+export const evmMainnetNetworks: TypedEvmNetworkConfig[] = [
   ethereumMainnet,
   arbitrumMainnet,
   baseMainnet,
@@ -44,7 +44,7 @@ export const evmMainnetNetworks: EvmNetworkConfig[] = [
 ];
 
 // All testnet networks
-export const evmTestnetNetworks: EvmNetworkConfig[] = [
+export const evmTestnetNetworks: TypedEvmNetworkConfig[] = [
   ethereumSepolia,
   arbitrumSepolia,
   baseSepolia,
@@ -55,14 +55,14 @@ export const evmTestnetNetworks: EvmNetworkConfig[] = [
   avalancheFuji,
   lineaSepolia,
   scrollSepolia,
-  zkSyncEraSepolia,
+  zksyncSepoliaTestnet,
   // Other testnet networks...
 ];
 
 // All EVM networks
 // NOTE: The wagmi integration automatically uses all networks defined here that have a `viemChain` property.
 // This ensures that adding a new network to mainnet.ts or testnet.ts automatically makes it available to wagmi.
-export const evmNetworks: EvmNetworkConfig[] = [...evmMainnetNetworks, ...evmTestnetNetworks];
+export const evmNetworks: TypedEvmNetworkConfig[] = [...evmMainnetNetworks, ...evmTestnetNetworks];
 
 // Export individual networks for direct import
 export {
@@ -89,5 +89,5 @@ export {
   avalancheFuji,
   lineaSepolia,
   scrollSepolia,
-  zkSyncEraSepolia,
+  zksyncSepoliaTestnet,
 };

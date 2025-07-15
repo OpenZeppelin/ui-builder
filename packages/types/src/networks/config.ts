@@ -4,8 +4,6 @@
  * This file defines the TypeScript types for network configurations across different blockchain ecosystems.
  * It uses a discriminated union pattern with the 'ecosystem' property as the discriminant to ensure type safety.
  */
-import type { Chain } from 'viem';
-
 import { Ecosystem, NetworkType } from '../common/ecosystem';
 
 /**
@@ -102,11 +100,12 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
   apiUrl?: string;
 
   /**
-   * Optional Viem Chain object for this network.
-   * If provided, this will be used directly by Viem clients.
+   * Optional chain-specific configuration object for this network.
+   * For EVM networks, this should be a Viem Chain object.
+   * If provided, this will be used directly by the chain's clients.
    * If not provided, a fallback or minimal custom chain object might be used.
    */
-  viemChain?: Chain;
+  viemChain?: unknown;
 }
 
 /**

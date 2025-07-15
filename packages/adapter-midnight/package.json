@@ -48,7 +48,8 @@
     "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "lucide-react": "^0.510.0"
   },
   "devDependencies": {
     "@types/react": "19.1.6",
