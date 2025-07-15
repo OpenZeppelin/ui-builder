@@ -19,7 +19,6 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    environment: Release
     permissions:
       id-token: write
       contents: read
@@ -27,6 +26,8 @@ jobs:
       attestations: write
     env:
       REGISTRY: "{{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com"
+      ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
+      ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
@@ -68,7 +69,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
-    environment: Release
     env:
       ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
       ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
