@@ -38,7 +38,7 @@ import { rendererConfig } from 'virtual:renderer-config';
 import { Ecosystem, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import type { RendererConfig } from '../../../renderer/dist';
+import type { RendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';

@@ -16,7 +16,7 @@ import type {
   RenderFormSchema,
 } from '@openzeppelin/contracts-ui-builder-types';
 
-import { createTransformForFieldType } from '../../../../renderer/dist';
+import { createTransformForFieldType } from '@openzeppelin/contracts-ui-builder-renderer';
 import { generateFieldsFromFunction } from '../../services/FormGenerator';
 import { BuilderFormConfig } from '../types/FormTypes';
 import { humanizeString } from '../utils/utils';
