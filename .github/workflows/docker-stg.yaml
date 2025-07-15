@@ -10,7 +10,7 @@ on:
       branch:
         description: 'Branch to build from'
         required: true
-        default: 'ci-cd'
+        default: 'main'
         type: string
 
 permissions:
@@ -26,7 +26,7 @@ jobs:
       packages: write
       attestations: write
     env:
-      REGISTRY: {{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+      REGISTRY: "{{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com"
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
