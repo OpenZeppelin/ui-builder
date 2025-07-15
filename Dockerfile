@@ -32,9 +32,8 @@ COPY . .
 #            rm .npmrc'
 
 RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
-    --mount=type=cache,target=/root/.cache/pnpm \
     pnpm config set @openzeppelin:registry https://npm.pkg.github.com \
-    pnpm config set //npm.pkg.github.com/:_authToken "example" \
+    pnpm config set //npm.pkg.github.com/:_authToken "$NPM_TOKEN" \
     pnpm install --frozen-lockfile
 
 # Build the core application
