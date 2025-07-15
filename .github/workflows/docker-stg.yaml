@@ -26,7 +26,7 @@ jobs:
       packages: write
       attestations: write
     env:
-      REGISTRY: ghcr.io
+      REGISTRY: {{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
@@ -39,46 +39,31 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
         with:
-          platforms: 'arm64,amd64'
+          platforms: 'arm64'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      - name: Set up AWS credentials via OIDC and role chaining
+        uses: ./.github/actions/oidc
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare repository name
-        id: repo_name
-        run: |
-          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "lowercase=$REPO_NAME" >> $GITHUB_OUTPUT
+          role-for-oidc: ${{ env.ROLE_FOR_OIDC }}
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         id: push
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.lowercase }}:latest
-            ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.lowercase }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/contracts-ui-builder-stg:latest
+            ${{ env.REGISTRY }}/contracts-ui-builder-stg:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
-      
-      - name: Attest
-        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 #v2.2.3
-        id: attest
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.lowercase }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
 
   deploy:
     runs-on: ubuntu-latest
