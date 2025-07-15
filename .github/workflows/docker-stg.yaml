@@ -25,7 +25,7 @@ jobs:
       packages: write
       attestations: write
     env:
-      REGISTRY: "{{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com"
+      REGISTRY: ${{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
       ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
       ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
     steps:
