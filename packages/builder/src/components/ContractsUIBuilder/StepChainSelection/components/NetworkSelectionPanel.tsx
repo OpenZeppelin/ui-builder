@@ -13,7 +13,7 @@ import {
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
 
-import { NetworkMiniTile } from './NetworkMiniTile';
+import { NetworkRow } from './NetworkRow';
 
 interface NetworkSelectionPanelProps {
   ecosystem: Ecosystem;
@@ -188,20 +188,20 @@ function NetworkGroup({
   return (
     <div className="space-y-3">
       <h4 className="font-medium text-sm">{title}</h4>
-      {/* Flex container with natural card widths */}
-      <div className="flex flex-wrap gap-3">
+      {/* Vertical stack container for row-based layout */}
+      <div className="space-y-2">
         {networks.map((network) => (
           <div key={network.id} className="relative group">
-            <NetworkMiniTile
+            <NetworkRow
               network={network}
               isSelected={network.id === selectedNetworkId}
               onSelect={() => onNetworkSelected(network.id)}
             />
-            {/* Settings button - positioned slightly outside top-right corner */}
+            {/* Settings button - positioned on the right side of the row */}
             <button
               type="button"
               onClick={(e) => onOpenNetworkSettings(network, e)}
-              className="absolute -top-2 -right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
+              className="absolute top-1/2 -translate-y-1/2 right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
                          opacity-0 group-hover:opacity-100 transition-all duration-200 
                          hover:bg-muted border border-border
                          shadow-md z-10"
