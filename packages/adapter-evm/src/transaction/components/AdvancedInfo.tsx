@@ -2,7 +2,7 @@ import { Info } from 'lucide-react';
 
 import React from 'react';
 
-import { Button } from '@openzeppelin/transaction-form-ui';
+import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
 interface AdvancedInfoProps {
   showAdvancedInfo: boolean;

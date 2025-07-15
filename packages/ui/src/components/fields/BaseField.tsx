@@ -1,7 +1,7 @@
 import { type ForwardedRef, type ReactElement, type ReactNode } from 'react';
 import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
-import { type FieldValidation } from '@openzeppelin/transaction-form-types';
+import { type FieldValidation } from '@openzeppelin/contracts-ui-builder-types';
 
 import {
   FormControl,
@@ -70,7 +70,7 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
 /**
  * BaseField component to provide a consistent layout for form fields
  *
- * @important This component is the foundation of the form rendering architecture and should
+ * @important This component is the foundation of the app rendering architecture and should
  * ONLY be used by field-specific components within the system, not as a standalone component.
  *
  * Architecture role:
@@ -80,7 +80,7 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
  * 4. Delegates actual input rendering to field-specific components via renderInput
  *
  * Field component hierarchy:
- * - TransactionForm (top-level form renderer)
+ * - TransactionForm (top-level renderer)
  *   - DynamicFormField (field type selector)
  *     - Specific field components (TextField, NumberField, etc.)
  *       - BaseField (common field structure - this component)

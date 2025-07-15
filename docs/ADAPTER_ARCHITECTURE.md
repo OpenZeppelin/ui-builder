@@ -1,6 +1,6 @@
 # Adapter Architecture Guide
 
-This document outlines the standardized architecture for blockchain adapters within the Transaction Form Builder project.
+This document outlines the standardized architecture for blockchain adapters within the Contracts UI Builder project.
 
 ## 1. Overview
 
@@ -96,7 +96,7 @@ adapter-<chain>/
   - **Flexibility:** This directory name is flexible to reflect the chain's specific definition format.
 
 - **`mapping/`:**
-  - **Purpose:** Handles the logic for mapping blockchain-specific parameter types to the standard `FieldType` used by the form builder, determining compatible field types, and generating default `FormFieldType` configurations.
+  - **Purpose:** Handles the logic for mapping blockchain-specific parameter types to the standard `FieldType` used by the builder app, determining compatible field types, and generating default `FormFieldType` configurations.
   - **Key Exports:** `map[Chain]ParamTypeToFieldType`, `get[Chain]CompatibleFieldTypes`, `generate[Chain]DefaultField`.
 
 - **`transform/`:**
@@ -206,7 +206,7 @@ This design keeps the main adapter class clean and delegates the complex, method
 
 A robust adapter should allow its network-dependent configurations to be overridden at runtime. This is crucial for flexibility, allowing both the core development environment and exported applications to use custom settings (like private RPC endpoints or API keys) without modifying the adapter's source code.
 
-This project uses a centralized service (`@openzeppelin/transaction-form-utils/appConfigService`) for this purpose.
+This project uses a centralized service (`@openzeppelin/contracts-ui-builder-utils/appConfigService`) for this purpose.
 
 ### 7.1. Pattern
 
@@ -233,7 +233,7 @@ Just as API keys can be customized, the architecture also allows users to provid
 
 This feature is implemented using a pattern almost identical to the `appConfigService` override, but is designed for user-facing configuration that is persisted locally in the browser:
 
-1.  **`UserRpcConfigService`**: A dedicated service in `@openzeppelin/transaction-form-utils` that handles saving, retrieving, and managing user-defined RPC endpoints in `localStorage`.
+1.  **`UserRpcConfigService`**: A dedicated service in `@openzeppelin/contracts-ui-builder-utils` that handles saving, retrieving, and managing user-defined RPC endpoints in `localStorage`.
 2.  **Adapter Integration**: Each adapter must respect these user-provided endpoints. The `resolveRpcUrl` utility in the EVM adapter is a perfect example of this. It establishes a clear priority for which RPC endpoint to use.
 3.  **UI Component**: The `RpcSettingsPanel` in the `packages/ui` library provides a user interface for adding, testing, and saving custom RPC endpoints.
 
@@ -249,12 +249,12 @@ This layered approach guarantees that user preferences are prioritized, while st
 
 ### 7.5. User-Provided Explorer Configuration
 
-To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the Transaction Form Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
+To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the Contracts UI Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
 
 This system is parallel to the RPC configuration and follows a similar pattern:
 
 1.  **`UserExplorerConfig` Interface**: A standardized interface in `packages/types` defines the shape of a user's custom explorer configuration.
-2.  **`UserExplorerConfigService`**: A centralized service in `@openzeppelin/transaction-form-utils` manages the storage and retrieval of these configurations from `localStorage`.
+2.  **`UserExplorerConfigService`**: A centralized service in `@openzeppelin/contracts-ui-builder-utils` manages the storage and retrieval of these configurations from `localStorage`.
 3.  **Adapter-Level Integration**: Each adapter is responsible for handling this user-provided configuration.
     - It must implement `validateExplorerConfig` and `testExplorerConnection` methods on the `ContractAdapter` interface. These functions are used by the UI to allow users to verify their custom settings before saving them.
     - Adapter modules that interact with block explorers (e.g., for fetching contract ABIs or constructing explorer URLs) must be updated to prioritize the user's configuration.
@@ -282,11 +282,11 @@ By following this structure, we aim for a cleaner, more testable, and easier-to-
 
 ## 9. Adapter UI Facilitation Capabilities (Optional)
 
-Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the core application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
+Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the builder application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
 
 ### 9.1. Rationale
 
-Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the core app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
+Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the builder app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
 
 ### 9.2. Case Study: EVM Adapter UI Kit Management
 
@@ -309,4 +309,4 @@ The EVM adapter provides a sophisticated implementation of this pattern to handl
     - **User-Native Code**: For complex kits like RainbowKit, the consuming application can provide a native `rainbowkit.config.ts` file, which is dynamically loaded by the adapter via a callback.
     - **Programmatic Override**: The application can call the adapter's `configureUiKit()` method at runtime to override any setting.
 
-This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the core application to simply request the UI components and hooks it needs without knowing the specific implementation details.
+This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the builder application to simply request the UI components and hooks it needs without knowing the specific implementation details.

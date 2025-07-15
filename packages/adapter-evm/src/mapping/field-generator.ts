@@ -6,8 +6,8 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
-import { getDefaultValueForType } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { RadioGroup, RadioGroupItem } from '@openzeppelin/contracts-ui-builder-ui';
 import { Speed } from '@openzeppelin/relayer-sdk';
-import { RadioGroup, RadioGroupItem } from '@openzeppelin/transaction-form-ui';
 
 interface SpeedSelectionProps {
   selectedSpeed: Speed | undefined;

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@styles/*": ["../styles/src/*"],
+      "@openzeppelin/contracts-ui-builder-types/*": ["../types/src/*"]
+    },
+    "emitDeclarationOnly": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
+  "exclude": ["src/export/codeTemplates/*.template.tsx"]
+}

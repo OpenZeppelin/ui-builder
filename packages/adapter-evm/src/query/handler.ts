@@ -1,15 +1,12 @@
 import { type Chain, type PublicClient, createPublicClient, http, isAddress } from 'viem';
 
-import type {
-  ContractSchema,
-  EvmNetworkConfig,
-  FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
-import { logger, userRpcConfigService } from '@openzeppelin/transaction-form-utils';
+import type { ContractSchema, FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { resolveRpcUrl } from '../configuration';
 import { parseEvmInput } from '../transform';
+import type { TypedEvmNetworkConfig } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 import { isEvmViewFunction } from './view-checker';
@@ -21,7 +18,7 @@ import { isEvmViewFunction } from './view-checker';
  */
 async function getPublicClientForQuery(
   walletImplementation: WagmiWalletImplementation,
-  networkConfig: EvmNetworkConfig
+  networkConfig: TypedEvmNetworkConfig
 ): Promise<PublicClient> {
   // First check if there's a custom RPC configuration
   const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
@@ -61,7 +58,10 @@ async function getPublicClientForQuery(
 /**
  * Helper to create a public client with a specific RPC URL
  */
-function createPublicClientWithRpc(networkConfig: EvmNetworkConfig, rpcUrl: string): PublicClient {
+function createPublicClientWithRpc(
+  networkConfig: TypedEvmNetworkConfig,
+  rpcUrl: string
+): PublicClient {
   let chainForViem: Chain;
   if (networkConfig.viemChain) {
     chainForViem = networkConfig.viemChain;
@@ -118,7 +118,7 @@ function createPublicClientWithRpc(networkConfig: EvmNetworkConfig, rpcUrl: stri
 export async function queryEvmViewFunction(
   contractAddress: string,
   functionId: string,
-  networkConfig: EvmNetworkConfig,
+  networkConfig: TypedEvmNetworkConfig,
   params: unknown[],
   contractSchema: ContractSchema | undefined,
   walletImplementation: WagmiWalletImplementation,

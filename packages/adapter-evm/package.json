@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/transaction-form-adapter-evm",
-  "version": "1.18.0",
+  "name": "@openzeppelin/contracts-ui-builder-adapter-evm",
+  "version": "0.1.2",
   "private": false,
-  "description": "EVM Adapter for Transaction Form Builder",
+  "description": "EVM Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",
@@ -14,7 +14,7 @@
     "wagmi"
   ],
   "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
-  "homepage": "https://github.com/OpenZeppelin/transaction-form-builder#readme",
+  "homepage": "https://github.com/OpenZeppelin/contracts-ui-builder#readme",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -29,11 +29,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder.git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder.git",
     "directory": "packages/adapter-evm"
   },
   "bugs": {
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -48,13 +48,15 @@
   },
   "dependencies": {
     "@openzeppelin/relayer-sdk": "1.1.0",
-    "@openzeppelin/transaction-form-react-core": "workspace:^",
-    "@openzeppelin/transaction-form-types": "workspace:^",
-    "@openzeppelin/transaction-form-ui": "workspace:^",
-    "@openzeppelin/transaction-form-utils": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
     "@wagmi/connectors": "5.7.13",
     "@wagmi/core": "^2.17.3",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "lucide-react": "^0.510.0",
+    "react-hook-form": "^7.60.0"
   },
   "devDependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",

@@ -46,14 +46,21 @@ Fixes #123
 - **ui**: UI components and styling
 - **api**: API-related code
 - **auth**: Authentication and authorization
-- **core**: Core functionality
+- **builder**: Builder functionality
 - **deps**: Dependencies
 - **config**: Configuration files
-- **form**: Form-related components and logic
+- **renderer**: Renderer functionality
+- **react-core**: React core functionality
+- **types**: Types
 - **transaction**: Transaction-related code
 - **utils**: Utility functions
 - **docs**: Documentation
 - **tests**: Test-related changes
+- **adapter-evm**: EVM adapter functionality
+- **adapter-solana**: Solana adapter functionality
+- **adapter-stellar**: Stellar adapter functionality
+- **adapter-midnight**: Midnight adapter functionality
+- **styles**: Styles package functionality
 
 ## Breaking Changes
 
@@ -69,4 +76,4 @@ Or by adding a `BREAKING CHANGE:` footer:
 feat(api): change API response format
 
 BREAKING CHANGE: The API response format has changed from XML to JSON.
-``` 
+```

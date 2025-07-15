@@ -12,9 +12,9 @@ import {
   zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
 } from 'viem/chains';
 
-import { EvmNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { TypedEvmNetworkConfig } from '../types';
 
-export const ethereumSepolia: EvmNetworkConfig = {
+export const ethereumSepolia: TypedEvmNetworkConfig = {
   id: 'ethereum-sepolia',
   exportConstName: 'ethereumSepolia',
   name: 'Sepolia',
@@ -36,7 +36,7 @@ export const ethereumSepolia: EvmNetworkConfig = {
   viemChain: viemSepolia,
 };
 
-export const arbitrumSepolia: EvmNetworkConfig = {
+export const arbitrumSepolia: TypedEvmNetworkConfig = {
   id: 'arbitrum-sepolia',
   exportConstName: 'arbitrumSepolia',
   name: 'Arbitrum Sepolia',
@@ -58,7 +58,7 @@ export const arbitrumSepolia: EvmNetworkConfig = {
   viemChain: viemArbitrumSepolia,
 };
 
-export const polygonAmoy: EvmNetworkConfig = {
+export const polygonAmoy: TypedEvmNetworkConfig = {
   id: 'polygon-amoy',
   exportConstName: 'polygonAmoy',
   name: 'Polygon Amoy',
@@ -80,7 +80,7 @@ export const polygonAmoy: EvmNetworkConfig = {
   viemChain: viemPolygonAmoy,
 };
 
-export const polygonZkEvmCardona: EvmNetworkConfig = {
+export const polygonZkEvmCardona: TypedEvmNetworkConfig = {
   id: 'polygon-zkevm-cardona',
   exportConstName: 'polygonZkEvmCardona',
   name: 'Polygon zkEVM Cardona',
@@ -102,7 +102,7 @@ export const polygonZkEvmCardona: EvmNetworkConfig = {
   viemChain: viemPolygonZkEvmCardona,
 };
 
-export const baseSepolia: EvmNetworkConfig = {
+export const baseSepolia: TypedEvmNetworkConfig = {
   id: 'base-sepolia',
   exportConstName: 'baseSepolia',
   name: 'Base Sepolia',
@@ -124,7 +124,7 @@ export const baseSepolia: EvmNetworkConfig = {
   viemChain: viemBaseSepolia,
 };
 
-export const bscTestnet: EvmNetworkConfig = {
+export const bscTestnet: TypedEvmNetworkConfig = {
   id: 'bsc-testnet',
   exportConstName: 'bscTestnet',
   name: 'BSC Testnet',
@@ -146,7 +146,7 @@ export const bscTestnet: EvmNetworkConfig = {
   viemChain: viemBscTestnet,
 };
 
-export const optimismSepolia: EvmNetworkConfig = {
+export const optimismSepolia: TypedEvmNetworkConfig = {
   id: 'optimism-sepolia',
   exportConstName: 'optimismSepolia',
   name: 'OP Sepolia',
@@ -168,7 +168,7 @@ export const optimismSepolia: EvmNetworkConfig = {
   viemChain: viemOptimismSepolia,
 };
 
-export const avalancheFuji: EvmNetworkConfig = {
+export const avalancheFuji: TypedEvmNetworkConfig = {
   id: 'avalanche-fuji',
   exportConstName: 'avalancheFuji',
   name: 'Avalanche Fuji C-Chain',
@@ -190,9 +190,9 @@ export const avalancheFuji: EvmNetworkConfig = {
   viemChain: viemAvalancheFuji,
 };
 
-export const zkSyncEraSepolia: EvmNetworkConfig = {
+export const zksyncSepoliaTestnet: TypedEvmNetworkConfig = {
   id: 'zksync-era-sepolia',
-  exportConstName: 'zkSyncEraSepolia',
+  exportConstName: 'zksyncSepoliaTestnet',
   name: 'ZkSync Era Sepolia',
   ecosystem: 'evm',
   network: 'zksync-era',
@@ -212,7 +212,7 @@ export const zkSyncEraSepolia: EvmNetworkConfig = {
   viemChain: viemZkSyncSepoliaTestnet,
 };
 
-export const scrollSepolia: EvmNetworkConfig = {
+export const scrollSepolia: TypedEvmNetworkConfig = {
   id: 'scroll-sepolia',
   exportConstName: 'scrollSepolia',
   name: 'Scroll Sepolia',
@@ -234,7 +234,7 @@ export const scrollSepolia: EvmNetworkConfig = {
   viemChain: viemScrollSepolia,
 };
 
-export const lineaSepolia: EvmNetworkConfig = {
+export const lineaSepolia: TypedEvmNetworkConfig = {
   id: 'linea-sepolia',
   exportConstName: 'lineaSepolia',
   name: 'Linea Sepolia',

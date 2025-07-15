@@ -1,0 +1,21 @@
+/* Define layer order first - this is critical for predictability */
+@layer base, components, utilities;
+
+/* 
+  Import Tailwind directives.
+  The `source()` function is a Tailwind v4 feature that sets the base path for
+  automatic content detection. By setting it to the monorepo root, Tailwind
+  can discover all necessary files in all packages, including `ui` and `renderer`.
+*/
+@import 'tailwindcss' source('../../');
+
+/*
+  Import global theme variables and base styles from the styles package.
+  The path alias is configured in vite.config.ts.
+*/
+@import '@styles/global.css';
+
+/* Core-specific styles or overrides can be added here, preferably in layers */
+@layer components {
+  /* Example: Add core-specific component styles */
+}

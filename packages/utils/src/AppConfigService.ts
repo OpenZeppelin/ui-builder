@@ -6,11 +6,11 @@ import type {
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { logger } from './logger';
 
-// Changed from @openzeppelin/transaction-form-utils
+// Changed from @openzeppelin/contracts-ui-builder-utils
 
 /**
  * Type for the strategy array in initialize method.

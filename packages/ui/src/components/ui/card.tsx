@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 function Card({ className, ...props }: React.ComponentProps<'div'>): JSX.Element {
   return (

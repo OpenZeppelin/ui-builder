@@ -2,7 +2,7 @@ import { useMidnightWallet } from './useMidnightWallet';
 
 /**
  * Facade hook to expose connection status and the connect action.
- * Adheres to the `DerivedConnectStatus` interface expected by the core app.
+ * Adheres to the `DerivedConnectStatus` interface expected by the builder app.
  */
 export const useConnect = () => {
   const { connect, isConnecting, error } = useMidnightWallet();
@@ -20,7 +20,7 @@ export const useConnect = () => {
 
 /**
  * Facade hook to expose disconnection status and the disconnect action.
- * Adheres to the `DerivedDisconnectStatus` interface expected by the core app.
+ * Adheres to the `DerivedDisconnectStatus` interface expected by the builder app.
  */
 export const useDisconnect = () => {
   const { disconnect } = useMidnightWallet();
@@ -33,7 +33,7 @@ export const useDisconnect = () => {
 
 /**
  * Facade hook to expose the current account state.
- * Adheres to the `Account` interface expected by the core app.
+ * Adheres to the `Account` interface expected by the builder app.
  */
 export const useAccount = () => {
   const { address, isConnected, isConnecting } = useMidnightWallet();
@@ -50,7 +50,7 @@ export const useAccount = () => {
 
 /**
  * An object containing all the facade hooks for the Midnight adapter.
- * This is the primary export that will be consumed by the core application.
+ * This is the primary export that will be consumed by the builder application.
  */
 export const midnightFacadeHooks = {
   useAccount,

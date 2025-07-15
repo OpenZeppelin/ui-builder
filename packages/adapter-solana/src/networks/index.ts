@@ -1,4 +1,4 @@
-import { SolanaNetworkConfig } from '@openzeppelin/transaction-form-types';
+import { SolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { solanaMainnetBeta } from './mainnet';
 import { solanaDevnet, solanaTestnet } from './testnet';

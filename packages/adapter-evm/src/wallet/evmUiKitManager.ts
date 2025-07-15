@@ -2,8 +2,8 @@ import type { Config as WagmiConfig } from '@wagmi/core';
 
 import type React from 'react';
 
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getEvmWalletImplementation } from './utils/walletImplementationManager';
 

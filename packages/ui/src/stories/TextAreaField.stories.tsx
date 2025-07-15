@@ -55,7 +55,7 @@ const TextAreaFieldWrapper = (args: TextAreaFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/TextAreaField',
+  title: 'Renderer/Components/Fields/TextAreaField',
   component: TextAreaFieldWrapper,
   parameters: {
     layout: 'centered',

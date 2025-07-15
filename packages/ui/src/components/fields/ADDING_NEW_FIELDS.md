@@ -1,12 +1,12 @@
 # Adding New Field Components
 
-This document outlines the step-by-step process for adding new field components to the Transaction Form Builder system.
+This document outlines the step-by-step process for adding new field components to the Contracts UI Builder system.
 
 ## Architecture Overview
 
 The form system follows a layered architecture:
 
-1. **TransactionForm**: Top-level form renderer
+1. **TransactionForm**: Top-level renderer
 2. **DynamicFormField**: Selects appropriate field component based on field type
 3. **Field Components**: Type-specific field components (TextField, NumberField, etc.)
 4. **UI Components**: Radix UI based components
@@ -36,11 +36,11 @@ export type FieldType =
 If your field requires a new UI component not already available, create it first using Radix UI primitives:
 
 ```typescript
-// packages/form-renderer/src/components/ui/your-component.tsx
+// packages/renderer/src/components/ui/your-component.tsx
 
 import * as React from 'react';
 import * as YourPrimitive from '@radix-ui/react-your-primitive';
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 const YourComponent = React.forwardRef<
   HTMLDivElement,
@@ -67,7 +67,7 @@ import { FieldValues, Controller, FieldPath } from 'react-hook-form';
 import { BaseFieldProps } from './BaseField';
 import { YourComponent } from '../ui/your-component';
 import { Label } from '../ui/label';
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * YourNewField component properties
@@ -246,14 +246,14 @@ Here's an example of creating a SelectField:
 1. Create the UI component (e.g., using Radix UI):
 
    ```tsx
-   // packages/form-renderer/src/components/ui/select.tsx
+   // packages/renderer/src/components/ui/select.tsx
    import * as SelectPrimitive from '@radix-ui/react-select';
 
    import * as React from 'react';
 
-   import { cn } from '@openzeppelin/transaction-form-utils';
+   import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
-   // packages/form-renderer/src/components/ui/select.tsx
+   // packages/renderer/src/components/ui/select.tsx
 
    const Select = SelectPrimitive.Root;
 
@@ -285,11 +285,11 @@ Here's an example of creating a SelectField:
 2. Create the field component incorporating the UI component:
 
    ```tsx
-   // packages/form-renderer/src/components/fields/SelectField.tsx
+   // packages/renderer/src/components/fields/SelectField.tsx
    import React from 'react';
    import { Controller, FieldValues } from 'react-hook-form';
 
-   import { cn } from '@openzeppelin/transaction-form-utils';
+   import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
    import { Label } from '../ui/label';
    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';

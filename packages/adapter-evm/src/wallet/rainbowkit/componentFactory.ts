@@ -1,4 +1,4 @@
-import type { EcosystemWalletComponents } from '@openzeppelin/transaction-form-types';
+import type { EcosystemWalletComponents } from '@openzeppelin/contracts-ui-builder-types';
 
 import { RainbowKitConnectButton } from './components';
 

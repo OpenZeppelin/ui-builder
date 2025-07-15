@@ -54,7 +54,7 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          if git diff --exit-code packages/core/src/export/versions.ts; then
+          if git diff --exit-code packages/builder/src/export/versions.ts; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -65,6 +65,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add packages/core/src/export/versions.ts
+          git add packages/builder/src/export/versions.ts
           git commit -m "chore: update export versions"
           git push

@@ -1,5 +1,5 @@
 // Assumes WalletStateContext exports useWalletState
-import { isRecordWithProperties } from '@openzeppelin/transaction-form-utils';
+import { isRecordWithProperties } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useWalletState } from './WalletStateContext';
 

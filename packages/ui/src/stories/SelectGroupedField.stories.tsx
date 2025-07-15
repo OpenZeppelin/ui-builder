@@ -108,7 +108,7 @@ const SelectGroupedFieldWrapper = (args: SelectGroupedFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/SelectGroupedField',
+  title: 'Renderer/Components/Fields/SelectGroupedField',
   component: SelectGroupedFieldWrapper,
   parameters: {
     layout: 'centered',

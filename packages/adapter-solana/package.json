@@ -1,7 +1,7 @@
 {
-  "name": "@openzeppelin/transaction-form-adapter-solana",
-  "version": "0.3.0",
-  "description": "Solana Adapter for Transaction Form Builder",
+  "name": "@openzeppelin/contracts-ui-builder-adapter-solana",
+  "version": "0.0.2",
+  "description": "Solana Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",
@@ -11,7 +11,7 @@
     "solana"
   ],
   "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
-  "homepage": "https://github.com/OpenZeppelin/transaction-form-builder#readme",
+  "homepage": "https://github.com/OpenZeppelin/contracts-ui-builder#readme",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -26,11 +26,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder.git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder.git",
     "directory": "packages/adapter-solana"
   },
   "bugs": {
-    "url": "https://github.com/OpenZeppelin/transaction-form-builder/issues"
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -42,14 +42,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openzeppelin/transaction-form-types": "workspace:*",
-    "@openzeppelin/transaction-form-utils": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-types": "workspace:*",
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
     "@project-serum/anchor": "^0.26.0",
     "@solana/spl-token": "^0.3.11",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/web3.js": "^1.98.2",
-    "bs58": "^5.0.0"
+    "bs58": "^5.0.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "eslint": "^9.29.0",

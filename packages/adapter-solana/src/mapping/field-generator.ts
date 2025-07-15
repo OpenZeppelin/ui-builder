@@ -5,8 +5,8 @@ import type {
   FieldValidation,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
-import { getDefaultValueForType } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 

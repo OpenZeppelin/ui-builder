@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EvmNetworkConfig, UserExplorerConfig } from '@openzeppelin/transaction-form-types';
+import { EvmNetworkConfig, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { testEvmExplorerConnection, validateEvmExplorerConfig } from '../../configuration/explorer';
 

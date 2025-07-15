@@ -13,7 +13,7 @@ import {
 import { Input } from '../components/ui/input';
 
 const meta = {
-  title: 'Core/UI/Dialog',
+  title: 'Builder/UI/Dialog',
   component: Dialog,
   parameters: {
     layout: 'centered',

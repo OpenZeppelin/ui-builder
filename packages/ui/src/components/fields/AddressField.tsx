@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/transaction-form-types';
+import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';

@@ -1,4 +1,4 @@
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
 import { generateRainbowKitConfigFile } from './config-generator';
 

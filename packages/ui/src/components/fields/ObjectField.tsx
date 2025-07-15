@@ -6,7 +6,7 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/transaction-form-types';
+} from '@openzeppelin/contracts-ui-builder-types';
 
 // TODO: Consider if FunctionParameter is the most appropriate type for `components` here,
 // or if a UI-specific version of a component/property definition would be more robust.

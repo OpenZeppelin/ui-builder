@@ -1,12 +1,12 @@
-# Stellar Adapter (`@openzeppelin/transaction-form-adapter-stellar`)
+# Stellar Adapter (`@openzeppelin/contracts-ui-builder-adapter-stellar`)
 
-This package provides the `ContractAdapter` implementation for the Stellar network for the Transaction Form Builder.
+This package provides the `ContractAdapter` implementation for the Stellar network for the Contracts UI Builder.
 
 **Note:** While the basic structure is in place, including network configuration definitions, the core adapter logic for Stellar-specific operations is currently a placeholder and will be implemented in future development phases.
 
 It is intended to be responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/transaction-form-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
 - Defining and exporting specific Stellar network configurations (e.g., Public Network, Testnet) as `StellarNetworkConfig` objects. These are located in `src/networks/` and include details like Horizon URLs, network passphrases, and explorer URLs.
 - Loading Stellar contract metadata (e.g., from XDR for Soroban contracts).
 - Mapping Stellar-specific data types (e.g., Soroban types) to the form field types.
@@ -20,9 +20,9 @@ It is intended to be responsible for:
 Once fully implemented, the `StellarAdapter` class will be instantiated with a specific `StellarNetworkConfig` object:
 
 ```typescript
-import { StellarAdapter } from '@openzeppelin/transaction-form-adapter-stellar';
-// Example: import { stellarPubnet } from '@openzeppelin/transaction-form-adapter-stellar';
-import { StellarNetworkConfig } from '@openzeppelin/transaction-form-types';
+// Example: import { stellarPubnet } from '@openzeppelin/contracts-ui-builder-adapter-stellar';
+import { StellarAdapter } from '@openzeppelin/contracts-ui-builder-adapter-stellar';
+import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 // For type access if needed
 

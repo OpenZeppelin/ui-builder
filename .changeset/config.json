@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "OpenZeppelin/transaction-form-builder"
+      "repo": "OpenZeppelin/contracts-ui-builder"
     }
   ],
   "commit": false,

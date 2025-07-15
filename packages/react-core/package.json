@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/transaction-form-react-core",
-  "version": "1.17.0",
+  "name": "@openzeppelin/contracts-ui-builder-react-core",
+  "version": "0.1.2",
   "private": false,
-  "description": "Core React context providers and hooks for the OpenZeppelin Transaction Form Builder.",
+  "description": "Core React context providers and hooks for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -47,9 +47,10 @@
   "author": "OpenZeppelin",
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/transaction-form-types": "workspace:^",
-    "@openzeppelin/transaction-form-ui": "workspace:^",
-    "@openzeppelin/transaction-form-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "lucide-react": "^0.510.0"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",

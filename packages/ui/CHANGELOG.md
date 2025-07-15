@@ -1,5 +1,14 @@
 # @openzeppelin/transaction-form-ui
 
+## 0.1.2
+
+### Patch Changes
+
+- [#52](https://github.com/OpenZeppelin/contracts-ui-builder/pull/52) [`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037) Thanks [@pasevin](https://github.com/pasevin)! - resolves clean build issues due to missing packages
+
+- Updated dependencies [[`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037)]:
+  - @openzeppelin/contracts-ui-builder-types@0.1.2
+
 ## 1.18.0
 
 ### Minor Changes
@@ -15,7 +24,7 @@
 ### Patch Changes
 
 - Updated dependencies [[`f507dcd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/f507dcdc6cab173c812f9111c9c57d523d20740a)]:
-  - @openzeppelin/transaction-form-types@1.17.0
+  - @openzeppelin/contracts-ui-builder-types@1.17.0
   - @openzeppelin/transaction-form-utils@1.17.0
 
 ## 1.16.0
@@ -27,7 +36,7 @@
 ### Patch Changes
 
 - Updated dependencies [[`6b20ff8`](https://github.com/OpenZeppelin/transaction-form-builder/commit/6b20ff82cab748db41797dff0891890e35a24bfe)]:
-  - @openzeppelin/transaction-form-types@1.16.0
+  - @openzeppelin/contracts-ui-builder-types@1.16.0
   - @openzeppelin/transaction-form-utils@1.16.0
 
 ## 1.15.1

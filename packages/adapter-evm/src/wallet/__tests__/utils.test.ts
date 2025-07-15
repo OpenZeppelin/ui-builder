@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { logger } from '@openzeppelin/transaction-form-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { resolveAndInitializeKitConfig } from '../utils';
 
 // Mock the logger to prevent console output during tests and allow spying
-vi.mock('@openzeppelin/transaction-form-utils', () => ({
+vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
   logger: {
     debug: vi.fn(),
     info: vi.fn(),

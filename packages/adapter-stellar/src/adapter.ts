@@ -20,9 +20,9 @@ import type {
   StellarNetworkConfig,
   UiKitConfiguration,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isStellarNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isStellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import functions from modules
 import {

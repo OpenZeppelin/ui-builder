@@ -1,4 +1,10 @@
-# @openzeppelin/transaction-form-types
+# @openzeppelin/contracts-ui-builder-types
+
+## 0.1.2
+
+### Patch Changes
+
+- [#52](https://github.com/OpenZeppelin/contracts-ui-builder/pull/52) [`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037) Thanks [@pasevin](https://github.com/pasevin)! - resolves clean build issues due to missing packages
 
 ## 1.17.0
 

@@ -48,7 +48,7 @@ jobs:
 
       - name: Check for changes
         run: |
-          if ! git diff --exit-code packages/core/src/export/versions.ts; then
+          if ! git diff --exit-code packages/builder/src/export/versions.ts; then
             echo "❌ Error: versions.ts is out of sync with package.json versions"
             echo "Please run 'pnpm run update-export-versions' and commit the changes"
             exit 1

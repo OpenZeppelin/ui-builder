@@ -1,5 +1,5 @@
-import type { UiKitConfiguration } from '@openzeppelin/transaction-form-types';
-import { appConfigService, logger } from '@openzeppelin/transaction-form-utils';
+import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
 

@@ -12,7 +12,6 @@ import type {
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   EcosystemWalletComponents,
-  EvmNetworkConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
@@ -20,15 +19,15 @@ import type {
   FormValues,
   FunctionParameter,
   NativeConfigLoader,
+  NetworkConfig,
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
-} from '@openzeppelin/transaction-form-types';
-import { isEvmNetworkConfig } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+} from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
@@ -76,18 +75,27 @@ import {
   waitForEvmTransactionConfirmation,
 } from './transaction';
 import { formatEvmFunctionResult } from './transform';
+import { TypedEvmNetworkConfig } from './types';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
+
+/**
+ * Type guard to check if a network config is a TypedEvmNetworkConfig
+ * @param config The network configuration to check
+ * @returns True if the config is for EVM
+ */
+const isTypedEvmNetworkConfig = (config: NetworkConfig): config is TypedEvmNetworkConfig =>
+  config.ecosystem === 'evm';
 
 /**
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
-  readonly networkConfig: EvmNetworkConfig;
+  readonly networkConfig: TypedEvmNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
 
-  constructor(networkConfig: EvmNetworkConfig) {
-    if (!isEvmNetworkConfig(networkConfig)) {
+  constructor(networkConfig: TypedEvmNetworkConfig) {
+    if (!isTypedEvmNetworkConfig(networkConfig)) {
       throw new Error('EvmAdapter requires a valid EVM network configuration.');
     }
     this.networkConfig = networkConfig;

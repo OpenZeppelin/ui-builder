@@ -1,37 +1,37 @@
 const fs = require('fs');
 const path = require('path');
 
-const versionsFilePath = path.resolve(__dirname, '../packages/core/src/export/versions.ts');
+const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export/versions.ts');
 
 // List of internal packages to update
 const packagesToUpdate = [
-  '@openzeppelin/transaction-form-adapter-evm',
-  '@openzeppelin/transaction-form-adapter-midnight',
-  '@openzeppelin/transaction-form-adapter-solana',
-  '@openzeppelin/transaction-form-adapter-stellar',
-  '@openzeppelin/transaction-form-react-core',
-  '@openzeppelin/transaction-form-renderer',
-  '@openzeppelin/transaction-form-types',
-  '@openzeppelin/transaction-form-ui',
-  '@openzeppelin/transaction-form-utils',
+  '@openzeppelin/contracts-ui-builder-adapter-evm',
+  '@openzeppelin/contracts-ui-builder-adapter-midnight',
+  '@openzeppelin/contracts-ui-builder-adapter-solana',
+  '@openzeppelin/contracts-ui-builder-adapter-stellar',
+  '@openzeppelin/contracts-ui-builder-react-core',
+  '@openzeppelin/contracts-ui-builder-renderer',
+  '@openzeppelin/contracts-ui-builder-types',
+  '@openzeppelin/contracts-ui-builder-ui',
+  '@openzeppelin/contracts-ui-builder-utils',
 ];
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/transaction-form-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/contracts-ui-builder-types').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/transaction-form-types' -> 'types'
-    // e.g., '@openzeppelin/transaction-form-adapter-evm' -> 'adapter-evm'
+    // e.g., '@openzeppelin/contracts-ui-builder-types' -> 'types'
+    // e.g., '@openzeppelin/contracts-ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
-    let packageDirName = nameWithoutScope.replace('transaction-form-', '');
+    let packageDirName = nameWithoutScope.replace('contracts-ui-builder-', '');
 
-    // Handle special case for form-renderer
-    if (packageName === '@openzeppelin/transaction-form-renderer') {
-      packageDirName = 'form-renderer';
+    // Handle special case for renderer
+    if (packageName === '@openzeppelin/contracts-ui-builder-renderer') {
+      packageDirName = 'renderer';
     }
 
     const packageJsonPath = path.resolve(__dirname, '../packages', packageDirName, 'package.json');
@@ -87,8 +87,8 @@ const updateSnapshots = () => {
   const { execSync } = require('child_process');
 
   try {
-    // Update snapshots for the core package where the export tests are located
-    execSync('pnpm --filter @openzeppelin/transaction-form-builder-core test -- -u', {
+    // Update snapshots for the builder package where the export tests are located
+    execSync('pnpm --filter @openzeppelin/contracts-ui-builder-app test -- -u', {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'inherit',
     });
@@ -96,7 +96,7 @@ const updateSnapshots = () => {
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
     console.log(
-      '⚠️  Please run "pnpm --filter=@openzeppelin/transaction-form-builder-core test -u" manually'
+      '⚠️  Please run "pnpm --filter=@openzeppelin/contracts-ui-builder-app test -u" manually'
     );
   }
 };

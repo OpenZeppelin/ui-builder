@@ -1,7 +1,7 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 
-import type { Connector } from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
+import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   getEvmWalletImplementation,

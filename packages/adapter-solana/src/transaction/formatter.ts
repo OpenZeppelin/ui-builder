@@ -1,4 +1,4 @@
-import type { ContractSchema, FormFieldType } from '@openzeppelin/transaction-form-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 // Placeholder
 export function formatSolanaTransactionData(

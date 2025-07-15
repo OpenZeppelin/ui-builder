@@ -1,7 +1,6 @@
 /**
- * Styles package for the Transaction Form Builder
+ * Styles package for the Contracts UI Builder
  */
-
 import './index.css';
 
 // Export CSS utility functions

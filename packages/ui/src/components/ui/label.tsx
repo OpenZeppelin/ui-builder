@@ -2,7 +2,7 @@ import * as LabelPrimitive from '@radix-ui/react-label';
 
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/transaction-form-utils';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 type LabelProps = React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>;
 /**

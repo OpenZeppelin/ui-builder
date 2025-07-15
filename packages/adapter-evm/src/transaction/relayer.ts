@@ -2,6 +2,14 @@
 import { encodeFunctionData, formatEther } from 'viem';
 
 import {
+  ExecutionConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+  TransactionStatusUpdate,
+} from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import {
   type ApiResponseRelayerResponseData,
   Configuration,
   type EvmTransactionRequest,
@@ -9,17 +17,8 @@ import {
   RelayersApi,
   Speed,
 } from '@openzeppelin/relayer-sdk';
-import {
-  EvmNetworkConfig,
-  ExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-  TransactionStatusUpdate,
-} from '@openzeppelin/transaction-form-types';
-import { logger } from '@openzeppelin/transaction-form-utils';
 
-import { WriteContractParameters } from '../types';
+import { TypedEvmNetworkConfig, WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 import { ExecutionStrategy } from './execution-strategy';
@@ -97,7 +96,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
   public async getEvmRelayers(
     serviceUrl: string,
     accessToken: string,
-    networkConfig: EvmNetworkConfig
+    networkConfig: TypedEvmNetworkConfig
   ): Promise<RelayerDetails[]> {
     logger.info('[Relayer] Getting relayers with access token', accessToken);
     const sdkConfig = new Configuration({
@@ -157,7 +156,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     serviceUrl: string,
     accessToken: string,
     relayerId: string,
-    networkConfig: EvmNetworkConfig
+    networkConfig: TypedEvmNetworkConfig
   ): Promise<RelayerDetailsRich> {
     logger.info('[Relayer] Getting detailed relayer info', relayerId);
 

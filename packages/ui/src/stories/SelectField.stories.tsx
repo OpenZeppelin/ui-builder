@@ -71,7 +71,7 @@ const SelectFieldWrapper = (args: SelectFieldWrapperProps) => {
 };
 
 const meta = {
-  title: 'Form Renderer/Components/Fields/SelectField',
+  title: 'Renderer/Components/Fields/SelectField',
   component: SelectFieldWrapper,
   parameters: {
     layout: 'centered',
