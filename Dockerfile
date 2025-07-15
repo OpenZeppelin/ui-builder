@@ -31,10 +31,7 @@ COPY . .
 #            pnpm install --frozen-lockfile && \
 #            rm .npmrc'
 
-RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
-    pnpm config set @openzeppelin:registry https://npm.pkg.github.com \
-    pnpm config set //npm.pkg.github.com/:_authToken "$NPM_TOKEN" \
-    pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # Build the core application
 # The filter @openzeppelin/transaction-form-builder-core targets the specific package we want to build
