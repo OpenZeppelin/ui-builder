@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-types",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "Shared TypeScript type definitions for the OpenZeppelin Contracts UI Builder ecosystem.",
   "type": "module",
