@@ -19,6 +19,7 @@ import type {
   FormValues,
   FunctionParameter,
   NativeConfigLoader,
+  NetworkConfig,
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
@@ -26,7 +27,6 @@ import type {
   UserExplorerConfig,
   UserRpcProviderConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { isEvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
@@ -80,6 +80,14 @@ import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
 
 /**
+ * Type guard to check if a network config is a TypedEvmNetworkConfig
+ * @param config The network configuration to check
+ * @returns True if the config is for EVM
+ */
+const isTypedEvmNetworkConfig = (config: NetworkConfig): config is TypedEvmNetworkConfig =>
+  config.ecosystem === 'evm';
+
+/**
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
@@ -87,7 +95,7 @@ export class EvmAdapter implements ContractAdapter {
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
 
   constructor(networkConfig: TypedEvmNetworkConfig) {
-    if (!isEvmNetworkConfig(networkConfig)) {
+    if (!isTypedEvmNetworkConfig(networkConfig)) {
       throw new Error('EvmAdapter requires a valid EVM network configuration.');
     }
     this.networkConfig = networkConfig;
