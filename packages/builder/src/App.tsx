@@ -39,7 +39,7 @@ function App() {
     <NetworkErrorNotificationProvider>
       <AdapterProvider resolveAdapter={getAdapter}>
         <WalletStateProvider
-          initialNetworkId="ethereum-mainnet"
+          initialNetworkId={null}
           getNetworkConfigById={getNetworkById}
           loadConfigModule={loadAppConfigModule}
         >

@@ -7,7 +7,7 @@ import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchM
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
 
-import { ChainTileSelector } from './StepChainSelection/index';
+import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
@@ -86,6 +86,11 @@ export function ContractsUIBuilder() {
 
     // Call the original handler
     handleNetworkSelect(networkId);
+
+    // Auto-advance to next step when a network is selected
+    if (networkId && currentStepIndex === 0) {
+      onStepChange(1);
+    }
   };
 
   // Watch for adapter changes that match our network to switch to
@@ -167,7 +172,7 @@ export function ContractsUIBuilder() {
       id: 'chain-select',
       title: 'Select Blockchain',
       component: (
-        <ChainTileSelector
+        <ChainSelector
           onNetworkSelect={handleNetworkSelection}
           initialEcosystem={selectedNetwork?.ecosystem ?? selectedEcosystem ?? 'evm'}
           selectedNetworkId={selectedNetworkConfigId}

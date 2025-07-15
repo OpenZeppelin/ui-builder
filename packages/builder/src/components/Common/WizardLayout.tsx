@@ -99,7 +99,7 @@ export function WizardLayout({
             </Button>
           )}
         </div>
-        {!isLastStep && (
+        {!isLastStep && !isFirstStep && (
           <Button onClick={handleNext} disabled={!isCurrentStepValid}>
             Next
           </Button>
