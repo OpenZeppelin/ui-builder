@@ -11,8 +11,11 @@ ENV NODE_ENV=development
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
 RUN apt-get update && apt-get install -y python-is-python3 build-essential && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm
-RUN npm install -g pnpm
+# # Install pnpm
+# RUN npm install -g pnpm
+
+RUN corepack enable \
+ && corepack prepare pnpm@latest --activate
 
 # Copy all source code first, which is necessary for pnpm workspaces
 COPY . .
