@@ -1,4 +1,8 @@
 [build]
 base = "/"
-command = "echo \"//npm.pkg.github.com/:_authToken=$NPM_TOKEN\" >> .npmrc && pnpm install-deps && pnpm build"
+command = "echo \"//npm.pkg.github.com/:_authToken=$NPM_TOKEN\" > .npmrc.local && cat .npmrc .npmrc.local > .npmrc.temp && mv .npmrc.temp .npmrc && pnpm install-deps && pnpm build"
 publish = "packages/builder/dist"
+
+[build.environment]
+NODE_VERSION = "20.11.1"
+SKIP_DEPENDENCY_INSTALL = "true"
