@@ -11,11 +11,8 @@ ENV NODE_ENV=development
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
 RUN apt-get update && apt-get install -y python-is-python3 build-essential && rm -rf /var/lib/apt/lists/*
 
-# # Install pnpm
-# RUN npm install -g pnpm
-
-RUN corepack enable \
- && corepack prepare pnpm@latest --activate
+# Install pnpm
+RUN npm install -g pnpm
 
 # Copy all source code first, which is necessary for pnpm workspaces
 COPY . .
@@ -37,7 +34,7 @@ COPY . .
 RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
     --mount=type=cache,target=/root/.cache/pnpm \
     pnpm config set @openzeppelin:registry https://npm.pkg.github.com \
-    pnpm config set //npm.pkg.github.com/:_authToken "$NPM_TOKEN" \
+    pnpm config set //npm.pkg.github.com/:_authToken "example" \
     pnpm install --frozen-lockfile
 
 # Build the core application
