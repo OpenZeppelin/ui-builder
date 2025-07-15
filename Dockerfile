@@ -31,9 +31,9 @@ RUN --mount=type=secret,id=npm_token \
            pnpm install --frozen-lockfile && \
            rm .npmrc'
 
-# Build the builder application
-# The filter @openzeppelin/contracts-ui-builder-app targets the specific package we want to build
-RUN pnpm --filter @openzeppelin/contracts-ui-builder-app build
+# Build all packages in the correct order
+# This ensures workspace dependencies are built before the main application
+RUN NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner
