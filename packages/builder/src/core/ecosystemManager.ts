@@ -1,8 +1,8 @@
+import type { TypedEvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-adapter-evm';
 import type {
   AdapterConfig,
   ContractAdapter,
   Ecosystem,
-  EvmNetworkConfig,
   MidnightNetworkConfig,
   NetworkConfig,
   SolanaNetworkConfig,
@@ -11,7 +11,7 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Define specific constructor types for each adapter
-type EvmAdapterConstructor = new (networkConfig: EvmNetworkConfig) => ContractAdapter;
+type EvmAdapterConstructor = new (networkConfig: TypedEvmNetworkConfig) => ContractAdapter;
 type SolanaAdapterConstructor = new (networkConfig: SolanaNetworkConfig) => ContractAdapter;
 type StellarAdapterConstructor = new (networkConfig: StellarNetworkConfig) => ContractAdapter;
 type MidnightAdapterConstructor = new (networkConfig: MidnightNetworkConfig) => ContractAdapter;
@@ -283,7 +283,9 @@ export async function getAdapter(networkConfigInput: NetworkConfig): Promise<Con
   // The adapter's constructor or client initialization logic will handle RPC overrides.
   switch (networkConfigInput.ecosystem) {
     case 'evm':
-      return new (AdapterClass as EvmAdapterConstructor)(networkConfigInput as EvmNetworkConfig);
+      return new (AdapterClass as EvmAdapterConstructor)(
+        networkConfigInput as TypedEvmNetworkConfig
+      );
     case 'solana':
       return new (AdapterClass as SolanaAdapterConstructor)(
         networkConfigInput as SolanaNetworkConfig
