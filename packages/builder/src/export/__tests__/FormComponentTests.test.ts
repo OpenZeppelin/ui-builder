@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import {
   createComplexFormConfig,
   createMinimalContractSchema,
@@ -36,7 +36,7 @@ describe('Form Component Tests', () => {
     useComplexForm: boolean = false
   ) {
     // Create the export system
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
 
     // Create form config
     const formConfig = useComplexForm
@@ -45,7 +45,7 @@ describe('Form Component Tests', () => {
     const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       mockContractSchema,
       mockEvmNetworkConfig,

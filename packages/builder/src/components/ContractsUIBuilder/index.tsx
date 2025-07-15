@@ -11,15 +11,16 @@ import { ChainTileSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
+import { HeroSection } from './HeroSection';
 import { StepComplete } from './StepComplete';
 import { StepContractDefinition } from './StepContractDefinition';
-import { useFormBuilderState } from './hooks';
+import { useUIBuilderState } from './hooks';
 
 /**
- * Main form builder wizard component.
- * This component renders the multi-step wizard for building transaction forms.
+ * Main builder app wizard component.
+ * This component renders the multi-step wizard for building transaction apps..
  */
-export function TransactionFormBuilder() {
+export function ContractsUIBuilder() {
   const {
     selectedNetworkConfigId,
     selectedNetwork,
@@ -42,9 +43,9 @@ export function TransactionFormBuilder() {
     handleFormConfigUpdated,
     handleExecutionConfigUpdated,
     toggleWidget,
-    exportForm,
+    exportApp,
     handleUiKitConfigUpdated,
-  } = useFormBuilderState();
+  } = useUIBuilderState();
 
   // Track network switching state
   const [networkToSwitchTo, setNetworkToSwitchTo] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export function TransactionFormBuilder() {
 
   // Custom handler for network selection that directly signals a network switch
   const handleNetworkSelection = (networkId: string | null) => {
-    logger.info('TransactionFormBuilder', `🔀 Network selected: ${networkId}`);
+    logger.info('ContractsUIBuilder', `🔀 Network selected: ${networkId}`);
 
     // If there's a previous network and we're selecting a new one, set it as the network to switch to
     // OR if this is the first network selection (initial load)
@@ -68,13 +69,13 @@ export function TransactionFormBuilder() {
     ) {
       setNetworkToSwitchTo(networkId);
       setIsAdapterReady(false); // Reset the adapter ready flag
-      logger.info('TransactionFormBuilder', `🎯 Setting network to switch to: ${networkId}`);
+      logger.info('ContractsUIBuilder', `🎯 Setting network to switch to: ${networkId}`);
 
       // Mark that we've initialized if this is the first selection
       if (!hasInitializedNetworkRef.current) {
         hasInitializedNetworkRef.current = true;
         logger.info(
-          'TransactionFormBuilder',
+          'ContractsUIBuilder',
           '🚀 Initial network selection - triggering wallet switch'
         );
       }
@@ -93,7 +94,7 @@ export function TransactionFormBuilder() {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
       if (!networkToSwitchTo && isAdapterReady) {
         logger.info(
-          'TransactionFormBuilder',
+          'ContractsUIBuilder',
           'Target network cleared, ensuring isAdapterReady is false.'
         );
         setIsAdapterReady(false);
@@ -104,7 +105,7 @@ export function TransactionFormBuilder() {
     // If the adapter is now loaded for the network we want to switch to, mark it as ready.
     if (selectedNetworkConfigId === networkToSwitchTo) {
       logger.info(
-        'TransactionFormBuilder',
+        'ContractsUIBuilder',
         `✅ Adapter available for target network ${selectedNetworkConfigId}. (Current selectedAdapter ID: ${selectedAdapter.networkConfig.id}). Setting isAdapterReady.`
       );
       if (!isAdapterReady) {
@@ -116,7 +117,7 @@ export function TransactionFormBuilder() {
       // ensure isAdapterReady is false, as we are not ready to switch with the current adapter.
       if (isAdapterReady) {
         logger.info(
-          'TransactionFormBuilder',
+          'ContractsUIBuilder',
           `Mismatch: selectedNetwork (${selectedNetworkConfigId}) vs target (${networkToSwitchTo}). Resetting isAdapterReady.`
         );
         setIsAdapterReady(false);
@@ -126,7 +127,7 @@ export function TransactionFormBuilder() {
 
   // Reset the network to switch to when switching is complete
   const handleNetworkSwitchComplete = () => {
-    logger.info('TransactionFormBuilder', '🔄 Network switch completed, resetting target');
+    logger.info('ContractsUIBuilder', '🔄 Network switch completed, resetting target');
     setNetworkToSwitchTo(null);
     setIsAdapterReady(false);
   };
@@ -141,7 +142,7 @@ export function TransactionFormBuilder() {
     );
     if (decision) {
       logger.info(
-        'TransactionFormBuilder',
+        'ContractsUIBuilder',
         `MOUNTING NetworkSwitchManager. Adapter ID: ${selectedAdapter.networkConfig.id}, Target: ${networkToSwitchTo ?? 'null'}`
       );
     }
@@ -233,7 +234,7 @@ export function TransactionFormBuilder() {
           formConfig={formConfig}
           contractSchema={contractSchema}
           onExport={() => {
-            void exportForm();
+            void exportApp();
           }}
           exportLoading={exportLoading}
           functionDetails={
@@ -258,12 +259,7 @@ export function TransactionFormBuilder() {
         />
       )}
 
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold">Build Transaction Forms</h1>
-        <p className="text-muted-foreground text-lg">
-          Design and export customized dApp interfaces for blockchain interactions
-        </p>
-      </div>
+      <HeroSection currentStepIndex={currentStepIndex} />
 
       <div className="bg-card rounded-lg border shadow-sm">
         <WizardLayout

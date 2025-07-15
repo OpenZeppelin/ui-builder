@@ -5,7 +5,7 @@ import type {
   SolanaNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip, validateExportedProject } from '../utils/zipInspector';
 
@@ -24,17 +24,17 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
   apiUrl: '',
 };
 
-describe('FormExportValidation', () => {
+describe('AppExportValidation', () => {
   it('should export a valid EVM project structure', async () => {
     // Create the export system
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
 
     // Create a test form config
     const formConfig = createMinimalFormConfig('transfer', 'evm');
     const contractSchema = createMinimalContractSchema('transfer', 'evm');
 
     // Export the form
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       contractSchema,
       mockEvmNetworkConfig,
@@ -91,7 +91,7 @@ describe('FormExportValidation', () => {
 
   it('should export a valid Solana project structure', async () => {
     // Create the export system
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
 
     // Create a test form config and schema for Solana
     const formConfig = createMinimalFormConfig('solanaTransfer', 'solana');
@@ -110,7 +110,7 @@ describe('FormExportValidation', () => {
     };
 
     // Export the form
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       contractSchema,
       mockSolanaConfig, // Pass Solana mock config
@@ -153,7 +153,7 @@ describe('FormExportValidation', () => {
   });
 
   it('should handle different ecosystems correctly (placeholder checks)', async () => {
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
     const formConfig = createMinimalFormConfig('transfer', 'solana');
     const contractSchema = createMinimalContractSchema('transfer', 'solana');
     // Use the mockSolanaConfig defined earlier in this file
@@ -170,7 +170,7 @@ describe('FormExportValidation', () => {
     };
 
     await expect(
-      exportSystem.exportForm(formConfig, contractSchema, mockSolanaConfig, 'transfer')
+      exportSystem.exportApp(formConfig, contractSchema, mockSolanaConfig, 'transfer')
     ).resolves.toBeDefined();
   });
 });

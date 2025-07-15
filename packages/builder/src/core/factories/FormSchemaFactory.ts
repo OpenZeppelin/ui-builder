@@ -80,7 +80,7 @@ export class FormSchemaFactory {
    * Converts a BuilderFormConfig to a RenderFormSchema
    * This is useful for previewing a form in the builder
    *
-   * @param builderConfig The BuilderFormConfig created in the form builder
+   * @param builderConfig The BuilderFormConfig created in the builder app
    * @param formTitle The title of the form
    * @param formDescription Optional description for the form
    * @returns A complete RenderFormSchema for rendering

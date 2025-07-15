@@ -22,7 +22,7 @@ interface ActionBarProps {
 }
 
 /**
- * ActionBar - Extended action bar for the core form builder
+ * ActionBar - Extended action bar for the builder app
  * Uses ContractActionBar as a base and adds core-specific actions (export, preview)
  */
 export function ActionBar({

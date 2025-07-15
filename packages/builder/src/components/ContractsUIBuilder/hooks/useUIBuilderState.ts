@@ -8,7 +8,7 @@ import {
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
 
-import { type BuilderFormConfig, formBuilderStore } from './formBuilderStore';
+import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 
@@ -16,8 +16,8 @@ import { useContractWidgetState } from './useContractWidgetState';
  * Coordinating hook that uses an external store to manage builder state.
  * This ensures state persists across component re-mounts.
  */
-export function useFormBuilderState() {
-  const state = useSyncExternalStore(formBuilderStore.subscribe, formBuilderStore.getState);
+export function useUIBuilderState() {
+  const state = useSyncExternalStore(uiBuilderStore.subscribe, uiBuilderStore.getState);
   const {
     setActiveNetworkId,
     activeNetworkConfig,
@@ -28,51 +28,51 @@ export function useFormBuilderState() {
 
   // Initialize the store with the active network from the wallet context on first load.
   useEffect(() => {
-    formBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
+    uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
   }, []); // Run only once
 
   const handleNetworkSelect = useCallback(
     (networkConfigId: string | null) => {
       setActiveNetworkId(networkConfigId);
-      formBuilderStore.updateState(() => ({
+      uiBuilderStore.updateState(() => ({
         selectedNetworkConfigId: networkConfigId,
         selectedEcosystem: activeNetworkConfig?.ecosystem ?? null,
       }));
-      formBuilderStore.resetDownstreamSteps('network');
+      uiBuilderStore.resetDownstreamSteps('network');
     },
     [setActiveNetworkId, activeNetworkConfig]
   );
 
   const onStepChange = useCallback((index: number) => {
-    formBuilderStore.updateState(() => ({ currentStepIndex: index }));
+    uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
   }, []);
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
-      formBuilderStore.updateState(() => ({
+      uiBuilderStore.updateState(() => ({
         contractSchema: schema,
         contractAddress: schema?.address ?? null,
         contractFormValues: formValues || null,
       }));
-      formBuilderStore.resetDownstreamSteps('contract');
+      uiBuilderStore.resetDownstreamSteps('contract');
     },
     []
   );
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
-    formBuilderStore.updateState(() => ({ selectedFunction: functionId }));
-    formBuilderStore.resetDownstreamSteps('function');
+    uiBuilderStore.updateState(() => ({ selectedFunction: functionId }));
+    uiBuilderStore.resetDownstreamSteps('function');
   }, []);
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
-    formBuilderStore.updateState((s) => ({
+    uiBuilderStore.updateState((s) => ({
       formConfig: s.formConfig ? { ...s.formConfig, ...config } : (config as BuilderFormConfig),
     }));
   }, []);
 
   const handleExecutionConfigUpdated = useCallback(
     (execConfig: ExecutionConfig | undefined, isValid: boolean) => {
-      formBuilderStore.updateState((s) => ({
+      uiBuilderStore.updateState((s) => ({
         formConfig: s.formConfig
           ? { ...s.formConfig, executionConfig: execConfig }
           : s.selectedFunction && s.contractAddress
@@ -93,7 +93,7 @@ export function useFormBuilderState() {
 
   const handleUiKitConfigUpdated = useCallback(
     (uiKitConfig: UiKitConfiguration) => {
-      formBuilderStore.updateState((s) => ({
+      uiBuilderStore.updateState((s) => ({
         formConfig: s.formConfig ? { ...s.formConfig, uiKitConfig } : null,
       }));
       // Also trigger the global reconfiguration to update the header, etc.
@@ -116,9 +116,9 @@ export function useFormBuilderState() {
         )
       : null;
 
-  const handleExportForm = useCallback(() => {
+  const handleExportApp = useCallback(() => {
     if (!activeNetworkConfig || !activeAdapter || !state.selectedFunction) return;
-    void completeStep.exportForm(
+    void completeStep.exportApp(
       state.formConfig,
       activeNetworkConfig,
       state.selectedFunction,
@@ -141,7 +141,7 @@ export function useFormBuilderState() {
     handleFormConfigUpdated,
     handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
-    exportForm: handleExportForm,
+    exportApp: handleExportApp,
     handleUiKitConfigUpdated,
   };
 }

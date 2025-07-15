@@ -10,7 +10,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 /**
  * Component that handles wallet network switching based on the selected network.
  *
- * This component is designed to be used in the FormBuilder itself rather than
+ * This component is designed to be used in the ContractsUIBuilder itself rather than
  * in the general wallet UI to ensure it has direct access to the adapter.
  */
 

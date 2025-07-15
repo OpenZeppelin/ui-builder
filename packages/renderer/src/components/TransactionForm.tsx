@@ -23,7 +23,7 @@ import { TransactionStatusDisplay } from './transaction';
  * This is the main entry point for the app rendering system. It represents the top level of
  * the app rendering architecture:
  *
- * 1. TransactionForm receives a schema and adapter from the transaction form builder
+ * 1. TransactionForm receives a schema and adapter from the transaction builder app
  * 2. It sets up React Hook Form for state management and validation
  * 3. It renders fields dynamically using the DynamicFormField component
  * 4. Provides wallet connection UI (demo implementation)

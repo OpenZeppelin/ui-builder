@@ -6,7 +6,7 @@ import type {
   SolanaNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
@@ -44,11 +44,11 @@ describe('Export Structure Tests', () => {
     networkConfig: NetworkConfig,
     functionName: string = 'transfer'
   ) {
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
     const formConfig = createMinimalFormConfig(functionName, networkConfig.ecosystem);
     const contractSchema = createMinimalContractSchema(functionName, networkConfig.ecosystem);
 
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       contractSchema,
       networkConfig,
@@ -135,9 +135,9 @@ describe('Export Structure Tests', () => {
   describe('Project Naming and Configuration', () => {
     it('should use the provided project name in package.json', async () => {
       const customProjectName = 'custom-project-name';
-      const exportSystem = new FormExportSystem();
+      const exportSystem = new AppExportSystem();
 
-      const result = await exportSystem.exportForm(
+      const result = await exportSystem.exportApp(
         createMinimalFormConfig('transfer'),
         createMinimalContractSchema('transfer', 'evm'),
         mockEvmNetworkConfig,

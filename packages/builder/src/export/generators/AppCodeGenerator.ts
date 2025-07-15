@@ -27,15 +27,17 @@ const templateFiles = import.meta.glob<string>('../codeTemplates/*.template.tsx'
 }) as Record<string, string>; // Changed from Record<string, () => Promise<string>> since eager returns strings directly
 
 /**
- * FormCodeGenerator class responsible for generating React components
+ * AppCodeGenerator class responsible for generating React components
  * that use the shared renderer package.
  *
  * Current implementation:
- * - Generates only the form component code
+ * - Generates the main.tsx file
+ * - Generates the App.tsx file
+ * - Generates the GeneratedForm.tsx file
  * - Uses a consistent import pattern that works in both dev and production
  * - Integrates with TemplateManager to generate complete projects
  */
-export class FormCodeGenerator {
+export class AppCodeGenerator {
   private templateManager: TemplateManager;
   private templateProcessor: TemplateProcessor;
 
@@ -45,7 +47,7 @@ export class FormCodeGenerator {
   }
 
   /**
-   * Generate a React component for a form that uses the shared renderer package.
+   * Generate a React component for an app that uses the shared renderer package.
    * Uses a consistent import path that works in both development and production
    * thanks to pnpm workspace resolution.
    *

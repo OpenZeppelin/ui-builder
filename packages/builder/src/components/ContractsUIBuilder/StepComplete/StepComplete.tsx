@@ -15,9 +15,9 @@ import { FormPreview } from '../StepFormCustomization/FormPreview';
  * the created form for use and allowing the user to export it if desired.
  *
  * The export process uses the complete export pipeline:
- * - FormExportSystem coordinates the entire export process
+ * - AppExportSystem coordinates the entire export process
  * - TemplateManager provides the project template files
- * - FormCodeGenerator creates the React component code
+ * - AppCodeGenerator creates the React component code
  * - AdapterExportManager includes necessary adapter files
  * - PackageManager handles dependencies in package.json
  * - ZipGenerator creates a downloadable ZIP file

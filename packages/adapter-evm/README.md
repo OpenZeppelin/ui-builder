@@ -7,7 +7,7 @@ It is responsible for:
 - Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
 - Defining and exporting specific EVM network configurations (e.g., Ethereum Mainnet, Sepolia Testnet) as `EvmNetworkConfig` objects. These are located in `src/networks/` and include details like RPC URLs, Chain IDs, explorer URLs, and native currency information.
 - Loading contract ABIs (from JSON strings or via Etherscan, using the `apiUrl` from the provided `EvmNetworkConfig`).
-- Mapping EVM-specific data types to the form field types used by the form builder.
+- Mapping EVM-specific data types to the form field types used by the builder app.
 - Parsing user input (including complex types like structs and arrays) into EVM-compatible transaction data, according to the `EvmNetworkConfig`.
 - Formatting results from view function calls.
 - **Transaction Execution**: Handling the signing and broadcasting of transactions via different strategies (EOA, Relayer).

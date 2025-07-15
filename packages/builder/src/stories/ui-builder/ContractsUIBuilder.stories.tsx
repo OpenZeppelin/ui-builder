@@ -5,12 +5,12 @@ import {
   WalletStateProvider,
 } from '@openzeppelin/contracts-ui-builder-react-core';
 
-import { TransactionFormBuilder } from '../../components/FormBuilder/TransactionFormBuilder';
+import { ContractsUIBuilder } from '../../components/ContractsUIBuilder';
 import { getAdapter, getNetworkById } from '../../core/ecosystemManager';
 
-const meta: Meta<typeof TransactionFormBuilder> = {
-  title: 'Builder/FormBuilder/TransactionFormBuilder',
-  component: TransactionFormBuilder,
+const meta: Meta<typeof ContractsUIBuilder> = {
+  title: 'Builder/ContractsUIBuilder',
+  component: ContractsUIBuilder,
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -32,10 +32,11 @@ const meta: Meta<typeof TransactionFormBuilder> = {
       </AdapterProvider>
     ),
   ],
-  tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {},
+};

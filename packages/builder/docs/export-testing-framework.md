@@ -103,7 +103,7 @@ This wrapper:
 
 1. Reads configuration from environment variables
 2. Creates form configurations based on these variables
-3. Exports the form using the FormExportSystem
+3. Exports the form using the AppExportSystem
 4. Handles file cleanup differently based on context
 
 ### CLI Mode
@@ -314,5 +314,5 @@ process.env.EXPORT_CLI_ENV = 'production';
 
 - [Test Configuration Utilities](../src/export/utils/testConfig.ts)
 - [ZIP Inspector](../src/export/utils/zipInspector.ts)
-- [Export System Implementation](../src/export/FormExportSystem.ts)
+- [Export System Implementation](../src/export/AppExportSystem.ts)
 - [Export CLI Tool Documentation](./export-cli-tool.md)

@@ -9,12 +9,12 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { PackageManager } from '../PackageManager';
 import { StyleManager } from '../StyleManager';
 import { TemplateManager } from '../TemplateManager';
 import { ZipGenerator } from '../ZipGenerator';
-import { FormCodeGenerator } from '../generators/FormCodeGenerator';
+import { AppCodeGenerator } from '../generators/AppCodeGenerator';
 import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 
@@ -51,9 +51,9 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 };
 
 /**
- * Unit tests for the FormExportSystem class
+ * Unit tests for the AppExportSystem class
  */
-describe('FormExportSystem', () => {
+describe('AppExportSystem', () => {
   // Suppress console warning about Vite glob options
   const originalConsoleWarn = console.warn;
   beforeAll(() => {
@@ -89,7 +89,7 @@ describe('FormExportSystem', () => {
   // Create a system with the provided dependencies
   const createExportSystem = () => {
     const templateManager = new TemplateManager();
-    const formCodeGenerator = new FormCodeGenerator();
+    const appCodeGenerator = new AppCodeGenerator();
     const styleManager = new StyleManager();
     const zipGenerator = new ZipGenerator();
     const templateProcessor = new TemplateProcessor({});
@@ -151,13 +151,13 @@ describe('FormExportSystem', () => {
       'src/styles.css': '/* Template styles */',
     });
     const generateFormComponentSpy = vi
-      .spyOn(formCodeGenerator, 'generateFormComponent')
+      .spyOn(appCodeGenerator, 'generateFormComponent')
       .mockResolvedValue('/* Mock Form */');
 
     // Create the system instance, injecting mocks
-    const system = new FormExportSystem({
+    const system = new AppExportSystem({
       templateManager,
-      formCodeGenerator,
+      appCodeGenerator,
       packageManager, // Inject the mock object
       styleManager,
       zipGenerator,
@@ -168,7 +168,7 @@ describe('FormExportSystem', () => {
       system,
       mocks: {
         templateManager,
-        formCodeGenerator,
+        appCodeGenerator,
         packageManager, // Return the mock object
         styleManager,
         zipGenerator,
@@ -179,13 +179,13 @@ describe('FormExportSystem', () => {
     };
   };
 
-  describe('exportForm', () => {
-    it('should generate a complete form export package', async () => {
+  describe('exportApp', () => {
+    it('should generate a complete app export package', async () => {
       const { system } = createExportSystem();
       const formConfig = createMinimalFormConfig();
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
-      const result = await system.exportForm(
+      const result = await system.exportApp(
         formConfig,
         contractSchema,
         mockEvmNetworkConfig,
@@ -232,7 +232,7 @@ describe('FormExportSystem', () => {
       } as SolanaNetworkConfig;
 
       // Test with Solana config
-      const solanaResult = await system.exportForm(
+      const solanaResult = await system.exportApp(
         formConfig,
         contractSchemaSol,
         mockSolanaConfig,
@@ -247,7 +247,7 @@ describe('FormExportSystem', () => {
       );
 
       // Test with EVM config (use the mock defined at top level)
-      const evmResult = await system.exportForm(
+      const evmResult = await system.exportApp(
         formConfig,
         contractSchemaEvm,
         mockEvmNetworkConfig,
@@ -299,13 +299,13 @@ describe('FormExportSystem', () => {
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
       // Export the forms with different systems
-      const basicResult = await basicSystem.exportForm(
+      const basicResult = await basicSystem.exportApp(
         formConfig,
         contractSchema,
         mockEvmNetworkConfig,
         'testFunction'
       );
-      const advancedResult = await advancedSystem.exportForm(
+      const advancedResult = await advancedSystem.exportApp(
         formConfig,
         contractSchema,
         mockEvmNetworkConfig,
@@ -335,7 +335,7 @@ describe('FormExportSystem', () => {
         },
       };
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
-      await system.exportForm(
+      await system.exportApp(
         formConfig,
         contractSchema,
         mockEvmNetworkConfig,
@@ -362,7 +362,7 @@ describe('FormExportSystem', () => {
       const getDependenciesSpy = vi.spyOn(mocks.packageManager, 'getDependencies');
       const formConfig = createMinimalFormConfig();
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
-      await system.exportForm(formConfig, contractSchema, mockEvmNetworkConfig, 'testFunction');
+      await system.exportApp(formConfig, contractSchema, mockEvmNetworkConfig, 'testFunction');
       expect(getDependenciesSpy).toHaveBeenCalledWith(formConfig, 'evm');
     });
 
@@ -375,7 +375,7 @@ describe('FormExportSystem', () => {
       const funcId = 'testFunction'; // Define funcId
 
       await expect(
-        system.exportForm(formConfig, contractSchema, mockEvmNetworkConfig, funcId)
+        system.exportApp(formConfig, contractSchema, mockEvmNetworkConfig, funcId)
       ).rejects.toThrow('Zip Error');
     });
   });

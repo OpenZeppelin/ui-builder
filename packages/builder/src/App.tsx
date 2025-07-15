@@ -8,7 +8,7 @@ import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-type
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { Header } from './components/Common/Header';
-import { TransactionFormBuilder } from './components/FormBuilder/TransactionFormBuilder';
+import { ContractsUIBuilder } from './components/ContractsUIBuilder';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
@@ -47,7 +47,7 @@ function App() {
             <Header />
 
             <main className="py-8">
-              <TransactionFormBuilder />
+              <ContractsUIBuilder />
             </main>
             <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
               <div className="container mx-auto">

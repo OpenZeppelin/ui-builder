@@ -5,8 +5,8 @@ import type { ContractSchema, NetworkConfig } from '@openzeppelin/contracts-ui-b
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { downloadBlob } from '../StepComplete/utils';
 
-// Lazy load FormExportSystem to prevent templates from loading on initial page load
-const FormExportSystemPromise = import('../../../export').then((module) => module.FormExportSystem);
+// Lazy load AppExportSystem to prevent templates from loading on initial page load
+const AppExportSystemPromise = import('../../../export').then((module) => module.AppExportSystem);
 
 /**
  * Custom hook to handle the state and actions for the complete step.
@@ -15,7 +15,7 @@ const FormExportSystemPromise = import('../../../export').then((module) => modul
 export function useCompleteStepState() {
   const [loading, setLoading] = useState(false);
 
-  const exportForm = useCallback(
+  const exportApp = useCallback(
     async (
       formConfig: BuilderFormConfig | null,
       networkConfig: NetworkConfig | null,
@@ -24,22 +24,22 @@ export function useCompleteStepState() {
       // TODO: Add a parameter here for uiKitConfiguration from builder UI state
     ) => {
       if (!formConfig || !selectedFunction || !contractSchema || !networkConfig) {
-        console.error('exportForm: Missing required configuration for export.');
+        console.error('exportApp: Missing required configuration for export.');
         return;
       }
 
       setLoading(true);
 
       try {
-        // Dynamically import FormExportSystem only when needed
-        const FormExportSystem = await FormExportSystemPromise;
-        const exportSystem = new FormExportSystem();
+        // Dynamically import AppExportSystem only when needed
+        const AppExportSystem = await AppExportSystemPromise;
+        const exportSystem = new AppExportSystem();
 
         const exportOptions = {
           ecosystem: networkConfig.ecosystem,
         };
 
-        const result = await exportSystem.exportForm(
+        const result = await exportSystem.exportApp(
           formConfig,
           contractSchema,
           networkConfig,
@@ -76,7 +76,7 @@ export function useCompleteStepState() {
 
   return {
     loading,
-    exportForm,
+    exportApp,
     resetLoadingState,
   };
 }

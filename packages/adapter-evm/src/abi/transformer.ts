@@ -12,7 +12,7 @@ import { formatInputName, formatMethodName } from '../utils';
 /**
  * Transforms a standard ABI array (typically from an EVM-compatible chain)
  * into the project's internal `ContractSchema` format.
- * This schema is used by the form builder and renderer to represent contract interactions
+ * This schema is used by the builder app and renderer to represent contract interactions
  * in a chain-agnostic way (though this specific transformer is for EVM ABIs).
  *
  * @param abi The raw ABI array (e.g., parsed from a JSON ABI file or fetched from Etherscan).
@@ -90,7 +90,7 @@ function mapAbiParametersToSchemaParameters(
       type: param.type, // The raw type string from the ABI (e.g., 'uint256', 'address', 'tuple').
       displayName: formatInputName(param.name || '', param.type), // Generate a user-friendly name.
       // `description` is not a standard part of an ABI parameter, so it's not mapped here.
-      // It can be added later by the user in the form builder UI.
+      // It can be added later by the user in the builder app UI.
     };
     // Check for nested components (structs/tuples).
     // `param.type.startsWith('tuple')` checks if it's a tuple or tuple array.

@@ -66,7 +66,7 @@ export const executionMethodValidatorMap: Record<
 /**
  * Generates the default form values for the execution method form based on the current configuration.
  * This centralizes the complex logic for setting default states for different execution methods.
- * @param currentConfig The current execution configuration from the form builder's state.
+ * @param currentConfig The current execution configuration from the builder app's state.
  * @returns An object with the appropriate default values for the form.
  */
 export function generateDefaultExecutionMethodFormValues(

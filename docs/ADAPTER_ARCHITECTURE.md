@@ -96,7 +96,7 @@ adapter-<chain>/
   - **Flexibility:** This directory name is flexible to reflect the chain's specific definition format.
 
 - **`mapping/`:**
-  - **Purpose:** Handles the logic for mapping blockchain-specific parameter types to the standard `FieldType` used by the form builder, determining compatible field types, and generating default `FormFieldType` configurations.
+  - **Purpose:** Handles the logic for mapping blockchain-specific parameter types to the standard `FieldType` used by the builder app, determining compatible field types, and generating default `FormFieldType` configurations.
   - **Key Exports:** `map[Chain]ParamTypeToFieldType`, `get[Chain]CompatibleFieldTypes`, `generate[Chain]DefaultField`.
 
 - **`transform/`:**

@@ -1,6 +1,6 @@
 # Code Templates
 
-This directory contains template files used by the FormCodeGenerator to generate code.
+This directory contains template files used by the AppCodeGenerator to generate code.
 
 ## Template Syntax
 
@@ -48,7 +48,7 @@ const adapter = new /*EvmAdapter*/();
 
 ## Template Processing Pipeline
 
-The FormCodeGenerator processes templates in a two-phase approach:
+The AppCodeGenerator processes templates in a two-phase approach:
 
 ### 1. Initial Processing (`processTemplate` method):
 
@@ -66,7 +66,7 @@ This approach ensures templates remain valid TypeScript during development while
 
 ## Common Post-Processing
 
-The FormCodeGenerator applies a unified post-processing approach to all templates:
+The AppCodeGenerator applies a unified post-processing approach to all templates:
 
 - **Removing template-specific comments**: All content between `/*------------TEMPLATE COMMENT START------------*/` and `/*------------TEMPLATE COMMENT END------------*/` markers is removed.
 - **Removing development comments**: All lines containing `@ts-expect-error` are removed.
@@ -136,7 +136,7 @@ Each template has specific parameters defined in `TemplateTypes.ts`:
 1. Create a new file following the naming convention: `[name].template.tsx`
 2. Use any of the supported placeholder formats (variable, JSX comment, or inline comment)
 3. Create corresponding parameter types in `TemplateTypes.ts`
-4. Update the FormCodeGenerator to support the new template and add any necessary post-processing steps
+4. Update the AppCodeGenerator to support the new template and add any necessary post-processing steps
 
 ### `form-component.template.tsx`
 
@@ -181,7 +181,7 @@ This method also cleans up template comments and formats the code using Prettier
 
 ### Available Template Variables for `generate` method
 
-When using the `generate` method of the `FormCodeGenerator` class, you can provide the following parameters in the `options` object. These are used to inject data into the code templates.
+When using the `generate` method of the `AppCodeGenerator` class, you can provide the following parameters in the `options` object. These are used to inject data into the code templates.
 
 - `adapterPackageName`: The npm package name of the adapter (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`).
 - `adapterClassName`: The class name of the adapter (e.g., `EvmAdapter`).

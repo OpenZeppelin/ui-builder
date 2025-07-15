@@ -1,6 +1,6 @@
 # Contracts UI Builder 🧩
 
-> A modern web application for building and customizing transaction forms for blockchain applications.
+> Spin up a front-end for any contract call in seconds. Select the function, auto-generate a React UI with wallet connect and multi-network support, and export a complete app.
 
 ## Status
 
@@ -33,7 +33,7 @@ This project is currently in development.
 
 This project is organized as a monorepo with the following packages:
 
-- **packages/builder**: The main application with the form builder UI and core logic.
+- **packages/builder**: The main application with the builder app UI and core logic.
 - **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
 - **packages/renderer**: The shared app rendering library (published to npm), responsible for dynamically rendering forms and other components based on schemas and an active adapter.
 - **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `renderer` to ensure a consistent look and feel.
@@ -207,7 +207,7 @@ contracts-ui-builder/
 │   │   ├── src/
 │   │   │   ├── components/      # UI components (application-specific or composed)
 │   │   │   │   ├── Common/      # Shared components across features within builder
-│   │   │   │   └── FormBuilder/ # Form builder specific components
+│   │   │   │   └── ContractsUIBuilder/ # Contracts UI Builder specific components
 │   │   │   ├── core/            # Chain-agnostic core functionality specific to this app
 │   │   │   │   ├── types/       # Builder-app-specific Type definitions
 │   │   │   │   ├── utils/       # Builder-app-specific utility functions

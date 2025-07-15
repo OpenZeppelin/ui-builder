@@ -6,7 +6,7 @@ import type {
   SolanaNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
@@ -38,10 +38,10 @@ const mockSolanaNetworkConfig: SolanaNetworkConfig = {
 };
 
 describe('Adapter Integration Tests', () => {
-  let exportSystem: FormExportSystem;
+  let exportSystem: AppExportSystem;
 
   beforeEach(() => {
-    exportSystem = new FormExportSystem();
+    exportSystem = new AppExportSystem();
   });
 
   // Helper function to get exported files and parsed package.json
@@ -51,7 +51,7 @@ describe('Adapter Integration Tests', () => {
   ) {
     const formConfig = createMinimalFormConfig(functionName, networkConfig.ecosystem);
     const mockContractSchema = createMinimalContractSchema(functionName, networkConfig.ecosystem);
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       mockContractSchema,
       networkConfig,

@@ -1,15 +1,15 @@
 # Export CLI Tool
 
-The `export-app` CLI tool provides a convenient way to export, build, and test transaction forms without manual UI interaction. This document explains how to use the CLI for various form export operations.
+The `export-app` CLI tool provides a convenient way to export, build, and test transaction apps without manual UI interaction. This document explains how to use the CLI for various app export operations.
 
 ## Overview
 
 The Export CLI tool enables developers to:
 
-1. **Export Forms** - Create forms for different blockchain types and functions
-2. **Build Forms** - Compile and prepare exported forms for deployment
-3. **Serve Forms** - Run forms locally for testing and verification
-4. **Verify Forms** - Check that forms meet expected requirements
+1. **Export Apps** - Create apps for different blockchain types and functions
+2. **Build Apps** - Compile and prepare exported apps for deployment
+3. **Serve Apps** - Run apps locally for testing and verification
+4. **Verify Apps** - Check that apps meet expected requirements
 
 ## Getting Started
 
@@ -319,6 +319,6 @@ Then examine the output files to identify issues.
 ## Related Resources
 
 - [Export Testing Framework Documentation](./export-testing-framework.md)
-- [Export System Implementation](../src/export/FormExportSystem.ts)
+- [Export System Implementation](../src/export/AppExportSystem.ts)
 - [CLI Source Code](../src/export/cli/export-app.cjs)
 - [CLI Documentation](../src/export/cli/README.md)

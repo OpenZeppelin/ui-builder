@@ -8,7 +8,7 @@ interface StepTitleWithDescriptionProps {
 
 /**
  * Reusable component for step titles and descriptions
- * Used across form builder steps for consistent layout and styling
+ * Used across builder app steps for consistent layout and styling
  * Width constrained to 60% to prevent overlap with the contract state widget
  */
 export function StepTitleWithDescription({

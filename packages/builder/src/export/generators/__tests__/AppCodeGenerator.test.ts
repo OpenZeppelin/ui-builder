@@ -11,7 +11,7 @@ import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../../utils/testConfig';
-import { FormCodeGenerator } from '../FormCodeGenerator';
+import { AppCodeGenerator } from '../AppCodeGenerator';
 
 // Mock adapterRegistry before other imports that might use it indirectly
 vi.mock('../../../core/adapterRegistry', () => {
@@ -31,7 +31,7 @@ vi.mock('../../../core/adapterRegistry', () => {
 vi.mock('../../PackageManager', () => {
   // Mock implementation
   const MockPackageManager = vi.fn().mockImplementation(() => ({
-    // Mock methods used by FormCodeGenerator -> generateTemplateProject
+    // Mock methods used by AppCodeGenerator -> generateTemplateProject
     updatePackageJson: vi
       .fn()
       .mockImplementation(
@@ -172,9 +172,9 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
 };
 
 /**
- * Unit tests for the FormCodeGenerator class
+ * Unit tests for the AppCodeGenerator class
  */
-describe('FormCodeGenerator', () => {
+describe('AppCodeGenerator', () => {
   // Reset mocks before each test
   beforeEach(() => {
     vi.clearAllMocks();
@@ -199,7 +199,7 @@ describe('FormCodeGenerator', () => {
 
   describe('generateFormComponent', () => {
     it('should generate React component code for a form', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const formConfig = createMinimalFormConfig('testFunction', 'evm');
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 
@@ -227,7 +227,7 @@ describe('FormCodeGenerator', () => {
     });
 
     it('should use FormSchemaFactory to transform BuilderFormConfig to RenderFormSchema', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const funcId = 'transferTokens';
       const formConfig = createMinimalFormConfig(funcId, 'evm');
       const contractSchema = createMinimalContractSchema(funcId, 'evm');
@@ -254,7 +254,7 @@ describe('FormCodeGenerator', () => {
     });
 
     it('should throw error when transformed schema is missing required properties', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const formConfig = createMinimalFormConfig('invalidForm', 'evm');
       const contractSchema = createMinimalContractSchema('invalidForm', 'evm');
 
@@ -286,7 +286,7 @@ describe('FormCodeGenerator', () => {
     });
 
     it('should throw error for invalid render schema', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const formConfig = createMinimalFormConfig('invalidForm', 'evm');
       const contractSchema = createMinimalContractSchema('invalidForm', 'evm');
 
@@ -315,7 +315,7 @@ describe('FormCodeGenerator', () => {
     });
 
     it('should handle functions without parameters (empty fields array)', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const formConfig = createMinimalFormConfig('emptyFunction', 'evm');
       // Create a form config with no fields (function without parameters)
       formConfig.fields = [];
@@ -365,7 +365,7 @@ describe('FormCodeGenerator', () => {
 
   describe('generateMainTsx', () => {
     it('should generate main.tsx code', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const code = await generator.generateMainTsx(mockEvmNetworkConfig);
       expect(code).toBeDefined();
       expect(mockTemplateProcessor.processTemplate).toHaveBeenCalledWith(
@@ -377,7 +377,7 @@ describe('FormCodeGenerator', () => {
 
   describe('generateAppComponent', () => {
     it('should generate App.tsx code', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const code = await generator.generateAppComponent('evm', 'testFunction');
       expect(code).toBeDefined();
       expect(mockTemplateProcessor.processTemplate).toHaveBeenCalledWith(
@@ -389,7 +389,7 @@ describe('FormCodeGenerator', () => {
 
   describe('generateTemplateProject', () => {
     it('should generate a complete project structure based on the template', async () => {
-      const generator = new FormCodeGenerator();
+      const generator = new AppCodeGenerator();
       const formConfig = createMinimalFormConfig('testFunction', 'evm');
       const contractSchema = createMinimalContractSchema('testFunction', 'evm');
 

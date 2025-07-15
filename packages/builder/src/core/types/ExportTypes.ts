@@ -91,7 +91,7 @@ export interface ExportOptions extends TemplateOptions {
 
   /**
    * UI Kit configuration chosen by the user in the builder UI.
-   * TODO: Implement UI in FormBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
+   * TODO: Implement UI in ContractsUIBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
    */
   uiKitConfiguration?: UiKitConfiguration;
 }

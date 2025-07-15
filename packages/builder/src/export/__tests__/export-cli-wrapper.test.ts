@@ -17,7 +17,7 @@ import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemMana
 // Import others as needed for different ecosystem tests
 // import { solanaDevnet } from '@openzeppelin/contracts-ui-builder-adapter-solana';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { ZipProgress } from '../ZipGenerator';
 import {
   createComplexFormConfig,
@@ -148,10 +148,10 @@ describe('Export CLI Wrapper', () => {
       throw new Error('Failed to determine network configuration to use.');
     }
 
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
 
     // Pass the actual NetworkConfig object
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       mockContractSchema,
       networkConfigToUse,

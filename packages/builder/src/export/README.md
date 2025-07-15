@@ -11,31 +11,31 @@ The export system follows a modular architecture with several specialized compon
 ```mermaid
 graph TD
     %% Define Nodes
-    FES[FormExportSystem]
+    FES[AppExportSystem]
     TP(TemplateProcessor)
     TM(TemplateManager)
-    FCG(FormCodeGenerator)
+    ACG(AppCodeGenerator)
     PM(PackageManager)
     SM(StyleManager)
     ZG(ZipGenerator)
 
     %% Define Links
     FES --> TP
-    FES --> FCG
+    FES --> ACG
     FES --> PM
     FES --> SM
     FES --> ZG
     TP --> TM
-    %% FormCodeGenerator link to PM removed as FES coordinates PM directly
+    %% AppCodeGenerator link to PM removed as FES coordinates PM directly
 
     %% Comments
-    %% FormExportSystem coordinates PackageManager
+    %% AppExportSystem coordinates PackageManager
 ```
 
 ### Key Components
 
-1.  **FormExportSystem**: The main orchestrator that coordinates the entire export process.
-2.  **FormCodeGenerator**: Generates React components (`main.tsx`, `App.tsx`, `GeneratedForm.tsx`) using code templates and the user's configuration.
+1.  **AppExportSystem**: The main orchestrator that coordinates the entire export process.
+2.  **AppCodeGenerator**: Generates React components (`main.tsx`, `App.tsx`, `GeneratedForm.tsx`) using code templates and the user's configuration.
 3.  **TemplateManager**: Manages base project template files (structure, static assets, placeholder components).
 4.  **TemplateProcessor**: Processes code templates with placeholder substitution and formatting.
 5.  **PackageManager**: Manages dependencies for the exported project (builder, adapter, renderer).
@@ -55,10 +55,10 @@ A validation step verifies that all required schema properties are present befor
 ## Export Process Flow
 
 1.  User initiates export with a form configuration, chain type, and function ID.
-2.  `FormCodeGenerator` creates the content for `main.tsx`, `App.tsx`, and `GeneratedForm.tsx` using code templates.
+2.  `AppCodeGenerator` creates the content for `main.tsx`, `App.tsx`, and `GeneratedForm.tsx` using code templates.
 3.  `TemplateManager` creates a base project structure from a template (e.g., `typescript-react-vite`), excluding files that will be generated (like `main.tsx`).
 4.  `StyleManager` retrieves shared CSS and root config file content.
-5.  `FormExportSystem` assembles the final project files:
+5.  `AppExportSystem` assembles the final project files:
     - Copies base template files.
     - Adds the generated `main.tsx`, `App.tsx`, `GeneratedForm.tsx` (overwriting placeholders like the base `App.tsx`).
     - Adds shared styles and configs.
@@ -106,7 +106,7 @@ const adapter = new /*@@adapter-class-name@@*/();
 
 ## Code Generation
 
-The code generation system (`FormCodeGenerator`) produces the content for:
+The code generation system (`AppCodeGenerator`) produces the content for:
 
 1.  **`main.tsx`**: The application entry point, initializing the adapter.
 2.  **`App.tsx`**: The main application component, passing the adapter down.
@@ -114,7 +114,7 @@ The code generation system (`FormCodeGenerator`) produces the content for:
 
 ### Form Component Generation
 
-The FormCodeGenerator creates a form component that:
+The AppCodeGenerator creates a form component that:
 
 - Imports the TransactionForm component from the renderer package
 - Uses the appropriate blockchain adapter
@@ -147,10 +147,10 @@ The export system supports various options:
 ## Usage
 
 ```typescript
-const exportSystem = new FormExportSystem();
+const exportSystem = new AppExportSystem();
 
 // Export a form
-const result = await exportSystem.exportForm(
+const result = await exportSystem.exportApp(
   formConfig, // Form configuration from the builder
   'evm', // Chain type
   'transferTokens', // Function ID

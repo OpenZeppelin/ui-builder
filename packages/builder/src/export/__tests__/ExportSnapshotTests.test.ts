@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Ecosystem, EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { FormExportSystem } from '../FormExportSystem';
+import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
@@ -28,12 +28,12 @@ describe('Export Snapshot Tests', () => {
    */
   async function getSnapshotFiles(ecosystem: Ecosystem = 'evm', functionName: string = 'transfer') {
     // Create the export system and form config
-    const exportSystem = new FormExportSystem();
+    const exportSystem = new AppExportSystem();
     const formConfig = createMinimalFormConfig(functionName, ecosystem);
     const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
     // Export the form with a consistent project name for snapshots
-    const result = await exportSystem.exportForm(
+    const result = await exportSystem.exportApp(
       formConfig,
       mockContractSchema,
       mockEvmNetworkConfig,

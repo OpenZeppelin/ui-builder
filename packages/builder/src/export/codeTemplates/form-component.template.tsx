@@ -32,7 +32,7 @@ interface GeneratedFormProps {
  *
  * This component renders a form for interacting with a blockchain contract.
  * It uses the shared renderer package which ensures consistent behavior
- * with the preview in the form builder.
+ * with the preview in the builder app.
  */
 export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedFormProps) {
   // TODO: Enable this useEffect as a fallback?

@@ -5,7 +5,7 @@ import { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
  * It merges the user-provided configuration with the necessary boilerplate to ensure
  * the config is valid for RainbowKit's `getDefaultConfig`.
  *
- * @param userConfig - The user-provided configuration from the form builder.
+ * @param userConfig - The user-provided configuration from the builder app.
  * @returns A string containing the formatted TypeScript code for the config file.
  */
 export function generateRainbowKitConfigFile(userConfig: UiKitConfiguration['kitConfig']): string {
@@ -23,7 +23,7 @@ export function generateRainbowKitConfigFile(userConfig: UiKitConfiguration['kit
   const appInfoContent = appInfoLines.join(',\n      ');
 
   const fileContent = `// RainbowKit configuration for your exported application
-// This file is used ONLY in the exported app, not in the form builder preview
+// This file is used ONLY in the exported app, not in the builder app preview
 
 // Uncomment imports as needed:
 // import { darkTheme, lightTheme } from '@rainbow-me/rainbowkit';

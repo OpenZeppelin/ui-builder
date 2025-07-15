@@ -16,7 +16,7 @@ export interface BuilderFormConfig extends CommonFormProperties {
   uiKitConfig?: UiKitConfiguration;
 }
 
-export interface FormBuilderState {
+export interface UIBuilderState {
   // Network and adapter state
   selectedNetworkConfigId: string | null;
   selectedEcosystem: Ecosystem | null;
@@ -36,7 +36,7 @@ export interface FormBuilderState {
   isExecutionStepValid: boolean;
 }
 
-let state: FormBuilderState = {
+let state: UIBuilderState = {
   selectedNetworkConfigId: null,
   selectedEcosystem: 'evm',
   currentStepIndex: 0,
@@ -57,13 +57,13 @@ const emitChange = () => {
   }
 };
 
-export const formBuilderStore = {
-  setInitialState(initialState: Partial<FormBuilderState>) {
+export const uiBuilderStore = {
+  setInitialState(initialState: Partial<UIBuilderState>) {
     state = { ...state, ...initialState };
     // No need to emit change here as it's for initial setup
   },
 
-  getState(): FormBuilderState {
+  getState(): UIBuilderState {
     return state;
   },
 
@@ -72,14 +72,14 @@ export const formBuilderStore = {
     return () => listeners.delete(listener);
   },
 
-  updateState(updater: (currentState: FormBuilderState) => Partial<FormBuilderState>) {
+  updateState(updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) {
     const changes = updater(state);
     state = { ...state, ...changes };
     emitChange();
   },
 
   resetDownstreamSteps(fromStep: 'network' | 'contract' | 'function') {
-    let resetState: Partial<FormBuilderState> = {};
+    let resetState: Partial<UIBuilderState> = {};
     if (fromStep === 'network') {
       resetState = {
         ...resetState,

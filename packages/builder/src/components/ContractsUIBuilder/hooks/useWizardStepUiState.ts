@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
-import { formBuilderStore } from './formBuilderStore';
+import { uiBuilderStore } from './uiBuilderStore';
 
 /**
  * A hook for managing transient UI state for a specific wizard step.
@@ -17,8 +17,8 @@ export function useWizardStepUiState<T>(
 ): [T, (newState: Partial<T>) => void] {
   // Subscribe to the entire uiState object from the external store
   const fullUiState = useSyncExternalStore(
-    formBuilderStore.subscribe,
-    () => formBuilderStore.getState().uiState
+    uiBuilderStore.subscribe,
+    () => uiBuilderStore.getState().uiState
   );
 
   // Get the state for this specific step, or fall back to the initial state
@@ -27,7 +27,7 @@ export function useWizardStepUiState<T>(
   // Create a memoized setter function
   const setStepState = useCallback(
     (newState: Partial<T>) => {
-      formBuilderStore.updateState((currentState) => ({
+      uiBuilderStore.updateState((currentState) => ({
         uiState: {
           ...currentState.uiState,
           [stepId]: {

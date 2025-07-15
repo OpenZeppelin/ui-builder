@@ -1,10 +1,10 @@
 /**
- * FormExportSystem
+ * AppExportSystem
  *
- * Orchestrates the entire form export process, integrating modules like
- * TemplateManager, FormCodeGenerator, PackageManager,
+ * Orchestrates the entire app export process, integrating modules like
+ * TemplateManager, AppCodeGenerator, PackageManager,
  * and ZipGenerator to produce a downloadable ZIP archive containing a
- * standalone form project.
+ * standalone app project.
  */
 import {
   ContractAdapter,
@@ -18,7 +18,7 @@ import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 
 // Lazy import types for dependency management
-import type { FormCodeGenerator } from './generators/FormCodeGenerator';
+import type { AppCodeGenerator } from './generators/AppCodeGenerator';
 import type { TemplateProcessor } from './generators/TemplateProcessor';
 
 import type { PackageManager } from './PackageManager';
@@ -34,9 +34,9 @@ import {
 } from './assemblers';
 
 // Define an interface for constructor dependencies (optional)
-interface FormExportSystemDependencies {
+interface AppExportSystemDependencies {
   templateManager?: TemplateManager;
-  formCodeGenerator?: FormCodeGenerator;
+  appCodeGenerator?: AppCodeGenerator;
   packageManager?: PackageManager;
   styleManager?: StyleManager;
   zipGenerator?: ZipGenerator;
@@ -44,25 +44,25 @@ interface FormExportSystemDependencies {
 }
 
 /**
- * FormExportSystem class coordinates the complete form export process,
+ * AppExportSystem class coordinates the complete app export process,
  * integrating the template system, code generator, adapter export, package management,
  * and style management.
  */
-export class FormExportSystem {
+export class AppExportSystem {
   private templateManager: TemplateManager | undefined;
-  private formCodeGenerator: FormCodeGenerator | undefined;
+  private appCodeGenerator: AppCodeGenerator | undefined;
   private packageManager: PackageManager | undefined;
   private styleManager: StyleManager | undefined;
   private zipGenerator: ZipGenerator | undefined;
   private templateProcessor: TemplateProcessor | undefined;
-  private dependencies: FormExportSystemDependencies;
+  private dependencies: AppExportSystemDependencies;
   private initialized = false;
 
   /**
-   * Creates a new FormExportSystem instance.
+   * Creates a new AppExportSystem instance.
    * Dependencies are lazy-loaded when first needed to enable code splitting.
    */
-  constructor(dependencies: FormExportSystemDependencies = {}) {
+  constructor(dependencies: AppExportSystemDependencies = {}) {
     // Store provided dependencies for testing
     this.dependencies = dependencies;
   }
@@ -84,11 +84,11 @@ export class FormExportSystem {
       this.templateManager = new TemplateManager();
     }
 
-    if (this.dependencies.formCodeGenerator) {
-      this.formCodeGenerator = this.dependencies.formCodeGenerator;
+    if (this.dependencies.appCodeGenerator) {
+      this.appCodeGenerator = this.dependencies.appCodeGenerator;
     } else {
-      const { FormCodeGenerator } = await import('./generators/FormCodeGenerator');
-      this.formCodeGenerator = new FormCodeGenerator();
+      const { AppCodeGenerator } = await import('./generators/AppCodeGenerator');
+      this.appCodeGenerator = new AppCodeGenerator();
     }
 
     if (this.dependencies.packageManager) {
@@ -124,17 +124,17 @@ export class FormExportSystem {
   }
 
   /**
-   * Main entry point for the export process. Exports a form based on the provided
-   * form configuration, ecosystem, and options.
+   * Main entry point for the export process. Exports an app based on the provided
+   * app configuration, ecosystem, and options.
    *
    * @param formConfig Form configuration created in the builder
    * @param contractSchema Full contract schema including ABI/function details
    * @param networkConfig Network configuration including ecosystem
-   * @param functionId Function ID this form is for
+   * @param functionId Function ID this app is for
    * @param options Export customization options
    * @returns An export result with the file blob and metadata
    */
-  async exportForm(
+  async exportApp(
     formConfig: BuilderFormConfig,
     contractSchema: ContractSchema,
     networkConfig: NetworkConfig,
@@ -159,12 +159,12 @@ export class FormExportSystem {
 
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');
-      const mainTsxCode = await this.formCodeGenerator!.generateMainTsx(networkConfig);
-      const appComponentCode = await this.formCodeGenerator!.generateAppComponent(
+      const mainTsxCode = await this.appCodeGenerator!.generateMainTsx(networkConfig);
+      const appComponentCode = await this.appCodeGenerator!.generateAppComponent(
         networkConfig.ecosystem,
         functionId
       );
-      const formComponentCode = await this.formCodeGenerator!.generateFormComponent(
+      const formComponentCode = await this.appCodeGenerator!.generateFormComponent(
         formConfig,
         contractSchema,
         networkConfig,

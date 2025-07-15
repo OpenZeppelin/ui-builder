@@ -120,7 +120,7 @@ export type NativeConfigLoader = (relativePath: string) => Promise<Record<string
 
 /**
  * Describes a UI kit available for a specific adapter, providing all necessary
- * metadata for the form builder to render its configuration options.
+ * metadata for the builder app to render its configuration options.
  */
 export interface AvailableUiKit {
   /** A unique identifier for the UI kit (e.g., 'rainbowkit'). */

@@ -3,16 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import { createMinimalContractSchema, createMinimalFormConfig } from '../../utils/testConfig';
-import { FormCodeGenerator } from '../FormCodeGenerator';
+import { AppCodeGenerator } from '../AppCodeGenerator';
 import { TemplateProcessor } from '../TemplateProcessor';
 
 /**
  * These tests focus specifically on testing the templating system
- * used by the FormCodeGenerator class. They verify that each of the
+ * used by the AppCodeGenerator class. They verify that each of the
  * supported template formats works correctly.
  */
-describe('FormCodeGenerator Templating System', () => {
-  let generator: FormCodeGenerator;
+describe('AppCodeGenerator Templating System', () => {
+  let generator: AppCodeGenerator;
   let templateProcessor: TemplateProcessor;
   let originalConsoleLog: typeof console.log;
   let originalConsoleWarn: typeof console.warn;
@@ -33,7 +33,7 @@ describe('FormCodeGenerator Templating System', () => {
   };
 
   beforeEach(() => {
-    generator = new FormCodeGenerator();
+    generator = new AppCodeGenerator();
 
     // Create a TemplateProcessor instance for direct testing
     templateProcessor = new TemplateProcessor({});

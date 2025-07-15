@@ -32,7 +32,7 @@ export-app verify <directory>
 
 ## Local Development and Testing
 
-When testing local changes to the form builder or its packages, the standard `export-app export` command generates a production-ready application that expects to fetch published packages from npm. To test against your local, unpublished code, you must use the `--env local` flag.
+When testing local changes to the builder app or its packages, the standard `export-app export` command generates a production-ready application that expects to fetch published packages from npm. To test against your local, unpublished code, you must use the `--env local` flag.
 
 ### `--env local` Workflow
 

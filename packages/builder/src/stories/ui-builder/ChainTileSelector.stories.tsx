@@ -4,10 +4,10 @@ import { useState } from 'react';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
-import { ChainTileSelector } from '../../components/FormBuilder/StepChainSelection/index';
+import { ChainTileSelector } from '../../components/ContractsUIBuilder/StepChainSelection/index';
 
 const meta = {
-  title: 'Builder/FormBuilder/ChainTileSelector',
+  title: 'Builder/ContractsUIBuilder/ChainTileSelector',
   component: ChainTileSelector,
   parameters: {
     layout: 'centered',
