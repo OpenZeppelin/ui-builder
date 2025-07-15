@@ -1,5 +1,4 @@
 import { NetworkIcon } from '@web3icons/react';
-import { capitalize } from 'lodash';
 
 import React from 'react';
 
@@ -15,7 +14,6 @@ interface NetworkStatusBadgeProps {
 
 // Define constants for consistency
 const ICON_SIZE = 16;
-const BADGE_SIZE = '1.2rem'; // For the network type badge
 
 function getNetworkIconName(network: NetworkConfig): string | null {
   // TODO: submit a PR to web3icons to add midnight to the list of networks
@@ -25,38 +23,9 @@ function getNetworkIconName(network: NetworkConfig): string | null {
   return network.icon || network.network.toLowerCase();
 }
 
-// NetworkTypeBadge component inline
-function NetworkTypeBadge({ type }: { type: string }): React.ReactElement {
-  const isDevnet = type === 'devnet';
-  const isTestnet = type === 'testnet';
-  const isTestnetLike = isTestnet || isDevnet; // For styling purposes
-
-  // Determine badge text based on network type
-  const badgeText = isDevnet ? 'D' : isTestnet ? 'T' : 'M';
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center justify-center rounded-full font-medium flex-shrink-0 text-xs',
-        isTestnetLike
-          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-          : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-      )}
-      style={{
-        width: BADGE_SIZE,
-        height: BADGE_SIZE,
-        lineHeight: BADGE_SIZE /* For vertical centering */,
-      }}
-      title={capitalize(type)} // Full type name for tooltip
-    >
-      {badgeText}
-    </span>
-  );
-}
-
 /**
  * NetworkStatusBadge - Displays network information in a compact badge format
- * Shows the network icon, ecosystem, name, and type - exactly as in the builder app
+ * Shows the network icon, ecosystem, and name with dashed borders for testnet/devnet
  */
 export function NetworkStatusBadge({
   network,
@@ -65,15 +34,17 @@ export function NetworkStatusBadge({
   if (!network) return null;
 
   const iconName = getNetworkIconName(network);
+  const isTestnetLike = network.type === 'testnet' || network.type === 'devnet';
 
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 border-0',
+        'inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2',
+        isTestnetLike ? 'border-2 border-dashed border-muted-foreground/40' : 'border-0',
         className
       )}
     >
-      {/* Network icon - reusing same icon component from NetworkMiniTile */}
+      {/* Network icon - reusing same icon component from NetworkRow */}
       {network.ecosystem === 'midnight' ? (
         <img src={MidnightLogoSvg} alt="Midnight" width={ICON_SIZE} height={ICON_SIZE} />
       ) : iconName ? (
@@ -89,9 +60,6 @@ export function NetworkStatusBadge({
         </span>
         <span className="text-xs font-medium">{network.name}</span>
       </div>
-
-      {/* Reusing the same NetworkTypeBadge component */}
-      <NetworkTypeBadge type={network.type} />
     </div>
   );
 }
