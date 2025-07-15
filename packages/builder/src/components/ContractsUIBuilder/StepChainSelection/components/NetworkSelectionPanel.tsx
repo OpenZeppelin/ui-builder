@@ -2,8 +2,12 @@ import { Search, Settings } from 'lucide-react';
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
+import {
+  ContractAdapter,
+  Ecosystem,
+  NetworkConfig,
+} from '@openzeppelin/contracts-ui-builder-types';
 import {
   Input,
   NetworkSettingsDialog,
@@ -30,9 +34,21 @@ export function NetworkSelectionPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
+  const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
   const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
-  const { activeAdapter } = useWalletState();
+  const { getAdapterForNetwork } = useAdapterContext();
   const { setOpenNetworkSettingsHandler } = useNetworkErrors();
+
+  // Get adapter for the settings network
+  useEffect(() => {
+    if (!settingsNetwork) {
+      setSettingsAdapter(null);
+      return;
+    }
+
+    const { adapter } = getAdapterForNetwork(settingsNetwork);
+    setSettingsAdapter(adapter);
+  }, [settingsNetwork, getAdapterForNetwork]);
 
   // Create a stable callback for opening network settings
   const openNetworkSettings = useCallback(
@@ -45,6 +61,7 @@ export function NetworkSelectionPanel({
         if (network) {
           setSettingsNetwork(network);
           setDefaultTab(tab);
+          // The useEffect will handle getting the adapter
         }
       } catch (error) {
         console.error('Failed to open network settings:', error);
@@ -98,6 +115,7 @@ export function NetworkSelectionPanel({
 
   const handleCloseNetworkSettings = () => {
     setSettingsNetwork(null);
+    setSettingsAdapter(null);
   };
 
   return (
@@ -163,7 +181,7 @@ export function NetworkSelectionPanel({
         isOpen={!!settingsNetwork}
         onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
         networkConfig={settingsNetwork}
-        adapter={activeAdapter}
+        adapter={settingsAdapter}
         defaultTab={defaultTab}
       />
     </div>
