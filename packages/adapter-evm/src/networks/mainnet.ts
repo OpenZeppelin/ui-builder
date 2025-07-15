@@ -12,9 +12,9 @@ import {
   zksync as viemZkSync,
 } from 'viem/chains';
 
-import { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { TypedEvmNetworkConfig } from '../types';
 
-export const ethereumMainnet: EvmNetworkConfig = {
+export const ethereumMainnet: TypedEvmNetworkConfig = {
   id: 'ethereum-mainnet',
   exportConstName: 'ethereumMainnet',
   name: 'Ethereum',
@@ -36,7 +36,7 @@ export const ethereumMainnet: EvmNetworkConfig = {
   viemChain: viemMainnet,
 };
 
-export const arbitrumMainnet: EvmNetworkConfig = {
+export const arbitrumMainnet: TypedEvmNetworkConfig = {
   id: 'arbitrum-mainnet',
   exportConstName: 'arbitrumMainnet',
   name: 'Arbitrum One',
@@ -58,7 +58,7 @@ export const arbitrumMainnet: EvmNetworkConfig = {
   viemChain: viemArbitrum,
 };
 
-export const polygonMainnet: EvmNetworkConfig = {
+export const polygonMainnet: TypedEvmNetworkConfig = {
   id: 'polygon-mainnet',
   exportConstName: 'polygonMainnet',
   name: 'Polygon',
@@ -80,7 +80,7 @@ export const polygonMainnet: EvmNetworkConfig = {
   viemChain: viemPolygon,
 };
 
-export const polygonZkEvmMainnet: EvmNetworkConfig = {
+export const polygonZkEvmMainnet: TypedEvmNetworkConfig = {
   id: 'polygon-zkevm-mainnet',
   exportConstName: 'polygonZkEvmMainnet',
   name: 'Polygon zkEVM',
@@ -102,7 +102,7 @@ export const polygonZkEvmMainnet: EvmNetworkConfig = {
   viemChain: viemPolygonZkEvm,
 };
 
-export const baseMainnet: EvmNetworkConfig = {
+export const baseMainnet: TypedEvmNetworkConfig = {
   id: 'base-mainnet',
   exportConstName: 'baseMainnet',
   name: 'Base',
@@ -124,7 +124,7 @@ export const baseMainnet: EvmNetworkConfig = {
   viemChain: viemBase,
 };
 
-export const bscMainnet: EvmNetworkConfig = {
+export const bscMainnet: TypedEvmNetworkConfig = {
   id: 'bsc-mainnet',
   exportConstName: 'bscMainnet',
   name: 'BNB Smart Chain',
@@ -146,7 +146,7 @@ export const bscMainnet: EvmNetworkConfig = {
   viemChain: viemBsc,
 };
 
-export const optimismMainnet: EvmNetworkConfig = {
+export const optimismMainnet: TypedEvmNetworkConfig = {
   id: 'optimism-mainnet',
   exportConstName: 'optimismMainnet',
   name: 'OP Mainnet',
@@ -168,7 +168,7 @@ export const optimismMainnet: EvmNetworkConfig = {
   viemChain: viemOptimism,
 };
 
-export const avalancheMainnet: EvmNetworkConfig = {
+export const avalancheMainnet: TypedEvmNetworkConfig = {
   id: 'avalanche-mainnet',
   exportConstName: 'avalancheMainnet',
   name: 'Avalanche C-Chain',
@@ -190,7 +190,7 @@ export const avalancheMainnet: EvmNetworkConfig = {
   viemChain: viemAvalanche,
 };
 
-export const zkSyncEraMainnet: EvmNetworkConfig = {
+export const zkSyncEraMainnet: TypedEvmNetworkConfig = {
   id: 'zksync-era-mainnet',
   exportConstName: 'zkSyncEraMainnet',
   name: 'ZkSync Era',
@@ -212,7 +212,7 @@ export const zkSyncEraMainnet: EvmNetworkConfig = {
   viemChain: viemZkSync,
 };
 
-export const scrollMainnet: EvmNetworkConfig = {
+export const scrollMainnet: TypedEvmNetworkConfig = {
   id: 'scroll-mainnet',
   exportConstName: 'scrollMainnet',
   name: 'Scroll',
@@ -234,7 +234,7 @@ export const scrollMainnet: EvmNetworkConfig = {
   viemChain: viemScroll,
 };
 
-export const lineaMainnet: EvmNetworkConfig = {
+export const lineaMainnet: TypedEvmNetworkConfig = {
   id: 'linea-mainnet',
   exportConstName: 'lineaMainnet',
   name: 'Linea',

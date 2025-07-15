@@ -12,7 +12,6 @@ import type {
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   EcosystemWalletComponents,
-  EvmNetworkConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
@@ -76,6 +75,7 @@ import {
   waitForEvmTransactionConfirmation,
 } from './transaction';
 import { formatEvmFunctionResult } from './transform';
+import { TypedEvmNetworkConfig } from './types';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
 
@@ -83,10 +83,10 @@ import { isValidEvmAddress } from './utils';
  * EVM-specific adapter implementation
  */
 export class EvmAdapter implements ContractAdapter {
-  readonly networkConfig: EvmNetworkConfig;
+  readonly networkConfig: TypedEvmNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
 
-  constructor(networkConfig: EvmNetworkConfig) {
+  constructor(networkConfig: TypedEvmNetworkConfig) {
     if (!isEvmNetworkConfig(networkConfig)) {
       throw new Error('EvmAdapter requires a valid EVM network configuration.');
     }

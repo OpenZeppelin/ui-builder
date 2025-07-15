@@ -33,12 +33,12 @@ export {
   avalancheFuji,
   lineaSepolia,
   scrollSepolia,
-  zkSyncEraSepolia,
+  zksyncSepoliaTestnet,
   // ... other individual network exports
 } from './networks';
 
 // Export adapter configuration
 export { evmAdapterConfig } from './config';
 
-export type { WriteContractParameters } from './types';
+export type { TypedEvmNetworkConfig, WriteContractParameters } from './types';
 export type { EvmRelayerTransactionOptions } from './transaction/relayer';
