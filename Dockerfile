@@ -38,7 +38,7 @@ RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
 
 # Build the core application
 # The filter @openzeppelin/transaction-form-builder-core targets the specific package we want to build
-RUN pnpm --filter @openzeppelin/transaction-form-builder-core build
+RUN pnpm build
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner
