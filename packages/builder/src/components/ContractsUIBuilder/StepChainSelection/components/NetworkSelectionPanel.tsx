@@ -1,4 +1,4 @@
-import { Search, Settings } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 import { useCallback, useEffect, useState } from 'react';
 
@@ -209,24 +209,13 @@ function NetworkGroup({
       {/* Vertical stack container for row-based layout */}
       <div className="space-y-2">
         {networks.map((network) => (
-          <div key={network.id} className="relative group">
+          <div key={network.id} className="relative">
             <NetworkRow
               network={network}
               isSelected={network.id === selectedNetworkId}
               onSelect={() => onNetworkSelected(network.id)}
+              onOpenSettings={(e) => onOpenNetworkSettings(network, e)}
             />
-            {/* Settings button - positioned on the right side of the row */}
-            <button
-              type="button"
-              onClick={(e) => onOpenNetworkSettings(network, e)}
-              className="absolute top-1/2 -translate-y-1/2 right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
-                         opacity-0 group-hover:opacity-100 transition-all duration-200 
-                         hover:bg-muted border border-border
-                         shadow-md z-10"
-              title="Configure network settings"
-            >
-              <Settings size={14} className="text-muted-foreground" />
-            </button>
           </div>
         ))}
       </div>

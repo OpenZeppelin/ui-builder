@@ -43,9 +43,22 @@ export function useUIBuilderState() {
     [setActiveNetworkId, activeNetworkConfig]
   );
 
-  const onStepChange = useCallback((index: number) => {
-    uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
-  }, []);
+  const onStepChange = useCallback(
+    (index: number) => {
+      uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
+
+      // Clear network selection when going back to the first step (index 0)
+      if (index === 0) {
+        setActiveNetworkId(null);
+        uiBuilderStore.updateState(() => ({
+          selectedNetworkConfigId: null,
+          selectedEcosystem: null,
+        }));
+        uiBuilderStore.resetDownstreamSteps('network');
+      }
+    },
+    [setActiveNetworkId]
+  );
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
