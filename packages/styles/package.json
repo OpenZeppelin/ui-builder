@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-styles",
-  "version": "1.16.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Centralized styling system for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
