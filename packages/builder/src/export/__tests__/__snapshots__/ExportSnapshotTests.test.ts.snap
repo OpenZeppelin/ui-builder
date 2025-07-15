@@ -278,11 +278,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-react-core": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-renderer": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-types": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-ui": "^0.1.1",
+    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-react-core": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-renderer": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-types": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-ui": "^0.1.2",
     "@openzeppelin/contracts-ui-builder-utils": "^0.1.1",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.17.0",
@@ -325,11 +325,11 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for package.json with Solana dependencies > package-json-solana 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-react-core": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-renderer": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-types": "^0.1.1",
-    "@openzeppelin/contracts-ui-builder-ui": "^0.1.1",
+    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-react-core": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-renderer": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-types": "^0.1.2",
+    "@openzeppelin/contracts-ui-builder-ui": "^0.1.2",
     "@openzeppelin/contracts-ui-builder-utils": "^0.1.1",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.17.0",
