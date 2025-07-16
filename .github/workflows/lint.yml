@@ -62,6 +62,15 @@ jobs:
           echo ""
           echo "Git status:"
           git status packages/styles/global.css || echo "Status check failed"
+          echo ""
+          echo "Running prettier check with debug info:"
+          cd packages/styles && npx prettier --check global.css --config ../../.prettierrc --log-level debug && cd ../.. || echo "Check failed"
+          echo ""
+          echo "File size and permissions:"
+          ls -la packages/styles/global.css
+          echo ""
+          echo "MD5 checksum:"
+          md5sum packages/styles/global.css || shasum packages/styles/global.css || echo "Checksum failed"
 
       - name: Format check
         run: pnpm format:check
