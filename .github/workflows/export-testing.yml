@@ -61,6 +61,10 @@ jobs:
       - name: Run export tests
         run: pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/
 
+      # Create test-results directory
+      - name: Create test results directory
+        run: mkdir -p packages/builder/test-results
+
       # Generate test report for better CI visibility
       - name: Generate test report
         if: success() || failure()
