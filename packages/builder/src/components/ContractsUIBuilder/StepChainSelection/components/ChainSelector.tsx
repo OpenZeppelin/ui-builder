@@ -1,9 +1,11 @@
 import { NetworkIcon } from '@web3icons/react';
+import { Clock } from 'lucide-react';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
@@ -233,13 +235,20 @@ export function ChainSelector({
               />
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-md border border-dashed text-muted-foreground">
-              <p>
-                {selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
-                  ? `${getEcosystemName(selectedEcosystem)} support is coming soon`
-                  : 'Select a blockchain ecosystem to view available networks'}
-              </p>
-            </div>
+            <EmptyState
+              icon={<Clock className="h-6 w-6 text-muted-foreground" />}
+              title={
+                selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
+                  ? `${getEcosystemName(selectedEcosystem)} Support Coming Soon`
+                  : 'Select Blockchain Ecosystem'
+              }
+              description={
+                selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
+                  ? `We're working hard to bring ${getEcosystemName(selectedEcosystem)} support to the platform. Stay tuned for updates!`
+                  : 'Select a blockchain ecosystem above to view available networks and continue building your contract interface.'
+              }
+              size="default"
+            />
           )}
         </div>
       </div>

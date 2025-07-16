@@ -1,3 +1,5 @@
+import { FormInput } from 'lucide-react';
+
 import { useEffect, useMemo } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
@@ -7,13 +9,18 @@ import {
   NetworkConfig,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/contracts-ui-builder-ui';
+import {
+  EmptyState,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@openzeppelin/contracts-ui-builder-ui';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 
-import { UiKitSettings } from './components/UiKitSettings';
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 import { ensureCompleteConfig } from './utils/executionUtils';
@@ -23,6 +30,7 @@ import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
+import { UiKitSettings } from './components';
 
 // TODO: Enhance the UiKitSettings component to support more advanced options from UiKitConfiguration,
 // such as `showInjectedConnector` and component exclusions (e.g., hiding NetworkSwitcher).
@@ -67,6 +75,7 @@ export function StepFormCustomization({
   // This ensures consistent UX when navigating back to this step
   useEffect(() => {
     setUiState({ activeTab: 'general' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array to run only on mount
 
   const {
@@ -228,27 +237,36 @@ export function StepFormCustomization({
           <TabsContent value="fields" className="mt-4 rounded-md border p-4">
             {baseFormConfigFromHook && (
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <FieldSelectorList
-                    fields={baseFormConfigFromHook.fields}
-                    selectedFieldIndex={selectedFieldIndex}
-                    onSelectField={selectField}
+                {baseFormConfigFromHook.fields.length === 0 ? (
+                  <EmptyState
+                    icon={<FormInput className="h-6 w-6 text-muted-foreground" />}
+                    title="No Fields to Configure"
+                    description="This function doesn't require any input parameters, so there are no form fields to customize. You can proceed to configure the execution method or preview your form."
                   />
-                  <div className="col-span-2">
-                    {selectedFieldIndex !== null &&
-                      baseFormConfigFromHook.fields[selectedFieldIndex] &&
-                      adapter && (
-                        <FieldEditor
-                          field={baseFormConfigFromHook.fields[selectedFieldIndex]}
-                          onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                          adapter={adapter}
-                          originalParameterType={
-                            baseFormConfigFromHook.fields[selectedFieldIndex].originalParameterType
-                          }
-                        />
-                      )}
+                ) : (
+                  <div className="grid grid-cols-3 gap-4">
+                    <FieldSelectorList
+                      fields={baseFormConfigFromHook.fields}
+                      selectedFieldIndex={selectedFieldIndex}
+                      onSelectField={selectField}
+                    />
+                    <div className="col-span-2">
+                      {selectedFieldIndex !== null &&
+                        baseFormConfigFromHook.fields[selectedFieldIndex] &&
+                        adapter && (
+                          <FieldEditor
+                            field={baseFormConfigFromHook.fields[selectedFieldIndex]}
+                            onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
+                            adapter={adapter}
+                            originalParameterType={
+                              baseFormConfigFromHook.fields[selectedFieldIndex]
+                                .originalParameterType
+                            }
+                          />
+                        )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </TabsContent>
