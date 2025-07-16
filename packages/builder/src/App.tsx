@@ -8,6 +8,7 @@ import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-type
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { Header } from './components/Common/Header';
+import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
@@ -58,6 +59,8 @@ function App() {
               </div>
             </footer>
           </div>
+          {/* Global network error handler - always mounted to handle error toasts */}
+          <NetworkErrorHandler />
         </WalletStateProvider>
       </AdapterProvider>
       <Toaster position="top-right" />

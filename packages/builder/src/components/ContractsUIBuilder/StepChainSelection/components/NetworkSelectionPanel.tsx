@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
@@ -8,11 +8,7 @@ import {
   Ecosystem,
   NetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
-import {
-  Input,
-  NetworkSettingsDialog,
-  useNetworkErrors,
-} from '@openzeppelin/contracts-ui-builder-ui';
+import { Input, NetworkSettingsDialog } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
@@ -35,9 +31,8 @@ export function NetworkSelectionPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
   const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
-  const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
+  const [defaultTab] = useState<'rpc' | 'explorer'>('rpc');
   const { getAdapterForNetwork } = useAdapterContext();
-  const { setOpenNetworkSettingsHandler } = useNetworkErrors();
 
   // Get adapter for the settings network
   useEffect(() => {
@@ -50,32 +45,8 @@ export function NetworkSelectionPanel({
     setSettingsAdapter(adapter);
   }, [settingsNetwork, getAdapterForNetwork]);
 
-  // Create a stable callback for opening network settings
-  const openNetworkSettings = useCallback(
-    async (networkId: string, tab: 'rpc' | 'explorer' = 'rpc') => {
-      try {
-        // Find the network by ID
-        const allNetworks = await networkService.getNetworksByEcosystem(ecosystem);
-        const network = allNetworks.find((n) => n.id === networkId);
-
-        if (network) {
-          setSettingsNetwork(network);
-          setDefaultTab(tab);
-          // The useEffect will handle getting the adapter
-        }
-      } catch (error) {
-        console.error('Failed to open network settings:', error);
-      }
-    },
-    [ecosystem]
-  );
-
-  // Register handler for opening network settings from error notifications
-  useEffect(() => {
-    setOpenNetworkSettingsHandler((networkId: string, defaultTab?: 'rpc' | 'explorer') => {
-      void openNetworkSettings(networkId, defaultTab);
-    });
-  }, [openNetworkSettings, setOpenNetworkSettingsHandler]);
+  // Note: Network settings handler for error notifications is now registered
+  // globally in NetworkErrorHandler component to ensure it's always available
 
   // Fetch networks for the selected ecosystem
   useEffect(() => {
