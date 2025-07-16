@@ -18,7 +18,6 @@ import {
   getVisibleEcosystems,
   isEcosystemEnabled,
 } from '../../../../utils/ecosystem-feature-flags';
-import { StepTitleWithDescription } from '../../Common';
 
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
 
@@ -129,16 +128,9 @@ export function ChainSelector({
 
   return (
     <div className="flex flex-col space-y-6">
-      <StepTitleWithDescription
-        title="Select Blockchain"
-        description="Choose the blockchain network that your contract is deployed on."
-      />
-
       <div className="flex flex-col md:flex-row gap-6">
         {/* Ecosystem Selection Column - Left Side */}
         <div className="w-full md:w-64 space-y-4">
-          <h3 className="text-base font-medium">Blockchain Ecosystem</h3>
-
           <div className="flex flex-col space-y-2">
             {ecosystemOptions.map((option) => {
               const isSelected = selectedEcosystem === option.value;
@@ -234,10 +226,6 @@ export function ChainSelector({
         <div className="flex-1 min-w-0">
           {selectedEcosystem && isEcosystemEnabled(selectedEcosystem) ? (
             <div className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-base font-medium">Select Network</h3>
-              </div>
-
               <NetworkSelectionPanel
                 ecosystem={selectedEcosystem}
                 onNetworkSelected={handleNetworkSelected}

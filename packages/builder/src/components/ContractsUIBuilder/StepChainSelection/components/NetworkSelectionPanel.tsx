@@ -146,7 +146,7 @@ export function NetworkSelectionPanel({
         <div className="space-y-4">
           {mainnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Mainnet Networks"
+              title="Mainnet"
               networks={mainnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -156,7 +156,7 @@ export function NetworkSelectionPanel({
 
           {testnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Testnet Networks"
+              title="Testnet"
               networks={testnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -166,7 +166,7 @@ export function NetworkSelectionPanel({
 
           {devnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Devnet Networks"
+              title="Devnet"
               networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -204,8 +204,9 @@ function NetworkGroup({
   onOpenNetworkSettings,
 }: NetworkGroupProps) {
   return (
-    <div className="space-y-3">
-      <h4 className="font-medium text-sm">{title}</h4>
+    <div className="space-y-4">
+      <h4 className="font-bold text-xs text-muted-foreground uppercase tracking-wide">{title}</h4>
+
       {/* Vertical stack container for row-based layout */}
       <div className="space-y-2">
         {networks.map((network) => (
