@@ -52,13 +52,16 @@ jobs:
           cat -A packages/styles/global.css | tail -5
           echo ""
           echo "Prettier version:"
-          cd packages/styles && npx prettier --version
+          cd packages/styles && npx prettier --version && cd ../..
           echo ""
           echo "Running prettier write to see if it changes anything:"
-          cd packages/styles && npx prettier --write global.css --config ../../.prettierrc
+          cd packages/styles && npx prettier --write global.css --config ../../.prettierrc && cd ../..
           echo ""
           echo "Git diff after prettier write:"
           git diff packages/styles/global.css || echo "No changes detected"
+          echo ""
+          echo "Git status:"
+          git status packages/styles/global.css || echo "Status check failed"
 
       - name: Format check
         run: pnpm format:check
