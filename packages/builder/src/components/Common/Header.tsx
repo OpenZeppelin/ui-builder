@@ -1,4 +1,4 @@
-import { SiGithub } from '@icons-pack/react-simple-icons';
+import { SiGithub, SiX } from '@icons-pack/react-simple-icons';
 
 import { WalletConnectionHeader } from '@openzeppelin/contracts-ui-builder-react-core';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
@@ -6,38 +6,66 @@ import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 import { DevToolsDropdown } from './DevToolsDropdown';
 
 /**
- * Application header component containing the logo, title, GitHub link, and wallet connection.
+ * Application header component matching the OpenZeppelin Wizard design with proper branding.
  */
 export const Header = () => {
   // Check if dev tools should be shown
   const showDevTools = appConfigService.isFeatureEnabled('show_dev_tools');
 
   return (
-    <header className="border-b px-6 py-3 min-h-14">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
-          <div className="h-5 border-l border-gray-300 mx-1"></div>
-          <span className="text-base font-medium">Contracts UI Builder</span>
+    <header className="border-b border-border bg-background">
+      <div className="flex h-16 items-center px-5">
+        {/* Left side - Logo and title */}
+        <div className="flex items-center space-x-3">
+          <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="w-[160px] h-auto" />
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Dev Tools Dropdown */}
-          {showDevTools && <DevToolsDropdown />}
+        {/* Right side - Navigation and tools */}
+        <div className="ml-auto flex items-center space-x-6">
+          {/* OpenZeppelin Navigation Links */}
+          <nav className="flex items-center space-x-5">
+            <a
+              href="https://forum.openzeppelin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-primary hover:text-gray-600 transition-colors"
+            >
+              Forum
+            </a>
+            <a
+              href="https://docs.openzeppelin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-primary hover:text-gray-600 transition-colors"
+            >
+              Docs
+            </a>
+            <a
+              href="https://github.com/OpenZeppelin/contracts-ui-builder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-gray-600 transition-colors"
+              title="View on GitHub"
+            >
+              <SiGithub size={20} />
+            </a>
+            <a
+              href="https://x.com/openzeppelin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-gray-600 transition-colors"
+              title="Follow on X"
+            >
+              <SiX size={20} />
+            </a>
+          </nav>
 
-          {/* GitHub Link */}
-          <a
-            href="https://github.com/OpenZeppelin/contracts-ui-builder"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="View on GitHub"
-          >
-            <SiGithub size={20} />
-          </a>
+          {/* Dev Tools and Wallet Connection */}
+          <div className="flex items-center space-x-4">
+            {/* Dev Tools Dropdown */}
+            {showDevTools && <DevToolsDropdown />}
 
-          {/* Wallet Connection */}
-          <div className="border-l pl-4">
+            {/* Wallet Connection */}
             <WalletConnectionHeader />
           </div>
         </div>
