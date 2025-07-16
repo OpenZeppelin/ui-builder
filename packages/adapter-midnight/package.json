@@ -40,8 +40,7 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'No tests for adapter-midnight package'",
-    "test:watch": "vitest"
+    "test": "echo 'No tests for adapter-midnight package'"
   },
   "dependencies": {
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
