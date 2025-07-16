@@ -1,37 +1,8 @@
-import type { ContractFunction, ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
-
 interface HeroSectionProps {
   currentStepIndex: number;
-  selectedFunction?: string | null;
-  contractSchema?: ContractSchema | null;
 }
 
-export function HeroSection({
-  currentStepIndex,
-  selectedFunction,
-  contractSchema,
-}: HeroSectionProps) {
-  // Find the selected function details
-  const selectedFunctionDetails = contractSchema?.functions.find(
-    (fn: ContractFunction) => fn.id === selectedFunction
-  );
-
-  // Determine the title to display
-  const getTitle = () => {
-    if (selectedFunctionDetails) {
-      return (
-        <>
-          Build a UI for{' '}
-          <span className="text-slate-800 font-mono font-bold">
-            &apos;{selectedFunctionDetails.displayName}&apos;
-          </span>{' '}
-          call of your contract
-        </>
-      );
-    }
-    return 'Build a UI for any contract call';
-  };
-
+export function HeroSection({ currentStepIndex }: HeroSectionProps) {
   return (
     <div
       className={`text-center transition-all duration-300 ${currentStepIndex === 0 ? 'mb-12' : 'mb-6'}`}
@@ -45,7 +16,7 @@ export function HeroSection({
               : 'mb-0 text-lg sm:text-xl font-semibold opacity-70'
           }`}
         >
-          {getTitle()}
+          Contracts UI Builder
         </h1>
 
         {/* Description - Only show on first step */}
