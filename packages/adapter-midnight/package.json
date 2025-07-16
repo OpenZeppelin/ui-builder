@@ -40,7 +40,7 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "echo 'No tests for adapter-midnight package'",
     "test:watch": "vitest"
   },
   "dependencies": {
