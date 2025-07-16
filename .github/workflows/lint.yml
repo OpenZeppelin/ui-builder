@@ -42,36 +42,6 @@ jobs:
       - name: Lint check
         run: pnpm lint
 
-      - name: Debug global.css formatting
-        run: |
-          echo "=== Checking global.css file ==="
-          echo "File info:"
-          file packages/styles/global.css || echo "file command not found"
-          echo ""
-          echo "Last 5 lines with special characters visible:"
-          cat -A packages/styles/global.css | tail -5
-          echo ""
-          echo "Prettier version:"
-          cd packages/styles && npx prettier --version && cd ../..
-          echo ""
-          echo "Running prettier write to see if it changes anything:"
-          cd packages/styles && npx prettier --write global.css --config ../../.prettierrc && cd ../..
-          echo ""
-          echo "Git diff after prettier write:"
-          git diff packages/styles/global.css || echo "No changes detected"
-          echo ""
-          echo "Git status:"
-          git status packages/styles/global.css || echo "Status check failed"
-          echo ""
-          echo "Running prettier check with debug info:"
-          cd packages/styles && npx prettier --check global.css --config ../../.prettierrc --log-level debug && cd ../.. || echo "Check failed"
-          echo ""
-          echo "File size and permissions:"
-          ls -la packages/styles/global.css
-          echo ""
-          echo "MD5 checksum:"
-          md5sum packages/styles/global.css || shasum packages/styles/global.css || echo "Checksum failed"
-
       - name: Format check
         run: pnpm format:check
 
