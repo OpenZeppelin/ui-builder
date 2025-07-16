@@ -1,4 +1,6 @@
-import { ReactNode } from 'react';
+import { Check } from 'lucide-react';
+
+import React, { ReactNode } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
@@ -49,31 +51,46 @@ export function WizardLayout({
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
       <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+        {/* Mobile-only current step title */}
+        <div className="sm:hidden mb-4 text-center">
+          <h3 className="text-lg font-semibold text-foreground">{steps[currentStepIndex].title}</h3>
         </div>
 
-        {/* Step progress indicators with names */}
-        <div className="flex w-full gap-3">
+        {/* Minimal step progress indicators with merged labels */}
+        <div className="flex w-full items-center">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex flex-1 flex-col items-center">
+            <React.Fragment key={step.id}>
               <div
-                className={`mb-2 h-3 w-full rounded-full ${
-                  index <= currentStepIndex ? 'bg-primary shadow-sm' : 'bg-muted'
-                }`}
-              />
-              <span
-                className={`text-sm font-medium ${
-                  index === currentStepIndex
-                    ? 'text-primary font-bold'
-                    : index < currentStepIndex
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground'
-                }`}
+                className={`
+                  flex items-center gap-2 rounded-full text-sm font-medium
+                  transition-all duration-300 ease-in-out
+                  px-2 py-1 sm:px-3 sm:py-1.5
+                  ${
+                    index <= currentStepIndex
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }
+                `}
+                title={step.title}
+                aria-label={`Step ${index + 1}: ${step.title}`}
               >
-                {step.title}
-              </span>
-            </div>
+                <span className="flex h-4 w-4 items-center justify-center text-xs font-bold">
+                  {index < currentStepIndex ? <Check className="h-3 w-3" /> : index + 1}
+                </span>
+                <span className="hidden sm:block">{step.title}</span>
+              </div>
+
+              {/* Connecting line */}
+              {index < steps.length - 1 && (
+                <div
+                  className={`
+                    h-px flex-1 transition-all duration-300 ease-in-out
+                    mx-2 sm:mx-3
+                    ${index < currentStepIndex ? 'bg-primary' : 'bg-muted'}
+                  `}
+                />
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
@@ -99,7 +116,7 @@ export function WizardLayout({
             </Button>
           )}
         </div>
-        {!isLastStep && (
+        {!isLastStep && !isFirstStep && currentStepIndex !== 2 && (
           <Button onClick={handleNext} disabled={!isCurrentStepValid}>
             Next
           </Button>

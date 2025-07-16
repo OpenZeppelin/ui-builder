@@ -1,19 +1,19 @@
-import { Search, Settings } from 'lucide-react';
+import { Search } from 'lucide-react';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
-  Input,
-  NetworkSettingsDialog,
-  useNetworkErrors,
-} from '@openzeppelin/contracts-ui-builder-ui';
+  ContractAdapter,
+  Ecosystem,
+  NetworkConfig,
+} from '@openzeppelin/contracts-ui-builder-types';
+import { Input, NetworkSettingsDialog } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
 
-import { NetworkMiniTile } from './NetworkMiniTile';
+import { NetworkRow } from './NetworkRow';
 
 interface NetworkSelectionPanelProps {
   ecosystem: Ecosystem;
@@ -30,35 +30,23 @@ export function NetworkSelectionPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
-  const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
-  const { activeAdapter } = useWalletState();
-  const { setOpenNetworkSettingsHandler } = useNetworkErrors();
+  const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
+  const [defaultTab] = useState<'rpc' | 'explorer'>('rpc');
+  const { getAdapterForNetwork } = useAdapterContext();
 
-  // Create a stable callback for opening network settings
-  const openNetworkSettings = useCallback(
-    async (networkId: string, tab: 'rpc' | 'explorer' = 'rpc') => {
-      try {
-        // Find the network by ID
-        const allNetworks = await networkService.getNetworksByEcosystem(ecosystem);
-        const network = allNetworks.find((n) => n.id === networkId);
-
-        if (network) {
-          setSettingsNetwork(network);
-          setDefaultTab(tab);
-        }
-      } catch (error) {
-        console.error('Failed to open network settings:', error);
-      }
-    },
-    [ecosystem]
-  );
-
-  // Register handler for opening network settings from error notifications
+  // Get adapter for the settings network
   useEffect(() => {
-    setOpenNetworkSettingsHandler((networkId: string, defaultTab?: 'rpc' | 'explorer') => {
-      void openNetworkSettings(networkId, defaultTab);
-    });
-  }, [openNetworkSettings, setOpenNetworkSettingsHandler]);
+    if (!settingsNetwork) {
+      setSettingsAdapter(null);
+      return;
+    }
+
+    const { adapter } = getAdapterForNetwork(settingsNetwork);
+    setSettingsAdapter(adapter);
+  }, [settingsNetwork, getAdapterForNetwork]);
+
+  // Note: Network settings handler for error notifications is now registered
+  // globally in NetworkErrorHandler component to ensure it's always available
 
   // Fetch networks for the selected ecosystem
   useEffect(() => {
@@ -98,6 +86,7 @@ export function NetworkSelectionPanel({
 
   const handleCloseNetworkSettings = () => {
     setSettingsNetwork(null);
+    setSettingsAdapter(null);
   };
 
   return (
@@ -128,7 +117,7 @@ export function NetworkSelectionPanel({
         <div className="space-y-4">
           {mainnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Mainnet Networks"
+              title="Mainnet"
               networks={mainnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -138,7 +127,7 @@ export function NetworkSelectionPanel({
 
           {testnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Testnet Networks"
+              title="Testnet"
               networks={testnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -148,7 +137,7 @@ export function NetworkSelectionPanel({
 
           {devnetNetworks.length > 0 && (
             <NetworkGroup
-              title="Devnet Networks"
+              title="Devnet"
               networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
@@ -163,7 +152,7 @@ export function NetworkSelectionPanel({
         isOpen={!!settingsNetwork}
         onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
         networkConfig={settingsNetwork}
-        adapter={activeAdapter}
+        adapter={settingsAdapter}
         defaultTab={defaultTab}
       />
     </div>
@@ -186,29 +175,19 @@ function NetworkGroup({
   onOpenNetworkSettings,
 }: NetworkGroupProps) {
   return (
-    <div className="space-y-3">
-      <h4 className="font-medium text-sm">{title}</h4>
-      {/* Flex container with natural card widths */}
-      <div className="flex flex-wrap gap-3">
+    <div className="space-y-4">
+      <h4 className="font-bold text-xs text-muted-foreground uppercase tracking-wide">{title}</h4>
+
+      {/* Vertical stack container for row-based layout */}
+      <div className="space-y-2">
         {networks.map((network) => (
-          <div key={network.id} className="relative group">
-            <NetworkMiniTile
+          <div key={network.id} className="relative">
+            <NetworkRow
               network={network}
               isSelected={network.id === selectedNetworkId}
               onSelect={() => onNetworkSelected(network.id)}
+              onOpenSettings={(e) => onOpenNetworkSettings(network, e)}
             />
-            {/* Settings button - positioned slightly outside top-right corner */}
-            <button
-              type="button"
-              onClick={(e) => onOpenNetworkSettings(network, e)}
-              className="absolute -top-2 -right-2 p-1.5 rounded-md bg-background/95 backdrop-blur-sm 
-                         opacity-0 group-hover:opacity-100 transition-all duration-200 
-                         hover:bg-muted border border-border
-                         shadow-md z-10"
-              title="Configure network settings"
-            >
-              <Settings size={14} className="text-muted-foreground" />
-            </button>
           </div>
         ))}
       </div>

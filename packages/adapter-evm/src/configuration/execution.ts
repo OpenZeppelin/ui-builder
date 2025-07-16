@@ -24,15 +24,15 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
       description: 'Execute using a standard wallet address.',
     },
     {
-      type: 'multisig',
-      name: 'Safe Multisig', // Example for future
-      description: 'Execute via a Safe multisignature wallet.',
-      disabled: false,
-    },
-    {
       type: 'relayer',
       name: 'OpenZeppelin Relayer',
       description: 'Execute via a OpenZeppelin open source transaction relayer service.',
+      disabled: false,
+    },
+    {
+      type: 'multisig',
+      name: 'Safe Multisig', // Example for future
+      description: 'Execute via a Safe multisignature wallet.',
       disabled: false,
     },
   ]);

@@ -1,9 +1,8 @@
-import { WritableFunctionCard } from './WritableFunctionCard';
+import { WritableFunctionRow } from './WritableFunctionRow';
 import { WritableFunctionsSectionProps } from './types';
 
 export function WritableFunctionsSection({
   functions,
-  selectedFunction,
   onSelectFunction,
 }: WritableFunctionsSectionProps) {
   return (
@@ -15,10 +14,10 @@ export function WritableFunctionsSection({
         </p>
       ) : (
         functions.map((fn) => (
-          <WritableFunctionCard
+          <WritableFunctionRow
             key={fn.id}
             fn={fn}
-            isSelected={selectedFunction === fn.id}
+            isSelected={false} // Never show selection in the function selector step. We automatically navigate to the form customization step when a function is selected.
             onSelect={onSelectFunction}
           />
         ))

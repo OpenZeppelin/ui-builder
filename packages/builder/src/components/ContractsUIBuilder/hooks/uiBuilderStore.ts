@@ -78,7 +78,10 @@ export const uiBuilderStore = {
     emitChange();
   },
 
-  resetDownstreamSteps(fromStep: 'network' | 'contract' | 'function') {
+  resetDownstreamSteps(
+    fromStep: 'network' | 'contract' | 'function',
+    preserveFunctionConfig: boolean = false
+  ) {
     let resetState: Partial<UIBuilderState> = {};
     if (fromStep === 'network') {
       resetState = {
@@ -92,7 +95,10 @@ export const uiBuilderStore = {
       resetState = { ...resetState, selectedFunction: null };
     }
     if (fromStep === 'network' || fromStep === 'contract' || fromStep === 'function') {
-      resetState = { ...resetState, formConfig: null, isExecutionStepValid: false };
+      // Only reset formConfig if not preserving or if it's for a different function
+      if (!preserveFunctionConfig) {
+        resetState = { ...resetState, formConfig: null, isExecutionStepValid: false };
+      }
     }
     this.updateState(() => resetState);
   },

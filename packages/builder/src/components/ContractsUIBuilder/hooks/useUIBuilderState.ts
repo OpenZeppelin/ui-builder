@@ -12,6 +12,15 @@ import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 
+// Step indices for the wizard navigation
+const STEP_INDICES = {
+  CHAIN_SELECT: 0,
+  CONTRACT_DEFINITION: 1,
+  FUNCTION_SELECTOR: 2,
+  FORM_CUSTOMIZATION: 3,
+  COMPLETE: 4,
+} as const;
+
 /**
  * Coordinating hook that uses an external store to manage builder state.
  * This ensures state persists across component re-mounts.
@@ -43,9 +52,26 @@ export function useUIBuilderState() {
     [setActiveNetworkId, activeNetworkConfig]
   );
 
-  const onStepChange = useCallback((index: number) => {
-    uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
-  }, []);
+  const onStepChange = useCallback(
+    (index: number) => {
+      uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
+
+      // Clear network selection when going back to the first step
+      if (index === STEP_INDICES.CHAIN_SELECT) {
+        setActiveNetworkId(null);
+        uiBuilderStore.updateState(() => ({
+          selectedNetworkConfigId: null,
+          selectedEcosystem: null,
+        }));
+        uiBuilderStore.resetDownstreamSteps('network');
+      }
+
+      // Note: We don't clear function selection when going back to step 2
+      // to preserve user progress. The UI will visually hide the selection
+      // but keep the data intact.
+    },
+    [setActiveNetworkId]
+  );
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
@@ -60,8 +86,28 @@ export function useUIBuilderState() {
   );
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
-    uiBuilderStore.updateState(() => ({ selectedFunction: functionId }));
-    uiBuilderStore.resetDownstreamSteps('function');
+    const currentState = uiBuilderStore.getState();
+    const previousFunctionId = currentState.selectedFunction;
+    const isDifferentFunction = functionId !== previousFunctionId;
+    const existingFormConfig = currentState.formConfig;
+    // Remove redundant check - !isDifferentFunction already implies function ID match
+    const isSameFunctionWithExistingConfig: boolean = !isDifferentFunction && !!existingFormConfig;
+
+    uiBuilderStore.updateState((s) => {
+      const newState = { selectedFunction: functionId };
+
+      // Auto-advance to next step when a function is selected and we're on the function selector step
+      if (functionId && s.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
+        return { ...newState, currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION };
+      }
+      return newState;
+    });
+
+    // Only reset downstream steps if we're selecting a different function
+    // Preserve form config if it's the same function
+    if (functionId !== null) {
+      uiBuilderStore.resetDownstreamSteps('function', isSameFunctionWithExistingConfig);
+    }
   }, []);
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
