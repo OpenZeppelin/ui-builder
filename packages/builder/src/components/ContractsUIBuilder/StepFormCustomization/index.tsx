@@ -41,6 +41,7 @@ interface StepFormCustomizationProps {
   isWidgetExpanded?: boolean;
   onUiKitConfigUpdated: (config: UiKitConfiguration) => void;
   currentUiKitConfig?: UiKitConfiguration;
+  currentFormConfig?: BuilderFormConfig | null;
 }
 
 export function StepFormCustomization({
@@ -54,6 +55,7 @@ export function StepFormCustomization({
   isWidgetExpanded,
   onUiKitConfigUpdated,
   currentUiKitConfig,
+  currentFormConfig,
 }: StepFormCustomizationProps) {
   const [{ activeTab, previewMode }, setUiState] = useWizardStepUiState('stepCustomize', {
     activeTab: 'general',
@@ -61,6 +63,12 @@ export function StepFormCustomization({
   });
 
   const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
+
+  // Reset to General tab whenever the component mounts (when user enters this step)
+  // This ensures consistent UX when navigating back to this step
+  useEffect(() => {
+    setUiState({ activeTab: 'general' });
+  }, []); // Empty dependency array to run only on mount
 
   const {
     formConfig: baseFormConfigFromHook,
@@ -72,6 +80,7 @@ export function StepFormCustomization({
     selectedFunction,
     adapter,
     onFormConfigUpdated,
+    existingFormConfig: currentFormConfig,
   });
 
   const { selectedFieldIndex, selectField } = useFieldSelection();

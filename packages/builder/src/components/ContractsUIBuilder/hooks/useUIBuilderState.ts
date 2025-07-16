@@ -56,6 +56,10 @@ export function useUIBuilderState() {
         }));
         uiBuilderStore.resetDownstreamSteps('network');
       }
+
+      // Note: We don't clear function selection when going back to step 2
+      // to preserve user progress. The UI will visually hide the selection
+      // but keep the data intact.
     },
     [setActiveNetworkId]
   );
@@ -73,8 +77,28 @@ export function useUIBuilderState() {
   );
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
-    uiBuilderStore.updateState(() => ({ selectedFunction: functionId }));
-    uiBuilderStore.resetDownstreamSteps('function');
+    const currentState = uiBuilderStore.getState();
+    const previousFunctionId = currentState.selectedFunction;
+    const isDifferentFunction = functionId !== previousFunctionId;
+    const existingFormConfig = currentState.formConfig;
+    const isSameFunctionWithExistingConfig: boolean =
+      !isDifferentFunction && !!existingFormConfig && existingFormConfig.functionId === functionId;
+
+    uiBuilderStore.updateState((s) => {
+      const newState = { selectedFunction: functionId };
+
+      // Auto-advance to next step when a function is selected and we're on the function selector step
+      if (functionId && s.currentStepIndex === 2) {
+        return { ...newState, currentStepIndex: 3 };
+      }
+      return newState;
+    });
+
+    // Only reset downstream steps if we're selecting a different function
+    // Preserve form config if it's the same function
+    if (functionId !== null) {
+      uiBuilderStore.resetDownstreamSteps('function', isSameFunctionWithExistingConfig);
+    }
   }, []);
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {

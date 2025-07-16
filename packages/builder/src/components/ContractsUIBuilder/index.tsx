@@ -203,7 +203,6 @@ export function ContractsUIBuilder() {
         <StepFunctionSelector
           contractSchema={contractSchema}
           onFunctionSelected={handleFunctionSelected}
-          selectedFunction={selectedFunction}
           networkConfig={selectedNetwork}
           onToggleContractState={toggleWidget}
           isWidgetExpanded={isWidgetVisible}
@@ -226,6 +225,7 @@ export function ContractsUIBuilder() {
           isWidgetExpanded={isWidgetVisible}
           onUiKitConfigUpdated={handleUiKitConfigUpdated}
           currentUiKitConfig={formConfig?.uiKitConfig}
+          currentFormConfig={formConfig}
         />
       ),
       isValid: isExecutionStepValid,

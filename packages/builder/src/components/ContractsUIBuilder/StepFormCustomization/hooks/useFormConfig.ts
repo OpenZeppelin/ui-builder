@@ -18,6 +18,7 @@ interface UseFormConfigProps {
   selectedFunction: string | null;
   adapter: ContractAdapter | null;
   onFormConfigUpdated: (config: BuilderFormConfig) => void;
+  existingFormConfig?: BuilderFormConfig | null;
 }
 
 export function useFormConfig({
@@ -25,9 +26,12 @@ export function useFormConfig({
   selectedFunction,
   adapter,
   onFormConfigUpdated,
+  existingFormConfig,
 }: UseFormConfigProps) {
-  const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(null);
-  const configInitialized = useRef(false);
+  const [formConfig, setFormConfig] = useState<BuilderFormConfig | null>(
+    existingFormConfig || null
+  );
+  const configInitialized = useRef(!!existingFormConfig);
   const lastSelectedFunction = useRef<string | null>(null);
   const lastParentUpdate = useRef<BuilderFormConfig | null>(null);
 
@@ -37,7 +41,15 @@ export function useFormConfig({
     const functionChanged = lastSelectedFunction.current !== selectedFunction;
     if (functionChanged) {
       lastSelectedFunction.current = selectedFunction;
-      configInitialized.current = false;
+      // Only reset if we're switching to a different function, not if it's the same one
+      if (existingFormConfig && existingFormConfig.functionId === selectedFunction) {
+        // Same function selected, use existing config
+        setFormConfig(existingFormConfig);
+        configInitialized.current = true;
+        return;
+      } else {
+        configInitialized.current = false;
+      }
     }
 
     // Get selected function details
@@ -110,7 +122,7 @@ export function useFormConfig({
         }
       }
     }
-  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated]); // Include all dependencies
+  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated, existingFormConfig]); // Include all dependencies
 
   // Reset state if function selection changes
   useEffect(() => {
