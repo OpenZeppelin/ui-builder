@@ -264,11 +264,7 @@ export function ContractsUIBuilder() {
         />
       )}
 
-      <HeroSection
-        currentStepIndex={currentStepIndex}
-        selectedFunction={selectedFunction}
-        contractSchema={contractSchema}
-      />
+      <HeroSection currentStepIndex={currentStepIndex} />
 
       <div className="bg-card rounded-lg border shadow-sm">
         <WizardLayout

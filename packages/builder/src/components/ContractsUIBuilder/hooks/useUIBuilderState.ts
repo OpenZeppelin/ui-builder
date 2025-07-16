@@ -12,6 +12,15 @@ import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 
+// Step indices for the wizard navigation
+const STEP_INDICES = {
+  CHAIN_SELECT: 0,
+  CONTRACT_DEFINITION: 1,
+  FUNCTION_SELECTOR: 2,
+  FORM_CUSTOMIZATION: 3,
+  COMPLETE: 4,
+} as const;
+
 /**
  * Coordinating hook that uses an external store to manage builder state.
  * This ensures state persists across component re-mounts.
@@ -47,8 +56,8 @@ export function useUIBuilderState() {
     (index: number) => {
       uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
 
-      // Clear network selection when going back to the first step (index 0)
-      if (index === 0) {
+      // Clear network selection when going back to the first step
+      if (index === STEP_INDICES.CHAIN_SELECT) {
         setActiveNetworkId(null);
         uiBuilderStore.updateState(() => ({
           selectedNetworkConfigId: null,
@@ -81,15 +90,15 @@ export function useUIBuilderState() {
     const previousFunctionId = currentState.selectedFunction;
     const isDifferentFunction = functionId !== previousFunctionId;
     const existingFormConfig = currentState.formConfig;
-    const isSameFunctionWithExistingConfig: boolean =
-      !isDifferentFunction && !!existingFormConfig && existingFormConfig.functionId === functionId;
+    // Remove redundant check - !isDifferentFunction already implies function ID match
+    const isSameFunctionWithExistingConfig: boolean = !isDifferentFunction && !!existingFormConfig;
 
     uiBuilderStore.updateState((s) => {
       const newState = { selectedFunction: functionId };
 
       // Auto-advance to next step when a function is selected and we're on the function selector step
-      if (functionId && s.currentStepIndex === 2) {
-        return { ...newState, currentStepIndex: 3 };
+      if (functionId && s.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
+        return { ...newState, currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION };
       }
       return newState;
     });

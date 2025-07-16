@@ -40,7 +40,7 @@ describe('ecosystem-feature-flags', () => {
         enabled: false,
         showInUI: true,
         disabledLabel: 'Coming Soon',
-        disabledDescription: 'Solana support is coming soon. Stay tuned for updates!',
+        disabledDescription: undefined,
       });
     });
 

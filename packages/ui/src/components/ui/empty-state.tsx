@@ -39,7 +39,7 @@ export function EmptyState({
   description,
   className = '',
   size = 'default',
-}: EmptyStateProps) {
+}: EmptyStateProps): React.ReactElement {
   // Default icon using lucide-react
   const defaultIcon = <FileText className="h-6 w-6 text-muted-foreground" />;
 
