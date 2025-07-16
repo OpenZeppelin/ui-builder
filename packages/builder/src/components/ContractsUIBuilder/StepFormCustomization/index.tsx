@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/contract
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
-import { StepTitleWithDescription } from '../Common';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 
 import { UiKitSettings } from './components/UiKitSettings';
@@ -198,16 +197,6 @@ export function StepFormCustomization({
           onTogglePreview={handleTogglePreview}
         />
       )}
-
-      <StepTitleWithDescription
-        title="Customize"
-        description={
-          <>
-            Customize the form fields and general settings for the &quot;
-            {selectedFunctionDetails.displayName}&quot; function.
-          </>
-        }
-      />
 
       {previewMode ? (
         <FormPreview
