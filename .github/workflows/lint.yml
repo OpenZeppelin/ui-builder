@@ -42,6 +42,24 @@ jobs:
       - name: Lint check
         run: pnpm lint
 
+      - name: Debug global.css formatting
+        run: |
+          echo "=== Checking global.css file ==="
+          echo "File info:"
+          file packages/styles/global.css || echo "file command not found"
+          echo ""
+          echo "Last 5 lines with special characters visible:"
+          cat -A packages/styles/global.css | tail -5
+          echo ""
+          echo "Prettier version:"
+          cd packages/styles && npx prettier --version
+          echo ""
+          echo "Running prettier write to see if it changes anything:"
+          cd packages/styles && npx prettier --write global.css --config ../../.prettierrc
+          echo ""
+          echo "Git diff after prettier write:"
+          git diff packages/styles/global.css || echo "No changes detected"
+
       - name: Format check
         run: pnpm format:check
 
