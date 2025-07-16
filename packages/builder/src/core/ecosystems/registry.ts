@@ -82,7 +82,6 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       enabled: false,
       showInUI: true,
       disabledLabel: 'Coming Soon',
-      disabledDescription: 'Midnight support is coming soon. Stay tuned for updates!',
     },
   },
   stellar: {
@@ -97,7 +96,6 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       enabled: false,
       showInUI: true,
       disabledLabel: 'Coming Soon',
-      disabledDescription: 'Stellar support is coming soon. Stay tuned for updates!',
     },
   },
   solana: {
@@ -112,7 +110,6 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       enabled: false,
       showInUI: true,
       disabledLabel: 'Coming Soon',
-      disabledDescription: 'Solana support is coming soon. Stay tuned for updates!',
     },
   },
 };
