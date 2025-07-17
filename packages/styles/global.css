@@ -263,8 +263,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Animation keyframes */
-  --animate-accordion-down: accordion-down 0.3s ease-out;
-  --animate-accordion-up: accordion-up 0.3s ease-out;
+  --animate-accordion-base: 0.3s ease-out;
+  --animate-accordion-down: accordion-down var(--animate-accordion-base);
+  --animate-accordion-up: accordion-up var(--animate-accordion-base);
 }
 
 /* Base application styling */
