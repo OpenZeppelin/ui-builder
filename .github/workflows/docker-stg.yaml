@@ -51,6 +51,9 @@ jobs:
           role-for-oidc: ${{ env.ROLE_FOR_OIDC }}
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
 
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
       - name: Build and push Docker image
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         id: push
