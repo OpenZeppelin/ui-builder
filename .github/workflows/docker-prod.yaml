@@ -62,8 +62,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/contracts-ui-builder:latest
-            ${{ env.REGISTRY }}/contracts-ui-builder:${{ github.sha }}
+            ${{ env.REGISTRY }}/contracts-ui-builder-prod:latest
+            ${{ env.REGISTRY }}/contracts-ui-builder-prod:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets: |
