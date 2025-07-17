@@ -83,11 +83,28 @@ export class UserExplorerConfigService {
 
   /**
    * Retrieves a user explorer configuration for a specific network.
+   * First checks for global settings, then falls back to network-specific settings.
    * @param networkId The network identifier
    * @returns The stored configuration or null if not found
    */
   static getUserExplorerConfig(networkId: string): UserExplorerConfig | null {
     try {
+      // First check for global settings
+      const globalKey = `${this.STORAGE_PREFIX}__global__`;
+      const globalStored = localStorage.getItem(globalKey);
+
+      if (globalStored) {
+        const globalConfig = JSON.parse(globalStored) as UserExplorerConfig;
+        if (globalConfig.applyToAllNetworks) {
+          logger.info(
+            'UserExplorerConfigService',
+            `Using global explorer config for network ${networkId}`
+          );
+          return globalConfig;
+        }
+      }
+
+      // Then check for network-specific settings
       const storageKey = `${this.STORAGE_PREFIX}${networkId}`;
       const stored = localStorage.getItem(storageKey);
 
@@ -150,6 +167,33 @@ export class UserExplorerConfigService {
       logger.info('UserExplorerConfigService', `Cleared ${keysToRemove.length} explorer configs`);
     } catch (error) {
       logger.error('UserExplorerConfigService', 'Failed to clear all explorer configs:', error);
+    }
+  }
+
+  /**
+   * Gets all network IDs that have explorer configurations.
+   * @returns Array of network IDs
+   */
+  static getConfiguredNetworkIds(): string[] {
+    try {
+      const networkIds: string[] = [];
+
+      // Check all localStorage keys
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(this.STORAGE_PREFIX)) {
+          const networkId = key.substring(this.STORAGE_PREFIX.length);
+          // Skip the global config
+          if (networkId !== '__global__') {
+            networkIds.push(networkId);
+          }
+        }
+      }
+
+      return networkIds;
+    } catch (error) {
+      logger.error('UserExplorerConfigService', 'Failed to get configured network IDs:', error);
+      return [];
     }
   }
 }
