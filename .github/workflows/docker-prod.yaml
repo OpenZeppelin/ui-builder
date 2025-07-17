@@ -75,8 +75,8 @@ jobs:
     env:
       ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
       ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
-      ECS_CLUSTER: "contracts-ui-builder-cluster"
-      ECS_SERVICE: "contracts-ui-builder-service"
+      ECS_CLUSTER: "contracts-ui-builder-prod-cluster"
+      ECS_SERVICE: "contracts-ui-builder-prod-service"
       AWS_REGION: "us-east-1"
     permissions:
       contents: read
