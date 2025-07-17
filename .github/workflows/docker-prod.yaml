@@ -3,15 +3,8 @@
 name: (PRODUCTION) Build and Push Docker Images
 
 on:
-  push:
-    branches: [main,ci-cd]
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build from'
-        required: true
-        default: 'main'
-        type: string
+  release:
+    types: [published]
 
 permissions:
   contents: read
