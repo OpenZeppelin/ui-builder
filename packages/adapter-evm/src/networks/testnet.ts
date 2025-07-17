@@ -25,8 +25,9 @@ export const ethereumSepolia: TypedEvmNetworkConfig = {
   chainId: 11155111,
   rpcUrl: viemSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.etherscan.io',
-  apiUrl: 'https://api-sepolia.etherscan.io/api',
-  primaryExplorerApiIdentifier: 'etherscan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'ethereum',
   nativeCurrency: {
     name: 'Sepolia Ether',
@@ -47,11 +48,12 @@ export const arbitrumSepolia: TypedEvmNetworkConfig = {
   chainId: 421614,
   rpcUrl: viemArbitrumSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.arbiscan.io',
-  apiUrl: 'https://api-sepolia.arbiscan.io/api',
-  primaryExplorerApiIdentifier: 'arbiscan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'arbitrum',
   nativeCurrency: {
-    name: 'Sepolia Ether',
+    name: 'Arbitrum Sepolia Ether',
     symbol: 'ETH',
     decimals: 18,
   },
@@ -69,8 +71,9 @@ export const polygonAmoy: TypedEvmNetworkConfig = {
   chainId: 80002,
   rpcUrl: viemPolygonAmoy.rpcUrls.default.http[0],
   explorerUrl: 'https://amoy.polygonscan.com',
-  apiUrl: 'https://api-amoy.polygonscan.com/api',
-  primaryExplorerApiIdentifier: 'polygonscan-amoy',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'polygon',
   nativeCurrency: {
     name: 'MATIC',
@@ -91,8 +94,9 @@ export const polygonZkEvmCardona: TypedEvmNetworkConfig = {
   chainId: 2442,
   rpcUrl: viemPolygonZkEvmCardona.rpcUrls.default.http[0],
   explorerUrl: 'https://cardona-zkevm.polygonscan.com',
-  apiUrl: 'https://api-cardona-zkevm.polygonscan.com/api',
-  primaryExplorerApiIdentifier: 'polygonscan-cardona',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'polygon',
   nativeCurrency: {
     name: 'Ether',
@@ -113,8 +117,9 @@ export const baseSepolia: TypedEvmNetworkConfig = {
   chainId: 84532,
   rpcUrl: viemBaseSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.basescan.org',
-  apiUrl: 'https://api-sepolia.basescan.org/api',
-  primaryExplorerApiIdentifier: 'basescan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'base',
   nativeCurrency: {
     name: 'Sepolia Ether',
@@ -135,8 +140,9 @@ export const bscTestnet: TypedEvmNetworkConfig = {
   chainId: 97,
   rpcUrl: viemBscTestnet.rpcUrls.default.http[0],
   explorerUrl: 'https://testnet.bscscan.com',
-  apiUrl: 'https://api-testnet.bscscan.com/api',
-  primaryExplorerApiIdentifier: 'bscscan-testnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'bsc',
   nativeCurrency: {
     name: 'BNB',
@@ -157,8 +163,9 @@ export const optimismSepolia: TypedEvmNetworkConfig = {
   chainId: 11155420,
   rpcUrl: viemOptimismSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia-optimism.etherscan.io',
-  apiUrl: 'https://api-sepolia-optimism.etherscan.io/api',
-  primaryExplorerApiIdentifier: 'optimistic-etherscan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'optimism',
   nativeCurrency: {
     name: 'Sepolia Ether',
@@ -178,9 +185,11 @@ export const avalancheFuji: TypedEvmNetworkConfig = {
   isTestnet: true,
   chainId: 43113,
   rpcUrl: viemAvalancheFuji.rpcUrls.default.http[0],
-  explorerUrl: 'https://subnets-test.avax.network/c-chain',
-  apiUrl: 'https://api.avascan.info/v2',
-  primaryExplorerApiIdentifier: 'avascan-fuji',
+  explorerUrl: 'https://testnet.snowscan.xyz',
+  apiUrl: 'https://api.etherscan.io/v2/api', // Using Etherscan V2 unified API
+  primaryExplorerApiIdentifier: 'etherscan-v2', // Unified identifier for V2 API
+  supportsEtherscanV2: true,
+  requiresExplorerApiKey: true,
   icon: 'avalanche',
   nativeCurrency: {
     name: 'Avalanche',
@@ -190,6 +199,7 @@ export const avalancheFuji: TypedEvmNetworkConfig = {
   viemChain: viemAvalancheFuji,
 };
 
+// TODO: test and setup the api and explorer config
 export const zksyncSepoliaTestnet: TypedEvmNetworkConfig = {
   id: 'zksync-era-sepolia',
   exportConstName: 'zksyncSepoliaTestnet',
@@ -203,6 +213,7 @@ export const zksyncSepoliaTestnet: TypedEvmNetworkConfig = {
   explorerUrl: 'https://sepolia.explorer.zksync.io',
   apiUrl: 'https://block-explorer-api.sepolia.zksync.dev/api',
   primaryExplorerApiIdentifier: 'zksync-era-sepolia',
+  supportsEtherscanV2: false,
   icon: 'zksync',
   nativeCurrency: {
     name: 'Ether',
@@ -223,8 +234,9 @@ export const scrollSepolia: TypedEvmNetworkConfig = {
   chainId: 534351,
   rpcUrl: viemScrollSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.scrollscan.dev',
-  apiUrl: 'https://api-sepolia.scrollscan.dev/api',
-  primaryExplorerApiIdentifier: 'scrollscan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'scroll',
   nativeCurrency: {
     name: 'Ether',
@@ -245,11 +257,12 @@ export const lineaSepolia: TypedEvmNetworkConfig = {
   chainId: 59141,
   rpcUrl: viemLineaSepolia.rpcUrls.default.http[0],
   explorerUrl: 'https://sepolia.lineascan.build',
-  apiUrl: 'https://api-sepolia.lineascan.build/api',
-  primaryExplorerApiIdentifier: 'lineascan-sepolia',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'linea',
   nativeCurrency: {
-    name: 'Ether',
+    name: 'Linea Ether',
     symbol: 'ETH',
     decimals: 18,
   },
