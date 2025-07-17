@@ -66,6 +66,7 @@ export function ExplorerSettingsPanel({
   const explorerUrl = watch('explorerUrl');
   const apiUrl = watch('apiUrl');
   const apiKey = watch('apiKey');
+  const useV2Api = watch('useV2Api');
 
   // Load existing configuration on mount
   useEffect(() => {
@@ -81,6 +82,15 @@ export function ExplorerSettingsPanel({
       console.error('Error loading explorer configuration:', error);
     }
   }, [networkId, setValue]);
+
+  // Auto-select "Apply to all networks" when V2 API is enabled, clear when disabled
+  useEffect(() => {
+    if (useV2Api) {
+      setValue('applyToAllNetworks', true);
+    } else {
+      setValue('applyToAllNetworks', false);
+    }
+  }, [useV2Api, setValue]);
 
   const testConnection = useCallback(async () => {
     if (!adapter.testExplorerConnection || !apiKey) {
@@ -244,48 +254,71 @@ export function ExplorerSettingsPanel({
               Advanced Settings
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-4">
-              <div className="space-y-4 pt-2">
-                <UrlField<FormData>
-                  id="explorerUrl"
-                  name="explorerUrl"
-                  control={control}
-                  label="Explorer URL"
-                  placeholder="https://etherscan.io"
-                  helperText="Base URL for viewing transactions and addresses. If not provided, defaults from the network will be used."
-                  validation={{}}
-                />
+              <div className="space-y-6 pt-2">
+                {/* API Configuration Section */}
+                <div>
+                  <div className="mb-3">
+                    <h4 className="text-sm font-medium text-foreground">API Configuration</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Configure API version and network application settings
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <BooleanField<FormData>
+                      id="useV2Api"
+                      name="useV2Api"
+                      control={control}
+                      label="Use Etherscan V2 API"
+                      helperText="Enable the new V2 API for all Etherscan-compatible networks. V2 provides unified access across all chains."
+                    />
 
-                <UrlField<FormData>
-                  id="apiUrl"
-                  name="apiUrl"
-                  control={control}
-                  label="API URL"
-                  placeholder="https://api.etherscan.io/api"
-                  helperText="API endpoint for fetching contract data. If not provided, defaults from the network will be used."
-                  validation={{}}
-                />
+                    <div className={`ml-6 ${!useV2Api ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <BooleanField<FormData>
+                        id="applyToAllNetworks"
+                        name="applyToAllNetworks"
+                        control={control}
+                        label="Apply to all compatible networks"
+                        helperText="Apply these settings to all Etherscan-compatible networks in your project."
+                        isReadOnly={!useV2Api}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Endpoints Section */}
+                <div className="pt-4 border-t">
+                  <div className="mb-3">
+                    <h4 className="text-sm font-medium text-foreground">Custom Endpoints</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Override default URLs for explorer and API endpoints
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <UrlField<FormData>
+                      id="explorerUrl"
+                      name="explorerUrl"
+                      control={control}
+                      label="Explorer URL"
+                      placeholder="https://etherscan.io"
+                      helperText="Base URL for viewing transactions and addresses. If not provided, defaults from the network will be used."
+                      validation={{}}
+                    />
+
+                    <UrlField<FormData>
+                      id="apiUrl"
+                      name="apiUrl"
+                      control={control}
+                      label="API URL"
+                      placeholder="https://api.etherscan.io/api"
+                      helperText="API endpoint for fetching contract data. If not provided, defaults from the network will be used."
+                      validation={{}}
+                    />
+                  </div>
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-        <div className="space-y-4 pt-4 border-t">
-          <BooleanField<FormData>
-            id="useV2Api"
-            name="useV2Api"
-            control={control}
-            label="Use Etherscan V2 API"
-            helperText="Enable the new V2 API for all Etherscan-compatible networks. V2 provides unified access across all chains."
-          />
-
-          <BooleanField<FormData>
-            id="applyToAllNetworks"
-            name="applyToAllNetworks"
-            control={control}
-            label="Apply to all compatible networks"
-            helperText="Apply these settings to all Etherscan-compatible networks in your project."
-          />
-        </div>
       </div>
 
       {connectionTestResult && (
