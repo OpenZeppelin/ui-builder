@@ -4,7 +4,7 @@ name: (Staging) Build and Push Docker Images
 
 on:
   push:
-    branches: [main,ci-cd]
+    branches: [main]
   workflow_dispatch:
     inputs:
       branch:
