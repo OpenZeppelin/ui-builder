@@ -77,6 +77,9 @@ export function ExplorerSettingsPanel({
         setValue('apiUrl', config.apiUrl || '');
         setValue('apiKey', config.apiKey || '');
         setValue('applyToAllNetworks', config.applyToAllNetworks || false);
+        // Set useV2Api based on the saved applyToAllNetworks preference
+        // If applyToAllNetworks was false, the user likely intended useV2Api to be false
+        setValue('useV2Api', config.applyToAllNetworks || false);
       }
     } catch (error) {
       console.error('Error loading explorer configuration:', error);
