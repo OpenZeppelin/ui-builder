@@ -1,5 +1,18 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.1.3
+
+### Patch Changes
+
+- [#54](https://github.com/OpenZeppelin/contracts-ui-builder/pull/54) [`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6) Thanks [@pasevin](https://github.com/pasevin)! - pre-release clean up and improvements
+
+- Updated dependencies [[`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6), [`6d74481`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6d7448140936f5c8dfadac3bca05dde54d468167)]:
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.1.3
+  - @openzeppelin/contracts-ui-builder-renderer@0.1.3
+  - @openzeppelin/contracts-ui-builder-styles@0.1.2
+  - @openzeppelin/contracts-ui-builder-ui@0.1.3
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.3
+
 ## 0.1.2
 
 ### Patch Changes
