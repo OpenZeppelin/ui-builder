@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.1.5
+
+### Patch Changes
+
+- [#57](https://github.com/OpenZeppelin/contracts-ui-builder/pull/57) [`fc05836`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/fc058368cbd885b63c5aa932ed216df783f59e71) Thanks [@pasevin](https://github.com/pasevin)! - resolve network switching regression and optimize state management
+
 ## 0.1.4
 
 ### Patch Changes
