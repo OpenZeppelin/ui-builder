@@ -7,6 +7,7 @@ import {
   FormValues,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
@@ -40,18 +41,6 @@ export function useUIBuilderState() {
     uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
   }, []); // Run only once
 
-  const handleNetworkSelect = useCallback(
-    (networkConfigId: string | null) => {
-      setActiveNetworkId(networkConfigId);
-      uiBuilderStore.updateState(() => ({
-        selectedNetworkConfigId: networkConfigId,
-        selectedEcosystem: activeNetworkConfig?.ecosystem ?? null,
-      }));
-      uiBuilderStore.resetDownstreamSteps('network');
-    },
-    [setActiveNetworkId, activeNetworkConfig]
-  );
-
   const onStepChange = useCallback(
     (index: number) => {
       uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
@@ -72,6 +61,66 @@ export function useUIBuilderState() {
     },
     [setActiveNetworkId]
   );
+
+  const handleNetworkSelect = useCallback(
+    (networkId: string | null) => {
+      logger.info('useUIBuilderState', `handleNetworkSelect: ${networkId}`);
+
+      // Update the store with the new network selection
+      // networkToSwitchTo is set here to trigger wallet switching in the component
+      uiBuilderStore.updateState(() => ({
+        selectedNetworkConfigId: networkId,
+        selectedEcosystem: networkId ? activeNetworkConfig?.ecosystem : null,
+        networkToSwitchTo: networkId,
+      }));
+      uiBuilderStore.resetDownstreamSteps('network');
+
+      // Set pending network for auto-advance tracking
+      // This will trigger navigation once the adapter is loaded
+      if (networkId && state.currentStepIndex === STEP_INDICES.CHAIN_SELECT) {
+        logger.info('useUIBuilderState', `Setting pendingNetworkId: ${networkId}`);
+        uiBuilderStore.updateState(() => ({ pendingNetworkId: networkId }));
+      }
+
+      // Notify the wallet state provider about the network change
+      setActiveNetworkId(networkId);
+    },
+    [setActiveNetworkId, activeNetworkConfig, state.currentStepIndex]
+  );
+
+  // Auto-advance to next step when adapter is ready after network selection
+  // This effect coordinates the timing between:
+  // 1. Network selection (sets pendingNetworkId)
+  // 2. Adapter loading (async operation)
+  // 3. Step navigation (happens after adapter is ready)
+  // 4. Wallet network switching (handled by NetworkSwitchManager in the component)
+  useEffect(() => {
+    const currentState = uiBuilderStore.getState();
+
+    logger.info(
+      'useUIBuilderState',
+      `Auto-advance effect check - pendingNetworkId: ${currentState.pendingNetworkId}, activeAdapter: ${!!activeAdapter}, isAdapterLoading: ${isAdapterLoading}, adapterId: ${activeAdapter?.networkConfig?.id}, currentStep: ${currentState.currentStepIndex}`
+    );
+
+    if (
+      currentState.pendingNetworkId &&
+      activeAdapter &&
+      !isAdapterLoading &&
+      activeAdapter.networkConfig.id === currentState.pendingNetworkId &&
+      currentState.currentStepIndex === STEP_INDICES.CHAIN_SELECT
+    ) {
+      logger.info(
+        'useUIBuilderState',
+        `Auto-advancing to next step after adapter ready for network: ${currentState.pendingNetworkId}`
+      );
+
+      // Clear the pending network and advance to next step
+      uiBuilderStore.updateState(() => ({
+        pendingNetworkId: null,
+        currentStepIndex: STEP_INDICES.CONTRACT_DEFINITION,
+      }));
+    }
+  }, [activeAdapter, isAdapterLoading]);
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
@@ -172,6 +221,10 @@ export function useUIBuilderState() {
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
+  const clearNetworkToSwitchTo = useCallback(() => {
+    uiBuilderStore.updateState(() => ({ networkToSwitchTo: null }));
+  }, []);
+
   return {
     ...state,
     selectedNetwork: activeNetworkConfig,
@@ -188,6 +241,7 @@ export function useUIBuilderState() {
     handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
     exportApp: handleExportApp,
+    clearNetworkToSwitchTo,
     handleUiKitConfigUpdated,
   };
 }
