@@ -1,5 +1,11 @@
 # @openzeppelin/contracts-ui-builder-types
 
+## 0.2.0
+
+### Minor Changes
+
+- [#56](https://github.com/OpenZeppelin/contracts-ui-builder/pull/56) [`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81) Thanks [@pasevin](https://github.com/pasevin)! - Support for the new Etherscan V2 Client by the EVM Adapter
+
 ## 0.1.2
 
 ### Patch Changes
