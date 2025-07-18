@@ -69,7 +69,7 @@ describe('testEvmExplorerConnection', () => {
     };
     const result = await testEvmExplorerConnection(config);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('API key is required for testing connection');
+    expect(result.error).toBe('API key is required for testing connection to this explorer');
   });
 
   it('should fail without apiUrl and no networkConfig', async () => {

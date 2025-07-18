@@ -5,6 +5,7 @@ import type {
   NetworkServiceConfigs,
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
+  ServiceParameterConfig,
   UserRpcProviderConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
@@ -278,6 +279,13 @@ export class AppConfigService {
       logger.warn(LOG_SYSTEM, 'getExplorerApiKey called before initialization.');
     }
     return this.config.networkServiceConfigs?.[serviceIdentifier]?.apiKey;
+  }
+
+  public getGlobalServiceConfig(serviceName: string): ServiceParameterConfig | undefined {
+    if (!this.isInitialized) {
+      logger.warn(LOG_SYSTEM, 'getGlobalServiceConfig called before initialization.');
+    }
+    return this.config.globalServiceConfigs?.[serviceName];
   }
 
   public isFeatureEnabled(flagName: string): boolean {

@@ -84,7 +84,7 @@ export interface UserRpcProviderConfig {
 export interface UserExplorerConfig {
   /** The explorer base URL (e.g., "https://etherscan.io") */
   explorerUrl?: string;
-  /** The explorer API URL (e.g., "https://api.etherscan.io/api") */
+  /** The explorer API URL (e.g., "https://api.etherscan.io/api") - V1 only */
   apiUrl?: string;
   /** API key for the explorer service */
   apiKey?: string;
@@ -92,6 +92,10 @@ export interface UserExplorerConfig {
   name?: string;
   /** Whether this is a custom user-provided configuration */
   isCustom: boolean;
+  /** Whether this configuration should be applied to all compatible networks */
+  applyToAllNetworks?: boolean;
+  /** List of network IDs this config applies to (if applyToAllNetworks is false) */
+  appliedNetworkIds?: string[];
 }
 
 /**

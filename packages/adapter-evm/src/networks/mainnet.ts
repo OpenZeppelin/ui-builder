@@ -25,8 +25,9 @@ export const ethereumMainnet: TypedEvmNetworkConfig = {
   chainId: 1,
   rpcUrl: viemMainnet.rpcUrls.default.http[0],
   explorerUrl: 'https://etherscan.io',
-  apiUrl: 'https://api.etherscan.io/api',
-  primaryExplorerApiIdentifier: 'etherscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'ethereum',
   nativeCurrency: {
     name: 'Ether',
@@ -47,8 +48,9 @@ export const arbitrumMainnet: TypedEvmNetworkConfig = {
   chainId: 42161,
   rpcUrl: viemArbitrum.rpcUrls.default.http[0],
   explorerUrl: 'https://arbiscan.io',
-  apiUrl: 'https://api.arbiscan.io/api',
-  primaryExplorerApiIdentifier: 'arbiscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'arbitrum',
   nativeCurrency: {
     name: 'Ether',
@@ -69,8 +71,9 @@ export const polygonMainnet: TypedEvmNetworkConfig = {
   chainId: 137,
   rpcUrl: viemPolygon.rpcUrls.default.http[0],
   explorerUrl: 'https://polygonscan.com',
-  apiUrl: 'https://api.polygonscan.com/api',
-  primaryExplorerApiIdentifier: 'polygonscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'polygon',
   nativeCurrency: {
     name: 'MATIC',
@@ -91,8 +94,9 @@ export const polygonZkEvmMainnet: TypedEvmNetworkConfig = {
   chainId: 1101,
   rpcUrl: viemPolygonZkEvm.rpcUrls.default.http[0],
   explorerUrl: 'https://zkevm.polygonscan.com',
-  apiUrl: 'https://api-zkevm.polygonscan.com/api',
-  primaryExplorerApiIdentifier: 'polygonscan-zkevm',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'polygon',
   nativeCurrency: {
     name: 'Ether',
@@ -113,8 +117,9 @@ export const baseMainnet: TypedEvmNetworkConfig = {
   chainId: 8453,
   rpcUrl: viemBase.rpcUrls.default.http[0],
   explorerUrl: 'https://basescan.org',
-  apiUrl: 'https://api.basescan.org/api',
-  primaryExplorerApiIdentifier: 'basescan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'base',
   nativeCurrency: {
     name: 'Ether',
@@ -135,8 +140,9 @@ export const bscMainnet: TypedEvmNetworkConfig = {
   chainId: 56,
   rpcUrl: viemBsc.rpcUrls.default.http[0],
   explorerUrl: 'https://bscscan.com',
-  apiUrl: 'https://api.bscscan.com/api',
-  primaryExplorerApiIdentifier: 'bscscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'bsc',
   nativeCurrency: {
     name: 'BNB',
@@ -157,8 +163,9 @@ export const optimismMainnet: TypedEvmNetworkConfig = {
   chainId: 10,
   rpcUrl: viemOptimism.rpcUrls.default.http[0],
   explorerUrl: 'https://optimistic.etherscan.io',
-  apiUrl: 'https://api-optimistic.etherscan.io/api',
-  primaryExplorerApiIdentifier: 'optimistic-etherscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'optimism',
   nativeCurrency: {
     name: 'Ether',
@@ -178,9 +185,10 @@ export const avalancheMainnet: TypedEvmNetworkConfig = {
   isTestnet: false,
   chainId: 43114,
   rpcUrl: viemAvalanche.rpcUrls.default.http[0],
-  explorerUrl: 'https://subnets.avax.network/c-chain',
-  apiUrl: 'https://api.avascan.info/v2',
-  primaryExplorerApiIdentifier: 'avascan-mainnet',
+  explorerUrl: 'https://snowscan.xyz',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'avalanche',
   nativeCurrency: {
     name: 'Avalanche',
@@ -190,6 +198,7 @@ export const avalancheMainnet: TypedEvmNetworkConfig = {
   viemChain: viemAvalanche,
 };
 
+// TODO: test and setup the api and explorer config
 export const zkSyncEraMainnet: TypedEvmNetworkConfig = {
   id: 'zksync-era-mainnet',
   exportConstName: 'zkSyncEraMainnet',
@@ -203,6 +212,7 @@ export const zkSyncEraMainnet: TypedEvmNetworkConfig = {
   explorerUrl: 'https://explorer.zksync.io',
   apiUrl: 'https://block-explorer-api.mainnet.zksync.io/api',
   primaryExplorerApiIdentifier: 'zksync-era-mainnet',
+  supportsEtherscanV2: false,
   icon: 'zksync',
   nativeCurrency: {
     name: 'Ether',
@@ -223,8 +233,9 @@ export const scrollMainnet: TypedEvmNetworkConfig = {
   chainId: 534352,
   rpcUrl: viemScroll.rpcUrls.default.http[0],
   explorerUrl: 'https://scrollscan.com',
-  apiUrl: 'https://api.scrollscan.com/api',
-  primaryExplorerApiIdentifier: 'scrollscan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'scroll',
   nativeCurrency: {
     name: 'Ether',
@@ -245,8 +256,9 @@ export const lineaMainnet: TypedEvmNetworkConfig = {
   chainId: 59144,
   rpcUrl: viemLinea.rpcUrls.default.http[0],
   explorerUrl: 'https://lineascan.build',
-  apiUrl: 'https://api.lineascan.build/api',
-  primaryExplorerApiIdentifier: 'lineascan-mainnet',
+  apiUrl: 'https://api.etherscan.io/v2/api',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  supportsEtherscanV2: true,
   icon: 'linea',
   nativeCurrency: {
     name: 'Ether',
