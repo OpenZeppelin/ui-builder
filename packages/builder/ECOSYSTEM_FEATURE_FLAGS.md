@@ -99,7 +99,7 @@ VITE_APP_CFG_FEATURE_FLAG_ECOSYSTEM_SOLANA_ENABLED=true
 The feature flags are implemented using:
 
 1. **`ecosystem-feature-flags.ts`**: Utility functions for checking ecosystem availability
-2. **`ChainTileSelector.tsx`**: Updated to respect feature flags and show placeholders
+2. **`ChainSelector.tsx`**: Updated to respect feature flags and show placeholders
 3. **`AppConfigService`**: Existing feature flag infrastructure
 
 The system automatically falls back to the first available enabled ecosystem if the initial ecosystem is disabled.

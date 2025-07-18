@@ -6,7 +6,6 @@ import type {
 
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
-  selectedFunction: string | null;
   onFunctionSelected: (functionId: string | null) => void;
   networkConfig?: NetworkConfig | null;
   onToggleContractState?: () => void;
@@ -18,7 +17,7 @@ export interface FilterControlsProps {
   setFilterValue: (value: string) => void;
 }
 
-export interface WritableFunctionCardProps {
+export interface WritableFunctionRowProps {
   fn: ContractFunction;
   isSelected: boolean;
   onSelect: (functionId: string, modifiesState: boolean) => void;
@@ -30,7 +29,6 @@ export interface ReadOnlyFunctionCardProps {
 
 export interface WritableFunctionsSectionProps {
   functions: ContractFunction[];
-  selectedFunction: string | null;
   onSelectFunction: (functionId: string, modifiesState: boolean) => void;
 }
 

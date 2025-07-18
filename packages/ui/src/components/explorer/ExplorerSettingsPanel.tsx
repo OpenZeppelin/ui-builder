@@ -8,9 +8,16 @@ import { useForm } from 'react-hook-form';
 import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
+import { BooleanField } from '../fields/BooleanField';
 import { PasswordField } from '../fields/PasswordField';
 import { UrlField } from '../fields/UrlField';
 
@@ -24,6 +31,8 @@ interface FormData {
   explorerUrl: string;
   apiUrl: string;
   apiKey: string;
+  useV2Api: boolean;
+  applyToAllNetworks: boolean;
 }
 
 export function ExplorerSettingsPanel({
@@ -49,12 +58,15 @@ export function ExplorerSettingsPanel({
       explorerUrl: '',
       apiUrl: '',
       apiKey: '',
+      useV2Api: true,
+      applyToAllNetworks: false,
     },
   });
 
   const explorerUrl = watch('explorerUrl');
   const apiUrl = watch('apiUrl');
   const apiKey = watch('apiKey');
+  const useV2Api = watch('useV2Api');
 
   // Load existing configuration on mount
   useEffect(() => {
@@ -64,11 +76,24 @@ export function ExplorerSettingsPanel({
         setValue('explorerUrl', config.explorerUrl || '');
         setValue('apiUrl', config.apiUrl || '');
         setValue('apiKey', config.apiKey || '');
+        setValue('applyToAllNetworks', config.applyToAllNetworks || false);
+        // Set useV2Api based on the saved applyToAllNetworks preference
+        // If applyToAllNetworks was false, the user likely intended useV2Api to be false
+        setValue('useV2Api', config.applyToAllNetworks || false);
       }
     } catch (error) {
       console.error('Error loading explorer configuration:', error);
     }
   }, [networkId, setValue]);
+
+  // Auto-select "Apply to all networks" when V2 API is enabled, clear when disabled
+  useEffect(() => {
+    if (useV2Api) {
+      setValue('applyToAllNetworks', true);
+    } else {
+      setValue('applyToAllNetworks', false);
+    }
+  }, [useV2Api, setValue]);
 
   const testConnection = useCallback(async () => {
     if (!adapter.testExplorerConnection || !apiKey) {
@@ -113,6 +138,7 @@ export function ExplorerSettingsPanel({
           apiKey: data.apiKey,
           name: 'Custom Explorer',
           isCustom: true,
+          applyToAllNetworks: data.applyToAllNetworks,
         };
 
         const isValid = await adapter.validateExplorerConfig(explorerConfig);
@@ -126,17 +152,29 @@ export function ExplorerSettingsPanel({
       }
 
       if (data.apiKey || data.explorerUrl || data.apiUrl) {
-        // Save the configuration
-        userExplorerConfigService.saveUserExplorerConfig(networkId, {
+        const explorerConfig: UserExplorerConfig = {
           explorerUrl: data.explorerUrl || undefined,
           apiUrl: data.apiUrl || undefined,
           apiKey: data.apiKey || undefined,
           name: 'Custom Explorer',
           isCustom: true,
-        });
+          applyToAllNetworks: data.applyToAllNetworks,
+          appliedNetworkIds: data.applyToAllNetworks ? undefined : [networkId],
+        };
+
+        // Save the configuration
+        userExplorerConfigService.saveUserExplorerConfig(networkId, explorerConfig);
+
+        // If applying to all networks, save to a special key
+        if (data.applyToAllNetworks) {
+          userExplorerConfigService.saveUserExplorerConfig('__global__', explorerConfig);
+        }
       } else {
         // Clear the configuration if all fields are empty
         userExplorerConfigService.clearUserExplorerConfig(networkId);
+        if (data.applyToAllNetworks) {
+          userExplorerConfigService.clearUserExplorerConfig('__global__');
+        }
       }
 
       onSettingsChanged?.();
@@ -184,20 +222,19 @@ export function ExplorerSettingsPanel({
 
       <Alert>
         <AlertTriangle className="h-4 w-4 text-yellow-600" />
-        <AlertTitle className="text-sm">Supported Explorer Types</AlertTitle>
+        <AlertTitle className="text-sm">Etherscan API Support</AlertTitle>
         <AlertDescription className="space-y-1 text-xs">
           <p>
-            <strong>Important:</strong> This feature currently only supports Etherscan-compatible
-            explorers:
+            <strong>V2 API (Recommended):</strong> Supports all Etherscan-compatible explorers
+            across multiple chains with a single API key.
           </p>
-          <ul className="list-disc list-inside space-y-0.5 ml-2">
-            <li>Etherscan (Ethereum)</li>
-            <li>Polygonscan (Polygon)</li>
-            <li>And other Etherscan-based explorers</li>
-          </ul>
+          <p>
+            <strong>V1 API (Legacy):</strong> Requires chain-specific API endpoints. Some explorers
+            may not be supported.
+          </p>
           <p className="mt-1">
-            <strong>Not supported:</strong> Blockscout, Routescan, or other non-Etherscan explorers.
-            Using these will result in API errors.
+            <strong>Note:</strong> Non-Etherscan explorers (Blockscout, Routescan, etc.) are not
+            supported.
           </p>
         </AlertDescription>
       </Alert>
@@ -214,25 +251,77 @@ export function ExplorerSettingsPanel({
           showToggle={true}
         />
 
-        <UrlField<FormData>
-          id="explorerUrl"
-          name="explorerUrl"
-          control={control}
-          label="Explorer URL (Optional)"
-          placeholder="https://etherscan.io"
-          helperText="Base URL for viewing transactions and addresses. If not provided, defaults from the network will be used."
-          validation={{}}
-        />
+        <Accordion type="single" collapsible className="w-full pt-4">
+          <AccordionItem value="advanced-settings" className="border rounded-md">
+            <AccordionTrigger className="text-sm font-medium px-3 py-2 hover:no-underline">
+              Advanced Settings
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-4">
+              <div className="space-y-6 pt-2">
+                {/* API Configuration Section */}
+                <div>
+                  <div className="mb-3">
+                    <h4 className="text-sm font-medium text-foreground">API Configuration</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Configure API version and network application settings
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <BooleanField<FormData>
+                      id="useV2Api"
+                      name="useV2Api"
+                      control={control}
+                      label="Use Etherscan V2 API"
+                      helperText="Enable the new V2 API for all Etherscan-compatible networks. V2 provides unified access across all chains."
+                    />
 
-        <UrlField<FormData>
-          id="apiUrl"
-          name="apiUrl"
-          control={control}
-          label="API URL (Optional)"
-          placeholder="https://api.etherscan.io/api"
-          helperText="API endpoint for fetching contract data. If not provided, defaults from the network will be used."
-          validation={{}}
-        />
+                    <div className={`ml-6 ${!useV2Api ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <BooleanField<FormData>
+                        id="applyToAllNetworks"
+                        name="applyToAllNetworks"
+                        control={control}
+                        label="Apply to all compatible networks"
+                        helperText="Apply these settings to all Etherscan-compatible networks in your project."
+                        isReadOnly={!useV2Api}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Endpoints Section */}
+                <div className="pt-4 border-t">
+                  <div className="mb-3">
+                    <h4 className="text-sm font-medium text-foreground">Custom Endpoints</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Override default URLs for explorer and API endpoints
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <UrlField<FormData>
+                      id="explorerUrl"
+                      name="explorerUrl"
+                      control={control}
+                      label="Explorer URL"
+                      placeholder="https://etherscan.io"
+                      helperText="Base URL for viewing transactions and addresses. If not provided, defaults from the network will be used."
+                      validation={{}}
+                    />
+
+                    <UrlField<FormData>
+                      id="apiUrl"
+                      name="apiUrl"
+                      control={control}
+                      label="API URL"
+                      placeholder="https://api.etherscan.io/api"
+                      helperText="API endpoint for fetching contract data. If not provided, defaults from the network will be used."
+                      validation={{}}
+                    />
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
 
       {connectionTestResult && (

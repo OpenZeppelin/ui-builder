@@ -23,10 +23,7 @@ const meta: Meta<typeof ContractsUIBuilder> = {
   decorators: [
     (Story) => (
       <AdapterProvider resolveAdapter={getAdapter}>
-        <WalletStateProvider
-          initialNetworkId="ethereum-mainnet"
-          getNetworkConfigById={getNetworkById}
-        >
+        <WalletStateProvider initialNetworkId={null} getNetworkConfigById={getNetworkById}>
           <Story />
         </WalletStateProvider>
       </AdapterProvider>

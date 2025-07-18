@@ -10,7 +10,6 @@ import { StepFunctionSelectorProps } from './types';
 
 export function StepFunctionSelector({
   contractSchema,
-  selectedFunction,
   onFunctionSelected,
   networkConfig,
   onToggleContractState,
@@ -20,7 +19,7 @@ export function StepFunctionSelector({
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
     useFunctionFilter(contractSchema);
 
-  const { selectFunction } = useFunctionSelection(selectedFunction, onFunctionSelected);
+  const { selectFunction } = useFunctionSelection(onFunctionSelected);
 
   if (!contractSchema) {
     return (
@@ -49,11 +48,7 @@ export function StepFunctionSelector({
       <FilterControls filterValue={filterValue} setFilterValue={setFilterValue} />
 
       <div className="max-h-96 space-y-6 overflow-y-auto">
-        <WritableFunctionsSection
-          functions={writableFunctions}
-          selectedFunction={selectedFunction}
-          onSelectFunction={selectFunction}
-        />
+        <WritableFunctionsSection functions={writableFunctions} onSelectFunction={selectFunction} />
 
         {/* Show a message if no functions match the filter */}
         {filteredFunctions.length === 0 && (

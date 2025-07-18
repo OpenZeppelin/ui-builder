@@ -100,6 +100,17 @@ export interface EvmNetworkConfig extends BaseNetworkConfig {
   apiUrl?: string;
 
   /**
+   * Whether this network supports Etherscan V2 API (default: true for all Etherscan-compatible explorers)
+   */
+  supportsEtherscanV2?: boolean;
+
+  /**
+   * Whether this network's explorer requires an API key for basic operations (default: true)
+   * Some explorers like routescan.io provide free access without API keys
+   */
+  requiresExplorerApiKey?: boolean;
+
+  /**
    * Optional chain-specific configuration object for this network.
    * For EVM networks, this should be a Viem Chain object.
    * If provided, this will be used directly by the chain's clients.

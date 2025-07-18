@@ -1,2 +1,2 @@
-export * from './components/ChainTileSelector';
+export * from './components/ChainSelector';
 export * from './components/NetworkSelectionPanel';

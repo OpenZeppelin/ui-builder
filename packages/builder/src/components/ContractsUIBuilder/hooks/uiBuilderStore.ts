@@ -20,6 +20,8 @@ export interface UIBuilderState {
   // Network and adapter state
   selectedNetworkConfigId: string | null;
   selectedEcosystem: Ecosystem | null;
+  pendingNetworkId: string | null; // Track network that's being loaded for auto-advance
+  networkToSwitchTo: string | null; // Track network that needs wallet switch
 
   // Wizard state
   currentStepIndex: number;
@@ -39,6 +41,8 @@ export interface UIBuilderState {
 let state: UIBuilderState = {
   selectedNetworkConfigId: null,
   selectedEcosystem: 'evm',
+  pendingNetworkId: null,
+  networkToSwitchTo: null,
   currentStepIndex: 0,
   uiState: {},
   contractSchema: null,
@@ -78,7 +82,10 @@ export const uiBuilderStore = {
     emitChange();
   },
 
-  resetDownstreamSteps(fromStep: 'network' | 'contract' | 'function') {
+  resetDownstreamSteps(
+    fromStep: 'network' | 'contract' | 'function',
+    preserveFunctionConfig: boolean = false
+  ) {
     let resetState: Partial<UIBuilderState> = {};
     if (fromStep === 'network') {
       resetState = {
@@ -86,13 +93,17 @@ export const uiBuilderStore = {
         contractSchema: null,
         contractAddress: null,
         contractFormValues: null,
+        pendingNetworkId: null, // Clear pending network when network changes
       };
     }
     if (fromStep === 'network' || fromStep === 'contract') {
       resetState = { ...resetState, selectedFunction: null };
     }
     if (fromStep === 'network' || fromStep === 'contract' || fromStep === 'function') {
-      resetState = { ...resetState, formConfig: null, isExecutionStepValid: false };
+      // Only reset formConfig if not preserving or if it's for a different function
+      if (!preserveFunctionConfig) {
+        resetState = { ...resetState, formConfig: null, isExecutionStepValid: false };
+      }
     }
     this.updateState(() => resetState);
   },

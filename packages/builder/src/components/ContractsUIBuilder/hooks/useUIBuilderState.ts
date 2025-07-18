@@ -7,10 +7,20 @@ import {
   FormValues,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
+
+// Step indices for the wizard navigation
+const STEP_INDICES = {
+  CHAIN_SELECT: 0,
+  CONTRACT_DEFINITION: 1,
+  FUNCTION_SELECTOR: 2,
+  FORM_CUSTOMIZATION: 3,
+  COMPLETE: 4,
+} as const;
 
 /**
  * Coordinating hook that uses an external store to manage builder state.
@@ -31,21 +41,86 @@ export function useUIBuilderState() {
     uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
   }, []); // Run only once
 
-  const handleNetworkSelect = useCallback(
-    (networkConfigId: string | null) => {
-      setActiveNetworkId(networkConfigId);
-      uiBuilderStore.updateState(() => ({
-        selectedNetworkConfigId: networkConfigId,
-        selectedEcosystem: activeNetworkConfig?.ecosystem ?? null,
-      }));
-      uiBuilderStore.resetDownstreamSteps('network');
+  const onStepChange = useCallback(
+    (index: number) => {
+      uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
+
+      // Clear network selection when going back to the first step
+      if (index === STEP_INDICES.CHAIN_SELECT) {
+        setActiveNetworkId(null);
+        uiBuilderStore.updateState(() => ({
+          selectedNetworkConfigId: null,
+          selectedEcosystem: null,
+        }));
+        uiBuilderStore.resetDownstreamSteps('network');
+      }
+
+      // Note: We don't clear function selection when going back to step 2
+      // to preserve user progress. The UI will visually hide the selection
+      // but keep the data intact.
     },
-    [setActiveNetworkId, activeNetworkConfig]
+    [setActiveNetworkId]
   );
 
-  const onStepChange = useCallback((index: number) => {
-    uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
-  }, []);
+  const handleNetworkSelect = useCallback(
+    (networkId: string | null) => {
+      logger.info('useUIBuilderState', `handleNetworkSelect: ${networkId}`);
+
+      // Update the store with the new network selection
+      // networkToSwitchTo is set here to trigger wallet switching in the component
+      uiBuilderStore.updateState(() => ({
+        selectedNetworkConfigId: networkId,
+        selectedEcosystem: networkId ? activeNetworkConfig?.ecosystem : null,
+        networkToSwitchTo: networkId,
+      }));
+      uiBuilderStore.resetDownstreamSteps('network');
+
+      // Set pending network for auto-advance tracking
+      // This will trigger navigation once the adapter is loaded
+      if (networkId && state.currentStepIndex === STEP_INDICES.CHAIN_SELECT) {
+        logger.info('useUIBuilderState', `Setting pendingNetworkId: ${networkId}`);
+        uiBuilderStore.updateState(() => ({ pendingNetworkId: networkId }));
+      }
+
+      // Notify the wallet state provider about the network change
+      setActiveNetworkId(networkId);
+    },
+    [setActiveNetworkId, activeNetworkConfig, state.currentStepIndex]
+  );
+
+  // Auto-advance to next step when adapter is ready after network selection
+  // This effect coordinates the timing between:
+  // 1. Network selection (sets pendingNetworkId)
+  // 2. Adapter loading (async operation)
+  // 3. Step navigation (happens after adapter is ready)
+  // 4. Wallet network switching (handled by NetworkSwitchManager in the component)
+  useEffect(() => {
+    const currentState = uiBuilderStore.getState();
+
+    logger.info(
+      'useUIBuilderState',
+      `Auto-advance effect check - pendingNetworkId: ${currentState.pendingNetworkId}, activeAdapter: ${!!activeAdapter}, isAdapterLoading: ${isAdapterLoading}, adapterId: ${activeAdapter?.networkConfig?.id}, currentStep: ${currentState.currentStepIndex}`
+    );
+
+    if (
+      currentState.pendingNetworkId &&
+      activeAdapter &&
+      !isAdapterLoading &&
+      activeAdapter.networkConfig.id === currentState.pendingNetworkId &&
+      currentState.currentStepIndex === STEP_INDICES.CHAIN_SELECT
+    ) {
+      logger.info(
+        'useUIBuilderState',
+        `Auto-advancing to next step after adapter ready for network: ${currentState.pendingNetworkId}`
+      );
+
+      // Clear the pending network and advance to next step
+      uiBuilderStore.updateState(() => ({
+        pendingNetworkId: null,
+        currentStepIndex: STEP_INDICES.CONTRACT_DEFINITION,
+      }));
+    }
+  }, [activeAdapter, isAdapterLoading]);
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
@@ -60,8 +135,28 @@ export function useUIBuilderState() {
   );
 
   const handleFunctionSelected = useCallback((functionId: string | null) => {
-    uiBuilderStore.updateState(() => ({ selectedFunction: functionId }));
-    uiBuilderStore.resetDownstreamSteps('function');
+    const currentState = uiBuilderStore.getState();
+    const previousFunctionId = currentState.selectedFunction;
+    const isDifferentFunction = functionId !== previousFunctionId;
+    const existingFormConfig = currentState.formConfig;
+    // Remove redundant check - !isDifferentFunction already implies function ID match
+    const isSameFunctionWithExistingConfig: boolean = !isDifferentFunction && !!existingFormConfig;
+
+    uiBuilderStore.updateState((s) => {
+      const newState = { selectedFunction: functionId };
+
+      // Auto-advance to next step when a function is selected and we're on the function selector step
+      if (functionId && s.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
+        return { ...newState, currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION };
+      }
+      return newState;
+    });
+
+    // Only reset downstream steps if we're selecting a different function
+    // Preserve form config if it's the same function
+    if (functionId !== null) {
+      uiBuilderStore.resetDownstreamSteps('function', isSameFunctionWithExistingConfig);
+    }
   }, []);
 
   const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
@@ -126,6 +221,10 @@ export function useUIBuilderState() {
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
+  const clearNetworkToSwitchTo = useCallback(() => {
+    uiBuilderStore.updateState(() => ({ networkToSwitchTo: null }));
+  }, []);
+
   return {
     ...state,
     selectedNetwork: activeNetworkConfig,
@@ -142,6 +241,7 @@ export function useUIBuilderState() {
     handleExecutionConfigUpdated,
     toggleWidget: contractWidget.toggleWidget,
     exportApp: handleExportApp,
+    clearNetworkToSwitchTo,
     handleUiKitConfigUpdated,
   };
 }

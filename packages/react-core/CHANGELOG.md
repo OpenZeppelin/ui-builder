@@ -1,5 +1,14 @@
 # @openzeppelin/transaction-form-react-core
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [[`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81)]:
+  - @openzeppelin/contracts-ui-builder-types@0.2.0
+  - @openzeppelin/contracts-ui-builder-utils@0.2.0
+  - @openzeppelin/contracts-ui-builder-ui@0.2.0
+
 ## 0.1.2
 
 ### Patch Changes

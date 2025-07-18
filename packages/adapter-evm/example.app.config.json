@@ -1,0 +1,28 @@
+{
+  "$schema": "../types/src/schemas/app-config.schema.json",
+  "globalServiceConfigs": {
+    "etherscanv2": {
+      "apiKey": "YourEtherscanV2ApiKeyHere",
+      "comment": "This single API key works across all Etherscan V2 supported networks"
+    },
+    "walletconnect": {
+      "projectId": "YourWalletConnectProjectIdHere"
+    }
+  },
+  "networkServiceConfigs": {
+    "_comment": "These are legacy V1 API keys - only needed for networks that don't support V2 yet",
+    "etherscan-mainnet": {
+      "apiKey": "YourEtherscanMainnetKeyHere"
+    },
+    "etherscan-goerli": {
+      "apiKey": "YourEtherscanGoerliKeyHere"
+    },
+    "polygonscan-mainnet": {
+      "apiKey": "YourPolygonscanMainnetKeyHere"
+    }
+  },
+  "featureFlags": {
+    "enable_v2_api": true,
+    "enable_experimental_features": false
+  }
+}

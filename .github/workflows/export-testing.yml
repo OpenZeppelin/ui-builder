@@ -35,7 +35,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
         with:
-          version: 9.9.0
+          version: 9.10.0
           run_install: false
 
       - name: Setup Node.js ${{ matrix.node-version }}
@@ -60,6 +60,10 @@ jobs:
       # Run only export-related tests
       - name: Run export tests
         run: pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/
+
+      # Create test-results directory
+      - name: Create test results directory
+        run: mkdir -p packages/builder/test-results
 
       # Generate test report for better CI visibility
       - name: Generate test report

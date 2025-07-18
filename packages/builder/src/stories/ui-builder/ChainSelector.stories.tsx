@@ -4,11 +4,11 @@ import { useState } from 'react';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 
-import { ChainTileSelector } from '../../components/ContractsUIBuilder/StepChainSelection/index';
+import { ChainSelector } from '../../components/ContractsUIBuilder/StepChainSelection/index';
 
 const meta = {
-  title: 'Builder/ContractsUIBuilder/ChainTileSelector',
-  component: ChainTileSelector,
+  title: 'Builder/ContractsUIBuilder/ChainSelector',
+  component: ChainSelector,
   parameters: {
     layout: 'centered',
     docs: {
@@ -18,13 +18,13 @@ const meta = {
     },
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof ChainTileSelector>;
+} satisfies Meta<typeof ChainSelector>;
 
 export default meta;
-type Story = StoryObj<typeof ChainTileSelector>;
+type Story = StoryObj<typeof ChainSelector>;
 
 /**
- * Default implementation of the ChainTileSelector component.
+ * Default implementation of the ChainSelector component.
  */
 export const Default: Story = {
   args: {
@@ -43,7 +43,7 @@ export const Interactive = () => {
 
   return (
     <div className="max-w-3xl">
-      <ChainTileSelector
+      <ChainSelector
         initialEcosystem={selectedEcosystem}
         selectedNetworkId={selectedNetworkId}
         onNetworkSelect={(networkId: string | null) => {

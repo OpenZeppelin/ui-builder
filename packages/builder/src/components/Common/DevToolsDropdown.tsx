@@ -1,5 +1,6 @@
 import { Settings, Wrench } from 'lucide-react';
 
+import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,23 +16,44 @@ import {
  */
 export const DevToolsDropdown = () => {
   const { reportNetworkError } = useNetworkErrors();
+  const { activeNetworkConfig } = useWalletState();
 
   const triggerRpcError = () => {
-    reportNetworkError(
-      'rpc',
-      'ethereum-mainnet',
-      'Ethereum Mainnet',
-      'Failed to connect to RPC endpoint: Connection timeout after 5000ms'
-    );
+    if (activeNetworkConfig) {
+      reportNetworkError(
+        'rpc',
+        activeNetworkConfig.id,
+        activeNetworkConfig.name,
+        'Failed to connect to RPC endpoint: Connection timeout after 5000ms'
+      );
+    } else {
+      // Fallback if no network is selected
+      reportNetworkError(
+        'rpc',
+        'ethereum-mainnet',
+        'Ethereum Mainnet',
+        'Failed to connect to RPC endpoint: Connection timeout after 5000ms'
+      );
+    }
   };
 
   const triggerExplorerError = () => {
-    reportNetworkError(
-      'explorer',
-      'ethereum-mainnet',
-      'Ethereum Mainnet',
-      'Failed to fetch contract ABI: Invalid API key or rate limit exceeded'
-    );
+    if (activeNetworkConfig) {
+      reportNetworkError(
+        'explorer',
+        activeNetworkConfig.id,
+        activeNetworkConfig.name,
+        'Failed to fetch contract ABI: Invalid API key or rate limit exceeded'
+      );
+    } else {
+      // Fallback if no network is selected
+      reportNetworkError(
+        'explorer',
+        'ethereum-mainnet',
+        'Ethereum Mainnet',
+        'Failed to fetch contract ABI: Invalid API key or rate limit exceeded'
+      );
+    }
   };
 
   return (
@@ -52,7 +74,14 @@ export const DevToolsDropdown = () => {
           deploying!
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel>Network Error Testing</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Network Error Testing
+          {activeNetworkConfig && (
+            <span className="block text-xs font-normal text-muted-foreground mt-1">
+              Current: {activeNetworkConfig.name}
+            </span>
+          )}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={triggerRpcError}>
           <Settings className="mr-2 h-4 w-4" />

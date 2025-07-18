@@ -7,7 +7,7 @@ import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchM
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
 
-import { ChainTileSelector } from './StepChainSelection/index';
+import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
@@ -22,33 +22,33 @@ import { useUIBuilderState } from './hooks';
  */
 export function ContractsUIBuilder() {
   const {
+    currentStepIndex,
     selectedNetworkConfigId,
-    selectedNetwork,
-    selectedAdapter,
     selectedEcosystem,
     contractSchema,
     contractFormValues,
     selectedFunction,
     formConfig,
     isExecutionStepValid,
-    isWidgetVisible,
-    sidebarWidget: widgetData,
+    selectedNetwork,
+    selectedAdapter,
+    sidebarWidget,
     exportLoading,
-    currentStepIndex,
+    isWidgetVisible,
+    networkToSwitchTo,
     onStepChange,
-
     handleNetworkSelect,
     handleContractSchemaLoaded,
     handleFunctionSelected,
     handleFormConfigUpdated,
     handleExecutionConfigUpdated,
+    handleUiKitConfigUpdated,
     toggleWidget,
     exportApp,
-    handleUiKitConfigUpdated,
+    clearNetworkToSwitchTo,
   } = useUIBuilderState();
 
   // Track network switching state
-  const [networkToSwitchTo, setNetworkToSwitchTo] = useState<string | null>(null);
   const [isAdapterReady, setIsAdapterReady] = useState(false);
 
   // Store the latest selected network ID
@@ -67,7 +67,6 @@ export function ContractsUIBuilder() {
       networkId &&
       (latestNetworkIdRef.current !== networkId || !hasInitializedNetworkRef.current)
     ) {
-      setNetworkToSwitchTo(networkId);
       setIsAdapterReady(false); // Reset the adapter ready flag
       logger.info('ContractsUIBuilder', `🎯 Setting network to switch to: ${networkId}`);
 
@@ -84,11 +83,19 @@ export function ContractsUIBuilder() {
     // Update our cached latest network ID
     latestNetworkIdRef.current = networkId;
 
-    // Call the original handler
+    // Call the original handler from the hook
     handleNetworkSelect(networkId);
+
+    // Note: Auto-navigation is now handled in useUIBuilderState via the pendingNetworkId state
   };
 
   // Watch for adapter changes that match our network to switch to
+  // This effect manages the isAdapterReady flag which controls when NetworkSwitchManager is mounted
+  // The flow is:
+  // 1. User selects network -> networkToSwitchTo is set in the store
+  // 2. Adapter loads -> this effect detects when adapter matches the target network
+  // 3. isAdapterReady is set to true -> NetworkSwitchManager mounts
+  // 4. NetworkSwitchManager handles the actual wallet switch
   useEffect(() => {
     if (!selectedAdapter || !networkToSwitchTo || !selectedNetworkConfigId) {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
@@ -128,7 +135,7 @@ export function ContractsUIBuilder() {
   // Reset the network to switch to when switching is complete
   const handleNetworkSwitchComplete = () => {
     logger.info('ContractsUIBuilder', '🔄 Network switch completed, resetting target');
-    setNetworkToSwitchTo(null);
+    clearNetworkToSwitchTo();
     setIsAdapterReady(false);
   };
 
@@ -150,14 +157,14 @@ export function ContractsUIBuilder() {
   }, [selectedAdapter, networkToSwitchTo, isAdapterReady]);
 
   // Create sidebar widget when we have contract data
-  const sidebarWidget = widgetData ? (
+  const sidebarWidgetComponent = sidebarWidget ? (
     <div className="sticky top-4">
       <ContractStateWidget
-        contractSchema={widgetData.contractSchema}
-        contractAddress={widgetData.contractAddress}
-        adapter={widgetData.adapter}
-        isVisible={widgetData.isVisible}
-        onToggle={widgetData.onToggle}
+        contractSchema={sidebarWidget.contractSchema}
+        contractAddress={sidebarWidget.contractAddress}
+        adapter={sidebarWidget.adapter}
+        isVisible={sidebarWidget.isVisible}
+        onToggle={sidebarWidget.onToggle}
       />
     </div>
   ) : null;
@@ -167,7 +174,7 @@ export function ContractsUIBuilder() {
       id: 'chain-select',
       title: 'Select Blockchain',
       component: (
-        <ChainTileSelector
+        <ChainSelector
           onNetworkSelect={handleNetworkSelection}
           initialEcosystem={selectedNetwork?.ecosystem ?? selectedEcosystem ?? 'evm'}
           selectedNetworkId={selectedNetworkConfigId}
@@ -198,7 +205,6 @@ export function ContractsUIBuilder() {
         <StepFunctionSelector
           contractSchema={contractSchema}
           onFunctionSelected={handleFunctionSelected}
-          selectedFunction={selectedFunction}
           networkConfig={selectedNetwork}
           onToggleContractState={toggleWidget}
           isWidgetExpanded={isWidgetVisible}
@@ -221,6 +227,7 @@ export function ContractsUIBuilder() {
           isWidgetExpanded={isWidgetVisible}
           onUiKitConfigUpdated={handleUiKitConfigUpdated}
           currentUiKitConfig={formConfig?.uiKitConfig}
+          currentFormConfig={formConfig}
         />
       ),
       isValid: isExecutionStepValid,
@@ -264,7 +271,7 @@ export function ContractsUIBuilder() {
       <div className="bg-card rounded-lg border shadow-sm">
         <WizardLayout
           steps={steps}
-          sidebarWidget={sidebarWidget}
+          sidebarWidget={sidebarWidgetComponent}
           isWidgetExpanded={isWidgetVisible}
           currentStepIndex={currentStepIndex}
           onStepChange={onStepChange}
