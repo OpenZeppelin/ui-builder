@@ -20,6 +20,8 @@ export interface UIBuilderState {
   // Network and adapter state
   selectedNetworkConfigId: string | null;
   selectedEcosystem: Ecosystem | null;
+  pendingNetworkId: string | null; // Track network that's being loaded for auto-advance
+  networkToSwitchTo: string | null; // Track network that needs wallet switch
 
   // Wizard state
   currentStepIndex: number;
@@ -39,6 +41,8 @@ export interface UIBuilderState {
 let state: UIBuilderState = {
   selectedNetworkConfigId: null,
   selectedEcosystem: 'evm',
+  pendingNetworkId: null,
+  networkToSwitchTo: null,
   currentStepIndex: 0,
   uiState: {},
   contractSchema: null,
@@ -89,6 +93,7 @@ export const uiBuilderStore = {
         contractSchema: null,
         contractAddress: null,
         contractFormValues: null,
+        pendingNetworkId: null, // Clear pending network when network changes
       };
     }
     if (fromStep === 'network' || fromStep === 'contract') {
