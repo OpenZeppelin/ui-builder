@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-stellar",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Stellar Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",

@@ -3,6 +3,8 @@ import { Shield, User, Users } from 'lucide-react';
 import React from 'react';
 import { useController } from 'react-hook-form';
 
+import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
+
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
 import type { PrimaryMethodSelectorProps } from '../types';
@@ -61,12 +63,12 @@ export function PrimaryMethodSelector({
 
     if (field.value === 'multisig') {
       return (
-        <div className="h-full flex flex-col items-center justify-center py-8">
-          <p className="text-muted-foreground text-center text-sm">
-            Multisig (e.g., Safe, Squads) configuration options will be available here in a future
-            update.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Users className="h-6 w-6 text-muted-foreground" />}
+          title="Multisig Configuration Coming Soon"
+          description="Multisig (e.g., Safe, Squads) configuration options will be available here in a future update. Stay tuned for enhanced multi-signature wallet support."
+          size="small"
+        />
       );
     }
 

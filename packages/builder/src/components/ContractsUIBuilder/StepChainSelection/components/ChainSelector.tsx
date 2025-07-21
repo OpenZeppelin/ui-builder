@@ -1,14 +1,14 @@
 import { NetworkIcon } from '@web3icons/react';
+import { Clock } from 'lucide-react';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
-import { getNetworksByEcosystem } from '../../../../core/ecosystemManager';
 import {
   getEcosystemDescription,
   getEcosystemName,
@@ -20,26 +20,21 @@ import {
   getVisibleEcosystems,
   isEcosystemEnabled,
 } from '../../../../utils/ecosystem-feature-flags';
-import { StepTitleWithDescription } from '../../Common';
 
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
 
-interface ChainTileSelectorProps {
+interface ChainSelectorProps {
   onNetworkSelect: (networkConfigId: string | null) => void;
   initialEcosystem?: Ecosystem;
   selectedNetworkId?: string | null;
 }
 
-export function ChainTileSelector({
+export function ChainSelector({
   onNetworkSelect,
   initialEcosystem = 'evm',
   selectedNetworkId = null,
-}: ChainTileSelectorProps) {
+}: ChainSelectorProps) {
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
-  const { activeNetworkId } = useWalletState();
-
-  // Track if we've done the initial auto-selection
-  const hasAutoSelectedRef = useRef(false);
 
   // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({
@@ -68,22 +63,17 @@ export function ChainTileSelector({
     async (ecosystem: Ecosystem) => {
       // Check if ecosystem is enabled
       if (!isEcosystemEnabled(ecosystem)) {
-        logger.info('ChainTileSelector', `Ecosystem ${ecosystem} is disabled, ignoring selection`);
+        logger.info('ChainSelector', `Ecosystem ${ecosystem} is disabled, ignoring selection`);
         return;
       }
 
       setSelectedEcosystem(ecosystem);
       setValue('ecosystem', ecosystem);
 
-      try {
-        const networksInEcosystem = await getNetworksByEcosystem(ecosystem);
-        onNetworkSelect(networksInEcosystem[0].id);
-      } catch (error) {
-        logger.error('ChainTileSelector', `Error auto-selecting network for ${ecosystem}:`, error);
-        onNetworkSelect(null); // Clear selection on error
-      }
+      // Remove auto-selection logic - let users manually choose their network
+      // This improves UX by not forcing a default network selection
     },
-    [setValue, onNetworkSelect]
+    [setValue]
   );
 
   // Handle network selection
@@ -109,49 +99,6 @@ export function ChainTileSelector({
       }
     }
   }, [initialEcosystem, selectedEcosystem, selectedNetworkId]);
-
-  // Auto-select the first network when initial ecosystem is set
-  useEffect(() => {
-    // Only auto-select if:
-    // 1. We have a selected ecosystem
-    // 2. We haven't done the initial auto-selection yet
-    // 3. There is no globally active network already
-    if (selectedEcosystem && !hasAutoSelectedRef.current && !activeNetworkId) {
-      hasAutoSelectedRef.current = true;
-
-      async function autoSelectFirstNetwork(ecosystem: Ecosystem) {
-        try {
-          const networksInEcosystem = await getNetworksByEcosystem(ecosystem);
-          if (networksInEcosystem.length > 0) {
-            const firstNetworkId = networksInEcosystem[0].id;
-
-            // If no network is selected, or if the selected network is different, trigger selection
-            if (!selectedNetworkId || selectedNetworkId !== firstNetworkId) {
-              logger.info(
-                'ChainTileSelector',
-                `Auto-selecting first network for initial ecosystem ${ecosystem}: ${firstNetworkId}`
-              );
-              onNetworkSelect(firstNetworkId);
-            } else {
-              // Even if the network is already selected, trigger the selection to ensure wallet switches
-              logger.info(
-                'ChainTileSelector',
-                `Re-triggering selection for already selected network ${firstNetworkId} to ensure wallet sync`
-              );
-              onNetworkSelect(firstNetworkId);
-            }
-          }
-        } catch (error) {
-          logger.error(
-            'ChainTileSelector',
-            `Error auto-selecting initial network for ${ecosystem}:`,
-            error
-          );
-        }
-      }
-      void autoSelectFirstNetwork(selectedEcosystem);
-    }
-  }, [selectedEcosystem, selectedNetworkId, onNetworkSelect, activeNetworkId]);
 
   // If we have a selectedNetworkId and no ecosystem, we need to fetch the network to determine its ecosystem
   useEffect(() => {
@@ -183,16 +130,9 @@ export function ChainTileSelector({
 
   return (
     <div className="flex flex-col space-y-6">
-      <StepTitleWithDescription
-        title="Select Blockchain"
-        description="Choose the blockchain network that your contract is deployed on."
-      />
-
       <div className="flex flex-col md:flex-row gap-6">
         {/* Ecosystem Selection Column - Left Side */}
         <div className="w-full md:w-64 space-y-4">
-          <h3 className="text-base font-medium">Blockchain Ecosystem</h3>
-
           <div className="flex flex-col space-y-2">
             {ecosystemOptions.map((option) => {
               const isSelected = selectedEcosystem === option.value;
@@ -288,10 +228,6 @@ export function ChainTileSelector({
         <div className="flex-1 min-w-0">
           {selectedEcosystem && isEcosystemEnabled(selectedEcosystem) ? (
             <div className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-base font-medium">Select Network</h3>
-              </div>
-
               <NetworkSelectionPanel
                 ecosystem={selectedEcosystem}
                 onNetworkSelected={handleNetworkSelected}
@@ -299,13 +235,20 @@ export function ChainTileSelector({
               />
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-md border border-dashed text-muted-foreground">
-              <p>
-                {selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
-                  ? `${getEcosystemName(selectedEcosystem)} support is coming soon`
-                  : 'Select a blockchain ecosystem to view available networks'}
-              </p>
-            </div>
+            <EmptyState
+              icon={<Clock className="h-6 w-6 text-muted-foreground" />}
+              title={
+                selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
+                  ? `${getEcosystemName(selectedEcosystem)} Support Coming Soon`
+                  : 'Select Blockchain Ecosystem'
+              }
+              description={
+                selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
+                  ? `We're working hard to bring ${getEcosystemName(selectedEcosystem)} support to the platform. Stay tuned for updates!`
+                  : 'Select a blockchain ecosystem above to view available networks and continue building your contract interface.'
+              }
+              size="default"
+            />
           )}
         </div>
       </div>

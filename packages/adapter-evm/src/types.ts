@@ -10,7 +10,7 @@ import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types'
  * EVM-specific network configuration with properly typed viem chain
  * This extends the base EvmNetworkConfig with the correct Chain type from viem
  */
-export interface TypedEvmNetworkConfig extends Omit<EvmNetworkConfig, 'viemChain'> {
+export interface TypedEvmNetworkConfig extends EvmNetworkConfig {
   /**
    * Viem Chain object for this EVM network.
    * If provided, this will be used directly by Viem clients.

@@ -1,4 +1,4 @@
 [build]
 base = "/"
-command = "echo \"//npm.pkg.github.com/:_authToken=$NPM_TOKEN\" >> .npmrc && pnpm install-deps && pnpm build"
+command = "pnpm install-deps && pnpm build"
 publish = "packages/builder/dist"

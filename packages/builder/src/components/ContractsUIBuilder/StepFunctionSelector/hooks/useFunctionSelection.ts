@@ -5,7 +5,6 @@ interface UseFunctionSelectionResult {
 }
 
 export function useFunctionSelection(
-  selectedFunction: string | null,
   onFunctionSelected: (functionId: string | null) => void
 ): UseFunctionSelectionResult {
   const selectFunction = useCallback(
@@ -13,10 +12,10 @@ export function useFunctionSelection(
       // Only allow selection of functions that modify state
       if (!modifiesState) return;
 
-      // Toggle selection - if already selected, deselect it
-      onFunctionSelected(selectedFunction === functionId ? null : functionId);
+      // Always select the function (no toggle behavior)
+      onFunctionSelected(functionId);
     },
-    [selectedFunction, onFunctionSelected]
+    [onFunctionSelected]
   );
 
   return {

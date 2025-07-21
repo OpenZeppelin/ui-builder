@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  EmptyState,
   PasswordField,
 } from '@openzeppelin/contracts-ui-builder-ui';
 
@@ -113,7 +114,14 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
       // case 'multisig':
       //   return <MultisigConfigDetails config={executionConfig as MultisigExecutionConfig} />;
       default:
-        return <p className="text-sm text-muted-foreground">Unknown execution method.</p>;
+        return (
+          <EmptyState
+            icon={<AlertTriangle className="h-6 w-6 text-muted-foreground" />}
+            title="Unknown Execution Method"
+            description="The selected execution method is not recognized. Please check your configuration or contact support."
+            size="small"
+          />
+        );
     }
   };
 

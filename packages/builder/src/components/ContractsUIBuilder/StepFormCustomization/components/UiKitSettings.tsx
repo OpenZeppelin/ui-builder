@@ -1,4 +1,5 @@
 import CodeEditor from '@uiw/react-textarea-code-editor';
+import { Settings } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -12,7 +13,7 @@ import {
   UiKitConfiguration,
   UiKitName,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
+import { EmptyState, ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
@@ -118,11 +119,12 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
       )}
 
       {!selectedKit.hasCodeEditor && selectedKit.configFields.length === 0 && (
-        <div className="py-4">
-          <p className="text-muted-foreground text-sm">
-            This UI kit requires no additional configuration.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Settings className="h-6 w-6 text-muted-foreground" />}
+          title="No Configuration Required"
+          description="This UI kit requires no additional configuration."
+          size="small"
+        />
       )}
 
       {selectedKit.hasCodeEditor && (

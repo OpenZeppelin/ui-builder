@@ -49,27 +49,38 @@ export const NetworkSettingsDialog: React.FC<NetworkSettingsDialogProps> = ({
           <DialogTitle>Network Settings</DialogTitle>
           <DialogDescription>Configure settings for {networkConfig?.name}</DialogDescription>
         </DialogHeader>
-        {networkConfig && adapter && (
-          <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
-              <TabsTrigger value="explorer">Explorer</TabsTrigger>
-            </TabsList>
-            <TabsContent value="rpc">
-              <RpcSettingsPanel
-                adapter={adapter}
-                networkId={networkConfig.id}
-                onSettingsChanged={handleSettingsChanged}
-              />
-            </TabsContent>
-            <TabsContent value="explorer">
-              <ExplorerSettingsPanel
-                adapter={adapter}
-                networkId={networkConfig.id}
-                onSettingsChanged={handleSettingsChanged}
-              />
-            </TabsContent>
-          </Tabs>
+        {networkConfig && (
+          <>
+            {adapter ? (
+              <Tabs defaultValue={defaultTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
+                  <TabsTrigger value="explorer">Explorer</TabsTrigger>
+                </TabsList>
+                <TabsContent value="rpc">
+                  <RpcSettingsPanel
+                    adapter={adapter}
+                    networkId={networkConfig.id}
+                    onSettingsChanged={handleSettingsChanged}
+                  />
+                </TabsContent>
+                <TabsContent value="explorer">
+                  <ExplorerSettingsPanel
+                    adapter={adapter}
+                    networkId={networkConfig.id}
+                    onSettingsChanged={handleSettingsChanged}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center space-y-2">
+                  <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+                  <p className="text-sm text-muted-foreground">Loading network adapter...</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>

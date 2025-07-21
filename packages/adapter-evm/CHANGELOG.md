@@ -1,5 +1,28 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.2.0
+
+### Minor Changes
+
+- [#56](https://github.com/OpenZeppelin/contracts-ui-builder/pull/56) [`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81) Thanks [@pasevin](https://github.com/pasevin)! - New Etherscan V2 API Client. Etherscan V2 has been enabled by default for mainnet and testnet networks, with example configurations provided to guide users.
+
+### Patch Changes
+
+- Updated dependencies [[`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81)]:
+  - @openzeppelin/contracts-ui-builder-types@0.2.0
+  - @openzeppelin/contracts-ui-builder-utils@0.2.0
+  - @openzeppelin/contracts-ui-builder-ui@0.2.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.1.3
+
+## 0.1.3
+
+### Patch Changes
+
+- [#54](https://github.com/OpenZeppelin/contracts-ui-builder/pull/54) [`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6) Thanks [@pasevin](https://github.com/pasevin)! - pre-release clean up and improvements
+
+- Updated dependencies [[`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

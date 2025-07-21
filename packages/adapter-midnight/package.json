@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-midnight",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Midnight Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",
@@ -40,8 +40,7 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "echo 'No tests for adapter-midnight package'"
   },
   "dependencies": {
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",

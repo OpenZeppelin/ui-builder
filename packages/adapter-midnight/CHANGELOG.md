@@ -1,5 +1,24 @@
 # @openzeppelin/transaction-form-adapter-midnight
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81)]:
+  - @openzeppelin/contracts-ui-builder-types@0.2.0
+  - @openzeppelin/contracts-ui-builder-utils@0.2.0
+  - @openzeppelin/contracts-ui-builder-ui@0.2.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.1.3
+
+## 0.0.3
+
+### Patch Changes
+
+- [`6d74481`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6d7448140936f5c8dfadac3bca05dde54d468167) Thanks [@pasevin](https://github.com/pasevin)! - fix test script to handle no test files
+
+- Updated dependencies [[`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.1.3
+
 ## 0.0.2
 
 ### Patch Changes

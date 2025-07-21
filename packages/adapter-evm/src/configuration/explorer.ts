@@ -1,53 +1,79 @@
-import {
-  EvmNetworkConfig,
-  NetworkConfig,
-  UserExplorerConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
+import { NetworkConfig, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 import {
   appConfigService,
+  logger,
   userExplorerConfigService,
 } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
+import { TypedEvmNetworkConfig } from '../types';
 import { isValidEvmAddress } from '../utils';
 
 /**
  * Resolves the explorer configuration for a given EVM network.
  * Priority order:
  * 1. User-configured explorer (from UserExplorerConfigService)
- * 2. App-configured explorer API key (from AppConfigService)
- * 3. Default network explorer (from NetworkConfig)
+ * 2. For V2 API networks: Global Etherscan V2 API key (from AppConfigService global service configs)
+ * 3. App-configured explorer API key (from AppConfigService network service configs)
+ * 4. Default network explorer (from NetworkConfig)
  *
  * @param networkConfig - The EVM network configuration.
  * @returns The resolved explorer configuration.
  */
-export function resolveExplorerConfig(networkConfig: EvmNetworkConfig): {
-  explorerUrl?: string;
-  apiUrl?: string;
-  apiKey?: string;
-} {
-  const networkId = networkConfig.id;
-
-  // Priority 1: Check user-provided explorer configuration
-  const userConfig = userExplorerConfigService.getUserExplorerConfig(networkId);
+export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): UserExplorerConfig {
+  // 1. Check for user-configured explorer
+  const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
   if (userConfig) {
+    logger.info('ExplorerConfig', `Using user-configured explorer for ${networkConfig.name}`);
+    return userConfig;
+  }
+
+  // 2. For V2 API networks using 'etherscan-v2' identifier, check for global Etherscan V2 API key
+  if (
+    networkConfig.supportsEtherscanV2 &&
+    networkConfig.primaryExplorerApiIdentifier === 'etherscan-v2'
+  ) {
+    const globalV2ApiKey = appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as
+      | string
+      | undefined;
+    if (globalV2ApiKey) {
+      logger.info('ExplorerConfig', `Using global Etherscan V2 API key for ${networkConfig.name}`);
+      return {
+        explorerUrl: networkConfig.explorerUrl,
+        apiUrl: networkConfig.apiUrl,
+        apiKey: globalV2ApiKey,
+        name: `${networkConfig.name} Explorer (V2 API)`,
+        isCustom: false,
+      };
+    }
+  }
+
+  // 3. Check for app-configured API key (V1 style network-specific keys)
+  const apiKey = networkConfig.primaryExplorerApiIdentifier
+    ? appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier)
+    : undefined;
+
+  if (apiKey) {
+    logger.info('ExplorerConfig', `Using app-configured API key for ${networkConfig.name}`);
     return {
-      explorerUrl: userConfig.explorerUrl || networkConfig.explorerUrl,
-      apiUrl: userConfig.apiUrl || networkConfig.apiUrl,
-      apiKey: userConfig.apiKey,
+      explorerUrl: networkConfig.explorerUrl,
+      apiUrl: networkConfig.apiUrl,
+      apiKey,
+      name: `${networkConfig.name} Explorer`,
+      isCustom: false,
     };
   }
 
-  // Priority 2: Check AppConfigService for an API key
-  let apiKey: string | undefined;
-  if (networkConfig.primaryExplorerApiIdentifier) {
-    apiKey = appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier);
-  }
-
-  // Priority 3: Default from network config
+  // 4. Use default network explorer (no API key)
+  logger.info(
+    'ExplorerConfig',
+    `Using default explorer for ${networkConfig.name} (no API key configured)`
+  );
   return {
     explorerUrl: networkConfig.explorerUrl,
     apiUrl: networkConfig.apiUrl,
-    apiKey: apiKey,
+    name: `${networkConfig.name} Explorer`,
+    isCustom: false,
   };
 }
 
@@ -63,7 +89,7 @@ export function getEvmExplorerAddressUrl(
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as EvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
@@ -82,7 +108,7 @@ export function getEvmExplorerTxUrl(txHash: string, networkConfig: NetworkConfig
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as EvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
@@ -128,19 +154,31 @@ export function validateEvmExplorerConfig(explorerConfig: UserExplorerConfig): b
  */
 export async function testEvmExplorerConnection(
   explorerConfig: UserExplorerConfig,
-  networkConfig?: EvmNetworkConfig
+  networkConfig?: TypedEvmNetworkConfig
 ): Promise<{
   success: boolean;
   latency?: number;
   error?: string;
 }> {
-  if (!explorerConfig.apiKey) {
+  // Check if API key is required for this network
+  const requiresApiKey =
+    networkConfig && 'requiresExplorerApiKey' in networkConfig
+      ? networkConfig.requiresExplorerApiKey !== false
+      : true;
+
+  if (requiresApiKey && !explorerConfig.apiKey) {
     return {
       success: false,
-      error: 'API key is required for testing connection',
+      error: 'API key is required for testing connection to this explorer',
     };
   }
 
+  // Check if we should use V2 API
+  if (networkConfig && shouldUseV2Api(networkConfig)) {
+    return testEtherscanV2Connection(networkConfig, explorerConfig.apiKey);
+  }
+
+  // Use V1 API (legacy)
   // Use provided API URL or fall back to network config if available
   let apiUrl = explorerConfig.apiUrl;
   if (!apiUrl && networkConfig?.apiUrl) {
@@ -162,7 +200,9 @@ export async function testEvmExplorerConnection(
     const url = new URL(apiUrl);
     url.searchParams.append('module', 'proxy');
     url.searchParams.append('action', 'eth_blockNumber');
-    url.searchParams.append('apikey', explorerConfig.apiKey);
+    if (explorerConfig.apiKey) {
+      url.searchParams.append('apikey', explorerConfig.apiKey);
+    }
 
     const response = await fetch(url.toString());
     const latency = Date.now() - startTime;
