@@ -85,7 +85,7 @@ jobs:
           pnpm changeset publish --tag rc --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
 
       - name: Update export versions for RC packages
