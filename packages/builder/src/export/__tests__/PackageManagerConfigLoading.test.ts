@@ -170,6 +170,60 @@ describe('PackageManager configuration loading', () => {
       );
     });
 
+    it('should apply correct versioning for staging environment', async () => {
+      const packageManager = new PackageManager(mockRendererConfig);
+      const formConfig = createMinimalFormConfig();
+      const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'func1',
+        { env: 'staging' }
+      );
+      const result = JSON.parse(updated);
+      // Should append -rc to managed versions for staging
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/-rc$/);
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/-rc$/);
+
+      // External dependencies should remain unchanged
+      expect(result.dependencies['react']).toBe('^19.0.0');
+    });
+
+    it('should handle three environments consistently', async () => {
+      const packageManager = new PackageManager(mockRendererConfig);
+      const formConfig = createMinimalFormConfig();
+      const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
+
+      // Test all three environments
+      const environments: Array<'local' | 'staging' | 'production'> = [
+        'local',
+        'staging',
+        'production',
+      ];
+      const results = await Promise.all(
+        environments.map((env) =>
+          packageManager.updatePackageJson(basePackageJson, formConfig, 'evm', 'func1', { env })
+        )
+      );
+
+      const [localResult, stagingResult, prodResult] = results.map((r) => JSON.parse(r));
+
+      // Check each environment has correct versioning strategy
+      expect(localResult.dependencies['@openzeppelin/contracts-ui-builder-types']).toBe(
+        'workspace:*'
+      );
+      expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
+        /-rc$/
+      );
+      expect(prodResult.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/^\^/);
+
+      // All should have same external dependencies
+      expect(localResult.dependencies['react']).toBe('^19.0.0');
+      expect(stagingResult.dependencies['react']).toBe('^19.0.0');
+      expect(prodResult.dependencies['react']).toBe('^19.0.0');
+    });
+
     it('should include upgrade instructions in package.json', async () => {
       const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig();
