@@ -35,8 +35,22 @@ export function useCompleteStepState() {
         const AppExportSystem = await AppExportSystemPromise;
         const exportSystem = new AppExportSystem();
 
+        // Determine export environment from build-time env var
+        // - 'local' for CLI/development: uses workspace:* (latest local code)
+        // - 'staging' for staging UI: uses RC versions (latest unpublished features)
+        // - 'production' for production: uses stable published package versions
+        //
+        // TRANSITION NOTE: Once packages are published to public npm,
+        // RC versions will be automatically available via standard npm install
+        const exportEnv = import.meta.env.VITE_EXPORT_ENV as
+          | 'local'
+          | 'staging'
+          | 'production'
+          | undefined;
+
         const exportOptions = {
           ecosystem: networkConfig.ecosystem,
+          env: exportEnv || 'production',
         };
 
         const result = await exportSystem.exportApp(

@@ -39,11 +39,12 @@ export interface TemplateOptions {
 
   /**
    * Target environment for dependencies
-   * - 'local': Uses workspace dependencies for local development
+   * - 'local': Uses workspace:* dependencies for local development
+   * - 'staging': Uses RC versions for QA testing latest features
    * - 'production': Uses published dependencies for production builds
-   * @default 'local'
+   * @default 'production'
    */
-  env?: 'local' | 'production';
+  env?: 'local' | 'staging' | 'production';
 }
 
 /**

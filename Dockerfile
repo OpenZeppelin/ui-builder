@@ -6,6 +6,13 @@ WORKDIR /builder
 # Set NODE_ENV to development to ensure devDependencies are installed for the build
 ENV NODE_ENV=development
 
+# Accept build argument for export environment
+# - 'local': workspace:* dependencies for CLI/development
+# - 'staging': RC versions for QA testing  
+# - 'production': stable published versions for users
+ARG VITE_EXPORT_ENV=production
+ENV VITE_EXPORT_ENV=$VITE_EXPORT_ENV
+
 # Install build dependencies required for native Node.js modules
 # node-gyp (used by some dependencies) requires python and build-essential
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'

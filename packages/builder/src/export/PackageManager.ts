@@ -406,16 +406,17 @@ export class PackageManager {
   /**
    * Applies the versioning strategy based on the environment.
    *
-   * - 'local': Uses 'workspace:*' for known internal packages.
-   * - 'production' (or undefined): Uses the versions defined in config (assumed published).
+   * - 'local': Uses workspace:* for local development
+   * - 'staging': Uses RC versions for QA testing latest features
+   * - 'production': Uses stable published versions
    *
    * @param dependencies Original dependencies object
-   * @param env The target environment ('local' or 'production')
+   * @param env The target environment ('local' | 'staging' | 'production')
    * @returns Dependencies object with versions adjusted based on strategy
    */
   private applyVersioningStrategy(
     dependencies: Record<string, string>,
-    env: 'local' | 'production' | undefined = 'production' // Default to 'production'
+    env: 'local' | 'staging' | 'production' | undefined = 'production' // Default to 'production'
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
     const internalPackages = new Set([
@@ -428,17 +429,31 @@ export class PackageManager {
     ]);
 
     for (const [pkgName, version] of Object.entries(dependencies)) {
-      if (internalPackages.has(pkgName) && env === 'local') {
-        updatedDependencies[pkgName] = 'workspace:*';
-      } else if (internalPackages.has(pkgName)) {
-        // For production, use the centrally-managed version
+      if (internalPackages.has(pkgName)) {
         const managedVersion = packageVersions[pkgName as keyof typeof packageVersions] || version;
-        if (managedVersion.startsWith('^') || managedVersion === 'workspace:*') {
-          updatedDependencies[pkgName] = managedVersion;
+
+        if (env === 'local') {
+          // Local development: Use workspace packages (current monorepo code)
+          updatedDependencies[pkgName] = 'workspace:*';
+        } else if (env === 'staging') {
+          // Staging: Use RC versions for testing latest features
+          // If managedVersion is already an RC version, use it as-is
+          // Otherwise, append -rc to create an RC version
+          if (managedVersion.includes('-rc')) {
+            updatedDependencies[pkgName] = managedVersion;
+          } else {
+            updatedDependencies[pkgName] = `${managedVersion}-rc`;
+          }
         } else {
-          updatedDependencies[pkgName] = `^${managedVersion}`;
+          // Production: Use stable published versions
+          if (managedVersion.startsWith('^') || managedVersion === 'workspace:*') {
+            updatedDependencies[pkgName] = managedVersion;
+          } else {
+            updatedDependencies[pkgName] = `^${managedVersion}`;
+          }
         }
       } else {
+        // External packages: use as-is
         updatedDependencies[pkgName] = version;
       }
     }
