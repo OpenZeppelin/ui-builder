@@ -11,6 +11,7 @@ const packagesToUpdate = [
   '@openzeppelin/contracts-ui-builder-adapter-stellar',
   '@openzeppelin/contracts-ui-builder-react-core',
   '@openzeppelin/contracts-ui-builder-renderer',
+  '@openzeppelin/contracts-ui-builder-storage',
   '@openzeppelin/contracts-ui-builder-types',
   '@openzeppelin/contracts-ui-builder-ui',
   '@openzeppelin/contracts-ui-builder-utils',

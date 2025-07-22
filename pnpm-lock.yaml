@@ -308,6 +308,9 @@ importers:
       '@openzeppelin/contracts-ui-builder-renderer':
         specifier: workspace:*
         version: link:../renderer
+      '@openzeppelin/contracts-ui-builder-storage':
+        specifier: workspace:^
+        version: link:../storage
       '@openzeppelin/contracts-ui-builder-styles':
         specifier: workspace:*
         version: link:../styles

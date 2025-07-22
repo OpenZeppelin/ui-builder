@@ -421,6 +421,7 @@ export class PackageManager {
     const updatedDependencies: Record<string, string> = {};
     const internalPackages = new Set([
       '@openzeppelin/contracts-ui-builder-renderer',
+      '@openzeppelin/contracts-ui-builder-storage',
       '@openzeppelin/contracts-ui-builder-types',
       '@openzeppelin/contracts-ui-builder-utils',
       '@openzeppelin/contracts-ui-builder-ui',

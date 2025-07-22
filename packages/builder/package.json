@@ -39,6 +39,7 @@
     "@openzeppelin/contracts-ui-builder-adapter-stellar": "workspace:*",
     "@openzeppelin/contracts-ui-builder-react-core": "workspace:*",
     "@openzeppelin/contracts-ui-builder-renderer": "workspace:*",
+    "@openzeppelin/contracts-ui-builder-storage": "workspace:^",
     "@openzeppelin/contracts-ui-builder-styles": "workspace:*",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
@@ -54,6 +55,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.81.2",
     "@types/jszip": "^3.4.1",
     "@uiw/react-textarea-code-editor": "^3.1.1",
@@ -72,8 +74,7 @@
     "uuid": "^11.1.0",
     "viem": "^2.31.4",
     "wagmi": "^2.15.6",
-    "zod": "^3.25.67",
-    "@rainbow-me/rainbowkit": "^2.2.8"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
