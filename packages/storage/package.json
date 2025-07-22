@@ -1,0 +1,67 @@
+{
+  "name": "@openzeppelin/contracts-ui-builder-storage",
+  "version": "0.2.0",
+  "private": false,
+  "description": "Local storage services for the OpenZeppelin Contracts UI Builder ecosystem.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc"
+  },
+  "keywords": [
+    "storage",
+    "indexeddb",
+    "dexie",
+    "blockchain",
+    "typescript"
+  ],
+  "author": "OpenZeppelin",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "fake-indexeddb": "^6.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "sonner": "^2.0.5"
+  }
+}
