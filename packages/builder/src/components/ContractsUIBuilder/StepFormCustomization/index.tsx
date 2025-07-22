@@ -1,5 +1,4 @@
 import { FormInput } from 'lucide-react';
-
 import { useEffect, useMemo } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
@@ -25,12 +24,12 @@ import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 import { ensureCompleteConfig } from './utils/executionUtils';
 
+import { UiKitSettings } from './components';
 import { ExecutionMethodSettings } from './ExecutionMethodSettings';
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
-import { UiKitSettings } from './components';
 
 // TODO: Enhance the UiKitSettings component to support more advanced options from UiKitConfiguration,
 // such as `showInjectedConnector` and component exclusions (e.g., hiding NetworkSwitcher).

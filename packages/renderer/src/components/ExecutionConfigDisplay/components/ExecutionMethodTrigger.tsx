@@ -1,5 +1,4 @@
 import { AlertCircle, Info, Key, Shield, User, Users } from 'lucide-react';
-
 import React from 'react';
 
 import type { ExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';

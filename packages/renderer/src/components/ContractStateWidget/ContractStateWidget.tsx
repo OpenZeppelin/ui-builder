@@ -1,5 +1,4 @@
 import { FileText, Loader2, Minimize2 } from 'lucide-react';
-
 import { JSX, useEffect, useState } from 'react';
 
 import type {

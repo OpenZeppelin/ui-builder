@@ -6,14 +6,14 @@
  */
 import {
   EvmNetworkConfig,
-  MidnightNetworkConfig,
-  NetworkConfig,
-  SolanaNetworkConfig,
-  StellarNetworkConfig,
   isEvmNetworkConfig,
   isMidnightNetworkConfig,
   isSolanaNetworkConfig,
   isStellarNetworkConfig,
+  MidnightNetworkConfig,
+  NetworkConfig,
+  SolanaNetworkConfig,
+  StellarNetworkConfig,
 } from './config';
 
 /**

@@ -1,5 +1,4 @@
 import { Download, Eye, Pencil } from 'lucide-react';
-
 import React from 'react';
 
 import { ContractActionBar } from '@openzeppelin/contracts-ui-builder-renderer';

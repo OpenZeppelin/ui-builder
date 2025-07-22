@@ -8,7 +8,6 @@
 /*------------TEMPLATE COMMENT END------------*/
 // @ts-expect-error - This is a placeholder for the correct adapter import
 import { AdapterPlaceholder, NetworkConfigPlaceholder } from '@@adapter-package-name@@';
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -26,6 +25,7 @@ import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-uti
 
 // @ts-expect-error - this is a template file, so we don't have to worry about this import
 import { App } from './App';
+
 import './styles.css';
 
 /*------------TEMPLATE COMMENT START------------*/

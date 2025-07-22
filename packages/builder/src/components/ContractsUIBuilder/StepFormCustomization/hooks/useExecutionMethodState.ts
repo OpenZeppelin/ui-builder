@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { UseFormReturn, WatchObserver, useForm } from 'react-hook-form';
+import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
 import type {
   ContractAdapter,

@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 
 // Import logger
 import {
-  type ZipExtractionTestCallback,
   extractFilesFromZip,
   validateExportedProject,
+  type ZipExtractionTestCallback,
 } from '../zipInspector';
 
 // Helper to create a test ZIP blob

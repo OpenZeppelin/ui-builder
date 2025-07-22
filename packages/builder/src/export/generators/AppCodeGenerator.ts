@@ -11,11 +11,11 @@ import { adapterPackageMap } from '../../core/ecosystemManager';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
-import { TemplateManager } from '../TemplateManager';
 import type {
   AppComponentTemplateParams,
   FormComponentTemplateParams,
 } from '../codeTemplates/TemplateTypes';
+import { TemplateManager } from '../TemplateManager';
 
 import { TemplateProcessor } from './TemplateProcessor';
 

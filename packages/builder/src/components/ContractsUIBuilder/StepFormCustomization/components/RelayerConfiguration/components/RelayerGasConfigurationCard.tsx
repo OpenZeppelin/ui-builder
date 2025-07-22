@@ -1,5 +1,4 @@
 import { CheckCircle, Zap } from 'lucide-react';
-
 import React from 'react';
 
 import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';

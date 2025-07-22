@@ -6,9 +6,6 @@
  */
 import { injected, metaMask, safe, walletConnect } from '@wagmi/connectors';
 import {
-  type Config,
-  type GetAccountReturnType,
-  type CreateConnectorFn as WagmiCreateConnectorFn,
   connect,
   createConfig,
   disconnect,
@@ -17,8 +14,11 @@ import {
   getWalletClient as getWagmiWalletClient,
   switchChain,
   watchAccount,
+  type Config,
+  type GetAccountReturnType,
+  type CreateConnectorFn as WagmiCreateConnectorFn,
 } from '@wagmi/core';
-import { type Chain, PublicClient, WalletClient, http } from 'viem';
+import { http, PublicClient, WalletClient, type Chain } from 'viem';
 
 import type { Connector, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';

@@ -8,7 +8,6 @@ import {
   Network,
   Timer,
 } from 'lucide-react';
-
 import React from 'react';
 
 import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/contracts-ui-builder-types';

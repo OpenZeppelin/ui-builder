@@ -9,7 +9,7 @@ import {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
+import { uiBuilderStore, type BuilderFormConfig } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 

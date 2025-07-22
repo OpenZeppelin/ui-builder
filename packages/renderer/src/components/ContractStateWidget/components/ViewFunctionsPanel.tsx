@@ -1,5 +1,4 @@
 import { RefreshCw } from 'lucide-react';
-
 import { JSX, useCallback, useEffect, useState } from 'react';
 
 import type {
@@ -9,11 +8,11 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import {
-  type RpcConfigEvent,
   cn,
   logger,
   rateLimitedBatch,
   userRpcConfigService,
+  type RpcConfigEvent,
 } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { FunctionResult } from './FunctionResult';

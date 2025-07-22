@@ -1,5 +1,4 @@
 import { Key, User } from 'lucide-react';
-
 import React from 'react';
 
 import type { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';

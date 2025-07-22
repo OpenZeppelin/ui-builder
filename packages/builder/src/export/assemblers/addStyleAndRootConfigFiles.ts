@@ -1,7 +1,7 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import type { StyleManager } from '../StyleManager';
 import type { TemplateProcessor } from '../generators/TemplateProcessor';
+import type { StyleManager } from '../StyleManager';
 import { modifyTailwindConfigContentForExport } from '../utils/tailwindUtils';
 
 /**

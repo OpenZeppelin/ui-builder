@@ -1,5 +1,4 @@
 import { NetworkIcon } from '@web3icons/react';
-
 import React from 'react';
 
 import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';

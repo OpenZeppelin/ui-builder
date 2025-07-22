@@ -1,5 +1,4 @@
 import { Loader2, Wallet } from 'lucide-react';
-
 import React, { useEffect, useState } from 'react';
 
 import {

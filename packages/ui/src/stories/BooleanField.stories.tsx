@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { BooleanField } from '../components/fields/BooleanField';

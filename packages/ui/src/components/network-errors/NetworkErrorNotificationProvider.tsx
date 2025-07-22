@@ -1,7 +1,6 @@
 'use client';
 
 import { toast } from 'sonner';
-
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { NetworkErrorContext } from './NetworkErrorContext';

@@ -1,5 +1,4 @@
 import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
-
 import { createContext } from 'react';
 
 /**

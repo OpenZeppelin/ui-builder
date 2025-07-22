@@ -1,5 +1,4 @@
 import { LogOut } from 'lucide-react';
-
 import React from 'react';
 
 import {
