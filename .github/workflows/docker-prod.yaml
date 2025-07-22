@@ -61,6 +61,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VITE_EXPORT_ENV=production
+            VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=${{ secrets.VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY }}
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
 

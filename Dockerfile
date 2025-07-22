@@ -13,6 +13,10 @@ ENV NODE_ENV=development
 ARG VITE_EXPORT_ENV=production
 ENV VITE_EXPORT_ENV=$VITE_EXPORT_ENV
 
+# Accept build argument for Etherscan V2 API key
+ARG VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY
+ENV VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=$VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY
+
 # Install build dependencies required for native Node.js modules
 # node-gyp (used by some dependencies) requires python and build-essential
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
