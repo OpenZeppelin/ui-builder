@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.1.6
+
+### Patch Changes
+
+- [#60](https://github.com/OpenZeppelin/contracts-ui-builder/pull/60) [`c8cafd4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/c8cafd4bb8ba927c443f799e29700dbe6ca7c995) Thanks [@pasevin](https://github.com/pasevin)! - handle rc publishing for staging environment
+
 ## 0.1.5
 
 ### Patch Changes
