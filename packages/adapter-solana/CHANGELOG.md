@@ -1,5 +1,13 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479)]:
+  - @openzeppelin/contracts-ui-builder-types@0.2.1
+  - @openzeppelin/contracts-ui-builder-utils@0.2.1
+
 ## 0.0.3
 
 ### Patch Changes
