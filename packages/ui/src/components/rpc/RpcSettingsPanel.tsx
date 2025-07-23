@@ -1,7 +1,6 @@
 'use client';
 
 import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
-
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 

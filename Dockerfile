@@ -13,6 +13,8 @@ ENV NODE_ENV=development
 ARG VITE_EXPORT_ENV=production
 ENV VITE_EXPORT_ENV=$VITE_EXPORT_ENV
 
+
+
 # Install build dependencies required for native Node.js modules
 # node-gyp (used by some dependencies) requires python and build-essential
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
@@ -39,8 +41,16 @@ RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
            rm .npmrc'
 
 # Build all packages in the correct order
-# This ensures workspace dependencies are built before the main application
-RUN NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build
+# This step now uses Docker BuildKit secrets to securely pass the Etherscan API key
+# The secret is only available during this RUN command and won't be stored in the image
+RUN --mount=type=secret,id=etherscan_api_key \
+    sh -c 'if [ -f /run/secrets/etherscan_api_key ]; then \
+        export VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=$(cat /run/secrets/etherscan_api_key) && \
+        NODE_OPTIONS="--max-old-space-size=8192" pnpm -r build; \
+    else \
+        echo "Warning: Building without Etherscan API key" && \
+        NODE_OPTIONS="--max-old-space-size=8192" pnpm -r build; \
+    fi'
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:20-slim AS runner

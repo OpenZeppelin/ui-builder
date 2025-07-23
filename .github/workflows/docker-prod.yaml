@@ -63,6 +63,7 @@ jobs:
             VITE_EXPORT_ENV=production
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
+            etherscan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY }}
 
   deploy:
     runs-on: ubuntu-latest

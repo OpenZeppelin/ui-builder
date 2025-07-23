@@ -1,13 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Config as WagmiConfig, WagmiProvider } from 'wagmi';
-
+import { WagmiProvider, type Config as WagmiConfig } from 'wagmi';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
-import { type EvmUiKitManagerState, evmUiKitManager } from '../evmUiKitManager';
+import { evmUiKitManager, type EvmUiKitManagerState } from '../evmUiKitManager';
 import type { RainbowKitKitConfig, RainbowKitProviderProps } from '../rainbowkit';
 
 // Create a single QueryClient instance to be reused by EvmWalletUiRoot instances.

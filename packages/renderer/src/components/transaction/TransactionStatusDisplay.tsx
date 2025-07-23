@@ -1,5 +1,4 @@
 import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
-
 import React from 'react';
 
 import type { TxStatus } from '@openzeppelin/contracts-ui-builder-types';

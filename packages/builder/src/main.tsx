@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import App from './App';
+
 import './index.css';
 
 async function main() {

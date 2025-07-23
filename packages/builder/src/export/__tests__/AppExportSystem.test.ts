@@ -10,13 +10,13 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { AppExportSystem } from '../AppExportSystem';
+import { AppCodeGenerator } from '../generators/AppCodeGenerator';
+import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { PackageManager } from '../PackageManager';
 import { StyleManager } from '../StyleManager';
 import { TemplateManager } from '../TemplateManager';
-import { ZipGenerator } from '../ZipGenerator';
-import { AppCodeGenerator } from '../generators/AppCodeGenerator';
-import { TemplateProcessor } from '../generators/TemplateProcessor';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
+import { ZipGenerator } from '../ZipGenerator';
 
 // Mock RendererConfig (define before use)
 interface MockRendererConfig {

@@ -1,5 +1,4 @@
 import { Loader2, Wallet } from 'lucide-react';
-
 import React from 'react';
 
 import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';

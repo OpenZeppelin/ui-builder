@@ -10,12 +10,12 @@ import {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
-  type ApiResponseRelayerResponseData,
   Configuration,
-  type EvmTransactionRequest,
-  type EvmTransactionResponse,
   RelayersApi,
   Speed,
+  type ApiResponseRelayerResponseData,
+  type EvmTransactionRequest,
+  type EvmTransactionResponse,
 } from '@openzeppelin/relayer-sdk';
 
 import { TypedEvmNetworkConfig, WriteContractParameters } from '../types';

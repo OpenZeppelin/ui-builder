@@ -28,9 +28,9 @@ import { isMidnightNetworkConfig } from '@openzeppelin/contracts-ui-builder-type
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { parseMidnightContractInterface } from './utils/schema-parser';
-import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
+import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
 import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 

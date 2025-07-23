@@ -10,8 +10,8 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 import { useAdapterContext } from './useAdapterContext';
+import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';
 
 // Extended adapter interface that includes the callback-based configureUiKit method
 interface ExtendedContractAdapter extends ContractAdapter {

@@ -16,9 +16,9 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
 "import {
-  WalletConnectionWithSettings,
   useDerivedAccountStatus,
   useWalletState,
+  WalletConnectionWithSettings,
 } from '@openzeppelin/contracts-ui-builder-react-core';
 
 import GeneratedForm from './components/GeneratedForm';

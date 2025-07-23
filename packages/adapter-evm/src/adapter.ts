@@ -1,6 +1,5 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import { type TransactionReceipt } from 'viem';
-
 import React from 'react';
 
 import type {
@@ -70,8 +69,8 @@ import {
   EoaExecutionStrategy,
   EvmRelayerOptions,
   ExecutionStrategy,
-  RelayerExecutionStrategy,
   formatEvmTransactionData,
+  RelayerExecutionStrategy,
   waitForEvmTransactionConfirmation,
 } from './transaction';
 import { formatEvmFunctionResult } from './transform';

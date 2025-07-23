@@ -1,5 +1,4 @@
 import { toast } from 'sonner';
-
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
@@ -18,7 +17,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { loadContractDefinition } from '../../../services/ContractLoader';
 
-import { type BuilderFormConfig, uiBuilderStore } from './uiBuilderStore';
+import { uiBuilderStore, type BuilderFormConfig } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 

@@ -1,6 +1,5 @@
 import { Loader2 } from 'lucide-react';
 import type { Chain } from 'viem';
-
 import React from 'react';
 
 import {

@@ -5,8 +5,8 @@
  * This test file can be run with specific environment variables to export a form with the desired configuration.
  */
 import fs from 'fs';
-import JSZip from 'jszip';
 import path from 'path';
+import JSZip from 'jszip';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
@@ -18,12 +18,12 @@ import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemMana
 // import { solanaDevnet } from '@openzeppelin/contracts-ui-builder-adapter-solana';
 
 import { AppExportSystem } from '../AppExportSystem';
-import { ZipProgress } from '../ZipGenerator';
 import {
   createComplexFormConfig,
   createMinimalContractSchema,
   createMinimalFormConfig,
 } from '../utils/testConfig';
+import { ZipProgress } from '../ZipGenerator';
 
 // Keep track of created files for cleanup
 const createdFiles: string[] = [];

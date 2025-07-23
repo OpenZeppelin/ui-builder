@@ -1,5 +1,4 @@
 import { CircleHelp } from 'lucide-react';
-
 import { ReactNode } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';

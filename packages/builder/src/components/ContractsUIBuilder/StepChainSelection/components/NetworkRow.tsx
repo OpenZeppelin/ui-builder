@@ -6,7 +6,7 @@ import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
-import { ICON_SIZE, getNetworkIconName } from '../utils/utils';
+import { getNetworkIconName, ICON_SIZE } from '../utils/utils';
 
 import { NetworkDetail } from './NetworkDetail';
 

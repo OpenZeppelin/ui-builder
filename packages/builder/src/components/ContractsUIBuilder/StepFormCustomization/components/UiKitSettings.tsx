@@ -1,6 +1,5 @@
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import { Settings } from 'lucide-react';
-
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 

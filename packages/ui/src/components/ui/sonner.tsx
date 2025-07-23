@@ -1,6 +1,5 @@
 import { useTheme } from 'next-themes';
 import { Toaster as Sonner, ToasterProps } from 'sonner';
-
 import { JSX } from 'react';
 
 const Toaster = ({ ...props }: ToasterProps): JSX.Element => {
