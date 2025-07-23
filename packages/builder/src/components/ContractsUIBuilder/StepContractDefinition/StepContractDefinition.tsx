@@ -30,6 +30,8 @@ export function StepContractDefinition({
   const loadingRef = useRef(false);
   const [lastAttempted, setLastAttempted] = useState<string | null>(null);
   const previousNetworkIdRef = useRef<string | null>(networkConfig?.id || null);
+  // Track when we're restoring from existing data to prevent auto-loading
+  const isRestoringRef = useRef(false);
 
   const contractDefinitionInputs = useMemo(
     () => (adapter ? adapter.getContractDefinitionInputs() : []),
@@ -46,8 +48,12 @@ export function StepContractDefinition({
   // Restore form values when existingContractSchema and existingFormValues are provided
   useEffect(() => {
     if (existingContractSchema && existingFormValues) {
+      // Set flag to prevent auto-loading during restoration
+      isRestoringRef.current = true;
       setLoadedSchema(existingContractSchema);
       reset(existingFormValues);
+      // Mark this attempt as already processed to prevent auto-loading
+      setLastAttempted(JSON.stringify(existingFormValues));
       logger.info(
         'StepContractDefinition',
         'Restored form values from parent state:',
@@ -68,6 +74,7 @@ export function StepContractDefinition({
       setError(null);
       setLastAttempted(null);
       reset({});
+      isRestoringRef.current = false;
     }
 
     previousNetworkIdRef.current = currentNetworkId;
@@ -114,6 +121,15 @@ export function StepContractDefinition({
 
   useEffect(() => {
     const attemptAutomaticLoad = async () => {
+      // Skip auto-loading if we're currently restoring from existing data.
+      // The ref is true only for the first load cycle after restoration.
+      // We block the load here and reset the flag for subsequent user-driven changes.
+      if (isRestoringRef.current) {
+        logger.info('StepContractDefinition', 'Skipping auto-load during data restoration');
+        isRestoringRef.current = false;
+        return;
+      }
+
       // Only auto-load if all fields are valid and it's not a manual submission
       if (!adapter || !formState.isValid || loadingRef.current) {
         return;

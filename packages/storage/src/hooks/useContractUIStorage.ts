@@ -53,9 +53,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     async (id: string, updates: Partial<ContractUIRecord>): Promise<void> => {
       try {
         await contractUIStorage.update(id, updates);
-        toast.success('Configuration updated', {
-          description: 'Your changes have been saved.',
-        });
       } catch (error) {
         toast.error('Failed to update', {
           description: error instanceof Error ? error.message : 'Unknown error occurred',

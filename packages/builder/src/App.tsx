@@ -20,19 +20,23 @@ const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
 
 // Separate component to access builder state
 function AppContent() {
-  const { handleLoadContractUI, handleCreateNewContractUI } = useUIBuilderState();
+  const {
+    actions: {
+      lifecycle: { load, createNew },
+    },
+  } = useUIBuilderState();
 
   const handleLoad = useCallback(
     (id: string) => {
-      void handleLoadContractUI(id);
+      void load(id);
     },
-    [handleLoadContractUI]
+    [load]
   );
 
   return (
     <div className="bg-background text-foreground min-h-screen flex">
       {/* Global Sidebar */}
-      <AppSidebar onLoadContractUI={handleLoad} onCreateNew={handleCreateNewContractUI} />
+      <AppSidebar onLoadContractUI={handleLoad} onCreateNew={createNew} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

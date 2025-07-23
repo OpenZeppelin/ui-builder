@@ -16,7 +16,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         throw new Error('Configuration not found');
       }
 
-      const { id: _, createdAt, updatedAt, ...recordData } = original;
+      const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = original;
       const newTitle = `${original.title} (Copy)`;
 
       return await this.save({
@@ -72,7 +72,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       const importedIds: string[] = [];
 
       for (const config of data.configurations) {
-        const { id: _, createdAt, updatedAt, ...recordData } = config;
+        const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = config;
         const newId = await this.save(recordData);
         importedIds.push(newId);
       }
