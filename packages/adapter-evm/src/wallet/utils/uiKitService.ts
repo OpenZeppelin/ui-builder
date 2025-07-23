@@ -39,7 +39,7 @@ export function getResolvedWalletComponents(
   }
 
   const exclusions = getComponentExclusionsFromConfig(uiKitConfiguration.kitConfig);
-  logger.info(
+  logger.debug(
     'uiKitService',
     `Extracted component exclusions for ${currentKitName}: ${exclusions.join(', ') || 'none'}.`
   );

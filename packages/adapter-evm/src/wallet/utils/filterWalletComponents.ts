@@ -17,7 +17,7 @@ export function filterWalletComponents(
   exclusions: Array<keyof EcosystemWalletComponents>,
   kitName: string = 'custom' // Default to custom for logging context
 ): EcosystemWalletComponents | undefined {
-  logger.info(
+  logger.debug(
     'filterWalletComponents',
     `Filtering components for kit: ${kitName}. Exclusions: ${exclusions.join(', ')}.`
   );
@@ -49,7 +49,7 @@ export function filterWalletComponents(
   }
 
   if (componentCount > 0) {
-    logger.info(
+    logger.debug(
       'filterWalletComponents',
       `Providing filtered components for kit: ${kitName} after exclusions (${exclusions.join(', ')}).`,
       filteredComponents
@@ -57,7 +57,7 @@ export function filterWalletComponents(
     return filteredComponents as EcosystemWalletComponents;
   }
 
-  logger.info('filterWalletComponents', `All components were excluded for kit: ${kitName}.`);
+  logger.debug('filterWalletComponents', `All components were excluded for kit: ${kitName}.`);
   return undefined;
 }
 
