@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn, logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -35,36 +35,34 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
     });
   }, [activeAdapter, walletFacadeHooks]);
 
-  // Get wallet components from adapter if available
-  if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
-    logger.debug(
-      'WalletConnectionUI',
-      '[Debug] No activeAdapter or getEcosystemWalletComponents method, rendering null.'
-    );
-    return null;
-  }
-
-  let walletComponents;
-  try {
-    walletComponents = activeAdapter.getEcosystemWalletComponents();
-    logger.debug('WalletConnectionUI', '[Debug] walletComponents from adapter:', walletComponents);
-    if (!walletComponents) {
+  // Memoize wallet components to avoid repeated calls on every render
+  const walletComponents = useMemo(() => {
+    // Get wallet components from adapter if available
+    if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
       logger.debug(
         'WalletConnectionUI',
-        '[Debug] getEcosystemWalletComponents returned null/undefined, rendering null.'
+        '[Debug] No activeAdapter or getEcosystemWalletComponents method, returning null.'
       );
       return null;
     }
-  } catch (error) {
-    logger.error('WalletConnectionUI', '[Debug] Error getting wallet components:', error);
-    setIsError(true);
-    return (
-      <div className={cn('flex items-center gap-4', className)}>
-        <Button variant="destructive" size="sm" onClick={() => window.location.reload()}>
-          Wallet Error - Retry
-        </Button>
-      </div>
+
+    try {
+      const components = activeAdapter.getEcosystemWalletComponents();
+      logger.debug('WalletConnectionUI', '[Debug] walletComponents from adapter:', components);
+      return components;
+    } catch (error) {
+      logger.error('WalletConnectionUI', '[Debug] Error getting wallet components:', error);
+      setIsError(true);
+      return null;
+    }
+  }, [activeAdapter]); // Only re-compute when activeAdapter changes
+
+  if (!walletComponents) {
+    logger.debug(
+      'WalletConnectionUI',
+      '[Debug] getEcosystemWalletComponents returned null/undefined, rendering null.'
     );
+    return null;
   }
 
   // Log available components for debugging
