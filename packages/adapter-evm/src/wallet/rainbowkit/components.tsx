@@ -1,5 +1,4 @@
 import { Loader2 } from 'lucide-react';
-
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';

@@ -12,9 +12,9 @@ import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
 import { HeroSection } from './HeroSection';
+import { useUIBuilderState } from './hooks';
 import { StepComplete } from './StepComplete';
 import { StepContractDefinition } from './StepContractDefinition';
-import { useUIBuilderState } from './hooks';
 
 /**
  * Main builder app wizard component.

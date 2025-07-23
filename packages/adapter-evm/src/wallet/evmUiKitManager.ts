@@ -1,5 +1,4 @@
 import type { Config as WagmiConfig } from '@wagmi/core';
-
 import type React from 'react';
 
 import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';

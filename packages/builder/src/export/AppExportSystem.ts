@@ -21,10 +21,6 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
 import type { AppCodeGenerator } from './generators/AppCodeGenerator';
 import type { TemplateProcessor } from './generators/TemplateProcessor';
 
-import type { PackageManager } from './PackageManager';
-import type { StyleManager } from './StyleManager';
-import type { TemplateManager } from './TemplateManager';
-import type { ZipGenerator, ZipProgress } from './ZipGenerator';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
@@ -32,6 +28,10 @@ import {
   generateAndAddAppConfig,
   updatePackageJsonFile,
 } from './assemblers';
+import type { PackageManager } from './PackageManager';
+import type { StyleManager } from './StyleManager';
+import type { TemplateManager } from './TemplateManager';
+import type { ZipGenerator, ZipProgress } from './ZipGenerator';
 
 // Define an interface for constructor dependencies (optional)
 interface AppExportSystemDependencies {

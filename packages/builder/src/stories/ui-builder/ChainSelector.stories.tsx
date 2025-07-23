@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from '@storybook/react';
-
 import { useState } from 'react';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';

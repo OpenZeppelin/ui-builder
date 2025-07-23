@@ -1,5 +1,4 @@
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react';
-
 import React from 'react';
 
 interface TransactionHashDisplayProps {

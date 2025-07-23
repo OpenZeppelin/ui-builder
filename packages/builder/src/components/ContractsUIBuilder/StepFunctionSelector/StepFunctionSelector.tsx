@@ -5,8 +5,8 @@ import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
 
 import { FilterControls } from './FilterControls';
-import { WritableFunctionsSection } from './WritableFunctionsSection';
 import { StepFunctionSelectorProps } from './types';
+import { WritableFunctionsSection } from './WritableFunctionsSection';
 
 export function StepFunctionSelector({
   contractSchema,

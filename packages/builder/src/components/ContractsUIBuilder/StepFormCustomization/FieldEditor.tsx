@@ -8,8 +8,8 @@ import { getFieldTypeGroups } from './utils/fieldTypeUtils';
 
 import { FieldAdvancedSettings } from './FieldAdvancedSettings';
 import { FieldBasicSettings } from './FieldBasicSettings';
-import { TypeWarningSection } from './TypeWarningSection';
 import { FieldEditorFormValues } from './types';
+import { TypeWarningSection } from './TypeWarningSection';
 import { initializeFormValues } from './utils';
 
 interface FieldEditorProps {

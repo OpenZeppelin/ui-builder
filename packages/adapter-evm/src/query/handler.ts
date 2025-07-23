@@ -1,4 +1,4 @@
-import { type Chain, type PublicClient, createPublicClient, http, isAddress } from 'viem';
+import { createPublicClient, http, isAddress, type Chain, type PublicClient } from 'viem';
 
 import type { ContractSchema, FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';

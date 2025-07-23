@@ -2,9 +2,9 @@ import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
-  type EcosystemFeatureConfig,
   getAvailableEcosystems,
   getEcosystemDefaultFeatureConfig,
+  type EcosystemFeatureConfig,
 } from '../core/ecosystems/registry';
 
 /**

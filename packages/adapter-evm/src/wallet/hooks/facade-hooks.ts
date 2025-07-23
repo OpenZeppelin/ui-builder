@@ -1,15 +1,4 @@
 import {
-  type UseAccountReturnType,
-  type UseBalanceReturnType,
-  type UseChainIdReturnType,
-  type UseChainsReturnType,
-  type UseConnectReturnType,
-  type UseDisconnectReturnType,
-  type UseSendTransactionReturnType,
-  type UseSignMessageReturnType,
-  type UseSignTypedDataReturnType,
-  type UseSwitchChainReturnType,
-  type UseWaitForTransactionReceiptReturnType,
   useAccount,
   useBalance,
   useChainId,
@@ -21,6 +10,17 @@ import {
   useSignTypedData,
   useSwitchChain,
   useWaitForTransactionReceipt,
+  type UseAccountReturnType,
+  type UseBalanceReturnType,
+  type UseChainIdReturnType,
+  type UseChainsReturnType,
+  type UseConnectReturnType,
+  type UseDisconnectReturnType,
+  type UseSendTransactionReturnType,
+  type UseSignMessageReturnType,
+  type UseSignTypedDataReturnType,
+  type UseSwitchChainReturnType,
+  type UseWaitForTransactionReceiptReturnType,
 } from 'wagmi';
 
 import type { EcosystemSpecificReactHooks } from '@openzeppelin/contracts-ui-builder-types';

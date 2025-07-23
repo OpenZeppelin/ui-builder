@@ -7,9 +7,9 @@
  */
 /*------------TEMPLATE COMMENT END------------*/
 import {
-  WalletConnectionWithSettings,
   useDerivedAccountStatus,
   useWalletState,
+  WalletConnectionWithSettings,
 } from '@openzeppelin/contracts-ui-builder-react-core';
 
 // @ts-expect-error - This import will be processed during code generation
