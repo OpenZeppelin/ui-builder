@@ -103,6 +103,29 @@ export function useUIBuilderState() {
             // Set auto-saving state
             uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
 
+            // Check if this is an update and if the title was manually set
+            let titleToUse: string;
+            if (shouldUpdate && configId) {
+              // For updates, check if the title was manually renamed
+              const existingConfig = await contractUIStorage.get(configId);
+              const isManuallyRenamed = existingConfig?.metadata?.isManuallyRenamed === true;
+
+              if (isManuallyRenamed && existingConfig?.title) {
+                // Preserve the manually set title
+                titleToUse = existingConfig.title;
+              } else {
+                // Use the form title if not manually renamed
+                titleToUse =
+                  currentState.formConfig?.title ||
+                  `${currentState.contractAddress?.slice(0, 6) || 'New'}...${currentState.contractAddress?.slice(-4) || 'UI'} - ${currentState.selectedFunction || 'Contract'}`;
+              }
+            } else {
+              // For new configs, always use the form title
+              titleToUse =
+                currentState.formConfig?.title ||
+                `${currentState.contractAddress?.slice(0, 6) || 'New'}...${currentState.contractAddress?.slice(-4) || 'UI'} - ${currentState.selectedFunction || 'Contract'}`;
+            }
+
             // Convert BuilderFormConfig to RenderFormSchema format
             const formConfig = {
               ...currentState.formConfig,
@@ -130,9 +153,7 @@ export function useUIBuilderState() {
             };
 
             const configToSave = {
-              title:
-                currentState.formConfig?.title ||
-                `${currentState.contractAddress?.slice(0, 6) || 'New'}...${currentState.contractAddress?.slice(-4) || 'UI'} - ${currentState.selectedFunction || 'Contract'}`,
+              title: titleToUse,
               ecosystem: currentState.selectedEcosystem || 'evm',
               networkId: currentState.selectedNetworkConfigId || '',
               contractAddress: currentState.contractAddress || '',

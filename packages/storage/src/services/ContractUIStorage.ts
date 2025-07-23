@@ -22,6 +22,10 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       return await this.save({
         ...recordData,
         title: newTitle,
+        metadata: {
+          ...recordData.metadata,
+          isManuallyRenamed: false, // Reset the manual rename flag for duplicates
+        },
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

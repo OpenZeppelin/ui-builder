@@ -98,7 +98,12 @@ export default function ContractUIsList({
             onLoad={() => onLoadContractUI?.(contractUI.id)}
             onDelete={() => deleteContractUI(contractUI.id)}
             onDuplicate={() => duplicateContractUI(contractUI.id)}
-            onRename={(newTitle) => updateContractUI(contractUI.id, { title: newTitle })}
+            onRename={(newTitle) =>
+              updateContractUI(contractUI.id, {
+                title: newTitle,
+                metadata: { ...contractUI.metadata, isManuallyRenamed: true },
+              })
+            }
             onExport={() => exportContractUIs([contractUI.id])}
           />
         ))}
