@@ -1,6 +1,9 @@
+import { Loader2 } from 'lucide-react';
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ContractStateWidget } from '@openzeppelin/contracts-ui-builder-renderer';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';
@@ -46,6 +49,8 @@ export function ContractsUIBuilder() {
     toggleWidget,
     exportApp,
     clearNetworkToSwitchTo,
+    isLoadingConfiguration,
+    isAutoSaving,
   } = useUIBuilderState();
 
   // Track network switching state
@@ -58,8 +63,8 @@ export function ContractsUIBuilder() {
   const hasInitializedNetworkRef = useRef(false);
 
   // Custom handler for network selection that directly signals a network switch
-  const handleNetworkSelection = (networkId: string | null) => {
-    logger.info('ContractsUIBuilder', `🔀 Network selected: ${networkId}`);
+  const handleNetworkSelection = (ecosystem: Ecosystem, networkId: string | null) => {
+    logger.info('ContractsUIBuilder', `🔀 Network selected: ${ecosystem}/${networkId}`);
 
     // If there's a previous network and we're selecting a new one, set it as the network to switch to
     // OR if this is the first network selection (initial load)
@@ -83,8 +88,8 @@ export function ContractsUIBuilder() {
     // Update our cached latest network ID
     latestNetworkIdRef.current = networkId;
 
-    // Call the original handler from the hook
-    handleNetworkSelect(networkId);
+    // Call the original handler from the hook with both ecosystem and networkId
+    void handleNetworkSelect(ecosystem, networkId);
 
     // Note: Auto-navigation is now handled in useUIBuilderState via the pendingNetworkId state
   };
@@ -255,9 +260,7 @@ export function ContractsUIBuilder() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl py-8">
-      {/* Network switch manager to handle wallet network switching 
-          Only mount when adapter is ready and matches the networkToSwitchTo */}
+    <>
       {shouldMountNetworkSwitcher && selectedAdapter && networkToSwitchTo && (
         <NetworkSwitchManager
           adapter={selectedAdapter}
@@ -266,17 +269,37 @@ export function ContractsUIBuilder() {
         />
       )}
 
-      <HeroSection currentStepIndex={currentStepIndex} />
+      {/* Loading overlay when configuration is being loaded */}
+      {isLoadingConfiguration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading configuration...</p>
+          </div>
+        </div>
+      )}
 
-      <div className="bg-card rounded-lg border shadow-sm">
-        <WizardLayout
-          steps={steps}
-          sidebarWidget={sidebarWidgetComponent}
-          isWidgetExpanded={isWidgetVisible}
-          currentStepIndex={currentStepIndex}
-          onStepChange={onStepChange}
-        />
+      {/* Auto-save indicator */}
+      {isAutoSaving && (
+        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-md bg-background/95 border shadow-sm px-3 py-2">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Saving...</p>
+        </div>
+      )}
+
+      <div className="mx-auto max-w-5xl py-8">
+        <HeroSection currentStepIndex={currentStepIndex} />
+
+        <div className="bg-card rounded-lg border shadow-sm">
+          <WizardLayout
+            steps={steps}
+            sidebarWidget={sidebarWidgetComponent}
+            isWidgetExpanded={isWidgetVisible}
+            currentStepIndex={currentStepIndex}
+            onStepChange={onStepChange}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

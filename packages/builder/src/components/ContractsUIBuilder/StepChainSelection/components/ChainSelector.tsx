@@ -24,7 +24,7 @@ import {
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
 
 interface ChainSelectorProps {
-  onNetworkSelect: (networkConfigId: string | null) => void;
+  onNetworkSelect: (ecosystem: Ecosystem, networkConfigId: string) => void;
   initialEcosystem?: Ecosystem;
   selectedNetworkId?: string | null;
 }
@@ -79,9 +79,11 @@ export function ChainSelector({
   // Handle network selection
   const handleNetworkSelected = useCallback(
     (networkId: string) => {
-      onNetworkSelect(networkId);
+      if (selectedEcosystem) {
+        onNetworkSelect(selectedEcosystem, networkId);
+      }
     },
-    [onNetworkSelect]
+    [onNetworkSelect, selectedEcosystem]
   );
 
   // Initialize with the default ecosystem if it's enabled

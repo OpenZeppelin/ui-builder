@@ -1,4 +1,4 @@
-import { Copy, Download, Edit, MoreVertical, Play, Trash2 } from 'lucide-react';
+import { Copy, Download, Edit, MoreVertical, Trash2 } from 'lucide-react';
 
 import { useState } from 'react';
 
@@ -31,6 +31,7 @@ function formatRelativeTime(date: Date): string {
 interface ContractUIItemProps {
   contractUI: ContractUIRecord;
   isSelected: boolean;
+  isCurrentlyLoaded?: boolean;
   onToggleSelect: (id: string) => void;
   onLoad: () => void;
   onDelete: () => Promise<void>;
@@ -42,6 +43,7 @@ interface ContractUIItemProps {
 export default function ContractUIItem({
   contractUI,
   isSelected,
+  isCurrentlyLoaded = false,
   onToggleSelect,
   onLoad,
   onDelete,
@@ -68,9 +70,20 @@ export default function ContractUIItem({
 
   return (
     <>
-      <div className="group relative flex items-start gap-2 border-b p-3 hover:bg-muted/50">
+      <div
+        onClick={onLoad}
+        className={`group relative flex items-start gap-2 border-b p-3 hover:bg-muted/50 cursor-pointer ${
+          isCurrentlyLoaded ? 'bg-primary/5' : ''
+        }`}
+      >
         {/* Checkbox */}
-        <div className="pt-1">
+        <div
+          className="pt-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect(contractUI.id);
+          }}
+        >
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => onToggleSelect(contractUI.id)}
@@ -80,32 +93,24 @@ export default function ContractUIItem({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          <button
-            onClick={onLoad}
-            className="block w-full text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          <h3
+            className={`font-medium truncate ${isCurrentlyLoaded ? 'text-primary' : 'group-hover:text-primary'}`}
           >
-            <h3 className="font-medium truncate hover:text-primary">{contractUI.title}</h3>
-            <div className="mt-1 text-xs text-muted-foreground">
-              <p className="truncate">
-                {ecosystemLabel} • {contractUI.contractAddress}
-              </p>
-              <p className="mt-0.5">Updated {formatRelativeTime(contractUI.updatedAt)}</p>
-            </div>
-          </button>
+            {contractUI.title}
+          </h3>
+          <div className="mt-1 text-xs text-muted-foreground">
+            <p className="truncate">
+              {ecosystemLabel} • {contractUI.contractAddress}
+            </p>
+            <p className="mt-0.5">Updated {formatRelativeTime(contractUI.updatedAt)}</p>
+          </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <LoadingButton
-            size="icon"
-            variant="ghost"
-            onClick={onLoad}
-            className="h-8 w-8"
-            title="Load this Contract UI"
-          >
-            <Play className="h-4 w-4" />
-          </LoadingButton>
-
+        <div
+          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <LoadingButton size="icon" variant="ghost" className="h-8 w-8">

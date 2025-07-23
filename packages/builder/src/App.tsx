@@ -10,11 +10,50 @@ import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contrac
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
+import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
+import AppSidebar from './components/Sidebar/AppSidebar';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
 // Expecting them to be .ts files as per convention.
 const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
+
+// Separate component to access builder state
+function AppContent() {
+  const { handleLoadContractUI, handleCreateNewContractUI } = useUIBuilderState();
+
+  const handleLoad = useCallback(
+    (id: string) => {
+      void handleLoadContractUI(id);
+    },
+    [handleLoadContractUI]
+  );
+
+  return (
+    <div className="bg-background text-foreground min-h-screen flex">
+      {/* Global Sidebar */}
+      <AppSidebar onLoadContractUI={handleLoad} onCreateNew={handleCreateNewContractUI} />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <Header />
+
+        <main className="py-8 flex-1">
+          <ContractsUIBuilder />
+        </main>
+
+        <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
+          <div className="container mx-auto">
+            <p>© {new Date().getFullYear()} OpenZeppelin Contracts UI Builder</p>
+            <p className="mt-1">
+              A proof of concept for building transaction forms for blockchain applications
+            </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const loadAppConfigModule: NativeConfigLoader = useCallback(async (relativePath: string) => {
@@ -44,21 +83,7 @@ function App() {
           getNetworkConfigById={getNetworkById}
           loadConfigModule={loadAppConfigModule}
         >
-          <div className="bg-background text-foreground min-h-screen">
-            <Header />
-
-            <main className="py-8">
-              <ContractsUIBuilder />
-            </main>
-            <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
-              <div className="container mx-auto">
-                <p>© {new Date().getFullYear()} OpenZeppelin Contracts UI Builder</p>
-                <p className="mt-1">
-                  A proof of concept for building transaction forms for blockchain applications
-                </p>
-              </div>
-            </footer>
-          </div>
+          <AppContent />
           {/* Global network error handler - always mounted to handle error toasts */}
           <NetworkErrorHandler />
         </WalletStateProvider>

@@ -9,9 +9,13 @@ import ContractUIItem from './ContractUIItem';
 
 interface ContractUIsListProps {
   onLoadContractUI?: (id: string) => void;
+  currentLoadedConfigurationId?: string | null;
 }
 
-export default function ContractUIsList({ onLoadContractUI }: ContractUIsListProps) {
+export default function ContractUIsList({
+  onLoadContractUI,
+  currentLoadedConfigurationId,
+}: ContractUIsListProps) {
   const {
     contractUIs,
     isLoading,
@@ -90,6 +94,7 @@ export default function ContractUIsList({ onLoadContractUI }: ContractUIsListPro
             key={contractUI.id}
             contractUI={contractUI}
             isSelected={selectedIds.has(contractUI.id)}
+            isCurrentlyLoaded={currentLoadedConfigurationId === contractUI.id}
             onToggleSelect={handleToggleSelect}
             onLoad={() => onLoadContractUI?.(contractUI.id)}
             onDelete={() => deleteContractUI(contractUI.id)}
