@@ -1,5 +1,22 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.1.7
+
+### Patch Changes
+
+- [#64](https://github.com/OpenZeppelin/contracts-ui-builder/pull/64) [`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479) Thanks [@pasevin](https://github.com/pasevin)! - changed import sorting library
+
+- Updated dependencies [[`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479)]:
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.5
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.2.1
+  - @openzeppelin/contracts-ui-builder-react-core@0.1.4
+  - @openzeppelin/contracts-ui-builder-renderer@0.1.5
+  - @openzeppelin/contracts-ui-builder-types@0.2.1
+  - @openzeppelin/contracts-ui-builder-utils@0.2.1
+  - @openzeppelin/contracts-ui-builder-ui@0.2.1
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.4
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.4
+
 ## 0.1.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @openzeppelin/contracts-ui-builder-types
 
+## 0.2.1
+
+### Patch Changes
+
+- [#64](https://github.com/OpenZeppelin/contracts-ui-builder/pull/64) [`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479) Thanks [@pasevin](https://github.com/pasevin)! - changed import sorting library
+
 ## 0.2.0
 
 ### Minor Changes
