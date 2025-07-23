@@ -1,5 +1,4 @@
 import { deepEqual } from 'fast-equals';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type {

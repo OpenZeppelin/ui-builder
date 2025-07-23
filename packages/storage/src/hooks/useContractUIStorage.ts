@@ -1,6 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
-
 import { useCallback, useMemo } from 'react';
 
 import { db } from '../database/db';

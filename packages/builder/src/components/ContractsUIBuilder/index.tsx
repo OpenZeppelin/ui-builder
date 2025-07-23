@@ -1,5 +1,4 @@
 import { Loader2 } from 'lucide-react';
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ContractStateWidget } from '@openzeppelin/contracts-ui-builder-renderer';

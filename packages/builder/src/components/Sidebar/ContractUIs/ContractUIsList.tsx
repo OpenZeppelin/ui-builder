@@ -1,5 +1,4 @@
 import { Download, Loader2 } from 'lucide-react';
-
 import { useState } from 'react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';

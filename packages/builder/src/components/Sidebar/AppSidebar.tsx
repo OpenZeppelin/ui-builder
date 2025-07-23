@@ -1,5 +1,4 @@
 import { FileText, Plus, Upload } from 'lucide-react';
-
 import { useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';

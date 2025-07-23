@@ -1,5 +1,4 @@
 import { Copy, Download, Edit, MoreVertical, Trash2 } from 'lucide-react';
-
 import { useState } from 'react';
 
 import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';

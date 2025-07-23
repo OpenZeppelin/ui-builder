@@ -1,5 +1,4 @@
 import { Upload } from 'lucide-react';
-
 import { ChangeEvent, useRef, useState } from 'react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
