@@ -90,7 +90,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
    * Checks if a record is considered "empty" or a draft.
    * A record is empty if it lacks critical configuration data AND has not been manually renamed.
    */
-  private isEmptyRecord(record: ContractUIRecord): boolean {
+  isEmptyRecord(record: ContractUIRecord): boolean {
     if (record.metadata?.isManuallyRenamed === true) {
       return false;
     }
@@ -100,6 +100,14 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       !record.functionId &&
       (!record.formConfig.fields || record.formConfig.fields.length === 0)
     );
+  }
+
+  /**
+   * Checks if a record can be deleted.
+   * Draft/empty records cannot be deleted to maintain user working space.
+   */
+  canDelete(record: ContractUIRecord): boolean {
+    return !this.isEmptyRecord(record);
   }
 
   /**

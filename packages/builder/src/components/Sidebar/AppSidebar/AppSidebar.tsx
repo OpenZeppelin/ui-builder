@@ -13,6 +13,7 @@ interface AppSidebarProps {
   className?: string;
   onLoadContractUI?: (id: string) => void;
   onCreateNew?: () => void;
+  onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
 }
 
@@ -23,6 +24,7 @@ export default function AppSidebar({
   className,
   onLoadContractUI,
   onCreateNew,
+  onResetAfterDelete,
   currentLoadedConfigurationId,
 }: AppSidebarProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -50,6 +52,7 @@ export default function AppSidebar({
 
           <ContractUIsSection
             onLoadContractUI={onLoadContractUI}
+            onResetAfterDelete={onResetAfterDelete}
             currentLoadedConfigurationId={currentLoadedConfigurationId}
           />
         </div>

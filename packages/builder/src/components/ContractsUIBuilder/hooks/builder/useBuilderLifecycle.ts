@@ -181,9 +181,30 @@ export function useBuilderLifecycle(
     }
   }, [findOrCreateDraftRecord, savedConfigIdRef]);
 
+  const handleResetAfterDelete = useCallback(() => {
+    try {
+      uiBuilderStore.resetWizard();
+      setActiveNetworkId(null);
+      savedConfigIdRef.current = null;
+      isLoadingSavedConfigRef.current = false;
+      autoSave.resume();
+      logger.info(
+        'Wizard reset after delete',
+        'State cleared, initialization will handle draft creation'
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to reset after delete', errorMessage);
+      toast.error('Failed to reset wizard', {
+        description: errorMessage,
+      });
+    }
+  }, [setActiveNetworkId, isLoadingSavedConfigRef, savedConfigIdRef, autoSave]);
+
   return {
     load: handleLoadContractUI,
     createNew: handleCreateNewContractUI,
+    resetAfterDelete: handleResetAfterDelete,
     initializePageState: handleInitializePageState,
   };
 }

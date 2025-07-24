@@ -2,6 +2,7 @@ import ContractUIsList from '../ContractUIs/ContractUIsList';
 
 interface ContractUIsSectionProps {
   onLoadContractUI?: (id: string) => void;
+  onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
 }
 
@@ -10,6 +11,7 @@ interface ContractUIsSectionProps {
  */
 export default function ContractUIsSection({
   onLoadContractUI,
+  onResetAfterDelete,
   currentLoadedConfigurationId,
 }: ContractUIsSectionProps) {
   return (
@@ -20,6 +22,7 @@ export default function ContractUIsSection({
       <div className="flex-1 overflow-hidden">
         <ContractUIsList
           onLoadContractUI={onLoadContractUI}
+          onResetAfterDelete={onResetAfterDelete}
           currentLoadedConfigurationId={currentLoadedConfigurationId}
         />
       </div>

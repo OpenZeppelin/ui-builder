@@ -6,11 +6,13 @@ import ContractUIItem from './ContractUIItem';
 
 interface ContractUIsListProps {
   onLoadContractUI?: (id: string) => void;
+  onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
 }
 
 export default function ContractUIsList({
   onLoadContractUI,
+  onResetAfterDelete,
   currentLoadedConfigurationId,
 }: ContractUIsListProps) {
   const { contractUIs, isLoading, deleteContractUI, duplicateContractUI, updateContractUI } =
@@ -21,6 +23,15 @@ export default function ContractUIsList({
       title: newTitle,
       metadata: { isManuallyRenamed: true },
     });
+  };
+
+  const handleDelete = async (contractUIId: string): Promise<void> => {
+    const isDeletingCurrentRecord = currentLoadedConfigurationId === contractUIId;
+    await deleteContractUI(contractUIId);
+
+    if (isDeletingCurrentRecord && onResetAfterDelete) {
+      onResetAfterDelete();
+    }
   };
 
   if (isLoading) {
@@ -51,7 +62,7 @@ export default function ContractUIsList({
               contractUI={contractUI}
               isCurrentlyLoaded={currentLoadedConfigurationId === contractUI.id}
               onLoad={() => onLoadContractUI?.(contractUI.id)}
-              onDelete={() => deleteContractUI(contractUI.id)}
+              onDelete={() => handleDelete(contractUI.id)}
               onDuplicate={async () => {
                 await duplicateContractUI(contractUI.id);
               }}

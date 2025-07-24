@@ -14,6 +14,24 @@ import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
 
+/**
+ * Checks if a record can be deleted.
+ * Draft/empty records cannot be deleted to maintain user working space.
+ */
+function canDeleteRecord(record: ContractUIRecord): boolean {
+  if (record.metadata?.isManuallyRenamed === true) {
+    return true;
+  }
+
+  // If it has meaningful content, it's not a draft
+  const hasContent =
+    Boolean(record.contractAddress) ||
+    Boolean(record.functionId) ||
+    Boolean(record.formConfig.fields && record.formConfig.fields.length > 0);
+
+  return hasContent;
+}
+
 interface ContractUIItemProps {
   contractUI: ContractUIRecord;
   isCurrentlyLoaded?: boolean;
@@ -34,6 +52,8 @@ export default function ContractUIItem({
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const canDelete = canDeleteRecord(contractUI);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -91,12 +111,14 @@ export default function ContractUIItem({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
               <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive"
-              >
-                Delete
-              </DropdownMenuItem>
+              {canDelete && (
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive"
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

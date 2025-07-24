@@ -166,6 +166,7 @@ export function useUIBuilderState() {
       lifecycle: {
         load: lifecycle.load,
         createNew: lifecycle.createNew,
+        resetAfterDelete: lifecycle.resetAfterDelete,
         initializePageState: lifecycle.initializePageState,
       },
     },

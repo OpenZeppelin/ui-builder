@@ -22,7 +22,7 @@ function AppContent() {
   const {
     state,
     actions: {
-      lifecycle: { load, createNew },
+      lifecycle: { load, createNew, resetAfterDelete },
     },
   } = useUIBuilderState();
 
@@ -39,6 +39,7 @@ function AppContent() {
       <AppSidebar
         onLoadContractUI={handleLoad}
         onCreateNew={() => void createNew()}
+        onResetAfterDelete={resetAfterDelete}
         currentLoadedConfigurationId={state.loadedConfigurationId}
       />
 
