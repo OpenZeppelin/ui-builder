@@ -2,11 +2,17 @@ import { toast } from 'sonner';
 import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import {
+  contractUIStorage,
+  useContractUIStorage,
+} from '@openzeppelin/contracts-ui-builder-storage';
 import { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { uiBuilderStore, type BuilderFormConfig } from '../uiBuilderStore';
+
+// Global lock to prevent multiple page initializations
+let globalPageInitializationInProgress = false;
 
 /**
  * @notice A hook to manage the lifecycle of a UI configuration.
@@ -18,6 +24,7 @@ export function useBuilderLifecycle(
   autoSave: { pause: () => void; resume: () => void; isPaused: boolean }
 ) {
   const { setActiveNetworkId } = useWalletState();
+  const { findOrCreateDraftRecord } = useContractUIStorage();
 
   const handleLoadContractUI = useCallback(
     async (id: string) => {
@@ -103,27 +110,80 @@ export function useBuilderLifecycle(
     [setActiveNetworkId, isLoadingSavedConfigRef, savedConfigIdRef, autoSave]
   );
 
-  const handleCreateNewContractUI = useCallback(() => {
-    // Reset the wizard to initial state
-    uiBuilderStore.resetWizard();
+  const handleCreateNewContractUI = useCallback(async () => {
+    try {
+      // Reset the wizard to initial state
+      uiBuilderStore.resetWizard();
 
-    // Clear the active network
-    setActiveNetworkId(null);
+      // Clear the active network
+      setActiveNetworkId(null);
 
-    // Clear the saved configuration ID so a new one will be created
-    savedConfigIdRef.current = null;
+      // Ensure the loading flag is not set
+      isLoadingSavedConfigRef.current = false;
 
-    // Ensure the loading flag is not set
-    isLoadingSavedConfigRef.current = false;
+      // Resume auto-save if it was paused
+      autoSave.resume();
 
-    // Resume auto-save if it was paused
-    autoSave.resume();
+      // Create or reuse an existing draft record
+      const currentState = uiBuilderStore.getState();
+      const ecosystem = currentState.selectedEcosystem || 'evm';
+      const draftId = await findOrCreateDraftRecord(ecosystem);
 
-    logger.info('Creating new Contract UI', 'Wizard reset to initial state');
-  }, [setActiveNetworkId, isLoadingSavedConfigRef, savedConfigIdRef, autoSave]);
+      // Set the draft record as the current loaded configuration
+      savedConfigIdRef.current = draftId;
+      uiBuilderStore.updateState(() => ({ loadedConfigurationId: draftId }));
+
+      logger.info('Creating new Contract UI', `Draft record ID: ${draftId}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to create new Contract UI', errorMessage);
+      toast.error('Failed to create new configuration', {
+        description: errorMessage,
+      });
+    }
+  }, [
+    setActiveNetworkId,
+    isLoadingSavedConfigRef,
+    savedConfigIdRef,
+    autoSave,
+    findOrCreateDraftRecord,
+  ]);
+
+  const handleInitializePageState = useCallback(async () => {
+    // Prevent multiple simultaneous initializations
+    if (globalPageInitializationInProgress) {
+      logger.info('Page initialization', 'Already in progress, skipping');
+      return;
+    }
+
+    try {
+      globalPageInitializationInProgress = true;
+
+      // Only initialize if no configuration is currently loaded
+      const currentState = uiBuilderStore.getState();
+
+      if (!currentState.loadedConfigurationId && !savedConfigIdRef.current) {
+        const ecosystem = currentState.selectedEcosystem || 'evm';
+        const draftId = await findOrCreateDraftRecord(ecosystem);
+
+        // Set the draft record as the current loaded configuration
+        savedConfigIdRef.current = draftId;
+        uiBuilderStore.updateState(() => ({ loadedConfigurationId: draftId }));
+
+        logger.info('Page state initialized', `Draft record ID: ${draftId}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize page state', errorMessage);
+      // Don't show toast for this - it's a background operation
+    } finally {
+      globalPageInitializationInProgress = false;
+    }
+  }, [findOrCreateDraftRecord, savedConfigIdRef]);
 
   return {
     load: handleLoadContractUI,
     createNew: handleCreateNewContractUI,
+    initializePageState: handleInitializePageState,
   };
 }

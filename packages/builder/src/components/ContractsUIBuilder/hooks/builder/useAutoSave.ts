@@ -14,7 +14,6 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * This prevents race conditions and duplicate operations when multiple components use the hook.
  */
 let globalAutoSaveInProgress = false;
-let globalLastSavedFunction: string | null = null;
 let globalAutoSavePaused = false;
 let globalAutoSaveTimer: NodeJS.Timeout | null = null;
 let globalSkipNextCycle = false;
@@ -70,24 +69,21 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
       }
 
       const configId = currentState.loadedConfigurationId;
-      const shouldUpdate = configId !== null;
-      const shouldCreate =
-        !configId &&
-        currentState.selectedEcosystem &&
-        currentState.selectedNetworkConfigId &&
-        currentState.selectedFunction &&
-        currentState.formConfig;
 
-      // Prevent duplicate creation for the same function
-      if (shouldCreate && globalLastSavedFunction === currentState.selectedFunction) {
-        logger.info(
-          'builder',
-          `Skipping duplicate auto-save for function: ${currentState.selectedFunction}`
-        );
+      // With the new draft record system, we should always have a configId
+      if (!configId) {
+        logger.warn('builder', 'No loaded configuration ID found - cannot auto-save');
         return;
       }
 
-      if (!shouldUpdate && !shouldCreate) {
+      // Only auto-save if we have meaningful content to save
+      if (
+        !currentState.selectedEcosystem &&
+        !currentState.selectedNetworkConfigId &&
+        !currentState.selectedFunction &&
+        !currentState.formConfig
+      ) {
+        logger.info('builder', 'No meaningful content to auto-save yet');
         return;
       }
 
@@ -96,39 +92,28 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
 
       // Determine title to use (preserve manual renames)
       let titleToUse: string;
-      if (shouldUpdate && configId) {
-        const existingConfig = await contractUIStorage.get(configId);
-        const isManuallyRenamed = existingConfig?.metadata?.isManuallyRenamed === true;
-        titleToUse =
-          isManuallyRenamed && existingConfig?.title
-            ? existingConfig.title
-            : generateDefaultTitle(currentState);
-      } else {
-        titleToUse = generateDefaultTitle(currentState);
-      }
+      const existingConfig = await contractUIStorage.get(configId);
+      const isManuallyRenamed = existingConfig?.metadata?.isManuallyRenamed === true;
+      titleToUse =
+        isManuallyRenamed && existingConfig?.title
+          ? existingConfig.title
+          : generateDefaultTitle(currentState);
 
       // Prepare configuration object
       const configToSave = buildConfigurationObject(currentState, titleToUse);
 
-      // Perform save or update operation
-      if (configId) {
-        logger.info('Auto-save: Updating existing configuration', `ID: ${configId}`);
-        await updateContractUI(configId, configToSave);
+      // Always update the existing record
+      logger.info('Auto-save: Updating existing configuration', `ID: ${configId}`);
+      await updateContractUI(configId, configToSave);
 
-        if (currentState.loadedConfigurationId !== configId) {
-          uiBuilderStore.updateState(() => ({ loadedConfigurationId: configId }));
-        }
-
-        toast.success('Configuration saved', {
-          duration: 2000,
-          description: 'Your changes have been automatically saved.',
-        });
-      } else {
-        logger.info('Auto-save: Creating new configuration', 'Creating new record');
-        const id = await saveContractUI(configToSave);
-        uiBuilderStore.updateState(() => ({ loadedConfigurationId: id }));
-        globalLastSavedFunction = currentState.selectedFunction;
+      if (currentState.loadedConfigurationId !== configId) {
+        uiBuilderStore.updateState(() => ({ loadedConfigurationId: configId }));
       }
+
+      toast.success('Configuration saved', {
+        duration: 2000,
+        description: 'Your changes have been automatically saved.',
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Auto-save failed', errorMessage);
@@ -145,8 +130,8 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
    * Effect that handles auto-save scheduling with debouncing and various guards.
    */
   useEffect(() => {
-    // Only schedule auto-save if we have required state
-    if (!state.selectedFunction || !state.formConfig || globalAutoSavePaused) {
+    // Only schedule auto-save if we have some state changes and auto-save is not paused
+    if (globalAutoSavePaused) {
       return;
     }
 
@@ -163,30 +148,11 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
       globalAutoSaveTimer = null;
     }
 
-    // Skip if this function was already saved (prevents duplicate creation)
-    const currentState = uiBuilderStore.getState();
-    const isAlreadySaved =
-      !currentState.loadedConfigurationId && globalLastSavedFunction === state.selectedFunction;
-
-    if (isAlreadySaved) {
-      return;
-    }
-
     // Schedule debounced auto-save
     globalAutoSaveTimer = setTimeout(() => {
       void autoSave();
     }, 1500);
   }, [state.selectedFunction, state.formConfig, autoSave]);
-
-  /**
-   * Reset tracking when function changes to allow new saves.
-   */
-  useEffect(() => {
-    if (state.selectedFunction !== globalLastSavedFunction && globalLastSavedFunction !== null) {
-      globalLastSavedFunction = null;
-      globalAutoSaveInProgress = false;
-    }
-  }, [state.selectedFunction]);
 
   /**
    * Cleanup timer on unmount.

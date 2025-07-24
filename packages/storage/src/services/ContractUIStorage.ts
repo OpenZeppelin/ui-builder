@@ -85,6 +85,117 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       throw new Error('Failed to import configurations');
     }
   }
+
+  /**
+   * Checks if a record is considered "empty" or a draft.
+   * A record is empty if it lacks critical configuration data AND has not been manually renamed.
+   */
+  private isEmptyRecord(record: ContractUIRecord): boolean {
+    if (record.metadata?.isManuallyRenamed === true) {
+      return false;
+    }
+
+    return (
+      !record.contractAddress &&
+      !record.functionId &&
+      (!record.formConfig.fields || record.formConfig.fields.length === 0)
+    );
+  }
+
+  /**
+   * Finds existing empty records in the database.
+   * @returns Array of empty ContractUIRecord instances
+   */
+  async findEmptyRecords(): Promise<ContractUIRecord[]> {
+    try {
+      const allRecords = await this.getAll();
+      return allRecords.filter((record) => this.isEmptyRecord(record));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to find empty records', errorMessage);
+      throw new Error('Failed to find empty records');
+    }
+  }
+
+  /**
+   * Creates a minimal draft record for immediate storage.
+   * @param ecosystem The blockchain ecosystem (defaults to 'evm')
+   * @returns Promise resolving to the created record ID
+   */
+  async createDraftRecord(ecosystem: string = 'evm'): Promise<string> {
+    try {
+      const draftRecord: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: 'New Contract UI',
+        ecosystem,
+        networkId: '',
+        contractAddress: '',
+        functionId: '',
+        formConfig: {
+          id: 'draft',
+          title: 'Contract UI Form',
+          functionId: '',
+          contractAddress: '',
+          fields: [],
+          layout: {
+            columns: 1 as const,
+            spacing: 'normal' as const,
+            labelPosition: 'top' as const,
+          },
+          validation: {
+            mode: 'onChange' as const,
+            showErrors: 'inline' as const,
+          },
+          submitButton: {
+            text: 'Submit',
+            loadingText: 'Processing...',
+          },
+          theme: {},
+          description: '',
+        },
+        metadata: {
+          isDraft: true,
+          isManuallyRenamed: false,
+        },
+      };
+
+      const id = await this.save(draftRecord);
+      logger.info('Draft record created', `ID: ${id}`);
+      return id;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to create draft record', errorMessage);
+      throw new Error('Failed to create draft record');
+    }
+  }
+
+  /**
+   * Finds an existing empty record or creates a new draft record.
+   * This ensures we don't create duplicate empty records.
+   * @param ecosystem The blockchain ecosystem (defaults to 'evm')
+   * @returns Promise resolving to the record ID (existing or newly created)
+   */
+  async findOrCreateDraftRecord(ecosystem: string = 'evm'): Promise<string> {
+    try {
+      const emptyRecords = await this.findEmptyRecords();
+
+      if (emptyRecords.length > 0) {
+        // Return the most recently updated empty record
+        const mostRecent = emptyRecords.sort(
+          (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        )[0];
+
+        logger.info('Reusing existing empty record', `ID: ${mostRecent.id}`);
+        return mostRecent.id;
+      }
+
+      // No empty records found, create a new draft
+      return await this.createDraftRecord(ecosystem);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to find or create draft record', errorMessage);
+      throw new Error('Failed to find or create draft record');
+    }
+  }
 }
 
 // Export singleton instance

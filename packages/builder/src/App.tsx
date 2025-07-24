@@ -20,6 +20,7 @@ const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
 // Separate component to access builder state
 function AppContent() {
   const {
+    state,
     actions: {
       lifecycle: { load, createNew },
     },
@@ -35,7 +36,11 @@ function AppContent() {
   return (
     <div className="bg-background text-foreground min-h-screen flex">
       {/* Global Sidebar */}
-      <AppSidebar onLoadContractUI={handleLoad} onCreateNew={createNew} />
+      <AppSidebar
+        onLoadContractUI={handleLoad}
+        onCreateNew={() => void createNew()}
+        currentLoadedConfigurationId={state.loadedConfigurationId}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

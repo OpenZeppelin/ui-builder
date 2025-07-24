@@ -31,6 +31,9 @@ export function useUIBuilderState() {
   // Initialize the store with the active network from the wallet context on first load.
   useEffect(() => {
     uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
+
+    // Initialize a draft record for the page if needed
+    void lifecycle.initializePageState();
   }, []); // Run only once
 
   const autoSave = useAutoSave(isLoadingSavedConfigRef);
@@ -163,6 +166,7 @@ export function useUIBuilderState() {
       lifecycle: {
         load: lifecycle.load,
         createNew: lifecycle.createNew,
+        initializePageState: lifecycle.initializePageState,
       },
     },
   };
