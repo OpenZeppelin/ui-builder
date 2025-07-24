@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
@@ -48,16 +49,20 @@ export default function ContractUIItem({
     <>
       <div
         onClick={onLoad}
-        className={`group relative flex items-center justify-between h-11 px-3 py-2.5 rounded-lg cursor-pointer w-[225px] ${
-          isCurrentlyLoaded ? 'bg-neutral-100' : 'hover:bg-muted/80'
-        }`}
+        className={cn(
+          'group relative flex items-center justify-between h-11 px-3 py-2.5 cursor-pointer w-[225px] rounded-lg',
+          isCurrentlyLoaded
+            ? 'bg-neutral-100'
+            : 'hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10'
+        )}
       >
         {/* Content */}
         <div className="min-w-0 flex-1">
           <h3
-            className={`font-semibold text-sm truncate ${
+            className={cn(
+              'font-semibold text-sm truncate',
               isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
-            }`}
+            )}
           >
             {contractUI.title}
           </h3>
@@ -70,9 +75,10 @@ export default function ContractUIItem({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-full w-5 p-0 transition-opacity ${
+                className={cn(
+                  'h-full w-5 p-0 transition-opacity',
                   isCurrentlyLoaded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                }`}
+                )}
               >
                 <MoreHorizontal className="h-4 w-4" />
                 <span className="sr-only">Open menu</span>
