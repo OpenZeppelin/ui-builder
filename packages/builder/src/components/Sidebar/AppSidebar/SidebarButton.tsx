@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface SidebarButtonProps {
   icon: ReactNode;
@@ -21,13 +21,16 @@ export default function SidebarButton({
   const height = size === 'small' ? 'h-10' : 'h-11';
 
   return (
-    <Button
-      variant="ghost"
-      className={`flex items-center justify-start gap-2 ${height} px-3 py-2.5 rounded-lg text-gray-600 hover:text-gray-700 font-semibold text-sm`}
+    <button
+      className={cn(
+        'group relative flex items-center justify-start gap-2 px-3 py-2.5 rounded-lg text-gray-600 hover:text-gray-700 font-semibold text-sm cursor-pointer transition-colors',
+        'hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10',
+        height
+      )}
       onClick={onClick}
     >
       {icon}
       {children}
-    </Button>
+    </button>
   );
 }
