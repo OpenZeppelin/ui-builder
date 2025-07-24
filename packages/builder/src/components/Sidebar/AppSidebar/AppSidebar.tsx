@@ -32,6 +32,8 @@ export default function AppSidebar({
       {/* Sidebar */}
       <div
         className={cn(
+          // TODO: Replace hard-coded sidebar background with OpenZeppelin theme
+          // Should use semantic token like 'bg-sidebar-background'
           'fixed left-0 top-0 z-40 h-full w-[289px] bg-[rgba(245,245,245,0.31)] flex flex-col px-8 py-12',
           className
         )}

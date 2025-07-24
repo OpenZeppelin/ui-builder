@@ -52,7 +52,9 @@ export default function ContractUIItem({
         className={cn(
           'group relative flex items-center justify-between h-11 px-3 py-2.5 cursor-pointer w-[225px] rounded-lg',
           isCurrentlyLoaded
-            ? 'bg-neutral-100'
+            ? // TODO: Replace with OpenZeppelin theme colors for selected state
+              // Should use semantic token like 'bg-sidebar-item-selected'
+              'bg-neutral-100'
             : 'hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10'
         )}
       >
@@ -61,6 +63,8 @@ export default function ContractUIItem({
           <h3
             className={cn(
               'font-semibold text-sm truncate',
+              // TODO: Replace hard-coded text colors with OpenZeppelin theme
+              // Should use semantic tokens like 'text-sidebar-item-selected' and 'text-sidebar-item'
               isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
             )}
           >

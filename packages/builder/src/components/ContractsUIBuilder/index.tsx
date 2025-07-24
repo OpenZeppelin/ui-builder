@@ -264,10 +264,10 @@ export function ContractsUIBuilder() {
         </div>
       )}
 
-      <div className="mx-auto max-w-5xl py-8">
-        <HeroSection currentStepIndex={state.currentStepIndex} />
+      <div className="ml-8 mr-8 max-w-6xl py-8">
+        <HeroSection />
 
-        <div className="bg-card rounded-lg border shadow-sm">
+        <div className="bg-card rounded-lg">
           <WizardLayout
             steps={steps}
             sidebarWidget={sidebarWidgetComponent}

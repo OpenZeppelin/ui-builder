@@ -1,7 +1,8 @@
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { ReactNode } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 export interface WizardStep {
   id: string;
@@ -49,7 +50,7 @@ export function WizardLayout({
 
   return (
     <div className="flex w-full flex-col space-y-8 p-6">
-      <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5 border-b shadow-sm rounded-t-lg">
+      <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5">
         {/* Mobile-only current step title */}
         <div className="sm:hidden mb-4 text-center">
           <h3 className="text-lg font-semibold text-foreground">{steps[currentStepIndex].title}</h3>
@@ -107,17 +108,37 @@ export function WizardLayout({
         <div className="w-full">{currentStep.component}</div>
       </div>
 
-      <div className="mt-8 -mx-6 -mb-6 bg-muted px-6 py-4 border-t shadow-inner flex justify-between items-center rounded-b-lg">
+      <div className="mt-8 flex justify-between items-center">
         <div>
           {!isFirstStep && (
-            <Button variant="outline" onClick={handlePrevious}>
-              Previous
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              className={cn(
+                // TODO: Replace with OpenZeppelin theme colors
+                // Should use semantic tokens like 'bg-secondary hover:bg-secondary-hover'
+                'bg-neutral-100 border-neutral-100 text-black hover:bg-neutral-200',
+                'flex items-center gap-2 pl-3 pr-6 py-2.5 h-11'
+              )}
+            >
+              <ChevronLeft className="size-3" />
+              Back
             </Button>
           )}
         </div>
         {!isLastStep && !isFirstStep && currentStepIndex !== 2 && (
-          <Button onClick={handleNext} disabled={!isCurrentStepValid}>
+          <Button
+            onClick={handleNext}
+            disabled={!isCurrentStepValid}
+            className={cn(
+              // TODO: Replace hard-coded colors with OpenZeppelin theme for Tailwind
+              // Should use semantic tokens like 'bg-primary hover:bg-primary-hover'
+              'bg-[#5850ec] hover:bg-[#4940d1] text-white',
+              'flex items-center gap-2 pl-6 pr-3 py-2.5 h-11'
+            )}
+          >
             Next
+            <ChevronRight className="size-3" />
           </Button>
         )}
       </div>
