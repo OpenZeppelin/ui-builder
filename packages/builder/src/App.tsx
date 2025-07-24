@@ -7,7 +7,6 @@ import {
 import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-types';
 import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
 
-import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
 import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
@@ -40,20 +39,9 @@ function AppContent() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <Header />
-
         <main className="py-8 flex-1">
           <ContractsUIBuilder />
         </main>
-
-        <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
-          <div className="container mx-auto">
-            <p>© {new Date().getFullYear()} OpenZeppelin Contracts UI Builder</p>
-            <p className="mt-1">
-              A proof of concept for building transaction forms for blockchain applications
-            </p>
-          </div>
-        </footer>
       </div>
     </div>
   );

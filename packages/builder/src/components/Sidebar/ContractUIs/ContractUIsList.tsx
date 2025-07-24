@@ -1,8 +1,6 @@
-import { Download, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 
 import ContractUIItem from './ContractUIItem';
 
@@ -15,40 +13,14 @@ export default function ContractUIsList({
   onLoadContractUI,
   currentLoadedConfigurationId,
 }: ContractUIsListProps) {
-  const {
-    contractUIs,
-    isLoading,
-    exportContractUIs,
-    deleteContractUI,
-    duplicateContractUI,
-    updateContractUI,
-  } = useContractUIStorage();
+  const { contractUIs, isLoading, deleteContractUI, duplicateContractUI, updateContractUI } =
+    useContractUIStorage();
 
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  const handleToggleSelect = (id: string) => {
-    const newSelection = new Set(selectedIds);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedIds(newSelection);
-  };
-
-  const handleSelectAll = () => {
-    if (contractUIs && selectedIds.size === contractUIs.length) {
-      setSelectedIds(new Set());
-    } else if (contractUIs) {
-      setSelectedIds(new Set(contractUIs.map((ui) => ui.id)));
-    }
-  };
-
-  const handleExportSelected = async () => {
-    if (selectedIds.size > 0) {
-      await exportContractUIs(Array.from(selectedIds));
-      setSelectedIds(new Set());
-    }
+  const handleRename = async (contractUIId: string, newTitle: string): Promise<void> => {
+    await updateContractUI(contractUIId, {
+      title: newTitle,
+      metadata: { isManuallyRenamed: true },
+    });
   };
 
   if (isLoading) {
@@ -70,43 +42,23 @@ export default function ContractUIsList({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Bulk Actions */}
-      {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between border-b bg-muted/50 p-2">
-          <span className="text-sm text-muted-foreground">{selectedIds.size} selected</span>
-          <div className="flex gap-1">
-            <Button size="sm" variant="ghost" onClick={handleSelectAll}>
-              {selectedIds.size === contractUIs.length ? 'Deselect All' : 'Select All'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => void handleExportSelected()}>
-              <Download className="mr-1 h-3 w-3" />
-              Export
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* List */}
       <div className="flex-1 overflow-y-auto">
-        {contractUIs.map((contractUI) => (
-          <ContractUIItem
-            key={contractUI.id}
-            contractUI={contractUI}
-            isSelected={selectedIds.has(contractUI.id)}
-            isCurrentlyLoaded={currentLoadedConfigurationId === contractUI.id}
-            onToggleSelect={handleToggleSelect}
-            onLoad={() => onLoadContractUI?.(contractUI.id)}
-            onDelete={() => deleteContractUI(contractUI.id)}
-            onDuplicate={() => duplicateContractUI(contractUI.id)}
-            onRename={(newTitle) =>
-              updateContractUI(contractUI.id, {
-                title: newTitle,
-                metadata: { ...contractUI.metadata, isManuallyRenamed: true },
-              })
-            }
-            onExport={() => exportContractUIs([contractUI.id])}
-          />
-        ))}
+        <div className="flex flex-col">
+          {contractUIs.map((contractUI) => (
+            <ContractUIItem
+              key={contractUI.id}
+              contractUI={contractUI}
+              isCurrentlyLoaded={currentLoadedConfigurationId === contractUI.id}
+              onLoad={() => onLoadContractUI?.(contractUI.id)}
+              onDelete={() => deleteContractUI(contractUI.id)}
+              onDuplicate={async () => {
+                await duplicateContractUI(contractUI.id);
+              }}
+              onRename={(newTitle) => handleRename(contractUI.id, newTitle)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

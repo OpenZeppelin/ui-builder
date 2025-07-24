@@ -1,54 +1,34 @@
-import { Copy, Download, Edit, MoreVertical, Trash2 } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
 import {
-  Checkbox,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-  LoadingButton,
 } from '@openzeppelin/contracts-ui-builder-ui';
 
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
 
-// Simple relative time formatter
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  return `${Math.floor(diffInSeconds / 2592000)} months ago`;
-}
-
 interface ContractUIItemProps {
   contractUI: ContractUIRecord;
-  isSelected: boolean;
   isCurrentlyLoaded?: boolean;
-  onToggleSelect: (id: string) => void;
   onLoad: () => void;
   onDelete: () => Promise<void>;
-  onDuplicate: () => Promise<string>;
+  onDuplicate: () => Promise<void>;
   onRename: (newTitle: string) => Promise<void>;
-  onExport: () => Promise<void>;
 }
 
 export default function ContractUIItem({
   contractUI,
-  isSelected,
   isCurrentlyLoaded = false,
-  onToggleSelect,
   onLoad,
   onDelete,
   onDuplicate,
   onRename,
-  onExport,
 }: ContractUIItemProps) {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -64,77 +44,47 @@ export default function ContractUIItem({
     }
   };
 
-  const ecosystemLabel =
-    contractUI.ecosystem.charAt(0).toUpperCase() + contractUI.ecosystem.slice(1);
-
   return (
     <>
       <div
         onClick={onLoad}
-        className={`group relative flex items-start gap-2 border-b p-3 hover:bg-muted/50 cursor-pointer ${
-          isCurrentlyLoaded ? 'bg-primary/5' : ''
+        className={`group relative flex items-center justify-between h-11 px-3 py-2.5 rounded-lg cursor-pointer w-[225px] ${
+          isCurrentlyLoaded ? 'bg-neutral-100' : 'hover:bg-muted/80'
         }`}
       >
-        {/* Checkbox */}
-        <div
-          className="pt-1"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSelect(contractUI.id);
-          }}
-        >
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => onToggleSelect(contractUI.id)}
-            aria-label="Select item"
-          />
-        </div>
-
         {/* Content */}
         <div className="min-w-0 flex-1">
           <h3
-            className={`font-medium truncate ${isCurrentlyLoaded ? 'text-primary' : 'group-hover:text-primary'}`}
+            className={`font-semibold text-sm truncate ${
+              isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
+            }`}
           >
             {contractUI.title}
           </h3>
-          <div className="mt-1 text-xs text-muted-foreground">
-            <p className="truncate">
-              {ecosystemLabel} • {contractUI.contractAddress}
-            </p>
-            <p className="mt-0.5">Updated {formatRelativeTime(contractUI.updatedAt)}</p>
-          </div>
         </div>
 
         {/* Actions */}
-        <div
-          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="shrink-0 self-stretch" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <LoadingButton size="icon" variant="ghost" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </LoadingButton>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-full w-5 p-0 transition-opacity ${
+                  isCurrentlyLoaded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void onDuplicate()}>
-                <Copy className="mr-2 h-4 w-4" />
-                Duplicate
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void onExport()}>
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive focus:text-destructive"
+                className="text-destructive"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -149,7 +99,6 @@ export default function ContractUIItem({
         currentTitle={contractUI.title}
         onRename={onRename}
       />
-
       <ContractUIDeleteDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
