@@ -1,6 +1,6 @@
 # Contracts UI Builder App
 
-The main application for the Contract UI Builder monorepo. This package contains the application builder UI and core functionality.
+The main application for the Contracts UI Builder monorepo. This package contains the application builder UI and core functionality.
 
 ## Structure
 

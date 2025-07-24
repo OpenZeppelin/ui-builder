@@ -3,7 +3,7 @@ export function HeroSection() {
     <div className="mb-6">
       <div className="flex items-center justify-between w-full">
         {/* Main Title */}
-        <h1 className="text-2xl font-semibold text-black">Contract UI Builder</h1>
+        <h1 className="text-2xl font-semibold text-black">Contracts UI Builder</h1>
 
         {/* Description - positioned to the right */}
         <div className="max-w-[572px] text-right">
