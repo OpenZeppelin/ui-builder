@@ -15,8 +15,14 @@ export default function ContractUIsList({
   onResetAfterDelete,
   currentLoadedConfigurationId,
 }: ContractUIsListProps) {
-  const { contractUIs, isLoading, deleteContractUI, duplicateContractUI, updateContractUI } =
-    useContractUIStorage();
+  const {
+    contractUIs,
+    isLoading,
+    deleteContractUI,
+    duplicateContractUI,
+    updateContractUI,
+    exportContractUIs,
+  } = useContractUIStorage();
 
   const handleRename = async (contractUIId: string, newTitle: string): Promise<void> => {
     await updateContractUI(contractUIId, {
@@ -32,6 +38,10 @@ export default function ContractUIsList({
     if (isDeletingCurrentRecord && onResetAfterDelete) {
       onResetAfterDelete();
     }
+  };
+
+  const handleExport = async (contractUIId: string): Promise<void> => {
+    await exportContractUIs([contractUIId]);
   };
 
   if (isLoading) {
@@ -67,6 +77,7 @@ export default function ContractUIsList({
                 await duplicateContractUI(contractUI.id);
               }}
               onRename={(newTitle) => handleRename(contractUI.id, newTitle)}
+              onExport={() => handleExport(contractUI.id)}
             />
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { MoreHorizontal } from 'lucide-react';
+import { Download, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
@@ -15,10 +15,11 @@ import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
 
 /**
- * Checks if a record can be deleted.
- * Draft/empty records cannot be deleted to maintain user working space.
+ * Checks if a record is meaningful (not empty/draft).
+ * Empty/draft records cannot be deleted or exported to maintain user working space.
  */
-function canDeleteRecord(record: ContractUIRecord): boolean {
+function isRecordMeaningful(record: ContractUIRecord): boolean {
+  // If manually renamed, it's not a draft
   if (record.metadata?.isManuallyRenamed === true) {
     return true;
   }
@@ -39,6 +40,7 @@ interface ContractUIItemProps {
   onDelete: () => Promise<void>;
   onDuplicate: () => Promise<void>;
   onRename: (newTitle: string) => Promise<void>;
+  onExport: () => Promise<void>;
 }
 
 export default function ContractUIItem({
@@ -48,12 +50,14 @@ export default function ContractUIItem({
   onDelete,
   onDuplicate,
   onRename,
+  onExport,
 }: ContractUIItemProps) {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const canDelete = canDeleteRecord(contractUI);
+  const canDelete = isRecordMeaningful(contractUI);
+  const canExport = isRecordMeaningful(contractUI);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -111,6 +115,12 @@ export default function ContractUIItem({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
               <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
+              {canExport && (
+                <DropdownMenuItem onClick={() => void onExport()}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </DropdownMenuItem>
+              )}
               {canDelete && (
                 <DropdownMenuItem
                   onClick={() => setShowDeleteDialog(true)}

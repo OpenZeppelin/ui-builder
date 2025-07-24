@@ -46,10 +46,15 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         configurations = await this.getAll();
       }
 
+      // Filter out empty/draft records from export
+      const meaningfulConfigurations = configurations.filter(
+        (config) => !this.isEmptyRecord(config)
+      );
+
       const exportData: ContractUIExportData = {
         version: '1.0.0',
         exportedAt: new Date().toISOString(),
-        configurations,
+        configurations: meaningfulConfigurations,
       };
 
       return JSON.stringify(exportData, null, 2);
@@ -69,9 +74,18 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         throw new Error('Invalid export format');
       }
 
+      // Filter out empty/draft records from import data
+      const meaningfulConfigurations = data.configurations.filter(
+        (config) => !this.isEmptyRecord(config)
+      );
+
+      if (meaningfulConfigurations.length === 0) {
+        throw new Error('No meaningful configurations found to import');
+      }
+
       const importedIds: string[] = [];
 
-      for (const config of data.configurations) {
+      for (const config of meaningfulConfigurations) {
         const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = config;
         const newId = await this.save(recordData);
         importedIds.push(newId);

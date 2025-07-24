@@ -110,6 +110,19 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
   const exportContractUIs = useCallback(async (ids?: string[]): Promise<void> => {
     try {
       const jsonData = await contractUIStorage.export(ids);
+
+      // Parse the export data to get the actual count of exported configurations
+      const exportData = JSON.parse(jsonData);
+      const exportedCount = exportData.configurations?.length || 0;
+
+      if (exportedCount === 0) {
+        toast.error('Nothing to export', {
+          description:
+            'No meaningful configurations found to export. Empty/draft records are excluded.',
+        });
+        return;
+      }
+
       const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -121,7 +134,7 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       URL.revokeObjectURL(url);
 
       toast.success('Export successful', {
-        description: `Exported ${ids?.length || 'all'} configuration(s).`,
+        description: `Exported ${exportedCount} meaningful configuration(s).`,
       });
     } catch (error) {
       toast.error('Failed to export', {
