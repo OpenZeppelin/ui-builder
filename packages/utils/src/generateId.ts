@@ -3,16 +3,21 @@
  * It's important to keep these functions as simple as possible and avoid any
  * dependencies from other packages.
  */
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Generates a unique ID for form fields, components, etc.
- * Uses the uuid library for proper RFC 4122 UUID v4 generation.
+ * Uses crypto.getRandomValues() for browser-compatible random ID generation.
  *
  * @param prefix Optional prefix to add before the UUID
  * @returns A string ID that is guaranteed to be unique
  */
 export function generateId(prefix?: string): string {
-  const uuid = uuidv4();
+  // Generate a browser-compatible UUID v4
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 15) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+
   return prefix ? `${prefix}_${uuid}` : uuid;
 }

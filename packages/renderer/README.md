@@ -194,7 +194,7 @@ logger.info('MyComponent', 'Component loaded');
 
 #### `generateId`
 
-A utility function to generate unique IDs (UUID v4) for form elements or other components.
+A utility function to generate unique IDs for form elements or other components.
 
 ```typescript
 import { generateId } from '@openzeppelin/contracts-ui-builder-renderer';

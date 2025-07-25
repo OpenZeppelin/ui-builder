@@ -1,7 +1,6 @@
 import Dexie, { Table } from 'dexie';
-import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 export interface BaseRecord {
   id: string;
@@ -21,7 +20,7 @@ export abstract class DexieStorage<T extends BaseRecord> {
     // Hook to auto-generate timestamps on creation
     this.table.hook('creating', function (_primKey, obj, _trans) {
       // 'this' context is the table
-      obj.id = obj.id || uuidv4();
+      obj.id = obj.id || generateId();
       obj.createdAt = new Date();
       obj.updatedAt = new Date();
     });
@@ -35,7 +34,7 @@ export abstract class DexieStorage<T extends BaseRecord> {
 
   async save(record: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
-      const id = uuidv4();
+      const id = generateId();
       const fullRecord = {
         ...record,
         id,

@@ -72,7 +72,6 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0",
     "viem": "^2.31.4",
     "wagmi": "^2.15.6",
     "zod": "^3.25.67"
