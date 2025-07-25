@@ -1,4 +1,4 @@
-import { Download, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
@@ -16,7 +16,7 @@ import ContractUIRenameDialog from './ContractUIRenameDialog';
 
 /**
  * Checks if a record is meaningful (not empty/draft).
- * Empty/draft records cannot be deleted or exported to maintain user working space.
+ * Empty/draft records cannot be deleted, exported, or duplicated to maintain user working space.
  */
 function isRecordMeaningful(record: ContractUIRecord): boolean {
   // If manually renamed, it's not a draft
@@ -58,6 +58,7 @@ export default function ContractUIItem({
 
   const canDelete = isRecordMeaningful(contractUI);
   const canExport = isRecordMeaningful(contractUI);
+  const canDuplicate = isRecordMeaningful(contractUI);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -114,12 +115,11 @@ export default function ContractUIItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
+              {canDuplicate && (
+                <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
+              )}
               {canExport && (
-                <DropdownMenuItem onClick={() => void onExport()}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void onExport()}>Download</DropdownMenuItem>
               )}
               {canDelete && (
                 <DropdownMenuItem
