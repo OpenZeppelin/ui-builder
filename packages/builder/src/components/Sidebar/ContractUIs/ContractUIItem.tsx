@@ -1,5 +1,5 @@
 import { MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
 import {
@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+
+import { useContractUIOperationState } from '../../../hooks/useStorageOperations';
 
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
@@ -55,6 +57,24 @@ export default function ContractUIItem({
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
+
+  // Get operation state for progress indicators
+  const operationState = useContractUIOperationState(contractUI.id);
+
+  // Artificially prolong the animation for better visibility
+  useEffect(() => {
+    if (operationState.isAnyOperationInProgress) {
+      setShowLoadingAnimation(true);
+    } else if (showLoadingAnimation) {
+      // Keep animation visible for an additional 1.5 seconds after operation completes
+      const timer = setTimeout(() => {
+        setShowLoadingAnimation(false);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [operationState.isAnyOperationInProgress, showLoadingAnimation]);
 
   const canDelete = isRecordMeaningful(contractUI);
   const canExport = isRecordMeaningful(contractUI);
@@ -75,7 +95,10 @@ export default function ContractUIItem({
       <div
         onClick={onLoad}
         className={cn(
-          'group relative flex items-center justify-between h-11 px-3 py-2.5 cursor-pointer w-[225px] rounded-lg',
+          'group relative flex items-center justify-between h-11 px-3 py-2.5 cursor-pointer w-[225px] rounded-lg transition-all duration-300 ease-in-out',
+          // Background animation for operations in progress (with artificial delay)
+          showLoadingAnimation && 'bg-muted animate-pulse [animation-duration:1200ms] opacity-30',
+          // Selected state
           isCurrentlyLoaded
             ? // TODO: Replace with OpenZeppelin theme colors for selected state
               // Should use semantic token like 'bg-sidebar-item-selected'
@@ -84,17 +107,19 @@ export default function ContractUIItem({
         )}
       >
         {/* Content */}
-        <div className="min-w-0 flex-1">
-          <h3
-            className={cn(
-              'font-semibold text-sm truncate',
-              // TODO: Replace hard-coded text colors with OpenZeppelin theme
-              // Should use semantic tokens like 'text-sidebar-item-selected' and 'text-sidebar-item'
-              isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
-            )}
-          >
-            {contractUI.title}
-          </h3>
+        <div className="min-w-0 flex-1 flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <h3
+              className={cn(
+                'font-semibold text-sm truncate',
+                // TODO: Replace hard-coded text colors with OpenZeppelin theme
+                // Should use semantic tokens like 'text-sidebar-item-selected' and 'text-sidebar-item'
+                isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
+              )}
+            >
+              {contractUI.title}
+            </h3>
+          </div>
         </div>
 
         {/* Actions */}

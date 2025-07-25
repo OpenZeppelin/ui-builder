@@ -11,6 +11,7 @@ import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
 import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
 import AppSidebar from './components/Sidebar/AppSidebar';
+import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
@@ -75,18 +76,20 @@ function App() {
 
   return (
     <NetworkErrorNotificationProvider>
-      <AdapterProvider resolveAdapter={getAdapter}>
-        <WalletStateProvider
-          initialNetworkId={null}
-          getNetworkConfigById={getNetworkById}
-          loadConfigModule={loadAppConfigModule}
-        >
-          <AppContent />
-          {/* Global network error handler - always mounted to handle error toasts */}
-          <NetworkErrorHandler />
-        </WalletStateProvider>
-      </AdapterProvider>
-      <Toaster position="top-right" />
+      <StorageOperationsProvider>
+        <AdapterProvider resolveAdapter={getAdapter}>
+          <WalletStateProvider
+            initialNetworkId={null}
+            getNetworkConfigById={getNetworkById}
+            loadConfigModule={loadAppConfigModule}
+          >
+            <AppContent />
+            {/* Global network error handler - always mounted to handle error toasts */}
+            <NetworkErrorHandler />
+          </WalletStateProvider>
+        </AdapterProvider>
+        <Toaster position="top-right" />
+      </StorageOperationsProvider>
     </NetworkErrorNotificationProvider>
   );
 }

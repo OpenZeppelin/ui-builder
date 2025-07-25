@@ -36,9 +36,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     async (record: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
       try {
         const id = await contractUIStorage.save(record);
-        toast.success('Configuration saved', {
-          description: `"${record.title}" has been saved successfully.`,
-        });
         return id;
       } catch (error) {
         toast.error('Failed to save', {
@@ -67,9 +64,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
   const deleteContractUI = useCallback(async (id: string): Promise<void> => {
     try {
       await contractUIStorage.delete(id);
-      toast.success('Configuration deleted', {
-        description: 'The configuration has been removed.',
-      });
     } catch (error) {
       toast.error('Failed to delete', {
         description: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -81,9 +75,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
   const deleteAllContractUIs = useCallback(async (): Promise<void> => {
     try {
       await contractUIStorage.clear();
-      toast.success('All configurations deleted', {
-        description: 'Your Contract UI history has been cleared.',
-      });
     } catch (error) {
       toast.error('Failed to delete all', {
         description: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -95,9 +86,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
   const duplicateContractUI = useCallback(async (id: string): Promise<string> => {
     try {
       const newId = await contractUIStorage.duplicate(id);
-      toast.success('Configuration duplicated', {
-        description: 'A copy has been created successfully.',
-      });
       return newId;
     } catch (error) {
       toast.error('Failed to duplicate', {
@@ -132,10 +120,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      toast.success('Export successful', {
-        description: `Exported ${exportedCount} meaningful configuration(s).`,
-      });
     } catch (error) {
       toast.error('Failed to export', {
         description: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -147,11 +131,7 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
   const importContractUIs = useCallback(async (file: File): Promise<void> => {
     try {
       const text = await file.text();
-      const importedIds = await contractUIStorage.import(text);
-
-      toast.success('Import successful', {
-        description: `Imported ${importedIds.length} configuration(s).`,
-      });
+      await contractUIStorage.import(text);
     } catch (error) {
       toast.error('Failed to import', {
         description: error instanceof Error ? error.message : 'Unknown error occurred',

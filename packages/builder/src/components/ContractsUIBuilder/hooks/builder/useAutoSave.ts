@@ -7,6 +7,7 @@ import {
 } from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { uiBuilderStore } from '../uiBuilderStore';
 
 /**
@@ -32,6 +33,7 @@ let globalSkipNextCycle = false;
  */
 export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
   const { saveContractUI, updateContractUI } = useContractUIStorage();
+  const storageOperations = useStorageOperations();
 
   // Subscribe to UI builder store state changes
   const state = useSyncExternalStore(
@@ -56,9 +58,10 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
     }
     globalAutoSaveInProgress = true;
 
-    try {
-      const currentState = uiBuilderStore.getState();
+    const currentState = uiBuilderStore.getState();
+    const configId = currentState.loadedConfigurationId;
 
+    try {
       // Multiple guards to prevent auto-save during loading operations
       if (
         isLoadingSavedConfigRef.current ||
@@ -67,8 +70,6 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
       ) {
         return;
       }
-
-      const configId = currentState.loadedConfigurationId;
 
       // With the new draft record system, we should always have a configId
       if (!configId) {
@@ -90,6 +91,9 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
       // Update UI to show saving state
       uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
 
+      // Track saving state for progress indicator
+      storageOperations.setSaving(configId, true);
+
       // Determine title to use (preserve manual renames)
       let titleToUse: string;
       const existingConfig = await contractUIStorage.get(configId);
@@ -110,18 +114,19 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
         uiBuilderStore.updateState(() => ({ loadedConfigurationId: configId }));
       }
 
-      toast.success('Configuration saved', {
-        duration: 2000,
-        description: 'Your changes have been automatically saved.',
-      });
+      // Auto-save completed successfully
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Auto-save failed', errorMessage);
+      // Always show auto-save errors as they are important user feedback
       toast.error('Auto-save failed', {
         description: 'Your changes could not be saved. Please try again.',
       });
     } finally {
       uiBuilderStore.updateState(() => ({ isAutoSaving: false }));
+      if (configId) {
+        storageOperations.setSaving(configId, false);
+      }
       globalAutoSaveInProgress = false;
     }
   }, [isLoadingSavedConfigRef, saveContractUI, updateContractUI]);

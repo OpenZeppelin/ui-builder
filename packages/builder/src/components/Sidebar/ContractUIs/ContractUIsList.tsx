@@ -2,6 +2,8 @@ import { Loader2 } from 'lucide-react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 
+import { useStorageOperations } from '../../../hooks/useStorageOperations';
+
 import ContractUIItem from './ContractUIItem';
 
 interface ContractUIsListProps {
@@ -24,6 +26,8 @@ export default function ContractUIsList({
     exportContractUIs,
   } = useContractUIStorage();
 
+  const storageOperations = useStorageOperations();
+
   const handleRename = async (contractUIId: string, newTitle: string): Promise<void> => {
     await updateContractUI(contractUIId, {
       title: newTitle,
@@ -33,15 +37,26 @@ export default function ContractUIsList({
 
   const handleDelete = async (contractUIId: string): Promise<void> => {
     const isDeletingCurrentRecord = currentLoadedConfigurationId === contractUIId;
-    await deleteContractUI(contractUIId);
 
-    if (isDeletingCurrentRecord && onResetAfterDelete) {
-      onResetAfterDelete();
+    try {
+      storageOperations.setDeleting(contractUIId, true);
+      await deleteContractUI(contractUIId);
+
+      if (isDeletingCurrentRecord && onResetAfterDelete) {
+        onResetAfterDelete();
+      }
+    } finally {
+      storageOperations.setDeleting(contractUIId, false);
     }
   };
 
   const handleExport = async (contractUIId: string): Promise<void> => {
-    await exportContractUIs([contractUIId]);
+    try {
+      storageOperations.setExporting(contractUIId, true);
+      await exportContractUIs([contractUIId]);
+    } finally {
+      storageOperations.setExporting(contractUIId, false);
+    }
   };
 
   if (isLoading) {
@@ -74,7 +89,12 @@ export default function ContractUIsList({
               onLoad={() => onLoadContractUI?.(contractUI.id)}
               onDelete={() => handleDelete(contractUI.id)}
               onDuplicate={async () => {
-                await duplicateContractUI(contractUI.id);
+                try {
+                  storageOperations.setDuplicating(contractUI.id, true);
+                  await duplicateContractUI(contractUI.id);
+                } finally {
+                  storageOperations.setDuplicating(contractUI.id, false);
+                }
               }}
               onRename={(newTitle) => handleRename(contractUI.id, newTitle)}
               onExport={() => handleExport(contractUI.id)}

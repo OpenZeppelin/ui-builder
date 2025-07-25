@@ -38,10 +38,6 @@ export function useBuilderLifecycle(
 
         if (currentLoadedId === id) {
           logger.info('Configuration already loaded', `ID: ${id}`);
-          toast.info('Configuration already active', {
-            description: 'This configuration is already loaded.',
-            duration: 2000,
-          });
           return;
         }
 
@@ -87,9 +83,6 @@ export function useBuilderLifecycle(
         setActiveNetworkId(savedUI.networkId);
 
         logger.info('Contract UI loaded', `Title: ${savedUI.title}`);
-        toast.success('Configuration loaded', {
-          description: `Loaded "${savedUI.title}"`,
-        });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to load Contract UI', errorMessage);
