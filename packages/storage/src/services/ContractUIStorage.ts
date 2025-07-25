@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DexieStorage } from '../base/DexieStorage';
 import { db } from '../database/db';
@@ -86,8 +86,20 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       const importedIds: string[] = [];
 
       for (const config of meaningfulConfigurations) {
-        const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = config;
-        const newId = await this.save(recordData);
+        // Generate new ID but preserve original timestamps
+        const { id: _originalId, ...configWithTimestamps } = config;
+        const newId = generateId();
+
+        const recordToImport = {
+          ...configWithTimestamps,
+          id: newId,
+          // Preserve original timestamps if they exist, otherwise use current time
+          createdAt: configWithTimestamps.createdAt || new Date(),
+          updatedAt: configWithTimestamps.updatedAt || new Date(),
+        } as ContractUIRecord;
+
+        // Use table.add directly to bypass the save method's timestamp overwriting
+        await this.table.add(recordToImport);
         importedIds.push(newId);
       }
 

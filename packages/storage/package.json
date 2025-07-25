@@ -47,11 +47,9 @@
     "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
     "dexie": "^4.0.11",
-    "dexie-react-hooks": "^1.1.7",
-    "uuid": "^11.0.5"
+    "dexie-react-hooks": "^1.1.7"
   },
   "devDependencies": {
-    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
     "eslint": "^9.29.0",
