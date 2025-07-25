@@ -1,11 +1,18 @@
 import { FileJson2, FileSearch } from 'lucide-react';
 
+import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+
+import { DevToolsDropdown } from '../../Common/DevToolsDropdown';
+
 import SidebarButton from './SidebarButton';
 
 /**
  * Other Tools section component for the sidebar
  */
 export default function OtherToolsSection() {
+  // Check if dev tools should be shown
+  const showDevTools = appConfigService.isFeatureEnabled('show_dev_tools');
+
   return (
     <div className="flex flex-col w-full">
       {/* TODO: Replace hard-coded text color with OpenZeppelin theme */}
@@ -22,6 +29,13 @@ export default function OtherToolsSection() {
         <SidebarButton icon={<FileSearch className="size-4" />} badge="Coming Soon" disabled>
           Audit Tool
         </SidebarButton>
+
+        {/* Dev Tools - Only shown when feature flag is enabled */}
+        {showDevTools && (
+          <div className="relative">
+            <DevToolsDropdown />
+          </div>
+        )}
       </div>
     </div>
   );
