@@ -36,21 +36,20 @@ export default function MainActions({ onCreateNew, onShowImportDialog }: MainAct
 
   return (
     <div className="flex flex-col w-full">
-      <SidebarButton icon={<SquarePen className="h-4 w-4" />} onClick={onCreateNew}>
+      <SidebarButton icon={<SquarePen className="size-4" />} onClick={onCreateNew}>
         New Contract UI
       </SidebarButton>
 
-      <SidebarButton icon={<LayoutPanelTop className="h-4 w-4" />}>Templates</SidebarButton>
+      <SidebarButton icon={<LayoutPanelTop className="size-4" />} badge="Coming Soon" disabled>
+        Templates
+      </SidebarButton>
 
-      <SidebarButton icon={<Upload className="h-4 w-4" />} onClick={onShowImportDialog}>
+      <SidebarButton icon={<Upload className="size-4" />} onClick={onShowImportDialog}>
         Upload
       </SidebarButton>
 
       {hasMeaningfulRecords && (
-        <SidebarButton
-          icon={<Download className="h-4 w-4" />}
-          onClick={() => void handleDownload()}
-        >
+        <SidebarButton icon={<Download className="size-4" />} onClick={() => void handleDownload()}>
           Download
         </SidebarButton>
       )}
