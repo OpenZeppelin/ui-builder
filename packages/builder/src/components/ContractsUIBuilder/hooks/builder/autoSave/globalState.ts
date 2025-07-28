@@ -81,7 +81,7 @@ export function clearAutoSaveTimer(): void {
 /**
  * Set a new timer with proper handling for both requestIdleCallback and setTimeout
  */
-export function setAutoSaveTimer(callback: () => void, delay: number = 3000): void {
+export function setAutoSaveTimer(callback: () => void, delay: number = 500): void {
   clearAutoSaveTimer();
 
   // Always use setTimeout for the delay, then optionally use requestIdleCallback
