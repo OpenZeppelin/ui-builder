@@ -12,12 +12,12 @@ interface HeaderProps {
  */
 export const Header = ({ title, showNavigation = false }: HeaderProps) => {
   return (
-    <header className="border-b border-border bg-background">
+    <header className="border-b border-[#F5F5F5] bg-background">
       <div className="flex h-16 items-center px-5">
         {/* Left side - Title (conditional) */}
         {title && (
           <div className="flex items-center">
-            <h1 className="text-sm font-semibold text-foreground">{title}</h1>
+            <h1 className="text-base font-semibold text-foreground">{title}</h1>
           </div>
         )}
 
