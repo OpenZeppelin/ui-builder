@@ -69,6 +69,57 @@ let state: UIBuilderState = {
 
 const listeners = new Set<() => void>();
 
+// Optimized batching mechanism
+let updateQueue: Array<(state: UIBuilderState) => Partial<UIBuilderState>> = [];
+let isProcessingQueue = false;
+let batchTimeout: NodeJS.Timeout | null = null;
+
+const processUpdateQueue = () => {
+  if (isProcessingQueue || updateQueue.length === 0) return;
+
+  isProcessingQueue = true;
+
+  // Clear any existing timeout
+  if (batchTimeout) {
+    clearTimeout(batchTimeout);
+    batchTimeout = null;
+  }
+
+  // Use microtask for immediate batching without frame delay
+  void Promise.resolve().then(() => {
+    const updates = updateQueue;
+    updateQueue = [];
+
+    // Apply all updates at once with optimization
+    let newState = state;
+    const hasChanges = updates.length > 0;
+
+    if (hasChanges) {
+      for (const updater of updates) {
+        const changes = updater(newState);
+        if (Object.keys(changes).length > 0) {
+          newState = { ...newState, ...changes };
+        }
+      }
+
+      // Only update state and emit if there are actual changes
+      if (newState !== state) {
+        state = newState;
+
+        // Emit change once for all batched updates
+        emitChange();
+      }
+    }
+
+    isProcessingQueue = false;
+
+    // Process any new updates that came in while we were processing
+    if (updateQueue.length > 0) {
+      processUpdateQueue();
+    }
+  });
+};
+
 const emitChange = () => {
   for (const listener of listeners) {
     listener();
@@ -90,7 +141,47 @@ export const uiBuilderStore = {
     return () => listeners.delete(listener);
   },
 
+  /**
+   * Subscribe to specific state slices for better performance.
+   * Only triggers the listener when the selected value changes.
+   */
+  subscribeWithSelector<T>(
+    selector: (state: UIBuilderState) => T,
+    listener: (value: T) => void
+  ): () => void {
+    let previousValue = selector(state);
+
+    const wrappedListener = () => {
+      const currentValue = selector(state);
+      // Only trigger if the selected value actually changed
+      if (currentValue !== previousValue) {
+        previousValue = currentValue;
+        listener(currentValue);
+      }
+    };
+
+    listeners.add(wrappedListener);
+    return () => listeners.delete(wrappedListener);
+  },
+
   updateState(updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) {
+    updateQueue.push(updater);
+
+    // Debounce rapid successive updates to prevent performance issues
+    if (!batchTimeout) {
+      batchTimeout = setTimeout(() => {
+        // Use microtask for immediate processing (avoid requestIdleCallback complexity)
+        void Promise.resolve().then(() => {
+          processUpdateQueue();
+        });
+      }, 0);
+    }
+  },
+
+  /**
+   * Update state immediately without batching. Use sparingly for critical updates.
+   */
+  updateStateImmediate(updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) {
     const changes = updater(state);
     state = { ...state, ...changes };
     emitChange();

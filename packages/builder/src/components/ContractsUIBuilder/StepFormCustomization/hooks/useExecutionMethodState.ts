@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
 import type {
@@ -139,6 +139,15 @@ export function useExecutionMethodState({
   }, [adapter, getValues, onUpdateConfig, reset, setValue]);
 
   // Effect 2: Perform initial validation when config or validator changes
+  // Use a stable reference to currentConfig to avoid expensive JSON.stringify
+  const currentConfigKey = useMemo(() => {
+    if (!currentConfig) return 'empty';
+    // Create a simple key from the most important config properties
+    const method = currentConfig.method;
+    const allowAny = method === 'eoa' ? currentConfig.allowAny : false;
+    return `${method}-${allowAny}`;
+  }, [currentConfig?.method, currentConfig?.method === 'eoa' ? currentConfig.allowAny : false]);
+
   useEffect(() => {
     let configToValidate = ensureCompleteConfig(currentConfig || {});
 
@@ -147,9 +156,7 @@ export function useExecutionMethodState({
     }
 
     validateExecutionConfigForBuilder(configToValidate);
-    // Depend on the serialized value of currentConfig to prevent infinite loops
-    // from object reference changes.
-  }, [JSON.stringify(currentConfig), validateExecutionConfigForBuilder]);
+  }, [currentConfigKey, validateExecutionConfigForBuilder]);
 
   // Effect 3: Watch for user form input changes and trigger validation
   useEffect(() => {

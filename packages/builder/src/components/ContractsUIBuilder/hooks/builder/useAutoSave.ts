@@ -1,41 +1,46 @@
 import { toast } from 'sonner';
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
-import {
-  contractUIStorage,
-  useContractUIStorage,
-} from '@openzeppelin/contracts-ui-builder-storage';
+import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { uiBuilderStore } from '../uiBuilderStore';
 
-/**
- * Global state for auto-save functionality across all hook instances.
- * This prevents race conditions and duplicate operations when multiple components use the hook.
- */
-let globalAutoSaveInProgress = false;
-let globalAutoSavePaused = false;
-let globalAutoSaveTimer: NodeJS.Timeout | null = null;
-let globalSkipNextCycle = false;
+import {
+  autoSaveCache,
+  AutoSaveGuards,
+  AutoSaveHookReturn,
+  buildConfigurationObject,
+  generateDefaultTitle,
+  globalAutoSaveState,
+} from './autoSave';
 
 /**
- * Hook that provides reactive auto-save functionality for the UI builder state.
+ * Auto-save hook with debouncing and duplicate operation prevention.
+ * See documentation for complete usage patterns and architecture details.
  *
- * Features:
- * - Prevents duplicate saves across multiple hook instances using global locks
- * - Provides pause/resume API to control auto-save during loading operations
- * - Debounces auto-save operations to prevent excessive API calls
- * - Handles both creation of new configurations and updates to existing ones
- *
- * @param isLoadingSavedConfigRef - Ref to track if a saved configuration is being loaded
- * @returns Object with pause, resume functions and current pause state
+ * @see {@link packages/builder/docs/state-management.md | Auto-save Documentation}
  */
-export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
-  const { saveContractUI, updateContractUI } = useContractUIStorage();
+/**
+ * Handle auto-save errors with consistent logging and user feedback
+ */
+function handleAutoSaveError(error: unknown): void {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  logger.error('Auto-save failed', errorMessage);
+  toast.error('Auto-save failed', {
+    description: 'Your changes could not be saved. Please try again.',
+  });
+}
+
+export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): AutoSaveHookReturn {
+  const { updateContractUI } = useContractUIStorage();
   const storageOperations = useStorageOperations();
 
-  // Subscribe to UI builder store state changes
+  // Use ref to store the current auto-save function to avoid dependency issues
+  const autoSaveRef = useRef<(() => Promise<void>) | undefined>(undefined);
+
+  // Subscribe to store state changes
   const state = useSyncExternalStore(
     uiBuilderStore.subscribe,
     uiBuilderStore.getState,
@@ -43,221 +48,120 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>) {
   );
 
   /**
-   * Performs the actual auto-save operation with comprehensive guards and error handling.
+   * Core auto-save operation - simplified with extracted modules
    */
   const autoSave = useCallback(async () => {
-    // Early exit if auto-save is paused
-    if (globalAutoSavePaused) {
+    // Early exit if paused
+    if (globalAutoSaveState.paused) {
       logger.info('builder', 'Auto-save paused, skipping');
       return;
     }
 
-    // Atomic lock - only one auto-save can run at a time
-    if (globalAutoSaveInProgress) {
+    // Acquire lock to prevent concurrent operations
+    if (!globalAutoSaveState.acquireLock()) {
       return;
     }
-    globalAutoSaveInProgress = true;
-
-    const currentState = uiBuilderStore.getState();
-    const configId = currentState.loadedConfigurationId;
 
     try {
-      // Multiple guards to prevent auto-save during loading operations
-      if (
-        isLoadingSavedConfigRef.current ||
-        currentState.isLoadingConfiguration ||
-        (currentState.loadedConfigurationId && !currentState.selectedNetworkConfigId)
-      ) {
+      const currentState = uiBuilderStore.getState();
+
+      // Run all guard checks
+      const { proceed, configId } = AutoSaveGuards.shouldProceedWithAutoSave(
+        isLoadingSavedConfigRef,
+        currentState
+      );
+
+      if (!proceed || !configId) {
         return;
       }
 
-      // With the new draft record system, we should always have a configId
-      if (!configId) {
-        logger.warn('builder', 'No loaded configuration ID found - cannot auto-save');
-        return;
-      }
-
-      // Only auto-save if we have meaningful content to save
-      if (
-        !currentState.selectedEcosystem &&
-        !currentState.selectedNetworkConfigId &&
-        !currentState.selectedFunction &&
-        !currentState.formConfig
-      ) {
-        logger.info('builder', 'No meaningful content to auto-save yet');
-        return;
-      }
-
-      // Update UI to show saving state
+      // Update UI state
       uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
-
-      // Track saving state for progress indicator
       storageOperations.setSaving(configId, true);
 
-      // Determine title to use (preserve manual renames)
-      let titleToUse: string;
-      const existingConfig = await contractUIStorage.get(configId);
-      const isManuallyRenamed = existingConfig?.metadata?.isManuallyRenamed === true;
-      titleToUse =
-        isManuallyRenamed && existingConfig?.title
-          ? existingConfig.title
-          : generateDefaultTitle(currentState);
+      // Yield to prevent blocking
+      await Promise.resolve();
 
-      // Prepare configuration object
+      // Get title information (cached)
+      const { title: existingTitle, isManuallyRenamed } =
+        await autoSaveCache.getTitleInfo(configId);
+      const titleToUse =
+        isManuallyRenamed && existingTitle ? existingTitle : generateDefaultTitle(currentState);
+
+      // Build configuration
       const configToSave = buildConfigurationObject(currentState, titleToUse);
 
-      // Always update the existing record
+      // Check if config actually changed (cached comparison)
+      if (!autoSaveCache.hasConfigChanged(configId, configToSave)) {
+        logger.info('builder', 'Skipping unchanged auto-save');
+        return;
+      }
+
+      // Save configuration
       logger.info('Auto-save: Updating existing configuration', `ID: ${configId}`);
       await updateContractUI(configId, configToSave);
 
+      // Update cache
+      autoSaveCache.updateConfigCache(configId, configToSave);
+
+      // Update loaded configuration ID if needed
       if (currentState.loadedConfigurationId !== configId) {
         uiBuilderStore.updateState(() => ({ loadedConfigurationId: configId }));
       }
-
-      // Auto-save completed successfully
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Auto-save failed', errorMessage);
-      // Always show auto-save errors as they are important user feedback
-      toast.error('Auto-save failed', {
-        description: 'Your changes could not be saved. Please try again.',
-      });
+      handleAutoSaveError(error);
     } finally {
-      uiBuilderStore.updateState(() => ({ isAutoSaving: false }));
+      // Cleanup
+      const currentState = uiBuilderStore.getState();
+      const configId = currentState.loadedConfigurationId;
+
+      uiBuilderStore.updateStateImmediate(() => ({ isAutoSaving: false }));
       if (configId) {
         storageOperations.setSaving(configId, false);
       }
-      globalAutoSaveInProgress = false;
+      globalAutoSaveState.releaseLock();
     }
-  }, [isLoadingSavedConfigRef, saveContractUI, updateContractUI]);
+  }, [isLoadingSavedConfigRef, updateContractUI, storageOperations]);
+
+  // Update the ref whenever autoSave changes
+  useEffect(() => {
+    autoSaveRef.current = autoSave;
+  }, [autoSave]);
 
   /**
-   * Effect that handles auto-save scheduling with debouncing and various guards.
+   * Effect to schedule auto-save operations
+   * Fixed: Removed autoSave from dependencies to prevent infinite loop
    */
   useEffect(() => {
-    // Only schedule auto-save if we have some state changes and auto-save is not paused
-    if (globalAutoSavePaused) {
+    if (globalAutoSaveState.paused || globalAutoSaveState.shouldSkipCycle()) {
       return;
     }
 
-    // Skip one scheduling cycle after resuming from load to prevent immediate auto-save
-    if (globalSkipNextCycle) {
-      logger.info('builder', 'Skipping auto-save cycle - just resumed from load');
-      globalSkipNextCycle = false;
-      return;
-    }
-
-    // Clear any existing timer
-    if (globalAutoSaveTimer) {
-      clearTimeout(globalAutoSaveTimer);
-      globalAutoSaveTimer = null;
-    }
-
-    // Schedule debounced auto-save
-    globalAutoSaveTimer = setTimeout(() => {
-      void autoSave();
-    }, 1500);
-  }, [state.selectedFunction, state.formConfig, autoSave]);
-
-  /**
-   * Cleanup timer on unmount.
-   */
-  useEffect(() => {
-    return () => {
-      if (globalAutoSaveTimer) {
-        clearTimeout(globalAutoSaveTimer);
-        globalAutoSaveTimer = null;
+    globalAutoSaveState.setTimer(() => {
+      if (autoSaveRef.current) {
+        void autoSaveRef.current();
       }
-    };
-  }, []);
+    });
+  }, [
+    state.selectedFunction,
+    state.formConfig?.title,
+    state.formConfig?.description,
+    state.formConfig?.fields,
+    state.formConfig?.executionConfig,
+    state.formConfig?.uiKitConfig,
+    // Removed autoSave from here to prevent infinite loop
+  ]);
 
   /**
-   * Pauses auto-save and clears any pending timers.
-   * Use this when loading configurations to prevent auto-save corruption.
+   * Cleanup on unmount
    */
-  const pause = useCallback(() => {
-    logger.info('builder', 'Auto-save paused');
-    globalAutoSavePaused = true;
-
-    if (globalAutoSaveTimer) {
-      clearTimeout(globalAutoSaveTimer);
-      globalAutoSaveTimer = null;
-      logger.info('builder', 'Cleared existing auto-save timer');
-    }
-  }, []);
-
-  /**
-   * Resumes auto-save functionality.
-   * Sets a flag to skip the next scheduling cycle to prevent immediate auto-save.
-   */
-  const resume = useCallback(() => {
-    logger.info('builder', 'Auto-save resumed');
-    globalAutoSavePaused = false;
-    globalSkipNextCycle = true; // Prevent immediate auto-save after resume
+  useEffect(() => {
+    return () => globalAutoSaveState.cleanup();
   }, []);
 
   return {
-    pause,
-    resume,
-    isPaused: globalAutoSavePaused,
-  };
-}
-
-/**
- * Generates a default title for the configuration based on current state.
- * This is primarily used to preserve "New Contract UI" during early stages.
- * Meaningful titles with contract addresses are generated in FormGenerator.generateFormConfig().
- */
-function generateDefaultTitle(state: ReturnType<typeof uiBuilderStore.getState>): string {
-  // If there's already a form config title (generated by FormGenerator), use it
-  if (state.formConfig?.title) {
-    return state.formConfig.title;
-  }
-
-  // Fallback to preserve "New Contract UI" during early stages before form generation
-  return 'New Contract UI';
-}
-
-/**
- * Builds a complete configuration object for saving.
- */
-function buildConfigurationObject(
-  state: ReturnType<typeof uiBuilderStore.getState>,
-  title: string
-) {
-  const formConfig = {
-    ...state.formConfig,
-    id: state.formConfig?.functionId || 'new',
-    title: state.formConfig?.title || 'Contract UI Form',
-    functionId: state.selectedFunction || '',
-    contractAddress: state.contractAddress || '',
-    fields: state.formConfig?.fields || [],
-    layout: state.formConfig?.layout || {
-      columns: 1 as const,
-      spacing: 'normal' as const,
-      labelPosition: 'top' as const,
-    },
-    validation: state.formConfig?.validation || {
-      mode: 'onChange' as const,
-      showErrors: 'inline' as const,
-    },
-    submitButton: {
-      text: 'Submit',
-      loadingText: 'Processing...',
-      position: 'right' as const,
-    },
-    theme: state.formConfig?.theme || {},
-    description: state.formConfig?.description || '',
-  };
-
-  return {
-    title,
-    ecosystem: state.selectedEcosystem || 'evm',
-    networkId: state.selectedNetworkConfigId || '',
-    contractAddress: state.contractAddress || '',
-    functionId: state.selectedFunction || '',
-    formConfig,
-    executionConfig: state.formConfig?.executionConfig,
-    uiKitConfig: state.formConfig?.uiKitConfig,
+    pause: globalAutoSaveState.pause.bind(globalAutoSaveState),
+    resume: globalAutoSaveState.resume.bind(globalAutoSaveState),
+    isPaused: globalAutoSaveState.paused,
   };
 }

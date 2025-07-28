@@ -12,12 +12,12 @@ import { FieldEditorFormValues } from './types';
 
 interface FieldBasicSettingsProps {
   /**
-   * React Hook Form control
+   * React Hook Form control instance for managing form state
    */
   control: Control<FieldEditorFormValues>;
 
   /**
-   * Field type groups for the select dropdown
+   * Field type groups for the select dropdown, organized by category
    */
   fieldTypeGroups: OptionGroup[];
 
@@ -34,7 +34,19 @@ interface FieldBasicSettingsProps {
 }
 
 /**
- * Component for editing basic field settings like label, type, etc.
+ * Component for editing basic field settings like label, type, placeholder, and visibility options.
+ *
+ * Provides form controls for:
+ * - Field label and placeholder text
+ * - Field type selection (text, number, address, etc.)
+ * - Visibility options (hidden, hardcoded values)
+ * - Hardcoded value configuration when applicable
+ *
+ * @param props - Component props
+ * @param props.control - React Hook Form control instance
+ * @param props.fieldTypeGroups - Available field types organized by category
+ * @param props.adapter - Chain-specific adapter for type validation
+ * @param props.field - The field being edited with its current configuration
  */
 export function FieldBasicSettings({
   control,

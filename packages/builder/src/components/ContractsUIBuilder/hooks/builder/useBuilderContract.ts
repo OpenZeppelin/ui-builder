@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
@@ -7,6 +7,8 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../uiBuilderStore';
+
+import { useBuilderStoreSelector } from './useBuilderStoreSelector';
 
 const STEP_INDICES = {
   FUNCTION_SELECTOR: 2,
@@ -19,24 +21,19 @@ const STEP_INDICES = {
  */
 export function useBuilderContract() {
   const { activeAdapter } = useWalletState();
-  // Use useSyncExternalStore to get reactive state values instead of static snapshot
-  const state = useSyncExternalStore(
-    uiBuilderStore.subscribe,
-    uiBuilderStore.getState,
-    uiBuilderStore.getState
-  );
+
+  // Use selective subscriptions for better performance
+  const needsContractSchemaLoad = useBuilderStoreSelector((state) => state.needsContractSchemaLoad);
+  const contractFormValues = useBuilderStoreSelector((state) => state.contractFormValues);
+  const selectedNetworkConfigId = useBuilderStoreSelector((state) => state.selectedNetworkConfigId);
 
   // Loading guard to prevent multiple concurrent loads
   const isLoadingSchemaRef = useRef(false);
 
-  // Extract specific values to avoid dependency array issues
-  const needsContractSchemaLoad = state.needsContractSchemaLoad;
-  const contractFormValues = state.contractFormValues;
-  const selectedNetworkConfigId = state.selectedNetworkConfigId;
-
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
-      const currentState = uiBuilderStore.getState();
+      // Get the current state to check if we need to reset
+      const { selectedFunction } = uiBuilderStore.getState();
 
       uiBuilderStore.updateState(() => ({
         contractSchema: schema,
@@ -45,7 +42,7 @@ export function useBuilderContract() {
       }));
 
       // Only reset downstream steps if we're not loading a saved configuration
-      if (!currentState.selectedFunction) {
+      if (!selectedFunction) {
         uiBuilderStore.resetDownstreamSteps('contract');
       }
     },
@@ -93,21 +90,18 @@ export function useBuilderContract() {
       return;
     }
 
-    // Get fresh state values to avoid stale closure issues
-    const currentState = uiBuilderStore.getState();
-
     if (
       activeAdapter &&
-      currentState.needsContractSchemaLoad &&
-      currentState.contractFormValues &&
-      currentState.selectedNetworkConfigId === activeAdapter.networkConfig.id
+      needsContractSchemaLoad &&
+      contractFormValues &&
+      selectedNetworkConfigId === activeAdapter.networkConfig.id
     ) {
       try {
         isLoadingSchemaRef.current = true;
         logger.info('useBuilderContract', `Loading contract schema for saved configuration`);
-        const schema = await loadContractDefinition(activeAdapter, currentState.contractFormValues);
+        const schema = await loadContractDefinition(activeAdapter, contractFormValues);
         if (schema) {
-          handleContractSchemaLoaded(schema, currentState.contractFormValues);
+          handleContractSchemaLoaded(schema, contractFormValues);
         }
         uiBuilderStore.updateState(() => ({ needsContractSchemaLoad: false }));
       } catch (error) {

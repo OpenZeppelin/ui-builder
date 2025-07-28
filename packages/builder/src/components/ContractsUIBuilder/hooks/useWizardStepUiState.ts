@@ -1,4 +1,6 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback } from 'react';
+
+import { useBuilderStoreSelector } from './builder/useBuilderStoreSelector';
 
 import { uiBuilderStore } from './uiBuilderStore';
 
@@ -15,11 +17,8 @@ export function useWizardStepUiState<T>(
   stepId: string,
   initialStepState: T
 ): [T, (newState: Partial<T>) => void] {
-  // Subscribe to the entire uiState object from the external store
-  const fullUiState = useSyncExternalStore(
-    uiBuilderStore.subscribe,
-    () => uiBuilderStore.getState().uiState
-  );
+  // Subscribe only to the uiState object from the external store
+  const fullUiState = useBuilderStoreSelector((state) => state.uiState);
 
   // Get the state for this specific step, or fall back to the initial state
   const stepState = (fullUiState[stepId] as T) ?? initialStepState;

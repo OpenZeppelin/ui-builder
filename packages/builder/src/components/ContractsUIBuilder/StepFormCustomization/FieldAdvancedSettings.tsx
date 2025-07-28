@@ -6,34 +6,34 @@ import { FieldEditorFormValues } from './types';
 
 interface FieldAdvancedSettingsProps {
   /**
-   * React Hook Form control
+   * React Hook Form control instance for managing form state
    */
   control: Control<FieldEditorFormValues>;
 }
 
 /**
- * Component for editing advanced field settings like description and validation
+ * Component for editing advanced field settings like description and validation.
+ *
+ * Provides form controls for:
+ * - Field description (optional explanatory text)
+ * - Required field validation
+ *
+ * @param props - Component props
+ * @param props.control - React Hook Form control instance
  */
 export function FieldAdvancedSettings({ control }: FieldAdvancedSettingsProps) {
   return (
     <>
       <TextAreaField
         id="field-description"
-        name="helperText"
+        name="description"
         label="Field Description"
         control={control}
         placeholder="Enter field description or instructions"
       />
 
-      {/* 
-        React Hook Form supports dot notation in name attributes to access nested properties.
-        "validation.required" will automatically:
-        1. Access/create the validation object in form values
-        2. Set the required property within that object
-        3. Maintain the proper nested structure needed for FormFieldType
-      */}
       <BooleanField
-        id="field-required"
+        id="is-required"
         name="validation.required"
         label="Required Field"
         control={control}
