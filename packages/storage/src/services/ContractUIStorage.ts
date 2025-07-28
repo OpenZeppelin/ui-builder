@@ -83,25 +83,26 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         throw new Error('No meaningful configurations found to import');
       }
 
-      const importedIds: string[] = [];
-
-      for (const config of meaningfulConfigurations) {
+      const recordsToImport: ContractUIRecord[] = meaningfulConfigurations.map((config) => {
         // Generate new ID but preserve original timestamps
         const { id: _originalId, ...configWithTimestamps } = config;
-        const newId = generateId();
 
-        const recordToImport = {
+        return {
           ...configWithTimestamps,
-          id: newId,
-          // Preserve original timestamps if they exist, otherwise use current time
-          createdAt: configWithTimestamps.createdAt || new Date(),
-          updatedAt: configWithTimestamps.updatedAt || new Date(),
-        } as ContractUIRecord;
+          id: generateId(),
+          // Preserve original timestamps and ensure they are Date objects
+          createdAt: config.createdAt ? new Date(config.createdAt) : new Date(),
+          updatedAt: config.updatedAt ? new Date(config.updatedAt) : new Date(),
+        };
+      });
 
-        // Use table.add directly to bypass the save method's timestamp overwriting
-        await this.table.add(recordToImport);
-        importedIds.push(newId);
-      }
+      // Use table.bulkAdd for efficient batch insertion.
+      // This is much faster than adding records one by one in a loop.
+      // Note: bulkAdd does not trigger 'creating' hooks, which is desired here
+      // to preserve the timestamps from the imported file.
+      const importedIds = (await this.table.bulkAdd(recordsToImport, {
+        allKeys: true,
+      })) as string[];
 
       logger.info('Contract UIs imported', `Count: ${importedIds.length}`);
       return importedIds;
