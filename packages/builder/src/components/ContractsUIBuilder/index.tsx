@@ -264,7 +264,7 @@ export function ContractsUIBuilder() {
         </div>
       )}
 
-      <div className="ml-8 mr-8 max-w-6xl py-8">
+      <div className="ml-8 mr-8 max-w-6xl pt-13 pb-8">
         <HeroSection />
 
         <div className="bg-card rounded-lg">
