@@ -14,6 +14,24 @@ The goal of this package is to centralize common logic that is not tied to any s
 - **`cn`**: A utility (a wrapper around `clsx` and `tailwind-merge`) for conditionally joining CSS class names, essential for building dynamic and themeable UI components with Tailwind CSS.
 - **Type Guards and Helpers**: Various other small, reusable functions like `getDefaultValueForType`.
 
+## Package Structure
+
+```text
+utils/
+├── src/
+│   ├── config/                 # Configuration management
+│   ├── logger/                 # Logging utilities
+│   ├── ui/                     # UI utility functions
+│   ├── validation/             # Validation and type utilities
+│   ├── constants/              # Shared constants
+│   └── index.ts                # Main package exports
+├── package.json                # Package configuration
+├── tsconfig.json               # TypeScript configuration
+├── tsup.config.ts              # Build configuration
+├── vitest.config.ts            # Test configuration
+└── README.md                   # This documentation
+```
+
 ## Installation
 
 This package is a core part of the monorepo and is automatically linked via `pnpm` workspaces. For external use, it would be installed from the project's package registry.

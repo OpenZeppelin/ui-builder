@@ -34,9 +34,10 @@ This project is currently in development.
 This project is organized as a monorepo with the following packages:
 
 - **packages/builder**: The main application with the builder app UI and core logic.
-- **packages/react-core**: NEW - Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
+- **packages/react-core**: Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
 - **packages/renderer**: The shared app rendering library (published to npm), responsible for dynamically rendering forms and other components based on schemas and an active adapter.
 - **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `renderer` to ensure a consistent look and feel.
+- **packages/storage**: Local storage services built on IndexedDB for persisting contract UI configurations, providing history, auto-save, and import/export capabilities.
 - **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
 - **packages/styles**: Centralized styling system with shared CSS variables and configurations.
 - **packages/utils**: Shared, framework-agnostic utility functions (e.g., logger, app configuration service).
@@ -89,12 +90,31 @@ Features:
 
 For more details, see the [Styles README](./packages/styles/README.md).
 
+### Storage Package
+
+The `storage` package provides local storage services built on IndexedDB using Dexie.js for persisting contract UI configurations. It enables a complete history and auto-save system for the builder application.
+
+Features:
+
+- Generic storage base class for extensible type-safe storage services
+- Reactive updates with automatic UI synchronization across browser tabs
+- Complete CRUD operations with performance optimization for 1000+ records
+- Built-in auto-save functionality with debouncing and duplicate operation prevention
+- Import/export capabilities for sharing configurations as JSON files
+- Full TypeScript support with proper type definitions
+- Integration with React hooks for seamless UI state management
+
+For more details, see the [Storage README](./packages/storage/README.md).
+
 ## Features
 
 - Chain-agnostic architecture supporting multiple blockchain ecosystems
 - Adapter pattern for easily adding support for new blockchains
 - Modern React components for building transaction forms
 - Customizable UI with Tailwind CSS and shadcn/ui
+- **Local Storage & History**: Complete auto-save system with IndexedDB-based persistence for contract UI configurations
+- **Import/Export**: Save and share configurations as JSON files with built-in validation
+- **Multi-tab Synchronization**: Real-time synchronization of saved configurations across browser tabs
 - Handles wallet connection state consistently in both builder app and exported forms
 - Configure transaction execution methods (EOA, Relayer, Multisig) via a powerful Execution Strategy pattern
 - Type-safe with TypeScript
@@ -117,6 +137,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 - **ESLint 9**: Modern linting with improved TypeScript support
 - **tsup**: Fast, modern bundler for TypeScript libraries
 - **Vite**: Used for the builder application's dev server
+- **Dexie.js**: Modern IndexedDB wrapper for local storage and offline capabilities
 - **@openzeppelin/relayer-sdk**: For gasless transaction support via the Relayer execution method.
 
 ## Getting Started
@@ -195,104 +216,45 @@ For a consistent and reliable development environment, it is highly recommended 
 
 ## Project Structure
 
+This monorepo is organized into several specialized packages, each with a specific purpose:
+
+### Core Packages
+
+- **[packages/builder/](./packages/builder/README.md)** - Main application with builder UI, export system, and core logic
+- **[packages/renderer/](./packages/renderer/README.md)** - Shared library for rendering transaction forms and components (published to npm)
+- **[packages/react-core/](./packages/react-core/README.md)** - Core React providers and hooks for wallet/adapter state management
+- **[packages/ui/](./packages/ui/README.md)** - Shared UI components and form field components
+- **[packages/storage/](./packages/storage/README.md)** - Local storage services with IndexedDB for configuration persistence
+- **[packages/types/](./packages/types/README.md)** - Shared TypeScript type definitions (published to npm)
+- **[packages/styles/](./packages/styles/README.md)** - Centralized styling system with CSS variables and configurations
+- **[packages/utils/](./packages/utils/README.md)** - Framework-agnostic utility functions
+
+### Adapter Packages
+
+- **[packages/adapter-evm/](./packages/adapter-evm/README.md)** - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
+- **[packages/adapter-solana/](./packages/adapter-solana/README.md)** - Solana blockchain implementation
+- **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
+- **[packages/adapter-midnight/](./packages/adapter-midnight/README.md)** - Midnight blockchain implementation
+
+### Configuration Structure
+
 ```
 contracts-ui-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
 ├── .husky/              # Git hooks
 ├── test/                # Shared test setup and utilities
-├── packages/            # Monorepo packages
-│   ├── builder/         # Main application
-│   │   ├── public/      # Static assets
-│   │   ├── src/
-│   │   │   ├── components/      # UI components (application-specific or composed)
-│   │   │   │   ├── Common/      # Shared components across features within builder
-│   │   │   │   └── ContractsUIBuilder/ # Contracts UI Builder specific components
-│   │   │   ├── core/            # Chain-agnostic core functionality specific to this app
-│   │   │   │   ├── types/       # Builder-app-specific Type definitions
-│   │   │   │   ├── utils/       # Builder-app-specific utility functions
-│   │   │   │   ├── hooks/       # Builder-app-specific hooks (if any, shared React hooks are in react-core)
-│   │   │   │   ├── factories/   # Schema factories
-│   │   │   │   └── ecosystemManager.ts # Central management of ecosystems, adapters, and network configs
-│   │   │   ├── export/          # Export system
-│   │   │   │   ├── generators/  # Form code generators
-│   │   │   │   ├── codeTemplates/ # Individual file templates for generation
-│   │   │   │   ├── templates/   # Base project structures for export
-│   │   │   │   └── ...          # Other export utilities
-│   │   │   ├── services/        # Builder services
-│   │   │   ├── stories/         # Centralized Storybook stories (for builder-specific components)
-│   │   │   ├── App.tsx          # Main application component
-│   │   │   ├── main.tsx         # Application entry point
-│   │   │   └── index.css        # Main CSS entry point
-│   │   ├── vite-plugins/      # Custom Vite plugins
-│   │   ├── index.html           # HTML template
-│   │   ├── tsconfig.json        # TypeScript configuration
-│   │   ├── vite.config.ts       # Vite configuration
-│   │   └── ...                  # Other configuration files
-│   ├── react-core/          # Shared React core providers, hooks, and UI components
-│   │   ├── src/
-│   │   │   ├── hooks/       # Contains AdapterProvider, WalletStateProvider, useWalletState, etc.
-│   │   │   └── components/  # Contains WalletConnectionHeader, WalletConnectionUI
-│   │   ├── README.md
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   ├── renderer/            # Shared app rendering library
-│   │   ├── src/
-│   │   │   ├── components/  # App rendering specific components (TransactionForm, DynamicFormField)
-│   │   │   │   ├── ContractStateWidget/
-│   │   │   │   ├── transaction/
-│   │   │   │   └── wallet/
-│   │   │   ├── hooks/           # App rendering hooks
-│   │   │   ├── types/           # Type definitions specific to renderer
-│   │   │   ├── utils/           # Utility functions specific to renderer
-│   │   │   ├── stories/         # Stories for renderer specific components (e.g., TransactionForm)
-│   │   │   ├── test/            # Package-specific tests
-│   │   │   └── index.ts         # Public API exports (re-exports from @openzeppelin/contracts-ui-builder-ui for components)
-│   │   ├── scripts/             # Build scripts
-│   │   ├── tsconfig.json        # TypeScript configuration
-│   │   └── package.json         # Package configuration
-│   ├── ui/                      # NEW: Shared UI Components Package
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── ui/          # Basic UI primitives (Button, Input, Card, etc.)
-│   │   │   │   └── fields/      # Reusable form field components (AddressField, TextField, etc.)
-│   │   │   ├── utils/           # UI-specific utilities (e.g., buttonVariants)
-│   │   │   ├── stories/         # Stories for all shared UI and field components
-│   │   │   └── index.ts         # Public API exports for the UI package
-│   │   ├── tsconfig.json
-│   │   └── package.json
-│   ├── types/                   # Shared TypeScript type definitions
-│   │   ├── src/
-│   │   │   ├── adapters/        # Contract adapter interfaces
-│   │   │   ├── contracts/       # Contract and blockchain types
-│   │   │   ├── forms/           # Form field and layout definitions
-│   │   │   └── index.ts         # Main entry point
-│   │   ├── tsconfig.json
-│   │   └── package.json
-│   ├── styles/                  # Centralized styling system
-│   │   ├── global.css           # Global CSS variables and base styles
-│   │   ├── src/                 # Source directory for styles
-│   │   ├── utils/               # Styling utilities
-│   │   └── README.md            # Styling documentation
-│   ├── adapter-evm/             # EVM Adapter Package
-│   │   └── src/                 # Contains EvmAdapter implementation
-│   ├── adapter-solana/          # Solana Adapter Package
-│   │   └── src/                 # Contains SolanaAdapter implementation
-│   ├── adapter-stellar/         # Stellar Adapter Package
-│   │   └── src/                 # Contains StellarAdapter implementation
-│   └── adapter-midnight/        # Midnight Adapter Package
-│       └── src/                 # Contains MidnightAdapter implementation
+├── packages/            # Monorepo packages (see individual READMEs for detailed structure)
+├── scripts/             # Utility scripts
 ├── tailwind.config.cjs  # Central Tailwind CSS configuration
 ├── postcss.config.cjs   # Central PostCSS configuration
 ├── components.json      # Central shadcn/ui configuration
-├── scripts/             # Utility scripts
-├── .eslint/             # Custom ESLint plugins and rules
 ├── tsconfig.base.json   # Base TypeScript configuration for all packages
-├── tsconfig.json        # Root TypeScript configuration
 ├── pnpm-workspace.yaml  # PNPM workspace configuration
-├── package.json         # Root package configuration
 └── ...                  # Other configuration files
 ```
+
+For detailed internal structure of each package, please refer to the individual package README files linked above.
 
 ## Architecture
 
@@ -302,12 +264,35 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 - **Builder**: Chain-agnostic application logic, UI components, and the export system. It includes:
   - The `ecosystemManager.ts` for discovering network configurations and adapter capabilities.
+  - **Modular State Management**: Decomposed hook architecture with specialized responsibilities.
+  - **Application Sidebar**: Complete UI for managing saved configurations with import/export capabilities
+
+- **Storage System (`packages/storage`)**: IndexedDB-based persistence layer built on Dexie.js providing:
+  - **Auto-Save Engine**: Debounced saving with in-memory caching and global coordination
+  - **Multi-Tab Synchronization**: Real-time updates across browser tabs
+  - **Import/Export**: JSON-based configuration sharing with validation
+  - **CRUD Operations**: Complete lifecycle management for contract UI configurations
+  - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
+
 - **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/contracts-ui-builder-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
   - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/contracts-ui-builder-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/contracts-ui-builder-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
+
 - **Renderer**: Shared library containing app rendering components and common utilities (like logging).
+
+- **React Core (`packages/react-core`)**: Centralized React state management providing:
+  - **Adapter Provider**: Singleton pattern for adapter instance management
+  - **Wallet State Provider**: Global wallet/network state coordination
+  - **Context Hooks**: `useWalletState()` and `useAdapterContext()` for consistent state access
+
+- **UI Components (`packages/ui`)**: Comprehensive component library including:
+  - **Basic Primitives**: Buttons, inputs, cards, dialogs following shadcn/ui patterns
+  - **Form Fields**: Specialized components for React Hook Form integration
+  - **Field Utilities**: Validation, accessibility, and layout helpers
+
 - **Types**: Shared TypeScript type definitions across all packages, including the crucial `ContractAdapter` interface and types for adapter UI enhancements.
+
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/contracts-ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.

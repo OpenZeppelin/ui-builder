@@ -10,22 +10,10 @@ builder/
 ├── src/
 │   ├── assets/       # Static assets like images and icons used within the app
 │   ├── components/   # Application-specific React components
-│   │   ├── Common/      # Components shared across the application (e.g., Header, WizardLayout)
-│   │   └── ContractsUIBuilder/ # Components that make up the multi-step Contracts UI Builder wizard
 │   ├── config/       # User-facing configuration files (e.g., for UI kits like RainbowKit)
 │   ├── core/         # Core application logic and type definitions
-│   │   ├── chains/
-│   │   ├── ecosystems/
-│   │   ├── factories/
-│   │   ├── networks/
-│   │   └── ecosystemManager.ts # Central hub for loading and managing adapters
 │   ├── docs/         # Internal documentation files relevant to the builder package
 │   ├── export/       # The complete form export system
-│   │   ├── assemblers/
-│   │   ├── cli/
-│   │   ├── generators/
-│   │   ├── templates/
-│   │   └── ...
 │   ├── services/     # Application-level services (e.g., ContractLoader)
 │   ├── stories/      # Storybook stories for core components
 │   ├── test/         # Vitest test setup and configuration for this package
@@ -34,8 +22,8 @@ builder/
 │   └── main.tsx      # Application entry point
 ├── index.html        # HTML template for Vite
 ├── tsconfig.json     # TypeScript configuration for the package
-├── vite.config.ts    # Vite configuration for the package
-└── ...               # Other configuration files
+├── vite.config.ts    # Vite configuration
+└── README.md
 ```
 
 ## Dependencies
@@ -46,6 +34,7 @@ This package relies on:
 - **@openzeppelin/contracts-ui-builder-types**: Shared type definitions for contracts, adapters, and forms.
 - **@openzeppelin/contracts-ui-builder-renderer**: The shared library for rendering the final transaction form and other components.
 - **@openzeppelin/contracts-ui-builder-ui**: The shared library for all common UI and form field components.
+- **@openzeppelin/contracts-ui-builder-storage**: Local storage services for persisting contract UI configurations with auto-save functionality.
 - **@openzeppelin/contracts-ui-builder-styles**: The centralized styling system.
 - **@openzeppelin/contracts-ui-builder-utils**: Shared utility functions like the logger and `appConfigService`.
 - **@openzeppelin/contracts-ui-builder-adapter-{chain}**: Specific blockchain adapter packages (e.g., `-evm`, `-solana`).

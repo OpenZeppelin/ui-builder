@@ -296,6 +296,27 @@ The system applies a semantic versioning strategy to dependencies:
 
 The Package Management System automatically discovers the renderer configuration. The exported `rendererConfig` constant name is expected by the system.
 
+## Package Structure
+
+```text
+renderer/
+├── src/
+│   ├── components/              # Core rendering components
+│   ├── hooks/                   # Rendering-specific hooks
+│   ├── utils/                   # Rendering utilities
+│   ├── types/                   # Package-specific types
+│   ├── stories/                 # Storybook stories
+│   ├── test/                    # Package-specific tests
+│   ├── config.ts                # Renderer configuration
+│   └── index.ts                 # Main package exports
+├── scripts/                     # Build and development scripts
+├── package.json                 # Package configuration
+├── tsconfig.json                # TypeScript configuration
+├── tsup.config.ts               # Build configuration
+├── vitest.config.ts             # Test configuration
+└── README.md                    # This documentation
+```
+
 ## Development
 
 ### Build System

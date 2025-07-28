@@ -270,7 +270,50 @@ The logic for fetching a contract ABI from Etherscan (or a compatible explorer) 
 
 This layered approach ensures that the application remains functional out-of-the-box while giving advanced users the power to customize its network interactions to suit their needs.
 
-## 8. Enforcement & Contribution
+## 8. State Management & Storage Integration
+
+The Contracts UI Builder includes a sophisticated state management system and local storage capabilities that work seamlessly with the adapter architecture.
+
+### 8.1. State Management Architecture
+
+The builder application uses a custom state management system built on React's `useSyncExternalStore` for optimal performance:
+
+- **Modular Hook Design**: The monolithic state management has been decomposed into focused, single-responsibility hooks:
+  - `useAutoSave`: Handles automatic saving with debouncing and conflict resolution
+  - `useBuilderLifecycle`: Manages configuration creation, loading, and deletion
+  - `useBuilderContract`: Handles contract schema loading and function selection
+  - `useBuilderNetwork`: Manages network selection and adapter coordination
+  - `useBuilderNavigation`: Controls wizard step navigation
+  - `useBuilderConfig`: Manages UI configuration updates
+
+- **Optimized Subscriptions**: Components use `useBuilderStoreSelector` to subscribe only to specific state slices, minimizing unnecessary re-renders
+- **Batched Updates**: The central `uiBuilderStore` automatically batches multiple state changes for optimal performance
+
+### 8.2. Storage Integration
+
+The `@openzeppelin/contracts-ui-builder-storage` package provides persistent storage for contract UI configurations:
+
+- **IndexedDB Backend**: Uses Dexie.js for robust, performant local storage that works offline
+- **Auto-Save System**: Intelligent auto-saving with:
+  - Debounced writes to prevent excessive storage operations
+  - In-memory caching for performance optimization
+  - Global coordination to prevent race conditions and duplicate saves
+  - Smart guards to determine when saving is necessary
+
+- **Multi-Tab Synchronization**: Real-time synchronization of configurations across browser tabs
+- **Import/Export**: Complete JSON-based import/export system for sharing configurations
+
+### 8.3. Adapter Integration
+
+The storage system integrates seamlessly with the adapter pattern:
+
+- **Chain-Agnostic Storage**: Configurations are stored with ecosystem and network identifiers, allowing the same storage system to work across all supported blockchains
+- **Adapter-Aware Restoration**: When loading saved configurations, the appropriate adapter is automatically selected based on the stored ecosystem information
+- **Network Configuration Persistence**: Both the selected network and adapter-specific configurations are preserved and restored
+
+For detailed information about the state management architecture, see the [State Management Documentation](../packages/builder/docs/state-management.md).
+
+## 9. Enforcement & Contribution
 
 - Please refer to this document when developing new adapters or refactoring existing ones.
 - The `CONTRIBUTING.md` guide contains steps for adding new adapters following this architecture.
@@ -280,15 +323,15 @@ This layered approach ensures that the application remains functional out-of-the
 
 By following this structure, we aim for a cleaner, more testable, and easier-to-manage adapter system as the project grows.
 
-## 9. Adapter UI Facilitation Capabilities (Optional)
+## 10. Adapter UI Facilitation Capabilities (Optional)
 
 Beyond core data logic, adapters can facilitate rich, ecosystem-specific UI experiences. This allows the builder application to leverage powerful libraries (like `wagmi/react`) without being directly coupled to them.
 
-### 9.1. Rationale
+### 10.1. Rationale
 
 Many blockchain ecosystems have mature libraries offering React hooks and UI components for wallet interactions (e.g., RainbowKit for EVM). To enable their use while preserving chain-agnosticism in the builder app, the adapter acts as a gateway, providing these UI enhancements in an abstracted manner.
 
-### 9.2. Case Study: EVM Adapter UI Kit Management
+### 10.2. Case Study: EVM Adapter UI Kit Management
 
 The EVM adapter provides a sophisticated implementation of this pattern to handle different wallet connection UIs (e.g., RainbowKit, a custom modal). This serves as a reference for how other complex adapters could be built.
 

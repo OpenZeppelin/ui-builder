@@ -58,6 +58,25 @@ function MyCustomForm() {
 }
 ```
 
+## Package Structure
+
+```text
+ui/
+├── src/
+│   ├── components/
+│   │   ├── ui/                # Basic UI primitives
+│   │   └── fields/            # Specialized form field components
+│   ├── hooks/                 # Shared UI hooks
+│   ├── lib/                   # Utility functions and configurations
+│   ├── stories/               # Storybook stories for all components
+│   └── index.ts               # Main package exports
+├── package.json               # Package configuration
+├── tsconfig.json              # TypeScript configuration
+├── tsup.config.ts             # Build configuration
+├── vitest.config.ts           # Test configuration
+└── README.md                  # This documentation
+```
+
 ## Styling
 
 Components are styled using Tailwind CSS. The necessary Tailwind configuration (including theme, plugins) is expected to be present in the consuming application, typically by presetting from the monorepo's root `tailwind.config.cjs`. The UI package itself does not bundle CSS but provides the class names and structure.
