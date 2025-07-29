@@ -15,9 +15,6 @@ import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
 import { useUIBuilderStore } from './useUIBuilderStore';
 
-// Global lock to prevent multiple schema loading operations
-let globalSchemaLoadInProgress = false;
-
 /**
  * Coordinating hook that uses an external store to manage builder state.
  * This ensures state persists across component re-mounts.
@@ -60,11 +57,12 @@ export function useUIBuilderState() {
   const contractFormValues = state.contractFormValues;
   const selectedNetworkConfigId = state.selectedNetworkConfigId;
   const adapterNetworkId = activeAdapter?.networkConfig.id;
+  const isSchemaLoading = state.isSchemaLoading;
 
   // Only load schema when the conditions are actually met, not on every contract object change
   useEffect(() => {
-    // Global lock check - prevent multiple simultaneous loads
-    if (globalSchemaLoadInProgress) {
+    // Skip if already loading
+    if (isSchemaLoading) {
       return;
     }
 
@@ -79,17 +77,11 @@ export function useUIBuilderState() {
         // If we have a selectedNetworkConfigId, make sure it matches the adapter
         if (selectedNetworkConfigId) {
           if (selectedNetworkConfigId === adapterNetworkId) {
-            globalSchemaLoadInProgress = true;
-            void contract.loadSchemaIfNeeded().finally(() => {
-              globalSchemaLoadInProgress = false;
-            });
+            void contract.loadSchemaIfNeeded();
           }
         } else {
           // If selectedNetworkConfigId is empty (due to save bug), still try to load with current adapter
-          globalSchemaLoadInProgress = true;
-          void contract.loadSchemaIfNeeded().finally(() => {
-            globalSchemaLoadInProgress = false;
-          });
+          void contract.loadSchemaIfNeeded();
         }
       }
     }
@@ -100,6 +92,7 @@ export function useUIBuilderState() {
     selectedNetworkConfigId,
     adapterNetworkId,
     contract.loadSchemaIfNeeded,
+    isSchemaLoading,
     // Don't include activeAdapter directly to avoid re-runs when adapter object changes
   ]);
 

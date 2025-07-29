@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
@@ -21,9 +21,7 @@ export function useBuilderContract() {
   const needsContractSchemaLoad = useUIBuilderStore((state) => state.needsContractSchemaLoad);
   const contractFormValues = useUIBuilderStore((state) => state.contractFormValues);
   const selectedNetworkConfigId = useUIBuilderStore((state) => state.selectedNetworkConfigId);
-
-  // Loading guard to prevent multiple concurrent loads
-  const isLoadingSchemaRef = useRef(false);
+  const isSchemaLoading = useUIBuilderStore((state) => state.isSchemaLoading);
 
   const handleContractSchemaLoaded = useCallback(
     (schema: ContractSchema | null, formValues?: FormValues) => {
@@ -80,8 +78,8 @@ export function useBuilderContract() {
   }, []);
 
   const loadSchemaIfNeeded = useCallback(async () => {
-    // Prevent multiple concurrent loads
-    if (isLoadingSchemaRef.current) {
+    // Prevent multiple concurrent loads by checking the store
+    if (isSchemaLoading) {
       logger.info('useBuilderContract', 'Schema loading already in progress, skipping');
       return;
     }
@@ -94,7 +92,7 @@ export function useBuilderContract() {
       selectedNetworkConfigId === activeAdapter.networkConfig.id
     ) {
       try {
-        isLoadingSchemaRef.current = true;
+        uiBuilderStore.updateState(() => ({ isSchemaLoading: true }));
         logger.info('useBuilderContract', `Loading contract schema for saved configuration`);
         const schema = await loadContractDefinition(activeAdapter, contractFormValues);
         if (schema) {
@@ -108,7 +106,7 @@ export function useBuilderContract() {
         });
         uiBuilderStore.updateState(() => ({ needsContractSchemaLoad: false }));
       } finally {
-        isLoadingSchemaRef.current = false;
+        uiBuilderStore.updateState(() => ({ isSchemaLoading: false }));
       }
     }
   }, [
@@ -118,6 +116,7 @@ export function useBuilderContract() {
     contractFormValues,
     selectedNetworkConfigId,
     handleContractSchemaLoaded,
+    isSchemaLoading,
   ]);
 
   // Memoize the return object to prevent unnecessary re-renders

@@ -45,7 +45,9 @@ export interface UIBuilderState {
 
   // Loading states
   isLoadingConfiguration: boolean;
+  isSchemaLoading: boolean;
   isAutoSaving: boolean;
+  exportLoading: boolean;
   needsContractSchemaLoad: boolean;
 
   // Track the loaded configuration ID
@@ -92,7 +94,9 @@ const initialState: UIBuilderState = {
   formConfig: null,
   isExecutionStepValid: false,
   isLoadingConfiguration: false,
+  isSchemaLoading: false,
   isAutoSaving: false,
+  exportLoading: false,
   needsContractSchemaLoad: false,
   loadedConfigurationId: null,
   isInNewUIMode: false,
