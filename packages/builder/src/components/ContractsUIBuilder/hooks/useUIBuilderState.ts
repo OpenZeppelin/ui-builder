@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 
@@ -13,6 +13,7 @@ import {
 import { uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
+import { useUIBuilderStore } from './useUIBuilderStore';
 
 // Global lock to prevent multiple schema loading operations
 let globalSchemaLoadInProgress = false;
@@ -22,7 +23,7 @@ let globalSchemaLoadInProgress = false;
  * This ensures state persists across component re-mounts.
  */
 export function useUIBuilderState() {
-  const state = useSyncExternalStore(uiBuilderStore.subscribe, uiBuilderStore.getState);
+  const state = useUIBuilderStore((s) => s);
   const { activeNetworkConfig, activeAdapter, isAdapterLoading } = useWalletState();
 
   const savedConfigIdRef = useRef<string | null>(null);

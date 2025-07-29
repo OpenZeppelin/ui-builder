@@ -10,7 +10,10 @@ import { useWizardStepUiState } from './useWizardStepUiState';
  * This can be used across steps where the contract state widget is displayed.
  */
 export function useContractWidgetState() {
-  const [{ isWidgetVisible }, setUiState] = useWizardStepUiState('contractWidget', {
+  const {
+    stepUiState: { isWidgetVisible },
+    setStepUiState: setUiState,
+  } = useWizardStepUiState('contractWidget', {
     isWidgetVisible: false,
   });
 

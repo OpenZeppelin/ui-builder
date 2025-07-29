@@ -8,8 +8,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { loadContractDefinition } from '../../../../services/ContractLoader';
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
-
-import { useBuilderStoreSelector } from './useBuilderStoreSelector';
+import { useUIBuilderStore } from '../useUIBuilderStore';
 
 /**
  * @notice A hook to manage contract schema and function selection.
@@ -19,9 +18,9 @@ export function useBuilderContract() {
   const { activeAdapter } = useWalletState();
 
   // Use selective subscriptions for better performance
-  const needsContractSchemaLoad = useBuilderStoreSelector((state) => state.needsContractSchemaLoad);
-  const contractFormValues = useBuilderStoreSelector((state) => state.contractFormValues);
-  const selectedNetworkConfigId = useBuilderStoreSelector((state) => state.selectedNetworkConfigId);
+  const needsContractSchemaLoad = useUIBuilderStore((state) => state.needsContractSchemaLoad);
+  const contractFormValues = useUIBuilderStore((state) => state.contractFormValues);
+  const selectedNetworkConfigId = useUIBuilderStore((state) => state.selectedNetworkConfigId);
 
   // Loading guard to prevent multiple concurrent loads
   const isLoadingSchemaRef = useRef(false);

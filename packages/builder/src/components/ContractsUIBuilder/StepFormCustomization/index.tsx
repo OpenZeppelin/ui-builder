@@ -63,7 +63,10 @@ export function StepFormCustomization({
   currentUiKitConfig,
   currentFormConfig,
 }: StepFormCustomizationProps) {
-  const [{ activeTab, previewMode }, setUiState] = useWizardStepUiState('stepCustomize', {
+  const {
+    stepUiState: { activeTab, previewMode },
+    setStepUiState: setUiState,
+  } = useWizardStepUiState('stepCustomize', {
     activeTab: 'general',
     previewMode: false,
   });

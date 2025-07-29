@@ -4,4 +4,3 @@ export * from './useBuilderContract';
 export * from './useBuilderLifecycle';
 export * from './useBuilderNavigation';
 export * from './useBuilderNetwork';
-export * from './useBuilderStoreSelector';

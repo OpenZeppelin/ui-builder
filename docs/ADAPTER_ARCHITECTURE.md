@@ -286,7 +286,7 @@ The builder application uses a custom state management system built on React's `
   - `useBuilderNavigation`: Controls wizard step navigation
   - `useBuilderConfig`: Manages UI configuration updates
 
-- **Optimized Subscriptions**: Components use `useBuilderStoreSelector` to subscribe only to specific state slices, minimizing unnecessary re-renders
+- **Optimized Subscriptions**: Components use the `useUIBuilderStore` hook to subscribe only to specific state slices, minimizing unnecessary re-renders.
 - **Batched Updates**: The central `uiBuilderStore` automatically batches multiple state changes for optimal performance
 
 ### 8.2. Storage Integration

@@ -1,3 +1,5 @@
+import { createStore } from 'zustand/vanilla';
+
 import {
   CommonFormProperties,
   ContractSchema,
@@ -53,7 +55,30 @@ export interface UIBuilderState {
   isInNewUIMode: boolean;
 }
 
-let state: UIBuilderState = {
+// For clarity, we can define actions separately from the state.
+export interface UIBuilderActions {
+  setInitialState: (initialState: Partial<UIBuilderState>) => void;
+  updateState: (updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) => void;
+  resetDownstreamSteps: (
+    fromStep: 'network' | 'contract' | 'function',
+    preserveFunctionConfig?: boolean
+  ) => void;
+  resetWizard: () => void;
+  loadContractUI: (
+    id: string,
+    savedConfig: {
+      ecosystem: Ecosystem;
+      networkId: string;
+      contractAddress: string;
+      functionId: string;
+      formConfig: BuilderFormConfig;
+      executionConfig?: ExecutionConfig;
+      uiKitConfig?: UiKitConfiguration;
+    }
+  ) => void;
+}
+
+const initialState: UIBuilderState = {
   selectedNetworkConfigId: null,
   selectedEcosystem: 'evm',
   pendingNetworkId: null,
@@ -73,264 +98,137 @@ let state: UIBuilderState = {
   isInNewUIMode: false,
 };
 
-const listeners = new Set<() => void>();
+/**
+ * A vanilla Zustand store for the UI builder state.
+ */
+export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActions>()(
+  (set, get) => ({
+    ...initialState,
 
-// Optimized batching mechanism
-let updateQueue: Array<(state: UIBuilderState) => Partial<UIBuilderState>> = [];
-let isProcessingQueue = false;
-let batchTimeout: NodeJS.Timeout | null = null;
+    setInitialState: (initialState) => {
+      set(initialState);
+    },
 
-const processUpdateQueue = () => {
-  if (isProcessingQueue || updateQueue.length === 0) return;
+    updateState: (updater) => {
+      set(updater(get()));
+    },
 
-  isProcessingQueue = true;
-
-  // Clear any existing timeout
-  if (batchTimeout) {
-    clearTimeout(batchTimeout);
-    batchTimeout = null;
-  }
-
-  // Use microtask for immediate batching without frame delay
-  void Promise.resolve().then(() => {
-    const updates = updateQueue;
-    updateQueue = [];
-
-    // Apply all updates at once with optimization
-    let newState = state;
-    const hasChanges = updates.length > 0;
-
-    if (hasChanges) {
-      for (const updater of updates) {
-        const changes = updater(newState);
-        if (Object.keys(changes).length > 0) {
-          newState = { ...newState, ...changes };
+    resetDownstreamSteps: (
+      fromStep: 'network' | 'contract' | 'function',
+      preserveFunctionConfig: boolean = false
+    ) => {
+      let resetState: Partial<UIBuilderState> = {};
+      if (fromStep === 'network') {
+        resetState = {
+          ...resetState,
+          contractSchema: null,
+          contractAddress: null,
+          contractFormValues: null,
+          pendingNetworkId: null, // Clear pending network when network changes
+        };
+      }
+      if (fromStep === 'network' || fromStep === 'contract') {
+        resetState = { ...resetState, selectedFunction: null };
+      }
+      if (fromStep === 'network' || fromStep === 'contract' || fromStep === 'function') {
+        // Only reset formConfig if not preserving or if it's for a different function
+        if (!preserveFunctionConfig) {
+          resetState = {
+            ...resetState,
+            formConfig: null,
+            isExecutionStepValid: false,
+          };
         }
       }
+      set(resetState);
+    },
 
-      // Only update state and emit if there are actual changes
-      if (newState !== state) {
-        state = newState;
+    resetWizard: () => {
+      // Reset to initial state while preserving loading states
+      set({
+        ...initialState,
+        // Preserve UI state and loading states if needed, but a full reset is cleaner.
+        uiState: {},
+        isLoadingConfiguration: get().isLoadingConfiguration,
+        isAutoSaving: get().isAutoSaving,
+      });
+    },
 
-        // Emit change once for all batched updates
-        emitChange();
+    loadContractUI: (
+      id: string,
+      savedConfig: {
+        ecosystem: Ecosystem;
+        networkId: string;
+        contractAddress: string;
+        functionId: string;
+        formConfig: BuilderFormConfig;
+        executionConfig?: ExecutionConfig;
+        uiKitConfig?: UiKitConfiguration;
       }
-    }
+    ) => {
+      const determineStepFromSavedConfig = (config: typeof savedConfig): number => {
+        const hasNetwork = config.ecosystem && config.networkId;
+        const hasContract = config.contractAddress;
+        const hasFunction = config.functionId;
 
-    isProcessingQueue = false;
+        if (!hasNetwork) return STEP_INDICES.CHAIN_SELECT;
+        if (!hasContract) return STEP_INDICES.CONTRACT_DEFINITION;
+        if (!hasFunction) return STEP_INDICES.FUNCTION_SELECTOR;
 
-    // Process any new updates that came in while we were processing
-    if (updateQueue.length > 0) {
-      processUpdateQueue();
+        return STEP_INDICES.FORM_CUSTOMIZATION;
+      };
+
+      const targetStepIndex = determineStepFromSavedConfig(savedConfig);
+
+      set({
+        selectedEcosystem: savedConfig.ecosystem,
+        selectedNetworkConfigId: savedConfig.networkId,
+        networkToSwitchTo: savedConfig.networkId,
+        contractAddress: savedConfig.contractAddress,
+        selectedFunction: savedConfig.functionId,
+        formConfig: {
+          ...savedConfig.formConfig,
+          executionConfig: savedConfig.executionConfig,
+          uiKitConfig: savedConfig.uiKitConfig,
+        },
+        currentStepIndex: targetStepIndex,
+        isExecutionStepValid: !!savedConfig.executionConfig,
+        contractFormValues: {
+          contractAddress: savedConfig.contractAddress,
+        },
+        needsContractSchemaLoad: true,
+        contractSchema: null,
+        loadedConfigurationId: id,
+        isInNewUIMode: false,
+      });
+    },
+  })
+);
+
+const { getState, subscribe } = uiBuilderStoreVanilla;
+
+const subscribeWithSelector = <T>(
+  selector: (state: UIBuilderState) => T,
+  listener: (value: T) => void
+) => {
+  let lastState = selector(getState());
+  const unsub = subscribe((state) => {
+    const newState = selector(state);
+    if (newState !== lastState) {
+      lastState = newState;
+      listener(newState);
     }
   });
-};
-
-const emitChange = () => {
-  for (const listener of listeners) {
-    listener();
-  }
+  return unsub;
 };
 
 export const uiBuilderStore = {
-  setInitialState(initialState: Partial<UIBuilderState>) {
-    state = { ...state, ...initialState };
-    // No need to emit change here as it's for initial setup
-  },
-
-  getState(): UIBuilderState {
-    return state;
-  },
-
-  subscribe(listener: () => void): () => void {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  },
-
-  /**
-   * Subscribe to specific state slices for better performance.
-   * Only triggers the listener when the selected value changes.
-   */
-  subscribeWithSelector<T>(
-    selector: (state: UIBuilderState) => T,
-    listener: (value: T) => void
-  ): () => void {
-    let previousValue = selector(state);
-
-    const wrappedListener = () => {
-      const currentValue = selector(state);
-      // Only trigger if the selected value actually changed
-      if (currentValue !== previousValue) {
-        previousValue = currentValue;
-        listener(currentValue);
-      }
-    };
-
-    listeners.add(wrappedListener);
-    return () => listeners.delete(wrappedListener);
-  },
-
-  updateState(updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) {
-    updateQueue.push(updater);
-
-    // Debounce rapid successive updates to prevent performance issues
-    if (!batchTimeout) {
-      batchTimeout = setTimeout(() => {
-        // Use microtask for immediate processing (avoid requestIdleCallback complexity)
-        void Promise.resolve().then(() => {
-          processUpdateQueue();
-        });
-      }, 0);
-    }
-  },
-
-  /**
-   * Update state immediately without batching. Use sparingly for critical updates.
-   */
-  updateStateImmediate(updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) {
-    const changes = updater(state);
-    state = { ...state, ...changes };
-    emitChange();
-  },
-
-  resetDownstreamSteps(
-    fromStep: 'network' | 'contract' | 'function',
-    preserveFunctionConfig: boolean = false
-  ) {
-    let resetState: Partial<UIBuilderState> = {};
-    if (fromStep === 'network') {
-      resetState = {
-        ...resetState,
-        contractSchema: null,
-        contractAddress: null,
-        contractFormValues: null,
-        pendingNetworkId: null, // Clear pending network when network changes
-      };
-    }
-    if (fromStep === 'network' || fromStep === 'contract') {
-      resetState = { ...resetState, selectedFunction: null };
-    }
-    if (fromStep === 'network' || fromStep === 'contract' || fromStep === 'function') {
-      // Only reset formConfig if not preserving or if it's for a different function
-      if (!preserveFunctionConfig) {
-        resetState = { ...resetState, formConfig: null, isExecutionStepValid: false };
-      }
-    }
-    this.updateState(() => resetState);
-  },
-
-  resetWizard() {
-    // Reset to initial state while preserving loading states
-    this.updateState(() => ({
-      selectedNetworkConfigId: null,
-      selectedEcosystem: 'evm',
-      pendingNetworkId: null,
-      networkToSwitchTo: null,
-      currentStepIndex: 0,
-      contractSchema: null,
-      contractAddress: null,
-      contractFormValues: null,
-      selectedFunction: null,
-      formConfig: null,
-      isExecutionStepValid: false,
-      // Preserve UI state and loading states
-      uiState: {},
-      isLoadingConfiguration: false,
-      isAutoSaving: false,
-      needsContractSchemaLoad: false,
-      loadedConfigurationId: null,
-      isInNewUIMode: false,
-    }));
-  },
-
-  /**
-   * Determine the appropriate step index based on what data is available.
-   * This ensures we navigate to the first incomplete step when loading a saved config.
-   */
-  determineStepFromSavedConfig(savedConfig: {
-    ecosystem: Ecosystem;
-    networkId: string;
-    contractAddress: string;
-    functionId: string;
-    formConfig: BuilderFormConfig;
-    executionConfig?: ExecutionConfig;
-    uiKitConfig?: UiKitConfiguration;
-  }): number {
-    // Check what data we have
-    const hasNetwork = savedConfig.ecosystem && savedConfig.networkId;
-    const hasContract = savedConfig.contractAddress;
-    const hasFunction = savedConfig.functionId;
-
-    // Navigate to the first incomplete step
-    if (!hasNetwork) {
-      return STEP_INDICES.CHAIN_SELECT;
-    }
-    if (!hasContract) {
-      return STEP_INDICES.CONTRACT_DEFINITION;
-    }
-    if (!hasFunction) {
-      return STEP_INDICES.FUNCTION_SELECTOR;
-    }
-
-    // For any form-related state (missing form config, missing execution config, or everything complete),
-    // always land on form customization step. Users should intentionally navigate to the final step.
-    return STEP_INDICES.FORM_CUSTOMIZATION;
-  },
-
-  loadContractUI(
-    id: string,
-    savedConfig: {
-      ecosystem: Ecosystem;
-      networkId: string;
-      contractAddress: string;
-      functionId: string;
-      formConfig: BuilderFormConfig;
-      executionConfig?: ExecutionConfig;
-      uiKitConfig?: UiKitConfiguration;
-    }
-  ) {
-    // Determine the appropriate step based on available data
-    const targetStepIndex = this.determineStepFromSavedConfig(savedConfig);
-
-    // Reset the state and then load the saved configuration
-    this.updateState(() => ({
-      // Network state
-      selectedEcosystem: savedConfig.ecosystem,
-      selectedNetworkConfigId: savedConfig.networkId,
-      networkToSwitchTo: savedConfig.networkId, // Mark for network switch
-
-      // Contract state
-      contractAddress: savedConfig.contractAddress,
-      selectedFunction: savedConfig.functionId,
-
-      // Form configuration with all settings
-      formConfig: {
-        ...savedConfig.formConfig,
-        executionConfig: savedConfig.executionConfig,
-        uiKitConfig: savedConfig.uiKitConfig,
-      },
-
-      // Navigate to the appropriate step based on data completeness
-      currentStepIndex: targetStepIndex,
-
-      // Mark execution config as valid if it exists
-      isExecutionStepValid: !!savedConfig.executionConfig,
-
-      // Store contract form values for loading schema
-      contractFormValues: {
-        contractAddress: savedConfig.contractAddress,
-        // Add any other necessary form values here
-      },
-
-      // Set flag to load contract schema after adapter is ready
-      needsContractSchemaLoad: true,
-
-      // Contract schema will be loaded after adapter is ready
-      contractSchema: null,
-
-      // Store the loaded configuration ID
-      loadedConfigurationId: id,
-      isInNewUIMode: false,
-    }));
-  },
+  getState,
+  subscribe,
+  subscribeWithSelector,
+  setInitialState: uiBuilderStoreVanilla.getState().setInitialState,
+  updateState: uiBuilderStoreVanilla.getState().updateState,
+  resetDownstreamSteps: uiBuilderStoreVanilla.getState().resetDownstreamSteps,
+  resetWizard: uiBuilderStoreVanilla.getState().resetWizard,
+  loadContractUI: uiBuilderStoreVanilla.getState().loadContractUI,
 };

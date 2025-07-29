@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import useDeepCompareEffect from 'use-deep-compare-effect';
+import { useCallback, useEffect, useRef } from 'react';
 
 import {
   contractUIStorage,
@@ -9,6 +10,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { uiBuilderStore } from '../uiBuilderStore';
+import { useUIBuilderStore } from '../useUIBuilderStore';
 
 import {
   autoSaveCache,
@@ -40,15 +42,11 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   const { updateContractUI, saveContractUI } = useContractUIStorage();
   const storageOperations = useStorageOperations();
 
+  // Subscribe to store state changes with our new, clean hook
+  const state = useUIBuilderStore((s) => s);
+
   // Use ref to store the current auto-save function to avoid dependency issues
   const autoSaveRef = useRef<(() => Promise<void>) | undefined>(undefined);
-
-  // Subscribe to store state changes
-  const state = useSyncExternalStore(
-    uiBuilderStore.subscribe,
-    uiBuilderStore.getState,
-    uiBuilderStore.getState
-  );
 
   /**
    * Core auto-save operation - simplified with extracted modules
@@ -65,6 +63,8 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       return;
     }
 
+    let operationConfigId: string | null = null;
+
     try {
       const currentState = uiBuilderStore.getState();
 
@@ -73,6 +73,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         isLoadingSavedConfigRef,
         currentState
       );
+      operationConfigId = configId;
 
       if (!proceed) {
         return;
@@ -153,12 +154,9 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       handleAutoSaveError(error);
     } finally {
       // Cleanup
-      const currentState = uiBuilderStore.getState();
-      const configId = currentState.loadedConfigurationId;
-
-      uiBuilderStore.updateStateImmediate(() => ({ isAutoSaving: false }));
-      if (configId) {
-        storageOperations.setSaving(configId, false);
+      uiBuilderStore.updateState(() => ({ isAutoSaving: false }));
+      if (operationConfigId) {
+        storageOperations.setSaving(operationConfigId, false);
       }
       globalAutoSaveState.releaseLock();
     }
@@ -171,26 +169,25 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
 
   /**
    * Effect to schedule auto-save operations
+   *
+   * It is debounced with a timeout to prevent excessive updates. It also includes guards to prevent
+   * auto-saving in certain scenarios, such as when the form is pristine or when a load/reset has
+   * just occurred.
    */
-  useEffect(() => {
-    if (globalAutoSaveState.paused || globalAutoSaveState.shouldSkipCycle()) {
-      return;
-    }
-
+  useDeepCompareEffect(() => {
+    // Schedule the auto-save operation after a delay
     globalAutoSaveState.setTimer(() => {
       if (autoSaveRef.current) {
         void autoSaveRef.current();
       }
     });
   }, [
-    state.selectedNetworkConfigId,
-    state.contractAddress,
-    state.selectedFunction,
-    state.formConfig?.title,
-    state.formConfig?.description,
-    state.formConfig?.fields,
-    state.formConfig?.executionConfig,
-    state.formConfig?.uiKitConfig,
+    {
+      selectedNetworkConfigId: state.selectedNetworkConfigId,
+      contractAddress: state.contractAddress,
+      selectedFunction: state.selectedFunction,
+      formConfig: state.formConfig,
+    },
   ]);
 
   /**

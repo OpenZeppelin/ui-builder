@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { shallow } from 'zustand/shallow';
+import { useCallback, useEffect } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
@@ -6,6 +7,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
+import { useUIBuilderStore } from '../useUIBuilderStore';
 
 /**
  * @notice A hook to manage network and adapter interactions.
@@ -15,10 +17,12 @@ export function useBuilderNetwork() {
   const { setActiveNetworkId, activeAdapter, isAdapterLoading } = useWalletState();
 
   // Subscribe to store state for reactive auto-advance
-  const state = useSyncExternalStore(
-    uiBuilderStore.subscribe,
-    uiBuilderStore.getState,
-    uiBuilderStore.getState
+  const { pendingNetworkId, currentStepIndex } = useUIBuilderStore(
+    (s) => ({
+      pendingNetworkId: s.pendingNetworkId,
+      currentStepIndex: s.currentStepIndex,
+    }),
+    shallow
   );
 
   const handleNetworkSelect = useCallback(
@@ -49,15 +53,15 @@ export function useBuilderNetwork() {
 
   useEffect(() => {
     if (
-      state.pendingNetworkId &&
+      pendingNetworkId &&
       activeAdapter &&
       !isAdapterLoading &&
-      activeAdapter.networkConfig.id === state.pendingNetworkId &&
-      state.currentStepIndex === STEP_INDICES.CHAIN_SELECT
+      activeAdapter.networkConfig.id === pendingNetworkId &&
+      currentStepIndex === STEP_INDICES.CHAIN_SELECT
     ) {
       logger.info(
         'useBuilderNetwork',
-        `Auto-advancing to next step after adapter ready for network: ${state.pendingNetworkId}`
+        `Auto-advancing to next step after adapter ready for network: ${pendingNetworkId}`
       );
 
       uiBuilderStore.updateState(() => ({
@@ -66,8 +70,8 @@ export function useBuilderNetwork() {
       }));
     }
   }, [
-    state.pendingNetworkId,
-    state.currentStepIndex,
+    pendingNetworkId,
+    currentStepIndex,
     activeAdapter,
     isAdapterLoading,
     activeAdapter?.networkConfig.id,

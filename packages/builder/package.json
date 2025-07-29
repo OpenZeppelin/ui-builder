@@ -72,9 +72,11 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
+    "use-deep-compare-effect": "^1.8.1",
     "viem": "^2.31.4",
     "wagmi": "^2.15.6",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",

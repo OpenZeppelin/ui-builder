@@ -133,6 +133,7 @@ For more details, see the [Storage README](./packages/storage/README.md).
 - **pnpm (v9 or higher)**: Fast, disk-efficient package manager
 - **Vitest**: Testing framework integrated with Vite
 - **Storybook 8**: Component documentation and visual testing
+- **Zustand**: Lightweight, performant state management for React
 - **Changesets**: Automated versioning and package releases
 - **ESLint 9**: Modern linting with improved TypeScript support
 - **tsup**: Fast, modern bundler for TypeScript libraries
