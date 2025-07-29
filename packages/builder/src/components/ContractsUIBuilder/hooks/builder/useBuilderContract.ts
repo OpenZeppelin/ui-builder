@@ -64,17 +64,18 @@ export function useBuilderContract() {
           newState.isExecutionStepValid = false;
           return newState;
         });
+      }
 
-        // Always auto-advance to form customization step when a function is selected
-        if (currentState.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
-          logger.info(
-            'useBuilderContract',
-            `Auto-advancing to form customization after function selected: ${functionId}`
-          );
-          uiBuilderStore.updateState(() => ({
-            currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION,
-          }));
-        }
+      // Always auto-advance to form customization step when a function is selected,
+      // even if it's the same function being reselected
+      if (currentState.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
+        logger.info(
+          'useBuilderContract',
+          `Auto-advancing to form customization after function selected: ${functionId}`
+        );
+        uiBuilderStore.updateState(() => ({
+          currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION,
+        }));
       }
     }
   }, []);

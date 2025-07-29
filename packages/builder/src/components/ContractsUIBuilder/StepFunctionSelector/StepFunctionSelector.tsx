@@ -11,6 +11,7 @@ import { WritableFunctionsSection } from './WritableFunctionsSection';
 export function StepFunctionSelector({
   contractSchema,
   onFunctionSelected,
+  selectedFunction,
   networkConfig,
   onToggleContractState,
   isWidgetExpanded,
@@ -48,7 +49,11 @@ export function StepFunctionSelector({
       <FilterControls filterValue={filterValue} setFilterValue={setFilterValue} />
 
       <div className="max-h-96 space-y-6 overflow-y-auto">
-        <WritableFunctionsSection functions={writableFunctions} onSelectFunction={selectFunction} />
+        <WritableFunctionsSection
+          functions={writableFunctions}
+          selectedFunction={selectedFunction}
+          onSelectFunction={selectFunction}
+        />
 
         {/* Show a message if no functions match the filter */}
         {filteredFunctions.length === 0 && (

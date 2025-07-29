@@ -3,6 +3,7 @@ import { WritableFunctionRow } from './WritableFunctionRow';
 
 export function WritableFunctionsSection({
   functions,
+  selectedFunction,
   onSelectFunction,
 }: WritableFunctionsSectionProps) {
   return (
@@ -17,7 +18,7 @@ export function WritableFunctionsSection({
           <WritableFunctionRow
             key={fn.id}
             fn={fn}
-            isSelected={false} // Never show selection in the function selector step. We automatically navigate to the form customization step when a function is selected.
+            isSelected={selectedFunction === fn.id}
             onSelect={onSelectFunction}
           />
         ))

@@ -187,6 +187,7 @@ export function ContractsUIBuilder() {
         <StepFunctionSelector
           contractSchema={state.contractSchema}
           onFunctionSelected={actions.contract.functionSelected}
+          selectedFunction={state.selectedFunction}
           networkConfig={state.selectedNetwork}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
