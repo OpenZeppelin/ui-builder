@@ -47,6 +47,28 @@ const stellarAdapter = new StellarAdapter(placeholderNetworkConfig);
 
 Network configurations for Stellar networks (e.g., `stellarPubnet`, `stellarTestnet`) are defined and exported from `src/networks/index.ts` within this package. The full list is exported as `stellarNetworks`.
 
+## Package Structure
+
+```text
+adapter-stellar/
+├── src/
+│   ├── config/                  # Adapter-specific configuration
+│   ├── contract/                # Contract interaction utilities
+│   ├── mapping/                 # Type mapping utilities
+│   ├── networks/                # Stellar network configurations
+│   ├── operations/              # Stellar operations management
+│   ├── transaction/             # Transaction execution system
+│   ├── validation/              # Validation utilities
+│   ├── wallet/                  # Wallet integration (placeholder)
+│   ├── adapter.ts               # Main StellarAdapter class implementation
+│   └── index.ts                 # Public package exports
+├── package.json
+├── tsconfig.json
+├── tsup.config.ts
+├── vitest.config.ts
+└── README.md
+```
+
 ## Internal Structure
 
-This adapter will follow the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the `src/networks/` directory for managing its network configurations.
+This adapter follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the `src/networks/` directory for managing its network configurations.

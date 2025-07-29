@@ -1,8 +1,8 @@
 import { capitalize } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import type { ContractSchema, FieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { generateId } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
@@ -20,7 +20,7 @@ export function createMinimalFormConfig(
     functionId: functionName,
     fields: [
       {
-        id: uuidv4(),
+        id: generateId(),
         type: 'text',
         name: 'testParam',
         label: 'Test Parameter',
@@ -93,8 +93,8 @@ export function createComplexFormConfig(
   functionName: string = 'complexFunction',
   _ecosystem: Ecosystem = 'evm'
 ): BuilderFormConfig {
-  const basicFieldIds = [uuidv4(), uuidv4(), uuidv4()];
-  const advancedFieldIds = [uuidv4(), uuidv4(), uuidv4(), uuidv4()];
+  const basicFieldIds = [generateId(), generateId(), generateId()];
+  const advancedFieldIds = [generateId(), generateId(), generateId(), generateId()];
 
   return {
     functionId: functionName,
@@ -263,7 +263,7 @@ export function createTestField(
   [key: string]: unknown;
 } {
   return {
-    id: uuidv4(),
+    id: generateId(),
     type,
     name,
     label,

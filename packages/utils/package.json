@@ -47,10 +47,10 @@
     "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
-    "uuid": "^9.0.1"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
     "eslint": "^9.29.0",

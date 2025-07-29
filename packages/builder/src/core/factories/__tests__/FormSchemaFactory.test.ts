@@ -1,5 +1,4 @@
 // Import types from renderer
-import { v4 as uuidv4 } from 'uuid';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
@@ -12,6 +11,7 @@ import type {
   FunctionParameter,
   RelayerDetailsRich,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { generateId } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';
@@ -46,7 +46,7 @@ const mockAdapterInstance: ContractAdapter = {
   generateDefaultField: vi.fn((param: FunctionParameter): FormFieldType => {
     const fieldType = mockAdapterInstance.mapParameterTypeToFieldType(param.type) as FieldType;
     return {
-      id: `field-${param.name}-${uuidv4()}`,
+      id: `field-${param.name}-${generateId()}`,
       name: param.name,
       label: param.displayName || param.name,
       type: fieldType,
@@ -196,7 +196,7 @@ describe('FormSchemaFactory', () => {
         contractAddress: '0x123',
         fields: [
           {
-            id: uuidv4(),
+            id: generateId(),
             name: 'param1',
             label: 'P1',
             type: 'text',
@@ -204,7 +204,7 @@ describe('FormSchemaFactory', () => {
             originalParameterType: 'string',
           },
           {
-            id: uuidv4(),
+            id: generateId(),
             name: 'param2',
             label: 'P2',
             type: 'number',
@@ -213,7 +213,7 @@ describe('FormSchemaFactory', () => {
             originalParameterType: 'uint256',
           },
           {
-            id: uuidv4(),
+            id: generateId(),
             name: 'hiddenParam',
             label: 'HP',
             type: 'text',
@@ -223,7 +223,7 @@ describe('FormSchemaFactory', () => {
             originalParameterType: 'string',
           },
           {
-            id: uuidv4(),
+            id: generateId(),
             name: 'hardcodedParam',
             label: 'HCP',
             type: 'text',
@@ -234,7 +234,7 @@ describe('FormSchemaFactory', () => {
             originalParameterType: 'string',
           },
           {
-            id: uuidv4(),
+            id: generateId(),
             name: 'hardcodedHiddenParam',
             label: 'HCHP',
             type: 'text',

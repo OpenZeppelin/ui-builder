@@ -10,9 +10,27 @@ The goal of this package is to centralize common logic that is not tied to any s
 
 - **`AppConfigService`**: A singleton service responsible for loading and providing runtime configuration. It can load settings from Vite environment variables (for the builder app) or a `public/app.config.json` file (for exported apps), allowing for flexible configuration of RPC URLs, API keys, and other parameters.
 - **`logger`**: A pre-configured singleton logger for consistent, leveled logging across all packages. It can be enabled, disabled, or have its level changed globally.
-- **`generateId`**: A utility for generating unique IDs (UUID v4), used for form fields and other components.
+- **`generateId`**: A utility for generating unique IDs, used for form fields and other components.
 - **`cn`**: A utility (a wrapper around `clsx` and `tailwind-merge`) for conditionally joining CSS class names, essential for building dynamic and themeable UI components with Tailwind CSS.
 - **Type Guards and Helpers**: Various other small, reusable functions like `getDefaultValueForType`.
+
+## Package Structure
+
+```text
+utils/
+├── src/
+│   ├── config/                 # Configuration management
+│   ├── logger/                 # Logging utilities
+│   ├── ui/                     # UI utility functions
+│   ├── validation/             # Validation and type utilities
+│   ├── constants/              # Shared constants
+│   └── index.ts                # Main package exports
+├── package.json                # Package configuration
+├── tsconfig.json               # TypeScript configuration
+├── tsup.config.ts              # Build configuration
+├── vitest.config.ts            # Test configuration
+└── README.md                   # This documentation
+```
 
 ## Installation
 

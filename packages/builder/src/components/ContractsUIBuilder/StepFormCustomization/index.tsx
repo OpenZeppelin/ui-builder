@@ -63,19 +63,16 @@ export function StepFormCustomization({
   currentUiKitConfig,
   currentFormConfig,
 }: StepFormCustomizationProps) {
-  const [{ activeTab, previewMode }, setUiState] = useWizardStepUiState('stepCustomize', {
+  const {
+    stepUiState: { activeTab, previewMode, selectedFieldIndex },
+    setStepUiState: setUiState,
+  } = useWizardStepUiState('stepCustomize', {
     activeTab: 'general',
     previewMode: false,
+    selectedFieldIndex: null as number | null,
   });
 
   const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
-
-  // Reset to General tab whenever the component mounts (when user enters this step)
-  // This ensures consistent UX when navigating back to this step
-  useEffect(() => {
-    setUiState({ activeTab: 'general' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only on mount
 
   const {
     formConfig: baseFormConfigFromHook,
@@ -90,7 +87,9 @@ export function StepFormCustomization({
     existingFormConfig: currentFormConfig,
   });
 
-  const { selectedFieldIndex, selectField } = useFieldSelection();
+  const { selectField } = useFieldSelection({
+    onSelectField: (index) => setUiState({ selectedFieldIndex: index }),
+  });
 
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {
@@ -146,7 +145,12 @@ export function StepFormCustomization({
     ) {
       selectField(0);
     }
-  }, [activeTab, baseFormConfigFromHook, selectedFieldIndex, selectField]);
+    // We intentionally omit `selectedFieldIndex` from the dependency array.
+    // Including it would cause the effect to re-run after the first field is selected,
+    // which is unnecessary and not the intended behavior. This effect should only
+    // set the *initial* selection when the tab becomes active.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, baseFormConfigFromHook, selectField]);
 
   const handleTogglePreview = () => {
     setUiState({ previewMode: !previewMode });

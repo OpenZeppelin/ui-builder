@@ -194,7 +194,7 @@ logger.info('MyComponent', 'Component loaded');
 
 #### `generateId`
 
-A utility function to generate unique IDs (UUID v4) for form elements or other components.
+A utility function to generate unique IDs for form elements or other components.
 
 ```typescript
 import { generateId } from '@openzeppelin/contracts-ui-builder-renderer';
@@ -295,6 +295,27 @@ The system applies a semantic versioning strategy to dependencies:
 ### Configuration Discovery
 
 The Package Management System automatically discovers the renderer configuration. The exported `rendererConfig` constant name is expected by the system.
+
+## Package Structure
+
+```text
+renderer/
+├── src/
+│   ├── components/              # Core rendering components
+│   ├── hooks/                   # Rendering-specific hooks
+│   ├── utils/                   # Rendering utilities
+│   ├── types/                   # Package-specific types
+│   ├── stories/                 # Storybook stories
+│   ├── test/                    # Package-specific tests
+│   ├── config.ts                # Renderer configuration
+│   └── index.ts                 # Main package exports
+├── scripts/                     # Build and development scripts
+├── package.json                 # Package configuration
+├── tsconfig.json                # TypeScript configuration
+├── tsup.config.ts               # Build configuration
+├── vitest.config.ts             # Test configuration
+└── README.md                    # This documentation
+```
 
 ## Development
 

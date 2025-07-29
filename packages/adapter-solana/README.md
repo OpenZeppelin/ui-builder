@@ -47,6 +47,28 @@ const solanaAdapter = new SolanaAdapter(placeholderNetworkConfig);
 
 Network configurations for Solana networks (e.g., `solanaMainnetBeta`, `solanaDevnet`) are defined and exported from `src/networks/index.ts` within this package. The full list is exported as `solanaNetworks`.
 
+## Package Structure
+
+```text
+adapter-solana/
+├── src/
+│   ├── config/                  # Adapter-specific configuration
+│   ├── idl/                     # IDL (Interface Description Language) utilities
+│   ├── mapping/                 # Type mapping utilities
+│   ├── networks/                # Solana network configurations
+│   ├── program/                 # Program interaction utilities
+│   ├── transaction/             # Transaction execution system
+│   ├── validation/              # Validation utilities
+│   ├── wallet/                  # Wallet integration (placeholder)
+│   ├── adapter.ts               # Main SolanaAdapter class implementation
+│   └── index.ts                 # Public package exports
+├── package.json
+├── tsconfig.json
+├── tsup.config.ts
+├── vitest.config.ts
+└── README.md
+```
+
 ## Internal Structure
 
-This adapter will follow the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the `src/networks/` directory for managing its network configurations.
+This adapter follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md), with the `src/networks/` directory for managing its network configurations.

@@ -20,11 +20,34 @@ The `MidnightAdapter` is consumed by the `builder` application's `WalletStatePro
 
 ```typescript
 // In the builder application's adapter factory:
-import { MidnightAdapter } from '@openzeppelin/contracts-ui-builder-adapter-midnight';
-import { midnightTestnet } from '@openzeppelin/contracts-ui-builder-adapter-midnight';
+import {
+  MidnightAdapter,
+  midnightTestnet,
+} from '@openzeppelin/contracts-ui-builder-adapter-midnight';
 
 const networkConfig = midnightTestnet;
 const midnightAdapter = new MidnightAdapter(networkConfig);
+```
+
+## Package Structure
+
+```text
+adapter-midnight/
+├── src/
+│   ├── config/                  # Adapter-specific configuration
+│   ├── contract/                # Contract interaction utilities (placeholder)
+│   ├── mapping/                 # Type mapping utilities (placeholder)
+│   ├── networks/                # Midnight network configurations
+│   ├── transaction/             # Transaction execution system (placeholder)
+│   ├── validation/              # Validation utilities (placeholder)
+│   ├── wallet/                  # Wallet integration (implemented)
+│   ├── adapter.ts               # Main MidnightAdapter class implementation
+│   └── index.ts                 # Public package exports
+├── package.json
+├── tsconfig.json
+├── tsup.config.ts
+├── vitest.config.ts
+└── README.md
 ```
 
 ## Internal Structure

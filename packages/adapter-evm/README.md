@@ -47,28 +47,35 @@ The `EvmAdapter` implements the optional UI facilitation methods from the `Contr
 
 This adapter generally follows the standard module structure outlined in the main project [Adapter Architecture Guide](../../docs/ADAPTER_ARCHITECTURE.md).
 
-## Module Structure
+## Package Structure
 
-The adapter is organized into several key modules:
-
-```
+```text
 adapter-evm/
-└── src/
-    ├── abi/         # ABI fetching and parsing utilities
-    ├── config/      # Adapter-specific configuration types and defaults
-    ├── mapping/     # Logic for mapping ABI types to form field types
-    ├── networks/    # Definitions for supported EVM networks (mainnets, testnets)
-    ├── query/       # Logic for executing read-only view function calls
-    ├── transaction/ # Core logic for transaction creation, signing, and broadcasting
-    │   ├── components/ # React components for execution method configuration (e.g., Relayer options)
-    │   ├── eoa.ts      # EOA (Externally Owned Account) execution strategy
-    │   ├── relayer.ts  # Relayer execution strategy and SDK interaction
-    │   ├── execution-strategy.ts # Core interface for all execution strategies
-    │   └── ...
-    ├── validation/  # Validation logic for addresses and execution configurations
-    ├── wallet/      # Wallet connection management via Wagmi (see wallet/README.md)
-    ├── adapter.ts   # Main EvmAdapter class implementation
-    └── index.ts     # Public exports for the package
+├── src/
+│   ├── abi/                     # ABI fetching and parsing utilities
+│   ├── config/                  # Adapter-specific configuration
+│   ├── mapping/                 # Type mapping utilities
+│   ├── networks/                # EVM network configurations
+│   ├── query/                   # View function execution
+│   ├── transaction/             # Transaction execution system
+│   │   ├── components/                # React components for configuration
+│   │   ├── strategies/                # Execution strategy implementations
+│   ├── validation/              # Validation utilities
+│   ├── wallet/                  # Wallet integration (see wallet/README.md)
+│   │   ├── providers/                 # Wallet context providers
+│   │   ├── hooks/                     # Wallet interaction hooks
+│   │   ├── components/                # Wallet UI components
+│   │   ├── implementation/            # Wagmi implementation details
+│   │   ├── types/                     # Wallet-specific types
+│   │   ├── utils/                     # Wallet utilities
+│   │   ├── README.md                  # Detailed wallet documentation
+│   ├── adapter.ts               # Main EvmAdapter class implementation
+│   └── index.ts                 # Public package exports
+├── package.json
+├── tsconfig.json
+├── tsup.config.ts
+├── vitest.config.ts
+└── README.md
 ```
 
 ---
@@ -78,7 +85,7 @@ adapter-evm/
 The `EvmAdapter` class is instantiated with a specific `EvmNetworkConfig` object, making it aware of the target network from its creation:
 
 ```typescript
-import { EvmAdapter, ethereumSepolia } from '@openzeppelin/contracts-ui-builder-adapter-evm';
+import { ethereumSepolia, EvmAdapter } from '@openzeppelin/contracts-ui-builder-adapter-evm';
 
 // Or any other exported EvmNetworkConfig
 

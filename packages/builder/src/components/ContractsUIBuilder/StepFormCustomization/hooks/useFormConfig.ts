@@ -1,3 +1,4 @@
+import { deepEqual } from 'fast-equals';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type {
@@ -32,99 +33,12 @@ export function useFormConfig({
     existingFormConfig || null
   );
   const configInitialized = useRef(!!existingFormConfig);
-  const lastSelectedFunction = useRef<string | null>(null);
-  const lastParentUpdate = useRef<BuilderFormConfig | null>(null);
 
-  // Only for initial config generation - setup the form config when a function is first selected
-  useEffect(() => {
-    // Only create config when function changes or if it hasn't been initialized
-    const functionChanged = lastSelectedFunction.current !== selectedFunction;
-    if (functionChanged) {
-      lastSelectedFunction.current = selectedFunction;
-      // Only reset if we're switching to a different function, not if it's the same one
-      if (existingFormConfig && existingFormConfig.functionId === selectedFunction) {
-        // Same function selected, use existing config
-        setFormConfig(existingFormConfig);
-        configInitialized.current = true;
-        return;
-      } else {
-        configInitialized.current = false;
-      }
-    }
-
-    // Get selected function details
-    const selectedFunctionDetails = contractSchema?.functions.find(
-      (fn) => fn.id === selectedFunction
-    );
-
-    // Generate config if needed
-    if (
-      contractSchema &&
-      selectedFunction &&
-      selectedFunctionDetails &&
-      adapter &&
-      !configInitialized.current
-    ) {
-      try {
-        // Use the FormGenerator service to generate the form config
-        const config = generateFormConfig(adapter, contractSchema, selectedFunction);
-
-        // Set the flag to prevent re-initialization
-        configInitialized.current = true;
-
-        // Update state first
-        setFormConfig(config);
-
-        // Track what we're sending to parent to avoid loops
-        lastParentUpdate.current = config;
-
-        // Notify parent outside of render/effect cycle
-        setTimeout(() => {
-          onFormConfigUpdated(config);
-        }, 0);
-      } catch (error) {
-        console.error('Error generating form configuration:', error);
-
-        // If the FormGenerator service fails, use fallback field generation
-        if (selectedFunctionDetails) {
-          const contractAddress = contractSchema?.address || '';
-          const fields = generateFallbackFields(selectedFunctionDetails, contractAddress);
-
-          const config: BuilderFormConfig = {
-            functionId: selectedFunction,
-            fields,
-            layout: {
-              columns: 1,
-              spacing: 'normal',
-              labelPosition: 'top',
-            },
-            theme: {},
-            validation: {
-              mode: 'onChange',
-              showErrors: 'inline',
-            },
-            contractAddress,
-          };
-
-          // Set the flag to prevent re-initialization
-          configInitialized.current = true;
-
-          // Update state first
-          setFormConfig(config);
-
-          // Track what we're sending to parent to avoid loops
-          lastParentUpdate.current = config;
-
-          // Notify parent outside of render/effect cycle
-          setTimeout(() => {
-            onFormConfigUpdated(config);
-          }, 0);
-        }
-      }
-    }
-  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated, existingFormConfig]); // Include all dependencies
-
-  // Reset state if function selection changes
+  /**
+   * Effect 1: Reset config when the selected function is cleared.
+   * This ensures that no stale form configuration persists if the user
+   * navigates back and deselects a function.
+   */
   useEffect(() => {
     if (!selectedFunction) {
       setFormConfig(null);
@@ -132,6 +46,67 @@ export function useFormConfig({
     }
   }, [selectedFunction]);
 
+  /**
+   * Effect 2: Update internal state when a new `existingFormConfig` is loaded from props.
+   * This handles the scenario where a saved contract UI is loaded from storage,
+   * ensuring the hook's internal state syncs with the parent's state.
+   */
+  useEffect(() => {
+    if (existingFormConfig && !deepEqual(existingFormConfig, formConfig)) {
+      setFormConfig(existingFormConfig);
+      configInitialized.current = true;
+    }
+  }, [existingFormConfig, formConfig]);
+
+  /**
+   * Effect 3: Generate a new form config when a function is selected for the first time.
+   * This is the core logic for auto-generating the form layout and fields based on the
+   * contract's schema and the selected function. It runs only when no configuration has
+   * been initialized yet.
+   */
+  useEffect(() => {
+    if (configInitialized.current) {
+      return;
+    }
+
+    const selectedFunctionDetails = contractSchema?.functions.find(
+      (fn) => fn.id === selectedFunction
+    );
+
+    if (contractSchema && selectedFunction && selectedFunctionDetails && adapter) {
+      try {
+        const newConfig = generateFormConfig(adapter, contractSchema, selectedFunction);
+        setFormConfig(newConfig);
+        onFormConfigUpdated(newConfig);
+        configInitialized.current = true;
+      } catch (error) {
+        console.error('Error generating form configuration:', error);
+        if (selectedFunctionDetails) {
+          const contractAddress = contractSchema?.address || '';
+          const fields = generateFallbackFields(selectedFunctionDetails, contractAddress);
+          const fallbackConfig: BuilderFormConfig = {
+            functionId: selectedFunction,
+            fields,
+            layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
+            theme: {},
+            validation: { mode: 'onChange', showErrors: 'inline' },
+            contractAddress,
+          };
+          setFormConfig(fallbackConfig);
+          onFormConfigUpdated(fallbackConfig);
+          configInitialized.current = true;
+        }
+      }
+    }
+  }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated, configInitialized.current]);
+
+  /**
+   * Updates a specific field in the form configuration.
+   * This function creates a new configuration object with the updated field
+   * and notifies the parent component of the change.
+   * @param index The index of the field to update.
+   * @param updates A partial object of the field properties to update.
+   */
   const updateField = useCallback(
     (index: number, updates: Partial<FormFieldType>) => {
       if (!formConfig) return;
@@ -145,16 +120,15 @@ export function useFormConfig({
       });
 
       setFormConfig(updatedConfig);
-
-      // Only notify parent if the config actually changed
-      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
-        lastParentUpdate.current = updatedConfig;
-        onFormConfigUpdated(updatedConfig);
-      }
+      onFormConfigUpdated(updatedConfig);
     },
     [formConfig, onFormConfigUpdated]
   );
 
+  /**
+   * Updates the title of the form configuration.
+   * @param title The new title for the form.
+   */
   const updateFormTitle = useCallback(
     (title: string) => {
       if (!formConfig) return;
@@ -165,16 +139,15 @@ export function useFormConfig({
       });
 
       setFormConfig(updatedConfig);
-
-      // Only notify parent if the config actually changed
-      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
-        lastParentUpdate.current = updatedConfig;
-        onFormConfigUpdated(updatedConfig);
-      }
+      onFormConfigUpdated(updatedConfig);
     },
     [formConfig, onFormConfigUpdated]
   );
 
+  /**
+   * Updates the description of the form configuration.
+   * @param description The new description for the form.
+   */
   const updateFormDescription = useCallback(
     (description: string) => {
       if (!formConfig) return;
@@ -185,18 +158,13 @@ export function useFormConfig({
       });
 
       setFormConfig(updatedConfig);
-
-      // Only notify parent if the config actually changed
-      if (JSON.stringify(updatedConfig) !== JSON.stringify(lastParentUpdate.current)) {
-        lastParentUpdate.current = updatedConfig;
-        onFormConfigUpdated(updatedConfig);
-      }
+      onFormConfigUpdated(updatedConfig);
     },
     [formConfig, onFormConfigUpdated]
   );
 
   return {
-    formConfig,
+    formConfig: formConfig || existingFormConfig || null,
     updateField,
     updateFormTitle,
     updateFormDescription,

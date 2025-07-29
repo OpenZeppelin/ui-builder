@@ -98,3 +98,30 @@ function MyWalletComponent() {
 ```
 
 This package aims to decouple the builder application logic from the direct management of adapter instances and their UI contexts, promoting a cleaner and more maintainable architecture.
+
+## Package Structure
+
+```text
+react-core/
+├── src/
+│   ├── providers/              # React context providers
+│   ├── contexts/               # React contexts
+│   ├── hooks/                  # Consumer hooks
+│   ├── types/                  # Package-specific types
+│   ├── utils/                  # Internal utilities
+│   └── index.ts                # Main package exports
+├── package.json                # Package configuration
+├── tsconfig.json               # TypeScript configuration
+├── tsup.config.ts              # Build configuration
+├── vitest.config.ts            # Test configuration
+└── README.md                   # This documentation
+```
+
+## Dependencies
+
+This package has minimal dependencies to maintain a lightweight footprint:
+
+- **@openzeppelin/contracts-ui-builder-types**: Shared type definitions
+- **@openzeppelin/contracts-ui-builder-utils**: Shared utility functions (logger)
+- **react**: Peer dependency for React hooks and context
+- **react-dom**: Peer dependency for React DOM utilities

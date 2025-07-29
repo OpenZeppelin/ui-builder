@@ -10,11 +10,54 @@ import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contrac
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
+import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
+import AppSidebar from './components/Sidebar/AppSidebar';
+import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
 // Expecting them to be .ts files as per convention.
 const kitConfigImporters = import.meta.glob('./config/wallet/*.config.ts');
+
+// Separate component to access builder state
+function AppContent() {
+  const {
+    state,
+    actions: {
+      lifecycle: { load, createNew, resetAfterDelete },
+    },
+  } = useUIBuilderState();
+
+  const handleLoad = useCallback(
+    (id: string) => {
+      void load(id);
+    },
+    [load]
+  );
+
+  return (
+    <div className="bg-background text-foreground min-h-screen flex">
+      {/* Global Sidebar */}
+      <AppSidebar
+        onLoadContractUI={handleLoad}
+        onCreateNew={() => void createNew()}
+        onResetAfterDelete={resetAfterDelete}
+        currentLoadedConfigurationId={state.loadedConfigurationId}
+        isInNewUIMode={state.isInNewUIMode}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <Header title="Contracts UI Builder" />
+
+        <main className="pb-8 flex-1">
+          <ContractsUIBuilder />
+        </main>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const loadAppConfigModule: NativeConfigLoader = useCallback(async (relativePath: string) => {
@@ -38,32 +81,20 @@ function App() {
 
   return (
     <NetworkErrorNotificationProvider>
-      <AdapterProvider resolveAdapter={getAdapter}>
-        <WalletStateProvider
-          initialNetworkId={null}
-          getNetworkConfigById={getNetworkById}
-          loadConfigModule={loadAppConfigModule}
-        >
-          <div className="bg-background text-foreground min-h-screen">
-            <Header />
-
-            <main className="py-8">
-              <ContractsUIBuilder />
-            </main>
-            <footer className="text-muted-foreground mt-10 border-t py-6 text-center text-sm">
-              <div className="container mx-auto">
-                <p>© {new Date().getFullYear()} OpenZeppelin Contracts UI Builder</p>
-                <p className="mt-1">
-                  A proof of concept for building transaction forms for blockchain applications
-                </p>
-              </div>
-            </footer>
-          </div>
-          {/* Global network error handler - always mounted to handle error toasts */}
-          <NetworkErrorHandler />
-        </WalletStateProvider>
-      </AdapterProvider>
-      <Toaster position="top-right" />
+      <StorageOperationsProvider>
+        <AdapterProvider resolveAdapter={getAdapter}>
+          <WalletStateProvider
+            initialNetworkId={null}
+            getNetworkConfigById={getNetworkById}
+            loadConfigModule={loadAppConfigModule}
+          >
+            <AppContent />
+            {/* Global network error handler - always mounted to handle error toasts */}
+            <NetworkErrorHandler />
+          </WalletStateProvider>
+        </AdapterProvider>
+        <Toaster position="top-right" />
+      </StorageOperationsProvider>
     </NetworkErrorNotificationProvider>
   );
 }

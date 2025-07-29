@@ -1,44 +1,33 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback } from 'react';
 
 import { uiBuilderStore } from './uiBuilderStore';
+import { useUIBuilderStore } from './useUIBuilderStore';
 
 /**
- * A hook for managing transient UI state for a specific wizard step.
- * This state is stored in an external store to persist across component re-mounts.
- * It provides a `useState`-like API for convenience.
+ * A hook to manage UI state for a specific wizard step.
+ * This allows for isolated state management within each step.
  *
- * @param stepId A unique identifier for the step's state slice.
- * @param initialStepState The initial state for this step's UI.
- * @returns A tuple containing the current state and a function to update it.
+ * @param stepId - A unique identifier for the wizard step.
  */
-export function useWizardStepUiState<T>(
-  stepId: string,
-  initialStepState: T
-): [T, (newState: Partial<T>) => void] {
-  // Subscribe to the entire uiState object from the external store
-  const fullUiState = useSyncExternalStore(
-    uiBuilderStore.subscribe,
-    () => uiBuilderStore.getState().uiState
-  );
+export function useWizardStepUiState<T>(stepId: string, initialValues: T) {
+  const fullUiState = useUIBuilderStore((state) => state.uiState);
 
-  // Get the state for this specific step, or fall back to the initial state
-  const stepState = (fullUiState[stepId] as T) ?? initialStepState;
-
-  // Create a memoized setter function
-  const setStepState = useCallback(
-    (newState: Partial<T>) => {
+  const setStepUiState = useCallback(
+    (newStepState: Partial<T>) => {
       uiBuilderStore.updateState((currentState) => ({
         uiState: {
           ...currentState.uiState,
           [stepId]: {
-            ...((currentState.uiState[stepId] as T) ?? initialStepState),
-            ...newState,
+            ...(currentState.uiState[stepId] as T),
+            ...newStepState,
           },
         },
       }));
     },
-    [stepId, initialStepState]
+    [stepId]
   );
 
-  return [stepState, setStepState];
+  const stepUiState = (fullUiState[stepId] as T) ?? initialValues;
+
+  return { stepUiState, setStepUiState };
 }

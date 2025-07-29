@@ -39,6 +39,7 @@
     "@openzeppelin/contracts-ui-builder-adapter-stellar": "workspace:*",
     "@openzeppelin/contracts-ui-builder-react-core": "workspace:*",
     "@openzeppelin/contracts-ui-builder-renderer": "workspace:*",
+    "@openzeppelin/contracts-ui-builder-storage": "workspace:^",
     "@openzeppelin/contracts-ui-builder-styles": "workspace:*",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
@@ -61,6 +62,7 @@
     "@web3icons/react": "^4.0.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fast-equals": "^5.2.2",
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.510.0",
@@ -70,10 +72,11 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.1.0",
+    "use-deep-compare-effect": "^1.8.1",
     "viem": "^2.31.4",
     "wagmi": "^2.15.6",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",

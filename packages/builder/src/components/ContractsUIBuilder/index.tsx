@@ -1,6 +1,8 @@
+import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ContractStateWidget } from '@openzeppelin/contracts-ui-builder-renderer';
+import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';
@@ -21,32 +23,7 @@ import { StepContractDefinition } from './StepContractDefinition';
  * This component renders the multi-step wizard for building transaction apps..
  */
 export function ContractsUIBuilder() {
-  const {
-    currentStepIndex,
-    selectedNetworkConfigId,
-    selectedEcosystem,
-    contractSchema,
-    contractFormValues,
-    selectedFunction,
-    formConfig,
-    isExecutionStepValid,
-    selectedNetwork,
-    selectedAdapter,
-    sidebarWidget,
-    exportLoading,
-    isWidgetVisible,
-    networkToSwitchTo,
-    onStepChange,
-    handleNetworkSelect,
-    handleContractSchemaLoaded,
-    handleFunctionSelected,
-    handleFormConfigUpdated,
-    handleExecutionConfigUpdated,
-    handleUiKitConfigUpdated,
-    toggleWidget,
-    exportApp,
-    clearNetworkToSwitchTo,
-  } = useUIBuilderState();
+  const { state, widget, actions } = useUIBuilderState();
 
   // Track network switching state
   const [isAdapterReady, setIsAdapterReady] = useState(false);
@@ -58,8 +35,8 @@ export function ContractsUIBuilder() {
   const hasInitializedNetworkRef = useRef(false);
 
   // Custom handler for network selection that directly signals a network switch
-  const handleNetworkSelection = (networkId: string | null) => {
-    logger.info('ContractsUIBuilder', `🔀 Network selected: ${networkId}`);
+  const handleNetworkSelection = (ecosystem: Ecosystem, networkId: string | null) => {
+    logger.info('ContractsUIBuilder', `🔀 Network selected: ${ecosystem}/${networkId}`);
 
     // If there's a previous network and we're selecting a new one, set it as the network to switch to
     // OR if this is the first network selection (initial load)
@@ -83,8 +60,8 @@ export function ContractsUIBuilder() {
     // Update our cached latest network ID
     latestNetworkIdRef.current = networkId;
 
-    // Call the original handler from the hook
-    handleNetworkSelect(networkId);
+    // Call the original handler from the hook with both ecosystem and networkId
+    void actions.network.select(ecosystem, networkId);
 
     // Note: Auto-navigation is now handled in useUIBuilderState via the pendingNetworkId state
   };
@@ -97,9 +74,9 @@ export function ContractsUIBuilder() {
   // 3. isAdapterReady is set to true -> NetworkSwitchManager mounts
   // 4. NetworkSwitchManager handles the actual wallet switch
   useEffect(() => {
-    if (!selectedAdapter || !networkToSwitchTo || !selectedNetworkConfigId) {
+    if (!state.selectedAdapter || !state.networkToSwitchTo || !state.selectedNetworkConfigId) {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
-      if (!networkToSwitchTo && isAdapterReady) {
+      if (!state.networkToSwitchTo && isAdapterReady) {
         logger.info(
           'ContractsUIBuilder',
           'Target network cleared, ensuring isAdapterReady is false.'
@@ -110,10 +87,10 @@ export function ContractsUIBuilder() {
     }
 
     // If the adapter is now loaded for the network we want to switch to, mark it as ready.
-    if (selectedNetworkConfigId === networkToSwitchTo) {
+    if (state.selectedNetworkConfigId === state.networkToSwitchTo && state.selectedAdapter) {
       logger.info(
         'ContractsUIBuilder',
-        `✅ Adapter available for target network ${selectedNetworkConfigId}. (Current selectedAdapter ID: ${selectedAdapter.networkConfig.id}). Setting isAdapterReady.`
+        `✅ Adapter available for target network ${state.selectedNetworkConfigId}. (Current selectedAdapter ID: ${state.selectedAdapter.networkConfig.id}). Setting isAdapterReady.`
       );
       if (!isAdapterReady) {
         setIsAdapterReady(true);
@@ -125,46 +102,51 @@ export function ContractsUIBuilder() {
       if (isAdapterReady) {
         logger.info(
           'ContractsUIBuilder',
-          `Mismatch: selectedNetwork (${selectedNetworkConfigId}) vs target (${networkToSwitchTo}). Resetting isAdapterReady.`
+          `Mismatch: selectedNetwork (${state.selectedNetworkConfigId}) vs target (${state.networkToSwitchTo}). Resetting isAdapterReady.`
         );
         setIsAdapterReady(false);
       }
     }
-  }, [selectedAdapter, networkToSwitchTo, selectedNetworkConfigId, isAdapterReady]);
+  }, [
+    state.selectedAdapter,
+    state.networkToSwitchTo,
+    state.selectedNetworkConfigId,
+    isAdapterReady,
+  ]);
 
   // Reset the network to switch to when switching is complete
   const handleNetworkSwitchComplete = () => {
     logger.info('ContractsUIBuilder', '🔄 Network switch completed, resetting target');
-    clearNetworkToSwitchTo();
+    actions.network.clearSwitchTo();
     setIsAdapterReady(false);
   };
 
   // Memoize the mounting conditions to prevent unnecessary re-renders
   const shouldMountNetworkSwitcher = useMemo(() => {
     const decision = !!(
-      selectedAdapter &&
-      networkToSwitchTo &&
+      state.selectedAdapter &&
+      state.networkToSwitchTo &&
       isAdapterReady && // Indicates the switching process has been initiated
-      selectedAdapter.networkConfig.id === networkToSwitchTo // Ensures the adapter in current render scope is correct
+      state.selectedAdapter.networkConfig.id === state.networkToSwitchTo // Ensures the adapter in current render scope is correct
     );
     if (decision) {
       logger.info(
         'ContractsUIBuilder',
-        `MOUNTING NetworkSwitchManager. Adapter ID: ${selectedAdapter.networkConfig.id}, Target: ${networkToSwitchTo ?? 'null'}`
+        `MOUNTING NetworkSwitchManager. Adapter ID: ${state.selectedAdapter?.networkConfig.id}, Target: ${state.networkToSwitchTo ?? 'null'}`
       );
     }
     return decision;
-  }, [selectedAdapter, networkToSwitchTo, isAdapterReady]);
+  }, [state.selectedAdapter, state.networkToSwitchTo, isAdapterReady]);
 
   // Create sidebar widget when we have contract data
-  const sidebarWidgetComponent = sidebarWidget ? (
+  const sidebarWidgetComponent = widget.sidebar ? (
     <div className="sticky top-4">
       <ContractStateWidget
-        contractSchema={sidebarWidget.contractSchema}
-        contractAddress={sidebarWidget.contractAddress}
-        adapter={sidebarWidget.adapter}
-        isVisible={sidebarWidget.isVisible}
-        onToggle={sidebarWidget.onToggle}
+        contractSchema={widget.sidebar.contractSchema}
+        contractAddress={widget.sidebar.contractAddress}
+        adapter={widget.sidebar.adapter}
+        isVisible={widget.sidebar.isVisible}
+        onToggle={widget.sidebar.onToggle}
       />
     </div>
   ) : null;
@@ -176,107 +158,126 @@ export function ContractsUIBuilder() {
       component: (
         <ChainSelector
           onNetworkSelect={handleNetworkSelection}
-          initialEcosystem={selectedNetwork?.ecosystem ?? selectedEcosystem ?? 'evm'}
-          selectedNetworkId={selectedNetworkConfigId}
+          initialEcosystem={state.selectedNetwork?.ecosystem ?? state.selectedEcosystem ?? 'evm'}
+          selectedNetworkId={state.selectedNetworkConfigId}
         />
       ),
-      isValid: !!selectedNetworkConfigId,
+      isValid: !!state.selectedNetworkConfigId,
     },
     {
       id: 'contract-definition',
       title: 'Load Contract',
       component: (
         <StepContractDefinition
-          onContractSchemaLoaded={handleContractSchemaLoaded}
-          adapter={selectedAdapter}
-          networkConfig={selectedNetwork}
-          existingContractSchema={contractSchema}
-          existingFormValues={contractFormValues}
-          onToggleContractState={toggleWidget}
-          isWidgetExpanded={isWidgetVisible}
+          onContractSchemaLoaded={actions.contract.schemaLoaded}
+          adapter={state.selectedAdapter}
+          networkConfig={state.selectedNetwork}
+          existingContractSchema={state.contractSchema}
+          existingFormValues={state.contractFormValues}
+          onToggleContractState={widget.toggle}
+          isWidgetExpanded={state.isWidgetVisible}
         />
       ),
-      isValid: !!contractSchema,
+      isValid: !!state.contractSchema,
     },
     {
       id: 'function-selector',
       title: 'Select Function',
       component: (
         <StepFunctionSelector
-          contractSchema={contractSchema}
-          onFunctionSelected={handleFunctionSelected}
-          networkConfig={selectedNetwork}
-          onToggleContractState={toggleWidget}
-          isWidgetExpanded={isWidgetVisible}
+          contractSchema={state.contractSchema}
+          onFunctionSelected={actions.contract.functionSelected}
+          selectedFunction={state.selectedFunction}
+          networkConfig={state.selectedNetwork}
+          onToggleContractState={widget.toggle}
+          isWidgetExpanded={state.isWidgetVisible}
         />
       ),
-      isValid: !!selectedFunction,
+      isValid: !!state.selectedFunction,
     },
     {
       id: 'form-customization',
       title: 'Customize',
       component: (
         <StepFormCustomization
-          contractSchema={contractSchema}
-          selectedFunction={selectedFunction}
-          networkConfig={selectedNetwork}
-          onFormConfigUpdated={handleFormConfigUpdated}
-          onExecutionConfigUpdated={handleExecutionConfigUpdated}
-          currentExecutionConfig={formConfig?.executionConfig}
-          onToggleContractState={toggleWidget}
-          isWidgetExpanded={isWidgetVisible}
-          onUiKitConfigUpdated={handleUiKitConfigUpdated}
-          currentUiKitConfig={formConfig?.uiKitConfig}
-          currentFormConfig={formConfig}
+          contractSchema={state.contractSchema}
+          selectedFunction={state.selectedFunction}
+          networkConfig={state.selectedNetwork}
+          onFormConfigUpdated={actions.config.form}
+          onExecutionConfigUpdated={actions.config.execution}
+          currentExecutionConfig={state.formConfig?.executionConfig}
+          onToggleContractState={widget.toggle}
+          isWidgetExpanded={state.isWidgetVisible}
+          onUiKitConfigUpdated={actions.config.uiKit}
+          currentUiKitConfig={state.formConfig?.uiKitConfig}
+          currentFormConfig={state.formConfig}
         />
       ),
-      isValid: isExecutionStepValid,
+      isValid: state.isExecutionStepValid,
     },
     {
       id: 'complete',
       title: 'Complete',
       component: (
         <StepComplete
-          networkConfig={selectedNetwork}
-          formConfig={formConfig}
-          contractSchema={contractSchema}
+          networkConfig={state.selectedNetwork}
+          formConfig={state.formConfig}
+          contractSchema={state.contractSchema}
           onExport={() => {
-            void exportApp();
+            void actions.export();
           }}
-          exportLoading={exportLoading}
+          exportLoading={state.exportLoading}
           functionDetails={
-            contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null
+            state.contractSchema?.functions.find((fn) => fn.id === state.selectedFunction) || null
           }
-          onToggleContractState={toggleWidget}
-          isWidgetExpanded={isWidgetVisible}
+          onToggleContractState={widget.toggle}
+          isWidgetExpanded={state.isWidgetVisible}
         />
       ),
     },
   ];
 
   return (
-    <div className="mx-auto max-w-5xl py-8">
-      {/* Network switch manager to handle wallet network switching 
-          Only mount when adapter is ready and matches the networkToSwitchTo */}
-      {shouldMountNetworkSwitcher && selectedAdapter && networkToSwitchTo && (
+    <>
+      {shouldMountNetworkSwitcher && state.selectedAdapter && state.networkToSwitchTo && (
         <NetworkSwitchManager
-          adapter={selectedAdapter}
-          targetNetworkId={networkToSwitchTo}
+          adapter={state.selectedAdapter}
+          targetNetworkId={state.networkToSwitchTo}
           onNetworkSwitchComplete={handleNetworkSwitchComplete}
         />
       )}
 
-      <HeroSection currentStepIndex={currentStepIndex} />
+      {/* Loading overlay when configuration is being loaded */}
+      {state.isLoadingConfiguration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading configuration...</p>
+          </div>
+        </div>
+      )}
 
-      <div className="bg-card rounded-lg border shadow-sm">
-        <WizardLayout
-          steps={steps}
-          sidebarWidget={sidebarWidgetComponent}
-          isWidgetExpanded={isWidgetVisible}
-          currentStepIndex={currentStepIndex}
-          onStepChange={onStepChange}
-        />
+      {/* Auto-save indicator */}
+      {state.isAutoSaving && (
+        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-md bg-background/95 border shadow-sm px-3 py-2">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Saving...</p>
+        </div>
+      )}
+
+      <div className="ml-8 mr-8 max-w-6xl pt-13 pb-8">
+        <HeroSection />
+
+        <div className="bg-card rounded-lg">
+          <WizardLayout
+            steps={steps}
+            sidebarWidget={sidebarWidgetComponent}
+            isWidgetExpanded={state.isWidgetVisible}
+            currentStepIndex={state.currentStepIndex}
+            onStepChange={actions.navigation.onStepChange}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import type {
 export interface StepFunctionSelectorProps {
   contractSchema: ContractSchema | null;
   onFunctionSelected: (functionId: string | null) => void;
+  selectedFunction?: string | null;
   networkConfig?: NetworkConfig | null;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
@@ -29,6 +30,7 @@ export interface ReadOnlyFunctionCardProps {
 
 export interface WritableFunctionsSectionProps {
   functions: ContractFunction[];
+  selectedFunction?: string | null;
   onSelectFunction: (functionId: string, modifiesState: boolean) => void;
 }
 

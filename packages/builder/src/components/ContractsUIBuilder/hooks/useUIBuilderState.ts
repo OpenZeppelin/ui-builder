@@ -1,215 +1,131 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import {
-  ContractSchema,
-  ExecutionConfig,
-  FormValues,
-  UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { uiBuilderStore, type BuilderFormConfig } from './uiBuilderStore';
+import {
+  useAutoSave,
+  useBuilderConfig,
+  useBuilderContract,
+  useBuilderLifecycle,
+  useBuilderNavigation,
+  useBuilderNetwork,
+} from './builder';
+import { uiBuilderStore } from './uiBuilderStore';
 import { useCompleteStepState } from './useCompleteStepState';
 import { useContractWidgetState } from './useContractWidgetState';
-
-// Step indices for the wizard navigation
-const STEP_INDICES = {
-  CHAIN_SELECT: 0,
-  CONTRACT_DEFINITION: 1,
-  FUNCTION_SELECTOR: 2,
-  FORM_CUSTOMIZATION: 3,
-  COMPLETE: 4,
-} as const;
+import { useUIBuilderStore } from './useUIBuilderStore';
 
 /**
  * Coordinating hook that uses an external store to manage builder state.
  * This ensures state persists across component re-mounts.
  */
 export function useUIBuilderState() {
-  const state = useSyncExternalStore(uiBuilderStore.subscribe, uiBuilderStore.getState);
-  const {
-    setActiveNetworkId,
-    activeNetworkConfig,
-    activeAdapter,
-    isAdapterLoading,
-    reconfigureActiveAdapterUiKit,
-  } = useWalletState();
+  const state = useUIBuilderStore((s) => s);
+  const { activeNetworkConfig, activeAdapter, isAdapterLoading, reconfigureActiveAdapterUiKit } =
+    useWalletState();
+
+  const savedConfigIdRef = useRef<string | null>(null);
+  const isLoadingSavedConfigRef = useRef<boolean>(false);
 
   // Initialize the store with the active network from the wallet context on first load.
   useEffect(() => {
     uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
+
+    void lifecycle.initializePageState();
   }, []); // Run only once
 
-  const onStepChange = useCallback(
-    (index: number) => {
-      uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
+  const autoSave = useAutoSave(isLoadingSavedConfigRef);
+  const lifecycle = useBuilderLifecycle(isLoadingSavedConfigRef, savedConfigIdRef, autoSave);
+  const navigation = useBuilderNavigation(isLoadingSavedConfigRef, savedConfigIdRef);
+  const network = useBuilderNetwork();
+  const contract = useBuilderContract();
+  const config = useBuilderConfig();
 
-      // Clear network selection when going back to the first step
-      if (index === STEP_INDICES.CHAIN_SELECT) {
-        setActiveNetworkId(null);
-        uiBuilderStore.updateState(() => ({
-          selectedNetworkConfigId: null,
-          selectedEcosystem: null,
-        }));
-        uiBuilderStore.resetDownstreamSteps('network');
+  const load = useCallback(
+    async (id: string) => {
+      const loadedData = await lifecycle.load(id);
+      if (loadedData?.uiKitConfig && reconfigureActiveAdapterUiKit) {
+        reconfigureActiveAdapterUiKit(loadedData.uiKitConfig);
       }
-
-      // Note: We don't clear function selection when going back to step 2
-      // to preserve user progress. The UI will visually hide the selection
-      // but keep the data intact.
+      return loadedData;
     },
-    [setActiveNetworkId]
+    [lifecycle, reconfigureActiveAdapterUiKit]
   );
 
-  const handleNetworkSelect = useCallback(
-    (networkId: string | null) => {
-      logger.info('useUIBuilderState', `handleNetworkSelect: ${networkId}`);
+  // Extract specific values to avoid dependency array reference issues
+  const needsContractSchemaLoad = state.needsContractSchemaLoad;
+  const contractFormValues = state.contractFormValues;
+  const selectedNetworkConfigId = state.selectedNetworkConfigId;
+  const adapterNetworkId = activeAdapter?.networkConfig.id;
+  const isSchemaLoading = state.isSchemaLoading;
 
-      // Update the store with the new network selection
-      // networkToSwitchTo is set here to trigger wallet switching in the component
-      uiBuilderStore.updateState(() => ({
-        selectedNetworkConfigId: networkId,
-        selectedEcosystem: networkId ? activeNetworkConfig?.ecosystem : null,
-        networkToSwitchTo: networkId,
-      }));
-      uiBuilderStore.resetDownstreamSteps('network');
-
-      // Set pending network for auto-advance tracking
-      // This will trigger navigation once the adapter is loaded
-      if (networkId && state.currentStepIndex === STEP_INDICES.CHAIN_SELECT) {
-        logger.info('useUIBuilderState', `Setting pendingNetworkId: ${networkId}`);
-        uiBuilderStore.updateState(() => ({ pendingNetworkId: networkId }));
-      }
-
-      // Notify the wallet state provider about the network change
-      setActiveNetworkId(networkId);
-    },
-    [setActiveNetworkId, activeNetworkConfig, state.currentStepIndex]
-  );
-
-  // Auto-advance to next step when adapter is ready after network selection
-  // This effect coordinates the timing between:
-  // 1. Network selection (sets pendingNetworkId)
-  // 2. Adapter loading (async operation)
-  // 3. Step navigation (happens after adapter is ready)
-  // 4. Wallet network switching (handled by NetworkSwitchManager in the component)
+  // Only load schema when the conditions are actually met, not on every contract object change
   useEffect(() => {
-    const currentState = uiBuilderStore.getState();
-
-    logger.info(
-      'useUIBuilderState',
-      `Auto-advance effect check - pendingNetworkId: ${currentState.pendingNetworkId}, activeAdapter: ${!!activeAdapter}, isAdapterLoading: ${isAdapterLoading}, adapterId: ${activeAdapter?.networkConfig?.id}, currentStep: ${currentState.currentStepIndex}`
-    );
-
-    if (
-      currentState.pendingNetworkId &&
-      activeAdapter &&
-      !isAdapterLoading &&
-      activeAdapter.networkConfig.id === currentState.pendingNetworkId &&
-      currentState.currentStepIndex === STEP_INDICES.CHAIN_SELECT
-    ) {
-      logger.info(
-        'useUIBuilderState',
-        `Auto-advancing to next step after adapter ready for network: ${currentState.pendingNetworkId}`
-      );
-
-      // Clear the pending network and advance to next step
-      uiBuilderStore.updateState(() => ({
-        pendingNetworkId: null,
-        currentStepIndex: STEP_INDICES.CONTRACT_DEFINITION,
-      }));
+    // Skip if already loading
+    if (isSchemaLoading) {
+      return;
     }
-  }, [activeAdapter, isAdapterLoading]);
 
-  const handleContractSchemaLoaded = useCallback(
-    (schema: ContractSchema | null, formValues?: FormValues) => {
-      uiBuilderStore.updateState(() => ({
-        contractSchema: schema,
-        contractAddress: schema?.address ?? null,
-        contractFormValues: formValues || null,
-      }));
-      uiBuilderStore.resetDownstreamSteps('contract');
-    },
-    []
-  );
+    // Skip if already loading in this component instance
+    if (state.isLoadingConfiguration || isLoadingSavedConfigRef.current) {
+      return;
+    }
 
-  const handleFunctionSelected = useCallback((functionId: string | null) => {
-    const currentState = uiBuilderStore.getState();
-    const previousFunctionId = currentState.selectedFunction;
-    const isDifferentFunction = functionId !== previousFunctionId;
-    const existingFormConfig = currentState.formConfig;
-    // Remove redundant check - !isDifferentFunction already implies function ID match
-    const isSameFunctionWithExistingConfig: boolean = !isDifferentFunction && !!existingFormConfig;
-
-    uiBuilderStore.updateState((s) => {
-      const newState = { selectedFunction: functionId };
-
-      // Auto-advance to next step when a function is selected and we're on the function selector step
-      if (functionId && s.currentStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
-        return { ...newState, currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION };
+    // Load schema if we need to and have the required data
+    if (needsContractSchemaLoad && contractFormValues) {
+      if (activeAdapter) {
+        // If we have a selectedNetworkConfigId, make sure it matches the adapter
+        if (selectedNetworkConfigId) {
+          if (selectedNetworkConfigId === adapterNetworkId) {
+            void contract.loadSchemaIfNeeded();
+          }
+        } else {
+          // If selectedNetworkConfigId is empty (due to save bug), still try to load with current adapter
+          void contract.loadSchemaIfNeeded();
+        }
       }
-      return newState;
-    });
-
-    // Only reset downstream steps if we're selecting a different function
-    // Preserve form config if it's the same function
-    if (functionId !== null) {
-      uiBuilderStore.resetDownstreamSteps('function', isSameFunctionWithExistingConfig);
     }
-  }, []);
+  }, [
+    // Use more stable dependencies to prevent rapid re-runs
+    needsContractSchemaLoad,
+    !!contractFormValues, // Boolean to avoid object reference changes
+    selectedNetworkConfigId,
+    adapterNetworkId,
+    contract.loadSchemaIfNeeded,
+    isSchemaLoading,
+    // Don't include activeAdapter directly to avoid re-runs when adapter object changes
+  ]);
 
-  const handleFormConfigUpdated = useCallback((config: Partial<BuilderFormConfig>) => {
-    uiBuilderStore.updateState((s) => ({
-      formConfig: s.formConfig ? { ...s.formConfig, ...config } : (config as BuilderFormConfig),
-    }));
-  }, []);
-
-  const handleExecutionConfigUpdated = useCallback(
-    (execConfig: ExecutionConfig | undefined, isValid: boolean) => {
-      uiBuilderStore.updateState((s) => ({
-        formConfig: s.formConfig
-          ? { ...s.formConfig, executionConfig: execConfig }
-          : s.selectedFunction && s.contractAddress
-            ? {
-                functionId: s.selectedFunction,
-                contractAddress: s.contractAddress,
-                fields: [],
-                layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-                validation: { mode: 'onChange', showErrors: 'inline' },
-                executionConfig: execConfig,
-              }
-            : s.formConfig,
-        isExecutionStepValid: isValid,
-      }));
-    },
-    []
-  );
-
-  const handleUiKitConfigUpdated = useCallback(
-    (uiKitConfig: UiKitConfiguration) => {
-      uiBuilderStore.updateState((s) => ({
-        formConfig: s.formConfig ? { ...s.formConfig, uiKitConfig } : null,
-      }));
-      // Also trigger the global reconfiguration to update the header, etc.
-      reconfigureActiveAdapterUiKit(uiKitConfig);
-    },
-    [reconfigureActiveAdapterUiKit]
-  );
-
-  // Other hooks that manage transient/UI state can remain here
   const contractWidget = useContractWidgetState();
   const completeStep = useCompleteStepState();
 
-  const sidebarWidget =
-    state.contractSchema && state.contractAddress && activeAdapter && activeNetworkConfig
-      ? contractWidget.createWidgetProps(
-          state.contractSchema,
-          state.contractAddress,
-          activeAdapter,
-          activeNetworkConfig
-        )
-      : null;
+  // Update widget visibility when contract schema is loaded
+  useEffect(() => {
+    contractWidget.handleWidgetVisibilityUpdate(
+      state.contractSchema,
+      state.contractAddress,
+      activeAdapter
+    );
+  }, [state.contractSchema, state.contractAddress, activeAdapter]);
+
+  const sidebarWidget = useMemo(
+    () =>
+      state.contractSchema && state.contractAddress && activeAdapter && activeNetworkConfig
+        ? contractWidget.createWidgetProps(
+            state.contractSchema,
+            state.contractAddress,
+            activeAdapter,
+            activeNetworkConfig
+          )
+        : null,
+    [
+      state.contractSchema,
+      state.contractAddress,
+      activeAdapter,
+      activeNetworkConfig,
+      contractWidget,
+    ]
+  );
 
   const handleExportApp = useCallback(() => {
     if (!activeNetworkConfig || !activeAdapter || !state.selectedFunction) return;
@@ -221,27 +137,43 @@ export function useUIBuilderState() {
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
-  const clearNetworkToSwitchTo = useCallback(() => {
-    uiBuilderStore.updateState(() => ({ networkToSwitchTo: null }));
-  }, []);
-
   return {
-    ...state,
-    selectedNetwork: activeNetworkConfig,
-    selectedAdapter: activeAdapter,
-    adapterLoading: isAdapterLoading,
-    sidebarWidget,
-    exportLoading: completeStep.loading,
-    isWidgetVisible: contractWidget.isWidgetVisible,
-    onStepChange,
-    handleNetworkSelect,
-    handleContractSchemaLoaded,
-    handleFunctionSelected,
-    handleFormConfigUpdated,
-    handleExecutionConfigUpdated,
-    toggleWidget: contractWidget.toggleWidget,
-    exportApp: handleExportApp,
-    clearNetworkToSwitchTo,
-    handleUiKitConfigUpdated,
+    state: {
+      ...state,
+      selectedNetwork: activeNetworkConfig,
+      selectedAdapter: activeAdapter,
+      adapterLoading: isAdapterLoading,
+      exportLoading: completeStep.loading,
+      isWidgetVisible: contractWidget.isWidgetVisible,
+    },
+    widget: {
+      sidebar: sidebarWidget,
+      toggle: contractWidget.toggleWidget,
+    },
+    actions: {
+      export: handleExportApp,
+      navigation: {
+        onStepChange: navigation.onStepChange,
+      },
+      network: {
+        select: network.select,
+        clearSwitchTo: network.clearSwitchTo,
+      },
+      contract: {
+        schemaLoaded: contract.schemaLoaded,
+        functionSelected: contract.functionSelected,
+      },
+      config: {
+        form: config.form,
+        execution: config.execution,
+        uiKit: config.uiKit,
+      },
+      lifecycle: {
+        load,
+        createNew: lifecycle.createNew,
+        resetAfterDelete: lifecycle.resetAfterDelete,
+        initializePageState: lifecycle.initializePageState,
+      },
+    },
   };
 }

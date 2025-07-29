@@ -20,7 +20,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         data-slot="button"
         data-variant={variant || 'default'}
         data-size={size || 'default'}
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), 'cursor-pointer')}
         ref={ref}
         {...props}
       />

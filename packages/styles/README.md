@@ -2,11 +2,26 @@
 
 This package contains the centralized styling system for the Contracts UI Builder monorepo. It uses Tailwind CSS 4.0 with OKLCH colors and follows the new-york style from shadcn/ui.
 
-## Structure
+## Package Structure
+
+```text
+styles/
+├── src/                        # Source stylesheets and utilities
+├── global.css                  # Main CSS file with theme variables and base styles
+├── tailwind.config.cjs -> ../../tailwind.config.cjs  # Symlink to root config
+├── postcss.config.cjs -> ../../postcss.config.cjs    # Symlink to root config
+├── components.json -> ../../components.json           # Symlink to root config
+├── package.json                # Package configuration
+├── tsconfig.json               # TypeScript configuration
+├── tsup.config.ts              # Build configuration
+└── README.md                   # This documentation
+```
+
+## Key Files
 
 - `global.css` - Main CSS file with theme variables and base styles that's shared across all packages.
-- `utils/` - Utility CSS files (if any).
-- `scripts/` - Scripts related to styling (if any).
+- `src/utils/` - Utility CSS files and styling functions (if any).
+- Configuration symlinks ensure consistency across the monorepo.
 
 ## Styling Approach
 
