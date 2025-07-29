@@ -24,7 +24,8 @@ let globalSchemaLoadInProgress = false;
  */
 export function useUIBuilderState() {
   const state = useUIBuilderStore((s) => s);
-  const { activeNetworkConfig, activeAdapter, isAdapterLoading } = useWalletState();
+  const { activeNetworkConfig, activeAdapter, isAdapterLoading, reconfigureActiveAdapterUiKit } =
+    useWalletState();
 
   const savedConfigIdRef = useRef<string | null>(null);
   const isLoadingSavedConfigRef = useRef<boolean>(false);
@@ -42,6 +43,17 @@ export function useUIBuilderState() {
   const network = useBuilderNetwork();
   const contract = useBuilderContract();
   const config = useBuilderConfig();
+
+  const load = useCallback(
+    async (id: string) => {
+      const loadedData = await lifecycle.load(id);
+      if (loadedData?.uiKitConfig && reconfigureActiveAdapterUiKit) {
+        reconfigureActiveAdapterUiKit(loadedData.uiKitConfig);
+      }
+      return loadedData;
+    },
+    [lifecycle, reconfigureActiveAdapterUiKit]
+  );
 
   // Extract specific values to avoid dependency array reference issues
   const needsContractSchemaLoad = state.needsContractSchemaLoad;
@@ -164,7 +176,7 @@ export function useUIBuilderState() {
         uiKit: config.uiKit,
       },
       lifecycle: {
-        load: lifecycle.load,
+        load,
         createNew: lifecycle.createNew,
         resetAfterDelete: lifecycle.resetAfterDelete,
         initializePageState: lifecycle.initializePageState,

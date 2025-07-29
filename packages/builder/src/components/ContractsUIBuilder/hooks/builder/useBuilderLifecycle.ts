@@ -79,6 +79,7 @@ export function useBuilderLifecycle(
         setActiveNetworkId(savedUI.networkId);
 
         logger.info('Contract UI loaded', `Title: ${savedUI.title}`);
+        return savedUI;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to load Contract UI', errorMessage);

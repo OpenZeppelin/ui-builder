@@ -301,6 +301,8 @@ export function WalletStateProvider({
   let childrenToRender: ReactNode;
 
   if (ActualProviderToRender) {
+    const key = (globalActiveAdapter as ExtendedContractAdapter)?.lastFullUiKitConfiguration
+      ?.kitName;
     // EvmWalletUiRoot (and similar for other adapters) no longer needs uiKitConfiguration prop
     // as it manages its own configuration internally via the EvmUiKitManager or equivalent.
     logger.info(
@@ -308,7 +310,7 @@ export function WalletStateProvider({
       'Rendering adapter-provided UI context provider:',
       ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent'
     );
-    childrenToRender = <ActualProviderToRender>{children}</ActualProviderToRender>;
+    childrenToRender = <ActualProviderToRender key={key}>{children}</ActualProviderToRender>;
   } else {
     logger.info(
       '[WSP RENDER]',
