@@ -32,7 +32,6 @@ export function useUIBuilderState() {
   useEffect(() => {
     uiBuilderStore.setInitialState({ selectedNetworkConfigId: activeNetworkConfig?.id || null });
 
-    // Initialize a draft record for the page if needed
     void lifecycle.initializePageState();
   }, []); // Run only once
 

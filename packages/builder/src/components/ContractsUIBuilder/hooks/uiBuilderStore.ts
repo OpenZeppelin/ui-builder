@@ -7,6 +7,8 @@ import {
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
 
+import { STEP_INDICES } from '../constants/stepIndices';
+
 export interface BuilderFormConfig extends CommonFormProperties {
   functionId: string;
   contractAddress: string;
@@ -46,6 +48,9 @@ export interface UIBuilderState {
 
   // Track the loaded configuration ID
   loadedConfigurationId: string | null;
+
+  // Track if we're in new UI mode (creating new UI vs loading existing)
+  isInNewUIMode: boolean;
 }
 
 let state: UIBuilderState = {
@@ -65,6 +70,7 @@ let state: UIBuilderState = {
   isAutoSaving: false,
   needsContractSchemaLoad: false,
   loadedConfigurationId: null,
+  isInNewUIMode: false,
 };
 
 const listeners = new Set<() => void>();
@@ -233,7 +239,42 @@ export const uiBuilderStore = {
       isAutoSaving: false,
       needsContractSchemaLoad: false,
       loadedConfigurationId: null,
+      isInNewUIMode: false,
     }));
+  },
+
+  /**
+   * Determine the appropriate step index based on what data is available.
+   * This ensures we navigate to the first incomplete step when loading a saved config.
+   */
+  determineStepFromSavedConfig(savedConfig: {
+    ecosystem: Ecosystem;
+    networkId: string;
+    contractAddress: string;
+    functionId: string;
+    formConfig: BuilderFormConfig;
+    executionConfig?: ExecutionConfig;
+    uiKitConfig?: UiKitConfiguration;
+  }): number {
+    // Check what data we have
+    const hasNetwork = savedConfig.ecosystem && savedConfig.networkId;
+    const hasContract = savedConfig.contractAddress;
+    const hasFunction = savedConfig.functionId;
+
+    // Navigate to the first incomplete step
+    if (!hasNetwork) {
+      return STEP_INDICES.CHAIN_SELECT;
+    }
+    if (!hasContract) {
+      return STEP_INDICES.CONTRACT_DEFINITION;
+    }
+    if (!hasFunction) {
+      return STEP_INDICES.FUNCTION_SELECTOR;
+    }
+
+    // For any form-related state (missing form config, missing execution config, or everything complete),
+    // always land on form customization step. Users should intentionally navigate to the final step.
+    return STEP_INDICES.FORM_CUSTOMIZATION;
   },
 
   loadContractUI(
@@ -248,6 +289,9 @@ export const uiBuilderStore = {
       uiKitConfig?: UiKitConfiguration;
     }
   ) {
+    // Determine the appropriate step based on available data
+    const targetStepIndex = this.determineStepFromSavedConfig(savedConfig);
+
     // Reset the state and then load the saved configuration
     this.updateState(() => ({
       // Network state
@@ -266,8 +310,8 @@ export const uiBuilderStore = {
         uiKitConfig: savedConfig.uiKitConfig,
       },
 
-      // Navigate to form customization step
-      currentStepIndex: 3, // STEP_INDICES.FORM_CUSTOMIZATION
+      // Navigate to the appropriate step based on data completeness
+      currentStepIndex: targetStepIndex,
 
       // Mark execution config as valid if it exists
       isExecutionStepValid: !!savedConfig.executionConfig,
@@ -286,6 +330,7 @@ export const uiBuilderStore = {
 
       // Store the loaded configuration ID
       loadedConfigurationId: id,
+      isInNewUIMode: false,
     }));
   },
 };

@@ -6,14 +6,10 @@ import { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-t
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { loadContractDefinition } from '../../../../services/ContractLoader';
+import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
 
 import { useBuilderStoreSelector } from './useBuilderStoreSelector';
-
-const STEP_INDICES = {
-  FUNCTION_SELECTOR: 2,
-  FORM_CUSTOMIZATION: 3,
-};
 
 /**
  * @notice A hook to manage contract schema and function selection.
@@ -94,6 +90,7 @@ export function useBuilderContract() {
       activeAdapter &&
       needsContractSchemaLoad &&
       contractFormValues &&
+      contractFormValues.contractAddress && // Ensure we have a valid contract address
       selectedNetworkConfigId === activeAdapter.networkConfig.id
     ) {
       try {

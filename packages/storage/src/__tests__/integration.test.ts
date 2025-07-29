@@ -21,22 +21,22 @@ describe('Storage Integration Tests', () => {
     it('should handle full lifecycle of contract UI configurations', async () => {
       const storage = new ContractUIStorage();
 
-      // 1. Create initial draft
-      const draftId = await storage.createDraftRecord('evm');
-      expect(draftId).toBeDefined();
+      // 1. Create a new, initially empty record
+      const newRecord = createEmptyContractUIRecord();
+      const recordId = await storage.save(newRecord);
+      expect(recordId).toBeDefined();
 
-      let draft = await storage.get(draftId);
-      expect(draft).toBeDefined();
-      expect(storage.isEmptyRecord(draft!)).toBe(true);
-      expect(storage.canDelete(draft!)).toBe(false);
+      let record = await storage.get(recordId);
+      expect(record).toBeDefined();
+      expect(storage.isEmptyRecord(record!)).toBe(true);
 
-      // 2. Update draft to meaningful configuration
-      await storage.update(draftId, {
+      // 2. Update record to be a meaningful configuration
+      await storage.update(recordId, {
         title: 'Token Transfer UI',
         contractAddress: '0x1234567890123456789012345678901234567890',
         functionId: 'transfer',
         formConfig: {
-          ...draft!.formConfig,
+          ...record!.formConfig,
           contractAddress: '0x1234567890123456789012345678901234567890',
           functionId: 'transfer',
           fields: [
@@ -59,13 +59,12 @@ describe('Storage Integration Tests', () => {
         metadata: { isManuallyRenamed: true },
       });
 
-      const updated = await storage.get(draftId);
+      const updated = await storage.get(recordId);
       expect(updated!.title).toBe('Token Transfer UI');
       expect(storage.isEmptyRecord(updated!)).toBe(false);
-      expect(storage.canDelete(updated!)).toBe(true);
 
       // 3. Duplicate the configuration
-      const duplicateId = await storage.duplicate(draftId);
+      const duplicateId = await storage.duplicate(recordId);
       const duplicate = await storage.get(duplicateId);
       expect(duplicate!.title).toBe('Token Transfer UI (Copy)');
       expect(duplicate!.contractAddress).toBe('0x1234567890123456789012345678901234567890');
@@ -83,7 +82,7 @@ describe('Storage Integration Tests', () => {
       expect(allConfigs).toHaveLength(3);
 
       // 6. Export specific configurations
-      const exportJson = await storage.export([draftId, config2Id]);
+      const exportJson = await storage.export([recordId, config2Id]);
       const exportData: ContractUIExportData = JSON.parse(exportJson);
       expect(exportData.configurations).toHaveLength(2);
 
@@ -104,54 +103,6 @@ describe('Storage Integration Tests', () => {
       await storage.delete(importedIds[0]);
       const finalConfigs = await storage.getAll();
       expect(finalConfigs).toHaveLength(1);
-    });
-  });
-
-  describe('Draft management workflow', () => {
-    it('should properly handle draft creation and reuse', async () => {
-      const storage = new ContractUIStorage();
-
-      // 1. Create first draft
-      const draft1Id = await storage.findOrCreateDraftRecord();
-      const draft1 = await storage.get(draft1Id);
-      expect(storage.isEmptyRecord(draft1!)).toBe(true);
-
-      // 2. Attempt to create another draft - should return the same one
-      const draft2Id = await storage.findOrCreateDraftRecord();
-      expect(draft2Id).toBe(draft1Id);
-
-      // 3. Make the draft meaningful
-      await storage.update(draft1Id, {
-        contractAddress: '0x123',
-        metadata: { isManuallyRenamed: true },
-      });
-
-      // 4. Now creating a new draft should create a new record
-      const draft3Id = await storage.findOrCreateDraftRecord();
-      expect(draft3Id).not.toBe(draft1Id);
-
-      const draft3 = await storage.get(draft3Id);
-      expect(storage.isEmptyRecord(draft3!)).toBe(true);
-
-      // 5. Verify both records exist
-      const allConfigs = await storage.getAll();
-      expect(allConfigs).toHaveLength(2);
-    });
-
-    it('should reuse most recent empty record when multiple exist', async () => {
-      const storage = new ContractUIStorage();
-
-      // Create multiple empty records with different timestamps
-      const empty1 = createEmptyContractUIRecord();
-      const empty2 = createEmptyContractUIRecord();
-
-      await storage.save(empty1);
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      const id2 = await storage.save(empty2);
-
-      // Should return the most recent one (id2)
-      const foundId = await storage.findOrCreateDraftRecord();
-      expect(foundId).toBe(id2);
     });
   });
 

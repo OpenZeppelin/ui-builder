@@ -21,7 +21,6 @@ export interface UseContractUIStorageReturn {
   duplicateContractUI: (id: string) => Promise<string>;
   exportContractUIs: (ids?: string[]) => Promise<void>;
   importContractUIs: (file: File) => Promise<void>;
-  findOrCreateDraftRecord: (ecosystem?: string) => Promise<string>;
 }
 
 export function useContractUIStorage(): UseContractUIStorageReturn {
@@ -105,8 +104,7 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
 
       if (exportedCount === 0) {
         toast.error('Nothing to export', {
-          description:
-            'No meaningful configurations found to export. Empty/draft records are excluded.',
+          description: 'No configurations found to export.',
         });
         return;
       }
@@ -140,17 +138,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     }
   }, []);
 
-  const findOrCreateDraftRecord = useCallback(async (ecosystem?: string): Promise<string> => {
-    try {
-      return await contractUIStorage.findOrCreateDraftRecord(ecosystem);
-    } catch (error) {
-      toast.error('Failed to initialize draft', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred',
-      });
-      throw error;
-    }
-  }, []);
-
   return useMemo(
     () => ({
       contractUIs,
@@ -162,7 +149,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       duplicateContractUI,
       exportContractUIs,
       importContractUIs,
-      findOrCreateDraftRecord,
     }),
     [
       contractUIs,
@@ -174,7 +160,6 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       duplicateContractUI,
       exportContractUIs,
       importContractUIs,
-      findOrCreateDraftRecord,
     ]
   );
 }

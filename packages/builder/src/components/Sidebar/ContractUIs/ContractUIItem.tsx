@@ -13,27 +13,10 @@ import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useContractUIOperationState } from '../../../hooks/useStorageOperations';
 
+import { useTypewriterEffect } from './hooks/useTypewriterEffect';
+
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
-
-/**
- * Checks if a record is meaningful (not empty/draft).
- * Empty/draft records cannot be deleted, exported, or duplicated to maintain user working space.
- */
-function isRecordMeaningful(record: ContractUIRecord): boolean {
-  // If manually renamed, it's not a draft
-  if (record.metadata?.isManuallyRenamed === true) {
-    return true;
-  }
-
-  // If it has meaningful content, it's not a draft
-  const hasContent =
-    Boolean(record.contractAddress) ||
-    Boolean(record.functionId) ||
-    Boolean(record.formConfig.fields && record.formConfig.fields.length > 0);
-
-  return hasContent;
-}
 
 interface ContractUIItemProps {
   contractUI: ContractUIRecord;
@@ -59,6 +42,17 @@ export default function ContractUIItem({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
 
+  // Typewriter effect for title changes
+  const { displayText: animatedTitle, isAnimating: isTitleAnimating } = useTypewriterEffect(
+    contractUI.title,
+    {
+      typingSpeed: 40,
+      erasingSpeed: 25,
+      eraseDelay: 150,
+      typeDelay: 100,
+    }
+  );
+
   // Get operation state for progress indicators
   const operationState = useContractUIOperationState(contractUI.id);
 
@@ -75,10 +69,6 @@ export default function ContractUIItem({
       return () => clearTimeout(timer);
     }
   }, [operationState.isAnyOperationInProgress, showLoadingAnimation]);
-
-  const canDelete = isRecordMeaningful(contractUI);
-  const canExport = isRecordMeaningful(contractUI);
-  const canDuplicate = isRecordMeaningful(contractUI);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -117,7 +107,8 @@ export default function ContractUIItem({
                 isCurrentlyLoaded ? 'text-[#111928]' : 'text-gray-600'
               )}
             >
-              {contractUI.title}
+              {animatedTitle}
+              {isTitleAnimating && <span className="animate-pulse text-current">|</span>}
             </h3>
           </div>
         </div>
@@ -140,20 +131,14 @@ export default function ContractUIItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
-              {canDuplicate && (
-                <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
-              )}
-              {canExport && (
-                <DropdownMenuItem onClick={() => void onExport()}>Download</DropdownMenuItem>
-              )}
-              {canDelete && (
-                <DropdownMenuItem
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-destructive"
-                >
-                  Delete
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void onExport()}>Download</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive"
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

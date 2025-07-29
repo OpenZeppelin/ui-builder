@@ -235,18 +235,6 @@ describe('ContractUIStorage', () => {
     });
   });
 
-  describe('canDelete', () => {
-    it('should return true for non-empty records', async () => {
-      const fullRecord = createMockContractUIRecord();
-      expect(storage.canDelete(fullRecord)).toBe(true);
-    });
-
-    it('should return false for empty records', async () => {
-      const emptyRecord = createEmptyContractUIRecord();
-      expect(storage.canDelete(emptyRecord)).toBe(false);
-    });
-  });
-
   describe('findEmptyRecords', () => {
     it('should find all empty records', async () => {
       const fullRecord = createMockContractUIRecord({ title: 'Full UI' });
@@ -277,84 +265,6 @@ describe('ContractUIStorage', () => {
       await expect(storage.findEmptyRecords()).rejects.toThrow('Failed to find empty records');
 
       getAllSpy.mockRestore();
-    });
-  });
-
-  describe('createDraftRecord', () => {
-    it('should create a new draft record with default values', async () => {
-      const draftId = await storage.createDraftRecord();
-
-      const draft = await storage.get(draftId);
-      expect(draft).toBeDefined();
-      expect(draft!.title).toBe('New Contract UI');
-      expect(draft!.ecosystem).toBe('evm');
-      expect(draft!.contractAddress).toBe('');
-      expect(draft!.functionId).toBe('');
-      expect(draft!.metadata?.isDraft).toBe(true);
-      expect(draft!.metadata?.isManuallyRenamed).toBe(false);
-      expect(storage.isEmptyRecord(draft!)).toBe(true);
-    });
-
-    it('should create a draft record with specified ecosystem', async () => {
-      const draftId = await storage.createDraftRecord('solana');
-
-      const draft = await storage.get(draftId);
-      expect(draft!.ecosystem).toBe('solana');
-    });
-
-    it('should handle creation errors gracefully', async () => {
-      const saveSpy = vi.spyOn(storage, 'save').mockRejectedValue(new Error('Save failed'));
-
-      await expect(storage.createDraftRecord()).rejects.toThrow('Failed to create draft record');
-
-      saveSpy.mockRestore();
-    });
-  });
-
-  describe('findOrCreateDraftRecord', () => {
-    it('should return existing empty record if one exists', async () => {
-      const emptyRecord = createEmptyContractUIRecord();
-      const existingId = await storage.save(emptyRecord);
-
-      const foundId = await storage.findOrCreateDraftRecord();
-
-      expect(foundId).toBe(existingId);
-    });
-
-    it('should create new draft record if no empty records exist', async () => {
-      const fullRecord = createMockContractUIRecord();
-      await storage.save(fullRecord);
-
-      const draftId = await storage.findOrCreateDraftRecord();
-
-      const draft = await storage.get(draftId);
-      expect(draft).toBeDefined();
-      expect(storage.isEmptyRecord(draft!)).toBe(true);
-    });
-
-    it('should return most recently updated empty record when multiple exist', async () => {
-      const emptyRecord1 = createEmptyContractUIRecord();
-      const emptyRecord2 = createEmptyContractUIRecord();
-
-      await storage.save(emptyRecord1);
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      const id2 = await storage.save(emptyRecord2);
-
-      const foundId = await storage.findOrCreateDraftRecord();
-
-      expect(foundId).toBe(id2); // Most recent one
-    });
-
-    it('should handle errors gracefully', async () => {
-      const findEmptyRecordsSpy = vi
-        .spyOn(storage, 'findEmptyRecords')
-        .mockRejectedValue(new Error('Find failed'));
-
-      await expect(storage.findOrCreateDraftRecord()).rejects.toThrow(
-        'Failed to find or create draft record'
-      );
-
-      findEmptyRecordsSpy.mockRestore();
     });
   });
 

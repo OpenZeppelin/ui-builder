@@ -9,6 +9,7 @@ interface SidebarButtonProps {
   size?: 'default' | 'small';
   badge?: string;
   disabled?: boolean;
+  isSelected?: boolean;
 }
 
 /**
@@ -21,6 +22,7 @@ export default function SidebarButton({
   size = 'default',
   badge,
   disabled = false,
+  isSelected = false,
 }: SidebarButtonProps) {
   const height = size === 'small' ? 'h-10' : 'h-11';
 
@@ -33,7 +35,10 @@ export default function SidebarButton({
         badge ? 'justify-between' : 'justify-start',
         disabled
           ? 'text-gray-400 cursor-not-allowed'
-          : 'text-gray-600 hover:text-gray-700 cursor-pointer hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10',
+          : isSelected
+            ? // Selected state styling
+              'text-[#111928] bg-neutral-100'
+            : 'text-gray-600 hover:text-gray-700 cursor-pointer hover:before:content-[""] hover:before:absolute hover:before:inset-x-0 hover:before:top-1 hover:before:bottom-1 hover:before:bg-muted/80 hover:before:rounded-lg hover:before:-z-10',
         height
       )}
       onClick={disabled ? undefined : onClick}

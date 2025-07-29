@@ -2,16 +2,8 @@ import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 
+import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
-
-// Step indices for the wizard navigation
-const STEP_INDICES = {
-  CHAIN_SELECT: 0,
-  CONTRACT_DEFINITION: 1,
-  FUNCTION_SELECTOR: 2,
-  FORM_CUSTOMIZATION: 3,
-  COMPLETE: 4,
-} as const;
 
 /**
  * @notice A hook to manage wizard navigation.
@@ -27,15 +19,49 @@ export function useBuilderNavigation(
     (index: number) => {
       uiBuilderStore.updateState(() => ({ currentStepIndex: index }));
 
-      // Clear network selection when going back to the first step
+      // Handle going back to the first step
       if (index === STEP_INDICES.CHAIN_SELECT) {
-        setActiveNetworkId(null);
-        uiBuilderStore.updateState(() => ({ selectedNetworkConfigId: null }));
-        uiBuilderStore.resetDownstreamSteps('network');
-        // Only reset saved configuration ID when starting fresh, not when loading
-        if (!isLoadingSavedConfigRef.current) {
+        const currentState = uiBuilderStore.getState();
+
+        // Check if we're working with an existing saved record
+        const isExistingMeaningfulRecord =
+          currentState.loadedConfigurationId &&
+          savedConfigIdRef.current &&
+          !currentState.isInNewUIMode;
+
+        // Check if we have meaningful content even in new UI mode
+        const hasMeaningfulContent = !!(
+          currentState.selectedNetworkConfigId ||
+          currentState.contractAddress ||
+          currentState.selectedFunction
+        );
+
+        // Determine if we should preserve the existing record
+        const shouldPreserveRecord =
+          isLoadingSavedConfigRef.current || isExistingMeaningfulRecord || hasMeaningfulContent;
+
+        if (shouldPreserveRecord) {
+          // Keep the existing record and network selection
+          // Reset only contract and form state, leaving network state untouched
+          uiBuilderStore.resetDownstreamSteps('network');
+          uiBuilderStore.updateState(() => ({
+            isInNewUIMode: false,
+          }));
+
+          // Ensure wallet's active network matches the store's selected network
+          if (currentState.selectedNetworkConfigId) {
+            setActiveNetworkId(currentState.selectedNetworkConfigId);
+          }
+        } else {
+          // Reset to new UI mode for fresh start
+          setActiveNetworkId(null);
+          uiBuilderStore.updateState(() => ({ selectedNetworkConfigId: null }));
+          uiBuilderStore.resetDownstreamSteps('network');
           savedConfigIdRef.current = null;
-          uiBuilderStore.updateState(() => ({ loadedConfigurationId: null }));
+          uiBuilderStore.updateState(() => ({
+            loadedConfigurationId: null,
+            isInNewUIMode: true,
+          }));
         }
       }
     },

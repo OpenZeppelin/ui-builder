@@ -1,9 +1,27 @@
+import { ContractUIRecord, useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+
+import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
 import ContractUIsList from '../ContractUIs/ContractUIsList';
 
 interface ContractUIsSectionProps {
   onLoadContractUI?: (id: string) => void;
   onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
+}
+
+/**
+ * Filters records to only show those with meaningful content or that are manually renamed.
+ */
+function shouldShowRecord(
+  record: ContractUIRecord,
+  currentLoadedConfigurationId: string | null
+): boolean {
+  // Always show the currently loaded record, even if it's empty
+  if (currentLoadedConfigurationId === record.id) {
+    return true;
+  }
+
+  return recordHasMeaningfulContent(record);
 }
 
 /**
@@ -14,6 +32,19 @@ export default function ContractUIsSection({
   onResetAfterDelete,
   currentLoadedConfigurationId,
 }: ContractUIsSectionProps) {
+  const { contractUIs } = useContractUIStorage();
+
+  // Check if there are any visible contract UIs
+  const visibleContractUIs =
+    contractUIs?.filter((contractUI) =>
+      shouldShowRecord(contractUI, currentLoadedConfigurationId ?? null)
+    ) || [];
+
+  // Don't render the section at all if there are no visible contract UIs
+  if (visibleContractUIs.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col w-full flex-1">
       {/* Section Header */}

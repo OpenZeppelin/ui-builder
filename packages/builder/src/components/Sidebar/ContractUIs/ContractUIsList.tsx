@@ -1,8 +1,9 @@
 import { Loader2 } from 'lucide-react';
 
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import { ContractUIRecord, useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 
 import { useStorageOperations } from '../../../hooks/useStorageOperations';
+import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
 
 import ContractUIItem from './ContractUIItem';
 
@@ -10,6 +11,23 @@ interface ContractUIsListProps {
   onLoadContractUI?: (id: string) => void;
   onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
+}
+
+/**
+ * Determines if a record should be shown in the sidebar.
+ * Filters out empty records unless they're manually renamed or currently loaded.
+ */
+function shouldShowRecord(
+  record: ContractUIRecord,
+  currentLoadedConfigurationId: string | null
+): boolean {
+  // Always show the currently loaded record, even if it's empty
+  if (currentLoadedConfigurationId === record.id) {
+    return true;
+  }
+
+  // Use the shared logic for meaningful content detection
+  return recordHasMeaningfulContent(record);
 }
 
 export default function ContractUIsList({
@@ -67,13 +85,14 @@ export default function ContractUIsList({
     );
   }
 
-  if (!contractUIs || contractUIs.length === 0) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        <p className="mb-2">No saved Contract UIs yet</p>
-        <p className="text-sm">Create your first one or import existing configurations</p>
-      </div>
-    );
+  // Filter contracts to hide empty records (unless they meet certain criteria)
+  const visibleContractUIs =
+    contractUIs?.filter((contractUI) =>
+      shouldShowRecord(contractUI, currentLoadedConfigurationId ?? null)
+    ) || [];
+
+  if (visibleContractUIs.length === 0) {
+    return null;
   }
 
   return (
@@ -81,7 +100,7 @@ export default function ContractUIsList({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col">
-          {contractUIs.map((contractUI) => (
+          {visibleContractUIs.map((contractUI) => (
             <ContractUIItem
               key={contractUI.id}
               contractUI={contractUI}

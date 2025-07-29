@@ -15,6 +15,7 @@ interface AppSidebarProps {
   onCreateNew?: () => void;
   onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
+  isInNewUIMode?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export default function AppSidebar({
   onCreateNew,
   onResetAfterDelete,
   currentLoadedConfigurationId,
+  isInNewUIMode = false,
 }: AppSidebarProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
 
@@ -51,6 +53,7 @@ export default function AppSidebar({
             <MainActions
               onCreateNew={onCreateNew}
               onShowImportDialog={() => setShowImportDialog(true)}
+              isInNewUIMode={isInNewUIMode}
             />
 
             <OtherToolsSection />

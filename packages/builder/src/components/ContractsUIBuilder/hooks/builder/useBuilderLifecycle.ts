@@ -2,10 +2,7 @@ import { toast } from 'sonner';
 import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import {
-  contractUIStorage,
-  useContractUIStorage,
-} from '@openzeppelin/contracts-ui-builder-storage';
+import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -24,7 +21,6 @@ export function useBuilderLifecycle(
   autoSave: { pause: () => void; resume: () => void; isPaused: boolean }
 ) {
   const { setActiveNetworkId } = useWalletState();
-  const { findOrCreateDraftRecord } = useContractUIStorage();
 
   const handleLoadContractUI = useCallback(
     async (id: string) => {
@@ -108,25 +104,20 @@ export function useBuilderLifecycle(
       // Reset the wizard to initial state
       uiBuilderStore.resetWizard();
 
-      // Clear the active network
-      setActiveNetworkId(null);
+      // Set up for new UI creation
+      uiBuilderStore.updateState(() => ({
+        isInNewUIMode: true,
+      }));
 
-      // Ensure the loading flag is not set
+      // Clear active network and references
+      setActiveNetworkId(null);
+      savedConfigIdRef.current = null;
       isLoadingSavedConfigRef.current = false;
 
       // Resume auto-save if it was paused
       autoSave.resume();
 
-      // Create or reuse an existing draft record
-      const currentState = uiBuilderStore.getState();
-      const ecosystem = currentState.selectedEcosystem || 'evm';
-      const draftId = await findOrCreateDraftRecord(ecosystem);
-
-      // Set the draft record as the current loaded configuration
-      savedConfigIdRef.current = draftId;
-      uiBuilderStore.updateState(() => ({ loadedConfigurationId: draftId }));
-
-      logger.info('Creating new Contract UI', `Draft record ID: ${draftId}`);
+      logger.info('Creating new Contract UI', 'Entering new UI mode - no record created yet');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Failed to create new Contract UI', errorMessage);
@@ -134,13 +125,7 @@ export function useBuilderLifecycle(
         description: errorMessage,
       });
     }
-  }, [
-    setActiveNetworkId,
-    isLoadingSavedConfigRef,
-    savedConfigIdRef,
-    autoSave,
-    findOrCreateDraftRecord,
-  ]);
+  }, [setActiveNetworkId, isLoadingSavedConfigRef, savedConfigIdRef, autoSave]);
 
   const handleInitializePageState = useCallback(async () => {
     // Prevent multiple simultaneous initializations
@@ -152,18 +137,18 @@ export function useBuilderLifecycle(
     try {
       globalPageInitializationInProgress = true;
 
-      // Only initialize if no configuration is currently loaded
+      // Check if we already have a loaded configuration or are in new UI mode
       const currentState = uiBuilderStore.getState();
 
-      if (!currentState.loadedConfigurationId && !savedConfigIdRef.current) {
-        const ecosystem = currentState.selectedEcosystem || 'evm';
-        const draftId = await findOrCreateDraftRecord(ecosystem);
+      if (!currentState.loadedConfigurationId && !currentState.isInNewUIMode) {
+        // If no configuration is loaded and we're not in new UI mode,
+        // set new UI mode as the default state
+        uiBuilderStore.updateState(() => ({
+          isInNewUIMode: true,
+          loadedConfigurationId: null,
+        }));
 
-        // Set the draft record as the current loaded configuration
-        savedConfigIdRef.current = draftId;
-        uiBuilderStore.updateState(() => ({ loadedConfigurationId: draftId }));
-
-        logger.info('Page state initialized', `Draft record ID: ${draftId}`);
+        logger.info('Page state initialized', 'Set to new UI mode');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -172,7 +157,7 @@ export function useBuilderLifecycle(
     } finally {
       globalPageInitializationInProgress = false;
     }
-  }, [findOrCreateDraftRecord, savedConfigIdRef]);
+  }, [savedConfigIdRef]);
 
   const handleResetAfterDelete = useCallback(() => {
     try {
@@ -183,7 +168,7 @@ export function useBuilderLifecycle(
       autoSave.resume();
       logger.info(
         'Wizard reset after delete',
-        'State cleared, initialization will handle draft creation'
+        'State cleared, initialization will handle new UI mode setup'
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

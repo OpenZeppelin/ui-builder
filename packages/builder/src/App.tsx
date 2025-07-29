@@ -43,6 +43,7 @@ function AppContent() {
         onCreateNew={() => void createNew()}
         onResetAfterDelete={resetAfterDelete}
         currentLoadedConfigurationId={state.loadedConfigurationId}
+        isInNewUIMode={state.isInNewUIMode}
       />
 
       {/* Main Content */}

@@ -1,15 +1,11 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
-
-const STEP_INDICES = {
-  CHAIN_SELECT: 0,
-  CONTRACT_DEFINITION: 1,
-} as const;
 
 /**
  * @notice A hook to manage network and adapter interactions.
@@ -17,13 +13,27 @@ const STEP_INDICES = {
  */
 export function useBuilderNetwork() {
   const { setActiveNetworkId, activeAdapter, isAdapterLoading } = useWalletState();
-  const state = uiBuilderStore.getState();
+
+  // Subscribe to store state for reactive auto-advance
+  const state = useSyncExternalStore(
+    uiBuilderStore.subscribe,
+    uiBuilderStore.getState,
+    uiBuilderStore.getState
+  );
 
   const handleNetworkSelect = useCallback(
     async (ecosystem: Ecosystem, networkId: string | null) => {
-      const previousNetworkId = state.selectedNetworkConfigId;
+      // Get fresh state each time instead of using stale snapshot
+      const currentState = uiBuilderStore.getState();
+      const previousNetworkId = currentState.selectedNetworkConfigId;
       const isChangingNetwork = previousNetworkId !== null && previousNetworkId !== networkId;
 
+      // Reset downstream steps FIRST if we're changing networks
+      if (isChangingNetwork) {
+        uiBuilderStore.resetDownstreamSteps('network');
+      }
+
+      // THEN set the new network state (including pendingNetworkId)
       uiBuilderStore.updateState(() => ({
         selectedNetworkConfigId: networkId,
         selectedEcosystem: ecosystem,
@@ -31,30 +41,23 @@ export function useBuilderNetwork() {
         networkToSwitchTo: networkId, // Mark for network switch
       }));
 
-      // Only reset downstream steps if we're actually changing networks
-      if (isChangingNetwork) {
-        uiBuilderStore.resetDownstreamSteps('network');
-      }
-
       // Set the network ID and trigger adapter loading
       setActiveNetworkId(networkId);
     },
-    [setActiveNetworkId, state.selectedNetworkConfigId]
+    [setActiveNetworkId]
   );
 
   useEffect(() => {
-    const currentState = uiBuilderStore.getState();
-
     if (
-      currentState.pendingNetworkId &&
+      state.pendingNetworkId &&
       activeAdapter &&
       !isAdapterLoading &&
-      activeAdapter.networkConfig.id === currentState.pendingNetworkId &&
-      currentState.currentStepIndex === STEP_INDICES.CHAIN_SELECT
+      activeAdapter.networkConfig.id === state.pendingNetworkId &&
+      state.currentStepIndex === STEP_INDICES.CHAIN_SELECT
     ) {
       logger.info(
         'useBuilderNetwork',
-        `Auto-advancing to next step after adapter ready for network: ${currentState.pendingNetworkId}`
+        `Auto-advancing to next step after adapter ready for network: ${state.pendingNetworkId}`
       );
 
       uiBuilderStore.updateState(() => ({
@@ -62,7 +65,13 @@ export function useBuilderNetwork() {
         currentStepIndex: STEP_INDICES.CONTRACT_DEFINITION,
       }));
     }
-  }, [activeAdapter, isAdapterLoading]);
+  }, [
+    state.pendingNetworkId,
+    state.currentStepIndex,
+    activeAdapter,
+    isAdapterLoading,
+    activeAdapter?.networkConfig.id,
+  ]);
 
   const clearNetworkToSwitchTo = useCallback(() => {
     uiBuilderStore.updateState(() => ({ networkToSwitchTo: null }));

@@ -1,7 +1,10 @@
 import { toast } from 'sonner';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import {
+  contractUIStorage,
+  useContractUIStorage,
+} from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
@@ -34,7 +37,7 @@ function handleAutoSaveError(error: unknown): void {
 }
 
 export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): AutoSaveHookReturn {
-  const { updateContractUI } = useContractUIStorage();
+  const { updateContractUI, saveContractUI } = useContractUIStorage();
   const storageOperations = useStorageOperations();
 
   // Use ref to store the current auto-save function to avoid dependency issues
@@ -66,16 +69,54 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       const currentState = uiBuilderStore.getState();
 
       // Run all guard checks
-      const { proceed, configId } = AutoSaveGuards.shouldProceedWithAutoSave(
+      const { proceed, configId, needsRecordCreation } = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
         currentState
       );
 
-      if (!proceed || !configId) {
+      if (!proceed) {
         return;
       }
 
-      // Update UI state
+      // Handle record creation for new UI mode
+      if (needsRecordCreation) {
+        // Update UI state for creation
+        uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
+
+        // Yield to prevent blocking
+        await Promise.resolve();
+
+        // Build configuration for new record
+        const titleToUse = generateDefaultTitle(currentState);
+        const configToSave = buildConfigurationObject(currentState, titleToUse);
+
+        // Create new record
+        logger.info('builder', 'Auto-save: Creating new record for meaningful content');
+        const newConfigId = await contractUIStorage.save({
+          ...configToSave,
+          metadata: {
+            isManuallyRenamed: false,
+          },
+        });
+
+        // Update state with new record ID and exit new UI mode
+        uiBuilderStore.updateState(() => ({
+          loadedConfigurationId: newConfigId,
+          isInNewUIMode: false,
+        }));
+
+        // Update cache for new record
+        autoSaveCache.updateConfigCache(newConfigId, configToSave);
+
+        logger.info('Auto-save: New record created', `ID: ${newConfigId}`);
+        return;
+      }
+
+      if (!configId) {
+        return;
+      }
+
+      // Update UI state for existing record
       uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
       storageOperations.setSaving(configId, true);
 
@@ -121,7 +162,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       }
       globalAutoSaveState.releaseLock();
     }
-  }, [isLoadingSavedConfigRef, updateContractUI, storageOperations]);
+  }, [isLoadingSavedConfigRef, updateContractUI, saveContractUI, storageOperations]);
 
   // Update the ref whenever autoSave changes
   useEffect(() => {
@@ -130,7 +171,6 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
 
   /**
    * Effect to schedule auto-save operations
-   * Fixed: Removed autoSave from dependencies to prevent infinite loop
    */
   useEffect(() => {
     if (globalAutoSaveState.paused || globalAutoSaveState.shouldSkipCycle()) {
@@ -143,13 +183,14 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       }
     });
   }, [
+    state.selectedNetworkConfigId,
+    state.contractAddress,
     state.selectedFunction,
     state.formConfig?.title,
     state.formConfig?.description,
     state.formConfig?.fields,
     state.formConfig?.executionConfig,
     state.formConfig?.uiKitConfig,
-    // Removed autoSave from here to prevent infinite loop
   ]);
 
   /**
