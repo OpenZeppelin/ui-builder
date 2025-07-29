@@ -27,7 +27,7 @@ export function useWizardStepUiState<T>(stepId: string, initialValues: T) {
     [stepId]
   );
 
-  const stepUiState = (fullUiState[stepId] as T) || initialValues;
+  const stepUiState = (fullUiState[stepId] as T) ?? initialValues;
 
   return { stepUiState, setStepUiState };
 }
