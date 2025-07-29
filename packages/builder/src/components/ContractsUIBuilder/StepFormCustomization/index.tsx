@@ -145,7 +145,12 @@ export function StepFormCustomization({
     ) {
       selectField(0);
     }
-  }, [activeTab, baseFormConfigFromHook, selectedFieldIndex, selectField]);
+    // We intentionally omit `selectedFieldIndex` from the dependency array.
+    // Including it would cause the effect to re-run after the first field is selected,
+    // which is unnecessary and not the intended behavior. This effect should only
+    // set the *initial* selection when the tab becomes active.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, baseFormConfigFromHook, selectField]);
 
   const handleTogglePreview = () => {
     setUiState({ previewMode: !previewMode });
