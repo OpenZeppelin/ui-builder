@@ -73,6 +73,9 @@ module.exports = {
       'testRpcConnection',
       'validateExplorerConfig',
       'testExplorerConnection',
+      'compareContractSchemas',
+      'validateContractSchema',
+      'hashContractSchema',
     ];
 
     // Common standard methods and properties that are allowed

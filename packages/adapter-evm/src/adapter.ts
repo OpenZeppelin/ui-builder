@@ -28,6 +28,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { abiComparisonService } from './abi/comparison';
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
@@ -125,7 +126,8 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
-    return loadEvmContract(artifacts, this.networkConfig);
+    const result = await loadEvmContract(artifacts, this.networkConfig);
+    return result.schema;
   }
 
   /**
@@ -552,6 +554,71 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
     error?: string;
   }> {
     return testEvmExplorerConnection(explorerConfig, this.networkConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async compareContractSchemas(
+    storedSchema: string,
+    freshSchema: string
+  ): Promise<{
+    identical: boolean;
+    differences: Array<{
+      type: 'added' | 'removed' | 'modified';
+      section: string;
+      name: string;
+      details: string;
+      impact: 'low' | 'medium' | 'high';
+      oldSignature?: string;
+      newSignature?: string;
+    }>;
+    severity: 'none' | 'minor' | 'major' | 'breaking';
+    summary: string;
+  }> {
+    try {
+      const result = abiComparisonService.compareAbis(storedSchema, freshSchema);
+      return {
+        identical: result.identical,
+        differences: result.differences.map((diff) => ({
+          type: diff.type,
+          section: diff.section,
+          name: diff.name,
+          details: diff.details,
+          impact: diff.impact,
+          oldSignature: diff.oldSignature,
+          newSignature: diff.newSignature,
+        })),
+        severity: result.severity,
+        summary: result.summary,
+      };
+    } catch (error) {
+      logger.error('EVM contract schema comparison failed:', (error as Error).message);
+      throw new Error(`Contract schema comparison failed: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public validateContractSchema(schema: string): {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  } {
+    const result = abiComparisonService.validateAbi(schema);
+    return {
+      valid: result.valid,
+      errors: result.errors,
+      warnings: result.warnings,
+    };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public hashContractSchema(schema: string): string {
+    return abiComparisonService.hashAbi(schema);
   }
 }
 

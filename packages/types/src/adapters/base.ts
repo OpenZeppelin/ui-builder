@@ -422,4 +422,52 @@ export interface ContractAdapter {
     latency?: number;
     error?: string;
   }>;
+
+  /**
+   * (Optional) Compares two contract schemas and returns detailed analysis.
+   * Provides chain-specific comparison logic for detecting differences between schemas.
+   *
+   * @param storedSchema - The previously stored contract schema as JSON string
+   * @param freshSchema - The newly fetched contract schema as JSON string
+   * @returns A promise resolving to detailed comparison results
+   */
+  compareContractSchemas?(
+    storedSchema: string,
+    freshSchema: string
+  ): Promise<{
+    identical: boolean;
+    differences: Array<{
+      type: 'added' | 'removed' | 'modified';
+      section: string;
+      name: string;
+      details: string;
+      impact: 'low' | 'medium' | 'high';
+      oldSignature?: string;
+      newSignature?: string;
+    }>;
+    severity: 'none' | 'minor' | 'major' | 'breaking';
+    summary: string;
+  }>;
+
+  /**
+   * (Optional) Validates contract schema structure and format for this chain.
+   * Provides chain-specific validation logic for contract schemas.
+   *
+   * @param schema - The contract schema as JSON string to validate
+   * @returns Validation result with errors and warnings
+   */
+  validateContractSchema?(schema: string): {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  };
+
+  /**
+   * (Optional) Creates a deterministic hash of a contract schema for quick comparison.
+   * Provides chain-specific normalization and hashing for contract schemas.
+   *
+   * @param schema - The contract schema as JSON string to hash
+   * @returns A deterministic hash string for quick comparison
+   */
+  hashContractSchema?(schema: string): string;
 }
