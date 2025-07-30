@@ -2,6 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
 import { useCallback, useMemo } from 'react';
 
+import type { ContractSchemaMetadata } from '@openzeppelin/contracts-ui-builder-types';
+
 import { db } from '../database/db';
 import { contractUIStorage } from '../services/ContractUIStorage';
 import type { ContractUIRecord } from '../types';
@@ -21,6 +23,24 @@ export interface UseContractUIStorageReturn {
   duplicateContractUI: (id: string) => Promise<string>;
   exportContractUIs: (ids?: string[]) => Promise<void>;
   importContractUIs: (file: File) => Promise<void>;
+  updateContractSchema: (
+    id: string,
+    contractSchema: string,
+    schemaSource: 'fetched' | 'manual' | 'hybrid',
+    schemaMetadata?: ContractSchemaMetadata,
+    schemaHash?: string
+  ) => Promise<void>;
+  getRecordsNeedingSchemaRefresh: (thresholdHours?: number) => Promise<ContractUIRecord[]>;
+  compareStoredSchema: (
+    id: string,
+    freshSchema: string
+  ) => Promise<{
+    record: ContractUIRecord;
+    hasStoredSchema: boolean;
+    schemasMatch: boolean;
+    needsUpdate: boolean;
+  }>;
+  getRecordsBySchemaHash: (schemaHash: string) => Promise<ContractUIRecord[]>;
 }
 
 export function useContractUIStorage(): UseContractUIStorageReturn {
@@ -138,6 +158,82 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     }
   }, []);
 
+  const updateContractSchema = useCallback(
+    async (
+      id: string,
+      contractSchema: string,
+      schemaSource: 'fetched' | 'manual' | 'hybrid',
+      schemaMetadata?: ContractSchemaMetadata,
+      schemaHash?: string
+    ): Promise<void> => {
+      try {
+        await contractUIStorage.updateSchema(
+          id,
+          contractSchema,
+          schemaSource,
+          schemaMetadata,
+          schemaHash
+        );
+      } catch (error) {
+        toast.error('Failed to update schema', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const getRecordsNeedingSchemaRefresh = useCallback(
+    async (thresholdHours?: number): Promise<ContractUIRecord[]> => {
+      try {
+        return await contractUIStorage.getRecordsNeedingSchemaRefresh(thresholdHours);
+      } catch (error) {
+        toast.error('Failed to check schema refresh', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const compareStoredSchema = useCallback(
+    async (
+      id: string,
+      freshSchema: string
+    ): Promise<{
+      record: ContractUIRecord;
+      hasStoredSchema: boolean;
+      schemasMatch: boolean;
+      needsUpdate: boolean;
+    }> => {
+      try {
+        return await contractUIStorage.compareStoredSchema(id, freshSchema);
+      } catch (error) {
+        toast.error('Failed to compare schema', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const getRecordsBySchemaHash = useCallback(
+    async (schemaHash: string): Promise<ContractUIRecord[]> => {
+      try {
+        return await contractUIStorage.getRecordsBySchemaHash(schemaHash);
+      } catch (error) {
+        toast.error('Failed to get records by schema hash', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
   return useMemo(
     () => ({
       contractUIs,
@@ -149,6 +245,10 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       duplicateContractUI,
       exportContractUIs,
       importContractUIs,
+      updateContractSchema,
+      getRecordsNeedingSchemaRefresh,
+      compareStoredSchema,
+      getRecordsBySchemaHash,
     }),
     [
       contractUIs,
@@ -160,6 +260,10 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
       duplicateContractUI,
       exportContractUIs,
       importContractUIs,
+      updateContractSchema,
+      getRecordsNeedingSchemaRefresh,
+      compareStoredSchema,
+      getRecordsBySchemaHash,
     ]
   );
 }

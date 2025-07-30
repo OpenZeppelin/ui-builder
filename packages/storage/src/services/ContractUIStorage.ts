@@ -1,3 +1,4 @@
+import type { ContractSchemaMetadata } from '@openzeppelin/contracts-ui-builder-types';
 import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DexieStorage } from '../base/DexieStorage';
@@ -140,6 +141,159 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Failed to find empty records', errorMessage);
       throw new Error('Failed to find empty records');
+    }
+  }
+
+  /**
+   * Helper to prepare a record with contract schema data for saving
+   */
+  static prepareRecordWithSchema(
+    record: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
+    contractSchema?: string,
+    schemaSource: 'fetched' | 'manual' | 'hybrid' = 'manual',
+    schemaMetadata?: ContractSchemaMetadata,
+    schemaHash?: string
+  ): Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> {
+    const recordWithSchema = {
+      ...record,
+      schemaSource,
+      contractSchema,
+      schemaHash,
+      schemaMetadata,
+    };
+
+    if (schemaSource === 'fetched') {
+      recordWithSchema.lastSchemaFetched = new Date();
+    }
+
+    return recordWithSchema;
+  }
+
+  /**
+   * Updates contract schema data for existing record
+   */
+  async updateSchema(
+    id: string,
+    contractSchema: string,
+    schemaSource: 'fetched' | 'manual' | 'hybrid',
+    schemaMetadata?: ContractSchemaMetadata,
+    schemaHash?: string
+  ): Promise<void> {
+    try {
+      const existing = await this.get(id);
+      if (!existing) {
+        throw new Error(`Record with id ${id} not found`);
+      }
+
+      const updates: Partial<ContractUIRecord> = {
+        contractSchema,
+        schemaSource,
+        schemaMetadata,
+        schemaHash,
+        updatedAt: new Date(),
+      };
+
+      if (schemaSource === 'fetched') {
+        updates.lastSchemaFetched = new Date();
+      }
+
+      await this.update(id, updates);
+      logger.info('Contract schema updated', `ID: ${id}, Source: ${schemaSource}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to update contract schema', errorMessage);
+      throw new Error('Failed to update contract schema');
+    }
+  }
+
+  /**
+   * Gets records that need contract schema refresh (older than threshold)
+   */
+  async getRecordsNeedingSchemaRefresh(thresholdHours: number = 24): Promise<ContractUIRecord[]> {
+    try {
+      const threshold = new Date(Date.now() - thresholdHours * 60 * 60 * 1000);
+      const allRecords = await this.getAll();
+
+      const needsRefresh = allRecords.filter(
+        (record) =>
+          record.schemaSource === 'fetched' &&
+          record.lastSchemaFetched &&
+          record.lastSchemaFetched < threshold
+      );
+
+      logger.info('Schema refresh check', `Found ${needsRefresh.length} records needing refresh`);
+      return needsRefresh;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to get records needing schema refresh', errorMessage);
+      throw new Error('Failed to check for schema refresh needs');
+    }
+  }
+
+  /**
+   * Compares stored contract schema with fresh schema
+   * Note: Actual comparison logic should be implemented in chain-specific adapters
+   */
+  async compareStoredSchema(
+    id: string,
+    freshSchema: string
+  ): Promise<{
+    record: ContractUIRecord;
+    hasStoredSchema: boolean;
+    schemasMatch: boolean;
+    needsUpdate: boolean;
+  }> {
+    try {
+      const record = await this.get(id);
+      if (!record) {
+        throw new Error(`Record with id ${id} not found`);
+      }
+
+      const hasStoredSchema = !!record.contractSchema;
+
+      if (!hasStoredSchema) {
+        return {
+          record,
+          hasStoredSchema: false,
+          schemasMatch: false,
+          needsUpdate: true,
+        };
+      }
+
+      // Simple string comparison - chain-specific adapters should implement
+      // more sophisticated comparison logic
+      const schemasMatch = record.contractSchema === freshSchema;
+
+      return {
+        record,
+        hasStoredSchema: true,
+        schemasMatch,
+        needsUpdate: !schemasMatch,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to compare stored schema', errorMessage);
+      throw new Error('Failed to compare contract schemas');
+    }
+  }
+
+  /**
+   * Gets records by contract schema hash for quick lookup
+   */
+  async getRecordsBySchemaHash(schemaHash: string): Promise<ContractUIRecord[]> {
+    try {
+      const allRecords = await this.getAll();
+      const matchingRecords = allRecords.filter((record) => record.schemaHash === schemaHash);
+
+      logger.info(
+        'Schema hash lookup',
+        `Found ${matchingRecords.length} records with hash ${schemaHash}`
+      );
+      return matchingRecords;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to get records by schema hash', errorMessage);
+      throw new Error('Failed to lookup records by schema hash');
     }
   }
 }

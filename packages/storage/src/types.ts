@@ -1,4 +1,5 @@
 import type {
+  ContractSchemaMetadata,
   ExecutionConfig,
   RenderFormSchema,
   UiKitConfiguration,
@@ -16,6 +17,13 @@ export interface ContractUIRecord extends BaseRecord {
   executionConfig?: ExecutionConfig;
   uiKitConfig?: UiKitConfiguration;
   metadata?: Record<string, unknown>;
+
+  // Contract Schema Storage Fields
+  contractSchema?: string; // JSON string of the contract schema
+  schemaSource: 'fetched' | 'manual' | 'hybrid';
+  schemaHash?: string; // SHA-256 hash for quick comparison
+  lastSchemaFetched?: Date; // When schema was last fetched from block explorer
+  schemaMetadata?: ContractSchemaMetadata;
 }
 
 export interface ContractUIExportData {
