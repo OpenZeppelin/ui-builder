@@ -146,11 +146,11 @@ export function FieldBasicSettings({
           />
           <BooleanField
             id="is-read-only"
-            name="isReadOnly"
+            name="readOnly"
             label="Display as read-only"
             control={control}
             helperText="If checked, the field shows the hardcoded value but cannot be edited by the end-user."
-            isReadOnly={isHardcodedValueInvalid}
+            readOnly={isHardcodedValueInvalid}
           />
         </div>
       )}

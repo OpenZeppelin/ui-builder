@@ -97,7 +97,7 @@ export interface FormFieldType<T extends FieldType = FieldType> {
    * Typically used when isHardcoded is true but isHidden is false.
    * @default false
    */
-  isReadOnly?: boolean;
+  readOnly?: boolean;
 
   /**
    * Components/properties for object and array-object field types.

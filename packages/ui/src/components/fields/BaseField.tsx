@@ -64,7 +64,7 @@ export interface BaseFieldProps<TFieldValues extends FieldValues = FieldValues> 
    * Whether the field should be displayed as read-only/disabled.
    * @default false
    */
-  isReadOnly?: boolean;
+  readOnly?: boolean;
 }
 
 /**

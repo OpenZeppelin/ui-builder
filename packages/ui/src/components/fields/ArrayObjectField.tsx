@@ -95,7 +95,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
   renderProperty,
   collapsible = true,
   defaultCollapsed = false,
-  isReadOnly,
+  readOnly,
   adapter,
 }: ArrayObjectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
@@ -263,7 +263,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                             </div>
                           )}
                         </div>
-                        {!isReadOnly && canRemove && (
+                        {!readOnly && canRemove && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -306,7 +306,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                                   component.description ||
                                   (propertyFieldType === 'number' ? 'Numbers only' : undefined),
                                 width: 'full',
-                                isReadOnly,
+                                readOnly,
                                 // Pass components for nested objects
                                 ...(component.components && {
                                   components: component.components,
@@ -337,7 +337,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
             </div>
 
             {/* Add Item button */}
-            {!isReadOnly && canAddMore && (
+            {!readOnly && canAddMore && (
               <Button
                 type="button"
                 variant="outline"

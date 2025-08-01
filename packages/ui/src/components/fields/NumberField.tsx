@@ -70,7 +70,7 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
   max,
   step = 1,
   validateNumber,
-  isReadOnly,
+  readOnly,
 }: NumberFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -156,7 +156,7 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        disabled={isReadOnly}
+        disabled={readOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -297,7 +297,7 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
                 pattern="-?[0-9]*\.?[0-9]*"
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
-                disabled={isReadOnly}
+                disabled={readOnly}
               />
 
               {/* Display helper text */}

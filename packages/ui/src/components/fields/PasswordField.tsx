@@ -60,7 +60,7 @@ export function PasswordField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
-  isReadOnly,
+  readOnly,
   showToggle = true,
 }: PasswordFieldProps<TFieldValues>): React.ReactElement {
   const [showPassword, setShowPassword] = useState(false);
@@ -107,7 +107,7 @@ export function PasswordField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        disabled={isReadOnly}
+        disabled={readOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -158,9 +158,9 @@ export function PasswordField<TFieldValues extends FieldValues = FieldValues>({
                   value={field.value ?? ''}
                   {...accessibilityProps}
                   aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
-                  disabled={isReadOnly}
+                  disabled={readOnly}
                 />
-                {showToggle && !isReadOnly && (
+                {showToggle && !readOnly && (
                   <Button
                     type="button"
                     variant="ghost"

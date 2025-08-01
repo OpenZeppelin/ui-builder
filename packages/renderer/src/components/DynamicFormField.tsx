@@ -134,8 +134,8 @@ export function DynamicFormField({
           key={`${field.id}-element-${index}`}
           field={{
             ...elementField,
-            // Inherit isReadOnly from parent field
-            isReadOnly: elementField.isReadOnly ?? field.isReadOnly,
+            // Inherit readOnly from parent field
+            readOnly: elementField.readOnly ?? field.readOnly,
           }}
           control={control}
           adapter={adapter}
@@ -149,8 +149,8 @@ export function DynamicFormField({
           key={`${field.id}-property-${propertyName}`}
           field={{
             ...propertyField,
-            // Inherit isReadOnly from parent field
-            isReadOnly: propertyField.isReadOnly ?? field.isReadOnly,
+            // Inherit readOnly from parent field
+            readOnly: propertyField.readOnly ?? field.readOnly,
           }}
           control={control}
           adapter={adapter}
@@ -168,8 +168,8 @@ export function DynamicFormField({
           key={`${field.id}-item-${itemIndex}-property-${propertyName}`}
           field={{
             ...propertyField,
-            // Inherit isReadOnly from parent field
-            isReadOnly: propertyField.isReadOnly ?? field.isReadOnly,
+            // Inherit readOnly from parent field
+            readOnly: propertyField.readOnly ?? field.readOnly,
           }}
           control={control}
           adapter={adapter}
@@ -191,7 +191,7 @@ export function DynamicFormField({
       control={control as unknown as Control<FormValues>}
       name={field.name}
       adapter={adapter}
-      isReadOnly={field.isReadOnly}
+      readOnly={field.readOnly}
       {...enhancedProps}
     />
   );

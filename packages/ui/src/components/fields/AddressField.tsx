@@ -48,7 +48,7 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
   width = 'full',
   validation,
   adapter,
-  isReadOnly,
+  readOnly,
 }: AddressFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -92,7 +92,7 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        disabled={isReadOnly}
+        disabled={readOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -141,7 +141,7 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
                 value={field.value ?? ''}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
-                disabled={isReadOnly}
+                disabled={readOnly}
               />
 
               {/* Display helper text */}
