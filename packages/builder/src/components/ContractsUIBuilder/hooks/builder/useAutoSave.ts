@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import {
   contractUIStorage,
+  ContractUIStorage,
   useContractUIStorage,
 } from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -68,6 +69,15 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
     try {
       const currentState = uiBuilderStore.getState();
 
+      // Skip auto-save only for validation errors, not for unverified contract errors
+      if (
+        currentState.contractState.error &&
+        !currentState.contractState.error.includes('not verified on the block explorer')
+      ) {
+        logger.info('builder', 'Skipping auto-save due to contract definition validation error');
+        return;
+      }
+
       // Run all guard checks
       const { proceed, configId, needsRecordCreation } = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
@@ -81,6 +91,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
 
       // Handle record creation for new UI mode
       if (needsRecordCreation) {
+        console.log('[useAutoSave] Taking CREATE path - creating new record');
         // Update UI state for creation
         uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
 
@@ -91,14 +102,37 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         const titleToUse = generateDefaultTitle(currentState);
         const configToSave = buildConfigurationObject(currentState, titleToUse);
 
+        // Prepare record with contract schema data if available
+
+        const recordToSave = currentState.contractState.definitionJson
+          ? ContractUIStorage.prepareRecordWithDefinition(
+              {
+                ...configToSave,
+                metadata: {
+                  isManuallyRenamed: false,
+                },
+                contractDefinitionSource: currentState.contractState.source || undefined,
+              },
+              currentState.contractState.definitionJson,
+              currentState.contractState.source ?? undefined,
+              currentState.contractState.metadata || undefined,
+              currentState.contractState.definitionOriginal || undefined
+            )
+          : ({
+              ...configToSave,
+              metadata: {
+                isManuallyRenamed: false,
+              },
+              // Explicitly clear all contract definition fields when no definition exists
+              contractDefinition: '',
+              contractDefinitionMetadata: undefined,
+              contractDefinitionOriginal: '',
+              contractDefinitionSource: undefined,
+            } as const);
+
         // Create new record
         logger.info('builder', 'Auto-save: Creating new record for meaningful content');
-        const newConfigId = await contractUIStorage.save({
-          ...configToSave,
-          metadata: {
-            isManuallyRenamed: false,
-          },
-        });
+        const newConfigId = await contractUIStorage.save(recordToSave);
 
         // Update state with new record ID and exit new UI mode
         uiBuilderStore.updateState(() => ({
@@ -139,9 +173,32 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         return;
       }
 
+      // Prepare record with contract definition data if available
+      const recordToSave = currentState.contractState.definitionJson
+        ? ContractUIStorage.prepareRecordWithDefinition(
+            {
+              ...configToSave,
+              contractDefinitionSource: currentState.contractState.source || undefined,
+            },
+            currentState.contractState.definitionJson,
+            currentState.contractState.source ?? undefined,
+            currentState.contractState.metadata || undefined,
+            currentState.contractState.definitionOriginal || undefined
+          )
+        : ({
+            ...configToSave,
+            // Explicitly clear all contract definition fields when no definition exists
+            contractDefinition: '',
+            contractDefinitionMetadata: undefined,
+            contractDefinitionOriginal: '',
+            contractDefinitionSource: undefined,
+          } as const);
+
       // Save configuration
       logger.info('Auto-save: Updating existing configuration', `ID: ${configId}`);
-      await updateContractUI(configId, configToSave);
+      logger.info('Auto-save', 'Record data being saved:', recordToSave);
+      await updateContractUI(configId, recordToSave);
+      logger.info('Auto-save', 'Database update completed');
 
       // Update cache
       autoSaveCache.updateConfigCache(configId, configToSave);
@@ -184,9 +241,13 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   }, [
     {
       selectedNetworkConfigId: state.selectedNetworkConfigId,
-      contractAddress: state.contractAddress,
+      contractAddress: state.contractState.address,
       selectedFunction: state.selectedFunction,
       formConfig: state.formConfig,
+      // Include contract definition fields to trigger auto-save when they change
+      contractDefinitionJson: state.contractState.definitionJson,
+      contractDefinitionSource: state.contractState.source,
+      contractDefinitionMetadata: state.contractState.metadata,
     },
   ]);
 

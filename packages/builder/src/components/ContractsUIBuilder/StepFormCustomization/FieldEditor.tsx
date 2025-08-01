@@ -26,7 +26,7 @@ interface FieldEditorProps {
    */
   adapter?: ContractAdapter;
   /**
-   * Original parameter type from the contract ABI for validation warnings
+   * Original parameter type from the contract schema for validation warnings
    */
   originalParameterType?: string;
 }

@@ -6,7 +6,9 @@ import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { uiBuilderStore, type BuilderFormConfig } from '../uiBuilderStore';
+import { BuilderFormConfig } from '@/core/types/FormTypes';
+
+import { uiBuilderStore } from '../uiBuilderStore';
 
 // Global lock to prevent multiple page initializations
 let globalPageInitializationInProgress = false;
@@ -73,6 +75,11 @@ export function useBuilderLifecycle(
           formConfig,
           executionConfig: savedUI.executionConfig,
           uiKitConfig: savedUI.uiKitConfig,
+          // Pass stored contract definition data (map from storage to UI field names)
+          contractDefinition: savedUI.contractDefinition, // Storage uses 'contractDefinition', UI expects 'contractDefinition'
+          contractDefinitionOriginal: savedUI.contractDefinitionOriginal,
+          contractDefinitionSource: savedUI.contractDefinitionSource,
+          contractDefinitionMetadata: savedUI.contractDefinitionMetadata,
         });
 
         // Set the active network to trigger wallet connection and network switch

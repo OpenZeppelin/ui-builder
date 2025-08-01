@@ -240,6 +240,15 @@ function getFieldSpecificProps(field: FormFieldType): Record<string, unknown> {
     case 'checkbox':
       // Add checkbox-specific props
       return {};
+    case 'code-editor':
+      // Extract code editor-specific props
+      return {
+        language: field.codeEditorProps?.language || 'json',
+        theme: field.codeEditorProps?.theme || 'light',
+        height: field.codeEditorProps?.height || '200px',
+        maxHeight: field.codeEditorProps?.maxHeight || '400px',
+        performanceThreshold: field.codeEditorProps?.performanceThreshold || 5000,
+      };
     default:
       return {};
   }

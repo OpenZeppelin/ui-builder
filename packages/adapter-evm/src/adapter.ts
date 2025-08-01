@@ -133,6 +133,44 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
+  public async loadContractWithMetadata(artifacts: FormValues): Promise<{
+    schema: ContractSchema;
+    source: 'fetched' | 'manual' | 'hybrid';
+    contractDefinitionOriginal?: string;
+    metadata?: {
+      fetchedFrom?: string;
+      contractName?: string;
+      verificationStatus?: 'verified' | 'unverified' | 'unknown';
+      fetchTimestamp?: Date;
+      definitionHash?: string;
+    };
+  }> {
+    try {
+      const result = await loadEvmContract(artifacts, this.networkConfig);
+
+      return {
+        schema: result.schema,
+        source: result.source,
+        contractDefinitionOriginal: result.contractDefinitionOriginal,
+        metadata: result.metadata,
+      };
+    } catch (error) {
+      // Check if this is an unverified contract error
+      const errorMessage = (error as Error).message || '';
+      if (errorMessage.includes('not verified on the block explorer')) {
+        // For unverified contracts, we still need to throw but include metadata
+        // The UI will handle this error and can extract verification status from the message
+        throw error;
+      }
+
+      // Re-throw other errors
+      throw error;
+    }
+  }
+
+  /**
+   * @inheritdoc
+   */
   mapParameterTypeToFieldType(parameterType: string): FieldType {
     return mapEvmParamTypeToFieldType(parameterType);
   }
@@ -507,15 +545,21 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
           'Enter the deployed contract address. For verified contracts, the ABI will be fetched automatically from the block explorer.',
       },
       {
-        id: 'abiJson',
-        name: 'abiJson',
+        id: 'contractDefinition',
+        name: 'contractDefinition',
         label: 'Contract ABI (Optional)',
-        type: 'textarea',
+        type: 'code-editor',
         validation: { required: false },
         placeholder:
           '[{"inputs":[],"name":"myFunction","outputs":[],"stateMutability":"nonpayable","type":"function"}]',
         helperText:
           "If the contract is not verified on the block explorer, paste the contract's ABI JSON here. You can find this in your contract's compilation artifacts or deployment files.",
+        codeEditorProps: {
+          language: 'json',
+          placeholder: 'Paste your contract ABI JSON here...',
+          maxHeight: '500px',
+          performanceThreshold: 3000, // Disable syntax highlighting for large ABIs
+        },
       },
     ];
   }
@@ -559,7 +603,7 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
   /**
    * @inheritdoc
    */
-  public async compareContractSchemas(
+  public async compareContractDefinitions(
     storedSchema: string,
     freshSchema: string
   ): Promise<{
@@ -593,20 +637,20 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
         summary: result.summary,
       };
     } catch (error) {
-      logger.error('EVM contract schema comparison failed:', (error as Error).message);
-      throw new Error(`Contract schema comparison failed: ${(error as Error).message}`);
+      logger.error('EVM contract definition comparison failed:', (error as Error).message);
+      throw new Error(`Contract definition comparison failed: ${(error as Error).message}`);
     }
   }
 
   /**
    * @inheritdoc
    */
-  public validateContractSchema(schema: string): {
+  public validateContractDefinition(definition: string): {
     valid: boolean;
     errors: string[];
     warnings: string[];
   } {
-    const result = abiComparisonService.validateAbi(schema);
+    const result = abiComparisonService.validateAbi(definition);
     return {
       valid: result.valid,
       errors: result.errors,
@@ -617,8 +661,8 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
   /**
    * @inheritdoc
    */
-  public hashContractSchema(schema: string): string {
-    return abiComparisonService.hashAbi(schema);
+  public hashContractDefinition(definition: string): string {
+    return abiComparisonService.hashAbi(definition);
   }
 }
 

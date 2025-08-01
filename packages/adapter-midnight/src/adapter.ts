@@ -129,15 +129,20 @@ export class MidnightAdapter implements ContractAdapter {
           'A unique identifier for your private state instance. This ID is used to manage your personal encrypted data.',
       },
       {
-        id: 'contractInterface',
-        name: 'contractInterface',
+        id: 'contractSchema',
+        name: 'contractSchema',
         label: 'Contract Interface (.d.ts)',
-        type: 'textarea',
+        type: 'code-editor',
         validation: { required: true },
         placeholder:
           'export interface MyContract {\n  myMethod(param: string): Promise<void>;\n  // ... other methods\n}',
         helperText:
           "Paste the TypeScript interface definition from your contract.d.ts file. This defines the contract's available methods.",
+        codeEditorProps: {
+          language: 'typescript',
+          placeholder: 'Paste your contract interface here...',
+          maxHeight: '400px',
+        },
       },
       {
         id: 'contractModule',
@@ -169,19 +174,19 @@ export class MidnightAdapter implements ContractAdapter {
     }
 
     const artifacts = source as FormValues;
-    const { contractAddress, contractInterface } = artifacts;
+    const { contractAddress, contractSchema } = artifacts;
 
     if (typeof contractAddress !== 'string' || !this.isValidAddress(contractAddress)) {
       throw new Error('A valid contract address must be provided.');
     }
-    if (typeof contractInterface !== 'string' || !contractInterface.trim()) {
-      throw new Error('A contract interface must be provided.');
+    if (typeof contractSchema !== 'string' || !contractSchema.trim()) {
+      throw new Error('A contract schema must be provided.');
     }
 
     this.artifacts = artifacts;
     logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
 
-    const { functions, events } = parseMidnightContractInterface(contractInterface);
+    const { functions, events } = parseMidnightContractInterface(contractSchema);
 
     const schema: ContractSchema = {
       name: 'MyMidnightContract', // TODO: Extract from artifacts if possible

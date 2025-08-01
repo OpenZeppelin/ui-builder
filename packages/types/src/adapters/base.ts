@@ -31,6 +31,10 @@ export interface ExecutionMethodDetail {
   disabled?: boolean;
 }
 
+/**
+ * Transaction execution configuration.
+ * Note: Stored both at ContractUIRecord top-level (persistent) and in BuilderFormConfig (transient during editing).
+ */
 export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
 
 /**
@@ -69,6 +73,25 @@ export interface ContractAdapter {
    * @returns A promise resolving to the ContractSchema.
    */
   loadContract(source: string | Record<string, unknown>): Promise<ContractSchema>;
+
+  /**
+   * (Optional) Load a contract with source metadata information.
+   * Returns both the contract schema and information about how it was loaded.
+   *
+   * @param source - The contract artifacts/source data.
+   * @returns A promise resolving to both ContractSchema and source metadata.
+   */
+  loadContractWithMetadata?(source: string | Record<string, unknown>): Promise<{
+    schema: ContractSchema;
+    source: 'fetched' | 'manual' | 'hybrid';
+    metadata?: {
+      fetchedFrom?: string;
+      contractName?: string;
+      verificationStatus?: 'verified' | 'unverified' | 'unknown';
+      fetchTimestamp?: Date;
+      definitionHash?: string;
+    };
+  }>;
 
   /**
    * Get only the functions that modify state (writable functions)
@@ -431,7 +454,7 @@ export interface ContractAdapter {
    * @param freshSchema - The newly fetched contract schema as JSON string
    * @returns A promise resolving to detailed comparison results
    */
-  compareContractSchemas?(
+  compareContractDefinitions?(
     storedSchema: string,
     freshSchema: string
   ): Promise<{
@@ -450,24 +473,24 @@ export interface ContractAdapter {
   }>;
 
   /**
-   * (Optional) Validates contract schema structure and format for this chain.
-   * Provides chain-specific validation logic for contract schemas.
+   * (Optional) Validates contract definition structure and format for this chain.
+   * Provides chain-specific validation logic for contract definitions.
    *
-   * @param schema - The contract schema as JSON string to validate
+   * @param definition - The contract definition as JSON string to validate
    * @returns Validation result with errors and warnings
    */
-  validateContractSchema?(schema: string): {
+  validateContractDefinition?(definition: string): {
     valid: boolean;
     errors: string[];
     warnings: string[];
   };
 
   /**
-   * (Optional) Creates a deterministic hash of a contract schema for quick comparison.
-   * Provides chain-specific normalization and hashing for contract schemas.
+   * (Optional) Creates a deterministic hash of a contract definition for quick comparison.
+   * Provides chain-specific normalization and hashing for contract definitions.
    *
-   * @param schema - The contract schema as JSON string to hash
+   * @param definition - The contract definition as JSON string to hash
    * @returns A deterministic hash string for quick comparison
    */
-  hashContractSchema?(schema: string): string;
+  hashContractDefinition?(definition: string): string;
 }

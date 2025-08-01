@@ -27,9 +27,9 @@ export function buildConfigurationObject(
   const formConfig = {
     ...state.formConfig,
     id: state.formConfig?.functionId || 'new',
-    title: state.formConfig?.title || 'Contract UI Form',
+    title: state.formConfig?.title || 'New Contract UI',
     functionId: state.selectedFunction || '',
-    contractAddress: state.contractAddress || '',
+    contractAddress: state.contractState.address || '',
     fields: state.formConfig?.fields || [],
     layout: state.formConfig?.layout || {
       columns: 1 as const,
@@ -53,7 +53,7 @@ export function buildConfigurationObject(
     title,
     ecosystem: state.selectedEcosystem || 'evm',
     networkId: state.selectedNetworkConfigId || '',
-    contractAddress: state.contractAddress || '',
+    contractAddress: state.contractState.address || '',
     functionId: state.selectedFunction || '',
     formConfig,
     executionConfig: state.formConfig?.executionConfig,

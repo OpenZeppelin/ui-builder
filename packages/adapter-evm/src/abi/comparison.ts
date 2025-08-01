@@ -3,13 +3,26 @@
  * Provides detailed analysis of differences between ABIs
  */
 
-import { createHash } from 'crypto';
 import type { Abi } from 'viem';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { AbiComparisonResult, AbiDifference, AbiValidationResult } from './types';
 import { isValidAbiArray } from './types';
+
+/**
+ * Simple browser-compatible hash function for deterministic hashing
+ * Used for ABI comparison - doesn't need to be cryptographically secure
+ */
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(16);
+}
 
 /**
  * Service for comparing and validating EVM ABIs
@@ -35,8 +48,8 @@ export class AbiComparisonService {
       const normalized1 = this.normalizeAbi(validation1.normalizedAbi!);
       const normalized2 = this.normalizeAbi(validation2.normalizedAbi!);
 
-      const hash1 = createHash('sha256').update(JSON.stringify(normalized1)).digest('hex');
-      const hash2 = createHash('sha256').update(JSON.stringify(normalized2)).digest('hex');
+      const hash1 = simpleHash(JSON.stringify(normalized1));
+      const hash2 = simpleHash(JSON.stringify(normalized2));
 
       if (hash1 === hash2) {
         return {
@@ -80,6 +93,14 @@ export class AbiComparisonService {
 
       if (!Array.isArray(abi)) {
         errors.push('ABI must be an array');
+        return { valid: false, errors, warnings };
+      }
+
+      // Empty ABI arrays are not valid contract definitions
+      if (abi.length === 0) {
+        errors.push(
+          'ABI array cannot be empty - contract must have at least one function, event, or constructor'
+        );
         return { valid: false, errors, warnings };
       }
 
@@ -141,7 +162,7 @@ export class AbiComparisonService {
       const normalized = this.normalizeAbi(validation.normalizedAbi);
       const normalizedString = JSON.stringify(normalized);
 
-      return createHash('sha256').update(normalizedString).digest('hex');
+      return simpleHash(normalizedString);
     } catch (error) {
       logger.error('ABI hashing failed:', (error as Error).message);
       throw new Error(`Failed to hash ABI: ${(error as Error).message}`);

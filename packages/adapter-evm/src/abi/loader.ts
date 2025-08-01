@@ -1,8 +1,8 @@
 import { isAddress } from 'viem';
 
 import type {
+  ContractDefinitionMetadata,
   ContractSchema,
-  ContractSchemaMetadata,
   EvmNetworkConfig,
   FormValues,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -39,7 +39,8 @@ async function loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
 export interface EvmContractLoadResult {
   schema: ContractSchema;
   source: 'fetched' | 'manual';
-  metadata?: ContractSchemaMetadata;
+  contractDefinitionOriginal?: string;
+  metadata?: ContractDefinitionMetadata;
 }
 
 /**
@@ -50,30 +51,42 @@ export async function loadEvmContract(
   artifacts: FormValues,
   networkConfig: EvmNetworkConfig
 ): Promise<EvmContractLoadResult> {
-  const { contractAddress, abiJson } = artifacts;
+  const { contractAddress, contractDefinition } = artifacts;
 
   if (!contractAddress || typeof contractAddress !== 'string' || !isAddress(contractAddress)) {
     throw new Error('A valid contract address is required.');
   }
 
-  // 1. Prioritize manual ABI input if provided.
-  if (abiJson && typeof abiJson === 'string' && abiJson.trim().startsWith('[')) {
-    logger.info('loadEvmContract', 'Manual ABI provided. Attempting to parse...');
-    try {
-      const schema = await loadAbiFromJson(abiJson);
-      // Attach the address to the schema from the separate address field.
-      return {
-        schema: { ...schema, address: contractAddress },
-        source: 'manual',
-        metadata: {
-          contractName: schema.name,
-          fetchTimestamp: new Date(),
-        },
-      };
-    } catch (error) {
-      logger.error('loadEvmContract', 'Failed to parse manually provided ABI:', error);
-      // If manual ABI is provided but invalid, it's a hard error.
-      throw new Error(`The provided ABI JSON is invalid: ${(error as Error).message}`);
+  // 1. Prioritize manual contract definition input if provided.
+  if (
+    contractDefinition &&
+    typeof contractDefinition === 'string' &&
+    contractDefinition.trim().length > 0
+  ) {
+    // Try to detect if this looks like JSON
+    const trimmed = contractDefinition.trim();
+    const hasJsonContent = trimmed.includes('[') && trimmed.includes(']') && trimmed.includes('{');
+
+    if (hasJsonContent) {
+      logger.info('loadEvmContract', 'Manual contract definition provided. Attempting to parse...');
+      try {
+        const schema = await loadAbiFromJson(contractDefinition);
+        // Attach the address to the schema from the separate address field.
+        return {
+          schema: { ...schema, address: contractAddress },
+          source: 'manual' as const,
+          contractDefinitionOriginal: contractDefinition,
+          metadata: {
+            contractName: schema.name,
+            fetchTimestamp: new Date(),
+            verificationStatus: 'unknown', // Manual ABI - verification status unknown
+          },
+        };
+      } catch (error) {
+        logger.error('loadEvmContract', 'Failed to parse manually provided ABI:', error);
+        // If manual ABI is provided but invalid, it's a hard error.
+        throw new Error(`The provided ABI JSON is invalid: ${(error as Error).message}`);
+      }
     }
   }
 
@@ -83,7 +96,7 @@ export async function loadEvmContract(
     `No manual ABI detected. Attempting Etherscan fetch for address: ${contractAddress}...`
   );
   try {
-    const schema = await loadAbiFromEtherscan(
+    const result = await loadAbiFromEtherscan(
       contractAddress,
       networkConfig as TypedEvmNetworkConfig
     );
@@ -92,24 +105,36 @@ export async function loadEvmContract(
       `Successfully fetched ABI from Etherscan for ${contractAddress}.`
     );
 
-    // Create metadata for fetched ABI
+    // Create metadata for fetched ABI including the original ABI string
     const explorerBaseUrl = networkConfig.explorerUrl || 'unknown';
-    const metadata: ContractSchemaMetadata = {
+
+    const metadata: ContractDefinitionMetadata = {
       fetchedFrom: `${explorerBaseUrl}/address/${contractAddress}`,
-      contractName: schema.name,
+      contractName: result.schema.name,
       verificationStatus: 'verified', // Assume verified if we got ABI from explorer
       fetchTimestamp: new Date(),
     };
 
     return {
-      schema,
+      schema: result.schema,
       source: 'fetched',
+      contractDefinitionOriginal: result.originalAbi,
       metadata,
     };
   } catch (error) {
     logger.warn('loadEvmContract', `Etherscan ABI fetch failed for ${contractAddress}:`, error);
-    // 3. If both manual ABI is missing and Etherscan fails, re-throw the specific error.
-    // This preserves important details like missing API keys or network issues.
+
+    // Check if this is a "contract not verified" error
+    const errorMessage = (error as Error).message || '';
+    if (errorMessage.includes('Contract not verified')) {
+      // For unverified contracts, we can't provide a schema but we should indicate the status
+      throw new Error(
+        `Contract at ${contractAddress} is not verified on the block explorer. ` +
+          `Verification status: unverified. Please provide the contract ABI manually.`
+      );
+    }
+
+    // 3. For other errors (API issues, network problems), re-throw the original error
     throw error;
   }
 }

@@ -38,6 +38,7 @@ module.exports = {
       'networkConfig',
       'initialAppServiceKitName',
       'loadContract',
+      'loadContractWithMetadata',
       'getWritableFunctions',
       'mapParameterTypeToFieldType',
       'getCompatibleFieldTypes',
@@ -73,9 +74,9 @@ module.exports = {
       'testRpcConnection',
       'validateExplorerConfig',
       'testExplorerConnection',
-      'compareContractSchemas',
-      'validateContractSchema',
-      'hashContractSchema',
+      'compareContractDefinitions',
+      'validateContractDefinition',
+      'hashContractDefinition',
     ];
 
     // Common standard methods and properties that are allowed

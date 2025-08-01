@@ -8,6 +8,14 @@ import { loadAbiFromEtherscanV2, shouldUseV2Api } from './etherscan-v2';
 import { transformAbiToSchema } from './transformer';
 
 /**
+ * Result type for Etherscan ABI loading that includes the original ABI string
+ */
+export interface EtherscanAbiResult {
+  schema: ContractSchema;
+  originalAbi: string;
+}
+
+/**
  * IMPORTANT: Etherscan V1 API Deprecation Notice
  *
  * Etherscan has announced the deprecation of their V1 API endpoints in favor of the new V2 unified API.
@@ -34,7 +42,7 @@ import { transformAbiToSchema } from './transformer';
 export async function loadAbiFromEtherscan(
   address: string,
   networkConfig: TypedEvmNetworkConfig
-): Promise<ContractSchema> {
+): Promise<EtherscanAbiResult> {
   if (shouldUseV2Api(networkConfig)) {
     logger.info('loadAbiFromEtherscan', 'Using V2 API for fetching ABI');
     return loadAbiFromEtherscanV2(address, networkConfig);
@@ -51,7 +59,7 @@ export async function loadAbiFromEtherscan(
 export async function loadAbiFromEtherscanV1(
   address: string,
   networkConfig: TypedEvmNetworkConfig
-): Promise<ContractSchema> {
+): Promise<EtherscanAbiResult> {
   const explorerConfig = resolveExplorerConfig(networkConfig);
 
   // Check if API key is required for this network (default to true if not specified)
@@ -126,15 +134,18 @@ export async function loadAbiFromEtherscanV1(
     );
     if (apiResult.result?.includes('Contract source code not verified')) {
       throw new Error(
-        `Contract not verified on ${networkConfig.name} explorer (address: ${address}). ABI not available.`
+        `Contract not verified on ${networkConfig.name} explorer (address: ${address}). ABI not available. You can provide the contract's ABI manually.`
       );
     }
     throw new Error(`Explorer API Error: ${apiResult.result || apiResult.message}`);
   }
 
+  // Store the original raw ABI string before parsing
+  const originalAbiString = apiResult.result;
+
   let abi: AbiItem[];
   try {
-    abi = JSON.parse(apiResult.result);
+    abi = JSON.parse(originalAbiString);
     if (!Array.isArray(abi)) {
       throw new Error('Parsed ABI from Explorer API is not an array.');
     }
@@ -152,5 +163,10 @@ export async function loadAbiFromEtherscanV1(
   );
   // TODO: Fetch contract name?
   const contractName = `Contract_${address.substring(0, 6)}`;
-  return transformAbiToSchema(abi, contractName, address);
+  const schema = transformAbiToSchema(abi, contractName, address);
+
+  return {
+    schema,
+    originalAbi: originalAbiString,
+  };
 }

@@ -1,4 +1,4 @@
-import type { ContractSchemaMetadata } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractDefinitionMetadata } from '@openzeppelin/contracts-ui-builder-types';
 import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DexieStorage } from '../base/DexieStorage';
@@ -145,39 +145,35 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
   }
 
   /**
-   * Helper to prepare a record with contract schema data for saving
+   * Helper to prepare a record with contract definition data for saving
    */
-  static prepareRecordWithSchema(
+  static prepareRecordWithDefinition(
     record: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
-    contractSchema?: string,
-    schemaSource: 'fetched' | 'manual' | 'hybrid' = 'manual',
-    schemaMetadata?: ContractSchemaMetadata,
-    schemaHash?: string
+    contractDefinition?: string,
+    contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid',
+    contractDefinitionMetadata?: ContractDefinitionMetadata,
+    contractDefinitionOriginal?: string
   ): Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> {
-    const recordWithSchema = {
+    const recordWithDefinition = {
       ...record,
-      schemaSource,
-      contractSchema,
-      schemaHash,
-      schemaMetadata,
+      contractDefinitionSource,
+      contractDefinition,
+      contractDefinitionOriginal,
+      contractDefinitionMetadata,
     };
 
-    if (schemaSource === 'fetched') {
-      recordWithSchema.lastSchemaFetched = new Date();
-    }
-
-    return recordWithSchema;
+    return recordWithDefinition;
   }
 
   /**
-   * Updates contract schema data for existing record
+   * Updates contract definition data for existing record
    */
-  async updateSchema(
+  async updateDefinition(
     id: string,
-    contractSchema: string,
-    schemaSource: 'fetched' | 'manual' | 'hybrid',
-    schemaMetadata?: ContractSchemaMetadata,
-    schemaHash?: string
+    contractDefinition: string,
+    contractDefinitionSource: 'fetched' | 'manual' | 'hybrid',
+    contractDefinitionMetadata?: ContractDefinitionMetadata,
+    contractDefinitionOriginal?: string
   ): Promise<void> {
     try {
       const existing = await this.get(id);
@@ -186,61 +182,62 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       }
 
       const updates: Partial<ContractUIRecord> = {
-        contractSchema,
-        schemaSource,
-        schemaMetadata,
-        schemaHash,
+        contractDefinition,
+        contractDefinitionOriginal,
+        contractDefinitionSource,
+        contractDefinitionMetadata,
         updatedAt: new Date(),
       };
 
-      if (schemaSource === 'fetched') {
-        updates.lastSchemaFetched = new Date();
-      }
-
       await this.update(id, updates);
-      logger.info('Contract schema updated', `ID: ${id}, Source: ${schemaSource}`);
+      logger.info('Contract definition updated', `ID: ${id}, Source: ${contractDefinitionSource}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Failed to update contract schema', errorMessage);
-      throw new Error('Failed to update contract schema');
+      logger.error('Failed to update contract definition', errorMessage);
+      throw new Error('Failed to update contract definition');
     }
   }
 
   /**
-   * Gets records that need contract schema refresh (older than threshold)
+   * Gets records that need contract definition refresh (older than threshold)
    */
-  async getRecordsNeedingSchemaRefresh(thresholdHours: number = 24): Promise<ContractUIRecord[]> {
+  async getRecordsNeedingDefinitionRefresh(
+    thresholdHours: number = 24
+  ): Promise<ContractUIRecord[]> {
     try {
       const threshold = new Date(Date.now() - thresholdHours * 60 * 60 * 1000);
       const allRecords = await this.getAll();
 
       const needsRefresh = allRecords.filter(
         (record) =>
-          record.schemaSource === 'fetched' &&
-          record.lastSchemaFetched &&
-          record.lastSchemaFetched < threshold
+          record.contractDefinitionSource === 'fetched' &&
+          record.contractDefinitionMetadata?.fetchTimestamp &&
+          record.contractDefinitionMetadata.fetchTimestamp < threshold
       );
 
-      logger.info('Schema refresh check', `Found ${needsRefresh.length} records needing refresh`);
+      logger.info(
+        'Definition refresh check',
+        `Found ${needsRefresh.length} records needing refresh`
+      );
       return needsRefresh;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Failed to get records needing schema refresh', errorMessage);
-      throw new Error('Failed to check for schema refresh needs');
+      logger.error('Failed to get records needing definition refresh', errorMessage);
+      throw new Error('Failed to check for definition refresh needs');
     }
   }
 
   /**
-   * Compares stored contract schema with fresh schema
+   * Compares stored contract definition with fresh definition
    * Note: Actual comparison logic should be implemented in chain-specific adapters
    */
-  async compareStoredSchema(
+  async compareStoredDefinition(
     id: string,
-    freshSchema: string
+    freshContractDefinition: string
   ): Promise<{
     record: ContractUIRecord;
-    hasStoredSchema: boolean;
-    schemasMatch: boolean;
+    hasStoredDefinition: boolean;
+    definitionsMatch: boolean;
     needsUpdate: boolean;
   }> {
     try {
@@ -249,51 +246,53 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         throw new Error(`Record with id ${id} not found`);
       }
 
-      const hasStoredSchema = !!record.contractSchema;
+      const hasStoredDefinition = !!record.contractDefinition;
 
-      if (!hasStoredSchema) {
+      if (!hasStoredDefinition) {
         return {
           record,
-          hasStoredSchema: false,
-          schemasMatch: false,
+          hasStoredDefinition: false,
+          definitionsMatch: false,
           needsUpdate: true,
         };
       }
 
       // Simple string comparison - chain-specific adapters should implement
       // more sophisticated comparison logic
-      const schemasMatch = record.contractSchema === freshSchema;
+      const definitionsMatch = record.contractDefinition === freshContractDefinition;
 
       return {
         record,
-        hasStoredSchema: true,
-        schemasMatch,
-        needsUpdate: !schemasMatch,
+        hasStoredDefinition: true,
+        definitionsMatch: definitionsMatch,
+        needsUpdate: !definitionsMatch,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Failed to compare stored schema', errorMessage);
-      throw new Error('Failed to compare contract schemas');
+      logger.error('Failed to compare stored definition', errorMessage);
+      throw new Error('Failed to compare contract definitions');
     }
   }
 
   /**
-   * Gets records by contract schema hash for quick lookup
+   * Gets records by contract definition hash for quick lookup
    */
-  async getRecordsBySchemaHash(schemaHash: string): Promise<ContractUIRecord[]> {
+  async getRecordsByDefinitionHash(definitionHash: string): Promise<ContractUIRecord[]> {
     try {
       const allRecords = await this.getAll();
-      const matchingRecords = allRecords.filter((record) => record.schemaHash === schemaHash);
+      const matchingRecords = allRecords.filter(
+        (record) => record.contractDefinitionMetadata?.definitionHash === definitionHash
+      );
 
       logger.info(
-        'Schema hash lookup',
-        `Found ${matchingRecords.length} records with hash ${schemaHash}`
+        'Definition hash lookup',
+        `Found ${matchingRecords.length} records with hash ${definitionHash}`
       );
       return matchingRecords;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Failed to get records by schema hash', errorMessage);
-      throw new Error('Failed to lookup records by schema hash');
+      logger.error('Failed to get records by definition hash', errorMessage);
+      throw new Error('Failed to lookup records by definition hash');
     }
   }
 }

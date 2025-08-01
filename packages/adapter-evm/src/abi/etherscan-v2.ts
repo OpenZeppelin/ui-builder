@@ -6,6 +6,14 @@ import type { AbiItem, TypedEvmNetworkConfig } from '../types';
 
 import { transformAbiToSchema } from './transformer';
 
+/**
+ * Result type for Etherscan ABI loading that includes the original ABI string
+ */
+export interface EtherscanAbiResult {
+  schema: ContractSchema;
+  originalAbi: string;
+}
+
 // Etherscan V2 unified API base URL
 const ETHERSCAN_V2_BASE_URL = 'https://api.etherscan.io/v2/api';
 
@@ -52,7 +60,7 @@ export function shouldUseV2Api(networkConfig: TypedEvmNetworkConfig): boolean {
 export async function loadAbiFromEtherscanV2(
   address: string,
   networkConfig: TypedEvmNetworkConfig
-): Promise<ContractSchema> {
+): Promise<EtherscanAbiResult> {
   const explorerConfig = resolveExplorerConfig(networkConfig);
 
   const requiresApiKey = networkConfig.requiresExplorerApiKey ?? true;
@@ -124,7 +132,7 @@ export async function loadAbiFromEtherscanV2(
       }
       if (apiResult.result?.includes('Contract source code not verified')) {
         throw new Error(
-          `Contract not verified on ${networkConfig.name} explorer (address: ${address}). ABI not available.`
+          `Contract not verified on ${networkConfig.name} explorer (address: ${address}). ABI not available. You can provide the contract's ABI manually.`
         );
       }
       if (apiResult.result?.includes('Invalid chain')) {
@@ -137,9 +145,12 @@ export async function loadAbiFromEtherscanV2(
     throw new Error(`Explorer V2 API Error: ${apiResult.result || apiResult.message}`);
   }
 
+  // Store the original raw ABI string before parsing
+  const originalAbiString = apiResult.result;
+
   let abi: AbiItem[];
   try {
-    abi = JSON.parse(apiResult.result);
+    abi = JSON.parse(originalAbiString);
     if (!Array.isArray(abi)) {
       throw new Error('Parsed ABI from Explorer V2 API is not an array.');
     }
@@ -158,7 +169,12 @@ export async function loadAbiFromEtherscanV2(
 
   // TODO: Fetch contract name?
   const contractName = `Contract_${address.substring(0, 6)}`;
-  return transformAbiToSchema(abi, contractName, address);
+  const schema = transformAbiToSchema(abi, contractName, address);
+
+  return {
+    schema,
+    originalAbi: originalAbiString,
+  };
 }
 
 /**

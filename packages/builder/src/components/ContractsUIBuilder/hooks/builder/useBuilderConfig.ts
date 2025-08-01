@@ -3,7 +3,9 @@ import { useCallback } from 'react';
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { ExecutionConfig, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
 
-import { uiBuilderStore, type BuilderFormConfig } from '../uiBuilderStore';
+import { BuilderFormConfig } from '@/core/types/FormTypes';
+
+import { uiBuilderStore } from '../uiBuilderStore';
 
 /**
  * @notice A hook for updating the UI configuration.
@@ -23,10 +25,10 @@ export function useBuilderConfig() {
       uiBuilderStore.updateState((s) => ({
         formConfig: s.formConfig
           ? { ...s.formConfig, executionConfig: execConfig }
-          : s.selectedFunction && s.contractAddress
+          : s.selectedFunction && s.contractState.address
             ? {
                 functionId: s.selectedFunction,
-                contractAddress: s.contractAddress,
+                contractAddress: s.contractState.address,
                 fields: [],
                 layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
                 validation: { mode: 'onChange', showErrors: 'inline' },

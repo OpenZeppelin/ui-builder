@@ -128,7 +128,7 @@ export class AppExportSystem {
    * app configuration, ecosystem, and options.
    *
    * @param formConfig Form configuration created in the builder
-   * @param contractSchema Full contract schema including ABI/function details
+   * @param contractSchema Full contract schema including function details
    * @param networkConfig Network configuration including ecosystem
    * @param functionId Function ID this app is for
    * @param options Export customization options

@@ -76,6 +76,11 @@ export interface CodeEditorFieldProps<TFieldValues extends FieldValues = FieldVa
   disabled?: boolean;
 
   /**
+   * Whether the field is read-only
+   */
+  isReadOnly?: boolean;
+
+  /**
    * Custom validation function for code values
    */
   validateCode?: (value: string) => boolean | string;
@@ -118,6 +123,7 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
   performanceThreshold = 5000,
   required = false,
   disabled = false,
+  isReadOnly = false,
   validateCode,
   className,
   ...props
@@ -195,6 +201,7 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
                   minHeight={minHeightNum}
                   data-color-mode={theme as 'light' | 'dark'}
                   disabled={disabled}
+                  readOnly={isReadOnly}
                   data-testid={`${id}-code-editor${shouldDisableHighlighting ? '-no-highlight' : ''}`}
                   className="text-sm placeholder:text-muted-foreground"
                   style={{

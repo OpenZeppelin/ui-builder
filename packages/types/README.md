@@ -141,6 +141,8 @@ Types for form structure, rendering, and handling:
 - `FieldValidation`: Validation rules for form fields.
 - `FormValues`: Type representing the collected data from a form submission.
 
+**Note on Field Duplication**: Some fields (like `contractAddress`, `functionId`, `executionConfig`) appear in both storage records and form schemas. This is intentional architectural design where top-level fields enable database indexing/queries while nested fields serve runtime form functionality.
+
 ### Network Types (`./src/networks`)
 
 Types for defining specific blockchain network configurations:
