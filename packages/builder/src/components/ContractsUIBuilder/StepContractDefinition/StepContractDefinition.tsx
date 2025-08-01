@@ -20,7 +20,6 @@ import {
 import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
-  onContractSchemaLoaded,
   adapter,
   networkConfig,
   existingFormValues = null,
@@ -202,13 +201,6 @@ export function StepContractDefinition({
           metadata: result.metadata ?? {},
           original: result.contractDefinitionOriginal ?? '',
         });
-        onContractSchemaLoaded(
-          result.schema,
-          data,
-          result.source,
-          result.metadata,
-          result.contractDefinitionOriginal
-        );
       } catch (err) {
         // Update circuit breaker
         if (circuitBreakerRef.current?.key === attemptKey) {
@@ -224,23 +216,12 @@ export function StepContractDefinition({
 
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         uiBuilderStore.setContractDefinitionError(errorMessage);
-
-        // Check if this is an unverified contract error and set appropriate metadata
-        let metadata = undefined;
-        if (errorMessage.includes('not verified on the block explorer')) {
-          metadata = {
-            verificationStatus: 'unverified' as const,
-            fetchTimestamp: new Date(),
-          };
-        }
-
-        onContractSchemaLoaded(null, data, undefined, metadata, undefined);
       } finally {
         setIsLoading(false);
         loadingRef.current = false;
       }
     },
-    [adapter, onContractSchemaLoaded]
+    [adapter]
   );
 
   useEffect(() => {

@@ -48,7 +48,13 @@ export function useUIBuilderState() {
   // Contract definition loading hook with automatic deduplication
   const contractDefinition = useContractDefinition({
     onLoaded: (schema, formValues, source, metadata, originalDefinition) => {
-      contract.schemaLoaded(schema, formValues, source, metadata ?? {}, originalDefinition ?? '');
+      uiBuilderStore.setContractDefinitionResult({
+        schema,
+        formValues,
+        source,
+        metadata: metadata ?? {},
+        original: originalDefinition ?? '',
+      });
     },
   });
 
@@ -166,7 +172,6 @@ export function useUIBuilderState() {
         clearSwitchTo: network.clearSwitchTo,
       },
       contract: {
-        schemaLoaded: contract.schemaLoaded,
         functionSelected: contract.functionSelected,
         loadDefinition: contractDefinition.load,
       },

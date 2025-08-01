@@ -1,11 +1,5 @@
 import { useCallback, useMemo } from 'react';
 
-import {
-  ContractDefinitionMetadata,
-  ContractSchema,
-  FormValues,
-} from '@openzeppelin/contracts-ui-builder-types';
-
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';
 
@@ -14,30 +8,6 @@ import { uiBuilderStore } from '../uiBuilderStore';
  * @returns An object with functions to handle definition loading and function selection.
  */
 export function useBuilderContract() {
-  const handleContractSchemaLoaded = useCallback(
-    (
-      schema: ContractSchema,
-      formValues: FormValues,
-      source: 'fetched' | 'manual' | 'hybrid',
-      metadata: ContractDefinitionMetadata,
-      original: string
-    ) => {
-      uiBuilderStore.setContractDefinitionResult({
-        schema,
-        formValues,
-        source,
-        metadata,
-        original,
-      });
-
-      const { selectedFunction } = uiBuilderStore.getState();
-      if (!selectedFunction) {
-        uiBuilderStore.resetDownstreamSteps('contract');
-      }
-    },
-    []
-  );
-
   const handleFunctionSelected = useCallback((functionId: string | null) => {
     const currentState = uiBuilderStore.getState();
     const previousFunctionId = currentState.selectedFunction;
@@ -66,9 +36,8 @@ export function useBuilderContract() {
   // Memoize the return object to prevent unnecessary re-renders
   return useMemo(
     () => ({
-      schemaLoaded: handleContractSchemaLoaded,
       functionSelected: handleFunctionSelected,
     }),
-    [handleContractSchemaLoaded, handleFunctionSelected]
+    [handleFunctionSelected]
   );
 }

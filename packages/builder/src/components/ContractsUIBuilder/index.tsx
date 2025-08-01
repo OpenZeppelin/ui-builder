@@ -169,16 +169,9 @@ export function ContractsUIBuilder() {
       title: 'Load Contract',
       component: (
         <StepContractDefinition
-          onContractSchemaLoaded={(schema, formValues, source, metadata, original) => {
-            if (schema && formValues && source && metadata && original) {
-              actions.contract.schemaLoaded(schema, formValues, source, metadata, original);
-            }
-          }}
           adapter={state.selectedAdapter}
           networkConfig={state.selectedNetwork}
-          existingContractSchema={state.contractState.schema}
           existingFormValues={state.contractState.formValues}
-          contractDefinitionSource={state.contractState.source}
           loadedConfigurationId={state.loadedConfigurationId}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
