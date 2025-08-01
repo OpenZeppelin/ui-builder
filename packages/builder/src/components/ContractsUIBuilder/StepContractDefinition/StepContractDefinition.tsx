@@ -187,8 +187,6 @@ export function StepContractDefinition({
           </p>
         </div>
       )}
-
-      <ContractPreview contractSchema={loadedSchema} />
     </div>
   );
 }
