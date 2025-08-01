@@ -1,5 +1,5 @@
 import type {
-  ContractSchemaMetadata,
+  ContractDefinitionMetadata,
   ExecutionConfig,
   RenderFormSchema,
   UiKitConfiguration,
@@ -11,19 +11,22 @@ export interface ContractUIRecord extends BaseRecord {
   title: string;
   ecosystem: string;
   networkId: string;
-  contractAddress: string;
-  functionId: string;
-  formConfig: RenderFormSchema;
-  executionConfig?: ExecutionConfig;
+
+  // Database indexing fields for efficient queries and search
+  contractAddress: string; // Indexed for fast lookup by contract address
+  functionId: string; // Indexed for finding all UIs for a specific function
+
+  // Runtime configuration objects (contain same fields for different architectural purposes)
+  formConfig: RenderFormSchema; // Contains contractAddress/functionId for form rendering context
+  executionConfig?: ExecutionConfig; // Persistent transaction execution settings
   uiKitConfig?: UiKitConfiguration;
   metadata?: Record<string, unknown>;
 
-  // Contract Schema Storage Fields
-  contractSchema?: string; // JSON string of the contract schema
-  schemaSource: 'fetched' | 'manual' | 'hybrid';
-  schemaHash?: string; // SHA-256 hash for quick comparison
-  lastSchemaFetched?: Date; // When schema was last fetched from block explorer
-  schemaMetadata?: ContractSchemaMetadata;
+  // Contract Definition Storage Fields
+  contractDefinition?: string; // Primary contract definition used for UI generation (normalized/processed)
+  contractDefinitionOriginal?: string; // Original raw contract definition for data lineage (manual: same as contractDefinition, fetched: raw from explorer)
+  contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid';
+  contractDefinitionMetadata?: ContractDefinitionMetadata; // Metadata about fetch process (excludes definition content)
 }
 
 export interface ContractUIExportData {

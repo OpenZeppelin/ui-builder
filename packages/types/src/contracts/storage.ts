@@ -1,15 +1,15 @@
 /**
- * Contract Schema Storage and Persistence Types
+ * Contract Definition Storage and Persistence Types
  *
- * These types support chain-agnostic contract schema storage and comparison functionality
+ * These types support chain-agnostic contract definition storage and comparison functionality
  * while allowing chain-specific implementations in adapters.
  */
 
 /**
- * Metadata associated with a contract schema
+ * Metadata associated with a contract definition
  */
-export interface ContractSchemaMetadata {
-  /** Block explorer URL where schema was fetched from */
+export interface ContractDefinitionMetadata {
+  /** Block explorer URL where definition was fetched from */
   fetchedFrom?: string;
   /** Contract name from verification data */
   contractName?: string;
@@ -17,20 +17,22 @@ export interface ContractSchemaMetadata {
   compilerVersion?: string;
   /** Contract verification status */
   verificationStatus?: 'verified' | 'unverified' | 'unknown';
-  /** When the schema was fetched */
+  /** When the definition was fetched */
   fetchTimestamp?: Date;
   /** Error message if fetch failed */
   fetchError?: string;
+  /** SHA-256 hash of the raw contract definition for quick comparison */
+  definitionHash?: string;
 }
 
 /**
- * Result of comparing two contract schemas
+ * Result of comparing two contract definitions (raw ABI, IDL, etc.)
  */
-export interface ContractSchemaComparisonResult {
-  /** Whether the schemas are functionally identical */
+export interface ContractDefinitionComparisonResult {
+  /** Whether the definitions are functionally identical */
   identical: boolean;
-  /** List of differences between the schemas */
-  differences: ContractSchemaDifference[];
+  /** List of differences between the definitions */
+  differences: ContractDefinitionDifference[];
   /** Overall severity of differences */
   severity: 'none' | 'minor' | 'major' | 'breaking';
   /** Human-readable summary of the comparison */
@@ -38,12 +40,12 @@ export interface ContractSchemaComparisonResult {
 }
 
 /**
- * A specific difference between two contract schemas
+ * A specific difference between two contract definitions (raw ABI, IDL, etc.)
  */
-export interface ContractSchemaDifference {
+export interface ContractDefinitionDifference {
   /** Type of change */
   type: 'added' | 'removed' | 'modified';
-  /** Section of schema that changed (chain-specific: function, event, etc.) */
+  /** Section of definition that changed (chain-specific: function, event, etc.) */
   section: string;
   /** Name of the changed element */
   name: string;
@@ -58,15 +60,15 @@ export interface ContractSchemaDifference {
 }
 
 /**
- * Result of contract schema validation
+ * Result of contract definition validation (raw ABI, IDL, etc.)
  */
-export interface ContractSchemaValidationResult {
-  /** Whether the schema is structurally valid */
+export interface ContractDefinitionValidationResult {
+  /** Whether the definition is structurally valid */
   valid: boolean;
   /** List of validation errors */
   errors: string[];
   /** List of validation warnings */
   warnings: string[];
-  /** Normalized schema if validation passed */
-  normalizedSchema?: unknown; // Chain-agnostic - actual type depends on chain
+  /** Normalized definition if validation passed */
+  normalizedDefinition?: unknown; // Chain-agnostic - actual type depends on chain
 }

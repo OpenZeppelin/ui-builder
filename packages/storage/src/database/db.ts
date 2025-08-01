@@ -2,14 +2,14 @@ import Dexie from 'dexie';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import type { ContractUIRecord } from '../types';
-
 // Single database instance shared across all storage services
 export const db = new Dexie('ContractsUIBuilder');
 
-// Version 1: Initial schema
+// Version 1: Initial schema with indexed fields for efficient queries
 db.version(1).stores({
   contractUIs:
+    // contractAddress and functionId are indexed for fast lookup/filtering
+    // (these fields are also stored in nested formConfig for different architectural purposes)
     '++id, title, createdAt, updatedAt, ecosystem, networkId, contractAddress, functionId',
 });
 
@@ -17,28 +17,12 @@ db.version(1).stores({
 db.version(2)
   .stores({
     contractUIs:
-      '++id, title, createdAt, updatedAt, ecosystem, networkId, contractAddress, functionId, schemaHash, lastSchemaFetched, schemaSource',
+      // contractAddress and functionId remain indexed for database performance
+      '++id, title, createdAt, updatedAt, ecosystem, networkId, contractAddress, functionId, contractDefinitionSource, contractDefinitionOriginal',
   })
-  .upgrade(async (tx) => {
-    logger.info('Database Migration', 'Upgrading to version 2: Adding contract schema fields');
-
-    // Update existing records with default contract schema values
-    await tx
-      .table('contractUIs')
-      .toCollection()
-      .modify((record: ContractUIRecord) => {
-        // Set default schemaSource for existing records (required field)
-        if (!record.schemaSource) {
-          record.schemaSource = 'manual';
-        }
-
-        // Optional fields remain undefined unless explicitly set
-        // This ensures backward compatibility
-      });
-
-    const recordCount = await tx.table('contractUIs').count();
+  .upgrade(() => {
     logger.info(
       'Database Migration',
-      `Updated ${recordCount} existing records with default schema values`
+      'Upgrading to version 2: Adding contract schema fields. No data modification is necessary.'
     );
   });
