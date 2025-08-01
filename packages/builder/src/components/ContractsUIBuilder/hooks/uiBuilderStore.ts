@@ -321,7 +321,7 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
             result.source === 'fetched' || !currentState.contractState.definitionOriginal
               ? result.original
               : currentState.contractState.definitionOriginal,
-          definitionJson: currentState.contractState.definitionJson, // Keep existing json
+          definitionJson: result.original,
         },
         needsContractDefinitionLoad: false,
       });
