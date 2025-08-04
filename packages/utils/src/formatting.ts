@@ -1,6 +1,6 @@
 /**
- * String formatting utility functions
- * These utilities help with common string formatting operations
+ * String and date formatting utility functions
+ * These utilities help with common formatting operations
  */
 
 /**
@@ -15,4 +15,24 @@ export function truncateMiddle(str: string, startChars = 6, endChars = 4): strin
   if (str.length <= startChars + endChars) return str;
 
   return `${str.substring(0, startChars)}...${str.substring(str.length - endChars)}`;
+}
+
+/**
+ * Formats a timestamp as a relative time string (e.g., "2h ago", "just now")
+ * @param date The date to format
+ * @returns A human-readable relative time string
+ */
+export function formatTimestamp(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes < 1) return 'just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString();
 }
