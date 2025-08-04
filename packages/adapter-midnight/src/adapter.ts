@@ -113,7 +113,7 @@ export class MidnightAdapter implements ContractAdapter {
         id: 'contractAddress',
         name: 'contractAddress',
         label: 'Contract Address',
-        type: 'text',
+        type: 'blockchain-address',
         validation: { required: true },
         placeholder: 'ct1q8ej4px...',
         helperText: 'Enter the deployed Midnight contract address (Bech32m format).',

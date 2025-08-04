@@ -538,7 +538,7 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
         id: 'contractAddress',
         name: 'contractAddress',
         label: 'Contract Address',
-        type: 'text',
+        type: 'blockchain-address',
         validation: { required: true },
         placeholder: '0x1234...abcd',
         helperText:
