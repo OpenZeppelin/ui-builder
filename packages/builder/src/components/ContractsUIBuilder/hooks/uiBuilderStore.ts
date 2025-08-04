@@ -19,7 +19,7 @@ export interface ContractState {
   formValues: FormValues | null;
   definitionJson: string | null; // TODO: might need to rename this, cause other adapters might have non-json definitions
   definitionOriginal: string | null;
-  source: 'fetched' | 'manual' | 'hybrid' | null;
+  source: 'fetched' | 'manual' | null;
   metadata: ContractDefinitionMetadata | null;
   error: string | null;
 }
@@ -81,7 +81,7 @@ export interface UIBuilderActions {
       // Add contract definition fields
       contractDefinition?: string;
       contractDefinitionOriginal?: string;
-      contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid';
+      contractDefinitionSource?: 'fetched' | 'manual';
       contractDefinitionMetadata?: ContractDefinitionMetadata;
     }
   ) => void;
@@ -90,7 +90,7 @@ export interface UIBuilderActions {
   setContractDefinitionResult: (result: {
     schema: ContractSchema;
     formValues: FormValues;
-    source: 'fetched' | 'manual' | 'hybrid';
+    source: 'fetched' | 'manual';
     metadata: ContractDefinitionMetadata;
     original: string;
   }) => void;
@@ -195,7 +195,7 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         uiKitConfig?: UiKitConfiguration;
         contractDefinition?: string;
         contractDefinitionOriginal?: string;
-        contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid';
+        contractDefinitionSource?: 'fetched' | 'manual';
         contractDefinitionMetadata?: ContractDefinitionMetadata;
       }
     ) => {
@@ -233,8 +233,7 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
               contractAddress: savedConfig.contractAddress,
             };
             if (
-              (savedConfig.contractDefinitionSource === 'manual' ||
-                savedConfig.contractDefinitionSource === 'hybrid') &&
+              savedConfig.contractDefinitionSource === 'manual' &&
               savedConfig.contractDefinition
             ) {
               try {
