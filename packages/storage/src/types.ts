@@ -25,7 +25,7 @@ export interface ContractUIRecord extends BaseRecord {
   // Contract Definition Storage Fields
   contractDefinition?: string; // Primary contract definition used for UI generation (normalized/processed)
   contractDefinitionOriginal?: string; // Original raw contract definition for data lineage (manual: same as contractDefinition, fetched: raw from explorer)
-  contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid';
+  contractDefinitionSource?: 'fetched' | 'manual';
   contractDefinitionMetadata?: ContractDefinitionMetadata; // Metadata about fetch process (excludes definition content)
 }
 

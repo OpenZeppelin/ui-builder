@@ -83,7 +83,7 @@ export interface ContractAdapter {
    */
   loadContractWithMetadata?(source: string | Record<string, unknown>): Promise<{
     schema: ContractSchema;
-    source: 'fetched' | 'manual' | 'hybrid';
+    source: 'fetched' | 'manual';
     metadata?: {
       fetchedFrom?: string;
       contractName?: string;

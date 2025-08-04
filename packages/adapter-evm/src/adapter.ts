@@ -135,7 +135,7 @@ export class EvmAdapter implements ContractAdapter {
    */
   public async loadContractWithMetadata(artifacts: FormValues): Promise<{
     schema: ContractSchema;
-    source: 'fetched' | 'manual' | 'hybrid';
+    source: 'fetched' | 'manual';
     contractDefinitionOriginal?: string;
     metadata?: {
       fetchedFrom?: string;

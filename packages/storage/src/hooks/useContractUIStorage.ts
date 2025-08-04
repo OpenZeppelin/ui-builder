@@ -26,7 +26,7 @@ export interface UseContractUIStorageReturn {
   updateContractDefinition: (
     id: string,
     contractDefinition: string,
-    contractDefinitionSource: 'fetched' | 'manual' | 'hybrid',
+    contractDefinitionSource: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
     contractDefinitionOriginal?: string
   ) => Promise<void>;
@@ -162,7 +162,7 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     async (
       id: string,
       contractDefinition: string,
-      contractDefinitionSource: 'fetched' | 'manual' | 'hybrid',
+      contractDefinitionSource: 'fetched' | 'manual',
       contractDefinitionMetadata?: ContractDefinitionMetadata,
       contractDefinitionOriginal?: string
     ): Promise<void> => {

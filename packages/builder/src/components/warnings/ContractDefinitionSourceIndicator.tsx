@@ -10,7 +10,7 @@ import {
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 export interface ContractDefinitionSourceIndicatorProps {
-  source: 'fetched' | 'manual' | 'hybrid';
+  source: 'fetched' | 'manual';
   fetchedFrom?: string;
   lastFetched?: Date;
   className?: string;
@@ -32,14 +32,6 @@ const sourceConfig = {
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     description: 'Contract schema was manually entered by user',
-  },
-  hybrid: {
-    icon: GitBranch,
-    label: 'Hybrid',
-    variant: 'outline' as const,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    description: 'Contract schema combines fetched data with manual modifications',
   },
 };
 

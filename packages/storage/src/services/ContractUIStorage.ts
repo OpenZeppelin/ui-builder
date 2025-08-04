@@ -150,7 +150,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
   static prepareRecordWithDefinition(
     record: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
     contractDefinition?: string,
-    contractDefinitionSource?: 'fetched' | 'manual' | 'hybrid',
+    contractDefinitionSource?: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
     contractDefinitionOriginal?: string
   ): Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> {
@@ -171,7 +171,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
   async updateDefinition(
     id: string,
     contractDefinition: string,
-    contractDefinitionSource: 'fetched' | 'manual' | 'hybrid',
+    contractDefinitionSource: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
     contractDefinitionOriginal?: string
   ): Promise<void> {

@@ -47,7 +47,7 @@ export async function loadContractDefinition(
  */
 export interface ContractLoadResult {
   schema: ContractSchema;
-  source: 'fetched' | 'manual' | 'hybrid';
+  source: 'fetched' | 'manual';
   contractDefinitionOriginal?: string;
   metadata?: {
     fetchedFrom?: string;
