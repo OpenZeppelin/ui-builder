@@ -10,6 +10,10 @@ import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-
 
 import { loadContractDefinitionWithMetadata } from '../../../services/ContractLoader';
 import { ActionBar } from '../../Common/ActionBar';
+import {
+  ContractDefinitionMismatchWarning,
+  ContractDefinitionSourceIndicator,
+} from '../../warnings';
 import { useDebounce } from '../hooks';
 import {
   uiBuilderStore,
@@ -26,6 +30,7 @@ export function StepContractDefinition({
   loadedConfigurationId = null,
   onToggleContractState,
   isWidgetExpanded,
+  definitionComparison,
 }: StepContractDefinitionProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -317,22 +322,64 @@ export function StepContractDefinition({
         </Alert>
       )}
 
-      {contractSchema && !contractDefinitionError && !validationError && (
-        <div className="mt-4 rounded-md border border-green-200 bg-green-50 p-4">
-          <p className="flex items-center text-green-800">
-            <CheckCircle className="mr-2 size-5" />
-            {(() => {
-              const functionCount = contractSchema.functions.length;
-              const contractName = contractSchema.name;
-              const source = contractDefinitionSource || 'fetched';
-
-              if (source === 'manual' || source === 'hybrid') {
-                return `Contract ${contractName} processed successfully with ${functionCount} functions. Click "Next" to continue.`;
-              } else {
-                return `Contract ${contractName} loaded successfully with ${functionCount} functions. Click "Next" to continue.`;
+      {/* Contract Definition Mismatch Warning */}
+      {contractSchema &&
+        !contractDefinitionError &&
+        !validationError &&
+        definitionComparison?.comparisonResult &&
+        !definitionComparison.comparisonResult.identical && (
+          <ContractDefinitionMismatchWarning
+            comparison={definitionComparison.comparisonResult}
+            onDismiss={() => {
+              if (loadedConfigurationId && contractState.metadata?.definitionHash) {
+                definitionComparison.dismissWarning(
+                  loadedConfigurationId,
+                  contractState.metadata.definitionHash
+                );
               }
-            })()}
-          </p>
+            }}
+            onViewDetails={() => {
+              // Could open a modal with detailed comparison view
+              console.log('View full comparison details');
+            }}
+            className="mb-4"
+          />
+        )}
+
+      {contractSchema && !contractDefinitionError && !validationError && (
+        <div className="space-y-3">
+          {/* Contract Definition Source Indicator - Standalone */}
+          <div className="flex justify-end">
+            <ContractDefinitionSourceIndicator
+              source={contractDefinitionSource || 'fetched'}
+              fetchedFrom={contractState.metadata?.fetchedFrom}
+              lastFetched={contractState.metadata?.fetchTimestamp}
+              hasError={
+                !!(
+                  definitionComparison?.comparisonResult &&
+                  !definitionComparison.comparisonResult.identical
+                )
+              }
+            />
+          </div>
+
+          {/* Success Message */}
+          <div className="rounded-md border border-green-200 bg-green-50 p-4">
+            <p className="flex items-center text-green-800">
+              <CheckCircle className="mr-2 size-5" />
+              {(() => {
+                const functionCount = contractSchema.functions.length;
+                const contractName = contractSchema.name;
+                const source = contractDefinitionSource || 'fetched';
+
+                if (source === 'manual') {
+                  return `Contract ${contractName} processed successfully with ${functionCount} functions. Click "Next" to continue.`;
+                } else {
+                  return `Contract ${contractName} loaded successfully with ${functionCount} functions. Click "Next" to continue.`;
+                }
+              })()}
+            </p>
+          </div>
         </div>
       )}
     </div>

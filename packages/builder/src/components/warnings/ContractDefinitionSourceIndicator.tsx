@@ -1,100 +1,96 @@
-import { Download, Edit, GitBranch } from 'lucide-react';
+import { Clock, Download, Edit, ExternalLink } from 'lucide-react';
 import React from 'react';
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn, formatTimestamp } from '@openzeppelin/contracts-ui-builder-utils';
 
 export interface ContractDefinitionSourceIndicatorProps {
   source: 'fetched' | 'manual';
   fetchedFrom?: string;
   lastFetched?: Date;
   className?: string;
+  hasError?: boolean;
 }
 
 const sourceConfig = {
   fetched: {
     icon: Download,
     label: 'Fetched',
-    variant: 'default' as const,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
     description: 'Contract schema was automatically fetched from block explorer',
   },
   manual: {
     icon: Edit,
     label: 'Manual',
-    variant: 'secondary' as const,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
     description: 'Contract schema was manually entered by user',
   },
 };
 
 /**
- * Component for displaying contract schema source information with tooltips
+ * Component for displaying contract schema source information
+ * Shows source directly in the badge with clickable link if available
  */
 export const ContractDefinitionSourceIndicator: React.FC<
   ContractDefinitionSourceIndicatorProps
-> = ({ source, fetchedFrom, lastFetched, className }) => {
+> = ({ source, fetchedFrom, lastFetched, className, hasError = false }) => {
   const config = sourceConfig[source];
   const Icon = config.icon;
 
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  // Determine styling based on error state (similar to ExecutionMethodTrigger)
+  const iconColorClass = hasError ? 'text-red-500' : 'text-muted-foreground';
+  const borderColorClass = hasError ? 'border-red-300' : 'border-slate-200';
+  const bgColorClass = hasError ? 'bg-red-50' : 'bg-white';
+  const textColorClass = hasError ? 'text-red-800' : 'text-slate-700';
 
-    if (diffMinutes < 1) return 'just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return date.toLocaleDateString();
-  };
-
-  const getTooltipContent = () => {
-    let content = config.description;
-
-    if (source === 'fetched' && fetchedFrom) {
-      content += `\n\nSource: ${fetchedFrom}`;
+  // Extract domain from URL for display
+  const getDisplaySource = (url: string) => {
+    try {
+      return new URL(url).hostname.replace('www.', '');
+    } catch {
+      return url;
     }
-
-    if (lastFetched) {
-      content += `\n\nLast fetched: ${formatTimestamp(lastFetched)}`;
-    }
-
-    return content;
   };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 px-3 py-2 text-xs rounded-md border',
+        'transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
+        borderColorClass,
+        bgColorClass,
+        textColorClass,
+        className
+      )}
+    >
+      <div className="flex items-center gap-1.5">
+        <Icon className={cn('h-3.5 w-3.5', iconColorClass)} aria-hidden="true" />
+        <span className="font-semibold">Source:</span>
+        <span className="uppercase">{config.label}</span>
+      </div>
+
+      {/* Source link for fetched contracts */}
+      {source === 'fetched' && fetchedFrom && (
+        <div className="flex items-center gap-1 ml-1 pl-1 border-l border-current/20">
+          <a
+            href={fetchedFrom}
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
-              'inline-flex items-center gap-1 cursor-help rounded-full px-2 py-1 text-xs font-medium',
-              config.bgColor,
-              className
+              'flex items-center gap-1 hover:underline',
+              hasError ? 'text-red-600 hover:text-red-700' : 'text-blue-600 hover:text-blue-700'
             )}
           >
-            <Icon className={cn('h-3 w-3', config.color)} />
-            <span className={config.color}>{config.label}</span>
-            {source === 'fetched' && lastFetched && (
-              <span className="text-xs opacity-70">({formatTimestamp(lastFetched)})</span>
-            )}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-xs">
-          <div className="whitespace-pre-line text-sm">{getTooltipContent()}</div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+            <span className="font-medium">{getDisplaySource(fetchedFrom)}</span>
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          </a>
+        </div>
+      )}
+
+      {/* Time indicator for fetched contracts */}
+      {source === 'fetched' && lastFetched && (
+        <div className="flex items-center gap-1 ml-1 pl-1 border-l border-current/20">
+          <Clock className={cn('h-3 w-3', iconColorClass)} aria-hidden="true" />
+          <span className="font-medium opacity-80">{formatTimestamp(lastFetched)}</span>
+        </div>
+      )}
+    </div>
   );
 };
