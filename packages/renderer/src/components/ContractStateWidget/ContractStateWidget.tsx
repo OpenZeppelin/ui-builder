@@ -87,7 +87,7 @@ export function ContractStateWidget({
 
   return (
     <Card
-      className={`mb-2 overflow-hidden p-0 gap-0 flex flex-col h-full ${className || ''}
+      className={`mb-2 overflow-hidden p-0 gap-0 flex flex-col max-h-160 ${className || ''}
         transition-all duration-300 ease-in-out
         ${
           animationState === 'entering' || animationState === 'entered'
@@ -111,7 +111,7 @@ export function ContractStateWidget({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="space-y-3 px-3 py-2 flex-grow overflow-hidden flex flex-col min-h-0">
+      <CardContent className="space-y-3 px-3 py-2 flex-grow overflow-y-auto flex flex-col min-h-0">
         {error ? (
           <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md p-3 flex flex-col items-center justify-center h-full">
             <p className="font-medium text-center">Error loading contract state</p>

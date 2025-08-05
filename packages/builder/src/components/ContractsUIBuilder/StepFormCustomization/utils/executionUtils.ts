@@ -60,7 +60,8 @@ export const executionMethodValidatorMap: Record<
 > = {
   eoa: _validateEoaForBuilder,
   relayer: _validateRelayerForBuilder,
-  multisig: () => null, // Placeholder for multisig
+  multisig: () =>
+    'Multisig execution is not yet available. Please select a different execution method.',
 };
 
 /**

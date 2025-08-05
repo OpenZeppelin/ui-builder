@@ -33,7 +33,7 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
       type: 'multisig',
       name: 'Safe Multisig', // Example for future
       description: 'Execute via a Safe multisignature wallet.',
-      disabled: false,
+      disabled: true,
     },
   ]);
 }
