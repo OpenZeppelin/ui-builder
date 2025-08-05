@@ -128,9 +128,15 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
   className,
   ...props
 }: CodeEditorFieldProps<TFieldValues>): React.ReactElement {
-  // Convert height strings to numbers for native props
-  const minHeightNum = parseInt(height.replace('px', ''), 10) || 200;
-  const maxHeightNum = parseInt(maxHeight.replace('px', ''), 10) || 400;
+  // Convert height strings to numbers for native props with robust parsing
+  function extractPixelValue(val: string | number, fallback: number): number {
+    if (typeof val === 'number') return val;
+    const match = typeof val === 'string' ? val.match(/^(\d+)\s*px$/) : null;
+    if (match) return parseInt(match[1], 10);
+    return fallback;
+  }
+  const minHeightNum = extractPixelValue(height, 200);
+  const maxHeightNum = extractPixelValue(maxHeight, 400);
 
   return (
     <div className={className} {...props}>

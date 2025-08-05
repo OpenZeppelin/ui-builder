@@ -65,6 +65,8 @@ export const ContractDefinitionComparisonModal: React.FC<
       acc[diff.section].push(diff);
       return acc;
     },
+    // Use Object.create(null) to avoid prototype pollution - ensures acc[section]
+    // is always undefined or an array, never an inherited property from Object.prototype
     Object.create(null) as Record<string, ContractDefinitionDifference[]>
   );
 

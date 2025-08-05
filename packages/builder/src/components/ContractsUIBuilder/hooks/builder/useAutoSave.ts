@@ -130,7 +130,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
 
       // Handle record creation for new UI mode
       if (needsRecordCreation) {
-        console.log('[useAutoSave] Taking CREATE path - creating new record');
+        logger.info('builder', '[useAutoSave] Taking CREATE path - creating new record');
         // Update UI state for creation
         uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
 

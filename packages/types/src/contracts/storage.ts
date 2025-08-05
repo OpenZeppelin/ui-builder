@@ -21,7 +21,7 @@ export interface ContractDefinitionMetadata {
   fetchTimestamp?: Date;
   /** Error message if fetch failed */
   fetchError?: string;
-  /** SHA-256 hash of the raw contract definition for quick comparison */
+  /** Non-cryptographic hash of the raw contract definition for quick comparison */
   definitionHash?: string;
 }
 

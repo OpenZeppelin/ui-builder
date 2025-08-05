@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import type { ContractAdapter, FormValues } from '@openzeppelin/contracts-ui-builder-types';
+import { simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -79,7 +80,11 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
 
       // Create unique key for this specific load attempt
       // This allows tracking failures per contract/definition combination
-      const attemptKey = `${data.contractAddress}-${data.contractDefinition || 'no-abi'}`;
+      const definitionHash =
+        data.contractDefinition && typeof data.contractDefinition === 'string'
+          ? simpleHash(data.contractDefinition)
+          : 'no-abi';
+      const attemptKey = `${data.contractAddress}-${definitionHash}`;
       const now = Date.now();
 
       // Circuit breaker check: Prevent repeated failures
