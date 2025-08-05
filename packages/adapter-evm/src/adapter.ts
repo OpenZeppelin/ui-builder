@@ -19,6 +19,7 @@ import type {
   FunctionParameter,
   NativeConfigLoader,
   NetworkConfig,
+  ProxyInfo,
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
@@ -144,6 +145,7 @@ export class EvmAdapter implements ContractAdapter {
       fetchTimestamp?: Date;
       definitionHash?: string;
     };
+    proxyInfo?: ProxyInfo;
   }> {
     try {
       const result = await loadEvmContract(artifacts, this.networkConfig);
@@ -153,6 +155,7 @@ export class EvmAdapter implements ContractAdapter {
         source: result.source,
         contractDefinitionOriginal: result.contractDefinitionOriginal,
         metadata: result.metadata,
+        proxyInfo: result.proxyInfo,
       };
     } catch (error) {
       // Check if this is an unverified contract error

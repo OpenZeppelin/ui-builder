@@ -5,24 +5,10 @@
 
 import type { Abi } from 'viem';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { AbiComparisonResult, AbiDifference, AbiValidationResult } from './types';
 import { isValidAbiArray } from './types';
-
-/**
- * Simple browser-compatible hash function for deterministic hashing
- * Used for ABI comparison - doesn't need to be cryptographically secure
- */
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash).toString(16);
-}
 
 /**
  * Service for comparing and validating EVM ABIs
@@ -67,7 +53,7 @@ export class AbiComparisonService {
         identical: false,
         differences,
         severity,
-        summary: this.generateSummary(differences, severity),
+        summary: this.generateSummary(differences),
       };
     } catch (error) {
       logger.error('ABI comparison failed:', (error as Error).message);
@@ -352,11 +338,17 @@ export class AbiComparisonService {
     }
 
     if (type === 'function') {
-      return changeType === 'removed' ? 'high' : 'medium';
+      if (changeType === 'removed') return 'high'; // Breaking: removes functionality
+      if (changeType === 'modified') return 'medium'; // Major: changes behavior
+      if (changeType === 'added') return 'low'; // Minor: adds functionality
     }
 
     if (type === 'event') {
       return 'low'; // Events don't break existing functionality
+    }
+
+    if (type === 'error') {
+      return 'low'; // Custom errors don't break existing functionality
     }
 
     return 'medium';
@@ -376,7 +368,7 @@ export class AbiComparisonService {
     return 'minor';
   }
 
-  private generateSummary(differences: AbiDifference[], severity: string): string {
+  private generateSummary(differences: AbiDifference[]): string {
     const counts = {
       added: differences.filter((d) => d.type === 'added').length,
       removed: differences.filter((d) => d.type === 'removed').length,
@@ -389,7 +381,7 @@ export class AbiComparisonService {
     if (counts.modified > 0) parts.push(`${counts.modified} modified`);
 
     const summary = parts.join(', ');
-    return `${summary} (${severity} changes)`;
+    return `${summary}`;
   }
 }
 
