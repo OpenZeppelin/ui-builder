@@ -59,6 +59,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@uiw/react-textarea-code-editor": "^3.1.1",
     "@web3icons/react": "^4.0.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

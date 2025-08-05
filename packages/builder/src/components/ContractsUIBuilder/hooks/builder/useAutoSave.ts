@@ -4,12 +4,14 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import {
   contractUIStorage,
+  ContractUIStorage,
   useContractUIStorage,
+  type ContractUIRecord,
 } from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
-import { uiBuilderStore } from '../uiBuilderStore';
+import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';
 
 import {
@@ -36,6 +38,44 @@ function handleAutoSaveError(error: unknown): void {
   toast.error('Auto-save failed', {
     description: 'Your changes could not be saved. Please try again.',
   });
+}
+
+/**
+ * Prepare record with definition while preserving original for comparison
+ * This ensures that the original contract definition is preserved when updating
+ * a loaded configuration, which is critical for ABI comparison functionality.
+ */
+async function prepareRecordWithDefinition(
+  currentState: UIBuilderState,
+  configToSave: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
+  configId: string
+): Promise<Partial<ContractUIRecord>> {
+  const existingConfig = await contractUIStorage.get(configId);
+
+  const storedOriginal = existingConfig?.contractDefinitionOriginal;
+  const freshOriginal = currentState.contractState.definitionOriginal;
+
+  const shouldPreserveStoredDefinition =
+    existingConfig && // Has stored config
+    storedOriginal && // Has stored original definition
+    currentState.loadedConfigurationId === configId && // We're in loaded config mode
+    freshOriginal !== storedOriginal; // Fresh vs stored are different
+
+  if (shouldPreserveStoredDefinition) {
+    logger.info('Auto-save', 'Preserving stored contract definition for ABI comparison');
+  } else {
+    logger.info('Auto-save', 'Saving fresh contract definition');
+  }
+
+  return ContractUIStorage.prepareRecordWithDefinition(
+    configToSave,
+    currentState.contractState.definitionJson || undefined, // Use fresh definition for UI
+    currentState.contractState.source ?? undefined,
+    currentState.contractState.metadata || undefined,
+    shouldPreserveStoredDefinition
+      ? storedOriginal
+      : currentState.contractState.definitionOriginal || undefined
+  );
 }
 
 export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): AutoSaveHookReturn {
@@ -68,6 +108,15 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
     try {
       const currentState = uiBuilderStore.getState();
 
+      // Skip auto-save only for validation errors, not for unverified contract errors
+      if (
+        currentState.contractState.error &&
+        !currentState.contractState.error.includes('not verified on the block explorer')
+      ) {
+        logger.info('builder', 'Skipping auto-save due to contract definition validation error');
+        return;
+      }
+
       // Run all guard checks
       const { proceed, configId, needsRecordCreation } = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
@@ -81,6 +130,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
 
       // Handle record creation for new UI mode
       if (needsRecordCreation) {
+        logger.info('builder', '[useAutoSave] Taking CREATE path - creating new record');
         // Update UI state for creation
         uiBuilderStore.updateState(() => ({ isAutoSaving: true }));
 
@@ -91,14 +141,36 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         const titleToUse = generateDefaultTitle(currentState);
         const configToSave = buildConfigurationObject(currentState, titleToUse);
 
+        // Prepare record with contract schema data if available
+        const recordToSave = currentState.contractState.definitionJson
+          ? ContractUIStorage.prepareRecordWithDefinition(
+              {
+                ...configToSave,
+                metadata: {
+                  isManuallyRenamed: false,
+                },
+                contractDefinitionSource: currentState.contractState.source || undefined,
+              },
+              currentState.contractState.definitionJson,
+              currentState.contractState.source ?? undefined,
+              currentState.contractState.metadata || undefined,
+              currentState.contractState.definitionOriginal || undefined
+            )
+          : ({
+              ...configToSave,
+              metadata: {
+                isManuallyRenamed: false,
+              },
+              // Explicitly clear all contract definition fields when no definition exists
+              contractDefinition: '',
+              contractDefinitionMetadata: undefined,
+              contractDefinitionOriginal: '',
+              contractDefinitionSource: undefined,
+            } as const);
+
         // Create new record
         logger.info('builder', 'Auto-save: Creating new record for meaningful content');
-        const newConfigId = await contractUIStorage.save({
-          ...configToSave,
-          metadata: {
-            isManuallyRenamed: false,
-          },
-        });
+        const newConfigId = await contractUIStorage.save(recordToSave);
 
         // Update state with new record ID and exit new UI mode
         uiBuilderStore.updateState(() => ({
@@ -139,9 +211,23 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
         return;
       }
 
+      // Prepare record with contract definition data if available
+      const recordToSave = currentState.contractState.definitionJson
+        ? await prepareRecordWithDefinition(currentState, configToSave, configId)
+        : ({
+            ...configToSave,
+            // Explicitly clear all contract definition fields when no definition exists
+            contractDefinition: '',
+            contractDefinitionMetadata: undefined,
+            contractDefinitionOriginal: '',
+            contractDefinitionSource: undefined,
+          } as const);
+
       // Save configuration
       logger.info('Auto-save: Updating existing configuration', `ID: ${configId}`);
-      await updateContractUI(configId, configToSave);
+      logger.info('Auto-save', 'Record data being saved:', recordToSave);
+      await updateContractUI(configId, recordToSave);
+      logger.info('Auto-save', 'Database update completed');
 
       // Update cache
       autoSaveCache.updateConfigCache(configId, configToSave);
@@ -184,9 +270,13 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
   }, [
     {
       selectedNetworkConfigId: state.selectedNetworkConfigId,
-      contractAddress: state.contractAddress,
+      contractAddress: state.contractState.address,
       selectedFunction: state.selectedFunction,
       formConfig: state.formConfig,
+      // Include contract definition fields to trigger auto-save when they change
+      contractDefinitionJson: state.contractState.definitionJson,
+      contractDefinitionSource: state.contractState.source,
+      contractDefinitionMetadata: state.contractState.metadata,
     },
   ]);
 

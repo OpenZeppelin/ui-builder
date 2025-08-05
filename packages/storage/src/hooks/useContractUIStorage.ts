@@ -2,6 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
 import { useCallback, useMemo } from 'react';
 
+import type { ContractDefinitionMetadata } from '@openzeppelin/contracts-ui-builder-types';
+
 import { db } from '../database/db';
 import { contractUIStorage } from '../services/ContractUIStorage';
 import type { ContractUIRecord } from '../types';
@@ -21,13 +23,31 @@ export interface UseContractUIStorageReturn {
   duplicateContractUI: (id: string) => Promise<string>;
   exportContractUIs: (ids?: string[]) => Promise<void>;
   importContractUIs: (file: File) => Promise<void>;
+  updateContractDefinition: (
+    id: string,
+    contractDefinition: string,
+    contractDefinitionSource: 'fetched' | 'manual',
+    contractDefinitionMetadata?: ContractDefinitionMetadata,
+    contractDefinitionOriginal?: string
+  ) => Promise<void>;
+  getRecordsNeedingDefinitionRefresh: (thresholdHours?: number) => Promise<ContractUIRecord[]>;
+  compareStoredDefinition: (
+    id: string,
+    freshDefinition: string
+  ) => Promise<{
+    record: ContractUIRecord;
+    hasStoredDefinition: boolean;
+    definitionsMatch: boolean;
+    needsUpdate: boolean;
+  }>;
+  getRecordsByDefinitionHash: (definitionHash: string) => Promise<ContractUIRecord[]>;
 }
 
 export function useContractUIStorage(): UseContractUIStorageReturn {
   // Live query for reactive updates
-  const contractUIs = useLiveQuery(() =>
-    db.table('contractUIs').orderBy('updatedAt').reverse().toArray()
-  );
+  const contractUIs = useLiveQuery(() => {
+    return db.table('contractUIs').orderBy('updatedAt').reverse().toArray();
+  });
 
   const isLoading = contractUIs === undefined;
 
@@ -138,28 +158,114 @@ export function useContractUIStorage(): UseContractUIStorageReturn {
     }
   }, []);
 
-  return useMemo(
-    () => ({
-      contractUIs,
-      isLoading,
-      saveContractUI,
-      updateContractUI,
-      deleteContractUI,
-      deleteAllContractUIs,
-      duplicateContractUI,
-      exportContractUIs,
-      importContractUIs,
-    }),
-    [
-      contractUIs,
-      isLoading,
-      saveContractUI,
-      updateContractUI,
-      deleteContractUI,
-      deleteAllContractUIs,
-      duplicateContractUI,
-      exportContractUIs,
-      importContractUIs,
-    ]
+  const updateContractDefinition = useCallback(
+    async (
+      id: string,
+      contractDefinition: string,
+      contractDefinitionSource: 'fetched' | 'manual',
+      contractDefinitionMetadata?: ContractDefinitionMetadata,
+      contractDefinitionOriginal?: string
+    ): Promise<void> => {
+      try {
+        await contractUIStorage.updateDefinition(
+          id,
+          contractDefinition,
+          contractDefinitionSource,
+          contractDefinitionMetadata,
+          contractDefinitionOriginal
+        );
+      } catch (error) {
+        toast.error('Failed to update schema', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
   );
+
+  const getRecordsNeedingDefinitionRefresh = useCallback(
+    async (thresholdHours?: number): Promise<ContractUIRecord[]> => {
+      try {
+        return await contractUIStorage.getRecordsNeedingDefinitionRefresh(thresholdHours);
+      } catch (error) {
+        toast.error('Failed to check definition refresh', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const compareStoredDefinition = useCallback(
+    async (
+      id: string,
+      freshDefinition: string
+    ): Promise<{
+      record: ContractUIRecord;
+      hasStoredDefinition: boolean;
+      definitionsMatch: boolean;
+      needsUpdate: boolean;
+    }> => {
+      try {
+        return await contractUIStorage.compareStoredDefinition(id, freshDefinition);
+      } catch (error) {
+        toast.error('Failed to compare definition', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const getRecordsByDefinitionHash = useCallback(
+    async (definitionHash: string): Promise<ContractUIRecord[]> => {
+      try {
+        return await contractUIStorage.getRecordsByDefinitionHash(definitionHash);
+      } catch (error) {
+        toast.error('Failed to get records by definition hash', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+        });
+        throw error;
+      }
+    },
+    []
+  );
+
+  const result = useMemo(() => {
+    const memoizedResult = {
+      contractUIs,
+      isLoading,
+      saveContractUI,
+      updateContractUI,
+      deleteContractUI,
+      deleteAllContractUIs,
+      duplicateContractUI,
+      exportContractUIs,
+      importContractUIs,
+      updateContractDefinition,
+      getRecordsNeedingDefinitionRefresh,
+      compareStoredDefinition,
+      getRecordsByDefinitionHash,
+    };
+    return memoizedResult;
+  }, [
+    contractUIs,
+    isLoading,
+    saveContractUI,
+    updateContractUI,
+    deleteContractUI,
+    deleteAllContractUIs,
+    duplicateContractUI,
+    exportContractUIs,
+    importContractUIs,
+    updateContractDefinition,
+    getRecordsNeedingDefinitionRefresh,
+    compareStoredDefinition,
+    getRecordsByDefinitionHash,
+  ]);
+
+  return result;
 }

@@ -111,7 +111,7 @@ export class FormSchemaFactory {
         isHidden: field.isHidden,
         isHardcoded: field.isHardcoded,
         hardcodedValue: field.hardcodedValue,
-        isReadOnly: field.isReadOnly,
+        readOnly: field.readOnly,
         components: field.components,
         elementType: field.elementType,
         elementFieldConfig: field.elementFieldConfig,

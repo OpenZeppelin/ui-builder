@@ -1,14 +1,19 @@
 import { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import type { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 
+import type { ContractDefinitionComparisonResult } from '../../warnings';
+
 export interface StepContractDefinitionProps {
-  onContractSchemaLoaded: (schema: ContractSchema | null, formValues?: FormValues) => void;
   adapter: ContractAdapter | null;
   networkConfig: NetworkConfig | null;
-  existingContractSchema?: ContractSchema | null;
   existingFormValues?: FormValues | null;
+  loadedConfigurationId?: string | null;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
+  // Definition comparison functionality
+  definitionComparison?: {
+    comparisonResult: ContractDefinitionComparisonResult;
+  } | null;
 }
 
 export interface ContractFormData {
@@ -25,8 +30,4 @@ export interface ContractAddressFormProps {
   setError: (error: string | null) => void;
   error: string | null;
   existingContractAddress?: string | null;
-}
-
-export interface ContractPreviewProps {
-  contractSchema: ContractSchema | null;
 }

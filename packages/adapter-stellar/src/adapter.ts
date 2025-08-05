@@ -77,7 +77,7 @@ export class StellarAdapter implements ContractAdapter {
         id: 'contractAddress',
         name: 'contractAddress',
         label: 'Contract ID',
-        type: 'text',
+        type: 'blockchain-address',
         validation: { required: true },
         placeholder: 'G...',
         helperText: 'Enter the Stellar contract ID.',

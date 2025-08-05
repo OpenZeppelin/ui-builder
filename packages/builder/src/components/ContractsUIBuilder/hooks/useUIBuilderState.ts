@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 
+import { useContractDefinition } from '../../../hooks/useContractDefinition';
+import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
+
 import {
   useAutoSave,
   useBuilderConfig,
@@ -41,6 +44,26 @@ export function useUIBuilderState() {
   const contract = useBuilderContract();
   const config = useBuilderConfig();
 
+  const { comparisonResult } = useContractDefinitionComparison({
+    originalDefinition: state.contractState.definitionOriginal,
+    currentDefinition: state.contractState.definitionJson,
+    isLoadedConfigMode: !!state.loadedConfigurationId,
+  });
+
+  // Contract definition loading hook with automatic deduplication
+  const contractDefinition = useContractDefinition({
+    onLoaded: (schema, formValues, source, metadata, originalDefinition) => {
+      // Update store with fresh contract definition
+      uiBuilderStore.setContractDefinitionResult({
+        schema,
+        formValues,
+        source,
+        metadata: metadata ?? {},
+        original: originalDefinition ?? '',
+      });
+    },
+  });
+
   const load = useCallback(
     async (id: string) => {
       const loadedData = await lifecycle.load(id);
@@ -52,48 +75,30 @@ export function useUIBuilderState() {
     [lifecycle, reconfigureActiveAdapterUiKit]
   );
 
-  // Extract specific values to avoid dependency array reference issues
-  const needsContractSchemaLoad = state.needsContractSchemaLoad;
-  const contractFormValues = state.contractFormValues;
-  const selectedNetworkConfigId = state.selectedNetworkConfigId;
-  const adapterNetworkId = activeAdapter?.networkConfig.id;
-  const isSchemaLoading = state.isSchemaLoading;
-
-  // Only load schema when the conditions are actually met, not on every contract object change
+  // Auto-load contract definition when needed
   useEffect(() => {
-    // Skip if already loading
-    if (isSchemaLoading) {
-      return;
-    }
-
-    // Skip if already loading in this component instance
+    // Skip if we're in the middle of loading a saved configuration
     if (state.isLoadingConfiguration || isLoadingSavedConfigRef.current) {
       return;
     }
 
-    // Load schema if we need to and have the required data
-    if (needsContractSchemaLoad && contractFormValues) {
-      if (activeAdapter) {
-        // If we have a selectedNetworkConfigId, make sure it matches the adapter
-        if (selectedNetworkConfigId) {
-          if (selectedNetworkConfigId === adapterNetworkId) {
-            void contract.loadSchemaIfNeeded();
-          }
-        } else {
-          // If selectedNetworkConfigId is empty (due to save bug), still try to load with current adapter
-          void contract.loadSchemaIfNeeded();
-        }
-      }
+    // Load if we need to and have the required data
+    if (
+      state.needsContractDefinitionLoad &&
+      state.contractState.formValues?.contractAddress &&
+      activeAdapter &&
+      (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
+        !state.selectedNetworkConfigId)
+    ) {
+      void contractDefinition.load(state.contractState.formValues);
     }
   }, [
-    // Use more stable dependencies to prevent rapid re-runs
-    needsContractSchemaLoad,
-    !!contractFormValues, // Boolean to avoid object reference changes
-    selectedNetworkConfigId,
-    adapterNetworkId,
-    contract.loadSchemaIfNeeded,
-    isSchemaLoading,
-    // Don't include activeAdapter directly to avoid re-runs when adapter object changes
+    state.needsContractDefinitionLoad,
+    state.contractState.formValues?.contractAddress,
+    state.selectedNetworkConfigId,
+    state.isLoadingConfiguration,
+    activeAdapter?.networkConfig.id,
+    contractDefinition.load,
   ]);
 
   const contractWidget = useContractWidgetState();
@@ -102,25 +107,28 @@ export function useUIBuilderState() {
   // Update widget visibility when contract schema is loaded
   useEffect(() => {
     contractWidget.handleWidgetVisibilityUpdate(
-      state.contractSchema,
-      state.contractAddress,
+      state.contractState.schema,
+      state.contractState.address,
       activeAdapter
     );
-  }, [state.contractSchema, state.contractAddress, activeAdapter]);
+  }, [state.contractState.schema, state.contractState.address, activeAdapter]);
 
   const sidebarWidget = useMemo(
     () =>
-      state.contractSchema && state.contractAddress && activeAdapter && activeNetworkConfig
+      state.contractState.schema &&
+      state.contractState.address &&
+      activeAdapter &&
+      activeNetworkConfig
         ? contractWidget.createWidgetProps(
-            state.contractSchema,
-            state.contractAddress,
+            state.contractState.schema,
+            state.contractState.address,
             activeAdapter,
             activeNetworkConfig
           )
         : null,
     [
-      state.contractSchema,
-      state.contractAddress,
+      state.contractState.schema,
+      state.contractState.address,
       activeAdapter,
       activeNetworkConfig,
       contractWidget,
@@ -133,7 +141,7 @@ export function useUIBuilderState() {
       state.formConfig,
       activeNetworkConfig,
       state.selectedFunction,
-      state.contractSchema
+      state.contractState.schema
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
@@ -145,6 +153,12 @@ export function useUIBuilderState() {
       adapterLoading: isAdapterLoading,
       exportLoading: completeStep.loading,
       isWidgetVisible: contractWidget.isWidgetVisible,
+      // Override schema loading state with our service state
+      isSchemaLoading: contractDefinition.isLoading,
+      contractState: state.contractState,
+      definitionComparison: {
+        comparisonResult: comparisonResult,
+      },
     },
     widget: {
       sidebar: sidebarWidget,
@@ -160,14 +174,15 @@ export function useUIBuilderState() {
         clearSwitchTo: network.clearSwitchTo,
       },
       contract: {
-        schemaLoaded: contract.schemaLoaded,
         functionSelected: contract.functionSelected,
+        loadDefinition: contractDefinition.load,
       },
       config: {
         form: config.form,
         execution: config.execution,
         uiKit: config.uiKit,
       },
+
       lifecycle: {
         load,
         createNew: lifecycle.createNew,

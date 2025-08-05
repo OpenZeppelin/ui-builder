@@ -40,7 +40,7 @@ export function FieldSelectorList({
           <div
             key={field.id}
             className={`hover:border-primary/50 hover:bg-primary/2 cursor-pointer rounded-md border p-2 transition-colors ${
-              selectedFieldIndex === index ? 'border-primary bg-primary/5' : ''
+              (selectedFieldIndex ?? 0) === index ? 'border-primary bg-primary/5' : ''
             }`}
             onClick={() => onSelectField(index)}
           >

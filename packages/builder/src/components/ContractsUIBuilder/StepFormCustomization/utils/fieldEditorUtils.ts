@@ -18,7 +18,7 @@ export function initializeFormValues(field: FormFieldType): FieldEditorFormValue
     // Initialize validation object if not present
     validation: field.validation || { required: false },
     // Ensure boolean flags are properly initialized
-    isReadOnly: field.isReadOnly ?? false,
+    readOnly: field.readOnly ?? false,
     isHidden: field.isHidden ?? false,
     isHardcoded: field.isHardcoded ?? false,
   };

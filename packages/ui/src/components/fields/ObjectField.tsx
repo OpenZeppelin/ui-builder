@@ -75,7 +75,7 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
   components = [],
   renderProperty,
   showCard = true,
-  isReadOnly,
+  readOnly,
   adapter,
 }: ObjectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
@@ -164,7 +164,7 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                       component.description ||
                       (propertyFieldType === 'number' ? 'Numbers only' : undefined),
                     width: 'full',
-                    isReadOnly,
+                    readOnly,
                     // Pass components for nested objects (tuples within a struct)
                     ...(component.components && {
                       components: component.components,

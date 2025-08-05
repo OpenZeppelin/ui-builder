@@ -1,150 +1,98 @@
-import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useStore } from 'zustand/react';
+import { useShallow } from 'zustand/react/shallow';
+import { useCallback, useMemo, useState } from 'react';
 
-import { DynamicFormField } from '@openzeppelin/contracts-ui-builder-renderer';
-import type { ContractSchema, FormValues } from '@openzeppelin/contracts-ui-builder-types';
-import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
-
-import { loadContractDefinition } from '../../../services/ContractLoader';
 import { ActionBar } from '../../Common/ActionBar';
-import { useDebounce } from '../hooks';
+import { uiBuilderStoreVanilla, type UIBuilderState } from '../hooks/uiBuilderStore';
 
-import { ContractPreview } from './components/ContractPreview';
-
+import { ContractFormFields, ContractLoadingErrors, ContractSuccessStatus } from './components';
+import { useAutoContractLoad, useContractForm, useContractLoader, useFormSync } from './hooks';
 import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
-  onContractSchemaLoaded,
   adapter,
   networkConfig,
-  existingContractSchema = null,
   existingFormValues = null,
+  loadedConfigurationId = null,
   onToggleContractState,
   isWidgetExpanded,
+  definitionComparison,
 }: StepContractDefinitionProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loadedSchema, setLoadedSchema] = useState<ContractSchema | null>(existingContractSchema);
-  const loadingRef = useRef(false);
-  const [lastAttempted, setLastAttempted] = useState<string | null>(null);
-  const previousNetworkIdRef = useRef<string | null>(networkConfig?.id || null);
-  // Track when we're restoring from existing data to prevent auto-loading
-  const isRestoringRef = useRef(false);
+  const [ignoreProxy, setIgnoreProxy] = useState(false);
+
+  const { contractState, needsContractDefinitionLoad } = useStore(
+    uiBuilderStoreVanilla,
+    useShallow((state: UIBuilderState) => ({
+      contractState: state.contractState,
+      needsContractDefinitionLoad: state.needsContractDefinitionLoad,
+    }))
+  );
+
+  const {
+    schema: contractSchema,
+    definitionJson: contractDefinitionJson,
+    error: contractDefinitionError,
+    source: contractDefinitionSource,
+  } = contractState;
 
   const contractDefinitionInputs = useMemo(
     () => (adapter ? adapter.getContractDefinitionInputs() : []),
     [adapter]
   );
 
-  const { control, reset, watch, formState } = useForm<FormValues>({
-    mode: 'onChange',
+  // Form management
+  const {
+    control,
+    formState,
+    debouncedValues,
+    contractAddressValue,
+    debouncedManualDefinition,
+    validationError,
+  } = useContractForm({
+    adapter,
+    existingFormValues,
+    loadedConfigurationId,
+    networkId: networkConfig?.id || null,
+    contractDefinitionSource,
+    contractDefinitionJson,
+    contractError: contractState.error,
   });
 
-  const watchedValues = watch();
-  const debouncedValues = useDebounce(watchedValues, 500);
+  // Contract loading with circuit breaker
+  const { isLoading, circuitBreakerActive, loadContract, canAttemptLoad, markAttempted } =
+    useContractLoader({
+      adapter,
+      ignoreProxy,
+    });
 
-  // Restore form values when existingContractSchema and existingFormValues are provided
-  useEffect(() => {
-    if (existingContractSchema && existingFormValues) {
-      // Set flag to prevent auto-loading during restoration
-      isRestoringRef.current = true;
-      setLoadedSchema(existingContractSchema);
-      reset(existingFormValues);
-      // Mark this attempt as already processed to prevent auto-loading
-      setLastAttempted(JSON.stringify(existingFormValues));
-      logger.info(
-        'StepContractDefinition',
-        'Restored form values from parent state:',
-        existingFormValues
-      );
+  // Form-store synchronization
+  useFormSync({
+    debouncedManualDefinition,
+    contractAddressValue,
+    currentContractAddress: contractState.address,
+  });
+
+  // Automatic contract loading
+  useAutoContractLoad({
+    debouncedValues,
+    formIsValid: formState.isValid,
+    needsContractDefinitionLoad,
+    contractDefinitionJson,
+    contractDefinitionError,
+    contractSchema,
+    canAttemptLoad,
+    markAttempted,
+    loadContract,
+  });
+
+  const handleIgnoreProxy = useCallback(() => {
+    setIgnoreProxy(true);
+    // Trigger reload with proxy detection disabled
+    const currentFormValues = contractState.formValues;
+    if (currentFormValues && adapter) {
+      void loadContract(currentFormValues);
     }
-  }, [existingContractSchema, existingFormValues, reset]);
-
-  // Only reset form when network actually changes
-  useEffect(() => {
-    const currentNetworkId = networkConfig?.id || null;
-    const hasNetworkChanged = previousNetworkIdRef.current !== currentNetworkId;
-
-    if (hasNetworkChanged && previousNetworkIdRef.current !== null) {
-      // Network has actually changed, reset everything
-      logger.info('StepContractDefinition', 'Network changed, resetting form state');
-      setLoadedSchema(null);
-      setError(null);
-      setLastAttempted(null);
-      reset({});
-      isRestoringRef.current = false;
-    }
-
-    previousNetworkIdRef.current = currentNetworkId;
-  }, [networkConfig?.id, reset]);
-
-  const handleClearContract = useCallback(() => {
-    setLoadedSchema(null);
-    reset({});
-    onContractSchemaLoaded(null);
-  }, [onContractSchemaLoaded, reset]);
-
-  const handleLoadContract = useCallback(
-    async (data: FormValues) => {
-      if (!adapter || loadingRef.current) return;
-
-      loadingRef.current = true;
-      setIsLoading(true);
-      setError(null);
-      const attempt = JSON.stringify(data);
-      setLastAttempted(attempt);
-
-      try {
-        logger.info('StepContractDefinition', 'Attempting to load contract with artifacts:', data);
-        const schema = await loadContractDefinition(adapter, data);
-        // Pass both the schema and the form values up to the parent
-        onContractSchemaLoaded(schema, data);
-        setLoadedSchema(schema);
-        logger.info(
-          'StepContractDefinition',
-          'Contract loaded successfully, form values passed to parent'
-        );
-      } catch (err) {
-        logger.error('StepContractDefinition', 'Failed to load contract:', err);
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-        setError(errorMessage);
-        handleClearContract();
-      } finally {
-        setIsLoading(false);
-        loadingRef.current = false;
-      }
-    },
-    [adapter, onContractSchemaLoaded, handleClearContract]
-  );
-
-  useEffect(() => {
-    const attemptAutomaticLoad = async () => {
-      // Skip auto-loading if we're currently restoring from existing data.
-      // The ref is true only for the first load cycle after restoration.
-      // We block the load here and reset the flag for subsequent user-driven changes.
-      if (isRestoringRef.current) {
-        logger.info('StepContractDefinition', 'Skipping auto-load during data restoration');
-        isRestoringRef.current = false;
-        return;
-      }
-
-      // Only auto-load if all fields are valid and it's not a manual submission
-      if (!adapter || !formState.isValid || loadingRef.current) {
-        return;
-      }
-
-      const currentAttempt = JSON.stringify(debouncedValues);
-      if (currentAttempt === lastAttempted || currentAttempt === '{}') {
-        return;
-      }
-
-      await handleLoadContract(debouncedValues);
-    };
-
-    void attemptAutomaticLoad();
-  }, [debouncedValues, adapter, formState.isValid, lastAttempted, handleLoadContract]);
+  }, [contractState.formValues, adapter, loadContract]);
 
   if (!adapter || !networkConfig) {
     return (
@@ -154,41 +102,45 @@ export function StepContractDefinition({
     );
   }
 
+  const hasNoErrors = !contractDefinitionError && !validationError;
+  const hasContract = contractSchema && hasNoErrors;
+
   return (
     <div className="space-y-6">
       <ActionBar
         network={networkConfig}
-        contractAddress={loadedSchema?.address}
+        contractAddress={contractSchema?.address}
         onToggleContractState={onToggleContractState}
         isWidgetExpanded={isWidgetExpanded}
       />
 
-      <div className="space-y-4">
-        {contractDefinitionInputs.map((field) => (
-          <DynamicFormField key={field.id} field={field} control={control} adapter={adapter} />
-        ))}
-      </div>
+      <ContractFormFields
+        contractDefinitionInputs={contractDefinitionInputs}
+        control={control}
+        adapter={adapter}
+        isLoading={isLoading}
+      />
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading contract...</p>}
+      <ContractLoadingErrors
+        validationError={validationError}
+        contractDefinitionError={contractDefinitionError}
+        circuitBreakerActive={circuitBreakerActive}
+        loadedConfigurationId={loadedConfigurationId}
+      />
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Contract Loading Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      {hasContract && (
+        <ContractSuccessStatus
+          contractSchema={contractSchema}
+          contractDefinitionSource={contractDefinitionSource}
+          contractMetadata={contractState.metadata || {}}
+          proxyInfo={contractState.proxyInfo}
+          ignoreProxy={ignoreProxy}
+          definitionComparison={definitionComparison}
+          loadedConfigurationId={loadedConfigurationId}
+          adapter={adapter}
+          onIgnoreProxy={handleIgnoreProxy}
+        />
       )}
-
-      {loadedSchema && !error && (
-        <div className="mt-4 rounded-md border border-green-200 bg-green-50 p-4">
-          <p className="flex items-center text-green-800">
-            <CheckCircle className="mr-2 size-5" />
-            Contract loaded successfully! Click &ldquo;Next&rdquo; to continue.
-          </p>
-        </div>
-      )}
-
-      <ContractPreview contractSchema={loadedSchema} />
     </div>
   );
 }

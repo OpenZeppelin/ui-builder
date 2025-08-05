@@ -281,7 +281,7 @@ export function ExplorerSettingsPanel({
                         control={control}
                         label="Apply to all compatible networks"
                         helperText="Apply these settings to all Etherscan-compatible networks in your project."
-                        isReadOnly={!useV2Api}
+                        readOnly={!useV2Api}
                       />
                     </div>
                   </div>

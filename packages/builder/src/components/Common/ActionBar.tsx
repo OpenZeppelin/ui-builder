@@ -1,4 +1,4 @@
-import { Download, Eye, Pencil } from 'lucide-react';
+import { ArrowUpFromLine, Eye, Pencil } from 'lucide-react';
 import React from 'react';
 
 import { ContractActionBar } from '@openzeppelin/contracts-ui-builder-renderer';
@@ -54,7 +54,7 @@ export function ActionBar({
           className="gap-2"
           loading={exportLoading}
         >
-          <Download size={16} />
+          <ArrowUpFromLine size={16} />
           <span>Export</span>
         </LoadingButton>
       )}

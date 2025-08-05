@@ -1,3 +1,4 @@
+import type { ContractDefinitionMetadata } from '@openzeppelin/contracts-ui-builder-types';
 import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DexieStorage } from '../base/DexieStorage';
@@ -140,6 +141,158 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Failed to find empty records', errorMessage);
       throw new Error('Failed to find empty records');
+    }
+  }
+
+  /**
+   * Helper to prepare a record with contract definition data for saving
+   */
+  static prepareRecordWithDefinition(
+    record: Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'>,
+    contractDefinition?: string,
+    contractDefinitionSource?: 'fetched' | 'manual',
+    contractDefinitionMetadata?: ContractDefinitionMetadata,
+    contractDefinitionOriginal?: string
+  ): Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> {
+    const recordWithDefinition = {
+      ...record,
+      contractDefinitionSource,
+      contractDefinition,
+      contractDefinitionOriginal,
+      contractDefinitionMetadata,
+    };
+
+    return recordWithDefinition;
+  }
+
+  /**
+   * Updates contract definition data for existing record
+   */
+  async updateDefinition(
+    id: string,
+    contractDefinition: string,
+    contractDefinitionSource: 'fetched' | 'manual',
+    contractDefinitionMetadata?: ContractDefinitionMetadata,
+    contractDefinitionOriginal?: string
+  ): Promise<void> {
+    try {
+      const existing = await this.get(id);
+      if (!existing) {
+        throw new Error(`Record with id ${id} not found`);
+      }
+
+      const updates: Partial<ContractUIRecord> = {
+        contractDefinition,
+        contractDefinitionOriginal,
+        contractDefinitionSource,
+        contractDefinitionMetadata,
+        updatedAt: new Date(),
+      };
+
+      await this.update(id, updates);
+      logger.info('Contract definition updated', `ID: ${id}, Source: ${contractDefinitionSource}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to update contract definition', errorMessage);
+      throw new Error('Failed to update contract definition');
+    }
+  }
+
+  /**
+   * Gets records that need contract definition refresh (older than threshold)
+   */
+  async getRecordsNeedingDefinitionRefresh(
+    thresholdHours: number = 24
+  ): Promise<ContractUIRecord[]> {
+    try {
+      const threshold = new Date(Date.now() - thresholdHours * 60 * 60 * 1000);
+      const allRecords = await this.getAll();
+
+      const needsRefresh = allRecords.filter(
+        (record) =>
+          record.contractDefinitionSource === 'fetched' &&
+          record.contractDefinitionMetadata?.fetchTimestamp &&
+          record.contractDefinitionMetadata.fetchTimestamp < threshold
+      );
+
+      logger.info(
+        'Definition refresh check',
+        `Found ${needsRefresh.length} records needing refresh`
+      );
+      return needsRefresh;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to get records needing definition refresh', errorMessage);
+      throw new Error('Failed to check for definition refresh needs');
+    }
+  }
+
+  /**
+   * Compares stored contract definition with fresh definition
+   * Note: Actual comparison logic should be implemented in chain-specific adapters
+   */
+  async compareStoredDefinition(
+    id: string,
+    freshContractDefinition: string
+  ): Promise<{
+    record: ContractUIRecord;
+    hasStoredDefinition: boolean;
+    definitionsMatch: boolean;
+    needsUpdate: boolean;
+  }> {
+    try {
+      const record = await this.get(id);
+      if (!record) {
+        throw new Error(`Record with id ${id} not found`);
+      }
+
+      const hasStoredDefinition = !!record.contractDefinition;
+
+      if (!hasStoredDefinition) {
+        return {
+          record,
+          hasStoredDefinition: false,
+          definitionsMatch: false,
+          needsUpdate: true,
+        };
+      }
+
+      // Simple string comparison - chain-specific adapters should implement
+      // more sophisticated comparison logic
+      const definitionsMatch = record.contractDefinition === freshContractDefinition;
+
+      return {
+        record,
+        hasStoredDefinition: true,
+        definitionsMatch: definitionsMatch,
+        needsUpdate: !definitionsMatch,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to compare stored definition', errorMessage);
+      throw new Error('Failed to compare contract definitions');
+    }
+  }
+
+  /**
+   * Gets records by contract definition hash for quick lookup
+   */
+  async getRecordsByDefinitionHash(definitionHash: string): Promise<ContractUIRecord[]> {
+    try {
+      const allRecords = await this.getAll();
+      const matchingRecords = allRecords.filter(
+        (record) => record.contractDefinitionMetadata?.definitionHash === definitionHash
+      );
+
+      logger.info(
+        'Definition hash lookup',
+        `Found ${matchingRecords.length} records with hash ${definitionHash}`
+      );
+      return matchingRecords;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to get records by definition hash', errorMessage);
+      throw new Error('Failed to lookup records by definition hash');
     }
   }
 }

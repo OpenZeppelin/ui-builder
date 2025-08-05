@@ -27,7 +27,7 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
   name,
   width = 'full',
   validation,
-  isReadOnly,
+  readOnly,
 }: BaseFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -68,7 +68,7 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        disabled={isReadOnly}
+        disabled={readOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -118,7 +118,7 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
                 value={field.value ?? ''}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
-                disabled={isReadOnly}
+                disabled={readOnly}
               />
 
               {/* Display helper text */}

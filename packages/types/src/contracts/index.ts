@@ -3,4 +3,6 @@
  * @packageDocumentation
  */
 
+export * from './proxy';
 export * from './schema';
+export * from './storage';

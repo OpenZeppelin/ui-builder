@@ -233,7 +233,7 @@ export class SolanaAdapter implements ContractAdapter {
         id: 'contractAddress',
         name: 'contractAddress',
         label: 'Program ID',
-        type: 'text',
+        type: 'blockchain-address',
         validation: { required: true },
         placeholder: 'Enter Solana program ID',
       },

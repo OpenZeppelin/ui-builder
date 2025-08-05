@@ -1,4 +1,4 @@
-import { Upload } from 'lucide-react';
+import { ArrowDownToLine } from 'lucide-react';
 import { ChangeEvent, useRef, useState } from 'react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
@@ -70,7 +70,7 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
         <DialogHeader>
           <DialogTitle>Import Contract UIs</DialogTitle>
           <DialogDescription>
-            Upload a JSON file containing exported Contract UI configurations.
+            Import a JSON file containing exported Contract UI configurations.
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +93,7 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isImporting}
               >
-                <Upload className="h-4 w-4" />
+                <ArrowDownToLine className="h-4 w-4" />
               </Button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}

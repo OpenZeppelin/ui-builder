@@ -1,4 +1,4 @@
-import { Copy } from 'lucide-react';
+import { Copy, ExternalLink } from 'lucide-react';
 import * as React from 'react';
 
 import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
@@ -34,6 +34,11 @@ interface AddressDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   showCopyButton?: boolean;
 
   /**
+   * Optional explorer URL to make the address clickable
+   */
+  explorerUrl?: string;
+
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -45,6 +50,7 @@ export function AddressDisplay({
   startChars = 6,
   endChars = 4,
   showCopyButton = false,
+  explorerUrl,
   className,
   ...props
 }: AddressDisplayProps): React.ReactElement {
@@ -54,15 +60,8 @@ export function AddressDisplay({
     navigator.clipboard.writeText(address);
   };
 
-  return (
-    <div
-      className={cn(
-        'inline-flex items-center bg-slate-100 rounded-md px-2 py-1 max-w-full',
-        'text-slate-700 text-xs font-mono',
-        className
-      )}
-      {...props}
-    >
+  const addressContent = (
+    <>
       <span className={cn('truncate', truncate ? '' : 'break-all')}>{displayAddress}</span>
 
       {showCopyButton && (
@@ -74,6 +73,31 @@ export function AddressDisplay({
           <Copy className="h-3.5 w-3.5" />
         </button>
       )}
+
+      {explorerUrl && (
+        <a
+          href={explorerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1.5 text-slate-500 hover:text-slate-700 transition-colors flex-shrink-0"
+          aria-label="View in explorer"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      )}
+    </>
+  );
+
+  return (
+    <div
+      className={cn(
+        'inline-flex items-center bg-slate-100 rounded-md px-2 py-1 max-w-full',
+        'text-slate-700 text-xs font-mono',
+        className
+      )}
+      {...props}
+    >
+      {addressContent}
     </div>
   );
 }

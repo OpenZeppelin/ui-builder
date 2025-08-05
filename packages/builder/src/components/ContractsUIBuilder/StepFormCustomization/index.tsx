@@ -254,19 +254,23 @@ export function StepFormCustomization({
                       onSelectField={selectField}
                     />
                     <div className="col-span-2">
-                      {selectedFieldIndex !== null &&
-                        baseFormConfigFromHook.fields[selectedFieldIndex] &&
-                        adapter && (
-                          <FieldEditor
-                            field={baseFormConfigFromHook.fields[selectedFieldIndex]}
-                            onUpdate={(updates) => updateField(selectedFieldIndex, updates)}
-                            adapter={adapter}
-                            originalParameterType={
-                              baseFormConfigFromHook.fields[selectedFieldIndex]
-                                .originalParameterType
-                            }
-                          />
-                        )}
+                      {(() => {
+                        // Show first field if none is selected but fields exist
+                        const effectiveSelectedIndex = selectedFieldIndex ?? 0;
+                        const selectedField = baseFormConfigFromHook.fields[effectiveSelectedIndex];
+
+                        if (selectedField && adapter) {
+                          return (
+                            <FieldEditor
+                              field={selectedField}
+                              onUpdate={(updates) => updateField(effectiveSelectedIndex, updates)}
+                              adapter={adapter}
+                              originalParameterType={selectedField.originalParameterType}
+                            />
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                 )}

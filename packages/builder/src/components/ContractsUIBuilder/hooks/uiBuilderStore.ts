@@ -1,23 +1,29 @@
 import { createStore } from 'zustand/vanilla';
 
 import {
-  CommonFormProperties,
+  ContractDefinitionMetadata,
   ContractSchema,
   Ecosystem,
   ExecutionConfig,
   FormValues,
+  ProxyInfo,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
 
+import { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { contractDefinitionService } from '../../../services/ContractDefinitionService';
 import { STEP_INDICES } from '../constants/stepIndices';
 
-export interface BuilderFormConfig extends CommonFormProperties {
-  functionId: string;
-  contractAddress: string;
-  title?: string;
-  description?: string;
-  executionConfig?: ExecutionConfig;
-  uiKitConfig?: UiKitConfiguration;
+export interface ContractState {
+  schema: ContractSchema | null;
+  address: string | null;
+  formValues: FormValues | null;
+  definitionJson: string | null; // TODO: might need to rename this, cause other adapters might have non-json definitions
+  definitionOriginal: string | null;
+  source: 'fetched' | 'manual' | null;
+  metadata: ContractDefinitionMetadata | null;
+  proxyInfo: ProxyInfo | null;
+  error: string | null;
 }
 
 export interface UIBuilderState {
@@ -33,10 +39,8 @@ export interface UIBuilderState {
   // Step navigation
   currentStepIndex: number;
 
-  // Contract definition state
-  contractSchema: ContractSchema | null;
-  contractAddress: string | null;
-  contractFormValues: FormValues | null;
+  // Contract state
+  contractState: ContractState;
 
   // Function selection state
   selectedFunction: string | null;
@@ -48,7 +52,7 @@ export interface UIBuilderState {
   isSchemaLoading: boolean;
   isAutoSaving: boolean;
   exportLoading: boolean;
-  needsContractSchemaLoad: boolean;
+  needsContractDefinitionLoad: boolean;
 
   // Track the loaded configuration ID
   loadedConfigurationId: string | null;
@@ -62,7 +66,7 @@ export interface UIBuilderActions {
   setInitialState: (initialState: Partial<UIBuilderState>) => void;
   updateState: (updater: (currentState: UIBuilderState) => Partial<UIBuilderState>) => void;
   resetDownstreamSteps: (
-    fromStep: 'network' | 'contract' | 'function',
+    fromStep: 'ecosystem' | 'network' | 'contract' | 'function',
     preserveFunctionConfig?: boolean
   ) => void;
   resetWizard: () => void;
@@ -76,9 +80,38 @@ export interface UIBuilderActions {
       formConfig: BuilderFormConfig;
       executionConfig?: ExecutionConfig;
       uiKitConfig?: UiKitConfiguration;
+      // Add contract definition fields
+      contractDefinition?: string;
+      contractDefinitionOriginal?: string;
+      contractDefinitionSource?: 'fetched' | 'manual';
+      contractDefinitionMetadata?: ContractDefinitionMetadata;
     }
   ) => void;
+  setManualContractDefinition: (definition: string) => void;
+  clearManualContractDefinition: () => void;
+  setContractDefinitionResult: (result: {
+    schema: ContractSchema;
+    formValues: FormValues;
+    source: 'fetched' | 'manual';
+    metadata: ContractDefinitionMetadata;
+    original: string;
+    proxyInfo?: ProxyInfo | null;
+  }) => void;
+  setContractDefinitionError: (error: string) => void;
+  acceptCurrentContractDefinition: () => void;
 }
+
+const initialContractState: ContractState = {
+  schema: null,
+  address: null,
+  formValues: null,
+  definitionJson: null,
+  definitionOriginal: null,
+  source: null,
+  metadata: null,
+  proxyInfo: null,
+  error: null,
+};
 
 const initialState: UIBuilderState = {
   selectedNetworkConfigId: null,
@@ -87,9 +120,7 @@ const initialState: UIBuilderState = {
   networkToSwitchTo: null,
   currentStepIndex: 0,
   uiState: {},
-  contractSchema: null,
-  contractAddress: null,
-  contractFormValues: null,
+  contractState: initialContractState,
   selectedFunction: null,
   formConfig: null,
   isExecutionStepValid: false,
@@ -97,14 +128,11 @@ const initialState: UIBuilderState = {
   isSchemaLoading: false,
   isAutoSaving: false,
   exportLoading: false,
-  needsContractSchemaLoad: false,
+  needsContractDefinitionLoad: false,
   loadedConfigurationId: null,
   isInNewUIMode: false,
 };
 
-/**
- * A vanilla Zustand store for the UI builder state.
- */
 export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActions>()(
   (set, get) => ({
     ...initialState,
@@ -118,24 +146,28 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
     },
 
     resetDownstreamSteps: (
-      fromStep: 'network' | 'contract' | 'function',
+      fromStep: 'ecosystem' | 'network' | 'contract' | 'function',
       preserveFunctionConfig: boolean = false
     ) => {
       let resetState: Partial<UIBuilderState> = {};
-      if (fromStep === 'network') {
+
+      if (fromStep === 'ecosystem' || fromStep === 'network') {
         resetState = {
           ...resetState,
-          contractSchema: null,
-          contractAddress: null,
-          contractFormValues: null,
-          pendingNetworkId: null, // Clear pending network when network changes
+          contractState: initialContractState,
+          pendingNetworkId: null,
         };
       }
-      if (fromStep === 'network' || fromStep === 'contract') {
+
+      if (fromStep === 'ecosystem' || fromStep === 'network' || fromStep === 'contract') {
         resetState = { ...resetState, selectedFunction: null };
       }
-      if (fromStep === 'network' || fromStep === 'contract' || fromStep === 'function') {
-        // Only reset formConfig if not preserving or if it's for a different function
+      if (
+        fromStep === 'ecosystem' ||
+        fromStep === 'network' ||
+        fromStep === 'contract' ||
+        fromStep === 'function'
+      ) {
         if (!preserveFunctionConfig) {
           resetState = {
             ...resetState,
@@ -148,10 +180,8 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
     },
 
     resetWizard: () => {
-      // Reset to initial state while preserving loading states
       set({
         ...initialState,
-        // Preserve UI state and loading states if needed, but a full reset is cleaner.
         uiState: {},
         isLoadingConfiguration: get().isLoadingConfiguration,
         isAutoSaving: get().isAutoSaving,
@@ -168,6 +198,10 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         formConfig: BuilderFormConfig;
         executionConfig?: ExecutionConfig;
         uiKitConfig?: UiKitConfiguration;
+        contractDefinition?: string;
+        contractDefinitionOriginal?: string;
+        contractDefinitionSource?: 'fetched' | 'manual';
+        contractDefinitionMetadata?: ContractDefinitionMetadata;
       }
     ) => {
       const determineStepFromSavedConfig = (config: typeof savedConfig): number => {
@@ -184,11 +218,42 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
 
       const targetStepIndex = determineStepFromSavedConfig(savedConfig);
 
+      if (savedConfig.contractAddress && savedConfig.networkId) {
+        contractDefinitionService.reset(savedConfig.networkId, savedConfig.contractAddress);
+      }
+
       set({
         selectedEcosystem: savedConfig.ecosystem,
         selectedNetworkConfigId: savedConfig.networkId,
         networkToSwitchTo: savedConfig.networkId,
-        contractAddress: savedConfig.contractAddress,
+        contractState: {
+          ...initialContractState,
+          address: savedConfig.contractAddress,
+          definitionJson: savedConfig.contractDefinition || null,
+          definitionOriginal: savedConfig.contractDefinitionOriginal || null,
+          source: savedConfig.contractDefinitionSource || null,
+          metadata: savedConfig.contractDefinitionMetadata || null,
+          formValues: (() => {
+            const formValues: FormValues = {
+              contractAddress: savedConfig.contractAddress,
+            };
+            if (
+              savedConfig.contractDefinitionSource === 'manual' &&
+              savedConfig.contractDefinition
+            ) {
+              try {
+                formValues.contractDefinition = JSON.stringify(
+                  JSON.parse(savedConfig.contractDefinition),
+                  null,
+                  2
+                );
+              } catch {
+                formValues.contractDefinition = savedConfig.contractDefinition;
+              }
+            }
+            return formValues;
+          })(),
+        },
         selectedFunction: savedConfig.functionId,
         formConfig: {
           ...savedConfig.formConfig,
@@ -197,14 +262,104 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         },
         currentStepIndex: targetStepIndex,
         isExecutionStepValid: !!savedConfig.executionConfig,
-        contractFormValues: {
-          contractAddress: savedConfig.contractAddress,
-        },
-        needsContractSchemaLoad: true,
-        contractSchema: null,
+        needsContractDefinitionLoad: !!savedConfig.contractDefinition,
         loadedConfigurationId: id,
         isInNewUIMode: false,
       });
+    },
+
+    setManualContractDefinition: (definition: string) => {
+      set((state) => ({
+        contractState: {
+          ...state.contractState,
+          definitionJson: definition,
+          source: 'manual',
+          schema: null,
+          error: null,
+          formValues: {
+            ...state.contractState.formValues,
+            contractDefinition: definition,
+          },
+        },
+        needsContractDefinitionLoad: true,
+      }));
+    },
+
+    clearManualContractDefinition: () => {
+      const currentState = get();
+      const { address } = currentState.contractState;
+      const networkId = currentState.selectedNetworkConfigId;
+
+      // Reset the service state to allow re-fetching
+      if (networkId && address) {
+        contractDefinitionService.reset(networkId, address);
+      }
+
+      set((state) => ({
+        contractState: {
+          ...state.contractState,
+          definitionJson: null,
+          source: null,
+          schema: null,
+          error: null,
+          formValues: {
+            ...state.contractState.formValues,
+            contractDefinition: undefined,
+          },
+        },
+      }));
+    },
+
+    setContractDefinitionResult: (result) => {
+      const currentState = get();
+      let finalMetadata = result.metadata;
+
+      if (
+        result.source === 'manual' &&
+        result.metadata.verificationStatus === 'unknown' &&
+        currentState.contractState.metadata?.verificationStatus === 'unverified'
+      ) {
+        finalMetadata = { ...result.metadata, verificationStatus: 'unverified' };
+      }
+
+      set({
+        contractState: {
+          schema: result.schema,
+          formValues: result.formValues,
+          source: result.source,
+          metadata: finalMetadata,
+          address: result.schema?.address || null,
+          proxyInfo: result.proxyInfo || null,
+          error: null,
+          definitionOriginal:
+            // Preserve existing definitionOriginal when in loaded config mode for comparison
+            currentState.loadedConfigurationId && currentState.contractState.definitionOriginal
+              ? currentState.contractState.definitionOriginal // Keep stored baseline for comparison
+              : result.original, // Normal case: use fresh as baseline
+          definitionJson: result.original,
+        },
+        needsContractDefinitionLoad: false,
+      });
+    },
+
+    setContractDefinitionError: (error: string) => {
+      set((state) => ({
+        contractState: {
+          ...state.contractState,
+          schema: null,
+          error: error,
+        },
+        needsContractDefinitionLoad: false,
+      }));
+    },
+
+    acceptCurrentContractDefinition: () => {
+      set((state) => ({
+        contractState: {
+          ...state.contractState,
+          definitionOriginal: state.contractState.definitionJson,
+        },
+      }));
     },
   })
 );
@@ -235,4 +390,9 @@ export const uiBuilderStore = {
   resetDownstreamSteps: uiBuilderStoreVanilla.getState().resetDownstreamSteps,
   resetWizard: uiBuilderStoreVanilla.getState().resetWizard,
   loadContractUI: uiBuilderStoreVanilla.getState().loadContractUI,
+  setManualContractDefinition: uiBuilderStoreVanilla.getState().setManualContractDefinition,
+  clearManualContractDefinition: uiBuilderStoreVanilla.getState().clearManualContractDefinition,
+  setContractDefinitionResult: uiBuilderStoreVanilla.getState().setContractDefinitionResult,
+  setContractDefinitionError: uiBuilderStoreVanilla.getState().setContractDefinitionError,
+  acceptCurrentContractDefinition: uiBuilderStoreVanilla.getState().acceptCurrentContractDefinition,
 };

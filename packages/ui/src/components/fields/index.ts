@@ -8,6 +8,7 @@ export * from './ArrayField';
 export * from './ArrayObjectField';
 export * from './BaseField';
 export * from './BooleanField';
+export * from './CodeEditorField';
 export * from './NumberField';
 export * from './ObjectField';
 export * from './PasswordField';

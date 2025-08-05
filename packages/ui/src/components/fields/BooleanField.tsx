@@ -51,7 +51,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
   width = 'full',
   validation,
   validateBoolean,
-  isReadOnly,
+  readOnly,
 }: BooleanFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -99,7 +99,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        disabled={isReadOnly}
+        disabled={readOnly}
         render={({ field, fieldState: { error } }) => {
           const hasError = !!error;
           const validationClasses = getValidationStateClasses(error);
@@ -132,7 +132,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
             id,
             hasError,
             isRequired,
-            isDisabled: isReadOnly,
+            isDisabled: readOnly,
             hasHelperText: !!helperText,
           });
 
@@ -146,7 +146,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
                   onCheckedChange={handleCheckedChange}
                   className={validationClasses}
                   onKeyDown={handleKeyDown}
-                  disabled={isReadOnly}
+                  disabled={readOnly}
                   {...accessibilityProps}
                   aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 />

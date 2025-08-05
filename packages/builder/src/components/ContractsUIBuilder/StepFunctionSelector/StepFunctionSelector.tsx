@@ -1,5 +1,8 @@
+import { useStore } from 'zustand';
+
 import { ActionBar } from '../../Common/ActionBar';
 import { StepTitleWithDescription } from '../Common';
+import { uiBuilderStoreVanilla } from '../hooks/uiBuilderStore';
 
 import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
@@ -16,6 +19,8 @@ export function StepFunctionSelector({
   onToggleContractState,
   isWidgetExpanded,
 }: StepFunctionSelectorProps) {
+  const { contractState } = useStore(uiBuilderStoreVanilla);
+
   // Use custom hooks to manage component logic
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
     useFunctionFilter(contractSchema);
@@ -23,9 +28,19 @@ export function StepFunctionSelector({
   const { selectFunction } = useFunctionSelection(onFunctionSelected);
 
   if (!contractSchema) {
+    // If we have a definition but no schema yet, we're loading
+    if (contractState.definitionJson) {
+      return (
+        <div className="py-8 text-center">
+          <p className="text-muted-foreground">Loading contract functions...</p>
+        </div>
+      );
+    }
+
+    // Otherwise, we need a contract definition
     return (
       <div className="py-8 text-center">
-        <p>Please upload a contract definition first.</p>
+        <p>Please import a contract definition first.</p>
       </div>
     );
   }

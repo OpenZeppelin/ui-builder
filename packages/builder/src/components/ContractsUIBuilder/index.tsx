@@ -169,23 +169,23 @@ export function ContractsUIBuilder() {
       title: 'Load Contract',
       component: (
         <StepContractDefinition
-          onContractSchemaLoaded={actions.contract.schemaLoaded}
           adapter={state.selectedAdapter}
           networkConfig={state.selectedNetwork}
-          existingContractSchema={state.contractSchema}
-          existingFormValues={state.contractFormValues}
+          existingFormValues={state.contractState.formValues}
+          loadedConfigurationId={state.loadedConfigurationId}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
+          definitionComparison={state.definitionComparison || null}
         />
       ),
-      isValid: !!state.contractSchema,
+      isValid: !!state.contractState.schema,
     },
     {
       id: 'function-selector',
       title: 'Select Function',
       component: (
         <StepFunctionSelector
-          contractSchema={state.contractSchema}
+          contractSchema={state.contractState.schema}
           onFunctionSelected={actions.contract.functionSelected}
           selectedFunction={state.selectedFunction}
           networkConfig={state.selectedNetwork}
@@ -200,7 +200,7 @@ export function ContractsUIBuilder() {
       title: 'Customize',
       component: (
         <StepFormCustomization
-          contractSchema={state.contractSchema}
+          contractSchema={state.contractState.schema}
           selectedFunction={state.selectedFunction}
           networkConfig={state.selectedNetwork}
           onFormConfigUpdated={actions.config.form}
@@ -222,13 +222,14 @@ export function ContractsUIBuilder() {
         <StepComplete
           networkConfig={state.selectedNetwork}
           formConfig={state.formConfig}
-          contractSchema={state.contractSchema}
+          contractSchema={state.contractState.schema}
           onExport={() => {
             void actions.export();
           }}
           exportLoading={state.exportLoading}
           functionDetails={
-            state.contractSchema?.functions.find((fn) => fn.id === state.selectedFunction) || null
+            state.contractState.schema?.functions.find((fn) => fn.id === state.selectedFunction) ||
+            null
           }
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}

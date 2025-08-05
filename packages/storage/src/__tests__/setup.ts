@@ -82,7 +82,7 @@ export const createEmptyContractUIRecord = (overrides = {}) => ({
   functionId: '',
   formConfig: {
     id: 'draft',
-    title: 'Contract UI Form',
+    title: 'New Contract UI',
     functionId: '',
     contractAddress: '',
     fields: [],

@@ -51,7 +51,7 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   // @ts-expect-error - Placeholder
   const formSchema: RenderFormSchema = {}; /*@@FORM_SCHEMA_JSON@@*/
 
-  // Contract schema injected by generator (loaded or uploaded by the user)
+  // Contract schema injected by generator (loaded or imported by the user)
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty object that will be replaced at generation time with a properly
   // transformed ContractSchema that includes all necessary properties

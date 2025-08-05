@@ -1,5 +1,6 @@
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
+import type { ProxyInfo } from '../contracts/proxy';
 import type {
   EoaExecutionConfig,
   MultisigExecutionConfig,
@@ -31,6 +32,10 @@ export interface ExecutionMethodDetail {
   disabled?: boolean;
 }
 
+/**
+ * Transaction execution configuration.
+ * Note: Stored both at ContractUIRecord top-level (persistent) and in BuilderFormConfig (transient during editing).
+ */
 export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
 
 /**
@@ -69,6 +74,27 @@ export interface ContractAdapter {
    * @returns A promise resolving to the ContractSchema.
    */
   loadContract(source: string | Record<string, unknown>): Promise<ContractSchema>;
+
+  /**
+   * (Optional) Load a contract with source metadata information.
+   * Returns both the contract schema and information about how it was loaded.
+   *
+   * @param source - The contract artifacts/source data.
+   * @returns A promise resolving to both ContractSchema and source metadata.
+   */
+  loadContractWithMetadata?(source: string | Record<string, unknown>): Promise<{
+    schema: ContractSchema;
+    source: 'fetched' | 'manual';
+    metadata?: {
+      fetchedFrom?: string;
+      contractName?: string;
+      verificationStatus?: 'verified' | 'unverified' | 'unknown';
+      fetchTimestamp?: Date;
+      definitionHash?: string;
+    };
+    /** Chain-agnostic proxy information */
+    proxyInfo?: ProxyInfo;
+  }>;
 
   /**
    * Get only the functions that modify state (writable functions)
@@ -422,4 +448,52 @@ export interface ContractAdapter {
     latency?: number;
     error?: string;
   }>;
+
+  /**
+   * (Optional) Compares two contract schemas and returns detailed analysis.
+   * Provides chain-specific comparison logic for detecting differences between schemas.
+   *
+   * @param storedSchema - The previously stored contract schema as JSON string
+   * @param freshSchema - The newly fetched contract schema as JSON string
+   * @returns A promise resolving to detailed comparison results
+   */
+  compareContractDefinitions?(
+    storedSchema: string,
+    freshSchema: string
+  ): Promise<{
+    identical: boolean;
+    differences: Array<{
+      type: 'added' | 'removed' | 'modified';
+      section: string;
+      name: string;
+      details: string;
+      impact: 'low' | 'medium' | 'high';
+      oldSignature?: string;
+      newSignature?: string;
+    }>;
+    severity: 'none' | 'minor' | 'major' | 'breaking';
+    summary: string;
+  }>;
+
+  /**
+   * (Optional) Validates contract definition structure and format for this chain.
+   * Provides chain-specific validation logic for contract definitions.
+   *
+   * @param definition - The contract definition as JSON string to validate
+   * @returns Validation result with errors and warnings
+   */
+  validateContractDefinition?(definition: string): {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  };
+
+  /**
+   * (Optional) Creates a deterministic hash of a contract definition for quick comparison.
+   * Provides chain-specific normalization and hashing for contract definitions.
+   *
+   * @param definition - The contract definition as JSON string to hash
+   * @returns A deterministic hash string for quick comparison
+   */
+  hashContractDefinition?(definition: string): string;
 }

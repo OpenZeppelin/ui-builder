@@ -75,7 +75,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
   maxItems,
   elementFieldConfig,
   renderElement,
-  isReadOnly,
+  readOnly,
 }: ArrayFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -191,7 +191,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                     placeholder: elementFieldConfig?.placeholder,
                     helperText: elementFieldConfig?.helperText,
                     width: 'full', // Typically, elements take full width within their row
-                    isReadOnly: elementFieldConfig?.isReadOnly ?? isReadOnly, // Inherit isReadOnly from parent
+                    readOnly: elementFieldConfig?.readOnly ?? readOnly, // Inherit readOnly from parent
                     ...elementFieldConfig, // Spread any other config but ensure id, name, type, label are controlled
                   };
 
@@ -214,7 +214,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                           </div>
                         )}
                       </div>
-                      {!isReadOnly && canRemove && (
+                      {!readOnly && canRemove && (
                         <Button
                           type="button"
                           variant="ghost"
@@ -233,7 +233,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
             </div>
 
             {/* Add Item button */}
-            {!isReadOnly && canAddMore && (
+            {!readOnly && canAddMore && (
               <Button
                 type="button"
                 variant="outline"

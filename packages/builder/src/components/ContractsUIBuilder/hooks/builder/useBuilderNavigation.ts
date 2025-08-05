@@ -32,7 +32,7 @@ export function useBuilderNavigation(
         // Check if we have meaningful content even in new UI mode
         const hasMeaningfulContent = !!(
           currentState.selectedNetworkConfigId ||
-          currentState.contractAddress ||
+          currentState.contractState.address ||
           currentState.selectedFunction
         );
 
@@ -40,28 +40,27 @@ export function useBuilderNavigation(
         const shouldPreserveRecord =
           isLoadingSavedConfigRef.current || isExistingMeaningfulRecord || hasMeaningfulContent;
 
+        // Always preserve network selection when going back to ecosystem step
+        // Only reset contract and downstream data
+        uiBuilderStore.resetDownstreamSteps('ecosystem');
+
         if (shouldPreserveRecord) {
-          // Keep the existing record and network selection
-          // Reset only contract and form state, leaving network state untouched
-          uiBuilderStore.resetDownstreamSteps('network');
+          // Keep the existing record
           uiBuilderStore.updateState(() => ({
             isInNewUIMode: false,
           }));
-
-          // Ensure wallet's active network matches the store's selected network
-          if (currentState.selectedNetworkConfigId) {
-            setActiveNetworkId(currentState.selectedNetworkConfigId);
-          }
         } else {
-          // Reset to new UI mode for fresh start
-          setActiveNetworkId(null);
-          uiBuilderStore.updateState(() => ({ selectedNetworkConfigId: null }));
-          uiBuilderStore.resetDownstreamSteps('network');
+          // Clear the saved record reference but keep network
           savedConfigIdRef.current = null;
           uiBuilderStore.updateState(() => ({
             loadedConfigurationId: null,
             isInNewUIMode: true,
           }));
+        }
+
+        // Ensure wallet's active network matches the store's selected network
+        if (currentState.selectedNetworkConfigId) {
+          setActiveNetworkId(currentState.selectedNetworkConfigId);
         }
       }
     },

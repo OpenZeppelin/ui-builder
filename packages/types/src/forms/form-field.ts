@@ -97,7 +97,7 @@ export interface FormFieldType<T extends FieldType = FieldType> {
    * Typically used when isHardcoded is true but isHidden is false.
    * @default false
    */
-  isReadOnly?: boolean;
+  readOnly?: boolean;
 
   /**
    * Components/properties for object and array-object field types.
@@ -114,4 +114,16 @@ export interface FormFieldType<T extends FieldType = FieldType> {
    * Base configuration for array element fields
    */
   elementFieldConfig?: Partial<FormFieldType>;
+
+  /**
+   * Configuration specific to code editor fields
+   */
+  codeEditorProps?: {
+    language?: string;
+    placeholder?: string;
+    theme?: string;
+    height?: string;
+    maxHeight?: string;
+    performanceThreshold?: number;
+  };
 }
