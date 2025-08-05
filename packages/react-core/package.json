@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-react-core",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "private": false,
   "description": "Core React context providers and hooks for the OpenZeppelin Contracts UI Builder.",
   "type": "module",

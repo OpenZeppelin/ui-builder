@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-styles
 
+## 0.3.0
+
+### Minor Changes
+
+- [#66](https://github.com/OpenZeppelin/contracts-ui-builder/pull/66) [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103) Thanks [@pasevin](https://github.com/pasevin)! - support contracts UIs CRUD
+
 ## 0.2.0
 
 ### Minor Changes
