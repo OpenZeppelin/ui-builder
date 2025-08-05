@@ -4,6 +4,8 @@
  * Automatically detects proxy contracts and resolves implementation addresses
  * for UUPS, Transparent, Beacon, and other proxy patterns.
  */
+import { createPublicClient, http, parseAbi } from 'viem';
+
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { AbiItem, TypedEvmNetworkConfig } from '../types';
@@ -279,7 +281,16 @@ async function tryCommonImplementationMethods(
 }
 
 /**
- * Reads a storage slot from a contract
+ * Creates a viem public client for the given network configuration
+ */
+function createViemClient(networkConfig: TypedEvmNetworkConfig) {
+  return createPublicClient({
+    transport: http(networkConfig.rpcUrl),
+  });
+}
+
+/**
+ * Reads a storage slot from a contract using viem
  */
 async function readStorageSlot(
   address: string,
@@ -287,24 +298,12 @@ async function readStorageSlot(
   networkConfig: TypedEvmNetworkConfig
 ): Promise<string | null> {
   try {
-    const response = await fetch(networkConfig.rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_getStorageAt',
-        params: [address, slot, 'latest'],
-        id: 1,
-      }),
+    const client = createViemClient(networkConfig);
+
+    const storageValue = await client.getStorageAt({
+      address: address as `0x${string}`,
+      slot: slot as `0x${string}`,
     });
-
-    const result = await response.json();
-
-    if (result.error) {
-      throw new Error(`RPC error: ${result.error.message}`);
-    }
-
-    const storageValue = result.result;
 
     // Convert from 32-byte storage format to 20-byte address
     if (
@@ -323,48 +322,34 @@ async function readStorageSlot(
 }
 
 /**
- * Calls a function on a contract
+ * Calls a function on a contract using viem's readContract
+ * Supports functions with parameters and proper return value decoding
  */
 async function callContractFunction(
   address: string,
   signature: string,
-  _params: unknown[],
+  params: unknown[],
   networkConfig: TypedEvmNetworkConfig
 ): Promise<string | null> {
   try {
-    // For simple cases, we'll use eth_call
-    // In a full implementation, you'd use web3 or ethers to encode the function call
-    const functionSelector = signature.slice(0, 10); // First 4 bytes after '0x'
+    const client = createViemClient(networkConfig);
 
-    const response = await fetch(networkConfig.rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_call',
-        params: [
-          {
-            to: address,
-            data: functionSelector + '0'.repeat(56), // Pad to 32 bytes
-          },
-          'latest',
-        ],
-        id: 1,
-      }),
+    // Parse the function signature to get proper ABI format
+    const abi = parseAbi([signature]);
+    const func = abi[0] as { name: string; type: 'function' };
+
+    // Use viem's readContract for cleaner, more robust contract calls
+    const result = await client.readContract({
+      address: address as `0x${string}`,
+      abi,
+      functionName: func.name,
+      args: params as readonly unknown[],
     });
 
-    const result = await response.json();
-
-    if (result.error) {
-      throw new Error(`RPC error: ${result.error.message}`);
-    }
-
-    const returnData = result.result;
-
-    // Extract address from return data (assume it's the first 32 bytes containing an address)
-    if (returnData && returnData.length >= 66) {
-      const address = '0x' + returnData.slice(-40); // Last 20 bytes
-      return address;
+    // For proxy functions, we expect an address return value
+    const addressResult = result as string;
+    if (addressResult && addressResult !== '0x0000000000000000000000000000000000000000') {
+      return addressResult;
     }
 
     return null;
@@ -375,31 +360,20 @@ async function callContractFunction(
 }
 
 /**
- * Gets contract bytecode
+ * Gets contract bytecode using viem
  */
 async function getContractBytecode(
   address: string,
   networkConfig: TypedEvmNetworkConfig
 ): Promise<string | null> {
   try {
-    const response = await fetch(networkConfig.rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_getCode',
-        params: [address, 'latest'],
-        id: 1,
-      }),
+    const client = createViemClient(networkConfig);
+
+    const bytecode = await client.getCode({
+      address: address as `0x${string}`,
     });
 
-    const result = await response.json();
-
-    if (result.error) {
-      throw new Error(`RPC error: ${result.error.message}`);
-    }
-
-    return result.result;
+    return bytecode || null;
   } catch (error) {
     logger.warn('getContractBytecode', `Failed to get bytecode: ${error}`);
     return null;
