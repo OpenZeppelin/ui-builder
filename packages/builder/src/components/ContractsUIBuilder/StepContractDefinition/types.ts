@@ -12,14 +12,8 @@ export interface StepContractDefinitionProps {
   isWidgetExpanded?: boolean;
   // Definition comparison functionality
   definitionComparison?: {
-    comparisonResult: ContractDefinitionComparisonResult | null;
-    isComparing: boolean;
-    dismissWarning: (recordId: string, definitionHash: string) => void;
-    compareDefinitions: (
-      stored: string,
-      fresh: string
-    ) => Promise<ContractDefinitionComparisonResult | null>;
-  };
+    comparisonResult: ContractDefinitionComparisonResult;
+  } | null;
 }
 
 export interface ContractFormData {
