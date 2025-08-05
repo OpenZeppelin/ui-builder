@@ -151,11 +151,7 @@ export const ContractDefinitionComparisonModal: React.FC<
           </div>
 
           {/* Changes by Section */}
-          <Accordion 
-            type="multiple" 
-            defaultValue={Object.keys(groupedDifferences)} 
-            variant="card"
-          >
+          <Accordion type="multiple" defaultValue={Object.keys(groupedDifferences)} variant="card">
             {Object.entries(groupedDifferences).map(([section, differences]) => (
               <AccordionItem key={section} value={section}>
                 <AccordionTrigger className="capitalize">
