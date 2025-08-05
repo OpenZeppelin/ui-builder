@@ -43,7 +43,10 @@ export interface ContractDefinitionMismatchWarningProps {
   comparison: ContractDefinitionComparisonResult;
   /** Whether the warning is dismissible */
   dismissible?: boolean;
-  /** Callback when the warning is dismissed */
+  /**
+   * Callback when the warning is dismissed permanently.
+   * This should update the baseline contract definition to accept the current state.
+   */
   onDismiss?: () => void;
   /** Callback to view full comparison details */
   onViewDetails?: () => void;
@@ -78,40 +81,25 @@ export const ContractDefinitionMismatchWarning: React.FC<
       <AlertTriangle className="h-4 w-4" />
       <div className="flex-1">
         <AlertDescription>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h4 className="font-semibold text-sm">Contract Definition Mismatch Detected</h4>
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
-                    comparison.severity === 'breaking'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-gray-100 text-gray-800'
-                  )}
-                >
-                  {comparison.severity}
-                </span>
-              </div>
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className="font-semibold text-sm">Contract Definition Mismatch Detected</h4>
+            <span
+              className={cn(
+                'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
+                comparison.severity === 'breaking'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-gray-100 text-gray-800'
+              )}
+            >
+              {comparison.severity}
+            </span>
+          </div>
 
-              <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                <span className={severityColor}>
-                  {comparison.differences.length} difference
-                  {comparison.differences.length !== 1 ? 's' : ''} found
-                </span>
-              </div>
-            </div>
-
-            {dismissible && onDismiss && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDismiss}
-                className="text-gray-500 hover:text-gray-700 px-2"
-              >
-                ×
-              </Button>
-            )}
+          <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+            <span className={severityColor}>
+              {comparison.differences.length} difference
+              {comparison.differences.length !== 1 ? 's' : ''} found
+            </span>
           </div>
 
           {comparison.differences.length > 0 && (
@@ -179,6 +167,16 @@ export const ContractDefinitionMismatchWarning: React.FC<
             </Accordion>
           )}
 
+          {dismissible && onDismiss && (
+            <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md">
+              <p className="text-xs text-gray-600 mb-2">
+                <strong>Permanently accept changes:</strong> Dismissing this warning will update
+                your saved configuration to use the current contract definition as the new baseline.
+                Future comparisons will be made against this version.
+              </p>
+            </div>
+          )}
+
           <div className="flex gap-2 mt-4">
             {onViewDetails && (
               <Button variant="outline" size="sm" onClick={onViewDetails} className="text-xs">
@@ -186,8 +184,14 @@ export const ContractDefinitionMismatchWarning: React.FC<
               </Button>
             )}
             {dismissible && onDismiss && (
-              <Button variant="ghost" size="sm" onClick={onDismiss} className="text-xs">
-                Dismiss Warning
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDismiss}
+                className="text-xs text-gray-600 hover:text-gray-800"
+                title="Accept current contract definition as the new baseline. This action cannot be undone."
+              >
+                Accept Changes & Dismiss
               </Button>
             )}
           </div>

@@ -98,6 +98,7 @@ export interface UIBuilderActions {
     proxyInfo?: ProxyInfo | null;
   }) => void;
   setContractDefinitionError: (error: string) => void;
+  acceptCurrentContractDefinition: () => void;
 }
 
 const initialContractState: ContractState = {
@@ -351,6 +352,15 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         needsContractDefinitionLoad: false,
       }));
     },
+
+    acceptCurrentContractDefinition: () => {
+      set((state) => ({
+        contractState: {
+          ...state.contractState,
+          definitionOriginal: state.contractState.definitionJson,
+        },
+      }));
+    },
   })
 );
 
@@ -384,4 +394,5 @@ export const uiBuilderStore = {
   clearManualContractDefinition: uiBuilderStoreVanilla.getState().clearManualContractDefinition,
   setContractDefinitionResult: uiBuilderStoreVanilla.getState().setContractDefinitionResult,
   setContractDefinitionError: uiBuilderStoreVanilla.getState().setContractDefinitionError,
+  acceptCurrentContractDefinition: uiBuilderStoreVanilla.getState().acceptCurrentContractDefinition,
 };
