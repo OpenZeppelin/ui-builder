@@ -132,7 +132,7 @@ export default function ContractUIItem({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowRenameDialog(true)}>Rename</DropdownMenuItem>
               <DropdownMenuItem onClick={() => void onDuplicate()}>Duplicate</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void onExport()}>Download</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void onExport()}>Export</DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
                 className="text-destructive"

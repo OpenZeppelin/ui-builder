@@ -1,4 +1,4 @@
-import { Download, LayoutPanelTop, SquarePen, Upload } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, LayoutPanelTop, SquarePen } from 'lucide-react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
@@ -23,7 +23,7 @@ export default function MainActions({
 }: MainActionsProps) {
   const { exportContractUIs, contractUIs } = useContractUIStorage();
 
-  const handleDownload = async () => {
+  const handleExport = async () => {
     await exportContractUIs(); // Export all configurations
   };
 
@@ -53,13 +53,16 @@ export default function MainActions({
         Templates
       </SidebarButton>
 
-      <SidebarButton icon={<Upload className="size-4" />} onClick={onShowImportDialog}>
-        Upload
+      <SidebarButton icon={<ArrowDownToLine className="size-4" />} onClick={onShowImportDialog}>
+        Import
       </SidebarButton>
 
       {hasMeaningfulRecords && (
-        <SidebarButton icon={<Download className="size-4" />} onClick={() => void handleDownload()}>
-          Download
+        <SidebarButton
+          icon={<ArrowUpFromLine className="size-4" />}
+          onClick={() => void handleExport()}
+        >
+          Export
         </SidebarButton>
       )}
     </div>

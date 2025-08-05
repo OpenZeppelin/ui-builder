@@ -40,7 +40,7 @@ export function StepFunctionSelector({
     // Otherwise, we need a contract definition
     return (
       <div className="py-8 text-center">
-        <p>Please upload a contract definition first.</p>
+        <p>Please import a contract definition first.</p>
       </div>
     );
   }
