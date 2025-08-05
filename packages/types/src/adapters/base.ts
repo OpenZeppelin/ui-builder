@@ -1,5 +1,6 @@
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
+import type { ProxyInfo } from '../contracts/proxy';
 import type {
   EoaExecutionConfig,
   MultisigExecutionConfig,
@@ -91,6 +92,8 @@ export interface ContractAdapter {
       fetchTimestamp?: Date;
       definitionHash?: string;
     };
+    /** Chain-agnostic proxy information */
+    proxyInfo?: ProxyInfo;
   }>;
 
   /**

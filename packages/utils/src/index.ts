@@ -9,3 +9,4 @@ export * from './formatting';
 export * from './generateId';
 export * from './validators';
 export * from './async';
+export * from './hash';
