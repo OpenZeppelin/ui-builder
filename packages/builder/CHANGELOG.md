@@ -1,5 +1,25 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.2.0
+
+### Minor Changes
+
+- [#66](https://github.com/OpenZeppelin/contracts-ui-builder/pull/66) [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103) Thanks [@pasevin](https://github.com/pasevin)! - support contracts UIs CRUD
+
+### Patch Changes
+
+- Updated dependencies [[`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103), [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103), [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103)]:
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.6
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.5
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.5
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.2.2
+  - @openzeppelin/contracts-ui-builder-storage@0.3.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.0
+  - @openzeppelin/contracts-ui-builder-renderer@0.2.0
+  - @openzeppelin/contracts-ui-builder-styles@0.3.0
+  - @openzeppelin/contracts-ui-builder-utils@0.3.0
+  - @openzeppelin/contracts-ui-builder-ui@0.3.0
+
 ## 0.1.7
 
 ### Patch Changes
