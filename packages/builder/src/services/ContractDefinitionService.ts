@@ -3,6 +3,15 @@
  *
  * A centralized service that handles contract definition loading with automatic
  * deduplication, state management, and error handling.
+ *
+ * TODO: Consider migrating to TanStack Query which would provide:
+ * - Built-in request deduplication
+ * - Automatic caching with configurable stale times
+ * - Background refetching on focus/reconnect
+ * - Optimistic updates
+ * - Better error handling with retry strategies
+ * - Integration with React Suspense and Error Boundaries
+ * - DevTools for debugging query states
  */
 import { ContractAdapter, FormValues } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';

@@ -8,6 +8,7 @@ import {
   ContractAdapter,
   ContractSchema,
   FormValues,
+  ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -56,6 +57,7 @@ export interface ContractLoadResult {
     fetchTimestamp?: Date;
     definitionHash?: string;
   };
+  proxyInfo?: ProxyInfo;
 }
 
 /**

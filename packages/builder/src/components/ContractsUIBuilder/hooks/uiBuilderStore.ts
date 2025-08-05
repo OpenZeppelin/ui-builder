@@ -6,6 +6,7 @@ import {
   Ecosystem,
   ExecutionConfig,
   FormValues,
+  ProxyInfo,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
 
@@ -21,6 +22,7 @@ export interface ContractState {
   definitionOriginal: string | null;
   source: 'fetched' | 'manual' | null;
   metadata: ContractDefinitionMetadata | null;
+  proxyInfo: ProxyInfo | null;
   error: string | null;
 }
 
@@ -93,6 +95,7 @@ export interface UIBuilderActions {
     source: 'fetched' | 'manual';
     metadata: ContractDefinitionMetadata;
     original: string;
+    proxyInfo?: ProxyInfo | null;
   }) => void;
   setContractDefinitionError: (error: string) => void;
 }
@@ -105,6 +108,7 @@ const initialContractState: ContractState = {
   definitionOriginal: null,
   source: null,
   metadata: null,
+  proxyInfo: null,
   error: null,
 };
 
@@ -281,6 +285,15 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
     },
 
     clearManualContractDefinition: () => {
+      const currentState = get();
+      const { address } = currentState.contractState;
+      const networkId = currentState.selectedNetworkConfigId;
+
+      // Reset the service state to allow re-fetching
+      if (networkId && address) {
+        contractDefinitionService.reset(networkId, address);
+      }
+
       set((state) => ({
         contractState: {
           ...state.contractState,
@@ -315,11 +328,13 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
           source: result.source,
           metadata: finalMetadata,
           address: result.schema?.address || null,
+          proxyInfo: result.proxyInfo || null,
           error: null,
           definitionOriginal:
-            result.source === 'fetched' || !currentState.contractState.definitionOriginal
-              ? result.original
-              : currentState.contractState.definitionOriginal,
+            // Preserve existing definitionOriginal when in loaded config mode for comparison
+            currentState.loadedConfigurationId && currentState.contractState.definitionOriginal
+              ? currentState.contractState.definitionOriginal // Keep stored baseline for comparison
+              : result.original, // Normal case: use fresh as baseline
           definitionJson: result.original,
         },
         needsContractDefinitionLoad: false,

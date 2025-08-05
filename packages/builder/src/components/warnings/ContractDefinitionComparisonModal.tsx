@@ -65,7 +65,7 @@ export const ContractDefinitionComparisonModal: React.FC<
       acc[diff.section].push(diff);
       return acc;
     },
-    {} as Record<string, ContractDefinitionDifference[]>
+    Object.create(null) as Record<string, ContractDefinitionDifference[]>
   );
 
   // Get icon for change type

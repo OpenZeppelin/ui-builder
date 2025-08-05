@@ -43,11 +43,17 @@ export function useUIBuilderState() {
   const network = useBuilderNetwork();
   const contract = useBuilderContract();
   const config = useBuilderConfig();
-  const definitionComparison = useContractDefinitionComparison();
+
+  const { comparisonResult } = useContractDefinitionComparison({
+    originalDefinition: state.contractState.definitionOriginal,
+    currentDefinition: state.contractState.definitionJson,
+    isLoadedConfigMode: !!state.loadedConfigurationId,
+  });
 
   // Contract definition loading hook with automatic deduplication
   const contractDefinition = useContractDefinition({
     onLoaded: (schema, formValues, source, metadata, originalDefinition) => {
+      // Update store with fresh contract definition
       uiBuilderStore.setContractDefinitionResult({
         schema,
         formValues,
@@ -151,11 +157,7 @@ export function useUIBuilderState() {
       isSchemaLoading: contractDefinition.isLoading,
       contractState: state.contractState,
       definitionComparison: {
-        comparisonResult: definitionComparison.comparisonResult,
-        isComparing: definitionComparison.isComparing,
-        error: definitionComparison.error,
-        lastComparison: definitionComparison.lastComparison,
-        dismissedWarnings: definitionComparison.dismissedWarnings,
+        comparisonResult: comparisonResult,
       },
     },
     widget: {
@@ -180,16 +182,7 @@ export function useUIBuilderState() {
         execution: config.execution,
         uiKit: config.uiKit,
       },
-      definitionComparison: {
-        compareDefinitions: definitionComparison.compareDefinitions,
-        validateDefinition: definitionComparison.validateDefinition,
-        hashDefinition: definitionComparison.hashDefinition,
-        dismissWarning: definitionComparison.dismissWarning,
-        isWarningDismissed: definitionComparison.isWarningDismissed,
-        clearDismissedWarnings: definitionComparison.clearDismissedWarnings,
-        resetComparison: definitionComparison.resetComparison,
-        supportsComparison: definitionComparison.supportsComparison,
-      },
+
       lifecycle: {
         load,
         createNew: lifecycle.createNew,

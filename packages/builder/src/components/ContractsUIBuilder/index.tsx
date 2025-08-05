@@ -175,12 +175,7 @@ export function ContractsUIBuilder() {
           loadedConfigurationId={state.loadedConfigurationId}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
-          definitionComparison={{
-            comparisonResult: state.definitionComparison?.comparisonResult ?? null,
-            isComparing: state.definitionComparison?.isComparing ?? false,
-            dismissWarning: actions.definitionComparison.dismissWarning,
-            compareDefinitions: actions.definitionComparison.compareDefinitions,
-          }}
+          definitionComparison={state.definitionComparison || null}
         />
       ),
       isValid: !!state.contractState.schema,

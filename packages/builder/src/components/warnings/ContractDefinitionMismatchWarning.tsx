@@ -81,7 +81,7 @@ export const ContractDefinitionMismatchWarning: React.FC<
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h4 className="font-semibold text-sm">Contract Schema Mismatch Detected</h4>
+                <h4 className="font-semibold text-sm">Contract Definition Mismatch Detected</h4>
                 <span
                   className={cn(
                     'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
@@ -94,16 +94,10 @@ export const ContractDefinitionMismatchWarning: React.FC<
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 mb-3">{comparison.summary}</p>
-
               <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
                 <span className={severityColor}>
                   {comparison.differences.length} difference
                   {comparison.differences.length !== 1 ? 's' : ''} found
-                </span>
-                <span>•</span>
-                <span>
-                  Impact: <span className="font-medium">{comparison.severity}</span>
                 </span>
               </div>
             </div>
@@ -124,7 +118,7 @@ export const ContractDefinitionMismatchWarning: React.FC<
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="details" className="border-none">
                 <AccordionTrigger className="text-xs text-gray-600 hover:text-gray-800 p-0 h-auto font-normal hover:no-underline">
-                  Show Details ({comparison.differences.length} changes)
+                  Show Details
                 </AccordionTrigger>
                 <AccordionContent className="pt-3">
                   <div className="space-y-2 max-h-48 overflow-y-auto">
