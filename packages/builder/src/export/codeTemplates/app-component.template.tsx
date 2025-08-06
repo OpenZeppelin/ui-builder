@@ -11,6 +11,7 @@ import {
   useWalletState,
   WalletConnectionWithSettings,
 } from '@openzeppelin/contracts-ui-builder-react-core';
+import { Footer } from '@openzeppelin/contracts-ui-builder-ui';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';
@@ -60,10 +61,7 @@ export function App() {
         </div>
       </main>
 
-      <footer className="footer">
-        <p>Generated with OpenZeppelin Contracts UI Builder</p>
-        <p>© @@current-year@@ OpenZeppelin</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

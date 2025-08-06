@@ -4,6 +4,8 @@ import React, { ReactNode } from 'react';
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useAnalytics } from '../../hooks/useAnalytics';
+
 export interface WizardStep {
   id: string;
   title: string;
@@ -30,18 +32,31 @@ export function WizardLayout({
 }: WizardLayoutProps) {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
+  const { trackWizardStep } = useAnalytics();
 
   const handleNext = () => {
     if (isLastStep) {
       onComplete?.();
       return;
     }
-    onStepChange(currentStepIndex + 1);
+    const nextStepIndex = currentStepIndex + 1;
+    const nextStep = steps[nextStepIndex];
+
+    // Track wizard step progression
+    trackWizardStep(nextStepIndex + 1, nextStep.id); // Step numbers are 1-indexed for analytics
+
+    onStepChange(nextStepIndex);
   };
 
   const handlePrevious = () => {
     if (!isFirstStep) {
-      onStepChange(currentStepIndex - 1);
+      const prevStepIndex = currentStepIndex - 1;
+      const prevStep = steps[prevStepIndex];
+
+      // Track wizard step progression (going backwards)
+      trackWizardStep(prevStepIndex + 1, prevStep.id); // Step numbers are 1-indexed for analytics
+
+      onStepChange(prevStepIndex);
     }
   };
 

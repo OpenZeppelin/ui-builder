@@ -83,6 +83,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/ga-gtag": "^1.2.0",
     "@types/lodash": "^4.17.19",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

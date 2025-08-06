@@ -297,7 +297,7 @@ describe('AppCodeGenerator Templating System', () => {
 
       // Verify that template placeholders were correctly replaced
       expect(code).toContain('transferTokens');
-      expect(code).toContain(new Date().getFullYear().toString()); // current year
+      expect(code).toContain('<Footer />'); // Footer component is used instead of hardcoded year
 
       // Verify that specific VARIABLE template placeholders were replaced
       expect(code).not.toContain('@@app-title@@');

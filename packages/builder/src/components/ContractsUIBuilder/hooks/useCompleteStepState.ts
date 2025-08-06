@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { ContractSchema, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { useAnalytics } from '../../../hooks/useAnalytics';
 import { downloadBlob } from '../StepComplete/utils';
 
 // Lazy load AppExportSystem to prevent templates from loading on initial page load
@@ -14,6 +15,7 @@ const AppExportSystemPromise = import('../../../export').then((module) => module
  */
 export function useCompleteStepState() {
   const [loading, setLoading] = useState(false);
+  const { trackExportAction } = useAnalytics();
 
   const exportApp = useCallback(
     async (
@@ -61,6 +63,9 @@ export function useCompleteStepState() {
           exportOptions
         );
 
+        // Track successful export action
+        trackExportAction('react-vite'); // Default export type - could be made dynamic based on template choice
+
         if (result.data instanceof Blob) {
           downloadBlob(result.data, result.fileName);
         } else if (
@@ -78,7 +83,7 @@ export function useCompleteStepState() {
         setLoading(false);
       }
     },
-    []
+    [trackExportAction]
   );
 
   // Reset loading state when dependencies change

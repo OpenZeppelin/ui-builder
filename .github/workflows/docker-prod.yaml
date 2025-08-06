@@ -61,6 +61,8 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VITE_EXPORT_ENV=production
+            VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=true
+            VITE_GA_TAG_ID=${{ secrets.VITE_GA_TAG_ID_PROD }}
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
             etherscan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY }}

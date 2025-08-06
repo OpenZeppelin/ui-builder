@@ -106,6 +106,29 @@ describe('AppConfigService', () => {
       expect(config.featureFlags?.['show_cool_thing']).toBe(true);
     });
 
+    it('should handle analytics feature flag correctly', async () => {
+      // Test analytics disabled by default
+      await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: {} }]);
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(false);
+
+      // Test analytics enabled via environment variable
+      mockViteEnv['VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED'] = 'true';
+      await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
+
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(true);
+      expect(appConfigServiceInstance.getConfig().featureFlags?.['analytics_enabled']).toBe(true);
+
+      // Test case insensitivity
+      mockViteEnv['VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED'] = 'TRUE';
+      await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(true);
+
+      // Test disabled state
+      mockViteEnv['VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED'] = 'false';
+      await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(false);
+    });
+
     it('should parse VITE_APP_CFG_DEFAULT_LANGUAGE correctly', async () => {
       mockViteEnv['VITE_APP_CFG_DEFAULT_LANGUAGE'] = 'fr';
       await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
@@ -181,6 +204,39 @@ describe('AppConfigService', () => {
       expect(config.rpcEndpoints?.['ethereum-mainnet']).toBe('https://json.rpc.com');
       expect(config.featureFlags?.['jsonFeature']).toBe(true);
       expect(config.defaultLanguage).toBe('es');
+    });
+
+    it('should handle analytics feature flag in JSON config', async () => {
+      const jsonConfig: Partial<AppRuntimeConfig> = {
+        featureFlags: {
+          analytics_enabled: true,
+        },
+      };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => jsonConfig,
+      } as unknown as Response);
+
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+      const config = appConfigServiceInstance.getConfig();
+
+      expect(fetch).toHaveBeenCalledWith('/app.config.json');
+      expect(config.featureFlags?.['analytics_enabled']).toBe(true);
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(true);
+    });
+
+    it('should default analytics feature flag to false when not specified in JSON', async () => {
+      // Test that it defaults to false when not specified
+      const emptyJsonConfig: Partial<AppRuntimeConfig> = {};
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => emptyJsonConfig,
+      } as unknown as Response);
+
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/empty.config.json' }]);
+      expect(appConfigServiceInstance.isFeatureEnabled('analytics_enabled')).toBe(false);
     });
 
     it('should handle fetch returning non-ok status (e.g., 500)', async () => {

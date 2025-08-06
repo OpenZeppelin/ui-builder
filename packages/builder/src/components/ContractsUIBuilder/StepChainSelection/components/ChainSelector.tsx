@@ -14,6 +14,7 @@ import {
   getEcosystemNetworkIconName,
 } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
+import { useAnalytics } from '../../../../hooks/useAnalytics';
 import {
   getEcosystemFeatureConfig,
   getVisibleEcosystems,
@@ -34,6 +35,7 @@ export function ChainSelector({
   selectedNetworkId = null,
 }: ChainSelectorProps) {
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
+  const { trackEcosystemSelection, trackNetworkSelection } = useAnalytics();
 
   // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({
@@ -69,20 +71,26 @@ export function ChainSelector({
       setSelectedEcosystem(ecosystem);
       setValue('ecosystem', ecosystem);
 
+      // Track ecosystem selection
+      trackEcosystemSelection(ecosystem);
+
       // Remove auto-selection logic - let users manually choose their network
       // This improves UX by not forcing a default network selection
     },
-    [setValue]
+    [setValue, trackEcosystemSelection]
   );
 
   // Handle network selection
   const handleNetworkSelected = useCallback(
     (networkId: string) => {
       if (selectedEcosystem) {
+        // Track network selection
+        trackNetworkSelection(networkId, selectedEcosystem);
+
         onNetworkSelect(selectedEcosystem, networkId);
       }
     },
-    [onNetworkSelect, selectedEcosystem]
+    [onNetworkSelect, selectedEcosystem, trackNetworkSelection]
   );
 
   // Initialize with the default ecosystem if it's enabled
