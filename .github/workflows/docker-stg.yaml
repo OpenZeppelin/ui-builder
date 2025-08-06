@@ -74,12 +74,26 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
-      - name: Create RC version and publish
+      - name: Create RC snapshot version
         run: |
           # Create RC snapshot version
           pnpm changeset version --snapshot rc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HUSKY: 0
 
-          # Publish RC packages
+      - name: Rebuild packages after version update
+        run: pnpm -r build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
+
+      - name: Type check all packages
+        run: pnpm -r typecheck
+
+      - name: Publish RC packages
+        run: |
+          # Publish RC packages with dependencies pre-built
           # TRANSITION NOTE: When switching to public npm, this will automatically
           # start publishing RC versions to public npm instead of GitHub registry
           pnpm changeset publish --tag rc --no-git-checks
