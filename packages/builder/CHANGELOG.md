@@ -1,5 +1,24 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.4.0
+
+### Minor Changes
+
+- [#74](https://github.com/OpenZeppelin/contracts-ui-builder/pull/74) [`521dc09`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/521dc092e2394501affc9f3f37144ba8c735591c) Thanks [@pasevin](https://github.com/pasevin)! - implement google analytics and a common footer
+
+### Patch Changes
+
+- Updated dependencies [[`521dc09`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/521dc092e2394501affc9f3f37144ba8c735591c)]:
+  - @openzeppelin/contracts-ui-builder-utils@0.4.0
+  - @openzeppelin/contracts-ui-builder-ui@0.4.0
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.1
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.1
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.7
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.7
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.2
+  - @openzeppelin/contracts-ui-builder-renderer@0.2.2
+  - @openzeppelin/contracts-ui-builder-storage@0.3.2
+
 ## 0.3.0
 
 ### Minor Changes
