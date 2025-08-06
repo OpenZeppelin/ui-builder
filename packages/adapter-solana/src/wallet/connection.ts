@@ -1,6 +1,3 @@
-import type { GetAccountReturnType } from '@wagmi/core';
-
-// Keep for callback type consistency?
 import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 
 // Assuming a Solana Wallet Implementation type might exist later
@@ -36,10 +33,7 @@ export function getSolanaWalletConnectionStatus(/* walletImplementation: SolanaW
 }
 export function onSolanaWalletConnectionChange(
   /* walletImplementation: SolanaWalletImplementation, */
-  _callback: (
-    account: /* Replace with Solana specific type */ GetAccountReturnType,
-    prevAccount: GetAccountReturnType
-  ) => void
+  _callback: (status: { isConnected: boolean; address?: string }) => void
 ): () => void {
   return () => {};
 }

@@ -256,6 +256,9 @@ importers:
         specifier: ^19.0.0
         version: 19.1.1
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.19
+        version: 4.17.20
       eslint:
         specifier: ^9.29.0
         version: 9.32.0(jiti@2.5.1)

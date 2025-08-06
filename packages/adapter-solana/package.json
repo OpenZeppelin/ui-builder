@@ -53,6 +53,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.19",
     "eslint": "^9.29.0",
     "typescript": "^5.8.3"
   },
