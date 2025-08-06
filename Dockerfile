@@ -13,6 +13,16 @@ ENV NODE_ENV=development
 ARG VITE_EXPORT_ENV=production
 ENV VITE_EXPORT_ENV=$VITE_EXPORT_ENV
 
+# Accept build argument for analytics feature flag
+# - 'true': Enable Google Analytics tracking
+# - 'false' or unset: Disable analytics (default for security/privacy)
+ARG VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=false
+ENV VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=$VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED
+
+# Accept build argument for Google Analytics tag ID
+ARG VITE_GA_TAG_ID
+ENV VITE_GA_TAG_ID=$VITE_GA_TAG_ID
+
 
 
 # Install build dependencies required for native Node.js modules

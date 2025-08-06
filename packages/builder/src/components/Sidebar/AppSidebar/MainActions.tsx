@@ -3,6 +3,7 @@ import { ArrowDownToLine, ArrowUpFromLine, LayoutPanelTop, SquarePen } from 'luc
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useAnalytics } from '../../../hooks/useAnalytics';
 import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
 
 import SidebarButton from './SidebarButton';
@@ -22,9 +23,20 @@ export default function MainActions({
   isInNewUIMode = false,
 }: MainActionsProps) {
   const { exportContractUIs, contractUIs } = useContractUIStorage();
+  const { trackSidebarInteraction } = useAnalytics();
 
   const handleExport = async () => {
+    // Track sidebar export interaction
+    trackSidebarInteraction('export');
+
     await exportContractUIs(); // Export all configurations
+  };
+
+  const handleImport = () => {
+    // Track sidebar import interaction
+    trackSidebarInteraction('import');
+
+    onShowImportDialog();
   };
 
   // Check if there are any meaningful (non-draft) records to export
@@ -53,7 +65,7 @@ export default function MainActions({
         Templates
       </SidebarButton>
 
-      <SidebarButton icon={<ArrowDownToLine className="size-4" />} onClick={onShowImportDialog}>
+      <SidebarButton icon={<ArrowDownToLine className="size-4" />} onClick={handleImport}>
         Import
       </SidebarButton>
 
