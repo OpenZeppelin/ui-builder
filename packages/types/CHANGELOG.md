@@ -1,5 +1,11 @@
 # @openzeppelin/contracts-ui-builder-types
 
+## 0.3.0
+
+### Minor Changes
+
+- [#72](https://github.com/OpenZeppelin/contracts-ui-builder/pull/72) [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca) Thanks [@pasevin](https://github.com/pasevin)! - feat: Added the `ProxyInfo` type to support the new proxy detection feature and updated the `ContractAdapter` interface to include it.
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.3.0
+
+### Minor Changes
+
+- [#72](https://github.com/OpenZeppelin/contracts-ui-builder/pull/72) [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca) Thanks [@pasevin](https://github.com/pasevin)! - feat: Implemented automatic proxy detection for UUPS and EIP-1967 patterns, enabling the adapter to load the underlying implementation ABI. Also enhanced the ABI comparison logic to provide more detailed and accurate diffs.
+
+### Patch Changes
+
+- Updated dependencies [[`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.3.1
+  - @openzeppelin/contracts-ui-builder-utils@0.3.1
+  - @openzeppelin/contracts-ui-builder-types@0.3.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.1
+
 ## 0.2.2
 
 ### Patch Changes
