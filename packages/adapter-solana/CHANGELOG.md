@@ -1,5 +1,15 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 0.0.6
+
+### Patch Changes
+
+- [#72](https://github.com/OpenZeppelin/contracts-ui-builder/pull/72) [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca) Thanks [@pasevin](https://github.com/pasevin)! - fix: Updated the contract address input field to use the new `blockchain-address` type for better validation and user experience.
+
+- Updated dependencies [[`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca)]:
+  - @openzeppelin/contracts-ui-builder-utils@0.3.1
+  - @openzeppelin/contracts-ui-builder-types@0.3.0
+
 ## 0.0.5
 
 ### Patch Changes
