@@ -38,7 +38,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:adapters": "node ../../lint-adapters.cjs",
-    "prepublishOnly": "pnpm build",
+    "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

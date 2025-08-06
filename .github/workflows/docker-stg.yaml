@@ -94,6 +94,9 @@ jobs:
       - name: Publish RC packages
         run: |
           # Publish RC packages with dependencies pre-built
+          # Temporarily disable prepublishOnly scripts to skip rebuild during publishing
+          # since we already built all packages with proper dependencies in previous step
+          export SKIP_PUBLISH_BUILD=true
           # TRANSITION NOTE: When switching to public npm, this will automatically
           # start publishing RC versions to public npm instead of GitHub registry
           pnpm changeset publish --tag rc --no-git-checks
