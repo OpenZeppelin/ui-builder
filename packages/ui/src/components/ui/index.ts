@@ -8,6 +8,7 @@ export * from './dialog';
 export * from './dropdown-menu';
 export * from './empty-state';
 export * from './external-link';
+export * from './footer';
 export * from './form';
 export * from './input';
 export * from './label';

@@ -5,7 +5,11 @@ import {
   WalletStateProvider,
 } from '@openzeppelin/contracts-ui-builder-react-core';
 import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-types';
-import { NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/contracts-ui-builder-ui';
+import {
+  Footer,
+  NetworkErrorNotificationProvider,
+  Toaster,
+} from '@openzeppelin/contracts-ui-builder-ui';
 
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
@@ -55,6 +59,9 @@ function AppContent() {
         <main className="pb-8 flex-1">
           <ContractsUIBuilder />
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   );
