@@ -89,3 +89,4 @@ $RECYCLE.BIN/
 .config/
 
 .npm_token
+/.agent-os
