@@ -1,5 +1,25 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.3.0
+
+### Minor Changes
+
+- [#72](https://github.com/OpenZeppelin/contracts-ui-builder/pull/72) [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca) Thanks [@pasevin](https://github.com/pasevin)! - feat: Added UI components to display proxy contract information and allow users to bypass proxy detection. The contract loading step has been refactored into smaller, more maintainable hooks. The auto-save functionality now preserves the original contract definition to ensure accurate ABI comparisons.
+
+### Patch Changes
+
+- Updated dependencies [[`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca)]:
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.6
+  - @openzeppelin/contracts-ui-builder-renderer@0.2.1
+  - @openzeppelin/contracts-ui-builder-storage@0.3.1
+  - @openzeppelin/contracts-ui-builder-ui@0.3.1
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.6
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.0
+  - @openzeppelin/contracts-ui-builder-utils@0.3.1
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.0
+  - @openzeppelin/contracts-ui-builder-types@0.3.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes
