@@ -37,6 +37,8 @@ jobs:
       run-scripts: "install-pnpm, install-deps, build, test"
       node-version: "20.11.1"
       rekor-log-public: true
+    env:
+      NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     runs-on: ubuntu-latest
