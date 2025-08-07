@@ -44,7 +44,8 @@
     "export-app": "node packages/builder/src/export/cli/export-app.cjs",
     "preinstall": "npx only-allow pnpm",
     "changeset": "changeset",
-    "install-pnpm": "npm install -g pnpm"
+    "install-pnpm": "npm install -g pnpm",
+    "npmpvt": "echo '//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}' >> ~/.npmrc"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs}": "pnpm fix-all"
