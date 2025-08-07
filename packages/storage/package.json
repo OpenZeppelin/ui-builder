@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-storage",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "description": "Local storage services for the OpenZeppelin Contracts UI Builder ecosystem.",
   "type": "module",

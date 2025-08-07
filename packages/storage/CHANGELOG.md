@@ -1,5 +1,12 @@
 # @openzeppelin/contracts-ui-builder-storage
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [[`521dc09`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/521dc092e2394501affc9f3f37144ba8c735591c)]:
+  - @openzeppelin/contracts-ui-builder-utils@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes
