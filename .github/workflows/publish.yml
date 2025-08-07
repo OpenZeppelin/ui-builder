@@ -31,58 +31,15 @@ permissions:
   actions: write
 
 jobs:
-  # setup:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.5.4
-  #       with:
-  #         persist-credentials: false
-
-  #     - uses: pnpm/action-setup@v4
-  #       with:
-  #         # version: 9
-  #         run_install: false
-
-  #     - name: Use node@20
-  #       uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
-  #       with:
-  #         node-version: 20.11.1
-  #         cache: 'pnpm'
-  #         registry-url: "https://npm.pkg.github.com"
-  #         scope: "@openzeppelin"
-  #         always-auth: true
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   provenance:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.5.4
-        with:
-          persist-credentials: false
-
-      - uses: pnpm/action-setup@v4
-        with:
-          # version: 9
-          run_install: false
-
-      - name: Use node@20
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
-        with:
-          node-version: 20.11.1
-          # cache: 'pnpm'
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@openzeppelin"
-          always-auth: true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run SLSA Node.js builder
-        uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a  # v2.1.0
-        with:
-          run-scripts: "install-pnpm, install-deps, build, test"
-          node-version: "20.11.1"
-          rekor-log-public: true
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a  # v2.1.0
+    with:
+      run-scripts: "install-pnpm, install-deps, build, test"
+      node-version: "20.11.1"
+      rekor-log-public: true
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NPM_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
 
   release:
     runs-on: ubuntu-latest
@@ -94,9 +51,9 @@ jobs:
           # This is needed for changesets to calculate version based on commit history
           persist-credentials: false
 
-      # - name: Configure npm authentication for private registry
-      #   run: |
-      #     echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+      - name: Configure npm authentication for private registry
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Verify dependencies
         run: pnpm audit
@@ -119,12 +76,12 @@ jobs:
           temp_dir=$(mktemp -d)
           echo "path=${temp_dir}" >>"${GITHUB_OUTPUT}"
 
-      # - name: Download tarball
-      #   uses: slsa-framework/slsa-github-generator/.github/actions/secure-download-artifact@3bcecb4ade4f265cff30488059a9dca39e26b360 # main
-      #   with:
-      #     name: ${{ needs.provenance.outputs.package-download-name }}
-      #     path: "${{ steps.temp-dir.outputs.path }}/${{ needs.provenance.outputs.package-name }}"
-      #     sha256: ${{ needs.provenance.outputs.package-download-sha256 }}
+      - name: Download tarball
+        uses: slsa-framework/slsa-github-generator/.github/actions/secure-download-artifact@3bcecb4ade4f265cff30488059a9dca39e26b360 # main
+        with:
+          name: ${{ needs.provenance.outputs.package-download-name }}
+          path: "${{ steps.temp-dir.outputs.path }}/${{ needs.provenance.outputs.package-name }}"
+          sha256: ${{ needs.provenance.outputs.package-download-sha256 }}
 
       - name: Download provenance
         uses: slsa-framework/slsa-github-generator/actions/nodejs/secure-attestations-download@3bcecb4ade4f265cff30488059a9dca39e26b360 # v1.6.0
