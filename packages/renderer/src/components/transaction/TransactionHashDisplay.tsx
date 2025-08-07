@@ -1,5 +1,6 @@
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react';
 import React from 'react';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface TransactionHashDisplayProps {
   /**
@@ -43,7 +44,7 @@ export function TransactionHashDisplay({
             className="inline-flex items-center text-xs text-primary hover:text-primary/80 hover:underline py-1 px-2 cursor-pointer"
             onClick={() => {
               // Add a debug log to ensure click is working
-              console.log('Explorer link clicked', explorerUrl);
+              logger.info('TransactionHashDisplay', 'Explorer link clicked', explorerUrl);
               // Don't stop propagation - we want to bubble up
             }}
           >

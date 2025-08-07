@@ -1,4 +1,5 @@
 import type { AbiFunction, AbiParameter, AbiStateMutability } from 'viem';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type {
   ContractFunction,
@@ -27,7 +28,7 @@ export function transformAbiToSchema(
   contractName: string,
   address?: string
 ): ContractSchema {
-  console.info(`Transforming ABI to ContractSchema for: ${contractName}`);
+  logger.info('transformAbiToSchema', `Transforming ABI to ContractSchema for: ${contractName}`);
   const functions: ContractFunction[] = [];
 
   for (const item of abi) {
@@ -64,7 +65,10 @@ export function transformAbiToSchema(
     address,
     functions,
   };
-  console.info(`Transformation complete. Found ${contractSchema.functions.length} functions.`);
+  logger.info(
+    'transformAbiToSchema',
+    `Transformation complete. Found ${contractSchema.functions.length} functions.`
+  );
   return contractSchema;
 }
 

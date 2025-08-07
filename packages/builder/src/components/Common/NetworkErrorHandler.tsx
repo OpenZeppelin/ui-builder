@@ -5,6 +5,7 @@ import { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-build
 import { NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { networkService } from '../../core/networks/service';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Global network error handler that registers the settings dialog opener
@@ -64,10 +65,10 @@ export function NetworkErrorHandler() {
           setDefaultTab(tab);
           // The useEffect will handle getting the adapter
         } else {
-          console.error(`Network not found: ${networkId}`);
+          logger.error('NetworkErrorHandler', `Network not found: ${networkId}`);
         }
       } catch (error) {
-        console.error('Failed to open network settings:', error);
+        logger.error('NetworkErrorHandler', 'Failed to open network settings:', error);
       }
     },
     []

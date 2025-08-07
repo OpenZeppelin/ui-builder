@@ -5,6 +5,7 @@
  * that can be imported and used with parameters.
  */
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 /**
  * Create a template processing plugin
  */
@@ -14,7 +15,7 @@ export default function templatePlugin() {
     transform(code: string, id: string) {
       // Only process files in the codeTemplates directory with .template.tsx extension
       if (id.includes('/codeTemplates/') && id.endsWith('.template.tsx')) {
-        console.log(`Processing template file: ${id}`);
+        logger.info('vite-template-plugin', `Processing template file: ${id}`);
 
         // Handle template parameters with a simple pattern like ${{paramName}}
         const processedCode = code

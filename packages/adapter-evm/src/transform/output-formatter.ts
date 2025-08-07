@@ -1,6 +1,7 @@
 import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
 
 import { stringifyWithBigInt } from '../utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Formats the decoded result of an EVM view function call into a user-friendly string.
@@ -14,8 +15,9 @@ export function formatEvmFunctionResult(
   functionDetails: ContractFunction
 ): string {
   if (!functionDetails.outputs || !Array.isArray(functionDetails.outputs)) {
-    console.warn(
-      `formatEvmFunctionResult: Output ABI definition missing or invalid for function ${functionDetails.name}.`
+    logger.warn(
+      'formatEvmFunctionResult',
+      `Output ABI definition missing or invalid for function ${functionDetails.name}.`
     );
     return '[Error: Output ABI definition missing]';
   }
@@ -52,7 +54,7 @@ export function formatEvmFunctionResult(
     }
   } catch (error) {
     const errorMessage = `Error formatting result for ${functionDetails.name}: ${(error as Error).message}`;
-    console.error(`formatEvmFunctionResult Error: ${errorMessage}`, {
+    logger.error('formatEvmFunctionResult', errorMessage, {
       functionName: functionDetails.name,
       decodedValue,
       error,
