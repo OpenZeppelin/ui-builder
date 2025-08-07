@@ -5,7 +5,7 @@ import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger, userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   Accordion,
@@ -81,7 +81,7 @@ export function ExplorerSettingsPanel({
         setValue('useV2Api', config.applyToAllNetworks || false);
       }
     } catch (error) {
-      console.error('Error loading explorer configuration:', error);
+      logger.error('ExplorerSettingsPanel', 'Error loading explorer configuration:', error);
     }
   }, [networkId, setValue]);
 

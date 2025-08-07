@@ -1,6 +1,7 @@
 import { getAddress, isAddress } from 'viem';
 
 import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Recursively parses a raw input value based on its expected ABI type definition.
@@ -162,7 +163,7 @@ export function parseEvmInput(
     }
 
     // --- Fallback for unknown types --- //
-    console.warn(`Unknown EVM parameter type encountered: '${type}'. Using raw value.`);
+    logger.warn('parseEvmInput', `Unknown EVM parameter type encountered: '${type}'. Using raw value.`);
     return rawValue;
   } catch (error) {
     // Add parameter context to the error message

@@ -9,6 +9,7 @@ import {
 } from '@openzeppelin/contracts-ui-builder-types';
 
 import { fieldComponents } from './fieldRegistry';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import the shared registry
 
@@ -117,7 +118,7 @@ export function DynamicFormField({
 
   // If no component is registered for this field type, log a warning and return null
   if (!FieldComponent) {
-    console.warn(`DynamicFormField: No component registered for field type: ${field.type}`);
+    logger.warn('DynamicFormField', `No component registered for field type: ${field.type}`);
     return null;
   }
 

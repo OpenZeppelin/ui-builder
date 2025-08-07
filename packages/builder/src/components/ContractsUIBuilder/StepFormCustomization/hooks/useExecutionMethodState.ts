@@ -15,6 +15,7 @@ import {
   generateDefaultExecutionMethodFormValues,
   mapFormDataToExecutionConfig,
 } from '../utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 //---------------------------------------------------------------------------
 // Hook Definition
@@ -119,7 +120,7 @@ export function useExecutionMethodState({
           }
         })
         .catch((error: unknown) => {
-          console.error('Failed to fetch supported execution methods:', error);
+          logger.error('useExecutionMethodState', 'Failed to fetch supported execution methods:', error);
           if (isMounted) {
             setSupportedMethods([]);
           }

@@ -15,7 +15,7 @@ const SYSTEM_LOG_TAG = 'adapter-evm-execution-config';
  * Returns details for execution methods supported by the EVM adapter.
  */
 export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
-  console.warn('getEvmSupportedExecutionMethods is using placeholder implementation.');
+  logger.warn('adapter-evm-execution-config', 'getEvmSupportedExecutionMethods is using placeholder implementation.');
   // TODO: Implement actual supported methods for EVM (e.g., EOA, Safe).
   return Promise.resolve([
     {

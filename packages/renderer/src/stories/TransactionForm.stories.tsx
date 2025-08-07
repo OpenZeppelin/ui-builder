@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import type { ContractSchema, RenderFormSchema } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { TransactionForm } from '../components/TransactionForm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockAdapter: any = {
   formatTransactionData: (_functionId: string, data: Record<string, unknown>) => {
-    console.log('Mock Adapter: Formatting data', data);
+    logger.info('TransactionForm.stories', 'Mock Adapter: Formatting data', data);
     // Simulate data formatting for EVM
     // In a real adapter, this would ABI-encode the data
     return {

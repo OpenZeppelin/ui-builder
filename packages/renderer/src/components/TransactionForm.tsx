@@ -262,7 +262,8 @@ export function TransactionForm({
     }
 
     // Fallback using getExplorerUrl (also uses internal networkConfig)
-    console.warn(
+    logger.warn(
+      'TransactionForm',
       'getExplorerTxUrl not implemented by adapter, trying getExplorerUrl as fallback (might expect address).'
     );
     // Ensure adapter.getExplorerUrl exists before calling

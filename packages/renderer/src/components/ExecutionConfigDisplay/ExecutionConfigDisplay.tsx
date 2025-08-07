@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type {
   ContractAdapter,
@@ -86,7 +87,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
           setEnhancedRelayerDetails(details);
         })
         .catch((err) => {
-          console.error('Failed to fetch enhanced relayer details:', err);
+          logger.error('ExecutionConfigDisplay', 'Failed to fetch enhanced relayer details:', err);
           // Keep using basic details if enhanced fetch fails
           setEnhancedRelayerDetails(null);
         })

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Plugin } from 'vite';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * @module virtual-content-loader
@@ -104,8 +105,8 @@ export function virtualContentLoaderPlugin(): Plugin {
             if (error instanceof Error) {
               message = error.message;
             }
-            console.error(`[virtual-content-loader] Error loading ${fileName}:`, message);
-            return `export default ""; console.error("Failed to load ${fileName}: ${message}");`;
+            logger.error('virtual-content-loader', `Error loading ${fileName}:`, message);
+            return `export default "";`;
           }
         }
       }

@@ -7,6 +7,7 @@ import type {
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 
@@ -19,7 +20,7 @@ function getDefaultValidationForType(_parameterType: string): FieldValidation {
 export function generateSolanaDefaultField<T extends FieldType = FieldType>(
   parameter: FunctionParameter
 ): FormFieldType<T> {
-  console.warn('generateSolanaDefaultField not implemented');
+  logger.warn('adapter-solana', 'generateSolanaDefaultField not implemented');
   const fieldType = mapSolanaParamTypeToFieldType(parameter.type) as T;
   return {
     id: `field-${Math.random().toString(36).substring(2, 9)}`,

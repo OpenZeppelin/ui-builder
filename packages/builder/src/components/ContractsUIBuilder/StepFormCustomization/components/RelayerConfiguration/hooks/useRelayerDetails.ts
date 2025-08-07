@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import type { ContractAdapter, RelayerDetailsRich } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface UseRelayerDetailsParams {
   adapter: ContractAdapter | null;
@@ -42,7 +43,7 @@ export function useRelayerDetails({
         setEnhancedDetails(details);
       })
       .catch((err) => {
-        console.error('Failed to fetch enhanced relayer details:', err);
+        logger.error('useRelayerDetails', 'Failed to fetch enhanced relayer details:', err);
         setError(err as Error);
         setEnhancedDetails(null);
       })

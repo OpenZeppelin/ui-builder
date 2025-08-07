@@ -17,6 +17,7 @@ import {
 } from '../../../warnings';
 import type { UIBuilderActions, UIBuilderState } from '../../hooks/uiBuilderStore';
 import { useUIBuilderStore } from '../../hooks/useUIBuilderStore';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface ContractSuccessStatusProps {
   contractSchema: ContractSchema;
@@ -95,7 +96,7 @@ export function ContractSuccessStatus({
       // Update the store state to reflect the change
       acceptCurrentContractDefinition();
     } catch (error) {
-      console.error('Failed to accept contract definition changes:', error);
+      logger.error('ContractSuccessStatus', 'Failed to accept contract definition changes:', error);
     }
   };
 
