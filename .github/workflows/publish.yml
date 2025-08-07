@@ -26,6 +26,9 @@ permissions:
   packages: write # ✅ Includes both read and write permissions
   pull-requests: write
   issues: write
+  id-token: write
+  attestations: write
+  actions: write
 
 jobs:
   provenance:
