@@ -36,6 +36,7 @@ jobs:
     with:
       run-scripts: "install-pnpm, install-deps, build, test"
       node-version: "20.11.1"
+      rekor-log-public: true
 
   release:
     runs-on: ubuntu-latest
