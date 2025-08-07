@@ -14,7 +14,9 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 /* Base styles... */"
 `;
 
-exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > app-component-evm 1`] = `
 "import {
   useDerivedAccountStatus,
   useWalletState,
@@ -75,8 +77,6 @@ export function App() {
 }
 "
 `;
-
-exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
 "import { useState } from 'react';
