@@ -43,7 +43,8 @@
     "outdated": "pnpm outdated -r",
     "export-app": "node packages/builder/src/export/cli/export-app.cjs",
     "preinstall": "npx only-allow pnpm",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "install-pnpm": "npm install -g pnpm"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs}": "pnpm fix-all"
