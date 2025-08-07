@@ -31,6 +31,20 @@ permissions:
   actions: write
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use node@20
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 20.11.1
+          cache: 'pnpm'
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@openzeppelin"
+          always-auth: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
   provenance:
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a  # v2.1.0
     with:
@@ -48,9 +62,9 @@ jobs:
           # This is needed for changesets to calculate version based on commit history
           persist-credentials: false
 
-      - name: Configure npm authentication for private registry
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+      # - name: Configure npm authentication for private registry
+      #   run: |
+      #     echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Verify dependencies
         run: pnpm audit
