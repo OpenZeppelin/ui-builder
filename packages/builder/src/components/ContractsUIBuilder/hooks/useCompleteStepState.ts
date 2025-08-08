@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
 
 import type { ContractSchema, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { useAnalytics } from '../../../hooks/useAnalytics';
 import { downloadBlob } from '../StepComplete/utils';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Lazy load AppExportSystem to prevent templates from loading on initial page load
 const AppExportSystemPromise = import('../../../export').then((module) => module.AppExportSystem);
@@ -27,7 +27,10 @@ export function useCompleteStepState() {
       // TODO: Add a parameter here for uiKitConfiguration from builder UI state
     ) => {
       if (!formConfig || !selectedFunction || !contractSchema || !networkConfig) {
-        logger.error('useCompleteStepState', 'exportApp: Missing required configuration for export.');
+        logger.error(
+          'useCompleteStepState',
+          'exportApp: Missing required configuration for export.'
+        );
         return;
       }
 

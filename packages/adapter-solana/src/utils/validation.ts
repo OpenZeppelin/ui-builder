@@ -1,4 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 // Placeholder validation utility for Solana
 export function isValidSolanaAddress(address: string): boolean {
   logger.warn('adapter-solana', 'isValidSolanaAddress not implemented robustly');

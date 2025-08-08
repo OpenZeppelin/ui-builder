@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 import { FieldType, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
@@ -205,30 +206,21 @@ describe('createArrayTransform', () => {
 
   it('input should return "[]" and warn for non-array values (defensive check)', () => {
     const transform = createArrayTransform();
-    const consoleWarnSpy = vi.spyOn(console, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
     if (transform.input) {
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input(null)).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayTransform input received non-array value:',
-        null
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayTransform input received non-array value:', null);
 
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input(undefined)).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayTransform input received non-array value:',
-        undefined
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayTransform input received non-array value:', undefined);
 
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input('not-an-array')).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayTransform input received non-array value:',
-        'not-an-array'
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayTransform input received non-array value:', 'not-an-array');
     }
-    consoleWarnSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it('output should parse a valid JSON array string', () => {
@@ -281,30 +273,21 @@ describe('createObjectTransform', () => {
 
   it('input should return "{}" and warn for non-object/null values passed at runtime (defensive check)', () => {
     const transform = createObjectTransform();
-    const consoleWarnSpy = vi.spyOn(console, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
     if (transform.input) {
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input(null)).toBe('{}');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createObjectTransform input received non-object or null value:',
-        null
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createObjectTransform input received non-object or null value:', null);
 
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input(undefined)).toBe('{}');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createObjectTransform input received non-object or null value:',
-        undefined
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createObjectTransform input received non-object or null value:', undefined);
 
       // @ts-expect-error Testing runtime robustness with incorrect type
       expect(transform.input('not-an-object-string')).toBe('{}');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createObjectTransform input received non-object or null value:',
-        'not-an-object-string'
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createObjectTransform input received non-object or null value:', 'not-an-object-string');
     }
-    consoleWarnSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it('output should parse a valid JSON object string', () => {
@@ -365,34 +348,22 @@ describe('createArrayObjectTransform', () => {
 
   it('input should return "[]" and warn for non-array values passed at runtime (defensive check)', () => {
     const transform = createArrayObjectTransform();
-    const consoleWarnSpy = vi.spyOn(console, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
     if (transform.input) {
       // @ts-expect-error Testing runtime robustness by passing null
       expect(transform.input(null)).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayObjectTransform input received non-array value:',
-        null
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayObjectTransform input received non-array value:', null);
       // @ts-expect-error Testing runtime robustness by passing undefined
       expect(transform.input(undefined)).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayObjectTransform input received non-array value:',
-        undefined
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayObjectTransform input received non-array value:', undefined);
       // @ts-expect-error Testing runtime robustness by passing a string
       expect(transform.input('not-an-array-of-objects')).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayObjectTransform input received non-array value:',
-        'not-an-array-of-objects'
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayObjectTransform input received non-array value:', 'not-an-array-of-objects');
       // Testing runtime robustness by passing an object (cast to trick TS)
       expect(transform.input({ a: 1 } as unknown as Record<string, unknown>[])).toBe('[]');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'createArrayObjectTransform input received non-array value:',
-        { a: 1 }
-      );
+      expect(warnSpy).toHaveBeenCalledWith('formUtils', 'createArrayObjectTransform input received non-array value:', { a: 1 });
     }
-    consoleWarnSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it('output should parse a valid JSON array of objects string', () => {
@@ -492,15 +463,16 @@ describe('createTransformForFieldType', () => {
   });
 
   it('should return createComplexTypeTransform and warn for unknown type', () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
     // Use a type not explicitly handled to trigger default case
     const transform = createTransformForFieldType('unknown-type' as FieldType);
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
+    expect(warnSpy).toHaveBeenCalledWith(
+      'formUtils',
       'createTransformForFieldType: No specific transform for fieldType "unknown-type". Falling back to createComplexTypeTransform. Ensure adapter maps all expected ABI types to specific FieldTypes.'
     );
     // Check if it behaves like complex transform
     expect(transform.input!({ c: 3 })).toBe('{\n  "c": 3\n}');
-    consoleWarnSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 });
 

@@ -1,7 +1,6 @@
 import { AlertCircle, AlertTriangle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type {
   ContractAdapter,
@@ -21,6 +20,7 @@ import {
   EmptyState,
   PasswordField,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EoaConfigDetails } from './components/EoaConfigDetails';
 import { ExecutionMethodTrigger } from './components/ExecutionMethodTrigger';

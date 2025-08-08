@@ -10,7 +10,10 @@ export function formatStellarTransactionData(
   _submittedInputs: Record<string, unknown>,
   _fields: FormFieldType[]
 ): unknown {
-  logger.warn('adapter-stellar', 'formatTransactionData not implemented, returning placeholder data.');
+  logger.warn(
+    'adapter-stellar',
+    'formatTransactionData not implemented, returning placeholder data.'
+  );
   // Placeholder implementation
   return { data: 'stellar_formatted_placeholder' };
 }

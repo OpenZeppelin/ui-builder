@@ -8,10 +8,10 @@ import {
   NetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { Input, NetworkSettingsDialog } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { NetworkRow } from './NetworkRow';
 

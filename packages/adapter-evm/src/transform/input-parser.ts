@@ -163,7 +163,10 @@ export function parseEvmInput(
     }
 
     // --- Fallback for unknown types --- //
-    logger.warn('parseEvmInput', `Unknown EVM parameter type encountered: '${type}'. Using raw value.`);
+    logger.warn(
+      'parseEvmInput',
+      `Unknown EVM parameter type encountered: '${type}'. Using raw value.`
+    );
     return rawValue;
   } catch (error) {
     // Add parameter context to the error message

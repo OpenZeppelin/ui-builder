@@ -98,7 +98,11 @@ function createPublicClientWithRpc(
     });
     return publicClient;
   } catch (error) {
-    logger.error('createPublicClientWithRpc', 'Failed to create network-specific public client for query:', error);
+    logger.error(
+      'createPublicClientWithRpc',
+      'Failed to create network-specific public client for query:',
+      error
+    );
     throw new Error(
       `Failed to create network-specific public client for query: ${(error as Error).message}`
     );
@@ -195,7 +199,11 @@ export async function queryEvmViewFunction(
       );
     }
 
-    logger.debug('queryEvmViewFunction', `[Query ${functionDetails.name}] Raw decoded result:`, decodedResult);
+    logger.debug(
+      'queryEvmViewFunction',
+      `[Query ${functionDetails.name}] Raw decoded result:`,
+      decodedResult
+    );
 
     return decodedResult;
   } catch (error) {

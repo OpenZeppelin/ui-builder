@@ -10,7 +10,10 @@ export function formatMidnightTransactionData(
   _submittedInputs: Record<string, unknown>,
   _fields: FormFieldType[]
 ): unknown {
-  logger.warn('adapter-midnight', 'formatTransactionData not implemented, returning placeholder data.');
+  logger.warn(
+    'adapter-midnight',
+    'formatTransactionData not implemented, returning placeholder data.'
+  );
   // Placeholder implementation
   return { data: 'midnight_formatted_placeholder' };
 }

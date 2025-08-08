@@ -1,4 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 import { useWalletState } from './WalletStateContext';
 
 export interface DerivedChainInfo {

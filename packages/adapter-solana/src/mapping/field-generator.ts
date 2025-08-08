@@ -6,8 +6,7 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { getDefaultValueForType, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 

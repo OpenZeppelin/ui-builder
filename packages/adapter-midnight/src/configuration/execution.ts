@@ -12,7 +12,10 @@ import { isValidAddress } from '../utils';
  */
 export function getMidnightSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
   // Placeholder: Assume only EOA is supported for now
-  logger.warn('MidnightExecutionConfig', 'getSupportedExecutionMethods is using placeholder implementation.');
+  logger.warn(
+    'MidnightExecutionConfig',
+    'getSupportedExecutionMethods is using placeholder implementation.'
+  );
   return Promise.resolve([
     {
       type: 'eoa',
@@ -28,7 +31,10 @@ export function getMidnightSupportedExecutionMethods(): Promise<ExecutionMethodD
  */
 export function validateMidnightExecutionConfig(config: ExecutionConfig): Promise<true | string> {
   // Placeholder: Basic validation
-  logger.warn('MidnightExecutionConfig', 'validateExecutionConfig is using placeholder implementation.');
+  logger.warn(
+    'MidnightExecutionConfig',
+    'validateExecutionConfig is using placeholder implementation.'
+  );
   if (config.method === 'eoa') {
     if (!config.allowAny && !config.specificAddress) {
       return Promise.resolve('Specific EOA address is required.');

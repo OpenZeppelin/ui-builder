@@ -1,7 +1,7 @@
 import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { stringifyWithBigInt } from '../utils';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Formats the decoded result of an EVM view function call into a user-friendly string.
