@@ -76,7 +76,13 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
    */
   const loadContract = useCallback(
     async (data: FormValues) => {
-      if (!adapter || loadingRef.current || !data.contractAddress) return;
+      if (!adapter || loadingRef.current) return;
+      // Narrow contractAddress to string before validation
+      const address =
+        typeof data.contractAddress === 'string' ? data.contractAddress.trim() : undefined;
+      if (!address) return;
+      // Do not attempt loads for invalid/partial addresses while the user is typing
+      if (!adapter.isValidAddress(address)) return;
 
       // Create unique key for this specific load attempt
       // This allows tracking failures per contract/definition combination
@@ -84,7 +90,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
         data.contractDefinition && typeof data.contractDefinition === 'string'
           ? simpleHash(data.contractDefinition)
           : 'no-abi';
-      const attemptKey = `${data.contractAddress}-${definitionHash}`;
+      const attemptKey = `${address}-${definitionHash}`;
       const now = Date.now();
 
       // Circuit breaker check: Prevent repeated failures
@@ -153,12 +159,22 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
    * Check if we should attempt to load based on form values
    * Prevents duplicate loads for the same form state
    */
-  const canAttemptLoad = useCallback((formValues: FormValues) => {
-    if (loadingRef.current) return false;
+  const canAttemptLoad = useCallback(
+    (formValues: FormValues) => {
+      if (loadingRef.current) return false;
 
-    const currentAttempt = JSON.stringify(formValues);
-    return currentAttempt !== lastAttemptedRef.current;
-  }, []);
+      // Require a valid address before attempting any load
+      const address =
+        typeof formValues.contractAddress === 'string'
+          ? formValues.contractAddress.trim()
+          : undefined;
+      if (!address || (adapter && !adapter.isValidAddress(address))) return false;
+
+      const currentAttempt = JSON.stringify(formValues);
+      return currentAttempt !== lastAttemptedRef.current;
+    },
+    [adapter]
+  );
 
   /**
    * Mark form values as attempted to prevent duplicate loads
