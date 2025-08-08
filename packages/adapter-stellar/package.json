@@ -46,8 +46,8 @@
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
   },
   "devDependencies": {
-    "eslint": "^9.29.0",
-    "typescript": "^5.8.3"
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "react": "^19.0.0"
