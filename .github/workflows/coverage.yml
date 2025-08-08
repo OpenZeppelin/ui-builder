@@ -1,8 +1,5 @@
-# PRIVATE REGISTRY COVERAGE WORKFLOW
-# ===================================
-# This workflow requires authentication for the GitHub private registry.
-# All @openzeppelin packages (including dependencies) are resolved from the private registry
-# due to organization-level scoping in .npmrc.
+# Public npm coverage workflow
+# ============================
 
 name: Coverage
 
@@ -17,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@v4
 
@@ -32,9 +28,9 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      - name: Configure npm authentication for private registry
+      - name: Configure npm authentication for npm registry
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install

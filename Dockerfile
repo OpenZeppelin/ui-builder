@@ -36,19 +36,8 @@ RUN npm install -g pnpm
 # Copy all source code first, which is necessary for pnpm workspaces
 COPY . .
 
-# AUTHENTICATION FOR PRIVATE REGISTRY
-# ===================================
-# This step creates a temporary .npmrc file to authenticate with the GitHub private registry
-# using a build secret. This ensures that the NPM_TOKEN is not leaked into any image layers.
-#
-# TRANSITION TO PUBLIC RELEASE:
-# If packages are moved to the public npm registry, this authentication
-# step may no longer be necessary and can be removed.
-RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
-    sh -c 'echo "@openzeppelin:registry=https://npm.pkg.github.com" > .npmrc && \
-           echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc && \
-           pnpm install --frozen-lockfile && \
-           rm .npmrc'
+# Install dependencies directly from the public npm registry
+RUN pnpm install --frozen-lockfile
 
 # Build all packages in the correct order
 # This step now uses Docker BuildKit secrets to securely pass the Etherscan API key
