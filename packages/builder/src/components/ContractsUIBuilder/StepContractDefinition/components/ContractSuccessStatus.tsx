@@ -8,6 +8,7 @@ import type {
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   ContractDefinitionComparisonModal,
@@ -95,7 +96,7 @@ export function ContractSuccessStatus({
       // Update the store state to reflect the change
       acceptCurrentContractDefinition();
     } catch (error) {
-      console.error('Failed to accept contract definition changes:', error);
+      logger.error('ContractSuccessStatus', 'Failed to accept contract definition changes:', error);
     }
   };
 

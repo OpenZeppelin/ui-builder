@@ -2,6 +2,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { ChainSelector } from '../../components/ContractsUIBuilder/StepChainSelection/index';
 
@@ -28,7 +29,8 @@ type Story = StoryObj<typeof ChainSelector>;
 export const Default: Story = {
   args: {
     initialEcosystem: 'evm',
-    onNetworkSelect: (networkId: string | null) => console.log('Selected network:', networkId),
+    onNetworkSelect: (networkId: string | null) =>
+      logger.info('ChainSelector.stories', 'Selected network:', networkId),
   },
 };
 
@@ -46,7 +48,7 @@ export const Interactive = () => {
         initialEcosystem={selectedEcosystem}
         selectedNetworkId={selectedNetworkId}
         onNetworkSelect={(networkId: string | null) => {
-          console.log('Network selected:', networkId);
+          logger.info('ChainSelector.stories', 'Network selected:', networkId);
           setSelectedNetworkId(networkId);
         }}
       />

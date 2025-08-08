@@ -2,6 +2,7 @@ import type {
   ExecutionConfig,
   ExecutionMethodDetail,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidAddress } from '../utils';
 
@@ -11,7 +12,10 @@ import { isValidAddress } from '../utils';
  */
 export function getStellarSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
   // Placeholder: Assume only EOA is supported for now
-  console.warn('StellarAdapter.getSupportedExecutionMethods is using placeholder implementation.');
+  logger.warn(
+    'StellarExecutionConfig',
+    'getSupportedExecutionMethods is using placeholder implementation.'
+  );
   return Promise.resolve([
     {
       type: 'eoa',
@@ -27,7 +31,10 @@ export function getStellarSupportedExecutionMethods(): Promise<ExecutionMethodDe
  */
 export function validateStellarExecutionConfig(config: ExecutionConfig): Promise<true | string> {
   // Placeholder: Basic validation
-  console.warn('StellarAdapter.validateExecutionConfig is using placeholder implementation.');
+  logger.warn(
+    'StellarExecutionConfig',
+    'validateExecutionConfig is using placeholder implementation.'
+  );
   if (config.method === 'eoa') {
     if (!config.allowAny && !config.specificAddress) {
       return Promise.resolve('Specific Stellar account address is required.');

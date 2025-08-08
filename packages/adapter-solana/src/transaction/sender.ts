@@ -23,6 +23,6 @@ export async function signAndBroadcastSolanaTransaction(
 export async function waitForSolanaTransactionConfirmation(
   _txHash: string
 ): Promise<{ status: 'success' | 'error'; receipt?: unknown; error?: Error }> {
-  console.warn('waitForSolanaTransactionConfirmation not implemented');
+  logger.warn('adapter-solana', 'waitForSolanaTransactionConfirmation not implemented');
   return { status: 'success' }; // Assume success for placeholder
 }

@@ -2,6 +2,7 @@ import { isAddress } from 'viem';
 import type { Abi } from 'viem';
 
 import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { parseEvmInput } from '../transform';
@@ -30,7 +31,10 @@ export function formatEvmTransactionData(
   submittedInputs: Record<string, unknown>,
   fields: FormFieldType[]
 ): WriteContractParameters {
-  console.log(`Formatting EVM transaction data for function: ${functionId}`);
+  logger.info(
+    'formatEvmTransactionData',
+    `Formatting EVM transaction data for function: ${functionId}`
+  );
 
   // --- Step 1: Determine Argument Order --- //
   const functionDetails = contractSchema.functions.find((fn) => fn.id === functionId);
@@ -84,7 +88,10 @@ export function formatEvmTransactionData(
   const isPayable = functionDetails.stateMutability === 'payable';
   let transactionValue = 0n; // Use BigInt zero
   if (isPayable) {
-    console.warn('Payable function detected, but sending 0 ETH. Implement value input.');
+    logger.warn(
+      'formatEvmTransactionData',
+      'Payable function detected, but sending 0 ETH. Implement value input.'
+    );
     // TODO: Read value from submittedInputs or config when payable input is implemented
   }
 

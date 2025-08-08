@@ -6,6 +6,7 @@ import type {
   ContractSchema,
   FormFieldType,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
@@ -80,7 +81,7 @@ export function useFormConfig({
         onFormConfigUpdated(newConfig);
         configInitialized.current = true;
       } catch (error) {
-        console.error('Error generating form configuration:', error);
+        logger.error('useFormConfig', 'Error generating form configuration:', error);
         if (selectedFunctionDetails) {
           const contractAddress = contractSchema?.address || '';
           const fields = generateFallbackFields(selectedFunctionDetails, contractAddress);

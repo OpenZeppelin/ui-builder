@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import type { ContractSchema, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { useAnalytics } from '../../../hooks/useAnalytics';
@@ -26,7 +27,10 @@ export function useCompleteStepState() {
       // TODO: Add a parameter here for uiKitConfiguration from builder UI state
     ) => {
       if (!formConfig || !selectedFunction || !contractSchema || !networkConfig) {
-        console.error('exportApp: Missing required configuration for export.');
+        logger.error(
+          'useCompleteStepState',
+          'exportApp: Missing required configuration for export.'
+        );
         return;
       }
 

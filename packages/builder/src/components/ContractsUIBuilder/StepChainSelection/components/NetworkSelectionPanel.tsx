@@ -8,6 +8,7 @@ import {
   NetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { Input, NetworkSettingsDialog } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
@@ -55,7 +56,7 @@ export function NetworkSelectionPanel({
         const ecosystemNetworks = await networkService.getNetworksByEcosystem(ecosystem);
         setNetworks(ecosystemNetworks);
       } catch (error) {
-        console.error(`Failed to load networks for ${ecosystem}:`, error);
+        logger.error('NetworkSelectionPanel', `Failed to load networks for ${ecosystem}:`, error);
         setNetworks([]);
       } finally {
         setIsLoading(false);

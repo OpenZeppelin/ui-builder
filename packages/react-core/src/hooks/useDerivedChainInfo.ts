@@ -1,3 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 import { useWalletState } from './WalletStateContext';
 
 export interface DerivedChainInfo {
@@ -30,8 +32,9 @@ export function useDerivedChainInfo(): DerivedChainInfo {
     chainIdToReturn = chainIdHookOutput;
   } else if (chainIdHookOutput !== undefined) {
     // If it's not a number but not undefined, log a warning but use default. Could be an adapter returning unexpected type.
-    console.warn(
-      '[useDerivedChainInfo] useChainId facade hook returned non-numeric value:',
+    logger.warn(
+      'useDerivedChainInfo',
+      'useChainId facade hook returned non-numeric value:',
       chainIdHookOutput
     );
   }
@@ -42,8 +45,9 @@ export function useDerivedChainInfo(): DerivedChainInfo {
   if (Array.isArray(chainsHookOutput)) {
     chainsToReturn = chainsHookOutput;
   } else if (chainsHookOutput !== undefined) {
-    console.warn(
-      '[useDerivedChainInfo] useChains facade hook returned non-array value:',
+    logger.warn(
+      'useDerivedChainInfo',
+      'useChains facade hook returned non-array value:',
       chainsHookOutput
     );
   }

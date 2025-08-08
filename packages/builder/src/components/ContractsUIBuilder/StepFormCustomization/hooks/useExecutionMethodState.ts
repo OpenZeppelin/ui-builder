@@ -7,6 +7,7 @@ import type {
   ExecutionMethodDetail,
   ExecutionMethodType,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { ExecutionMethodFormData } from '../types';
 import {
@@ -119,7 +120,11 @@ export function useExecutionMethodState({
           }
         })
         .catch((error: unknown) => {
-          console.error('Failed to fetch supported execution methods:', error);
+          logger.error(
+            'useExecutionMethodState',
+            'Failed to fetch supported execution methods:',
+            error
+          );
           if (isMounted) {
             setSupportedMethods([]);
           }

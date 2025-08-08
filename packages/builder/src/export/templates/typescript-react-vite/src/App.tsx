@@ -37,10 +37,12 @@
 // We need a valid import path here just to make the *base* template structure work,
 // even though this App.tsx content is entirely replaced during export.
 // We import the dummy export from the placeholder GeneratedForm.tsx
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 import { GeneratedForm } from './components/GeneratedForm';
 
 // Define a dummy App function to make the base template valid
 export function App() {
-  console.log('Using placeholder App', GeneratedForm);
+  logger.info('AppTemplate', 'Using placeholder App', GeneratedForm as unknown as object);
   return null;
 }

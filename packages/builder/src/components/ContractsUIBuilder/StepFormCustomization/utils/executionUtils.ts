@@ -6,6 +6,7 @@ import type {
   RelayerDetails,
   RelayerExecutionConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { ExecutionMethodFormData } from '../types';
 
@@ -186,6 +187,9 @@ export function ensureCompleteConfig(
   }
 
   // Handle potential invalid method types if ExecutionMethodType allows more
-  console.warn(`ensureCompleteConfig: Unknown method type encountered: ${partialConfig.method}`);
+  logger.warn(
+    'executionUtils',
+    `ensureCompleteConfig: Unknown method type encountered: ${partialConfig.method}`
+  );
   return undefined;
 }
