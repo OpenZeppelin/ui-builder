@@ -10,6 +10,9 @@ overrides:
   '@paulmillr/qr': npm:qr@^0.5.0
   '@walletconnect/modal': 2.7.0
   '@types/react': ^19.1.8
+  prettier: 3.6.2
+  prettier-plugin-tailwindcss: 0.6.14
+  '@ianvs/prettier-plugin-sort-imports': 4.5.1
 
 importers:
 
@@ -35,7 +38,7 @@ importers:
         specifier: ^19.8.1
         version: 19.8.1(@types/node@22.17.0)(commitizen@4.3.1(@types/node@22.17.0)(typescript@5.9.2))(inquirer@8.2.5)(typescript@5.9.2)
       '@ianvs/prettier-plugin-sort-imports':
-        specifier: ^4.5.1
+        specifier: 4.5.1
         version: 4.5.1(prettier@3.6.2)
       '@storybook/addon-controls':
         specifier: ^8.6.14
@@ -110,10 +113,10 @@ importers:
         specifier: ^15.5.2
         version: 15.5.2
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.13
+        specifier: 0.6.14
         version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.5.1(prettier@3.6.2))(prettier@3.6.2)
       tsup:
         specifier: ^8.5.0
@@ -493,10 +496,10 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.13
+        specifier: 0.6.14
         version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.5.1(prettier@3.6.2))(prettier@3.6.2)
       tailwindcss:
         specifier: ^4.1.11
@@ -551,7 +554,7 @@ importers:
         specifier: ^10.1.5
         version: 10.1.8(eslint@9.32.0(jiti@2.5.1))
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       react:
         specifier: ^19.1.0
@@ -654,13 +657,13 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       prettier-eslint:
         specifier: ^16.4.2
         version: 16.4.2(typescript@5.9.2)
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.13
+        specifier: 0.6.14
         version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.5.1(prettier@3.6.2))(prettier@3.6.2)
       typescript:
         specifier: ^5.8.3
@@ -835,10 +838,10 @@ importers:
         specifier: ^10.1.5
         version: 10.1.8(eslint@9.32.0(jiti@2.5.1))
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.13
+        specifier: 0.6.14
         version: 0.6.14(@ianvs/prettier-plugin-sort-imports@4.5.1(prettier@3.6.2))(prettier@3.6.2)
       react:
         specifier: ^19.1.0
@@ -887,7 +890,7 @@ importers:
         specifier: ^10.1.5
         version: 10.1.8(eslint@9.32.0(jiti@2.5.1))
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       typescript:
         specifier: ^5.8.3
@@ -1568,7 +1571,7 @@ packages:
     peerDependencies:
       '@prettier/plugin-oxc': ^0.0.4
       '@vue/compiler-sfc': 2.7.x || 3.x
-      prettier: 2 || 3 || ^4.0.0-0
+      prettier: 3.6.2
     peerDependenciesMeta:
       '@prettier/plugin-oxc':
         optional: true
@@ -2809,7 +2812,7 @@ packages:
   '@storybook/core@8.6.14':
     resolution: {integrity: sha512-1P/w4FSNRqP8j3JQBOi3yGt8PVOgSRbP66Ok520T78eJBeqx9ukCfl912PQZ7SPbW3TIunBwLXMZOjZwBB/JmA==}
     peerDependencies:
-      prettier: ^2 || ^3
+      prettier: 3.6.2
     peerDependenciesMeta:
       prettier:
         optional: true
@@ -4736,7 +4739,7 @@ packages:
       '@types/eslint': '>=8.0.0'
       eslint: '>=8.0.0'
       eslint-config-prettier: '>= 7.0.0 <10.0.0 || >=10.1.0'
-      prettier: '>=3.0.0'
+      prettier: 3.6.2
     peerDependenciesMeta:
       '@types/eslint':
         optional: true
@@ -6673,14 +6676,14 @@ packages:
     resolution: {integrity: sha512-pi2e/+ZygeIqntN+vC573BcW5Cve8zUB0SSAGxqpB4f96boZF4M3phPVoOFCeypwkpRYdi7+jQ5YJJUwrkGUAg==}
     engines: {node: '>=14.21.3'}
     peerDependencies:
-      '@ianvs/prettier-plugin-sort-imports': '*'
+      '@ianvs/prettier-plugin-sort-imports': 4.5.1
       '@prettier/plugin-hermes': '*'
       '@prettier/plugin-oxc': '*'
       '@prettier/plugin-pug': '*'
       '@shopify/prettier-plugin-liquid': '*'
       '@trivago/prettier-plugin-sort-imports': '*'
       '@zackad/prettier-plugin-twig': '*'
-      prettier: ^3.0
+      prettier: 3.6.2
       prettier-plugin-astro: '*'
       prettier-plugin-css-order: '*'
       prettier-plugin-import-sort: '*'
@@ -6729,11 +6732,6 @@ packages:
         optional: true
       prettier-plugin-svelte:
         optional: true
-
-  prettier@2.8.8:
-    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
-    engines: {node: '>=10.13.0'}
-    hasBin: true
 
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
@@ -7286,7 +7284,7 @@ packages:
     resolution: {integrity: sha512-sVKbCj/OTx67jhmauhxc2dcr1P+yOgz/x3h0krwjyMgdc5Oubvxyg4NYDZmzAw+ym36g/lzH8N0Ccp4dwtdfxw==}
     hasBin: true
     peerDependencies:
-      prettier: ^2 || ^3
+      prettier: 3.6.2
     peerDependenciesMeta:
       prettier:
         optional: true
@@ -8556,7 +8554,7 @@ snapshots:
       fs-extra: 7.0.1
       lodash.startcase: 4.4.0
       outdent: 0.5.0
-      prettier: 2.8.8
+      prettier: 3.6.2
       resolve-from: 5.0.0
       semver: 7.7.2
 
@@ -8699,7 +8697,7 @@ snapshots:
       '@changesets/types': 6.1.0
       fs-extra: 7.0.1
       human-id: 4.1.1
-      prettier: 2.8.8
+      prettier: 3.6.2
 
   '@coinbase/wallet-sdk@3.9.3':
     dependencies:
@@ -16077,8 +16075,6 @@ snapshots:
       prettier: 3.6.2
     optionalDependencies:
       '@ianvs/prettier-plugin-sort-imports': 4.5.1(prettier@3.6.2)
-
-  prettier@2.8.8: {}
 
   prettier@3.6.2: {}
 
