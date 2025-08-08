@@ -30,6 +30,9 @@ ENV VITE_GA_TAG_ID=$VITE_GA_TAG_ID
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
 RUN apt-get update && apt-get install -y python-is-python3 build-essential && rm -rf /var/lib/apt/lists/*
 
+# Clear any potential corrupted Node.js cache that might cause gyp issues
+RUN rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp || true
+
 # Install pnpm
 RUN npm install -g pnpm
 
@@ -47,7 +50,10 @@ COPY . .
 RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN \
     sh -c 'echo "@openzeppelin:registry=https://npm.pkg.github.com" > .npmrc && \
            echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc && \
-           pnpm install --frozen-lockfile && \
+           (pnpm install --frozen-lockfile || \
+            (echo "Install failed, clearing cache and retrying..." && \
+             rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp && \
+             pnpm install --frozen-lockfile)) && \
            rm .npmrc'
 
 # Build all packages in the correct order

@@ -99,7 +99,10 @@
       "valtio": "^1.13.2",
       "@paulmillr/qr": "npm:qr@^0.5.0",
       "@walletconnect/modal": "2.7.0",
-      "@types/react": "^19.1.8"
+      "@types/react": "^19.1.8",
+      "prettier": "3.6.2",
+      "prettier-plugin-tailwindcss": "0.6.14",
+      "@ianvs/prettier-plugin-sort-imports": "4.5.1"
     }
   },
   "dependencies": {
