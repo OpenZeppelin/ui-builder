@@ -50,8 +50,14 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Checkout Repo
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
+        id: gh-app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Prepare pre-requisites
+        uses: ./.github/actions/prepare
         with:
           token: ${{ steps.gh-app-token.outputs.token }}
 
