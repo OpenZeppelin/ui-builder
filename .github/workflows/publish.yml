@@ -39,6 +39,7 @@ jobs:
       rekor-log-public: true
 
   release:
+    needs: [provenance]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
