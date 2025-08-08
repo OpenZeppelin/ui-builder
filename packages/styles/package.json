@@ -13,8 +13,8 @@
     "build": "echo 'No build step needed for styles'",
     "lint": "echo 'No JavaScript files to lint in styles package'",
     "lint:fix": "echo 'No JavaScript files to lint in styles package'",
-    "format": "prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
-    "format:check": "prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
+    "format": "pnpm exec prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
+    "format:check": "pnpm exec prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ../../.prettierrc",
     "test": "echo 'No tests for styles package'"
   },
   "keywords": [
