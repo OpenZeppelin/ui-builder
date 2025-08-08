@@ -44,12 +44,16 @@ jobs:
     needs: [provenance]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
+        id: gh-app-token
         with:
-          fetch-depth: 0
-          # This is needed for changesets to calculate version based on commit history
-          persist-credentials: false
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
+        with:
+          token: ${{ steps.gh-app-token.outputs.token }}
 
       - name: Verify dependencies
         run: pnpm audit
@@ -92,7 +96,7 @@ jobs:
         with:
           publish: pnpm changeset publish --no-git-checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0 # Disable husky hooks for automated changeset commits
           NPM_CONFIG_PROVENANCE: true
