@@ -37,7 +37,7 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a  # v2.1.0
     with:
       run-scripts: "install-pnpm, install-deps, build, test"
-      node-version: "20.11.1"
+      node-version: "22.14.0"
       rekor-log-public: true
 
   release:
