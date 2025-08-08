@@ -97,6 +97,13 @@ export function useContractForm({
 
     // Only restore form values when loading a saved configuration
     if (loadedConfigurationId && existingFormValues) {
+      // If user is actively editing the address, do not reset from storage snapshot
+      if (
+        typeof contractAddressValue === 'string' &&
+        contractAddressValue !== existingFormValues.contractAddress
+      ) {
+        return false;
+      }
       const valuesToRestore = { ...existingFormValues };
       // Only restore manual definition if user hasn't explicitly cleared it
       if (
@@ -117,6 +124,7 @@ export function useContractForm({
     existingFormValues,
     contractDefinitionSource,
     contractDefinitionJson,
+    contractAddressValue,
     reset,
   ]);
 
