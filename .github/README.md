@@ -33,7 +33,7 @@ The system automatically publishes Release Candidate (RC) packages for staging a
 | Environment       | Use Case          | Package Dependencies | Command/Trigger                      |
 | ----------------- | ----------------- | -------------------- | ------------------------------------ |
 | **🏠 Local**      | Developer testing | `workspace:*`        | `pnpm export-app export --env local` |
-| **🧪 Staging**    | QA testing        | `0.2.1-rc.123`       | Staging UI (auto)                    |
+| **🧪 Staging**    | QA testing        | `0.0.0-rc-123456`    | Staging UI (auto)                    |
 | **🚀 Production** | End users         | `^0.2.1`             | Production UI (auto)                 |
 
 ### Package Versioning Strategy
@@ -71,7 +71,7 @@ if (env === 'local') {
 
 **Key Features:**
 
-- Automatic RC version publishing (`0.2.1-rc.123`)
+- Automatic RC version publishing (`0.0.0-rc-123456`)
 - Updates `versions.ts` with RC versions
 - Docker build with `VITE_EXPORT_ENV=staging`
 - Parallel execution for faster deployment
@@ -142,12 +142,23 @@ graph TD
     style H fill:#166534,stroke:#14532d,stroke-width:2px,color:#ffffff
 ```
 
+### RC Version Format
+
+RC packages use the format `0.0.0-rc-timestamp` (e.g., `0.0.0-rc-20250807123456`).
+
+**Why 0.0.0?** This is intentional design by Changesets to prevent version conflicts:
+
+- Avoids interference with existing prerelease versions
+- Prevents unexpected version resolution in package managers
+- Clearly identifies these as temporary snapshot versions
+- Follows Changesets' official snapshot versioning strategy
+
 ### Benefits of RC Publishing
 
 - ✅ **Consistent Testing**: QA tests exact versions that will be released
 - ✅ **No Local Dependencies**: QA doesn't need the full monorepo
 - ✅ **Standard npm install**: Works with any Node.js environment
-- ✅ **Version Preview**: RC versions preview the next release version
+- ✅ **Clear Separation**: 0.0.0 prefix makes it obvious these are test versions
 
 ---
 
@@ -285,7 +296,7 @@ graph LR
 **RC Publishing Flow:**
 
 1. **Push to main** → Triggers staging workflow
-2. **Publish RC Packages** → Creates versions like `@openzeppelin/adapter-evm@0.2.1-rc.123`
+2. **Publish RC Packages** → Creates versions like `@openzeppelin/adapter-evm@0.0.0-rc-123456`
 3. **Update versions.ts** → Contains RC versions for consistent exports
 4. **Docker Build staging** → Uses `VITE_EXPORT_ENV=staging`
 5. **QA Tests Latest Features** → Standard `npm install` gets RC packages
@@ -293,7 +304,7 @@ graph LR
 **Three-Environment System:**
 
 - **Local**: Developers use `workspace:*` for current monorepo code
-- **Staging**: QA gets RC packages (`0.2.1-rc.123`) for testing latest features
+- **Staging**: QA gets RC packages (`0.0.0-rc-123456`) for testing latest features
 - **Production**: Users get stable packages (`^0.2.1`) for reliable deployments
 
 **Workflow Execution:**

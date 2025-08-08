@@ -76,8 +76,8 @@ jobs:
 
       - name: Create RC snapshot version
         run: |
-          # Create RC snapshot version that preserves base version numbers
-          pnpm changeset version --snapshot
+          # Create RC snapshot version with 'rc' tag
+          pnpm changeset version --snapshot rc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

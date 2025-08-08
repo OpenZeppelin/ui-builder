@@ -74,7 +74,6 @@ WORKDIR /builder
 RUN npm install -g serve
 
 # Copy the built application from the builder stage
-# This corresponds to the 'publish' directory in your previous netlify.toml
 COPY --from=builder /builder/packages/builder/dist ./dist
 
 # Expose the port the app will run on

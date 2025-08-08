@@ -4,6 +4,11 @@
 # All @openzeppelin packages (including dependencies) are resolved from the private registry
 # due to organization-level scoping in .npmrc.
 #
+# AUTHENTICATION:
+# The workflow uses the NPM_TOKEN secret for authentication to GitHub Package Registry.
+# This should be a Personal Access Token (PAT) with `read:packages` and `write:packages`
+# permissions to avoid GitHub Package Registry permission limitations.
+#
 # TRANSITION TO PUBLIC RELEASE:
 # When ready to publish publicly, update this workflow to:
 # 1. Update the .npmrc authentication to use NPM_TOKEN for npm registry
@@ -88,7 +93,7 @@ jobs:
           publish: pnpm changeset publish --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0 # Disable husky hooks for automated changeset commits
           NPM_CONFIG_PROVENANCE: true
           TARBALL: ${{ needs.provenance.outputs.package-name }}
