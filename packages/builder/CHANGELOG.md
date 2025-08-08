@@ -1,5 +1,20 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.4.1
+
+### Patch Changes
+
+- [#80](https://github.com/OpenZeppelin/contracts-ui-builder/pull/80) [`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc) Thanks [@pasevin](https://github.com/pasevin)! - Route all console.\* logs through centralized logger from utils, add system tags, update tests to spy on logger, restore missing createAbiFunctionItem in EVM adapter, and apply lint/prettier fixes. No public API changes.
+
+- Updated dependencies [[`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc), [`14171aa`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/14171aa46dfd76811551e0ba4560097736fb3420)]:
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.2
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.8
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.8
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.2
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.3
+  - @openzeppelin/contracts-ui-builder-renderer@0.2.3
+  - @openzeppelin/contracts-ui-builder-ui@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes
