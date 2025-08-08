@@ -41,3 +41,6 @@ logs/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml 
+
+# Temporary: skip Tailwind v4 theme file due to Prettier CSS diff in CI
+packages/styles/global.css
