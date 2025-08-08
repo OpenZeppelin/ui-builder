@@ -35,8 +35,8 @@ describe('useContractForm reset guard', () => {
     // rather than the existingFormValues snapshot
     // Note: react-hook-form is internal; we rely on the hook's return value
 
-    // First render should reflect existing defaults
-    expect(result.current.contractAddressValue).toBeUndefined();
+    // First render should reflect existing defaults from props
+    expect(result.current.contractAddressValue).toBe('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
 
     // Simulate input typing by mocking watch return - not straightforward; instead rely on guard path:
     // Re-render with the same props; the guard should prevent reset if the input differs from existing
@@ -49,9 +49,8 @@ describe('useContractForm reset guard', () => {
 
     rerender(updatedProps);
 
-    // The hook should not clobber in-progress edits; since we cannot directly set the input here,
-    // this test acts as a smoke test that the hook remains stable and does not throw
-    // A stronger assertion would render the real component; we keep this lightweight
+    // The hook should not clobber in-progress edits; verify the value was NOT reset to updated props
+    expect(result.current.contractAddressValue).toBe('0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
     expect(result.current.validationError).toBeNull();
   });
 });
