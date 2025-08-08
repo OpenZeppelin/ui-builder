@@ -332,7 +332,11 @@ export function createObjectTransform(): FieldTransforms<Record<string, unknown>
       // An empty or uninitialized object state should be represented by an empty object `{}`.
       if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         // This case should ideally not be hit if types are strictly followed.
-        logger.warn('formUtils', 'createObjectTransform input received non-object or null value:', value);
+        logger.warn(
+          'formUtils',
+          'createObjectTransform input received non-object or null value:',
+          value
+        );
         return '{}'; // Default to empty object string
       }
       try {
@@ -376,7 +380,11 @@ export function createArrayObjectTransform(): FieldTransforms<Record<string, unk
       if (!Array.isArray(value)) {
         // This case should ideally not be hit if types are strictly followed.
         // However, if it occurs at runtime, log a warning and return default.
-        logger.warn('formUtils', 'createArrayObjectTransform input received non-array value:', value);
+        logger.warn(
+          'formUtils',
+          'createArrayObjectTransform input received non-array value:',
+          value
+        );
         return '[]';
       }
       try {

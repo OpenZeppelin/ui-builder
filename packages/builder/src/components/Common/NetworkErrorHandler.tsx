@@ -3,9 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
 import { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { networkService } from '../../core/networks/service';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Global network error handler that registers the settings dialog opener

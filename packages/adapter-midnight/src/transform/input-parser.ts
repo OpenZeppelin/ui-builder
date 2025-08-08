@@ -1,4 +1,5 @@
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 // TODO: Implement Midnight-specific input parsing logic if needed.
 
 // Placeholder function - adapt as needed

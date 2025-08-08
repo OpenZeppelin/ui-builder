@@ -8,6 +8,7 @@ import type {
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
   ContractDefinitionComparisonModal,
@@ -17,7 +18,6 @@ import {
 } from '../../../warnings';
 import type { UIBuilderActions, UIBuilderState } from '../../hooks/uiBuilderStore';
 import { useUIBuilderStore } from '../../hooks/useUIBuilderStore';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface ContractSuccessStatusProps {
   contractSchema: ContractSchema;

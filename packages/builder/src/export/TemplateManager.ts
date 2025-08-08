@@ -5,8 +5,9 @@
  * and providing them for export without requiring filesystem operations.
  * It implements in-memory project generation to allow browser-based exports.
  */
-import type { TemplateOptions } from '../core/types/ExportTypes';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
+import type { TemplateOptions } from '../core/types/ExportTypes';
 
 // Template registry type - maps template names to file collections
 type TemplateRegistry = Record<string, Record<string, string>>;
@@ -207,7 +208,10 @@ export class TemplateManager {
               process.env.EXPORT_CLI_MODE === 'true'
             ) {
               packageJson.dependencies[dep] = 'workspace:*';
-              logger.info('TemplateManager', `Setting ${dep} to use workspace dependency for local development`);
+              logger.info(
+                'TemplateManager',
+                `Setting ${dep} to use workspace dependency for local development`
+              );
             } else if (
               dep.startsWith('@openzeppelin/') &&
               !isLocalEnv &&
@@ -215,7 +219,10 @@ export class TemplateManager {
             ) {
               // For production mode, use the latest published version
               packageJson.dependencies[dep] = 'latest';
-              logger.info('TemplateManager', `Setting ${dep} to use latest published version for production`);
+              logger.info(
+                'TemplateManager',
+                `Setting ${dep} to use latest published version for production`
+              );
             }
           });
         }

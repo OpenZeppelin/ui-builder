@@ -6,6 +6,7 @@ import type {
   ContractSchema,
   FormFieldType,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {
@@ -13,7 +14,6 @@ import {
   generateFormConfig,
   updateFormConfig,
 } from '../../../../services/FormGenerator';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;

@@ -7,9 +7,9 @@ import {
   FormFieldType,
   FormValues,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { fieldComponents } from './fieldRegistry';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import the shared registry
 
