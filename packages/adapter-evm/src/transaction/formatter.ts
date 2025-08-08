@@ -1,20 +1,11 @@
 import { isAddress } from 'viem';
-import type { Abi } from 'viem';
 
 import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { createAbiFunctionItem } from '../abi';
 import { parseEvmInput } from '../transform';
-
-// Define structure locally or import from shared types
-interface WriteContractParameters {
-  address: `0x${string}`;
-  abi: Abi;
-  functionName: string;
-  args: unknown[];
-  value?: bigint;
-}
+import type { WriteContractParameters } from '../types';
 
 /**
  * Formats transaction data for EVM chains based on parsed inputs.
@@ -68,14 +59,12 @@ export function formatEvmTransactionData(
   const transformedArgs = expectedArgs.map((param, index) => {
     let valueToParse = orderedRawValues[index];
 
-    // If the ABI parameter type is an array (e.g., 'tuple[]', 'address[]')
-    // AND it has components (indicating its elements are tuples/structs)
-    // AND the raw value from the form is an array (not already a string),
-    // then stringify it for parseEvmInput.
+    // If the ABI parameter type is an array (e.g., 'tuple[]', 'address[]') and
+    // the raw value from the form/runtime is an array (not already a string),
+    // stringify it for parseEvmInput which expects JSON at the top-level.
     if (
+      typeof param.type === 'string' &&
       param.type.endsWith('[]') &&
-      param.components && // `components` is the key indicator for tuples/structs
-      param.components.length > 0 &&
       Array.isArray(valueToParse)
     ) {
       valueToParse = JSON.stringify(valueToParse);

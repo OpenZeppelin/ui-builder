@@ -8,6 +8,7 @@ import { createPublicClient, http, parseAbi } from 'viem';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { resolveRpcUrl } from '../configuration';
 import { AbiItem, TypedEvmNetworkConfig } from '../types';
 
 export interface ProxyDetectionResult {
@@ -284,8 +285,10 @@ async function tryCommonImplementationMethods(
  * Creates a viem public client for the given network configuration
  */
 function createViemClient(networkConfig: TypedEvmNetworkConfig) {
+  // Honor user/app RPC overrides
+  const rpcUrl = resolveRpcUrl(networkConfig);
   return createPublicClient({
-    transport: http(networkConfig.rpcUrl),
+    transport: http(rpcUrl),
   });
 }
 
@@ -310,8 +313,8 @@ async function readStorageSlot(
       storageValue &&
       storageValue !== '0x0000000000000000000000000000000000000000000000000000000000000000'
     ) {
-      const address = '0x' + storageValue.slice(-40); // Last 20 bytes
-      return address;
+      const implAddress = '0x' + storageValue.slice(-40); // Last 20 bytes
+      return implAddress;
     }
 
     return null;

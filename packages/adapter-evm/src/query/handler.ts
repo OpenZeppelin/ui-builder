@@ -163,7 +163,17 @@ export async function queryEvmViewFunction(
       );
     }
     const args = expectedInputs.map((inputParam: FunctionParameter, index: number) => {
-      const rawValue = params[index];
+      let rawValue = params[index];
+      // If the ABI parameter type is an array (e.g., 'tuple[]', 'address[]') and
+      // the incoming raw value is an actual array (from programmatic usage),
+      // stringify it to align with parseEvmInput expectations for top-level arrays.
+      if (
+        typeof inputParam.type === 'string' &&
+        inputParam.type.endsWith('[]') &&
+        Array.isArray(rawValue)
+      ) {
+        rawValue = JSON.stringify(rawValue);
+      }
       return parseEvmInput(inputParam, rawValue, false);
     });
     logger.debug('queryEvmViewFunction', 'Parsed Args for readContract:', args);

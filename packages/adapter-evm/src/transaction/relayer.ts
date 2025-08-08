@@ -261,11 +261,35 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
       | EvmRelayerTransactionOptions
       | undefined;
 
+    // Compute value for relayer request. The SDK type is number, but JS Number
+    // cannot safely represent large wei amounts. Prefer passing zero when undefined
+    // or warn when truncation would occur.
+    const valueBigint = transactionData.value ?? 0n;
+    let valueNumber: number = 0;
+    const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+    if (valueBigint > MAX_SAFE) {
+      logger.warn(
+        '[Relayer] Value exceeds JS safe integer. Truncating for request.',
+        valueBigint.toString()
+      );
+      valueNumber = Number(MAX_SAFE);
+    } else {
+      valueNumber = Number(valueBigint);
+    }
+
     const relayerTxRequest: EvmTransactionRequest = {
       to: transactionData.address,
       data,
-      value: Number(transactionData.value || 0),
-      gas_limit: evmOptions?.gasLimit ?? 210000, // SDK requires gas_limit, so we must provide a default
+      value: valueNumber,
+      // If no explicit gas limit is provided, keep a conservative default but warn.
+      gas_limit: (() => {
+        if (typeof evmOptions?.gasLimit === 'number') return evmOptions.gasLimit;
+        logger.warn(
+          '[Relayer]',
+          'No gasLimit provided; using default 210000. Consider setting explicitly.'
+        );
+        return 210000;
+      })(),
       // Note: The OpenZeppelin Relayer API requires exactly one gas pricing strategy to be provided.
       // Valid options are: speed, gas_price, or both max_fee_per_gas + max_priority_fee_per_gas.
       // If none are provided, the API will return a 400 Bad Request error.
