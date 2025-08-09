@@ -47,7 +47,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@openzeppelin/relayer-sdk": "npm:@openzeppelin/relayer-sdk@1.1.0",
+    "@openzeppelin/relayer-sdk": "1.1.0",
     "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
     "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
