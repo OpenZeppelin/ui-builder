@@ -37,11 +37,8 @@ jobs:
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
-      - name: Clean pnpm store
-        run: pnpm store prune
-
-      - name: Install dependencies (fresh)
-        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Lint check
         run: pnpm lint
