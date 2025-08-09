@@ -14,7 +14,7 @@
     "lint": "echo 'No JavaScript files to lint in styles package'",
     "lint:fix": "echo 'No JavaScript files to lint in styles package'",
     "format": "./node_modules/.bin/prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ./.prettierrc.cjs",
-    "format:check": "node debug-prettier-ci.cjs && echo '=== ACTUAL FORMAT CHECK ===' && ./node_modules/.bin/prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ./.prettierrc.cjs",
+    "format:check": "node debug-prettier-ci.cjs && node debug-diff.cjs && echo '=== ACTUAL FORMAT CHECK ===' && ./node_modules/.bin/prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ./.prettierrc.cjs",
     "test": "echo 'No tests for styles package'"
   },
   "keywords": [
