@@ -4,7 +4,6 @@ import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
-
 import {
   useAutoSave,
   useBuilderConfig,

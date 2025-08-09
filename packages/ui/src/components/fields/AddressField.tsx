@@ -5,7 +5,6 @@ import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-
 import { BaseFieldProps } from './BaseField';
 import {
   ErrorMessage,

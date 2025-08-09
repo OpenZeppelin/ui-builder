@@ -11,10 +11,9 @@ import {
 } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { useContractUIOperationState } from '../../../hooks/useStorageOperations';
-
 import { useTypewriterEffect } from './hooks/useTypewriterEffect';
 
+import { useContractUIOperationState } from '../../../hooks/useStorageOperations';
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
 

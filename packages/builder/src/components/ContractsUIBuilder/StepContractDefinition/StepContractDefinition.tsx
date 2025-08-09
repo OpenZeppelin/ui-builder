@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ActionBar } from '../../Common/ActionBar';
 import { uiBuilderStoreVanilla, type UIBuilderState } from '../hooks/uiBuilderStore';
-
 import { ContractFormFields, ContractLoadingErrors, ContractSuccessStatus } from './components';
 import { useAutoContractLoad, useContractForm, useContractLoader, useFormSync } from './hooks';
 import { StepContractDefinitionProps } from './types';

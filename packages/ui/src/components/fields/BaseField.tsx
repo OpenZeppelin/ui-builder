@@ -3,6 +3,8 @@ import type { Control, FieldPath, FieldValues } from 'react-hook-form';
 
 import { type FieldValidation } from '@openzeppelin/contracts-ui-builder-types';
 
+import { getWidthClasses } from './utils/layout';
+
 import {
   FormControl,
   FormDescription,
@@ -11,8 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form';
-
-import { getWidthClasses } from './utils/layout';
 
 /**
  * Base props shared by all field components

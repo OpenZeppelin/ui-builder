@@ -5,7 +5,6 @@ import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-
 import { BaseFieldProps } from './BaseField';
 
 /**

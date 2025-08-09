@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import ContractUIImportDialog from '../ContractUIs/ContractUIImportDialog';
-
 import ContractUIsSection from './ContractUIsSection';
 import MainActions from './MainActions';
 import OtherToolsSection from './OtherToolsSection';

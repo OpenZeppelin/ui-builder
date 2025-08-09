@@ -13,7 +13,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';
-
 import {
   autoSaveCache,
   AutoSaveGuards,

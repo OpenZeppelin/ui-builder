@@ -3,7 +3,6 @@ import { FileJson2, FileSearch } from 'lucide-react';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { DevToolsDropdown } from '../../Common/DevToolsDropdown';
-
 import SidebarButton from './SidebarButton';
 
 /**

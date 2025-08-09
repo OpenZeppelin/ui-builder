@@ -5,7 +5,6 @@ import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { useAnalytics } from '../../../hooks/useAnalytics';
 import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
-
 import SidebarButton from './SidebarButton';
 
 interface MainActionsProps {
