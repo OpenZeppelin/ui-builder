@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 // Adjust path as needed
 import type { ContractFunction, FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
 
+import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
+
 import { EvmAdapter } from '../adapter';
 import { parseEvmInput as parseEvmInputFunction } from '../transform';
-
-import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 
 // Mock FunctionParameter type helper
 const createParam = (

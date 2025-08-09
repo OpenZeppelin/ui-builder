@@ -20,7 +20,6 @@ import {
 
 import { TypedEvmNetworkConfig, WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-
 import { ExecutionStrategy } from './execution-strategy';
 
 /**

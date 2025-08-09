@@ -1,5 +1,4 @@
 import { TypedEvmNetworkConfig } from '../types';
-
 import {
   arbitrumMainnet,
   avalancheMainnet,
