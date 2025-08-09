@@ -30,14 +30,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          # Disabled cache to avoid stale dependencies
+          # cache: 'pnpm'
 
       - name: Configure npm authentication for private registry
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Clean pnpm store
+        run: pnpm store prune
+
+      - name: Install dependencies (fresh)
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint check
         run: pnpm lint

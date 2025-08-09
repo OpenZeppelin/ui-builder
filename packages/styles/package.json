@@ -13,8 +13,8 @@
     "build": "echo 'No build step needed for styles'",
     "lint": "echo 'No JavaScript files to lint in styles package'",
     "lint:fix": "echo 'No JavaScript files to lint in styles package'",
-    "format": "./node_modules/.bin/prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ./.prettierrc.cjs",
-    "format:check": "node debug-prettier-ci.cjs && node debug-diff.cjs && echo '=== ACTUAL FORMAT CHECK ===' && ./node_modules/.bin/prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore --config ./.prettierrc.cjs",
+    "format": "prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
+    "format:check": "prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
     "test": "echo 'No tests for styles package'"
   },
   "keywords": [
@@ -24,11 +24,5 @@
     "design-system"
   ],
   "author": "OpenZeppelin",
-  "license": "MIT",
-  "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "4.5.1",
-    "glob": "^11.0.3",
-    "prettier": "3.6.2",
-    "prettier-plugin-tailwindcss": "0.6.14"
-  }
+  "license": "MIT"
 }

@@ -292,16 +292,16 @@
 
   /* Focus styles for accessibility */
   :focus-visible {
-    @apply ring-primary ring-2 ring-offset-2 outline-none;
+    @apply ring-primary outline-none ring-2 ring-offset-2;
   }
 
   /* Override focus styles for select components */
   [data-slot='select-trigger']:focus-visible,
   [data-slot='select-item']:focus-visible {
-    @apply ring-0 ring-offset-0 outline-none;
+    @apply outline-none ring-0 ring-offset-0;
   }
 
   [data-radix-popper-content-wrapper] *:focus-visible {
-    @apply ring-0 ring-offset-0 outline-none;
+    @apply outline-none ring-0 ring-offset-0;
   }
 }
