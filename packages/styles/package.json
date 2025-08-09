@@ -13,8 +13,8 @@
     "build": "echo 'No build step needed for styles'",
     "lint": "echo 'No JavaScript files to lint in styles package'",
     "lint:fix": "echo 'No JavaScript files to lint in styles package'",
-    "format": "prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
-    "format:check": "node debug-prettier.cjs && echo '---' && prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
+    "format": "npx prettier --write \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
+    "format:check": "npx --yes prettier --check \"**/*.{css,js,cjs}\" --ignore-path ../../.prettierignore",
     "test": "echo 'No tests for styles package'"
   },
   "keywords": [
@@ -26,8 +26,9 @@
   "author": "OpenZeppelin",
   "license": "MIT",
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.5.1",
+    "glob": "^11.0.3",
     "prettier": "3.6.2",
-    "prettier-plugin-tailwindcss": "0.6.14",
-    "@ianvs/prettier-plugin-sort-imports": "4.5.1"
+    "prettier-plugin-tailwindcss": "0.6.14"
   }
 }
