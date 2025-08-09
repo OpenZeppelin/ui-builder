@@ -6,7 +6,6 @@ import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-
 import { BaseFieldProps } from './BaseField';
 import { ErrorMessage, getAccessibilityProps } from './utils';
 

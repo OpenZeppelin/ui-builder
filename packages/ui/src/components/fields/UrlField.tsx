@@ -5,7 +5,6 @@ import { getInvalidUrlMessage, isValidUrl } from '@openzeppelin/contracts-ui-bui
 
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-
 import { BaseFieldProps } from './BaseField';
 import {
   ErrorMessage,

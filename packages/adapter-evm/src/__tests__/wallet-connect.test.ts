@@ -4,9 +4,9 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EvmAdapter } from '../adapter';
-
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
+
+import { EvmAdapter } from '../adapter';
 
 // Mock the WagmiWalletImplementation to isolate EvmAdapter logic
 vi.mock('../wallet/implementation/wagmi-implementation', () => {

@@ -3,7 +3,6 @@ import React, { ReactNode, useEffect } from 'react';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { AnalyticsService } from '../services/AnalyticsService';
-
 import { AnalyticsContext } from './AnalyticsContext';
 
 /**

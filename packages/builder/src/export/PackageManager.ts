@@ -42,7 +42,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../core/types/FormTypes';
-
 import { AdapterConfigLoader } from './AdapterConfigLoader';
 import { packageVersions } from './versions';
 

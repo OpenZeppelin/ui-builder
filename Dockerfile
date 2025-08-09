@@ -30,6 +30,9 @@ ENV VITE_GA_TAG_ID=$VITE_GA_TAG_ID
 # 'python-is-python3' is used in newer Debian-based images instead of 'python'
 RUN apt-get update && apt-get install -y python-is-python3 build-essential && rm -rf /var/lib/apt/lists/*
 
+# Clear any potential corrupted Node.js cache that might cause gyp issues
+RUN rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp || true
+
 # Install pnpm
 RUN npm install -g pnpm
 

@@ -31,8 +31,8 @@
     "test:coverage": "vitest run --coverage --passWithNoTests",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc"
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc.cjs",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc.cjs"
   },
   "keywords": [
     "utils",

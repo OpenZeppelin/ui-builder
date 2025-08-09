@@ -1,6 +1,5 @@
 import type { ContractAdapter, ExecutionConfig } from '../adapters/base';
 import type { ContractSchema } from '../contracts/schema';
-
 import type { RenderFormSchema } from './schema';
 
 /**
