@@ -7,7 +7,6 @@ import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
 import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
 import type { PrimaryMethodSelectorProps } from '../types';
-
 import { EoaConfiguration } from './EoaConfiguration';
 import { RelayerConfiguration } from './RelayerConfiguration';
 

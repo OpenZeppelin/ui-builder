@@ -30,7 +30,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          # Disabled cache to avoid stale dependencies
+          # cache: 'pnpm'
 
       - name: Configure npm authentication for private registry
         run: |

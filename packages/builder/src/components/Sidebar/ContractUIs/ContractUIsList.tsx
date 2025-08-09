@@ -4,7 +4,6 @@ import { ContractUIRecord, useContractUIStorage } from '@openzeppelin/contracts-
 
 import { useStorageOperations } from '../../../hooks/useStorageOperations';
 import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
-
 import ContractUIItem from './ContractUIItem';
 
 interface ContractUIsListProps {

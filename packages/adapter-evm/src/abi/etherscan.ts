@@ -3,7 +3,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { resolveExplorerConfig } from '../configuration/explorer';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
-
 import { loadAbiFromEtherscanV2, shouldUseV2Api } from './etherscan-v2';
 import { transformAbiToSchema } from './transformer';
 

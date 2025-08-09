@@ -1,5 +1,4 @@
 import { FunctionParameter } from '../contracts/schema';
-
 import { FieldCondition, FieldTransforms, FieldType, FieldValue } from './fields';
 import { FieldValidation } from './validation';
 

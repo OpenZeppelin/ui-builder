@@ -16,7 +16,6 @@ import type {
   FormComponentTemplateParams,
 } from '../codeTemplates/TemplateTypes';
 import { TemplateManager } from '../TemplateManager';
-
 import { TemplateProcessor } from './TemplateProcessor';
 
 // Use the glob pattern to discover template files

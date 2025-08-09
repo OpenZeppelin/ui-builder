@@ -6,7 +6,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../components';
 import { createRainbowKitComponents, validateRainbowKitConfig } from '../rainbowkit';
-
 // Assuming this is the default custom provider
 import { filterWalletComponents, getComponentExclusionsFromConfig } from './filterWalletComponents';
 

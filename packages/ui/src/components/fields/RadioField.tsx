@@ -2,7 +2,6 @@ import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
 import { Label } from '../ui/label';
-
 import { BaseFieldProps } from './BaseField';
 import { ErrorMessage, getAccessibilityProps } from './utils';
 
