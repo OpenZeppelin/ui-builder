@@ -86,7 +86,7 @@ jobs:
         uses: slsa-framework/slsa-github-generator/.github/actions/secure-download-artifact@3bcecb4ade4f265cff30488059a9dca39e26b360 # main
         with:
           name: ${{ needs.provenance.outputs.package-download-name }}
-          path: ${{ needs.provenance.outputs.package-name }}
+          path: "${{ steps.temp-dir.outputs.path }}"
           sha256: ${{ needs.provenance.outputs.package-download-sha256 }}
 
       - name: Unpack the zipped artifact
