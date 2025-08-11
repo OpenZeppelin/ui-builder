@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import ContractUIImportDialog from '../ContractUIs/ContractUIImportDialog';
-import ContractUIsSection from './ContractUIsSection';
-import MainActions from './MainActions';
-import OtherToolsSection from './OtherToolsSection';
+import SidebarContent from './SidebarContent';
 import SidebarLogo from './SidebarLogo';
+import SidebarNavIcons from './SidebarNavIcons';
 
 interface AppSidebarProps {
   className?: string;
@@ -36,7 +35,7 @@ export default function AppSidebar({
 }: AppSidebarProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
 
-  /** Shared sidebar scrollable content */
+  /** Shared sidebar scrollable content wrapper */
   const SidebarBody = ({
     paddingClass,
     gapClass = 'gap-12',
@@ -47,21 +46,15 @@ export default function AppSidebar({
     onLoadContractUiHandler: (id: string) => void;
   }) => (
     <div className={cn('flex-1 overflow-y-auto', paddingClass)}>
-      <div className={cn('flex flex-col w-full', gapClass)}>
-        <MainActions
-          onCreateNew={onCreateNew}
-          onShowImportDialog={() => setShowImportDialog(true)}
-          isInNewUIMode={isInNewUIMode}
-        />
-
-        <OtherToolsSection />
-
-        <ContractUIsSection
-          onLoadContractUI={onLoadContractUiHandler}
-          onResetAfterDelete={onResetAfterDelete}
-          currentLoadedConfigurationId={currentLoadedConfigurationId}
-        />
-      </div>
+      <SidebarContent
+        onCreateNew={onCreateNew}
+        onShowImportDialog={() => setShowImportDialog(true)}
+        isInNewUIMode={isInNewUIMode}
+        onLoadContractUI={onLoadContractUiHandler}
+        onResetAfterDelete={onResetAfterDelete}
+        currentLoadedConfigurationId={currentLoadedConfigurationId}
+        gapClass={gapClass}
+      />
     </div>
   );
 
@@ -83,9 +76,14 @@ export default function AppSidebar({
 
         {/* Scrollable Content Area */}
         <SidebarBody
-          paddingClass="px-8 pb-12"
+          paddingClass="px-8 pb-24"
           onLoadContractUiHandler={(id) => onLoadContractUI?.(id)}
         />
+
+        {/* Fixed footer icons */}
+        <div className="pointer-events-auto sticky bottom-0 px-8 py-4">
+          <SidebarNavIcons />
+        </div>
       </div>
 
       {/* Import Dialog */}
@@ -126,13 +124,17 @@ export default function AppSidebar({
                 <SidebarLogo />
               </div>
               <SidebarBody
-                paddingClass="px-6 pb-8"
+                paddingClass="px-6 pb-20"
                 gapClass="gap-10"
                 onLoadContractUiHandler={(id) => {
                   onOpenChange(false);
                   onLoadContractUI?.(id);
                 }}
               />
+              {/* Mobile fixed footer icons */}
+              <div className="px-6 py-4">
+                <SidebarNavIcons />
+              </div>
             </div>
           </div>
         </div>
