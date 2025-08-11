@@ -4,7 +4,6 @@ import { useWatch } from 'react-hook-form';
 import type { RelayerDetails } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { RelayerConfigurationProps } from '../../types';
-
 import {
   RelayerCredentialsCard,
   RelayerGasConfigurationCard,

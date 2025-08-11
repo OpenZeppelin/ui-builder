@@ -8,7 +8,6 @@ import { resolveRpcUrl } from '../configuration';
 import { parseEvmInput } from '../transform';
 import type { TypedEvmNetworkConfig } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-
 import { isEvmViewFunction } from './view-checker';
 
 /**

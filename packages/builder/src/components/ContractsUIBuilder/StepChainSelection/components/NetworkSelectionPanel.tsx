@@ -12,7 +12,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
-
 import { NetworkRow } from './NetworkRow';
 
 interface NetworkSelectionPanelProps {

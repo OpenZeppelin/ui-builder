@@ -20,7 +20,6 @@ import {
   getVisibleEcosystems,
   isEcosystemEnabled,
 } from '../../../../utils/ecosystem-feature-flags';
-
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
 
 interface ChainSelectorProps {

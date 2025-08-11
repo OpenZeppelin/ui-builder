@@ -51,9 +51,9 @@
     "lucide-react": "^0.510.0"
   },
   "devDependencies": {
-    "@types/react": "19.1.6",
-    "eslint": "^9.29.0",
-    "typescript": "^5.8.3"
+    "@types/react": "^19.1.9",
+    "eslint": "^9.32.0",
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "react": "^19.0.0"

@@ -12,7 +12,6 @@ import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
-
 import type {
   AvailableUiKit,
   EcosystemReactUiProviderProps,

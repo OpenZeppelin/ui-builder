@@ -11,7 +11,6 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { WriteContractParameters } from '../types';
 import { validateEoaConfig } from '../validation';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-
 import { ExecutionStrategy } from './execution-strategy';
 
 const SYSTEM_LOG_TAG = 'EoaExecutionStrategy';

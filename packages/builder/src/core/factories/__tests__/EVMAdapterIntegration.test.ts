@@ -6,10 +6,10 @@ import type {
   EvmNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
+import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
+
 import { getAdapter } from '../../ecosystemManager';
 import { FormSchemaFactory } from '../FormSchemaFactory';
-
-import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 
 /**
  * EVM Adapter Integration Tests

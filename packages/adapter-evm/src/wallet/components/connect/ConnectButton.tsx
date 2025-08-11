@@ -10,7 +10,6 @@ import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
-
 import { ConnectorDialog } from './ConnectorDialog';
 
 /**

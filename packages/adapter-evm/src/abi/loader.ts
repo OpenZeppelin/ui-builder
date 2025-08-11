@@ -11,7 +11,6 @@ import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { detectProxyFromAbi, getImplementationAddress } from '../proxy/detection';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
-
 import { loadAbiFromEtherscan } from './etherscan';
 import { transformAbiToSchema } from './transformer';
 

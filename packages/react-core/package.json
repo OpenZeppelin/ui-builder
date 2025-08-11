@@ -32,8 +32,8 @@
     "test:coverage": "vitest run --coverage --passWithNoTests",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc"
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc.cjs",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" --config ../../.prettierrc.cjs"
   },
   "keywords": [
     "react",
@@ -58,17 +58,17 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
     "@types/rollup-plugin-peer-deps-external": "^2.2.5",
-    "@typescript-eslint/eslint-plugin": "^8.35.0",
-    "@typescript-eslint/parser": "^8.35.0",
-    "eslint": "^9.29.0",
-    "eslint-config-prettier": "^10.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "typescript": "^5.8.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
 }

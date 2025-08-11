@@ -1,5 +1,4 @@
 import { uiBuilderStore } from '../../uiBuilderStore';
-
 import { SavedConfigurationData } from './types';
 
 /**

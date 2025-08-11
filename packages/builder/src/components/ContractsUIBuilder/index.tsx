@@ -5,14 +5,13 @@ import { ContractStateWidget } from '@openzeppelin/contracts-ui-builder-renderer
 import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';
-import type { WizardStep } from '../Common/WizardLayout';
-import { WizardLayout } from '../Common/WizardLayout';
-
 import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
+import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';
+import type { WizardStep } from '../Common/WizardLayout';
+import { WizardLayout } from '../Common/WizardLayout';
 import { HeroSection } from './HeroSection';
 import { useUIBuilderState } from './hooks';
 import { StepComplete } from './StepComplete';

@@ -1,12 +1,11 @@
 import { useStore } from 'zustand';
 
-import { ActionBar } from '../../Common/ActionBar';
-import { StepTitleWithDescription } from '../Common';
-import { uiBuilderStoreVanilla } from '../hooks/uiBuilderStore';
-
 import { useFunctionFilter } from './hooks/useFunctionFilter';
 import { useFunctionSelection } from './hooks/useFunctionSelection';
 
+import { ActionBar } from '../../Common/ActionBar';
+import { StepTitleWithDescription } from '../Common';
+import { uiBuilderStoreVanilla } from '../hooks/uiBuilderStore';
 import { FilterControls } from './FilterControls';
 import { StepFunctionSelectorProps } from './types';
 import { WritableFunctionsSection } from './WritableFunctionsSection';

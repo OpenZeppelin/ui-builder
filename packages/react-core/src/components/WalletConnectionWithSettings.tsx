@@ -8,7 +8,6 @@ import {
 } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { useWalletState } from '../hooks/WalletStateContext';
-
 import { WalletConnectionUI } from './WalletConnectionUI';
 
 /**

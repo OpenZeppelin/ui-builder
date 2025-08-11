@@ -17,18 +17,19 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v2
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
+        id: gh-app-token
         with:
-          version: 9.10.0
-          run_install: false
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout Repo
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
+
+      - name: Prepare pre-requisites
+        uses: ./.github/actions/prepare
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          token: ${{ steps.gh-app-token.outputs.token }}
 
       - name: Configure npm authentication for npm registry
         run: |

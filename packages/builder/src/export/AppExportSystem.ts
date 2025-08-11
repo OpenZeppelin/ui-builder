@@ -13,14 +13,13 @@ import {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { getAdapter } from '../core/ecosystemManager';
-import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
-import type { BuilderFormConfig } from '../core/types/FormTypes';
-
 // Lazy import types for dependency management
 import type { AppCodeGenerator } from './generators/AppCodeGenerator';
 import type { TemplateProcessor } from './generators/TemplateProcessor';
 
+import { getAdapter } from '../core/ecosystemManager';
+import type { ExportOptions, ExportResult } from '../core/types/ExportTypes';
+import type { BuilderFormConfig } from '../core/types/FormTypes';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
