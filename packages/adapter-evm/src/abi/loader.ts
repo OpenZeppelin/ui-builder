@@ -11,7 +11,6 @@ import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { detectProxyFromAbi, getImplementationAddress } from '../proxy/detection';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
-
 import { loadAbiFromEtherscan } from './etherscan';
 import { transformAbiToSchema } from './transformer';
 
@@ -26,11 +25,11 @@ async function loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
       throw new Error('Parsed JSON is not an array.');
     }
   } catch (error) {
-    console.error('loadAbiFromJson', 'Failed to parse source string as JSON ABI:', error);
+    logger.error('loadAbiFromJson', 'Failed to parse source string as JSON ABI:', error);
     throw new Error(`Invalid JSON ABI provided: ${(error as Error).message}`);
   }
 
-  console.info(`Successfully parsed JSON ABI with ${abi.length} items.`);
+  logger.info('loadAbiFromJson', `Successfully parsed JSON ABI with ${abi.length} items.`);
   const contractName = 'ContractFromABI'; // Default name for direct ABI
   return transformAbiToSchema(abi, contractName, undefined);
 }

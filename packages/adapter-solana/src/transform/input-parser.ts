@@ -1,4 +1,5 @@
 import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Placeholder
 export function parseSolanaInput(
@@ -6,6 +7,6 @@ export function parseSolanaInput(
   rawValue: unknown,
   _isRecursive = false
 ): unknown {
-  console.warn('parseSolanaInput not implemented');
+  logger.warn('adapter-solana', 'parseSolanaInput not implemented');
   return rawValue; // Passthrough for now
 }

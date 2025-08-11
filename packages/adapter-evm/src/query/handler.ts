@@ -8,7 +8,6 @@ import { resolveRpcUrl } from '../configuration';
 import { parseEvmInput } from '../transform';
 import type { TypedEvmNetworkConfig } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-
 import { isEvmViewFunction } from './view-checker';
 
 /**
@@ -49,7 +48,8 @@ async function getPublicClientForQuery(
 
   // Fallback: Create a dedicated client using the resolved RPC URL
   const resolvedRpc = resolveRpcUrl(networkConfig);
-  console.log(
+  logger.info(
+    'getPublicClientForQuery',
     `Wallet not connected/on wrong chain OR failed to get wallet client. Creating dedicated public client for query on ${networkConfig.name} using RPC: ${resolvedRpc}`
   );
   return createPublicClientWithRpc(networkConfig, resolvedRpc);
@@ -66,7 +66,8 @@ function createPublicClientWithRpc(
   if (networkConfig.viemChain) {
     chainForViem = networkConfig.viemChain;
   } else {
-    console.warn(
+    logger.warn(
+      'createPublicClientWithRpc',
       `Viem chain object (viemChain) not provided in EvmNetworkConfig for ${networkConfig.name} (query). Creating a minimal one.`
     );
     if (!networkConfig.rpcUrl) {
@@ -96,7 +97,11 @@ function createPublicClientWithRpc(
     });
     return publicClient;
   } catch (error) {
-    console.error('Failed to create network-specific public client for query:', error);
+    logger.error(
+      'createPublicClientWithRpc',
+      'Failed to create network-specific public client for query:',
+      error
+    );
     throw new Error(
       `Failed to create network-specific public client for query: ${(error as Error).message}`
     );
@@ -124,11 +129,10 @@ export async function queryEvmViewFunction(
   walletImplementation: WagmiWalletImplementation,
   loadContractFn: (source: string) => Promise<ContractSchema>
 ): Promise<unknown> {
-  console.log(
+  logger.info(
+    'queryEvmViewFunction',
     `Querying view function: ${functionId} on ${contractAddress} (${networkConfig.name})`,
-    {
-      params,
-    }
+    { params }
   );
   try {
     // --- Validate Address --- //
@@ -158,15 +162,26 @@ export async function queryEvmViewFunction(
       );
     }
     const args = expectedInputs.map((inputParam: FunctionParameter, index: number) => {
-      const rawValue = params[index];
+      let rawValue = params[index];
+      // If the ABI parameter type is an array (e.g., 'tuple[]', 'address[]') and
+      // the incoming raw value is an actual array (from programmatic usage),
+      // stringify it to align with parseEvmInput expectations for top-level arrays.
+      if (
+        typeof inputParam.type === 'string' &&
+        inputParam.type.endsWith('[]') &&
+        Array.isArray(rawValue)
+      ) {
+        rawValue = JSON.stringify(rawValue);
+      }
       return parseEvmInput(inputParam, rawValue, false);
     });
-    console.log('Parsed Args for readContract:', args);
+    logger.debug('queryEvmViewFunction', 'Parsed Args for readContract:', args);
 
     // --- Construct ABI Item --- //
     const functionAbiItem = createAbiFunctionItem(functionDetails);
 
-    console.log(
+    logger.debug(
+      'queryEvmViewFunction',
       `[Query ${functionDetails.name}] Calling readContract with ABI:`,
       functionAbiItem,
       'Args:',
@@ -183,7 +198,8 @@ export async function queryEvmViewFunction(
         args: args,
       });
     } catch (readError) {
-      console.error(
+      logger.error(
+        'queryEvmViewFunction',
         `[Query ${functionDetails.name}] publicClient.readContract specific error:`,
         readError
       );
@@ -192,12 +208,16 @@ export async function queryEvmViewFunction(
       );
     }
 
-    console.log(`[Query ${functionDetails.name}] Raw decoded result:`, decodedResult);
+    logger.debug(
+      'queryEvmViewFunction',
+      `[Query ${functionDetails.name}] Raw decoded result:`,
+      decodedResult
+    );
 
     return decodedResult;
   } catch (error) {
     const errorMessage = `Failed to query view function ${functionId} on network ${networkConfig.name}: ${(error as Error).message}`;
-    console.error(`queryEvmViewFunction Error: ${errorMessage}`, {
+    logger.error('queryEvmViewFunction', errorMessage, {
       contractAddress,
       functionId,
       params,

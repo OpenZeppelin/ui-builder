@@ -4,7 +4,6 @@ import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
-
 import {
   useAutoSave,
   useBuilderConfig,
@@ -85,16 +84,24 @@ export function useUIBuilderState() {
     // Load if we need to and have the required data
     if (
       state.needsContractDefinitionLoad &&
-      state.contractState.formValues?.contractAddress &&
+      state.contractState.address &&
       activeAdapter &&
+      // Avoid triggering loads while the user is still typing an invalid/partial address
+      activeAdapter.isValidAddress(state.contractState.address) &&
       (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
         !state.selectedNetworkConfigId)
     ) {
-      void contractDefinition.load(state.contractState.formValues);
+      // Build form values using the latest address from store to avoid stale resets
+      const baseFormValues = state.contractState.formValues || { contractAddress: '' };
+      const mergedFormValues = {
+        ...baseFormValues,
+        contractAddress: state.contractState.address,
+      } as typeof baseFormValues;
+      void contractDefinition.load(mergedFormValues);
     }
   }, [
     state.needsContractDefinitionLoad,
-    state.contractState.formValues?.contractAddress,
+    state.contractState.address,
     state.selectedNetworkConfigId,
     state.isLoadingConfiguration,
     activeAdapter?.networkConfig.id,

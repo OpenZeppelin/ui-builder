@@ -20,6 +20,7 @@ import {
   EmptyState,
   PasswordField,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { EoaConfigDetails } from './components/EoaConfigDetails';
 import { ExecutionMethodTrigger } from './components/ExecutionMethodTrigger';
@@ -86,7 +87,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
           setEnhancedRelayerDetails(details);
         })
         .catch((err) => {
-          console.error('Failed to fetch enhanced relayer details:', err);
+          logger.error('ExecutionConfigDisplay', 'Failed to fetch enhanced relayer details:', err);
           // Keep using basic details if enhanced fetch fails
           setEnhancedRelayerDetails(null);
         })

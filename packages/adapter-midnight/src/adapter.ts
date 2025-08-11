@@ -286,7 +286,7 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
-    console.warn('getRelayers is not implemented for the Midnight adapter yet.');
+    logger.warn('MidnightAdapter', 'getRelayers is not implemented for the Midnight adapter yet.');
     return Promise.resolve([]);
   }
 
@@ -295,7 +295,7 @@ export class MidnightAdapter implements ContractAdapter {
     _accessToken: string,
     _relayerId: string
   ): Promise<RelayerDetailsRich> {
-    console.warn('getRelayer is not implemented for the Midnight adapter yet.');
+    logger.warn('MidnightAdapter', 'getRelayer is not implemented for the Midnight adapter yet.');
     return Promise.resolve({} as RelayerDetailsRich);
   }
 

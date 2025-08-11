@@ -10,7 +10,6 @@ import type {
 import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
-
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 
 /**

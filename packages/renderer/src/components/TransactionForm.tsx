@@ -9,11 +9,10 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { createDefaultFormValues } from '../utils/formUtils';
-
 import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
+import { createDefaultFormValues } from '../utils/formUtils';
 import { DynamicFormField } from './DynamicFormField';
 import { TransactionStatusDisplay } from './transaction';
 
@@ -262,7 +261,8 @@ export function TransactionForm({
     }
 
     // Fallback using getExplorerUrl (also uses internal networkConfig)
-    console.warn(
+    logger.warn(
+      'TransactionForm',
       'getExplorerTxUrl not implemented by adapter, trying getExplorerUrl as fallback (might expect address).'
     );
     // Ensure adapter.getExplorerUrl exists before calling

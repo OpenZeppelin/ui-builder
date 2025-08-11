@@ -5,6 +5,8 @@
  * and providing them for export without requiring filesystem operations.
  * It implements in-memory project generation to allow browser-based exports.
  */
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 import type { TemplateOptions } from '../core/types/ExportTypes';
 
 // Template registry type - maps template names to file collections
@@ -131,7 +133,7 @@ export class TemplateManager {
       // that gets updated during the build process
       return '1.0.0';
     } catch (error) {
-      console.warn('Failed to get package version:', error);
+      logger.warn('TemplateManager', 'Failed to get package version:', error);
       return '0.0.0';
     }
   }
@@ -206,7 +208,10 @@ export class TemplateManager {
               process.env.EXPORT_CLI_MODE === 'true'
             ) {
               packageJson.dependencies[dep] = 'workspace:*';
-              console.log(`Setting ${dep} to use workspace dependency for local development`);
+              logger.info(
+                'TemplateManager',
+                `Setting ${dep} to use workspace dependency for local development`
+              );
             } else if (
               dep.startsWith('@openzeppelin/') &&
               !isLocalEnv &&
@@ -214,7 +219,10 @@ export class TemplateManager {
             ) {
               // For production mode, use the latest published version
               packageJson.dependencies[dep] = 'latest';
-              console.log(`Setting ${dep} to use latest published version for production`);
+              logger.info(
+                'TemplateManager',
+                `Setting ${dep} to use latest published version for production`
+              );
             }
           });
         }
@@ -222,7 +230,7 @@ export class TemplateManager {
         // Use simple JSON.stringify without formatting - Prettier will handle it later
         files['package.json'] = JSON.stringify(packageJson);
       } catch (error) {
-        console.error('Error processing package.json:', error);
+        logger.error('TemplateManager', 'Error processing package.json:', error);
       }
     }
 

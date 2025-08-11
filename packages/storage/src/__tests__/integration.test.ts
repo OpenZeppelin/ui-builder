@@ -8,7 +8,6 @@ import { FieldType, FieldValidation } from '../../../types/src';
 import { db } from '../database/db';
 import { ContractUIStorage } from '../services/ContractUIStorage';
 import type { ContractUIExportData } from '../types';
-
 import { cleanupTestDb, createEmptyContractUIRecord, createMockContractUIRecord } from './setup';
 
 describe('Storage Integration Tests', () => {

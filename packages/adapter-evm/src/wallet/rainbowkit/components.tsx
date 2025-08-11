@@ -8,7 +8,6 @@ import { cn, logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { CustomConnectButton } from '../components';
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
 import { evmUiKitManager } from '../evmUiKitManager';
-
 import { extractRainbowKitCustomizations } from './types';
 
 const MIN_COMPONENT_LOADING_DISPLAY_MS = 1000; // 1 second artificial delay

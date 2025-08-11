@@ -1,5 +1,7 @@
 import JSZip from 'jszip';
 
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 /**
  * Options for ZIP file generation
  */
@@ -134,7 +136,7 @@ export class ZipGenerator {
         fileName: this.ensureZipExtension(fileName),
       };
     } catch (error) {
-      console.error('Error creating ZIP file:', error);
+      logger.error('ZipGenerator', 'Error creating ZIP file:', error);
       throw new Error(`Failed to create ZIP file: ${(error as Error).message}`);
     }
   }

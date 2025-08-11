@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
 import { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/contracts-ui-builder-ui';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { networkService } from '../../core/networks/service';
 
@@ -64,10 +65,10 @@ export function NetworkErrorHandler() {
           setDefaultTab(tab);
           // The useEffect will handle getting the adapter
         } else {
-          console.error(`Network not found: ${networkId}`);
+          logger.error('NetworkErrorHandler', `Network not found: ${networkId}`);
         }
       } catch (error) {
-        console.error('Failed to open network settings:', error);
+        logger.error('NetworkErrorHandler', 'Failed to open network settings:', error);
       }
     },
     []

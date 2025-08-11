@@ -4,7 +4,6 @@
 import { describe, expect, it } from 'vitest';
 
 import type { BaseRecord, ContractUIExportData, ContractUIRecord } from '../types';
-
 import { createEmptyContractUIRecord, createMockContractUIRecord } from './setup';
 
 describe('Types', () => {

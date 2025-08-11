@@ -1,3 +1,5 @@
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
 // TODO: Implement Stellar-specific input parsing logic if needed.
 
 // Placeholder function - adapt as needed
@@ -6,6 +8,6 @@ export function parseStellarInput(
   _value: unknown,
   _parameterType: string
 ): unknown {
-  console.warn('StellarAdapter.parseStellarInput not implemented, returning raw value.');
+  logger.warn('adapter-stellar', 'parseStellarInput not implemented, returning raw value.');
   return _value; // Placeholder: return value as is
 }

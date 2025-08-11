@@ -3,6 +3,7 @@ import type {
   MidnightNetworkConfig,
   NetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Queries a view function on a contract
@@ -23,6 +24,6 @@ export async function queryMidnightViewFunction(
   // - midnightConfig properties (e.g., RPC endpoint if applicable)
   // - _contractAddress, _functionId, _params, _contractSchema
   // - Potentially use Midnight SDK
-  console.warn(`queryMidnightViewFunction not implemented for network: ${midnightConfig.name}`);
+  logger.warn('queryMidnightViewFunction', `Not implemented for network: ${midnightConfig.name}`);
   throw new Error('Midnight view function queries not yet implemented');
 }

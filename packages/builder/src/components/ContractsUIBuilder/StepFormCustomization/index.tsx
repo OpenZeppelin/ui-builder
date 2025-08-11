@@ -16,14 +16,13 @@ import {
   TabsTrigger,
 } from '@openzeppelin/contracts-ui-builder-ui';
 
-import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-import { ActionBar } from '../../Common/ActionBar';
-import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
-
 import { useFieldSelection } from './hooks/useFieldSelection';
 import { useFormConfig } from './hooks/useFormConfig';
 import { ensureCompleteConfig } from './utils/executionUtils';
 
+import type { BuilderFormConfig } from '../../../core/types/FormTypes';
+import { ActionBar } from '../../Common/ActionBar';
+import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 import { UiKitSettings } from './components';
 import { ExecutionMethodSettings } from './ExecutionMethodSettings';
 import { FieldEditor } from './FieldEditor';

@@ -105,7 +105,7 @@ export function ViewFunctionsPanel({
       // Execute queries with rate limiting (1 at a time with 200ms delay between requests)
       await rateLimitedBatch(queryFunctions, 1, 200);
     } catch (err) {
-      console.error('Error querying functions:', err);
+      logger.error('ViewFunctionsPanel', 'Error querying functions:', err);
       // Clear all loading states on error
       setLoadingStates({});
     } finally {

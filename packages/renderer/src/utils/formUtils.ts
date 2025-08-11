@@ -11,6 +11,7 @@ import {
   FormFieldType,
   FormValues,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
  * Parameter constraints for validation and default value generation
@@ -205,7 +206,8 @@ export function createTransformForFieldType(
     default:
       // For unhandled field types, log a warning and fallback to complex type (JSON) transform.
       // Ideally, all common ABI types should be mapped by the adapter to specific FieldTypes.
-      console.warn(
+      logger.warn(
+        'formUtils',
         `createTransformForFieldType: No specific transform for fieldType "${fieldType as string}". Falling back to createComplexTypeTransform. Ensure adapter maps all expected ABI types to specific FieldTypes.`
       );
       return createComplexTypeTransform();
@@ -291,7 +293,7 @@ export function createArrayTransform(): FieldTransforms<unknown[]> {
       if (!Array.isArray(value)) {
         // This case should ideally not be hit if types are followed,
         // but as a safeguard, return empty array string.
-        console.warn('createArrayTransform input received non-array value:', value);
+        logger.warn('formUtils', 'createArrayTransform input received non-array value:', value);
         return '[]';
       }
       try {
@@ -330,7 +332,11 @@ export function createObjectTransform(): FieldTransforms<Record<string, unknown>
       // An empty or uninitialized object state should be represented by an empty object `{}`.
       if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         // This case should ideally not be hit if types are strictly followed.
-        console.warn('createObjectTransform input received non-object or null value:', value);
+        logger.warn(
+          'formUtils',
+          'createObjectTransform input received non-object or null value:',
+          value
+        );
         return '{}'; // Default to empty object string
       }
       try {
@@ -374,7 +380,11 @@ export function createArrayObjectTransform(): FieldTransforms<Record<string, unk
       if (!Array.isArray(value)) {
         // This case should ideally not be hit if types are strictly followed.
         // However, if it occurs at runtime, log a warning and return default.
-        console.warn('createArrayObjectTransform input received non-array value:', value);
+        logger.warn(
+          'formUtils',
+          'createArrayObjectTransform input received non-array value:',
+          value
+        );
         return '[]';
       }
       try {

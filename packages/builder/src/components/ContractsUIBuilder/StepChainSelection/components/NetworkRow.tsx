@@ -7,7 +7,6 @@ import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { getNetworkIconName, ICON_SIZE } from '../utils/utils';
-
 import { NetworkDetail } from './NetworkDetail';
 
 export interface NetworkRowProps {

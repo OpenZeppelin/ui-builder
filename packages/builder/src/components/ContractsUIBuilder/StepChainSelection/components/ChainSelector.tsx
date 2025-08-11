@@ -20,7 +20,6 @@ import {
   getVisibleEcosystems,
   isEcosystemEnabled,
 } from '../../../../utils/ecosystem-feature-flags';
-
 import { NetworkSelectionPanel } from './NetworkSelectionPanel';
 
 interface ChainSelectorProps {
@@ -121,12 +120,12 @@ export function ChainSelector({
             setValue('ecosystem', network.ecosystem);
           } else {
             // Fall back to initialEcosystem if network not found
-            console.warn(`Network with ID ${selectedNetworkId} not found`);
+            logger.warn('ChainSelector', `Network with ID ${selectedNetworkId} not found`);
             setSelectedEcosystem(initialEcosystem);
             setValue('ecosystem', initialEcosystem);
           }
         } catch (error) {
-          console.error('Failed to fetch network details:', error);
+          logger.error('ChainSelector', 'Failed to fetch network details:', error);
           // Fall back to initialEcosystem if we can't determine the ecosystem
           setSelectedEcosystem(initialEcosystem);
           setValue('ecosystem', initialEcosystem);

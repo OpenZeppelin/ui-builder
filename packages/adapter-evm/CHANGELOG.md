@@ -1,5 +1,19 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.3.2
+
+### Patch Changes
+
+- [#80](https://github.com/OpenZeppelin/contracts-ui-builder/pull/80) [`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc) Thanks [@pasevin](https://github.com/pasevin)! - Route all console.\* logs through centralized logger from utils, add system tags, update tests to spy on logger, restore missing createAbiFunctionItem in EVM adapter, and apply lint/prettier fixes. No public API changes.
+
+- [#81](https://github.com/OpenZeppelin/contracts-ui-builder/pull/81) [`14171aa`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/14171aa46dfd76811551e0ba4560097736fb3420) Thanks [@pasevin](https://github.com/pasevin)! - - Stringify array args for view calls before parsing to prevent runtime failures
+  - Stringify array inputs for write path to align with the parser
+  - Guard relayer value precision (avoid Number overflow) and warn on default gasLimit
+  - Honor RPC overrides in proxy detection and remove variable shadowingNo breaking changes; behavior is more robust and config-compliant.
+- Updated dependencies [[`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc)]:
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.3
+  - @openzeppelin/contracts-ui-builder-ui@0.4.1
+
 ## 0.3.1
 
 ### Patch Changes

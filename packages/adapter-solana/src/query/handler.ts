@@ -3,6 +3,7 @@ import type {
   NetworkConfig,
   SolanaNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Assuming we might reuse some types temporarily
 // Placeholder type for wallet implementation
@@ -28,8 +29,9 @@ export async function querySolanaViewFunction(
   // - solanaConfig.rpcEndpoint
   // - _contractAddress, _functionId, _params, _contractSchema
   // - Potentially use a Solana library like @solana/web3.js
-  console.warn(
-    `querySolanaViewFunction not fully implemented for network: ${solanaConfig.name} (RPC: ${solanaConfig.rpcEndpoint})`
+  logger.warn(
+    'querySolanaViewFunction',
+    `Not fully implemented for network: ${solanaConfig.name} (RPC: ${solanaConfig.rpcEndpoint})`
   );
   return undefined;
 }

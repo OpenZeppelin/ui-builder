@@ -1,4 +1,5 @@
 import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Placeholder
 export function formatSolanaTransactionData(
@@ -7,6 +8,6 @@ export function formatSolanaTransactionData(
   _submittedInputs: Record<string, unknown>,
   _fields: FormFieldType[]
 ): unknown {
-  console.warn('formatSolanaTransactionData not implemented');
+  logger.warn('adapter-solana', 'formatSolanaTransactionData not implemented');
   return {};
 }
