@@ -40,7 +40,8 @@ RUN npm install -g pnpm
 COPY . .
 
 # Install dependencies directly from the public npm registry
-RUN pnpm install --frozen-lockfile
+# Retry once on failure after clearing possible corrupted caches to avoid node-gyp issues
+RUN pnpm install --frozen-lockfile || (echo "Install failed, clearing caches and retrying..." && rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp && pnpm install --frozen-lockfile)
 
 # Build all packages in the correct order
 # This step now uses Docker BuildKit secrets to securely pass the Etherscan API key
