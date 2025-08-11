@@ -1,0 +1,64 @@
+= Customization
+
+Once you have selected the function you want to build a form for, you can finally customize the experience the form will take.
+
+== General Settings
+
+In the general settings you can update the name of the form and a custom description to help clarify it's purpose
+
+image::customization-general.png[Customization general settings]
+
+== Fields
+
+The fields section will let you customize how someone might interact with your form. This can be incredibly useful if you need to provide a better UX for values to fill in. You can also make certain fields or values hard coded into the form and only give users the option to execute the function. All of these are available so you can craft an experience for yourself or for someone who is non-technical and might need guidance on what to add.
+
+image::customization-fields.png[Customization fields]
+
+== Execution Method
+
+When it comes to how the form is executed as a transaction there are several options.
+
+[WARNING]
+====
+These execution method restrictions only apply on the client form, NOT the contract itself. Make sure your contract has secure access controls in place!
+====
+
+=== EOA
+
+The EOA method allows a user to connect their wallet and execute on the form. You can also specify if anyone can connect or just one specific address.
+
+image::customization-eoa.png[Customization EOA settings]
+
+=== OpenZeppelin Relayer
+
+Forms can also be configured to be executed by an OpenZeppelin Relayer by providing the service URL and an API key for the relayer. From there you can select which of the available relayers to use.
+
+image::customization-relayer.png[Customization relayer settings]
+
+== Multisig (coming soon)
+
+Multisig services like Safe, Squads, etc. will be available in the near future!
+
+image::customization-multisig.png[Customization multisig settings]
+
+== Wallet UI Kit
+
+If you are using an EOA execution method you can customize the wallet connection experience. You can do this by using the OpenZeppelin setup which requires no additional configuration:
+
+image::customization-wallet-ui.png[Customization wallet UI settings]
+
+Of you can use RainbowKit which will require the additional RainbowKit config to be added to your final app.
+
+image::customization-rainbow.png[Customization Rainbow Kit settings]
+
+== Form Previews
+
+At any time during the customization phase you can open up the preview for your form to see what the final product will look like.
+
+image::customization-preview-button.png[Customization preview button]
+
+In the preview you can also test the interaction by connecting your wallet and using it!
+
+image::customization-preview-usage.png[Customization preview usage]
+
+image::customization-preview-tx.png[Customization preview transaction]

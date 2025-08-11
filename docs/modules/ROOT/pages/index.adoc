@@ -1,0 +1,38 @@
+:contracts-ui-builder: https://github.com/OpenZeppelin/contracts-ui-builder
+
+= Contracts UI Builder
+:description: User guide for the Contracts UI Builder - an open source tool to quickly create online forms to interact with your smart contracts.
+
+The Contracts UI Builder is an open source tool that allows you to quickly create online forms to interact with your smart contracts for testing or administration purposes. Build custom interfaces for your contracts with configurable networks, automatic ABI scraping, and export as React applications.
+
+== Features
+
+* Configurable EVM Networks
+* Automatic contract state and ABI scraping
+* Custom forms for different contract input types
+* Execution restriction options
+* OpenZeppelin Wallet UI or Rainbow Kit integration
+* Export as React App projects
+
+== Getting Started
+
+Ready to build your first contract interface? Start with our xref:quickstart.adoc[Quickstart Guide] to create your first form in minutes.
+
+== Documentation Sections
+
+* xref:quickstart.adoc[Quickstart] - Get up and running quickly with a step-by-step guide to creating your first contract form
+* xref:loading-contracts.adoc[Loading Contracts] - Learn how to load contract ABIs automatically or manually for verified and unverified contracts
+* xref:functions.adoc[Functions] - Understand how to select and configure write functions for your contract forms
+* xref:customization.adoc[Customization] - Customize form fields, execution methods, wallet integrations, and preview your forms
+* xref:networks.adoc[Networks] - Configure supported networks, custom RPCs, and block explorer settings
+* xref:exporting-and-history.adoc[Exporting and History] - Export your forms as React projects and manage your build history
+
+== Resources
+
+* {contracts-ui-builder}[GitHub Repository]
+* https://builder.openzeppelin.com[Live Application]
+
+[TIP]
+====
+Visit the {contracts-ui-builder}/issues[GitHub Issues] page to report bugs or request new features.
+====

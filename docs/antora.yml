@@ -1,0 +1,6 @@
+---
+name: contracts-ui-builder
+title: Contracts UI Builder
+version: 1.0.x
+nav:
+  - modules/ROOT/nav.adoc
