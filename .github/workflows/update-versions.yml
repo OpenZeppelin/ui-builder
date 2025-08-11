@@ -24,22 +24,22 @@ jobs:
       packages: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
+        id: gh-app-token
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.head_ref }}
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - name: Checkout Repo
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
         with:
-          version: 9.10.0
-          run_install: false
+          token: ${{ steps.gh-app-token.outputs.token }}
+          fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare pre-requisites
+        uses: ./.github/actions/prepare
         with:
-          node-version: '20'
+          token: ${{ steps.gh-app-token.outputs.token }}
 
       - name: Configure npm authentication for private registry
         run: |
