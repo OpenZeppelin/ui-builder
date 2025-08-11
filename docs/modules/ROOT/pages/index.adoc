@@ -1,38 +1,57 @@
-:contracts-ui-builder: https://github.com/OpenZeppelin/contracts-ui-builder
+= Quickstart
 
-= Contracts UI Builder
-:description: User guide for the Contracts UI Builder - an open source tool to quickly create online forms to interact with your smart contracts.
-
-The Contracts UI Builder is an open source tool that allows you to quickly create online forms to interact with your smart contracts for testing or administration purposes. Build custom interfaces for your contracts with configurable networks, automatic ABI scraping, and export as React applications.
-
-== Features
+The Contracts UI Builder is an open source tool you can quickly create online forms to interact with your smart contracts for testing or for administration purposes. It includes a vast amount of features including:
 
 * Configurable EVM Networks
 * Automatic contract state and ABI scraping
-* Custom forms for different contract input types
+* Custom forms to handle different types of contract inputs and functions
 * Execution restriction options
-* OpenZeppelin Wallet UI or Rainbow Kit integration
-* Export as React App projects
+* OpenZeppelin Wallet UI or Rainbow Kit
+* Export as React App project
 
 == Getting Started
 
-Ready to build your first contract interface? Start with our xref:quickstart.adoc[Quickstart Guide] to create your first form in minutes.
+Visit https://builder.openzeppelin.com[builder.openzeppelin.com] to get started
 
-== Documentation Sections
+=== 1. Select Network
 
-* xref:quickstart.adoc[Quickstart] - Get up and running quickly with a step-by-step guide to creating your first contract form
-* xref:loading-contracts.adoc[Loading Contracts] - Learn how to load contract ABIs automatically or manually for verified and unverified contracts
-* xref:functions.adoc[Functions] - Understand how to select and configure write functions for your contract forms
-* xref:customization.adoc[Customization] - Customize form fields, execution methods, wallet integrations, and preview your forms
-* xref:networks.adoc[Networks] - Configure supported networks, custom RPCs, and block explorer settings
-* xref:exporting-and-history.adoc[Exporting and History] - Export your forms as React projects and manage your build history
+First select the network your contract is deployed to
 
-== Resources
+image::quickstart-select-network.png[Quickstart select network]
 
-* {contracts-ui-builder}[GitHub Repository]
-* https://builder.openzeppelin.com[Live Application]
+=== 2. Provide Contract Address
+
+Paste in the contract address and the UI Builder will fetch the ABI if the contract is verified. If it is not verified then provide the ABI in the form.
+
+image::quickstart-contract-address.png[Quickstart contract address]
+
+=== 3. Select Function
+
+Choose which write function you would like to build a form for.
+
+image::quickstart-select-function.png[Quickstart select function]
+
+=== 4. Customize
+
+Setup the form for your function and customize any applicable fields, execution method restrictions, or wallet UI kit.
 
 [TIP]
 ====
-Visit the {contracts-ui-builder}/issues[GitHub Issues] page to report bugs or request new features.
+Check out the xref:customization.adoc[Customization] section for more details
 ====
+
+image::quickstart-customize-form.png[Quickstart customize form]
+
+=== 5. Export
+
+Once complete you can click the "Export" button which will download the form as a React app you can deploy or customize further.
+
+image::quickstart-export-form.png[Quickstart export form]
+
+== Next Steps
+
+Learn how you can customize xref:networks.adoc[networks] or customize the xref:functions.adoc[forms] for your project.
+
+Visit the GitHub repo with the link below and open an issue if you have any problems!
+
+https://github.com/OpenZeppelin/contracts-ui-builder[GitHub Repo]
