@@ -54,7 +54,10 @@ function AppContent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <Header title="Contracts UI Builder" />
+        <Header
+          title="Contracts UI Builder"
+          showNavigation={{ github: true, docs: true, forum: true, x: true }}
+        />
 
         <main className="pb-8 flex-1">
           <ContractsUIBuilder />
