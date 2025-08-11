@@ -47,6 +47,7 @@ export function useUIBuilderState() {
     originalDefinition: state.contractState.definitionOriginal,
     currentDefinition: state.contractState.definitionJson,
     isLoadedConfigMode: !!state.loadedConfigurationId,
+    adapter: activeAdapter,
   });
 
   // Contract definition loading hook with automatic deduplication

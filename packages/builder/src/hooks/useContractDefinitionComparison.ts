@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { abiComparisonService } from '@openzeppelin/contracts-ui-builder-adapter-evm';
 // Import the correct interface from types package
 import type {
+  ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractDefinitionDifference,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -12,6 +12,7 @@ interface UseContractDefinitionComparisonProps {
   originalDefinition: string | null;
   currentDefinition: string | null;
   isLoadedConfigMode: boolean;
+  adapter?: ContractAdapter | null;
 }
 
 interface UseContractDefinitionComparisonReturn {
@@ -26,6 +27,7 @@ export function useContractDefinitionComparison({
   originalDefinition,
   currentDefinition,
   isLoadedConfigMode,
+  adapter,
 }: UseContractDefinitionComparisonProps): UseContractDefinitionComparisonReturn {
   const [comparisonResult, setComparisonResult] = useState<ContractDefinitionComparisonResult>({
     identical: true,
@@ -52,8 +54,24 @@ export function useContractDefinitionComparison({
               currentLength: currentDefinition.length,
             })
           );
+          if (!adapter || !adapter.compareContractDefinitions) {
+            logger.warn(
+              'useContractDefinitionComparison',
+              'Active adapter is missing compareContractDefinitions; skipping detailed comparison.'
+            );
+            setComparisonResult({
+              identical: true,
+              differences: [],
+              severity: 'none',
+              summary: 'Comparison not available for this chain/adapter',
+            });
+            return;
+          }
 
-          const result = abiComparisonService.compareAbis(originalDefinition, currentDefinition);
+          const result = await adapter.compareContractDefinitions(
+            originalDefinition,
+            currentDefinition
+          );
           const differences = result.differences.map(
             (diff) =>
               ({
@@ -103,6 +121,7 @@ export function useContractDefinitionComparison({
     originalDefinition,
     currentDefinition,
     isLoadedConfigMode,
+    adapter,
     comparisonResult.identical,
     comparisonResult.differences.length,
   ]);
