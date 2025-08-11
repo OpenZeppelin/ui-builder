@@ -86,8 +86,15 @@ jobs:
         uses: slsa-framework/slsa-github-generator/.github/actions/secure-download-artifact@3bcecb4ade4f265cff30488059a9dca39e26b360 # main
         with:
           name: ${{ needs.provenance.outputs.package-download-name }}
-          path: "${{ steps.temp-dir.outputs.path }}"
+          path: "${{ steps.temp-dir.outputs.path }}/${{ needs.provenance.outputs.package-name }}"
           sha256: ${{ needs.provenance.outputs.package-download-sha256 }}
+
+      - name: Download provenance
+        uses: slsa-framework/slsa-github-generator/actions/nodejs/secure-attestations-download@3bcecb4ade4f265cff30488059a9dca39e26b360 # v1.6.0
+        with:
+          name: ${{ needs.provenance.outputs.provenance-download-name }}
+          path: "${{ steps.temp-dir.outputs.path }}"
+          sha256: ${{ needs.provenance.outputs.provenance-download-sha256 }}
 
       - name: Unpack the zipped artifact
         run: |
