@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   AdapterProvider,
@@ -33,6 +33,8 @@ function AppContent() {
     },
   } = useUIBuilderState();
 
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
   const handleLoad = useCallback(
     (id: string) => {
       void load(id);
@@ -49,6 +51,8 @@ function AppContent() {
         onResetAfterDelete={resetAfterDelete}
         currentLoadedConfigurationId={state.loadedConfigurationId}
         isInNewUIMode={state.isInNewUIMode}
+        open={isMobileSidebarOpen}
+        onOpenChange={setIsMobileSidebarOpen}
       />
 
       {/* Main Content */}
@@ -56,6 +60,7 @@ function AppContent() {
         {/* Header */}
         <Header
           title="Contracts UI Builder"
+          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
           showNavigation={{ github: true, docs: true, forum: true, x: true }}
         />
 

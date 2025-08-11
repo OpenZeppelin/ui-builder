@@ -1,4 +1,5 @@
 import { SiGithub, SiX } from '@icons-pack/react-simple-icons';
+import { Menu } from 'lucide-react';
 
 import { WalletConnectionHeader } from '@openzeppelin/contracts-ui-builder-react-core';
 
@@ -17,12 +18,14 @@ interface HeaderProps {
   title?: string;
   /** Per-item navigation visibility toggles */
   showNavigation?: HeaderNavigationToggles;
+  /** Open the mobile sidebar */
+  onOpenSidebar?: () => void;
 }
 
 /**
  * Application header component with optional title, navigation, and wallet connection.
  */
-export const Header = ({ title, showNavigation }: HeaderProps) => {
+export const Header = ({ title, showNavigation, onOpenSidebar }: HeaderProps) => {
   const showForum = !!showNavigation?.forum;
   const showDocs = !!showNavigation?.docs;
   const showGithub = !!showNavigation?.github;
@@ -32,6 +35,15 @@ export const Header = ({ title, showNavigation }: HeaderProps) => {
   return (
     <header className="border-b border-[#F5F5F5] bg-background">
       <div className="flex h-16 items-center px-5">
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          aria-label="Open menu"
+          onClick={onOpenSidebar}
+          className="mr-3 inline-flex items-center justify-center rounded-md p-2 text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary xl:hidden"
+        >
+          <Menu className="size-5" />
+        </button>
         {/* Left side - Title (conditional) */}
         {title && (
           <div className="flex items-center">

@@ -15,6 +15,10 @@ interface AppSidebarProps {
   onResetAfterDelete?: () => void;
   currentLoadedConfigurationId?: string | null;
   isInNewUIMode?: boolean;
+  /** Controls visibility in mobile slide-over */
+  open?: boolean;
+  /** Close handler for mobile slide-over */
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -27,8 +31,39 @@ export default function AppSidebar({
   onResetAfterDelete,
   currentLoadedConfigurationId,
   isInNewUIMode = false,
+  open,
+  onOpenChange,
 }: AppSidebarProps) {
   const [showImportDialog, setShowImportDialog] = useState(false);
+
+  /** Shared sidebar scrollable content */
+  const SidebarBody = ({
+    paddingClass,
+    gapClass = 'gap-12',
+    onLoadContractUiHandler,
+  }: {
+    paddingClass: string;
+    gapClass?: string;
+    onLoadContractUiHandler: (id: string) => void;
+  }) => (
+    <div className={cn('flex-1 overflow-y-auto', paddingClass)}>
+      <div className={cn('flex flex-col w-full', gapClass)}>
+        <MainActions
+          onCreateNew={onCreateNew}
+          onShowImportDialog={() => setShowImportDialog(true)}
+          isInNewUIMode={isInNewUIMode}
+        />
+
+        <OtherToolsSection />
+
+        <ContractUIsSection
+          onLoadContractUI={onLoadContractUiHandler}
+          onResetAfterDelete={onResetAfterDelete}
+          currentLoadedConfigurationId={currentLoadedConfigurationId}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -37,7 +72,7 @@ export default function AppSidebar({
         className={cn(
           // TODO: Replace hard-coded sidebar background with OpenZeppelin theme
           // Should use semantic token like 'bg-sidebar-background'
-          'fixed left-0 top-0 z-40 h-full w-[289px] bg-[rgba(245,245,245,0.31)] flex flex-col',
+          'fixed left-0 top-0 z-40 h-full w-[289px] bg-[rgba(245,245,245,0.31)] hidden xl:flex xl:flex-col',
           className
         )}
       >
@@ -47,30 +82,61 @@ export default function AppSidebar({
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-8 pb-12">
-          <div className="flex flex-col gap-12 w-full">
-            <MainActions
-              onCreateNew={onCreateNew}
-              onShowImportDialog={() => setShowImportDialog(true)}
-              isInNewUIMode={isInNewUIMode}
-            />
-
-            <OtherToolsSection />
-
-            <ContractUIsSection
-              onLoadContractUI={onLoadContractUI}
-              onResetAfterDelete={onResetAfterDelete}
-              currentLoadedConfigurationId={currentLoadedConfigurationId}
-            />
-          </div>
-        </div>
+        <SidebarBody
+          paddingClass="px-8 pb-12"
+          onLoadContractUiHandler={(id) => onLoadContractUI?.(id)}
+        />
       </div>
 
       {/* Import Dialog */}
       <ContractUIImportDialog open={showImportDialog} onOpenChange={setShowImportDialog} />
 
-      {/* Spacer to push content */}
-      <div className="w-[289px]" />
+      {/* Spacer to push content (desktop only) */}
+      <div className="hidden xl:block w-[289px]" />
+
+      {/* Mobile slide-over */}
+      {typeof open === 'boolean' && onOpenChange && (
+        <div
+          className={cn(
+            'xl:hidden fixed inset-0 z-50',
+            open ? 'pointer-events-auto' : 'pointer-events-none'
+          )}
+          aria-hidden={!open}
+        >
+          {/* Backdrop */}
+          <div
+            className={cn(
+              'absolute inset-0 bg-black/40 transition-opacity',
+              open ? 'opacity-100' : 'opacity-0'
+            )}
+            onClick={() => onOpenChange(false)}
+          />
+          {/* Panel */}
+          <div
+            className={cn(
+              'absolute left-0 top-0 h-full w-[85%] max-w-[320px] bg-[rgba(245,245,245,0.98)] shadow-xl transition-transform',
+              open ? 'translate-x-0' : '-translate-x-full'
+            )}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex-shrink-0 px-6 pt-10 pb-4">
+                <SidebarLogo />
+              </div>
+              <SidebarBody
+                paddingClass="px-6 pb-8"
+                gapClass="gap-10"
+                onLoadContractUiHandler={(id) => {
+                  onOpenChange(false);
+                  onLoadContractUI?.(id);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
