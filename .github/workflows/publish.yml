@@ -96,7 +96,7 @@ jobs:
           commitMode: "github-api"
         env:
           GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKENY }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0 # Disable husky hooks for automated changeset commits
           NPM_CONFIG_PROVENANCE: true
           TARBALL: ${{ needs.provenance.outputs.package-name }}
