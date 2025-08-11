@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /builder
 
@@ -63,7 +63,7 @@ RUN --mount=type=secret,id=etherscan_api_key \
     fi'
 
 # Runtime stage - using a slim image for a smaller footprint
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 
 # Set NODE_ENV to production for the final runtime image
 ENV NODE_ENV=production
