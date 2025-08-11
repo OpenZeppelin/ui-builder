@@ -177,11 +177,7 @@ For a consistent and reliable development environment, it is highly recommended 
 
 1.  **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
 
-2.  **Create a GitHub Personal Access Token**: The project uses private packages from the GitHub Package Registry. To authenticate, you need to create a [Personal Access Token (PAT)](https://github.com/settings/tokens) with the `read:packages` scope.
-
-3.  **Create a `.npm_token` file**: In the root of the project, create a file named `.npm_token` and paste your PAT into it. This file is listed in `.gitignore` and will not be committed.
-
-4.  **Build and Run the Container**:
+2.  **Build and Run the Container**:
     ```bash
     docker-compose up --build
     ```
@@ -527,9 +523,7 @@ This project uses GitHub Actions for continuous integration and delivery:
 
 ### Package Publishing
 
-The project uses [Changesets](https://github.com/changesets/changesets) for managing package versions and releases. All packages in the monorepo are published to the GitHub Package Registry.
-
-> **Note**: Currently, packages are published to the GitHub Package Registry only. Once the project becomes public, we will enable publishing to the npm public registry to make the packages more widely accessible.
+The project uses [Changesets](https://github.com/changesets/changesets) for managing package versions and releases. All public packages in the monorepo are published to the npm registry.
 
 The publishing process:
 
@@ -540,7 +534,7 @@ The publishing process:
    - Updates package versions according to the changesets
    - Updates changelogs for affected packages
 4. When the Version Packages PR is merged:
-   - Packages are automatically published to the GitHub Package Registry
+   - Packages are automatically published to npm
    - Git tags are created for each published package version
    - GitHub releases are created with changelogs
 

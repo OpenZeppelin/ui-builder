@@ -27,9 +27,6 @@
     "storybook": "cd ../.. && pnpm storybook",
     "build-storybook": "cd ../.. && pnpm build-storybook"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
     "@icons-pack/react-simple-icons": "^12.9.0",

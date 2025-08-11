@@ -164,32 +164,26 @@ RC packages use the format `0.0.0-rc-timestamp` (e.g., `0.0.0-rc-20250807123456`
 
 ## 🌐 **Transition to Public NPM**
 
-Currently using GitHub Package Registry temporarily. Transition plan:
+All packages are now published to the public npm registry.
 
 ### Current State
 
 ```yaml
-# .npmrc (temporary)
-@openzeppelin:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+# .npmrc (current)
+registry=https://registry.npmjs.org/
+access=public
+# (repo also keeps pnpm settings like shamefully-hoist/peer behaviors)
 ```
 
-### Future State (Public NPM)
+### Completed Steps
 
-```yaml
-# .npmrc (future)
-# Standard npm registry - no special configuration needed
-```
+1. Removed private-registry auth steps from all workflows
+2. Updated `.npmrc` to the standard npm registry with public access
+3. Switched each package `publishConfig` to `access: "public"` (app remains private)
+4. Verified RC publishing targets npm (staging flow unchanged otherwise)
+5. Updated documentation and Dockerfile to drop GitHub Packages usage
 
-### Transition Steps
-
-1. **Remove** `Configure npm authentication for private registry` steps from workflows
-2. **Update** `.npmrc` to use standard npm registry
-3. **Publish** first packages to public npm
-4. **Test** RC publishing on public npm
-5. **Update** documentation
-
-**Note**: All package names and imports remain identical during transition.
+All package names and imports remained the same throughout the transition.
 
 ---
 

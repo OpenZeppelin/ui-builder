@@ -6,7 +6,7 @@
   "type": "module",
   "main": "global.css",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "scripts": {
     "clean": "echo 'No build artifacts to clean'",

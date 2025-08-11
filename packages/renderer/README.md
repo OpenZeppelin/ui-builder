@@ -348,7 +348,7 @@ The build process, which uses `tsup` and `tsc`, creates the following outputs in
 
 > **Note**: Automatic publishing is currently disabled during early development. The workflow is configured but commented out until the package is ready for production release.
 
-This package is published to the GitHub Package Registry as part of the monorepo's release process using Changesets.
+This package is published to the public npm registry as part of the monorepo's release process using Changesets.
 
 The release workflow (when enabled):
 

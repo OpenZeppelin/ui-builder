@@ -1,20 +1,6 @@
-# PRIVATE REGISTRY RELEASE WORKFLOW
-# ==================================
-# This workflow handles both CI and publishing for the private registry.
-# All @openzeppelin packages (including dependencies) are resolved from the private registry
-# due to organization-level scoping in .npmrc.
-#
-# AUTHENTICATION:
-# The workflow uses the NPM_TOKEN secret for authentication to GitHub Package Registry.
-# This should be a Personal Access Token (PAT) with `read:packages` and `write:packages`
-# permissions to avoid GitHub Package Registry permission limitations.
-#
-# TRANSITION TO PUBLIC RELEASE:
-# When ready to publish publicly, update this workflow to:
-# 1. Update the .npmrc authentication to use NPM_TOKEN for npm registry
-# 2. Update the Changesets publish command to target npm registry
-# 3. Ensure .npmrc is updated (see .npmrc comments)
-# 4. All package names and imports will remain the same
+# Public npm release workflow
+# ===========================
+# This workflow handles CI and publishing to the public npm registry using Changesets.
 
 name: Release
 
@@ -27,7 +13,6 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  packages: write # ✅ Includes both read and write permissions
   pull-requests: write
   issues: write
   id-token: write
@@ -103,9 +88,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pnpm run install-deps
 
-      # CURRENT: Publishing to GitHub private registry using Changesets
-      # FUTURE: When going public, this will automatically switch to npm registry
-      - name: Create Release Pull Request or Publish to GitHub
+      - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:

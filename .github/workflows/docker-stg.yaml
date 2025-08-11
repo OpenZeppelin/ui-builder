@@ -1,7 +1,7 @@
 # STAGING ENVIRONMENT WITH RC PUBLISHING
 # =====================================
 # This workflow builds staging environment and publishes RC packages for QA testing.
-# Currently uses GitHub private registry for @openzeppelin packages.
+# Uses public npm registry for @openzeppelin packages.
 #
 # RC PUBLISHING STRATEGY:
 # - Publishes RC snapshot versions (e.g., @openzeppelin/adapter-evm@0.2.1-rc.123)
@@ -62,10 +62,9 @@ jobs:
         with:
           token: ${{ steps.gh-app-token.outputs.token }}
 
-      # TRANSITION NOTE: When switching to public npm, this will be removed
-      - name: Configure npm authentication for private registry
+      - name: Configure npm authentication for npm registry
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install
