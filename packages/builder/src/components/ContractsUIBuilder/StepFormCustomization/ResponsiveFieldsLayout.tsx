@@ -51,7 +51,7 @@ export function ResponsiveFieldsLayout({
   onUpdateField,
 }: ResponsiveFieldsLayoutProps) {
   // Show first field if none is selected but fields exist
-    const effectiveSelectedIndex = selectedFieldIndex ?? 0;
+  const effectiveSelectedIndex = selectedFieldIndex ?? 0;
   const selectedField = fields[effectiveSelectedIndex];
 
   // Use media query to determine if we're on mobile
