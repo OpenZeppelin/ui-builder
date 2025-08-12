@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@openzeppelin/contracts-ui-builder-ui';
 
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { OptionSelector, type SelectableOption } from '../../Common/OptionSelector';
 
 interface ExecutionMethodOption extends SelectableOption {
@@ -78,6 +79,8 @@ export function ResponsiveExecutionMethodSelector({
   loadingMessage = 'Loading execution methods...',
 }: ResponsiveExecutionMethodSelectorProps) {
   const selectedOption = options.find((opt) => opt.id === selectedId);
+  // Use media query to determine if we're on mobile
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   if (isLoading) {
     return (
@@ -95,78 +98,74 @@ export function ResponsiveExecutionMethodSelector({
     );
   }
 
-  return (
-    <>
-      {/* Mobile Layout */}
-      <div className="block md:hidden">
-        <div className="space-y-6">
-          {/* Mobile method selector section */}
-          <div className="space-y-3">
-            {/* Unified selector/indicator */}
-            <Select value={selectedId || ''} onValueChange={onSelect}>
-              <SelectTrigger className="h-auto min-h-[3rem] px-4 py-3 bg-card border-2 border-border hover:border-primary/50 transition-colors [&>svg]:ml-3">
-                <SelectValue asChild>
-                  {selectedOption ? (
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <div className="flex flex-col items-start flex-1">
-                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                          Selected Method
-                        </span>
-                        <span className="font-semibold text-base mt-0.5">
-                          {selectedOption.label}
-                        </span>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        {iconMap && iconMap[selectedOption.id] && (
-                          <div className="text-muted-foreground">{iconMap[selectedOption.id]}</div>
-                        )}
-                      </div>
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <div className="space-y-6">
+        {/* Mobile method selector section */}
+        <div className="space-y-3">
+          {/* Unified selector/indicator */}
+          <Select value={selectedId || ''} onValueChange={onSelect}>
+            <SelectTrigger className="h-auto min-h-[3rem] px-4 py-3 bg-card border-2 border-border hover:border-primary/50 transition-colors [&>svg]:ml-3">
+              <SelectValue asChild>
+                {selectedOption ? (
+                  <div className="flex items-center justify-between w-full pr-2">
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                        Selected Method
+                      </span>
+                      <span className="font-semibold text-base mt-0.5">{selectedOption.label}</span>
                     </div>
-                  ) : (
-                    <span>Choose an execution method</span>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((option) => (
-                  <SelectItem
-                    key={option.id}
-                    value={option.id}
-                    className="py-3"
-                    disabled={option.disabled}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      {iconMap && iconMap[option.id] && (
-                        <div className="text-muted-foreground">{iconMap[option.id]}</div>
+                    <div className="text-right flex-shrink-0">
+                      {iconMap && iconMap[selectedOption.id] && (
+                        <div className="text-muted-foreground">{iconMap[selectedOption.id]}</div>
                       )}
-                      <div className="font-medium text-sm">{option.label}</div>
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Mobile method configuration content */}
-          {selectedOption && configContent && (
-            <div className="bg-card border rounded-lg p-4">{configContent}</div>
-          )}
+                  </div>
+                ) : (
+                  <span>Choose an execution method</span>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem
+                  key={option.id}
+                  value={option.id}
+                  className="py-3"
+                  disabled={option.disabled}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    {iconMap && iconMap[option.id] && (
+                      <div className="text-muted-foreground">{iconMap[option.id]}</div>
+                    )}
+                    <div className="font-medium text-sm">{option.label}</div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
 
-      {/* Desktop Layout: Use existing OptionSelector */}
-      <div className="hidden md:block">
-        <OptionSelector
-          options={options}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          configContent={configContent}
-          isCollapsed={isCollapsed}
-          iconMap={iconMap}
-          isLoading={isLoading}
-          loadingMessage={loadingMessage}
-        />
+        {/* Mobile method configuration content */}
+        {selectedOption && configContent && (
+          <div className="bg-card border rounded-lg p-4">{configContent}</div>
+        )}
       </div>
-    </>
+    );
+  }
+
+  // Desktop Layout: Use existing OptionSelector
+  return (
+    <OptionSelector
+      options={options}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      configContent={configContent}
+      isCollapsed={isCollapsed}
+      iconMap={iconMap}
+      isLoading={isLoading}
+      loadingMessage={loadingMessage}
+    />
   );
 }

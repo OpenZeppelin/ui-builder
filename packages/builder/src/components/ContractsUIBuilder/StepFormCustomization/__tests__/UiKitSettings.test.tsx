@@ -21,6 +21,21 @@ vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
   };
 });
 
+// Mock window.matchMedia for useMediaQuery hook
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query) => ({
+    matches: false, // Default to desktop layout in tests
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // deprecated method
+    removeListener: vi.fn(), // deprecated method
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 describe('UiKitSettings', () => {
   const mockAdapter: Partial<ContractAdapter> = {
     getAvailableUiKits: vi.fn().mockResolvedValue([

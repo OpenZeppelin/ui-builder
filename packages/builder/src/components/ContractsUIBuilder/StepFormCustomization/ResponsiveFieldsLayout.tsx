@@ -1,5 +1,6 @@
 import type { ContractAdapter, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { FieldEditor } from './FieldEditor';
 import { FieldSelectorList } from './FieldSelectorList';
 import { MobileFieldSelector } from './MobileFieldSelector';
@@ -50,55 +51,56 @@ export function ResponsiveFieldsLayout({
   onUpdateField,
 }: ResponsiveFieldsLayoutProps) {
   // Show first field if none is selected but fields exist
-  const effectiveSelectedIndex = selectedFieldIndex ?? 0;
+    const effectiveSelectedIndex = selectedFieldIndex ?? 0;
   const selectedField = fields[effectiveSelectedIndex];
 
-  return (
-    <>
-      {/* Mobile Layout */}
-      <div className="block md:hidden">
-        <div className="space-y-6">
-          {/* Mobile unified field selector/indicator */}
-          <MobileFieldSelector
-            fields={fields}
-            selectedFieldIndex={selectedFieldIndex}
-            onSelectField={onSelectField}
-          />
+  // Use media query to determine if we're on mobile
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
-          {/* Mobile field editor content */}
-          {selectedField && (
-            <div className="bg-card border rounded-lg p-4">
-              <FieldEditor
-                field={selectedField}
-                onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
-                adapter={adapter}
-                originalParameterType={selectedField.originalParameterType}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <div className="space-y-6">
+        {/* Mobile unified field selector/indicator */}
+        <MobileFieldSelector
+          fields={fields}
+          selectedFieldIndex={selectedFieldIndex}
+          onSelectField={onSelectField}
+        />
 
-      {/* Desktop Layout: Sidebar + editor */}
-      <div className="hidden md:block">
-        <div className="grid grid-cols-3 gap-4">
-          <FieldSelectorList
-            fields={fields}
-            selectedFieldIndex={selectedFieldIndex}
-            onSelectField={onSelectField}
-          />
-          <div className="col-span-2">
-            {selectedField && (
-              <FieldEditor
-                field={selectedField}
-                onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
-                adapter={adapter}
-                originalParameterType={selectedField.originalParameterType}
-              />
-            )}
+        {/* Mobile field editor content */}
+        {selectedField && (
+          <div className="bg-card border rounded-lg p-4">
+            <FieldEditor
+              field={selectedField}
+              onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
+              adapter={adapter}
+              originalParameterType={selectedField.originalParameterType}
+            />
           </div>
-        </div>
+        )}
       </div>
-    </>
+    );
+  }
+
+  // Desktop Layout: Sidebar + editor
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <FieldSelectorList
+        fields={fields}
+        selectedFieldIndex={selectedFieldIndex}
+        onSelectField={onSelectField}
+      />
+      <div className="col-span-2">
+        {selectedField && (
+          <FieldEditor
+            field={selectedField}
+            onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
+            adapter={adapter}
+            originalParameterType={selectedField.originalParameterType}
+          />
+        )}
+      </div>
+    </div>
   );
 }
