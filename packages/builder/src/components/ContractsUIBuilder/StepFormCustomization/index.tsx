@@ -216,13 +216,20 @@ export function StepFormCustomization({
           contractSchema={contractSchema!}
         />
       ) : (
-        <Tabs value={activeTab} onValueChange={(newTab) => setUiState({ activeTab: newTab })}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="fields">Fields</TabsTrigger>
-            <TabsTrigger value="execution">Execution Method</TabsTrigger>
-            <TabsTrigger value="uikit">UI Kit</TabsTrigger>
-          </TabsList>
+        <Tabs
+          value={activeTab}
+          onValueChange={(newTab) =>
+            setUiState({ activeTab: newTab as 'general' | 'fields' | 'execution' | 'uikit' })
+          }
+        >
+          <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="w-max sm:w-full">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="fields">Fields</TabsTrigger>
+              <TabsTrigger value="execution">Execution Method</TabsTrigger>
+              <TabsTrigger value="uikit">UI Kit</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="general" className="mt-4 rounded-md border p-4">
             {baseFormConfigFromHook && (
