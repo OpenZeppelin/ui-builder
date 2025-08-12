@@ -222,7 +222,10 @@ export function StepFormCustomization({
             setUiState({ activeTab: newTab as 'general' | 'fields' | 'execution' | 'uikit' })
           }
         >
-          <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div
+            className="w-full max-w-full min-w-0 flex-1 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={{ contain: 'inline-size' }}
+          >
             <TabsList className="w-max sm:w-full">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="fields">Fields</TabsTrigger>
