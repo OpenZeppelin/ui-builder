@@ -52,8 +52,12 @@ export const ContractDefinitionSourceIndicator: React.FC<
   return (
     <div
       className={cn(
-        // Full-width on mobile to avoid horizontal overflow; stacked layout
-        'flex flex-col gap-1 px-3 py-2 text-xs rounded-md border w-full max-w-full',
+        // Full-width on mobile; auto width and right-aligned on larger screens
+        'flex flex-col gap-1 px-3 py-2 text-xs rounded-md border w-full sm:w-auto',
+        // Align inner content to the end on larger screens so text and rows are right-aligned
+        'items-start sm:items-end text-left sm:text-right',
+        // Allow the badge to sit at the right edge when container allows
+        'sm:ml-auto',
         'transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
         borderColorClass,
         bgColorClass,
@@ -70,7 +74,7 @@ export const ContractDefinitionSourceIndicator: React.FC<
 
       {/* Row 2: Details (URL and/or time) */}
       {source === 'fetched' && (fetchedFrom || lastFetched) && (
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap sm:justify-end">
           {fetchedFrom && (
             <a
               href={fetchedFrom}
