@@ -42,8 +42,8 @@ export const EvmRelayerOptions: React.FC<{
 
       <Tabs value={configMode} onValueChange={handleModeChange}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="speed">Speed Presets</TabsTrigger>
-          <TabsTrigger value="custom">Custom Parameters</TabsTrigger>
+          <TabsTrigger value="speed">Speed</TabsTrigger>
+          <TabsTrigger value="custom">Custom</TabsTrigger>
         </TabsList>
 
         <TabsContent value="speed" className="space-y-4">
