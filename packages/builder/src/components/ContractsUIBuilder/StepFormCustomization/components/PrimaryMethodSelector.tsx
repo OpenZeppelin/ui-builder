@@ -4,8 +4,9 @@ import { useController } from 'react-hook-form';
 
 import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
 
-import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
+import { SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
+import { ResponsiveExecutionMethodSelector } from '../ResponsiveExecutionMethodSelector';
 import type { PrimaryMethodSelectorProps } from '../types';
 import { EoaConfiguration } from './EoaConfiguration';
 import { RelayerConfiguration } from './RelayerConfiguration';
@@ -86,7 +87,7 @@ export function PrimaryMethodSelector({
       isAvailable={adapterAvailable}
       unavailableMessage="No blockchain adapter selected."
     >
-      <OptionSelector
+      <ResponsiveExecutionMethodSelector
         options={selectorOptions}
         selectedId={field.value || null}
         onSelect={field.onChange}

@@ -52,17 +52,11 @@ export function RelayerCredentialsCard({
       <CardHeader className="pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-2">
-            <div
-              className={`rounded-md p-0.5 ${
-                isComplete ? 'bg-green-100 text-green-600' : 'bg-primary/10 text-primary'
-              }`}
-            >
-              {isComplete ? (
+            {isComplete && (
+              <div className="rounded-md p-0.5 bg-green-100 text-green-600">
                 <CheckCircle className="h-3.5 w-3.5" />
-              ) : (
-                <span className="block w-5 h-5 text-center text-xs font-medium leading-5">1</span>
-              )}
-            </div>
+              </div>
+            )}
             <CardTitle className="text-base">Connect to Relayer Service</CardTitle>
           </div>
           {isComplete && !isActive && (

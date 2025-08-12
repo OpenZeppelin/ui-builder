@@ -1,5 +1,3 @@
-import { Settings } from 'lucide-react';
-
 import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 import {
   Select,
@@ -40,12 +38,6 @@ export function MobileFieldSelector({
 
   return (
     <div className="space-y-3">
-      {/* Section header */}
-      <div className="flex items-center gap-2">
-        <Settings className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Field Configuration</h3>
-      </div>
-
       {/* Unified selector/indicator */}
       <Select
         value={effectiveSelectedIndex.toString()}
