@@ -1,0 +1,104 @@
+import type { ContractAdapter, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+
+import { FieldEditor } from './FieldEditor';
+import { FieldSelectorList } from './FieldSelectorList';
+import { MobileFieldSelector } from './MobileFieldSelector';
+
+interface ResponsiveFieldsLayoutProps {
+  /**
+   * The array of form fields to display
+   */
+  fields: FormFieldType[];
+
+  /**
+   * The currently selected field index
+   */
+  selectedFieldIndex: number | null;
+
+  /**
+   * Callback when a field is selected
+   */
+  onSelectField: (index: number) => void;
+
+  /**
+   * Chain-specific adapter for type validation and mapping
+   */
+  adapter: ContractAdapter;
+
+  /**
+   * Callback fired when field properties are updated
+   */
+  onUpdateField: (index: number, updates: Partial<FormFieldType>) => void;
+}
+
+/**
+ * Responsive layout component that adapts the field editing interface for different screen sizes.
+ *
+ * On mobile devices (< md breakpoint):
+ * - Shows a dropdown selector for choosing fields
+ * - Displays the field editor below the selector
+ *
+ * On desktop devices (>= md breakpoint):
+ * - Shows the traditional sidebar layout with field list on the left
+ * - Displays the field editor on the right side
+ */
+export function ResponsiveFieldsLayout({
+  fields,
+  selectedFieldIndex,
+  onSelectField,
+  adapter,
+  onUpdateField,
+}: ResponsiveFieldsLayoutProps) {
+  // Show first field if none is selected but fields exist
+  const effectiveSelectedIndex = selectedFieldIndex ?? 0;
+  const selectedField = fields[effectiveSelectedIndex];
+
+  return (
+    <>
+      {/* Mobile Layout */}
+      <div className="block md:hidden">
+        <div className="space-y-6">
+          {/* Mobile unified field selector/indicator */}
+          <MobileFieldSelector
+            fields={fields}
+            selectedFieldIndex={selectedFieldIndex}
+            onSelectField={onSelectField}
+          />
+
+          {/* Mobile field editor content */}
+          {selectedField && (
+            <div className="bg-card border rounded-lg p-4">
+              <FieldEditor
+                field={selectedField}
+                onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
+                adapter={adapter}
+                originalParameterType={selectedField.originalParameterType}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Layout: Sidebar + editor */}
+      <div className="hidden md:block">
+        <div className="grid grid-cols-3 gap-4">
+          <FieldSelectorList
+            fields={fields}
+            selectedFieldIndex={selectedFieldIndex}
+            onSelectField={onSelectField}
+          />
+          <div className="col-span-2">
+            {selectedField && (
+              <FieldEditor
+                field={selectedField}
+                onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
+                adapter={adapter}
+                originalParameterType={selectedField.originalParameterType}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

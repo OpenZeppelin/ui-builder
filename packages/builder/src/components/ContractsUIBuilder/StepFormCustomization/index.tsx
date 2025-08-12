@@ -25,10 +25,9 @@ import { ActionBar } from '../../Common/ActionBar';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
 import { UiKitSettings } from './components';
 import { ExecutionMethodSettings } from './ExecutionMethodSettings';
-import { FieldEditor } from './FieldEditor';
-import { FieldSelectorList } from './FieldSelectorList';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
+import { ResponsiveFieldsLayout } from './ResponsiveFieldsLayout';
 
 // TODO: Enhance the UiKitSettings component to support more advanced options from UiKitConfiguration,
 // such as `showInjectedConnector` and component exclusions (e.g., hiding NetworkSwitcher).
@@ -256,32 +255,15 @@ export function StepFormCustomization({
                     description="This function doesn't require any input parameters, so there are no form fields to customize. You can proceed to configure the execution method or preview your form."
                   />
                 ) : (
-                  <div className="grid grid-cols-3 gap-4">
-                    <FieldSelectorList
+                  adapter && (
+                    <ResponsiveFieldsLayout
                       fields={baseFormConfigFromHook.fields}
                       selectedFieldIndex={selectedFieldIndex}
                       onSelectField={selectField}
+                      adapter={adapter}
+                      onUpdateField={updateField}
                     />
-                    <div className="col-span-2">
-                      {(() => {
-                        // Show first field if none is selected but fields exist
-                        const effectiveSelectedIndex = selectedFieldIndex ?? 0;
-                        const selectedField = baseFormConfigFromHook.fields[effectiveSelectedIndex];
-
-                        if (selectedField && adapter) {
-                          return (
-                            <FieldEditor
-                              field={selectedField}
-                              onUpdate={(updates) => updateField(effectiveSelectedIndex, updates)}
-                              adapter={adapter}
-                              originalParameterType={selectedField.originalParameterType}
-                            />
-                          );
-                        }
-                        return null;
-                      })()}
-                    </div>
-                  </div>
+                  )
                 )}
               </div>
             )}
