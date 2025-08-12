@@ -21,10 +21,10 @@ permissions:
 
 jobs:
   provenance:
-    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a  # v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
-      run-scripts: "install-pnpm, install-deps, build, test"
-      node-version: "22.14.0"
+      run-scripts: 'install-pnpm, install-deps, build, test'
+      node-version: '22.14.0'
       rekor-log-public: true
 
   release:
@@ -70,14 +70,14 @@ jobs:
         uses: slsa-framework/slsa-github-generator/.github/actions/secure-download-artifact@3bcecb4ade4f265cff30488059a9dca39e26b360 # main
         with:
           name: ${{ needs.provenance.outputs.package-download-name }}
-          path: "${{ steps.temp-dir.outputs.path }}/${{ needs.provenance.outputs.package-name }}"
+          path: '${{ steps.temp-dir.outputs.path }}/${{ needs.provenance.outputs.package-name }}'
           sha256: ${{ needs.provenance.outputs.package-download-sha256 }}
 
       - name: Download provenance
         uses: slsa-framework/slsa-github-generator/actions/nodejs/secure-attestations-download@3bcecb4ade4f265cff30488059a9dca39e26b360 # v1.6.0
         with:
           name: ${{ needs.provenance.outputs.provenance-download-name }}
-          path: "${{ steps.temp-dir.outputs.path }}"
+          path: '${{ steps.temp-dir.outputs.path }}'
           sha256: ${{ needs.provenance.outputs.provenance-download-sha256 }}
 
       - name: Unpack the zipped artifact
@@ -93,7 +93,7 @@ jobs:
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           publish: pnpm changeset publish --no-git-checks
-          commitMode: "github-api"
+          commitMode: 'committed'
         env:
           GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
