@@ -1,0 +1,18 @@
+= Loading Contracts
+
+After you have selected your chain you can paste in the deployed contract address. After providing the contract address the UI Builder will try to use public block explorer APIs to fetch the contract ABIs. This will only work if the contract is verified.
+
+[TIP]
+====
+If you experience rate or usage limits with the public block explorers xref:networks.adoc[configure the network to use an API key]
+====
+
+image::contracts-abi-auto.png[Contracts ABI auto loading]
+
+If your contract is not verified you can still provide the ABI manually.
+
+image::contracts-abi-manual.png[Contracts ABI manual input]
+
+Once a contract and it's ABI is loaded the UI Builder will automatically fetch the state of the contract, which can be toggled if you wish to hide it
+
+image::contracts-state.png[Contracts state display]
