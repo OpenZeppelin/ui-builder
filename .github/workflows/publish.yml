@@ -88,16 +88,18 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pnpm run install-deps
 
+      - name: Make Husky files non-executable for GitHub API compatibility
+        run: |
+          chmod -x .husky/commit-msg .husky/pre-commit .husky/pre-push 2>/dev/null || true
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           publish: pnpm changeset publish --no-git-checks
-          commitMode: 'committed'
         env:
           GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          HUSKY: 0 # Disable husky hooks for automated changeset commits
           NPM_CONFIG_PROVENANCE: true
           TARBALL: ${{ needs.provenance.outputs.package-name }}
           NPM_CONFIG_ACCESS: public
