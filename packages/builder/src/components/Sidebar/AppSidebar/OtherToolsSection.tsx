@@ -1,4 +1,4 @@
-import { FileJson2, FileSearch } from 'lucide-react';
+import { FileJson2 } from 'lucide-react';
 
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -25,10 +25,6 @@ export default function OtherToolsSection() {
           rel="noopener noreferrer"
         >
           Contract Wizard
-        </SidebarButton>
-
-        <SidebarButton icon={<FileSearch className="size-4" />} badge="Coming Soon" disabled>
-          Audit Tool
         </SidebarButton>
 
         {/* Dev Tools - Only shown when feature flag is enabled */}
