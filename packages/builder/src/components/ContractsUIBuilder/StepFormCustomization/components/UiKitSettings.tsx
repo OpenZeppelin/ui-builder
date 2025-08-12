@@ -15,8 +15,9 @@ import {
 import { EmptyState, ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { OptionSelector, SelectableOption } from '../../../Common/OptionSelector';
+import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
+import { ResponsiveUiKitSelector } from '../ResponsiveUiKitSelector';
 
 interface UiKitSettingsProps {
   adapter: ContractAdapter;
@@ -184,7 +185,7 @@ export function UiKitSettings({ adapter, onUpdateConfig, currentConfig }: UiKitS
       errorMessage={errorMessage}
       unavailableMessage="No blockchain adapter selected."
     >
-      <OptionSelector
+      <ResponsiveUiKitSelector
         options={selectorOptions}
         selectedId={selectedKitId}
         onSelect={(id) => {

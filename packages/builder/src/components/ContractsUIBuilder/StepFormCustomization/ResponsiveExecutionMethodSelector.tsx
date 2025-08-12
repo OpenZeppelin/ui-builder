@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@openzeppelin/contracts-ui-builder-ui';
 
-import { OptionSelector, SelectableOption } from '../../Common/OptionSelector';
+import { OptionSelector, type SelectableOption } from '../../Common/OptionSelector';
 
 interface ExecutionMethodOption extends SelectableOption {
   value: string;

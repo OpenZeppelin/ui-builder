@@ -4,7 +4,7 @@ import { useController } from 'react-hook-form';
 
 import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
 
-import { SelectableOption } from '../../../Common/OptionSelector';
+import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';
 import { ResponsiveExecutionMethodSelector } from '../ResponsiveExecutionMethodSelector';
 import type { PrimaryMethodSelectorProps } from '../types';
