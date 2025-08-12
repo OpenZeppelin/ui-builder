@@ -52,43 +52,49 @@ export const ContractDefinitionSourceIndicator: React.FC<
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-2 px-3 py-2 text-xs rounded-md border',
-        'transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
+        // Full-width on mobile; auto width and right-aligned on larger screens
+        'flex flex-col gap-1 px-3 py-2 text-xs rounded-md border w-full sm:w-auto',
+        // Align inner content to the end on larger screens so text and rows are right-aligned
+        'items-start sm:items-end text-left sm:text-right',
+        // Allow the badge to sit at the right edge when container allows
+        'sm:ml-auto',
+        // Hover effects disabled
         borderColorClass,
         bgColorClass,
         textColorClass,
         className
       )}
     >
+      {/* Row 1: Source label */}
       <div className="flex items-center gap-1.5">
         <Icon className={cn('h-3.5 w-3.5', iconColorClass)} aria-hidden="true" />
         <span className="font-semibold">Source:</span>
         <span className="uppercase">{config.label}</span>
       </div>
 
-      {/* Source link for fetched contracts */}
-      {source === 'fetched' && fetchedFrom && (
-        <div className="flex items-center gap-1 ml-1 pl-1 border-l border-current/20">
-          <a
-            href={fetchedFrom}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              'flex items-center gap-1 hover:underline',
-              hasError ? 'text-red-600 hover:text-red-700' : 'text-blue-600 hover:text-blue-700'
-            )}
-          >
-            <span className="font-medium">{getDisplaySource(fetchedFrom)}</span>
-            <ExternalLink className="h-3 w-3" aria-hidden="true" />
-          </a>
-        </div>
-      )}
-
-      {/* Time indicator for fetched contracts */}
-      {source === 'fetched' && lastFetched && (
-        <div className="flex items-center gap-1 ml-1 pl-1 border-l border-current/20">
-          <Clock className={cn('h-3 w-3', iconColorClass)} aria-hidden="true" />
-          <span className="font-medium opacity-80">{formatTimestamp(lastFetched)}</span>
+      {/* Row 2: Details (URL and/or time) */}
+      {source === 'fetched' && (fetchedFrom || lastFetched) && (
+        <div className="flex items-center gap-3 flex-wrap sm:justify-end">
+          {fetchedFrom && (
+            <a
+              href={fetchedFrom}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'inline-flex items-center gap-1 break-all',
+                hasError ? 'text-red-600' : 'text-blue-600'
+              )}
+            >
+              <span className="font-medium">{getDisplaySource(fetchedFrom)}</span>
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          )}
+          {lastFetched && (
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <Clock className={cn('h-3 w-3', iconColorClass)} aria-hidden="true" />
+              <span className="font-medium">{formatTimestamp(lastFetched)}</span>
+            </span>
+          )}
         </div>
       )}
     </div>

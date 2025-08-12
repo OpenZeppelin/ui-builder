@@ -1,4 +1,10 @@
-import { ArrowDownToLine, ArrowUpFromLine, LayoutPanelTop, SquarePen } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  BookOpenText,
+  LayoutPanelTop,
+  SquarePen,
+} from 'lucide-react';
 
 import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
@@ -76,6 +82,16 @@ export default function MainActions({
           Export
         </SidebarButton>
       )}
+
+      {/* Docs link below Import/Export */}
+      <SidebarButton
+        icon={<BookOpenText className="size-4" />}
+        href="https://docs.openzeppelin.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Docs
+      </SidebarButton>
     </div>
   );
 }

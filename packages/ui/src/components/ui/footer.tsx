@@ -84,13 +84,13 @@ export const Footer = ({
 
   return (
     <footer className={cn('border-t bg-background border-[#F5F5F5]', className)}>
-      <div className="flex h-12 items-center justify-center px-6">
-        <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+      <div className="px-6 py-4 sm:h-12">
+        <div className="text-sm text-muted-foreground flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
             © {copyrightYear} {companyName}
           </span>
           {hasLegalLinks && (
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
               {showPrivacyPolicy && (
                 <a
                   href={privacyPolicyUrl}

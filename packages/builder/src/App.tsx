@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   AdapterProvider,
@@ -33,6 +33,8 @@ function AppContent() {
     },
   } = useUIBuilderState();
 
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
   const handleLoad = useCallback(
     (id: string) => {
       void load(id);
@@ -49,12 +51,14 @@ function AppContent() {
         onResetAfterDelete={resetAfterDelete}
         currentLoadedConfigurationId={state.loadedConfigurationId}
         isInNewUIMode={state.isInNewUIMode}
+        open={isMobileSidebarOpen}
+        onOpenChange={setIsMobileSidebarOpen}
       />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <Header title="Contracts UI Builder" />
+        <Header title="Contracts UI Builder" onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
 
         <main className="pb-8 flex-1">
           <ContractsUIBuilder />

@@ -20,7 +20,9 @@ export default function OtherToolsSection() {
       <div className="flex flex-col">
         <SidebarButton
           icon={<FileJson2 className="size-4" />}
-          onClick={() => window.open('https://wizard.openzeppelin.com/', '_blank')}
+          href="https://wizard.openzeppelin.com/"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           Contract Wizard
         </SidebarButton>

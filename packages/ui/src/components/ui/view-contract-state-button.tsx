@@ -24,14 +24,16 @@ export function ViewContractStateButton({
     <Button
       variant="outline"
       size="sm"
-      className="gap-2 h-9 px-3 py-2"
+      className="px-3 py-2 h-auto gap-2 items-start justify-start sm:items-center"
       onClick={onToggle}
       title="Show Contract State"
     >
-      <FileText size={16} className="shrink-0" />
-      <span className="text-sm font-medium">View Contract State</span>
-      <span className="ml-1 text-xs text-muted-foreground">
-        ({truncateMiddle(contractAddress)})
+      <FileText size={16} className="shrink-0 self-center" />
+      <span className="flex flex-col sm:flex-row sm:items-center text-left leading-tight">
+        <span className="text-sm font-medium">View Contract State</span>
+        <span className="text-xs text-muted-foreground sm:ml-1">
+          ({truncateMiddle(contractAddress)})
+        </span>
       </span>
     </Button>
   );

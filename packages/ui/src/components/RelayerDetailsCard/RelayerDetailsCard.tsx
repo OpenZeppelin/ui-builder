@@ -123,9 +123,10 @@ export const RelayerDetailsCard: React.FC<RelayerDetailsCardProps> = ({
               {enhancedDetails.balance && (
                 <div className="flex items-center gap-2 text-xs">
                   <DollarSign className="size-3.5 text-muted-foreground flex-shrink-0" />
-                  <span className="text-muted-foreground truncate">
-                    <span className="font-medium">Balance:</span> {enhancedDetails.balance}
-                  </span>
+                  <div className="text-muted-foreground min-w-0 flex-1">
+                    <span className="font-medium">Balance:</span>{' '}
+                    <span className="break-all">{enhancedDetails.balance}</span>
+                  </div>
                 </div>
               )}
 

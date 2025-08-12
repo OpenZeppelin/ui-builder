@@ -1,6 +1,6 @@
 // Reusable components from Common directory
 export { TitledSection } from '../../../Common/TitledSection';
-export { OptionSelector, type SelectableOption } from '../../../Common/OptionSelector';
+export { type SelectableOption } from '../../../Common/OptionSelector';
 
 // Specific component implementations
 export { EoaConfiguration } from './EoaConfiguration';

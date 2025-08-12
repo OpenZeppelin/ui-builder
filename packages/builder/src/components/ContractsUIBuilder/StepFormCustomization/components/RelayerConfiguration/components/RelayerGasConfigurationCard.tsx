@@ -26,8 +26,9 @@ export function RelayerGasConfigurationCard({
   onSetupStepChange,
   onTransactionOptionsChange,
 }: RelayerGasConfigurationCardProps): React.ReactElement {
-  const hasCustomOptions =
-    transactionOptions.speed || transactionOptions.gasPrice || transactionOptions.maxFeePerGas;
+  const hasCustomOptions = Boolean(
+    transactionOptions.speed || transactionOptions.gasPrice || transactionOptions.maxFeePerGas
+  );
 
   if (!adapter?.getRelayerOptionsComponent) {
     return <></>;
@@ -35,20 +36,14 @@ export function RelayerGasConfigurationCard({
 
   return (
     <Card className={isActive ? '' : ''}>
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <div className="flex items-center space-x-2">
-            <div
-              className={`rounded-md p-0.5 ${
-                hasCustomOptions ? 'bg-green-100 text-green-600' : 'bg-primary/10 text-primary'
-              }`}
-            >
-              {hasCustomOptions ? (
+      <CardHeader className="pb-1 pt-2 px-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1.5">
+            {hasCustomOptions && (
+              <div className="rounded-md p-0.5 bg-green-100 text-green-600">
                 <CheckCircle className="h-3.5 w-3.5" />
-              ) : (
-                <span className="block w-5 h-5 text-center text-xs font-medium leading-5">3</span>
-              )}
-            </div>
+              </div>
+            )}
             <CardTitle className="text-base">Gas Configuration</CardTitle>
           </div>
         </div>
@@ -60,9 +55,9 @@ export function RelayerGasConfigurationCard({
       </CardHeader>
 
       {!isActive && (
-        <CardContent>
-          <div className="space-y-3">
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4">
+        <CardContent className="pt-0">
+          <div className="space-y-2">
+            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-3">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-green-100 dark:bg-green-900/50 p-1.5 mt-0.5 flex-shrink-0">
                   <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -94,7 +89,7 @@ export function RelayerGasConfigurationCard({
       )}
 
       {isActive && (
-        <CardContent>
+        <CardContent className="pt-0">
           {(() => {
             const RelayerOptionsComponent = adapter.getRelayerOptionsComponent();
             if (!RelayerOptionsComponent) return null;

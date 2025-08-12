@@ -47,24 +47,23 @@ export function RelayerSelectionCard({
 
   return (
     <Card className={!isActive && isComplete ? 'opacity-60' : ''}>
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <div className="flex items-center space-x-2">
-            <div
-              className={`rounded-md p-0.5 ${
-                isComplete ? 'bg-green-100 text-green-600' : 'bg-primary/10 text-primary'
-              }`}
-            >
-              {isComplete ? (
+      <CardHeader className="pb-1 pt-2 px-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center space-x-1.5">
+            {isComplete && (
+              <div className="rounded-md p-0.5 bg-green-100 text-green-600">
                 <CheckCircle className="h-3.5 w-3.5" />
-              ) : (
-                <span className="block w-5 h-5 text-center text-xs font-medium leading-5">2</span>
-              )}
-            </div>
+              </div>
+            )}
             <CardTitle className="text-base">Select Relayer</CardTitle>
           </div>
           {isComplete && !isActive && (
-            <Button variant="ghost" size="sm" onClick={onEdit}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+              className="self-center sm:self-auto mt-1 sm:mt-0"
+            >
               Change
             </Button>
           )}
@@ -72,7 +71,7 @@ export function RelayerSelectionCard({
       </CardHeader>
 
       {(isActive || !isComplete) && (
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 pt-0">
           <div className="w-full">
             <SelectField
               id="selected-relayer"

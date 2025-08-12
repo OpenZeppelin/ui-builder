@@ -40,6 +40,31 @@ module.exports = [
           argsIgnorePattern: '^_',
         },
       ],
+      // Prevent importing adapter packages directly in builder; use ecosystemManager dynamic loading
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@openzeppelin/contracts-ui-builder-adapter-*'],
+              message:
+                'Do not import adapter packages directly in the builder. Use dynamic loading via src/core/ecosystemManager.ts.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Allowlist files that are explicitly responsible for dynamic adapter integration or typed config
+  {
+    files: [
+      'src/core/ecosystemManager.ts',
+      // This config is intentionally typed for EVM and is loaded by the EVM adapter at runtime
+      'src/config/wallet/rainbowkit.config.ts',
+    ],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 ];

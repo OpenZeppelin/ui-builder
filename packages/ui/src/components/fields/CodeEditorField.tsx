@@ -187,7 +187,7 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
           return (
             <div className="space-y-2">
               <div
-                className="w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                className="w-full rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed resize-y"
                 style={{
                   maxHeight: `${maxHeightNum}px`,
                   overflow: 'auto',

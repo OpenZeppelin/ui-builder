@@ -110,7 +110,10 @@ export function useContractWidgetState() {
 
         // When contract changes, only auto-show if it has view functions and user hasn't toggled yet.
         // We no longer auto-hide, respecting the user's choice to keep it open.
-        if (hasViewFunctions && !userToggledRef.current) {
+        // On mobile screens, do not auto-show by default
+        const isMobileScreen =
+          typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+        if (hasViewFunctions && !userToggledRef.current && !isMobileScreen) {
           setUiState({ isWidgetVisible: true });
         }
       }
@@ -118,7 +121,10 @@ export function useContractWidgetState() {
       // On the very first load of a contract, if it has view functions, show the widget by default.
       if (currentContractAddress.current === null && hasViewFunctions) {
         currentContractAddress.current = contractAddress; // Set it so this block doesn't re-run
-        if (!userToggledRef.current) {
+        // On mobile screens, do not auto-show by default
+        const isMobileScreen =
+          typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+        if (!userToggledRef.current && !isMobileScreen) {
           setUiState({ isWidgetVisible: true });
         }
       }

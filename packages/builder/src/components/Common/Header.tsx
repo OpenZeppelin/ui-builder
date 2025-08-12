@@ -1,69 +1,40 @@
-import { SiGithub, SiX } from '@icons-pack/react-simple-icons';
+import { Menu } from 'lucide-react';
 
 import { WalletConnectionHeader } from '@openzeppelin/contracts-ui-builder-react-core';
 
 interface HeaderProps {
   title?: string;
-  showNavigation?: boolean;
+  /** Open the mobile sidebar */
+  onOpenSidebar?: () => void;
 }
 
 /**
  * Application header component with optional title, navigation, and wallet connection.
  */
-export const Header = ({ title, showNavigation = false }: HeaderProps) => {
+export const Header = ({ title, onOpenSidebar }: HeaderProps) => {
   return (
     <header className="border-b border-[#F5F5F5] bg-background">
-      <div className="flex h-16 items-center px-5">
+      <div className="flex h-16 items-center px-3 sm:px-4 md:px-5 min-w-0">
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          aria-label="Open menu"
+          onClick={onOpenSidebar}
+          className="mr-2 sm:mr-3 inline-flex items-center justify-center rounded-md p-2 text-primary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary xl:hidden"
+        >
+          <Menu className="size-5" />
+        </button>
         {/* Left side - Title (conditional) */}
         {title && (
-          <div className="flex items-center">
-            <h1 className="text-base font-semibold text-foreground">{title}</h1>
+          <div className="flex items-center min-w-0">
+            <h1 className="truncate max-w-[50vw] text-base font-semibold text-foreground">
+              {title}
+            </h1>
           </div>
         )}
 
-        {/* Right side - Navigation and tools */}
-        <div className="ml-auto flex items-center space-x-6">
-          {/* OpenZeppelin Navigation Links (conditional) */}
-          {showNavigation && (
-            <nav className="flex items-center space-x-5">
-              <a
-                href="https://forum.openzeppelin.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-primary hover:text-gray-600 transition-colors"
-              >
-                Forum
-              </a>
-              <a
-                href="https://docs.openzeppelin.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-primary hover:text-gray-600 transition-colors"
-              >
-                Docs
-              </a>
-              <a
-                href="https://github.com/OpenZeppelin/contracts-ui-builder"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-gray-600 transition-colors"
-                title="View on GitHub"
-              >
-                <SiGithub size={20} />
-              </a>
-              <a
-                href="https://x.com/openzeppelin"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-gray-600 transition-colors"
-                title="Follow on X"
-              >
-                <SiX size={20} />
-              </a>
-            </nav>
-          )}
-
-          {/* Wallet Connection */}
+        {/* Right side - Wallet Connection */}
+        <div className="ml-auto flex items-center">
           <WalletConnectionHeader />
         </div>
       </div>

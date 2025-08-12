@@ -35,7 +35,7 @@ export function FieldSelectorList({
 }: FieldSelectorListProps) {
   return (
     <TooltipProvider>
-      <div className="col-span-1 space-y-2 border-r pr-4">
+      <div className="space-y-2 border-r pr-4">
         {fields.map((field, index) => (
           <div
             key={field.id}
