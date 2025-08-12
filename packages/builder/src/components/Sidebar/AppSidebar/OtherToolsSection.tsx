@@ -1,7 +1,6 @@
-import { FileJson2 } from 'lucide-react';
-
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
+import ContractsWizardIconSvg from '../../../assets/icons/contracts-wizard-icon.svg';
 import { DevToolsDropdown } from '../../Common/DevToolsDropdown';
 import SidebarButton from './SidebarButton';
 
@@ -19,7 +18,7 @@ export default function OtherToolsSection() {
       <div className="text-[#5e5e5e] text-xs font-semibold leading-4 mb-1">Other Tools</div>
       <div className="flex flex-col">
         <SidebarButton
-          icon={<FileJson2 className="size-4" />}
+          icon={<img src={ContractsWizardIconSvg} alt="Contract Wizard" className="size-4" />}
           href="https://wizard.openzeppelin.com/"
           target="_blank"
           rel="noopener noreferrer"
