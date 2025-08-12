@@ -63,6 +63,9 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          # Checkout the proper branch (handle both PR and push events)
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          git checkout "$BRANCH_NAME"
           git add packages/builder/src/export/versions.ts
           git commit -m "chore: update export versions"
-          git push
+          git push origin "$BRANCH_NAME"
