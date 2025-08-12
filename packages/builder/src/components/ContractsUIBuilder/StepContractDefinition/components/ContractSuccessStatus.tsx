@@ -8,6 +8,7 @@ import type {
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import {
@@ -162,12 +163,11 @@ export function ContractSuccessStatus({
       )}
 
       {/* Success Message */}
-      <div className="rounded-md border border-green-200 bg-green-50 p-4">
-        <p className="flex items-center text-green-800">
-          <CheckCircle className="mr-2 size-5" />
-          {successMessage}
-        </p>
-      </div>
+      <Alert variant="success" className="p-4">
+        <CheckCircle className="size-5" />
+        <AlertTitle>Contract loaded</AlertTitle>
+        <AlertDescription>{successMessage}</AlertDescription>
+      </Alert>
 
       {/* Contract Definition Comparison Modal */}
       {definitionComparison?.comparisonResult && (
