@@ -86,7 +86,7 @@ export default function MainActions({
       {/* Docs link below Import/Export */}
       <SidebarButton
         icon={<BookOpenText className="size-4" />}
-        href="https://docs.openzeppelin.com/"
+        href="https://docs.openzeppelin.com/contracts-ui-builder"
         target="_blank"
         rel="noopener noreferrer"
       >
