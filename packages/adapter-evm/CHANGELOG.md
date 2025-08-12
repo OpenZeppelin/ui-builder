@@ -1,5 +1,17 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.4.0
+
+### Minor Changes
+
+- [#91](https://github.com/OpenZeppelin/contracts-ui-builder/pull/91) [`6ad118f`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6ad118fcac5aeb6c807bdcc9464de98791d2a20a) Thanks [@pasevin](https://github.com/pasevin)! - a better support for mobile screen sizes
+
+### Patch Changes
+
+- Updated dependencies [[`6ad118f`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6ad118fcac5aeb6c807bdcc9464de98791d2a20a)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.5.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.4
+
 ## 0.3.2
 
 ### Patch Changes
