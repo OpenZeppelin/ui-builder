@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@openzeppelin/contracts-ui-builder-ui';
+import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 
@@ -46,7 +47,7 @@ export function ContractStateWidget({
 
   const networkConfig = adapter?.networkConfig;
 
-  useEffect(() => {
+  useEffect((): void => {
     if (!contractSchema || !adapter) return;
     // Filter functions to only simple view functions (no parameters)
     const viewFns = contractSchema.functions.filter((fn) => adapter.isViewFunction(fn));
@@ -65,7 +66,7 @@ export function ContractStateWidget({
       setAnimationState('exiting');
       const timer = setTimeout(() => {
         setAnimationState('exited');
-      }, 300);
+      }, 500);
       return (): void => clearTimeout(timer);
     }
   }, [isVisible]);
@@ -80,21 +81,30 @@ export function ContractStateWidget({
     return null;
   }
 
-  // If widget is hidden, don't render anything
-  if (!isVisible) {
-    return null;
-  }
+  // Keep mounted to allow exit animation on mobile. We'll hide on desktop via classes.
 
   return (
     <Card
-      className={`mb-2 overflow-hidden p-0 gap-0 flex flex-col max-h-160 ${className || ''}
-        transition-all duration-300 ease-in-out
-        ${
-          animationState === 'entering' || animationState === 'entered'
-            ? 'opacity-100 transform scale-100 translate-y-0'
-            : 'opacity-0 transform scale-95 -translate-y-2'
-        }
-      `}
+      className={cn(
+        'overflow-hidden p-0 gap-0 flex flex-col transition-transform duration-500 ease-in-out will-change-transform transform-gpu',
+        // Mobile: slide from bottom using translate classes
+        animationState === 'entering' || animationState === 'entered'
+          ? 'translate-y-0'
+          : 'translate-y-[120%]',
+        // Desktop: subtle scale/opacity
+        animationState === 'entering' || animationState === 'entered'
+          ? 'md:scale-100 md:opacity-100'
+          : 'md:scale-95 md:opacity-0',
+        // Mobile: fixed overlay positioned at bottom
+        'fixed bottom-4 inset-x-4 z-[9999] max-h-[50vh] shadow-xl bg-background backdrop-blur-md rounded-lg border border-border',
+        // Desktop: relative positioned card in sidebar
+        'md:relative md:inset-auto md:bottom-auto md:shadow-none md:bg-card md:backdrop-blur-none md:z-auto md:mb-2 md:max-h-160',
+        // Prevent interactions while animating out; hide entirely on desktop when exited
+        (animationState === 'exiting' || animationState === 'exited') && 'pointer-events-none',
+        animationState === 'exited' && 'md:hidden',
+        className
+      )}
+      aria-hidden={animationState === 'exited'}
     >
       <CardHeader className="pb-2 pt-2 px-3 flex-shrink-0 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium">Contract State</CardTitle>

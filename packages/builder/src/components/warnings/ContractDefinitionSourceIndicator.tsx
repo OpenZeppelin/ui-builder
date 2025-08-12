@@ -86,9 +86,9 @@ export const ContractDefinitionSourceIndicator: React.FC<
             </a>
           )}
           {lastFetched && (
-            <span className="flex items-center gap-1 text-foreground/80">
+            <span className="flex items-center gap-1 text-muted-foreground">
               <Clock className={cn('h-3 w-3', iconColorClass)} aria-hidden="true" />
-              <span className="font-medium opacity-80">{formatTimestamp(lastFetched)}</span>
+              <span className="font-medium">{formatTimestamp(lastFetched)}</span>
             </span>
           )}
         </div>

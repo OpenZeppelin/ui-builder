@@ -139,15 +139,13 @@ export function ContractsUIBuilder() {
 
   // Create sidebar widget when we have contract data
   const sidebarWidgetComponent = widget.sidebar ? (
-    <div className="sticky top-4">
-      <ContractStateWidget
-        contractSchema={widget.sidebar.contractSchema}
-        contractAddress={widget.sidebar.contractAddress}
-        adapter={widget.sidebar.adapter}
-        isVisible={widget.sidebar.isVisible}
-        onToggle={widget.sidebar.onToggle}
-      />
-    </div>
+    <ContractStateWidget
+      contractSchema={widget.sidebar.contractSchema}
+      contractAddress={widget.sidebar.contractAddress}
+      adapter={widget.sidebar.adapter}
+      isVisible={widget.sidebar.isVisible}
+      onToggle={widget.sidebar.onToggle}
+    />
   ) : null;
 
   const steps: WizardStep[] = [

@@ -114,7 +114,13 @@ export function WizardLayout({
       <div className="flex w-full relative">
         {/* Sidebar widget - Only show when not on the first step */}
         {sidebarWidget && !isFirstStep && (
-          <div className={isWidgetExpanded ? 'w-80 shrink-0 mr-6' : 'shrink-0'}>
+          <div
+            className={cn(
+              'shrink-0',
+              // Keep container present on mobile to avoid unmount during exit animation
+              isWidgetExpanded ? 'md:w-80 md:mr-6' : 'md:w-0'
+            )}
+          >
             {sidebarWidget}
           </div>
         )}
