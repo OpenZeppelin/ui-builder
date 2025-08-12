@@ -37,7 +37,7 @@ jobs:
       - name: Prepare pre-requisites
         uses: ./.github/actions/prepare
         with:
-          token: ${{ steps.gh-app-token.outputs.token }}'
+          token: ${{ steps.gh-app-token.outputs.token }}
 
       - name: Configure npm authentication for npm registry
         run: |
