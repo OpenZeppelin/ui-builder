@@ -225,7 +225,7 @@ export function StepFormCustomization({
             className="w-full max-w-full min-w-0 flex-1 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
             style={{ contain: 'inline-size' }}
           >
-            <TabsList className="w-max sm:w-full">
+            <TabsList className="w-full">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="fields">Fields</TabsTrigger>
               <TabsTrigger value="execution">Execution Method</TabsTrigger>

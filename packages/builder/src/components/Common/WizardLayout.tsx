@@ -64,8 +64,8 @@ export function WizardLayout({
   const isCurrentStepValid = currentStep.isValid !== false;
 
   return (
-    <div className="flex w-full flex-col space-y-8 p-6">
-      <div className="-mx-6 -mt-6 mb-8 bg-card px-6 pt-6 pb-5">
+    <div className="flex w-full flex-col space-y-8 p-3 sm:p-6">
+      <div className="-mx-3 sm:-mx-6 -mt-3 sm:-mt-6 mb-8 bg-card px-3 sm:px-6 pt-3 sm:pt-6 pb-5">
         {/* Mobile-only current step title */}
         <div className="sm:hidden mb-4 text-center">
           <h3 className="text-lg font-semibold text-foreground">{steps[currentStepIndex].title}</h3>
