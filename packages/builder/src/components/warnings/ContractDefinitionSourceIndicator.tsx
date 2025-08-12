@@ -58,7 +58,7 @@ export const ContractDefinitionSourceIndicator: React.FC<
         'items-start sm:items-end text-left sm:text-right',
         // Allow the badge to sit at the right edge when container allows
         'sm:ml-auto',
-        'transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
+        // Hover effects disabled
         borderColorClass,
         bgColorClass,
         textColorClass,
@@ -81,8 +81,8 @@ export const ContractDefinitionSourceIndicator: React.FC<
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                'inline-flex items-center gap-1 hover:underline break-all',
-                hasError ? 'text-red-600 hover:text-red-700' : 'text-blue-600 hover:text-blue-700'
+                'inline-flex items-center gap-1 break-all',
+                hasError ? 'text-red-600' : 'text-blue-600'
               )}
             >
               <span className="font-medium">{getDisplaySource(fetchedFrom)}</span>
