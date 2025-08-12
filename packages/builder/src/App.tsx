@@ -58,11 +58,7 @@ function AppContent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <Header
-          title="Contracts UI Builder"
-          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
-          showNavigation={{ github: true, docs: true, forum: true, x: true }}
-        />
+        <Header title="Contracts UI Builder" onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
 
         <main className="pb-8 flex-1">
           <ContractsUIBuilder />
