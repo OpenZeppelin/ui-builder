@@ -35,6 +35,9 @@ export function ViewFunctionsPanel({
   contractSchema,
   className,
 }: ViewFunctionsPanelProps): JSX.Element {
+  const safeFunctions = adapter.filterAutoQueryableFunctions
+    ? adapter.filterAutoQueryableFunctions(functions)
+    : functions;
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [hasQueried, setHasQueried] = useState(false);
@@ -42,7 +45,7 @@ export function ViewFunctionsPanel({
 
   // Query all view functions at once
   const handleQueryAll = useCallback(async () => {
-    if (functions.length === 0) return;
+    if (safeFunctions.length === 0) return;
 
     // Prevent duplicate queries
     if (isQueryInProgress) {
@@ -54,14 +57,14 @@ export function ViewFunctionsPanel({
 
     // Set all functions to loading state
     const initialLoadingStates: Record<string, boolean> = {};
-    functions.forEach((func) => {
+    safeFunctions.forEach((func) => {
       initialLoadingStates[func.id] = true;
     });
     setLoadingStates(initialLoadingStates);
 
     try {
       // Create query functions with incremental result updates
-      const queryFunctions = functions.map(
+      const queryFunctions = safeFunctions.map(
         (func) => async (): Promise<{ funcId: string; success: boolean }> => {
           try {
             const result = await adapter.queryViewFunction(
@@ -112,7 +115,7 @@ export function ViewFunctionsPanel({
       setHasQueried(true);
       setIsQueryInProgress(false);
     }
-  }, [functions, contractAddress, adapter, contractSchema, isQueryInProgress]);
+  }, [safeFunctions, contractAddress, adapter, contractSchema, isQueryInProgress]);
 
   // Auto-query all functions on component mount
   useEffect(() => {
@@ -120,7 +123,7 @@ export function ViewFunctionsPanel({
     let timeoutId: NodeJS.Timeout | null = null;
 
     const performInitialQuery = async (): Promise<void> => {
-      if (functions.length > 0 && mounted && !hasQueried && !isQueryInProgress) {
+      if (safeFunctions.length > 0 && mounted && !hasQueried && !isQueryInProgress) {
         // Add a small delay to help with React StrictMode double mounting
         timeoutId = setTimeout(() => {
           if (mounted) {
@@ -138,7 +141,7 @@ export function ViewFunctionsPanel({
         clearTimeout(timeoutId);
       }
     };
-  }, [functions.length, hasQueried, isQueryInProgress, handleQueryAll]);
+  }, [safeFunctions.length, hasQueried, isQueryInProgress, handleQueryAll]);
 
   // Listen for RPC configuration changes
   useEffect(() => {
@@ -157,7 +160,7 @@ export function ViewFunctionsPanel({
     return unsubscribe;
   }, [adapter.networkConfig?.id, handleQueryAll]);
 
-  if (functions.length === 0) {
+  if (safeFunctions.length === 0) {
     return (
       <div className="text-xs text-muted-foreground">
         No simple view functions found in this contract.
@@ -186,7 +189,7 @@ export function ViewFunctionsPanel({
       </div>
 
       <div className="space-y-2 overflow-y-auto pr-1 flex-grow min-h-0">
-        {functions.map((func) => (
+        {safeFunctions.map((func) => (
           <FunctionResult
             key={func.id}
             functionDetails={func}

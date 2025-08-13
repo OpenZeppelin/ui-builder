@@ -90,7 +90,7 @@ export function StepContractDefinition({
     // Trigger reload with proxy detection disabled
     const currentFormValues = contractState.formValues;
     if (currentFormValues && adapter) {
-      void loadContract(currentFormValues);
+      void loadContract(currentFormValues, { skipProxyDetection: true });
     }
   }, [contractState.formValues, adapter, loadContract]);
 

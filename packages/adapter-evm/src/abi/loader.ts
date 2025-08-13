@@ -9,7 +9,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { detectProxyFromAbi, getImplementationAddress } from '../proxy/detection';
+import { detectProxyFromAbi, getAdminAddress, getImplementationAddress } from '../proxy/detection';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
 import { loadAbiFromEtherscan } from './etherscan';
 import { transformAbiToSchema } from './transformer';
@@ -204,6 +204,9 @@ async function handleProxyDetection(
     proxyType
   );
 
+  // Attempt to resolve admin address as well for display purposes
+  const adminAddress = await getAdminAddress(contractAddress, networkConfig);
+
   if (!implementationAddress) {
     logger.info('handleProxyDetection', 'Proxy detected but implementation address not found');
 
@@ -226,12 +229,13 @@ async function handleProxyDetection(
     proxyType
   );
 
-  const baseProxyInfo: ProxyInfo = {
+  const baseProxyInfo = {
     isProxy: true,
     proxyType,
     implementationAddress,
     proxyAddress: contractAddress,
     detectionMethod: 'automatic',
+    ...(adminAddress ? { adminAddress } : {}),
   };
 
   if (implementationResult) {
