@@ -56,19 +56,14 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Temporarily make Husky files non-executable for API compatibility
+      - name: Commit changes
         if: steps.check-changes.outputs.changed == 'true'
-        run: |
-          chmod -x .husky/* 2>/dev/null || true
-
-      - name: Create signed commit using changesets action
-        if: steps.check-changes.outputs.changed == 'true'
-        id: changesets
-        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
-        with:
-          commit: 'chore: update export versions'
-          title: 'chore: update export versions'
-          setupGitUser: true
-          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
+          HUSKY: 0  # Disable husky hooks for automated commits
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add packages/builder/src/export/versions.ts
+          git commit -m "chore: update export versions"
+          git push
