@@ -1,17 +1,11 @@
 # Configuration Files
 
-## Symlinked Files
+## Configuration Files
 
-The following files in this directory are symlinks to the root configuration files:
+This package consumes centralized configuration from the repository root without using symlinks:
 
-- `postcss.config.cjs` - PostCSS configuration
-- `tailwind.config.cjs` - Tailwind CSS configuration
-- `components.json` - shadcn/ui component configuration
+- `tailwind.config.cjs`: JS proxy that `module.exports = require('../../tailwind.config.cjs')`
+- `postcss.config.cjs`: JS proxy that `module.exports = require('../../postcss.config.cjs')`
+- `components.json`: Regular JSON file pointing to `../styles/global.css` as the Tailwind CSS entry
 
-## Important
-
-**DO NOT edit these files directly** as they are symlinks to the root configuration files.
-
-Instead, edit the source files at the root of the monorepo and run `pnpm create-symlinks` to update all copies.
-
-This ensures consistent configuration across all packages in the monorepo.
+Edit the root configs to change shared behavior. Per-package `components.json` can be adjusted to point to the correct CSS entry for that package.

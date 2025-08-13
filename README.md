@@ -558,21 +558,14 @@ This project uses a centralized configuration approach to maintain consistency a
 
 - **tailwind.config.cjs**: Root configuration for Tailwind CSS, used by all packages
 - **postcss.config.cjs**: Root configuration for PostCSS, used by all packages
-- **components.json**: Root configuration for shadcn/ui components, used by all packages
+- **components.json**: Root configuration for shadcn/ui components, referenced by packages
 
-Each package has symlinks to these root configuration files, ensuring consistent styling, processing, and component behavior across the entire
-monorepo.
+Packages consume these root configs via:
 
-### Symlink Structure
+- JS proxy files (`packages/*/tailwind.config.cjs` and `packages/*/postcss.config.cjs`) that require the root configs
+- Per-package `components.json` files (regular JSON) that reference the package CSS entry (e.g., `../styles/global.css`)
 
-To ensure consistency, the following packages use symlinks pointing to the root configuration files (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`):
-
-- **Builder Package**: Links to root configuration files.
-- **Renderer Package**: Links to root configuration files.
-- **Styles Package**: Links to root configuration files.
-
-During the export process, these symlinks are resolved to create standalone configuration files with the appropriate settings for the exported
-project.
+During the export process, proxy configs and JSON are included to create standalone configuration files for the exported project.
 
 ## Runtime Configuration
 
