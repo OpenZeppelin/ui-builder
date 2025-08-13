@@ -1,5 +1,25 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.6.0
+
+### Minor Changes
+
+- [#106](https://github.com/OpenZeppelin/contracts-ui-builder/pull/106) [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b) Thanks [@pasevin](https://github.com/pasevin)! - Show proxy implementation/admin in banner with explorer links and chain-agnostic copy; “Reset detection” now uses proxy ABI only (no implementation fetch); prevent reload loop on fatal load errors.
+
+### Patch Changes
+
+- Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b), [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b), [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.5.0
+  - @openzeppelin/contracts-ui-builder-types@0.4.0
+  - @openzeppelin/contracts-ui-builder-renderer@0.4.0
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.4
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.9
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.9
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.5
+  - @openzeppelin/contracts-ui-builder-storage@0.3.4
+  - @openzeppelin/contracts-ui-builder-ui@0.5.1
+  - @openzeppelin/contracts-ui-builder-utils@0.4.1
+
 ## 0.5.0
 
 ### Minor Changes

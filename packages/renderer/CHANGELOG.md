@@ -1,5 +1,18 @@
 # @openzeppelin/transaction-form-renderer
 
+## 0.4.0
+
+### Minor Changes
+
+- [#106](https://github.com/OpenZeppelin/contracts-ui-builder/pull/106) [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b) Thanks [@pasevin](https://github.com/pasevin)! - Use adapter-provided filtering for safe auto-queries to prevent calling admin-only getters; improve FunctionResult header layout to avoid overflow.
+
+### Patch Changes
+
+- Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
+  - @openzeppelin/contracts-ui-builder-types@0.4.0
+  - @openzeppelin/contracts-ui-builder-ui@0.5.1
+  - @openzeppelin/contracts-ui-builder-utils@0.4.1
+
 ## 0.3.0
 
 ### Minor Changes
