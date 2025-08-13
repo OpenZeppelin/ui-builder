@@ -11,9 +11,6 @@
   "scripts": {
     "clean": "pnpm -r clean",
     "install-deps": "pnpm install --frozen-lockfile --ignore-scripts --prefer-offline",
-    "check-symlinks": "node scripts/manage-symlinks.js check",
-    "fix-symlinks": "node scripts/manage-symlinks.js fix",
-    "create-symlinks": "node scripts/manage-symlinks.js create",
     "dev": "pnpm --filter=@openzeppelin/contracts-ui-builder-app dev",
     "docker:dev": "docker-compose up --build",
     "docs": "oz-docs -c docs",
