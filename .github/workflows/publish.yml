@@ -91,6 +91,9 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pnpm run install-deps
 
+      - name: Guard against disallowed file modes (executables/symlinks)
+        run: pnpm run check-file-modes
+
       - name: Make Husky files non-executable for GitHub API compatibility
         run: |
           chmod -x .husky/commit-msg .husky/pre-commit .husky/pre-push 2>/dev/null || true
