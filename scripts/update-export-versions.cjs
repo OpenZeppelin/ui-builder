@@ -88,8 +88,8 @@ const updateSnapshots = () => {
   const { execSync } = require('child_process');
 
   try {
-    // Update snapshots for the builder package where the export tests are located
-    execSync('pnpm --filter @openzeppelin/contracts-ui-builder-app test -- -u', {
+    // Update snapshots for the export tests specifically (these are the tests that use package versions)
+    execSync('pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u', {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'inherit',
     });
@@ -97,7 +97,7 @@ const updateSnapshots = () => {
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
     console.log(
-      '⚠️  Please run "pnpm --filter=@openzeppelin/contracts-ui-builder-app test -u" manually'
+      '⚠️  Please run "pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u" manually'
     );
   }
 };
