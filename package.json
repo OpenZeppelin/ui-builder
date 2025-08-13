@@ -41,6 +41,7 @@
     "update-deps": "pnpm update -r",
     "update-deps:major": "pnpm update -r --latest",
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
+    "check-file-modes": "node scripts/check-file-modes.cjs",
     "update-export-versions": "node scripts/update-export-versions.cjs",
     "outdated": "pnpm outdated -r",
     "export-app": "node packages/builder/src/export/cli/export-app.cjs",
