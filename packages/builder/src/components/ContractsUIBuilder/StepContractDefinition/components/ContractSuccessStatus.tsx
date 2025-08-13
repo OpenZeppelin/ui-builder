@@ -118,6 +118,14 @@ export function ContractSuccessStatus({
     [proxyInfo?.implementationAddress, adapter]
   );
 
+  const adminExplorerUrl = useMemo(
+    () =>
+      proxyInfo?.adminAddress
+        ? adapter?.getExplorerUrl(proxyInfo.adminAddress) || undefined
+        : undefined,
+    [proxyInfo?.adminAddress, adapter]
+  );
+
   return (
     <div className="space-y-3">
       {/* Contract Definition Source Indicator */}
@@ -158,6 +166,7 @@ export function ContractSuccessStatus({
           proxyInfo={proxyInfo}
           proxyExplorerUrl={proxyExplorerUrl}
           implementationExplorerUrl={implementationExplorerUrl}
+          adminExplorerUrl={adminExplorerUrl}
           onIgnoreProxy={onIgnoreProxy}
         />
       )}
