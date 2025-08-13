@@ -1,5 +1,15 @@
 # @openzeppelin/transaction-form-adapter-midnight
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
+  - @openzeppelin/contracts-ui-builder-types@0.4.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.2.5
+  - @openzeppelin/contracts-ui-builder-ui@0.5.1
+  - @openzeppelin/contracts-ui-builder-utils@0.4.1
+
 ## 0.1.3
 
 ### Patch Changes

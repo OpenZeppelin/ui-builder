@@ -12,6 +12,8 @@ export interface ProxyStatusIndicatorProps {
   proxyExplorerUrl?: string;
   /** Pre-generated explorer URL for the implementation address (optional) */
   implementationExplorerUrl?: string;
+  /** Pre-generated explorer URL for the admin address (optional) */
+  adminExplorerUrl?: string;
   /** Callback when user wants to reload without proxy detection */
   onIgnoreProxy?: () => void;
   /** Optional CSS class name */
@@ -26,6 +28,7 @@ export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
   proxyInfo,
   proxyExplorerUrl,
   implementationExplorerUrl,
+  adminExplorerUrl,
   onIgnoreProxy,
   className,
 }) => {
@@ -34,6 +37,7 @@ export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
   }
 
   const hasImplementation = !!proxyInfo.implementationAddress;
+  const hasAdmin = !!proxyInfo.adminAddress;
 
   return (
     <div
@@ -80,6 +84,23 @@ export const ProxyStatusIndicator: React.FC<ProxyStatusIndicatorProps> = ({
               className="bg-blue-100 text-blue-800"
             />
           </div>
+
+          {hasAdmin && (
+            <div className="flex items-center gap-2 text-blue-700">
+              <span>Admin:</span>
+              <AddressDisplay
+                address={proxyInfo.adminAddress!}
+                showCopyButton={true}
+                explorerUrl={adminExplorerUrl}
+                className="bg-blue-100 text-blue-800"
+              />
+            </div>
+          )}
+
+          <p className="text-xs text-blue-700">
+            Some management or diagnostic getters may not be callable by all accounts. The
+            implementation and controller addresses shown here are derived from on-chain state.
+          </p>
         </div>
       ) : (
         <p className="text-sm text-blue-800">

@@ -4,7 +4,7 @@
  * Automatically detects proxy contracts and resolves implementation addresses
  * for UUPS, Transparent, Beacon, and other proxy patterns.
  */
-import { createPublicClient, http, parseAbi } from 'viem';
+import { createPublicClient, http, keccak256, parseAbi, toHex } from 'viem';
 
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -157,8 +157,17 @@ export async function getImplementationAddress(
   try {
     switch (proxyType) {
       case 'uups':
-      case 'transparent':
-        return await getEIP1967Implementation(proxyAddress, networkConfig);
+      case 'transparent': {
+        // Try modern EIP-1967 slot first
+        const eip1967Impl = await getEIP1967Implementation(proxyAddress, networkConfig);
+        if (eip1967Impl) return eip1967Impl;
+
+        // Fall back to legacy OZ Unstructured Storage slot used by older proxies
+        const legacyImpl = await getLegacyOZImplementation(proxyAddress, networkConfig);
+        if (legacyImpl) return legacyImpl;
+
+        return null;
+      }
 
       case 'beacon':
         return await getBeaconImplementation(proxyAddress, networkConfig);
@@ -183,6 +192,28 @@ export async function getImplementationAddress(
 }
 
 /**
+ * Attempts to resolve the admin address for a proxy contract
+ * Tries EIP-1967 admin slot first, then legacy OZ slot
+ */
+export async function getAdminAddress(
+  proxyAddress: string,
+  networkConfig: TypedEvmNetworkConfig
+): Promise<string | null> {
+  try {
+    const eip1967Admin = await getEIP1967Admin(proxyAddress, networkConfig);
+    if (eip1967Admin) return eip1967Admin;
+
+    const legacyAdmin = await getLegacyOZAdmin(proxyAddress, networkConfig);
+    if (legacyAdmin) return legacyAdmin;
+
+    return null;
+  } catch (error) {
+    logger.warn('getAdminAddress', `Failed to resolve admin: ${error}`);
+    return null;
+  }
+}
+
+/**
  * Reads implementation address from EIP-1967 storage slot
  */
 async function getEIP1967Implementation(
@@ -193,6 +224,55 @@ async function getEIP1967Implementation(
   const implementationSlot = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 
   return await readStorageSlot(proxyAddress, implementationSlot, networkConfig);
+}
+
+/**
+ * Reads admin address from EIP-1967 admin storage slot
+ * Slot: bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
+ */
+async function getEIP1967Admin(
+  proxyAddress: string,
+  networkConfig: TypedEvmNetworkConfig
+): Promise<string | null> {
+  const adminSlot = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103';
+  return await readStorageSlot(proxyAddress, adminSlot, networkConfig);
+}
+
+/**
+ * Reads admin address from legacy OpenZeppelin Unstructured Storage slot
+ * Slot: keccak256("org.zeppelinos.proxy.admin")
+ */
+async function getLegacyOZAdmin(
+  proxyAddress: string,
+  networkConfig: TypedEvmNetworkConfig
+): Promise<string | null> {
+  try {
+    const slot = keccak256(toHex('org.zeppelinos.proxy.admin'));
+    logger.info('getLegacyOZAdmin', `Trying legacy OZ admin slot: ${slot}`);
+    return await readStorageSlot(proxyAddress, slot, networkConfig);
+  } catch (error) {
+    logger.warn('getLegacyOZAdmin', `Failed computing or reading legacy admin slot: ${error}`);
+    return null;
+  }
+}
+
+/**
+ * Reads implementation address from legacy OpenZeppelin Unstructured Storage slot
+ * Slot: keccak256("org.zeppelinos.proxy.implementation")
+ */
+async function getLegacyOZImplementation(
+  proxyAddress: string,
+  networkConfig: TypedEvmNetworkConfig
+): Promise<string | null> {
+  try {
+    // Compute slot deterministically at runtime to avoid hardcoding
+    const slot = keccak256(toHex('org.zeppelinos.proxy.implementation'));
+    logger.info('getLegacyOZImplementation', `Trying legacy OZ slot: ${slot}`);
+    return await readStorageSlot(proxyAddress, slot, networkConfig);
+  } catch (error) {
+    logger.warn('getLegacyOZImplementation', `Failed computing or reading legacy slot: ${error}`);
+    return null;
+  }
 }
 
 /**
@@ -313,6 +393,7 @@ async function readStorageSlot(
       storageValue &&
       storageValue !== '0x0000000000000000000000000000000000000000000000000000000000000000'
     ) {
+      logger.info('readStorageSlot', `Found non-zero value at slot ${slot}: ${storageValue}`);
       const implAddress = '0x' + storageValue.slice(-40); // Last 20 bytes
       return implAddress;
     }

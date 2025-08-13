@@ -11,9 +11,6 @@
   "scripts": {
     "clean": "pnpm -r clean",
     "install-deps": "pnpm install --frozen-lockfile --ignore-scripts --prefer-offline",
-    "check-symlinks": "node scripts/manage-symlinks.js check",
-    "fix-symlinks": "node scripts/manage-symlinks.js fix",
-    "create-symlinks": "node scripts/manage-symlinks.js create",
     "dev": "pnpm --filter=@openzeppelin/contracts-ui-builder-app dev",
     "docker:dev": "docker-compose up --build",
     "docs": "oz-docs -c docs",
@@ -41,6 +38,7 @@
     "update-deps": "pnpm update -r",
     "update-deps:major": "pnpm update -r --latest",
     "check-deps": "node --no-warnings scripts/check-deps.cjs",
+    "check-file-modes": "node scripts/check-file-modes.cjs",
     "update-export-versions": "node scripts/update-export-versions.cjs",
     "outdated": "pnpm outdated -r",
     "export-app": "node packages/builder/src/export/cli/export-app.cjs",

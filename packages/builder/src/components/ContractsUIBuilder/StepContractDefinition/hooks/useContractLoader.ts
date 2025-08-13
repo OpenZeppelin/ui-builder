@@ -75,7 +75,10 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
    * @param data - Form values containing contract address and optional manual definition
    */
   const loadContract = useCallback(
-    async (data: FormValues) => {
+    async (
+      data: FormValues,
+      options?: { skipProxyDetection?: boolean; treatAsImplementation?: boolean }
+    ) => {
       if (!adapter || loadingRef.current) return;
       // Narrow contractAddress to string before validation
       const address =
@@ -115,7 +118,14 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
         const enhancedData = {
           ...data,
           __proxyDetectionOptions: {
-            skipProxyDetection: ignoreProxyRef.current,
+            skipProxyDetection:
+              options && typeof options.skipProxyDetection === 'boolean'
+                ? options.skipProxyDetection
+                : ignoreProxyRef.current,
+            treatAsImplementation:
+              options && typeof options.treatAsImplementation === 'boolean'
+                ? options.treatAsImplementation
+                : false,
           },
         };
 
@@ -189,7 +199,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
     circuitBreakerActive, // Whether circuit breaker is preventing loads
 
     // Actions
-    loadContract, // Main function to load a contract definition
+    loadContract, // Main function to load a contract definition (supports proxy detection options)
     canAttemptLoad, // Check if load should be attempted
     markAttempted, // Mark form values as attempted
 

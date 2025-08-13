@@ -8,9 +8,6 @@ This package contains the centralized styling system for the Contracts UI Builde
 styles/
 ├── src/                        # Source stylesheets and utilities
 ├── global.css                  # Main CSS file with theme variables and base styles
-├── tailwind.config.cjs -> ../../tailwind.config.cjs  # Symlink to root config
-├── postcss.config.cjs -> ../../postcss.config.cjs    # Symlink to root config
-├── components.json -> ../../components.json           # Symlink to root config
 ├── package.json                # Package configuration
 ├── tsconfig.json               # TypeScript configuration
 ├── tsup.config.ts              # Build configuration
@@ -21,14 +18,16 @@ styles/
 
 - `global.css` - Main CSS file with theme variables and base styles that's shared across all packages.
 - `src/utils/` - Utility CSS files and styling functions (if any).
-- Configuration symlinks ensure consistency across the monorepo.
+- Configuration is centralized at the repo root and consumed by packages via lightweight JS proxy configs and copied JSON to ensure consistency.
 
 ## Styling Approach
 
 This monorepo utilizes a consistent styling approach driven by the consuming application:
 
 1.  **Centralized Theme:** This `@styles` package provides the single source of truth for theme variables (colors, spacing, radius) and base styles in `global.css`.
-2.  **Centralized Configuration:** Root-level `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are used via symlinks in consuming packages (`builder`, exported apps).
+2.  **Centralized Configuration:** Root-level `tailwind.config.cjs`, `postcss.config.cjs`, and `components.json` are consumed by packages using:
+    - package-level JS proxy configs (`tailwind.config.cjs`, `postcss.config.cjs`) that `require('../../...')`
+    - a per-package `components.json` file (regular JSON, not a symlink)
 3.  **Consumer-Driven Build:** The main application (`packages/builder`) or exported applications are responsible for the Tailwind CSS build process.
 4.  **Automatic Content Scanning:** Tailwind v4 automatically scans the source code of the application _and its dependencies_ (like `@openzeppelin/contracts-ui-builder-ui` and `@openzeppelin/contracts-ui-builder-renderer`) for utility class usage.
 5.  **CSS Generation:** The consumer app's build generates the final CSS file, including base styles from `global.css`, theme variables, and all necessary utility classes used throughout the application and its dependencies.
@@ -76,7 +75,7 @@ This ensures all components follow the same unified styling approach.
 ## Configuration Architecture
 
 This package provides centralized styling utilities and components used across all packages in the monorepo. The project uses a
-symlink-based configuration approach for consistency:
+proxy-config approach (no symlinks) for consistency:
 
 ### Root Configuration Files
 
@@ -88,20 +87,17 @@ The root directory contains these key configuration files:
 
 ### Package Integration
 
-Each package that contains UI elements needing Tailwind processing (like `builder`, `renderer`, and the new `ui` package) has symbolic links to these root configurations, ensuring consistent styling and behavior:
+Packages that contain UI elements needing Tailwind processing (like `builder`, `renderer`, and `ui`) include:
 
-```
-packages/builder/tailwind.config.cjs -> ../../tailwind.config.cjs
-packages/renderer/tailwind.config.cjs -> ../../tailwind.config.cjs
-packages/ui/tailwind.config.cjs -> ../../tailwind.config.cjs
-```
+- `tailwind.config.cjs` and `postcss.config.cjs` as simple JS proxies that `require('../../tailwind.config.cjs')` and `require('../../postcss.config.cjs')`
+- a local `components.json` that points to the package's CSS entry (e.g., `../styles/global.css`)
 
 ### Exported Templates
 
 During the export process:
 
 1. Template files in the builder package are used to create standalone projects
-2. Symlinks are resolved to create standalone configuration files
+2. Proxy configs and JSON are copied as needed to create standalone configuration files
 3. The styles from this package are included in the exported project
 4. The result is a self-contained project with proper styling
 

@@ -62,6 +62,10 @@ export function useUIBuilderState() {
         original: originalDefinition ?? '',
       });
     },
+    onError: (err) => {
+      // Record error and stop auto-retry loop
+      uiBuilderStore.setContractDefinitionError(err.message);
+    },
   });
 
   const load = useCallback(

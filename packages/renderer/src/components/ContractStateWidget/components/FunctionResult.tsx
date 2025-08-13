@@ -1,4 +1,4 @@
-import { JSX } from 'react';
+import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
@@ -21,14 +21,56 @@ export function FunctionResult({
   const hasResult = typeof result === 'string';
   const isError = hasResult && (result.startsWith('Error:') || result.startsWith('[Error:'));
 
-  const outputs = functionDetails.outputs || [];
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState<'xs' | '2xs'>('xs');
+  const hasScaledDownRef = useRef(false);
+  const lastContentRef = useRef<string>('');
+
+  const outputs = useMemo(() => functionDetails.outputs || [], [functionDetails.outputs]);
+  const currentContent = `${functionDetails.name}-${outputs.map((o) => o.type).join(',')}`;
+
+  // Check if content overflows and adjust font size accordingly
+  useEffect(() => {
+    // Reset scaling state when content changes
+    if (lastContentRef.current !== currentContent) {
+      lastContentRef.current = currentContent;
+      hasScaledDownRef.current = false;
+      setFontSize('xs');
+      return;
+    }
+
+    const checkOverflow = (): void => {
+      if (!headerRef.current) return;
+
+      const container = headerRef.current;
+      const isOverflowing = container.scrollWidth > container.clientWidth;
+
+      if (isOverflowing && fontSize === 'xs' && !hasScaledDownRef.current) {
+        hasScaledDownRef.current = true;
+        setFontSize('2xs');
+      }
+    };
+
+    // Small delay to ensure rendering is complete
+    const timeoutId = setTimeout(checkOverflow, 10);
+
+    return (): void => {
+      clearTimeout(timeoutId);
+    };
+  }, [functionDetails.name, outputs, fontSize, currentContent]);
 
   return (
     <div className="border rounded-sm p-2">
-      <div className="text-xs font-medium mb-1">
-        {functionDetails.name}
+      <div
+        ref={headerRef}
+        className={cn(
+          'font-medium mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 leading-tight overflow-hidden',
+          fontSize === 'xs' ? 'text-xs' : 'text-[10px]'
+        )}
+      >
+        <span className="flex-shrink-0 min-w-0 break-all">{functionDetails.name}</span>
         {outputs.length > 0 && (
-          <span className="text-muted-foreground ml-2">
+          <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap">
             {`→ ${outputs.map((o) => o.type).join(', ')}`}
           </span>
         )}

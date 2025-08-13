@@ -9,7 +9,10 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# Prevent concurrent release operations and coordinate with staging workflow
+concurrency:
+  group: release-publishing-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -88,15 +91,23 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pnpm run install-deps
 
-      - name: Make Husky files non-executable for GitHub API compatibility
+      - name: Guard against disallowed file modes (executables/symlinks)
+        run: pnpm run check-file-modes
+
+      - name: Make files non-executable for GitHub API compatibility
         run: |
+          # Make Husky files non-executable
           chmod -x .husky/commit-msg .husky/pre-commit .husky/pre-push 2>/dev/null || true
+
+          # Find and make any other executable files non-executable (except in .husky/)
+          find . -type f -executable ! -path "./.husky/*" ! -path "./node_modules/*" ! -path "./.git/*" -exec chmod -x {} \; 2>/dev/null || true
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           publish: pnpm changeset publish --no-git-checks
+          commitMode: 'github-api'
         env:
           GITHUB_TOKEN: ${{ steps.gh-app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

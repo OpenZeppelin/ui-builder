@@ -309,6 +309,24 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
+  public filterAutoQueryableFunctions(functions: ContractFunction[]): ContractFunction[] {
+    // Exclude admin/upgrade management getters that often revert or require permissions
+    const skipNames = new Set([
+      'admin',
+      'implementation',
+      'getImplementation',
+      '_implementation',
+      'proxyAdmin',
+      'changeAdmin',
+      'upgradeTo',
+      'upgradeToAndCall',
+    ]);
+    return functions.filter((f) => !skipNames.has(f.name));
+  }
+
+  /**
+   * @inheritdoc
+   */
   async queryViewFunction(
     contractAddress: string,
     functionId: string,

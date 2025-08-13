@@ -1,5 +1,12 @@
 # @openzeppelin/transaction-form-utils
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
+  - @openzeppelin/contracts-ui-builder-types@0.4.0
+
 ## 0.4.0
 
 ### Minor Changes
