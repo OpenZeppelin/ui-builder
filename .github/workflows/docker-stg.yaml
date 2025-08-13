@@ -29,6 +29,11 @@ on:
         default: 'main'
         type: string
 
+# Prevent concurrent staging deployments and avoid conflicts with release workflow
+concurrency:
+  group: staging-deployment-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -74,7 +79,20 @@ jobs:
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
+      - name: Check for pending changesets
+        id: changeset-check
+        run: |
+          # Check if there are any pending changesets to create snapshots from
+          if [ -z "$(find .changeset -name '*.md' -not -name 'README.md' -not -name 'config.json')" ]; then
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "⚠️  No pending changesets found. Skipping RC publishing to prevent stable version pollution."
+          else
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+            echo "✅ Pending changesets found. Proceeding with RC snapshot creation."
+          fi
+
       - name: Create RC snapshot version
+        if: steps.changeset-check.outputs.has_changesets == 'true'
         run: |
           # Create RC snapshot version with 'rc' tag
           pnpm changeset version --snapshot rc
@@ -84,14 +102,17 @@ jobs:
           HUSKY: 0
 
       - name: Rebuild packages after version update
+        if: steps.changeset-check.outputs.has_changesets == 'true'
         run: pnpm -r build
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Type check all packages
+        if: steps.changeset-check.outputs.has_changesets == 'true'
         run: pnpm -r typecheck
 
       - name: Publish RC packages
+        if: steps.changeset-check.outputs.has_changesets == 'true'
         run: |
           # Publish RC packages with dependencies pre-built
           # Temporarily disable prepublishOnly scripts to skip rebuild during publishing
@@ -105,7 +126,15 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           HUSKY: 0
 
+      - name: Skip RC publishing notice
+        if: steps.changeset-check.outputs.has_changesets == 'false'
+        run: |
+          echo "🚫 RC publishing skipped because no pending changesets were found."
+          echo "This prevents publishing stable versions with 'rc' tags."
+          echo "Stable versions should only be published by the Release workflow with 'latest' tags."
+
       - name: Update export versions for RC packages
+        if: steps.changeset-check.outputs.has_changesets == 'true'
         run: |
           # Sync versions.ts with the newly published RC versions
           # This ensures staging exports use correct RC versions (e.g., 0.2.1-rc.123)

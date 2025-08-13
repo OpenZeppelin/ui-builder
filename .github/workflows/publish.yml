@@ -9,7 +9,10 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# Prevent concurrent release operations and coordinate with staging workflow
+concurrency:
+  group: release-publishing-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
