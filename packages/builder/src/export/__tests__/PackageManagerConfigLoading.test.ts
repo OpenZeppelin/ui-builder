@@ -106,6 +106,8 @@ const createMinimalFormConfig = (fieldTypes: string[] = ['text']): BuilderFormCo
 });
 
 describe('PackageManager configuration loading', () => {
+  // Accept both plain "-rc" and timestamped RC variants like "-rc-20250813180014" or "-rc.123"
+  const rcVersionRegex = /-rc(?:[.-]\d+)?$/;
   /**
    * This test suite focuses on testing the PackageManager with configurations
    * passed directly to the constructor, bypassing the dynamic loading mechanism.
@@ -182,9 +184,13 @@ describe('PackageManager configuration loading', () => {
         { env: 'staging' }
       );
       const result = JSON.parse(updated);
-      // Should append -rc to managed versions for staging
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/-rc$/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/-rc$/);
+      // Should use RC versions for staging (may include timestamp suffix)
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
+        rcVersionRegex
+      );
+      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(
+        rcVersionRegex
+      );
 
       // External dependencies should remain unchanged
       expect(result.dependencies['react']).toBe('^19.0.0');
@@ -214,7 +220,7 @@ describe('PackageManager configuration loading', () => {
         'workspace:*'
       );
       expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
-        /-rc$/
+        rcVersionRegex
       );
       expect(prodResult.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/^\^/);
 
