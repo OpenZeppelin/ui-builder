@@ -94,9 +94,13 @@ jobs:
       - name: Guard against disallowed file modes (executables/symlinks)
         run: pnpm run check-file-modes
 
-      - name: Make Husky files non-executable for GitHub API compatibility
+      - name: Make files non-executable for GitHub API compatibility
         run: |
+          # Make Husky files non-executable
           chmod -x .husky/commit-msg .husky/pre-commit .husky/pre-push 2>/dev/null || true
+
+          # Find and make any other executable files non-executable (except in .husky/)
+          find . -type f -executable ! -path "./.husky/*" ! -path "./node_modules/*" ! -path "./.git/*" -exec chmod -x {} \; 2>/dev/null || true
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
