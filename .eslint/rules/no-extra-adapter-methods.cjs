@@ -49,6 +49,7 @@ module.exports = {
       'getSupportedExecutionMethods',
       'validateExecutionConfig',
       'isViewFunction',
+      'filterAutoQueryableFunctions',
       'queryViewFunction',
       'formatFunctionResult',
       'supportsWalletConnection',

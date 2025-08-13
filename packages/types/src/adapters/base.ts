@@ -166,6 +166,14 @@ export interface ContractAdapter {
   isViewFunction(functionDetails: ContractFunction): boolean;
 
   /**
+   * Optionally filter which view functions are safe to auto-query without user input.
+   * Adapters can exclude chain-specific management/admin functions that are likely
+   * to revert or require special permissions.
+   * If not implemented, the UI will assume all parameterless view functions are safe.
+   */
+  filterAutoQueryableFunctions?(functions: ContractFunction[]): ContractFunction[];
+
+  /**
    * Queries a view function on a contract.
    * The adapter instance should be pre-configured with the necessary network context.
    *

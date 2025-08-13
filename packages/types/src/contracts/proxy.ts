@@ -16,6 +16,8 @@ export interface ProxyInfo {
   proxyType: string;
   /** Implementation contract address that contains the business logic */
   implementationAddress?: string;
+  /** Admin address for admin-managed proxies (when determinable via storage slots) */
+  adminAddress?: string;
   /** Original proxy contract address provided by the user */
   proxyAddress: string;
   /** Method used to detect the proxy pattern (e.g., 'abi-analysis', 'eip1967-storage', 'direct-call') */
