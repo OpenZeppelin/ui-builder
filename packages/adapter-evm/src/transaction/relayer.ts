@@ -97,7 +97,10 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     accessToken: string,
     networkConfig: TypedEvmNetworkConfig
   ): Promise<RelayerDetails[]> {
-    logger.info('[Relayer] Getting relayers with access token', accessToken);
+    logger.info(
+      '[Relayer] Getting relayers with access token',
+      accessToken.slice(0, 5).padEnd(accessToken.length, '*')
+    );
     const sdkConfig = new Configuration({
       basePath: serviceUrl,
       accessToken,
