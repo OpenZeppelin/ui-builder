@@ -1,5 +1,11 @@
 # @openzeppelin/contracts-ui-builder-types
 
+## 0.4.0
+
+### Minor Changes
+
+- [#106](https://github.com/OpenZeppelin/contracts-ui-builder/pull/106) [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b) Thanks [@pasevin](https://github.com/pasevin)! - Extend ProxyInfo with optional adminAddress; add optional adapter method filterAutoQueryableFunctions for chain-specific auto-query filtering.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -77,10 +77,13 @@ const updateVersionsFile = () => {
   if (versionsUpdated) {
     fs.writeFileSync(versionsFilePath, fileContent, 'utf8');
     console.log('\n🎉 Successfully synchronized versions.ts!');
-    updateSnapshots();
   } else {
     console.log('\n✅ All versions in versions.ts are already up to date.');
   }
+
+  // Always update snapshots to ensure they match current versions
+  console.log('\n📸 Ensuring snapshots match current versions...');
+  updateSnapshots();
 };
 
 const updateSnapshots = () => {
@@ -88,16 +91,19 @@ const updateSnapshots = () => {
   const { execSync } = require('child_process');
 
   try {
-    // Update snapshots for the builder package where the export tests are located
-    execSync('pnpm --filter @openzeppelin/contracts-ui-builder-app test -- -u', {
-      cwd: path.resolve(__dirname, '..'),
-      stdio: 'inherit',
-    });
+    // Update snapshots for the export tests specifically (these are the tests that use package versions)
+    execSync(
+      'pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u',
+      {
+        cwd: path.resolve(__dirname, '..'),
+        stdio: 'inherit',
+      }
+    );
     console.log('✅ Snapshots updated successfully!');
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
     console.log(
-      '⚠️  Please run "pnpm --filter=@openzeppelin/contracts-ui-builder-app test -u" manually'
+      '⚠️  Please run "pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u" manually'
     );
   }
 };
