@@ -66,12 +66,13 @@ jobs:
         id: build
         with:
           context: .
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ env.REGISTRY }}/contracts-ui-builder-prod:latest
             ${{ env.REGISTRY }}/contracts-ui-builder-prod:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
           build-args: |
             VITE_EXPORT_ENV=production
             VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=true
@@ -96,7 +97,7 @@ jobs:
         id: push
         with:
           context: .
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ env.REGISTRY }}/contracts-ui-builder-prod:latest
