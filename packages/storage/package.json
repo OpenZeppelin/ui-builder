@@ -43,6 +43,11 @@
   ],
   "author": "OpenZeppelin",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "directory": "packages/storage"
+  },
   "dependencies": {
     "@openzeppelin/contracts-ui-builder-types": "workspace:^",
     "@openzeppelin/contracts-ui-builder-utils": "workspace:^",

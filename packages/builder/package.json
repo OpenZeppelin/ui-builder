@@ -104,5 +104,10 @@
     "typescript": "^5.9.2",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "directory": "packages/builder"
   }
 }

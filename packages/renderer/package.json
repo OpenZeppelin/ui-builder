@@ -52,6 +52,11 @@
   ],
   "author": "OpenZeppelin",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "directory": "packages/renderer"
+  },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",

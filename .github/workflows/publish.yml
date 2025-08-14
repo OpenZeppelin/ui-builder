@@ -91,6 +91,11 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pnpm run install-deps
 
+      - name: Build packages
+        run: pnpm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
+
       - name: Guard against disallowed file modes (executables/symlinks)
         run: pnpm run check-file-modes
 
