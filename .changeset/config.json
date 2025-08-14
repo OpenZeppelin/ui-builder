@@ -8,7 +8,21 @@
   ],
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [
+    [
+      "@openzeppelin/contracts-ui-builder-types",
+      "@openzeppelin/contracts-ui-builder-utils",
+      "@openzeppelin/contracts-ui-builder-storage",
+      "@openzeppelin/contracts-ui-builder-ui",
+      "@openzeppelin/contracts-ui-builder-renderer",
+      "@openzeppelin/contracts-ui-builder-react-core",
+      "@openzeppelin/contracts-ui-builder-styles",
+      "@openzeppelin/contracts-ui-builder-adapter-evm",
+      "@openzeppelin/contracts-ui-builder-adapter-midnight",
+      "@openzeppelin/contracts-ui-builder-adapter-solana",
+      "@openzeppelin/contracts-ui-builder-adapter-stellar"
+    ]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
