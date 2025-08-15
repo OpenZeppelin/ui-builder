@@ -4,6 +4,7 @@ import {
   baseSepolia as viemBaseSepolia,
   bscTestnet as viemBscTestnet,
   lineaSepolia as viemLineaSepolia,
+  monadTestnet as viemMonadTestnet,
   optimismSepolia as viemOptimismSepolia,
   polygonAmoy as viemPolygonAmoy,
   polygonZkEvmCardona as viemPolygonZkEvmCardona,
@@ -267,6 +268,29 @@ export const lineaSepolia: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemLineaSepolia,
+};
+
+export const monadTestnet: TypedEvmNetworkConfig = {
+  id: 'monad-testnet',
+  exportConstName: 'monadTestnet',
+  name: 'monadTestnet',
+  ecosystem: 'evm',
+  network: 'monad',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 10143,
+  rpcUrl: viemMonadTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://testnet.monadexplorer.com',
+  apiUrl: 'https://api-testnet.monadscan.com/api',
+  primaryExplorerApiIdentifier: 'mondad-explorer',
+  supportsEtherscanV2: false,
+  icon: 'monad',
+  nativeCurrency: {
+    name: 'Monad',
+    symbol: 'MON',
+    decimals: 18,
+  },
+  viemChain: viemMonadTestnet,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)
