@@ -10,13 +10,11 @@ This project is currently in development.
 [![Coverage](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder)
 [![Publish](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml)
-[![Security](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/security.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/security.yml)
 [![Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml)
 [![Dependency Review](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml)
 [![Update Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml)
-
-<!-- TODO: Add license badge when we have a license -->
-<!-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) -->
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
