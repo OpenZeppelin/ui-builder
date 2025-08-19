@@ -273,7 +273,7 @@ export const lineaSepolia: TypedEvmNetworkConfig = {
 export const monadTestnet: TypedEvmNetworkConfig = {
   id: 'monad-testnet',
   exportConstName: 'monadTestnet',
-  name: 'monadTestnet',
+  name: 'Monad Testnet',
   ecosystem: 'evm',
   network: 'monad',
   type: 'testnet',
@@ -281,9 +281,9 @@ export const monadTestnet: TypedEvmNetworkConfig = {
   chainId: 10143,
   rpcUrl: viemMonadTestnet.rpcUrls.default.http[0],
   explorerUrl: 'https://testnet.monadexplorer.com',
-  apiUrl: 'https://api-testnet.monadscan.com/api',
+  apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'mondad-explorer',
-  supportsEtherscanV2: false,
+  supportsEtherscanV2: true,
   icon: 'monad',
   nativeCurrency: {
     name: 'Monad',
