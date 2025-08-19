@@ -83,6 +83,7 @@ jobs:
 
       - name: Scan Docker image
         uses: anchore/scan-action@df395807f4554463d4455b8047cf58e37b6acaae # v6.5.0
+        id: scan
         with:
           image: ${{ env.REGISTRY }}/contracts-ui-builder-prod:${{ github.sha }}
           fail-build: false
