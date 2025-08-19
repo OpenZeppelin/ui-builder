@@ -182,7 +182,7 @@ jobs:
         id: build
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64 # linux/arm64 causes anchore/scan-action to fail
           tags: |
             ${{ env.REGISTRY }}/contracts-ui-builder-stg:latest
             ${{ env.REGISTRY }}/contracts-ui-builder-stg:${{ github.sha }}
