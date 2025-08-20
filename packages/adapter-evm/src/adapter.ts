@@ -521,7 +521,7 @@ export class EvmAdapter implements ContractAdapter {
     return [
       {
         id: 'custom',
-        name: 'OpenZeppelin Custom',
+        name: 'Wagmi Custom',
         configFields: [],
       },
       {
