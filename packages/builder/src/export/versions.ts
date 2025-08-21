@@ -6,7 +6,7 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/contracts-ui-builder-adapter-evm': '0.5.0',
+  '@openzeppelin/contracts-ui-builder-adapter-evm': '0.6.0',
   '@openzeppelin/contracts-ui-builder-adapter-midnight': '0.1.4',
   '@openzeppelin/contracts-ui-builder-adapter-solana': '0.0.9',
   '@openzeppelin/contracts-ui-builder-adapter-stellar': '0.0.9',
