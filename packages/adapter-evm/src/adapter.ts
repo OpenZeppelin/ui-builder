@@ -280,7 +280,13 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  isValidAddress(address: string): boolean {
+  isValidAddress(address: string, _addressType?: string): boolean {
+    // TODO: Could support ENS names as a different addressType (e.g., 'ens')
+    // Viem provides normalize() and isAddress() functions that could validate ENS names
+    // Example: addressType === 'ens' ? isValidEnsName(address) : isValidEvmAddress(address)
+
+    // Currently, EVM treats all addresses uniformly (hex format)
+    // The addressType parameter is ignored for backward compatibility with other chains
     return isValidEvmAddress(address);
   }
 

@@ -140,9 +140,10 @@ export interface ContractAdapter {
    * Validate a blockchain address for this chain
    *
    * @param address - The address to validate
+   * @param addressType - Optional specific address type to validate (chain-specific)
    * @returns Whether the address is valid for this chain
    */
-  isValidAddress(address: string): boolean;
+  isValidAddress(address: string, addressType?: string): boolean;
 
   /**
    * Returns details for execution methods supported by this chain adapter.

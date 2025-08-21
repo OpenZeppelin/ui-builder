@@ -39,15 +39,19 @@
     "lint:fix": "eslint . --fix",
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.8.0",
     "@openzeppelin/contracts-ui-builder-types": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^"
+    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "@stellar/stellar-sdk": "^14.1.0"
   },
   "devDependencies": {
     "eslint": "^9.32.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "react": "^19.0.0"

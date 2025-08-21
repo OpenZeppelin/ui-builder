@@ -25,12 +25,8 @@ import { isStellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import functions from modules
-import {
-  getStellarSupportedExecutionMethods,
-  validateStellarExecutionConfig,
-} from './configuration/execution';
-import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './configuration/explorer';
-
+import { getStellarSupportedExecutionMethods, validateStellarExecutionConfig } from './execution';
+import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './explorer';
 import {
   generateStellarDefaultField,
   getStellarCompatibleFieldTypes,
@@ -39,7 +35,7 @@ import {
 import { isStellarViewFunction, queryStellarViewFunction } from './query';
 import { formatStellarTransactionData, signAndBroadcastStellarTransaction } from './transaction';
 import { formatStellarFunctionResult } from './transform';
-import { isValidAddress as isStellarValidAddress } from './utils';
+import { isValidAddress as isStellarValidAddress, type StellarAddressType } from './validation';
 import {
   connectStellarWallet,
   disconnectStellarWallet,
@@ -207,8 +203,8 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   // --- Validation --- //
-  isValidAddress(address: string): boolean {
-    return isStellarValidAddress(address);
+  isValidAddress(address: string, addressType?: string): boolean {
+    return isStellarValidAddress(address, addressType as StellarAddressType);
   }
 
   public async getAvailableUiKits(): Promise<AvailableUiKit[]> {

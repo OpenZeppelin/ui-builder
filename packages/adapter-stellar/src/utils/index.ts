@@ -1,4 +1,4 @@
 // Barrel file
 
-export * from './validator';
+export * from './formatting';
 // Add other utils exports here if needed

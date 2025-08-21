@@ -4,7 +4,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { isValidAddress } from '../utils';
+import { isValidAddress } from './validation';
 
 /**
  * Get supported execution methods for Stellar.
