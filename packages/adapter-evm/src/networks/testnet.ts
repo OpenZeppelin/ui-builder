@@ -282,7 +282,7 @@ export const monadTestnet: TypedEvmNetworkConfig = {
   rpcUrl: viemMonadTestnet.rpcUrls.default.http[0],
   explorerUrl: 'https://testnet.monadexplorer.com',
   apiUrl: 'https://api.etherscan.io/v2/api',
-  primaryExplorerApiIdentifier: 'monad-explorer',
+  primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
   icon: 'monad',
   nativeCurrency: {
