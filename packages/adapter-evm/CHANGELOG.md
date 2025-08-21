@@ -1,5 +1,17 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.6.0
+
+### Minor Changes
+
+- [#129](https://github.com/OpenZeppelin/contracts-ui-builder/pull/129) [`a4236e9`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/a4236e95ddda6530dfd2a87c4bc8a0915e9ff332) Thanks [@stevedylandev](https://github.com/stevedylandev)! - Patched Monad testnet config
+
+- [#122](https://github.com/OpenZeppelin/contracts-ui-builder/pull/122) [`3a85c72`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3a85c7296ca05c2edb9931966089f4bfd04e105a) Thanks [@stevedylandev](https://github.com/stevedylandev)! - Added Monad Testnet support
+
+### Patch Changes
+
+- [#127](https://github.com/OpenZeppelin/contracts-ui-builder/pull/127) [`acc7037`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/acc70372e7b815026331ed76f77a5d55633ec547) Thanks [@pasevin](https://github.com/pasevin)! - feat(adapter-evm): change cystom ui kit name
+
 ## 0.5.0
 
 ### Minor Changes
