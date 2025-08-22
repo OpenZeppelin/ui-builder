@@ -6,6 +6,7 @@ import type {
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
   ServiceParameterConfig,
+  UiKitName,
   UserRpcProviderConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
 
@@ -414,6 +415,68 @@ export class AppConfigService {
     return (
       nestedConfig !== undefined && Object.prototype.hasOwnProperty.call(nestedConfig, propName)
     );
+  }
+
+  /**
+   * Gets wallet UI configuration for a specific ecosystem.
+   * Uses ecosystem-namespaced format with optional default fallback.
+   *
+   * @param ecosystemId The ecosystem ID (e.g., 'stellar', 'evm', 'solana')
+   * @returns The wallet UI configuration for the ecosystem, or undefined
+   *
+   * @example
+   * Configuration format:
+   * {
+   *   "globalServiceConfigs": {
+   *     "walletui": {
+   *       "stellar": { "kitName": "stellar-wallets-kit", "kitConfig": {} },
+   *       "evm": { "kitName": "rainbowkit", "kitConfig": {} },
+   *       "default": { "kitName": "custom", "kitConfig": {} }
+   *     }
+   *   }
+   * }
+   * const stellarConfig = appConfigService.getWalletUIConfig('stellar');
+   */
+  public getWalletUIConfig<
+    T extends object = { kitName: UiKitName; kitConfig?: Record<string, unknown> },
+  >(ecosystemId?: string): T | undefined {
+    if (!this.isInitialized) {
+      logger.warn(LOG_SYSTEM, 'getWalletUIConfig called before initialization.');
+      return undefined;
+    }
+
+    try {
+      const walletUIService = this.config.globalServiceConfigs?.walletui;
+
+      if (!walletUIService) {
+        return undefined;
+      }
+
+      // Check for new ecosystem-namespaced format
+      if (
+        ecosystemId &&
+        walletUIService[ecosystemId] &&
+        typeof walletUIService[ecosystemId] === 'object'
+      ) {
+        logger.debug(LOG_SYSTEM, `Found ecosystem-specific wallet UI config for ${ecosystemId}`);
+        return walletUIService[ecosystemId] as T;
+      }
+
+      // Check for default config in new format
+      if (walletUIService.default && typeof walletUIService.default === 'object') {
+        logger.debug(LOG_SYSTEM, `Using default wallet UI config for ecosystem ${ecosystemId}`);
+        return walletUIService.default as T;
+      }
+
+      return undefined;
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Error accessing wallet UI configuration for ecosystem ${ecosystemId}:`,
+        error
+      );
+      return undefined;
+    }
   }
 }
 

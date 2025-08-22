@@ -16,7 +16,7 @@ let uiKitConfig: UiKitConfiguration = { ...defaultConfig };
 
 export function loadInitialConfigFromAppService(): UiKitConfiguration {
   logger.debug('useUiKitConfig', 'Attempting to load initial config from AppConfigService...');
-  const configObj = appConfigService.getTypedNestedConfig<UiKitConfiguration>('walletui', 'config');
+  const configObj = appConfigService.getWalletUIConfig<UiKitConfiguration>('evm');
 
   if (configObj && configObj.kitName) {
     logger.info(

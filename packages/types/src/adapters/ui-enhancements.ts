@@ -153,4 +153,10 @@ export interface AvailableUiKit {
   defaultCode?: string;
 }
 
-export type UiKitName = 'rainbowkit' | 'connectkit' | 'appkit' | 'custom' | 'none';
+export type UiKitName =
+  | 'rainbowkit'
+  | 'connectkit'
+  | 'appkit'
+  | 'stellar-wallets-kit'
+  | 'custom'
+  | 'none';
