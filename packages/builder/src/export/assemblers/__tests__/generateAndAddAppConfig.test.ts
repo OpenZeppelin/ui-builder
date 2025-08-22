@@ -141,10 +141,10 @@ describe('generateAndAddAppConfig', () => {
   });
 
   describe('app.config.json generation for specific UI kits', () => {
-    it('should generate app.config.json for custom kit on Stellar', async () => {
+    it('should generate app.config.json for stellar-wallets-kit on Stellar', async () => {
       const projectFiles: Record<string, string> = {};
       const networkConfig = createNetworkConfig('stellar', 'stellar-testnet');
-      const formConfig = createFormConfig('custom', { someOption: true });
+      const formConfig = createFormConfig('stellar-wallets-kit', { someOption: true });
 
       await generateAndAddAppConfig(projectFiles, networkConfig, mockTemplateProcessor, formConfig);
 
@@ -155,7 +155,7 @@ describe('generateAndAddAppConfig', () => {
         globalServiceConfigs: {
           walletui: {
             stellar: {
-              kitName: 'custom',
+              kitName: 'stellar-wallets-kit',
               kitConfig: { someOption: true },
             },
           },
@@ -313,7 +313,7 @@ describe('generateAndAddAppConfig', () => {
     it('should call formatJson for generated files', async () => {
       const projectFiles: Record<string, string> = {};
       const networkConfig = createNetworkConfig('stellar', 'stellar-testnet');
-      const formConfig = createFormConfig('custom');
+      const formConfig = createFormConfig('stellar-wallets-kit');
 
       const formatJsonSpy = vi.spyOn(mockTemplateProcessor, 'formatJson');
 
@@ -322,7 +322,7 @@ describe('generateAndAddAppConfig', () => {
       // Should be called twice: once for example, once for active config
       expect(formatJsonSpy).toHaveBeenCalledTimes(2);
       expect(formatJsonSpy).toHaveBeenCalledWith(expect.stringContaining('_readme'));
-      expect(formatJsonSpy).toHaveBeenCalledWith(expect.stringContaining('custom'));
+      expect(formatJsonSpy).toHaveBeenCalledWith(expect.stringContaining('stellar-wallets-kit'));
     });
   });
 });
