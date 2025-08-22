@@ -1,5 +1,24 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.7.0
+
+### Minor Changes
+
+- [#131](https://github.com/OpenZeppelin/contracts-ui-builder/pull/131) [`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec) Thanks [@pasevin](https://github.com/pasevin)! - implements ecosystem-namespaced wallet UI configuration to support different wallet UI kits for different blockchain ecosystems
+
+### Patch Changes
+
+- Updated dependencies [[`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec)]:
+  - @openzeppelin/contracts-ui-builder-adapter-evm@0.7.0
+  - @openzeppelin/contracts-ui-builder-utils@0.7.0
+  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.7.0
+  - @openzeppelin/contracts-ui-builder-adapter-solana@0.7.0
+  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.7.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.7.0
+  - @openzeppelin/contracts-ui-builder-renderer@0.7.0
+  - @openzeppelin/contracts-ui-builder-storage@0.7.0
+  - @openzeppelin/contracts-ui-builder-ui@0.7.0
+
 ## 0.6.1
 
 ### Patch Changes

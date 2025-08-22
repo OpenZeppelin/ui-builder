@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-utils
 
+## 0.7.0
+
+### Minor Changes
+
+- [#131](https://github.com/OpenZeppelin/contracts-ui-builder/pull/131) [`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec) Thanks [@pasevin](https://github.com/pasevin)! - implements ecosystem-namespaced wallet UI configuration to support different wallet UI kits for different blockchain ecosystems
+
 ## 0.4.1
 
 ### Patch Changes
