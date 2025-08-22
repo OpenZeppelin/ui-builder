@@ -1,14 +1,22 @@
 {
   "globalServiceConfigs": {
     "walletui": {
-      "config": {
-        "kitName": "custom",
+      "stellar": {
+        "kitName": "stellar-wallets-kit",
+        "kitConfig": {}
+      },
+      "evm": {
+        "kitName": "rainbowkit",
         "kitConfig": {
           "showInjectedConnector": false,
           "components": {
             "exclude": ["NetworkSwitcher"]
           }
         }
+      },
+      "default": {
+        "kitName": "custom",
+        "kitConfig": {}
       }
     }
   }
