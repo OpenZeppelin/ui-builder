@@ -6,7 +6,7 @@
         "kitConfig": {}
       },
       "evm": {
-        "kitName": "rainbowkit",
+        "kitName": "custom",
         "kitConfig": {
           "showInjectedConnector": false,
           "components": {
