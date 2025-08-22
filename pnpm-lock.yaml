@@ -280,6 +280,9 @@ importers:
       '@openzeppelin/contracts-ui-builder-types':
         specifier: workspace:*
         version: link:../types
+      '@openzeppelin/contracts-ui-builder-ui':
+        specifier: workspace:*
+        version: link:../ui
       '@openzeppelin/contracts-ui-builder-utils':
         specifier: workspace:^
         version: link:../utils

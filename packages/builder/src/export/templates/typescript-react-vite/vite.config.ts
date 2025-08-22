@@ -11,6 +11,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    'process.env': {},
+    // Some transitive dependencies referenced by wallet stacks expect Node's `global` in the browser.
+    // In particular, chains of imports like randombytes -> @near-js/crypto -> @hot-wallet/sdk
+    // can throw "ReferenceError: global is not defined" during runtime without this alias.
+    // Mapping `global` to `globalThis` provides a safe browser shim for exported apps.
+    global: 'globalThis',
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,

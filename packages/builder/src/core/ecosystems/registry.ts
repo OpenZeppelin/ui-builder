@@ -93,9 +93,8 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
     bgColorClass: 'bg-sky-100',
     textColorClass: 'text-sky-900',
     defaultFeatureConfig: {
-      enabled: false,
+      enabled: true,
       showInUI: true,
-      disabledLabel: 'Coming Soon',
     },
   },
   solana: {

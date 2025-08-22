@@ -2,6 +2,7 @@ import {
   testStellarRpcConnection,
   validateStellarRpcEndpoint,
 } from 'packages/adapter-stellar/src/configuration';
+import type React from 'react';
 
 import type {
   AvailableUiKit,
@@ -9,12 +10,16 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
+  EcosystemReactUiProviderProps,
+  EcosystemSpecificReactHooks,
+  EcosystemWalletComponents,
   ExecutionConfig,
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
   FormValues,
   FunctionParameter,
+  NativeConfigLoader,
   RelayerDetails,
   RelayerDetailsRich,
   StellarNetworkConfig,
@@ -39,8 +44,15 @@ import { isValidAddress as isStellarValidAddress, type StellarAddressType } from
 import {
   connectStellarWallet,
   disconnectStellarWallet,
+  generateStellarWalletsKitExportables,
+  getResolvedWalletComponents,
   getStellarAvailableConnectors,
   getStellarWalletConnectionStatus,
+  loadInitialConfigFromAppService,
+  resolveFullUiKitConfiguration,
+  stellarFacadeHooks,
+  stellarUiKitManager,
+  StellarWalletUiRoot,
   supportsStellarWalletConnection,
   // onStellarWalletConnectionChange, // Placeholder if needed later
 } from './wallet';
@@ -59,7 +71,23 @@ export class StellarAdapter implements ContractAdapter {
       throw new Error('StellarAdapter requires a valid Stellar network configuration.');
     }
     this.networkConfig = networkConfig;
-    this.initialAppServiceKitName = 'custom';
+
+    // Set the network config in the wallet UI kit manager
+    stellarUiKitManager.setNetworkConfig(networkConfig);
+
+    // Determine the initial kitName from AppConfigService at the time of adapter construction.
+    // This provides a baseline kitName preference from the application's static/global configuration.
+    // It defaults to 'custom' if no specific kitName is found in AppConfigService.
+    const initialGlobalConfig = loadInitialConfigFromAppService();
+    this.initialAppServiceKitName =
+      (initialGlobalConfig.kitName as UiKitConfiguration['kitName']) || 'custom';
+
+    logger.info(
+      'StellarAdapter:constructor',
+      'Initial kitName from AppConfigService noted:',
+      this.initialAppServiceKitName
+    );
+
     logger.info(
       'StellarAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
@@ -210,11 +238,97 @@ export class StellarAdapter implements ContractAdapter {
   public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
     return [
       {
+        id: 'stellar-wallets-kit',
+        name: 'Stellar Wallets Kit',
+        configFields: [],
+      },
+      {
         id: 'custom',
-        name: 'OpenZeppelin Custom',
+        name: 'Stellar Wallets Kit Custom',
         configFields: [],
       },
     ];
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async configureUiKit(
+    programmaticOverrides: Partial<UiKitConfiguration> = {},
+    options?: {
+      loadUiKitNativeConfig?: NativeConfigLoader;
+    }
+  ): Promise<void> {
+    const currentAppServiceConfig = loadInitialConfigFromAppService();
+
+    // Delegate the entire configuration resolution to the service function
+    const finalFullConfig = await resolveFullUiKitConfiguration(
+      programmaticOverrides,
+      this.initialAppServiceKitName,
+      currentAppServiceConfig,
+      options
+    );
+
+    // Configure the Stellar UI kit manager
+    await stellarUiKitManager.configure(finalFullConfig);
+    logger.info(
+      'StellarAdapter:configureUiKit',
+      'StellarUiKitManager configuration requested with final config:',
+      finalFullConfig
+    );
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getExportableWalletConfigFiles(
+    uiKitConfig?: UiKitConfiguration
+  ): Promise<Record<string, string>> {
+    if (uiKitConfig?.kitName === 'stellar-wallets-kit') {
+      return generateStellarWalletsKitExportables(uiKitConfig);
+    }
+    return {};
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemWalletComponents(): EcosystemWalletComponents | undefined {
+    const currentManagerState = stellarUiKitManager.getState();
+
+    // Only attempt to resolve components if the manager has a configuration set
+    if (!currentManagerState.currentFullUiKitConfig) {
+      logger.debug(
+        'StellarAdapter:getEcosystemWalletComponents',
+        'No UI kit configuration available in manager yet. Returning undefined components.'
+      );
+      return undefined;
+    }
+
+    // Use the service to resolve components based on the current UI kit configuration
+    const components = getResolvedWalletComponents(currentManagerState.currentFullUiKitConfig);
+    return components;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactUiContextProvider():
+    | React.ComponentType<EcosystemReactUiProviderProps>
+    | undefined {
+    logger.info(
+      'StellarAdapter:getEcosystemReactUiContextProvider',
+      'Returning StellarWalletUiRoot.'
+    );
+    return StellarWalletUiRoot;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getEcosystemReactHooks(): EcosystemSpecificReactHooks | undefined {
+    // Always provide hooks for Stellar adapter regardless of UI kit
+    return stellarFacadeHooks;
   }
 
   public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {

@@ -2,7 +2,7 @@
   "globalServiceConfigs": {
     "walletui": {
       "stellar": {
-        "kitName": "stellar-wallets-kit",
+        "kitName": "custom",
         "kitConfig": {}
       },
       "evm": {

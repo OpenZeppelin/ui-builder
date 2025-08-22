@@ -154,9 +154,12 @@ export interface AvailableUiKit {
 }
 
 export type UiKitName =
+  // EVM UI Kits
   | 'rainbowkit'
   | 'connectkit'
   | 'appkit'
+  // Stellar UI Kits
   | 'stellar-wallets-kit'
+  // Generic options
   | 'custom'
   | 'none';
