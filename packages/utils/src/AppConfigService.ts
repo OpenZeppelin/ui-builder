@@ -437,9 +437,9 @@ export class AppConfigService {
    * }
    * const stellarConfig = appConfigService.getWalletUIConfig('stellar');
    */
-  public getWalletUIConfig<T extends object = { kitName: UiKitName; kitConfig?: object }>(
-    ecosystemId?: string
-  ): T | undefined {
+  public getWalletUIConfig<
+    T extends object = { kitName: UiKitName; kitConfig?: Record<string, unknown> },
+  >(ecosystemId?: string): T | undefined {
     if (!this.isInitialized) {
       logger.warn(LOG_SYSTEM, 'getWalletUIConfig called before initialization.');
       return undefined;

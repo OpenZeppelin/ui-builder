@@ -54,10 +54,13 @@ function _generateRpcEndpointsConfigSection(
   return rpcConfig;
 }
 
-function _buildWalletUiServiceConfig(): {
+// Type alias for the wallet UI service config structure
+type WalletUiServiceConfig = {
   [key: string]: { kitName: string; kitConfig: object } | string;
   _comment: string;
-} {
+};
+
+function _buildWalletUiServiceConfig(): WalletUiServiceConfig {
   return {
     _comment:
       "Wallet UI configuration is ecosystem-specific. Example: { 'stellar': { 'kitName': 'stellar-wallets-kit', 'kitConfig': {} }, 'evm': { 'kitName': 'rainbowkit', 'kitConfig': {} }, 'default': { 'kitName': 'custom', 'kitConfig': {} } }",
