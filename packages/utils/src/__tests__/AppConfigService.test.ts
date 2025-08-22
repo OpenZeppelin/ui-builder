@@ -673,4 +673,105 @@ describe('AppConfigService', () => {
       expect(logger.warn).toHaveBeenCalledTimes(5);
     });
   });
+
+  describe('getWalletUIConfig', () => {
+    it('should return ecosystem-specific wallet UI config', async () => {
+      const jsonConfig = {
+        globalServiceConfigs: {
+          walletui: {
+            stellar: {
+              kitName: 'stellar-wallets-kit',
+              kitConfig: { appName: 'Stellar App' },
+            },
+            evm: {
+              kitName: 'rainbowkit',
+              kitConfig: { projectId: 'abc123' },
+            },
+            default: {
+              kitName: 'custom',
+              kitConfig: {},
+            },
+          },
+        },
+      };
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => jsonConfig,
+      } as unknown as Response);
+
+      vi.stubGlobal('fetch', mockFetch);
+
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+
+      // Test ecosystem-specific configs
+      const stellarConfig = appConfigServiceInstance.getWalletUIConfig('stellar');
+      expect(stellarConfig).toEqual({
+        kitName: 'stellar-wallets-kit',
+        kitConfig: { appName: 'Stellar App' },
+      });
+
+      const evmConfig = appConfigServiceInstance.getWalletUIConfig('evm');
+      expect(evmConfig).toEqual({
+        kitName: 'rainbowkit',
+        kitConfig: { projectId: 'abc123' },
+      });
+
+      // Test fallback to default
+      const solanaConfig = appConfigServiceInstance.getWalletUIConfig('solana');
+      expect(solanaConfig).toEqual({
+        kitName: 'custom',
+        kitConfig: {},
+      });
+
+      // Test missing ecosystem with no default
+      const jsonConfigNoDefault = {
+        globalServiceConfigs: {
+          walletui: {
+            stellar: {
+              kitName: 'stellar-wallets-kit',
+              kitConfig: {},
+            },
+          },
+        },
+      };
+
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          json: async () => jsonConfigNoDefault,
+        } as unknown as Response)
+      );
+
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+
+      const missingConfig = appConfigServiceInstance.getWalletUIConfig('solana');
+      expect(missingConfig).toBeUndefined();
+    });
+
+    it('should handle missing walletui config gracefully', async () => {
+      const jsonConfig = {
+        globalServiceConfigs: {},
+      };
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => jsonConfig,
+      } as unknown as Response);
+
+      vi.stubGlobal('fetch', mockFetch);
+
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([{ type: 'json', path: '/app.config.json' }]);
+
+      const config = appConfigServiceInstance.getWalletUIConfig('stellar');
+      expect(config).toBeUndefined();
+    });
+  });
 });
