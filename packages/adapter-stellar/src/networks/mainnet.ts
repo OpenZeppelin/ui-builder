@@ -1,6 +1,6 @@
 import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
-// Placeholder for Stellar Public Network (Mainnet)
+// Stellar Public Network (Mainnet)
 export const stellarPublic: StellarNetworkConfig = {
   id: 'stellar-public',
   exportConstName: 'stellarPublic',
@@ -10,6 +10,7 @@ export const stellarPublic: StellarNetworkConfig = {
   type: 'mainnet',
   isTestnet: false,
   horizonUrl: 'https://horizon.stellar.org',
+  sorobanRpcUrl: 'https://mainnet.sorobanrpc.com',
   networkPassphrase: 'Public Global Stellar Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/public',
   icon: 'stellar',
