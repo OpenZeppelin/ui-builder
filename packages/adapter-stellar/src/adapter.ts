@@ -30,6 +30,8 @@ import { isStellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import functions from modules
+import { loadStellarContract, loadStellarContractWithMetadata } from './contract/loader';
+
 import { getStellarSupportedExecutionMethods, validateStellarExecutionConfig } from './execution';
 import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './explorer';
 import {
@@ -37,7 +39,11 @@ import {
   getStellarCompatibleFieldTypes,
   mapStellarParameterTypeToFieldType,
 } from './mapping';
-import { isStellarViewFunction, queryStellarViewFunction } from './query';
+import {
+  getStellarWritableFunctions,
+  isStellarViewFunction,
+  queryStellarViewFunction,
+} from './query';
 import { formatStellarTransactionData, signAndBroadcastStellarTransaction } from './transaction';
 import { formatStellarFunctionResult } from './transform';
 import { isValidAddress as isStellarValidAddress, type StellarAddressType } from './validation';
@@ -103,31 +109,51 @@ export class StellarAdapter implements ContractAdapter {
         label: 'Contract ID',
         type: 'blockchain-address',
         validation: { required: true },
-        placeholder: 'G...',
-        helperText: 'Enter the Stellar contract ID.',
+        placeholder: 'C...',
+        helperText: 'Enter the Stellar contract ID (C...).',
       },
     ];
   }
 
-  async loadContract(artifacts: FormValues): Promise<ContractSchema> {
-    // Stellar doesn't have a standardized on-chain contract interface like an ABI.
-    // The 'source' would need to be a custom JSON descriptor provided by the user.
-    // This is a placeholder for a more complex implementation.
-    if (typeof artifacts.contractAddress !== 'string') {
-      throw new Error('A contract address must be provided.');
-    }
+  /**
+   * @inheritdoc
+   */
+  public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+    const result = await loadStellarContract(artifacts, this.networkConfig);
+    return result.schema;
+  }
 
-    return {
-      name: 'StellarContract',
-      address: artifacts.contractAddress,
-      ecosystem: 'stellar',
-      functions: [],
-      events: [],
+  /**
+   * @inheritdoc
+   */
+  public async loadContractWithMetadata(artifacts: FormValues): Promise<{
+    schema: ContractSchema;
+    source: 'fetched' | 'manual';
+    contractDefinitionOriginal?: string;
+    metadata?: {
+      fetchedFrom?: string;
+      contractName?: string;
+      fetchTimestamp?: Date;
+      definitionHash?: string;
     };
+  }> {
+    try {
+      const result = await loadStellarContractWithMetadata(artifacts, this.networkConfig);
+
+      return {
+        schema: result.schema,
+        source: result.source,
+        contractDefinitionOriginal: result.contractDefinitionOriginal,
+        metadata: result.metadata,
+      };
+    } catch (error) {
+      // Re-throw errors consistently with EVM adapter
+      throw error;
+    }
   }
 
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
-    return contractSchema.functions.filter((fn: ContractFunction) => fn.modifiesState);
+    return getStellarWritableFunctions(contractSchema);
   }
 
   // --- Type Mapping & Field Generation --- //

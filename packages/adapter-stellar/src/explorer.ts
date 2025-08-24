@@ -2,6 +2,8 @@ import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { isValidContractAddress } from './validation';
+
 /**
  * Gets a blockchain explorer URL for an address on Stellar.
  * Uses the explorerUrl from the network configuration.
@@ -17,9 +19,10 @@ export function getStellarExplorerAddressUrl(
   if (!address || !networkConfig.explorerUrl) {
     return null;
   }
-  // Construct the URL, assuming a standard /account/ path for Stellar explorers
+  // Use /contract for Soroban contract IDs, otherwise /account
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
-  return `${baseUrl}/account/${address}`;
+  const path = isValidContractAddress(address) ? 'contract' : 'account';
+  return `${baseUrl}/${path}/${encodeURIComponent(address)}`;
 }
 
 /**
@@ -39,7 +42,7 @@ export function getStellarExplorerTxUrl(
   }
   // Construct the URL, assuming a standard /tx/ path for Stellar explorers
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
-  return `${baseUrl}/tx/${txHash}`;
+  return `${baseUrl}/tx/${encodeURIComponent(txHash)}`;
 }
 
 /**
