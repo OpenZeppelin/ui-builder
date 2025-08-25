@@ -9,32 +9,14 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { isValidEvmAddress } from '../utils';
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 
 /**
- * Get default validation rules for a parameter type
+ * Get default validation rules for a parameter type.
+ * Only includes serializable validation rules - no custom functions.
  */
-function getDefaultValidationForType(parameterType: string): FieldValidation {
-  const validation: FieldValidation = { required: true };
-
-  // Add specific validation rules based on the parameter type
-  if (parameterType === 'blockchain-address') {
-    return {
-      ...validation,
-      // Use the imported isValidEvmAddress method for direct validation
-      // NOTE: FieldValidation type doesn't officially support `custom`. This relies
-      // on React Hook Form's `validate` prop potentially picking this up downstream.
-      // Consider alternative validation approaches if this proves problematic.
-      custom: (value: unknown): boolean | string => {
-        if (value === '') return true; // Empty values handled by required
-        if (typeof value !== 'string') return 'Address must be a string';
-        return isValidEvmAddress(value) ? true : 'Invalid address format';
-      },
-    } as FieldValidation & { custom?: (value: unknown) => boolean | string }; // Cast to include custom
-  }
-
-  return validation;
+function getDefaultValidationForType(): FieldValidation {
+  return { required: true };
 }
 
 /**
@@ -52,7 +34,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
     helperText: parameter.description || '',
     defaultValue: getDefaultValueForType(fieldType) as FieldValue<T>,
-    validation: getDefaultValidationForType(parameter.type),
+    validation: getDefaultValidationForType(),
     width: 'full',
   };
 
