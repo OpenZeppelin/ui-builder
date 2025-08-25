@@ -114,14 +114,8 @@ function isScVal(value: unknown): boolean {
   }
 
   try {
-    // Check if it has the structure of an ScVal by looking for the switch property
-    // This is a heuristic based on XDR structure
-    const potentialScVal = value as unknown as Record<string, unknown>;
-    return (
-      potentialScVal.hasOwnProperty('switch') ||
-      potentialScVal.hasOwnProperty('_switch') ||
-      (potentialScVal.constructor && potentialScVal.constructor.name?.includes('ScVal'))
-    );
+    // Use instanceof check for robust type detection
+    return typeof xdr !== 'undefined' && xdr.ScVal && value instanceof xdr.ScVal;
   } catch {
     return false;
   }

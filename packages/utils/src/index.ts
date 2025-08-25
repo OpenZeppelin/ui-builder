@@ -10,3 +10,4 @@ export * from './generateId';
 export * from './validators';
 export * from './async';
 export * from './hash';
+export * from './environment';

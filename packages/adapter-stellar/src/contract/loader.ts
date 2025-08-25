@@ -7,7 +7,7 @@ import type {
   FunctionParameter,
   StellarNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { isDevelopmentOrTestEnvironment, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getStellarExplorerAddressUrl } from '../explorer';
 
@@ -115,7 +115,7 @@ function extractSorobanTypeFromScSpec(scSpecType: StellarSdk.xdr.ScSpecTypeDef):
         };
 
         // In development, throw an error to fail fast
-        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+        if (isDevelopmentOrTestEnvironment()) {
           throw new Error(
             `Missing ScSpec type handler: ${typeSwitch.name} (value: ${typeSwitch.value}). Please add support for this type.`
           );

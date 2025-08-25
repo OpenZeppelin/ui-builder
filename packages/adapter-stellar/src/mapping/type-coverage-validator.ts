@@ -63,7 +63,7 @@ export function validateTypeMappingCompleteness(): {
             `Type "${stellarType}" defaults to 'text' - consider adding explicit mapping`
           );
         }
-      } catch (error) {
+      } catch {
         missing.push(stellarType);
         logger.warn('validateTypeMappingCompleteness', `No mapping for type: ${stellarType}`);
       }
