@@ -19,6 +19,7 @@ import {
   bscTestnet,
   ethereumSepolia,
   lineaSepolia,
+  mantraDuKongEVMTestnet,
   monadTestnet,
   optimismSepolia,
   polygonAmoy,
@@ -57,6 +58,7 @@ export const evmTestnetNetworks: TypedEvmNetworkConfig[] = [
   scrollSepolia,
   zksyncSepoliaTestnet,
   monadTestnet,
+  mantraDuKongEVMTestnet,
   // Other testnet networks...
 ];
 
@@ -92,4 +94,5 @@ export {
   scrollSepolia,
   zksyncSepoliaTestnet,
   monadTestnet,
+  mantraDuKongEVMTestnet,
 };
