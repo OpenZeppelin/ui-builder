@@ -8,8 +8,9 @@ import { describe, expect, it } from 'vitest';
 describe('Complete ScSpec Type Coverage', () => {
   // Get all ScSpec types from the current SDK version
   const ALL_SCSPEC_TYPES = Object.getOwnPropertyNames(StellarSdk.xdr.ScSpecType)
-    .filter((name) => 
-      name.startsWith('scSpecType') && typeof StellarSdk.xdr.ScSpecType[name] === 'function'
+    .filter(
+      (name) =>
+        name.startsWith('scSpecType') && typeof StellarSdk.xdr.ScSpecType[name] === 'function'
     )
     .sort();
 
@@ -69,7 +70,7 @@ describe('Complete ScSpec Type Coverage', () => {
       // This test documents all the ScSpec types we're currently handling
       console.log(`SDK has ${ALL_SCSPEC_TYPES.length} ScSpec types:`);
       console.log(ALL_SCSPEC_TYPES.join(', '));
-      
+
       // Should have a reasonable number of types (at least 20+)
       expect(ALL_SCSPEC_TYPES.length).toBeGreaterThanOrEqual(20);
     });
