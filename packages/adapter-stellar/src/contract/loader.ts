@@ -12,6 +12,126 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import { getStellarExplorerAddressUrl } from '../explorer';
 
 /**
+ * Extract human-readable Soroban type name from ScSpecTypeDef
+ * Based on the Stellar SDK type system
+ */
+function extractSorobanTypeFromScSpec(scSpecType: StellarSdk.xdr.ScSpecTypeDef): string {
+  try {
+    const typeSwitch = scSpecType.switch();
+
+    switch (typeSwitch) {
+      case StellarSdk.xdr.ScSpecType.scSpecTypeVal():
+        return 'Val';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeBool():
+        return 'Bool';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeVoid():
+        return 'Void';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeError():
+        return 'Error';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeU32():
+        return 'U32';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeI32():
+        return 'I32';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeU64():
+        return 'U64';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeI64():
+        return 'I64';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeTimepoint():
+        return 'Timepoint';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeDuration():
+        return 'Duration';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeU128():
+        return 'U128';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeI128():
+        return 'I128';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeU256():
+        return 'U256';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeI256():
+        return 'I256';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeBytes():
+        return 'Bytes';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeBytesN(): {
+        const bytesNType = scSpecType.bytesN();
+        const size = bytesNType.n();
+        return `BytesN<${size}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeString():
+        return 'ScString';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeSymbol():
+        return 'ScSymbol';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeVec(): {
+        const vecType = scSpecType.vec();
+        const elementType = extractSorobanTypeFromScSpec(vecType.elementType());
+        return `Vec<${elementType}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeMap(): {
+        const mapType = scSpecType.map();
+        const keyType = extractSorobanTypeFromScSpec(mapType.keyType());
+        const valueType = extractSorobanTypeFromScSpec(mapType.valueType());
+        return `Map<${keyType}, ${valueType}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeTuple(): {
+        const tupleType = scSpecType.tuple();
+        const valueTypes = tupleType.valueTypes();
+        const typeNames = valueTypes.map((t) => extractSorobanTypeFromScSpec(t));
+        return `Tuple<${typeNames.join(', ')}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeOption(): {
+        const optionType = scSpecType.option();
+        const valueType = extractSorobanTypeFromScSpec(optionType.valueType());
+        return `Option<${valueType}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeResult(): {
+        const resultType = scSpecType.result();
+        const okType = extractSorobanTypeFromScSpec(resultType.okType());
+        const errorType = extractSorobanTypeFromScSpec(resultType.errorType());
+        return `Result<${okType}, ${errorType}>`;
+      }
+      case StellarSdk.xdr.ScSpecType.scSpecTypeAddress():
+        return 'Address';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeMuxedAddress():
+        return 'MuxedAddress';
+      case StellarSdk.xdr.ScSpecType.scSpecTypeUdt(): {
+        const udtType = scSpecType.udt();
+        return udtType.name().toString();
+      }
+      default:
+        // COMPREHENSIVE TYPE MISS DETECTION
+        logger.error('extractSorobanTypeFromScSpec', `🚨 MISSING SCSPEC TYPE HANDLER 🚨`, {
+          typeSwitchValue: typeSwitch.value,
+          typeSwitchName: typeSwitch.name,
+          rawScSpecType: scSpecType,
+          message: 'This indicates a missing case in extractSorobanTypeFromScSpec switch statement',
+          actionRequired: 'Add support for this ScSpec type immediately',
+          sdkVersion: process.env.npm_package_dependencies_stellar_sdk || 'unknown',
+        });
+
+        // Create detailed error report for unknown types
+        const errorReport = {
+          type: 'MISSING_SCSPEC_TYPE',
+          scSpecType: typeSwitch.name,
+          value: typeSwitch.value,
+          timestamp: new Date().toISOString(),
+        };
+
+        // In development, throw an error to fail fast
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+          throw new Error(
+            `Missing ScSpec type handler: ${typeSwitch.name} (value: ${typeSwitch.value}). Please add support for this type.`
+          );
+        }
+
+        // In production, log extensively but don't break
+        console.error('STELLAR_ADAPTER_MISSING_TYPE', errorReport);
+        return 'unknown';
+    }
+  } catch (error) {
+    logger.error('extractSorobanTypeFromScSpec', 'Failed to extract type:', error);
+    return 'unknown';
+  }
+}
+
+/**
  * Load a Stellar contract using the official Stellar SDK approach
  * Based on the patterns from the official Stellar laboratory
  */
@@ -84,7 +204,14 @@ function extractFunctionsFromSpec(
         const inputs: FunctionParameter[] = func.inputs().map((input, inputIndex) => {
           try {
             const inputName = input.name().toString();
-            const inputType = 'unknown'; // Simplified for now - we'll extract type properly later
+            const inputType = extractSorobanTypeFromScSpec(input.type());
+
+            if (inputType === 'unknown') {
+              logger.warn(
+                'extractFunctionsFromSpec',
+                `Unknown type for parameter "${inputName}" in function "${functionName}"`
+              );
+            }
 
             return {
               name: inputName || `param_${inputIndex}`,
@@ -99,10 +226,10 @@ function extractFunctionsFromSpec(
           }
         });
 
-        const outputs: FunctionParameter[] = func.outputs().map((_output, outputIndex) => {
+        const outputs: FunctionParameter[] = func.outputs().map((output, outputIndex) => {
           try {
             // Outputs are ScSpecTypeDef objects, they don't have names, only types
-            const outputType = 'unknown'; // Simplified for now - we'll extract type properly later
+            const outputType = extractSorobanTypeFromScSpec(output);
 
             return {
               name: `result_${outputIndex}`,

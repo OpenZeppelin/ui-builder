@@ -40,7 +40,10 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "test:types": "vitest run src/contract/__tests__/complete-type-coverage.test.ts",
+    "typecheck": "tsc --noEmit",
+    "validate-stellar-types": "node scripts/check-stellar-sdk-types.js",
+    "postinstall": "pnpm validate-stellar-types || echo '⚠️  Stellar SDK type validation warnings detected'"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.8.0",
