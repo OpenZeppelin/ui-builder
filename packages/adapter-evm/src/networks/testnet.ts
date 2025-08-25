@@ -298,7 +298,7 @@ export const mantraDuKongEVMTestnet: TypedEvmNetworkConfig = {
   id: 'mantra-dukong-evm-testnet',
   exportConstName: 'mantraDuKongEVMTestnet',
   name: 'Mantra DuKong EVM Testnet',
-  ecosystem: 'cosmos',
+  ecosystem: 'evm',
   network: 'mantra-dukong',
   type: 'testnet',
   isTestnet: true,
