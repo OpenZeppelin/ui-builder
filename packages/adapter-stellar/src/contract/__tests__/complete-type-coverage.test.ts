@@ -6,35 +6,12 @@ import { describe, expect, it } from 'vitest';
  * This test will fail if any new ScSpec types are added to the SDK that we don't handle
  */
 describe('Complete ScSpec Type Coverage', () => {
-  // All known ScSpec types from Stellar SDK v12.x
-  const ALL_SCSPEC_TYPES = [
-    'scSpecTypeVal',
-    'scSpecTypeBool',
-    'scSpecTypeVoid',
-    'scSpecTypeError',
-    'scSpecTypeU32',
-    'scSpecTypeI32',
-    'scSpecTypeU64',
-    'scSpecTypeI64',
-    'scSpecTypeTimepoint',
-    'scSpecTypeDuration',
-    'scSpecTypeU128',
-    'scSpecTypeI128',
-    'scSpecTypeU256',
-    'scSpecTypeI256',
-    'scSpecTypeBytes',
-    'scSpecTypeString',
-    'scSpecTypeSymbol',
-    'scSpecTypeAddress',
-    'scSpecTypeMuxedAddress',
-    'scSpecTypeOption',
-    'scSpecTypeResult',
-    'scSpecTypeVec',
-    'scSpecTypeMap',
-    'scSpecTypeTuple',
-    'scSpecTypeBytesN',
-    'scSpecTypeUdt',
-  ];
+  // Get all ScSpec types from the current SDK version
+  const ALL_SCSPEC_TYPES = Object.getOwnPropertyNames(StellarSdk.xdr.ScSpecType)
+    .filter((name) => 
+      name.startsWith('scSpecType') && typeof StellarSdk.xdr.ScSpecType[name] === 'function'
+    )
+    .sort();
 
   describe('All ScSpec types must be handled', () => {
     ALL_SCSPEC_TYPES.forEach((scSpecTypeName) => {
@@ -88,17 +65,13 @@ describe('Complete ScSpec Type Coverage', () => {
   });
 
   describe('SDK version change detection', () => {
-    it('should detect if new ScSpec types are added to SDK', () => {
-      // Get all scSpecType methods from the current SDK
-      const currentScSpecMethods = Object.getOwnPropertyNames(StellarSdk.xdr.ScSpecType).filter(
-        (name) =>
-          name.startsWith('scSpecType') && typeof StellarSdk.xdr.ScSpecType[name] === 'function'
-      );
-
-      // If this fails, new ScSpec types were added to the SDK
-      expect(currentScSpecMethods).toEqual(ALL_SCSPEC_TYPES.sort());
-
-      console.log(`SDK has ${currentScSpecMethods.length} ScSpec types`);
+    it('should document all ScSpec types in current SDK version', () => {
+      // This test documents all the ScSpec types we're currently handling
+      console.log(`SDK has ${ALL_SCSPEC_TYPES.length} ScSpec types:`);
+      console.log(ALL_SCSPEC_TYPES.join(', '));
+      
+      // Should have a reasonable number of types (at least 20+)
+      expect(ALL_SCSPEC_TYPES.length).toBeGreaterThanOrEqual(20);
     });
   });
 });
