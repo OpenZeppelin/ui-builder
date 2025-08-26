@@ -12,6 +12,20 @@ import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 
 /**
+ * Extracts the inner type from an EVM array type.
+ * @param parameterType - The parameter type (e.g., 'uint32[]', 'address[]')
+ * @returns The inner type (e.g., 'uint32', 'address') or null if not an array type
+ */
+function extractArrayElementType(parameterType: string): string | null {
+  // Handle array types like uint32[], address[], bytes32[]
+  const arrayMatch = parameterType.match(/^(.+)\[\d*\]$/);
+  if (arrayMatch) {
+    return arrayMatch[1];
+  }
+  return null;
+}
+
+/**
  * Get default validation rules for a parameter type.
  * Only includes serializable validation rules - no custom functions.
  */
@@ -37,6 +51,26 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     validation: getDefaultValidationForType(),
     width: 'full',
   };
+
+  // For array types, provide element type information
+  if (fieldType === 'array') {
+    const elementType = extractArrayElementType(parameter.type);
+    if (elementType) {
+      const elementFieldType = mapEvmParamTypeToFieldType(elementType);
+
+      // Add array-specific properties
+      const arrayField = {
+        ...baseField,
+        elementType: elementFieldType,
+        elementFieldConfig: {
+          type: elementFieldType,
+          validation: { required: true },
+          placeholder: `Enter ${elementType}`,
+        },
+      };
+      return arrayField;
+    }
+  }
 
   // Preserve components for object and array-object types
   if (parameter.components && (fieldType === 'object' || fieldType === 'array-object')) {
