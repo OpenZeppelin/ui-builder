@@ -305,7 +305,7 @@ export const mantraDuKongEVMTestnet: TypedEvmNetworkConfig = {
   chainId: 5887,
   rpcUrl: viemMantraDuKongEVMTestnet.rpcUrls.default.http[0],
   explorerUrl: 'https://mantrascan.io/dukong',
-  // MANTRA Chain is not using Etherscan, so leaving this blank for now.
+  // MANTRA Chain is not using Etherscan, so leaving the following 2 fields empty.
   apiUrl: '',
   primaryExplorerApiIdentifier: '',
   supportsEtherscanV2: false,
