@@ -195,7 +195,53 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
 }
 
 /**
- * Converts a value to ScVal with proper type hints.
+ * Parses a generic type string and extracts the base type and parameters
+ * @param typeString - Type like "Vec<U32>", "Map<U32,Address>", "Option<Vec<U32>>"
+ * @returns Object with baseType and parameters, or null if not generic
+ */
+function parseGenericType(typeString: string): {
+  baseType: string;
+  parameters: string[];
+} | null {
+  const match = typeString.match(/^(\w+)<(.+)>$/);
+  if (!match) return null;
+
+  const baseType = match[1];
+  const paramString = match[2];
+
+  // Handle nested generics by counting angle brackets
+  const parameters: string[] = [];
+  let current = '';
+  let depth = 0;
+  let i = 0;
+
+  while (i < paramString.length) {
+    const char = paramString[i];
+
+    if (char === '<') {
+      depth++;
+      current += char;
+    } else if (char === '>') {
+      depth--;
+      current += char;
+    } else if (char === ',' && depth === 0) {
+      parameters.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+    i++;
+  }
+
+  if (current.trim()) {
+    parameters.push(current.trim());
+  }
+
+  return { baseType, parameters };
+}
+
+/**
+ * Converts a value to ScVal with comprehensive generic type support.
  * This should be used in the transaction execution instead of calling nativeToScVal directly.
  *
  * @param value - The parsed value from parseStellarInput
@@ -203,15 +249,83 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
  * @returns ScVal ready for contract calls
  */
 export function valueToScVal(value: unknown, parameterType: string): xdr.ScVal {
-  const scValType = convertStellarTypeToScValType(parameterType);
+  const genericInfo = parseGenericType(parameterType);
 
-  // Handle special cases that don't need type hints
-  if (parameterType === 'Bool' || parameterType === 'Bytes') {
-    return nativeToScVal(value);
+  if (!genericInfo) {
+    // Non-generic types - use existing logic
+    if (parameterType === 'Bool' || parameterType === 'Bytes') {
+      return nativeToScVal(value);
+    }
+    const scValType = convertStellarTypeToScValType(parameterType);
+    return nativeToScVal(value, { type: scValType });
   }
 
-  // For most types, use type hints
-  return nativeToScVal(value, { type: scValType });
+  const { baseType, parameters } = genericInfo;
+
+  switch (baseType) {
+    case 'Vec': {
+      // Handle Vec<T> types
+      const innerType = parameters[0];
+      if (Array.isArray(value)) {
+        const convertedElements = value.map((element) => valueToScVal(element, innerType));
+        return nativeToScVal(convertedElements);
+      }
+      return nativeToScVal(value);
+    }
+
+    case 'Map': {
+      // Handle Map<K,V> types
+      const keyType = parameters[0];
+      const valueType = parameters[1];
+
+      if (typeof value === 'object' && value !== null) {
+        // Convert object to Map entries with proper type hints
+        const entries: [unknown, unknown][] = Object.entries(value).map(([key, val]) => [
+          valueToScVal(key, keyType),
+          valueToScVal(val, valueType),
+        ]);
+        return nativeToScVal(new Map(entries));
+      }
+      return nativeToScVal(value);
+    }
+
+    case 'Option': {
+      // Handle Option<T> types
+      const innerType = parameters[0];
+
+      if (value === null || value === undefined) {
+        return nativeToScVal(null); // None variant
+      } else {
+        // Some variant - convert the inner value
+        return valueToScVal(value, innerType);
+      }
+    }
+
+    case 'Result': {
+      // Handle Result<T,E> types
+      const okType = parameters[0];
+      const errType = parameters[1];
+
+      // Result types typically come as {ok: value} or {err: error}
+      if (typeof value === 'object' && value !== null) {
+        const resultObj = value as Record<string, unknown>;
+        if ('ok' in resultObj) {
+          const okScVal = valueToScVal(resultObj.ok, okType);
+          return nativeToScVal({ ok: okScVal });
+        } else if ('err' in resultObj) {
+          const errScVal = valueToScVal(resultObj.err, errType);
+          return nativeToScVal({ err: errScVal });
+        }
+      }
+      return nativeToScVal(value);
+    }
+
+    default: {
+      // Unknown generic type - fallback to basic conversion
+      const scValType = convertStellarTypeToScValType(parameterType);
+      return nativeToScVal(value, { type: scValType });
+    }
+  }
 }
 
 // ================================

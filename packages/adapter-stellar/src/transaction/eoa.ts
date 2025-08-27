@@ -2,7 +2,6 @@ import {
   Account,
   BASE_FEE,
   Contract,
-  nativeToScVal,
   rpc as StellarRpc,
   TransactionBuilder,
 } from '@stellar/stellar-sdk';
@@ -14,7 +13,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { convertStellarTypeToScValType } from '../utils';
+import { valueToScVal } from '../transform/input-parser';
 import { getStellarWalletConnectionStatus, signTransaction } from '../wallet/connection';
 import { ExecutionStrategy } from './execution-strategy';
 import type { StellarTransactionData } from './formatter';
@@ -97,24 +96,10 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         networkPassphrase: stellarConfig.networkPassphrase,
       });
 
-      // Add the contract call operation (convert args to ScVal with type hints)
+      // Add the contract call operation (convert args to ScVal with comprehensive type support)
       const scValArgs = txData.args.map((arg, index) => {
         const argType = txData.argTypes[index];
-
-        // Use type hints
-        if (argType === 'Bool') {
-          // Boolean values don't need type hints
-          return nativeToScVal(arg);
-        }
-
-        if (argType === 'Bytes' || argType.match(/^BytesN<\d+>$/)) {
-          // Bytes values don't need type hints (already Uint8Array)
-          return nativeToScVal(arg);
-        }
-
-        // Use common utility for type conversion
-        const typeHint = convertStellarTypeToScValType(argType);
-        return nativeToScVal(arg, { type: typeHint });
+        return valueToScVal(arg, argType);
       });
 
       transactionBuilder.addOperation(contract.call(txData.functionName, ...scValArgs));

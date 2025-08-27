@@ -109,6 +109,58 @@ describe('generateStellarDefaultField', () => {
         helperText: 'List of item IDs',
         width: 'full',
         validation: { required: true },
+        elementType: 'number',
+        elementFieldConfig: {
+          type: 'number',
+          validation: { required: true },
+          placeholder: 'Enter U32',
+        },
+      });
+    });
+
+    it('should generate field for Vec<Address> parameter', () => {
+      const parameter: FunctionParameter = {
+        name: 'addresses',
+        type: 'Vec<Address>',
+        displayName: 'Addresses',
+        description: 'List of user addresses',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result).toMatchObject({
+        name: 'addresses',
+        label: 'Addresses',
+        type: 'array',
+        elementType: 'blockchain-address',
+        elementFieldConfig: {
+          type: 'blockchain-address',
+          validation: { required: true },
+          placeholder: 'Enter Address',
+        },
+      });
+    });
+
+    it('should generate field for Vec<Bool> parameter', () => {
+      const parameter: FunctionParameter = {
+        name: 'flags',
+        type: 'Vec<Bool>',
+        displayName: 'Flags',
+        description: 'List of boolean flags',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result).toMatchObject({
+        name: 'flags',
+        label: 'Flags',
+        type: 'array',
+        elementType: 'checkbox',
+        elementFieldConfig: {
+          type: 'checkbox',
+          validation: { required: true },
+          placeholder: 'Enter Bool',
+        },
       });
     });
   });
