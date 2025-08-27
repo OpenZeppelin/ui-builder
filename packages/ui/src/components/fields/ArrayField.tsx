@@ -109,7 +109,38 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
             ? false
             : ''; // Default for text, address, etc.
 
+    // Background and rationale:
+    // In certain runtime states (e.g., preview remounts, incidental resets, StrictMode double-invocations),
+    // an immediate read right after useFieldArray.append(...) can be stale and still reflect the
+    // pre-append array. This manifested as a user-visible bug where adding an item (notably value 0)
+    // either did nothing or briefly appeared and then disappeared.
+    //
+    // To make the operation deterministic, we snapshot the array BEFORE calling append and then
+    // verify that the length actually increased. If not, we force-set the array using the snapshot
+    // plus the new value. This is safe and idempotent because it only runs when the immediate read
+    // did not reflect the append; it does not double-append.
+    const fieldsBeforeAppend = fields.length;
+    const valuesBeforeAppend = (formContext.getValues(name) as unknown[] | undefined) ?? [];
+
     append(defaultValue as FieldValues[typeof name]);
+
+    // Verify append actually reflected in form state; if not, force set
+    const afterAppendFieldsCount =
+      (formContext.getValues(name) as unknown[] | undefined)?.length ?? fields.length;
+
+    // Fallback: if the immediate read did not reflect the append, coerce to
+    // "previous snapshot + new value" so the UI consistently renders the new item.
+    if (afterAppendFieldsCount <= fieldsBeforeAppend) {
+      const baseArray = Array.isArray(valuesBeforeAppend)
+        ? (valuesBeforeAppend as unknown[])
+        : ([] as unknown[]);
+      const coercedArray = [...baseArray, defaultValue] as unknown[];
+
+      formContext.setValue(name as never, coercedArray as never, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
   };
 
   // Check if we can add more items
@@ -182,7 +213,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                 fields.map((field, index) => {
                   // Create field configuration for array element
                   const elementField: FormFieldType = {
-                    id: `${id}-${index}`, // Internal ID for the element's field
+                    id: field.id, // Use RHF field.id for stable, unique keys per item
                     name: `${name}.${index}`, // RHF name for the element
                     label: elementFieldConfig?.label || '', // Label for the element's field (can be empty if not desired)
                     type: elementType,
