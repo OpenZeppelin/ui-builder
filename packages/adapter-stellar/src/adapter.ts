@@ -23,6 +23,7 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   StellarNetworkConfig,
+  TransactionStatusUpdate,
   UiKitConfiguration,
   UserRpcProviderConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -180,9 +181,17 @@ export class StellarAdapter implements ContractAdapter {
   }
   async signAndBroadcast(
     transactionData: unknown,
-    executionConfig?: ExecutionConfig
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
-    return signAndBroadcastStellarTransaction(transactionData, executionConfig);
+    return signAndBroadcastStellarTransaction(
+      transactionData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
   }
 
   // NOTE: waitForTransactionConfirmation? is optional in the interface.
@@ -207,7 +216,8 @@ export class StellarAdapter implements ContractAdapter {
       functionId,
       this.networkConfig,
       params,
-      contractSchema
+      contractSchema,
+      (address: string) => this.loadContract({ contractAddress: address })
     );
   }
 
