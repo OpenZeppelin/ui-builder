@@ -1,3 +1,10 @@
+// Polyfill Buffer for Stellar SDK browser compatibility (only when Stellar adapter is used)
+import { Buffer } from 'buffer';
+
+if (typeof globalThis.Buffer === 'undefined') {
+  (globalThis as typeof globalThis & { Buffer: typeof Buffer }).Buffer = Buffer;
+}
+
 // Re-export the main adapter class
 export { StellarAdapter } from './adapter';
 
