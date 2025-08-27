@@ -33,11 +33,29 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Check if app creds exist (base repo only)
+        id: has-app
+        run: |
+          present=true
+          if [ "${{ github.event.pull_request.head.repo.fork || false }}" = "true" ]; then present=false; fi
+          if [ -z "${{ vars.GH_APP_ID }}" ] || [ -z "${{ secrets.GH_APP_PRIVATE_KEY }}" ]; then present=false; fi
+          echo "present=$present" >> "$GITHUB_OUTPUT"
+
       - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
         id: gh-app-token
+        if: steps.has-app.outputs.present == 'true'
         with:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Select token
+        id: auth
+        run: |
+          if [ "${{ steps.has-app.outputs.present }}" = "true" ]; then
+            echo "token=${{ steps.gh-app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${{ github.token }}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -45,7 +63,7 @@ jobs:
       - name: Prepare pre-requisites
         uses: ./.github/actions/prepare
         with:
-          token: ${{ steps.gh-app-token.outputs.token }}
+          token: ${{ steps.auth.outputs.token }}
 
       - name: Configure npm authentication for npm registry
         run: |
