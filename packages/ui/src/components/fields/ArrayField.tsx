@@ -161,7 +161,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
         // should also be callable here, in addition to these built-in length checks.
         validate: (value) => {
           // Validate array constraints
-          if (validation?.required && (!value || !Array.isArray(value) || value.length === 0)) {
+          if (validation?.required && (!Array.isArray(value) || value.length === 0)) {
             return 'At least one item is required';
           }
 
