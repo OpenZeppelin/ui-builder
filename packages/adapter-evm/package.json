@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-evm",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": false,
   "description": "EVM Adapter for Contracts UI Builder",
   "keywords": [
