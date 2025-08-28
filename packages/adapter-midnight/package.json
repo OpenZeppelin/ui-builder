@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-adapter-midnight",
-  "version": "0.1.4",
+  "version": "0.7.1",
   "description": "Midnight Adapter for Contracts UI Builder",
   "keywords": [
     "openzeppelin",

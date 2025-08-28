@@ -1,5 +1,20 @@
 # @openzeppelin/transaction-form-ui
 
+## 0.7.1
+
+### Patch Changes
+
+- [#137](https://github.com/OpenZeppelin/contracts-ui-builder/pull/137) [`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9) Thanks [@pasevin](https://github.com/pasevin)! - allow zero values in ArrayField required validation
+
+- [#139](https://github.com/OpenZeppelin/contracts-ui-builder/pull/139) [`49d7d6c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/49d7d6c38d1890a67dfbf514161e71f46849a123) Thanks [@pasevin](https://github.com/pasevin)! - snapshot pre-append and fallback setValue to fix add-item with default 0 in ArrayField
+
+## 0.7.0
+
+### Patch Changes
+
+- Updated dependencies [[`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec)]:
+  - @openzeppelin/contracts-ui-builder-utils@0.7.0
+
 ## 0.5.1
 
 ### Patch Changes

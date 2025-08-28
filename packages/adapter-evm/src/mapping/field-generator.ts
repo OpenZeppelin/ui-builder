@@ -64,7 +64,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
         elementType: elementFieldType,
         elementFieldConfig: {
           type: elementFieldType,
-          validation: { required: true },
+          validation: getDefaultValidationForType(),
           placeholder: `Enter ${elementType}`,
         },
       };
