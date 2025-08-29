@@ -65,6 +65,7 @@ export const FieldEditor = React.memo(
 
     // Track previous field to detect meaningful changes
     const previousFieldRef = React.useRef(field);
+    const previousHardcodedRef = React.useRef<unknown>(field.hardcodedValue);
 
     const debouncedUpdate = useMemo(
       () =>
@@ -87,9 +88,14 @@ export const FieldEditor = React.memo(
     const handleUpdate = useCallback(
       (updates: Partial<FormFieldType>) => {
         // For critical updates like type changes, update immediately
-        if ('type' in updates || 'isHardcoded' in updates) {
+        if ('type' in updates || 'isHardcoded' in updates || 'hardcodedValue' in updates) {
           debouncedUpdate.cancel(); // Cancel any pending debounced updates
-          onUpdate(updates);
+          // For hardcodedValue changes, allow the store update to settle before autosave picks it up
+          if ('hardcodedValue' in updates) {
+            setTimeout(() => onUpdate(updates), 0);
+          } else {
+            onUpdate(updates);
+          }
           return;
         }
 
@@ -138,6 +144,8 @@ export const FieldEditor = React.memo(
         }
 
         reset(newValues);
+        // Keep our snapshot in sync for change detection in the watch subscription
+        previousHardcodedRef.current = newValues.hardcodedValue;
       }
 
       // Update the ref for next comparison
@@ -147,14 +155,9 @@ export const FieldEditor = React.memo(
     // Watch for changes and update fields
     React.useEffect(() => {
       const subscription = watch((value, { name, type: eventType }) => {
-        // Skip updates if we're just seeing validation changes for hardcodedValue
-        if (name === 'hardcodedValue' && eventType === undefined) {
-          return;
-        }
-
         if (name && value) {
           // Skip if type is undefined
-          if (name === 'type' && value[name] === undefined) {
+          if (name === 'type' && value[name as keyof typeof value] === undefined) {
             return;
           }
 
@@ -167,13 +170,23 @@ export const FieldEditor = React.memo(
             const currentValues = getValues();
 
             if (name === 'hardcodedValue' || name?.startsWith('hardcodedValue.')) {
+              const currentHardcoded = currentValues.hardcodedValue;
+              const valuesEqual = deepEqual(previousHardcodedRef.current, currentHardcoded);
+
+              // For structural changes from useFieldArray (eventType === undefined), only skip
+              // if the value truly hasn't changed. Otherwise, process and update the snapshot.
+              if (eventType === undefined && valuesEqual) {
+                return;
+              }
+
+              previousHardcodedRef.current = currentHardcoded;
               handleUpdate({ hardcodedValue: currentValues.hardcodedValue });
             } else {
               handleUpdate({ validation: currentValues.validation });
             }
           } else {
             // For other fields, send the change with appropriate debouncing
-            const change = { [name]: value[name] } as Partial<FormFieldType>;
+            const change = { [name]: value[name as keyof typeof value] } as Partial<FormFieldType>;
             handleUpdate(change);
           }
         }
