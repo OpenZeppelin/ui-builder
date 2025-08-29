@@ -23,6 +23,7 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
+  TxStatus,
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
@@ -212,7 +213,7 @@ export class EvmAdapter implements ContractAdapter {
   public async signAndBroadcast(
     transactionData: unknown,
     executionConfig: ExecutionConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const walletImplementation = await getEvmWalletImplementation();
