@@ -1,6 +1,6 @@
 import { GripVertical, Plus, X } from 'lucide-react';
 import React from 'react';
-import { Controller, FieldValues, useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 
@@ -60,6 +60,35 @@ export interface ArrayFieldProps<TFieldValues extends FieldValues = FieldValues>
  *
  * The component reuses existing field components (TextField, NumberField, etc.)
  * for individual array elements, maintaining consistency across the form system.
+ *
+ * Why the extra guards and synchronization exist (post-mortem/rationale):
+ * - In certain runtime states (StrictMode double-invocation, preview remounts, state rehydration
+ *   from storage), React Hook Form's useFieldArray may not synchronously reflect an `append()`
+ *   or `remove()` call in the immediately subsequent read (e.g., reading `fields.length` or
+ *   `getValues(name)` right after the call). This resulted in newly added items (especially
+ *   falsy defaults like 0/false) appearing briefly and then disappearing, or remove operations
+ *   not updating the UI.
+ * - To make array operations deterministic and resilient across flows (preview form with
+ *   FormProvider and the wizard's "Use Hardcoded Value" without a provider), we:
+ *   1) Read a stable snapshot of the array value BEFORE `append()` and, if the immediate
+ *      post-append read doesn't reflect the addition, we coerce the state to
+ *      "previousSnapshot + newValue" via `setValue` (when context exists) or `replace`.
+ *   2) Avoid `remove()` race conditions by always computing the new array via filter and
+ *      applying it with `replace`, which proved to be the most consistent across contexts.
+ *   3) Keep `fields` in sync with the watched array value using a guarded `replace` in an effect.
+ *      A ref flag (`isReplacingRef`) prevents infinite loops when we ourselves are driving
+ *      the `replace`.
+ *   4) Use optional chaining for form context (`formContext?.control`, `formContext?.getValues`,
+ *      `formContext?.setValue`) so the component works with either an inherited FormProvider or
+ *      an explicit `control` prop.
+ *   5) Use `queueMicrotask` to reset the guard flag after our `replace` has been scheduled,
+ *      avoiding an extra timer tick while ensuring the effect observes the final state.
+ *
+ * Guarantees:
+ * - Operations are idempotent: the fallback only runs when the immediate read does not reflect
+ *   the intended state, so we don't double-append/remove.
+ * - Works both with and without FormProvider (preview vs wizard) due to context-agnostic state
+ *   reads and `replace` fallback.
  */
 export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
   id,
@@ -80,17 +109,66 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
 
-  // Get form context for nested field registration
+  // Get form context for nested field registration (may be absent in some builder flows)
   const formContext = useFormContext();
 
   // Use useFieldArray for dynamic array management
-  const { fields, append, remove } = useFieldArray({
-    control: control || formContext.control,
+  const { fields, append, replace } = useFieldArray({
+    control: control || formContext?.control,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     name: name as any, // Type assertion needed due to generic constraints
     // TODO: Investigate if stricter typing for `name` can be achieved to avoid `as any`
     // with react-hook-form's useFieldArray and deeply nested field names.
   });
+
+  // Watch current array value in a context-agnostic way (works with provided control)
+  const rawWatchedArray = useWatch({ control: control || formContext?.control, name }) as
+    | unknown[]
+    | undefined;
+  const watchedArrayValue = React.useMemo<unknown[]>(() => {
+    return Array.isArray(rawWatchedArray) ? rawWatchedArray : [];
+  }, [rawWatchedArray]);
+
+  // Ensure field array is synchronized with current value length on mount/reset
+  // Keep field array synchronized with watched values, but prevent infinite loops
+  const isReplacingRef = React.useRef(false);
+  React.useEffect(() => {
+    if (isReplacingRef.current) {
+      // Skip sync if we're in the middle of a replace operation
+      return;
+    }
+
+    if (Array.isArray(watchedArrayValue) && fields.length !== watchedArrayValue.length) {
+      isReplacingRef.current = true;
+      replace(watchedArrayValue as unknown as never);
+
+      // Reset the flag in a microtask to allow the replace to complete without a timer tick
+      queueMicrotask(() => {
+        isReplacingRef.current = false;
+      });
+    }
+  }, [fields.length, watchedArrayValue, replace]);
+
+  // Note: Structural changes are observed via useWatch and the sync effect above; no additional tracking needed here.
+
+  // Handle removing an array item with fallback for stale reads
+  const handleRemoveItem = (index: number): void => {
+    const valuesBeforeRemove = Array.isArray(watchedArrayValue)
+      ? (watchedArrayValue as unknown[])
+      : ([] as unknown[]);
+
+    // Always use the fallback approach for remove to ensure consistency
+    const updatedArray = valuesBeforeRemove.filter((_, i) => i !== index);
+
+    // Set flag to prevent sync loop during manual replace
+    isReplacingRef.current = true;
+    replace(updatedArray as unknown as never);
+
+    // Reset flag after operation
+    queueMicrotask(() => {
+      isReplacingRef.current = false;
+    });
+  };
 
   // Handle adding new array item
   const handleAddItem = (): void => {
@@ -119,14 +197,20 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
     // verify that the length actually increased. If not, we force-set the array using the snapshot
     // plus the new value. This is safe and idempotent because it only runs when the immediate read
     // did not reflect the append; it does not double-append.
+
+    // Set flag to prevent sync interference during add operation
+    isReplacingRef.current = true;
+
     const fieldsBeforeAppend = fields.length;
-    const valuesBeforeAppend = (formContext.getValues(name) as unknown[] | undefined) ?? [];
+    const valuesBeforeAppend = Array.isArray(watchedArrayValue)
+      ? (watchedArrayValue as unknown[])
+      : ([] as unknown[]);
 
     append(defaultValue as FieldValues[typeof name]);
 
     // Verify append actually reflected in form state; if not, force set
     const afterAppendFieldsCount =
-      (formContext.getValues(name) as unknown[] | undefined)?.length ?? fields.length;
+      (formContext?.getValues?.(name) as unknown[] | undefined)?.length ?? fields.length;
 
     // Fallback: if the immediate read did not reflect the append, coerce to
     // "previous snapshot + new value" so the UI consistently renders the new item.
@@ -136,11 +220,21 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
         : ([] as unknown[]);
       const coercedArray = [...baseArray, defaultValue] as unknown[];
 
-      formContext.setValue(name as never, coercedArray as never, {
-        shouldDirty: true,
-        shouldTouch: true,
-      });
+      if (formContext?.setValue) {
+        formContext.setValue(name as never, coercedArray as never, {
+          shouldDirty: true,
+          shouldTouch: true,
+        });
+      } else {
+        // No form context (e.g., builder hardcoded flow). Use useFieldArray.replace to force state.
+        replace(coercedArray as unknown as never);
+      }
     }
+
+    // Reset flag after operation completes
+    queueMicrotask(() => {
+      isReplacingRef.current = false;
+    });
   };
 
   // Check if we can add more items
@@ -154,7 +248,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
 
   return (
     <Controller
-      control={control}
+      control={control || formContext?.control}
       name={name}
       rules={{
         // TODO: Consider if custom validation functions passed via `validation.validate` prop
@@ -213,6 +307,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                 fields.map((field, index) => {
                   // Create field configuration for array element
                   const elementField: FormFieldType = {
+                    ...elementFieldConfig, // Allow overrides for optional props, but controlled keys follow next
                     id: field.id, // Use RHF field.id for stable, unique keys per item
                     name: `${name}.${index}`, // RHF name for the element
                     label: elementFieldConfig?.label || '', // Label for the element's field (can be empty if not desired)
@@ -222,7 +317,6 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                     helperText: elementFieldConfig?.helperText,
                     width: 'full', // Typically, elements take full width within their row
                     readOnly: elementFieldConfig?.readOnly ?? readOnly, // Inherit readOnly from parent
-                    ...elementFieldConfig, // Spread any other config but ensure id, name, type, label are controlled
                   };
 
                   return (
@@ -249,7 +343,7 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => remove(index)}
+                          onClick={() => handleRemoveItem(index)}
                           className="size-8 p-0"
                           aria-label={`Remove item ${index + 1}`}
                         >
