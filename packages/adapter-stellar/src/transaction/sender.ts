@@ -4,6 +4,7 @@ import type {
   ExecutionConfig,
   StellarNetworkConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -50,7 +51,7 @@ export async function signAndBroadcastStellarTransaction(
   transactionData: unknown,
   executionConfig: ExecutionConfig,
   networkConfig: StellarNetworkConfig,
-  onStatusChange?: (status: string, details: TransactionStatusUpdate) => void,
+  onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
   runtimeApiKey?: string
 ): Promise<{ txHash: string }> {
   logger.info(

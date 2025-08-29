@@ -10,6 +10,7 @@ import type {
   ExecutionConfig,
   StellarNetworkConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -49,7 +50,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
     transactionData: StellarTransactionData,
     executionConfig: ExecutionConfig,
     networkConfig: StellarNetworkConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     // runtimeApiKey is unused in EOA strategy but required by the interface
     _runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
@@ -66,18 +67,14 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
   private async executeEoaTransaction(
     txData: StellarTransactionData,
     stellarConfig: StellarNetworkConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void
   ): Promise<{ txHash: string }> {
     try {
-      onStatusChange('preparing', {});
-
       // --- Step 1: Get RPC Server and Connected Wallet Address --- //
       const rpcServer = getSorobanRpcServer(stellarConfig);
       const connectedAddress = this.getConnectedWalletAddress();
 
       logger.info(SYSTEM_LOG_TAG, `Connected address: ${connectedAddress}`);
-
-      onStatusChange('building', {});
 
       // --- Step 2: Get Account Details --- //
       let sourceAccount: Account;
@@ -110,8 +107,6 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       let transaction = transactionBuilder.build();
 
       // --- Step 4: Simulate Transaction First --- //
-      onStatusChange('simulating', {});
-
       try {
         const simulation = await rpcServer.simulateTransaction(transaction);
 
@@ -125,7 +120,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         throw new Error(`Transaction simulation/preparation failed: ${(error as Error).message}`);
       }
 
-      onStatusChange('signing', {});
+      onStatusChange('pendingSignature', {});
 
       // --- Step 5: Sign Transaction --- //
       try {
@@ -148,7 +143,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         throw new Error(`Failed to sign transaction: ${(error as Error).message}`);
       }
 
-      onStatusChange('broadcasting', {});
+      onStatusChange('pendingConfirmation', {});
 
       // --- Step 6: Send Transaction --- //
       let sendResult: StellarRpc.Api.SendTransactionResponse;
@@ -165,9 +160,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       const txHash = sendResult.hash;
       logger.info(SYSTEM_LOG_TAG, `Transaction submitted successfully: ${txHash}`);
 
-      onStatusChange('confirming', {
-        txHash,
-      });
+      // Status remains 'pendingConfirmation' during confirmation wait
 
       // --- Step 7: Wait for Confirmation --- //
       try {
@@ -200,7 +193,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         logger.error(SYSTEM_LOG_TAG, 'Error waiting for confirmation:', confirmError);
       }
 
-      onStatusChange('confirmed', {
+      onStatusChange('success', {
         txHash,
       });
 

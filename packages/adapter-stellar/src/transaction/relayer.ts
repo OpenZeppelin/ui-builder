@@ -2,6 +2,7 @@ import type {
   ExecutionConfig,
   StellarNetworkConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 
 import { ExecutionStrategy } from './execution-strategy';
@@ -28,7 +29,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     _transactionData: StellarTransactionData,
     _executionConfig: ExecutionConfig,
     _networkConfig: StellarNetworkConfig,
-    _onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    _onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     _runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     throw new Error('Relayer execution strategy not yet implemented for Stellar.');

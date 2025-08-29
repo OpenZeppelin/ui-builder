@@ -2,6 +2,7 @@ import {
   ExecutionConfig,
   StellarNetworkConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 
 import type { StellarTransactionData } from './formatter';
@@ -26,7 +27,7 @@ export interface ExecutionStrategy {
     transactionData: StellarTransactionData,
     executionConfig: ExecutionConfig,
     networkConfig: StellarNetworkConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }>;
 }
