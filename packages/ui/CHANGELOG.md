@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-ui
 
+## 0.7.2
+
+### Patch Changes
+
+- [#143](https://github.com/OpenZeppelin/contracts-ui-builder/pull/143) [`f344326`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/f344326aab505e16468ec1b45708fc28a53df192) Thanks [@pasevin](https://github.com/pasevin)! - stabilize array ops across contexts
+
 ## 0.7.1
 
 ### Patch Changes

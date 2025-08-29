@@ -1,5 +1,12 @@
 # @openzeppelin/transaction-form-renderer
 
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [[`f344326`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/f344326aab505e16468ec1b45708fc28a53df192)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.7.2
+
 ## 0.7.1
 
 ### Patch Changes
