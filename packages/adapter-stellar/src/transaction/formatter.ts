@@ -1,8 +1,14 @@
-import { Address } from '@stellar/stellar-sdk';
+import { Address, xdr } from '@stellar/stellar-sdk';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type {
+  ContractSchema,
+  EnumValue,
+  FormFieldType,
+} from '@openzeppelin/contracts-ui-builder-types';
+import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { extractEnumVariants, isEnumType } from '../mapping/enum-metadata';
 import { parseStellarInput } from '../transform';
 
 /**
@@ -67,6 +73,39 @@ export function formatStellarTransactionData(
   // --- Step 3: Parse/Transform Values using the imported parser --- //
   const transformedArgs = expectedArgs.map((param, index) => {
     let valueToParse = orderedRawValues[index];
+
+    // Handle enum values - process payload types using enum metadata
+    if (isEnumValue(valueToParse)) {
+      const specEntries = contractSchema.metadata?.specEntries as xdr.ScSpecEntry[] | undefined;
+      if (specEntries && isEnumType(specEntries, param.type)) {
+        const enumMetadata = extractEnumVariants(specEntries, param.type);
+        const enumValue = valueToParse as EnumValue;
+        if (enumMetadata && enumValue.values) {
+          // Find the variant metadata for the selected tag
+          const selectedVariant = enumMetadata.variants.find((v) => v.name === enumValue.tag);
+          if (selectedVariant && selectedVariant.payloadTypes) {
+            // Process each payload value according to its expected type
+            const processedValues = enumValue.values.map(
+              (rawValue: unknown, payloadIndex: number) => {
+                const expectedType = selectedVariant.payloadTypes![payloadIndex];
+                if (expectedType) {
+                  // Use parseStellarInput to convert the raw value to the proper type
+                  const processedValue = parseStellarInput(rawValue, expectedType);
+                  // Create SorobanArgumentValue structure for getScValFromArg
+                  return {
+                    type: expectedType,
+                    value: processedValue,
+                  };
+                }
+                return rawValue;
+              }
+            );
+            // Return the enum with processed payload values
+            valueToParse = { ...enumValue, values: processedValues };
+          }
+        }
+      }
+    }
 
     // Handle array parameters - if the value is already an array and the type expects it,
     // we can pass it directly. The Stellar input parser will handle the conversion.

@@ -950,5 +950,115 @@ describe('formatStellarTransactionData', () => {
         ],
       });
     });
+
+    describe('enum payload processing with raw values', () => {
+      it('should handle enum values when specEntries is missing', () => {
+        const schemaWithoutSpecEntries: ContractSchema = {
+          name: 'DemoEnumContract',
+          address: mockContractAddress,
+          ecosystem: 'stellar',
+          functions: [
+            {
+              id: 'set_enum_DemoEnum',
+              name: 'set_enum',
+              displayName: 'Set Enum',
+              type: 'function',
+              modifiesState: true,
+              inputs: [{ name: 'choice', type: 'DemoEnum', displayName: 'Choice' }],
+              outputs: [],
+              stateMutability: 'nonpayable',
+            },
+          ],
+          metadata: undefined,
+        };
+
+        const submittedInputs = {
+          choice: {
+            tag: 'Two',
+            values: [444],
+          },
+        };
+
+        const fields: FormFieldType[] = [
+          {
+            id: 'field-1',
+            name: 'choice',
+            label: 'Choice',
+            type: 'enum',
+            placeholder: 'Select choice',
+            defaultValue: { tag: 'One' },
+            validation: { required: true },
+            width: 'full',
+          },
+        ];
+
+        const result = formatStellarTransactionData(
+          schemaWithoutSpecEntries,
+          'set_enum_DemoEnum',
+          submittedInputs,
+          fields
+        );
+
+        expect(result.contractAddress).toBe(mockContractAddress);
+        expect(result.functionName).toBe('set_enum');
+        expect(result.args).toHaveLength(1);
+        // Should pass through unchanged when no metadata available
+        expect(result.args[0]).toEqual({
+          tag: 'Two',
+          values: [444],
+        });
+      });
+
+      it('should handle non-enum values normally', () => {
+        const schemaWithoutSpecEntries: ContractSchema = {
+          name: 'DemoEnumContract',
+          address: mockContractAddress,
+          ecosystem: 'stellar',
+          functions: [
+            {
+              id: 'set_enum_DemoEnum',
+              name: 'set_enum',
+              displayName: 'Set Enum',
+              type: 'function',
+              modifiesState: true,
+              inputs: [{ name: 'choice', type: 'DemoEnum', displayName: 'Choice' }],
+              outputs: [],
+              stateMutability: 'nonpayable',
+            },
+          ],
+          metadata: undefined,
+        };
+
+        const submittedInputs = {
+          choice: 'not an enum value', // Regular string value
+        };
+
+        const fields: FormFieldType[] = [
+          {
+            id: 'field-1',
+            name: 'choice',
+            label: 'Choice',
+            type: 'text',
+            placeholder: 'Enter choice',
+            defaultValue: '',
+            validation: { required: true },
+            width: 'full',
+          },
+        ];
+
+        const result = formatStellarTransactionData(
+          schemaWithoutSpecEntries,
+          'set_enum_DemoEnum',
+          submittedInputs,
+          fields
+        );
+
+        expect(result.contractAddress).toBe(mockContractAddress);
+        expect(result.functionName).toBe('set_enum');
+        expect(result.args).toHaveLength(1);
+        // Should be processed normally by parseStellarInput
+        expect(result.args[0]).toBe('not an enum value');
+      });
+    });
   });
 });
