@@ -93,6 +93,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
   enumMetadata,
   validateEnum,
   renderPayloadField,
+  readOnly,
 }: EnumFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -114,6 +115,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
         <Controller
           control={control}
           name={name}
+          disabled={readOnly}
           rules={{
             validate: (value) => {
               // Use standard validation first
@@ -191,6 +193,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
                     }}
                     onBlur={field.onBlur}
                     name={field.name}
+                    disabled={readOnly}
                   />
                 </div>
 
@@ -220,6 +223,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
       <Controller
         control={control}
         name={name}
+        disabled={readOnly}
         rules={{
           validate: (value) => {
             // Use standard validation first
@@ -289,7 +293,11 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
           return (
             <>
               {/* Variant Picker */}
-              <Select value={currentValue.tag} onValueChange={handleVariantChange}>
+              <Select
+                value={currentValue.tag}
+                onValueChange={handleVariantChange}
+                disabled={readOnly}
+              >
                 <SelectTrigger id={id} {...accessibilityProps}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
@@ -330,6 +338,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
                         helperText: undefined,
                         width: 'full',
                         originalParameterType: payloadType,
+                        readOnly: readOnly, // Inherit readOnly state from parent
                       };
 
                       return (
@@ -348,6 +357,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
                                 placeholder={`Enter ${payloadType} value`}
                                 value={(currentValue.values?.[index] as string) || ''}
                                 onChange={(e) => handlePayloadChange(index, e.target.value)}
+                                disabled={readOnly}
                               />
                             </div>
                           )}

@@ -85,8 +85,16 @@ export function FieldBasicSettings({
             elementFieldConfig: field.elementFieldConfig,
           }
         : {}),
+      ...(fieldType === 'enum' && field.enumMetadata ? { enumMetadata: field.enumMetadata } : {}),
     }),
-    [fieldType, isFieldRequired, field.components, field.elementType, field.elementFieldConfig]
+    [
+      fieldType,
+      isFieldRequired,
+      field.components,
+      field.elementType,
+      field.elementFieldConfig,
+      field.enumMetadata,
+    ]
   );
 
   return (
