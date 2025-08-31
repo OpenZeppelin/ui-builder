@@ -187,32 +187,31 @@ export function getScValFromArg(arg: SorobanComplexValue, scVals: xdr.ScVal[]): 
 
 export function convertEnumToScVal(obj: SorobanEnumValue, scVals?: xdr.ScVal[]): xdr.ScVal {
   try {
-    // Tuple variant - has tag and values
-    if (obj.tag && obj.values) {
-      const tagVal = nativeToScVal(obj.tag, { type: 'symbol' });
-      const valuesVal = convertValuesToScVals(obj.values, scVals || []);
-      const tupleScValsVec = xdr.ScVal.scvVec([tagVal, ...valuesVal]);
-
-      logger.debug(SYSTEM_LOG_TAG, `Converted tuple enum with tag: ${obj.tag}`);
-      return tupleScValsVec;
-    }
-
-    // Integer variant - has enum property
+    // Integer variant - has enum property (keep as-is for integer enums)
     if (obj.enum !== undefined) {
       const enumScVal = nativeToScVal(obj.enum, { type: 'u32' });
-      logger.debug(SYSTEM_LOG_TAG, `Converted integer enum: ${obj.enum}`);
       return enumScVal;
     }
 
-    // Unit variant - has tag only
-    if (obj.tag) {
-      const tagVec = [obj.tag];
-      const symbolScVal = nativeToScVal(tagVec, { type: 'symbol' });
-      logger.debug(SYSTEM_LOG_TAG, `Converted unit enum with tag: ${obj.tag}`);
-      return symbolScVal;
+    if (!obj.tag) {
+      throw new Error('Enum object must have either "tag" or "enum" property');
     }
 
-    throw new Error('Invalid enum structure - missing tag or enum property');
+    // Use Vector format with Symbol for variant names (as per Soroban documentation)
+    // Unit variants: ScVec containing single ScSymbol
+    // Tuple variants: ScVec with ScSymbol + payload elements
+    const tagSymbol = nativeToScVal(obj.tag, { type: 'symbol' });
+
+    if (!obj.values || obj.values.length === 0) {
+      // Unit variant - ScVec containing single ScSymbol
+      const unitVec = xdr.ScVal.scvVec([tagSymbol]);
+      return unitVec;
+    }
+
+    // Tuple variant - ScVec with ScSymbol + payload elements
+    const valuesVal = obj.values.map((v) => getScValFromArg(v, scVals || []));
+    const tupleVec = xdr.ScVal.scvVec([tagSymbol, ...valuesVal]);
+    return tupleVec;
   } catch (error) {
     logger.error(SYSTEM_LOG_TAG, 'Failed to convert enum:', error);
     throw new Error(`Failed to convert enum: ${error}`);
@@ -245,7 +244,6 @@ export function convertObjectToScVal(obj: Record<string, SorobanArgumentValue>):
       }
     }
 
-    logger.debug(SYSTEM_LOG_TAG, `Converting object with ${Object.keys(obj).length} fields`);
     return nativeToScVal(convertedValue, { type: typeHints });
   } catch (error) {
     logger.error(SYSTEM_LOG_TAG, 'Failed to convert object:', error);
@@ -282,7 +280,6 @@ export function convertObjectToMap(mapArray: SorobanMapEntry[]): {
       return acc;
     }, {});
 
-    logger.debug(SYSTEM_LOG_TAG, `Converted map with ${mapArray.length} entries`);
     return { mapVal, mapType };
   } catch (error) {
     logger.error(SYSTEM_LOG_TAG, 'Failed to convert map:', error);
@@ -307,7 +304,6 @@ export function convertTupleToScVal(tupleArray: SorobanArgumentValue[]): xdr.ScV
       return nativeToScVal(v.value, { type: typeHint });
     });
 
-    logger.debug(SYSTEM_LOG_TAG, `Converted tuple with ${tupleArray.length} elements`);
     // JS SDK's nativeToScVal doesn't support mixed-type arrays, so use xdr.ScVal.scvVec
     return xdr.ScVal.scvVec(tupleScVals);
   } catch (error) {

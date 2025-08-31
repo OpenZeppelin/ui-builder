@@ -1,7 +1,3 @@
-import {
-  testStellarRpcConnection,
-  validateStellarRpcEndpoint,
-} from 'packages/adapter-stellar/src/configuration';
 import type React from 'react';
 
 import type {
@@ -34,6 +30,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 // Import functions from modules
 import { loadStellarContract, loadStellarContractWithMetadata } from './contract/loader';
 
+import { testStellarRpcConnection, validateStellarRpcEndpoint } from './configuration';
 import { getStellarSupportedExecutionMethods, validateStellarExecutionConfig } from './execution';
 import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './explorer';
 import {
@@ -166,9 +163,10 @@ export class StellarAdapter implements ContractAdapter {
     return getStellarCompatibleFieldTypes(parameterType);
   }
   generateDefaultField<T extends FieldType = FieldType>(
-    parameter: FunctionParameter
+    parameter: FunctionParameter,
+    contractSchema?: ContractSchema
   ): FormFieldType<T> {
-    return generateStellarDefaultField(parameter);
+    return generateStellarDefaultField(parameter, contractSchema);
   }
 
   // --- Transaction Formatting & Execution --- //

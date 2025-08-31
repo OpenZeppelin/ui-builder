@@ -678,4 +678,277 @@ describe('formatStellarTransactionData', () => {
       expect(result.transactionOptions).toEqual({});
     });
   });
+
+  describe('enum value handling', () => {
+    const mockEnumContractSchema: ContractSchema = {
+      name: 'DemoEnumContract',
+      address: mockContractAddress,
+      ecosystem: 'stellar',
+      functions: [
+        {
+          id: 'set_enum_DemoEnum',
+          name: 'set_enum',
+          displayName: 'Set Enum',
+          type: 'function',
+          modifiesState: true,
+          inputs: [{ name: 'choice', type: 'DemoEnum', displayName: 'Choice' }],
+          outputs: [],
+          stateMutability: 'nonpayable',
+        },
+        {
+          id: 'process_priority',
+          name: 'process_priority',
+          displayName: 'Process Priority',
+          type: 'function',
+          modifiesState: true,
+          inputs: [{ name: 'priority', type: 'Priority', displayName: 'Priority Level' }],
+          outputs: [],
+          stateMutability: 'nonpayable',
+        },
+      ],
+    };
+
+    it('should handle unit enum variants correctly', () => {
+      const submittedInputs = {
+        choice: { tag: 'One' },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'choice',
+          label: 'Choice',
+          type: 'enum',
+          placeholder: 'Select choice',
+          defaultValue: { tag: 'One' },
+          validation: { required: true },
+          width: 'full',
+          enumMetadata: {
+            name: 'DemoEnum',
+            variants: [
+              { name: 'One', type: 'void' },
+              { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+              { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+            ],
+            isUnitOnly: false,
+          },
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        mockEnumContractSchema,
+        'set_enum_DemoEnum',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('set_enum');
+      expect(result.args).toHaveLength(1);
+      expect(result.args[0]).toEqual({ tag: 'One' });
+    });
+
+    it('should handle tuple enum variants with payloads correctly', () => {
+      const submittedInputs = {
+        choice: {
+          tag: 'Two',
+          values: [{ type: 'U32', value: '42' }],
+        },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'choice',
+          label: 'Choice',
+          type: 'enum',
+          placeholder: 'Select choice',
+          defaultValue: { tag: 'One' },
+          validation: { required: true },
+          width: 'full',
+          enumMetadata: {
+            name: 'DemoEnum',
+            variants: [
+              { name: 'One', type: 'void' },
+              { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+              { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+            ],
+            isUnitOnly: false,
+          },
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        mockEnumContractSchema,
+        'set_enum_DemoEnum',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('set_enum');
+      expect(result.args).toHaveLength(1);
+      expect(result.args[0]).toEqual({
+        tag: 'Two',
+        values: [{ type: 'U32', value: '42' }],
+      });
+    });
+
+    it('should handle tuple enum variants with string payloads correctly', () => {
+      const submittedInputs = {
+        choice: {
+          tag: 'Three',
+          values: [{ type: 'ScString', value: 'hello world' }],
+        },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'choice',
+          label: 'Choice',
+          type: 'enum',
+          placeholder: 'Select choice',
+          defaultValue: { tag: 'One' },
+          validation: { required: true },
+          width: 'full',
+          enumMetadata: {
+            name: 'DemoEnum',
+            variants: [
+              { name: 'One', type: 'void' },
+              { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+              { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+            ],
+            isUnitOnly: false,
+          },
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        mockEnumContractSchema,
+        'set_enum_DemoEnum',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('set_enum');
+      expect(result.args).toHaveLength(1);
+      expect(result.args[0]).toEqual({
+        tag: 'Three',
+        values: [{ type: 'ScString', value: 'hello world' }],
+      });
+    });
+
+    it('should handle integer enum variants correctly', () => {
+      const submittedInputs = {
+        priority: { enum: 1 },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'priority',
+          label: 'Priority Level',
+          type: 'enum',
+          placeholder: 'Select priority',
+          defaultValue: { enum: 0 },
+          validation: { required: true },
+          width: 'full',
+          enumMetadata: {
+            name: 'Priority',
+            variants: [
+              { name: 'Low', type: 'integer', value: 0 },
+              { name: 'Medium', type: 'integer', value: 1 },
+              { name: 'High', type: 'integer', value: 2 },
+            ],
+            isUnitOnly: true,
+          },
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        mockEnumContractSchema,
+        'process_priority',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('process_priority');
+      expect(result.args).toHaveLength(1);
+      expect(result.args[0]).toEqual({ enum: 1 });
+    });
+
+    it('should handle complex enum variants with multiple payload types', () => {
+      const complexEnumSchema: ContractSchema = {
+        name: 'ComplexEnumContract',
+        address: mockContractAddress,
+        ecosystem: 'stellar',
+        functions: [
+          {
+            id: 'process_complex',
+            name: 'process_complex',
+            displayName: 'Process Complex',
+            type: 'function',
+            modifiesState: true,
+            inputs: [{ name: 'data', type: 'ComplexEnum', displayName: 'Complex Data' }],
+            outputs: [],
+            stateMutability: 'nonpayable',
+          },
+        ],
+      };
+
+      const submittedInputs = {
+        data: {
+          tag: 'MultiPayload',
+          values: [
+            { type: 'U32', value: '123' },
+            { type: 'ScString', value: 'test' },
+            { type: 'Bool', value: true },
+          ],
+        },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'data',
+          label: 'Complex Data',
+          type: 'enum',
+          placeholder: 'Select data',
+          defaultValue: { tag: 'Empty' },
+          validation: { required: true },
+          width: 'full',
+          enumMetadata: {
+            name: 'ComplexEnum',
+            variants: [
+              { name: 'Empty', type: 'void' },
+              { name: 'MultiPayload', type: 'tuple', payloadTypes: ['U32', 'ScString', 'Bool'] },
+            ],
+            isUnitOnly: false,
+          },
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        complexEnumSchema,
+        'process_complex',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('process_complex');
+      expect(result.args).toHaveLength(1);
+      expect(result.args[0]).toEqual({
+        tag: 'MultiPayload',
+        values: [
+          { type: 'U32', value: '123' },
+          { type: 'ScString', value: 'test' },
+          { type: 'Bool', value: true },
+        ],
+      });
+    });
+  });
 });

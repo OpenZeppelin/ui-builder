@@ -1,5 +1,6 @@
 import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
 
+import { isLikelyEnumType } from '../utils/type-detection';
 import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
 
 /**
@@ -68,7 +69,7 @@ export function mapStellarParameterTypeToFieldType(parameterType: string): Field
   }
 
   // Handle custom types (structs, enums) - default to object unless it's clearly an enum
-  if (parameterType.includes('Enum') || parameterType.includes('enum')) {
+  if (isLikelyEnumType(parameterType)) {
     return 'select';
   }
 
@@ -179,8 +180,8 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
   }
 
   // Handle enums
-  if (parameterType.includes('Enum') || parameterType.includes('enum')) {
-    return ['select', 'radio', 'text'];
+  if (isLikelyEnumType(parameterType)) {
+    return ['enum', 'select', 'radio', 'text'];
   }
 
   // Handle custom types (assumed to be structs)

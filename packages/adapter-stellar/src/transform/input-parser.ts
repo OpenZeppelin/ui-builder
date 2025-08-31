@@ -1,5 +1,6 @@
 import { Address, nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
+import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
 import { detectBytesEncoding, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { convertStellarTypeToScValType } from '../utils/formatting';
@@ -19,6 +20,7 @@ import {
   isPrimitiveValue,
   isTupleArray,
 } from '../utils/input-parsing';
+import { isLikelyEnumType } from '../utils/type-detection';
 
 const SYSTEM_LOG_TAG = 'StellarInputParser';
 
@@ -73,11 +75,8 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
   try {
     // Handle null/undefined values
     if (value === null || value === undefined) {
-      logger.debug(SYSTEM_LOG_TAG, `Converting null/undefined value for type ${parameterType}`);
       return null;
     }
-
-    logger.debug(SYSTEM_LOG_TAG, `Parsing input for type ${parameterType}:`, value);
 
     // Handle special cases first
     switch (true) {
@@ -170,12 +169,15 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
 
       // Custom types and structs: return as-is for nativeToScVal to handle
       default:
+        // Check if this is an enum type and transform from chain-agnostic to Soroban format
+        if (isEnumValue(value) && isLikelyEnumType(parameterType)) {
+          // Chain-agnostic enum format: { tag: "VariantName", values?: [...] }
+          // Return the chain-agnostic enum value as-is
+          // The Stellar-specific transformation will happen in valueToScVal
+          return value;
+        }
+
         if (typeof value === 'object' && value !== null) {
-          logger.debug(
-            SYSTEM_LOG_TAG,
-            `Handling custom type ${parameterType}, returning value as-is:`,
-            value
-          );
           return value;
         }
 
@@ -252,6 +254,11 @@ export function valueToScVal(value: unknown, parameterType: string): xdr.ScVal {
   const genericInfo = parseGenericType(parameterType);
 
   if (!genericInfo) {
+    // Check if this is an enum object (has 'tag' or 'enum' property)
+    if (isEnumValue(value) || (typeof value === 'object' && value !== null && 'enum' in value)) {
+      return convertEnumToScVal(value as SorobanEnumValue);
+    }
+
     // Non-generic types - use existing logic
     if (parameterType === 'Bool' || parameterType === 'Bytes') {
       return nativeToScVal(value);
@@ -344,8 +351,6 @@ export function getScValsFromArgs(
   args: Record<string, SorobanComplexValue> | SorobanComplexValue[],
   scVals: xdr.ScVal[] = []
 ): xdr.ScVal[] {
-  logger.debug(SYSTEM_LOG_TAG, 'Processing arguments for ScVal conversion:', args);
-
   // Handle array input (multiple arguments)
   if (Array.isArray(args)) {
     return args.map((arg) => {
@@ -362,7 +367,6 @@ export function getScValsFromArgs(
       return getScValFromPrimitive(v as SorobanArgumentValue);
     });
 
-    logger.debug(SYSTEM_LOG_TAG, `Generated ${primitiveScVals.length} primitive ScVals`);
     return primitiveScVals;
   }
 
@@ -372,7 +376,6 @@ export function getScValsFromArgs(
       return convertEnumToScVal(v as SorobanEnumValue, scVals);
     });
 
-    logger.debug(SYSTEM_LOG_TAG, `Generated ${enumScVals.length} enum ScVals`);
     return enumScVals;
   }
 
@@ -461,6 +464,5 @@ export function getScValsFromArgs(
     }
   }
 
-  logger.debug(SYSTEM_LOG_TAG, `Generated ${scVals.length} total ScVals`);
   return scVals;
 }
