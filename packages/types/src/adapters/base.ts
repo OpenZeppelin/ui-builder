@@ -211,9 +211,13 @@ export interface ContractAdapter {
    * Generate default field configuration for a function parameter
    *
    * @param parameter - The function parameter to convert to a form field
+   * @param contractSchema - Optional contract schema for additional context (e.g., spec entries)
    * @returns A form field configuration with appropriate defaults
    */
-  generateDefaultField(parameter: FunctionParameter): FormFieldType;
+  generateDefaultField(
+    parameter: FunctionParameter,
+    contractSchema?: ContractSchema
+  ): FormFieldType;
 
   /**
    * Indicates if this adapter supports wallet connection

@@ -5,3 +5,4 @@
  */
 
 export * from './ecosystem';
+export * from './enum';

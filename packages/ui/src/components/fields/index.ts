@@ -9,6 +9,7 @@ export * from './ArrayObjectField';
 export * from './BaseField';
 export * from './BooleanField';
 export * from './CodeEditorField';
+export * from './EnumField';
 export * from './NumberField';
 export * from './ObjectField';
 export * from './PasswordField';

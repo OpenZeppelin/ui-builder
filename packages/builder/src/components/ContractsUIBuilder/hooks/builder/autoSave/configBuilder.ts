@@ -1,5 +1,44 @@
+import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+
 import { uiBuilderStore } from '../../uiBuilderStore';
 import { SavedConfigurationData } from './types';
+
+/**
+ * Cleans a field object by removing non-serializable properties like functions
+ * This ensures the field can be safely stored in IndexedDB
+ */
+function cleanFieldForSerialization(field: FormFieldType): FormFieldType {
+  // Create a copy of the field without any function properties
+  const cleanedField: FormFieldType = {
+    id: field.id,
+    name: field.name,
+    label: field.label,
+    type: field.type,
+    placeholder: field.placeholder,
+    helperText: field.helperText,
+    defaultValue: field.defaultValue,
+    validation: field.validation,
+    options: field.options,
+    width: field.width,
+    // transforms: field.transforms, // EXCLUDED - contains functions that cannot be serialized
+    visibleWhen: field.visibleWhen,
+    originalParameterType: field.originalParameterType,
+    isHidden: field.isHidden,
+    isHardcoded: field.isHardcoded,
+    hardcodedValue: field.hardcodedValue,
+    readOnly: field.readOnly,
+    components: field.components,
+    elementType: field.elementType,
+    elementFieldConfig: field.elementFieldConfig,
+    enumMetadata: field.enumMetadata,
+  };
+
+  // Note: We explicitly exclude transforms, renderPayloadField and any other function properties
+  // as they cannot be serialized to IndexedDB. The transforms will be re-applied when the
+  // configuration is loaded and processed by the FormGenerator.
+
+  return cleanedField;
+}
 
 /**
  * Generates a default title for the configuration based on current state.
@@ -29,7 +68,7 @@ export function buildConfigurationObject(
     title: state.formConfig?.title || 'New Contract UI',
     functionId: state.selectedFunction || '',
     contractAddress: state.contractState.address || '',
-    fields: state.formConfig?.fields || [],
+    fields: (state.formConfig?.fields || []).map(cleanFieldForSerialization),
     layout: state.formConfig?.layout || {
       columns: 1 as const,
       spacing: 'normal' as const,

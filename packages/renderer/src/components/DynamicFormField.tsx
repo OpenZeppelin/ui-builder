@@ -123,7 +123,7 @@ export function DynamicFormField({
   }
 
   // Get field-specific props based on type
-  const fieldSpecificProps = getFieldSpecificProps(field);
+  const fieldSpecificProps = getFieldSpecificProps(field, control, adapter);
 
   // Add render functions for complex fields
   const enhancedProps = {
@@ -201,7 +201,11 @@ export function DynamicFormField({
 /**
  * Extract field-specific props based on field type
  */
-function getFieldSpecificProps(field: FormFieldType): Record<string, unknown> {
+function getFieldSpecificProps(
+  field: FormFieldType,
+  control: Control<FormValues>,
+  adapter: ContractAdapter
+): Record<string, unknown> {
   switch (field.type) {
     case 'number':
       // Extract number-specific props from validation
@@ -249,6 +253,35 @@ function getFieldSpecificProps(field: FormFieldType): Record<string, unknown> {
         height: field.codeEditorProps?.height || '200px',
         maxHeight: field.codeEditorProps?.maxHeight || '400px',
         performanceThreshold: field.codeEditorProps?.performanceThreshold || 5000,
+      };
+    case 'enum':
+      // Extract enum-specific props
+      return {
+        enumMetadata: field.enumMetadata,
+        renderPayloadField: (
+          payloadField: FormFieldType,
+          payloadIndex: number
+        ): React.ReactElement => {
+          // Map the payload type to appropriate field type using the adapter
+          const mappedFieldType = adapter.mapParameterTypeToFieldType(
+            payloadField.originalParameterType || 'text'
+          );
+
+          // Create enhanced field with proper type mapping
+          const enhancedPayloadField: FormFieldType = {
+            ...payloadField,
+            type: mappedFieldType,
+          };
+
+          return (
+            <DynamicFormField
+              key={`${field.id}-payload-${payloadIndex}`}
+              field={enhancedPayloadField}
+              control={control}
+              adapter={adapter}
+            />
+          );
+        },
       };
     default:
       return {};

@@ -47,7 +47,7 @@ export class FormSchemaFactory {
 
     // Create the common properties
     const commonProperties = {
-      fields: this.generateFields(functionDefinition.inputs, adapter),
+      fields: this.generateFields(functionDefinition.inputs, adapter, contractSchema),
       layout: this.generateDefaultLayout(),
       validation: {
         mode: 'onChange' as const,
@@ -115,6 +115,7 @@ export class FormSchemaFactory {
         components: field.components,
         elementType: field.elementType,
         elementFieldConfig: field.elementFieldConfig,
+        enumMetadata: field.enumMetadata,
       };
 
       if (field.isHardcoded && !field.isHidden && outputField.defaultValue === undefined) {
@@ -168,7 +169,11 @@ export class FormSchemaFactory {
    * @param adapter The blockchain adapter to use
    * @returns An array of form fields with transforms
    */
-  private generateFields(inputs: FunctionParameter[], adapter: ContractAdapter): FormFieldType[] {
+  private generateFields(
+    inputs: FunctionParameter[],
+    adapter: ContractAdapter,
+    contractSchema?: ContractSchema
+  ): FormFieldType[] {
     // Use generateFieldsFromFunction to properly handle complex types
     const functionDetails = {
       inputs,
@@ -182,7 +187,7 @@ export class FormSchemaFactory {
       stateMutability: 'view' as const,
     };
 
-    const fields = generateFieldsFromFunction(adapter, functionDetails);
+    const fields = generateFieldsFromFunction(adapter, functionDetails, contractSchema);
 
     // Enhance fields with transforms
     return fields.map((field) => ({

@@ -10,6 +10,7 @@ import {
   BaseFieldProps,
   BooleanField,
   CodeEditorField,
+  EnumField,
   NumberField,
   ObjectField,
   PasswordField,
@@ -47,5 +48,6 @@ export const fieldComponents: Record<
   object: ObjectField,
   'array-object': ArrayObjectField,
   url: UrlField,
+  enum: EnumField,
   hidden: () => null, // Return null for hidden type
 };

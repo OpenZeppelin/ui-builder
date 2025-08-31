@@ -1,4 +1,5 @@
 import type { ContractAdapter, ExecutionConfig } from '../adapters/base';
+import type { EnumValue } from '../common';
 import type { ContractSchema } from '../contracts/schema';
 import type { RenderFormSchema } from './schema';
 
@@ -28,6 +29,7 @@ export type FieldType =
   | 'array-object' // Arrays of objects
   | 'url'
   | 'select-grouped'
+  | 'enum' // Enum field with variant picker and conditional payload inputs
   | 'hidden';
 
 /**
@@ -49,13 +51,15 @@ export type FieldValue<T extends FieldType> = T extends
         ? Date
         : T extends 'select' | 'radio'
           ? string
-          : T extends 'array'
-            ? unknown[]
-            : T extends 'object'
-              ? Record<string, unknown>
-              : T extends 'array-object'
-                ? Record<string, unknown>[]
-                : unknown;
+          : T extends 'enum'
+            ? EnumValue
+            : T extends 'array'
+              ? unknown[]
+              : T extends 'object'
+                ? Record<string, unknown>
+                : T extends 'array-object'
+                  ? Record<string, unknown>[]
+                  : unknown;
 
 /**
  * Shared condition interface for both validation and visibility rules
