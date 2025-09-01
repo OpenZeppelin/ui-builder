@@ -127,7 +127,6 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
       <Controller
         control={control}
         name={name}
-        disabled={readOnly}
         rules={{
           validate: (value) => {
             // Handle required validation explicitly
@@ -148,14 +147,16 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
             id,
             hasError,
             isRequired,
+            isDisabled: readOnly,
             hasHelperText: !!helperText,
           });
 
           return (
             <>
               <Textarea
-                {...field}
                 id={id}
+                name={field.name}
+                ref={field.ref}
                 placeholder={placeholder}
                 rows={rows}
                 className={validationClasses}
@@ -171,7 +172,6 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                   field.onBlur();
                 }}
                 onKeyDown={handleEscapeKey(field.onChange, field.value)}
-                readOnly={readOnly}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`.trim()}
               />

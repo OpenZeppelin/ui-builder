@@ -283,6 +283,58 @@ function getFieldSpecificProps(
           );
         },
       };
+    case 'map':
+      // Extract map-specific props and create render functions
+      return {
+        mapMetadata: field.mapMetadata,
+        minItems: field.validation?.min,
+        renderKeyField: (keyField: FormFieldType, entryIndex: number): React.ReactElement => {
+          // Map the key type using the adapter if originalParameterType is available
+          const mappedKeyType = keyField.originalParameterType
+            ? adapter.mapParameterTypeToFieldType(keyField.originalParameterType)
+            : keyField.type;
+
+          // Create enhanced field with proper type mapping
+          const enhancedKeyField: FormFieldType = {
+            ...keyField,
+            type: mappedKeyType,
+            // Inherit readOnly from parent field
+            readOnly: keyField.readOnly ?? field.readOnly,
+          };
+
+          return (
+            <DynamicFormField
+              key={`${field.id}-key-${entryIndex}`}
+              field={enhancedKeyField}
+              control={control}
+              adapter={adapter}
+            />
+          );
+        },
+        renderValueField: (valueField: FormFieldType, entryIndex: number): React.ReactElement => {
+          // Map the value type using the adapter if originalParameterType is available
+          const mappedValueType = valueField.originalParameterType
+            ? adapter.mapParameterTypeToFieldType(valueField.originalParameterType)
+            : valueField.type;
+
+          // Create enhanced field with proper type mapping
+          const enhancedValueField: FormFieldType = {
+            ...valueField,
+            type: mappedValueType,
+            // Inherit readOnly from parent field
+            readOnly: valueField.readOnly ?? field.readOnly,
+          };
+
+          return (
+            <DynamicFormField
+              key={`${field.id}-value-${entryIndex}`}
+              field={enhancedValueField}
+              control={control}
+              adapter={adapter}
+            />
+          );
+        },
+      };
     default:
       return {};
   }
