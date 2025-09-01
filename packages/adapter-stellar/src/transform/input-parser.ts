@@ -1,6 +1,6 @@
 import { Address, nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
+import { isEnumValue, isMapEntryArray } from '@openzeppelin/contracts-ui-builder-types';
 import { detectBytesEncoding, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { convertStellarTypeToScValType } from '../utils/formatting';
@@ -151,10 +151,33 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
 
       // Map types: handle key-value pairs
       case parameterType.startsWith('Map<'):
-        if (!Array.isArray(value)) {
-          throw new Error(`Array of key-value pairs expected for Map type, got ${typeof value}`);
+        if (!isMapEntryArray(value)) {
+          throw new Error(`Array of MapEntry objects expected for Map type, got ${typeof value}`);
         }
-        return value;
+
+        // Extract key and value types from Map<K,V>
+        const mapTypeMatch = parameterType.match(/Map<(.+),\s*(.+)>$/);
+        if (!mapTypeMatch) {
+          throw new Error(`Could not parse Map type: ${parameterType}`);
+        }
+
+        const mapKeyType = mapTypeMatch[1];
+        const mapValueType = mapTypeMatch[2];
+
+        // Convert MapEntry array to Stellar SDK expected format
+        return value.map((entry) => {
+          // Convert to Stellar SDK format: { 0: {value, type}, 1: {value, type} }
+          return {
+            0: {
+              value: entry.key,
+              type: mapKeyType,
+            },
+            1: {
+              value: entry.value,
+              type: mapValueType,
+            },
+          };
+        });
 
       // Option types: handle optionals
       case parameterType.startsWith('Option<'):
@@ -281,18 +304,44 @@ export function valueToScVal(value: unknown, parameterType: string): xdr.ScVal {
     }
 
     case 'Map': {
-      // Handle Map<K,V> types
-      const keyType = parameters[0];
-      const valueType = parameters[1];
+      // Handle Map<K,V> types in Stellar SDK format
+      if (Array.isArray(value)) {
+        // Expect Stellar SDK format: [{ 0: {value, type}, 1: {value, type} }, ...]
+        const convertedValue: Record<string, unknown> = {};
+        const typeHints: Record<string, string[]> = {};
 
-      if (typeof value === 'object' && value !== null) {
-        // Convert object to Map entries with proper type hints
-        const entries: [unknown, unknown][] = Object.entries(value).map(([key, val]) => [
-          valueToScVal(key, keyType),
-          valueToScVal(val, valueType),
-        ]);
-        return nativeToScVal(new Map(entries));
+        value.forEach(
+          (entry: { 0: { value: string; type: string }; 1: { value: string; type: string } }) => {
+            if (
+              typeof entry !== 'object' ||
+              entry === null ||
+              !entry[0] ||
+              !entry[1] ||
+              typeof entry[0].value === 'undefined' ||
+              typeof entry[1].value === 'undefined'
+            ) {
+              throw new Error('Invalid Stellar SDK map format in valueToScVal');
+            }
+
+            // Process key and value through parseStellarInput for full type support
+            const processedKey = parseStellarInput(entry[0].value, entry[0].type);
+            const processedValue = parseStellarInput(entry[1].value, entry[1].type);
+
+            // Use the processed key as the object key (convert to string if needed)
+            const keyString =
+              typeof processedKey === 'string' ? processedKey : String(processedKey);
+            convertedValue[keyString] = processedValue;
+
+            typeHints[keyString] = [
+              convertStellarTypeToScValType(entry[0].type),
+              convertStellarTypeToScValType(entry[1].type),
+            ];
+          }
+        );
+
+        return nativeToScVal(convertedValue, { type: typeHints });
       }
+
       return nativeToScVal(value);
     }
 
