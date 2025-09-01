@@ -18,6 +18,7 @@ export type FieldType =
   | 'radio'
   | 'select'
   | 'textarea'
+  | 'bytes' // Byte data with hex/base64 validation
   | 'code-editor' // Code editor with syntax highlighting
   | 'date'
   | 'email'
@@ -40,6 +41,7 @@ export type FieldValue<T extends FieldType> = T extends
   | 'email'
   | 'password'
   | 'textarea'
+  | 'bytes'
   | 'code-editor'
   | 'blockchain-address'
   ? string

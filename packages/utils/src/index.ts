@@ -11,3 +11,4 @@ export * from './validators';
 export * from './async';
 export * from './hash';
 export * from './environment';
+export * from './bytesValidation';

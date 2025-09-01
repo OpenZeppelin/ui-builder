@@ -24,6 +24,7 @@ export function getDefaultValueForType<T extends FieldType>(fieldType: T): Field
     case 'blockchain-address':
     case 'text':
     case 'textarea':
+    case 'bytes':
     case 'email':
     case 'password':
     case 'select':
