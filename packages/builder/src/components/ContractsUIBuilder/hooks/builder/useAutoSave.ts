@@ -252,6 +252,17 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
     autoSaveRef.current = autoSave;
   }, [autoSave]);
 
+  // Single composite key to detect changes across the full formConfig and relevant contract state.
+  // Perf note: JSON.stringify is O(n) in config size and acceptable for typical forms.
+  // If profiling shows this hot, switch to a store-level numeric revision counter instead,
+  // e.g. `formConfigRevision` incremented on any formConfig/definition change, and depend on that.
+  const autoSaveKey = JSON.stringify({
+    formConfig: state.formConfig,
+    contractDefinitionJson: state.contractState.definitionJson,
+    contractDefinitionSource: state.contractState.source,
+    contractDefinitionMetadata: state.contractState.metadata,
+  });
+
   /**
    * Effect to schedule auto-save operations
    *
@@ -271,11 +282,8 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
       selectedNetworkConfigId: state.selectedNetworkConfigId,
       contractAddress: state.contractState.address,
       selectedFunction: state.selectedFunction,
-      formConfig: state.formConfig,
-      // Include contract definition fields to trigger auto-save when they change
-      contractDefinitionJson: state.contractState.definitionJson,
-      contractDefinitionSource: state.contractState.source,
-      contractDefinitionMetadata: state.contractState.metadata,
+      // Single composite key capturing all relevant formConfig + contract definition changes
+      autoSaveKey,
     },
   ]);
 

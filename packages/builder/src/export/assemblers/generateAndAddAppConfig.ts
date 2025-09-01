@@ -1,8 +1,4 @@
-import type {
-  GlobalServiceConfigs,
-  NetworkConfig,
-  UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
+import type { GlobalServiceConfigs, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -58,24 +54,34 @@ function _generateRpcEndpointsConfigSection(
   return rpcConfig;
 }
 
-function _buildWalletUiServiceConfig(uiKitConfig?: UiKitConfiguration): {
-  config: { kitName?: string };
+// Type alias for the wallet UI service config structure
+type WalletUiServiceConfig = {
+  [key: string]: { kitName: string; kitConfig: object } | string;
   _comment: string;
-} {
+};
+
+function _buildWalletUiServiceConfig(): WalletUiServiceConfig {
   return {
-    config: {
-      kitName: uiKitConfig?.kitName || 'custom',
-    },
     _comment:
-      "Defines the UI kit to use. E.g., 'custom', 'rainbowkit', or 'none'. The exported app will load the corresponding config from src/config/wallet/[kitName].config.ts.",
+      "Wallet UI configuration is ecosystem-specific. Example: { 'stellar': { 'kitName': 'stellar-wallets-kit', 'kitConfig': {} }, 'evm': { 'kitName': 'rainbowkit', 'kitConfig': {} }, 'default': { 'kitName': 'custom', 'kitConfig': {} } }",
+    stellar: {
+      kitName: 'stellar-wallets-kit',
+      kitConfig: {},
+    },
+    evm: {
+      kitName: 'rainbowkit',
+      kitConfig: {},
+    },
+    default: {
+      kitName: 'custom',
+      kitConfig: {},
+    },
   };
 }
 
-function _generateGlobalServiceConfigPlaceholders(
-  uiKitConfig?: UiKitConfiguration
-): GlobalServiceConfigs {
+function _generateGlobalServiceConfigPlaceholders(): GlobalServiceConfigs {
   return {
-    walletui: _buildWalletUiServiceConfig(uiKitConfig),
+    walletui: _buildWalletUiServiceConfig(),
     walletconnect: {
       projectId: 'YOUR_WALLETCONNECT_PROJECT_ID_HERE',
       _comment: 'WalletConnect Project ID, required if you intend to use WalletConnect.',
@@ -99,7 +105,7 @@ export async function generateAndAddAppConfig(
 
   const explorerInfo = _generateExplorerApiConfigSection(networkConfig, logSystem);
   const rpcEndpointsConfig = _generateRpcEndpointsConfigSection(networkConfig);
-  const globalServicePlaceholders = _generateGlobalServiceConfigPlaceholders(uiKitConfig);
+  const globalServicePlaceholders = _generateGlobalServiceConfigPlaceholders();
 
   const appConfigContent = {
     _readme: [
@@ -132,8 +138,9 @@ export async function generateAndAddAppConfig(
       const activeAppConfigContent = {
         globalServiceConfigs: {
           walletui: {
-            config: {
+            [networkConfig.ecosystem]: {
               kitName: uiKitConfig.kitName,
+              kitConfig: uiKitConfig.kitConfig || {},
             },
           },
         },
