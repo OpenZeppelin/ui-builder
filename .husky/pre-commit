@@ -29,9 +29,10 @@ if [ -z "$staged_files" ]; then
   exit 0
 fi
 
-# Run fix-all from package.json
-pnpm fix-all
-
-# Auto-fix file permissions to prevent executable permissions on non-executable files
+# Fast checks first - auto-fix file permissions (fails fast if issues)
 echo "🔧 Checking and fixing file permissions..."
-AUTOFIX_FILE_MODES=true pnpm run check-file-modes 
+AUTOFIX_FILE_MODES=true pnpm run check-file-modes
+
+# Expensive operations last - formatting and linting
+echo "🎨 Running formatting and linting (this may take a moment)..."
+pnpm fix-all 
