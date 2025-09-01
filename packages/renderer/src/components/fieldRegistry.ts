@@ -12,6 +12,7 @@ import {
   BytesField,
   CodeEditorField,
   EnumField,
+  MapField,
   NumberField,
   ObjectField,
   PasswordField,
@@ -49,6 +50,7 @@ export const fieldComponents: Record<
   array: ArrayField,
   object: ObjectField,
   'array-object': ArrayObjectField,
+  map: MapField,
   url: UrlField,
   enum: EnumField,
   hidden: () => null, // Return null for hidden type
