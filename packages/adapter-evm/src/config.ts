@@ -20,7 +20,7 @@ export const evmAdapterConfig: AdapterConfig = {
       // Core EVM libraries
       // Wallet connection libraries
       wagmi: '^2.15.0',
-      '@wagmi/core': '^2.17.0',
+      '@wagmi/core': '^2.20.3',
       viem: '^2.28.0',
       '@tanstack/react-query': '^5.0.0',
       // Utility library

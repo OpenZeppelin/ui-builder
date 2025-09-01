@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, type Config as WagmiConfig } from 'wagmi';
+import { createConfig, http } from '@wagmi/core';
+import { mainnet } from 'viem/chains';
+import { WagmiProvider } from 'wagmi';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/contracts-ui-builder-types';
@@ -15,13 +17,14 @@ const stableQueryClient = new QueryClient();
 
 // Create a minimal, default WagmiConfig to use when no other config is ready.
 // This ensures WagmiProvider can always be mounted with a valid config object.
-const minimalDefaultWagmiConfig = {
-  chains: [], // No chains initially
-  transports: {},
-  // connectors: [], // Wagmi core createConfig requires connectors, but provider might be more lenient
-  // Or provide a dummy connector if absolutely needed by WagmiProvider for mount.
-  // For now, relying on WagmiProvider handling minimal config gracefully.
-} as unknown as WagmiConfig; // Cast because a true minimal config might not satisfy full Config type
+// Uses mainnet as a minimal default chain with HTTP transport.
+const minimalDefaultWagmiConfig = createConfig({
+  chains: [mainnet], // At least one chain is required in wagmi v2.20+
+  connectors: [], // Empty connectors array
+  transports: {
+    [mainnet.id]: http(), // Basic HTTP transport for the default chain
+  },
+});
 
 export const EvmWalletUiRoot: React.FC<EcosystemReactUiProviderProps> = ({ children }) => {
   const [managerState, setManagerState] = useState<EvmUiKitManagerState>(
