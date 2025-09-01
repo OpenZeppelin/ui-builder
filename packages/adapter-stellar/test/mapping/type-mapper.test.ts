@@ -56,12 +56,12 @@ describe('mapStellarParameterTypeToFieldType', () => {
       expect(mapStellarParameterTypeToFieldType('I256')).toBe('number');
     });
 
-    it('should map Bytes to textarea', () => {
-      expect(mapStellarParameterTypeToFieldType('Bytes')).toBe('textarea');
+    it('should map Bytes to bytes', () => {
+      expect(mapStellarParameterTypeToFieldType('Bytes')).toBe('bytes');
     });
 
-    it('should map DataUrl to textarea', () => {
-      expect(mapStellarParameterTypeToFieldType('DataUrl')).toBe('textarea');
+    it('should map DataUrl to bytes', () => {
+      expect(mapStellarParameterTypeToFieldType('DataUrl')).toBe('bytes');
     });
   });
 

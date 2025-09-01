@@ -43,7 +43,7 @@ export function mapStellarParameterTypeToFieldType(parameterType: string): Field
 
   // Check if this is a Map type
   if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
-    return 'object';
+    return 'map' as FieldType;
   }
 
   // Extract base type for generic types (e.g., Option<U32> -> U32)
@@ -126,7 +126,7 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
 
   // Handle Map types
   if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
-    return ['object', 'textarea', 'text'];
+    return ['map' as FieldType, 'textarea', 'text'];
   }
 
   // Handle generic types
@@ -163,10 +163,10 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
     ScSymbol: ['text', 'textarea'],
 
     // Byte types
-    Bytes: ['textarea', 'text'],
-    DataUrl: ['textarea', 'text'],
+    Bytes: ['bytes', 'textarea', 'text'],
+    DataUrl: ['bytes', 'textarea', 'text'],
     // BytesN types like BytesN<32> for hashes
-    'BytesN<32>': ['textarea', 'text'],
+    'BytesN<32>': ['bytes', 'textarea', 'text'],
 
     // Complex types
     Tuple: ['object', 'textarea', 'text'],

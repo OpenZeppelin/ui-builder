@@ -30,6 +30,25 @@ function extractStellarVecElementType(parameterType: string): string | null {
 }
 
 /**
+ * Extracts the key and value types from a Stellar Map type.
+ * @param parameterType - The parameter type (e.g., 'Map<Symbol, Bytes>', 'Map<U32, Address>')
+ * @returns An object with keyType and valueType, or null if not a Map type
+ */
+function extractStellarMapTypes(
+  parameterType: string
+): { keyType: string; valueType: string } | null {
+  // Handle Map types like Map<Symbol, Bytes>, Map<U32, Address>
+  const mapMatch = parameterType.match(/^Map<([^,]+),\s*([^>]+)>$/);
+  if (mapMatch) {
+    return {
+      keyType: mapMatch[1].trim(),
+      valueType: mapMatch[2].trim(),
+    };
+  }
+  return null;
+}
+
+/**
  * Get default validation rules for a parameter type.
  * Only includes serializable validation rules - no custom functions.
  */
@@ -119,6 +138,42 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
         },
       };
       return arrayField;
+    }
+  }
+
+  // For map types, provide key and value type information
+  if (fieldType === ('map' as FieldType)) {
+    const mapTypes = extractStellarMapTypes(parameter.type);
+    if (mapTypes) {
+      const keyFieldType = mapStellarParameterTypeToFieldType(mapTypes.keyType);
+      const valueFieldType = mapStellarParameterTypeToFieldType(mapTypes.valueType);
+
+      // Add map-specific properties
+      const mapField = {
+        ...baseField,
+        mapMetadata: {
+          keyType: keyFieldType,
+          valueType: valueFieldType,
+          keyFieldConfig: {
+            type: keyFieldType,
+            validation: { required: true },
+            placeholder: `Enter ${mapTypes.keyType}`,
+            originalParameterType: mapTypes.keyType,
+          },
+          valueFieldConfig: {
+            type: valueFieldType,
+            validation: { required: true },
+            placeholder: `Enter ${mapTypes.valueType}`,
+            originalParameterType: mapTypes.valueType,
+          },
+        },
+        validation: {
+          ...getDefaultValidationForType(),
+          min: 0,
+          // No max limit - users can add as many map entries as needed
+        },
+      };
+      return mapField;
     }
   }
 
