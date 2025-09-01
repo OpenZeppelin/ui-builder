@@ -107,7 +107,6 @@ export function validateBytes(
   // Try hex validation first (more specific)
   if (validator.isHexadecimal(withoutPrefix)) {
     detectedFormat = 'hex';
-    byteSize = withoutPrefix.length / 2;
 
     // Ensure even length for hex
     if (withoutPrefix.length % 2 !== 0) {
@@ -118,6 +117,9 @@ export function validateBytes(
         detectedFormat,
       };
     }
+
+    // Calculate byte size after validation
+    byteSize = withoutPrefix.length / 2;
   }
   // Try base64 validation
   else if (validator.isBase64(withoutPrefix)) {
