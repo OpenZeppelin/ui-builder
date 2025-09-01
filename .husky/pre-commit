@@ -30,4 +30,8 @@ if [ -z "$staged_files" ]; then
 fi
 
 # Run fix-all from package.json
-pnpm fix-all 
+pnpm fix-all
+
+# Check file modes to prevent executable permissions on non-executable files
+echo "🔍 Checking file permissions..."
+pnpm run check-file-modes 
