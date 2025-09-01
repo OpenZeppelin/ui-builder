@@ -161,10 +161,11 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                 className={validationClasses}
                 value={field.value ?? ''}
                 onChange={(e) => {
-                  const formatted = formatValue(e.target.value);
-                  field.onChange(formatted);
+                  // Only update value without formatting for better performance
+                  field.onChange(e.target.value);
                 }}
                 onBlur={(e) => {
+                  // Apply formatting on blur when user finishes typing
                   const formatted = formatValue(e.target.value);
                   field.onChange(formatted);
                   field.onBlur();
