@@ -11,6 +11,7 @@ export * from './BooleanField';
 export * from './BytesField';
 export * from './CodeEditorField';
 export * from './EnumField';
+export * from './MapField';
 export * from './NumberField';
 export * from './ObjectField';
 export * from './PasswordField';
