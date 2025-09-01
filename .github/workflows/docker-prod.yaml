@@ -6,6 +6,11 @@ on:
   release:
     types: [published]
 
+# Prevent multiple production deployments from running simultaneously
+concurrency:
+  group: production-deployment
+  cancel-in-progress: true
+
 permissions:
   contents: read
   actions: read
