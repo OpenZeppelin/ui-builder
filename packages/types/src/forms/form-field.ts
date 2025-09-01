@@ -140,4 +140,15 @@ export interface FormFieldType<T extends FieldType = FieldType> {
     }>;
     isUnitOnly: boolean;
   };
+
+  /**
+   * Map metadata for map field types.
+   * Contains information about key and value types and their field configurations.
+   */
+  mapMetadata?: {
+    keyType?: string;
+    valueType?: string;
+    keyFieldConfig?: Partial<FormFieldType>;
+    valueFieldConfig?: Partial<FormFieldType>;
+  };
 }
