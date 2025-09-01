@@ -31,6 +31,7 @@ function cleanFieldForSerialization(field: FormFieldType): FormFieldType {
     elementType: field.elementType,
     elementFieldConfig: field.elementFieldConfig,
     enumMetadata: field.enumMetadata,
+    mapMetadata: field.mapMetadata,
   };
 
   // Note: We explicitly exclude transforms, renderPayloadField and any other function properties

@@ -116,6 +116,7 @@ export class FormSchemaFactory {
         elementType: field.elementType,
         elementFieldConfig: field.elementFieldConfig,
         enumMetadata: field.enumMetadata,
+        mapMetadata: field.mapMetadata,
       };
 
       if (field.isHardcoded && !field.isHidden && outputField.defaultValue === undefined) {

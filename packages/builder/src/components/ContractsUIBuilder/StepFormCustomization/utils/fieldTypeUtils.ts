@@ -37,6 +37,7 @@ export function getFieldTypeLabel(type: FieldType): string {
     checkbox: 'Checkbox',
     'blockchain-address': 'Blockchain Address',
     enum: 'Enum Field',
+    map: 'Map Field (Key-Value Pairs)',
   };
 
   return labelMap[type] || capitalize(type);

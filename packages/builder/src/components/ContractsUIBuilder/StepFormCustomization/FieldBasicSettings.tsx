@@ -86,6 +86,7 @@ export function FieldBasicSettings({
           }
         : {}),
       ...(fieldType === 'enum' && field.enumMetadata ? { enumMetadata: field.enumMetadata } : {}),
+      ...(fieldType === 'map' && field.mapMetadata ? { mapMetadata: field.mapMetadata } : {}),
     }),
     [
       fieldType,
@@ -94,6 +95,7 @@ export function FieldBasicSettings({
       field.elementType,
       field.elementFieldConfig,
       field.enumMetadata,
+      field.mapMetadata,
     ]
   );
 

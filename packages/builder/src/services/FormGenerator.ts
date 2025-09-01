@@ -197,6 +197,41 @@ function handleComplexTypeField(
     };
   }
 
+  // Map types - enhance with key-value type information
+  if (parameter.type === 'Map' || parameter.type.startsWith('Map<')) {
+    const enhancedField: FormFieldType = {
+      ...baseField,
+      helperText: `${baseField.helperText || ''} Add key-value pairs to the map.`.trim(),
+      placeholder: undefined, // Not applicable for map
+      validation: {
+        ...baseField.validation,
+      },
+    };
+
+    // Extract key and value types from Map<K, V> if available
+    const mapMatch = parameter.type.match(/^Map<(.+),\s*(.+)>$/);
+    if (mapMatch) {
+      const keyType = mapMatch[1].trim();
+      const valueType = mapMatch[2].trim();
+
+      // Add type information for the MapField component
+      enhancedField.mapMetadata = {
+        keyType,
+        valueType,
+        keyFieldConfig: {
+          type: adapter.mapParameterTypeToFieldType(keyType),
+          validation: { required: true },
+        },
+        valueFieldConfig: {
+          type: adapter.mapParameterTypeToFieldType(valueType),
+          validation: { required: true },
+        },
+      };
+    }
+
+    return enhancedField;
+  }
+
   // Default case - just return the adapter's default field
   return baseField;
 }
@@ -280,6 +315,11 @@ export function isComplexType(parameterType: string): boolean {
 
   // Check for tuple types
   if (parameterType.startsWith('tuple')) {
+    return true;
+  }
+
+  // Check for Map types (e.g., Map<String, Bytes>, Map)
+  if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
     return true;
   }
 
