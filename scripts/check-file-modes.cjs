@@ -3,10 +3,21 @@
  * Guard against tracked executables and symlinks that break Changesets commitMode=github-api.
  * Allows executables only under `.husky/`. Auto-fixes disallowed executables, reports symlinks.
  */
-const { execSync } = require('node:child_process');
+const { execSync, spawnSync } = require('node:child_process');
 
 function run(cmd) {
   return execSync(cmd, { encoding: 'utf8' }).trim();
+}
+
+function runGitSafe(args) {
+  const result = spawnSync('git', args, { encoding: 'utf8' });
+  if (result.error) {
+    throw new Error(`Git command failed: ${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    throw new Error(`Git command failed with status ${result.status}: ${result.stderr}`);
+  }
+  return result.stdout.trim();
 }
 
 function main() {
@@ -41,7 +52,7 @@ function main() {
     console.log('🔧 Auto-fixing file permissions...');
     for (const path of execDisallowed) {
       try {
-        run(`git update-index --chmod=-x "${path}"`);
+        runGitSafe(['update-index', '--chmod=-x', path]);
         fixedFiles.push(path);
         console.log(`  ✅ Fixed: ${path}`);
       } catch (error) {
@@ -69,7 +80,7 @@ function main() {
     if (!autoFix) {
       console.error('\nFix with:');
       console.error('  git update-index --chmod=-x <file>');
-      console.error('Or run with --fix flag to auto-fix: npm run check-file-modes -- --fix');
+      console.error('Or run with --fix flag to auto-fix: pnpm run check-file-modes -- --fix');
     }
   }
 
