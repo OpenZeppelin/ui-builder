@@ -32,6 +32,6 @@ fi
 # Run fix-all from package.json
 pnpm fix-all
 
-# Check file modes to prevent executable permissions on non-executable files
-echo "🔍 Checking file permissions..."
-pnpm run check-file-modes 
+# Auto-fix file permissions to prevent executable permissions on non-executable files
+echo "🔧 Checking and fixing file permissions..."
+AUTOFIX_FILE_MODES=true pnpm run check-file-modes 

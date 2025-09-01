@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Guard against tracked executables and symlinks that break Changesets commitMode=github-api.
- * Allows executables only under `.husky/`. Fails on any other 100755 or any 120000 entries.
+ * Allows executables only under `.husky/`. Auto-fixes disallowed executables, reports symlinks.
  */
 const { execSync } = require('node:child_process');
 
@@ -10,6 +10,8 @@ function run(cmd) {
 }
 
 function main() {
+  const autoFix = process.argv.includes('--fix') || process.env.AUTOFIX_FILE_MODES === 'true';
+  
   const lsOutput = run('git ls-files -s');
   const lines = lsOutput.split(/\r?\n/);
 
@@ -33,16 +35,42 @@ function main() {
     }
   }
 
-  if (execDisallowed.length === 0 && symlinkDisallowed.length === 0) {
-    console.log('✅ File mode check passed: no disallowed executables or symlinks.');
+  // Auto-fix executable permissions if requested
+  let fixedFiles = [];
+  if (autoFix && execDisallowed.length > 0) {
+    console.log('🔧 Auto-fixing file permissions...');
+    for (const path of execDisallowed) {
+      try {
+        run(`git update-index --chmod=-x "${path}"`);
+        fixedFiles.push(path);
+        console.log(`  ✅ Fixed: ${path}`);
+      } catch (error) {
+        console.error(`  ❌ Failed to fix: ${path} - ${error.message}`);
+      }
+    }
+  }
+
+  // Check final state
+  const remainingExecDisallowed = execDisallowed.filter(path => !fixedFiles.includes(path));
+
+  if (remainingExecDisallowed.length === 0 && symlinkDisallowed.length === 0) {
+    if (fixedFiles.length > 0) {
+      console.log(`✅ File mode check passed after auto-fixing ${fixedFiles.length} file(s).`);
+    } else {
+      console.log('✅ File mode check passed: no disallowed executables or symlinks.');
+    }
     return;
   }
 
-  if (execDisallowed.length > 0) {
+  // Report remaining issues
+  if (remainingExecDisallowed.length > 0) {
     console.error('❌ Disallowed executable files (100755) detected:');
-    for (const p of execDisallowed) console.error(` - ${p}`);
-    console.error('\nFix with:');
-    console.error('  git update-index --chmod=-x <file>');
+    for (const p of remainingExecDisallowed) console.error(` - ${p}`);
+    if (!autoFix) {
+      console.error('\nFix with:');
+      console.error('  git update-index --chmod=-x <file>');
+      console.error('Or run with --fix flag to auto-fix: npm run check-file-modes -- --fix');
+    }
   }
 
   if (symlinkDisallowed.length > 0) {
