@@ -103,7 +103,6 @@ export function getFieldTypeGroups(
 
   // Define field type categories
   const fieldTypeCategories: Record<string, FieldType[]> = {
-    text: ['text', 'textarea', 'email', 'password'],
     text: ['text', 'textarea', 'bytes', 'email', 'password'],
     numeric: ['number', 'amount'],
     selection: ['select', 'radio', 'checkbox', 'enum'],
