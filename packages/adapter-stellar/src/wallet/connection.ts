@@ -152,6 +152,15 @@ export function getStellarWalletConnectionStatus(): {
 }
 
 /**
+ * Update the cached Stellar wallet connection state.
+ * Used by provider code that derives the address directly from the kit.
+ */
+export function setStellarConnectedAddress(address: string | null, walletId?: string | null): void {
+  currentAddress = address;
+  currentWalletId = walletId ?? null;
+}
+
+/**
  * Sign a transaction using the connected wallet
  * @internal
  */

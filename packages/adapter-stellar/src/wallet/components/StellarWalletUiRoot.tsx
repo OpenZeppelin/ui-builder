@@ -9,6 +9,7 @@ import {
   disconnectStellarWallet,
   getStellarAvailableConnectors,
   getStellarWalletConnectionStatus,
+  setStellarConnectedAddress,
 } from '../connection';
 import {
   StellarWalletContext,
@@ -67,7 +68,22 @@ export function StellarWalletUiRoot({ children, uiKitConfig }: StellarWalletUiRo
 
   // Update connection status periodically
   useEffect(() => {
-    const updateConnectionStatus = () => {
+    const updateConnectionStatus = async () => {
+      // Prefer reading from the active kit so native button connections are reflected
+      try {
+        const state = stellarUiKitManager.getState();
+        const kit = state.stellarKitProvider;
+        if (kit) {
+          const result = await kit.getAddress();
+          const resolved = result?.address || null;
+          setAddress(resolved);
+          setStellarConnectedAddress(resolved, undefined);
+          return;
+        }
+      } catch {
+        // Fall through to legacy status resolver below
+      }
+      // Fallback to legacy status derived from internal state
       const status = getStellarWalletConnectionStatus();
       setAddress(status.address || null);
     };
