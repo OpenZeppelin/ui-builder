@@ -87,6 +87,13 @@ describe('Enum Field End-to-End Integration', () => {
         functionName: 'set_enum',
         args: [{ tag: 'One' }],
         argTypes: ['DemoEnum'],
+        argSchema: [
+          {
+            name: 'choice',
+            type: 'DemoEnum',
+            displayName: 'Choice',
+          },
+        ],
         transactionOptions: {},
       });
 
@@ -143,6 +150,13 @@ describe('Enum Field End-to-End Integration', () => {
           },
         ],
         argTypes: ['DemoEnum'],
+        argSchema: [
+          {
+            name: 'choice',
+            type: 'DemoEnum',
+            displayName: 'Choice',
+          },
+        ],
         transactionOptions: {},
       });
 
@@ -199,6 +213,13 @@ describe('Enum Field End-to-End Integration', () => {
           },
         ],
         argTypes: ['DemoEnum'],
+        argSchema: [
+          {
+            name: 'choice',
+            type: 'DemoEnum',
+            displayName: 'Choice',
+          },
+        ],
         transactionOptions: {},
       });
 
@@ -294,6 +315,18 @@ describe('Enum Field End-to-End Integration', () => {
         functionName: 'process_multiple_enums',
         args: [{ tag: 'One' }, { tag: 'Two', values: [{ type: 'U32', value: '123' }] }],
         argTypes: ['DemoEnum', 'DemoEnum'],
+        argSchema: [
+          {
+            name: 'choice1',
+            type: 'DemoEnum',
+            displayName: 'First Choice',
+          },
+          {
+            name: 'choice2',
+            type: 'DemoEnum',
+            displayName: 'Second Choice',
+          },
+        ],
         transactionOptions: {},
       });
     });

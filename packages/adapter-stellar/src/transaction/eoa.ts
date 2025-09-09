@@ -96,7 +96,9 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       // Add the contract call operation (convert args to ScVal with comprehensive type support)
       const scValArgs = txData.args.map((arg, index) => {
         const argType = txData.argTypes[index];
-        return valueToScVal(arg, argType);
+        const argSchema = txData.argSchema?.[index]; // Pass schema for struct field type resolution
+
+        return valueToScVal(arg, argType, argSchema);
       });
 
       transactionBuilder.addOperation(contract.call(txData.functionName, ...scValArgs));

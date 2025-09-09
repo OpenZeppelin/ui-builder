@@ -4,6 +4,7 @@ import type {
   ContractSchema,
   EnumValue,
   FormFieldType,
+  FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -19,6 +20,7 @@ export interface StellarTransactionData {
   functionName: string;
   args: unknown[];
   argTypes: string[]; // Parameter types for nativeToScVal type hints
+  argSchema?: FunctionParameter[]; // Full parameter schema with struct field info
   transactionOptions: Record<string, unknown>;
 }
 
@@ -50,6 +52,7 @@ export function formatStellarTransactionData(
   const expectedArgs = functionDetails.inputs;
 
   // --- Step 2: Iterate and Select Values --- //
+
   const orderedRawValues: unknown[] = [];
   for (const expectedArg of expectedArgs) {
     const fieldConfig = fields.find((field: FormFieldType) => field.name === expectedArg.name);
@@ -58,7 +61,17 @@ export function formatStellarTransactionData(
     }
     let value: unknown;
     if (fieldConfig.isHardcoded) {
-      value = fieldConfig.hardcodedValue;
+      // FIX: If hardcoded value is undefined but we have submitted input, use submitted input instead
+      // This handles cases where fields were incorrectly saved with undefined hardcoded values
+      if (fieldConfig.hardcodedValue === undefined && fieldConfig.name in submittedInputs) {
+        logger.warn(
+          'formatStellarTransactionData',
+          `Field '${fieldConfig.name}' is hardcoded with undefined value but has submitted input. Using submitted input instead.`
+        );
+        value = submittedInputs[fieldConfig.name];
+      } else {
+        value = fieldConfig.hardcodedValue;
+      }
     } else if (fieldConfig.isHidden) {
       throw new Error(`Field '${fieldConfig.name}' cannot be hidden without being hardcoded.`);
     } else {
@@ -138,6 +151,7 @@ export function formatStellarTransactionData(
     functionName: functionDetails.name,
     args: transformedArgs,
     argTypes: functionDetails.inputs.map((param) => param.type), // Include parameter types for ScVal conversion
+    argSchema: functionDetails.inputs, // Include full parameter schema with struct field definitions
     transactionOptions: {
       // Add any Stellar-specific transaction options here
       // For example: fee, timeout, memo, etc.

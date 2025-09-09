@@ -11,6 +11,7 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getStellarExplorerAddressUrl } from '../explorer';
+import { extractStructFields, isStructType } from '../mapping/struct-fields';
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
 
 /**
@@ -43,14 +44,6 @@ export async function loadStellarContractFromAddress(
 
     logger.info('loadStellarContractFromAddress', 'Contract client created successfully');
 
-    // Extract functions using the official laboratory approach
-    const functions = extractFunctionsFromSpec(contractClient.spec, contractAddress);
-
-    logger.info(
-      'loadStellarContractFromAddress',
-      `Successfully extracted ${functions.length} functions`
-    );
-
     // Get spec entries - try different approaches to access them
     let specEntries: xdr.ScSpecEntry[] = [];
     try {
@@ -76,11 +69,28 @@ export async function loadStellarContractFromAddress(
           }
         }
 
+        // Try the method directly on spec if it has the method
+        if (specEntries.length === 0 && typeof spec.entries === 'function') {
+          try {
+            specEntries = (spec.entries as () => xdr.ScSpecEntry[])();
+          } catch (e) {
+            logger.warn('loadStellarContractFromAddress', 'direct entries() method failed:', e);
+          }
+        }
+
         logger.info('loadStellarContractFromAddress', `Found ${specEntries.length} spec entries`);
       }
     } catch (specError) {
       logger.warn('loadStellarContractFromAddress', 'Could not extract spec entries:', specError);
     }
+
+    // Extract functions using the official laboratory approach with spec entries for struct extraction
+    const functions = extractFunctionsFromSpec(contractClient.spec, contractAddress, specEntries);
+
+    logger.info(
+      'loadStellarContractFromAddress',
+      `Successfully extracted ${functions.length} functions`
+    );
 
     return {
       name: `Soroban Contract ${contractAddress.slice(0, 8)}...`,
@@ -101,7 +111,8 @@ export async function loadStellarContractFromAddress(
  */
 function extractFunctionsFromSpec(
   spec: StellarSdk.contract.Spec,
-  _contractAddress: string
+  _contractAddress: string,
+  specEntries?: xdr.ScSpecEntry[]
 ): ContractFunction[] {
   try {
     // Get all functions using the official SDK method
@@ -129,9 +140,28 @@ function extractFunctionsFromSpec(
               );
             }
 
+            // Check if this is a struct type and extract components
+            let components: FunctionParameter[] | undefined;
+            if (specEntries && specEntries.length > 0 && isStructType(specEntries, inputType)) {
+              const structFields = extractStructFields(specEntries, inputType);
+              if (structFields && structFields.length > 0) {
+                components = structFields;
+                logger.debug(
+                  'extractFunctionsFromSpec',
+                  `Extracted ${structFields.length} fields for struct type "${inputType}": ${structFields.map((f) => `${f.name}:${f.type}`).join(', ')}`
+                );
+              } else {
+                logger.warn(
+                  'extractFunctionsFromSpec',
+                  `No fields extracted for struct "${inputType}"`
+                );
+              }
+            }
+
             return {
               name: inputName || `param_${inputIndex}`,
               type: inputType,
+              ...(components && { components }),
             };
           } catch (error) {
             logger.warn('extractFunctionsFromSpec', `Failed to parse input ${inputIndex}:`, error);

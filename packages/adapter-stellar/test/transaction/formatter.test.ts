@@ -120,6 +120,10 @@ describe('formatStellarTransactionData', () => {
         functionName: 'transfer',
         args: ['GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5', '1000'],
         argTypes: ['Address', 'U128'],
+        argSchema: [
+          { name: 'to', type: 'Address', displayName: 'Recipient Address' },
+          { name: 'amount', type: 'U128', displayName: 'Amount' },
+        ],
         transactionOptions: {},
       });
     });
@@ -193,6 +197,20 @@ describe('formatStellarTransactionData', () => {
           true,
         ],
         argTypes: ['UserInfo', 'Vec<U128>', 'Bool'],
+        argSchema: [
+          {
+            name: 'user_info',
+            type: 'UserInfo',
+            displayName: 'User Info',
+            components: [
+              { name: 'name', type: 'ScString' },
+              { name: 'age', type: 'U32' },
+              { name: 'address', type: 'Address' },
+            ],
+          },
+          { name: 'amounts', type: 'Vec<U128>', displayName: 'Amounts' },
+          { name: 'enabled', type: 'Bool', displayName: 'Enabled' },
+        ],
         transactionOptions: {},
       });
     });
