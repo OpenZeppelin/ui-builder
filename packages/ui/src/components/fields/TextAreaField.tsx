@@ -104,9 +104,10 @@ export function TextAreaField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && isTouched;
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Get accessibility attributes
           const accessibilityProps = getAccessibilityProps({
@@ -150,7 +151,11 @@ export function TextAreaField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

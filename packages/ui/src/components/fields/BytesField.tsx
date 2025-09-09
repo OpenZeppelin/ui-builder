@@ -138,9 +138,10 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
             return validateBytesField(value);
           },
         }}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && (isTouched || validation?.required);
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Get accessibility attributes
           const accessibilityProps = getAccessibilityProps({
@@ -169,7 +170,7 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                   // Apply formatting on blur when user finishes typing
                   const formatted = formatValue(e.target.value);
                   field.onChange(formatted);
-                  field.onBlur();
+                  // Note: Let React Hook Form handle blur naturally without programmatic trigger
                 }}
                 onKeyDown={handleEscapeKey(field.onChange, field.value)}
                 {...accessibilityProps}
@@ -191,7 +192,11 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

@@ -91,30 +91,25 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
           },
         }}
         disabled={readOnly}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && isTouched;
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Handle input change with validation for required fields
           const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
             const value = e.target.value;
             field.onChange(value);
-
-            // Trigger validation if the field is required and empty
-            if (isRequired && value === '') {
-              setTimeout(() => field.onBlur(), 0);
-            }
+            // Note: Validation happens naturally when user leaves the field
+            // No need to trigger it programmatically on every change
           };
 
           // Handle keyboard events
           const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
             if (e.key === 'Escape') {
               handleEscapeKey(field.onChange, field.value)(e);
-
-              // If required, trigger validation after clearing
-              if (isRequired) {
-                setTimeout(() => field.onBlur(), 0);
-              }
+              // Note: Validation happens naturally when user leaves the field
+              // No need to trigger it programmatically
             }
           };
 
@@ -150,7 +145,11 @@ export function TextField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

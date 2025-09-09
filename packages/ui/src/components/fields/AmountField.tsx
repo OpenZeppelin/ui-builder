@@ -152,8 +152,9 @@ export function AmountField<TFieldValues extends FieldValues = FieldValues>({
             return true;
           },
         }}
-        render={({ field, fieldState: { error } }) => {
-          const hasError = !!error;
+        render={({ field, fieldState: { error, isTouched } }) => {
+          const hasError = !!error?.message;
+          const shouldShowError = hasError && isTouched;
           const validationClasses = getValidationStateClasses(error);
 
           // Get accessibility attributes
@@ -247,7 +248,11 @@ export function AmountField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}
