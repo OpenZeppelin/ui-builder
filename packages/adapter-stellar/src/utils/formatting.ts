@@ -49,7 +49,33 @@ export function isSerializableObject(value: unknown): boolean {
  * nativeToScVal("GDQP2...", { type: convertStellarTypeToScValType("Address") }) // → ScAddress
  * ```
  */
-export function convertStellarTypeToScValType(stellarType: string): string {
+export function convertStellarTypeToScValType(stellarType: string): string | string[] {
+  // Handle Vec types - return array type hint
+  if (stellarType.startsWith('Vec<')) {
+    const innerTypeMatch = stellarType.match(/Vec<(.+)>$/);
+    if (innerTypeMatch) {
+      const innerType = innerTypeMatch[1];
+      const innerScValType = convertStellarTypeToScValType(innerType);
+      // For Vec types, nativeToScVal expects the inner type as string
+      return Array.isArray(innerScValType) ? innerScValType[0] : innerScValType;
+    }
+  }
+
+  // Handle Map types - return undefined to signal special handling needed
+  if (stellarType.startsWith('Map<')) {
+    // Map types need special handling - can't use a simple type hint
+    return 'map-special';
+  }
+
+  // Handle Option types - return the inner type
+  if (stellarType.startsWith('Option<')) {
+    const innerTypeMatch = stellarType.match(/Option<(.+)>$/);
+    if (innerTypeMatch) {
+      const innerType = innerTypeMatch[1];
+      return convertStellarTypeToScValType(innerType);
+    }
+  }
+
   switch (stellarType) {
     case 'Address':
       return 'address';

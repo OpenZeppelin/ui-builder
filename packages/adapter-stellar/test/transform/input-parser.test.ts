@@ -64,6 +64,17 @@ describe('parseStellarInput', () => {
       const result = parseStellarInput(customObject, 'CustomStruct');
       expect(result).toEqual(customObject);
     });
+
+    it('should handle struct objects in parseStellarInput', () => {
+      const structValue = {
+        id: 456,
+        flag: true,
+        info: 'test-struct',
+      };
+
+      const result = parseStellarInput(structValue, 'DemoStruct');
+      expect(result).toEqual(structValue);
+    });
   });
 
   describe('error handling', () => {
@@ -89,6 +100,106 @@ describe('valueToScVal', () => {
     expect(() => valueToScVal('123', 'U32')).not.toThrow();
     expect(() => valueToScVal(true, 'Bool')).not.toThrow();
     expect(() => valueToScVal(new Uint8Array([1, 2, 3]), 'Bytes')).not.toThrow();
+  });
+
+  describe('struct conversion', () => {
+    it('should convert struct with schema to ScVal', () => {
+      const structValue = {
+        id: 123,
+        flag: true,
+        info: 'test-info',
+      };
+
+      const structSchema = {
+        name: 'data',
+        type: 'DemoStruct',
+        components: [
+          { name: 'id', type: 'U32' },
+          { name: 'flag', type: 'Bool' },
+          { name: 'info', type: 'ScSymbol' },
+        ],
+      };
+
+      expect(() => valueToScVal(structValue, 'DemoStruct', structSchema)).not.toThrow();
+    });
+
+    it('should throw error for struct without schema', () => {
+      const structValue = {
+        id: 123,
+        flag: true,
+      };
+
+      expect(() => valueToScVal(structValue, 'DemoStruct')).toThrow(
+        'Missing schema information for struct field "id" in struct type "DemoStruct"'
+      );
+    });
+
+    it('should throw error for missing field in schema', () => {
+      const structValue = {
+        id: 123,
+        unknown_field: 'value',
+      };
+
+      const incompleteSchema = {
+        name: 'data',
+        type: 'IncompleteStruct',
+        components: [
+          { name: 'id', type: 'U32' },
+          // missing unknown_field
+        ],
+      };
+
+      expect(() => valueToScVal(structValue, 'IncompleteStruct', incompleteSchema)).toThrow(
+        'Missing schema information for struct field "unknown_field" in struct type "IncompleteStruct"'
+      );
+    });
+
+    it('should handle empty struct with empty schema', () => {
+      const emptyStruct = {};
+
+      const emptySchema = {
+        name: 'empty',
+        type: 'EmptyStruct',
+        components: [],
+      };
+
+      expect(() => valueToScVal(emptyStruct, 'EmptyStruct', emptySchema)).not.toThrow();
+    });
+
+    it('should not treat arrays as structs', () => {
+      const arrayValue = [1, 2, 3];
+
+      // Arrays should be processed as Vec<T>, not struct
+      expect(() => valueToScVal(arrayValue, 'Vec<U32>')).not.toThrow();
+    });
+
+    it('should handle nested struct fields', () => {
+      const nestedStructValue = {
+        user: {
+          id: 456,
+          name: 'test-user',
+        },
+        active: true,
+      };
+
+      const nestedSchema = {
+        name: 'data',
+        type: 'UserData',
+        components: [
+          {
+            name: 'user',
+            type: 'UserInfo',
+            components: [
+              { name: 'id', type: 'U64' },
+              { name: 'name', type: 'ScString' },
+            ],
+          },
+          { name: 'active', type: 'Bool' },
+        ],
+      };
+
+      expect(() => valueToScVal(nestedStructValue, 'UserData', nestedSchema)).not.toThrow();
+    });
   });
 });
 
