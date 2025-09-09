@@ -1,46 +1,13 @@
-import {
-  allowAllModules,
-  ISupportedWallet,
-  StellarWalletsKit,
-  WalletNetwork,
-} from '@creit.tech/stellar-wallets-kit';
-
 import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import {
+  getInitializedStellarWalletImplementation,
+  getStellarWalletImplementation,
+} from './utils/stellarWalletImplementationManager';
+
 import { stellarUiKitManager } from './stellar-wallets-kit';
-
-// Singleton wallet kit instance
-let walletKit: StellarWalletsKit | null = null;
-let currentAddress: string | null = null;
-let currentWalletId: string | null = null;
-
-/**
- * Get or create the wallet kit instance
- */
-function getWalletKit(): StellarWalletsKit {
-  if (!walletKit) {
-    const managerState = stellarUiKitManager.getState();
-
-    if (managerState.stellarKitProvider) {
-      walletKit = managerState.stellarKitProvider;
-    } else {
-      // Create a default instance if the manager hasn't been configured yet
-      const network =
-        managerState.networkConfig?.type === 'mainnet'
-          ? WalletNetwork.PUBLIC
-          : WalletNetwork.TESTNET;
-
-      walletKit = new StellarWalletsKit({
-        network,
-        selectedWalletId: undefined,
-        modules: allowAllModules(),
-      });
-    }
-  }
-
-  return walletKit;
-}
+import { StellarConnectionStatusListener } from './types';
 
 /**
  * Indicates if this adapter supports wallet connection
@@ -54,16 +21,8 @@ export function supportsStellarWalletConnection(): boolean {
  * Get available Stellar wallet connectors
  */
 export async function getStellarAvailableConnectors(): Promise<Connector[]> {
-  const kit = getWalletKit();
-  const wallets = await kit.getSupportedWallets();
-
-  return wallets.map((wallet: ISupportedWallet) => ({
-    id: wallet.id,
-    name: wallet.name,
-    icon: wallet.icon,
-    installed: wallet.isAvailable,
-    type: (wallet.type as string) || 'browser',
-  }));
+  const impl = await getStellarWalletImplementation();
+  return impl.getAvailableConnectors();
 }
 
 /**
@@ -73,35 +32,8 @@ export async function getStellarAvailableConnectors(): Promise<Connector[]> {
 export async function connectStellarWallet(
   connectorId: string
 ): Promise<{ connected: boolean; address?: string; error?: string }> {
-  try {
-    const kit = getWalletKit();
-
-    // Set the selected wallet
-    kit.setWallet(connectorId);
-
-    // Get the address from the wallet
-    const result = await kit.getAddress();
-
-    if (result.address) {
-      currentAddress = result.address;
-      currentWalletId = connectorId;
-      return {
-        connected: true,
-        address: result.address,
-      };
-    } else {
-      return {
-        connected: false,
-        error: 'Failed to get address from wallet',
-      };
-    }
-  } catch (error) {
-    logger.error('Failed to connect Stellar wallet:', String(error));
-    return {
-      connected: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
+  const impl = await getStellarWalletImplementation();
+  return impl.connect(connectorId);
 }
 
 /**
@@ -111,23 +43,8 @@ export async function disconnectStellarWallet(): Promise<{
   disconnected: boolean;
   error?: string;
 }> {
-  try {
-    // Clear the current connection state
-    currentAddress = null;
-    currentWalletId = null;
-
-    // For Stellar Wallets Kit, we just clear our internal state
-    // The kit doesn't have a specific disconnect method
-    // Setting to empty string causes an error
-
-    return { disconnected: true };
-  } catch (error) {
-    logger.error('Failed to disconnect Stellar wallet:', String(error));
-    return {
-      disconnected: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
+  const impl = await getStellarWalletImplementation();
+  return impl.disconnect();
 }
 
 /**
@@ -140,14 +57,26 @@ export function getStellarWalletConnectionStatus(): {
   chainId?: string;
   walletId?: string;
 } {
-  const managerState = stellarUiKitManager.getState();
-  const chainId = managerState.networkConfig?.id || 'stellar-testnet';
+  const impl = getInitializedStellarWalletImplementation();
+  if (!impl) {
+    logger.warn(
+      'getStellarWalletConnectionStatus',
+      'Wallet implementation not ready. Returning default disconnected state.'
+    );
+    return {
+      isConnected: false,
+      address: undefined,
+      chainId: stellarUiKitManager.getState().networkConfig?.id || 'stellar-testnet',
+      walletId: undefined,
+    };
+  }
 
+  const status = impl.getWalletConnectionStatus();
   return {
-    isConnected: currentAddress !== null,
-    address: currentAddress || undefined,
-    chainId,
-    walletId: currentWalletId || undefined,
+    isConnected: status.isConnected,
+    address: status.address,
+    chainId: typeof status.chainId === 'number' ? status.chainId.toString() : status.chainId,
+    walletId: status.walletId,
   };
 }
 
@@ -156,8 +85,57 @@ export function getStellarWalletConnectionStatus(): {
  * Used by provider code that derives the address directly from the kit.
  */
 export function setStellarConnectedAddress(address: string | null, walletId?: string | null): void {
-  currentAddress = address;
-  currentWalletId = walletId ?? null;
+  const impl = getInitializedStellarWalletImplementation();
+  if (impl) {
+    impl.updateConnectionStatus(address, walletId);
+  } else {
+    logger.warn(
+      'setStellarConnectedAddress',
+      'Wallet implementation not ready. Cannot update connection status.'
+    );
+  }
+}
+
+// StellarConnectionStatusListener is now imported from the implementation file
+
+/**
+ * Subscribe to Stellar wallet connection status changes
+ * @param callback Function to call when connection status changes
+ * @returns Unsubscribe function
+ */
+export function onStellarWalletConnectionChange(
+  callback: StellarConnectionStatusListener
+): () => void {
+  const impl = getInitializedStellarWalletImplementation();
+  if (!impl) {
+    logger.warn(
+      'onStellarWalletConnectionChange',
+      'Wallet implementation not ready. Returning no-op.'
+    );
+    return () => {};
+  }
+
+  // Convert from implementation status format to connection format
+  return impl.onWalletConnectionChange((currentImplStatus, prevImplStatus) => {
+    const currentStatus = {
+      isConnected: currentImplStatus.isConnected,
+      address: currentImplStatus.address,
+      chainId: currentImplStatus.chainId,
+      walletId: currentImplStatus.walletId,
+    };
+    const previousStatus = {
+      isConnected: prevImplStatus.isConnected,
+      address: prevImplStatus.address,
+      chainId: prevImplStatus.chainId,
+      walletId: prevImplStatus.walletId,
+    };
+
+    try {
+      callback(currentStatus, previousStatus);
+    } catch (error) {
+      logger.error('Error in Stellar connection status listener:', String(error));
+    }
+  });
 }
 
 /**
@@ -168,15 +146,6 @@ export async function signTransaction(
   xdr: string,
   address: string
 ): Promise<{ signedTxXdr: string }> {
-  const kit = getWalletKit();
-  const managerState = stellarUiKitManager.getState();
-
-  // Determine network passphrase based on network config
-  const networkPassphrase =
-    managerState.networkConfig?.type === 'mainnet' ? WalletNetwork.PUBLIC : WalletNetwork.TESTNET;
-
-  return await kit.signTransaction(xdr, {
-    address,
-    networkPassphrase,
-  });
+  const impl = await getStellarWalletImplementation();
+  return impl.signTransaction(xdr, address);
 }

@@ -1,5 +1,7 @@
 import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
 
+import type { SolanaWalletConnectionStatus } from './types';
+
 // Assuming a Solana Wallet Implementation type might exist later
 // import type { SolanaWalletImplementation } from './implementation';
 
@@ -24,16 +26,21 @@ export async function disconnectSolanaWallet(/* walletImplementation: SolanaWall
 }> {
   return { disconnected: true };
 }
-export function getSolanaWalletConnectionStatus(/* walletImplementation: SolanaWalletImplementation */): {
-  isConnected: boolean;
-  address?: string;
-  chainId?: string;
-} {
-  return { isConnected: false };
+export function getSolanaWalletConnectionStatus(/* walletImplementation: SolanaWalletImplementation */): SolanaWalletConnectionStatus {
+  return {
+    isConnected: false,
+    isConnecting: false,
+    isDisconnected: true,
+    isReconnecting: false,
+    status: 'disconnected',
+  };
 }
 export function onSolanaWalletConnectionChange(
   /* walletImplementation: SolanaWalletImplementation, */
-  _callback: (status: { isConnected: boolean; address?: string }) => void
+  _callback: (
+    currentStatus: SolanaWalletConnectionStatus,
+    previousStatus: SolanaWalletConnectionStatus
+  ) => void
 ): () => void {
   return () => {};
 }

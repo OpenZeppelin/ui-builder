@@ -46,6 +46,33 @@ export type Connector = {
 };
 
 /**
+ * Base wallet connection status interface with universal properties.
+ * Chain-specific adapters should extend this interface with their specific fields.
+ */
+export interface WalletConnectionStatus {
+  /** Core connection state - always present for backward compatibility */
+  isConnected: boolean;
+  /** Wallet address - always present when connected */
+  address?: string;
+  /** Chain/network ID - format may vary by chain (number for EVM, string for others) */
+  chainId?: string | number;
+
+  /** Enhanced connection states for better UX */
+  isConnecting?: boolean;
+  isDisconnected?: boolean;
+  isReconnecting?: boolean;
+  /** Detailed status string */
+  status?: 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
+
+  /** Connector/wallet information - universal across all chains */
+  connector?: {
+    id: string;
+    name?: string;
+    type?: string;
+  };
+}
+
+/**
  * Minimal adapter interface for the renderer and contract interaction
  *
  * This is the base interface that all chain-specific adapters must implement.
@@ -260,9 +287,9 @@ export interface ContractAdapter {
   /**
    * Gets current wallet connection status
    *
-   * @returns Status object with connection state and address
+   * @returns Rich status object with detailed connection state and address information
    */
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string };
+  getWalletConnectionStatus(): WalletConnectionStatus;
 
   /**
    * Gets a blockchain explorer URL for an address in this chain.
@@ -280,7 +307,7 @@ export interface ContractAdapter {
    * @returns Cleanup function to unsubscribe
    */
   onWalletConnectionChange?(
-    callback: (status: { isConnected: boolean; address?: string }) => void
+    callback: (status: WalletConnectionStatus, previousStatus: WalletConnectionStatus) => void
   ): () => void;
 
   /**
