@@ -9,7 +9,7 @@ import {
   disconnectStellarWallet,
   getStellarAvailableConnectors,
   getStellarWalletConnectionStatus,
-  setStellarConnectedAddress,
+  onStellarWalletConnectionChange,
 } from '../connection';
 import {
   StellarWalletContext,
@@ -66,36 +66,27 @@ export function StellarWalletUiRoot({ children, uiKitConfig }: StellarWalletUiRo
     return unsubscribe;
   }, []);
 
-  // Update connection status periodically
+  // Event-driven connection status updates
   useEffect(() => {
-    const updateConnectionStatus = async () => {
-      // Prefer reading from the active kit so native button connections are reflected
-      try {
-        const state = stellarUiKitManager.getState();
-        const kit = state.stellarKitProvider;
-        if (kit) {
-          const result = await kit.getAddress();
-          const resolved = result?.address || null;
-          setAddress(resolved);
-          setStellarConnectedAddress(resolved, undefined);
-          return;
-        }
-      } catch {
-        // Fall through to legacy status resolver below
+    const unsubscribeFromConnectionChanges = onStellarWalletConnectionChange(
+      (currentStatus, _previousStatus) => {
+        setAddress(currentStatus.address || null);
+        logger.debug(
+          'StellarWalletUiRoot',
+          `Connection status changed: ${currentStatus.isConnected ? 'connected' : 'disconnected'}`,
+          currentStatus.address
+        );
       }
-      // Fallback to legacy status derived from internal state
-      const status = getStellarWalletConnectionStatus();
-      setAddress(status.address || null);
+    );
+
+    // Initial update to sync current state
+    const initialStatus = getStellarWalletConnectionStatus();
+    setAddress(initialStatus.address || null);
+
+    return () => {
+      unsubscribeFromConnectionChanges();
     };
-
-    // Initial update
-    updateConnectionStatus();
-
-    // Update every second to catch external changes
-    const interval = setInterval(updateConnectionStatus, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [address]);
 
   // Load available wallets
   useEffect(() => {

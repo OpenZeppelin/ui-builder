@@ -23,6 +23,7 @@ import type {
   TxStatus,
   UiKitConfiguration,
   UserRpcProviderConfig,
+  WalletConnectionStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { isStellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -50,16 +51,17 @@ import {
   connectStellarWallet,
   disconnectStellarWallet,
   generateStellarWalletsKitExportables,
+  getInitializedStellarWalletImplementation,
   getResolvedWalletComponents,
   getStellarAvailableConnectors,
-  getStellarWalletConnectionStatus,
+  getStellarWalletImplementation,
   loadInitialConfigFromAppService,
   resolveFullUiKitConfiguration,
   stellarFacadeHooks,
   stellarUiKitManager,
+  StellarWalletConnectionStatus,
   StellarWalletUiRoot,
   supportsStellarWalletConnection,
-  // onStellarWalletConnectionChange, // Placeholder if needed later
 } from './wallet';
 
 /**
@@ -79,6 +81,15 @@ export class StellarAdapter implements ContractAdapter {
 
     // Set the network config in the wallet UI kit manager
     stellarUiKitManager.setNetworkConfig(networkConfig);
+
+    // Initialize wallet implementation with network config
+    getStellarWalletImplementation(networkConfig).catch((error) => {
+      logger.error(
+        'StellarAdapter:constructor',
+        'Failed to initialize wallet implementation:',
+        error
+      );
+    });
 
     // Determine the initial kitName from AppConfigService at the time of adapter construction.
     // This provides a baseline kitName preference from the application's static/global configuration.
@@ -239,10 +250,46 @@ export class StellarAdapter implements ContractAdapter {
   async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
     return disconnectStellarWallet();
   }
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    return getStellarWalletConnectionStatus();
+  getWalletConnectionStatus(): StellarWalletConnectionStatus {
+    const impl = getInitializedStellarWalletImplementation();
+    if (!impl) {
+      return {
+        isConnected: false,
+        address: undefined,
+        chainId: stellarUiKitManager.getState().networkConfig?.id || 'stellar-testnet',
+      };
+    }
+
+    const stellarStatus = impl.getWalletConnectionStatus();
+
+    // Return the rich Stellar-specific status directly
+    return stellarStatus;
   }
-  // Optional: onWalletConnectionChange(...) implementation would go here
+
+  /**
+   * @inheritdoc
+   */
+  onWalletConnectionChange(
+    callback: (
+      currentStatus: WalletConnectionStatus,
+      previousStatus: WalletConnectionStatus
+    ) => void
+  ): () => void {
+    const walletImplementation = getInitializedStellarWalletImplementation();
+    if (!walletImplementation) {
+      logger.warn(
+        'StellarAdapter:onWalletConnectionChange',
+        'Wallet implementation not ready. Subscription may not work.'
+      );
+      return () => {};
+    }
+
+    return walletImplementation.onWalletConnectionChange(
+      (currentImplStatus, previousImplStatus) => {
+        callback(currentImplStatus, previousImplStatus);
+      }
+    );
+  }
 
   // --- Configuration & Metadata --- //
   async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
