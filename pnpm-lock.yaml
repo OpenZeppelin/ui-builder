@@ -288,7 +288,7 @@ importers:
         specifier: workspace:^
         version: link:../utils
       '@stellar/stellar-sdk':
-        specifier: ^14.1.0
+        specifier: ^14.1.1
         version: 14.1.1
       react:
         specifier: ^19.0.0
