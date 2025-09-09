@@ -9,22 +9,6 @@ import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
  * @returns The appropriate default form field type (e.g., 'number', 'blockchain-address', 'array')
  */
 export function mapStellarParameterTypeToFieldType(parameterType: string): FieldType {
-  // Debug logging to identify completely unmapped types (not generics or handled cases)
-  if (
-    !STELLAR_TYPE_TO_FIELD_TYPE[parameterType] &&
-    !parameterType.startsWith('Vec<') &&
-    !parameterType.startsWith('Map<') &&
-    !parameterType.startsWith('BytesN<') &&
-    !parameterType.includes('<') &&
-    parameterType !== 'Vec' &&
-    parameterType !== 'Map' &&
-    parameterType !== 'unknown'
-  ) {
-    console.warn(
-      `[mapStellarParameterTypeToFieldType] No mapping found for type: "${parameterType}"`
-    );
-  }
-
   // Check if this is a Vec of custom/complex types (e.g., Vec<CustomStruct>)
   const vecComplexMatch = parameterType.match(/^Vec<([^>]+)>$/);
   if (vecComplexMatch) {

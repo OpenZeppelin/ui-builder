@@ -71,8 +71,8 @@ describe('mapStellarParameterTypeToFieldType', () => {
       expect(mapStellarParameterTypeToFieldType('Vec')).toBe('array');
     });
 
-    it('should map Map to object', () => {
-      expect(mapStellarParameterTypeToFieldType('Map')).toBe('object');
+    it('should map Map to map', () => {
+      expect(mapStellarParameterTypeToFieldType('Map')).toBe('map');
     });
 
     it('should map custom struct types to object', () => {
@@ -180,7 +180,7 @@ describe('getStellarCompatibleFieldTypes', () => {
 
     it('should return compatible types for Map', () => {
       const result = getStellarCompatibleFieldTypes('Map');
-      expect(result).toContain('object');
+      expect(result).toContain('map');
       expect(result).toContain('textarea');
       expect(result).toContain('text');
     });

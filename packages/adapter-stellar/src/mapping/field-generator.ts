@@ -9,7 +9,7 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
+import { getDefaultValueForType, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isLikelyEnumType } from '../utils/type-detection';
 import { extractEnumVariants, isEnumType, type EnumMetadata } from './enum-metadata';
@@ -69,7 +69,10 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
 
   // Debug logging for unmapped types
   if (parameter.type === 'unknown') {
-    console.warn(`[generateStellarDefaultField] Parameter "${parameter.name}" has type "unknown"`);
+    logger.warn(
+      'adapter-stellar',
+      `[generateStellarDefaultField] Parameter "${parameter.name}" has type "unknown"`
+    );
   }
 
   let enumMetadata: EnumMetadata | null = null;
