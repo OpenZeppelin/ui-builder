@@ -1,9 +1,8 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/contracts-ui-builder-renderer';
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { ContractAdapter, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
 import { BooleanField, SelectGroupedField, TextField } from '@openzeppelin/contracts-ui-builder-ui';
 
 import { OptionGroup } from './utils/fieldTypeUtils';
@@ -22,6 +21,11 @@ interface FieldBasicSettingsProps {
   fieldTypeGroups: OptionGroup[];
 
   /**
+   * React Hook Form trigger function for manual validation
+   */
+  trigger?: (name?: string | string[]) => Promise<boolean>;
+
+  /**
    * The adapter for chain-specific type mapping and validation
    */
   adapter?: ContractAdapter;
@@ -31,6 +35,11 @@ interface FieldBasicSettingsProps {
    * Contains all field properties including components, elementType, etc.
    */
   field: FormFieldType;
+
+  /**
+   * Callback fired when field validation status changes
+   */
+  onFieldValidationChange?: (fieldId: string, hasError: boolean) => void;
 }
 
 /**
@@ -53,6 +62,8 @@ export function FieldBasicSettings({
   fieldTypeGroups,
   adapter,
   field,
+  onFieldValidationChange,
+  trigger,
 }: FieldBasicSettingsProps) {
   // TODO: Prevent wizard from advancing to the next step if `isHardcodedValueInvalid` is true.
   // This might involve lifting the validation state up or providing a callback/ref to the parent wizard.
@@ -61,10 +72,39 @@ export function FieldBasicSettings({
   const fieldType = useWatch({ control, name: 'type' }) || 'text';
   // Watch the 'Required Field' checkbox state
   const isFieldRequired = useWatch({ control, name: 'validation.required' }) || false;
-  // Get the entire errors object from form state
-  const { errors } = useFormState({ control });
+  // Watch the hardcodedValue to detect changes
+  const hardcodedValue = useWatch({ control, name: 'hardcodedValue' });
+  // Get the complete form state to track hardcodedValue errors
+  // Using useFormState with explicit subscription to ensure we get updates
+  const formState = useFormState({
+    control,
+    name: 'hardcodedValue', // Subscribe specifically to this field's changes
+  });
   // Check specifically for the hardcodedValue error
-  const isHardcodedValueInvalid = !!errors?.hardcodedValue;
+  const hardcodedValueError = formState.errors?.hardcodedValue;
+  const isHardcodedValueInvalid = !!hardcodedValueError;
+
+  // Trigger validation when hardcoded is toggled on or hardcodedValue changes
+  useEffect(() => {
+    if (isHardcoded && trigger) {
+      // Force validation of the hardcodedValue field when hardcoded is enabled or value changes
+      // Use a small delay to allow React Hook Form to update its internal state
+      const timeoutId = setTimeout(() => {
+        void trigger('hardcodedValue');
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isHardcoded, hardcodedValue, trigger]);
+
+  // Report validation status to parent component
+  useEffect(() => {
+    if (onFieldValidationChange) {
+      // Only report hardcoded value validation errors when the field is actually hardcoded
+      // This prevents false positives when the field is not hardcoded
+      const shouldReportError = isHardcoded && isHardcodedValueInvalid;
+      onFieldValidationChange(field.id, shouldReportError);
+    }
+  }, [field.id, isHardcoded, isHardcodedValueInvalid, onFieldValidationChange]);
 
   // Construct synthetic field config for DynamicFormField
   const hardcodedFieldConfig = useMemo(
@@ -149,7 +189,7 @@ export function FieldBasicSettings({
       {isHardcoded && adapter && (
         <div className="space-y-4 border-t pt-4 md:col-span-2">
           <DynamicFormField
-            key={`hardcoded-${fieldType}`}
+            key={`hardcoded-${field.id}-${fieldType}`}
             field={hardcodedFieldConfig}
             control={control}
             adapter={adapter}
