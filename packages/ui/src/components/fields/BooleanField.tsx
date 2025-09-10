@@ -99,9 +99,9 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
           },
         }}
         disabled={readOnly}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Handle checkbox change with validation
           const handleCheckedChange = (checked: boolean | 'indeterminate'): void => {

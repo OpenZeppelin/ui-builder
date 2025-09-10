@@ -147,9 +147,9 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
               return true;
             },
           }}
-          render={({ field, fieldState: { error } }) => {
+          render={({ field, fieldState: { error, isTouched } }) => {
             const hasError = !!error;
-            const validationClasses = getValidationStateClasses(error);
+            const validationClasses = getValidationStateClasses(error, isTouched);
 
             // Get accessibility attributes
             const accessibilityProps = getAccessibilityProps({

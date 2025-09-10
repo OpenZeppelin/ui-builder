@@ -172,7 +172,8 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                   // Apply formatting on blur when user finishes typing
                   const formatted = formatValue(e.target.value);
                   field.onChange(formatted);
-                  // Note: Let React Hook Form handle blur naturally without programmatic trigger
+                  // Register field as touched with React Hook Form
+                  field.onBlur();
                 }}
                 onKeyDown={handleEscapeKey(field.onChange, field.value)}
                 {...accessibilityProps}
