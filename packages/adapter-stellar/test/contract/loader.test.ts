@@ -3,6 +3,8 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+
 import {
   loadStellarContract,
   loadStellarContractFromAddress,
@@ -15,7 +17,10 @@ const mockContractClient = {
   spec: {
     funcs: vi.fn(),
   },
-};
+  options: {},
+  txFromJSON: vi.fn(),
+  txFromXDR: vi.fn(),
+} as unknown as import('@stellar/stellar-sdk').contract.Client;
 
 const mockFunc = {
   name: vi.fn(),
@@ -25,18 +30,23 @@ const mockFunc = {
 
 const mockInput = {
   name: vi.fn(),
+  type: vi.fn(),
 };
 
-vi.mock('@stellar/stellar-sdk', () => ({
-  StrKey: {
-    isValidContract: vi.fn(),
-  },
-  contract: {
-    Client: {
-      from: vi.fn(),
+vi.mock('@stellar/stellar-sdk', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    StrKey: {
+      isValidContract: vi.fn(),
     },
-  },
-}));
+    contract: {
+      Client: {
+        from: vi.fn(),
+      },
+    },
+  };
+});
 
 // Mock the logger
 vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
@@ -67,8 +77,14 @@ describe('Stellar Contract Loader', () => {
       mockFunc.inputs.mockReturnValue([mockInput]);
       mockFunc.outputs.mockReturnValue([]);
       mockInput.name.mockReturnValue('account');
+      // Mock a simple Address type for the input - need to properly structure the mock
+      const StellarSdk = await import('@stellar/stellar-sdk');
+      const mockScSpecType = {
+        switch: vi.fn().mockReturnValue(StellarSdk.xdr.ScSpecType.scSpecTypeAddress()),
+      };
+      mockInput.type.mockReturnValue(mockScSpecType);
 
-      mockContractClient.spec.funcs.mockReturnValue([mockFunc]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([mockFunc]);
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
@@ -81,14 +97,14 @@ describe('Stellar Contract Loader', () => {
         ecosystem: 'stellar',
         functions: [
           {
-            id: 'get_balance_unknown',
+            id: 'get_balance_Address',
             name: 'get_balance',
             displayName: 'Get balance',
             description: 'Soroban function: get_balance',
             inputs: [
               {
                 name: 'account',
-                type: 'unknown',
+                type: 'Address',
               },
             ],
             outputs: [],
@@ -97,6 +113,9 @@ describe('Stellar Contract Loader', () => {
             stateMutability: 'nonpayable',
           },
         ],
+        metadata: {
+          specEntries: [],
+        },
       });
     });
 
@@ -133,7 +152,7 @@ describe('Stellar Contract Loader', () => {
       mockFunc.inputs.mockReturnValue([]);
       mockFunc.outputs.mockReturnValue([{}, {}]); // Two outputs
 
-      mockContractClient.spec.funcs.mockReturnValue([mockFunc]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([mockFunc]);
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
@@ -160,7 +179,7 @@ describe('Stellar Contract Loader', () => {
         outputs: vi.fn(),
       };
 
-      mockContractClient.spec.funcs.mockReturnValue([errorFunc]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([errorFunc]);
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
@@ -187,16 +206,27 @@ describe('Stellar Contract Loader', () => {
       const { StrKey, contract } = await import('@stellar/stellar-sdk');
       vi.mocked(StrKey.isValidContract).mockReturnValue(true);
       vi.mocked(contract.Client.from).mockResolvedValue(mockContractClient);
-      mockContractClient.spec.funcs.mockReturnValue([]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
       const result = await loadStellarContract(
-        'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        { contractAddress: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG' },
+        {
+          ecosystem: 'stellar',
+          id: 'test-network',
+          name: 'Test Network',
+          sorobanRpcUrl: 'https://rpc.url',
+          horizonUrl: 'https://horizon.url',
+          networkPassphrase: 'passphrase',
+          isTestnet: true,
+          network: 'testnet',
+          type: 'testnet',
+          exportConstName: 'TEST_NETWORK',
+        } as StellarNetworkConfig
       );
 
-      expect(result.ecosystem).toBe('stellar');
-      expect(result.functions).toEqual([]);
+      expect(result.schema.ecosystem).toBe('stellar');
+      expect(result.schema.functions).toEqual([]);
+      expect(result.source).toBe('fetched');
     });
   });
 
@@ -205,19 +235,29 @@ describe('Stellar Contract Loader', () => {
       const { StrKey, contract } = await import('@stellar/stellar-sdk');
       vi.mocked(StrKey.isValidContract).mockReturnValue(true);
       vi.mocked(contract.Client.from).mockResolvedValue(mockContractClient);
-      mockContractClient.spec.funcs.mockReturnValue([]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([]);
 
       const result = await loadStellarContractWithMetadata(
-        'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        { contractAddress: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG' },
+        {
+          ecosystem: 'stellar',
+          id: 'test-network',
+          name: 'Test Network',
+          sorobanRpcUrl: 'https://rpc.url',
+          horizonUrl: 'https://horizon.url',
+          networkPassphrase: 'passphrase',
+          isTestnet: true,
+          network: 'testnet',
+          type: 'testnet',
+          exportConstName: 'TEST_NETWORK',
+        } as StellarNetworkConfig
       );
 
       expect(result.source).toBe('fetched');
       expect(result.metadata).toEqual({
-        rpcUrl: 'https://rpc.url',
-        networkPassphrase: 'passphrase',
-        loadedAt: expect.any(String),
+        fetchedFrom: 'https://rpc.url',
+        contractName: 'Soroban Contract CDLZFC3S...',
+        fetchTimestamp: expect.any(Date),
       });
       expect(result.schema.address).toBe(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG'
@@ -226,7 +266,10 @@ describe('Stellar Contract Loader', () => {
 
     it('should handle errors gracefully', async () => {
       await expect(
-        loadStellarContractWithMetadata(null as unknown as string, '', '')
+        loadStellarContractWithMetadata(
+          null as unknown as { contractAddress: string },
+          {} as unknown as StellarNetworkConfig
+        )
       ).rejects.toThrow();
     });
   });
@@ -299,7 +342,7 @@ describe('Stellar Contract Loader', () => {
       mockFunc.inputs.mockReturnValue([errorInput]);
       mockFunc.outputs.mockReturnValue([]);
 
-      mockContractClient.spec.funcs.mockReturnValue([mockFunc]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([mockFunc]);
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
@@ -322,7 +365,7 @@ describe('Stellar Contract Loader', () => {
       mockFunc.inputs.mockReturnValue([]);
       mockFunc.outputs.mockReturnValue([{}, {}]); // Two outputs that will use fallback names
 
-      mockContractClient.spec.funcs.mockReturnValue([mockFunc]);
+      (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([mockFunc]);
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',

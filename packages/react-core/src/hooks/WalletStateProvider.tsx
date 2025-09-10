@@ -21,7 +21,6 @@ interface ExtendedContractAdapter extends ContractAdapter {
       loadUiKitNativeConfig?: (kitName: string) => Promise<Record<string, unknown> | null>;
     }
   ): void | Promise<void>;
-  lastFullUiKitConfiguration?: UiKitConfiguration | null;
   getEcosystemReactUiContextProvider?():
     | React.ComponentType<EcosystemReactUiProviderProps>
     | undefined;
@@ -301,14 +300,18 @@ export function WalletStateProvider({
   let childrenToRender: ReactNode;
 
   if (ActualProviderToRender) {
-    const key = (globalActiveAdapter as ExtendedContractAdapter)?.lastFullUiKitConfiguration
-      ?.kitName;
+    // Generate a unique key based on adapter's network ecosystem and ID
+    // This ensures proper unmounting/mounting when switching between EVM/Stellar/etc.
+    const key = `${globalActiveAdapter?.networkConfig?.ecosystem || 'unknown'}-${globalActiveAdapter?.networkConfig?.id || 'unknown'}`;
+
     // EvmWalletUiRoot (and similar for other adapters) no longer needs uiKitConfiguration prop
     // as it manages its own configuration internally via the EvmUiKitManager or equivalent.
     logger.info(
       '[WSP RENDER]',
       'Rendering adapter-provided UI context provider:',
-      ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent'
+      ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent',
+      'with key:',
+      key
     );
     childrenToRender = <ActualProviderToRender key={key}>{children}</ActualProviderToRender>;
   } else {

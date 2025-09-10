@@ -15,6 +15,7 @@ import type {
   SolanaNetworkConfig,
   UiKitConfiguration,
   UserRpcProviderConfig,
+  WalletConnectionStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { isSolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -48,6 +49,7 @@ import {
   getSolanaWalletConnectionStatus,
   onSolanaWalletConnectionChange,
   solanaSupportsWalletConnection,
+  SolanaWalletConnectionStatus,
 } from './wallet';
 
 /**
@@ -177,12 +179,15 @@ export class SolanaAdapter implements ContractAdapter {
     return disconnectSolanaWallet(/* undefined */);
   }
 
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+  getWalletConnectionStatus(): SolanaWalletConnectionStatus {
     return getSolanaWalletConnectionStatus(/* undefined */);
   }
 
   onWalletConnectionChange?(
-    callback: (status: { isConnected: boolean; address?: string }) => void
+    callback: (
+      currentStatus: WalletConnectionStatus,
+      previousStatus: WalletConnectionStatus
+    ) => void
   ): () => void {
     // Optional methods need careful handling during delegation
     if (onSolanaWalletConnectionChange) {

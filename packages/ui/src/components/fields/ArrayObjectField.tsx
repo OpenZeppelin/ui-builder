@@ -4,7 +4,6 @@ import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from
 
 import type {
   ContractAdapter,
-  FieldType,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -279,22 +278,21 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                         <div className="space-y-4 mt-4">
                           {((): React.ReactNode[] => {
                             return components.map((component) => {
-                              const propertyFieldType = ((): FieldType => {
-                                if (!adapter) {
-                                  throw new Error(
-                                    `ArrayObjectField: No adapter provided for type mapping. Cannot map type "${component.type}" for field "${component.name}"`
-                                  );
-                                }
-                                return adapter.mapParameterTypeToFieldType(component.type);
-                              })();
+                              // Generate field using adapter to get full configuration including elementType for arrays
+                              if (!adapter) {
+                                throw new Error(
+                                  `ArrayObjectField: No adapter provided for field generation. Cannot generate field for "${component.name}"`
+                                );
+                              }
 
-                              // TODO: Similar to ObjectField, refine `propertyField` definition,
-                              // especially regarding `validation` inheritance and granularity.
+                              const generatedField = adapter.generateDefaultField(component);
+
+                              // Override with array object-specific configuration
                               const propertyField: FormFieldType = {
+                                ...generatedField, // Include elementType and other adapter-specific properties
                                 id: `${id}-${index}-${component.name}`,
                                 name: `${name}.${index}.${component.name}`,
                                 label: component.displayName || component.name,
-                                type: propertyFieldType,
                                 validation: {
                                   // TODO: This makes each property required if the parent array item's object is considered required.
                                   // Re-evaluate if this is the desired behavior or if properties should have independent required flags.
@@ -303,7 +301,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                                 placeholder: `Enter ${component.displayName || component.name}`,
                                 helperText:
                                   component.description ||
-                                  (propertyFieldType === 'number' ? 'Numbers only' : undefined),
+                                  (generatedField.type === 'number' ? 'Numbers only' : undefined),
                                 width: 'full',
                                 readOnly,
                                 // Pass components for nested objects

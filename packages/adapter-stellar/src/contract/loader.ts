@@ -1,4 +1,5 @@
 import * as StellarSdk from '@stellar/stellar-sdk';
+import { xdr } from '@stellar/stellar-sdk';
 
 import type {
   ContractFunction,
@@ -10,6 +11,8 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getStellarExplorerAddressUrl } from '../explorer';
+import { extractStructFields, isStructType } from '../mapping/struct-fields';
+import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
 
 /**
  * Load a Stellar contract using the official Stellar SDK approach
@@ -41,8 +44,48 @@ export async function loadStellarContractFromAddress(
 
     logger.info('loadStellarContractFromAddress', 'Contract client created successfully');
 
-    // Extract functions using the official laboratory approach
-    const functions = extractFunctionsFromSpec(contractClient.spec, contractAddress);
+    // Get spec entries - try different approaches to access them
+    let specEntries: xdr.ScSpecEntry[] = [];
+    try {
+      // Access spec entries from the spec object
+
+      // Try to access spec entries through different possible properties/methods
+      if (contractClient.spec && typeof contractClient.spec === 'object') {
+        const spec = contractClient.spec as unknown as Record<string, unknown>;
+
+        // Try common property names
+        if (Array.isArray(spec.entries)) {
+          specEntries = spec.entries as xdr.ScSpecEntry[];
+        } else if (Array.isArray(spec._entries)) {
+          specEntries = spec._entries as xdr.ScSpecEntry[];
+        } else if (Array.isArray(spec.specEntries)) {
+          specEntries = spec.specEntries as xdr.ScSpecEntry[];
+        } else if (typeof spec.entries === 'function') {
+          // Maybe it's a method after all, but with different signature
+          try {
+            specEntries = (spec.entries as () => xdr.ScSpecEntry[])();
+          } catch (e) {
+            logger.warn('loadStellarContractFromAddress', 'entries() method failed:', e);
+          }
+        }
+
+        // Try the method directly on spec if it has the method
+        if (specEntries.length === 0 && typeof spec.entries === 'function') {
+          try {
+            specEntries = (spec.entries as () => xdr.ScSpecEntry[])();
+          } catch (e) {
+            logger.warn('loadStellarContractFromAddress', 'direct entries() method failed:', e);
+          }
+        }
+
+        logger.info('loadStellarContractFromAddress', `Found ${specEntries.length} spec entries`);
+      }
+    } catch (specError) {
+      logger.warn('loadStellarContractFromAddress', 'Could not extract spec entries:', specError);
+    }
+
+    // Extract functions using the official laboratory approach with spec entries for struct extraction
+    const functions = extractFunctionsFromSpec(contractClient.spec, contractAddress, specEntries);
 
     logger.info(
       'loadStellarContractFromAddress',
@@ -53,6 +96,9 @@ export async function loadStellarContractFromAddress(
       name: `Soroban Contract ${contractAddress.slice(0, 8)}...`,
       ecosystem: 'stellar',
       functions,
+      metadata: {
+        specEntries,
+      },
     };
   } catch (error) {
     logger.error('loadStellarContractFromAddress', 'Failed to load contract:', error);
@@ -65,7 +111,8 @@ export async function loadStellarContractFromAddress(
  */
 function extractFunctionsFromSpec(
   spec: StellarSdk.contract.Spec,
-  _contractAddress: string
+  _contractAddress: string,
+  specEntries?: xdr.ScSpecEntry[]
 ): ContractFunction[] {
   try {
     // Get all functions using the official SDK method
@@ -84,11 +131,37 @@ function extractFunctionsFromSpec(
         const inputs: FunctionParameter[] = func.inputs().map((input, inputIndex) => {
           try {
             const inputName = input.name().toString();
-            const inputType = 'unknown'; // Simplified for now - we'll extract type properly later
+            const inputType = extractSorobanTypeFromScSpec(input.type());
+
+            if (inputType === 'unknown') {
+              logger.warn(
+                'extractFunctionsFromSpec',
+                `Unknown type for parameter "${inputName}" in function "${functionName}"`
+              );
+            }
+
+            // Check if this is a struct type and extract components
+            let components: FunctionParameter[] | undefined;
+            if (specEntries && specEntries.length > 0 && isStructType(specEntries, inputType)) {
+              const structFields = extractStructFields(specEntries, inputType);
+              if (structFields && structFields.length > 0) {
+                components = structFields;
+                logger.debug(
+                  'extractFunctionsFromSpec',
+                  `Extracted ${structFields.length} fields for struct type "${inputType}": ${structFields.map((f) => `${f.name}:${f.type}`).join(', ')}`
+                );
+              } else {
+                logger.warn(
+                  'extractFunctionsFromSpec',
+                  `No fields extracted for struct "${inputType}"`
+                );
+              }
+            }
 
             return {
               name: inputName || `param_${inputIndex}`,
               type: inputType,
+              ...(components && { components }),
             };
           } catch (error) {
             logger.warn('extractFunctionsFromSpec', `Failed to parse input ${inputIndex}:`, error);
@@ -99,10 +172,10 @@ function extractFunctionsFromSpec(
           }
         });
 
-        const outputs: FunctionParameter[] = func.outputs().map((_output, outputIndex) => {
+        const outputs: FunctionParameter[] = func.outputs().map((output, outputIndex) => {
           try {
             // Outputs are ScSpecTypeDef objects, they don't have names, only types
-            const outputType = 'unknown'; // Simplified for now - we'll extract type properly later
+            const outputType = extractSorobanTypeFromScSpec(output);
 
             return {
               name: `result_${outputIndex}`,
@@ -195,10 +268,12 @@ export async function loadStellarContract(
     networkConfig.networkPassphrase
   );
 
+  const schemaWithAddress = { ...schema, address: artifacts.contractAddress };
+
   return {
-    schema: { ...schema, address: artifacts.contractAddress },
+    schema: schemaWithAddress,
     source: 'fetched',
-    contractDefinitionOriginal: JSON.stringify({ ...schema, address: artifacts.contractAddress }),
+    contractDefinitionOriginal: JSON.stringify(schemaWithAddress),
     metadata: {
       fetchedFrom:
         getStellarExplorerAddressUrl(artifacts.contractAddress, networkConfig) ||

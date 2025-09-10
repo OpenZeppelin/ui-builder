@@ -57,7 +57,7 @@ export const createMockContractUIRecord = (overrides = {}) => ({
       labelPosition: 'top' as const,
     },
     validation: {
-      mode: 'onChange' as const,
+      mode: 'onTouched' as const,
       showErrors: 'inline' as const,
     },
     submitButton: {
@@ -92,7 +92,7 @@ export const createEmptyContractUIRecord = (overrides = {}) => ({
       labelPosition: 'top' as const,
     },
     validation: {
-      mode: 'onChange' as const,
+      mode: 'onTouched' as const,
       showErrors: 'inline' as const,
     },
     submitButton: {

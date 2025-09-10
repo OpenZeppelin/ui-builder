@@ -9,6 +9,7 @@ import {
   disconnectStellarWallet,
   getStellarAvailableConnectors,
   getStellarWalletConnectionStatus,
+  onStellarWalletConnectionChange,
 } from '../connection';
 import {
   StellarWalletContext,
@@ -65,21 +66,27 @@ export function StellarWalletUiRoot({ children, uiKitConfig }: StellarWalletUiRo
     return unsubscribe;
   }, []);
 
-  // Update connection status periodically
+  // Event-driven connection status updates
   useEffect(() => {
-    const updateConnectionStatus = () => {
-      const status = getStellarWalletConnectionStatus();
-      setAddress(status.address || null);
+    const unsubscribeFromConnectionChanges = onStellarWalletConnectionChange(
+      (currentStatus, _previousStatus) => {
+        setAddress(currentStatus.address || null);
+        logger.debug(
+          'StellarWalletUiRoot',
+          `Connection status changed: ${currentStatus.isConnected ? 'connected' : 'disconnected'}`,
+          currentStatus.address
+        );
+      }
+    );
+
+    // Initial update to sync current state
+    const initialStatus = getStellarWalletConnectionStatus();
+    setAddress(initialStatus.address || null);
+
+    return () => {
+      unsubscribeFromConnectionChanges();
     };
-
-    // Initial update
-    updateConnectionStatus();
-
-    // Update every second to catch external changes
-    const interval = setInterval(updateConnectionStatus, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [address]);
 
   // Load available wallets
   useEffect(() => {
