@@ -1,8 +1,9 @@
 // Re-export the main adapter class
 export { SolanaAdapter } from './adapter';
 
-// Optionally re-export types if needed
-// export * from './types'; // No types.ts in Solana adapter yet
+// Re-export adapter-specific types
+export type { SolanaContractArtifacts } from './types/artifacts';
+export { isSolanaContractArtifacts } from './types/artifacts';
 
 export {
   solanaNetworks,

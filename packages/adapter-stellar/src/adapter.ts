@@ -13,7 +13,6 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   NativeConfigLoader,
   RelayerDetails,
@@ -46,6 +45,7 @@ import {
 } from './query';
 import { formatStellarTransactionData, signAndBroadcastStellarTransaction } from './transaction';
 import { formatStellarFunctionResult } from './transform';
+import { validateAndConvertStellarArtifacts } from './utils';
 import { isValidAddress as isStellarValidAddress, type StellarAddressType } from './validation';
 import {
   connectStellarWallet,
@@ -128,7 +128,9 @@ export class StellarAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+  public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
+    // Convert generic input to Stellar-specific artifacts
+    const artifacts = validateAndConvertStellarArtifacts(source);
     const result = await loadStellarContract(artifacts, this.networkConfig);
     return result.schema;
   }
@@ -136,7 +138,7 @@ export class StellarAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContractWithMetadata(artifacts: FormValues): Promise<{
+  public async loadContractWithMetadata(source: string | Record<string, unknown>): Promise<{
     schema: ContractSchema;
     source: 'fetched' | 'manual';
     contractDefinitionOriginal?: string;
@@ -148,6 +150,8 @@ export class StellarAdapter implements ContractAdapter {
     };
   }> {
     try {
+      // Convert generic input to Stellar-specific artifacts
+      const artifacts = validateAndConvertStellarArtifacts(source);
       const result = await loadStellarContractWithMetadata(artifacts, this.networkConfig);
 
       return {

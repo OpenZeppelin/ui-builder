@@ -4,7 +4,6 @@ import { xdr } from '@stellar/stellar-sdk';
 import type {
   ContractFunction,
   ContractSchema,
-  FormValues,
   FunctionParameter,
   StellarNetworkConfig,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -12,6 +11,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getStellarExplorerAddressUrl } from '../explorer';
 import { extractStructFields, isStructType } from '../mapping/struct-fields';
+import type { StellarContractArtifacts } from '../types/artifacts';
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
 
 /**
@@ -255,7 +255,7 @@ export interface StellarContractLoadResult {
  * Load Stellar contract with basic metadata
  */
 export async function loadStellarContract(
-  artifacts: FormValues,
+  artifacts: StellarContractArtifacts,
   networkConfig: StellarNetworkConfig
 ): Promise<StellarContractLoadResult> {
   if (typeof artifacts.contractAddress !== 'string') {
@@ -288,7 +288,7 @@ export async function loadStellarContract(
  * Load Stellar contract with extended metadata
  */
 export async function loadStellarContractWithMetadata(
-  artifacts: FormValues,
+  artifacts: StellarContractArtifacts,
   networkConfig: StellarNetworkConfig
 ): Promise<StellarContractLoadResult> {
   if (typeof artifacts.contractAddress !== 'string') {

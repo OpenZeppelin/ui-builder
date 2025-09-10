@@ -14,7 +14,6 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   NativeConfigLoader,
   NetworkConfig,
@@ -67,7 +66,7 @@ import {
 import { formatEvmFunctionResult } from './transform';
 import { TypedEvmNetworkConfig } from './types';
 import type { WriteContractParameters } from './types';
-import { isValidEvmAddress } from './utils';
+import { isValidEvmAddress, validateAndConvertEvmArtifacts } from './utils';
 import {
   connectAndEnsureCorrectNetwork,
   convertWagmiToEvmStatus,
@@ -127,7 +126,9 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+  public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
+    // Convert generic input to EVM-specific artifacts
+    const artifacts = validateAndConvertEvmArtifacts(source);
     const result = await loadEvmContract(artifacts, this.networkConfig);
     return result.schema;
   }
@@ -135,7 +136,7 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContractWithMetadata(artifacts: FormValues): Promise<{
+  public async loadContractWithMetadata(source: string | Record<string, unknown>): Promise<{
     schema: ContractSchema;
     source: 'fetched' | 'manual';
     contractDefinitionOriginal?: string;
@@ -149,6 +150,8 @@ export class EvmAdapter implements ContractAdapter {
     proxyInfo?: ProxyInfo;
   }> {
     try {
+      // Convert generic input to EVM-specific artifacts
+      const artifacts = validateAndConvertEvmArtifacts(source);
       const result = await loadEvmContract(artifacts, this.networkConfig);
 
       return {

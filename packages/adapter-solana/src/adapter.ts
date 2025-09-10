@@ -8,7 +8,6 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   RelayerDetails,
   RelayerDetailsRich,
@@ -41,7 +40,7 @@ import {
   waitForSolanaTransactionConfirmation,
 } from './transaction';
 import { formatSolanaFunctionResult } from './transform';
-import { isValidSolanaAddress } from './utils';
+import { isValidSolanaAddress, validateAndConvertSolanaArtifacts } from './utils';
 import {
   connectSolanaWallet,
   disconnectSolanaWallet,
@@ -72,13 +71,11 @@ export class SolanaAdapter implements ContractAdapter {
     );
   }
 
-  async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+  async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
     // Solana contracts (programs) don't have a standardized on-chain ABI.
     // The 'source' would likely be an IDL JSON provided by the user.
     // This is a placeholder for a more complex implementation.
-    if (typeof artifacts.contractAddress !== 'string') {
-      throw new Error('A program ID must be provided.');
-    }
+    const artifacts = validateAndConvertSolanaArtifacts(source);
 
     return {
       name: 'SolanaProgram',

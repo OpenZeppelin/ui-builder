@@ -43,5 +43,9 @@ export { evmAdapterConfig } from './config';
 export type { TypedEvmNetworkConfig, WriteContractParameters } from './types';
 export type { EvmRelayerTransactionOptions } from './transaction/relayer';
 
+// Re-export adapter-specific types
+export type { EvmContractArtifacts } from './types/artifacts';
+export { isEvmContractArtifacts } from './types/artifacts';
+
 // Export abi module for comparison functionality
 export { abiComparisonService } from './abi';
