@@ -8,6 +8,7 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
+import { EvmWalletConnectionStatus } from '../wallet/types';
 
 const SYSTEM_LOG_TAG = 'adapter-evm-execution-config';
 
@@ -46,7 +47,7 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
  */
 async function _validateMultisigConfig(
   _config: MultisigExecutionConfig,
-  _walletStatus: { isConnected: boolean; address?: string; chainId?: string }
+  _walletStatus: EvmWalletConnectionStatus
 ): Promise<true | string> {
   logger.info(SYSTEM_LOG_TAG, 'Multisig execution config validation: Not yet fully implemented.');
   // TODO: Add validation for Safe address, required signers, etc.
@@ -59,26 +60,17 @@ async function _validateMultisigConfig(
  */
 export async function validateEvmExecutionConfig(
   config: ExecutionConfig,
-  walletStatus: { isConnected: boolean; address?: string; chainId?: string | number }
+  walletStatus: EvmWalletConnectionStatus
 ): Promise<true | string> {
   logger.info(SYSTEM_LOG_TAG, 'Validating EVM execution config:', { config, walletStatus });
 
-  // Normalize chainId to string for validation functions
-  const normalizedWalletStatus = {
-    ...walletStatus,
-    chainId:
-      typeof walletStatus.chainId === 'number'
-        ? walletStatus.chainId.toString()
-        : walletStatus.chainId,
-  };
-
   switch (config.method) {
     case 'eoa':
-      return validateEoaConfig(config as EoaExecutionConfig, normalizedWalletStatus);
+      return validateEoaConfig(config as EoaExecutionConfig, walletStatus);
     case 'relayer':
       return validateRelayerConfig(config as RelayerExecutionConfig);
     case 'multisig':
-      return _validateMultisigConfig(config as MultisigExecutionConfig, normalizedWalletStatus);
+      return _validateMultisigConfig(config as MultisigExecutionConfig, walletStatus);
     default: {
       const unknownMethod = (config as ExecutionConfig).method;
       logger.warn(

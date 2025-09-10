@@ -2,12 +2,13 @@ import { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
+import { EvmWalletConnectionStatus } from '../wallet/types';
 
 const SYSTEM_LOG_TAG = 'EoaValidator';
 
 export async function validateEoaConfig(
   config: EoaExecutionConfig,
-  walletStatus: { isConnected: boolean; address?: string; chainId?: string }
+  walletStatus: EvmWalletConnectionStatus
 ): Promise<true | string> {
   if (!config.allowAny) {
     if (!config.specificAddress) {
