@@ -116,6 +116,18 @@ export interface EcosystemWalletComponents {
   NetworkSwitcher?: React.ComponentType<BaseComponentProps>;
 }
 
+/**
+ * Valid component keys for EcosystemWalletComponents.
+ * Used for type-safe runtime validation of component exclusion lists.
+ */
+export const ECOSYSTEM_WALLET_COMPONENT_KEYS = [
+  'ConnectButton',
+  'AccountDisplay',
+  'NetworkSwitcher',
+] as const satisfies Array<keyof EcosystemWalletComponents>;
+
+export type EcosystemWalletComponentKey = (typeof ECOSYSTEM_WALLET_COMPONENT_KEYS)[number];
+
 export type NativeConfigLoader = (relativePath: string) => Promise<Record<string, unknown> | null>;
 
 /**

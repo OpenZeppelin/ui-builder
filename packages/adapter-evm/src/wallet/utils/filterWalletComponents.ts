@@ -2,6 +2,7 @@ import type {
   EcosystemWalletComponents,
   UiKitConfiguration,
 } from '@openzeppelin/contracts-ui-builder-types';
+import { ECOSYSTEM_WALLET_COMPONENT_KEYS } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 /**
@@ -83,7 +84,7 @@ export function getComponentExclusionsFromConfig(
       return componentsCfg.exclude.filter(
         (key): key is keyof EcosystemWalletComponents =>
           typeof key === 'string' &&
-          ('ConnectButton' === key || 'AccountDisplay' === key || 'NetworkSwitcher' === key)
+          (ECOSYSTEM_WALLET_COMPONENT_KEYS as readonly string[]).includes(key)
       ) as Array<keyof EcosystemWalletComponents>;
     }
   }
