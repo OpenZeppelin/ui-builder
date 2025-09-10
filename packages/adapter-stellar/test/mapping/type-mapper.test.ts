@@ -56,12 +56,12 @@ describe('mapStellarParameterTypeToFieldType', () => {
       expect(mapStellarParameterTypeToFieldType('I256')).toBe('number');
     });
 
-    it('should map Bytes to textarea', () => {
-      expect(mapStellarParameterTypeToFieldType('Bytes')).toBe('textarea');
+    it('should map Bytes to bytes', () => {
+      expect(mapStellarParameterTypeToFieldType('Bytes')).toBe('bytes');
     });
 
-    it('should map DataUrl to textarea', () => {
-      expect(mapStellarParameterTypeToFieldType('DataUrl')).toBe('textarea');
+    it('should map DataUrl to bytes', () => {
+      expect(mapStellarParameterTypeToFieldType('DataUrl')).toBe('bytes');
     });
   });
 
@@ -71,8 +71,8 @@ describe('mapStellarParameterTypeToFieldType', () => {
       expect(mapStellarParameterTypeToFieldType('Vec')).toBe('array');
     });
 
-    it('should map Map to object', () => {
-      expect(mapStellarParameterTypeToFieldType('Map')).toBe('object');
+    it('should map Map to map', () => {
+      expect(mapStellarParameterTypeToFieldType('Map')).toBe('map');
     });
 
     it('should map custom struct types to object', () => {
@@ -180,7 +180,7 @@ describe('getStellarCompatibleFieldTypes', () => {
 
     it('should return compatible types for Map', () => {
       const result = getStellarCompatibleFieldTypes('Map');
-      expect(result).toContain('object');
+      expect(result).toContain('map');
       expect(result).toContain('textarea');
       expect(result).toContain('text');
     });

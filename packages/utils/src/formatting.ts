@@ -36,3 +36,39 @@ export function formatTimestamp(date: Date): string {
 
   return date.toLocaleDateString();
 }
+
+/**
+ * Detects whether a string contains hex-encoded or base64-encoded binary data.
+ * Useful for auto-detecting the encoding format of user inputs across blockchain adapters.
+ *
+ * @param value - The string to analyze
+ * @returns 'hex' if the string appears to be hexadecimal, 'base64' if it appears to be base64
+ *
+ * @example
+ * ```typescript
+ * detectBytesEncoding("48656c6c6f") // → 'hex'
+ * detectBytesEncoding("SGVsbG8=") // → 'base64'
+ * detectBytesEncoding("0x48656c6c6f") // → 'hex' (after stripping 0x prefix)
+ * ```
+ */
+export function detectBytesEncoding(value: string): 'base64' | 'hex' {
+  const hexRegex = /^[0-9a-fA-F]+$/;
+  const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+
+  if (hexRegex.test(value) && value.length % 2 === 0) {
+    return 'hex';
+  }
+
+  if (base64Regex.test(value) && value.length % 4 === 0) {
+    try {
+      // Try to decode as base64 using native atob() and re-encode to verify it's valid
+      const decoded = atob(value);
+      const reencoded = btoa(decoded);
+      return reencoded.replace(/=+$/, '') === value.replace(/=+$/, '') ? 'base64' : 'hex';
+    } catch {
+      return 'hex';
+    }
+  }
+
+  return 'base64';
+}

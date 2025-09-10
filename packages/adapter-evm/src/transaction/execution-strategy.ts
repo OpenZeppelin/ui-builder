@@ -1,4 +1,8 @@
-import { ExecutionConfig, TransactionStatusUpdate } from '@openzeppelin/contracts-ui-builder-types';
+import {
+  ExecutionConfig,
+  TransactionStatusUpdate,
+  TxStatus,
+} from '@openzeppelin/contracts-ui-builder-types';
 
 import { WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
@@ -27,7 +31,7 @@ export interface ExecutionStrategy {
     transactionData: WriteContractParameters,
     executionConfig: ExecutionConfig,
     walletImplementation: WagmiWalletImplementation,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }>;
 }

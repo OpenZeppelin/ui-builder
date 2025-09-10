@@ -1,7 +1,7 @@
 import { scValToNative, xdr } from '@stellar/stellar-sdk';
 
 import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { bytesToHex, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isSerializableObject, stringifyWithBigInt } from '../utils';
 
@@ -61,9 +61,9 @@ export function formatStellarFunctionResult(
       return valueToFormat.toString();
     } else if (typeof valueToFormat === 'boolean') {
       return String(valueToFormat);
-    } else if (valueToFormat instanceof Uint8Array || valueToFormat instanceof Buffer) {
+    } else if (valueToFormat instanceof Uint8Array) {
       // Handle byte arrays - convert to hex string
-      return `0x${Buffer.from(valueToFormat).toString('hex')}`;
+      return bytesToHex(valueToFormat, true);
     } else if (Array.isArray(valueToFormat)) {
       // Handle arrays/vectors
       if (valueToFormat.length === 0) {

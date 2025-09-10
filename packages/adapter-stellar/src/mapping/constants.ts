@@ -29,12 +29,12 @@ export const STELLAR_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   Bool: 'checkbox',
 
   // Byte types
-  Bytes: 'textarea',
-  DataUrl: 'textarea',
+  Bytes: 'bytes',
+  DataUrl: 'bytes',
 
   // Collection types
   Vec: 'array',
-  Map: 'object',
+  Map: 'map',
 
   // Complex types
   Tuple: 'object',

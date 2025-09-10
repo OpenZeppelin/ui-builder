@@ -78,7 +78,7 @@ async function checkStellarSDKTypes() {
       console.error(
         '\n💡 Action Required: Add these types to extractSorobanTypeFromScSpec function'
       );
-      console.error('📍 File: packages/adapter-stellar/src/contract/loader.ts\n');
+      console.error('📍 File: packages/adapter-stellar/src/utils/type-detection.ts\n');
     }
 
     if (deprecatedTypes.length > 0) {

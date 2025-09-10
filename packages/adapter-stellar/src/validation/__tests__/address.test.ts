@@ -210,7 +210,7 @@ describe('isValidAddress (main function)', () => {
 
     it('should validate pre-auth-tx when specified', () => {
       const preAuthTx = 'TDQP2KPQGKIHYJGXNUIYOMHARUARCA7DJT5FO2FFOOKY3B2WSQHG4W37';
-      mockStrKey.decodePreAuthTx.mockReturnValue(Buffer.from('fake'));
+      mockStrKey.decodePreAuthTx.mockReturnValue(new Uint8Array([1, 2, 3, 4]));
 
       const result = isValidAddress(preAuthTx, 'pre-auth-tx');
 
@@ -220,7 +220,7 @@ describe('isValidAddress (main function)', () => {
 
     it('should validate hash-x when specified', () => {
       const hashX = 'XDQP2KPQGKIHYJGXNUIYOMHARUARCA7DJT5FO2FFOOKY3B2WSQHG4W37';
-      mockStrKey.decodeSha256Hash.mockReturnValue(Buffer.from('fake'));
+      mockStrKey.decodeSha256Hash.mockReturnValue(new Uint8Array([1, 2, 3, 4]));
 
       const result = isValidAddress(hashX, 'hash-x');
 

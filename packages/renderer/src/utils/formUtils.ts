@@ -203,6 +203,9 @@ export function createTransformForFieldType(
       return createObjectTransform() as FieldTransforms<unknown>;
     case 'array-object':
       return createArrayObjectTransform() as FieldTransforms<unknown>;
+    case 'enum':
+      // Enum fields use complex type transform for JSON serialization of enum values
+      return createComplexTypeTransform() as FieldTransforms<unknown>;
     default:
       // For unhandled field types, log a warning and fallback to complex type (JSON) transform.
       // Ideally, all common ABI types should be mapped by the adapter to specific FieldTypes.

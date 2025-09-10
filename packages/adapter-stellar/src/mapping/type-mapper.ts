@@ -1,5 +1,6 @@
 import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
 
+import { isLikelyEnumType } from '../utils/type-detection';
 import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
 
 /**
@@ -8,22 +9,6 @@ import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
  * @returns The appropriate default form field type (e.g., 'number', 'blockchain-address', 'array')
  */
 export function mapStellarParameterTypeToFieldType(parameterType: string): FieldType {
-  // Debug logging to identify completely unmapped types (not generics or handled cases)
-  if (
-    !STELLAR_TYPE_TO_FIELD_TYPE[parameterType] &&
-    !parameterType.startsWith('Vec<') &&
-    !parameterType.startsWith('Map<') &&
-    !parameterType.startsWith('BytesN<') &&
-    !parameterType.includes('<') &&
-    parameterType !== 'Vec' &&
-    parameterType !== 'Map' &&
-    parameterType !== 'unknown'
-  ) {
-    console.warn(
-      `[mapStellarParameterTypeToFieldType] No mapping found for type: "${parameterType}"`
-    );
-  }
-
   // Check if this is a Vec of custom/complex types (e.g., Vec<CustomStruct>)
   const vecComplexMatch = parameterType.match(/^Vec<([^>]+)>$/);
   if (vecComplexMatch) {
@@ -42,7 +27,7 @@ export function mapStellarParameterTypeToFieldType(parameterType: string): Field
 
   // Check if this is a Map type
   if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
-    return 'object';
+    return 'map' as FieldType;
   }
 
   // Extract base type for generic types (e.g., Option<U32> -> U32)
@@ -68,7 +53,7 @@ export function mapStellarParameterTypeToFieldType(parameterType: string): Field
   }
 
   // Handle custom types (structs, enums) - default to object unless it's clearly an enum
-  if (parameterType.includes('Enum') || parameterType.includes('enum')) {
+  if (isLikelyEnumType(parameterType)) {
     return 'select';
   }
 
@@ -125,7 +110,7 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
 
   // Handle Map types
   if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
-    return ['object', 'textarea', 'text'];
+    return ['map' as FieldType, 'textarea', 'text'];
   }
 
   // Handle generic types
@@ -162,10 +147,10 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
     ScSymbol: ['text', 'textarea'],
 
     // Byte types
-    Bytes: ['textarea', 'text'],
-    DataUrl: ['textarea', 'text'],
+    Bytes: ['bytes', 'textarea', 'text'],
+    DataUrl: ['bytes', 'textarea', 'text'],
     // BytesN types like BytesN<32> for hashes
-    'BytesN<32>': ['textarea', 'text'],
+    'BytesN<32>': ['bytes', 'textarea', 'text'],
 
     // Complex types
     Tuple: ['object', 'textarea', 'text'],
@@ -179,8 +164,8 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
   }
 
   // Handle enums
-  if (parameterType.includes('Enum') || parameterType.includes('enum')) {
-    return ['select', 'radio', 'text'];
+  if (isLikelyEnumType(parameterType)) {
+    return ['enum', 'select', 'radio', 'text'];
   }
 
   // Handle custom types (assumed to be structs)

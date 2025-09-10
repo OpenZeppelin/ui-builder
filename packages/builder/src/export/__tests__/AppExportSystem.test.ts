@@ -141,7 +141,7 @@ describe('AppExportSystem', () => {
     const createZipFileSpy = vi
       .spyOn(zipGenerator, 'createZipFile')
       .mockImplementation(async (_files, fileName, _options) => {
-        return { data: Buffer.from('mock zip'), fileName: fileName }; // Return passed filename
+        return { data: Buffer.from([1, 2, 3, 4]), fileName: fileName }; // Return passed filename
       });
 
     // --- Mock/Spy on other dependencies' methods ---

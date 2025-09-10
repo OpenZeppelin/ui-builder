@@ -1,4 +1,3 @@
-import type { GetAccountReturnType } from '@wagmi/core';
 import { type TransactionReceipt } from 'viem';
 import React from 'react';
 
@@ -23,9 +22,11 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
+  TxStatus,
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
+  WalletConnectionStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -37,18 +38,6 @@ import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
-import { getResolvedWalletComponents } from './wallet/utils';
-import {
-  connectAndEnsureCorrectNetwork,
-  disconnectEvmWallet,
-  evmSupportsWalletConnection,
-  getEvmAvailableConnectors,
-  getEvmWalletConnectionStatus,
-} from './wallet/utils/connection';
-import {
-  getEvmWalletImplementation,
-  getInitializedEvmWalletImplementation,
-} from './wallet/utils/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
 import {
@@ -79,6 +68,18 @@ import { formatEvmFunctionResult } from './transform';
 import { TypedEvmNetworkConfig } from './types';
 import type { WriteContractParameters } from './types';
 import { isValidEvmAddress } from './utils';
+import {
+  connectAndEnsureCorrectNetwork,
+  convertWagmiToEvmStatus,
+  disconnectEvmWallet,
+  evmSupportsWalletConnection,
+  EvmWalletConnectionStatus,
+  getEvmAvailableConnectors,
+  getEvmWalletConnectionStatus,
+  getEvmWalletImplementation,
+  getInitializedEvmWalletImplementation,
+  getResolvedWalletComponents,
+} from './wallet';
 
 /**
  * Type guard to check if a network config is a TypedEvmNetworkConfig
@@ -212,7 +213,7 @@ export class EvmAdapter implements ContractAdapter {
   public async signAndBroadcast(
     transactionData: unknown,
     executionConfig: ExecutionConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const walletImplementation = await getEvmWalletImplementation();
@@ -400,20 +401,19 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+  public getWalletConnectionStatus(): EvmWalletConnectionStatus {
     const status = getEvmWalletConnectionStatus();
-    return {
-      isConnected: status.isConnected,
-      address: status.address,
-      chainId: status.chainId?.toString(),
-    };
+    return convertWagmiToEvmStatus(status);
   }
 
   /**
    * @inheritdoc
    */
   public onWalletConnectionChange(
-    callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
+    callback: (
+      currentStatus: WalletConnectionStatus,
+      previousStatus: WalletConnectionStatus
+    ) => void
   ): () => void {
     const walletImplementation = getInitializedEvmWalletImplementation();
     if (!walletImplementation) {
@@ -423,7 +423,16 @@ export class EvmAdapter implements ContractAdapter {
       );
       return () => {};
     }
-    return walletImplementation.onWalletConnectionChange(callback);
+    return walletImplementation.onWalletConnectionChange(
+      (currentWagmiStatus, previousWagmiStatus) => {
+        // Convert wagmi's GetAccountReturnType to the rich adapter interface
+        // This preserves all the enhanced UX capabilities from wagmi
+        const current = convertWagmiToEvmStatus(currentWagmiStatus);
+        const previous = convertWagmiToEvmStatus(previousWagmiStatus);
+
+        callback(current, previous);
+      }
+    );
   }
 
   /**

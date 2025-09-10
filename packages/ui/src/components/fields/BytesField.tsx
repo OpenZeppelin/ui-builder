@@ -139,26 +139,30 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
             return validateBytesField(value);
           },
         }}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && (isTouched || validation?.required);
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Get accessibility attributes
           const accessibilityProps = getAccessibilityProps({
             id,
             hasError,
             isRequired,
+            isDisabled: readOnly,
             hasHelperText: !!helperText,
           });
 
           return (
             <>
               <Textarea
-                {...field}
                 id={id}
+                name={field.name}
+                ref={field.ref}
                 placeholder={placeholder}
                 rows={rows}
                 className={validationClasses}
+                disabled={readOnly}
                 value={field.value ?? ''}
                 onChange={(e) => {
                   // Only update value without formatting for better performance
@@ -168,10 +172,9 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                   // Apply formatting on blur when user finishes typing
                   const formatted = formatValue(e.target.value);
                   field.onChange(formatted);
-                  field.onBlur();
+                  // Note: Let React Hook Form handle blur naturally without programmatic trigger
                 }}
                 onKeyDown={handleEscapeKey(field.onChange, field.value)}
-                readOnly={readOnly}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`.trim()}
               />
@@ -191,7 +194,11 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

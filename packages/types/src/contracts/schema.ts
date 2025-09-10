@@ -153,4 +153,11 @@ export interface ContractSchema {
    * Optional address where the contract is deployed on its respective blockchain.
    */
   address?: string;
+
+  /**
+   * Optional chain-specific metadata that adapters can use for enhanced functionality.
+   * This allows adapters to store additional context (e.g., Stellar spec entries, EVM ABI metadata)
+   * without polluting the core schema interface.
+   */
+  metadata?: Record<string, unknown>;
 }
