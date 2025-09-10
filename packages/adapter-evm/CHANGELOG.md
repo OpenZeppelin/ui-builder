@@ -1,5 +1,15 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.8.0
+
+### Patch Changes
+
+- Updated dependencies [[`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9)]:
+  - @openzeppelin/contracts-ui-builder-types@0.8.0
+  - @openzeppelin/contracts-ui-builder-utils@0.8.0
+  - @openzeppelin/contracts-ui-builder-ui@0.8.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.8.0
+
 ## 0.7.1
 
 ### Patch Changes

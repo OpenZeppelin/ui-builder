@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/contracts-ui-builder-utils",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": false,
   "description": "Shared, framework-agnostic utility functions for the OpenZeppelin Contracts UI Builder.",
   "type": "module",
