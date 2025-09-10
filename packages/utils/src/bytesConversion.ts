@@ -71,6 +71,6 @@ export function stringToBytes(value: string, encoding: 'hex' | 'base64'): Uint8A
     case 'base64':
       return base64ToBytes(value);
     default:
-      throw new Error(`Unsupported encoding: ${encoding}`);
+      throw new Error(`Unsupported encoding: ${encoding}. Supported encodings: hex, base64`);
   }
 }
