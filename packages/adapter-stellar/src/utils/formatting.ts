@@ -31,7 +31,6 @@ export function isSerializableObject(value: unknown): boolean {
     !Array.isArray(value) &&
     !(value instanceof Date) &&
     !(value instanceof Uint8Array) &&
-    !(value instanceof Buffer) &&
     value.constructor === Object
   );
 }

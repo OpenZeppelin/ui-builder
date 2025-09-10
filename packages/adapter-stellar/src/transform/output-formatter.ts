@@ -61,11 +61,9 @@ export function formatStellarFunctionResult(
       return valueToFormat.toString();
     } else if (typeof valueToFormat === 'boolean') {
       return String(valueToFormat);
-    } else if (valueToFormat instanceof Uint8Array || valueToFormat instanceof Buffer) {
+    } else if (valueToFormat instanceof Uint8Array) {
       // Handle byte arrays - convert to hex string
-      const bytes =
-        valueToFormat instanceof Uint8Array ? valueToFormat : new Uint8Array(valueToFormat);
-      return bytesToHex(bytes, true);
+      return bytesToHex(valueToFormat, true);
     } else if (Array.isArray(valueToFormat)) {
       // Handle arrays/vectors
       if (valueToFormat.length === 0) {
