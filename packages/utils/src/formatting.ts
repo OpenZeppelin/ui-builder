@@ -61,11 +61,10 @@ export function detectBytesEncoding(value: string): 'base64' | 'hex' {
 
   if (base64Regex.test(value) && value.length % 4 === 0) {
     try {
-      // Try to decode as base64 and re-encode to verify it's valid
-      const decoded = Buffer.from(value, 'base64');
-      return decoded.toString('base64').replace(/=+$/, '') === value.replace(/=+$/, '')
-        ? 'base64'
-        : 'hex';
+      // Try to decode as base64 using native atob() and re-encode to verify it's valid
+      const decoded = atob(value);
+      const reencoded = btoa(decoded);
+      return reencoded.replace(/=+$/, '') === value.replace(/=+$/, '') ? 'base64' : 'hex';
     } catch {
       return 'hex';
     }

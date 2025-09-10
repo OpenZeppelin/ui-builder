@@ -126,8 +126,7 @@ export function validateBytes(
     detectedFormat = 'base64';
 
     try {
-      // Calculate byte size by decoding using Buffer (cross-platform)
-      const decoded = Buffer.from(withoutPrefix, 'base64');
+      const decoded = atob(withoutPrefix);
       byteSize = decoded.length;
     } catch {
       return {
