@@ -40,10 +40,17 @@ export function StellarWalletsKitConnectButton() {
 
     // Cleanup: remove the button when component unmounts
     return () => {
-      try {
-        kit.removeButton();
-      } catch (error) {
-        logger.debug('StellarWalletsKitConnectButton', 'Error removing button:', error);
+      if (typeof kit.removeButton === 'function') {
+        try {
+          kit.removeButton();
+        } catch (error) {
+          logger.warn('StellarWalletsKitConnectButton', 'Error removing button:', error);
+        }
+      } else {
+        logger.warn(
+          'StellarWalletsKitConnectButton',
+          'removeButton method not available on kit instance'
+        );
       }
     };
   }, []);
