@@ -7,6 +7,7 @@ import {
   RelayerDetailsRich,
   RelayerExecutionConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
@@ -51,7 +52,7 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
     transactionData: WriteContractParameters,
     executionConfig: ExecutionConfig,
     _walletImplementation: WagmiWalletImplementation,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const relayerConfig = executionConfig as RelayerExecutionConfig;

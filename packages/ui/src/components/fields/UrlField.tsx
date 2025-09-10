@@ -68,9 +68,10 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
           },
         }}
         disabled={readOnly}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && isTouched;
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Handle input change with validation
           const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -128,7 +129,11 @@ export function UrlField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

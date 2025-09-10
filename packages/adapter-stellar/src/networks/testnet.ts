@@ -1,6 +1,6 @@
 import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 
-// Placeholder for Stellar Testnet
+// Stellar Testnet
 export const stellarTestnet: StellarNetworkConfig = {
   id: 'stellar-testnet',
   exportConstName: 'stellarTestnet',
@@ -10,6 +10,7 @@ export const stellarTestnet: StellarNetworkConfig = {
   type: 'testnet',
   isTestnet: true,
   horizonUrl: 'https://horizon-testnet.stellar.org',
+  sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
   networkPassphrase: 'Test SDF Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/testnet',
   icon: 'stellar',

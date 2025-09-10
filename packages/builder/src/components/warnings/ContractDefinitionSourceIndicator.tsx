@@ -15,7 +15,7 @@ const sourceConfig = {
   fetched: {
     icon: Download,
     label: 'Fetched',
-    description: 'Contract schema was automatically fetched from block explorer',
+    description: 'Contract schema was fetched automatically',
   },
   manual: {
     icon: Edit,

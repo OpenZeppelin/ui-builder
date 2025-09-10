@@ -30,6 +30,16 @@ interface ResponsiveFieldsLayoutProps {
    * Callback fired when field properties are updated
    */
   onUpdateField: (index: number, updates: Partial<FormFieldType>) => void;
+
+  /**
+   * Callback fired when field validation status changes
+   */
+  onFieldValidationChange?: (fieldId: string, hasError: boolean) => void;
+
+  /**
+   * Map of field IDs to their validation error status
+   */
+  fieldValidationErrors?: Map<string, boolean>;
 }
 
 /**
@@ -49,6 +59,8 @@ export function ResponsiveFieldsLayout({
   onSelectField,
   adapter,
   onUpdateField,
+  onFieldValidationChange,
+  fieldValidationErrors,
 }: ResponsiveFieldsLayoutProps) {
   // Show first field if none is selected but fields exist
   const effectiveSelectedIndex = selectedFieldIndex ?? 0;
@@ -66,16 +78,19 @@ export function ResponsiveFieldsLayout({
           fields={fields}
           selectedFieldIndex={selectedFieldIndex}
           onSelectField={onSelectField}
+          fieldValidationErrors={fieldValidationErrors}
         />
 
         {/* Mobile field editor content */}
         {selectedField && (
           <div className="bg-card border rounded-lg p-4">
             <FieldEditor
+              key={selectedField.id}
               field={selectedField}
               onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
               adapter={adapter}
               originalParameterType={selectedField.originalParameterType}
+              onFieldValidationChange={onFieldValidationChange}
             />
           </div>
         )}
@@ -90,14 +105,17 @@ export function ResponsiveFieldsLayout({
         fields={fields}
         selectedFieldIndex={selectedFieldIndex}
         onSelectField={onSelectField}
+        fieldValidationErrors={fieldValidationErrors}
       />
       <div className="col-span-2">
         {selectedField && (
           <FieldEditor
+            key={selectedField.id}
             field={selectedField}
             onUpdate={(updates) => onUpdateField(effectiveSelectedIndex, updates)}
             adapter={adapter}
             originalParameterType={selectedField.originalParameterType}
+            onFieldValidationChange={onFieldValidationChange}
           />
         )}
       </div>

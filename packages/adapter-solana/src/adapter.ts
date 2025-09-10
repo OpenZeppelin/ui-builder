@@ -8,13 +8,13 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   RelayerDetails,
   RelayerDetailsRich,
   SolanaNetworkConfig,
   UiKitConfiguration,
   UserRpcProviderConfig,
+  WalletConnectionStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { isSolanaNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -40,7 +40,7 @@ import {
   waitForSolanaTransactionConfirmation,
 } from './transaction';
 import { formatSolanaFunctionResult } from './transform';
-import { isValidSolanaAddress } from './utils';
+import { isValidSolanaAddress, validateAndConvertSolanaArtifacts } from './utils';
 import {
   connectSolanaWallet,
   disconnectSolanaWallet,
@@ -48,6 +48,7 @@ import {
   getSolanaWalletConnectionStatus,
   onSolanaWalletConnectionChange,
   solanaSupportsWalletConnection,
+  SolanaWalletConnectionStatus,
 } from './wallet';
 
 /**
@@ -70,13 +71,11 @@ export class SolanaAdapter implements ContractAdapter {
     );
   }
 
-  async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+  async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
     // Solana contracts (programs) don't have a standardized on-chain ABI.
     // The 'source' would likely be an IDL JSON provided by the user.
     // This is a placeholder for a more complex implementation.
-    if (typeof artifacts.contractAddress !== 'string') {
-      throw new Error('A program ID must be provided.');
-    }
+    const artifacts = validateAndConvertSolanaArtifacts(source);
 
     return {
       name: 'SolanaProgram',
@@ -177,12 +176,15 @@ export class SolanaAdapter implements ContractAdapter {
     return disconnectSolanaWallet(/* undefined */);
   }
 
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+  getWalletConnectionStatus(): SolanaWalletConnectionStatus {
     return getSolanaWalletConnectionStatus(/* undefined */);
   }
 
   onWalletConnectionChange?(
-    callback: (status: { isConnected: boolean; address?: string }) => void
+    callback: (
+      currentStatus: WalletConnectionStatus,
+      previousStatus: WalletConnectionStatus
+    ) => void
   ): () => void {
     // Optional methods need careful handling during delegation
     if (onSolanaWalletConnectionChange) {

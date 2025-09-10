@@ -156,9 +156,10 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
           },
         }}
         disabled={readOnly}
-        render={({ field, fieldState: { error } }) => {
+        render={({ field, fieldState: { error, isTouched } }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && isTouched;
+          const validationClasses = getValidationStateClasses(error, isTouched);
 
           // Handle input change
           const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -189,10 +190,8 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
               field.onChange(isNaN(numValue) ? rawValue : numValue);
             }
 
-            // Trigger validation only if the field is potentially invalid
-            if (rawValue === '-' || rawValue === '' || !isValidNumberFormat) {
-              setTimeout(() => field.onBlur(), 0);
-            }
+            // Note: Validation happens naturally when user leaves the field
+            // No need to trigger it programmatically on every change
           };
 
           // Handle keyboard events
@@ -265,7 +264,7 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
 
               // Update the field
               field.onChange(newValue);
-              setTimeout(() => field.onBlur(), 0); // Trigger validation
+              // Note: Validation happens naturally, no need to trigger it programmatically
             }
           };
 
@@ -307,7 +306,11 @@ export function NumberField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message : undefined}
+              />
             </>
           );
         }}

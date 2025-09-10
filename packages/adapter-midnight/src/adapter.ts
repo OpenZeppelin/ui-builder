@@ -16,7 +16,6 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   MidnightNetworkConfig,
   RelayerDetails,
@@ -27,12 +26,14 @@ import type {
 import { isMidnightNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { parseMidnightContractInterface } from './utils/schema-parser';
+import type { MidnightContractArtifacts } from './types/artifacts';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
 import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
 import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
+
+import { parseMidnightContractInterface, validateAndConvertMidnightArtifacts } from './utils';
 
 /**
  * Midnight-specific adapter.
@@ -44,7 +45,7 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 export class MidnightAdapter implements ContractAdapter {
   readonly networkConfig: MidnightNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
-  private artifacts: FormValues = {};
+  private artifacts: MidnightContractArtifacts | null = null;
 
   constructor(networkConfig: MidnightNetworkConfig) {
     if (!isMidnightNetworkConfig(networkConfig)) {
@@ -169,29 +170,18 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
-    if (typeof source !== 'object' || source === null) {
-      throw new Error('Invalid source provided to MidnightAdapter.loadContract.');
-    }
-
-    const artifacts = source as FormValues;
-    const { contractAddress, contractSchema } = artifacts;
-
-    if (typeof contractAddress !== 'string' || !this.isValidAddress(contractAddress)) {
-      throw new Error('A valid contract address must be provided.');
-    }
-    if (typeof contractSchema !== 'string' || !contractSchema.trim()) {
-      throw new Error('A contract schema must be provided.');
-    }
+    // Convert and validate the input
+    const artifacts = validateAndConvertMidnightArtifacts(source);
 
     this.artifacts = artifacts;
     logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
 
-    const { functions, events } = parseMidnightContractInterface(contractSchema);
+    const { functions, events } = parseMidnightContractInterface(artifacts.contractSchema);
 
     const schema: ContractSchema = {
       name: 'MyMidnightContract', // TODO: Extract from artifacts if possible
       ecosystem: 'midnight',
-      address: contractAddress,
+      address: artifacts.contractAddress,
       functions,
       events,
     };

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/contracts-ui-builder-ui';
 import { cn, logger } from '@openzeppelin/contracts-ui-builder-utils';
@@ -17,17 +17,6 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
   const [isError, setIsError] = useState(false);
   const { activeAdapter, walletFacadeHooks } = useWalletState();
 
-  // Setup error handling with useEffect
-  useEffect(() => {
-    const handleError = () => {
-      setIsError(true);
-    };
-    window.addEventListener('error', handleError);
-    return () => {
-      window.removeEventListener('error', handleError);
-    };
-  }, []);
-
   useEffect(() => {
     logger.debug('WalletConnectionUI', '[Debug] State from useWalletState:', {
       adapterId: activeAdapter?.networkConfig.id,
@@ -35,9 +24,8 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
     });
   }, [activeAdapter, walletFacadeHooks]);
 
-  // Memoize wallet components to avoid repeated calls on every render
-  const walletComponents = useMemo(() => {
-    // Get wallet components from adapter if available
+  // Compute wallet components on each render so UI updates immediately when kits toggle
+  const walletComponents = (() => {
     if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
       logger.debug(
         'WalletConnectionUI',
@@ -55,7 +43,7 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
       setIsError(true);
       return null;
     }
-  }, [activeAdapter]); // Only re-compute when activeAdapter changes
+  })();
 
   if (!walletComponents) {
     logger.debug(
