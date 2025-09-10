@@ -276,7 +276,7 @@ describe('Struct ScVal Conversion', () => {
 
       expect(() => {
         valueToScVal(complexStructValue, 'ComplexStruct', complexStructSchema);
-      }).toThrow('Invalid number format for U128: klkjlk');
+      }).toThrow('invalid type (vec<u128>) specified for string value');
     });
   });
 });

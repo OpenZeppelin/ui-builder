@@ -12,7 +12,7 @@ export function parseGenericType(typeString: string): {
   baseType: string;
   parameters: string[];
 } | null {
-  const match = typeString.match(/^(\w+)<(.+)>$/);
+  const match = typeString.match(/^(\w+)<(.*)>$/);
   if (!match) return null;
 
   const baseType = match[1];
