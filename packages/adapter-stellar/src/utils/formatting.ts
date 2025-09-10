@@ -1,3 +1,9 @@
+import {
+  extractOptionElementType,
+  extractVecElementType,
+  isValidTypeString,
+} from './safe-type-parser';
+
 /**
  * Custom JSON stringifier that handles BigInt values by converting them to strings.
  * @param value The value to stringify.
@@ -49,11 +55,15 @@ export function isSerializableObject(value: unknown): boolean {
  * ```
  */
 export function convertStellarTypeToScValType(stellarType: string): string | string[] {
+  // Input validation
+  if (!isValidTypeString(stellarType)) {
+    return stellarType.toLowerCase();
+  }
+
   // Handle Vec types - return array type hint
   if (stellarType.startsWith('Vec<')) {
-    const innerTypeMatch = stellarType.match(/Vec<(.+)>$/);
-    if (innerTypeMatch) {
-      const innerType = innerTypeMatch[1];
+    const innerType = extractVecElementType(stellarType);
+    if (innerType) {
       const innerScValType = convertStellarTypeToScValType(innerType);
       // For Vec types, nativeToScVal expects the inner type as string
       return Array.isArray(innerScValType) ? innerScValType[0] : innerScValType;
@@ -68,9 +78,8 @@ export function convertStellarTypeToScValType(stellarType: string): string | str
 
   // Handle Option types - return the inner type
   if (stellarType.startsWith('Option<')) {
-    const innerTypeMatch = stellarType.match(/Option<(.+)>$/);
-    if (innerTypeMatch) {
-      const innerType = innerTypeMatch[1];
+    const innerType = extractOptionElementType(stellarType);
+    if (innerType) {
       return convertStellarTypeToScValType(innerType);
     }
   }

@@ -11,42 +11,10 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { getDefaultValueForType, logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
 import { isLikelyEnumType } from '../utils/type-detection';
 import { extractEnumVariants, isEnumType, type EnumMetadata } from './enum-metadata';
 import { mapStellarParameterTypeToFieldType } from './type-mapper';
-
-/**
- * Extracts the inner type from a Stellar Vec type.
- * @param parameterType - The parameter type (e.g., 'Vec<U32>', 'Vec<Address>')
- * @returns The inner type (e.g., 'U32', 'Address') or null if not a Vec type
- */
-function extractStellarVecElementType(parameterType: string): string | null {
-  // Handle Vec types like Vec<U32>, Vec<Address>, Vec<Bool>
-  const vecMatch = parameterType.match(/^Vec<(.+)>$/);
-  if (vecMatch) {
-    return vecMatch[1];
-  }
-  return null;
-}
-
-/**
- * Extracts the key and value types from a Stellar Map type.
- * @param parameterType - The parameter type (e.g., 'Map<Symbol, Bytes>', 'Map<U32, Address>')
- * @returns An object with keyType and valueType, or null if not a Map type
- */
-function extractStellarMapTypes(
-  parameterType: string
-): { keyType: string; valueType: string } | null {
-  // Handle Map types like Map<Symbol, Bytes>, Map<U32, Address>
-  const mapMatch = parameterType.match(/^Map<([^,]+),\s*([^>]+)>$/);
-  if (mapMatch) {
-    return {
-      keyType: mapMatch[1].trim(),
-      valueType: mapMatch[2].trim(),
-    };
-  }
-  return null;
-}
 
 /**
  * Get default validation rules for a parameter type.
@@ -126,7 +94,7 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
 
   // For array types, provide element type information
   if (fieldType === 'array') {
-    const elementType = extractStellarVecElementType(parameter.type);
+    const elementType = extractVecElementType(parameter.type);
     if (elementType) {
       const elementFieldType = mapStellarParameterTypeToFieldType(elementType);
 
@@ -146,7 +114,7 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
 
   // For map types, provide key and value type information
   if (fieldType === ('map' as FieldType)) {
-    const mapTypes = extractStellarMapTypes(parameter.type);
+    const mapTypes = extractMapTypes(parameter.type);
     if (mapTypes) {
       const keyFieldType = mapStellarParameterTypeToFieldType(mapTypes.keyType);
       const valueFieldType = mapStellarParameterTypeToFieldType(mapTypes.valueType);
