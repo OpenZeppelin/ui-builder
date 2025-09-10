@@ -1,3 +1,5 @@
+import { isMapEntryArray, MapEntry } from '@openzeppelin/contracts-ui-builder-types';
+
 import { validateMapEntries } from '../../utils/validation';
 
 interface ValidateArgs {
@@ -7,25 +9,29 @@ interface ValidateArgs {
 }
 
 export function validateMapStructure({ value, required, minItems }: ValidateArgs): string | true {
-  const mapArray = Array.isArray(value) ? value : [];
+  // Validate that the value is actually an array of MapEntry objects
+  if (!isMapEntryArray(value)) {
+    if (required) return 'This field is required';
+    return true;
+  }
 
-  const duplicateError = validateMapEntries(
-    mapArray as unknown as { key: string; value: unknown }[]
-  );
+  const mapArray: MapEntry[] = value;
+
+  const duplicateError = validateMapEntries(mapArray);
   if (duplicateError) return duplicateError;
 
-  const hasPartial = mapArray.some((entry: { key?: unknown; value?: unknown }) => {
-    const key = entry?.key;
-    const val = entry?.value;
+  const hasPartial = mapArray.some((entry: MapEntry) => {
+    const key = entry.key;
+    const val = entry.value;
     const keyEmpty = key === '' || key == null;
     const valEmpty = val === '' || val == null;
     return (keyEmpty && !valEmpty) || (!keyEmpty && valEmpty);
   });
   if (hasPartial) return 'All key-value pairs must be completed';
 
-  const validEntries = mapArray.filter((entry: { key?: unknown; value?: unknown }) => {
-    const key = entry?.key;
-    const val = entry?.value;
+  const validEntries = mapArray.filter((entry: MapEntry) => {
+    const key = entry.key;
+    const val = entry.value;
     return key !== '' && key != null && val !== '' && val != null;
   });
 
