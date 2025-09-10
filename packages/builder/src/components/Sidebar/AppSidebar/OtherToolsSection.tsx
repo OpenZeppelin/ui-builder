@@ -18,12 +18,12 @@ export default function OtherToolsSection() {
       <div className="text-[#5e5e5e] text-xs font-semibold leading-4 mb-1">Other Tools</div>
       <div className="flex flex-col">
         <SidebarButton
-          icon={<img src={ContractsWizardIconSvg} alt="Contract Wizard" className="size-4" />}
+          icon={<img src={ContractsWizardIconSvg} alt="Contracts Wizard" className="size-4" />}
           href="https://wizard.openzeppelin.com/"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Contract Wizard
+          Contracts Wizard
         </SidebarButton>
 
         {/* Dev Tools - Only shown when feature flag is enabled */}
