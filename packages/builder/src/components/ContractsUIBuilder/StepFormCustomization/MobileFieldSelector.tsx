@@ -22,6 +22,11 @@ interface MobileFieldSelectorProps {
    * Callback when a field is selected
    */
   onSelectField: (index: number) => void;
+
+  /**
+   * Map of field IDs to their validation error status
+   */
+  fieldValidationErrors?: Map<string, boolean>;
 }
 
 /**
@@ -32,9 +37,13 @@ export function MobileFieldSelector({
   fields,
   selectedFieldIndex,
   onSelectField,
+  fieldValidationErrors,
 }: MobileFieldSelectorProps) {
   const effectiveSelectedIndex = selectedFieldIndex ?? 0;
   const selectedField = fields[effectiveSelectedIndex];
+  const hasValidationError = selectedField
+    ? (fieldValidationErrors?.get(selectedField.id) ?? false)
+    : false;
 
   return (
     <div className="space-y-3">
@@ -43,7 +52,13 @@ export function MobileFieldSelector({
         value={effectiveSelectedIndex.toString()}
         onValueChange={(value) => onSelectField(parseInt(value, 10))}
       >
-        <SelectTrigger className="h-auto min-h-[3rem] px-4 py-3 bg-card border-2 border-border hover:border-primary/50 transition-colors [&>svg]:ml-3">
+        <SelectTrigger
+          className={`h-auto min-h-[3rem] px-4 py-3 bg-card border-2 transition-colors [&>svg]:ml-3 ${
+            hasValidationError
+              ? 'border-destructive hover:border-destructive/70 bg-destructive/5'
+              : 'border-border hover:border-primary/50'
+          }`}
+        >
           <SelectValue asChild>
             {selectedField ? (
               <div className="flex items-center justify-between w-full pr-2">

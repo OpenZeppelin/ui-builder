@@ -92,30 +92,35 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
           },
         }}
         disabled={readOnly}
-        render={({ field, fieldState: { error } }) => {
+        render={({ fieldState: { error, isTouched }, field }) => {
           const hasError = !!error;
-          const validationClasses = getValidationStateClasses(error);
+          const shouldShowError = hasError && isTouched;
+          const validationClasses = getValidationStateClasses(error, isTouched);
+
+          // Safely extract the pattern error message. The `pattern` validation rule can be either a
+          // RegExp object or an object with a `value` (RegExp) and a `message` (string). This
+          // type guard ensures we only try to access `.message` on the correct object type.
+          const patternErrorMessage =
+            validation?.pattern &&
+            typeof validation.pattern === 'object' &&
+            'message' in validation.pattern
+              ? (validation.pattern.message as string)
+              : undefined;
 
           // Handle input change with validation
           const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
             const value = e.target.value;
             field.onChange(value);
-
-            // Trigger validation if the field is required and empty
-            if (isRequired && value === '') {
-              setTimeout(() => field.onBlur(), 0);
-            }
+            // Note: Validation happens naturally when user leaves the field
+            // No need to trigger it programmatically on every change
           };
 
           // Add keyboard accessibility for clearing the field with Escape
           const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
             if (e.key === 'Escape') {
               handleEscapeKey(field.onChange, field.value)(e);
-
-              // If required, trigger validation after clearing
-              if (isRequired) {
-                setTimeout(() => field.onBlur(), 0);
-              }
+              // Note: Validation happens naturally when user leaves the field
+              // No need to trigger it programmatically
             }
           };
 
@@ -151,7 +156,11 @@ export function AddressField<TFieldValues extends FieldValues = FieldValues>({
               )}
 
               {/* Display error message */}
-              <ErrorMessage error={error} id={errorId} />
+              <ErrorMessage
+                error={error}
+                id={errorId}
+                message={shouldShowError ? error?.message || patternErrorMessage : undefined}
+              />
             </>
           );
         }}

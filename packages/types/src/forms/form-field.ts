@@ -125,4 +125,30 @@ export interface FormFieldType<T extends FieldType = FieldType> {
     maxHeight?: string;
     performanceThreshold?: number;
   };
+
+  /**
+   * Enum metadata for enum field types.
+   * Contains information about enum variants and their payload types.
+   */
+  enumMetadata?: {
+    name: string;
+    variants: Array<{
+      name: string;
+      type: 'void' | 'tuple' | 'integer';
+      payloadTypes?: string[];
+      value?: number;
+    }>;
+    isUnitOnly: boolean;
+  };
+
+  /**
+   * Map metadata for map field types.
+   * Contains information about key and value types and their field configurations.
+   */
+  mapMetadata?: {
+    keyType?: string;
+    valueType?: string;
+    keyFieldConfig?: Partial<FormFieldType>;
+    valueFieldConfig?: Partial<FormFieldType>;
+  };
 }

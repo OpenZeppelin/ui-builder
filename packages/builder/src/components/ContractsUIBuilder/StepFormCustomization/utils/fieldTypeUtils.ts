@@ -27,6 +27,7 @@ export function getFieldTypeLabel(type: FieldType): string {
   const labelMap: Record<string, string> = {
     text: 'Text Input',
     textarea: 'Text Area',
+    bytes: 'Bytes Input (Hex/Base64)',
     email: 'Email Input',
     password: 'Password Input',
     number: 'Number Input',
@@ -35,6 +36,8 @@ export function getFieldTypeLabel(type: FieldType): string {
     radio: 'Radio Buttons',
     checkbox: 'Checkbox',
     'blockchain-address': 'Blockchain Address',
+    enum: 'Enum Field',
+    map: 'Map Field (Key-Value Pairs)',
   };
 
   return labelMap[type] || capitalize(type);
@@ -61,10 +64,12 @@ const DEFAULT_FIELD_TYPES: FieldType[] = [
   'radio',
   'select',
   'textarea',
+  'bytes',
   'email',
   'password',
   'blockchain-address',
   'amount',
+  'enum',
 ];
 
 /**
@@ -99,9 +104,9 @@ export function getFieldTypeGroups(
 
   // Define field type categories
   const fieldTypeCategories: Record<string, FieldType[]> = {
-    text: ['text', 'textarea', 'email', 'password'],
+    text: ['text', 'textarea', 'bytes', 'email', 'password'],
     numeric: ['number', 'amount'],
-    selection: ['select', 'radio', 'checkbox'],
+    selection: ['select', 'radio', 'checkbox', 'enum'],
     blockchain: ['blockchain-address'],
   };
 

@@ -105,7 +105,7 @@ describe('Types', () => {
       const contractUIRecord = createMockContractUIRecord();
       const { validation } = contractUIRecord.formConfig;
 
-      expect(['onChange', 'onBlur', 'onSubmit']).toContain(validation.mode);
+      expect(['onChange', 'onBlur', 'onSubmit', 'onTouched']).toContain(validation.mode);
       expect(['inline', 'summary', 'toast']).toContain(validation.showErrors);
     });
 
@@ -209,7 +209,7 @@ describe('Types', () => {
           contractAddress: '0x123',
           fields: [],
           layout: { columns: 1, spacing: 'normal', labelPosition: 'top' },
-          validation: { mode: 'onChange', showErrors: 'inline' },
+          validation: { mode: 'onTouched', showErrors: 'inline' },
           submitButton: { text: 'Submit', loadingText: 'Processing...' },
           theme: {},
           description: '',

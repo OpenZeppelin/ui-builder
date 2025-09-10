@@ -4,13 +4,13 @@ import type {
   ContractDefinitionMetadata,
   ContractSchema,
   EvmNetworkConfig,
-  FormValues,
   ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { detectProxyFromAbi, getAdminAddress, getImplementationAddress } from '../proxy/detection';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
+import type { EvmContractArtifacts } from '../types/artifacts';
 import { loadAbiFromEtherscan } from './etherscan';
 import { transformAbiToSchema } from './transformer';
 
@@ -60,7 +60,7 @@ export interface ContractLoadOptions {
  * Returns enhanced result with schema source information and automatic proxy detection.
  */
 export async function loadEvmContract(
-  artifacts: FormValues,
+  artifacts: EvmContractArtifacts,
   networkConfig: EvmNetworkConfig,
   options: ContractLoadOptions = {}
 ): Promise<EvmContractLoadResult> {

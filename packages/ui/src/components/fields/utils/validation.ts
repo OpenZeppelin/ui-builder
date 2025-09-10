@@ -3,7 +3,7 @@
  */
 import { FieldError } from 'react-hook-form';
 
-import { FieldValidation } from '@openzeppelin/contracts-ui-builder-types';
+import { FieldValidation, MapEntry } from '@openzeppelin/contracts-ui-builder-types';
 
 /**
  * Determines if a field has an error
@@ -173,4 +173,56 @@ export function validateField(value: unknown, validation?: FieldValidation): str
 
   // If all validations pass
   return true;
+}
+
+/**
+ * Map validation utilities
+ */
+
+/**
+ * Checks if a map entry at the given index has a duplicate key
+ * @param entries - Array of map entries
+ * @param currentIndex - Index of the entry to check
+ * @returns true if the key at currentIndex is duplicated elsewhere in the array
+ */
+export function isDuplicateMapKey(entries: MapEntry[], currentIndex: number): boolean {
+  if (!Array.isArray(entries) || entries.length <= 1) {
+    return false;
+  }
+
+  const currentKeyValue = entries[currentIndex]?.key;
+
+  // Don't consider empty keys as duplicates
+  if (!currentKeyValue || currentKeyValue === '') {
+    return false;
+  }
+
+  return entries.some(
+    (entry: MapEntry, i: number) =>
+      i !== currentIndex && String(entry?.key) === String(currentKeyValue) && entry?.key !== ''
+  );
+}
+
+/**
+ * Validates an array of map entries for duplicate keys
+ * @param entries - Array of map entries to validate
+ * @returns Validation error message if duplicates found, otherwise undefined
+ */
+export function validateMapEntries(entries: MapEntry[]): string | undefined {
+  if (!Array.isArray(entries) || entries.length <= 1) {
+    return undefined;
+  }
+
+  const keys = entries
+    .map((entry) => entry?.key)
+    .filter((key) => key !== undefined && key !== null && key !== '');
+
+  const keyStrings = keys.map((key) => String(key));
+  const uniqueKeyStrings = new Set(keyStrings);
+
+  if (keyStrings.length !== uniqueKeyStrings.size) {
+    return 'Duplicate keys are not allowed';
+  }
+
+  return undefined;
 }

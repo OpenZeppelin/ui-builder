@@ -21,9 +21,12 @@ export function getDefaultValueForType<T extends FieldType>(fieldType: T): Field
       return {} as FieldValue<T>;
     case 'array-object':
       return [] as FieldValue<T>;
+    case 'map':
+      return [] as FieldValue<T>; // Empty array of key-value pairs
     case 'blockchain-address':
     case 'text':
     case 'textarea':
+    case 'bytes':
     case 'email':
     case 'password':
     case 'select':

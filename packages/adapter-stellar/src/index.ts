@@ -1,8 +1,9 @@
 // Re-export the main adapter class
 export { StellarAdapter } from './adapter';
 
-// Optionally re-export types if needed
-// export * from './types'; // No types.ts in Stellar adapter yet
+// Re-export adapter-specific types
+export type { StellarContractArtifacts } from './types/artifacts';
+export { isStellarContractArtifacts } from './types/artifacts';
 
 export {
   stellarNetworks,

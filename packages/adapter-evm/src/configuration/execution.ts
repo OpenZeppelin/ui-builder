@@ -59,17 +59,26 @@ async function _validateMultisigConfig(
  */
 export async function validateEvmExecutionConfig(
   config: ExecutionConfig,
-  walletStatus: { isConnected: boolean; address?: string; chainId?: string }
+  walletStatus: { isConnected: boolean; address?: string; chainId?: string | number }
 ): Promise<true | string> {
   logger.info(SYSTEM_LOG_TAG, 'Validating EVM execution config:', { config, walletStatus });
 
+  // Normalize chainId to string for validation functions
+  const normalizedWalletStatus = {
+    ...walletStatus,
+    chainId:
+      typeof walletStatus.chainId === 'number'
+        ? walletStatus.chainId.toString()
+        : walletStatus.chainId,
+  };
+
   switch (config.method) {
     case 'eoa':
-      return validateEoaConfig(config as EoaExecutionConfig, walletStatus);
+      return validateEoaConfig(config as EoaExecutionConfig, normalizedWalletStatus);
     case 'relayer':
       return validateRelayerConfig(config as RelayerExecutionConfig);
     case 'multisig':
-      return _validateMultisigConfig(config as MultisigExecutionConfig, walletStatus);
+      return _validateMultisigConfig(config as MultisigExecutionConfig, normalizedWalletStatus);
     default: {
       const unknownMethod = (config as ExecutionConfig).method;
       logger.warn(

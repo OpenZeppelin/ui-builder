@@ -5,6 +5,7 @@ import {
   EoaExecutionConfig,
   ExecutionConfig,
   TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -25,7 +26,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
     transactionData: WriteContractParameters,
     executionConfig: ExecutionConfig,
     walletImplementation: WagmiWalletImplementation,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     // runtimeApiKey is unused in EOA strategy but required by the interface
     _runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
