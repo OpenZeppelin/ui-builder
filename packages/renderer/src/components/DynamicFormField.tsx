@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
 import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
@@ -107,6 +107,87 @@ export function DynamicFormField({
   control,
   adapter,
 }: DynamicFormFieldProps): React.ReactElement | null {
+  // Memoized render functions to prevent unnecessary re-renders
+  // These must be called before any early returns to satisfy React Hooks rules
+  const renderPayloadField = useCallback(
+    (payloadField: FormFieldType, payloadIndex: number): React.ReactElement => {
+      // Map the payload type to appropriate field type using the adapter
+      const mappedFieldType = adapter.mapParameterTypeToFieldType(
+        payloadField.originalParameterType || 'text'
+      );
+
+      // Create enhanced field with proper type mapping
+      const enhancedPayloadField: FormFieldType = {
+        ...payloadField,
+        type: mappedFieldType,
+      };
+
+      return (
+        <DynamicFormField
+          key={`${field.id}-payload-${payloadIndex}`}
+          field={enhancedPayloadField}
+          control={control}
+          adapter={adapter}
+        />
+      );
+    },
+    [field.id, control, adapter]
+  );
+
+  const renderKeyField = useCallback(
+    (keyField: FormFieldType, entryIndex: number): React.ReactElement => {
+      // Map the key type using the adapter if originalParameterType is available
+      const mappedKeyType = keyField.originalParameterType
+        ? adapter.mapParameterTypeToFieldType(keyField.originalParameterType)
+        : keyField.type;
+
+      // Create enhanced field with proper type mapping
+      const enhancedKeyField: FormFieldType = {
+        ...keyField,
+        type: mappedKeyType,
+        // Inherit readOnly from parent field
+        readOnly: keyField.readOnly ?? field.readOnly,
+      };
+
+      return (
+        <DynamicFormField
+          key={`${field.id}-key-${entryIndex}`}
+          field={enhancedKeyField}
+          control={control}
+          adapter={adapter}
+        />
+      );
+    },
+    [field.id, field.readOnly, control, adapter]
+  );
+
+  const renderValueField = useCallback(
+    (valueField: FormFieldType, entryIndex: number): React.ReactElement => {
+      // Map the value type using the adapter if originalParameterType is available
+      const mappedValueType = valueField.originalParameterType
+        ? adapter.mapParameterTypeToFieldType(valueField.originalParameterType)
+        : valueField.type;
+
+      // Create enhanced field with proper type mapping
+      const enhancedValueField: FormFieldType = {
+        ...valueField,
+        type: mappedValueType,
+        // Inherit readOnly from parent field
+        readOnly: valueField.readOnly ?? field.readOnly,
+      };
+
+      return (
+        <DynamicFormField
+          key={`${field.id}-value-${entryIndex}`}
+          field={enhancedValueField}
+          control={control}
+          adapter={adapter}
+        />
+      );
+    },
+    [field.id, field.readOnly, control, adapter]
+  );
+
   // Check if the field should be rendered based on visibility conditions
   const shouldRender = useShouldRenderField(field, control);
   if (!shouldRender) {
@@ -123,7 +204,11 @@ export function DynamicFormField({
   }
 
   // Get field-specific props based on type
-  const fieldSpecificProps = getFieldSpecificProps(field, control, adapter);
+  const fieldSpecificProps = getFieldSpecificProps(field, {
+    renderPayloadField,
+    renderKeyField,
+    renderValueField,
+  });
 
   // Add render functions for complex fields
   const enhancedProps = {
@@ -199,12 +284,20 @@ export function DynamicFormField({
 }
 
 /**
+ * Render functions for memoization
+ */
+interface RenderFunctions {
+  renderPayloadField: (payloadField: FormFieldType, payloadIndex: number) => React.ReactElement;
+  renderKeyField: (keyField: FormFieldType, entryIndex: number) => React.ReactElement;
+  renderValueField: (valueField: FormFieldType, entryIndex: number) => React.ReactElement;
+}
+
+/**
  * Extract field-specific props based on field type
  */
 function getFieldSpecificProps(
   field: FormFieldType,
-  control: Control<FormValues>,
-  adapter: ContractAdapter
+  renderFunctions: RenderFunctions
 ): Record<string, unknown> {
   switch (field.type) {
     case 'number':
@@ -258,82 +351,15 @@ function getFieldSpecificProps(
       // Extract enum-specific props
       return {
         enumMetadata: field.enumMetadata,
-        renderPayloadField: (
-          payloadField: FormFieldType,
-          payloadIndex: number
-        ): React.ReactElement => {
-          // Map the payload type to appropriate field type using the adapter
-          const mappedFieldType = adapter.mapParameterTypeToFieldType(
-            payloadField.originalParameterType || 'text'
-          );
-
-          // Create enhanced field with proper type mapping
-          const enhancedPayloadField: FormFieldType = {
-            ...payloadField,
-            type: mappedFieldType,
-          };
-
-          return (
-            <DynamicFormField
-              key={`${field.id}-payload-${payloadIndex}`}
-              field={enhancedPayloadField}
-              control={control}
-              adapter={adapter}
-            />
-          );
-        },
+        renderPayloadField: renderFunctions.renderPayloadField,
       };
     case 'map':
-      // Extract map-specific props and create render functions
+      // Extract map-specific props using memoized render functions
       return {
         mapMetadata: field.mapMetadata,
         minItems: field.validation?.min,
-        renderKeyField: (keyField: FormFieldType, entryIndex: number): React.ReactElement => {
-          // Map the key type using the adapter if originalParameterType is available
-          const mappedKeyType = keyField.originalParameterType
-            ? adapter.mapParameterTypeToFieldType(keyField.originalParameterType)
-            : keyField.type;
-
-          // Create enhanced field with proper type mapping
-          const enhancedKeyField: FormFieldType = {
-            ...keyField,
-            type: mappedKeyType,
-            // Inherit readOnly from parent field
-            readOnly: keyField.readOnly ?? field.readOnly,
-          };
-
-          return (
-            <DynamicFormField
-              key={`${field.id}-key-${entryIndex}`}
-              field={enhancedKeyField}
-              control={control}
-              adapter={adapter}
-            />
-          );
-        },
-        renderValueField: (valueField: FormFieldType, entryIndex: number): React.ReactElement => {
-          // Map the value type using the adapter if originalParameterType is available
-          const mappedValueType = valueField.originalParameterType
-            ? adapter.mapParameterTypeToFieldType(valueField.originalParameterType)
-            : valueField.type;
-
-          // Create enhanced field with proper type mapping
-          const enhancedValueField: FormFieldType = {
-            ...valueField,
-            type: mappedValueType,
-            // Inherit readOnly from parent field
-            readOnly: valueField.readOnly ?? field.readOnly,
-          };
-
-          return (
-            <DynamicFormField
-              key={`${field.id}-value-${entryIndex}`}
-              field={enhancedValueField}
-              control={control}
-              adapter={adapter}
-            />
-          );
-        },
+        renderKeyField: renderFunctions.renderKeyField,
+        renderValueField: renderFunctions.renderValueField,
       };
     default:
       return {};
