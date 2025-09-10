@@ -127,6 +127,7 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
       <Controller
         control={control}
         name={name}
+        disabled={readOnly}
         rules={{
           validate: (value) => {
             // Handle required validation explicitly
