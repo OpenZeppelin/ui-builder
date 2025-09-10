@@ -167,7 +167,7 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
                       Enum metadata not available. Please enter the value in JSON format.
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Example: {`{"tag":"VariantName"}`} or {`{"tag":"VariantName","values":[...]}`}
+                      Example: {`{"tag":"One"}`} or {`{"tag":"Two","values":[42]}`}
                     </p>
                   </div>
 
