@@ -126,6 +126,7 @@ export function validateBytes(
     detectedFormat = 'base64';
 
     try {
+      // Decode base64 using Web API to calculate byte size
       const decoded = atob(withoutPrefix);
       byteSize = decoded.length;
     } catch {
