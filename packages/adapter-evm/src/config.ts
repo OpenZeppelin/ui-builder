@@ -13,8 +13,6 @@ export const evmAdapterConfig: AdapterConfig = {
    * These will be included in exported projects that use this adapter
    */
   dependencies: {
-    // TODO: Review and update with real, verified dependencies and versions before production release
-
     // Runtime dependencies
     runtime: {
       // Core EVM libraries
