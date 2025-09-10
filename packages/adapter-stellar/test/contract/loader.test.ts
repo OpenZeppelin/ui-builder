@@ -58,6 +58,19 @@ vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
 }));
 
 describe('Stellar Contract Loader', () => {
+  const mockNetworkConfig: StellarNetworkConfig = {
+    ecosystem: 'stellar',
+    id: 'test',
+    name: 'Test Network',
+    network: 'testnet',
+    type: 'testnet',
+    isTestnet: true,
+    exportConstName: 'TEST_NETWORK',
+    networkPassphrase: 'passphrase',
+    sorobanRpcUrl: 'https://rpc.url',
+    horizonUrl: '',
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -86,10 +99,22 @@ describe('Stellar Contract Loader', () => {
 
       (mockContractClient.spec.funcs as ReturnType<typeof vi.fn>).mockReturnValue([mockFunc]);
 
+      const testNetworkConfig: StellarNetworkConfig = {
+        ecosystem: 'stellar',
+        id: 'testnet',
+        name: 'Testnet',
+        network: 'testnet',
+        type: 'testnet',
+        isTestnet: true,
+        exportConstName: 'TESTNET',
+        networkPassphrase: 'Test SDF Network ; September 2015',
+        sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+        horizonUrl: 'https://horizon-testnet.stellar.org',
+      };
+
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://soroban-testnet.stellar.org',
-        'Test SDF Network ; September 2015'
+        testNetworkConfig
       );
 
       expect(result).toEqual({
@@ -123,8 +148,21 @@ describe('Stellar Contract Loader', () => {
       const { StrKey } = await import('@stellar/stellar-sdk');
       vi.mocked(StrKey.isValidContract).mockReturnValue(false);
 
+      const invalidNetworkConfig: StellarNetworkConfig = {
+        ecosystem: 'stellar',
+        id: 'test',
+        name: 'Test',
+        network: 'testnet',
+        type: 'testnet',
+        isTestnet: true,
+        exportConstName: 'TEST',
+        networkPassphrase: 'passphrase',
+        sorobanRpcUrl: 'https://rpc.url',
+        horizonUrl: '',
+      };
+
       await expect(
-        loadStellarContractFromAddress('invalid_address', 'https://rpc.url', 'passphrase')
+        loadStellarContractFromAddress('invalid_address', invalidNetworkConfig)
       ).rejects.toThrow('Invalid contract address: invalid_address');
     });
 
@@ -133,21 +171,33 @@ describe('Stellar Contract Loader', () => {
       vi.mocked(StrKey.isValidContract).mockReturnValue(true);
       vi.mocked(contract.Client.from).mockRejectedValue(new Error('Network error'));
 
+      const failNetworkConfig: StellarNetworkConfig = {
+        ecosystem: 'stellar',
+        id: 'test',
+        name: 'Test',
+        network: 'testnet',
+        type: 'testnet',
+        isTestnet: true,
+        exportConstName: 'TEST',
+        networkPassphrase: 'passphrase',
+        sorobanRpcUrl: 'https://rpc.url',
+        horizonUrl: '',
+      };
+
       await expect(
         loadStellarContractFromAddress(
           'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-          'https://rpc.url',
-          'passphrase'
+          failNetworkConfig
         )
       ).rejects.toThrow('Failed to load contract: Network error');
     });
 
-    it('should handle functions with outputs (view functions)', async () => {
+    it('should handle functions with outputs (defaults to state-modifying without simulation)', async () => {
       const { StrKey, contract } = await import('@stellar/stellar-sdk');
       vi.mocked(StrKey.isValidContract).mockReturnValue(true);
       vi.mocked(contract.Client.from).mockResolvedValue(mockContractClient);
 
-      // Mock view function (has outputs, no inputs)
+      // Mock function (simulation-based detection will fail in test environment, so defaults to state-modifying)
       mockFunc.name.mockReturnValue('get_balance');
       mockFunc.inputs.mockReturnValue([]);
       mockFunc.outputs.mockReturnValue([{}, {}]); // Two outputs
@@ -156,12 +206,11 @@ describe('Stellar Contract Loader', () => {
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        mockNetworkConfig
       );
 
-      expect(result.functions[0].stateMutability).toBe('view');
-      expect(result.functions[0].modifiesState).toBe(false);
+      expect(result.functions[0].stateMutability).toBe('nonpayable');
+      expect(result.functions[0].modifiesState).toBe(true);
       expect(result.functions[0].outputs).toHaveLength(2);
     });
 
@@ -183,8 +232,7 @@ describe('Stellar Contract Loader', () => {
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        mockNetworkConfig
       );
 
       expect(result.functions[0]).toEqual({
@@ -346,8 +394,7 @@ describe('Stellar Contract Loader', () => {
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        mockNetworkConfig
       );
 
       expect(result.functions[0].inputs[0]).toEqual({
@@ -369,8 +416,7 @@ describe('Stellar Contract Loader', () => {
 
       const result = await loadStellarContractFromAddress(
         'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQAHHAGCM2SG',
-        'https://rpc.url',
-        'passphrase'
+        mockNetworkConfig
       );
 
       expect(result.functions[0].outputs).toEqual([

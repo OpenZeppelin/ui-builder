@@ -11,6 +11,7 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { getStellarExplorerAddressUrl } from '../explorer';
 import { extractStructFields, isStructType } from '../mapping/struct-fields';
+import { checkStellarFunctionStateMutability } from '../query/handler';
 import type { StellarContractArtifacts } from '../types/artifacts';
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
 
@@ -20,13 +21,13 @@ import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
  */
 export async function loadStellarContractFromAddress(
   contractAddress: string,
-  rpcUrl: string,
-  networkPassphrase: string
+  networkConfig: StellarNetworkConfig
 ): Promise<ContractSchema> {
   logger.info('loadStellarContractFromAddress', 'Loading contract:', {
     contractAddress,
-    rpcUrl,
-    networkPassphrase,
+    network: networkConfig.name,
+    rpcUrl: networkConfig.sorobanRpcUrl,
+    networkPassphrase: networkConfig.networkPassphrase,
   });
 
   try {
@@ -38,8 +39,8 @@ export async function loadStellarContractFromAddress(
     // Create contract client using the official Stellar SDK approach
     const contractClient = await StellarSdk.contract.Client.from({
       contractId: contractAddress,
-      networkPassphrase,
-      rpcUrl,
+      networkPassphrase: networkConfig.networkPassphrase,
+      rpcUrl: networkConfig.sorobanRpcUrl,
     });
 
     logger.info('loadStellarContractFromAddress', 'Contract client created successfully');
@@ -85,7 +86,12 @@ export async function loadStellarContractFromAddress(
     }
 
     // Extract functions using the official laboratory approach with spec entries for struct extraction
-    const functions = extractFunctionsFromSpec(contractClient.spec, contractAddress, specEntries);
+    const functions = await extractFunctionsFromSpec(
+      contractClient.spec,
+      contractAddress,
+      specEntries,
+      networkConfig
+    );
 
     logger.info(
       'loadStellarContractFromAddress',
@@ -108,128 +114,177 @@ export async function loadStellarContractFromAddress(
 
 /**
  * Extract functions from contract spec using the official Stellar laboratory approach
+ * with simulation-based state mutability detection
  */
-function extractFunctionsFromSpec(
+async function extractFunctionsFromSpec(
   spec: StellarSdk.contract.Spec,
-  _contractAddress: string,
-  specEntries?: xdr.ScSpecEntry[]
-): ContractFunction[] {
+  contractAddress: string,
+  specEntries?: xdr.ScSpecEntry[],
+  networkConfig?: StellarNetworkConfig
+): Promise<ContractFunction[]> {
   try {
     // Get all functions using the official SDK method
     const specFunctions = spec.funcs();
 
     logger.info('extractFunctionsFromSpec', `Found ${specFunctions.length} functions in spec`);
 
-    return specFunctions.map((func, index) => {
-      try {
-        // Extract function name using the official SDK method
-        const functionName = func.name().toString();
+    return await Promise.all(
+      specFunctions.map(async (func, index) => {
+        try {
+          // Extract function name using the official SDK method
+          const functionName = func.name().toString();
 
-        logger.info('extractFunctionsFromSpec', `Processing function: ${functionName}`);
+          logger.info('extractFunctionsFromSpec', `Processing function: ${functionName}`);
 
-        // Get function inputs and outputs using the official SDK methods
-        const inputs: FunctionParameter[] = func.inputs().map((input, inputIndex) => {
-          try {
-            const inputName = input.name().toString();
-            const inputType = extractSorobanTypeFromScSpec(input.type());
+          // Get function inputs and outputs using the official SDK methods
+          const inputs: FunctionParameter[] = func.inputs().map((input, inputIndex) => {
+            try {
+              const inputName = input.name().toString();
+              const inputType = extractSorobanTypeFromScSpec(input.type());
 
-            if (inputType === 'unknown') {
-              logger.warn(
-                'extractFunctionsFromSpec',
-                `Unknown type for parameter "${inputName}" in function "${functionName}"`
-              );
-            }
-
-            // Check if this is a struct type and extract components
-            let components: FunctionParameter[] | undefined;
-            if (specEntries && specEntries.length > 0 && isStructType(specEntries, inputType)) {
-              const structFields = extractStructFields(specEntries, inputType);
-              if (structFields && structFields.length > 0) {
-                components = structFields;
-                logger.debug(
-                  'extractFunctionsFromSpec',
-                  `Extracted ${structFields.length} fields for struct type "${inputType}": ${structFields.map((f) => `${f.name}:${f.type}`).join(', ')}`
-                );
-              } else {
+              if (inputType === 'unknown') {
                 logger.warn(
                   'extractFunctionsFromSpec',
-                  `No fields extracted for struct "${inputType}"`
+                  `Unknown type for parameter "${inputName}" in function "${functionName}"`
                 );
               }
+
+              // Check if this is a struct type and extract components
+              let components: FunctionParameter[] | undefined;
+              if (specEntries && specEntries.length > 0 && isStructType(specEntries, inputType)) {
+                const structFields = extractStructFields(specEntries, inputType);
+                if (structFields && structFields.length > 0) {
+                  components = structFields;
+                  logger.debug(
+                    'extractFunctionsFromSpec',
+                    `Extracted ${structFields.length} fields for struct type "${inputType}": ${structFields.map((f) => `${f.name}:${f.type}`).join(', ')}`
+                  );
+                } else {
+                  logger.warn(
+                    'extractFunctionsFromSpec',
+                    `No fields extracted for struct "${inputType}"`
+                  );
+                }
+              }
+
+              return {
+                name: inputName || `param_${inputIndex}`,
+                type: inputType,
+                ...(components && { components }),
+              };
+            } catch (error) {
+              logger.warn(
+                'extractFunctionsFromSpec',
+                `Failed to parse input ${inputIndex}:`,
+                error
+              );
+              return {
+                name: `param_${inputIndex}`,
+                type: 'unknown',
+              };
             }
+          });
 
-            return {
-              name: inputName || `param_${inputIndex}`,
-              type: inputType,
-              ...(components && { components }),
-            };
-          } catch (error) {
-            logger.warn('extractFunctionsFromSpec', `Failed to parse input ${inputIndex}:`, error);
-            return {
-              name: `param_${inputIndex}`,
-              type: 'unknown',
-            };
-          }
-        });
+          const outputs: FunctionParameter[] = func.outputs().map((output, outputIndex) => {
+            try {
+              // Outputs are ScSpecTypeDef objects, they don't have names, only types
+              const outputType = extractSorobanTypeFromScSpec(output);
 
-        const outputs: FunctionParameter[] = func.outputs().map((output, outputIndex) => {
-          try {
-            // Outputs are ScSpecTypeDef objects, they don't have names, only types
-            const outputType = extractSorobanTypeFromScSpec(output);
+              return {
+                name: `result_${outputIndex}`,
+                type: outputType,
+              };
+            } catch (error) {
+              logger.warn(
+                'extractFunctionsFromSpec',
+                `Failed to parse output ${outputIndex}:`,
+                error
+              );
+              return {
+                name: `result_${outputIndex}`,
+                type: 'unknown',
+              };
+            }
+          });
 
-            return {
-              name: `result_${outputIndex}`,
-              type: outputType,
-            };
-          } catch (error) {
+          // Determine if function is read-only (view function) using simulation-based detection
+          // This follows the same approach as the official Stellar Laboratory
+          let modifiesState = true; // Default assumption for safety
+          let stateMutability: 'view' | 'pure' | 'nonpayable' = 'nonpayable';
+
+          if (networkConfig) {
+            try {
+              // Extract input types for simulation
+              const inputTypes = inputs.map((input) => input.type);
+
+              logger.debug(
+                'extractFunctionsFromSpec',
+                `Checking state mutability for ${functionName} with input types: ${inputTypes.join(', ')}`
+              );
+
+              // Use simulation-based state mutability detection
+              modifiesState = await checkStellarFunctionStateMutability(
+                contractAddress,
+                functionName,
+                networkConfig,
+                inputTypes
+              );
+
+              stateMutability = modifiesState ? 'nonpayable' : 'view';
+
+              logger.info(
+                'extractFunctionsFromSpec',
+                `Function ${functionName} state mutability determined:`,
+                { modifiesState, stateMutability }
+              );
+            } catch (error) {
+              logger.warn(
+                'extractFunctionsFromSpec',
+                `Failed to determine state mutability for ${functionName}, assuming it modifies state:`,
+                error
+              );
+              // Keep defaults: modifiesState = true, stateMutability = 'nonpayable'
+            }
+          } else {
             logger.warn(
               'extractFunctionsFromSpec',
-              `Failed to parse output ${outputIndex}:`,
-              error
+              `No network config provided for ${functionName}, assuming it modifies state`
             );
-            return {
-              name: `result_${outputIndex}`,
-              type: 'unknown',
-            };
           }
-        });
 
-        // Determine if function is read-only (view function)
-        // In Soroban, this is typically determined by whether the function modifies state
-        const readonly = outputs.length > 0 && inputs.length === 0; // Simple heuristic
+          // Generate a unique ID for the function
+          const functionId = `${functionName}_${inputs.map((i) => i.type).join('_')}`;
 
-        // Generate a unique ID for the function
-        const functionId = `${functionName}_${inputs.map((i) => i.type).join('_')}`;
+          return {
+            id: functionId,
+            name: functionName,
+            displayName:
+              functionName.charAt(0).toUpperCase() + functionName.slice(1).replace(/_/g, ' '),
+            description: `Soroban function: ${functionName}`,
+            inputs,
+            outputs,
+            type: 'function',
+            modifiesState,
+            stateMutability,
+          };
+        } catch (error) {
+          logger.error('extractFunctionsFromSpec', `Failed to process function ${index}:`, error);
 
-        return {
-          id: functionId,
-          name: functionName,
-          displayName:
-            functionName.charAt(0).toUpperCase() + functionName.slice(1).replace(/_/g, ' '),
-          description: `Soroban function: ${functionName}`,
-          inputs,
-          outputs,
-          type: 'function',
-          modifiesState: !readonly,
-          stateMutability: readonly ? 'view' : 'nonpayable',
-        };
-      } catch (error) {
-        logger.error('extractFunctionsFromSpec', `Failed to process function ${index}:`, error);
-
-        // Return a basic function entry for failed parsing
-        return {
-          id: `function_${index}`,
-          name: `function_${index}`,
-          displayName: `Function ${index}`,
-          description: `Failed to parse function ${index}: ${(error as Error).message}`,
-          inputs: [],
-          outputs: [],
-          type: 'function',
-          modifiesState: true,
-          stateMutability: 'nonpayable',
-        };
-      }
-    });
+          // Return a basic function entry for failed parsing
+          return {
+            id: `function_${index}`,
+            name: `function_${index}`,
+            displayName: `Function ${index}`,
+            description: `Failed to parse function ${index}: ${(error as Error).message}`,
+            inputs: [],
+            outputs: [],
+            type: 'function',
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          };
+        }
+      })
+    );
   } catch (error) {
     logger.error('extractFunctionsFromSpec', 'Failed to extract functions from spec:', error);
     throw new Error(`Failed to extract functions: ${(error as Error).message}`);
@@ -262,11 +317,7 @@ export async function loadStellarContract(
     throw new Error('A contract address must be provided.');
   }
 
-  const schema = await loadStellarContractFromAddress(
-    artifacts.contractAddress,
-    networkConfig.sorobanRpcUrl,
-    networkConfig.networkPassphrase
-  );
+  const schema = await loadStellarContractFromAddress(artifacts.contractAddress, networkConfig);
 
   const schemaWithAddress = { ...schema, address: artifacts.contractAddress };
 
@@ -298,8 +349,7 @@ export async function loadStellarContractWithMetadata(
   try {
     const contractData = await loadStellarContractFromAddress(
       artifacts.contractAddress,
-      networkConfig.sorobanRpcUrl,
-      networkConfig.networkPassphrase
+      networkConfig
     );
 
     const schema = {
