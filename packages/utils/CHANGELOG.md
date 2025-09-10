@@ -1,5 +1,16 @@
 # @openzeppelin/transaction-form-utils
 
+## 0.8.0
+
+### Minor Changes
+
+- [#145](https://github.com/OpenZeppelin/contracts-ui-builder/pull/145) [`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9) Thanks [@pasevin](https://github.com/pasevin)! - support for new BytesField component with validation
+
+### Patch Changes
+
+- Updated dependencies [[`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9)]:
+  - @openzeppelin/contracts-ui-builder-types@0.8.0
+
 ## 0.7.0
 
 ### Minor Changes
