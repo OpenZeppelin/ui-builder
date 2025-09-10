@@ -105,6 +105,45 @@ function coerceEnumHardcodedValue(field: FormFieldType, raw: unknown): unknown {
 /**
  * Centralized coercion of a field's hardcoded value into the proper shape for its type.
  * Ensures cross-field switches never leak incompatible shapes (e.g., map array into a string field).
+ *
+ * This function is critical for handling scenarios where users change a field's type in the UI builder
+ * after setting a hardcoded value. Without proper coercion, we could end up with type mismatches like:
+ * - A map array `[{key: 'x', value: 'y'}]` in a text field (should become empty string)
+ * - A string value `"hello"` in a number field (should become 0)
+ * - An object `{foo: 'bar'}` in an array field (should become empty array)
+ *
+ * @param field - The target field configuration containing type and metadata
+ * @param raw - The raw value that needs to be coerced (may be incompatible with field type)
+ * @returns The coerced value that matches the field's expected type shape
+ *
+ * ## Coercion Rules by Field Type:
+ *
+ * **Collection Types:**
+ * - `array`: Ensures array format, replaces corrupted objects with element defaults
+ * - `map`: Ensures array of `{key, value}` objects, handles legacy [key, value] tuple format
+ * - `array-object`: Ensures array format, defaults to empty array `[]`
+ * - `object`: Ensures object format, defaults to empty object `{}`
+ *
+ * **Primitive Types:**
+ * - `number`/`amount`: Ensures numeric value, defaults to `0`
+ * - `checkbox`: Ensures boolean value, defaults to `false`
+ *
+ * **Complex Types:**
+ * - `enum`: Ensures proper `EnumValue` format with `{tag, values?}`, uses first variant as default
+ *
+ * **String-based Types:**
+ * - `text`, `textarea`, `bytes`, `email`, `password`, `url`, `date`, etc.
+ * - All coerced to string format, default to empty string `""`
+ * - `blockchain-address`: Special string type for addresses, defaults to `""`
+ * - `select`, `radio`, `select-grouped`: Option-based fields, defaults to `""`
+ * - `code-editor`: Code content field, defaults to `""`
+ * - `hidden`: Hidden form field, defaults to `""`
+ *
+ * ## Common Use Cases:
+ * 1. **Field Type Changes**: User switches from "Array" to "Text" - array gets coerced to `""`
+ * 2. **Import/Export**: Imported configs might have mismatched value types
+ * 3. **Legacy Data**: Older saved configurations with different value formats
+ * 4. **Cross-Chain Adaptation**: Different adapters might have different value expectations
  */
 export function coerceHardcodedValue(field: FormFieldType, raw: unknown): unknown {
   // If value is undefined, leave it as undefined (caller decides defaults)
