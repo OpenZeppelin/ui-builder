@@ -196,11 +196,9 @@ export function isDuplicateMapKey(entries: MapEntry[], currentIndex: number): bo
     return false;
   }
 
-  return (
-    entries.filter(
-      (entry: MapEntry, i: number) =>
-        i !== currentIndex && String(entry?.key) === String(currentKeyValue) && entry?.key !== ''
-    ).length > 0
+  return entries.some(
+    (entry: MapEntry, i: number) =>
+      i !== currentIndex && String(entry?.key) === String(currentKeyValue) && entry?.key !== ''
   );
 }
 
