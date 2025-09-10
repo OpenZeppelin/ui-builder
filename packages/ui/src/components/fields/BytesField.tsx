@@ -161,6 +161,7 @@ export function BytesField<TFieldValues extends FieldValues = FieldValues>({
                 placeholder={placeholder}
                 rows={rows}
                 className={validationClasses}
+                disabled={readOnly}
                 value={field.value ?? ''}
                 onChange={(e) => {
                   // Only update value without formatting for better performance
