@@ -80,6 +80,41 @@ function cleanupCollectionHardcodedValue(field: FormFieldType, value: unknown): 
 }
 
 /**
+ * Coerce object and array-object type values
+ */
+function coerceObjectValue(field: FormFieldType, raw: unknown): unknown {
+  if (field.type === 'object') {
+    return typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  }
+  if (field.type === 'array-object') {
+    return Array.isArray(raw) ? raw : [];
+  }
+  return raw;
+}
+
+/**
+ * Coerce primitive type values (number, amount, checkbox)
+ */
+function coercePrimitiveValue(field: FormFieldType, raw: unknown): unknown {
+  switch (field.type) {
+    case 'number':
+    case 'amount':
+      return typeof raw === 'number' ? raw : 0;
+    case 'checkbox':
+      return typeof raw === 'boolean' ? raw : false;
+    default:
+      return raw;
+  }
+}
+
+/**
+ * Coerce string-based type values
+ */
+function coerceStringValue(raw: unknown): string {
+  return typeof raw === 'string' ? raw : '';
+}
+
+/**
  * Clean up and coerce enum hardcoded values to proper EnumValue format
  */
 function coerceEnumHardcodedValue(field: FormFieldType, raw: unknown): unknown {
@@ -105,6 +140,13 @@ function coerceEnumHardcodedValue(field: FormFieldType, raw: unknown): unknown {
 /**
  * Centralized coercion of a field's hardcoded value into the proper shape for its type.
  * Ensures cross-field switches never leak incompatible shapes (e.g., map array into a string field).
+ *
+ * This function delegates to specialized coercion functions based on field type categories:
+ * - Collection types (array, map) → `cleanupCollectionHardcodedValue`
+ * - Object types (object, array-object) → `coerceObjectValue`
+ * - Primitive types (number, amount, checkbox) → `coercePrimitiveValue`
+ * - Enum types → `coerceEnumHardcodedValue`
+ * - String-based types → `coerceStringValue`
  *
  * This function is critical for handling scenarios where users change a field's type in the UI builder
  * after setting a hardcoded value. Without proper coercion, we could end up with type mismatches like:
@@ -149,37 +191,28 @@ export function coerceHardcodedValue(field: FormFieldType, raw: unknown): unknow
   // If value is undefined, leave it as undefined (caller decides defaults)
   if (raw === undefined) return undefined;
 
-  switch (field.type) {
-    case 'array':
-    case 'map':
-      return cleanupCollectionHardcodedValue(field, raw);
-    case 'object':
-      return typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
-    case 'array-object':
-      return Array.isArray(raw) ? raw : [];
-    case 'number':
-    case 'amount':
-      return typeof raw === 'number' ? raw : 0;
-    case 'checkbox':
-      return typeof raw === 'boolean' ? raw : false;
-    case 'enum':
-      return coerceEnumHardcodedValue(field, raw);
-    case 'blockchain-address':
-    case 'text':
-    case 'textarea':
-    case 'bytes':
-    case 'email':
-    case 'password':
-    case 'select':
-    case 'radio':
-    case 'select-grouped':
-    case 'code-editor':
-    case 'url':
-    case 'date':
-    case 'hidden':
-    default:
-      return typeof raw === 'string' ? raw : '';
+  // Handle collection types (array, map)
+  if (field.type === 'array' || field.type === 'map') {
+    return cleanupCollectionHardcodedValue(field, raw);
   }
+
+  // Handle object types (object, array-object)
+  if (field.type === 'object' || field.type === 'array-object') {
+    return coerceObjectValue(field, raw);
+  }
+
+  // Handle primitive types (number, amount, checkbox)
+  if (field.type === 'number' || field.type === 'amount' || field.type === 'checkbox') {
+    return coercePrimitiveValue(field, raw);
+  }
+
+  // Handle enum types
+  if (field.type === 'enum') {
+    return coerceEnumHardcodedValue(field, raw);
+  }
+
+  // Handle all string-based types
+  return coerceStringValue(raw);
 }
 
 /**
