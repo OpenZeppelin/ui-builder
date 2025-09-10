@@ -192,7 +192,8 @@ export function isDuplicateMapKey(entries: MapEntry[], currentIndex: number): bo
 
   const currentKeyValue = entries[currentIndex]?.key;
 
-  if (!currentKeyValue) {
+  // Don't consider empty keys as duplicates
+  if (!currentKeyValue || currentKeyValue === '') {
     return false;
   }
 
