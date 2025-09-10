@@ -1,3 +1,11 @@
+/*
+ * Stellar Explorer Configuration
+ *
+ * DESIGN NOTE: This module provides minimal explorer functionality compared to EVM adapters.
+ * Stellar explorers are used only for generating display URLs, unlike EVM where explorers
+ * are critical infrastructure for ABI fetching. See comments below for detailed explanation.
+ */
+
 import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
 
@@ -46,7 +54,10 @@ export function getStellarExplorerTxUrl(
 
 /**
  * Validates a Stellar explorer configuration.
- * Checks URL formats and API key format.
+ *
+ * NOTE: This validation is minimal compared to EVM - only checks URL formats.
+ * No API key validation or connection testing since Stellar explorers are
+ * display-only (not used for contract ABI fetching like in EVM).
  */
 export function validateStellarExplorerConfig(explorerConfig: UserExplorerConfig): boolean {
   // Validate URLs if provided
@@ -77,77 +88,18 @@ export function validateStellarExplorerConfig(explorerConfig: UserExplorerConfig
   return true;
 }
 
-/**
- * Tests the connection to a Stellar explorer API.
- * Makes a test request to verify the explorer is accessible.
+/*
+ * NOTE: Unlike EVM adapters, Stellar does not implement explorer connection testing.
+ *
+ * DESIGN DECISION: Stellar explorers are used only for generating display URLs,
+ * not for critical functionality like ABI fetching (which EVM requires).
+ *
+ * Key differences from EVM:
+ * - EVM: Explorers provide essential APIs for contract ABI fetching
+ * - Stellar: Explorers are display-only; contract loading uses Soroban RPC directly
+ * - EVM: Multiple explorer providers with varying API formats requiring validation
+ * - Stellar: Standardized ecosystem using Horizon API underneath
+ *
+ * Therefore, testing explorer "connectivity" would only verify website availability,
+ * which provides no functional value and adds unnecessary complexity.
  */
-export async function testStellarExplorerConnection(
-  explorerConfig: UserExplorerConfig,
-  _networkConfig?: NetworkConfig,
-  timeoutMs: number = 5000
-): Promise<{
-  success: boolean;
-  latency?: number;
-  error?: string;
-}> {
-  if (!explorerConfig.explorerUrl) {
-    return { success: false, error: 'Explorer URL is required' };
-  }
-
-  const startTime = Date.now();
-
-  try {
-    // Test by making a simple HTTP request to the explorer URL
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-    const response = await fetch(explorerConfig.explorerUrl, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'contracts-ui-builder-stellar-adapter',
-      },
-    });
-
-    clearTimeout(timeoutId);
-    const latency = Date.now() - startTime;
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: `HTTP ${response.status}: ${response.statusText}`,
-        latency,
-      };
-    }
-
-    // Success if we got a response
-    return {
-      success: true,
-      latency,
-    };
-  } catch (error) {
-    const latency = Date.now() - startTime;
-
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        return {
-          success: false,
-          error: `Connection timeout after ${timeoutMs}ms`,
-          latency,
-        };
-      }
-
-      return {
-        success: false,
-        error: error.message,
-        latency,
-      };
-    }
-
-    return {
-      success: false,
-      error: 'Connection test failed',
-      latency,
-    };
-  }
-}

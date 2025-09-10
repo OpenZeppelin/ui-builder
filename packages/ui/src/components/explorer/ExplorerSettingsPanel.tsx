@@ -198,6 +198,9 @@ export function ExplorerSettingsPanel({
     adapter.validateExplorerConfig || adapter.testExplorerConnection
   );
 
+  // Note: This fallback should rarely be seen since NetworkSettingsDialog
+  // now conditionally renders this component based on adapter capabilities.
+  // This serves as a defensive fallback for edge cases.
   if (!supportsExplorerConfig) {
     return (
       <div className="text-sm text-muted-foreground">
