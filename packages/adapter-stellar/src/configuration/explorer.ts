@@ -1,6 +1,5 @@
 import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { isValidContractAddress } from '../validation';
 
@@ -46,28 +45,109 @@ export function getStellarExplorerTxUrl(
 }
 
 /**
- * Validates an explorer configuration for Stellar networks.
- * @param explorerConfig - The explorer configuration to validate
- * @returns True if the configuration is valid, false otherwise
+ * Validates a Stellar explorer configuration.
+ * Checks URL formats and API key format.
  */
-export function validateStellarExplorerConfig(_explorerConfig: UserExplorerConfig): boolean {
-  // TODO: Implement Stellar-specific explorer validation when needed
-  logger.info('validateStellarExplorerConfig', 'Stellar explorer validation not yet implemented');
+export function validateStellarExplorerConfig(explorerConfig: UserExplorerConfig): boolean {
+  // Validate URLs if provided
+  if (explorerConfig.explorerUrl) {
+    try {
+      new URL(explorerConfig.explorerUrl);
+    } catch {
+      return false;
+    }
+  } else {
+    // explorerUrl is required
+    return false;
+  }
+
+  if (explorerConfig.apiUrl) {
+    try {
+      new URL(explorerConfig.apiUrl);
+    } catch {
+      return false;
+    }
+  }
+
+  // Basic API key validation (not empty)
+  if (explorerConfig.apiKey !== undefined && explorerConfig.apiKey.trim().length === 0) {
+    return false;
+  }
+
   return true;
 }
 
 /**
  * Tests the connection to a Stellar explorer API.
- * @param explorerConfig - The explorer configuration to test
- * @returns Connection test results including success status, latency, and any errors
+ * Makes a test request to verify the explorer is accessible.
  */
-export async function testStellarExplorerConnection(_explorerConfig: UserExplorerConfig): Promise<{
+export async function testStellarExplorerConnection(
+  explorerConfig: UserExplorerConfig,
+  _networkConfig?: NetworkConfig,
+  timeoutMs: number = 5000
+): Promise<{
   success: boolean;
   latency?: number;
   error?: string;
 }> {
-  // TODO: Implement explorer connection testing for Stellar
-  // Could use a health check endpoint if available
-  logger.info('testStellarExplorerConnection', 'TODO: Implement explorer connection testing');
-  return { success: true };
+  if (!explorerConfig.explorerUrl) {
+    return { success: false, error: 'Explorer URL is required' };
+  }
+
+  const startTime = Date.now();
+
+  try {
+    // Test by making a simple HTTP request to the explorer URL
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const response = await fetch(explorerConfig.explorerUrl, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'contracts-ui-builder-stellar-adapter',
+      },
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: `HTTP ${response.status}: ${response.statusText}`,
+        latency,
+      };
+    }
+
+    // Success if we got a response
+    return {
+      success: true,
+      latency,
+    };
+  } catch (error) {
+    const latency = Date.now() - startTime;
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          error: `Connection timeout after ${timeoutMs}ms`,
+          latency,
+        };
+      }
+
+      return {
+        success: false,
+        error: error.message,
+        latency,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Connection test failed',
+      latency,
+    };
+  }
 }

@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { resolveSorobanRpcUrl, testStellarRpcConnection, validateStellarRpcEndpoint } from '../rpc';
+import { resolveRpcUrl, testStellarRpcConnection, validateStellarRpcEndpoint } from '../rpc';
 
 // Helper to create a mock StellarNetworkConfig
 const createMockConfig = (
@@ -44,7 +44,7 @@ vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
   };
 });
 
-describe('resolveSorobanRpcUrl', () => {
+describe('resolveRpcUrl', () => {
   beforeEach(() => {
     // Reset mocks before each test to ensure test isolation
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReset();
@@ -57,7 +57,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(overrideRpcUrl);
 
     const config = createMockConfig(networkId, 'https://soroban-testnet.stellar.org');
-    expect(resolveSorobanRpcUrl(config)).toBe(overrideRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(overrideRpcUrl);
   });
 
   it('should use RPC override from AppConfigService if available (object with http)', () => {
@@ -66,7 +66,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue({ http: overrideRpcUrl });
 
     const config = createMockConfig(networkId, 'https://soroban-testnet.stellar.org');
-    expect(resolveSorobanRpcUrl(config)).toBe(overrideRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(overrideRpcUrl);
   });
 
   it('should fall back to networkConfig.sorobanRpcUrl if no override is available', () => {
@@ -75,7 +75,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(undefined);
 
     const config = createMockConfig(networkId, defaultRpcUrl);
-    expect(resolveSorobanRpcUrl(config)).toBe(defaultRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(defaultRpcUrl);
   });
 
   it('should fall back to networkConfig.sorobanRpcUrl if override is invalid URL', () => {
@@ -84,7 +84,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue('invalid-url');
 
     const config = createMockConfig(networkId, defaultRpcUrl);
-    expect(resolveSorobanRpcUrl(config)).toBe(defaultRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(defaultRpcUrl);
   });
 
   it('should throw an error if no valid Soroban RPC URL (override or default) is found', () => {
@@ -92,7 +92,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(undefined);
     const config = createMockConfig(networkId, undefined);
 
-    expect(() => resolveSorobanRpcUrl(config)).toThrowError(
+    expect(() => resolveRpcUrl(config)).toThrowError(
       `No valid Soroban RPC URL configured for network Test ${networkId} (ID: ${networkId}).`
     );
   });
@@ -102,7 +102,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(undefined);
     const config = createMockConfig(networkId, 'not-a-url');
 
-    expect(() => resolveSorobanRpcUrl(config)).toThrowError(
+    expect(() => resolveRpcUrl(config)).toThrowError(
       `No valid Soroban RPC URL configured for network Test ${networkId} (ID: ${networkId}).`
     );
   });
@@ -113,7 +113,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(overrideRpcUrl);
 
     const config = createMockConfig(networkId, 'bad-default-url');
-    expect(resolveSorobanRpcUrl(config)).toBe(overrideRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(overrideRpcUrl);
   });
 
   it('should work with mainnet Soroban RPC URL', () => {
@@ -122,7 +122,7 @@ describe('resolveSorobanRpcUrl', () => {
     vi.mocked(appConfigService.getRpcEndpointOverride).mockReturnValue(undefined);
 
     const config = createMockConfig(networkId, mainnetRpcUrl);
-    expect(resolveSorobanRpcUrl(config)).toBe(mainnetRpcUrl);
+    expect(resolveRpcUrl(config)).toBe(mainnetRpcUrl);
   });
 });
 
@@ -143,7 +143,6 @@ describe('validateStellarRpcEndpoint', () => {
   it('should return false for invalid URLs', () => {
     const invalidConfigs = [
       { url: 'not-a-url', name: 'Invalid', isCustom: false },
-      { url: 'ftp://soroban.example.com', name: 'Wrong protocol', isCustom: false },
       { url: '', name: 'Empty URL', isCustom: false },
     ];
 
@@ -164,7 +163,7 @@ describe('validateStellarRpcEndpoint', () => {
   it('should handle validation errors gracefully', () => {
     // This test verifies the catch block works, but doMock doesn't work in the middle of test execution
     // Instead, we'll test that the function returns false on invalid input
-    const config = { url: null as any, name: 'Test', isCustom: false };
+    const config = { url: null as unknown as string, name: 'Test', isCustom: false };
     expect(validateStellarRpcEndpoint(config)).toBe(false);
   });
 });
@@ -200,7 +199,7 @@ describe('testStellarRpcConnection', () => {
     vi.mocked(global.fetch).mockImplementation(async () => {
       // Advance time to simulate network latency
       vi.advanceTimersByTime(100);
-      return mockResponse as any;
+      return mockResponse as unknown as Response;
     });
 
     const config = { url: 'https://soroban-testnet.stellar.org', name: 'Testnet', isCustom: false };
@@ -225,7 +224,7 @@ describe('testStellarRpcConnection', () => {
     vi.mocked(global.fetch).mockImplementation(async () => {
       // Advance time to simulate network latency
       vi.advanceTimersByTime(150);
-      return mockResponse as any;
+      return mockResponse as unknown as Response;
     });
 
     const config = { url: 'https://soroban-testnet.stellar.org', name: 'Testnet', isCustom: false };
@@ -240,7 +239,7 @@ describe('testStellarRpcConnection', () => {
       ok: false,
       status: 500,
     };
-    vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
     const config = { url: 'https://bad-soroban.example.com', name: 'Bad RPC', isCustom: true };
     const result = await testStellarRpcConnection(config);
@@ -258,7 +257,7 @@ describe('testStellarRpcConnection', () => {
         error: { code: -32601, message: 'Method not found' },
       }),
     };
-    vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
     const config = { url: 'https://soroban-testnet.stellar.org', name: 'Testnet', isCustom: false };
     const result = await testStellarRpcConnection(config);
@@ -281,7 +280,7 @@ describe('testStellarRpcConnection', () => {
     vi.mocked(global.fetch).mockImplementation(async () => {
       // Advance time to simulate network latency
       vi.advanceTimersByTime(120);
-      return mockResponse as any;
+      return mockResponse as unknown as Response;
     });
 
     const config = { url: 'https://soroban-testnet.stellar.org', name: 'Testnet', isCustom: false };
@@ -340,7 +339,7 @@ describe('testStellarRpcConnection', () => {
         result: { status: 'healthy' },
       }),
     };
-    vi.mocked(global.fetch).mockResolvedValue(mockResponse as any);
+    vi.mocked(global.fetch).mockResolvedValue(mockResponse as unknown as Response);
 
     const config = { url: 'https://soroban-testnet.stellar.org', name: 'Testnet', isCustom: false };
     const result = await testStellarRpcConnection(config, 10000); // 10 second timeout

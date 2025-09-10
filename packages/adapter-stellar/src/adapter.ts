@@ -30,9 +30,14 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 // Import functions from modules
 import { loadStellarContract, loadStellarContractWithMetadata } from './contract/loader';
 
-import { testStellarRpcConnection, validateStellarRpcEndpoint } from './configuration';
-import { getStellarSupportedExecutionMethods, validateStellarExecutionConfig } from './execution';
-import { getStellarExplorerAddressUrl, getStellarExplorerTxUrl } from './explorer';
+import {
+  getStellarExplorerAddressUrl,
+  getStellarExplorerTxUrl,
+  getStellarSupportedExecutionMethods,
+  testStellarRpcConnection,
+  validateStellarExecutionConfig,
+  validateStellarRpcEndpoint,
+} from './configuration';
 import {
   generateStellarDefaultField,
   getStellarCompatibleFieldTypes,
@@ -300,7 +305,8 @@ export class StellarAdapter implements ContractAdapter {
     return getStellarSupportedExecutionMethods();
   }
   async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
-    return validateStellarExecutionConfig(config);
+    const walletStatus = this.getWalletConnectionStatus();
+    return validateStellarExecutionConfig(config, walletStatus);
   }
 
   // Implement getExplorerUrl with the correct signature from ContractAdapter

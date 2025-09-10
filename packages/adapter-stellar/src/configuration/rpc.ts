@@ -22,17 +22,17 @@ export function buildRpcUrl(config: UserRpcProviderConfig): string {
 }
 
 /**
- * Resolves the Soroban RPC URL for a given Stellar network configuration.
+ * Resolves the RPC URL for a given Stellar network configuration.
  * Priority order:
  * 1. User-provided RPC configuration (from UserRpcConfigService)
  * 2. RPC URL override from AppConfigService
  * 3. Default sorobanRpcUrl from the network configuration
  *
  * @param networkConfig - The Stellar network configuration.
- * @returns The resolved Soroban RPC URL string.
+ * @returns The resolved RPC URL string.
  * @throws If no RPC URL can be resolved (neither user config, override, nor default is present and valid).
  */
-export function resolveSorobanRpcUrl(networkConfig: StellarNetworkConfig): string {
+export function resolveRpcUrl(networkConfig: StellarNetworkConfig): string {
   const logSystem = 'StellarRpcResolver';
   const networkId = networkConfig.id;
 
@@ -113,51 +113,16 @@ export function validateStellarRpcEndpoint(rpcConfig: UserRpcProviderConfig): bo
   try {
     // Check if it's a valid URL (our validator already ensures HTTP/HTTPS)
     if (!isValidUrl(rpcConfig.url)) {
-      logger.error(
-        'validateStellarRpcEndpoint',
-        `Invalid Soroban RPC URL format: ${rpcConfig.url}`
-      );
+      logger.error('validateStellarRpcEndpoint', `Invalid RPC URL format: ${rpcConfig.url}`);
       return false;
     }
 
-    // Additional Stellar-specific validation
-    // Check if the URL appears to be a Soroban RPC endpoint
-    const url = rpcConfig.url.toLowerCase();
-
-    // Reject obviously invalid protocols or formats
-    if (url.startsWith('ftp://') || url.startsWith('file://')) {
-      logger.error(
-        'validateStellarRpcEndpoint',
-        `Invalid protocol for Soroban RPC: ${rpcConfig.url}`
-      );
-      return false;
-    }
-
-    // Accept common Soroban RPC URL patterns
-    const isSorobanRpcPattern =
-      url.includes('soroban') ||
-      url.includes('stellar.org') ||
-      url.includes('stellarbeat.io') ||
-      url.includes('publicnode.com') ||
-      url.includes('rpc.stellar.org') ||
-      url.includes('mainnet.sorobanrpc.com') ||
-      url.includes('testnet.sorobanrpc.com') ||
-      // Allow localhost for development
-      url.includes('localhost') ||
-      url.includes('127.0.0.1') ||
-      // Allow any HTTPS URL for custom RPC endpoints
-      url.startsWith('https://');
-
-    if (!isSorobanRpcPattern) {
-      logger.warn(
-        'validateStellarRpcEndpoint',
-        `URL does not match common Soroban RPC patterns: ${rpcConfig.url}. Proceeding with validation.`
-      );
-    }
+    // Additional Stellar-specific validation could be added here
+    // For example, checking if the URL follows known provider patterns
 
     return true;
   } catch (error) {
-    logger.error('validateStellarRpcEndpoint', 'Error validating Soroban RPC endpoint:', error);
+    logger.error('validateStellarRpcEndpoint', 'Error validating RPC endpoint:', error);
     return false;
   }
 }
@@ -199,7 +164,6 @@ export async function testStellarRpcConnection(
         jsonrpc: '2.0',
         id: 1,
         method: 'getHealth',
-        params: {},
       }),
       signal: controller.signal,
     });
@@ -250,7 +214,7 @@ export async function testStellarRpcConnection(
     // Try fallback method if primary test failed
     try {
       return await testWithFallbackMethod(rpcConfig, controller.signal, Date.now());
-    } catch (fallbackError) {
+    } catch {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Connection failed',
@@ -284,7 +248,6 @@ async function testWithFallbackMethod(
       jsonrpc: '2.0',
       id: 1,
       method: 'getLatestLedger',
-      params: {},
     }),
     signal,
   });

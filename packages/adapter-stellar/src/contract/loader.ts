@@ -9,7 +9,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { getStellarExplorerAddressUrl } from '../explorer';
+import { getStellarExplorerAddressUrl } from '../configuration/explorer';
 import { extractStructFields, isStructType } from '../mapping/struct-fields';
 import { checkStellarFunctionStateMutability } from '../query/handler';
 import type { StellarContractArtifacts } from '../types/artifacts';
