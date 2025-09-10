@@ -282,10 +282,10 @@ describe('safe-type-parser', () => {
 
     describe('invalid type strings', () => {
       it('should reject null, undefined, or non-string inputs', () => {
-        expect(isValidTypeString(null as any)).toBe(false);
-        expect(isValidTypeString(undefined as any)).toBe(false);
-        expect(isValidTypeString(123 as any)).toBe(false);
-        expect(isValidTypeString({} as any)).toBe(false);
+        expect(isValidTypeString(null as unknown as string)).toBe(false);
+        expect(isValidTypeString(undefined as unknown as string)).toBe(false);
+        expect(isValidTypeString(123 as unknown as string)).toBe(false);
+        expect(isValidTypeString({} as unknown as string)).toBe(false);
       });
 
       it('should reject empty strings', () => {
