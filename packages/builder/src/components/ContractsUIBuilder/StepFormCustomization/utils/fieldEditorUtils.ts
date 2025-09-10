@@ -1,4 +1,4 @@
-import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { FormFieldType, isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
 import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { FieldEditorFormValues } from '../types';
@@ -80,6 +80,29 @@ function cleanupCollectionHardcodedValue(field: FormFieldType, value: unknown): 
 }
 
 /**
+ * Clean up and coerce enum hardcoded values to proper EnumValue format
+ */
+function coerceEnumHardcodedValue(field: FormFieldType, raw: unknown): unknown {
+  // Preserve valid EnumValue objects
+  if (isEnumValue(raw)) {
+    return raw;
+  }
+
+  // If not a valid EnumValue, return a basic enum value with the first variant
+  // This handles cases where enum values were corrupted or stored as strings
+  if (field.enumMetadata && field.enumMetadata.variants.length > 0) {
+    const firstVariant = field.enumMetadata.variants[0];
+    return {
+      tag: firstVariant.name,
+      ...(firstVariant.type !== 'void' && { values: [] }),
+    };
+  }
+
+  // Fallback for enums without metadata
+  return { tag: '', values: [] };
+}
+
+/**
  * Centralized coercion of a field's hardcoded value into the proper shape for its type.
  * Ensures cross-field switches never leak incompatible shapes (e.g., map array into a string field).
  */
@@ -100,6 +123,8 @@ export function coerceHardcodedValue(field: FormFieldType, raw: unknown): unknow
       return typeof raw === 'number' ? raw : 0;
     case 'checkbox':
       return typeof raw === 'boolean' ? raw : false;
+    case 'enum':
+      return coerceEnumHardcodedValue(field, raw);
     case 'blockchain-address':
     case 'text':
     case 'textarea':
@@ -108,6 +133,9 @@ export function coerceHardcodedValue(field: FormFieldType, raw: unknown): unknow
     case 'password':
     case 'select':
     case 'radio':
+    case 'select-grouped':
+    case 'code-editor':
+    case 'url':
     case 'date':
     case 'hidden':
     default:
@@ -134,6 +162,14 @@ export function initializeFormValues(field: FormFieldType): FieldEditorFormValue
     }
     if (field.type === 'object') {
       hardcodedValue = {};
+    }
+    // For enum types, provide a proper EnumValue default
+    if (field.type === 'enum' && field.enumMetadata && field.enumMetadata.variants.length > 0) {
+      const firstVariant = field.enumMetadata.variants[0];
+      hardcodedValue = {
+        tag: firstVariant.name,
+        ...(firstVariant.type !== 'void' && { values: [] }),
+      };
     }
   }
 
