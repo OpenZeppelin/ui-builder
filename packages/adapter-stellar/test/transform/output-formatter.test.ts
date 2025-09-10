@@ -1,16 +1,20 @@
 import { Address, ScInt, xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 
-import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractFunction, FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
 
 import { formatStellarFunctionResult } from '../../src/transform/output-formatter';
 
 describe('formatStellarFunctionResult', () => {
   const mockFunction: ContractFunction = {
+    id: 'test_function',
     name: 'test_function',
+    displayName: 'Test Function',
+    type: 'function',
     inputs: [],
     outputs: [{ name: 'result', type: 'U32' }],
     stateMutability: 'view',
+    modifiesState: false,
   };
 
   describe('primitive types', () => {
@@ -95,8 +99,8 @@ describe('formatStellarFunctionResult', () => {
     });
 
     it('should format bytes ScVal', () => {
-      const buffer = Buffer.from('Hello World', 'utf8');
-      const scVal = xdr.ScVal.scvBytes(buffer);
+      const bytes = Buffer.from('Hello World', 'utf8');
+      const scVal = xdr.ScVal.scvBytes(bytes);
       const result = formatStellarFunctionResult(scVal, mockFunction);
       expect(result).toContain('48656c6c6f20576f726c64'); // hex representation
     });
@@ -267,10 +271,14 @@ describe('formatStellarFunctionResult', () => {
   describe('error handling', () => {
     it('should handle missing outputs in function definition', () => {
       const functionWithoutOutputs: ContractFunction = {
+        id: 'test_function',
         name: 'test_function',
+        displayName: 'Test Function',
+        type: 'function',
         inputs: [],
         outputs: undefined as unknown as FunctionParameter[],
         stateMutability: 'view',
+        modifiesState: false,
       };
 
       const scVal = xdr.ScVal.scvU32(42);
@@ -280,10 +288,14 @@ describe('formatStellarFunctionResult', () => {
 
     it('should handle invalid outputs array', () => {
       const functionWithInvalidOutputs: ContractFunction = {
+        id: 'test_function',
         name: 'test_function',
+        displayName: 'Test Function',
+        type: 'function',
         inputs: [],
         outputs: null as unknown as FunctionParameter[],
         stateMutability: 'view',
+        modifiesState: false,
       };
 
       const scVal = xdr.ScVal.scvU32(42);

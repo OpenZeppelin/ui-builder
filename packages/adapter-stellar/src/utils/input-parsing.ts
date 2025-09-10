@@ -1,6 +1,10 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { detectBytesEncoding, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import {
+  detectBytesEncoding,
+  logger,
+  stringToBytes,
+} from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import types for internal use
 import type {
@@ -138,7 +142,7 @@ export function getScValFromPrimitive(v: SorobanArgumentValue): xdr.ScVal {
     if (v.type === 'bytes') {
       const stringValue = v.value as string;
       const encoding = detectBytesEncoding(stringValue);
-      return nativeToScVal(new Uint8Array(Buffer.from(stringValue, encoding)));
+      return nativeToScVal(stringToBytes(stringValue, encoding));
     }
 
     // Use our improved type conversion utility
@@ -240,7 +244,11 @@ export function convertObjectToScVal(obj: Record<string, SorobanArgumentValue>):
         typeHints[key] = ['symbol']; // Key is always symbol, value type varies
       } else {
         convertedValue[key] = field.value;
-        typeHints[key] = ['symbol', convertStellarTypeToScValType(field.type)];
+        const fieldTypeHint = convertStellarTypeToScValType(field.type);
+        typeHints[key] = [
+          'symbol',
+          ...(Array.isArray(fieldTypeHint) ? fieldTypeHint : [fieldTypeHint]),
+        ];
       }
     }
 
@@ -273,9 +281,11 @@ export function convertObjectToMap(mapArray: SorobanMapEntry[]): {
 
     const mapType = mapArray.reduce((acc: Record<string, string[]>, pair) => {
       const key = pair['0'].value as string;
+      const keyTypeHint = convertStellarTypeToScValType(pair['0'].type);
+      const valueTypeHint = convertStellarTypeToScValType(pair['1'].type);
       acc[key] = [
-        convertStellarTypeToScValType(pair['0'].type),
-        convertStellarTypeToScValType(pair['1'].type),
+        ...(Array.isArray(keyTypeHint) ? keyTypeHint : [keyTypeHint]),
+        ...(Array.isArray(valueTypeHint) ? valueTypeHint : [valueTypeHint]),
       ];
       return acc;
     }, {});
@@ -297,7 +307,7 @@ export function convertTupleToScVal(tupleArray: SorobanArgumentValue[]): xdr.ScV
 
       if (v.type === 'bytes') {
         const encoding = detectBytesEncoding(v.value as string);
-        return nativeToScVal(new Uint8Array(Buffer.from(v.value as string, encoding)));
+        return nativeToScVal(stringToBytes(v.value as string, encoding));
       }
 
       const typeHint = convertStellarTypeToScValType(v.type);

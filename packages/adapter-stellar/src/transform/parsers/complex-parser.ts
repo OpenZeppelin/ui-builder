@@ -1,6 +1,6 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { detectBytesEncoding } from '@openzeppelin/contracts-ui-builder-utils';
+import { detectBytesEncoding, stringToBytes } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import {
@@ -113,7 +113,7 @@ export function getScValsFromArgs(
             acc.push(primitive.value === 'true' ? true : false);
           } else if (primitive.type === 'bytes') {
             const encoding = detectBytesEncoding(primitive.value as string);
-            acc.push(new Uint8Array(Buffer.from(primitive.value as string, encoding)));
+            acc.push(stringToBytes(primitive.value as string, encoding));
           } else {
             acc.push(primitive.value);
           }

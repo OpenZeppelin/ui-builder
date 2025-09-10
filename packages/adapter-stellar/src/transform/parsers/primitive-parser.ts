@@ -1,7 +1,10 @@
-import { Buffer } from 'buffer';
 import { Address } from '@stellar/stellar-sdk';
 
-import { detectBytesEncoding, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import {
+  detectBytesEncoding,
+  logger,
+  stringToBytes,
+} from '@openzeppelin/contracts-ui-builder-utils';
 
 const SYSTEM_LOG_TAG = 'PrimitiveParser';
 
@@ -37,7 +40,7 @@ export function parsePrimitive(value: unknown, parameterType: string): unknown {
           // Remove 0x prefix if present
           const cleanValue = value.startsWith('0x') ? value.slice(2) : value;
           const encoding = detectBytesEncoding(cleanValue);
-          return new Uint8Array(Buffer.from(cleanValue, encoding));
+          return stringToBytes(cleanValue, encoding);
         }
         throw new Error(`Bytes parameter must be a string, got ${typeof value}`);
 
@@ -46,7 +49,7 @@ export function parsePrimitive(value: unknown, parameterType: string): unknown {
         if (typeof value === 'string') {
           // DataUrl is typically base64 encoded
           const encoding = detectBytesEncoding(value);
-          return new Uint8Array(Buffer.from(value, encoding));
+          return stringToBytes(value, encoding);
         }
         throw new Error(`DataUrl parameter must be a string, got ${typeof value}`);
 
@@ -76,7 +79,7 @@ export function parsePrimitive(value: unknown, parameterType: string): unknown {
           if (typeof value === 'string') {
             const cleanValue = value.startsWith('0x') ? value.slice(2) : value;
             const encoding = detectBytesEncoding(cleanValue);
-            return new Uint8Array(Buffer.from(cleanValue, encoding));
+            return stringToBytes(cleanValue, encoding);
           }
           throw new Error(`Bytes parameter must be a string, got ${typeof value}`);
         }
