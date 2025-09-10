@@ -41,6 +41,17 @@ export function formatStellarFunctionResult(
           return '(void)';
         }
         valueToFormat = scValToNative(scVal);
+
+        // Convert Buffer to Uint8Array for cross-platform compatibility
+        // scValToNative may return Buffer objects in some environments
+        if (
+          valueToFormat &&
+          typeof valueToFormat === 'object' &&
+          'constructor' in valueToFormat &&
+          valueToFormat.constructor?.name === 'Buffer'
+        ) {
+          valueToFormat = new Uint8Array(valueToFormat as ArrayLike<number>);
+        }
       } catch (error) {
         logger.error('formatStellarFunctionResult', 'Failed to convert ScVal to native', {
           functionName: functionDetails.name,
