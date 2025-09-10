@@ -97,102 +97,127 @@ export const FieldEditor = React.memo(
     }, [debouncedUpdate]);
 
     /**
-     * Optimized update handler that debounces text inputs but immediately processes critical changes
+     * Handles field type changes with hardcoded value coercion
+     */
+    const handleTypeChange = useCallback(
+      (newType: FieldType) => {
+        const currentValues = getValues();
+        const snapshot: FormFieldType = { ...field, type: newType };
+        const currentHardcoded =
+          currentValues.hardcodedValue !== undefined
+            ? currentValues.hardcodedValue
+            : field.hardcodedValue;
+        const isHardcodedNow =
+          currentValues.isHardcoded !== undefined ? currentValues.isHardcoded : field.isHardcoded;
+
+        if (isHardcodedNow || currentHardcoded !== undefined) {
+          const coerced = coerceHardcodedValue(snapshot, currentHardcoded);
+          setValue('hardcodedValue', coerced, { shouldValidate: false });
+          onUpdate({ type: newType, hardcodedValue: coerced });
+          const isRequired = currentValues.validation?.required || field.validation?.required;
+          if (isRequired) {
+            setTimeout(() => {
+              trigger('hardcodedValue').catch(() => {});
+            }, 0);
+          }
+        } else {
+          onUpdate({ type: newType });
+        }
+      },
+      [getValues, field, setValue, onUpdate, trigger]
+    );
+
+    /**
+     * Handles isHardcoded toggle with proper initialization and validation
+     */
+    const handleHardcodedToggle = useCallback(
+      (isHardcoded: boolean) => {
+        const currentValues = getValues();
+        const isRequired = currentValues.validation?.required || field.validation?.required;
+
+        // When enabling hardcoded mode with no existing value, initialize a sensible default
+        if (
+          isHardcoded === true &&
+          (currentValues.hardcodedValue === undefined ||
+            typeof currentValues.hardcodedValue === 'object')
+        ) {
+          const currentType = (currentValues.type || field.type) as FieldType;
+          const defaultHardcoded = getDefaultValueForType(currentType);
+          setValue('hardcodedValue', defaultHardcoded, {
+            shouldValidate: false,
+          });
+
+          // Persist both flags immediately so preview reflects the change
+          onUpdate({ isHardcoded: true, hardcodedValue: defaultHardcoded });
+          // For required fields, trigger validation as before
+          if (isRequired) {
+            setTimeout(() => {
+              trigger('hardcodedValue').catch(() => {
+                // Silently handle trigger errors to avoid breaking the flow
+              });
+            }, 0);
+          }
+          return;
+        }
+
+        // If toggling hardcoded on a required field, or toggling off any hardcoded field,
+        // trigger validation immediately to update validation state
+        if ((isHardcoded === true && isRequired) || isHardcoded === false) {
+          // Update first, then trigger validation
+          onUpdate({ isHardcoded });
+          // Use setTimeout to ensure the update has been processed
+          setTimeout(() => {
+            trigger('hardcodedValue').catch(() => {
+              // Silently handle trigger errors to avoid breaking the flow
+            });
+          }, 0);
+          return;
+        }
+
+        onUpdate({ isHardcoded });
+      },
+      [getValues, field, setValue, onUpdate, trigger]
+    );
+
+    /**
+     * Handles hardcoded value changes
+     */
+    const handleHardcodedValueChange = useCallback(
+      (hardcodedValue: unknown) => {
+        onUpdate({ hardcodedValue });
+      },
+      [onUpdate]
+    );
+
+    /**
+     * Optimized update handler that dispatches to specific handlers or uses debounced updates
      */
     const handleUpdate = useCallback(
       (updates: Partial<FormFieldType>) => {
-        // For critical updates like type changes, update immediately
+        // For critical updates, cancel any pending debounced updates and handle immediately
         if ('type' in updates || 'isHardcoded' in updates || 'hardcodedValue' in updates) {
-          debouncedUpdate.cancel(); // Cancel any pending debounced updates
+          debouncedUpdate.cancel();
 
-          // Handle type change by coercing current hardcodedValue to new shape
           if ('type' in updates) {
-            const currentValues = getValues();
-            const newType = updates.type as FieldType;
-            const snapshot: FormFieldType = { ...field, type: newType };
-            const currentHardcoded =
-              currentValues.hardcodedValue !== undefined
-                ? currentValues.hardcodedValue
-                : field.hardcodedValue;
-            const isHardcodedNow =
-              currentValues.isHardcoded !== undefined
-                ? currentValues.isHardcoded
-                : field.isHardcoded;
-
-            if (isHardcodedNow || currentHardcoded !== undefined) {
-              const coerced = coerceHardcodedValue(snapshot, currentHardcoded);
-              setValue('hardcodedValue', coerced, { shouldValidate: false });
-              onUpdate({ type: newType, hardcodedValue: coerced });
-              const isRequired = currentValues.validation?.required || field.validation?.required;
-              if (isRequired) {
-                setTimeout(() => {
-                  trigger('hardcodedValue').catch(() => {});
-                }, 0);
-              }
-            } else {
-              onUpdate({ type: newType });
-            }
+            handleTypeChange(updates.type as FieldType);
             return;
           }
 
-          // Special handling for isHardcoded toggle on all fields
           if ('isHardcoded' in updates) {
-            const currentValues = getValues();
-            const isRequired = currentValues.validation?.required || field.validation?.required;
-
-            // When enabling hardcoded mode with no existing value, initialize a sensible default
-            if (
-              updates.isHardcoded === true &&
-              (currentValues.hardcodedValue === undefined ||
-                typeof currentValues.hardcodedValue === 'object')
-            ) {
-              const currentType = (currentValues.type || field.type) as FieldType;
-              const defaultHardcoded = getDefaultValueForType(currentType);
-              setValue('hardcodedValue', defaultHardcoded, {
-                shouldValidate: false,
-              });
-
-              // Persist both flags immediately so preview reflects the change
-              onUpdate({ isHardcoded: true, hardcodedValue: defaultHardcoded });
-              // For required fields, trigger validation as before
-              if (isRequired) {
-                setTimeout(() => {
-                  trigger('hardcodedValue').catch(() => {
-                    // Silently handle trigger errors to avoid breaking the flow
-                  });
-                }, 0);
-              }
-              return;
-            }
-
-            // If toggling hardcoded on a required field, or toggling off any hardcoded field,
-            // trigger validation immediately to update validation state
-            if ((updates.isHardcoded === true && isRequired) || updates.isHardcoded === false) {
-              // Update first, then trigger validation
-              onUpdate(updates);
-              // Use setTimeout to ensure the update has been processed
-              setTimeout(() => {
-                trigger('hardcodedValue').catch(() => {
-                  // Silently handle trigger errors to avoid breaking the flow
-                });
-              }, 0);
-              return;
-            }
+            handleHardcodedToggle(updates.isHardcoded as boolean);
+            return;
           }
 
-          // For hardcodedValue changes, allow the store update to settle before autosave picks it up
           if ('hardcodedValue' in updates) {
-            onUpdate(updates);
-          } else {
-            onUpdate(updates);
+            handleHardcodedValueChange(updates.hardcodedValue);
+            return;
           }
-          return;
         }
 
         // For other updates (text input, etc.), use debounced update
         debouncedUpdate(updates);
       },
-      [onUpdate, debouncedUpdate, getValues, trigger, setValue, field]
+      [debouncedUpdate, handleTypeChange, handleHardcodedToggle, handleHardcodedValueChange]
     );
 
     /**
