@@ -1,7 +1,6 @@
 import { CheckCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import type {
   ContractAdapter,
   ContractDefinitionComparisonResult,
@@ -11,6 +10,7 @@ import type {
 import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import {
   ContractDefinitionComparisonModal,
   ContractDefinitionMismatchWarning,

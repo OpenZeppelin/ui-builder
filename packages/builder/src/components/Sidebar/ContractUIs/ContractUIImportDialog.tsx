@@ -1,7 +1,6 @@
 import { ArrowDownToLine } from 'lucide-react';
 import { ChangeEvent, useRef, useState } from 'react';
 
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import {
   Button,
   Dialog,
@@ -13,6 +12,8 @@ import {
   Input,
   Label,
 } from '@openzeppelin/contracts-ui-builder-ui';
+
+import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 
 interface ImportDialogProps {
   open: boolean;

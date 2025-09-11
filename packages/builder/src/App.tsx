@@ -16,6 +16,7 @@ import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import { ContractsUIBuilder } from './components/ContractsUIBuilder';
 import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
 import AppSidebar from './components/Sidebar/AppSidebar';
+import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
 import { AnalyticsProvider } from './hooks/AnalyticsProvider';
@@ -95,18 +96,20 @@ function App() {
     <AnalyticsProvider tagId={import.meta.env.VITE_GA_TAG_ID} autoInit={true}>
       <NetworkErrorNotificationProvider>
         <StorageOperationsProvider>
-          <AdapterProvider resolveAdapter={getAdapter}>
-            <WalletStateProvider
-              initialNetworkId={null}
-              getNetworkConfigById={getNetworkById}
-              loadConfigModule={loadAppConfigModule}
-            >
-              <AppContent />
-              {/* Global network error handler - always mounted to handle error toasts */}
-              <NetworkErrorHandler />
-            </WalletStateProvider>
-          </AdapterProvider>
-          <Toaster position="top-right" />
+          <ContractUIStorageProvider>
+            <AdapterProvider resolveAdapter={getAdapter}>
+              <WalletStateProvider
+                initialNetworkId={null}
+                getNetworkConfigById={getNetworkById}
+                loadConfigModule={loadAppConfigModule}
+              >
+                <AppContent />
+                {/* Global network error handler - always mounted to handle error toasts */}
+                <NetworkErrorHandler />
+              </WalletStateProvider>
+            </AdapterProvider>
+            <Toaster position="top-right" />
+          </ContractUIStorageProvider>
         </StorageOperationsProvider>
       </NetworkErrorNotificationProvider>
     </AnalyticsProvider>

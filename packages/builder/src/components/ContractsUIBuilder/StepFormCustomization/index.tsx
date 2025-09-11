@@ -276,7 +276,11 @@ export function StepFormCustomization({
             </TabsList>
           </div>
 
-          <TabsContent value="general" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="general"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {baseFormConfigFromHook && (
               <GeneralSettings
                 title={baseFormConfigFromHook.title}
@@ -288,7 +292,11 @@ export function StepFormCustomization({
             )}
           </TabsContent>
 
-          <TabsContent value="fields" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="fields"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {baseFormConfigFromHook && (
               <div className="space-y-4">
                 {baseFormConfigFromHook.fields.length === 0 ? (
@@ -314,7 +322,11 @@ export function StepFormCustomization({
             )}
           </TabsContent>
 
-          <TabsContent value="execution" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="execution"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {adapter && (
               <ExecutionMethodSettings
                 adapter={adapter}
@@ -325,7 +337,11 @@ export function StepFormCustomization({
             )}
           </TabsContent>
 
-          <TabsContent value="uikit" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="uikit"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {adapter && (
               <UiKitSettings
                 adapter={adapter}

@@ -1,6 +1,4 @@
-import { ContractUIRecord, useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
-
-import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
+import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import ContractUIsList from '../ContractUIs/ContractUIsList';
 
 interface ContractUIsSectionProps {
@@ -10,38 +8,20 @@ interface ContractUIsSectionProps {
 }
 
 /**
- * Filters records to only show those with meaningful content or that are manually renamed.
- */
-function shouldShowRecord(
-  record: ContractUIRecord,
-  currentLoadedConfigurationId: string | null
-): boolean {
-  // Always show the currently loaded record, even if it's empty
-  if (currentLoadedConfigurationId === record.id) {
-    return true;
-  }
-
-  return recordHasMeaningfulContent(record);
-}
-
-/**
  * Contract UIs section component for the sidebar
+ *
+ * This component conditionally renders based on whether any contract UIs exist.
+ * When no contract UIs are saved, the entire section is hidden to keep the sidebar clean.
  */
 export default function ContractUIsSection({
   onLoadContractUI,
   onResetAfterDelete,
   currentLoadedConfigurationId,
 }: ContractUIsSectionProps) {
-  const { contractUIs } = useContractUIStorage();
+  const { contractUIs, isLoading } = useContractUIStorage();
 
-  // Check if there are any visible contract UIs
-  const visibleContractUIs =
-    contractUIs?.filter((contractUI) =>
-      shouldShowRecord(contractUI, currentLoadedConfigurationId ?? null)
-    ) || [];
-
-  // Don't render the section at all if there are no visible contract UIs
-  if (visibleContractUIs.length === 0) {
+  // Hide the entire section if there are no contract UIs and we're not loading
+  if (!isLoading && (!contractUIs || contractUIs.length === 0)) {
     return null;
   }
 

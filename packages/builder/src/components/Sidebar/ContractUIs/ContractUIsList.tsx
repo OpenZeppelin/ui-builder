@@ -1,7 +1,8 @@
 import { Loader2 } from 'lucide-react';
 
-import { ContractUIRecord, useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
 
+import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../hooks/useStorageOperations';
 import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
 import ContractUIItem from './ContractUIItem';
@@ -42,7 +43,6 @@ export default function ContractUIsList({
     updateContractUI,
     exportContractUIs,
   } = useContractUIStorage();
-
   const storageOperations = useStorageOperations();
 
   const handleRename = async (contractUIId: string, newTitle: string): Promise<void> => {
@@ -90,6 +90,7 @@ export default function ContractUIsList({
       shouldShowRecord(contractUI, currentLoadedConfigurationId ?? null)
     ) || [];
 
+  // Return null if no visible items - the parent will hide the entire section
   if (visibleContractUIs.length === 0) {
     return null;
   }

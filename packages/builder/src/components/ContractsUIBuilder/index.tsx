@@ -245,16 +245,6 @@ export function ContractsUIBuilder() {
         />
       )}
 
-      {/* Loading overlay when configuration is being loaded */}
-      {state.isLoadingConfiguration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Loading configuration...</p>
-          </div>
-        </div>
-      )}
-
       {/* Auto-save indicator */}
       {state.isAutoSaving && (
         <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-md bg-background/95 border shadow-sm px-3 py-2">
