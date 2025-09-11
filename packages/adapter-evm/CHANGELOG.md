@@ -1,5 +1,24 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.8.0
+
+### Patch Changes
+
+- Updated dependencies [[`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9)]:
+  - @openzeppelin/contracts-ui-builder-types@0.8.0
+  - @openzeppelin/contracts-ui-builder-utils@0.8.0
+  - @openzeppelin/contracts-ui-builder-ui@0.8.0
+  - @openzeppelin/contracts-ui-builder-react-core@0.8.0
+
+## 0.7.1
+
+### Patch Changes
+
+- [#137](https://github.com/OpenZeppelin/contracts-ui-builder/pull/137) [`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9) Thanks [@pasevin](https://github.com/pasevin)! - clean up redundant ternary in array field validation
+
+- Updated dependencies [[`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9), [`49d7d6c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/49d7d6c38d1890a67dfbf514161e71f46849a123)]:
+  - @openzeppelin/contracts-ui-builder-ui@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes
