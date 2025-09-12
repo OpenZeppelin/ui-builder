@@ -29,6 +29,8 @@ import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 // Import functions from modules
 import { loadStellarContract, loadStellarContractWithMetadata } from './contract/loader';
+import { StellarRelayerOptions } from './transaction/components';
+import { RelayerExecutionStrategy } from './transaction/relayer';
 
 import {
   getStellarExplorerAddressUrl,
@@ -423,18 +425,46 @@ export class StellarAdapter implements ContractAdapter {
     return stellarFacadeHooks;
   }
 
-  public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
-    logger.warn('StellarAdapter', 'getRelayers is not implemented for the Stellar adapter yet.');
-    return Promise.resolve([]);
+  public async getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
+    const relayerStrategy = new RelayerExecutionStrategy();
+    try {
+      return await relayerStrategy.getStellarRelayers(serviceUrl, accessToken, this.networkConfig);
+    } catch (error) {
+      logger.error('StellarAdapter', 'Failed to fetch Stellar relayers:', error);
+      return Promise.resolve([]);
+    }
   }
 
   public async getRelayer(
-    _serviceUrl: string,
-    _accessToken: string,
-    _relayerId: string
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string
   ): Promise<RelayerDetailsRich> {
-    logger.warn('StellarAdapter', 'getRelayer is not implemented for the Stellar adapter yet.');
-    return Promise.resolve({} as RelayerDetailsRich);
+    const relayerStrategy = new RelayerExecutionStrategy();
+    try {
+      return await relayerStrategy.getStellarRelayer(
+        serviceUrl,
+        accessToken,
+        relayerId,
+        this.networkConfig
+      );
+    } catch (error) {
+      logger.error('StellarAdapter', 'Failed to fetch Stellar relayer details:', error);
+      return Promise.resolve({} as RelayerDetailsRich);
+    }
+  }
+
+  /**
+   * Returns a React component for configuring Stellar-specific relayer transaction options.
+   * @returns The Stellar relayer options component
+   */
+  public getRelayerOptionsComponent():
+    | React.ComponentType<{
+        options: Record<string, unknown>;
+        onChange: (options: Record<string, unknown>) => void;
+      }>
+    | undefined {
+    return StellarRelayerOptions;
   }
 
   /**

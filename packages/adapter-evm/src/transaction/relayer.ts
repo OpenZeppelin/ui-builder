@@ -138,9 +138,9 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
       .map((r: ApiResponseRelayerResponseData) => ({
         relayerId: r.id,
         name: r.name,
-        address: r.address,
+        address: r.address || '',
         network: r.network,
-        paused: r.paused,
+        paused: r.paused || false,
       }));
   }
 
@@ -193,10 +193,10 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
       const enhancedDetails: RelayerDetailsRich = {
         relayerId: relayerData.id,
         name: relayerData.name,
-        address: relayerData.address,
+        address: relayerData.address || '',
         network: relayerData.network,
-        paused: relayerData.paused,
-        systemDisabled: relayerData.system_disabled,
+        paused: relayerData.paused || false,
+        systemDisabled: relayerData.system_disabled || false,
       };
 
       // Add balance if available
