@@ -20,5 +20,6 @@ export * from './SelectField';
 export * from './SelectGroupedField';
 export * from './TextAreaField';
 export * from './TextField';
+export * from './DateTimeField';
 export * from './UrlField';
 export * from './utils';
