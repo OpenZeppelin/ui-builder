@@ -1,7 +1,7 @@
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
 
-import { Button, Input, Label } from '@openzeppelin/contracts-ui-builder-ui';
+import { Button, DateTimeField } from '@openzeppelin/contracts-ui-builder-ui';
 
 import type { StellarRelayerFormData } from './useStellarRelayerOptions';
 
@@ -27,74 +27,50 @@ export const TransactionTiming: React.FC<TransactionTimingProps> = ({ control })
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="validUntil" className="text-sm font-medium">
-          Transaction Expiration
-        </Label>
+      <DateTimeField
+        id="validUntil"
+        label="Transaction Expiration"
+        name="transactionOptions.validUntil"
+        control={control}
+        placeholder="YYYY-MM-DDTHH:mm"
+        helperText="Set when this transaction should expire. Leave empty for no expiration limit."
+      />
+      <div className="flex gap-2 pt-1">
         <Controller
           name="transactionOptions.validUntil"
           control={control}
           render={({ field }) => (
-            <Input
-              {...field}
-              id="validUntil"
-              type="datetime-local"
-              className="w-full"
-              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
-              onChange={(e) => {
-                if (e.target.value) {
-                  // Convert datetime-local to ISO 8601 string
-                  const date = new Date(e.target.value);
-                  field.onChange(date.toISOString());
-                } else {
-                  field.onChange('');
-                }
-              }}
-            />
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => field.onChange(new Date(getOneHourFromNow()).toISOString())}
+                className="text-xs"
+              >
+                +1 Hour
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => field.onChange(new Date(getTwentyFourHoursFromNow()).toISOString())}
+                className="text-xs"
+              >
+                +24 Hours
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => field.onChange('')}
+                className="text-xs"
+              >
+                Clear
+              </Button>
+            </>
           )}
         />
-        <div className="flex gap-2 pt-1">
-          <Controller
-            name="transactionOptions.validUntil"
-            control={control}
-            render={({ field }) => (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => field.onChange(new Date(getOneHourFromNow()).toISOString())}
-                  className="text-xs"
-                >
-                  +1 Hour
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    field.onChange(new Date(getTwentyFourHoursFromNow()).toISOString())
-                  }
-                  className="text-xs"
-                >
-                  +24 Hours
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => field.onChange('')}
-                  className="text-xs"
-                >
-                  Clear
-                </Button>
-              </>
-            )}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Set when this transaction should expire. Leave empty for no expiration limit.
-        </p>
       </div>
     </div>
   );
