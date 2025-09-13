@@ -390,6 +390,29 @@ export interface ContractAdapter {
   getAvailableUiKits(): Promise<AvailableUiKit[]>;
 
   /**
+   * (Optional) Returns adapter-provided UI label overrides for chain-specific verbiage.
+   * Keys are consumed by chain-agnostic UI to avoid ecosystem-centric terms.
+   * Example keys used today (non-exhaustive):
+   * - relayerConfigTitle
+   * - relayerConfigActiveDesc
+   * - relayerConfigInactiveDesc
+   * - relayerConfigPresetTitle
+   * - relayerConfigPresetDesc
+   * - relayerConfigCustomizeBtn
+   * - detailsTitle
+   * - network
+   * - relayerId
+   * - active
+   * - paused
+   * - systemDisabled
+   * - balance
+   * - nonce
+   * - pending
+   * - lastTransaction
+   */
+  getUiLabels?(): Record<string, string> | undefined;
+
+  /**
    * Generates adapter-specific wallet configuration files for export.
    *
    * @param uiKitConfig The selected UI kit configuration from the builder.

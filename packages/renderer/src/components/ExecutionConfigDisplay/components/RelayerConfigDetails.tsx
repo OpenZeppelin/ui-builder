@@ -1,6 +1,7 @@
 import { Network, Shield } from 'lucide-react';
 import React from 'react';
 
+import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import type {
   RelayerDetailsRich,
   RelayerExecutionConfig,
@@ -21,6 +22,8 @@ export const RelayerConfigDetails: React.FC<RelayerConfigDetailsProps> = ({
   loading = false,
 }) => {
   const { relayer } = config;
+  const { activeAdapter } = useWalletState();
+  const labels = activeAdapter?.getUiLabels?.();
 
   return (
     <div className="space-y-4">
@@ -34,7 +37,12 @@ export const RelayerConfigDetails: React.FC<RelayerConfigDetailsProps> = ({
         </div>
       </div>
 
-      <RelayerDetailsCard details={relayer} enhancedDetails={enhancedDetails} loading={loading} />
+      <RelayerDetailsCard
+        details={relayer}
+        enhancedDetails={enhancedDetails}
+        loading={loading}
+        labels={labels}
+      />
 
       {/* Service Information */}
       <div className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">

@@ -486,6 +486,31 @@ export class StellarAdapter implements ContractAdapter {
     // TODO: Implement Stellar-specific RPC validation when needed
     return testStellarRpcConnection(rpcConfig);
   }
+
+  /**
+   * @inheritdoc
+   */
+  public getUiLabels(): Record<string, string> | undefined {
+    return {
+      relayerConfigTitle: 'Transaction Configuration',
+      relayerConfigActiveDesc: 'Customize transaction parameters for submission',
+      relayerConfigInactiveDesc: 'Using recommended transaction configuration for reliability',
+      relayerConfigPresetTitle: 'Recommended Preset Active',
+      relayerConfigPresetDesc: 'Transactions will use recommended parameters for quick inclusion',
+      relayerConfigCustomizeBtn: 'Customize Settings',
+      detailsTitle: 'Relayer Details',
+      network: 'Network',
+      relayerId: 'Relayer ID',
+      active: 'Active',
+      paused: 'Paused',
+      systemDisabled: 'System Disabled',
+      balance: 'Balance',
+      // For Stellar, sequence number is conceptually similar; adapters supply the value
+      nonce: 'Sequence',
+      pending: 'Pending Transactions',
+      lastTransaction: 'Last Transaction',
+    };
+  }
 }
 
 // Also export as default to ensure compatibility with various import styles
