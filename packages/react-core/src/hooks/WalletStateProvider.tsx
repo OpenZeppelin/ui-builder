@@ -186,7 +186,8 @@ export function WalletStateProvider({
 
       if (abortController.signal.aborted) return;
 
-      setGlobalActiveAdapter(newAdapter);
+      // Update loading state immediately, but defer exposing the new adapter
+      // until its UI provider and hooks are configured to avoid mismatch renders.
       setIsGlobalAdapterLoading(newIsLoading);
 
       if (newAdapter && !newIsLoading) {
@@ -198,11 +199,12 @@ export function WalletStateProvider({
           );
 
           if (!abortController.signal.aborted) {
-            // We use the functional update form `() => providerComponent` here to ensure
-            // that React sets the state to the component type itself, rather than trying
-            // to execute the component function as if it were a state updater.
+            // Ensure provider component and hooks are ready before exposing the new adapter
+            // to consumers. This prevents rendering ecosystem-specific components under the
+            // previous ecosystem provider (e.g., Stellar components under EVM provider).
             setAdapterUiContextProviderToRender(() => providerComponent);
             setWalletFacadeHooks(hooks);
+            setGlobalActiveAdapter(newAdapter);
           }
         } catch (error) {
           if (!abortController.signal.aborted) {
@@ -220,6 +222,7 @@ export function WalletStateProvider({
         if (!abortController.signal.aborted) {
           setAdapterUiContextProviderToRender(null);
           setWalletFacadeHooks(null);
+          setGlobalActiveAdapter(null);
         }
       }
       // If newIsLoading is true, retain previous AdapterUiContextProviderToRender and hooks
