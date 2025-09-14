@@ -197,10 +197,36 @@ export function isDuplicateMapKey(entries: MapEntry[], currentIndex: number): bo
     return false;
   }
 
-  return entries.some(
-    (entry: MapEntry, i: number) =>
-      i !== currentIndex && String(entry?.key) === String(currentKeyValue) && entry?.key !== ''
-  );
+  // Prefer strict equality to avoid cross-type false positives (e.g., 123 vs "123")
+  // Treat empty string as non-duplicate as above.
+  return entries.some((entry: MapEntry, i: number) => {
+    if (i === currentIndex) return false;
+    const key = entry?.key;
+    if (key === '') return false;
+    // If both are strings, compare strings
+    if (typeof key === 'string' && typeof currentKeyValue === 'string') {
+      return key === currentKeyValue;
+    }
+    // If both are numbers, compare numbers
+    if (typeof key === 'number' && typeof currentKeyValue === 'number') {
+      return Number.isNaN(key) ? Number.isNaN(currentKeyValue) : key === currentKeyValue;
+    }
+    // If both are booleans
+    if (typeof key === 'boolean' && typeof currentKeyValue === 'boolean') {
+      return key === currentKeyValue;
+    }
+    // For objects (including dates) fall back to reference equality
+    if (
+      typeof key === 'object' &&
+      key !== null &&
+      typeof currentKeyValue === 'object' &&
+      currentKeyValue !== null
+    ) {
+      return key === currentKeyValue;
+    }
+    // Otherwise, consider different types as different keys
+    return false;
+  });
 }
 
 /**
