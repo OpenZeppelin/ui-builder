@@ -52,23 +52,32 @@ export function formatTimestamp(date: Date): string {
  * ```
  */
 export function detectBytesEncoding(value: string): 'base64' | 'hex' {
+  // Normalize input and handle common prefixes
+  const trimmed = value?.trim() ?? '';
+  const without0x =
+    trimmed.startsWith('0x') || trimmed.startsWith('0X') ? trimmed.slice(2) : trimmed;
+
   const hexRegex = /^[0-9a-fA-F]+$/;
   const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
 
-  if (hexRegex.test(value) && value.length % 2 === 0) {
+  // Prefer hex when clearly valid (even length and hex charset)
+  if (hexRegex.test(without0x) && without0x.length > 0 && without0x.length % 2 === 0) {
     return 'hex';
   }
 
-  if (base64Regex.test(value) && value.length % 4 === 0) {
+  // Validate base64 by pattern + round-trip check
+  if (base64Regex.test(trimmed) && trimmed.length % 4 === 0) {
     try {
-      // Try to decode as base64 using native atob() and re-encode to verify it's valid
-      const decoded = atob(value);
+      const decoded = atob(trimmed);
       const reencoded = btoa(decoded);
-      return reencoded.replace(/=+$/, '') === value.replace(/=+$/, '') ? 'base64' : 'hex';
+      if (reencoded.replace(/=+$/, '') === trimmed.replace(/=+$/, '')) {
+        return 'base64';
+      }
     } catch {
-      return 'hex';
+      // fall through to safer hex default
     }
   }
 
-  return 'base64';
+  // Safer default: return 'hex' when ambiguous or invalid
+  return 'hex';
 }
