@@ -4,41 +4,61 @@ import { uiBuilderStore } from '../../uiBuilderStore';
 import { SavedConfigurationData } from './types';
 
 /**
- * Cleans a field object by removing non-serializable properties like functions
- * This ensures the field can be safely stored in IndexedDB
+ * Returns true when the given value is a plain object (i.e., created by `{}` or `Object.create(null)`).
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
+ * Deeply sanitizes a value by removing functions and symbols and
+ * recursively sanitizing arrays and plain objects. Intended to create
+ * a structure-safe version suitable for IndexedDB/JSON-like storage.
+ */
+function sanitizeForSerialization<T>(value: T, depth = 0): T {
+  // Depth guard to avoid pathological structures
+  if (depth > 50) return value;
+
+  // Drop functions and symbols entirely
+  if (typeof value === 'function' || typeof (value as unknown) === 'symbol') {
+    return undefined as unknown as T;
+  }
+
+  // Arrays: sanitize each element and remove undefined entries produced above
+  if (Array.isArray(value)) {
+    const result = (value as unknown[])
+      .map((v) => sanitizeForSerialization(v, depth + 1))
+      .filter((v) => v !== undefined);
+    return result as unknown as T;
+  }
+
+  // Plain objects: sanitize each enumerable own property
+  if (isPlainObject(value)) {
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (typeof val === 'function' || typeof val === 'symbol') continue;
+      const sanitized = sanitizeForSerialization(val as unknown, depth + 1);
+      if (sanitized !== undefined) {
+        result[key] = sanitized as unknown;
+      }
+    }
+    return result as unknown as T;
+  }
+
+  // Primitives and non-plain objects are returned as-is. This intentionally
+  // preserves Dates, Maps, etc., relying on Dexie/structured-clone semantics
+  // when available; callers should keep inputs to serializable shapes.
+  return value;
+}
+
+/**
+ * Cleans a field object by removing non-serializable properties like functions.
+ * Uses a deep sanitizer to reduce maintenance when `FormFieldType` evolves.
  */
 function cleanFieldForSerialization(field: FormFieldType): FormFieldType {
-  // Create a copy of the field without any function properties
-  const cleanedField: FormFieldType = {
-    id: field.id,
-    name: field.name,
-    label: field.label,
-    type: field.type,
-    placeholder: field.placeholder,
-    helperText: field.helperText,
-    defaultValue: field.defaultValue,
-    validation: field.validation,
-    options: field.options,
-    width: field.width,
-    // transforms: field.transforms, // EXCLUDED - contains functions that cannot be serialized
-    visibleWhen: field.visibleWhen,
-    originalParameterType: field.originalParameterType,
-    isHidden: field.isHidden,
-    isHardcoded: field.isHardcoded,
-    hardcodedValue: field.hardcodedValue,
-    readOnly: field.readOnly,
-    components: field.components,
-    elementType: field.elementType,
-    elementFieldConfig: field.elementFieldConfig,
-    enumMetadata: field.enumMetadata,
-    mapMetadata: field.mapMetadata,
-  };
-
-  // Note: We explicitly exclude transforms, renderPayloadField and any other function properties
-  // as they cannot be serialized to IndexedDB. The transforms will be re-applied when the
-  // configuration is loaded and processed by the FormGenerator.
-
-  return cleanedField;
+  return sanitizeForSerialization<FormFieldType>(field);
 }
 
 /**
