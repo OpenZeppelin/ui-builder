@@ -45,7 +45,7 @@ export function App() {
             <img src="/OZ-Logo-BlackBG.svg" alt="OpenZeppelin Logo" className="h-6 w-auto" />
             <div className="h-5 border-l border-gray-300 mx-1"></div>
             <div>
-              <h1 className="text-base font-medium">@@function-id@@</h1>
+              <h1 className="text-base font-medium">@@function-id-escaped@@</h1>
               <p className="text-xs text-muted-foreground">
                 Form for interacting with blockchain contracts
               </p>
