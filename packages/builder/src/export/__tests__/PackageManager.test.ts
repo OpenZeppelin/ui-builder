@@ -322,22 +322,17 @@ describe('PackageManager', () => {
       );
       const result = JSON.parse(updated);
 
-      // Should append -rc to base versions for staging (version-agnostic approach)
-      // All OpenZeppelin internal packages should have -rc suffix
+      // Should use RC versions for staging: accept 'rc' tag or timestamped RC like 0.0.0-rc-YYYYMMDDHHMMSS
+      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
-
-      // Verify all have -rc suffix (this approach works regardless of version numbers)
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/-rc$/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/-rc$/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/-rc$/);
 
       // Verify external deps don't get -rc treatment
       expect(result.dependencies['react']).not.toMatch(/-rc$/);
@@ -359,21 +354,17 @@ describe('PackageManager', () => {
       );
       const result = JSON.parse(updated);
 
-      // All internal packages should get -rc suffix (version-agnostic validation)
+      // All internal packages should resolve to RC format (either dist-tag 'rc' or timestamped RC)
+      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
       expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
-
-      // Verify that staging environment produces RC versions
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/-rc$/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/-rc$/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/-rc$/);
     });
 
     it('should verify RC detection logic works correctly', async () => {
@@ -392,8 +383,9 @@ describe('PackageManager', () => {
       const stagingResult = JSON.parse(stagingUpdated);
 
       // All internal packages should have -rc suffix added (version-agnostic)
+      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
       expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        rcVersionOrTag
       );
 
       // Test that production doesn't get -rc
@@ -458,7 +450,7 @@ describe('PackageManager', () => {
       );
       const stagingResult = JSON.parse(stagingUpdated);
       expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        /^\d+\.\d+\.\d+-rc$/
+        /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/
       );
 
       // Test production environment

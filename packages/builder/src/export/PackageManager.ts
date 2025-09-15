@@ -437,12 +437,13 @@ export class PackageManager {
           updatedDependencies[pkgName] = 'workspace:*';
         } else if (env === 'staging') {
           // Staging: Use RC versions for testing latest features
-          // If managedVersion is already an RC version, use it as-is
-          // Otherwise, append -rc to create an RC version
+          // If managedVersion is already an RC version (e.g., 0.0.0-rc-20250915124300), use it
+          // Otherwise, fall back to using the 'rc' dist-tag so consumers pull the latest RC snapshot
           if (managedVersion.includes('-rc')) {
             updatedDependencies[pkgName] = managedVersion;
           } else {
-            updatedDependencies[pkgName] = `${managedVersion}-rc`;
+            // Using the dist-tag ensures alignment with snapshot format 0.0.0-rc-YYYYMMDDHHMMSS
+            updatedDependencies[pkgName] = 'rc';
           }
         } else {
           // Production: Use stable published versions
