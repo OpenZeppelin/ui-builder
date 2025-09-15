@@ -293,10 +293,22 @@ importers:
       '@stellar/stellar-sdk':
         specifier: ^14.1.1
         version: 14.1.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      lucide-react:
+        specifier: ^0.510.0
+        version: 0.510.0(react@19.1.1)
       react:
         specifier: ^19.0.0
         version: 19.1.1
+      react-hook-form:
+        specifier: ^7.62.0
+        version: 7.62.0(react@19.1.1)
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.20
+        version: 4.17.20
       eslint:
         specifier: ^9.32.0
         version: 9.35.0(jiti@2.5.1)
