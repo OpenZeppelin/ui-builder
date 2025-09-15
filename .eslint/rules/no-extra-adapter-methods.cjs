@@ -66,6 +66,7 @@ module.exports = {
       'getEcosystemReactHooks',
       'getEcosystemWalletComponents',
       'getAvailableUiKits',
+      'getUiLabels',
       'getExportableWalletConfigFiles',
       'getContractDefinitionInputs',
       'getRelayers',

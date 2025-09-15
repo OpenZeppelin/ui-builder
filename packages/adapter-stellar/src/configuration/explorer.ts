@@ -1,6 +1,15 @@
+/*
+ * Stellar Explorer Configuration
+ *
+ * DESIGN NOTE: This module provides minimal explorer functionality compared to EVM adapters.
+ * Stellar explorers are used only for generating display URLs, unlike EVM where explorers
+ * are critical infrastructure for ABI fetching. See comments below for detailed explanation.
+ */
+
 import { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
 import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+
+import { isValidContractAddress } from '../validation';
 
 /**
  * Gets a blockchain explorer URL for an address on Stellar.
@@ -17,9 +26,10 @@ export function getStellarExplorerAddressUrl(
   if (!address || !networkConfig.explorerUrl) {
     return null;
   }
-  // Construct the URL, assuming a standard /account/ path for Stellar explorers
+  // Use /contract for Soroban contract IDs, otherwise /account
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
-  return `${baseUrl}/account/${address}`;
+  const path = isValidContractAddress(address) ? 'contract' : 'account';
+  return `${baseUrl}/${path}/${encodeURIComponent(address)}`;
 }
 
 /**
@@ -39,32 +49,57 @@ export function getStellarExplorerTxUrl(
   }
   // Construct the URL, assuming a standard /tx/ path for Stellar explorers
   const baseUrl = networkConfig.explorerUrl.replace(/\/+$/, '');
-  return `${baseUrl}/tx/${txHash}`;
+  return `${baseUrl}/tx/${encodeURIComponent(txHash)}`;
 }
 
 /**
- * Validates an explorer configuration for Stellar networks.
- * @param explorerConfig - The explorer configuration to validate
- * @returns True if the configuration is valid, false otherwise
+ * Validates a Stellar explorer configuration.
+ *
+ * NOTE: This validation is minimal compared to EVM - only checks URL formats.
+ * No API key validation or connection testing since Stellar explorers are
+ * display-only (not used for contract ABI fetching like in EVM).
  */
-export function validateStellarExplorerConfig(_explorerConfig: UserExplorerConfig): boolean {
-  // TODO: Implement Stellar-specific explorer validation when needed
-  logger.info('validateStellarExplorerConfig', 'Stellar explorer validation not yet implemented');
+export function validateStellarExplorerConfig(explorerConfig: UserExplorerConfig): boolean {
+  // Validate URLs if provided
+  if (explorerConfig.explorerUrl) {
+    try {
+      new URL(explorerConfig.explorerUrl);
+    } catch {
+      return false;
+    }
+  } else {
+    // explorerUrl is required
+    return false;
+  }
+
+  if (explorerConfig.apiUrl) {
+    try {
+      new URL(explorerConfig.apiUrl);
+    } catch {
+      return false;
+    }
+  }
+
+  // Basic API key validation (not empty)
+  if (explorerConfig.apiKey !== undefined && explorerConfig.apiKey.trim().length === 0) {
+    return false;
+  }
+
   return true;
 }
 
-/**
- * Tests the connection to a Stellar explorer API.
- * @param explorerConfig - The explorer configuration to test
- * @returns Connection test results including success status, latency, and any errors
+/*
+ * NOTE: Unlike EVM adapters, Stellar does not implement explorer connection testing.
+ *
+ * DESIGN DECISION: Stellar explorers are used only for generating display URLs,
+ * not for critical functionality like ABI fetching (which EVM requires).
+ *
+ * Key differences from EVM:
+ * - EVM: Explorers provide essential APIs for contract ABI fetching
+ * - Stellar: Explorers are display-only; contract loading uses Soroban RPC directly
+ * - EVM: Multiple explorer providers with varying API formats requiring validation
+ * - Stellar: Standardized ecosystem using Horizon API underneath
+ *
+ * Therefore, testing explorer "connectivity" would only verify website availability,
+ * which provides no functional value and adds unnecessary complexity.
  */
-export async function testStellarExplorerConnection(_explorerConfig: UserExplorerConfig): Promise<{
-  success: boolean;
-  latency?: number;
-  error?: string;
-}> {
-  // TODO: Implement explorer connection testing for Stellar
-  // Could use a health check endpoint if available
-  logger.info('testStellarExplorerConnection', 'TODO: Implement explorer connection testing');
-  return { success: true };
-}

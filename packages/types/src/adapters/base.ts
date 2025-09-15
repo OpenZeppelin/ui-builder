@@ -46,6 +46,33 @@ export type Connector = {
 };
 
 /**
+ * Base wallet connection status interface with universal properties.
+ * Chain-specific adapters should extend this interface with their specific fields.
+ */
+export interface WalletConnectionStatus {
+  /** Core connection state - always present for backward compatibility */
+  isConnected: boolean;
+  /** Wallet address - always present when connected */
+  address?: string;
+  /** Chain/network ID - format may vary by chain (number for EVM, string for others) */
+  chainId?: string | number;
+
+  /** Enhanced connection states for better UX */
+  isConnecting?: boolean;
+  isDisconnected?: boolean;
+  isReconnecting?: boolean;
+  /** Detailed status string */
+  status?: 'connected' | 'connecting' | 'disconnected' | 'reconnecting';
+
+  /** Connector/wallet information - universal across all chains */
+  connector?: {
+    id: string;
+    name?: string;
+    type?: string;
+  };
+}
+
+/**
  * Minimal adapter interface for the renderer and contract interaction
  *
  * This is the base interface that all chain-specific adapters must implement.
@@ -140,9 +167,10 @@ export interface ContractAdapter {
    * Validate a blockchain address for this chain
    *
    * @param address - The address to validate
+   * @param addressType - Optional specific address type to validate (chain-specific)
    * @returns Whether the address is valid for this chain
    */
-  isValidAddress(address: string): boolean;
+  isValidAddress(address: string, addressType?: string): boolean;
 
   /**
    * Returns details for execution methods supported by this chain adapter.
@@ -210,9 +238,13 @@ export interface ContractAdapter {
    * Generate default field configuration for a function parameter
    *
    * @param parameter - The function parameter to convert to a form field
+   * @param contractSchema - Optional contract schema for additional context (e.g., spec entries)
    * @returns A form field configuration with appropriate defaults
    */
-  generateDefaultField(parameter: FunctionParameter): FormFieldType;
+  generateDefaultField(
+    parameter: FunctionParameter,
+    contractSchema?: ContractSchema
+  ): FormFieldType;
 
   /**
    * Indicates if this adapter supports wallet connection
@@ -255,9 +287,9 @@ export interface ContractAdapter {
   /**
    * Gets current wallet connection status
    *
-   * @returns Status object with connection state and address
+   * @returns Rich status object with detailed connection state and address information
    */
-  getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string };
+  getWalletConnectionStatus(): WalletConnectionStatus;
 
   /**
    * Gets a blockchain explorer URL for an address in this chain.
@@ -275,7 +307,7 @@ export interface ContractAdapter {
    * @returns Cleanup function to unsubscribe
    */
   onWalletConnectionChange?(
-    callback: (status: { isConnected: boolean; address?: string }) => void
+    callback: (status: WalletConnectionStatus, previousStatus: WalletConnectionStatus) => void
   ): () => void;
 
   /**
@@ -356,6 +388,29 @@ export interface ContractAdapter {
    * @returns A promise resolving to an array of available UiKit objects.
    */
   getAvailableUiKits(): Promise<AvailableUiKit[]>;
+
+  /**
+   * (Optional) Returns adapter-provided UI label overrides for chain-specific verbiage.
+   * Keys are consumed by chain-agnostic UI to avoid ecosystem-centric terms.
+   * Example keys used today (non-exhaustive):
+   * - relayerConfigTitle
+   * - relayerConfigActiveDesc
+   * - relayerConfigInactiveDesc
+   * - relayerConfigPresetTitle
+   * - relayerConfigPresetDesc
+   * - relayerConfigCustomizeBtn
+   * - detailsTitle
+   * - network
+   * - relayerId
+   * - active
+   * - paused
+   * - systemDisabled
+   * - balance
+   * - nonce
+   * - pending
+   * - lastTransaction
+   */
+  getUiLabels?(): Record<string, string> | undefined;
 
   /**
    * Generates adapter-specific wallet configuration files for export.

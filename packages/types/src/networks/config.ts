@@ -143,9 +143,14 @@ export interface StellarNetworkConfig extends BaseNetworkConfig {
   ecosystem: 'stellar';
 
   /**
-   * Horizon server URL
+   * Horizon server URL (for Stellar Classic operations)
    */
   horizonUrl: string;
+
+  /**
+   * Soroban RPC server URL (for smart contract operations)
+   */
+  sorobanRpcUrl: string;
 
   /**
    * Stellar network passphrase

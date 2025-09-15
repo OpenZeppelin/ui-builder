@@ -1,4 +1,3 @@
-import type { GetAccountReturnType } from '@wagmi/core';
 import { type TransactionReceipt } from 'viem';
 import React from 'react';
 
@@ -15,7 +14,6 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
-  FormValues,
   FunctionParameter,
   NativeConfigLoader,
   NetworkConfig,
@@ -23,9 +21,11 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
+  TxStatus,
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
+  WalletConnectionStatus,
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
@@ -37,18 +37,6 @@ import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
-import { getResolvedWalletComponents } from './wallet/utils';
-import {
-  connectAndEnsureCorrectNetwork,
-  disconnectEvmWallet,
-  evmSupportsWalletConnection,
-  getEvmAvailableConnectors,
-  getEvmWalletConnectionStatus,
-} from './wallet/utils/connection';
-import {
-  getEvmWalletImplementation,
-  getInitializedEvmWalletImplementation,
-} from './wallet/utils/walletImplementationManager';
 
 import { loadEvmContract } from './abi';
 import {
@@ -78,7 +66,19 @@ import {
 import { formatEvmFunctionResult } from './transform';
 import { TypedEvmNetworkConfig } from './types';
 import type { WriteContractParameters } from './types';
-import { isValidEvmAddress } from './utils';
+import { isValidEvmAddress, validateAndConvertEvmArtifacts } from './utils';
+import {
+  connectAndEnsureCorrectNetwork,
+  convertWagmiToEvmStatus,
+  disconnectEvmWallet,
+  evmSupportsWalletConnection,
+  EvmWalletConnectionStatus,
+  getEvmAvailableConnectors,
+  getEvmWalletConnectionStatus,
+  getEvmWalletImplementation,
+  getInitializedEvmWalletImplementation,
+  getResolvedWalletComponents,
+} from './wallet';
 
 /**
  * Type guard to check if a network config is a TypedEvmNetworkConfig
@@ -126,7 +126,9 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContract(artifacts: FormValues): Promise<ContractSchema> {
+  public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
+    // Convert generic input to EVM-specific artifacts
+    const artifacts = validateAndConvertEvmArtifacts(source);
     const result = await loadEvmContract(artifacts, this.networkConfig);
     return result.schema;
   }
@@ -134,7 +136,7 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async loadContractWithMetadata(artifacts: FormValues): Promise<{
+  public async loadContractWithMetadata(source: string | Record<string, unknown>): Promise<{
     schema: ContractSchema;
     source: 'fetched' | 'manual';
     contractDefinitionOriginal?: string;
@@ -148,6 +150,8 @@ export class EvmAdapter implements ContractAdapter {
     proxyInfo?: ProxyInfo;
   }> {
     try {
+      // Convert generic input to EVM-specific artifacts
+      const artifacts = validateAndConvertEvmArtifacts(source);
       const result = await loadEvmContract(artifacts, this.networkConfig);
 
       return {
@@ -212,7 +216,7 @@ export class EvmAdapter implements ContractAdapter {
   public async signAndBroadcast(
     transactionData: unknown,
     executionConfig: ExecutionConfig,
-    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const walletImplementation = await getEvmWalletImplementation();
@@ -280,7 +284,13 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  isValidAddress(address: string): boolean {
+  isValidAddress(address: string, _addressType?: string): boolean {
+    // TODO: Could support ENS names as a different addressType (e.g., 'ens')
+    // Viem provides normalize() and isAddress() functions that could validate ENS names
+    // Example: addressType === 'ens' ? isValidEnsName(address) : isValidEvmAddress(address)
+
+    // Currently, EVM treats all addresses uniformly (hex format)
+    // The addressType parameter is ignored for backward compatibility with other chains
     return isValidEvmAddress(address);
   }
 
@@ -394,20 +404,19 @@ export class EvmAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
+  public getWalletConnectionStatus(): EvmWalletConnectionStatus {
     const status = getEvmWalletConnectionStatus();
-    return {
-      isConnected: status.isConnected,
-      address: status.address,
-      chainId: status.chainId?.toString(),
-    };
+    return convertWagmiToEvmStatus(status);
   }
 
   /**
    * @inheritdoc
    */
   public onWalletConnectionChange(
-    callback: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => void
+    callback: (
+      currentStatus: WalletConnectionStatus,
+      previousStatus: WalletConnectionStatus
+    ) => void
   ): () => void {
     const walletImplementation = getInitializedEvmWalletImplementation();
     if (!walletImplementation) {
@@ -417,7 +426,16 @@ export class EvmAdapter implements ContractAdapter {
       );
       return () => {};
     }
-    return walletImplementation.onWalletConnectionChange(callback);
+    return walletImplementation.onWalletConnectionChange(
+      (currentWagmiStatus, previousWagmiStatus) => {
+        // Convert wagmi's GetAccountReturnType to the rich adapter interface
+        // This preserves all the enhanced UX capabilities from wagmi
+        const current = convertWagmiToEvmStatus(currentWagmiStatus);
+        const previous = convertWagmiToEvmStatus(previousWagmiStatus);
+
+        callback(current, previous);
+      }
+    );
   }
 
   /**
@@ -548,6 +566,31 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
       return generateRainbowKitExportables(uiKitConfig);
     }
     return {};
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getUiLabels(): Record<string, string> | undefined {
+    return {
+      relayerConfigTitle: 'Gas Configuration',
+      relayerConfigActiveDesc: 'Customize gas pricing strategy for transaction submission',
+      relayerConfigInactiveDesc: 'Using recommended gas configuration for reliable transactions',
+      relayerConfigPresetTitle: 'Fast Speed Preset Active',
+      relayerConfigPresetDesc:
+        'Transactions will use high priority gas pricing for quick inclusion',
+      relayerConfigCustomizeBtn: 'Customize Gas Settings',
+      detailsTitle: 'Relayer Details',
+      network: 'Network',
+      relayerId: 'Relayer ID',
+      active: 'Active',
+      paused: 'Paused',
+      systemDisabled: 'System Disabled',
+      balance: 'Balance',
+      nonce: 'Nonce',
+      pending: 'Pending Transactions',
+      lastTransaction: 'Last Transaction',
+    };
   }
 
   /**

@@ -21,7 +21,6 @@ interface ExtendedContractAdapter extends ContractAdapter {
       loadUiKitNativeConfig?: (kitName: string) => Promise<Record<string, unknown> | null>;
     }
   ): void | Promise<void>;
-  lastFullUiKitConfiguration?: UiKitConfiguration | null;
   getEcosystemReactUiContextProvider?():
     | React.ComponentType<EcosystemReactUiProviderProps>
     | undefined;
@@ -187,7 +186,8 @@ export function WalletStateProvider({
 
       if (abortController.signal.aborted) return;
 
-      setGlobalActiveAdapter(newAdapter);
+      // Update loading state immediately, but defer exposing the new adapter
+      // until its UI provider and hooks are configured to avoid mismatch renders.
       setIsGlobalAdapterLoading(newIsLoading);
 
       if (newAdapter && !newIsLoading) {
@@ -199,11 +199,12 @@ export function WalletStateProvider({
           );
 
           if (!abortController.signal.aborted) {
-            // We use the functional update form `() => providerComponent` here to ensure
-            // that React sets the state to the component type itself, rather than trying
-            // to execute the component function as if it were a state updater.
+            // Ensure provider component and hooks are ready before exposing the new adapter
+            // to consumers. This prevents rendering ecosystem-specific components under the
+            // previous ecosystem provider (e.g., Stellar components under EVM provider).
             setAdapterUiContextProviderToRender(() => providerComponent);
             setWalletFacadeHooks(hooks);
+            setGlobalActiveAdapter(newAdapter);
           }
         } catch (error) {
           if (!abortController.signal.aborted) {
@@ -221,6 +222,7 @@ export function WalletStateProvider({
         if (!abortController.signal.aborted) {
           setAdapterUiContextProviderToRender(null);
           setWalletFacadeHooks(null);
+          setGlobalActiveAdapter(null);
         }
       }
       // If newIsLoading is true, retain previous AdapterUiContextProviderToRender and hooks
@@ -301,14 +303,18 @@ export function WalletStateProvider({
   let childrenToRender: ReactNode;
 
   if (ActualProviderToRender) {
-    const key = (globalActiveAdapter as ExtendedContractAdapter)?.lastFullUiKitConfiguration
-      ?.kitName;
+    // Generate a unique key based on adapter's network ecosystem and ID
+    // This ensures proper unmounting/mounting when switching between EVM/Stellar/etc.
+    const key = `${globalActiveAdapter?.networkConfig?.ecosystem || 'unknown'}-${globalActiveAdapter?.networkConfig?.id || 'unknown'}`;
+
     // EvmWalletUiRoot (and similar for other adapters) no longer needs uiKitConfiguration prop
     // as it manages its own configuration internally via the EvmUiKitManager or equivalent.
     logger.info(
       '[WSP RENDER]',
       'Rendering adapter-provided UI context provider:',
-      ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent'
+      ActualProviderToRender.displayName || ActualProviderToRender.name || 'UnknownComponent',
+      'with key:',
+      key
     );
     childrenToRender = <ActualProviderToRender key={key}>{children}</ActualProviderToRender>;
   } else {

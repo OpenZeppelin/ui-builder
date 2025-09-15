@@ -6,6 +6,7 @@
  */
 import { startCase } from 'lodash';
 
+import { createTransformForFieldType } from '@openzeppelin/contracts-ui-builder-renderer';
 import {
   CommonFormProperties,
   ContractAdapter,
@@ -22,10 +23,14 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
 /**
  * Generates a default form configuration for a contract function
  *
- * @param adapter The blockchain adapter to use for field generation
- * @param contractSchema The contract schema containing chain type and function details
+ * This function creates a complete form configuration including field generation,
+ * transform application, and common form properties setup. It handles complex types
+ * like enums, arrays, and objects through the adapter's field generation capabilities.
+ *
+ * @param adapter The blockchain adapter to use for field generation and type mapping
+ * @param contractSchema The contract schema containing chain type, function details, and metadata (e.g., specEntries for Stellar)
  * @param functionId The ID of the function to generate a form for
- * @returns A form configuration object
+ * @returns A complete form configuration object with enhanced fields and transforms
  */
 export function generateFormConfig(
   adapter: ContractAdapter,
@@ -39,7 +44,13 @@ export function generateFormConfig(
   }
 
   // Generate fields using the adapter
-  const fields = generateFieldsFromFunction(adapter, functionDetails);
+  const rawFields = generateFieldsFromFunction(adapter, functionDetails, contractSchema);
+
+  // Enhance fields with transforms (same as FormSchemaFactory)
+  const fields = rawFields.map((field) => ({
+    ...field,
+    transforms: createTransformForFieldType(field.type, adapter),
+  }));
 
   // Create the common form properties
   const commonProperties: CommonFormProperties = {
@@ -71,25 +82,32 @@ export function generateFormConfig(
 /**
  * Generates form fields for a contract function using the appropriate adapter
  *
- * @param adapter The blockchain adapter to use for field generation
- * @param functionDetails The contract function details
- * @returns An array of form fields
+ * This function processes each function parameter and generates appropriate form fields.
+ * It handles complex types (arrays, tuples, enums) through specialized logic and delegates
+ * to the adapter for chain-specific field generation. Each field is enhanced with the
+ * original parameter type for reference during form processing.
+ *
+ * @param adapter The blockchain adapter to use for field generation and type mapping
+ * @param functionDetails The contract function details containing input parameters
+ * @param contractSchema Optional contract schema for additional context (e.g., enum metadata from specEntries)
+ * @returns An array of form fields with enhanced metadata and original parameter type information
  */
 export function generateFieldsFromFunction(
   adapter: ContractAdapter,
-  functionDetails: ContractFunction
+  functionDetails: ContractFunction,
+  contractSchema?: ContractSchema
 ): FormFieldType[] {
   return functionDetails.inputs.map((input) => {
     // Check if this is a complex type that needs special handling
     if (isComplexType(input.type)) {
       return {
-        ...handleComplexTypeField(adapter, input),
+        ...handleComplexTypeField(adapter, input, contractSchema),
         originalParameterType: input.type,
       };
     }
 
     // Use adapter to generate the field with appropriate defaults for the chain
-    const field = adapter.generateDefaultField(input);
+    const field = adapter.generateDefaultField(input, contractSchema);
 
     // Add the original parameter type
     return {
@@ -102,15 +120,25 @@ export function generateFieldsFromFunction(
 /**
  * Handle generation of form fields for complex parameter types
  *
- * @param adapter The blockchain adapter to use
+ * This function specializes in handling complex blockchain parameter types such as:
+ * - Arrays of objects/tuples (e.g., tuple[])
+ * - Simple arrays (e.g., uint256[])
+ * - Objects/Tuples (e.g., tuple)
+ *
+ * It delegates to the adapter for base field generation and then enhances the field
+ * with appropriate UI components and metadata for complex type rendering.
+ *
+ * @param adapter The blockchain adapter to use for base field generation
  * @param parameter The complex parameter to generate a field for
- * @returns A form field appropriate for the complex type
+ * @param contractSchema Optional contract schema for additional context
+ * @returns A form field appropriate for the complex type with enhanced UI metadata
  */
 function handleComplexTypeField(
   adapter: ContractAdapter,
-  parameter: FunctionParameter
+  parameter: FunctionParameter,
+  contractSchema?: ContractSchema
 ): FormFieldType {
-  const baseField = adapter.generateDefaultField(parameter);
+  const baseField = adapter.generateDefaultField(parameter, contractSchema);
 
   // Arrays of objects/tuples
   if (parameter.type.match(/^tuple\[\d*\]$/)) {
@@ -132,11 +160,14 @@ function handleComplexTypeField(
   // Simple arrays - check if it's an array of simple types
   if (parameter.type.includes('[')) {
     const baseType = getBaseType(parameter.type);
-    const elementType = adapter.generateDefaultField({
-      ...parameter,
-      type: baseType,
-      name: 'element',
-    }).type;
+    const elementType = adapter.generateDefaultField(
+      {
+        ...parameter,
+        type: baseType,
+        name: 'element',
+      },
+      contractSchema
+    ).type;
 
     return {
       ...baseField,
@@ -164,6 +195,41 @@ function handleComplexTypeField(
       // Pass the component information for nested structure
       components: parameter.components,
     };
+  }
+
+  // Map types - enhance with key-value type information
+  if (parameter.type === 'Map' || parameter.type.startsWith('Map<')) {
+    const enhancedField: FormFieldType = {
+      ...baseField,
+      helperText: `${baseField.helperText || ''} Add key-value pairs to the map.`.trim(),
+      placeholder: undefined, // Not applicable for map
+      validation: {
+        ...baseField.validation,
+      },
+    };
+
+    // Extract key and value types from Map<K, V> if available
+    const mapMatch = parameter.type.match(/^Map<(.+),\s*(.+)>$/);
+    if (mapMatch) {
+      const keyType = mapMatch[1].trim();
+      const valueType = mapMatch[2].trim();
+
+      // Add type information for the MapField component
+      enhancedField.mapMetadata = {
+        keyType,
+        valueType,
+        keyFieldConfig: {
+          type: adapter.mapParameterTypeToFieldType(keyType),
+          validation: { required: true },
+        },
+        valueFieldConfig: {
+          type: adapter.mapParameterTypeToFieldType(valueType),
+          validation: { required: true },
+        },
+      };
+    }
+
+    return enhancedField;
   }
 
   // Default case - just return the adapter's default field
@@ -252,15 +318,24 @@ export function isComplexType(parameterType: string): boolean {
     return true;
   }
 
+  // Check for Map types (e.g., Map<String, Bytes>, Map)
+  if (parameterType === 'Map' || parameterType.startsWith('Map<')) {
+    return true;
+  }
+
   return false;
 }
 
 /**
  * Updates an existing form configuration with new values
  *
- * @param existingConfig The existing form configuration
- * @param updates Partial updates to apply
- * @returns The updated form configuration
+ * This function merges partial updates into an existing form configuration while
+ * preserving the structure and applying proper defaults. It handles special cases
+ * like title preservation (including empty strings) and theme merging.
+ *
+ * @param existingConfig The existing form configuration to update
+ * @param updates Partial updates to apply (fields, title, theme, etc.)
+ * @returns The updated form configuration with merged properties and preserved structure
  */
 export function updateFormConfig(
   existingConfig: BuilderFormConfig,

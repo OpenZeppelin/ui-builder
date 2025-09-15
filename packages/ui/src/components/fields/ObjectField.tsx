@@ -3,7 +3,6 @@ import { Control, Controller, FieldValues, useFormContext } from 'react-hook-for
 
 import type {
   ContractAdapter,
-  FieldType,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/contracts-ui-builder-types';
@@ -131,26 +130,21 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                 </div>
               ) : (
                 components.map((component) => {
-                  // Create field configuration for object property
-                  const propertyFieldType = ((): FieldType => {
-                    if (!adapter) {
-                      throw new Error(
-                        `ObjectField: No adapter provided for type mapping. Cannot map type "${component.type}" for field "${component.name}"`
-                      );
-                    }
-                    return adapter.mapParameterTypeToFieldType(component.type);
-                  })();
+                  // Generate field using adapter to get full configuration including elementType for arrays
+                  if (!adapter) {
+                    throw new Error(
+                      `ObjectField: No adapter provided for field generation. Cannot generate field for "${component.name}"`
+                    );
+                  }
 
-                  // TODO: Refine `propertyField` definition.
-                  // Some props from `component` (like `displayName`, `description`) are directly used.
-                  // Ensure that `validation` is correctly inherited or can be specified per-property.
-                  // The current `validation: { required: validation?.required }` inherits the object's overall required status,
-                  // which might not be granular enough for individual properties.
+                  const generatedField = adapter.generateDefaultField(component);
+
+                  // Override with object-specific configuration
                   const propertyField: FormFieldType = {
+                    ...generatedField, // Include elementType and other adapter-specific properties
                     id: `${id}-${component.name}`,
                     name: `${name}.${component.name}`,
                     label: component.displayName || component.name,
-                    type: propertyFieldType,
                     validation: {
                       // TODO: This makes each property required if the parent object is required.
                       // This might be too strict. Consider allowing individual properties to be optional
@@ -161,7 +155,7 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                     placeholder: `Enter ${component.displayName || component.name}`,
                     helperText:
                       component.description ||
-                      (propertyFieldType === 'number' ? 'Numbers only' : undefined),
+                      (generatedField.type === 'number' ? 'Numbers only' : undefined),
                     width: 'full',
                     readOnly,
                     // Pass components for nested objects (tuples within a struct)

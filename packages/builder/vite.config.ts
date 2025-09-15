@@ -1,6 +1,6 @@
+import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 import { defineConfig } from 'vite';
 
 import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-provider';
@@ -39,6 +39,11 @@ export default defineConfig({
   },
   define: {
     'process.env': {},
+    // Some transitive dependencies referenced by wallet stacks expect Node's `global` in the browser.
+    // In particular, chains of imports like randombytes -> @near-js/crypto -> @hot-wallet/sdk
+    // can throw "ReferenceError: global is not defined" during runtime without this alias.
+    // Mapping `global` to `globalThis` provides a safe browser shim.
+    global: 'globalThis',
   },
   build: {
     outDir: 'dist',
@@ -59,11 +64,5 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     // Reduce source map generation to save memory
     sourcemap: false,
-  },
-  optimizeDeps: {
-    exclude: [
-      // The patterns that caused errors have been removed.
-      // If the dev server has issues resolving these, we may need a more advanced solution.
-    ],
   },
 });

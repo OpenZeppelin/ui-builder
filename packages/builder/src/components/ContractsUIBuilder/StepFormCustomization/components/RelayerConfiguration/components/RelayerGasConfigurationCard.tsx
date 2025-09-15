@@ -26,6 +26,7 @@ export function RelayerGasConfigurationCard({
   onSetupStepChange,
   onTransactionOptionsChange,
 }: RelayerGasConfigurationCardProps): React.ReactElement {
+  const labels = adapter?.getUiLabels?.() || {};
   const hasCustomOptions = Boolean(
     transactionOptions.speed || transactionOptions.gasPrice || transactionOptions.maxFeePerGas
   );
@@ -35,7 +36,7 @@ export function RelayerGasConfigurationCard({
   }
 
   return (
-    <Card className={isActive ? '' : ''}>
+    <Card>
       <CardHeader className="pb-1 pt-2 px-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1.5">
@@ -44,13 +45,17 @@ export function RelayerGasConfigurationCard({
                 <CheckCircle className="h-3.5 w-3.5" />
               </div>
             )}
-            <CardTitle className="text-base">Gas Configuration</CardTitle>
+            <CardTitle className="text-base">
+              {labels.relayerConfigTitle || 'Gas Configuration'}
+            </CardTitle>
           </div>
         </div>
         <CardDescription className="mt-1">
           {isActive
-            ? 'Customize gas pricing strategy for transaction submission'
-            : 'Using recommended gas configuration for reliable transactions'}
+            ? labels.relayerConfigActiveDesc ||
+              'Customize gas pricing strategy for transaction submission'
+            : labels.relayerConfigInactiveDesc ||
+              'Using recommended gas configuration for reliable transactions'}
         </CardDescription>
       </CardHeader>
 
@@ -64,10 +69,11 @@ export function RelayerGasConfigurationCard({
                 </div>
                 <div className="flex-1 space-y-1 min-w-0">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                    Fast Speed Preset Active
+                    {labels.relayerConfigPresetTitle || 'Fast Speed Preset Active'}
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-300">
-                    Transactions will use high priority gas pricing for quick inclusion
+                    {labels.relayerConfigPresetDesc ||
+                      'Transactions will use high priority gas pricing for quick inclusion'}
                   </p>
                 </div>
               </div>
@@ -80,7 +86,7 @@ export function RelayerGasConfigurationCard({
                 className="w-full sm:flex-1"
                 type="button"
               >
-                Customize Gas Settings
+                {labels.relayerConfigCustomizeBtn || 'Customize Gas Settings'}
               </Button>
               <p className="text-xs text-muted-foreground self-start sm:self-center">(Optional)</p>
             </div>

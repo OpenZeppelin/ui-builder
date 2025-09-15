@@ -117,6 +117,7 @@ export function RelayerConfiguration({
           loadingEnhancedDetails={loadingEnhancedDetails}
           isLoading={isLoading}
           onEdit={() => setSetupStep('selection')}
+          adapter={adapter}
         />
       )}
 

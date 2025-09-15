@@ -6,9 +6,9 @@ import {
   SquarePen,
 } from 'lucide-react';
 
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { cn } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useAnalytics } from '../../../hooks/useAnalytics';
 import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
 import SidebarButton from './SidebarButton';

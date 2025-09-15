@@ -5,11 +5,11 @@ import { useCallback, useEffect, useRef } from 'react';
 import {
   contractUIStorage,
   ContractUIStorage,
-  useContractUIStorage,
   type ContractUIRecord,
 } from '@openzeppelin/contracts-ui-builder-storage';
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';

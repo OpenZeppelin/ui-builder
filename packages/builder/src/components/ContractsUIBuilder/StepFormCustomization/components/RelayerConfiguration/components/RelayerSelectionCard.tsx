@@ -2,7 +2,11 @@ import { CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Control } from 'react-hook-form';
 
-import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/contracts-ui-builder-types';
+import type {
+  ContractAdapter,
+  RelayerDetails,
+  RelayerDetailsRich,
+} from '@openzeppelin/contracts-ui-builder-types';
 import {
   Button,
   Card,
@@ -26,6 +30,7 @@ interface RelayerSelectionCardProps {
   loadingEnhancedDetails: boolean;
   isLoading: boolean;
   onEdit: () => void;
+  adapter?: ContractAdapter | null;
 }
 
 export function RelayerSelectionCard({
@@ -38,6 +43,7 @@ export function RelayerSelectionCard({
   loadingEnhancedDetails,
   isLoading,
   onEdit,
+  adapter,
 }: RelayerSelectionCardProps): React.ReactElement {
   const relayerOptions = fetchedRelayers.map((r) => ({
     value: r.relayerId,
@@ -91,6 +97,7 @@ export function RelayerSelectionCard({
                 enhancedDetails={enhancedDetails}
                 loading={loadingEnhancedDetails}
                 className="w-full"
+                labels={adapter?.getUiLabels?.()}
               />
             </div>
           )}

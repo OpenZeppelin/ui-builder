@@ -8,6 +8,7 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
+import { EvmWalletConnectionStatus } from '../wallet/types';
 
 const SYSTEM_LOG_TAG = 'adapter-evm-execution-config';
 
@@ -46,7 +47,7 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
  */
 async function _validateMultisigConfig(
   _config: MultisigExecutionConfig,
-  _walletStatus: { isConnected: boolean; address?: string; chainId?: string }
+  _walletStatus: EvmWalletConnectionStatus
 ): Promise<true | string> {
   logger.info(SYSTEM_LOG_TAG, 'Multisig execution config validation: Not yet fully implemented.');
   // TODO: Add validation for Safe address, required signers, etc.
@@ -59,7 +60,7 @@ async function _validateMultisigConfig(
  */
 export async function validateEvmExecutionConfig(
   config: ExecutionConfig,
-  walletStatus: { isConnected: boolean; address?: string; chainId?: string }
+  walletStatus: EvmWalletConnectionStatus
 ): Promise<true | string> {
   logger.info(SYSTEM_LOG_TAG, 'Validating EVM execution config:', { config, walletStatus });
 

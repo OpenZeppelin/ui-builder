@@ -1,5 +1,5 @@
 import { FormInput } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import {
@@ -89,10 +89,53 @@ export function StepFormCustomization({
     onSelectField: (index) => setUiState({ selectedFieldIndex: index }),
   });
 
+  // Field validation tracking
+  const [fieldValidationErrors, setFieldValidationErrors] = useState<Map<string, boolean>>(
+    new Map()
+  );
+  const executionValidRef = useRef<boolean>(true); // Track execution config validity
+
   // Find the selected function details using memoization
   const selectedFunctionDetails = useMemo(() => {
     return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
   }, [contractSchema, selectedFunction]);
+
+  // Callback for field components to report validation status
+  const onFieldValidationChange = useCallback((fieldId: string, hasError: boolean) => {
+    setFieldValidationErrors((prev) => {
+      const next = new Map(prev);
+      if (hasError) {
+        next.set(fieldId, true);
+      } else {
+        next.delete(fieldId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Enhanced execution config update handler that combines validations
+  const handleExecutionConfigUpdated = useCallback(
+    (execConfig: ExecutionConfig | undefined, isExecutionValid: boolean) => {
+      executionValidRef.current = isExecutionValid;
+      // Update the global state with combined validation result
+      const combinedIsValid =
+        isExecutionValid &&
+        Array.from(fieldValidationErrors.values()).every((hasError) => !hasError);
+      onExecutionConfigUpdated?.(execConfig, combinedIsValid);
+    },
+    [fieldValidationErrors, onExecutionConfigUpdated]
+  );
+
+  // Update combined validation whenever field validation changes
+  useEffect(() => {
+    if (onExecutionConfigUpdated) {
+      const combinedIsValid =
+        executionValidRef.current &&
+        Array.from(fieldValidationErrors.values()).every((hasError) => !hasError);
+      // Get current execution config from the current state
+      onExecutionConfigUpdated(currentExecutionConfig, combinedIsValid);
+    }
+  }, [fieldValidationErrors, currentExecutionConfig, onExecutionConfigUpdated]);
 
   const handleUiKitConfigUpdate = (config: UiKitConfiguration) => {
     // For runtime UI updates, exclude customCode to prevent reinitialization
@@ -124,15 +167,15 @@ export function StepFormCustomization({
 
   // Ensure execution config validation happens on mount if no config exists
   useEffect(() => {
-    if (adapter && onExecutionConfigUpdated && !currentExecutionConfig) {
+    if (adapter && handleExecutionConfigUpdated && !currentExecutionConfig) {
       // Create a default EOA config and validate it
       const defaultConfig = ensureCompleteConfig({ method: 'eoa', allowAny: true });
       if (defaultConfig) {
         // For the initial validation, we know EOA with allowAny is always valid
-        onExecutionConfigUpdated(defaultConfig, true);
+        handleExecutionConfigUpdated(defaultConfig, true);
       }
     }
-  }, [adapter, currentExecutionConfig, onExecutionConfigUpdated]);
+  }, [adapter, currentExecutionConfig, handleExecutionConfigUpdated]);
 
   useEffect(() => {
     if (
@@ -233,7 +276,11 @@ export function StepFormCustomization({
             </TabsList>
           </div>
 
-          <TabsContent value="general" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="general"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {baseFormConfigFromHook && (
               <GeneralSettings
                 title={baseFormConfigFromHook.title}
@@ -245,7 +292,11 @@ export function StepFormCustomization({
             )}
           </TabsContent>
 
-          <TabsContent value="fields" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="fields"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {baseFormConfigFromHook && (
               <div className="space-y-4">
                 {baseFormConfigFromHook.fields.length === 0 ? (
@@ -262,6 +313,8 @@ export function StepFormCustomization({
                       onSelectField={selectField}
                       adapter={adapter}
                       onUpdateField={updateField}
+                      onFieldValidationChange={onFieldValidationChange}
+                      fieldValidationErrors={fieldValidationErrors}
                     />
                   )
                 )}
@@ -269,18 +322,26 @@ export function StepFormCustomization({
             )}
           </TabsContent>
 
-          <TabsContent value="execution" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="execution"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {adapter && (
               <ExecutionMethodSettings
                 adapter={adapter}
                 currentConfig={currentExecutionConfig}
-                onUpdateConfig={onExecutionConfigUpdated || (() => {})}
+                onUpdateConfig={handleExecutionConfigUpdated}
                 isWidgetExpanded={isWidgetExpanded}
               />
             )}
           </TabsContent>
 
-          <TabsContent value="uikit" className="mt-4 rounded-md border p-4">
+          <TabsContent
+            value="uikit"
+            className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
+            forceMount
+          >
             {adapter && (
               <UiKitSettings
                 adapter={adapter}

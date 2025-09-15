@@ -1,5 +1,65 @@
+import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+
 import { uiBuilderStore } from '../../uiBuilderStore';
 import { SavedConfigurationData } from './types';
+
+/**
+ * Returns true when the given value is a plain object (i.e., created by `{}` or `Object.create(null)`).
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
+ * Deeply sanitizes a value by removing functions and symbols and
+ * recursively sanitizing arrays and plain objects. Intended to create
+ * a structure-safe version suitable for IndexedDB/JSON-like storage.
+ */
+function sanitizeForSerialization<T>(value: T, depth = 0): T {
+  // Depth guard to avoid pathological structures
+  if (depth > 50) return value;
+
+  // Drop functions and symbols entirely
+  if (typeof value === 'function' || typeof (value as unknown) === 'symbol') {
+    return undefined as unknown as T;
+  }
+
+  // Arrays: sanitize each element and remove undefined entries produced above
+  if (Array.isArray(value)) {
+    const result = (value as unknown[])
+      .map((v) => sanitizeForSerialization(v, depth + 1))
+      .filter((v) => v !== undefined);
+    return result as unknown as T;
+  }
+
+  // Plain objects: sanitize each enumerable own property
+  if (isPlainObject(value)) {
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (typeof val === 'function' || typeof val === 'symbol') continue;
+      const sanitized = sanitizeForSerialization(val as unknown, depth + 1);
+      if (sanitized !== undefined) {
+        result[key] = sanitized as unknown;
+      }
+    }
+    return result as unknown as T;
+  }
+
+  // Primitives and non-plain objects are returned as-is. This intentionally
+  // preserves Dates, Maps, etc., relying on Dexie/structured-clone semantics
+  // when available; callers should keep inputs to serializable shapes.
+  return value;
+}
+
+/**
+ * Cleans a field object by removing non-serializable properties like functions.
+ * Uses a deep sanitizer to reduce maintenance when `FormFieldType` evolves.
+ */
+function cleanFieldForSerialization(field: FormFieldType): FormFieldType {
+  return sanitizeForSerialization<FormFieldType>(field);
+}
 
 /**
  * Generates a default title for the configuration based on current state.
@@ -29,7 +89,7 @@ export function buildConfigurationObject(
     title: state.formConfig?.title || 'New Contract UI',
     functionId: state.selectedFunction || '',
     contractAddress: state.contractState.address || '',
-    fields: state.formConfig?.fields || [],
+    fields: (state.formConfig?.fields || []).map(cleanFieldForSerialization),
     layout: state.formConfig?.layout || {
       columns: 1 as const,
       spacing: 'normal' as const,

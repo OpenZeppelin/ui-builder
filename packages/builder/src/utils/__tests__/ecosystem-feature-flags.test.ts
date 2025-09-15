@@ -34,6 +34,16 @@ describe('ecosystem-feature-flags', () => {
       });
     });
 
+    it('should return default config for Stellar (enabled)', () => {
+      const config = getEcosystemFeatureConfig('stellar');
+      expect(config).toEqual({
+        enabled: true,
+        showInUI: true,
+        disabledLabel: undefined,
+        disabledDescription: undefined,
+      });
+    });
+
     it('should return default config for Solana (disabled)', () => {
       const config = getEcosystemFeatureConfig('solana');
       expect(config).toEqual({
@@ -58,6 +68,10 @@ describe('ecosystem-feature-flags', () => {
   describe('isEcosystemEnabled', () => {
     it('should return true for EVM by default', () => {
       expect(isEcosystemEnabled('evm')).toBe(true);
+    });
+
+    it('should return true for Stellar by default', () => {
+      expect(isEcosystemEnabled('stellar')).toBe(true);
     });
 
     it('should return false for Solana by default', () => {
@@ -111,9 +125,9 @@ describe('ecosystem-feature-flags', () => {
   });
 
   describe('getEnabledEcosystems', () => {
-    it('should return only EVM by default', () => {
+    it('should return EVM and Stellar by default', () => {
       const enabled = getEnabledEcosystems();
-      expect(enabled).toEqual(['evm']);
+      expect(enabled).toEqual(['evm', 'stellar']);
     });
 
     it('should include ecosystems enabled by feature flags', () => {

@@ -5,36 +5,34 @@
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const stellarAdapterConfig = {
+import type { AdapterConfig } from '@openzeppelin/contracts-ui-builder-types';
+
+export const stellarAdapterConfig: AdapterConfig = {
   /**
    * Dependencies required by the Stellar adapter
    * These will be included in exported projects that use this adapter
    */
   dependencies: {
-    // TODO: Review and update with real, verified dependencies and versions before production release
-
     // Runtime dependencies
     runtime: {
       // Core Stellar libraries
-      'stellar-sdk': '^10.4.1',
-      '@stellar/freighter-api': '^1.5.1',
+      '@stellar/stellar-sdk': '^14.1.1',
 
-      // Stellar wallet integration
-      '@stellar/design-system': '^0.5.1',
-      '@stellar/wallet-sdk': '^0.11.2',
+      // Wallet connection and integration
+      '@creit.tech/stellar-wallets-kit': '^1.9.5',
 
-      // Utilities for Stellar development
-      'bignumber.js': '^9.1.1',
-      'js-xdr': '^1.3.0',
+      // OpenZeppelin Relayer integration (optional, for gasless transactions)
+      '@openzeppelin/relayer-sdk': '1.1.0',
+
+      // React integration for wallet components
+      react: '^19.0.0',
+      'react-dom': '^19.0.0',
     },
 
     // Development dependencies
     dev: {
-      // Testing utilities for Stellar
-      '@stellar/typescript-wallet-sdk': '^1.9.0',
-
-      // Soroban contract SDK for Stellar
-      // '@stellar/soroban-sdk': '^0.7.0',
+      '@types/react': '^19.0.0',
+      '@types/react-dom': '^19.0.0',
     },
   },
 };

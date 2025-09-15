@@ -18,6 +18,10 @@ interface UseEvmRelayerOptionsProps {
 }
 
 export const useEvmRelayerOptions = ({ options, onChange }: UseEvmRelayerOptionsProps) => {
+  // Store latest onChange in a ref to avoid effect re-runs due to changing function identity
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   // Initialize form with options from parent (only on mount to prevent loops)
   const initialOptions = {
     speed: (() => {
@@ -67,7 +71,7 @@ export const useEvmRelayerOptions = ({ options, onChange }: UseEvmRelayerOptions
     }
   }, []);
 
-  // Notify parent of changes after initial mount
+  // Notify parent of changes after initial mount (watch specific fields to avoid loops)
   useEffect(() => {
     if (isInitialMount.current) {
       return;
@@ -84,11 +88,17 @@ export const useEvmRelayerOptions = ({ options, onChange }: UseEvmRelayerOptions
       }
       if (formValues.gasLimit) newOptions.gasLimit = formValues.gasLimit;
 
-      onChange(newOptions as Record<string, unknown>);
+      onChangeRef.current(newOptions as Record<string, unknown>);
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [formValues, onChange]);
+  }, [
+    formValues.speed,
+    formValues.gasPrice,
+    formValues.maxFeePerGas,
+    formValues.maxPriorityFeePerGas,
+    formValues.gasLimit,
+  ]);
 
   // Event handlers
   const handleSpeedChange = (speed: Speed) => {
