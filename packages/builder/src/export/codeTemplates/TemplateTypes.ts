@@ -68,6 +68,11 @@ export interface AppComponentTemplateParams extends BaseTemplateParams {
   functionId: string;
 
   /**
+   * HTML-escaped function ID safe for JSX text nodes
+   */
+  functionIdEscaped?: string;
+
+  /**
    * The current year for copyright notices
    */
   currentYear: number;

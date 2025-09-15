@@ -1,4 +1,4 @@
-import { capitalize } from 'lodash';
+import { capitalize, escape as escapeHtml } from 'lodash';
 
 import {
   Ecosystem,
@@ -283,6 +283,7 @@ export class AppCodeGenerator {
     // Create parameters for the template
     const params: AppComponentTemplateParams & Record<string, unknown> = {
       functionId,
+      functionIdEscaped: escapeHtml(functionId),
       currentYear: new Date().getFullYear(),
       adapterClassName,
       adapterPackageName,
