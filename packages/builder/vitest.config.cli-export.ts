@@ -50,6 +50,10 @@ export default defineConfig({
     environment: 'node', // Export test likely runs better in node env
     // setupFiles: [path.resolve(__dirname, '../../test/setup.ts')], // May not need full browser setup
     passWithNoTests: true,
+    // Increase timeouts for CLI export which performs heavier work (zipping, processing)
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 30000,
     // Coverage is likely not relevant for this specific config
   },
 });

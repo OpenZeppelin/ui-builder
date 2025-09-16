@@ -135,6 +135,10 @@ export default defineConfig(
       environment: 'jsdom',
       setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
       passWithNoTests: true,
+      // Increase timeouts to avoid flakes in heavy export tests under Vite 7
+      testTimeout: 20000,
+      hookTimeout: 20000,
+      teardownTimeout: 20000,
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html', 'json-summary'],
