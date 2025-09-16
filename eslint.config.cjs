@@ -152,6 +152,8 @@ const baseConfig = [
       'unused-imports': unusedImportsPlugin,
     },
     rules: {
+      // Disallow direct console usage; use logger utility instead
+      'no-console': 'error',
       'import/first': 'error',
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
@@ -165,6 +167,38 @@ const baseConfig = [
           argsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+
+  // Test files override: allow console usage in tests
+  {
+    files: ['**/__tests__/**', '**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/*.test.jsx'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // Story files override: allow console usage in Storybook stories
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.jsx', '**/*.stories.ts', '**/*.stories.js'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // Adapter Stellar scripts override: allow console usage in Node scripts
+  {
+    files: ['packages/adapter-stellar/scripts/**/*.js'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // Adapter Stellar validator override: allow console in the type coverage validator
+  {
+    files: ['packages/adapter-stellar/src/mapping/type-coverage-validator.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
 
