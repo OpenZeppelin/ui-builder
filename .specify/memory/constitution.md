@@ -54,6 +54,15 @@ Quality gates and exports must remain consistent and reproducible.
 - Exported apps: The export pipeline must produce standalone React + Vite apps. Runtime config is provided via `AppConfigService` (env in builder, `public/app.config.json` in exports). Local exports use `workspace:*`; production exports use published `latest` versions.
 - Features must be gated with feature flags where indicated by ecosystem readiness.
 
+### VI. Test‑Driven Development for Business Logic (NON‑NEGOTIABLE)
+
+TDD is required across non‑UI code. UI components are explicitly exempt.
+
+- Business logic (functions, services, adapters, validators, data transforms, storage, ecosystem manager, networking) MUST follow TDD: write a failing test first, then implement the minimal code to pass, then refactor.
+- UI components implemented in `.tsx` files are EXEMPT from TDD. Prefer Storybook, visual checks, and interaction tests when appropriate.
+- PRs that change business logic must include corresponding unit/integration tests created first (or updated first) demonstrating the behavior.
+- Vitest remains the standard test runner; use mocking only where necessary to keep tests focused and fast.
+
 ## Additional Constraints
 
 - Do not add chain‑specific code or polyfills in chain‑agnostic packages (e.g., no `globalThis.Buffer` in the builder); adapters must own such concerns.
@@ -82,6 +91,7 @@ This constitution supersedes other practices for architectural, quality, and wor
 
 Amendment History:
 
+- 2025-09-16 (v1.1.0): Declared TDD as non‑negotiable for business logic; explicitly exempted `.tsx` UI components.
 - 2025-09-16 (v1.0.1): Added README/CONTRIBUTING links, clarified logging defaults and `no any`, added raw contract comparison constraint.
 
-**Version**: 1.0.1 | **Ratified**: 2025-09-16 | **Last Amended**: 2025-09-16
+**Version**: 1.1.0 | **Ratified**: 2025-09-16 | **Last Amended**: 2025-09-16
