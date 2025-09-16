@@ -332,13 +332,13 @@ export class StellarAdapter implements ContractAdapter {
   public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
     return [
       {
-        id: 'stellar-wallets-kit',
-        name: 'Stellar Wallets Kit',
+        id: 'custom',
+        name: 'Stellar Wallets Kit Custom',
         configFields: [],
       },
       {
-        id: 'custom',
-        name: 'Stellar Wallets Kit Custom',
+        id: 'stellar-wallets-kit',
+        name: 'Stellar Wallets Kit',
         configFields: [],
       },
     ];
