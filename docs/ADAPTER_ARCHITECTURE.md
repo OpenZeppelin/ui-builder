@@ -353,3 +353,21 @@ The EVM adapter provides a sophisticated implementation of this pattern to handl
     - **Programmatic Override**: The application can call the adapter's `configureUiKit()` method at runtime to override any setting.
 
 This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the builder application to simply request the UI components and hooks it needs without knowing the specific implementation details.
+
+## 11. Architecture Boundaries & Constitution
+
+All adapter work must comply with the project constitution. Read it before implementing or modifying adapters:
+
+- [../.specify/memory/constitution.md](../.specify/memory/constitution.md)
+
+Key non‑negotiables for adapters (summary):
+
+- Chain‑agnostic core: All chain‑specific code, polyfills, and dependencies belong only in `packages/adapter-*`.
+- EVM adapter is the architectural template; mirror its structure, naming, and patterns.
+- Implement `ContractAdapter` exactly; do not add extra public methods beyond the interface.
+- Adapters are network‑aware (constructed with a `NetworkConfig` and must use it internally).
+- Use shared types from `packages/types` as the single source of truth.
+- Validation: `isValidAddress(address: string, addressType?: string)` is the single validation entrypoint.
+- No `console` in libraries; use the shared `logger` with default‑disabled logging outside development.
+- UI consistency: follow Tailwind v4 + shadcn/ui, `cn` utility, and `lucide-react` icons.
+- Contract comparisons must use raw definitions (ABI/IDL/etc.), not internal `ContractSchema`.

@@ -30,6 +30,12 @@ Key steps include:
 7.  **Testing**: Add comprehensive unit and integration tests for your adapter's logic and network configurations.
 8.  **Documentation**: Update any relevant documentation.
 
+## Constitution
+
+Before proposing architectural changes, adding new adapters, or modifying core tooling, read and comply with the project constitution:
+
+- [./.specify/memory/constitution.md](./.specify/memory/constitution.md)
+
 ## Pull Request Process
 
 1. Ensure your code follows the style guidelines of the project
@@ -37,6 +43,7 @@ Key steps include:
 3. The PR should work for Node.js version 20.11.1 or higher
 4. Include tests for new features or bug fixes
 5. Link any relevant issues in the PR description
+6. Confirm compliance with the constitution (architecture boundaries, adapter rules, tooling non-negotiables)
 
 ## Development Setup
 

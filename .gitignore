@@ -82,7 +82,6 @@ $RECYCLE.BIN/
 # Temporary directories
 .temp/
 .tmp/
-.cursor/
 
 /AGENT.md
 

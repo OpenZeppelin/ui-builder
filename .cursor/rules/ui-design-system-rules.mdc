@@ -1,0 +1,223 @@
+---
+description: Use these rules when working on UI components and layout.
+globs: *.tsx, *.css
+alwaysApply: false
+---
+
+# Design System Rules
+
+This document outlines the core design system rules for the Contracts UI Builder application, providing essential guidelines for maintaining consistency across the UI.
+
+## Spacing
+
+### Spacing Scale
+
+We use a consistent spacing scale throughout the application based on Tailwind's default spacing scale:
+
+| Name | Size | Tailwind Class | Use Case                                     |
+| ---- | ---- | -------------- | -------------------------------------------- |
+| xs   | 4px  | `p-1`, `m-1`   | Minimal spacing, tight elements              |
+| sm   | 8px  | `p-2`, `m-2`   | Standard element padding, form field spacing |
+| md   | 16px | `p-4`, `m-4`   | Spacing between related components           |
+| lg   | 24px | `p-6`, `m-6`   | Section padding, major component separation  |
+| xl   | 32px | `p-8`, `m-8`   | Page section spacing                         |
+| 2xl  | 48px | `p-12`, `m-12` | Major layout divisions                       |
+
+### Standard Spacing Patterns
+
+- **Form Fields**: Use `gap-2` (8px) between label and input
+- **Form Field Groups**: Use `space-y-4` (16px) between field groups
+- **Form Sections**: Use `space-y-6` (24px) between sections
+- **Card Padding**: Use `p-4` (16px) or `p-6` (24px) for card content
+- **Page Sections**: Use `py-8` (32px) for vertical section spacing
+
+## Typography
+
+### Font Family
+
+We use a system font stack for optimal performance:
+
+```css
+font-family:
+  ui-sans-serif,
+  system-ui,
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  'Helvetica Neue',
+  Arial,
+  sans-serif;
+```
+
+### Font Sizes
+
+| Name | Size | Tailwind Class | Use Case                     |
+| ---- | ---- | -------------- | ---------------------------- |
+| xs   | 12px | `text-xs`      | Helper text, captions        |
+| sm   | 14px | `text-sm`      | Form labels, secondary text  |
+| base | 16px | `text-base`    | Body text (default)          |
+| lg   | 18px | `text-lg`      | Subheadings, emphasized text |
+| xl   | 20px | `text-xl`      | Section headings             |
+| 2xl  | 24px | `text-2xl`     | Page titles                  |
+| 3xl  | 30px | `text-3xl`     | Major headings               |
+
+### Font Weights
+
+- **Regular**: `font-normal` (400)
+- **Medium**: `font-medium` (500)
+- **Semibold**: `font-semibold` (600)
+- **Bold**: `font-bold` (700)
+
+### Standard Text Patterns
+
+- **Body Text**: `text-base` (16px), `font-normal`, `text-foreground`
+- **Form Labels**: `text-sm` (14px), `font-medium`
+- **Headings**: `text-xl` to `text-3xl`, `font-semibold`
+- **Helper Text**: `text-sm` (14px), `text-muted-foreground`
+- **Error Messages**: `text-sm` (14px), `text-red-500`
+
+## Colors
+
+We use a semantic color system with HSL variables for easy theme customization:
+
+### Base Colors
+
+```css
+--color-primary: oklch(0.57 0.19 275); /* Purple */
+--color-secondary: oklch(0.65 0.15 245); /* Lavender */
+--color-accent: oklch(0.65 0.3 25); /* Amber */
+--color-destructive: oklch(0.65 0.22 25); /* Red */
+--color-success: oklch(0.65 0.15 150); /* Green */
+--color-warning: oklch(0.8 0.17 80); /* Yellow/Orange */
+--color-info: oklch(0.65 0.18 225); /* Blue */
+```
+
+### Neutral Colors
+
+```css
+--color-background: oklch(1 0 0); /* White */
+--color-foreground: oklch(0.18 0 0); /* Near black for text */
+--color-muted: oklch(0.96 0 0); /* Subtle background */
+--color-muted-foreground: oklch(0.45 0 0); /* Secondary text */
+--color-border: oklch(0.83 0 0); /* Standard borders */
+```
+
+### Color Usage
+
+- Use semantic color classes (`bg-primary`, `text-destructive`) rather than literal colors
+- Follow a11y contrast guidelines (4.5:1 minimum for text)
+- Reserve accent colors for interactive elements and emphasis
+- Use muted colors for backgrounds and secondary elements
+
+## Component Guidelines
+
+### Borders & Rounding
+
+- Default border radius: `rounded-md` (6px)
+- Small border radius: `rounded` (4px)
+- Large border radius: `rounded-lg` (8px)
+- Full rounding: `rounded-full` (9999px, for pills, avatars)
+- Default border: `border` (1px), `border-border` (standard color)
+
+### Shadows
+
+- Subtle shadow: `shadow-sm` (for cards, dropdowns)
+- Standard shadow: `shadow` (for popovers, modals)
+- Large shadow: `shadow-lg` (for elevating important elements)
+
+### Interactive States
+
+- **Focus**: Blue outline with `ring-2`, `ring-offset-2`
+- **Hover**: Slightly darkened background (10-15%)
+- **Active/Pressed**: Darker background than hover (20-25%)
+- **Disabled**: `opacity-50`, `pointer-events-none`
+
+## Layout Guidelines
+
+### Container Sizes
+
+- Default max width: `max-w-7xl` (1280px)
+- Constrained content: `max-w-prose` (65ch, ideal for reading)
+- Narrow panels: `max-w-md` (448px)
+- Wide content: `max-w-screen-xl` (1280px)
+
+### Responsive Breakpoints
+
+- **sm**: 640px - Small devices (mobile landscape)
+- **md**: 768px - Medium devices (tablets)
+- **lg**: 1024px - Large devices (desktops)
+- **xl**: 1280px - Extra large devices
+- **2xl**: 1536px - Very large screens
+
+### Grid System
+
+- Use CSS Grid (`grid`) for 2D layouts
+- Use Flexbox (`flex`) for 1D layouts
+- Standard grid columns: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+- Standard gap: `gap-4` (16px) or `gap-6` (24px)
+
+## Form Element Sizing
+
+- **Input/Button Height**: 40px (default), 32px (small), 48px (large)
+- **Checkbox/Radio Size**: 16px × 16px
+- **Select Height**: Same as inputs
+- **Input Padding**: `px-3 py-2`
+
+## Common Patterns
+
+### Cards
+
+```tsx
+<div className="bg-card rounded-lg border p-6 shadow-sm">
+  <div className="flex flex-col space-y-1.5">
+    <h3 className="text-lg font-semibold">Card Title</h3>
+    <p className="text-muted-foreground text-sm">Card description</p>
+  </div>
+  <div className="pt-4">{/* Card content */}</div>
+</div>
+```
+
+### Page Sections
+
+```tsx
+<section className="py-8">
+  <div className="container">
+    <div className="flex flex-col space-y-2">
+      <h2 className="text-2xl font-semibold">Section Title</h2>
+      <p className="text-muted-foreground">Section description</p>
+    </div>
+    <div className="mt-6">{/* Section content */}</div>
+  </div>
+</section>
+```
+
+### Content Sections
+
+```tsx
+<div className="space-y-6">
+  <div className="space-y-2">
+    <h3 className="text-xl font-semibold">Content Heading</h3>
+    <p className="text-muted-foreground">Descriptive text</p>
+  </div>
+
+  <div className="space-y-4">{/* Content items */}</div>
+</div>
+```
+
+## Implementation Guidelines
+
+1. **Use Tailwind Classes** - Leverage Tailwind's utility classes for consistent styling
+2. **Follow Semantic Naming** - Use semantic color names and variables instead of literal values
+3. **Responsive First** - Design for mobile first, then enhance for larger screens
+4. **Accessibility** - Maintain sufficient contrast and follow a11y best practices
+5. **Consistent Spacing** - Apply spacing using the defined scale
+6. **Component Composition** - Build complex UI from simple, consistent patterns
+7. **Dark Mode Support** - Use Tailwind's dark mode utilities for dark theme support
+
+## Animation & Transitions
+
+- **Duration**: 150ms (fast), 300ms (standard), 500ms (slow)
+- **Easing**: `ease-in-out` (standard), `ease-out` (entrances), `ease-in` (exits)
+- **Transition Properties**: opacity, transform, background-color, color, border-color
+- **Standard Animation**: `transition-all duration-300 ease-in-out`

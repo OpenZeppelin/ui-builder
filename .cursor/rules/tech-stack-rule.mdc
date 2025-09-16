@@ -1,0 +1,234 @@
+---
+description: 
+globs: "*.ts", "*.tsx", "*.cjs", "*.json", "*.yml"
+alwaysApply: false
+---
+
+# Tech Stack Overview
+
+This project uses a modern React + TypeScript frontend stack with Vite as the build tool, organized as a multi‑package monorepo. Key packages include:
+
+- **@openzeppelin/contracts-ui-builder-app (packages/builder)**: Main builder application with the UI and export system
+- **@openzeppelin/contracts-ui-builder-renderer (packages/renderer)**: Shared rendering library
+- **@openzeppelin/contracts-ui-builder-ui (packages/ui)**: Shared UI component library
+- **@openzeppelin/contracts-ui-builder-types (packages/types)**: Shared type system (single source of truth, includes ContractAdapter)
+- **@openzeppelin/contracts-ui-builder-styles (packages/styles)**: Centralized styling system
+- **@openzeppelin/contracts-ui-builder-utils (packages/utils)**: Shared utilities (logger, AppConfigService, cn, etc.)
+- **@openzeppelin/contracts-ui-builder-react-core (packages/react-core)**: Shared React providers/hooks (adapter and wallet state)
+- **@openzeppelin/contracts-ui-builder-storage (packages/storage)**: Dexie/IndexedDB persistence for builder history
+- **@openzeppelin/contracts-ui-builder-adapter-_ (packages/adapter-_)**: Chain‑specific adapters (EVM, Solana, Stellar, Midnight, ...)
+
+Key technologies include:
+
+- React 19 - UI library with modern hooks API and concurrent features
+- TypeScript 5.8+ - Static typing with enhanced type inference
+- Vite 6/7 - Fast build tool and dev server with HMR
+- pnpm workspaces - Monorepo package management
+- Tailwind CSS v4 - Utility-first CSS framework with new HSL theme syntax
+- shadcn/ui - Unstyled, accessible component system built on Radix UI
+- Vitest - Testing framework integrated with Vite
+- Storybook 8 - Component documentation and visual testing
+- pnpm - Fast, disk-efficient package manager
+- ESLint 9 + Prettier - Code quality and formatting tools
+- Husky + lint-staged - Git hooks for quality assurance
+- Conventional Commits - Structured commit message format for automated releases
+- Changesets - Versioning and release management
+
+# Framework-Specific Rules
+
+When working with React components:
+
+- Use functional components with hooks
+- Prefer destructuring props
+- Keep components focused on a single responsibility
+- Extract reusable logic into custom hooks
+- Use memoization (useMemo, useCallback) for expensive operations
+- Use React.ComponentRef instead of React.ElementRef
+
+# Monorepo Architecture
+
+Workspace structure (selected):
+
+- **packages/builder** - Main application with builder UI and export system
+- **packages/renderer** - Shared rendering library
+- **packages/ui** - Shared UI components
+- **packages/types** - Shared types
+- **packages/styles** - Centralized styles
+- **packages/utils** - Utilities
+- **packages/react-core** - React providers/hooks
+- **packages/storage** - IndexedDB storage
+- **packages/adapter-\*** - Chain‑specific adapters
+
+Guidelines for monorepo development:
+
+- Keep core rendering logic in the renderer package
+- The builder app imports shared libraries by published package names (no cross‑package source imports outside configured aliases/virtual modules)
+- Each package has its own tsconfig.json extending from the root tsconfig.base.json
+- Run commands with package filtering: `pnpm --filter=@openzeppelin/contracts-ui-builder-app <command>`
+- Use workspace-level commands when applicable: `pnpm -r <command>` (runs in all packages)
+- Keep package.json scripts synchronized between packages for consistency
+
+# Frontend Architecture
+
+Architecture patterns:
+
+- Component-driven development with composition patterns
+- Separation of UI components from business logic
+- Headless UI pattern (shadcn/ui + Radix) for accessibility and customization
+- Atomic design principles for component organization
+- Custom hooks for shared stateful logic
+- Utility functions for shared stateless logic
+- Shared form rendering logic in the form-renderer package
+
+# TypeScript
+
+[tsconfig.json](mdc:packages/builder/tsconfig.json)
+[tsconfig.json](mdc:packages/renderer/tsconfig.json)
+[tsconfig.base.json](mdc:tsconfig.base.json)
+[tsconfig.json](mdc:tsconfig.json)
+
+When writing TypeScript:
+
+- Use explicit return types for functions and React components
+- Prefer interfaces for public APIs and types for internal usage
+- Use proper type narrowing instead of type assertions (avoid `as` casts)
+- Leverage TypeScript's utility types (Partial, Pick, Omit, etc.)
+- Prefer readonly arrays and properties when data shouldn't change
+- Use discriminated unions for state management
+- Ensure strict null checks by avoiding `!` assertions
+- Use path aliases for imports between packages:
+  - Within builder: `@/` for src directory
+  - Use published package imports (e.g., `@openzeppelin/contracts-ui-builder-renderer`) and configured aliases
+
+# Tailwind CSS v4
+
+[tailwind.config.cjs](mdc:packages/builder/tailwind.config.cjs)
+[postcss.config.cjs](mdc:postcss.config.cjs)
+[index.css](mdc:packages/builder/src/index.css)
+
+When using Tailwind CSS v4:
+
+- Use centralized `@styles/global.css` and semantic classes (`bg-primary`, etc.)
+- Use simplified class names like `bg-primary` instead of verbose `bg-[hsl(var(--color))]` syntax
+- Define colors using OKLCH format for better color reproduction (e.g., `--color-primary: oklch(0.5 0.2 120)`)
+- Use Tailwind's built-in dark mode with the 'class' strategy
+- Use component composition rather than extending with apply when possible
+- For complex UI patterns, create reusable components instead of utility classes
+- Follow the container pattern for responsive layouts
+- Use responsive variants (sm:, md:, lg:) consistently
+- Import Tailwind with `@import "tailwindcss";` instead of the older directive syntax
+
+# Component Variants
+
+[button-variants.ts](mdc:packages/builder/src/core/utils/button-variants.ts)
+
+When working with component variants:
+
+- Use the `cva` function from class-variance-authority for defining variant styles
+- Organize variants in dedicated files (e.g., `button-variants.ts`)
+- Follow a consistent pattern for variant definitions:
+  - Define a base style that applies to all variants
+  - Group related variants (e.g., size, color, shape)
+  - Include default variants where appropriate
+- Compose variants from other variants when possible for consistency
+- Use the shadcn/ui configuration in components.json for style customization
+- Update the Tailwind theme when adding new design tokens
+- Use variant props with TypeScript's template literal types for type safety
+
+# Vite
+
+[vite.config.ts](mdc:packages/builder/vite.config.ts)
+
+When configuring Vite:
+
+- Use path aliases for cleaner imports (e.g., '@/' for src directory)
+- Configure cross-package imports with proper aliases
+- Leverage Vite plugins for additional functionality
+- Configure build optimization settings for production builds
+- Use environment variables with import.meta.env
+- Consider chunk splitting strategies for larger applications
+- Use the correct file extensions (.js for ESM, .cjs for CommonJS)
+
+# Testing
+
+[vitest.config.ts](mdc:packages/builder/vitest.config.ts)
+[setup.ts](mdc:packages/builder/test/setup.ts)
+
+Testing strategy:
+
+- Use Vitest for unit and integration testing
+- Follow the Arrange-Act-Assert pattern
+- Mock external dependencies using vi.mock()
+- Use Testing Library's user-event for simulating interactions
+- Test component behavior, not implementation details
+- Use test coverage reporting to identify untested code
+- Create test fixtures for reusable test data
+- For complex UI, supplement with Storybook visual testing
+- Test cross-package integration points
+
+# Quality & Standards
+
+[eslint.config.cjs](mdc:packages/builder/eslint.config.cjs)
+[commitlint.config.js](mdc:commitlint.config.js)
+
+Coding standards:
+
+- Follow ESLint configuration rules for consistent code style
+- Use simple-import-sort plugin to organize imports in a standard order
+- Follow Conventional Commits format: type(scope): subject
+- Valid scopes include: ui, api, auth, builder, export, deps, config, ci, renderer, react-core, types, transaction, utils, docs, tests, release, adapter, adapter-evm, adapter-solana, adapter-stellar, adapter-midnight, styles, storage, common
+- Run 'pnpm fix-all' before pushing to fix linting and formatting issues
+- Keep components focused with single responsibility principle
+- Limit component complexity (max ~150 lines, extract as needed)
+
+# Build & Deploy
+
+[ci.yml](mdc:.github/workflows/ci.yml)
+[publish.yml](mdc:.github/workflows/publish.yml)
+
+CI/CD configuration:
+
+- GitHub Actions for CI/CD pipelines
+- Changesets for versioning and release PRs
+- Coverage reports and badges generated via Vitest
+- ESM syntax is used throughout the codebase
+- Use 'type: module' in package.json with .cjs extension for CommonJS files
+- PR checks ensure code quality before merging
+- Husky bypassed in CI environment to avoid conflicts
+- Monorepo builds are orchestrated with proper dependencies
+
+# Package Management
+
+[package.json](mdc:package.json)
+[pnpm-workspace.yaml](mdc:pnpm-workspace.yaml)
+[package.json](mdc:packages/builder/package.json)
+[package.json](mdc:packages/renderer/package.json)
+
+Dependencies management:
+
+- Use pnpm for package management (9.x+)
+- Use pnpm workspaces for monorepo management
+- Run 'pnpm outdated' to check for outdated dependencies
+- Use scripts in package.json for common development tasks
+- Follow semantic versioning for dependencies
+- Use script aliases for complex commands
+- Prefer devDependencies for build-time dependencies
+- Keep dependencies lean to minimize bundle size
+- Ensure proper cross-package dependencies in workspace packages
+
+# Git Workflow
+
+[pre-commit](mdc:.husky/pre-commit)
+[commit-msg](mdc:.husky/commit-msg)
+[pre-push](mdc:.husky/pre-push)
+
+Development workflow:
+
+- Husky hooks ensure code quality before commits and pushes
+- Commit messages must follow Conventional Commits standard
+- Commit message scope must be one of [ui, api, auth, builder, export, deps, config, ci, renderer, react-core, types, transaction, utils, docs, tests, release, adapter, adapter-evm, adapter-solana, adapter-stellar, adapter-midnight, styles, storage, common]
+- Pre-push runs linting, formatting, and tests
+- Use 'pnpm commit' for guided commit message creation with commitizen
+- Create feature branches for new work
+- Keep commits focused and atomic
+- Document breaking changes in commit messages
