@@ -1,0 +1,116 @@
+---
+description: Use this rule when you are building any form UI.
+globs: *.tsx
+alwaysApply: false
+---
+
+# Form Styling Standards
+
+This document outlines the essential styling patterns for forms in the Contracts UI Builder application.
+
+## Core Principles
+
+- Use shadcn/ui components for all form elements
+- Maintain consistent spacing: `gap-2` between label and input, `space-y-4` between fields, `space-y-6` between sections
+- Always use the shadcn/ui `Label` component for labels
+
+```tsx
+// ✅ Correct
+<Label htmlFor="field-id">Field Label</Label>
+
+// ❌ Incorrect
+<label htmlFor="field-id">Field Label</label>
+```
+
+## Standard Patterns
+
+### Standard Form Fields
+
+```tsx
+<div className="flex flex-col gap-2">
+  <Label htmlFor="field-id">Field Label</Label>
+  <Input id="field-id" />
+</div>
+```
+
+### Checkbox Fields
+
+```tsx
+<div className="flex items-center space-x-2">
+  <Checkbox id="checkbox-id" />
+  <Label htmlFor="checkbox-id">Checkbox Label</Label>
+</div>
+```
+
+### Field Groups
+
+```tsx
+<div className="space-y-4">{/* Individual form fields go here */}</div>
+```
+
+### Form Actions
+
+```tsx
+<div className="flex justify-end gap-2">
+  <Button variant="outline">Cancel</Button>
+  <Button type="submit">Submit</Button>
+</div>
+```
+
+## Required Field Marking
+
+```tsx
+<Label htmlFor="email">
+  Email <span className="text-red-500">*</span>
+</Label>
+```
+
+## Form Layouts
+
+### Standard Vertical Layout
+
+```tsx
+<form className="space-y-6">
+  <div className="space-y-4">{/* Form fields */}</div>
+  <div className="flex justify-end">
+    <Button type="submit">Submit</Button>
+  </div>
+</form>
+```
+
+### Multi-Column Layout
+
+```tsx
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2">{/* Form fields in columns */}</div>
+```
+
+## Error Handling
+
+```tsx
+<div className="flex flex-col gap-2">
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" aria-invalid={errors.email ? 'true' : 'false'} />
+  {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+</div>
+```
+
+## CSS Classes Quick Reference
+
+| Class                         | Purpose                                                        |
+| ----------------------------- | -------------------------------------------------------------- |
+| `flex flex-col gap-2`         | Container for label + input pairs with vertical spacing        |
+| `space-y-4`                   | Spacing between form fields                                    |
+| `space-y-6`                   | Spacing between form sections                                  |
+| `flex items-center space-x-2` | Container for checkbox/radio + label with horizontal alignment |
+| `flex justify-end gap-2`      | Standard form actions container                                |
+
+## Key Implementation Guidelines
+
+1. **Use Label Component** - Always use the shadcn/ui `Label` component
+2. **Consistent Spacing** - Use `gap-2` between label and input, `space-y-4` between fields
+3. **Logical Grouping** - Group related fields with `space-y-4` containers
+4. **Accessibility First** - Include proper `htmlFor`, `aria-invalid`, and other accessibility attributes
+5. **Error States** - Display errors directly below the relevant field
+6. **Required Fields** - Mark required fields with red asterisk (\*) and `aria-required="true"`
+7. **Button Alignment** - Align form action buttons based on context (right-aligned for standard forms)
+8. **Responsive Design** - Use responsive utilities like `md:grid-cols-2` for different screen sizes
