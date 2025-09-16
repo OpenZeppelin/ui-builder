@@ -292,6 +292,12 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/contracts-ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
+## Project Constitution
+
+This project is governed by the Contracts UI Builder Constitution. Please read it before contributing changes that affect architecture, adapters, or tooling:
+
+- [./.specify/memory/constitution.md](./.specify/memory/constitution.md)
+
 ## Build System
 
 The project uses a standardized `tsup`-based build system for all library packages, ensuring proper ES module output with correct import extensions:
