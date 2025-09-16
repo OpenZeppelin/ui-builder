@@ -48,7 +48,7 @@ describe('ecosystem-feature-flags', () => {
       const config = getEcosystemFeatureConfig('solana');
       expect(config).toEqual({
         enabled: false,
-        showInUI: true,
+        showInUI: false,
         disabledLabel: 'Coming Soon',
         disabledDescription: undefined,
       });
@@ -89,9 +89,9 @@ describe('ecosystem-feature-flags', () => {
   });
 
   describe('shouldShowEcosystemInUI', () => {
-    it('should return true for all ecosystems by default', () => {
+    it('should return true for visible ecosystems by default', () => {
       expect(shouldShowEcosystemInUI('evm')).toBe(true);
-      expect(shouldShowEcosystemInUI('solana')).toBe(true);
+      expect(shouldShowEcosystemInUI('solana')).toBe(false);
       expect(shouldShowEcosystemInUI('stellar')).toBe(true);
       expect(shouldShowEcosystemInUI('midnight')).toBe(true);
     });
@@ -107,9 +107,9 @@ describe('ecosystem-feature-flags', () => {
   });
 
   describe('getVisibleEcosystems', () => {
-    it('should return all ecosystems by default', () => {
+    it('should return visible ecosystems by default', () => {
       const visible = getVisibleEcosystems();
-      expect(visible).toEqual(['evm', 'midnight', 'stellar', 'solana']);
+      expect(visible).toEqual(['evm', 'stellar', 'midnight']);
     });
 
     it('should filter out hidden ecosystems', () => {
