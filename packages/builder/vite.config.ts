@@ -20,7 +20,7 @@ import templatePlugin from './vite.template-plugin';
  */
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -68,5 +68,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     // Reduce source map generation to save memory
     sourcemap: false,
+    // Remove console and debugger in staging/production builds
+    minify: 'esbuild',
+    esbuild: mode === 'development' ? {} : { drop: ['console', 'debugger'] },
   },
-});
+}));

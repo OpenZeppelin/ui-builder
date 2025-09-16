@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -22,9 +22,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    minify: 'esbuild',
+    esbuild: mode === 'development' ? {} : { drop: ['console', 'debugger'] },
   },
   server: {
     port: 3000,
     open: true,
   },
-});
+}));
