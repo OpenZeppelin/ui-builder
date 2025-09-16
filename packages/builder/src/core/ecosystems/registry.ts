@@ -107,7 +107,7 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
     textColorClass: 'text-purple-900',
     defaultFeatureConfig: {
       enabled: false,
-      showInUI: true,
+      showInUI: false,
       disabledLabel: 'Coming Soon',
     },
   },
