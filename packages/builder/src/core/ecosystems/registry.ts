@@ -50,7 +50,7 @@ export interface EcosystemInfo {
  * Ordered list of ecosystems for consistent display across the application
  * This defines the order in which ecosystems appear in the UI
  */
-export const ECOSYSTEM_ORDER: Ecosystem[] = ['evm', 'midnight', 'stellar', 'solana'] as const;
+export const ECOSYSTEM_ORDER: Ecosystem[] = ['evm', 'stellar', 'midnight', 'solana'] as const;
 
 /**
  * Central registry of blockchain ecosystem information
@@ -70,6 +70,19 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       showInUI: true,
     },
   },
+  stellar: {
+    name: 'Stellar',
+    description:
+      'Stellar is a fast, energy-efficient blockchain network designed for real-world financial applications. It enables near-instant global payments at low cost, connects digital assets to traditional finance, and supports smart contracts through Soroban. Its anchor network spans over 180 countries and supports 20+ digital assets.',
+    explorerGuidance: 'contract IDs on Stellar Expert',
+    networkIconName: 'stellar',
+    bgColorClass: 'bg-sky-100',
+    textColorClass: 'text-sky-900',
+    defaultFeatureConfig: {
+      enabled: true,
+      showInUI: true,
+    },
+  },
   midnight: {
     name: 'Midnight',
     description:
@@ -82,19 +95,6 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       enabled: false,
       showInUI: true,
       disabledLabel: 'Coming Soon',
-    },
-  },
-  stellar: {
-    name: 'Stellar',
-    description:
-      'Stellar is a fast, energy-efficient blockchain network designed for real-world financial applications. It enables near-instant global payments at low cost, connects digital assets to traditional finance, and supports smart contracts through Soroban. Its anchor network spans over 180 countries and supports 20+ digital assets.',
-    explorerGuidance: 'contract IDs on Stellar Expert',
-    networkIconName: 'stellar',
-    bgColorClass: 'bg-sky-100',
-    textColorClass: 'text-sky-900',
-    defaultFeatureConfig: {
-      enabled: true,
-      showInUI: true,
     },
   },
   solana: {
