@@ -63,6 +63,15 @@ TDD is required across non‑UI code. UI components are explicitly exempt.
 - PRs that change business logic must include corresponding unit/integration tests created first (or updated first) demonstrating the behavior.
 - Vitest remains the standard test runner; use mocking only where necessary to keep tests focused and fast.
 
+### VII. Reuse‑First Development (NON‑NEGOTIABLE)
+
+- Always attempt to reuse or extend existing code (utilities, types, interfaces, services, adapters, patterns) before introducing new implementations.
+- Before writing a spec, planning, or implementation, perform a thorough codebase analysis to identify reusable modules and extension points (e.g., existing adapter flows, `AppConfigService`, `UserExplorerConfigService`, `resolveExplorerConfig`, transformers like `transformAbiToSchema`).
+- Introduce new code only when reuse would compromise core integrity or is impossible. In such cases, document rationale and alternatives considered.
+- When extending `packages/types/src/adapters/base.ts`, update the `no-extra-adapter-methods` rule accordingly; avoid ad‑hoc methods in adapters. Keep `adapter.ts` as orchestrators and place business logic into semantically correct modules.
+- Avoid duplicating chain‑agnostic logic across adapters; move shared logic into `packages/utils` or `packages/types` as appropriate.
+- Specifications and plans must reference existing modules over new ones and call out explicit reuse decisions; reviewers must enforce this principle.
+
 ## Additional Constraints
 
 - Do not add chain‑specific code or polyfills in chain‑agnostic packages (e.g., no `globalThis.Buffer` in the builder); adapters must own such concerns.
@@ -80,6 +89,7 @@ TDD is required across non‑UI code. UI components are explicitly exempt.
 - Before opening a PR: ensure tests, type checks, and linting pass across the workspace; include a Changeset for public package changes.
 - Adapter contributions must follow the Adapter Architecture Guide: network‑aware constructor, exports, ecosystem registration, and strict interface compliance.
 - Code review ensures adherence to this constitution, architecture boundaries, and design system.
+- Reuse‑First Gate: code review must verify reuse/extension of existing code was attempted and documented before approving new modules.
 
 ## Governance
 
@@ -91,7 +101,8 @@ This constitution supersedes other practices for architectural, quality, and wor
 
 Amendment History:
 
+- 2025-09-17 (v1.2.0): Added Reuse‑First Development as non‑negotiable; mandated pre‑implementation codebase analysis; added review gate.
 - 2025-09-16 (v1.1.0): Declared TDD as non‑negotiable for business logic; explicitly exempted `.tsx` UI components.
 - 2025-09-16 (v1.0.1): Added README/CONTRIBUTING links, clarified logging defaults and `no any`, added raw contract comparison constraint.
 
-**Version**: 1.1.0 | **Ratified**: 2025-09-16 | **Last Amended**: 2025-09-16
+**Version**: 1.2.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2025-09-17

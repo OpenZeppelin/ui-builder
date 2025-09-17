@@ -56,6 +56,13 @@ When amending the constitution (`/memory/constitution.md`), ensure all dependent
 - [ ] Add pattern prohibition examples
 - [ ] Include YAGNI reminders
 
+#### Article VIII (Reuse-First Development):
+
+- [ ] Ensure templates (spec/plan/tasks) prompt for codebase reuse analysis
+- [ ] Add checklist items to reference existing utils, types, interfaces before adding new ones
+- [ ] Require documenting reuse decisions and alternatives in specs/plans
+- [ ] Add review gate notes to PR templates/checklists
+
 ## Validation Steps
 
 1. **Before committing constitution changes:**
@@ -85,10 +92,10 @@ Watch for these often-forgotten updates:
 
 ## Template Sync Status
 
-Last sync check: 2025-09-16
+Last sync check: 2025-09-17
 
-- Constitution version: 1.1.0
-- Templates aligned: ❌ (new TDD Article VI requires template updates)
+- Constitution version: 1.2.0
+- Templates aligned: ❌ (new Reuse‑First article requires template updates)
 
 ---
 
