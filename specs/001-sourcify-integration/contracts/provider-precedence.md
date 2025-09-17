@@ -3,6 +3,8 @@
 ## Ordering
 
 - Adapter declares ordered list: [primary, fallback1, fallback2, ...].
+- EVM: [etherscan, sourcify] — etherscan uses existing loaders (`etherscan.ts`, `etherscan-v2.ts`) and `resolveExplorerConfig()` for URLs/keys. Sourcify requires no keys.
+- Stellar: [stellar-sdk] — contract definition derived from official SDK via network RPC.
 
 ## Timeouts
 
@@ -18,3 +20,4 @@
 ## Provenance
 
 - UI surfaces provider name and link (when available) using existing patterns.
+- EVM provenance URLs re-use `getExplorerUrl`/`resolveExplorerConfig` outputs; Stellar uses `getStellarExplorerAddressUrl` when available or the network RPC URL.

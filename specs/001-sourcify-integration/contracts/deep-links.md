@@ -2,9 +2,9 @@
 
 ## Parameters (Chain‑Agnostic)
 
-- networkIdentifier: identifies target network (adapter interprets).
-- contractIdentifier: identifies contract/resource (adapter validates).
-- service (optional): provider key to force a specific verification provider.
+- networkIdentifier: identifies target network (adapter interprets; e.g., EVM `chainId`).
+- contractIdentifier: identifies contract/resource (adapter validates via existing `isValidAddress` or equivalent).
+- service (optional): provider key to force a specific contract definition provider.
 
 ## Semantics
 
@@ -14,8 +14,13 @@
   - Unsupported → automatically fall back to adapter default order.
   - Failure (not found/unavailable) → stop with clear message (no fallback).
 
+## Mapping to Adapter Inputs
+
+- Parameters map to names returned by `adapter.getContractDefinitionInputs()` (e.g., EVM `contractAddress`, Stellar `contractAddress`/`Contract ID`).
+- Validation uses `adapter.isValidAddress(address, addressType?)` where applicable. No new validation entrypoints added.
+
 ## Examples
 
 - EVM: `?address=0x...&chainId=1&service=etherscan`
 - EVM (fallback provider forced): `?address=0x...&chainId=1&service=sourcify`
-- Other ecosystem: `?contractId=ABC123&networkId=testnet&service=<provider>`
+- Stellar: `?contractId=C...&networkPassphrase=Test SDF Network ; September 2015`

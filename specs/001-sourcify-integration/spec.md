@@ -94,24 +94,24 @@ As a user of the Contracts UI Builder, I can select a network and provide a cont
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST support multiple verification providers per adapter with an explicit precedence order (e.g., EVM adapter example: Etherscan primary, Sourcify fallback).
+- **FR-001**: The system MUST support multiple contract definition providers per adapter with an explicit precedence order (e.g., EVM adapter example: Etherscan primary, Sourcify fallback). Adapters MUST declare this order without introducing new base interface methods.
 - **FR-002**: The system MUST attempt the primary provider first and ONLY upon failure or unavailability attempt the next provider in the order.
 - **FR-003**: Failure conditions that MUST trigger fallback include: network errors, HTTP non‑success, malformed/empty responses, explicit "not verified/not found" statuses, or missing/invalid credentials at the primary provider.
-- **FR-004**: The system MUST support providers that do not require API keys; keys MUST NOT be required where not needed.
+- **FR-004**: The system MUST support providers that do not require API keys; keys MUST NOT be required where not needed. For EVM, explorer configuration MUST reuse existing `resolveExplorerConfig()` and `UserExplorerConfigService`/`AppConfigService`.
 - **FR-005**: The system MUST communicate contract definition provenance to the user (e.g., "Loaded from <provider>").
-- **FR-006**: The system MUST maintain the current user flow for manual contract definition input when no provider supplies a verified definition(if adapter supports manual input).
+- **FR-006**: The system MUST maintain the current user flow for manual contract definition input when no provider supplies a verified definition (if adapter supports manual input).
 - **FR-007**: The system MUST preserve existing behaviors (e.g., proxy/upgradability detection and flows where applicable) after a contract definition is loaded from any provider.
-- **FR-008**: The system MUST add chain‑agnostic deep-linking via URL query parameters at the Builder root. For EVM, default parameters include `address` and `chainId`; other ecosystems MAY expose adapter‑specific parameters.
+- **FR-008**: The system MUST add chain‑agnostic deep-linking via URL query parameters at the Builder root. For EVM, default parameters include `address` and `chainId`; other ecosystems MAY expose adapter‑specific parameters via existing input names from `getContractDefinitionInputs()`.
 - **FR-009**: When the required parameters are provided and valid, the system MUST auto-select the corresponding network, pre-fill the identifier, and attempt loading using the provider precedence policy.
-- **FR-010**: If the provided network identifier (e.g., `chainId`) is unknown/unsupported, the system MUST show a clear message and prompt the user to choose a supported network without breaking the page.
-- **FR-011**: The system MUST validate the contract identifier format per the active adapter before issuing network requests and show a helpful error if invalid.
+- **FR-010**: If the provided network identifier is unknown/unsupported, the system MUST show a clear message and prompt the user to choose a supported network without breaking the page.
+- **FR-011**: The system MUST validate the contract identifier format per the active adapter using existing methods (e.g., `isValidAddress`) before issuing network requests and show a helpful error if invalid.
 - **FR-012**: The system MUST display clear, user-friendly error messages for each failure case (rate limit/unavailable, unverified/not found, invalid input, unsupported network).
 - **FR-013**: The system SHOULD be deployable behind a feature flag named `contractDefinitionProviderIntegration` (default enabled in all environments) to allow staged rollout; it can be disabled via application configuration.
 - **FR-014**: The system SHOULD avoid long blocking waits; per-provider hard timeout is 4,000 ms, with fallback triggered thereafter and a total budget of 10,000 ms per load attempt.
 - **FR-015**: The system SHOULD surface a link to view verification at the provider (when available) using existing UI patterns and placement.
-- **FR-016**: Deep-linking MUST work seamlessly across all adapters (chain‑agnostic). The Builder MUST rely on each active adapter to interpret and validate its deep link parameters.
-- **FR-017**: Each adapter MUST define a minimal deep-link parameter schema sufficient to identify the target network and contract identifier for its ecosystem, and MUST document which parameters it honors.
-- **FR-018**: Each adapter MAY declare ecosystem‑specific verification providers and a primary→fallback order (e.g., EVM adapter: Etherscan → Sourcify; others may define analogous providers).
+- **FR-016**: Deep-linking MUST work seamlessly across all adapters (chain‑agnostic). The Builder MUST rely on each active adapter to interpret and validate its deep link parameters based on `getContractDefinitionInputs()`.
+- **FR-017**: Each adapter MUST define a minimal deep-link parameter schema sufficient to identify the target network and contract identifier for its ecosystem, and MUST document which parameters it honors (without changing the base adapter interface).
+- **FR-018**: Each adapter MAY declare ecosystem‑specific contract definition providers and a primary→fallback order (e.g., EVM: Etherscan → Sourcify; Stellar: SDK only).
 - **FR-019**: When both generic and adapter‑specific parameters are present, the adapter’s precedence rules MUST apply, and the UI MUST not fail silently (provide clear guidance to the user if there is a conflict).
 - **FR-020**: Deep links MUST be forward‑compatible: unknown parameters are ignored gracefully, and absence of adapter‑specific parameters MUST not break the app.
 - **FR-021**: Users MUST be able to configure a default contract definition provider per network via application configuration.
@@ -120,6 +120,11 @@ As a user of the Contracts UI Builder, I can select a network and provide a cont
 - **FR-024**: Precedence MUST be deterministic: forced `service` in URL > user’s per‑network UI setting > application configuration default > adapter‑declared default order.
 - **FR-025**: If the forced `service` is unsupported for the selected ecosystem/network, the system MUST inform the user and automatically fall back to the adapter’s default contract definition provider order.
 - **FR-026**: If the forced `service` fails (e.g., not found/unavailable), the system MUST honor the forced choice and stop with a clear message (no automatic fallback).
+
+### Adapter Notes (Reuse-First)
+
+- EVM: Reuse `etherscan.ts`/`etherscan-v2.ts` for primary provider and `resolveExplorerConfig()` for API URL/key resolution; add only a thin Sourcify fallback module that mirrors the same transform flow to `ContractSchema`.
+- Stellar: Reuse existing SDK-based contract loading in `loadStellarContractFromAddress` and explorer URL helpers for provenance only; no new providers are introduced now.
 
 ### Key Entities
 
@@ -138,18 +143,18 @@ _GATE: Automated checks run during main() execution_
 
 ### Content Quality
 
-- [x] No implementation details (languages, frameworks, APIs)
-- [x] Focused on user value and business needs
-- [x] Written for non-technical stakeholders
-- [x] All mandatory sections completed
+- [ ] No implementation details (languages, frameworks, APIs)
+- [ ] Focused on user value and business needs
+- [ ] Written for non-technical stakeholders
+- [ ] All mandatory sections completed
 
 ### Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain
-- [x] Requirements are testable and unambiguous
-- [x] Success criteria are measurable
-- [x] Scope is clearly bounded
-- [x] Dependencies and assumptions identified
+- [ ] No [NEEDS CLARIFICATION] markers remain
+- [ ] Requirements are testable and unambiguous
+- [ ] Success criteria are measurable
+- [ ] Scope is clearly bounded
+- [ ] Dependencies and assumptions identified
 
 ---
 
@@ -163,6 +168,6 @@ _Updated by main() during processing_
 - [x] User scenarios defined
 - [x] Requirements generated
 - [x] Entities identified
-- [x] Review checklist passed
+- [ ] Review checklist passed
 
 ---
