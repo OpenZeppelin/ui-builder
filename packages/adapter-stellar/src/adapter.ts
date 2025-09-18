@@ -118,6 +118,30 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   // --- Contract Loading --- //
+  /**
+   * NOTE about artifact inputs (single input with auto-detection):
+   *
+   * The Builder renders the contract definition step using whatever fields the
+   * adapter returns here. EVM uses one optional ABI field; Midnight provides
+   * multiple fields. Stellar should use a single input approach with automatic
+   * content detection when we add manual-spec support:
+   *
+   * - Keep `contractAddress` (required)
+   * - Add optional `contractDefinition` (type: `code-editor`, language: `json`)
+   *   with file upload support for both JSON and Wasm binary content
+   *
+   * When this field is added:
+   * - Extend `validateAndConvertStellarArtifacts(...)` to accept
+   *   `{ contractAddress, contractDefinition? }`
+   * - In the loader, branch: if `contractDefinition` provided, auto-detect
+   *   content type (JSON vs Wasm using magic bytes `\0asm`):
+   *   - For JSON: Parse and validate as Soroban spec, use `transformStellarSpecToSchema`
+   *   - For Wasm: Extract embedded spec from binary, parse locally (no RPC)
+   * - Set `source: 'manual'` with `contractDefinitionOriginal` to the raw
+   *   user-provided content. This ensures auto-save captures and restores the
+   *   manual contract definition exactly like the EVM/Midnight flows.
+   * - Provide clear UI hints about supported formats (JSON spec or Wasm binary).
+   */
   public getContractDefinitionInputs(): FormFieldType[] {
     return [
       {
