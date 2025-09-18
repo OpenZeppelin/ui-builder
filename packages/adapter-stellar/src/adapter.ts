@@ -119,27 +119,28 @@ export class StellarAdapter implements ContractAdapter {
 
   // --- Contract Loading --- //
   /**
-   * NOTE about artifact inputs (Midnight-style multi-input guidance):
+   * NOTE about artifact inputs (single input with auto-detection):
    *
    * The Builder renders the contract definition step using whatever fields the
    * adapter returns here. EVM uses one optional ABI field; Midnight provides
-   * multiple fields. Stellar can follow the Midnight pattern to support
-   * multiple artifact sources when we add manual-spec support:
+   * multiple fields. Stellar should use a single input approach with automatic
+   * content detection when we add manual-spec support:
    *
    * - Keep `contractAddress` (required)
-   * - Add optional `contractSpecJson` (type: `code-editor`, language: `json`)
-   *   for pasting Soroban spec JSON
-   * - Add optional `contractWasm` (type: `textarea` or `file-upload` if
-   *   available) for base64 or uploaded `.wasm`
+   * - Add optional `contractDefinition` (type: `code-editor`, language: `json`)
+   *   with file upload support for both JSON and Wasm binary content
    *
-   * When those fields are added:
+   * When this field is added:
    * - Extend `validateAndConvertStellarArtifacts(...)` to accept
-   *   `{ contractAddress, contractSpecJson?, contractWasm? }`
-   * - In the loader, branch: if `contractSpecJson`/`contractWasm` provided,
-   *   derive a schema locally and set `source: 'manual'` with
-   *   `contractDefinitionOriginal` to the raw user-provided content. This
-   *   ensures auto-save captures and restores the manual contract definition
-   *   exactly like the EVM/Midnight flows.
+   *   `{ contractAddress, contractDefinition? }`
+   * - In the loader, branch: if `contractDefinition` provided, auto-detect
+   *   content type (JSON vs Wasm using magic bytes `\0asm`):
+   *   - For JSON: Parse and validate as Soroban spec, use `transformStellarSpecToSchema`
+   *   - For Wasm: Extract embedded spec from binary, parse locally (no RPC)
+   * - Set `source: 'manual'` with `contractDefinitionOriginal` to the raw
+   *   user-provided content. This ensures auto-save captures and restores the
+   *   manual contract definition exactly like the EVM/Midnight flows.
+   * - Provide clear UI hints about supported formats (JSON spec or Wasm binary).
    */
   public getContractDefinitionInputs(): FormFieldType[] {
     return [

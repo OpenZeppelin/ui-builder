@@ -411,23 +411,22 @@ export async function loadStellarContractWithMetadata(
 }
 
 /**
- * Integration points for manual spec/wasm inputs (future work):
+ * Integration points for manual contract definition input (future work):
  *
- * 1) Import Soroban Spec JSON (parity with EVM ABI import):
- *    - Add a new loader path that accepts a spec JSON object/string.
- *    - Convert with `transformStellarSpecToSchema()` to a `ContractSchema`.
- *    - Persist via existing auto-save flow by returning `source: 'manual'` and
- *      setting `contractDefinitionOriginal` to the raw JSON provided.
- *    - Suggested API: `loadStellarContractFromSpecJson(specJson, networkConfig)`.
+ * Single Input with Auto-Detection (simplified UX):
+ *    - Add a new loader path: `loadStellarContractFromDefinition(definition, networkConfig)`
+ *    - Auto-detect content type using magic bytes and structure:
+ *      - Wasm binary: starts with magic bytes `[0x00, 0x61, 0x73, 0x6D]` (`\0asm`)
+ *      - JSON spec: valid JSON array with Soroban spec entry objects
+ *    - For JSON: Parse and validate, use `transformStellarSpecToSchema()` to build schema
+ *    - For Wasm: Extract embedded spec from binary locally (no RPC), then build schema
+ *    - Return `{ schema, source: 'manual' }` with `contractDefinitionOriginal` set to
+ *      the raw input (JSON string or Wasm binary) for auto-save restoration
  *
- * 2) Import compiled Wasm (parity with Midnight adapter manual inputs):
- *    - Parse embedded spec from `.wasm` locally (no RPC) to build the schema.
- *    - Return `{ schema, source: 'manual' }` similarly to spec JSON path.
- *    - Suggested API: `loadStellarContractFromWasm(wasmBytes, networkConfig)`.
- *
- * The builder UI can route these manual loaders based on user action (upload
- * spec/wasm), and the auto-save system will store the resulting schema and
- * `contractDefinitionOriginal` so the configuration restores seamlessly.
+ * The builder UI provides a single input field (code editor with file upload support)
+ * that accepts either format, eliminating user confusion about format selection.
+ * The auto-save system will store the resulting schema and `contractDefinitionOriginal`
+ * so the configuration restores seamlessly.
  */
 
 /**
