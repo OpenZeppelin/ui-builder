@@ -37,11 +37,26 @@ export async function loadStellarContractFromAddress(
     }
 
     // Create contract client using the official Stellar SDK approach
-    const contractClient = await StellarSdk.contract.Client.from({
-      contractId: contractAddress,
-      networkPassphrase: networkConfig.networkPassphrase,
-      rpcUrl: networkConfig.sorobanRpcUrl,
-    });
+    // Laboratory note: some contracts may be missing Wasm/definition retrievable via RPC.
+    // In that case the SDK can throw an internal error like
+    // "Cannot destructure property 'length'...". Detect and surface an explicit error.
+    let contractClient: StellarSdk.contract.Client;
+    try {
+      contractClient = await StellarSdk.contract.Client.from({
+        contractId: contractAddress,
+        networkPassphrase: networkConfig.networkPassphrase,
+        rpcUrl: networkConfig.sorobanRpcUrl,
+      });
+    } catch (e) {
+      const message = (e as Error)?.message || String(e);
+      if (message.includes("Cannot destructure property 'length'")) {
+        const friendly =
+          'Unable to fetch contract metadata from RPC. The contract appears to have no published Wasm/definition on this network.';
+        logger.error('loadStellarContractFromAddress', friendly);
+        throw new Error(`NO_WASM: ${friendly}`);
+      }
+      throw e;
+    }
 
     logger.info('loadStellarContractFromAddress', 'Contract client created successfully');
 
@@ -107,8 +122,14 @@ export async function loadStellarContractFromAddress(
       },
     };
   } catch (error) {
+    const msg = (error as Error)?.message || String(error);
+    // Preserve explicit NO_WASM error so downstream can surface it to the user
+    if (msg.startsWith('NO_WASM:')) {
+      logger.error('loadStellarContractFromAddress', msg);
+      throw new Error(msg);
+    }
     logger.error('loadStellarContractFromAddress', 'Failed to load contract:', error);
-    throw new Error(`Failed to load contract: ${(error as Error).message}`);
+    throw new Error(`Failed to load contract: ${msg}`);
   }
 }
 
@@ -372,6 +393,11 @@ export async function loadStellarContractWithMetadata(
   } catch (error) {
     // Check if this is a network/connection error
     const errorMessage = (error as Error).message || '';
+    // Surface Laboratory-style explicit message if Wasm is missing
+    if (errorMessage.startsWith('NO_WASM:')) {
+      // Re-throw without swallowing details so UI can show this immediately
+      throw new Error(errorMessage.replace(/^NO_WASM:\s*/, ''));
+    }
     if (errorMessage.includes('Failed to load contract')) {
       throw new Error(
         `Contract at ${artifacts.contractAddress} could not be loaded from the network. ` +
@@ -383,6 +409,26 @@ export async function loadStellarContractWithMetadata(
     throw error;
   }
 }
+
+/**
+ * Integration points for manual spec/wasm inputs (future work):
+ *
+ * 1) Import Soroban Spec JSON (parity with EVM ABI import):
+ *    - Add a new loader path that accepts a spec JSON object/string.
+ *    - Convert with `transformStellarSpecToSchema()` to a `ContractSchema`.
+ *    - Persist via existing auto-save flow by returning `source: 'manual'` and
+ *      setting `contractDefinitionOriginal` to the raw JSON provided.
+ *    - Suggested API: `loadStellarContractFromSpecJson(specJson, networkConfig)`.
+ *
+ * 2) Import compiled Wasm (parity with Midnight adapter manual inputs):
+ *    - Parse embedded spec from `.wasm` locally (no RPC) to build the schema.
+ *    - Return `{ schema, source: 'manual' }` similarly to spec JSON path.
+ *    - Suggested API: `loadStellarContractFromWasm(wasmBytes, networkConfig)`.
+ *
+ * The builder UI can route these manual loaders based on user action (upload
+ * spec/wasm), and the auto-save system will store the resulting schema and
+ * `contractDefinitionOriginal` so the configuration restores seamlessly.
+ */
 
 /**
  * Transform Stellar contract spec to our internal schema format.
