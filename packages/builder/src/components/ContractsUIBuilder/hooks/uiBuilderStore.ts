@@ -180,6 +180,9 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
     },
 
     resetWizard: () => {
+      // Clear any previous contract load state so new wizard starts fresh
+      contractDefinitionService.reset();
+
       set({
         ...initialState,
         uiState: {},

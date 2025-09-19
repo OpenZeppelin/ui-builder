@@ -77,6 +77,7 @@ export function StepContractDefinition({
     debouncedValues,
     formIsValid: formState.isValid,
     needsContractDefinitionLoad,
+    networkId: networkConfig?.id,
     contractDefinitionJson,
     contractDefinitionError,
     contractSchema,

@@ -3,9 +3,11 @@ import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
 import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
-import { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { ContractSchema, type Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { logger, parseDeepLink, routerService } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { resolveNetworkIdFromDeepLink } from '@/core/deeplink/resolveNetwork';
+import { getNetworkById } from '@/core/ecosystemManager';
 import { BuilderFormConfig } from '@/core/types/FormTypes';
 
 import { uiBuilderStore } from '../uiBuilderStore';
@@ -148,15 +150,73 @@ export function useBuilderLifecycle(
       // Check if we already have a loaded configuration or are in new UI mode
       const currentState = uiBuilderStore.getState();
 
+      // Default to new UI mode if nothing is loaded
       if (!currentState.loadedConfigurationId && !currentState.isInNewUIMode) {
-        // If no configuration is loaded and we're not in new UI mode,
-        // set new UI mode as the default state
-        uiBuilderStore.updateState(() => ({
-          isInNewUIMode: true,
-          loadedConfigurationId: null,
-        }));
-
+        uiBuilderStore.updateState(() => ({ isInNewUIMode: true, loadedConfigurationId: null }));
         logger.info('Page state initialized', 'Set to new UI mode');
+      }
+
+      // Deep-link handling: ecosystem (required) + networkId/chainId + identifier (address) + optional service
+      const params = parseDeepLink();
+      const urlEcosystem = (params.ecosystem || '').trim();
+      const urlNetworkId = params.networkId || params.networkid || null;
+      const urlAddress = params.contractAddress || params.address || params.identifier || null;
+      const urlForcedService = typeof params.service === 'string' ? params.service : null;
+      const urlChainId = params.chainId || null;
+
+      // Require ecosystem for deep link to be considered
+      if (!urlEcosystem) {
+        logger.info('Deep link', 'ecosystem parameter missing; skipping deep-link handling');
+        return;
+      }
+
+      // Resolve network using utility (ecosystem-aware, chain-agnostic)
+      const resolvedNetworkId = await resolveNetworkIdFromDeepLink(
+        urlEcosystem as Ecosystem,
+        urlNetworkId,
+        urlChainId
+      );
+
+      if (resolvedNetworkId && urlAddress) {
+        const network = await getNetworkById(resolvedNetworkId);
+        if (network) {
+          // Select network and set to switch; also set pendingNetworkId so the
+          // auto-advance effect moves from CHAIN_SELECT to CONTRACT_DEFINITION
+          uiBuilderStore.updateState(() => ({
+            selectedNetworkConfigId: network.id,
+            networkToSwitchTo: network.id,
+            pendingNetworkId: network.id,
+          }));
+          setActiveNetworkId(network.id);
+
+          // Prefill contract address and trigger loading
+          uiBuilderStore.updateState((s) => ({
+            contractState: {
+              ...s.contractState,
+              address: urlAddress,
+              // Persist forced provider hint (service) into form values so adapter can honor precedence
+              formValues: {
+                ...(s.contractState.formValues || {}),
+                contractAddress: urlAddress,
+                ...(urlForcedService ? { service: urlForcedService } : {}),
+              },
+              error: null,
+            },
+            needsContractDefinitionLoad: true,
+          }));
+
+          logger.info('Deep link', `Applied deep link for ${network.id} @ ${urlAddress}`);
+
+          // As soon as we consume deep-link params, clear them from the URL
+          if (typeof window !== 'undefined' && window.location.search) {
+            routerService.navigate(window.location.pathname);
+          }
+        } else {
+          const badId = urlNetworkId || urlChainId || urlEcosystem || 'unknown';
+          toast.error('Unsupported network from deep link', {
+            description: `Network '${badId}' is not available in this app configuration. Please select a supported network.`,
+          });
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

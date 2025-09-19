@@ -14,7 +14,7 @@
  * - DevTools for debugging query states
  */
 import { ContractAdapter, FormValues } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { ContractLoadResult, loadContractDefinitionWithMetadata } from './ContractLoader';
 
@@ -47,15 +47,16 @@ class ContractDefinitionService {
   /**
    * Generate request key for deduplication
    */
-  private getRequestKey(networkId: string, contractAddress: string): string {
-    return `${networkId}:${contractAddress.toLowerCase()}`;
+  private getRequestKey(networkId: string, contractAddress: string, definition?: string): string {
+    const defHash = definition && definition.trim().length > 0 ? simpleHash(definition) : 'no-abi';
+    return `${networkId}:${contractAddress.toLowerCase()}:${defHash}`;
   }
 
   /**
    * Get current loading state for a request
    */
-  getLoadingState(networkId: string, contractAddress: string): LoadingState {
-    const key = this.getRequestKey(networkId, contractAddress);
+  getLoadingState(networkId: string, contractAddress: string, definition?: string): LoadingState {
+    const key = this.getRequestKey(networkId, contractAddress, definition);
     return (
       this.loadingStates.get(key) || {
         isLoading: false,
@@ -90,8 +91,10 @@ class ContractDefinitionService {
     onSuccess: (result: ContractLoadResult, formValues: FormValues) => void
   ): Promise<boolean> {
     const { adapter, formValues, networkId, contractAddress } = request;
-    const requestKey = this.getRequestKey(networkId, contractAddress);
-    const currentState = this.getLoadingState(networkId, contractAddress);
+    const definitionStr =
+      typeof formValues.contractDefinition === 'string' ? formValues.contractDefinition : undefined;
+    const requestKey = this.getRequestKey(networkId, contractAddress, definitionStr);
+    const currentState = this.getLoadingState(networkId, contractAddress, definitionStr);
 
     // Skip if already loading
     if (currentState.isLoading) {
