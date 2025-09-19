@@ -33,3 +33,28 @@ export async function rateLimitedBatch<T>(
 
   return results;
 }
+
+/**
+ * Wraps a promise with a timeout. Rejects with a descriptive Error after timeoutMs.
+ *
+ * @param promise The promise to wrap
+ * @param timeoutMs Timeout in milliseconds
+ * @param label Optional label to include in the timeout error message
+ */
+export function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label?: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label ?? 'operation'} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}

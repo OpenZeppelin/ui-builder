@@ -13,3 +13,5 @@ export * from './hash';
 export * from './bytesValidation';
 export * from './bytesConversion';
 export * from './environment';
+export * from './RouterService';
+export * from './deepLink';
