@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
 
+import { ContractDefinitionSettingsPanel } from './contract-definition/ContractDefinitionSettingsPanel';
 import { ExplorerSettingsPanel } from './explorer/ExplorerSettingsPanel';
 import { RpcSettingsPanel } from './rpc/RpcSettingsPanel';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
@@ -20,7 +21,7 @@ interface NetworkSettingsDialogProps {
   /** The adapter to use for settings */
   adapter: ContractAdapter | null;
   /** The default tab to show */
-  defaultTab?: 'rpc' | 'explorer';
+  defaultTab?: 'rpc' | 'explorer' | 'contractdef';
   /** Callback when settings are changed */
   onSettingsChanged?: () => void;
 }
@@ -40,7 +41,7 @@ export const NetworkSettingsDialog: React.FC<NetworkSettingsDialogProps> = ({
 }) => {
   const handleSettingsChanged = (): void => {
     onSettingsChanged?.();
-    onOpenChange(false);
+    // Do not auto-close; allow users to continue editing other settings
   };
 
   // Determine which tabs to show based on adapter capabilities
@@ -50,10 +51,19 @@ export const NetworkSettingsDialog: React.FC<NetworkSettingsDialogProps> = ({
     adapter?.validateExplorerConfig || adapter?.testExplorerConnection
   );
 
+  // Contract Definitions tab capability (adapter-advertised providers).
+  const contractDefFeatureEnabled = true;
+
+  const supportsContractDefConfig = Boolean(
+    contractDefFeatureEnabled && adapter?.getSupportedContractDefinitionProviders
+  );
+
   // Determine the appropriate default tab
-  const effectiveDefaultTab = ((): 'rpc' | 'explorer' => {
+  const effectiveDefaultTab = ((): 'rpc' | 'explorer' | 'contractdef' => {
+    if (defaultTab === 'contractdef' && supportsContractDefConfig) return 'contractdef';
     if (defaultTab === 'explorer' && supportsExplorerConfig) return 'explorer';
     if (defaultTab === 'rpc' && supportsRpcConfig) return 'rpc';
+    if (supportsContractDefConfig) return 'contractdef';
     if (supportsRpcConfig) return 'rpc';
     if (supportsExplorerConfig) return 'explorer';
     return 'rpc'; // fallback
@@ -70,58 +80,55 @@ export const NetworkSettingsDialog: React.FC<NetworkSettingsDialogProps> = ({
           <>
             {adapter ? (
               <>
-                {supportsRpcConfig && supportsExplorerConfig ? (
-                  // Both tabs available
+                {supportsRpcConfig || supportsExplorerConfig || supportsContractDefConfig ? (
                   <Tabs defaultValue={effectiveDefaultTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="rpc">RPC Provider</TabsTrigger>
-                      <TabsTrigger value="explorer">Explorer</TabsTrigger>
+                    <TabsList
+                      className={`grid w-full ${
+                        [
+                          supportsRpcConfig,
+                          supportsExplorerConfig,
+                          supportsContractDefConfig,
+                        ].filter(Boolean).length === 3
+                          ? 'grid-cols-3'
+                          : 'grid-cols-2'
+                      }`}
+                    >
+                      {supportsRpcConfig && <TabsTrigger value="rpc">RPC Provider</TabsTrigger>}
+                      {supportsExplorerConfig && (
+                        <TabsTrigger value="explorer">Explorer</TabsTrigger>
+                      )}
+                      {supportsContractDefConfig && (
+                        <TabsTrigger value="contractdef">Contract Definitions</TabsTrigger>
+                      )}
                     </TabsList>
-                    <TabsContent value="rpc">
-                      <RpcSettingsPanel
-                        adapter={adapter}
-                        networkId={networkConfig.id}
-                        onSettingsChanged={handleSettingsChanged}
-                      />
-                    </TabsContent>
-                    <TabsContent value="explorer">
-                      <ExplorerSettingsPanel
-                        adapter={adapter}
-                        networkId={networkConfig.id}
-                        onSettingsChanged={handleSettingsChanged}
-                      />
-                    </TabsContent>
+                    {supportsRpcConfig && (
+                      <TabsContent value="rpc">
+                        <RpcSettingsPanel
+                          adapter={adapter}
+                          networkId={networkConfig.id}
+                          onSettingsChanged={handleSettingsChanged}
+                        />
+                      </TabsContent>
+                    )}
+                    {supportsExplorerConfig && (
+                      <TabsContent value="explorer">
+                        <ExplorerSettingsPanel
+                          adapter={adapter}
+                          networkId={networkConfig.id}
+                          onSettingsChanged={handleSettingsChanged}
+                        />
+                      </TabsContent>
+                    )}
+                    {supportsContractDefConfig && (
+                      <TabsContent value="contractdef">
+                        <ContractDefinitionSettingsPanel
+                          adapter={adapter}
+                          networkId={networkConfig.id}
+                          onSettingsChanged={handleSettingsChanged}
+                        />
+                      </TabsContent>
+                    )}
                   </Tabs>
-                ) : supportsRpcConfig ? (
-                  // Only RPC tab
-                  <div className="w-full">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium">RPC Provider Settings</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Configure RPC endpoint for this network
-                      </p>
-                    </div>
-                    <RpcSettingsPanel
-                      adapter={adapter}
-                      networkId={networkConfig.id}
-                      onSettingsChanged={handleSettingsChanged}
-                    />
-                  </div>
-                ) : supportsExplorerConfig ? (
-                  // Only Explorer tab
-                  <div className="w-full">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium">Explorer Settings</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Configure block explorer for this network
-                      </p>
-                    </div>
-                    <ExplorerSettingsPanel
-                      adapter={adapter}
-                      networkId={networkConfig.id}
-                      onSettingsChanged={handleSettingsChanged}
-                    />
-                  </div>
                 ) : (
                   // No configuration supported
                   <div className="flex items-center justify-center py-8">

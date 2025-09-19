@@ -5,8 +5,13 @@ import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger, userExplorerConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import {
+  appConfigService,
+  logger,
+  userExplorerConfigService,
+} from '@openzeppelin/contracts-ui-builder-utils';
 
+import { SettingsFooter } from '@/components/settings/SettingsFooter';
 import {
   Accordion,
   AccordionContent,
@@ -71,14 +76,23 @@ export function ExplorerSettingsPanel({
   useEffect(() => {
     try {
       const config = userExplorerConfigService.getUserExplorerConfig(networkId);
+      const globalV2ApiKey = appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as
+        | string
+        | undefined;
+      const appDefaultV2Enabled = Boolean(globalV2ApiKey);
       if (config) {
         setValue('explorerUrl', config.explorerUrl || '');
         setValue('apiUrl', config.apiUrl || '');
         setValue('apiKey', config.apiKey || '');
-        setValue('applyToAllNetworks', config.applyToAllNetworks || false);
-        // Set useV2Api based on the saved applyToAllNetworks preference
-        // If applyToAllNetworks was false, the user likely intended useV2Api to be false
-        setValue('useV2Api', config.applyToAllNetworks || false);
+        const hasUserV2 = typeof config.applyToAllNetworks === 'boolean';
+        const v2Enabled = hasUserV2 ? Boolean(config.applyToAllNetworks) : appDefaultV2Enabled;
+        setValue('applyToAllNetworks', v2Enabled);
+        setValue('useV2Api', v2Enabled);
+      }
+      if (!config) {
+        // No user config: reflect app default globally so all networks show the same prefill
+        setValue('applyToAllNetworks', appDefaultV2Enabled);
+        setValue('useV2Api', appDefaultV2Enabled);
       }
     } catch (error) {
       logger.error('ExplorerSettingsPanel', 'Error loading explorer configuration:', error);
@@ -344,31 +358,42 @@ export function ExplorerSettingsPanel({
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={!isDirty && !explorerUrl && !apiUrl && !apiKey}>
-          Save Settings
-        </Button>
-        {adapter.testExplorerConnection && apiKey && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={testConnection}
-            disabled={isTestingConnection}
-          >
-            {isTestingConnection ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Testing...
-              </>
-            ) : (
-              'Test Connection'
-            )}
-          </Button>
-        )}
-        <Button type="button" variant="outline" onClick={handleReset}>
-          Reset to Default
-        </Button>
-      </div>
+      <SettingsFooter
+        onPrimary={handleSubmit(onSubmit)}
+        onSecondary={handleReset}
+        primaryLabel="Save Settings"
+        disabled={!isDirty && !explorerUrl && !apiUrl && !apiKey}
+        extraActions={
+          adapter.testExplorerConnection && apiKey ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={testConnection}
+              disabled={isTestingConnection}
+            >
+              {isTestingConnection ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                'Test Connection'
+              )}
+            </Button>
+          ) : null
+        }
+        result={
+          connectionTestResult
+            ? {
+                type: connectionTestResult.success ? 'success' : 'error',
+                message: connectionTestResult.message,
+                extra: connectionTestResult.latencyMs
+                  ? `${connectionTestResult.latencyMs}ms`
+                  : undefined,
+              }
+            : null
+        }
+      />
     </form>
   );
 }

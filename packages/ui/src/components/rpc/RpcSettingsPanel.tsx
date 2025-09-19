@@ -10,6 +10,7 @@ import type {
 } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
 
+import { SettingsFooter } from '@/components/settings/SettingsFooter';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
@@ -195,31 +196,42 @@ export function RpcSettingsPanel({
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={!isDirty && !rpcUrl}>
-          Save Settings
-        </Button>
-        {adapter.testRpcConnection && rpcUrl && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={testConnection}
-            disabled={isTestingConnection}
-          >
-            {isTestingConnection ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Testing...
-              </>
-            ) : (
-              'Test Connection'
-            )}
-          </Button>
-        )}
-        <Button type="button" variant="outline" onClick={handleReset}>
-          Reset to Default
-        </Button>
-      </div>
+      <SettingsFooter
+        onPrimary={handleSubmit(onSubmit)}
+        onSecondary={handleReset}
+        primaryLabel="Save Settings"
+        disabled={!isDirty && !rpcUrl}
+        extraActions={
+          adapter.testRpcConnection && rpcUrl ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={testConnection}
+              disabled={isTestingConnection}
+            >
+              {isTestingConnection ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                'Test Connection'
+              )}
+            </Button>
+          ) : null
+        }
+        result={
+          connectionTestResult
+            ? {
+                type: connectionTestResult.success ? 'success' : 'error',
+                message: connectionTestResult.message,
+                extra: connectionTestResult.latencyMs
+                  ? `${connectionTestResult.latencyMs}ms`
+                  : undefined,
+              }
+            : null
+        }
+      />
     </form>
   );
 }
