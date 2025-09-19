@@ -27,7 +27,8 @@ Note: This is a computed state derived from:
 
 ### DeepLinkParameters (Adapter-Interpreted)
 
-- networkIdentifier: string (e.g., `chainId` for EVM; adapter interprets)
+- ecosystem: string (required; e.g., `evm`, `stellar`, `solana`, `midnight`)
+- networkIdentifier: string (e.g., `networkId` or `chainId`; adapter interprets)
 - contractIdentifier: string (e.g., address/contract ID; adapter validates)
 - service?: ProviderKey (typed union per adapter)
 

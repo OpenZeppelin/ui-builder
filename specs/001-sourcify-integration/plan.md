@@ -36,7 +36,7 @@ Implement a chain‑ and adapter‑agnostic contract definition provider integra
 **Target Platform**: Web (Vite)
 **Project Type**: Web application (builder UI)
 **Performance Goals**: Responsive UX; per‑provider timeout 4s, global 10s; avoid blocking UI thread
-**Constraints**: Adapter‑led, chain‑agnostic core; strict linting; no `any`; feature‑flagged rollout (`contractDefinitionProviderIntegration` default ON)
+**Constraints**: Adapter‑led, chain‑agnostic core; strict linting; no `any`.
 **Scale/Scope**: Multi‑adapter support; future providers can be added without core changes
 
 - Routing: Use React Router v6+ (Data APIs). Wrap with a small internal RouterService in `@openzeppelin/contracts-ui-builder-utils` to allow future router support without touching app code. Keep adapter‑specific deep‑link parsing in adapter packages.

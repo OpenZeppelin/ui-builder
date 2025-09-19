@@ -2,7 +2,8 @@
 
 ## Parameters (Chain‑Agnostic)
 
-- networkIdentifier: identifies target network (adapter interprets; e.g., EVM `chainId`).
+- ecosystem: identifies target ecosystem (required; e.g., `evm`, `stellar`, `solana`, `midnight`).
+- networkIdentifier: identifies target network within the ecosystem (adapter interprets; e.g., EVM `chainId`).
 - contractIdentifier: identifies contract/resource (adapter validates via existing `isValidAddress` or equivalent).
 - service (optional): provider key to force a specific contract definition provider.
 
@@ -21,6 +22,6 @@
 
 ## Examples
 
-- EVM: `?address=0x...&chainId=1&service=etherscan`
-- EVM (fallback provider forced): `?address=0x...&chainId=1&service=sourcify`
+- EVM: `?ecosystem=evm&address=0x...&chainId=1&service=etherscan`
+- EVM (fallback provider forced): `?ecosystem=evm&address=0x...&chainId=1&service=sourcify`
 - Stellar: `?contractId=C...&networkPassphrase=Test SDF Network ; September 2015`

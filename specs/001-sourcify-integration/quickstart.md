@@ -1,10 +1,5 @@
 # Quickstart: Contract Definition Provider Integration
 
-## Enable Feature Flag
-
-- The feature flag `contractDefinitionProviderIntegration` is enabled by default.
-- To disable/enable, set via AppConfigService (app config) and reload.
-
 ## Configure Default Provider
 
 - App Config: Set default contract definition provider per network in global service config.
@@ -12,7 +7,7 @@
 
 ## Use Deep Links
 
-- Format (EVM example): `?address=0x...&chainId=1&service=etherscan`
+- Format (EVM example): `?ecosystem=evm&address=0x...&chainId=1&service=etherscan`
 - On load: network selected, identifier filled, provider precedence applied.
 - Forced service: overrides order; unsupported → automatic fallback; failure → stop with message.
 
