@@ -47,15 +47,12 @@ export function ContractDefinitionSettingsPanel({
     (async (): Promise<void> => {
       let adapterOptions: ProviderOption[] = [];
       try {
-        const maybeGetSupported = (adapter as ContractAdapter)
-          .getSupportedContractDefinitionProviders;
-        if (typeof maybeGetSupported === 'function') {
-          const list = await Promise.resolve(maybeGetSupported.call(adapter as ContractAdapter));
-          if (Array.isArray(list)) {
-            adapterOptions = list
-              .map((item) => ({ key: String(item.key), label: item.label ?? String(item.key) }))
-              .filter((o) => o.key);
-          }
+        const method = adapter.getSupportedContractDefinitionProviders;
+        const list = typeof method === 'function' ? method() : undefined;
+        if (Array.isArray(list)) {
+          adapterOptions = list
+            .map((item) => ({ key: String(item.key), label: item.label ?? String(item.key) }))
+            .filter((o) => o.key);
         }
       } catch (e) {
         logger.debug('ContractDefinitionSettingsPanel', 'Adapter providers probe failed:', e);
@@ -165,8 +162,12 @@ export function ContractDefinitionSettingsPanel({
         return;
       }
       // Remove defaultProvider while preserving other fields
-      const { defaultProvider: _omit, ...rest } = existing as UserExplorerConfig;
-      userExplorerConfigService.saveUserExplorerConfig(networkId, rest as UserExplorerConfig);
+      const updatedConfig = { ...(existing as UserExplorerConfig) };
+      delete updatedConfig.defaultProvider;
+      userExplorerConfigService.saveUserExplorerConfig(
+        networkId,
+        updatedConfig as UserExplorerConfig
+      );
       // If applying to all networks is currently set, clear global as well
       const applyAll = watch('applyToAllNetworks');
       if (applyAll) {

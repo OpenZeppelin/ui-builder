@@ -307,10 +307,12 @@ async function loadContractWithProxyDetection(
 ): Promise<EvmContractLoadResult> {
   try {
     // Determine provider precedence based on forced provider and user config
-    const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id) as
-      | (Record<string, unknown> & { defaultProvider?: EvmContractDefinitionProviderKey })
-      | null;
-    const uiDefault = userConfig?.defaultProvider;
+    const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
+    const uiDefault: EvmContractDefinitionProviderKey | null =
+      userConfig && typeof userConfig === 'object' && 'defaultProvider' in userConfig
+        ? (userConfig as { defaultProvider?: EvmContractDefinitionProviderKey }).defaultProvider ||
+          null
+        : null;
     // App-config default provider (optional)
     const appDefaultRaw = appConfigService.getGlobalServiceParam(
       'contractdefinition',
@@ -321,22 +323,20 @@ async function loadContractWithProxyDetection(
         ? (appDefaultRaw as EvmContractDefinitionProviderKey)
         : null;
 
+    // Helper function to build provider array from primary provider
+    const buildProviderArray = (
+      primary: EvmContractDefinitionProviderKey
+    ): Array<EvmContractDefinitionProviderKey> => [
+      primary,
+      primary === EvmProviderKeys.Etherscan ? EvmProviderKeys.Sourcify : EvmProviderKeys.Etherscan,
+    ];
+
     const providers: Array<EvmContractDefinitionProviderKey> = forcedProvider
       ? [forcedProvider]
       : uiDefault
-        ? [
-            uiDefault,
-            uiDefault === EvmProviderKeys.Etherscan
-              ? EvmProviderKeys.Sourcify
-              : EvmProviderKeys.Etherscan,
-          ]
+        ? buildProviderArray(uiDefault)
         : appDefault
-          ? [
-              appDefault,
-              appDefault === EvmProviderKeys.Etherscan
-                ? EvmProviderKeys.Sourcify
-                : EvmProviderKeys.Etherscan,
-            ]
+          ? buildProviderArray(appDefault)
           : [EvmProviderKeys.Etherscan, EvmProviderKeys.Sourcify];
 
     const overallDeadline = Date.now() + OVERALL_BUDGET_MS;
