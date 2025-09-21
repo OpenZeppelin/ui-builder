@@ -2,6 +2,88 @@
 
 > Spin up a front-end for any contract call in seconds. Select the function, auto-generate a React UI with wallet connect and multi-network support, and export a complete app.
 
+## Project Status
+
+This project is currently in development.
+
+[![CI](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml)
+[![Coverage](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder)
+[![Publish](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml)
+[![Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml)
+[![Dependency Review](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml)
+[![Update Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![Storybook](https://img.shields.io/badge/Storybook-FF4785?logo=storybook&logoColor=white)](https://storybook.js.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/contracts-ui-builder/maintainability)
+
+## Table of Contents
+
+- [Monorepo Structure](#monorepo-structure)
+- [Packages](#packages)
+  - [Builder Package](#builder-package)
+  - [React Core Package](#react-core-package)
+  - [Renderer Package](#renderer-package)
+  - [UI Package](#ui-package)
+  - [Utils Package](#utils-package)
+  - [Types Package](#types-package)
+  - [Styles Package](#styles-package)
+  - [Storage Package](#storage-package)
+  - [EVM Adapter](#evm-adapter)
+  - [Solana Adapter](#solana-adapter)
+  - [Stellar Adapter](#stellar-adapter)
+  - [Midnight Adapter](#midnight-adapter)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running with Docker (Recommended)](#running-with-docker-recommended)
+- [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+  - [Core Packages](#core-packages)
+  - [Adapter Packages](#adapter-packages)
+  - [Configuration Structure](#configuration-structure)
+- [Architecture](#architecture)
+- [Project Constitution](#project-constitution)
+- [Build System](#build-system)
+  - [Adapter Pattern Enforcement](#adapter-pattern-enforcement)
+- [Component Architecture](#component-architecture)
+  - [Renderer Components](#renderer-components)
+  - [Storybook Integration](#storybook-integration)
+- [Code Style](#code-style)
+  - [Git Hooks](#git-hooks)
+  - [CSS Class Name Sorting](#css-class-name-sorting)
+  - [Shared Prettier Configuration](#shared-prettier-configuration)
+  - [Import Sorting](#import-sorting)
+- [Dependency Management](#dependency-management)
+  - [Exported Package Versions](#exported-package-versions)
+  - [Checking for Outdated Dependencies](#checking-for-outdated-dependencies)
+  - [Updating Dependencies](#updating-dependencies)
+  - [Automated Updates](#automated-updates)
+- [Adding New Adapters](#adding-new-adapters)
+- [Commit Convention](#commit-convention)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+- [CI/CD Pipeline](#cicd-pipeline)
+  - [Package Publishing](#package-publishing)
+- [Monorepo Configuration](#monorepo-configuration)
+  - [Shared Configurations](#shared-configurations)
+- [Runtime Configuration](#runtime-configuration)
+  - [Builder Application Configuration (Development)](#builder-application-configuration-development)
+  - [Exported Application Configuration](#exported-application-configuration)
+
 ## Status
 
 This project is currently in development.
@@ -46,6 +128,20 @@ This project is organized as a monorepo with the following packages:
 
 ## Packages
 
+### Builder Package
+
+The main application with the builder UI, export system, and core logic.
+
+For more details, see the [Builder README](./packages/builder/README.md).
+
+### React Core Package
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-react-core)
+
+Core React providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing adapter and wallet state.
+
+For more details, see the [React Core README](./packages/react-core/README.md).
+
 ### Renderer Package
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
@@ -64,6 +160,8 @@ For more details, see the [Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
+
 The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Contracts UI Builder.
 
 Features:
@@ -76,6 +174,8 @@ Features:
 For more details, see the [Types README](./packages/types/README.md).
 
 ### Styles Package
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-styles)
 
 The `styles` package contains the centralized styling system used across all packages. It provides consistent theming, spacing, and component styles throughout the application.
 
@@ -90,6 +190,8 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 ### Storage Package
 
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-storage)
+
 The `storage` package provides local storage services built on IndexedDB using Dexie.js for persisting contract UI configurations. It enables a complete history and auto-save system for the builder application.
 
 Features:
@@ -103,6 +205,62 @@ Features:
 - Integration with React hooks for seamless UI state management
 
 For more details, see the [Storage README](./packages/storage/README.md).
+
+### UI Package
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-ui)
+
+Shared UI primitives and form field components for a consistent UX across builder and renderer.
+
+For more details, see the [UI README](./packages/ui/README.md).
+
+### Utils Package
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-utils)
+
+Framework-agnostic utilities like logging, runtime configuration, validation, and helpers.
+
+For more details, see the [Utils README](./packages/utils/README.md).
+
+### EVM Adapter
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-evm)
+
+_Status: Fully implemented._
+
+Adapter implementation for EVM-compatible chains.
+
+For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md).
+
+### Solana Adapter
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-solana)
+
+_Status: Scaffolding._
+
+Adapter implementation for Solana.
+
+For more details, see the [Solana Adapter README](./packages/adapter-solana/README.md).
+
+### Stellar Adapter
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-stellar)
+
+_Status: Fully Implemented._
+
+Adapter implementation for Stellar (Soroban).
+
+For more details, see the [Stellar Adapter README](./packages/adapter-stellar/README.md).
+
+### Midnight Adapter
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-midnight)
+
+_Status: In progress._
+
+Adapter implementation for Midnight.
+
+For more details, see the [Midnight Adapter README](./packages/adapter-midnight/README.md).
 
 ## Features
 
@@ -173,13 +331,15 @@ For more details, see the [Storage README](./packages/storage/README.md).
 
 For a consistent and reliable development environment, it is highly recommended to run the application using Docker. This avoids potential issues with local Node.js, pnpm, or operating system configurations.
 
-1.  **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
+1. **Prerequisites**: Make sure you have Docker and Docker Compose installed on your system.
 
-2.  **Build and Run the Container**:
-    ```bash
-    docker-compose up --build
-    ```
-    This command will build the Docker image and start the application. Once it's running, you can access it at `http://localhost:3000`.
+2. **Build and Run the Container**:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   This command will build the Docker image and start the application. Once it's running, you can access it at `http://localhost:3000`.
 
 ## Available Scripts
 
@@ -233,7 +393,7 @@ This monorepo is organized into several specialized packages, each with a specif
 
 ### Configuration Structure
 
-```
+```text
 contracts-ui-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
@@ -458,37 +618,37 @@ The project is configured with:
 
 To add support for a new blockchain ecosystem:
 
-1.  **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
-2.  **Define `package.json`**:
-    - Set the package name (e.g., `@openzeppelin/contracts-ui-builder-adapter-sui`).
-    - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
-    - Add any chain-specific SDKs or libraries required by the adapter.
-    - Include standard build scripts (refer to existing adapter packages).
-    - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
-3.  **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
-4.  **Implement Adapter**:
-    - Create `src/adapter.ts`.
-    - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/contracts-ui-builder-types`.
-    - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
-    - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
-5.  **Define Network Configurations**:\
-    - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
-    - Each network config must provide all necessary details for the adapter to function, such as RPC endpoints (`rpcUrl` or `rpcEndpoint`), chain identifiers (`chainId` for EVM), explorer URLs, native currency details, etc., as defined by its `YourEcosystemNetworkConfig` interface.
-    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
-6.  **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
-7.  **Register Ecosystem in Builder**:
-    - Open `packages/builder/src/core/ecosystemManager.ts`.
-    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/contracts-ui-builder-adapter-sui';`).
-    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
-      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
-      - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
-    - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package module (which should export the `AdapterClass` and the `networksExportName` list).
-    - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
-8.  **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
-9.  **Build & Test**:
-    - Build the new adapter package (`pnpm --filter @openzeppelin/contracts-ui-builder-adapter-<chain-name> build`).
-    - Add relevant unit/integration tests.
-    - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
+1. **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
+2. **Define `package.json`**:
+   - Set the package name (e.g., `@openzeppelin/contracts-ui-builder-adapter-sui`).
+   - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
+   - Add any chain-specific SDKs or libraries required by the adapter.
+   - Include standard build scripts (refer to existing adapter packages).
+   - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
+3. **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
+4. **Implement Adapter**:
+   - Create `src/adapter.ts`.
+   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/contracts-ui-builder-types`.
+   - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
+   - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
+5. **Define Network Configurations**:\
+   - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
+   - Each network config must provide all necessary details for the adapter to function, such as RPC endpoints (`rpcUrl` or `rpcEndpoint`), chain identifiers (`chainId` for EVM), explorer URLs, native currency details, etc., as defined by its `YourEcosystemNetworkConfig` interface.
+   - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
+6. **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
+7. **Register Ecosystem in Builder**:
+   - Open `packages/builder/src/core/ecosystemManager.ts`.
+   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/contracts-ui-builder-adapter-sui';`).
+   - Add a new entry to the `ecosystemRegistry` object. This entry defines:
+     - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
+     - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
+   - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package module (which should export the `AdapterClass` and the `networksExportName` list).
+   - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
+8. **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
+9. **Build & Test**:
+   - Build the new adapter package (`pnpm --filter @openzeppelin/contracts-ui-builder-adapter-<chain-name> build`).
+   - Add relevant unit/integration tests.
+   - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
 
 ## Commit Convention
 
@@ -497,7 +657,7 @@ more details.
 
 Example:
 
-```
+```text
 feat(ui): add button component
 ```
 
@@ -597,38 +757,4 @@ The structure of this JSON file includes sections for:
 
 Refer to the README included with the exported application for detailed instructions on configuring `public/app.config.json`.
 
-### Adding/Modifying Networks
-
-When adding new EVM network definitions (in `packages/adapter-evm/src/networks/`), ensure you define:
-
-- `id`: A unique string identifier (e.g., "my-custom-chain-mainnet").
-- `chainId`: The numeric EVM chain ID.
-- `rpcUrl`: A default public RPC URL.
-- `primaryExplorerApiIdentifier`: A string (e.g., "mychainscan-mainnet") that will be used as the key in `app.config.json`'s `networkServiceConfigs` if this network's explorer requires an API key for ABI fetching.
-- `apiUrl` and `explorerUrl` for the block explorer.
-
-If this network is also to be a chain-switchable target within Wagmi (for the EVM adapter), you may need to update the `defaultSupportedChains` array and the `viemChainIdToAppNetworkIdMap` in `packages/adapter-evm/src/wallet/wagmi-implementation.ts` to ensure RPC overrides from `app.config.json` apply correctly to Wagmi's transports for this chain.
-
-### Midnight Wallet Integration
-
-The `@openzeppelin/contracts-ui-builder-adapter-midnight` package handles integration with the Midnight ecosystem, specifically the Lace wallet. Integrating with the Midnight wallet requires special handling due to its unique, non-blocking connection flow, which differs from many other wallet APIs.
-
-Key characteristics of the Midnight wallet integration:
-
-- **Non-Blocking `enable()`**: The wallet's `enable()` method resolves immediately, returning a "pre-flight" API object before the user has granted or denied connection permissions.
-- **State Polling**: To manage this, the adapter implements a state-polling mechanism. After `enable()` is called, the adapter repeatedly checks the wallet's state until the user approves the connection.
-- **Explicit Disconnect Handling**: The wallet's API does not provide a programmatic `disconnect` function. The adapter simulates disconnection by setting a flag in `localStorage` to prevent automatic reconnection in subsequent sessions, respecting the user's intent to disconnect.
-
-This implementation ensures a robust and user-friendly connection experience despite the underlying API's unconventional behavior. For a detailed look at the implementation, see the `MidnightWalletProvider.tsx` component within the adapter package.
-
-### Advanced EVM Wallet Integration & UI Customization
-
-The `@openzeppelin/contracts-ui-builder-adapter-evm` package offers robust integration with EVM wallets, leveraging the `wagmi` library. It features an enhanced architecture for UI kit integration, providing:
-
-- **Stable UI Rendering**: A new internal architecture (`EvmUiKitManager` and `EvmWalletUiRoot`) significantly reduces UI flickering during network switches when using supported UI kits.
-- **Support for UI Kits (e.g., RainbowKit)**: Easily integrate popular Wagmi-based UI kits like RainbowKit.
-- **Flexible Configuration**: Configure your chosen UI kit through a layered system involving global application settings (via `app.config.json` or environment variables), detailed kit-specific parameters in user-authored native TypeScript configuration files (e.g., `src/config/wallet/rainbowkit.config.ts`), and programmatic overrides.
-- **Automatic Asset Loading**: For supported kits like RainbowKit, necessary CSS and JavaScript assets are loaded dynamically by the adapter.
-- **Custom UI Option**: Retains support for a default set of custom-styled wallet components if no third-party kit is preferred.
-
-**For comprehensive details on configuring the EVM adapter's wallet module, setting up UI kits like RainbowKit, understanding the configuration flow, and the pattern for extending support to other UI kits, please refer to the dedicated [EVM Adapter Wallet Module README](./packages/adapter-evm/src/wallet/README.md).**
+<!-- Adapter-specific guides are documented in their respective package READMEs. -->

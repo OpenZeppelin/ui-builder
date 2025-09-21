@@ -19,7 +19,7 @@ This architecture allows applications to switch between different wallet UIs (li
 
 ## Directory Structure
 
-```
+```text
 wallet/
 ├── components/         # Core UI root (`EvmWalletUiRoot`) and custom wallet UI components
 │   ├── EvmWalletUiRoot.tsx
@@ -198,10 +198,10 @@ Applications can also call `adapter.configureUiKit(programmaticUiKitConfig, { lo
 
 ### Configuration Precedence
 
-1.  **Programmatic Overrides**: Settings passed directly to `configureUiKit` (for `kitName` or other top-level `UiKitConfiguration` flags, and `kitConfig` properties).
-2.  **User-Native `.ts` File**: Content from files like `src/config/wallet/rainbowkit.config.ts` (for `kitConfig` properties).
-3.  **`AppConfigService` (`app.config.json` / Env Vars)**: Baseline settings (for `kitName` and `kitConfig` properties).
-4.  **Adapter Defaults**: Internal defaults (e.g., `kitName: 'custom'`).
+1. **Programmatic Overrides**: Settings passed directly to `configureUiKit` (for `kitName` or other top-level `UiKitConfiguration` flags, and `kitConfig` properties).
+2. **User-Native `.ts` File**: Content from files like `src/config/wallet/rainbowkit.config.ts` (for `kitConfig` properties).
+3. **`AppConfigService` (`app.config.json` / Env Vars)**: Baseline settings (for `kitName` and `kitConfig` properties).
+4. **Adapter Defaults**: Internal defaults (e.g., `kitName: 'custom'`).
 
 ## Automatic CSS Loading (RainbowKit)
 
@@ -215,7 +215,7 @@ The primary way to interact with wallet functionalities and UI components is thr
 - **`useWalletState()`**: Hook to access `activeAdapter`, `activeNetworkConfig`, `walletFacadeHooks`, `isAdapterLoading`, etc.
 - **Derived Hooks** (e.g., `useDerivedAccountStatus`, `useDerivedConnectStatus`): Provide convenient, memoized state from facade hooks.
 
-**Example: Rendering Wallet UI in a Header**
+### Example: Rendering Wallet UI in a Header
 
 ```typescript
 import {
