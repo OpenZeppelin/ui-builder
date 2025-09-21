@@ -21,44 +21,55 @@ import { isValidEvmAddress } from '../utils';
  * @returns The resolved explorer configuration.
  */
 export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): UserExplorerConfig {
-  // 1. Check for user-configured explorer
-  const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
-  if (userConfig) {
-    logger.info('ExplorerConfig', `Using user-configured explorer for ${networkConfig.name}`);
-    return userConfig;
-  }
-
-  // 2. For V2 API networks using 'etherscan-v2' identifier, check for global Etherscan V2 API key
-  if (
+  // Precompute app-level keys and defaults for merging
+  const isV2 =
     networkConfig.supportsEtherscanV2 &&
-    networkConfig.primaryExplorerApiIdentifier === 'etherscan-v2'
-  ) {
-    const globalV2ApiKey = appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as
-      | string
-      | undefined;
-    if (globalV2ApiKey) {
-      logger.info('ExplorerConfig', `Using global Etherscan V2 API key for ${networkConfig.name}`);
-      return {
-        explorerUrl: networkConfig.explorerUrl,
-        apiUrl: networkConfig.apiUrl,
-        apiKey: globalV2ApiKey,
-        name: `${networkConfig.name} Explorer (V2 API)`,
-        isCustom: false,
-      };
-    }
-  }
-
-  // 3. Check for app-configured API key (V1 style network-specific keys)
-  const apiKey = networkConfig.primaryExplorerApiIdentifier
+    networkConfig.primaryExplorerApiIdentifier === 'etherscan-v2';
+  const globalV2ApiKey = isV2
+    ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
+    : undefined;
+  const appApiKey = networkConfig.primaryExplorerApiIdentifier
     ? appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier)
     : undefined;
 
-  if (apiKey) {
+  // 1. Check for user-configured explorer, but merge missing fields with app defaults
+  const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
+  if (userConfig) {
+    logger.info('ExplorerConfig', `Using user-configured explorer for ${networkConfig.name}`);
+    return {
+      // Prefer user overrides when provided
+      explorerUrl: userConfig.explorerUrl ?? networkConfig.explorerUrl,
+      apiUrl: userConfig.apiUrl ?? networkConfig.apiUrl,
+      // If user did not provide an API key, fall back to global V2 key (when applicable)
+      // then to app-configured per-explorer identifier key
+      apiKey: userConfig.apiKey ?? globalV2ApiKey ?? appApiKey,
+      name: userConfig.name ?? `${networkConfig.name} Explorer`,
+      isCustom: userConfig.isCustom ?? false,
+      applyToAllNetworks: userConfig.applyToAllNetworks,
+      appliedNetworkIds: userConfig.appliedNetworkIds,
+      defaultProvider: userConfig.defaultProvider,
+    };
+  }
+
+  // 2. For V2 API networks using 'etherscan-v2' identifier, check for global Etherscan V2 API key
+  if (isV2 && globalV2ApiKey) {
+    logger.info('ExplorerConfig', `Using global Etherscan V2 API key for ${networkConfig.name}`);
+    return {
+      explorerUrl: networkConfig.explorerUrl,
+      apiUrl: networkConfig.apiUrl,
+      apiKey: globalV2ApiKey,
+      name: `${networkConfig.name} Explorer (V2 API)`,
+      isCustom: false,
+    };
+  }
+
+  // 3. Check for app-configured API key (V1 style or other identifiers)
+  if (appApiKey) {
     logger.info('ExplorerConfig', `Using app-configured API key for ${networkConfig.name}`);
     return {
       explorerUrl: networkConfig.explorerUrl,
       apiUrl: networkConfig.apiUrl,
-      apiKey,
+      apiKey: appApiKey,
       name: `${networkConfig.name} Explorer`,
       isCustom: false,
     };

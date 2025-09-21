@@ -68,6 +68,7 @@ module.exports = {
       'getAvailableUiKits',
       'getUiLabels',
       'getExportableWalletConfigFiles',
+      'getSupportedContractDefinitionProviders',
       'getContractDefinitionInputs',
       'getRelayers',
       'getRelayer',

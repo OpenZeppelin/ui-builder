@@ -96,6 +96,8 @@ export interface UserExplorerConfig {
   applyToAllNetworks?: boolean;
   /** List of network IDs this config applies to (if applyToAllNetworks is false) */
   appliedNetworkIds?: string[];
+  /** Optional default contract definition provider key (adapter-defined options, chain-agnostic in UI) */
+  defaultProvider?: string;
 }
 
 /**

@@ -27,8 +27,6 @@ export function useFormSync({
       } else {
         uiBuilderStore.clearManualContractDefinition();
       }
-    } else if (debouncedManualDefinition === undefined) {
-      uiBuilderStore.clearManualContractDefinition();
     }
   }, [debouncedManualDefinition]);
 

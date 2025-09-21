@@ -6,13 +6,35 @@ import type {
   EvmNetworkConfig,
   ProxyInfo,
 } from '@openzeppelin/contracts-ui-builder-types';
-import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
+import {
+  appConfigService,
+  logger,
+  simpleHash,
+  userExplorerConfigService,
+  withTimeout,
+} from '@openzeppelin/contracts-ui-builder-utils';
 
+import { getEvmExplorerAddressUrl } from '../configuration/explorer';
 import { detectProxyFromAbi, getAdminAddress, getImplementationAddress } from '../proxy/detection';
 import type { AbiItem, TypedEvmNetworkConfig } from '../types';
 import type { EvmContractArtifacts } from '../types/artifacts';
+import {
+  EvmProviderKeys,
+  isEvmProviderKey,
+  type EvmContractDefinitionProviderKey,
+} from '../types/providers';
 import { loadAbiFromEtherscan } from './etherscan';
+import { getSourcifyRepoContractUrl, loadAbiFromSourcify } from './sourcify';
 import { transformAbiToSchema } from './transformer';
+
+/**
+ * Type guard to check if user config has defaultProvider field
+ */
+function hasDefaultProvider(
+  config: unknown
+): config is { defaultProvider?: EvmContractDefinitionProviderKey } {
+  return config !== null && typeof config === 'object' && 'defaultProvider' in config;
+}
 
 /**
  * Loads and parses an ABI directly from a JSON string.
@@ -54,6 +76,9 @@ export interface ContractLoadOptions {
   /** Force treating the address as an implementation contract */
   treatAsImplementation?: boolean;
 }
+
+const PER_PROVIDER_TIMEOUT_MS = 4000;
+const OVERALL_BUDGET_MS = 10000;
 
 /**
  * Loads contract schema from artifacts provided by the UI, prioritizing manual ABI input.
@@ -110,7 +135,15 @@ export async function loadEvmContract(
     }
   }
 
-  // 2. If no manual ABI, fall back to fetching from Etherscan with proxy detection.
+  // Extract optional forced provider (from adapter-specific field or generic 'service')
+  const forcedRaw =
+    (artifacts as unknown as { __forcedProvider?: string }).__forcedProvider ||
+    (artifacts as unknown as { service?: string }).service;
+  const forcedProvider: EvmContractDefinitionProviderKey | null = isEvmProviderKey(forcedRaw)
+    ? (forcedRaw as EvmContractDefinitionProviderKey)
+    : null;
+
+  // 2. If no manual ABI, fall back to fetching from provider(s) with proxy detection.
   logger.info(
     'loadEvmContract',
     `No manual ABI detected. Attempting Etherscan fetch for address: ${contractAddress}...`
@@ -119,7 +152,8 @@ export async function loadEvmContract(
   return await loadContractWithProxyDetection(
     contractAddress,
     networkConfig as TypedEvmNetworkConfig,
-    options
+    options,
+    forcedProvider
   );
 }
 
@@ -130,16 +164,26 @@ function buildContractResult(
   contractAddress: string,
   abiResult: { schema: ContractSchema; originalAbi: string },
   networkConfig: TypedEvmNetworkConfig,
+  sourceProvider: EvmContractDefinitionProviderKey | null,
   proxyInfo?: ProxyInfo
 ): EvmContractLoadResult {
-  const explorerBaseUrl = networkConfig.explorerUrl || 'unknown';
+  // Determine provenance URL based on the provider that supplied the ABI
+  let fetchedFrom: string | undefined = undefined;
+  if (sourceProvider === EvmProviderKeys.Etherscan) {
+    fetchedFrom = getEvmExplorerAddressUrl(contractAddress, networkConfig) || undefined;
+  } else if (sourceProvider === EvmProviderKeys.Sourcify) {
+    fetchedFrom = getSourcifyRepoContractUrl(networkConfig.chainId, contractAddress);
+  } else {
+    // Fallback to resolved explorer URL when provider is unknown
+    fetchedFrom = getEvmExplorerAddressUrl(contractAddress, networkConfig) || undefined;
+  }
 
   return {
     schema: { ...abiResult.schema, address: contractAddress },
     source: 'fetched',
     contractDefinitionOriginal: abiResult.originalAbi,
     metadata: {
-      fetchedFrom: `${explorerBaseUrl}/address/${contractAddress}`,
+      fetchedFrom,
       contractName: abiResult.schema.name,
       verificationStatus: 'verified',
       fetchTimestamp: new Date(),
@@ -182,7 +226,8 @@ async function loadImplementationAbi(
 async function handleProxyDetection(
   contractAddress: string,
   initialResult: { schema: ContractSchema; originalAbi: string },
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: TypedEvmNetworkConfig,
+  initialProvider: EvmContractDefinitionProviderKey | null
 ): Promise<EvmContractLoadResult | null> {
   // Parse the ABI to check for proxy patterns
   const abi: AbiItem[] = JSON.parse(initialResult.originalAbi);
@@ -211,7 +256,7 @@ async function handleProxyDetection(
     logger.info('handleProxyDetection', 'Proxy detected but implementation address not found');
 
     // Return proxy ABI with proxy info indicating detection failure
-    return buildContractResult(contractAddress, initialResult, networkConfig, {
+    return buildContractResult(contractAddress, initialResult, networkConfig, initialProvider, {
       isProxy: true,
       proxyType,
       proxyAddress: contractAddress,
@@ -240,10 +285,23 @@ async function handleProxyDetection(
 
   if (implementationResult) {
     // Use implementation ABI with proxy metadata
-    return buildContractResult(contractAddress, implementationResult, networkConfig, baseProxyInfo);
+    // Implementation ABI was fetched from Etherscan
+    return buildContractResult(
+      contractAddress,
+      implementationResult,
+      networkConfig,
+      EvmProviderKeys.Etherscan,
+      baseProxyInfo
+    );
   } else {
-    // Fall back to proxy ABI with proxy info
-    return buildContractResult(contractAddress, initialResult, networkConfig, baseProxyInfo);
+    // Fall back to proxy ABI with proxy info (provenance from initial provider)
+    return buildContractResult(
+      contractAddress,
+      initialResult,
+      networkConfig,
+      initialProvider,
+      baseProxyInfo
+    );
   }
 }
 
@@ -253,11 +311,73 @@ async function handleProxyDetection(
 async function loadContractWithProxyDetection(
   contractAddress: string,
   networkConfig: TypedEvmNetworkConfig,
-  options: ContractLoadOptions = {}
+  options: ContractLoadOptions = {},
+  forcedProvider: EvmContractDefinitionProviderKey | null = null
 ): Promise<EvmContractLoadResult> {
   try {
-    // Step 1: Get the initial ABI from the provided address
-    const initialResult = await loadAbiFromEtherscan(contractAddress, networkConfig);
+    // Determine provider precedence based on forced provider and user config
+    const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
+    const uiDefault: EvmContractDefinitionProviderKey | null = hasDefaultProvider(userConfig)
+      ? userConfig.defaultProvider || null
+      : null;
+    // App-config default provider (optional)
+    const appDefaultRaw = appConfigService.getGlobalServiceParam(
+      'contractdefinition',
+      'defaultProvider'
+    );
+    const appDefault: EvmContractDefinitionProviderKey | null =
+      typeof appDefaultRaw === 'string' && isEvmProviderKey(appDefaultRaw)
+        ? (appDefaultRaw as EvmContractDefinitionProviderKey)
+        : null;
+
+    // Helper function to build provider array from primary provider
+    const buildProviderArray = (
+      primary: EvmContractDefinitionProviderKey
+    ): Array<EvmContractDefinitionProviderKey> => [
+      primary,
+      primary === EvmProviderKeys.Etherscan ? EvmProviderKeys.Sourcify : EvmProviderKeys.Etherscan,
+    ];
+
+    const providers: Array<EvmContractDefinitionProviderKey> = forcedProvider
+      ? [forcedProvider]
+      : uiDefault
+        ? buildProviderArray(uiDefault)
+        : appDefault
+          ? buildProviderArray(appDefault)
+          : [EvmProviderKeys.Etherscan, EvmProviderKeys.Sourcify];
+
+    const overallDeadline = Date.now() + OVERALL_BUDGET_MS;
+    let initialResult: { schema: ContractSchema; originalAbi: string } | null = null;
+    let lastError: unknown = null;
+    let usedProvider: EvmContractDefinitionProviderKey | null = null;
+    for (const provider of providers) {
+      try {
+        const remainingOverall = Math.max(100, overallDeadline - Date.now());
+        const attemptTimeout = Math.min(PER_PROVIDER_TIMEOUT_MS, remainingOverall);
+
+        if (provider === EvmProviderKeys.Etherscan) {
+          initialResult = await withTimeout(
+            loadAbiFromEtherscan(contractAddress, networkConfig),
+            attemptTimeout,
+            'etherscan'
+          );
+        } else if (provider === EvmProviderKeys.Sourcify) {
+          initialResult = await withTimeout(
+            loadAbiFromSourcify(contractAddress, networkConfig, attemptTimeout),
+            attemptTimeout,
+            'sourcify'
+          );
+        }
+        if (initialResult) {
+          usedProvider = provider;
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        continue;
+      }
+    }
+    if (!initialResult) throw lastError ?? new Error('No provider succeeded');
 
     logger.info(
       'loadContractWithProxyDetection',
@@ -266,16 +386,26 @@ async function loadContractWithProxyDetection(
 
     // Step 2: Handle proxy detection if enabled
     if (!options.skipProxyDetection && !options.treatAsImplementation) {
-      const proxyResult = await handleProxyDetection(contractAddress, initialResult, networkConfig);
+      const proxyResult = await handleProxyDetection(
+        contractAddress,
+        initialResult,
+        networkConfig,
+        usedProvider
+      );
       if (proxyResult) {
         return proxyResult;
       }
     }
 
     // Step 3: Not a proxy or proxy detection skipped - return original ABI
-    return buildContractResult(contractAddress, initialResult, networkConfig);
+    return buildContractResult(contractAddress, initialResult, networkConfig, usedProvider);
   } catch (error) {
     logger.warn('loadContractWithProxyDetection', `Contract loading failed: ${error}`);
+
+    // If a forced provider was specified, honor it and do NOT fallback automatically
+    if (forcedProvider) {
+      throw error;
+    }
 
     // Check if this is a "contract not verified" error
     const errorMessage = (error as Error).message || '';
@@ -285,8 +415,7 @@ async function loadContractWithProxyDetection(
           `Verification status: unverified. Please provide the contract ABI manually.`
       );
     }
-
-    // For other errors (API issues, network problems), re-throw the original error
+    // Otherwise, rethrow the last error from provider attempts
     throw error;
   }
 }

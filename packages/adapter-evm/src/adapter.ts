@@ -30,6 +30,7 @@ import type {
 import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 
 import { abiComparisonService } from './abi/comparison';
+import { EvmProviderKeys, type EvmContractDefinitionProviderKey } from './types/providers';
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
@@ -512,6 +513,19 @@ export class EvmAdapter implements ContractAdapter {
   public getEcosystemReactHooks(): EcosystemSpecificReactHooks | undefined {
     // Always provide hooks for EVM adapter regardless of UI kit
     return evmFacadeHooks;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getSupportedContractDefinitionProviders(): Array<{
+    key: EvmContractDefinitionProviderKey;
+    label?: string;
+  }> {
+    return [
+      { key: EvmProviderKeys.Etherscan, label: 'Etherscan' },
+      { key: EvmProviderKeys.Sourcify, label: 'Sourcify' },
+    ];
   }
 
   /**

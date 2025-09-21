@@ -62,18 +62,6 @@ export async function loadAbiFromEtherscanV2(
 ): Promise<EtherscanAbiResult> {
   const explorerConfig = resolveExplorerConfig(networkConfig);
 
-  const requiresApiKey = networkConfig.requiresExplorerApiKey ?? true;
-
-  if (requiresApiKey && !explorerConfig.apiKey) {
-    logger.error(
-      'loadAbiFromEtherscanV2',
-      `API key is missing for ${networkConfig.name} explorer.`
-    );
-    throw new Error(
-      `API key for ${networkConfig.name} explorer is not configured. Please configure your explorer API key.`
-    );
-  }
-
   const url = buildV2ApiUrl(
     networkConfig.chainId,
     'contract',

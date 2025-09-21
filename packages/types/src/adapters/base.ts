@@ -423,6 +423,16 @@ export interface ContractAdapter {
   ): Promise<Record<string, string>>;
 
   /**
+   * Returns the set of supported contract definition providers for this adapter.
+   * The UI can use this to present a provider selection without hardcoding
+   * chain-specific values. When not implemented, the UI may fall back to
+   * application configuration or hide the selector.
+   *
+   * Example keys: "etherscan", "sourcify".
+   */
+  getSupportedContractDefinitionProviders?(): Array<{ key: string; label?: string }>;
+
+  /**
    * Returns a schema for the inputs required to define a contract.
    * This allows adapters to specify what information they need (e.g., address, ABI, artifacts).
    *
