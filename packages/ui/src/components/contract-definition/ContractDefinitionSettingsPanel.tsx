@@ -105,7 +105,7 @@ export function ContractDefinitionSettingsPanel({
         setValue('defaultProvider', saved);
       }
       if (typeof config?.applyToAllNetworks === 'boolean') {
-        setValue('applyToAllNetworks', Boolean(config.applyToAllNetworks));
+        setValue('applyToAllNetworks', config.applyToAllNetworks);
       }
     } catch (e) {
       logger.debug('ContractDefinitionSettingsPanel', 'Load saved defaultProvider failed:', e);

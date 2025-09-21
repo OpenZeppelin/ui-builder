@@ -31,7 +31,11 @@ export function resolveDeepLinkPlan(
   ctx: DeepLinkContext
 ): DeepLinkPlan {
   // Validate minimal requirements
-  const hasBasics = Boolean(params.networkId) && Boolean(params.identifier);
+  const hasBasics =
+    typeof params.networkId === 'string' &&
+    params.networkId.trim().length > 0 &&
+    typeof params.identifier === 'string' &&
+    params.identifier.trim().length > 0;
   if (!hasBasics) return { action: 'noop' };
 
   // Unsupported forced service → auto-fallback (strip forced)

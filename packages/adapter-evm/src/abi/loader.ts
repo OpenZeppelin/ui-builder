@@ -28,6 +28,15 @@ import { getSourcifyRepoContractUrl, loadAbiFromSourcify } from './sourcify';
 import { transformAbiToSchema } from './transformer';
 
 /**
+ * Type guard to check if user config has defaultProvider field
+ */
+function hasDefaultProvider(
+  config: unknown
+): config is { defaultProvider?: EvmContractDefinitionProviderKey } {
+  return config !== null && typeof config === 'object' && 'defaultProvider' in config;
+}
+
+/**
  * Loads and parses an ABI directly from a JSON string.
  */
 async function loadAbiFromJson(abiJsonString: string): Promise<ContractSchema> {
@@ -308,11 +317,9 @@ async function loadContractWithProxyDetection(
   try {
     // Determine provider precedence based on forced provider and user config
     const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
-    const uiDefault: EvmContractDefinitionProviderKey | null =
-      userConfig && typeof userConfig === 'object' && 'defaultProvider' in userConfig
-        ? (userConfig as { defaultProvider?: EvmContractDefinitionProviderKey }).defaultProvider ||
-          null
-        : null;
+    const uiDefault: EvmContractDefinitionProviderKey | null = hasDefaultProvider(userConfig)
+      ? userConfig.defaultProvider || null
+      : null;
     // App-config default provider (optional)
     const appDefaultRaw = appConfigService.getGlobalServiceParam(
       'contractdefinition',
