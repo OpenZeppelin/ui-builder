@@ -83,6 +83,18 @@ Edge cases (for testing)
 ?ecosystem=evm&networkId=ethereum-sepolia&networkId=ethereum-sepolia&address=0x753E2CFc06cF3bD485B846238828a9DA543BFF41
 ```
 
+### Provider notes: Sourcify (EVM)
+
+- **Match types**: Sourcify’s repo host expects explicit match types. We fetch metadata from:
+  - `contracts/full_match/<chainId>/<address>/metadata.json`
+  - `contracts/partial_match/<chainId>/<address>/metadata.json`
+    The `any` match type is not supported on the repo host and will return a validation error (`request/params/matchType must match format "match-type"`).
+- **Address casing**: Addresses are stored in lowercase on disk; the builder tries lowercase and original-casing for robustness.
+- **Forced provider semantics**: If you deep link with `service=sourcify` and both `full_match` and `partial_match` miss, the load fails without falling back to other providers (by design).
+- **Examples**:
+  - Viewer page (human‑readable): [Sourcify contract viewer (USDT)](https://repo.sourcify.dev/1/0xdAC17F958D2ee523a2206206994597C13D831ec7)
+  - Direct metadata (lowercase address): `https://repo.sourcify.dev/contracts/full_match/1/0xdac17f958d2ee523a2206206994597c13d831ec7/metadata.json`
+
 ### Tips
 
 - If you need to test UI default vs. forced provider precedence, first set your default provider in `Network Settings → Contract Definitions`, then use a deep link with `service=...` to override it temporarily.
