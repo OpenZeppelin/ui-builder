@@ -6,7 +6,7 @@ import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
 import { ContractSchema, type Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
 import { logger, parseDeepLink, routerService } from '@openzeppelin/contracts-ui-builder-utils';
 
-import { resolveNetworkIdFromDeepLink } from '@/core/deeplink/resolveNetwork';
+import { extractDeepLinkParams, resolveNetworkIdFromDeepLink } from '@/core/deeplink';
 import { getNetworkById } from '@/core/ecosystemManager';
 import { BuilderFormConfig } from '@/core/types/FormTypes';
 
@@ -158,11 +158,13 @@ export function useBuilderLifecycle(
 
       // Deep-link handling: ecosystem (required) + networkId/chainId + identifier (address) + optional service
       const params = parseDeepLink();
-      const urlEcosystem = (params.ecosystem || '').trim();
-      const urlNetworkId = params.networkId || params.networkid || null;
-      const urlAddress = params.contractAddress || params.address || params.identifier || null;
-      const urlForcedService = typeof params.service === 'string' ? params.service : null;
-      const urlChainId = params.chainId || null;
+      const {
+        ecosystem: urlEcosystem,
+        networkId: urlNetworkId,
+        address: urlAddress,
+        forcedService: urlForcedService,
+        chainId: urlChainId,
+      } = extractDeepLinkParams(params);
 
       // Require ecosystem for deep link to be considered
       if (!urlEcosystem) {
