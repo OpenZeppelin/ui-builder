@@ -1,6 +1,6 @@
 # Solana Adapter (`@openzeppelin/contracts-ui-builder-adapter-solana`)
 
-This package provides the `ContractAdapter` implementation for the Solana blockchain for the Contracts UI Builder.
+This package provides the `ContractAdapter` implementation for the Solana blockchain for the UI Builder.
 
 **Note:** While the basic structure is in place, including network configuration definitions, the core adapter logic for Solana-specific operations is currently a placeholder and will be implemented in future development phases.
 

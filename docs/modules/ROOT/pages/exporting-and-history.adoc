@@ -4,7 +4,7 @@ Once you have completed customizing your form it's ready to ship! There are a fe
 
 == Exporting
 
-On the last step of the UI builder you can click the export button to download a zip file of your form as a VIte + React project.
+On the last step of the UI Builder you can click the export button to download a zip file of your form as a Vite + React project.
 
 image::exporting-export-button.png[Exporting export button]
 
@@ -24,7 +24,7 @@ pnpm dev
 
 == History
 
-As you use the Contracts UI Builder the app will store a local history of all the forms you've built which can be see in the sidebar.
+As you use the UI Builder the app will store a local history of all the forms you've built which can be see in the sidebar.
 
 image::exporting-history-contracts.png[Exporting history contracts]
 

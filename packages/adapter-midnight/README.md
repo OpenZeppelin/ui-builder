@@ -1,6 +1,6 @@
 # Midnight Adapter (`@openzeppelin/contracts-ui-builder-adapter-midnight`)
 
-This package provides the `ContractAdapter` implementation for the Midnight Network for the Contracts UI Builder.
+This package provides the `ContractAdapter` implementation for the Midnight Network for the UI Builder.
 
 ## Current Status: Wallet Connection Implemented
 

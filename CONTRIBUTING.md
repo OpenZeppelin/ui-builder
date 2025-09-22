@@ -1,6 +1,6 @@
-# Contributing to Contracts UI Builder
+# Contributing to UI Builder
 
-Thank you for considering contributing to Contracts UI Builder! This document outlines the process for contributing to the project.
+Thank you for considering contributing to UI Builder! This document outlines the process for contributing to the project.
 
 ## Development Process
 

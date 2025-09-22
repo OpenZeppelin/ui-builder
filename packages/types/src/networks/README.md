@@ -1,10 +1,10 @@
 # Network Configuration Pattern
 
-This document explains the pattern for defining network configurations in the Contracts UI Builder's ecosystem of packages.
+This document explains the pattern for defining network configurations in the UI Builder's ecosystem of packages.
 
 ## Overview
 
-The Contracts UI Builder supports multiple blockchain ecosystems (EVM, Solana, Stellar, Midnight) with various networks (mainnet, testnets, etc.) within each ecosystem. To maintain a chain-agnostic architecture while preserving type safety and separation of concerns, we use a pattern where:
+The UI Builder supports multiple blockchain ecosystems (EVM, Solana, Stellar, Midnight) with various networks (mainnet, testnets, etc.) within each ecosystem. To maintain a chain-agnostic architecture while preserving type safety and separation of concerns, we use a pattern where:
 
 1. Network configurations are defined in their respective adapter packages
 2. Each adapter exports its network configurations

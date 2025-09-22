@@ -1,6 +1,6 @@
 # EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
 
-This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Contracts UI Builder.
+This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the UI Builder.
 
 It is responsible for:
 
@@ -29,7 +29,7 @@ The adapter selects the appropriate strategy at runtime based on the `ExecutionC
 
 ### Configuration
 
-In the Contracts UI Builder, the execution method is configured in the "Customize" step. The UI provides options to select between `EOA` and `Relayer` and configure their specific parameters (e.g., Relayer API credentials, EOA address restrictions).
+In the UI Builder, the execution method is configured in the "Customize" step. The UI provides options to select between `EOA` and `Relayer` and configure their specific parameters (e.g., Relayer API credentials, EOA address restrictions).
 
 This configuration is then passed to the `EvmAdapter`'s `signAndBroadcast` method, which uses a factory to instantiate the correct execution strategy.
 
@@ -101,7 +101,7 @@ Network configurations for various EVM chains (mainnets and testnets) are export
 
 The `EvmNetworkConfig` objects defined in `src/networks/` (e.g., `ethereumMainnet`) each specify a default public `rpcUrl`.
 
-This default RPC URL can be overridden at runtime by the consuming application (either the main Contracts UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
+This default RPC URL can be overridden at runtime by the consuming application (either the main UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
 
 To override an RPC URL, the application's configuration should define an entry in the `rpcEndpoints` section, keyed by the network's string ID (e.g., `"ethereum-mainnet"`). For example:
 
