@@ -49,10 +49,7 @@ export function UIBuilder() {
       // Mark that we've initialized if this is the first selection
       if (!hasInitializedNetworkRef.current) {
         hasInitializedNetworkRef.current = true;
-        logger.info(
-          'UIBuilder',
-          '🚀 Initial network selection - triggering wallet switch'
-        );
+        logger.info('UIBuilder', '🚀 Initial network selection - triggering wallet switch');
       }
     }
 
@@ -76,10 +73,7 @@ export function UIBuilder() {
     if (!state.selectedAdapter || !state.networkToSwitchTo || !state.selectedNetworkConfigId) {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
       if (!state.networkToSwitchTo && isAdapterReady) {
-        logger.info(
-          'UIBuilder',
-          'Target network cleared, ensuring isAdapterReady is false.'
-        );
+        logger.info('UIBuilder', 'Target network cleared, ensuring isAdapterReady is false.');
         setIsAdapterReady(false);
       }
       return;
