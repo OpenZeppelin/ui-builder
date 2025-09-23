@@ -28,4 +28,4 @@ B) If the context includes a specific feature without ecosystem adapter (e.g. Du
 ## Important
 
 - All tickets should be created under the `PLAT` team id.
-- All tickets should be created under the `OSS Contracts UI Builder` project.
+- All tickets should be created under the `OSS UI Builder` project.
