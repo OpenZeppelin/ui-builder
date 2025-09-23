@@ -1,6 +1,6 @@
 = Building New Adapters
 
-This document provides a comprehensive overview of the Contracts UI Builder's architecture, with a focus on the patterns and requirements for creating new ecosystem adapters. It's intended for developers tasked with extending the platform to support new blockchains.
+This document provides a comprehensive overview of the UI Builder's architecture, with a focus on the patterns and requirements for creating new ecosystem adapters. It's intended for developers tasked with extending the platform to support new blockchains.
 
 == Core Architecture: The Adapter Pattern
 

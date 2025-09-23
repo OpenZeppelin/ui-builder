@@ -1,6 +1,6 @@
 # Adding New Field Components
 
-This document outlines the step-by-step process for adding new field components to the Contracts UI Builder system.
+This document outlines the step-by-step process for adding new field components to the UI Builder system.
 
 ## Architecture Overview
 
@@ -248,7 +248,6 @@ Here's an example of creating a SelectField:
    ```tsx
    // packages/renderer/src/components/ui/select.tsx
    import * as SelectPrimitive from '@radix-ui/react-select';
-
    import * as React from 'react';
 
    import { cn } from '@openzeppelin/contracts-ui-builder-utils';
@@ -293,7 +292,6 @@ Here's an example of creating a SelectField:
 
    import { Label } from '../ui/label';
    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-
    import { BaseFieldProps } from './BaseField';
 
    export interface SelectOption {

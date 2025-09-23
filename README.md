@@ -1,4 +1,4 @@
-# Contracts UI Builder 🧩
+# UI Builder 🧩
 
 > Spin up a front-end for any contract call in seconds. Select the function, auto-generate a React UI with wallet connect and multi-network support, and export a complete app.
 

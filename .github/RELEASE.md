@@ -1,6 +1,6 @@
 # CI/CD Workflows & Three-Environment System
 
-This document explains the comprehensive CI/CD system for the **Contracts UI Builder** project, including our three-environment strategy and automated workflows.
+This document explains the comprehensive CI/CD system for the **UI Builder** project, including our three-environment strategy and automated workflows.
 
 ## 📋 **Table of Contents**
 
@@ -16,7 +16,7 @@ This document explains the comprehensive CI/CD system for the **Contracts UI Bui
 
 ## 🎯 **Overview**
 
-The Contracts UI Builder uses a sophisticated CI/CD system that supports three distinct environments, each optimized for different use cases:
+The UI Builder uses a sophisticated CI/CD system that supports three distinct environments, each optimized for different use cases:
 
 - **🏠 Local Development**: For developers working on the codebase
 - **🧪 Staging Environment**: For QA testing with latest features

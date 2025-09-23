@@ -1,6 +1,6 @@
 # Adapter Architecture Guide
 
-This document outlines the standardized architecture for blockchain adapters within the Contracts UI Builder project.
+This document outlines the standardized architecture for blockchain adapters within the UI Builder project.
 
 ## 1. Overview
 
@@ -272,7 +272,7 @@ This layered approach ensures that the application remains functional out-of-the
 
 ## 8. State Management & Storage Integration
 
-The Contracts UI Builder includes a sophisticated state management system and local storage capabilities that work seamlessly with the adapter architecture.
+The UI Builder includes a sophisticated state management system and local storage capabilities that work seamlessly with the adapter architecture.
 
 ### 8.1. State Management Architecture
 

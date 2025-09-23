@@ -2,7 +2,7 @@
 
 **Feature Branch**: `[001-sourcify-integration]`  
 **Created**: 2025-09-16  
-**Status**: Draft  
+**Status**: Implemented  
 **Input**: User description: "Integrate Sourcify as a fallback source to fetch verified contract ABIs when Etherscan fails or is unavailable. Add URL query parameters so Sourcify can deep-link users into the Builder, e.g., `?address=0xdAC17F958D2ee523a2206206994597C13D831ec7&chainId=1`. Keep Etherscan as primary; Sourcify requires no API key and is open source."
 
 ## Execution Flow (main)

@@ -2,7 +2,7 @@
 
 == Supported Networks
 
-Currently the Contracts UI Builder supports the following EVM networks
+Currently the UI Builder supports the following EVM networks
 
 *Mainnet*
 
@@ -44,7 +44,7 @@ In this modal you can configure a custom RPC URL which can include path API key 
 
 image::networks-rpc-settings.png[Networks RPC settings]
 
-Under the explorer tab you can configure block explorers like Etherscan. By default the Contracts UI Builder uses public APIs that can be rate limited, so be sure to provide your own API key if that becomes an issue.
+Under the explorer tab you can configure block explorers like Etherscan. By default the UI Builder uses public APIs that can be rate limited, so be sure to provide your own API key if that becomes an issue.
 
 image::networks-explorer-settings.png[Networks explorer settings]
 

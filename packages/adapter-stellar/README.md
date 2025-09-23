@@ -1,6 +1,6 @@
 # Stellar Adapter (`@openzeppelin/contracts-ui-builder-adapter-stellar`)
 
-This package provides the `ContractAdapter` implementation for the Stellar (Soroban) ecosystem for the Contracts UI Builder.
+This package provides the `ContractAdapter` implementation for the Stellar (Soroban) ecosystem for the UI Builder.
 
 It is responsible for:
 

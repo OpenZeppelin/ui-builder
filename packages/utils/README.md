@@ -1,6 +1,6 @@
 # @openzeppelin/contracts-ui-builder-utils
 
-This package provides a set of shared, framework-agnostic utility functions used across the entire Contracts UI Builder ecosystem.
+This package provides a set of shared, framework-agnostic utility functions used across the entire UI Builder ecosystem.
 
 ## Purpose
 
