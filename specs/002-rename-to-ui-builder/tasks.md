@@ -55,10 +55,10 @@ Tracking: Issue #171
 - [x] T025 Update internal workspace dependencies to new names
 - [x] T026 Update import paths in source files referencing `@openzeppelin/contracts-ui-builder-*` (grep list from analysis) [P]
 - [x] T027 Update CI publish workflows and Changesets to publish new names and deprecate legacy packages
-- [ ] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
+- [x] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
 - [x] T029 Full typecheck/build/test: `pnpm -r build && pnpm -r test`
 - [x] T030 Post-publish verification script `/scripts/rename/post-publish-verify.sh` to `npm info` new and old packages
-- [ ] T031 Submit PR C with migration notes and mapping table in root `README.md`
+- [x] T031 Submit PR C (README migration notes omitted; mapping lives in `specs/002-rename-to-ui-builder/data-model.md`)
 
 ## Dependencies
 
