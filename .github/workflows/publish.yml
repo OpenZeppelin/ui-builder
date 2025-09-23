@@ -124,6 +124,7 @@ jobs:
           NPM_CONFIG_PROVENANCE: true
           TARBALL: ${{ needs.provenance.outputs.package-name }}
           NPM_CONFIG_ACCESS: public
+          SKIP_PUBLISH_BUILD: true
 
       - name: Extract version from package.json
         id: extract_version
