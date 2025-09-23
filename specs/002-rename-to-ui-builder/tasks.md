@@ -38,6 +38,9 @@ Tracking: Issue #170
 - [x] T016 [P] Update internal docs headings and section titles across `/docs/**` and `/packages/**/README.md`
 - [x] T017 [P] Update comments/JSDoc references to use "UI Builder" [P]
 - [x] T018 [P] Update links and image alt text in READMEs [P]
+- [x] T018a [P] Rename code identifiers (components/classes/functions) containing `ContractsUI*` to `UI*`; update all exports and imports
+- [x] T018b [P] Rename file and directory paths containing `ContractsUIBuilder` to `UIBuilder`; update import paths
+- [x] T018c Update Storybook stories, docs, and test snapshots to use new identifiers
 - [x] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
 - [x] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
 - [x] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
