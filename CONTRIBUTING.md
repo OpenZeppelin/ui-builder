@@ -49,10 +49,10 @@ Before proposing architectural changes, adding new adapters, or modifying core t
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/contracts-ui-builder.git
+git clone https://github.com/your-username/ui-builder.git
 
 # Navigate to the project directory
-cd contracts-ui-builder
+cd ui-builder
 
 # Install dependencies
 pnpm install

@@ -54,7 +54,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "url": "https://github.com/OpenZeppelin/ui-builder",
     "directory": "packages/renderer"
   },
   "peerDependencies": {

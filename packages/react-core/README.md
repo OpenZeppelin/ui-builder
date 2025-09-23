@@ -1,6 +1,6 @@
 # @openzeppelin/contracts-ui-builder-react-core
 
-This package provides core React Context providers and hooks for the OpenZeppelin Contracts UI Builder ecosystem. It centralizes the management of global wallet state, active network selection, active adapter instances, and the consumption of adapter-specific UI capabilities (like facade hooks and UI context providers).
+This package provides core React Context providers and hooks for the OpenZeppelin UI Builder ecosystem. It centralizes the management of global wallet state, active network selection, active adapter instances, and the consumption of adapter-specific UI capabilities (like facade hooks and UI context providers).
 
 It is a foundational package intended to be used by the main `@openzeppelin/contracts-ui-builder-app` application and can also be leveraged by exported standalone applications to ensure consistent wallet and adapter integration patterns.
 

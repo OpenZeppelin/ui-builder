@@ -1,6 +1,6 @@
 ## Deep Link Guide
 
-This guide explains how deep links work in the Contracts UI Builder and provides copy‑pasteable examples. Deep links let you prefill the network and contract identifier, and optionally force a specific contract definition provider (e.g., Etherscan or Sourcify).
+This guide explains how deep links work in the UI Builder and provides copy‑pasteable examples. Deep links let you prefill the network and contract identifier, and optionally force a specific contract definition provider (e.g., Etherscan or Sourcify).
 
 ### Behavior
 

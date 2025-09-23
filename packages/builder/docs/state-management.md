@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Contracts UI Builder uses a robust and performant state management system built on [Zustand](https://github.com/pmndrs/zustand). This approach provides excellent performance, type safety, and a first-class developer experience with a minimal API.
+The UI Builder uses a robust and performant state management system built on [Zustand](https://github.com/pmndrs/zustand). This approach provides excellent performance, type safety, and a first-class developer experience with a minimal API.
 
 ## Table of Contents
 

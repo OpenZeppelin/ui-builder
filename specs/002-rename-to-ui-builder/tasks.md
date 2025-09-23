@@ -34,13 +34,13 @@ Tracking: Issue #169, PR #168
 
 Tracking: Issue #170
 
-- [ ] T015 Update repository description/title; prepare slug rename in `README.md`, `docs/antora.yml`, badges
+- [x] T015 Update repository description/title; prepare slug rename in `README.md`, `docs/antora.yml`, badges
 - [x] T016 [P] Update internal docs headings and section titles across `/docs/**` and `/packages/**/README.md`
 - [x] T017 [P] Update comments/JSDoc references to use "UI Builder" [P]
 - [x] T018 [P] Update links and image alt text in READMEs [P]
-- [ ] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
-- [ ] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
-- [ ] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
+- [x] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
+- [x] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
+- [x] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
 - [ ] T022 Submit PR B
 
 ## PR C: Packages & Imports + Migration

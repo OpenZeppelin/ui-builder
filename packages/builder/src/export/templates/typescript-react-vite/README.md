@@ -1,4 +1,4 @@
-# Contracts UI Builder Generated App
+# UI Builder Generated App
 
 {{ PROJECT_DESCRIPTION }}
 
@@ -164,4 +164,4 @@ This will create a production-ready build in the `dist/` directory.
 - [React Documentation](https://react.dev/)
 - [Vite Documentation](https://vitejs.dev/)
 - [OpenZeppelin Docs](https://docs.openzeppelin.com/)
-- [Transaction Renderer Documentation](https://github.com/OpenZeppelin/contracts-ui-builder)
+- [Transaction Renderer Documentation](https://github.com/OpenZeppelin/ui-builder)

@@ -1,6 +1,6 @@
 # @openzeppelin/contracts-ui-builder-storage
 
-Local storage services for the OpenZeppelin Contracts UI Builder ecosystem.
+Local storage services for the OpenZeppelin UI Builder ecosystem.
 
 ## Description
 
@@ -78,7 +78,7 @@ function MyComponent() {
 ### Creating a Custom Storage Service
 
 ```typescript
-import { DexieStorage, db } from '@openzeppelin/contracts-ui-builder-storage';
+import { db, DexieStorage } from '@openzeppelin/contracts-ui-builder-storage';
 
 interface TransactionRecord extends BaseRecord {
   hash: string;

@@ -54,4 +54,4 @@ Learn how you can customize xref:networks.adoc[networks] or customize the xref:f
 
 Visit the GitHub repo with the link below and open an issue if you have any problems!
 
-https://github.com/OpenZeppelin/contracts-ui-builder[GitHub Repo]
+https://github.com/OpenZeppelin/ui-builder[GitHub Repo]

@@ -1,6 +1,6 @@
-# Contracts UI Builder App
+# UI Builder App
 
-The main application for the Contracts UI Builder monorepo. This package contains the application builder UI and core functionality.
+The main application for the UI Builder monorepo. This package contains the application builder UI and core functionality.
 
 ## Structure
 
@@ -52,7 +52,7 @@ For more details on the styling system, see the [Styles README](../styles/README
 
 ## Type System
 
-The builder package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the Contracts UI Builder ecosystem. These include:
+The builder package uses type definitions from the `@openzeppelin/contracts-ui-builder-types` package, which serves as the single source of truth for types used across the UI Builder ecosystem. These include:
 
 - **Contract Types**: Definitions for blockchain contracts and their schemas
 - **Adapter Types**: Interfaces for chain-specific adapters

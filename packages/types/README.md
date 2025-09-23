@@ -1,12 +1,12 @@
-# Contracts UI Builder Types
+# UI Builder Types
 
-This package contains shared TypeScript type definitions for the OpenZeppelin Contracts UI Builder ecosystem.
+This package contains shared TypeScript type definitions for the OpenZeppelin UI Builder ecosystem.
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
 
 ## Purpose
 
-This package serves as the single source of truth for all shared types used across the Contracts UI Builder packages, including:
+This package serves as the single source of truth for all shared types used across the UI Builder packages, including:
 
 - Contract and blockchain related types
 - Form field and layout definitions
@@ -194,4 +194,4 @@ pnpm test
 
 ## License
 
-[MIT](https://github.com/OpenZeppelin/contracts-ui-builder/blob/main/LICENSE) © OpenZeppelin
+[MIT](https://github.com/OpenZeppelin/ui-builder/blob/main/LICENSE) © OpenZeppelin
