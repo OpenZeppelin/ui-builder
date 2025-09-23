@@ -6,14 +6,14 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/contracts-ui-builder-adapter-evm': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-adapter-midnight': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-adapter-solana': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-adapter-stellar': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-react-core': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-renderer': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-storage': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-types': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-ui': '0.8.0',
-  '@openzeppelin/contracts-ui-builder-utils': '0.8.0',
+  '@openzeppelin/contracts-ui-builder-adapter-evm': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-adapter-midnight': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-adapter-solana': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-adapter-stellar': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-react-core': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-renderer': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-storage': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-types': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-ui': '0.9.0',
+  '@openzeppelin/contracts-ui-builder-utils': '0.9.0',
 };
