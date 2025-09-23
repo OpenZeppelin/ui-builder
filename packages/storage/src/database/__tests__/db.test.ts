@@ -13,7 +13,7 @@ describe('Database Setup', () => {
 
   describe('database instance', () => {
     it('should have correct database name', () => {
-      expect(db.name).toBe('ContractsUIBuilder');
+      expect(db.name).toBe('UIBuilder');
     });
 
     it('should be a Dexie instance', () => {

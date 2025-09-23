@@ -35,7 +35,7 @@
   - Path: `packages/utils/src/deepLink.ts`
   - Use typed unions for provider keys per adapter
 - [x] T012 Integrate RouterService usage in builder deep-link handling
-  - Path: `packages/builder/src/components/ContractsUIBuilder/hooks/useBuilderLifecycle.ts` (or central loader)
+  - Path: `packages/builder/src/components/UIBuilder/hooks/useBuilderLifecycle.ts` (or central loader)
   - Map params to `getContractDefinitionInputs()` names
 - [x] T013 EVM: Implement thin Sourcify provider module (fallback only)
   - Path: `packages/adapter-evm/src/abi/sourcify.ts`

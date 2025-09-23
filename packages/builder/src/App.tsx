@@ -13,9 +13,9 @@ import {
 
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
-import { ContractsUIBuilder } from './components/ContractsUIBuilder';
-import { useUIBuilderState } from './components/ContractsUIBuilder/hooks';
 import AppSidebar from './components/Sidebar/AppSidebar';
+import { UIBuilder } from './components/UIBuilder';
+import { useUIBuilderState } from './components/UIBuilder/hooks';
 import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
@@ -62,7 +62,7 @@ function AppContent() {
         <Header title="UI Builder" onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
 
         <main className="pb-8 flex-1">
-          <ContractsUIBuilder />
+          <UIBuilder />
         </main>
 
         {/* Footer */}

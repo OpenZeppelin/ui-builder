@@ -1,5 +1,5 @@
 /**
- * Step indices for the ContractsUIBuilder wizard navigation.
+ * Step indices for the UIBuilder wizard navigation.
  * These must match the order of steps in the wizard.
  */
 export const STEP_INDICES = {

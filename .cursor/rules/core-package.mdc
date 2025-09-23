@@ -14,7 +14,7 @@ alwaysApply: false
 
 ## 2. Core Functionality
 
-- **Form Builder UI:** (`src/components/ContractsUIBuilder/`) Contains the multi‑step wizard and components allowing users to select a blockchain/contract/function, customize generated form fields (labels, validation, visibility), and preview the form in real time using the renderer package.
+- **Form Builder UI:** (`src/components/UIBuilder/`) Contains the multi‑step wizard and components allowing users to select a blockchain/contract/function, customize generated form fields (labels, validation, visibility), and preview the form in real time using the renderer package.
 - **Chain‑Agnostic Core:** (`src/core/`) Houses foundational logic independent of specific blockchains. This includes:
   - Shared TypeScript types live in `@openzeppelin/contracts-ui-builder-types` (single source of truth). The `ContractAdapter` interface is defined at `packages/types/src/adapters/base.ts` and implemented by adapter packages.
   - Utility functions: Prefer `@openzeppelin/contracts-ui-builder-utils` (e.g., `logger`, `AppConfigService`, `cn`) over ad‑hoc implementations.
@@ -42,7 +42,7 @@ alwaysApply: false
   - Leverages Tailwind utility classes extensively for component styling.
   - Consumes centralized root configs (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) via lightweight JS proxy files. **Does not** define its own theme; it inherits the centralized theme.
 - **State Management:** Primarily relies on standard React Hooks (`useState`, `useReducer`, `useContext`). The Context API is used for managing state across the multi-step form builder wizard.
-- **State Management:** Uses modular React hooks and providers (see `@openzeppelin/contracts-ui-builder-react-core` for adapter/wallet context) and focused builder hooks under `src/components/ContractsUIBuilder/hooks` for the multi-step wizard.
+- **State Management:** Uses modular React hooks and providers (see `@openzeppelin/contracts-ui-builder-react-core` for adapter/wallet context) and focused builder hooks under `src/components/UIBuilder/hooks` for the multi-step wizard.
 - **Export System Flow:** User Interaction -> UI State (`BuilderFormConfig`) -> `FormSchemaFactory` (using an external Adapter) -> Render schema -> `AppExportSystem` (orchestrates `AppCodeGenerator`, `TemplateManager`, `PackageManager`, `StyleManager`) -> `ZipGenerator` -> Download.
 - **Vite Build & Plugins:** Uses Vite for the development server and production builds (`vite.config.ts`). The builder defines virtual modules to reliably load cross‑package assets/config and uses `import.meta.glob` for template discovery.
 
