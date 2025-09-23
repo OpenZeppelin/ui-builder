@@ -1,5 +1,20 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 0.9.0
+
+### Patch Changes
+
+- [#130](https://github.com/OpenZeppelin/contracts-ui-builder/pull/130) [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47) Thanks [@pasevin](https://github.com/pasevin)! - Refactor wallet interface architecture for consistency
+  - Move `SolanaWalletConnectionStatus` interface to `wallet/types.ts` for better organization
+  - Update wallet connection functions to use two-parameter callback signature
+  - Maintain structural compatibility with base `WalletConnectionStatus` interface
+  - Align wallet directory structure with other adapters for architectural consistency
+  - Update barrel exports to include new wallet types
+
+- Updated dependencies [[`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`dca7f1c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/dca7f1c4eb93be062c687186b85bd6f61eca8b93), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47)]:
+  - @openzeppelin/contracts-ui-builder-types@0.9.0
+  - @openzeppelin/contracts-ui-builder-utils@0.9.0
+
 ## 0.8.0
 
 ### Patch Changes
