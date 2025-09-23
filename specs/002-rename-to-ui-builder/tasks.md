@@ -1,5 +1,7 @@
 # Tasks: Rename to 'UI Builder'
 
+Parent issue: #165
+
 **Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
@@ -17,6 +19,8 @@
 
 ## PR A: User-Facing Rename Sweep
 
+Tracking: Issue #169, PR #168
+
 - [x] T007 Update builder app title and visible strings in `packages/builder/index.html` and `packages/builder/src/App.tsx`
 - [x] T008 [P] Replace UI strings across builder components under `packages/builder/src/components/` referencing legacy name
 - [x] T009 [P] Update export templates text in `packages/builder/src/export/templates/typescript-react-vite/README.md` and `index.html`
@@ -28,6 +32,8 @@
 
 ## PR B: Codebase & Docs Rename
 
+Tracking: Issue #170
+
 - [ ] T015 Update repository description/title; prepare slug rename in `README.md`, `docs/antora.yml`, badges
 - [x] T016 [P] Update internal docs headings and section titles across `/docs/**` and `/packages/**/README.md`
 - [x] T017 [P] Update comments/JSDoc references to use "UI Builder" [P]
@@ -38,6 +44,8 @@
 - [ ] T022 Submit PR B
 
 ## PR C: Packages & Imports + Migration
+
+Tracking: Issue #171
 
 - [ ] T023 Finalize mapping in `/specs/002-rename-to-ui-builder/data-model.md` `PackageMapping` table
 - [ ] T024 Update package names in package manifests across workspace (e.g., `packages/types/package.json`, `packages/utils/package.json`, `packages/ui/package.json`, others per mapping)
