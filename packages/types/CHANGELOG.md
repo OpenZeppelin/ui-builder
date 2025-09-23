@@ -1,5 +1,23 @@
 # @openzeppelin/ui-builder-types
 
+## 0.9.0
+
+### Minor Changes
+
+- [#130](https://github.com/OpenZeppelin/contracts-ui-builder/pull/130) [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47) Thanks [@pasevin](https://github.com/pasevin)! - support for new BytesField component with validation
+
+- [#162](https://github.com/OpenZeppelin/contracts-ui-builder/pull/162) [`dca7f1c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/dca7f1c4eb93be062c687186b85bd6f61eca8b93) Thanks [@pasevin](https://github.com/pasevin)! - Add Sourcify fallback, deep-link orchestration, provider settings UI, RouterService/deepLink utils, and ContractAdapter/app-config extensions.
+
+- [#130](https://github.com/OpenZeppelin/contracts-ui-builder/pull/130) [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47) Thanks [@pasevin](https://github.com/pasevin)! - New FormField UI component for enum type handling and representation
+
+### Patch Changes
+
+- [#130](https://github.com/OpenZeppelin/contracts-ui-builder/pull/130) [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47) Thanks [@pasevin](https://github.com/pasevin)! - Enhance base wallet connection status interface
+  - Enhance `WalletConnectionStatus` interface with additional universal properties (isConnecting, isDisconnected, isReconnecting, status, connector)
+  - Remove chain-specific properties (addresses, chain) from base interface to maintain chain-agnostic design
+  - Support inheritance pattern for chain-specific extensions while preserving structural typing compatibility
+  - Enable richer wallet UX data across all adapters without sacrificing architectural principles
+
 ## 0.8.0
 
 ### Minor Changes

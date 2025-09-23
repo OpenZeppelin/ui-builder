@@ -1,5 +1,23 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.9.0
+
+### Patch Changes
+
+- [#130](https://github.com/OpenZeppelin/contracts-ui-builder/pull/130) [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47) Thanks [@pasevin](https://github.com/pasevin)! - Fix Freighter wallet popup loop and refactor wallet interface architecture
+  - **Fix critical bug**: Replace aggressive polling with event-driven wallet connection approach in `StellarWalletUiRoot`
+  - **Eliminate infinite Freighter popups** that occurred when clicking wallet connection button
+  - Add `stellarWalletImplementationManager` singleton pattern following EVM adapter architecture
+  - Update adapter to use new implementation manager and return `StellarWalletConnectionStatus`
+  - Move wallet interfaces (`StellarWalletConnectionStatus`, `StellarConnectionStatusListener`) to `wallet/types.ts`
+  - Implement event subscriptions with minimal fallback polling (5-minute intervals instead of 1-second)
+  - Align wallet directory structure with EVM adapter for architectural consistency
+
+- Updated dependencies [[`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`dca7f1c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/dca7f1c4eb93be062c687186b85bd6f61eca8b93), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47)]:
+  - @openzeppelin/contracts-ui-builder-types@0.9.0
+  - @openzeppelin/contracts-ui-builder-utils@0.9.0
+  - @openzeppelin/contracts-ui-builder-ui@0.9.0
+
 ## 0.8.0
 
 ### Patch Changes
