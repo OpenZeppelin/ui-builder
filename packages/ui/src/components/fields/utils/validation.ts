@@ -3,7 +3,7 @@
  */
 import { FieldError } from 'react-hook-form';
 
-import { FieldValidation, MapEntry } from '@openzeppelin/contracts-ui-builder-types';
+import { FieldValidation, MapEntry } from '@openzeppelin/ui-builder-types';
 
 /**
  * Determines if a field has an error

@@ -1,4 +1,4 @@
-import type { WalletConnectionStatus } from '@openzeppelin/contracts-ui-builder-types';
+import type { WalletConnectionStatus } from '@openzeppelin/ui-builder-types';
 
 /**
  * Solana-specific wallet connection status extending the base interface.

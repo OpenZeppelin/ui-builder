@@ -4,14 +4,14 @@
  * Utilities for form field transformations, validation, and more.
  * These functions handle converting between UI and blockchain data formats.
  */
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import {
   FieldTransforms,
   FieldType,
   FormFieldType,
   FormValues,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Parameter constraints for validation and default value generation

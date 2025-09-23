@@ -3,9 +3,9 @@ import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { FieldType, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { FieldType, FormFieldType } from '@openzeppelin/ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
 
 import { coerceHardcodedValue } from './utils/fieldEditorUtils';
 

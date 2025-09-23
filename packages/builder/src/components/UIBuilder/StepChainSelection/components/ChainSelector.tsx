@@ -3,9 +3,9 @@ import { Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
-import { EmptyState } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import { EmptyState } from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import {

@@ -1,8 +1,8 @@
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { ReactNode } from 'react';
 
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { Button } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useAnalytics } from '../../hooks/useAnalytics';
 

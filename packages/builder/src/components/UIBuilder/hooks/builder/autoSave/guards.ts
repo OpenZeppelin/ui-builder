@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { uiBuilderStore } from '../../uiBuilderStore';
 

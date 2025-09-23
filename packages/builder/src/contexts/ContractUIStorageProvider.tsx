@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { useContractUIStorage as useContractUIStorageHook } from '@openzeppelin/contracts-ui-builder-storage';
+import { useContractUIStorage as useContractUIStorageHook } from '@openzeppelin/ui-builder-storage';
 
 import { ContractUIStorageContext } from './ContractUIStorageContext';
 

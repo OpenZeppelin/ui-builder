@@ -3,7 +3,7 @@ import {
   ContractFunction,
   ContractSchema,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 /**
  * Parses the string content of a Midnight contract's .d.ts file.

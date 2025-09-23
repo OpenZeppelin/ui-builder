@@ -1,5 +1,5 @@
-import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * RainbowKit configuration options definition

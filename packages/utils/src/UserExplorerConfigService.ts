@@ -1,4 +1,4 @@
-import type { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { UserExplorerConfig } from '@openzeppelin/ui-builder-types';
 
 import { logger } from './logger';
 

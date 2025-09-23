@@ -6,8 +6,8 @@ import {
   contractUIStorage,
   ContractUIStorage,
   type ContractUIRecord,
-} from '@openzeppelin/contracts-ui-builder-storage';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-storage';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';

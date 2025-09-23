@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import { ExecutionConfig, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import { ExecutionConfig, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 
 import { BuilderFormConfig } from '@/core/types/FormTypes';
 

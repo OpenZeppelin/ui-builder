@@ -11,7 +11,7 @@
  */
 import { createContext } from 'react';
 
-import type { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-builder-types';
 
 /**
  * Registry type that maps network IDs to their corresponding adapter instances

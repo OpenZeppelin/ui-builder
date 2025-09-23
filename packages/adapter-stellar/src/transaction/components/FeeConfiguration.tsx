@@ -1,7 +1,7 @@
 import React from 'react';
 import { Control } from 'react-hook-form';
 
-import { BooleanField, NumberField } from '@openzeppelin/contracts-ui-builder-ui';
+import { BooleanField, NumberField } from '@openzeppelin/ui-builder-ui';
 
 import type { StellarRelayerFormData } from './useStellarRelayerOptions';
 

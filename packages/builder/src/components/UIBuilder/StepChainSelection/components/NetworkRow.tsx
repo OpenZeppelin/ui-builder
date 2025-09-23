@@ -1,9 +1,9 @@
 import { NetworkIcon } from '@web3icons/react';
 import { Settings } from 'lucide-react';
 
-import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { Button } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import { getNetworkIconName, ICON_SIZE } from '../utils/utils';

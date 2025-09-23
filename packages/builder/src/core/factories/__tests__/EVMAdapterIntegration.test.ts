@@ -4,7 +4,7 @@ import type {
   ContractAdapter,
   ContractSchema,
   EvmNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 

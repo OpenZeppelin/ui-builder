@@ -6,16 +6,16 @@ import {
   useDerivedAccountStatus,
   useDerivedChainInfo,
   useDerivedSwitchChainStatus,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-react-core';
+import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

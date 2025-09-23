@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Import AppRuntimeConfig for typing mock JSON
-import type { AppRuntimeConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { AppRuntimeConfig } from '@openzeppelin/ui-builder-types';
 
 // Import the original logger to be mocked, and the service to be tested
 import { AppConfigService } from '../AppConfigService';
@@ -377,7 +377,7 @@ describe('AppConfigService', () => {
             },
             metadata: {
               name: 'My App',
-              description: 'App using OpenZeppelin Contracts UI Builder',
+              description: 'App using OpenZeppelin UI Builder',
             },
           },
           analytics: {

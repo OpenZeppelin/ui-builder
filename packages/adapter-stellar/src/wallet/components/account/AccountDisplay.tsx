@@ -1,9 +1,9 @@
 import { LogOut } from 'lucide-react';
 import React from 'react';
 
-import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
+import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
+import { Button } from '@openzeppelin/ui-builder-ui';
+import { cn, truncateMiddle } from '@openzeppelin/ui-builder-utils';
 
 import { useStellarAccount, useStellarDisconnect } from '../../hooks';
 

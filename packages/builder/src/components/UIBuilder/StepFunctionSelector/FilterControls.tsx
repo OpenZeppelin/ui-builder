@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-import { TextField } from '@openzeppelin/contracts-ui-builder-ui';
+import { TextField } from '@openzeppelin/ui-builder-ui';
 
 import type { FilterControlsProps } from './types';
 

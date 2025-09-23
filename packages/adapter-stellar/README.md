@@ -1,10 +1,10 @@
-# Stellar Adapter (`@openzeppelin/contracts-ui-builder-adapter-stellar`)
+# Stellar Adapter (`@openzeppelin/ui-builder-adapter-stellar`)
 
 This package provides the `ContractAdapter` implementation for the Stellar (Soroban) ecosystem for the UI Builder.
 
 It is responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-builder-types`.
 - Defining and exporting Stellar network configurations (Public Network and Testnet) as `StellarNetworkConfig` objects in `src/networks/` (Horizon URL, Soroban RPC URL, network passphrase, explorer URL, icon, etc.).
 - Loading Stellar contract definitions and metadata and transforming them into the builder’s chain‑agnostic `ContractSchema`.
 - Mapping Soroban value types to builder form fields and validating user input.
@@ -91,7 +91,7 @@ adapter-stellar/
 Instantiate the adapter with a specific `StellarNetworkConfig`:
 
 ```typescript
-import { StellarAdapter, stellarTestnet } from '@openzeppelin/contracts-ui-builder-adapter-stellar';
+import { StellarAdapter, stellarTestnet } from '@openzeppelin/ui-builder-adapter-stellar';
 
 const networkConfig = stellarTestnet; // or stellarPublic
 const stellarAdapter = new StellarAdapter(networkConfig);

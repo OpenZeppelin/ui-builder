@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { ContractFunction, ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-builder-types';
 
 import { getStellarWritableFunctions, isStellarViewFunction } from '../../src/query/view-checker';
 

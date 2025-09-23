@@ -11,7 +11,7 @@ import {
   DialogTitle,
   Input,
   Label,
-} from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-ui';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 

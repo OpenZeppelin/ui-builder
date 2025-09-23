@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ExecutionMethodType } from '@openzeppelin/contracts-ui-builder-types';
+import { ExecutionMethodType } from '@openzeppelin/ui-builder-types';
 
 import { ensureCompleteConfig } from '../utils/executionUtils';
 

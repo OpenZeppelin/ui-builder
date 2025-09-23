@@ -35,9 +35,9 @@
  */
 import { rendererConfig } from 'virtual:renderer-config';
 
-import type { RendererConfig } from '@openzeppelin/contracts-ui-builder-renderer';
-import { Ecosystem, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { RendererConfig } from '@openzeppelin/ui-builder-renderer';
+import { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -229,11 +229,11 @@ export class PackageManager {
     // Add the adapter package itself if available
     if (adapterPackageName) {
       combined[adapterPackageName] = 'workspace:*'; // Use workspace protocol for now
-      combined['@openzeppelin/contracts-ui-builder-types'] = 'workspace:*';
-      combined['@openzeppelin/contracts-ui-builder-ui'] = 'workspace:*';
-      combined['@openzeppelin/contracts-ui-builder-utils'] = 'workspace:*';
-      combined['@openzeppelin/contracts-ui-builder-renderer'] = 'workspace:*';
-      combined['@openzeppelin/contracts-ui-builder-react-core'] = 'workspace:*';
+      combined['@openzeppelin/ui-builder-types'] = 'workspace:*';
+      combined['@openzeppelin/ui-builder-ui'] = 'workspace:*';
+      combined['@openzeppelin/ui-builder-utils'] = 'workspace:*';
+      combined['@openzeppelin/ui-builder-renderer'] = 'workspace:*';
+      combined['@openzeppelin/ui-builder-react-core'] = 'workspace:*';
     }
 
     return combined;
@@ -419,12 +419,12 @@ export class PackageManager {
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
     const internalPackages = new Set([
-      '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/contracts-ui-builder-storage',
-      '@openzeppelin/contracts-ui-builder-types',
-      '@openzeppelin/contracts-ui-builder-utils',
-      '@openzeppelin/contracts-ui-builder-ui',
-      '@openzeppelin/contracts-ui-builder-react-core',
+      '@openzeppelin/ui-builder-renderer',
+      '@openzeppelin/ui-builder-storage',
+      '@openzeppelin/ui-builder-types',
+      '@openzeppelin/ui-builder-utils',
+      '@openzeppelin/ui-builder-ui',
+      '@openzeppelin/ui-builder-react-core',
       ...Object.values(adapterPackageMap),
     ]);
 
@@ -471,7 +471,7 @@ export class PackageManager {
 
     // Add a script to update the renderer package
     (packageJson.scripts as Record<string, string>)['update-renderer'] =
-      'npm update @openzeppelin/contracts-ui-builder-renderer';
+      'npm update @openzeppelin/ui-builder-renderer';
 
     // Add a script to check for outdated dependencies
     (packageJson.scripts as Record<string, string>)['check-deps'] = 'npm outdated';

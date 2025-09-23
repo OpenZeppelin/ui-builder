@@ -4,8 +4,8 @@ import type {
   Ecosystem,
   EvmNetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -102,10 +102,10 @@ describe('AppExportSystem', () => {
           // Simulate dependency logic: return base + adapter with correct versions
           const baseDeps = {
             react: '^19.0.0', // Correct version for assertion
-            '@openzeppelin/contracts-ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
-            '@openzeppelin/contracts-ui-builder-types': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/ui-builder-types': 'workspace:*', // Use consistent placeholder version
           };
-          const adapterDep = `@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`;
+          const adapterDep = `@openzeppelin/ui-builder-adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
         }),
       updatePackageJson: vi
@@ -204,9 +204,9 @@ describe('AppExportSystem', () => {
 
       // Verify dependencies contain types, renderer, and EVM adapter packages
       // Check PRESENCE only, as applyVersioningStrategy might change value
-      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-renderer');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
       // Check a base dependency from the mock config is still present
       expect(result.dependencies).toHaveProperty('react', '^19.0.0');
     });
@@ -239,12 +239,10 @@ describe('AppExportSystem', () => {
         funcId
       );
       expect(solanaResult.dependencies).toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-solana',
+        '@openzeppelin/ui-builder-adapter-solana',
         'workspace:*'
       );
-      expect(solanaResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-evm'
-      );
+      expect(solanaResult.dependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
 
       // Test with EVM config (use the mock defined at top level)
       const evmResult = await system.exportApp(
@@ -254,12 +252,10 @@ describe('AppExportSystem', () => {
         funcId
       );
       expect(evmResult.dependencies).toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-evm',
+        '@openzeppelin/ui-builder-adapter-evm',
         'workspace:*'
       );
-      expect(evmResult.dependencies).not.toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-solana'
-      );
+      expect(evmResult.dependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
     });
 
     it('should include field-specific dependencies based on form fields', async () => {

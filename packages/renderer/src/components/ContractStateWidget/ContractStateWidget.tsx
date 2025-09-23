@@ -5,15 +5,9 @@ import type {
   ContractFunction,
   ContractSchema,
   FullContractAdapter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { ViewFunctionsPanel } from './components/ViewFunctionsPanel';
 

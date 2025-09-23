@@ -1,6 +1,6 @@
 import type { Chain } from 'viem';
 
-import type { WalletConnectionStatus } from '@openzeppelin/contracts-ui-builder-types';
+import type { WalletConnectionStatus } from '@openzeppelin/ui-builder-types';
 
 /**
  * EVM-specific wallet connection status extending the base interface.

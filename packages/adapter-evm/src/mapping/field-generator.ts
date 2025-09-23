@@ -6,8 +6,8 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
 
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 

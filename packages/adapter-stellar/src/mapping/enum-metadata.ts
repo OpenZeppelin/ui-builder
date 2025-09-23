@@ -1,6 +1,6 @@
 import { xdr } from '@stellar/stellar-sdk';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Import the type extraction utility from the shared utils module
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';

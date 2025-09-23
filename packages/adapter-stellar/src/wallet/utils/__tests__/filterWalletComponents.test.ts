@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { EcosystemWalletComponents } from '@openzeppelin/contracts-ui-builder-types';
+import type { EcosystemWalletComponents } from '@openzeppelin/ui-builder-types';
 
 import {
   filterWalletComponents,

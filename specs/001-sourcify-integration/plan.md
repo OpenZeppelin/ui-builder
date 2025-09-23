@@ -1,6 +1,6 @@
 # Implementation Plan: Contract Definition Provider Integration + Deep Links (Chain-Agnostic)
 
-**Branch**: `001-sourcify-integration` | **Date**: 2025-09-16 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/001-sourcify-integration/spec.md
+**Branch**: `001-sourcify-integration` | **Date**: 2025-09-16 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/001-sourcify-integration/spec.md
 **Input**: Feature specification from `/specs/001-sourcify-integration/spec.md`
 
 ## Execution Flow (/plan command scope)
@@ -39,8 +39,8 @@ Implement a chain‑ and adapter‑agnostic contract definition provider integra
 **Constraints**: Adapter‑led, chain‑agnostic core; strict linting; no `any`.
 **Scale/Scope**: Multi‑adapter support; future providers can be added without core changes
 
-- Routing: Use React Router v6+ (Data APIs). Wrap with a small internal RouterService in `@openzeppelin/contracts-ui-builder-utils` to allow future router support without touching app code. Keep adapter‑specific deep‑link parsing in adapter packages.
-- Types: Introduce base common types in `@openzeppelin/contracts-ui-builder-types` for provider precedence, deep‑link schema, and router integration; extend per adapter as needed.
+- Routing: Use React Router v6+ (Data APIs). Wrap with a small internal RouterService in `@openzeppelin/ui-builder-utils` to allow future router support without touching app code. Keep adapter‑specific deep‑link parsing in adapter packages.
+- Types: Introduce base common types in `@openzeppelin/ui-builder-types` for provider precedence, deep‑link schema, and router integration; extend per adapter as needed.
 - Adapters: When extending `ContractAdapter` in `packages/types/src/adapters/base.ts`, update `.eslint/rules/no-extra-adapter-methods.cjs` accordingly. Keep `adapter.ts` as an orchestrator delegating to small modules.
 
 ## Constitution Check

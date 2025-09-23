@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Props for the Footer component

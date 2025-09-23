@@ -19,8 +19,8 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import { Footer } from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-react-core';
+import { Footer } from '@openzeppelin/ui-builder-ui';
 
 import GeneratedForm from './components/GeneratedForm';
 
@@ -85,14 +85,14 @@ import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
-} from '@openzeppelin/contracts-ui-builder-renderer';
+} from '@openzeppelin/ui-builder-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { Card, CardContent } from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-types';
+import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -276,12 +276,12 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-react-core": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-renderer": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-types": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-ui": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-utils": "^0.8.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.8.0",
+    "@openzeppelin/ui-builder-react-core": "^0.8.0",
+    "@openzeppelin/ui-builder-renderer": "^0.8.0",
+    "@openzeppelin/ui-builder-types": "^0.8.0",
+    "@openzeppelin/ui-builder-ui": "^0.8.0",
+    "@openzeppelin/ui-builder-utils": "^0.8.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",
@@ -311,7 +311,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
   },
 }
 `;
@@ -323,12 +323,12 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for package.json with Solana dependencies > package-json-solana 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-adapter-evm": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-react-core": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-renderer": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-types": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-ui": "^0.8.0",
-    "@openzeppelin/contracts-ui-builder-utils": "^0.8.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.8.0",
+    "@openzeppelin/ui-builder-react-core": "^0.8.0",
+    "@openzeppelin/ui-builder-renderer": "^0.8.0",
+    "@openzeppelin/ui-builder-types": "^0.8.0",
+    "@openzeppelin/ui-builder-ui": "^0.8.0",
+    "@openzeppelin/ui-builder-utils": "^0.8.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",
@@ -358,7 +358,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
   },
 }
 `;

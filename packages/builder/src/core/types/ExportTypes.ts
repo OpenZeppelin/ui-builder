@@ -4,7 +4,7 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { Ecosystem, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import type { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 

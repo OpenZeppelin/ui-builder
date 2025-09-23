@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import { getInvalidUrlMessage, isValidUrl } from '@openzeppelin/contracts-ui-builder-utils';
+import { getInvalidUrlMessage, isValidUrl } from '@openzeppelin/ui-builder-utils';
 
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';

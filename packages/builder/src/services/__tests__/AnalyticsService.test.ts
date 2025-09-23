@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import { appConfigService } from '@openzeppelin/ui-builder-utils';
 
 // Import after mocks are set up
 import { AnalyticsService } from '../AnalyticsService';
@@ -9,7 +9,7 @@ import { AnalyticsService } from '../AnalyticsService';
 const mockGtag = vi.fn();
 
 // Mock the app config service and logger
-vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   appConfigService: {
     isFeatureEnabled: vi.fn(),
   },

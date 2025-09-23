@@ -2,8 +2,8 @@ import type {
   ContractSchema,
   NetworkConfig,
   SolanaNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Assuming we might reuse some types temporarily
 // Placeholder type for wallet implementation

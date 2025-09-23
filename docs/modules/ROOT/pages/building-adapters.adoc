@@ -233,7 +233,7 @@ The functions `resolveRpcUrl` and `resolveExplorerConfig` in the EVM adapter pro
 == Step-by-Step Guide to Creating a New Adapter
 
 . *Create Package*: In the `packages/` directory, create `adapter-<chain-name>`.
-. *Define `package.json`*: Add dependencies on `@openzeppelin/contracts-ui-builder-types` and any chain-specific SDKs. Set up standard build scripts (copy from an existing adapter).
+. *Define `package.json`*: Add dependencies on `@openzeppelin/ui-builder-types` and any chain-specific SDKs. Set up standard build scripts (copy from an existing adapter).
 . *Implement `NetworkConfig`*: In `src/networks/`, define your chain's specific `...NetworkConfig` interface (extending `BaseNetworkConfig`) and create configuration objects for its mainnets and testnets. Export them and a combined list (e.g., `export const myChainNetworks = [...]`).
 . *Implement `ContractAdapter`*: Create `src/adapter.ts` and begin implementing the `ContractAdapter` interface, delegating logic to the modular subdirectories as described above. Start with the core methods and tackle the optional UI/wallet methods last.
 . *Register in Builder*: Open `packages/builder/src/core/ecosystemManager.ts` and:

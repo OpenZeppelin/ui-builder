@@ -1,6 +1,6 @@
 import Dexie from 'dexie';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Single database instance shared across all storage services
 export const db = new Dexie('UIBuilder');

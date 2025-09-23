@@ -1,4 +1,4 @@
-import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import { appConfigService } from '@openzeppelin/ui-builder-utils';
 
 import ContractsWizardIconSvg from '../../../assets/icons/contracts-wizard-icon.svg';
 import { DevToolsDropdown } from '../../Common/DevToolsDropdown';

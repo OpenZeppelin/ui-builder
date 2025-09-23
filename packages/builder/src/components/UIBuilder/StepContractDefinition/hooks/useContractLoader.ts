@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/contracts-ui-builder-types';
-import { simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import { simpleHash } from '@openzeppelin/ui-builder-utils';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';

@@ -1,5 +1,5 @@
 {
-  "name": "contracts-ui-builder-exported",
+  "name": "ui-builder-exported",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,13 +8,13 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/contracts-ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
     "check-deps": "npm outdated"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-renderer": "^1.0.0",
-    "@openzeppelin/contracts-ui-builder-utils": "^0.1.0",
-    "@openzeppelin/contracts-ui-builder-ui": "^0.1.0",
+    "@openzeppelin/ui-builder-renderer": "^1.0.0",
+    "@openzeppelin/ui-builder-utils": "^0.1.0",
+    "@openzeppelin/ui-builder-ui": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.60.0"

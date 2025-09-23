@@ -1,4 +1,4 @@
-import type { TypedEvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-adapter-evm';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm';
 import type {
   AdapterConfig,
   ContractAdapter,
@@ -7,8 +7,8 @@ import type {
   NetworkConfig,
   SolanaNetworkConfig,
   StellarNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Define specific constructor types for each adapter
 type EvmAdapterConstructor = new (networkConfig: TypedEvmNetworkConfig) => ContractAdapter;
@@ -38,33 +38,32 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
   evm: {
     networksExportName: 'evmNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/contracts-ui-builder-adapter-evm'))
-        .EvmAdapter as EvmAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-evm',
+      (await import('@openzeppelin/ui-builder-adapter-evm')).EvmAdapter as EvmAdapterConstructor,
+    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-evm',
     adapterConfigExportName: 'evmAdapterConfig',
   },
   solana: {
     networksExportName: 'solanaNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/contracts-ui-builder-adapter-solana'))
+      (await import('@openzeppelin/ui-builder-adapter-solana'))
         .SolanaAdapter as SolanaAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-solana',
+    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-solana',
     adapterConfigExportName: 'solanaAdapterConfig',
   },
   stellar: {
     networksExportName: 'stellarNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/contracts-ui-builder-adapter-stellar'))
+      (await import('@openzeppelin/ui-builder-adapter-stellar'))
         .StellarAdapter as StellarAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-stellar',
+    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-stellar',
     adapterConfigExportName: 'stellarAdapterConfig',
   },
   midnight: {
     networksExportName: 'midnightNetworks',
     getAdapterClass: async () =>
-      (await import('@openzeppelin/contracts-ui-builder-adapter-midnight'))
+      (await import('@openzeppelin/ui-builder-adapter-midnight'))
         .MidnightAdapter as MidnightAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/contracts-ui-builder-adapter-midnight',
+    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-midnight',
     adapterConfigExportName: 'midnightAdapterConfig',
   },
 };
@@ -76,13 +75,13 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
   // This robust switch is good for Vite compatibility
   switch (ecosystem) {
     case 'evm':
-      return import('@openzeppelin/contracts-ui-builder-adapter-evm');
+      return import('@openzeppelin/ui-builder-adapter-evm');
     case 'solana':
-      return import('@openzeppelin/contracts-ui-builder-adapter-solana');
+      return import('@openzeppelin/ui-builder-adapter-solana');
     case 'stellar':
-      return import('@openzeppelin/contracts-ui-builder-adapter-stellar');
+      return import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
-      return import('@openzeppelin/contracts-ui-builder-adapter-midnight');
+      return import('@openzeppelin/ui-builder-adapter-midnight');
     default:
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
@@ -243,13 +242,13 @@ export function getAdapterConfigLoader(
   // the switch uses static paths for Vite compatibility.
   switch (ecosystem) {
     case 'evm':
-      return () => import('@openzeppelin/contracts-ui-builder-adapter-evm');
+      return () => import('@openzeppelin/ui-builder-adapter-evm');
     case 'solana':
-      return () => import('@openzeppelin/contracts-ui-builder-adapter-solana');
+      return () => import('@openzeppelin/ui-builder-adapter-solana');
     case 'stellar':
-      return () => import('@openzeppelin/contracts-ui-builder-adapter-stellar');
+      return () => import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
-      return () => import('@openzeppelin/contracts-ui-builder-adapter-midnight');
+      return () => import('@openzeppelin/ui-builder-adapter-midnight');
     default:
       return undefined;
   }
@@ -306,8 +305,8 @@ export async function getAdapter(networkConfigInput: NetworkConfig): Promise<Con
 
 // --- Adapter Package Name Map ---
 export const adapterPackageMap: Record<Ecosystem, string> = {
-  evm: '@openzeppelin/contracts-ui-builder-adapter-evm',
-  solana: '@openzeppelin/contracts-ui-builder-adapter-solana',
-  stellar: '@openzeppelin/contracts-ui-builder-adapter-stellar',
-  midnight: '@openzeppelin/contracts-ui-builder-adapter-midnight',
+  evm: '@openzeppelin/ui-builder-adapter-evm',
+  solana: '@openzeppelin/ui-builder-adapter-solana',
+  stellar: '@openzeppelin/ui-builder-adapter-stellar',
+  midnight: '@openzeppelin/ui-builder-adapter-midnight',
 };

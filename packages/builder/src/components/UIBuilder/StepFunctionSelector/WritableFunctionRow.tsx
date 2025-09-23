@@ -1,5 +1,5 @@
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { Button } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { WritableFunctionRowProps } from './types';
 

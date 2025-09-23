@@ -1,11 +1,7 @@
 import { Control } from 'react-hook-form';
 
-import { DynamicFormField } from '@openzeppelin/contracts-ui-builder-renderer';
-import type {
-  ContractAdapter,
-  FormFieldType,
-  FormValues,
-} from '@openzeppelin/contracts-ui-builder-types';
+import { DynamicFormField } from '@openzeppelin/ui-builder-renderer';
+import type { ContractAdapter, FormFieldType, FormValues } from '@openzeppelin/ui-builder-types';
 
 interface ContractFormFieldsProps {
   contractDefinitionInputs: FormFieldType[];

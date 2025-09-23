@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
+import type { Connector } from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Dialog,
@@ -8,8 +8,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { getStellarAvailableConnectors } from '../../connection';
 import { useStellarAccount, useStellarConnect } from '../../hooks';

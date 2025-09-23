@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 
 import { generateStellarWalletsKitExportables } from '../export-service';
 

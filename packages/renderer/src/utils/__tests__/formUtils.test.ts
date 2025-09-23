@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { FieldType, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { FieldType, FormFieldType } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import {
   createAddressTransform,

@@ -1,5 +1,5 @@
-import { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { EoaExecutionConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { isValidEvmAddress } from '../utils';
 import { EvmWalletConnectionStatus } from '../wallet/types';

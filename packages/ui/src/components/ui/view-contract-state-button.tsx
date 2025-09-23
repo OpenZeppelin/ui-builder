@@ -1,7 +1,7 @@
 import { FileText } from 'lucide-react';
 import React from 'react';
 
-import { truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
+import { truncateMiddle } from '@openzeppelin/ui-builder-utils';
 
 import { Button } from './button';
 

@@ -1,10 +1,10 @@
 import { toast } from 'sonner';
 import { useCallback } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
-import { ContractSchema, type Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
-import { logger, parseDeepLink, routerService } from '@openzeppelin/contracts-ui-builder-utils';
+import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import { contractUIStorage } from '@openzeppelin/ui-builder-storage';
+import { ContractSchema, type Ecosystem } from '@openzeppelin/ui-builder-types';
+import { logger, parseDeepLink, routerService } from '@openzeppelin/ui-builder-utils';
 
 import { extractDeepLinkParams, resolveNetworkIdFromDeepLink } from '@/core/deeplink';
 import { getNetworkById } from '@/core/ecosystemManager';

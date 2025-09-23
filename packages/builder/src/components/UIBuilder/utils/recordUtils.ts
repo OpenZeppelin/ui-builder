@@ -1,4 +1,4 @@
-import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
+import type { ContractUIRecord } from '@openzeppelin/ui-builder-storage';
 
 /**
  * Determines if a saved contract UI record has meaningful content.

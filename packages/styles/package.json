@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-styles",
+  "name": "@openzeppelin/ui-builder-styles",
   "version": "0.3.0",
   "private": false,
-  "description": "Centralized styling system for the OpenZeppelin Contracts UI Builder.",
+  "description": "Centralized styling system for the OpenZeppelin UI Builder.",
   "type": "module",
   "main": "global.css",
   "publishConfig": {

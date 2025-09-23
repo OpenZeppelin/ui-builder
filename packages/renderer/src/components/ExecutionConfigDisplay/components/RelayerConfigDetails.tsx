@@ -1,12 +1,9 @@
 import { Network, Shield } from 'lucide-react';
 import React from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
-import type {
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { RelayerDetailsCard } from '@openzeppelin/contracts-ui-builder-ui';
+import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import type { RelayerDetailsRich, RelayerExecutionConfig } from '@openzeppelin/ui-builder-types';
+import { RelayerDetailsCard } from '@openzeppelin/ui-builder-ui';
 
 import { ExecutionConfigCard } from './ExecutionConfigCard';
 

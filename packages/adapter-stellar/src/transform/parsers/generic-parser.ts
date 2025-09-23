@@ -1,5 +1,5 @@
-import { isMapEntryArray } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { isMapEntryArray } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 const SYSTEM_LOG_TAG = 'GenericParser';
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { stellarUiKitManager } from './stellarUiKitManager';
 

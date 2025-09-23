@@ -4,8 +4,8 @@ import type {
   ExecutionMethodDetail,
   MultisigExecutionConfig,
   RelayerExecutionConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { validateEoaConfig, validateRelayerConfig } from '../validation';
 import { EvmWalletConnectionStatus } from '../wallet/types';

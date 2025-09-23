@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
+import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';

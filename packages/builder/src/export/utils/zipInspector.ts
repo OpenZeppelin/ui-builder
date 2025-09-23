@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Optional callback for testing error handling during file extraction.

@@ -12,14 +12,14 @@ import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
-} from '@openzeppelin/contracts-ui-builder-renderer';
+} from '@openzeppelin/ui-builder-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { Card, CardContent } from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-types';
+import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {

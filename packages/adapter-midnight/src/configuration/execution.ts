@@ -1,8 +1,5 @@
-import type {
-  ExecutionConfig,
-  ExecutionMethodDetail,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { isValidAddress } from '../utils';
 

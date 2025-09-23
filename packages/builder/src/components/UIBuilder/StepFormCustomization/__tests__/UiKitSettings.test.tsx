@@ -3,13 +3,13 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import type { AvailableUiKit, ContractAdapter } from '@openzeppelin/ui-builder-types';
 
 import { UiKitSettings } from '../components/UiKitSettings';
 
 // Mock the logger with partial mocking to keep other exports
-vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@openzeppelin/contracts-ui-builder-utils')>();
+vi.mock('@openzeppelin/ui-builder-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openzeppelin/ui-builder-utils')>();
   return {
     ...actual,
     logger: {

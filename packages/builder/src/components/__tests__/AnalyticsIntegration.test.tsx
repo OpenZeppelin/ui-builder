@@ -18,7 +18,7 @@ vi.mock('../../services/AnalyticsService', () => ({
 }));
 
 // Mock other dependencies
-vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   appConfigService: {
     isFeatureEnabled: vi.fn(),
   },
@@ -28,11 +28,11 @@ vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
   cn: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/contracts-ui-builder-storage', () => ({
+vi.mock('@openzeppelin/ui-builder-storage', () => ({
   useContractUIStorage: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/contracts-ui-builder-react-core', () => ({
+vi.mock('@openzeppelin/ui-builder-react-core', () => ({
   useAdapterContext: vi.fn(),
 }));
 

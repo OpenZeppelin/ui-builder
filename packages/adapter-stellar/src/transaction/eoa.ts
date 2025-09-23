@@ -11,8 +11,8 @@ import type {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { valueToScVal } from '../transform/input-parser';
 import { getStellarWalletConnectionStatus, signTransaction } from '../wallet/connection';

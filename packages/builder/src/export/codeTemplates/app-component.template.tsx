@@ -10,8 +10,8 @@ import {
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import { Footer } from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-react-core';
+import { Footer } from '@openzeppelin/ui-builder-ui';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';

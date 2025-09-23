@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FormFieldType } from '@openzeppelin/ui-builder-types';
 
 interface Props {
   keyField: FormFieldType;

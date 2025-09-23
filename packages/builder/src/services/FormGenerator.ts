@@ -6,7 +6,7 @@
  */
 import { startCase } from 'lodash';
 
-import { createTransformForFieldType } from '@openzeppelin/contracts-ui-builder-renderer';
+import { createTransformForFieldType } from '@openzeppelin/ui-builder-renderer';
 import {
   CommonFormProperties,
   ContractAdapter,
@@ -15,8 +15,8 @@ import {
   FieldType,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { generateId } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { generateId } from '@openzeppelin/ui-builder-utils';
 
 import type { BuilderFormConfig } from '../core/types/FormTypes';
 

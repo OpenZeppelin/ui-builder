@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-utils",
+  "name": "@openzeppelin/ui-builder-utils",
   "version": "0.8.0",
   "private": false,
-  "description": "Shared, framework-agnostic utility functions for the OpenZeppelin Contracts UI Builder.",
+  "description": "Shared, framework-agnostic utility functions for the OpenZeppelin UI Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -49,7 +49,7 @@
     "directory": "packages/utils"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
+    "@openzeppelin/ui-builder-types": "workspace:^",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.3.1",
     "uuid": "^11.1.0",

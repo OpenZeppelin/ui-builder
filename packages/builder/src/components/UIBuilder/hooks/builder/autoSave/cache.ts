@@ -1,6 +1,6 @@
 import { deepEqual } from 'fast-equals';
 
-import { contractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import { contractUIStorage } from '@openzeppelin/ui-builder-storage';
 
 import { SavedConfigurationData } from './types';
 

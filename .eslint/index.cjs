@@ -1,5 +1,5 @@
 /**
- * Custom ESLint plugin for Contracts UI Builder
+ * Custom ESLint plugin for UI Builder
  */
 
 'use strict';

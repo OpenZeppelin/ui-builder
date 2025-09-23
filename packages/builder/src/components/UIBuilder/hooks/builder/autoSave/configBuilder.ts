@@ -1,4 +1,4 @@
-import { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { FormFieldType } from '@openzeppelin/ui-builder-types';
 
 import { uiBuilderStore } from '../../uiBuilderStore';
 import { SavedConfigurationData } from './types';

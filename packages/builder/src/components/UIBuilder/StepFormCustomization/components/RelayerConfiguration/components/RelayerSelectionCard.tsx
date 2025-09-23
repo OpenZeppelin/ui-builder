@@ -6,7 +6,7 @@ import type {
   ContractAdapter,
   RelayerDetails,
   RelayerDetailsRich,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Card,
@@ -15,8 +15,8 @@ import {
   CardTitle,
   RelayerDetailsCard,
   SelectField,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { truncateMiddle } from '@openzeppelin/ui-builder-utils';
 
 import type { ExecutionMethodFormData } from '../../../types';
 

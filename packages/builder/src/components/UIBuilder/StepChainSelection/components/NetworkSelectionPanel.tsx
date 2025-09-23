@@ -1,14 +1,10 @@
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { useAdapterContext } from '@openzeppelin/contracts-ui-builder-react-core';
-import {
-  ContractAdapter,
-  Ecosystem,
-  NetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { Input, NetworkSettingsDialog } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { useAdapterContext } from '@openzeppelin/ui-builder-react-core';
+import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { Input, NetworkSettingsDialog } from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';

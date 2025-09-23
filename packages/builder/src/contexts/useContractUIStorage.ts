@@ -1,13 +1,13 @@
 import { useContext } from 'react';
 
-import { UseContractUIStorageReturn } from '@openzeppelin/contracts-ui-builder-storage';
+import { UseContractUIStorageReturn } from '@openzeppelin/ui-builder-storage';
 
 import { ContractUIStorageContext } from './ContractUIStorageContext';
 
 /**
  * Hook to access the shared contract UI storage operations from context.
  *
- * IMPORTANT: Always use this hook instead of directly importing from @openzeppelin/contracts-ui-builder-storage.
+ * IMPORTANT: Always use this hook instead of directly importing from @openzeppelin/ui-builder-storage.
  * This wrapper ensures a single Dexie.js subscription shared across all components, preventing
  * state conflicts and unwanted remounting that occur with multiple independent subscriptions.
  *

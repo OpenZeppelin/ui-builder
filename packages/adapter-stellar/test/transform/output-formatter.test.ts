@@ -1,7 +1,7 @@
 import { Address, ScInt, xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 
-import type { ContractFunction, FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-builder-types';
 
 import { formatStellarFunctionResult } from '../../src/transform/output-formatter';
 

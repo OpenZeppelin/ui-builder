@@ -10,10 +10,13 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@styles': path.resolve(__dirname, '../styles'),
-        '@openzeppelin/contracts-ui-builder-utils': path.resolve(
+        '@openzeppelin/ui-builder-react-core': path.resolve(
           __dirname,
-          '../utils/src/index.ts'
+          '../react-core/dist/index.js'
         ),
+        '@openzeppelin/ui-builder-types': path.resolve(__dirname, '../types/dist/index.js'),
+        '@openzeppelin/ui-builder-ui': path.resolve(__dirname, '../ui/dist/index.js'),
+        '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
       },
     },
   })

@@ -1,9 +1,9 @@
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { ContractStateWidget } from '@openzeppelin/contracts-ui-builder-renderer';
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { ContractStateWidget } from '@openzeppelin/ui-builder-renderer';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';

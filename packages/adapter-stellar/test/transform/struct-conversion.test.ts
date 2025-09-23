@@ -1,7 +1,7 @@
 import { nativeToScVal } from '@stellar/stellar-sdk';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
 
 import { valueToScVal } from '../../src/transform/input-parser';
 
