@@ -4,7 +4,7 @@ This package provides a comprehensive set of shared React UI components for the 
 
 ## Overview
 
-The primary goal of `@openzeppelin/ui-builder-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the UI Builder, such as `@openzeppelin/contracts-ui-builder` and `@openzeppelin/ui-builder-renderer` and adapter packages.
+The primary goal of `@openzeppelin/ui-builder-ui` is to ensure UI consistency, maintainability, and reusability across the various parts of the UI Builder, such as the builder app and `@openzeppelin/ui-builder-renderer` and adapter packages.
 
 All components are built with React, TypeScript, and styled with Tailwind CSS, following the shadcn/ui patterns and design principles established in the root configuration of the monorepo.
 

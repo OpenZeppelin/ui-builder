@@ -19,7 +19,7 @@ const packagesToUpdate = [
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/contracts-ui-builder-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-builder-types').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {

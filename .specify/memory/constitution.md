@@ -16,7 +16,7 @@ The builder app (`packages/builder`), renderer (`packages/renderer`), UI compone
 
 TypeScript strictness and uniform linting/formatting are enforced monorepo‑wide.
 
-- Disallow `console` in source code; use the shared `logger` from `@openzeppelin/contracts-ui-builder-utils`. Console usage is allowed only in tests/stories/explicit script overrides.
+- Disallow `console` in source code; use the shared `logger` from `@openzeppelin/ui-builder-utils`. Console usage is allowed only in tests/stories/explicit script overrides.
 - Default logging is disabled outside development; enable only when necessary via `logger.configure({ enabled: true, level })`.
 - Disallow `any` types; prefer precise types and generics. Do not suppress type errors without justification.
 - No extra adapter methods beyond the base interface are allowed; enforced by custom lint rule when available.
@@ -39,8 +39,8 @@ The monorepo standardizes on pnpm, tsup, and Changesets with consistent outputs.
 
 A single design system governs all UI across builder, renderer, and exported apps.
 
-- Tailwind CSS v4 with shadcn/ui primitives; styling derives from `@openzeppelin/contracts-ui-builder-styles` and root configs.
-- Use the `cn` utility from `@openzeppelin/contracts-ui-builder-utils` for composing class names.
+- Tailwind CSS v4 with shadcn/ui primitives; styling derives from `@openzeppelin/ui-builder-styles` and root configs.
+- Use the `cn` utility from `@openzeppelin/ui-builder-utils` for composing class names.
 - Prefer `lucide-react` icons; do not use emojis in UI. Prefer existing SVG assets or lucide icons over inline raw SVG.
 - Use standard Tailwind size tokens; avoid arbitrary values unless justified by the design system.
 - Form spacing and layout follow the documented patterns (e.g., `flex flex-col gap-2`, `space-y-*`).
@@ -77,7 +77,7 @@ TDD is required across non‑UI code. UI components are explicitly exempt.
 - Do not add chain‑specific code or polyfills in chain‑agnostic packages (e.g., no `globalThis.Buffer` in the builder); adapters must own such concerns.
 - When extending `packages/types/src/adapters/base.ts`, update any corresponding no‑extra‑adapter‑methods configuration to keep lint rules in sync.
 - Single source of truth for data schemas and shared types lives in `packages/types`; avoid duplication.
-- Prefer shared utilities from `@openzeppelin/contracts-ui-builder-utils` (e.g., `logger`, `AppConfigService`, `cn`, ID generation) over ad‑hoc implementations. Use lodash’s `debounce` where debouncing is needed.
+- Prefer shared utilities from `@openzeppelin/ui-builder-utils` (e.g., `logger`, `AppConfigService`, `cn`, ID generation) over ad‑hoc implementations. Use lodash’s `debounce` where debouncing is needed.
 - Security: Do not hardcode secrets; use runtime configuration. Follow security checks in CI.
 - Avoid noisy logging in application code; prefer traceability via structured, level‑based logs only when debugging or investigating issues.
 - Contract comparisons must operate on raw contract definitions (ABI/IDL/etc.), not on internal `ContractSchema` representations.

@@ -429,9 +429,9 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **CRUD Operations**: Complete lifecycle management for contract UI configurations
   - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
 
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/contracts-ui-builder-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
-  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/contracts-ui-builder-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
-  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/contracts-ui-builder-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/ui-builder-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-builder-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
+  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-builder-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 
 - **Renderer**: Shared library containing app rendering components and common utilities (like logging).
@@ -450,7 +450,7 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/contracts-ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ## Project Constitution
 
@@ -488,7 +488,7 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/contracts-ui-builder-ui` package.
+The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/ui-builder-ui` package.
 
 These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
 
@@ -501,7 +501,7 @@ The project uses Storybook 8 for component documentation and development:
 pnpm storybook
 
 # Or start Storybook for a specific package
-pnpm --filter=@openzeppelin/contracts-ui-builder-renderer storybook
+pnpm --filter=@openzeppelin/ui-builder-renderer storybook
 ```
 
 Storybook stories are organized to:
@@ -620,15 +620,15 @@ To add support for a new blockchain ecosystem:
 
 1. **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
 2. **Define `package.json`**:
-   - Set the package name (e.g., `@openzeppelin/contracts-ui-builder-adapter-sui`).
-   - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
+   - Set the package name (e.g., `@openzeppelin/ui-builder-adapter-sui`).
+   - Add a dependency on `@openzeppelin/ui-builder-types` (`workspace:*`).
    - Add any chain-specific SDKs or libraries required by the adapter.
    - Include standard build scripts (refer to existing adapter packages).
    - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
 3. **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
 4. **Implement Adapter**:
    - Create `src/adapter.ts`.
-   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/contracts-ui-builder-types`.
+   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/ui-builder-types`.
    - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
    - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
 5. **Define Network Configurations**:\
@@ -638,7 +638,7 @@ To add support for a new blockchain ecosystem:
 6. **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
 7. **Register Ecosystem in Builder**:
    - Open `packages/builder/src/core/ecosystemManager.ts`.
-   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/contracts-ui-builder-adapter-sui';`).
+   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/ui-builder-adapter-sui';`).
    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
      - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
@@ -646,9 +646,9 @@ To add support for a new blockchain ecosystem:
    - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
 8. **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
 9. **Build & Test**:
-   - Build the new adapter package (`pnpm --filter @openzeppelin/contracts-ui-builder-adapter-<chain-name> build`).
+   - Build the new adapter package (`pnpm --filter @openzeppelin/ui-builder-adapter-<chain-name> build`).
    - Add relevant unit/integration tests.
-   - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
+   - Ensure the builder application (`pnpm --filter @openzeppelin/ui-builder-app build`) and the export system still function correctly.
 
 ## Commit Convention
 

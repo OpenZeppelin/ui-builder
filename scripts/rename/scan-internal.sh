@@ -9,7 +9,8 @@ PATTERN='@openzeppelin/contracts-ui-builder|contracts-ui-builder|OpenZeppelin Co
 MATCHES=$(grep -R -nE "$PATTERN" \
   --include='*.ts' --include='*.tsx' --include='*.json' --include='*.md' --include='*.adoc' --include='*.html' \
   --exclude-dir='.git' --exclude-dir='node_modules' --exclude-dir='dist' --exclude-dir='.next' \
-  --exclude-dir='.specify' --exclude-dir='specs' \
+  --exclude-dir='.specify' --exclude-dir='specs' --exclude-dir='.changeset' --exclude-dir='.temp' --exclude-dir='.agent-os' --exclude-dir='test-results' --exclude='**/coverage/**' \
+  --exclude='CHANGELOG.md' \
   "$REPO_ROOT" || true)
 
 if [[ -n "$MATCHES" ]]; then

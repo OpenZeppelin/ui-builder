@@ -278,7 +278,7 @@ function exportAppSimple(options) {
     }
 
     if (options.env === 'local') {
-      const tempDir = path.join(os.homedir(), 'contracts-ui-builder-app-test');
+      const tempDir = path.join(os.homedir(), 'ui-builder-app-test');
       console.log(
         `\n${colors.blue}Moving project to a test directory for isolated testing...${colors.reset}`
       );

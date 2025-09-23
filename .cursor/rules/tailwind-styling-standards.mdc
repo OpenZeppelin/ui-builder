@@ -374,7 +374,7 @@ className="grid grid-cols-[auto_1fr] gap-4"
 Always use the `cn` utility for combining classes:
 
 ```tsx
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 className={cn(
   'base-classes',

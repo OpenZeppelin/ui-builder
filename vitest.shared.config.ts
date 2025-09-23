@@ -1,20 +1,14 @@
-import react from '@vitejs/plugin-react';
 import path from 'path';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export const sharedVitestConfig = defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: [
-      '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/contracts-ui-builder-types',
-    ],
+    include: ['@openzeppelin/ui-builder-renderer', '@openzeppelin/ui-builder-types'],
   },
   ssr: {
-    noExternal: [
-      '@openzeppelin/contracts-ui-builder-renderer',
-      '@openzeppelin/contracts-ui-builder-types',
-    ],
+    noExternal: ['@openzeppelin/ui-builder-renderer', '@openzeppelin/ui-builder-types'],
   },
   test: {
     globals: true,
