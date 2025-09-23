@@ -35,7 +35,7 @@
  * the renderer configuration for dependency management during form export.
  */
 declare module 'virtual:renderer-config' {
-  export { rendererConfig } from '@openzeppelin/contracts-ui-builder-renderer/config';
+  export { rendererConfig } from '@openzeppelin/ui-builder-renderer/config';
 }
 
 /**
@@ -67,13 +67,13 @@ declare module 'virtual:renderer-config' {
  * Declaration merging for RendererConfig types
  *
  * This declaration allows importing types like RendererConfig using the
- * deep import path `@openzeppelin/contracts-ui-builder-renderer/types/RendererConfig`.
+ * deep import path `@openzeppelin/ui-builder-renderer/types/RendererConfig`.
  * It re-exports the types from the main
- * `@openzeppelin/contracts-ui-builder-renderer/types` module, ensuring type compatibility.
+ * `@openzeppelin/ui-builder-renderer/types` module, ensuring type compatibility.
  */
-declare module '@openzeppelin/contracts-ui-builder-renderer/types/RendererConfig' {
+declare module '@openzeppelin/ui-builder-renderer/types/RendererConfig' {
   // Re-export necessary types from the actual implementation
-  export * from '@openzeppelin/contracts-ui-builder-renderer/types';
+  export * from '@openzeppelin/ui-builder-renderer/types';
 }
 
 // Add declarations for the raw config content virtual modules

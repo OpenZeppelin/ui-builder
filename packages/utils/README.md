@@ -1,4 +1,4 @@
-# @openzeppelin/contracts-ui-builder-utils
+# @openzeppelin/ui-builder-utils
 
 This package provides a set of shared, framework-agnostic utility functions used across the entire UI Builder ecosystem.
 
@@ -37,5 +37,5 @@ utils/
 This package is a core part of the monorepo and is automatically linked via `pnpm` workspaces. For external use, it would be installed from the project's package registry.
 
 ```bash
-pnpm add @openzeppelin/contracts-ui-builder-utils
+pnpm add @openzeppelin/ui-builder-utils
 ```

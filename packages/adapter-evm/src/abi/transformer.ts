@@ -4,8 +4,8 @@ import type {
   ContractFunction,
   ContractSchema,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { AbiItem } from '../types';
 import { formatInputName, formatMethodName } from '../utils';

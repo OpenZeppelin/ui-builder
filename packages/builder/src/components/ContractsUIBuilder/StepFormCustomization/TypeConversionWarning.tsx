@@ -1,6 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 
-import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-builder-types';
 
 interface TypeConversionWarningProps {
   selectedType: FieldType;

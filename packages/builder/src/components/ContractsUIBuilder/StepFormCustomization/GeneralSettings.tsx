@@ -2,8 +2,8 @@ import { debounce } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
-import { TextAreaField, TextField } from '@openzeppelin/contracts-ui-builder-ui';
+import type { ContractFunction } from '@openzeppelin/ui-builder-types';
+import { TextAreaField, TextField } from '@openzeppelin/ui-builder-ui';
 
 interface GeneralSettingsProps {
   /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { UserExplorerConfig } from '@openzeppelin/ui-builder-types';
 
 import { validateStellarExplorerConfig } from '../../configuration/explorer';
 

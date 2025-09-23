@@ -1,4 +1,4 @@
-# Contracts UI Builder Constitution
+# UI Builder Constitution
 
 ## Core Principles
 

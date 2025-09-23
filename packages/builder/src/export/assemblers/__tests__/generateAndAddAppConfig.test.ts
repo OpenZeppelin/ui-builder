@@ -1,17 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type {
-  FormValues,
-  NetworkConfig,
-  UiKitName,
-} from '@openzeppelin/contracts-ui-builder-types';
+import type { FormValues, NetworkConfig, UiKitName } from '@openzeppelin/ui-builder-types';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import type { TemplateProcessor } from '../../generators/TemplateProcessor';
 import { generateAndAddAppConfig } from '../generateAndAddAppConfig';
 
 // Mock logger to avoid console output during tests
-vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),

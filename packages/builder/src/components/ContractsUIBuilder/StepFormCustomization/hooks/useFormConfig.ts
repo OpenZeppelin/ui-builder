@@ -5,8 +5,8 @@ import type {
   ContractAdapter,
   ContractSchema,
   FormFieldType,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {

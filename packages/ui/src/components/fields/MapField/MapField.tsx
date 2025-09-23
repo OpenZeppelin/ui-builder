@@ -2,7 +2,7 @@ import { Plus, X } from 'lucide-react';
 import React from 'react';
 import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
-import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FormFieldType } from '@openzeppelin/ui-builder-types';
 
 import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';

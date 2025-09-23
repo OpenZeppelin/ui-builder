@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';

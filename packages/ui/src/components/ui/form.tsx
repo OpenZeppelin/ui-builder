@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { FieldError, FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 import { Controller, FormProvider, useFormContext } from 'react-hook-form';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { Label } from './label';
 

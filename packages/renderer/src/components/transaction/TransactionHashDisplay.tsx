@@ -1,7 +1,7 @@
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react';
 import React from 'react';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 interface TransactionHashDisplayProps {
   /**

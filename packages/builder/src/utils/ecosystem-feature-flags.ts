@@ -1,5 +1,5 @@
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
-import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import { appConfigService } from '@openzeppelin/ui-builder-utils';
 
 import {
   getAvailableEcosystems,

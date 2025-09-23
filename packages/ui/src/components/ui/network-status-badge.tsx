@@ -1,8 +1,8 @@
 import { NetworkIcon } from '@web3icons/react';
 import React from 'react';
 
-import type { NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
 

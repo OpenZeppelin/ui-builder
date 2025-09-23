@@ -1,13 +1,10 @@
 import { LogOut } from 'lucide-react';
 import React from 'react';
 
-import {
-  useDerivedAccountStatus,
-  useDerivedDisconnect,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import type { BaseComponentProps } from '@openzeppelin/contracts-ui-builder-types';
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
+import { useDerivedAccountStatus, useDerivedDisconnect } from '@openzeppelin/ui-builder-react-core';
+import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
+import { Button } from '@openzeppelin/ui-builder-ui';
+import { cn, truncateMiddle } from '@openzeppelin/ui-builder-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

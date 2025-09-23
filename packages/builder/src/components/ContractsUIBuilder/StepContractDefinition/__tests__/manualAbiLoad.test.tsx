@@ -1,18 +1,14 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type {
-  ContractAdapter,
-  ContractSchema,
-  FormValues,
-} from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-builder-types';
 
 import { useContractDefinition } from '../../../../hooks/useContractDefinition';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
 let mockAdapter: ContractAdapter;
 
-vi.mock('@openzeppelin/contracts-ui-builder-react-core', () => ({
+vi.mock('@openzeppelin/ui-builder-react-core', () => ({
   useWalletState: () => ({ activeAdapter: mockAdapter }),
 }));
 

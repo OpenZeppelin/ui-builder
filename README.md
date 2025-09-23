@@ -136,7 +136,7 @@ For more details, see the [Builder README](./packages/builder/README.md).
 
 ### React Core Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-react-core)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-react-core)
 
 Core React providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing adapter and wallet state.
 
@@ -144,7 +144,7 @@ For more details, see the [React Core README](./packages/react-core/README.md).
 
 ### Renderer Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-renderer)
 
 The `renderer` package provides a reusable library for rendering transaction forms and other components. It's published to npm and can be used independently of the main application.
 
@@ -160,7 +160,7 @@ For more details, see the [Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-types)
 
 The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the UI Builder.
 
@@ -175,7 +175,7 @@ For more details, see the [Types README](./packages/types/README.md).
 
 ### Styles Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-styles)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-styles)
 
 The `styles` package contains the centralized styling system used across all packages. It provides consistent theming, spacing, and component styles throughout the application.
 
@@ -190,7 +190,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 ### Storage Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-storage)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-storage)
 
 The `storage` package provides local storage services built on IndexedDB using Dexie.js for persisting contract UI configurations. It enables a complete history and auto-save system for the builder application.
 
@@ -208,7 +208,7 @@ For more details, see the [Storage README](./packages/storage/README.md).
 
 ### UI Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-ui)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-ui)
 
 Shared UI primitives and form field components for a consistent UX across builder and renderer.
 
@@ -216,7 +216,7 @@ For more details, see the [UI README](./packages/ui/README.md).
 
 ### Utils Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-utils)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-utils)
 
 Framework-agnostic utilities like logging, runtime configuration, validation, and helpers.
 
@@ -224,7 +224,7 @@ For more details, see the [Utils README](./packages/utils/README.md).
 
 ### EVM Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-evm)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-evm)
 
 _Status: Fully implemented._
 
@@ -234,7 +234,7 @@ For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md)
 
 ### Solana Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-solana)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-solana)
 
 _Status: Scaffolding._
 
@@ -244,7 +244,7 @@ For more details, see the [Solana Adapter README](./packages/adapter-solana/READ
 
 ### Stellar Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-stellar)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-stellar)
 
 _Status: Fully Implemented._
 
@@ -254,7 +254,7 @@ For more details, see the [Stellar Adapter README](./packages/adapter-stellar/RE
 
 ### Midnight Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-midnight)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-midnight)
 
 _Status: In progress._
 

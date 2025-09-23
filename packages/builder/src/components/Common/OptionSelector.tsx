@@ -1,7 +1,7 @@
 import { CircleHelp } from 'lucide-react';
 import { ReactNode } from 'react';
 
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+import { Button } from '@openzeppelin/ui-builder-ui';
 
 export interface SelectableOption {
   id: string;

@@ -1,8 +1,8 @@
 import { Key, User } from 'lucide-react';
 import React from 'react';
 
-import type { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { AddressDisplay } from '@openzeppelin/contracts-ui-builder-ui';
+import type { EoaExecutionConfig } from '@openzeppelin/ui-builder-types';
+import { AddressDisplay } from '@openzeppelin/ui-builder-ui';
 
 interface EoaConfigDetailsProps {
   config: EoaExecutionConfig;

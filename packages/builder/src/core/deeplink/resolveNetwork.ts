@@ -1,4 +1,4 @@
-import type { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import type { Ecosystem } from '@openzeppelin/ui-builder-types';
 
 import { getNetworksByEcosystem } from '@/core/ecosystemManager';
 

@@ -6,9 +6,9 @@ import type {
   ContractDefinitionComparisonResult,
   ContractSchema,
   ProxyInfo,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import {

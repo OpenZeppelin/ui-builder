@@ -5,15 +5,15 @@ import type {
   ContractAdapter,
   ContractFunction,
   ContractSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { Button } from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-types';
+import { Button } from '@openzeppelin/ui-builder-ui';
 import {
   cn,
   logger,
   rateLimitedBatch,
   userRpcConfigService,
   type RpcConfigEvent,
-} from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-utils';
 
 import { FunctionResult } from './FunctionResult';
 

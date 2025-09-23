@@ -1,5 +1,5 @@
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { FieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { FieldType } from '@openzeppelin/ui-builder-types';
 
 import { TypeConversionWarning } from './TypeConversionWarning';
 

@@ -4,12 +4,12 @@ import { Info } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter, UserExplorerConfig } from '@openzeppelin/ui-builder-types';
 import {
   appConfigService,
   logger,
   userExplorerConfigService,
-} from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-utils';
 
 import { SettingsFooter } from '@/components/settings/SettingsFooter';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

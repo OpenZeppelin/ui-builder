@@ -90,4 +90,4 @@ wallet/
 
 ## Usage in Application
 
-`StellarWalletUiRoot` is returned by the adapter and used by the Builder’s `WalletStateProvider`. Use `useWalletState()` and facade hooks from `@openzeppelin/contracts-ui-builder-react-core` to render the wallet UI components from `getEcosystemWalletComponents()`.
+`StellarWalletUiRoot` is returned by the adapter and used by the Builder’s `WalletStateProvider`. Use `useWalletState()` and facade hooks from `@openzeppelin/ui-builder-react-core` to render the wallet UI components from `getEcosystemWalletComponents()`.

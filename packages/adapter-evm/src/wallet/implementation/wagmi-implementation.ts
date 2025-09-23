@@ -20,8 +20,8 @@ import {
 } from '@wagmi/core';
 import { http, PublicClient, WalletClient, type Chain } from 'viem';
 
-import type { Connector, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { Connector, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
 
 import { evmNetworks } from '../../networks';
 import { getWagmiConfigForRainbowKit } from '../rainbowkit';

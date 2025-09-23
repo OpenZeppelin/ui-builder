@@ -1,4 +1,4 @@
-# @openzeppelin/contracts-ui-builder-types
+# @openzeppelin/ui-builder-types
 
 ## 0.8.0
 

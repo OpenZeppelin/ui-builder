@@ -1,11 +1,7 @@
 import { capitalize, escape as escapeHtml } from 'lodash';
 
-import {
-  Ecosystem,
-  NetworkConfig,
-  RenderFormSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
-import type { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
+import { Ecosystem, NetworkConfig, RenderFormSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/ui-builder-types';
 
 import { adapterPackageMap } from '../../core/ecosystemManager';
 import { formSchemaFactory } from '../../core/factories/FormSchemaFactory';

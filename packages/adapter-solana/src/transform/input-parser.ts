@@ -1,5 +1,5 @@
-import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Placeholder
 export function parseSolanaInput(

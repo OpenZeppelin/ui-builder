@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-ui';
 
 interface DeleteConfirmDialogProps {
   open: boolean;

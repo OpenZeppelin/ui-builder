@@ -1,8 +1,8 @@
-# Tailwind CSS Styling Standards for Contracts UI Builder
+# Tailwind CSS Styling Standards for UI Builder
 
 ## Overview
 
-This document outlines the Tailwind CSS styling standards and patterns used throughout the OpenZeppelin Contracts UI Builder codebase. These rules ensure consistency, maintainability, and adherence to the established design system.
+This document outlines the Tailwind CSS styling standards and patterns used throughout the OpenZeppelin UI Builder codebase. These rules ensure consistency, maintainability, and adherence to the established design system.
 
 ## Design System Foundation
 
@@ -481,4 +481,4 @@ className={`${gridClass} ${isCollapsed ? 'grid-cols-[auto_1fr]' : `grid-cols-${c
 
 ---
 
-These standards ensure consistency across the entire Contracts UI Builder ecosystem while maintaining flexibility for component-specific needs. Always prioritize semantic tokens and established patterns over custom solutions.
+These standards ensure consistency across the entire UI Builder ecosystem while maintaining flexibility for component-specific needs. Always prioritize semantic tokens and established patterns over custom solutions.

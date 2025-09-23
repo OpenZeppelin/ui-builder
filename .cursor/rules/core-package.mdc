@@ -4,11 +4,11 @@ globs:
 alwaysApply: false
 ---
 
-# Contracts UI Builder: App Package Rules (@app)
+# UI Builder: App Package Rules (@app)
 
 ## 1. Overview
 
-**Purpose:** The `packages/builder` package (`@openzeppelin/contracts-ui-builder-app`) is the main application hub for the Contracts UI Builder. It encompasses the primary user interface for constructing forms, the central **chain‑agnostic** logic, and the export system that generates standalone, runnable web application projects.
+**Purpose:** The `packages/builder` package (`@openzeppelin/contracts-ui-builder-app`) is the main application hub for the UI Builder. It encompasses the primary user interface for constructing forms, the central **chain‑agnostic** logic, and the export system that generates standalone, runnable web application projects.
 
 **Key Role:** Acts as the orchestrator, integrating functionalities from `@openzeppelin/contracts-ui-builder-renderer`, `@openzeppelin/contracts-ui-builder-styles`, `@openzeppelin/contracts-ui-builder-react-core`, and the various adapter packages (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`). It manages the application state (e.g., the multi‑step builder wizard) and delivers the primary user‑facing experience and export capabilities.
 

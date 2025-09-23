@@ -1,7 +1,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 const Dialog = DialogPrimitive.Root;
 

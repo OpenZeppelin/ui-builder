@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { appConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { appConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { resolveRpcUrl, testStellarRpcConnection, validateStellarRpcEndpoint } from '../rpc';
 
@@ -26,9 +26,8 @@ const createMockConfig = (
 });
 
 // Mock the appConfigService from the correct package
-vi.mock('@openzeppelin/contracts-ui-builder-utils', async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import('@openzeppelin/contracts-ui-builder-utils')>();
+vi.mock('@openzeppelin/ui-builder-utils', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@openzeppelin/ui-builder-utils')>();
   return {
     ...original,
     logger: {

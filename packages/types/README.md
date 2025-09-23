@@ -2,7 +2,7 @@
 
 This package contains shared TypeScript type definitions for the OpenZeppelin UI Builder ecosystem.
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-types)
 
 ## Purpose
 
@@ -18,13 +18,13 @@ By centralizing type definitions, we ensure consistency across all packages and 
 
 ```bash
 # Using npm
-npm install @openzeppelin/contracts-ui-builder-types
+npm install @openzeppelin/ui-builder-types
 
 # Using yarn
-yarn add @openzeppelin/contracts-ui-builder-types
+yarn add @openzeppelin/ui-builder-types
 
 # Using pnpm
-pnpm add @openzeppelin/contracts-ui-builder-types
+pnpm add @openzeppelin/ui-builder-types
 ```
 
 ## Usage
@@ -33,16 +33,16 @@ The package is organized into namespaces for better organization and to prevent 
 
 ```typescript
 // Import everything
-import { adapters, contracts, forms } from '@openzeppelin/contracts-ui-builder-types';
+import { adapters, contracts, forms } from '@openzeppelin/ui-builder-types';
 
 // Import specific namespaces
-import * as contracts from '@openzeppelin/contracts-ui-builder-types';
-import * as adapters from '@openzeppelin/contracts-ui-builder-types';
-import * as forms from '@openzeppelin/contracts-ui-builder-types';
+import * as contracts from '@openzeppelin/ui-builder-types';
+import * as adapters from '@openzeppelin/ui-builder-types';
+import * as forms from '@openzeppelin/ui-builder-types';
 
 // Import specific types from their respective namespaces
-import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { FieldType, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { FieldType, FormFieldType } from '@openzeppelin/ui-builder-types';
 
 // Example usage in a function
 function validateField(field: forms.FormFieldType): boolean {
@@ -176,7 +176,7 @@ This package is a dependency for both the builder and renderer packages:
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/contracts-ui-builder-types build
+pnpm --filter @openzeppelin/ui-builder-types build
 
 # Or from within the types package directory
 pnpm build
@@ -186,7 +186,7 @@ pnpm build
 
 ```bash
 # From the monorepo root
-pnpm --filter @openzeppelin/contracts-ui-builder-types test
+pnpm --filter @openzeppelin/ui-builder-types test
 
 # Or from within the types package directory
 pnpm test

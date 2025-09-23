@@ -1,11 +1,11 @@
-import type { FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FormFieldType } from '@openzeppelin/ui-builder-types';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-ui';
 
 interface MobileFieldSelectorProps {
   /**

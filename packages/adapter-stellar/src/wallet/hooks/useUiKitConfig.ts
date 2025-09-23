@@ -1,5 +1,5 @@
-import type { UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Default configuration when no specific configuration is provided

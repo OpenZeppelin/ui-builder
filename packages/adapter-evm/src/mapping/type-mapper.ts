@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-builder-types';
 
 import { EVM_TYPE_TO_FIELD_TYPE } from './constants';
 

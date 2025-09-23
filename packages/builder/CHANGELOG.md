@@ -9,35 +9,35 @@
 ### Patch Changes
 
 - Updated dependencies [[`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9)]:
-  - @openzeppelin/contracts-ui-builder-renderer@0.8.0
-  - @openzeppelin/contracts-ui-builder-types@0.8.0
-  - @openzeppelin/contracts-ui-builder-utils@0.8.0
-  - @openzeppelin/contracts-ui-builder-ui@0.8.0
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.8.0
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.8.0
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.8.0
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.8.0
-  - @openzeppelin/contracts-ui-builder-react-core@0.8.0
-  - @openzeppelin/contracts-ui-builder-storage@0.8.0
+  - @openzeppelin/ui-builder-renderer@0.8.0
+  - @openzeppelin/ui-builder-types@0.8.0
+  - @openzeppelin/ui-builder-utils@0.8.0
+  - @openzeppelin/ui-builder-ui@0.8.0
+  - @openzeppelin/ui-builder-adapter-evm@0.8.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.8.0
+  - @openzeppelin/ui-builder-adapter-solana@0.8.0
+  - @openzeppelin/ui-builder-adapter-stellar@0.8.0
+  - @openzeppelin/ui-builder-react-core@0.8.0
+  - @openzeppelin/ui-builder-storage@0.8.0
 
 ## 0.7.2
 
 ### Patch Changes
 
 - Updated dependencies [[`f344326`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/f344326aab505e16468ec1b45708fc28a53df192)]:
-  - @openzeppelin/contracts-ui-builder-ui@0.7.2
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.7.2
-  - @openzeppelin/contracts-ui-builder-renderer@0.7.2
+  - @openzeppelin/ui-builder-ui@0.7.2
+  - @openzeppelin/ui-builder-adapter-midnight@0.7.2
+  - @openzeppelin/ui-builder-renderer@0.7.2
 
 ## 0.7.1
 
 ### Patch Changes
 
 - Updated dependencies [[`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9), [`49d7d6c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/49d7d6c38d1890a67dfbf514161e71f46849a123), [`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9)]:
-  - @openzeppelin/contracts-ui-builder-ui@0.7.1
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.7.1
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.7.1
-  - @openzeppelin/contracts-ui-builder-renderer@0.7.1
+  - @openzeppelin/ui-builder-ui@0.7.1
+  - @openzeppelin/ui-builder-adapter-evm@0.7.1
+  - @openzeppelin/ui-builder-adapter-midnight@0.7.1
+  - @openzeppelin/ui-builder-renderer@0.7.1
 
 ## 0.7.0
 
@@ -48,22 +48,22 @@
 ### Patch Changes
 
 - Updated dependencies [[`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.7.0
-  - @openzeppelin/contracts-ui-builder-utils@0.7.0
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.7.0
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.7.0
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.7.0
-  - @openzeppelin/contracts-ui-builder-react-core@0.7.0
-  - @openzeppelin/contracts-ui-builder-renderer@0.7.0
-  - @openzeppelin/contracts-ui-builder-storage@0.7.0
-  - @openzeppelin/contracts-ui-builder-ui@0.7.0
+  - @openzeppelin/ui-builder-adapter-evm@0.7.0
+  - @openzeppelin/ui-builder-utils@0.7.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.7.0
+  - @openzeppelin/ui-builder-adapter-solana@0.7.0
+  - @openzeppelin/ui-builder-adapter-stellar@0.7.0
+  - @openzeppelin/ui-builder-react-core@0.7.0
+  - @openzeppelin/ui-builder-renderer@0.7.0
+  - @openzeppelin/ui-builder-storage@0.7.0
+  - @openzeppelin/ui-builder-ui@0.7.0
 
 ## 0.6.1
 
 ### Patch Changes
 
 - Updated dependencies [[`a4236e9`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/a4236e95ddda6530dfd2a87c4bc8a0915e9ff332), [`3a85c72`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3a85c7296ca05c2edb9931966089f4bfd04e105a), [`acc7037`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/acc70372e7b815026331ed76f77a5d55633ec547)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.6.0
+  - @openzeppelin/ui-builder-adapter-evm@0.6.0
 
 ## 0.6.0
 
@@ -74,16 +74,16 @@
 ### Patch Changes
 
 - Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b), [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b), [`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.5.0
-  - @openzeppelin/contracts-ui-builder-types@0.4.0
-  - @openzeppelin/contracts-ui-builder-renderer@0.4.0
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.4
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.9
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.9
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.5
-  - @openzeppelin/contracts-ui-builder-storage@0.3.4
-  - @openzeppelin/contracts-ui-builder-ui@0.5.1
-  - @openzeppelin/contracts-ui-builder-utils@0.4.1
+  - @openzeppelin/ui-builder-adapter-evm@0.5.0
+  - @openzeppelin/ui-builder-types@0.4.0
+  - @openzeppelin/ui-builder-renderer@0.4.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.1.4
+  - @openzeppelin/ui-builder-adapter-solana@0.0.9
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.9
+  - @openzeppelin/ui-builder-react-core@0.2.5
+  - @openzeppelin/ui-builder-storage@0.3.4
+  - @openzeppelin/ui-builder-ui@0.5.1
+  - @openzeppelin/ui-builder-utils@0.4.1
 
 ## 0.5.0
 
@@ -94,11 +94,11 @@
 ### Patch Changes
 
 - Updated dependencies [[`6ad118f`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6ad118fcac5aeb6c807bdcc9464de98791d2a20a)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.4.0
-  - @openzeppelin/contracts-ui-builder-renderer@0.3.0
-  - @openzeppelin/contracts-ui-builder-ui@0.5.0
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.3
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.4
+  - @openzeppelin/ui-builder-adapter-evm@0.4.0
+  - @openzeppelin/ui-builder-renderer@0.3.0
+  - @openzeppelin/ui-builder-ui@0.5.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.1.3
+  - @openzeppelin/ui-builder-react-core@0.2.4
 
 ## 0.4.1
 
@@ -107,13 +107,13 @@
 - [#80](https://github.com/OpenZeppelin/contracts-ui-builder/pull/80) [`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc) Thanks [@pasevin](https://github.com/pasevin)! - Route all console.\* logs through centralized logger from utils, add system tags, update tests to spy on logger, restore missing createAbiFunctionItem in EVM adapter, and apply lint/prettier fixes. No public API changes.
 
 - Updated dependencies [[`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc), [`14171aa`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/14171aa46dfd76811551e0ba4560097736fb3420)]:
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.2
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.8
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.8
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.2
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.3
-  - @openzeppelin/contracts-ui-builder-renderer@0.2.3
-  - @openzeppelin/contracts-ui-builder-ui@0.4.1
+  - @openzeppelin/ui-builder-adapter-midnight@0.1.2
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.8
+  - @openzeppelin/ui-builder-adapter-solana@0.0.8
+  - @openzeppelin/ui-builder-adapter-evm@0.3.2
+  - @openzeppelin/ui-builder-react-core@0.2.3
+  - @openzeppelin/ui-builder-renderer@0.2.3
+  - @openzeppelin/ui-builder-ui@0.4.1
 
 ## 0.4.0
 
@@ -124,15 +124,15 @@
 ### Patch Changes
 
 - Updated dependencies [[`521dc09`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/521dc092e2394501affc9f3f37144ba8c735591c)]:
-  - @openzeppelin/contracts-ui-builder-utils@0.4.0
-  - @openzeppelin/contracts-ui-builder-ui@0.4.0
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.1
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.1
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.7
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.7
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.2
-  - @openzeppelin/contracts-ui-builder-renderer@0.2.2
-  - @openzeppelin/contracts-ui-builder-storage@0.3.2
+  - @openzeppelin/ui-builder-utils@0.4.0
+  - @openzeppelin/ui-builder-ui@0.4.0
+  - @openzeppelin/ui-builder-adapter-evm@0.3.1
+  - @openzeppelin/ui-builder-adapter-midnight@0.1.1
+  - @openzeppelin/ui-builder-adapter-solana@0.0.7
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.7
+  - @openzeppelin/ui-builder-react-core@0.2.2
+  - @openzeppelin/ui-builder-renderer@0.2.2
+  - @openzeppelin/ui-builder-storage@0.3.2
 
 ## 0.3.0
 
@@ -143,16 +143,16 @@
 ### Patch Changes
 
 - Updated dependencies [[`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca)]:
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.6
-  - @openzeppelin/contracts-ui-builder-renderer@0.2.1
-  - @openzeppelin/contracts-ui-builder-storage@0.3.1
-  - @openzeppelin/contracts-ui-builder-ui@0.3.1
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.6
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.1.0
-  - @openzeppelin/contracts-ui-builder-utils@0.3.1
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.3.0
-  - @openzeppelin/contracts-ui-builder-types@0.3.0
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.1
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.6
+  - @openzeppelin/ui-builder-renderer@0.2.1
+  - @openzeppelin/ui-builder-storage@0.3.1
+  - @openzeppelin/ui-builder-ui@0.3.1
+  - @openzeppelin/ui-builder-adapter-solana@0.0.6
+  - @openzeppelin/ui-builder-adapter-midnight@0.1.0
+  - @openzeppelin/ui-builder-utils@0.3.1
+  - @openzeppelin/ui-builder-adapter-evm@0.3.0
+  - @openzeppelin/ui-builder-types@0.3.0
+  - @openzeppelin/ui-builder-react-core@0.2.1
 
 ## 0.2.0
 
@@ -163,16 +163,16 @@
 ### Patch Changes
 
 - Updated dependencies [[`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103), [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103), [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103)]:
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.6
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.5
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.5
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.2.2
-  - @openzeppelin/contracts-ui-builder-storage@0.3.0
-  - @openzeppelin/contracts-ui-builder-react-core@0.2.0
-  - @openzeppelin/contracts-ui-builder-renderer@0.2.0
-  - @openzeppelin/contracts-ui-builder-styles@0.3.0
-  - @openzeppelin/contracts-ui-builder-utils@0.3.0
-  - @openzeppelin/contracts-ui-builder-ui@0.3.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.0.6
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.5
+  - @openzeppelin/ui-builder-adapter-solana@0.0.5
+  - @openzeppelin/ui-builder-adapter-evm@0.2.2
+  - @openzeppelin/ui-builder-storage@0.3.0
+  - @openzeppelin/ui-builder-react-core@0.2.0
+  - @openzeppelin/ui-builder-renderer@0.2.0
+  - @openzeppelin/ui-builder-styles@0.3.0
+  - @openzeppelin/ui-builder-utils@0.3.0
+  - @openzeppelin/ui-builder-ui@0.3.0
 
 ## 0.1.7
 
@@ -181,15 +181,15 @@
 - [#64](https://github.com/OpenZeppelin/contracts-ui-builder/pull/64) [`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479) Thanks [@pasevin](https://github.com/pasevin)! - changed import sorting library
 
 - Updated dependencies [[`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479)]:
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.5
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.2.1
-  - @openzeppelin/contracts-ui-builder-react-core@0.1.4
-  - @openzeppelin/contracts-ui-builder-renderer@0.1.5
-  - @openzeppelin/contracts-ui-builder-types@0.2.1
-  - @openzeppelin/contracts-ui-builder-utils@0.2.1
-  - @openzeppelin/contracts-ui-builder-ui@0.2.1
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.4
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.4
+  - @openzeppelin/ui-builder-adapter-midnight@0.0.5
+  - @openzeppelin/ui-builder-adapter-evm@0.2.1
+  - @openzeppelin/ui-builder-react-core@0.1.4
+  - @openzeppelin/ui-builder-renderer@0.1.5
+  - @openzeppelin/ui-builder-types@0.2.1
+  - @openzeppelin/ui-builder-utils@0.2.1
+  - @openzeppelin/ui-builder-ui@0.2.1
+  - @openzeppelin/ui-builder-adapter-solana@0.0.4
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.4
 
 ## 0.1.6
 
@@ -208,16 +208,16 @@
 ### Patch Changes
 
 - Updated dependencies [[`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81), [`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.2.0
-  - @openzeppelin/contracts-ui-builder-styles@0.2.0
-  - @openzeppelin/contracts-ui-builder-types@0.2.0
-  - @openzeppelin/contracts-ui-builder-utils@0.2.0
-  - @openzeppelin/contracts-ui-builder-ui@0.2.0
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.4
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.3
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.3
-  - @openzeppelin/contracts-ui-builder-react-core@0.1.3
-  - @openzeppelin/contracts-ui-builder-renderer@0.1.4
+  - @openzeppelin/ui-builder-adapter-evm@0.2.0
+  - @openzeppelin/ui-builder-styles@0.2.0
+  - @openzeppelin/ui-builder-types@0.2.0
+  - @openzeppelin/ui-builder-utils@0.2.0
+  - @openzeppelin/ui-builder-ui@0.2.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.0.4
+  - @openzeppelin/ui-builder-adapter-solana@0.0.3
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.3
+  - @openzeppelin/ui-builder-react-core@0.1.3
+  - @openzeppelin/ui-builder-renderer@0.1.4
 
 ## 0.1.3
 
@@ -226,11 +226,11 @@
 - [#54](https://github.com/OpenZeppelin/contracts-ui-builder/pull/54) [`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6) Thanks [@pasevin](https://github.com/pasevin)! - pre-release clean up and improvements
 
 - Updated dependencies [[`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6), [`6d74481`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6d7448140936f5c8dfadac3bca05dde54d468167)]:
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.1.3
-  - @openzeppelin/contracts-ui-builder-renderer@0.1.3
-  - @openzeppelin/contracts-ui-builder-styles@0.1.2
-  - @openzeppelin/contracts-ui-builder-ui@0.1.3
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.3
+  - @openzeppelin/ui-builder-adapter-evm@0.1.3
+  - @openzeppelin/ui-builder-renderer@0.1.3
+  - @openzeppelin/ui-builder-styles@0.1.2
+  - @openzeppelin/ui-builder-ui@0.1.3
+  - @openzeppelin/ui-builder-adapter-midnight@0.0.3
 
 ## 0.1.2
 
@@ -239,14 +239,14 @@
 - [#52](https://github.com/OpenZeppelin/contracts-ui-builder/pull/52) [`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037) Thanks [@pasevin](https://github.com/pasevin)! - resolves clean build issues due to missing packages
 
 - Updated dependencies [[`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037)]:
-  - @openzeppelin/contracts-ui-builder-adapter-midnight@0.0.2
-  - @openzeppelin/contracts-ui-builder-adapter-solana@0.0.2
-  - @openzeppelin/contracts-ui-builder-adapter-evm@0.1.2
-  - @openzeppelin/contracts-ui-builder-react-core@0.1.2
-  - @openzeppelin/contracts-ui-builder-renderer@0.1.2
-  - @openzeppelin/contracts-ui-builder-types@0.1.2
-  - @openzeppelin/contracts-ui-builder-ui@0.1.2
-  - @openzeppelin/contracts-ui-builder-adapter-stellar@0.0.2
+  - @openzeppelin/ui-builder-adapter-midnight@0.0.2
+  - @openzeppelin/ui-builder-adapter-solana@0.0.2
+  - @openzeppelin/ui-builder-adapter-evm@0.1.2
+  - @openzeppelin/ui-builder-react-core@0.1.2
+  - @openzeppelin/ui-builder-renderer@0.1.2
+  - @openzeppelin/ui-builder-types@0.1.2
+  - @openzeppelin/ui-builder-ui@0.1.2
+  - @openzeppelin/ui-builder-adapter-stellar@0.0.2
 
 ## 1.20.0
 
@@ -296,7 +296,7 @@
   - @openzeppelin/transaction-form-adapter-solana@0.3.0
   - @openzeppelin/transaction-form-renderer@1.17.0
   - @openzeppelin/transaction-form-adapter-evm@1.17.0
-  - @openzeppelin/contracts-ui-builder-types@1.17.0
+  - @openzeppelin/ui-builder-types@1.17.0
   - @openzeppelin/transaction-form-utils@1.17.0
   - @openzeppelin/transaction-form-ui@1.17.0
 
@@ -313,7 +313,7 @@
   - @openzeppelin/transaction-form-adapter-evm@1.16.0
   - @openzeppelin/transaction-form-react-core@1.16.0
   - @openzeppelin/transaction-form-styles@1.16.0
-  - @openzeppelin/contracts-ui-builder-types@1.16.0
+  - @openzeppelin/ui-builder-types@1.16.0
   - @openzeppelin/transaction-form-utils@1.16.0
   - @openzeppelin/transaction-form-ui@1.16.0
   - @openzeppelin/transaction-form-adapter-midnight@0.2.2

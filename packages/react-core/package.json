@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-react-core",
+  "name": "@openzeppelin/ui-builder-react-core",
   "version": "0.8.0",
   "private": false,
-  "description": "Core React context providers and hooks for the OpenZeppelin Contracts UI Builder.",
+  "description": "Core React context providers and hooks for the OpenZeppelin UI Builder.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -52,9 +52,9 @@
     "directory": "packages/react-core"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "@openzeppelin/ui-builder-types": "workspace:^",
+    "@openzeppelin/ui-builder-ui": "workspace:^",
+    "@openzeppelin/ui-builder-utils": "workspace:^",
     "lucide-react": "^0.510.0"
   },
   "peerDependencies": {

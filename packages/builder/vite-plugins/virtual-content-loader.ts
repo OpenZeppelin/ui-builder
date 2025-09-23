@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Plugin } from 'vite';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * @module virtual-content-loader

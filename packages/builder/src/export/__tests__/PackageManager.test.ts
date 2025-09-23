@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
@@ -11,15 +11,15 @@ vi.mock('../versions', async () => {
   return {
     ...actual,
     packageVersions: {
-      '@openzeppelin/contracts-ui-builder-adapter-evm': '0.2.0',
-      '@openzeppelin/contracts-ui-builder-adapter-midnight': '0.0.4',
-      '@openzeppelin/contracts-ui-builder-adapter-solana': '0.0.3',
-      '@openzeppelin/contracts-ui-builder-adapter-stellar': '0.0.3',
-      '@openzeppelin/contracts-ui-builder-react-core': '0.1.3',
-      '@openzeppelin/contracts-ui-builder-renderer': '0.1.4',
-      '@openzeppelin/contracts-ui-builder-types': '0.2.0',
-      '@openzeppelin/contracts-ui-builder-ui': '0.2.0',
-      '@openzeppelin/contracts-ui-builder-utils': '0.2.0',
+      '@openzeppelin/ui-builder-adapter-evm': '0.2.0',
+      '@openzeppelin/ui-builder-adapter-midnight': '0.0.4',
+      '@openzeppelin/ui-builder-adapter-solana': '0.0.3',
+      '@openzeppelin/ui-builder-adapter-stellar': '0.0.3',
+      '@openzeppelin/ui-builder-react-core': '0.1.3',
+      '@openzeppelin/ui-builder-renderer': '0.1.4',
+      '@openzeppelin/ui-builder-types': '0.2.0',
+      '@openzeppelin/ui-builder-ui': '0.2.0',
+      '@openzeppelin/ui-builder-utils': '0.2.0',
     },
   };
 });
@@ -43,7 +43,7 @@ describe('PackageManager', () => {
       react: '^19.0.0',
       'react-dom': '^19.0.0',
       'react-hook-form': '^7.43.9',
-      '@openzeppelin/contracts-ui-builder-renderer': '1.0.0',
+      '@openzeppelin/ui-builder-renderer': '1.0.0',
     },
     fieldDependencies: {
       text: { runtimeDependencies: {} },
@@ -105,7 +105,7 @@ describe('PackageManager', () => {
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
       expect(dependencies).toHaveProperty('react-hook-form');
-      expect(dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-renderer');
+      expect(dependencies).toHaveProperty('@openzeppelin/ui-builder-renderer');
     });
 
     it('should include the correct adapter package dependency', async () => {
@@ -113,24 +113,18 @@ describe('PackageManager', () => {
 
       const evmDependencies = await packageManager.getDependencies(formConfig, 'evm');
       // Check for core adapter package
-      expect(evmDependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm');
-      expect(evmDependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Should also include types
-      expect(evmDependencies).not.toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-solana'
-      );
+      expect(evmDependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+      expect(evmDependencies).toHaveProperty('@openzeppelin/ui-builder-types'); // Should also include types
+      expect(evmDependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
       // Check for specific runtime libs from EVM adapter config
       expect(evmDependencies).toHaveProperty('viem');
       expect(evmDependencies).toHaveProperty('wagmi');
 
       const solanaDependencies = await packageManager.getDependencies(formConfig, 'solana');
       // Check for core adapter package
-      expect(solanaDependencies).toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-solana'
-      );
-      expect(solanaDependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
-      expect(solanaDependencies).not.toHaveProperty(
-        '@openzeppelin/contracts-ui-builder-adapter-evm'
-      );
+      expect(solanaDependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
+      expect(solanaDependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(solanaDependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
       // Check for specific runtime libs from Solana adapter config
       expect(solanaDependencies).toHaveProperty('@solana/web3.js');
       // Check that EVM libs are NOT present
@@ -163,8 +157,8 @@ describe('PackageManager', () => {
         'unknown-ecosystem' as Ecosystem
       );
       expect(dependencies).toHaveProperty('react'); // Core deps still present
-      expect(dependencies).not.toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm'); // Adapter package not included
-      expect(dependencies).not.toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Types package not included for unknown chain
+      expect(dependencies).not.toHaveProperty('@openzeppelin/ui-builder-adapter-evm'); // Adapter package not included
+      expect(dependencies).not.toHaveProperty('@openzeppelin/ui-builder-types'); // Types package not included for unknown chain
     });
   });
 
@@ -270,8 +264,8 @@ describe('PackageManager', () => {
 
       expect(result.dependencies).toHaveProperty('react'); // Core
       expect(result.dependencies).toHaveProperty('react-datepicker'); // Field
-      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-adapter-evm'); // Adapter pkg
-      expect(result.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types'); // Types pkg
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm'); // Adapter pkg
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-types'); // Types pkg
       // Check for specific runtime libs from EVM adapter config
       expect(result.dependencies).toHaveProperty('viem');
       expect(result.dependencies).toHaveProperty('wagmi');
@@ -287,13 +281,9 @@ describe('PackageManager', () => {
         { env: 'local' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe(
-        'workspace:*'
-      );
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toBe('workspace:*');
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toBe(
-        'workspace:*'
-      );
+      expect(result.dependencies['@openzeppelin/ui-builder-renderer']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/ui-builder-types']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
     });
 
     it('should apply versioning strategy correctly (prod env)', async () => {
@@ -306,9 +296,9 @@ describe('PackageManager', () => {
         { env: 'production' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/^\^/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/^\^/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-types']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(/^\^/);
     });
 
     it('should apply versioning strategy correctly (staging env)', async () => {
@@ -324,15 +314,9 @@ describe('PackageManager', () => {
 
       // Should use RC versions for staging: accept 'rc' tag or timestamped RC like 0.0.0-rc-YYYYMMDDHHMMSS
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        rcVersionOrTag
-      );
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
-        rcVersionOrTag
-      );
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(
-        rcVersionOrTag
-      );
+      expect(result.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/ui-builder-types']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
 
       // Verify external deps don't get -rc treatment
       expect(result.dependencies['react']).not.toMatch(/-rc$/);
@@ -356,15 +340,9 @@ describe('PackageManager', () => {
 
       // All internal packages should resolve to RC format (either dist-tag 'rc' or timestamped RC)
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
-        rcVersionOrTag
-      );
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(
-        rcVersionOrTag
-      );
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(
-        rcVersionOrTag
-      );
+      expect(result.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/ui-builder-types']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
     });
 
     it('should verify RC detection logic works correctly', async () => {
@@ -384,7 +362,7 @@ describe('PackageManager', () => {
 
       // All internal packages should have -rc suffix added (version-agnostic)
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
+      expect(stagingResult.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(
         rcVersionOrTag
       );
 
@@ -399,12 +377,10 @@ describe('PackageManager', () => {
       const prodResult = JSON.parse(prodUpdated);
 
       // Production should have ^ prefix, not -rc suffix (version-agnostic)
-      expect(prodResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
+      expect(prodResult.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(
         /^\^\d+\.\d+\.\d+$/
       );
-      expect(prodResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).not.toMatch(
-        /-rc/
-      );
+      expect(prodResult.dependencies['@openzeppelin/ui-builder-renderer']).not.toMatch(/-rc/);
     });
 
     it('should default to production environment when env is undefined', async () => {
@@ -419,9 +395,9 @@ describe('PackageManager', () => {
       const result = JSON.parse(updated);
 
       // Should behave like production environment
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(/^\^/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-types']).toMatch(/^\^/);
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-adapter-evm']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-types']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(/^\^/);
     });
 
     it('should handle all three environments correctly in a single test', async () => {
@@ -436,9 +412,7 @@ describe('PackageManager', () => {
         { env: 'local' }
       );
       const localResult = JSON.parse(localUpdated);
-      expect(localResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toBe(
-        'workspace:*'
-      );
+      expect(localResult.dependencies['@openzeppelin/ui-builder-renderer']).toBe('workspace:*');
 
       // Test staging environment
       const stagingUpdated = await packageManager.updatePackageJson(
@@ -449,7 +423,7 @@ describe('PackageManager', () => {
         { env: 'staging' }
       );
       const stagingResult = JSON.parse(stagingUpdated);
-      expect(stagingResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
+      expect(stagingResult.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(
         /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/
       );
 
@@ -462,7 +436,7 @@ describe('PackageManager', () => {
         { env: 'production' }
       );
       const prodResult = JSON.parse(prodUpdated);
-      expect(prodResult.dependencies['@openzeppelin/contracts-ui-builder-renderer']).toMatch(
+      expect(prodResult.dependencies['@openzeppelin/ui-builder-renderer']).toMatch(
         /^\^\d+\.\d+\.\d+$/
       );
     });
@@ -498,7 +472,7 @@ describe('PackageManager', () => {
       const formConfig = createMinimalFormConfig();
       const customDeps = {
         'custom-external-dep': '2.0.0',
-        '@openzeppelin/contracts-ui-builder-custom': '1.0.0', // This should get RC treatment
+        '@openzeppelin/ui-builder-custom': '1.0.0', // This should get RC treatment
       };
 
       const updated = await packageManager.updatePackageJson(
@@ -518,7 +492,7 @@ describe('PackageManager', () => {
       expect(result.dependencies['custom-external-dep']).toBe('2.0.0');
 
       // OpenZeppelin custom dep should remain as specified (not in our internal packages list)
-      expect(result.dependencies['@openzeppelin/contracts-ui-builder-custom']).toBe('1.0.0');
+      expect(result.dependencies['@openzeppelin/ui-builder-custom']).toBe('1.0.0');
     });
 
     it('should include additional dependencies from options', async () => {

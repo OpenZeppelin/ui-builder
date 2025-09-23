@@ -6,8 +6,8 @@ import type {
   ExecutionConfig,
   ExecutionMethodDetail,
   ExecutionMethodType,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { ExecutionMethodFormData } from '../types';
 import {

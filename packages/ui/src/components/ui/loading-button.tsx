@@ -2,7 +2,7 @@ import { Slot, Slottable } from '@radix-ui/react-slot';
 import { type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { buttonVariants } from '../../utils/button-variants';
 

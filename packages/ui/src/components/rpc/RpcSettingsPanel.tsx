@@ -4,11 +4,8 @@ import { CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type {
-  ContractAdapter,
-  UserRpcProviderConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { SettingsFooter } from '@/components/settings/SettingsFooter';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

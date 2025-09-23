@@ -1,8 +1,5 @@
-import type {
-  NativeConfigLoader,
-  UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { NativeConfigLoader, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Resolves the final, complete UiKitConfiguration for Stellar by merging various sources.

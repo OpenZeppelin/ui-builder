@@ -1,4 +1,4 @@
-# Midnight Adapter (`@openzeppelin/contracts-ui-builder-adapter-midnight`)
+# Midnight Adapter (`@openzeppelin/ui-builder-adapter-midnight`)
 
 This package provides the `ContractAdapter` implementation for the Midnight Network for the UI Builder.
 
@@ -23,7 +23,7 @@ The `MidnightAdapter` is consumed by the `builder` application's `WalletStatePro
 import {
   MidnightAdapter,
   midnightTestnet,
-} from '@openzeppelin/contracts-ui-builder-adapter-midnight';
+} from '@openzeppelin/ui-builder-adapter-midnight';
 
 const networkConfig = midnightTestnet;
 const midnightAdapter = new MidnightAdapter(networkConfig);

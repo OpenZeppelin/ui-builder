@@ -7,8 +7,8 @@ import type {
   NativeConfigLoader,
   NetworkConfig,
   UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useAdapterContext } from './useAdapterContext';
 import { WalletStateContext, type WalletStateContextValue } from './WalletStateContext';

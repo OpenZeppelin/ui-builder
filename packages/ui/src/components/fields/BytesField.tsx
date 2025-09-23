@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import { validateBytesSimple } from '@openzeppelin/contracts-ui-builder-utils';
+import { validateBytesSimple } from '@openzeppelin/ui-builder-utils';
 
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-builder-types';
 
 describe('Enum Payload Processing in formatStellarTransactionData', () => {
   const mockContractAddress = 'CDVQVKOY2YSXS2IC7KN6MNASSHPAO7UN2UR2ON4OI2SKMFJNVAMDX6DP';

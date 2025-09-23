@@ -1,6 +1,6 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { isEnumValue, type FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
+import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-types';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { convertEnumToScVal } from '../../utils/input-parsing';

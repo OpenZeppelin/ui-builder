@@ -63,15 +63,15 @@ debug(`Found monorepo root: ${monorepoRoot}`);
 
 function showHelp() {
   console.log(`
-${colors.bold}${colors.cyan}Contracts UI Builder Export CLI${colors.reset}
-A utility for exporting, building, and testing Contracts UI Builder apps.
+${colors.bold}${colors.cyan}UI Builder Export CLI${colors.reset}
+A utility for exporting, building, and testing UI Builder apps.
 ${colors.bold}Usage:${colors.reset}
   export-app [command] [options]
 ${colors.bold}Commands:${colors.reset}
-  export       Export a Contracts UI Builder app with specified configuration
-  build        Build an exported Contracts UI Builder app
-  serve        Start a local server to test an exported Contracts UI Builder app
-  verify       Verify Contracts UI Builder app functionality
+  export       Export a UI Builder app with specified configuration
+  build        Build an exported UI Builder app
+  serve        Start a local server to test an exported UI Builder app
+  verify       Verify UI Builder app functionality
 ${colors.bold}Options:${colors.reset}
   --help, -h                 Show this help information
   --chain, -c [type]         Chain type (evm, solana, stellar) (default: evm)
@@ -162,9 +162,7 @@ function execInDir(command, dir, stdio = 'inherit') {
 
 function exportAppSimple(options) {
   try {
-    console.log(
-      `\n${colors.bold}${colors.cyan}Exporting Contracts UI Builder App${colors.reset}\n`
-    );
+    console.log(`\n${colors.bold}${colors.cyan}Exporting UI Builder App${colors.reset}\n`);
     const userCurrentDir = process.cwd();
     const outputDir = path.resolve(userCurrentDir, options.output);
     fs.mkdirSync(outputDir, { recursive: true });
@@ -250,15 +248,15 @@ function exportAppSimple(options) {
         const packageJsonPath = path.join(extractDir, 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const packageOverrides = {
-          '@openzeppelin/contracts-ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
-          '@openzeppelin/contracts-ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
-          '@openzeppelin/contracts-ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
-          '@openzeppelin/contracts-ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/contracts-ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
-          '@openzeppelin/contracts-ui-builder-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
-          '@openzeppelin/contracts-ui-builder-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
-          '@openzeppelin/contracts-ui-builder-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
-          '@openzeppelin/contracts-ui-builder-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
+          '@openzeppelin/ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
+          '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
+          '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
+          '@openzeppelin/ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
+          '@openzeppelin/ui-builder-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
+          '@openzeppelin/ui-builder-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
+          '@openzeppelin/ui-builder-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
+          '@openzeppelin/ui-builder-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
         };
         packageJson.pnpm = {
           ...(packageJson.pnpm || {}),
@@ -321,7 +319,7 @@ function buildExportedApp(options) {
     process.exit(1);
   }
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Building Contracts UI Builder App${colors.reset}\n`);
+    console.log(`\n${colors.bold}${colors.cyan}Building UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm install', targetDir);
     console.log(`${colors.blue}Running 'pnpm build' in ${targetDir}...${colors.reset}`);
@@ -340,7 +338,7 @@ function serveExportedApp(options) {
     process.exit(1);
   }
   try {
-    console.log(`\n${colors.bold}${colors.cyan}Serving Contracts UI Builder App${colors.reset}\n`);
+    console.log(`\n${colors.bold}${colors.cyan}Serving UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm install', targetDir);
     console.log(`${colors.blue}Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
@@ -362,9 +360,7 @@ function verifyExportedApp(options) {
     process.exit(1);
   }
   try {
-    console.log(
-      `\n${colors.bold}${colors.cyan}Verifying Contracts UI Builder App${colors.reset}\n`
-    );
+    console.log(`\n${colors.bold}${colors.cyan}Verifying UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running tests for:${colors.reset} ${targetDir}`);
     if (!fs.existsSync(path.join(targetDir, 'node_modules'))) {
       console.log(`${colors.yellow}Installing dependencies first...${colors.reset}`);

@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { DynamicFormField } from '@openzeppelin/contracts-ui-builder-renderer';
+import { DynamicFormField } from '@openzeppelin/ui-builder-renderer';
 import {
   AvailableUiKit,
   ContractAdapter,
@@ -11,9 +11,9 @@ import {
   FormValues,
   UiKitConfiguration,
   UiKitName,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { EmptyState, ExternalLink } from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { EmptyState, ExternalLink } from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';

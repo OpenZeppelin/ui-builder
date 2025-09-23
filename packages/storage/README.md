@@ -1,4 +1,4 @@
-# @openzeppelin/contracts-ui-builder-storage
+# @openzeppelin/ui-builder-storage
 
 Local storage services for the OpenZeppelin UI Builder ecosystem.
 
@@ -19,7 +19,7 @@ This package provides a reusable storage infrastructure built on top of IndexedD
 ## Installation
 
 ```bash
-pnpm add @openzeppelin/contracts-ui-builder-storage
+pnpm add @openzeppelin/ui-builder-storage
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ pnpm add @openzeppelin/contracts-ui-builder-storage
 ### Basic Usage
 
 ```typescript
-import { useContractUIStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import { useContractUIStorage } from '@openzeppelin/ui-builder-storage';
 
 function MyComponent() {
   const {
@@ -78,7 +78,7 @@ function MyComponent() {
 ### Creating a Custom Storage Service
 
 ```typescript
-import { db, DexieStorage } from '@openzeppelin/contracts-ui-builder-storage';
+import { db, DexieStorage } from '@openzeppelin/ui-builder-storage';
 
 interface TransactionRecord extends BaseRecord {
   hash: string;

@@ -6,8 +6,8 @@ import type {
   TransactionFormProps,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';

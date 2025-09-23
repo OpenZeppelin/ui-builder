@@ -1,4 +1,4 @@
-# EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
+# EVM Adapter (`@openzeppelin/ui-builder-adapter-evm`)
 
 This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the UI Builder.
 
@@ -153,7 +153,7 @@ export {
 Run the adapter tests to verify wagmi integration:
 
 ```bash
-pnpm --filter @openzeppelin/contracts-ui-builder-adapter-evm test
+pnpm --filter @openzeppelin/ui-builder-adapter-evm test
 ```
 
 The tests will verify that:

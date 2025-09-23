@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import type { FormValues } from '@openzeppelin/contracts-ui-builder-types';
+import type { FormValues } from '@openzeppelin/ui-builder-types';
 
 import { useContractForm } from '../hooks/useContractForm';
 

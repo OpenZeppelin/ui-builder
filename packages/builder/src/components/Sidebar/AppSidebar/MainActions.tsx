@@ -6,7 +6,7 @@ import {
   SquarePen,
 } from 'lucide-react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useAnalytics } from '../../../hooks/useAnalytics';

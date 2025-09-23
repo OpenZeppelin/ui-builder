@@ -13,8 +13,8 @@ import { ContractUIStorage } from '../ContractUIStorage';
 
 // Mock the generateId utility
 let idCounter = 0;
-vi.mock('@openzeppelin/contracts-ui-builder-utils', async () => {
-  const actual = await vi.importActual('@openzeppelin/contracts-ui-builder-utils');
+vi.mock('@openzeppelin/ui-builder-utils', async () => {
+  const actual = await vi.importActual('@openzeppelin/ui-builder-utils');
   return {
     ...actual,
     generateId: vi.fn(() => `mocked-id-${++idCounter}`),

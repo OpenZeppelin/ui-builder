@@ -288,7 +288,7 @@ Direct test runs will clean up files, while the CLI preserves them.
 If you're getting errors about missing workspace dependencies:
 
 ```
-ERROR: No matching version found for @openzeppelin/contracts-ui-builder-renderer@workspace:*
+ERROR: No matching version found for @openzeppelin/ui-builder-renderer@workspace:*
 ```
 
 Make sure you're:

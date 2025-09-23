@@ -5,9 +5,9 @@ import type {
   EnumValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { isEnumValue } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { extractEnumVariants, isEnumType } from '../mapping/enum-metadata';
 import { parseStellarInput } from '../transform';

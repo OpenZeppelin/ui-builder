@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import {
   useDerivedAccountStatus,
   useDerivedConnectStatus,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-react-core';
+import type { Connector } from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Dialog,
@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-ui';
 
 import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';

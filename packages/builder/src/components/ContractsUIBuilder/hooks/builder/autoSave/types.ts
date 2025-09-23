@@ -2,7 +2,7 @@ import {
   ExecutionConfig,
   RenderFormSchema,
   UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 /**
  * Type definition for the saved configuration data structure

@@ -1,15 +1,8 @@
 import { useCallback, useState } from 'react';
 
-import {
-  AdapterProvider,
-  WalletStateProvider,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import type { NativeConfigLoader } from '@openzeppelin/contracts-ui-builder-types';
-import {
-  Footer,
-  NetworkErrorNotificationProvider,
-  Toaster,
-} from '@openzeppelin/contracts-ui-builder-ui';
+import { AdapterProvider, WalletStateProvider } from '@openzeppelin/ui-builder-react-core';
+import type { NativeConfigLoader } from '@openzeppelin/ui-builder-types';
+import { Footer, NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-builder-ui';
 
 import { Header } from './components/Common/Header';
 import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 
 import { useNetworkErrors } from './useNetworkErrors';
 

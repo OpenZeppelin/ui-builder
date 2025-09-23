@@ -3,7 +3,7 @@ import {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import type { StellarTransactionData } from './formatter';
 

@@ -1,7 +1,7 @@
 import { Copy, ExternalLink } from 'lucide-react';
 import * as React from 'react';
 
-import { cn, truncateMiddle } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn, truncateMiddle } from '@openzeppelin/ui-builder-utils';
 
 interface AddressDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   /**

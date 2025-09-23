@@ -1,6 +1,6 @@
 import * as StellarSdk from '@stellar/stellar-sdk';
 
-import { isDevelopmentOrTestEnvironment, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { isDevelopmentOrTestEnvironment, logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Utility functions for detecting and analyzing Stellar/Soroban parameter types

@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
 import { useCallback, useMemo } from 'react';
 
-import type { ContractDefinitionMetadata } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractDefinitionMetadata } from '@openzeppelin/ui-builder-types';
 
 import { db } from '../database/db';
 import { contractUIStorage } from '../services/ContractUIStorage';

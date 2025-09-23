@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/contracts-ui-builder-react-core';
+import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';

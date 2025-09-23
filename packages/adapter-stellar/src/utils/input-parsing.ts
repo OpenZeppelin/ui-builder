@@ -1,10 +1,6 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import {
-  detectBytesEncoding,
-  logger,
-  stringToBytes,
-} from '@openzeppelin/contracts-ui-builder-utils';
+import { detectBytesEncoding, logger, stringToBytes } from '@openzeppelin/ui-builder-utils';
 
 // Import types for internal use
 import type {

@@ -83,7 +83,7 @@ export { evmNetworks, evmMainnetNetworks, evmTestnetNetworks } from './networks'
 The builder application, specifically the `ecosystemManager.ts` module, dynamically discovers and aggregates network configurations from all registered adapter packages. This is achieved by:
 
 1.  Maintaining an `ecosystemRegistry` that maps each `Ecosystem` to its metadata, including the conventional export name for its network list (e.g., `evmNetworks`).
-2.  Dynamically importing the main module of each adapter package (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`).
+2.  Dynamically importing the main module of each adapter package (e.g., `@openzeppelin/ui-builder-adapter-evm`).
 3.  Accessing the exported network list from the imported module using the conventional name (e.g., `module.evmNetworks`).
 
 This allows the builder to remain decoupled from the specifics of each adapter package while still being able to gather all network configurations.
@@ -107,9 +107,9 @@ const ecosystemRegistry = {
 async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<any> {
   switch (ecosystem) {
     case 'evm':
-      return import('@openzeppelin/contracts-ui-builder-adapter-evm');
+      return import('@openzeppelin/ui-builder-adapter-evm');
     case 'solana':
-      return import('@openzeppelin/contracts-ui-builder-adapter-solana');
+      return import('@openzeppelin/ui-builder-adapter-solana');
     // ... etc.
     default:
       throw new Error('...');
@@ -131,7 +131,7 @@ Here's a template for implementing network configurations in an adapter:
 
 ```typescript
 // In adapter-{ecosystem}/src/networks/mainnet.ts
-import { {Ecosystem}NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { {Ecosystem}NetworkConfig } from '@openzeppelin/ui-builder-types';
 
 export const {network}Mainnet: {Ecosystem}NetworkConfig = {
   id: '{network}-mainnet',

@@ -1,9 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import {
-  AdapterProvider,
-  WalletStateProvider,
-} from '@openzeppelin/contracts-ui-builder-react-core';
+import { AdapterProvider, WalletStateProvider } from '@openzeppelin/ui-builder-react-core';
 
 import { ContractsUIBuilder } from '../../components/ContractsUIBuilder';
 import { getAdapter, getNetworkById } from '../../core/ecosystemManager';

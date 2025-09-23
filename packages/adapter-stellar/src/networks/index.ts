@@ -1,4 +1,4 @@
-import { StellarNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 
 import { stellarPublic } from './mainnet';
 import { stellarTestnet } from './testnet';

@@ -8,7 +8,7 @@ import type {
   ExecutionConfig,
   RelayerDetailsRich,
   RelayerExecutionConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 import {
   Alert,
   AlertDescription,
@@ -19,8 +19,8 @@ import {
   DialogTitle,
   EmptyState,
   PasswordField,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { EoaConfigDetails } from './components/EoaConfigDetails';
 import { ExecutionMethodTrigger } from './components/ExecutionMethodTrigger';

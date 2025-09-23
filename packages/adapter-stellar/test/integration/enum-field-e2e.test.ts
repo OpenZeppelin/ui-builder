@@ -4,7 +4,7 @@ import type {
   ContractSchema,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import { generateStellarDefaultField } from '../../src/mapping/field-generator';
 import { mapStellarParameterTypeToFieldType } from '../../src/mapping/type-mapper';

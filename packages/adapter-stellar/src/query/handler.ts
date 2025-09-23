@@ -14,8 +14,8 @@ import type {
   FunctionParameter,
   NetworkConfig,
   StellarNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { parseStellarInput } from '../transform';
 import { formatStellarFunctionResult } from '../transform/output-formatter';

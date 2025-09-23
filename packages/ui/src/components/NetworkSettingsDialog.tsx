@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import { ContractAdapter } from '@openzeppelin/ui-builder-types';
 
 import { ContractDefinitionSettingsPanel } from './contract-definition/ContractDefinitionSettingsPanel';
 import { ExplorerSettingsPanel } from './explorer/ExplorerSettingsPanel';

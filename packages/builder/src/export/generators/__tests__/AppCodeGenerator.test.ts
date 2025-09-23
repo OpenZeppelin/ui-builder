@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
 import type {
   EvmNetworkConfig,
   FormFieldType,
   RenderFormSchema,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../../core/types/ExportTypes';
@@ -16,8 +16,8 @@ import { AppCodeGenerator } from '../AppCodeGenerator';
 // Mock adapterRegistry before other imports that might use it indirectly
 vi.mock('../../../core/adapterRegistry', () => {
   const adapterPackageMap = {
-    evm: '@openzeppelin/contracts-ui-builder-adapter-evm',
-    solana: '@openzeppelin/contracts-ui-builder-adapter-solana',
+    evm: '@openzeppelin/ui-builder-adapter-evm',
+    solana: '@openzeppelin/ui-builder-adapter-solana',
     // Add other real chains if needed by tests
   };
 
@@ -47,9 +47,9 @@ vi.mock('../../PackageManager', () => {
           // Simulate adding dependencies based on ecosystem
           packageJson.dependencies = {
             ...(packageJson.dependencies || {}),
-            '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-            '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-            [`@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
+            '@openzeppelin/ui-builder-renderer': '^1.0.0',
+            '@openzeppelin/ui-builder-types': '^0.1.0',
+            [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
         }
@@ -58,9 +58,9 @@ vi.mock('../../PackageManager', () => {
       .fn()
       .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
         return {
-          '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-          '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-          [`@openzeppelin/contracts-ui-builder-adapter-${ecosystem}`]: '^0.0.1',
+          '@openzeppelin/ui-builder-renderer': '^1.0.0',
+          '@openzeppelin/ui-builder-types': '^0.1.0',
+          [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
     getDevDependencies: vi
@@ -107,10 +107,9 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
               packageJson.name = options?.projectName || 'default-test-name';
               packageJson.dependencies = {
                 ...(packageJson.dependencies || {}),
-                '@openzeppelin/contracts-ui-builder-renderer': '^1.0.0',
-                '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-                [`@openzeppelin/contracts-ui-builder-adapter-${options.ecosystem || 'evm'}`]:
-                  '^0.0.1',
+                '@openzeppelin/ui-builder-renderer': '^1.0.0',
+                '@openzeppelin/ui-builder-types': '^0.1.0',
+                [`@openzeppelin/ui-builder-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);
             }
@@ -215,7 +214,7 @@ describe('AppCodeGenerator', () => {
         'form-component',
         expect.objectContaining({
           adapterClassName: 'EvmAdapter',
-          adapterPackageName: '@openzeppelin/contracts-ui-builder-adapter-evm',
+          adapterPackageName: '@openzeppelin/ui-builder-adapter-evm',
           networkConfigImportName: 'mockEvmNetworkConfig', // From the mock config exportConstName
           functionId: 'testFunction',
           formConfigJSON: expect.any(String),

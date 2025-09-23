@@ -1,9 +1,9 @@
 import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import React from 'react';
 
-import type { TxStatus } from '@openzeppelin/contracts-ui-builder-types';
-import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import type { TxStatus } from '@openzeppelin/ui-builder-types';
+import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { TransactionHashDisplay } from './TransactionHashDisplay';
 

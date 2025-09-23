@@ -6,7 +6,7 @@ import type {
   ContractAdapter,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';

@@ -1,7 +1,7 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-adapter-solana",
+  "name": "@openzeppelin/ui-builder-adapter-solana",
   "version": "0.8.0",
-  "description": "Solana Adapter for Contracts UI Builder",
+  "description": "Solana Adapter for UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",
@@ -42,8 +42,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-types": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "@openzeppelin/ui-builder-types": "workspace:*",
+    "@openzeppelin/ui-builder-utils": "workspace:^",
     "@project-serum/anchor": "^0.26.0",
     "@solana/spl-token": "^0.3.11",
     "@solana/wallet-adapter-base": "^0.9.27",

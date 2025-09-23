@@ -15,8 +15,8 @@
  */
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ContractAdapter, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { AdapterContext, AdapterContextValue, AdapterRegistry } from './AdapterContext';
 
