@@ -15,21 +15,26 @@ set -euo pipefail
 
 DRY_RUN=${DRY_RUN:-true}
 
-if [[ -z "${NPM_TOKEN:-}" ]]; then
-  echo "❌ NPM_TOKEN is not set. Export NPM_TOKEN before running."
+# Only require NPM_TOKEN when not in DRY_RUN mode
+if [[ "$DRY_RUN" != "true" && -z "${NPM_TOKEN:-}" ]]; then
+  echo "❌ NPM_TOKEN is not set. Export NPM_TOKEN or run with DRY_RUN=true."
   exit 1
 fi
 
 echo "ℹ️  DRY_RUN=${DRY_RUN}"
 
-# Use a temporary npmrc to avoid persisting the token locally
-TMP_NPMRC=$(mktemp)
-trap 'rm -f "$TMP_NPMRC"' EXIT
-export NPM_CONFIG_USERCONFIG="$TMP_NPMRC"
-echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$TMP_NPMRC"
+# In non-dry runs, use a temporary npmrc to avoid persisting the token locally
+if [[ "$DRY_RUN" != "true" ]]; then
+  TMP_NPMRC=$(mktemp)
+  trap 'rm -f "$TMP_NPMRC"' EXIT
+  export NPM_CONFIG_USERCONFIG="$TMP_NPMRC"
+  echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$TMP_NPMRC"
 
-echo "🔐 Authenticating to npm..."
-npm whoami || true
+  echo "🔐 Authenticating to npm..."
+  npm whoami || true
+else
+  echo "🔐 Skipping npm auth in DRY_RUN mode"
+fi
 
 # Parallel arrays: legacy -> new
 OLD_PKGS=(
