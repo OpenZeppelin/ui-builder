@@ -133,27 +133,13 @@ export default defineConfig(
         'react-dom',
       ],
     },
-    optimizeDeps: {
-      include: [
-        '@openzeppelin/ui-builder-renderer',
-        '@openzeppelin/ui-builder-types',
-        '@openzeppelin/ui-builder-react-core',
-        '@openzeppelin/ui-builder-ui',
-      ],
-    },
-    ssr: {
-      noExternal: [
-        '@openzeppelin/ui-builder-renderer',
-        '@openzeppelin/ui-builder-types',
-        '@openzeppelin/ui-builder-react-core',
-        '@openzeppelin/ui-builder-ui',
-      ],
-    },
     // Add optimizeDeps for Vite to correctly process these linked workspace packages
     optimizeDeps: {
       include: [
         '@openzeppelin/ui-builder-renderer',
         '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-builder-react-core',
+        '@openzeppelin/ui-builder-ui',
       ],
     },
     // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
@@ -161,6 +147,8 @@ export default defineConfig(
       noExternal: [
         '@openzeppelin/ui-builder-renderer',
         '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-builder-react-core',
+        '@openzeppelin/ui-builder-ui',
       ],
     },
     test: {

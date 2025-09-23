@@ -2,12 +2,12 @@ import { Meta, StoryObj } from '@storybook/react';
 
 import { AdapterProvider, WalletStateProvider } from '@openzeppelin/ui-builder-react-core';
 
-import { ContractsUIBuilder } from '../../components/ContractsUIBuilder';
+import { UIBuilder } from '../../components/UIBuilder';
 import { getAdapter, getNetworkById } from '../../core/ecosystemManager';
 
-const meta: Meta<typeof ContractsUIBuilder> = {
-  title: 'Builder/ContractsUIBuilder',
-  component: ContractsUIBuilder,
+const meta: Meta<typeof UIBuilder> = {
+  title: 'Builder/UIBuilder',
+  component: UIBuilder,
   parameters: {
     layout: 'fullscreen',
     docs: {

@@ -21,7 +21,7 @@ import { StepContractDefinition } from './StepContractDefinition';
  * Main builder app wizard component.
  * This component renders the multi-step wizard for building transaction apps..
  */
-export function ContractsUIBuilder() {
+export function UIBuilder() {
   const { state, widget, actions } = useUIBuilderState();
 
   // Track network switching state
@@ -35,7 +35,7 @@ export function ContractsUIBuilder() {
 
   // Custom handler for network selection that directly signals a network switch
   const handleNetworkSelection = (ecosystem: Ecosystem, networkId: string | null) => {
-    logger.info('ContractsUIBuilder', `🔀 Network selected: ${ecosystem}/${networkId}`);
+    logger.info('UIBuilder', `🔀 Network selected: ${ecosystem}/${networkId}`);
 
     // If there's a previous network and we're selecting a new one, set it as the network to switch to
     // OR if this is the first network selection (initial load)
@@ -44,15 +44,12 @@ export function ContractsUIBuilder() {
       (latestNetworkIdRef.current !== networkId || !hasInitializedNetworkRef.current)
     ) {
       setIsAdapterReady(false); // Reset the adapter ready flag
-      logger.info('ContractsUIBuilder', `🎯 Setting network to switch to: ${networkId}`);
+      logger.info('UIBuilder', `🎯 Setting network to switch to: ${networkId}`);
 
       // Mark that we've initialized if this is the first selection
       if (!hasInitializedNetworkRef.current) {
         hasInitializedNetworkRef.current = true;
-        logger.info(
-          'ContractsUIBuilder',
-          '🚀 Initial network selection - triggering wallet switch'
-        );
+        logger.info('UIBuilder', '🚀 Initial network selection - triggering wallet switch');
       }
     }
 
@@ -76,10 +73,7 @@ export function ContractsUIBuilder() {
     if (!state.selectedAdapter || !state.networkToSwitchTo || !state.selectedNetworkConfigId) {
       // If networkToSwitchTo is cleared (e.g., switch complete), ensure isAdapterReady is false.
       if (!state.networkToSwitchTo && isAdapterReady) {
-        logger.info(
-          'ContractsUIBuilder',
-          'Target network cleared, ensuring isAdapterReady is false.'
-        );
+        logger.info('UIBuilder', 'Target network cleared, ensuring isAdapterReady is false.');
         setIsAdapterReady(false);
       }
       return;
@@ -88,7 +82,7 @@ export function ContractsUIBuilder() {
     // If the adapter is now loaded for the network we want to switch to, mark it as ready.
     if (state.selectedNetworkConfigId === state.networkToSwitchTo && state.selectedAdapter) {
       logger.info(
-        'ContractsUIBuilder',
+        'UIBuilder',
         `✅ Adapter available for target network ${state.selectedNetworkConfigId}. (Current selectedAdapter ID: ${state.selectedAdapter.networkConfig.id}). Setting isAdapterReady.`
       );
       if (!isAdapterReady) {
@@ -100,7 +94,7 @@ export function ContractsUIBuilder() {
       // ensure isAdapterReady is false, as we are not ready to switch with the current adapter.
       if (isAdapterReady) {
         logger.info(
-          'ContractsUIBuilder',
+          'UIBuilder',
           `Mismatch: selectedNetwork (${state.selectedNetworkConfigId}) vs target (${state.networkToSwitchTo}). Resetting isAdapterReady.`
         );
         setIsAdapterReady(false);
@@ -115,7 +109,7 @@ export function ContractsUIBuilder() {
 
   // Reset the network to switch to when switching is complete
   const handleNetworkSwitchComplete = () => {
-    logger.info('ContractsUIBuilder', '🔄 Network switch completed, resetting target');
+    logger.info('UIBuilder', '🔄 Network switch completed, resetting target');
     actions.network.clearSwitchTo();
     setIsAdapterReady(false);
   };
@@ -130,7 +124,7 @@ export function ContractsUIBuilder() {
     );
     if (decision) {
       logger.info(
-        'ContractsUIBuilder',
+        'UIBuilder',
         `MOUNTING NetworkSwitchManager. Adapter ID: ${state.selectedAdapter?.networkConfig.id}, Target: ${state.networkToSwitchTo ?? 'null'}`
       );
     }
