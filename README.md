@@ -162,7 +162,7 @@ For more details, see the [Renderer README](./packages/renderer/README.md).
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
 
-The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Contracts UI Builder.
+The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the UI Builder.
 
 Features:
 
@@ -733,7 +733,7 @@ During the export process, proxy configs and JSON are included to create standal
 
 ## Runtime Configuration
 
-Both the main Contracts UI Builder application and its exported forms support runtime configuration for certain parameters. This is primarily managed via an `AppConfigService` and allows customization without rebuilding the application code.
+Both the main UI Builder application and its exported forms support runtime configuration for certain parameters. This is primarily managed via an `AppConfigService` and allows customization without rebuilding the application code.
 
 ### Builder Application Configuration (Development)
 

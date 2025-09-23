@@ -41,7 +41,7 @@ Tracking: Issue #170
 - [x] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
 - [x] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
 - [x] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
-- [ ] T022 Submit PR B
+- [x] T022 Submit PR B
 
 ## PR C: Packages & Imports + Migration
 

@@ -13,7 +13,7 @@ export default function SidebarNavIcons({ className }: SidebarNavIconsProps) {
   return (
     <nav className={cn('flex items-center gap-4 text-primary', className)}>
       <a
-        href="https://github.com/OpenZeppelin/contracts-ui-builder"
+        href="https://github.com/OpenZeppelin/ui-builder"
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-gray-600 transition-colors"

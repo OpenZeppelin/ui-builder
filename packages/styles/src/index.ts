@@ -1,5 +1,5 @@
 /**
- * Styles package for the Contracts UI Builder
+ * Styles package for the UI Builder
  */
 import './index.css';
 

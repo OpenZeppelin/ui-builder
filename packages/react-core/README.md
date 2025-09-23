@@ -33,7 +33,7 @@ It is a foundational package intended to be used by the main `@openzeppelin/cont
 
 ## Installation
 
-This package is typically used as a workspace dependency (e.g., `"@openzeppelin/contracts-ui-builder-react-core": "workspace:^"`) within the Contracts UI Builder monorepo.
+This package is typically used as a workspace dependency (e.g., `"@openzeppelin/contracts-ui-builder-react-core": "workspace:^"`) within the UI Builder monorepo.
 
 It has peer dependencies on `react` and `react-dom`, and direct dependencies on `@openzeppelin/contracts-ui-builder-types` and `@openzeppelin/contracts-ui-builder-utils`.
 

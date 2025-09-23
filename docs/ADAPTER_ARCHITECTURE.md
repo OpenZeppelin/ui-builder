@@ -249,7 +249,7 @@ This layered approach guarantees that user preferences are prioritized, while st
 
 ### 7.5. User-Provided Explorer Configuration
 
-To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the Contracts UI Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
+To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the UI Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
 
 This system is parallel to the RPC configuration and follows a similar pattern:
 
