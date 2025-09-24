@@ -37,6 +37,12 @@ export interface FormFieldType<T extends FieldType = FieldType> {
   helperText?: string;
 
   /**
+   * Additional information required to render or validate the field.
+   * Used for field-type-specific configuration (e.g., bytes length constraints).
+   */
+  metadata?: Record<string, unknown>;
+
+  /**
    * Default value for the field
    */
   defaultValue?: FieldValue<T>;

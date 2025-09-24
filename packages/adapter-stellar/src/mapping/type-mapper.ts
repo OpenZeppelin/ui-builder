@@ -1,6 +1,6 @@
 import type { FieldType } from '@openzeppelin/ui-builder-types';
 
-import { isLikelyEnumType } from '../utils/type-detection';
+import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
 
 /**
@@ -48,8 +48,8 @@ export function mapStellarParameterTypeToFieldType(parameterType: string): Field
   }
 
   // Handle BytesN types (fixed-size byte arrays like BytesN<32> for hashes)
-  if (parameterType.startsWith('BytesN<')) {
-    return 'textarea'; // Users input as hex strings
+  if (isBytesNType(parameterType)) {
+    return 'bytes';
   }
 
   // Handle custom types (structs, enums) - default to object unless it's clearly an enum
@@ -101,6 +101,10 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
       return ['array-object', 'textarea', 'text'];
     }
     return ['array', 'textarea', 'text'];
+  }
+
+  if (isBytesNType(parameterType)) {
+    return ['bytes', 'textarea', 'text'];
   }
 
   // Handle Vec types - allow array field or fallback to textarea/text

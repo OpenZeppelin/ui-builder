@@ -12,7 +12,7 @@ import type {
 import { getDefaultValueForType, logger } from '@openzeppelin/ui-builder-utils';
 
 import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
-import { isLikelyEnumType } from '../utils/type-detection';
+import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 import { extractEnumVariants, isEnumType, type EnumMetadata } from './enum-metadata';
 import { mapStellarParameterTypeToFieldType } from './type-mapper';
 
@@ -91,6 +91,19 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
     width: 'full',
     options,
   };
+
+  // Propagate max byte length for BytesN types so the UI can enforce it
+  if (isBytesNType(parameter.type)) {
+    const sizeMatch = parameter.type.match(/^BytesN<(\d+)>$/);
+    const maxBytes = sizeMatch ? Number.parseInt(sizeMatch[1], 10) : undefined;
+
+    if (!Number.isNaN(maxBytes) && Number.isFinite(maxBytes)) {
+      baseField.metadata = {
+        ...(baseField.metadata ?? {}),
+        maxBytes,
+      };
+    }
+  }
 
   // For array types, provide element type information
   if (fieldType === 'array') {

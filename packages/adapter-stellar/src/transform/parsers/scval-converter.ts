@@ -4,6 +4,7 @@ import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-ty
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { convertEnumToScVal } from '../../utils/input-parsing';
+import { isBytesNType } from '../../utils/type-detection';
 import { parseGenericType } from './generic-parser';
 import { parsePrimitive } from './primitive-parser';
 import { convertStructToScVal, isStructType } from './struct-parser';
@@ -49,6 +50,27 @@ export function valueToScVal(
     // Non-generic types - use existing logic
     if (parameterType === 'Bool' || parameterType === 'Bytes') {
       return nativeToScVal(value);
+    }
+    if (isBytesNType(parameterType)) {
+      const match = parameterType.match(/^BytesN<(\d+)>$/);
+      if (!match) {
+        throw new Error(`Invalid BytesN parameterType format: ${parameterType}`);
+      }
+      const expectedBytes = Number.parseInt(match[1], 10);
+      const decoded = parsePrimitive(value, 'Bytes');
+      const bytesValue = decoded instanceof Uint8Array ? decoded : (decoded ?? value);
+
+      if (
+        Number.isFinite(expectedBytes) &&
+        bytesValue instanceof Uint8Array &&
+        bytesValue.length !== expectedBytes
+      ) {
+        throw new Error(
+          `BytesN value must be exactly ${expectedBytes} bytes, received ${bytesValue.length}`
+        );
+      }
+
+      return nativeToScVal(bytesValue);
     }
     const scValType = convertStellarTypeToScValType(parameterType);
     const typeHint = Array.isArray(scValType) ? scValType[0] : scValType;

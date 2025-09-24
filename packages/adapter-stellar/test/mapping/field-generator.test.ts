@@ -6,6 +6,24 @@ import { generateStellarDefaultField } from '../../src/mapping/field-generator';
 
 describe('generateStellarDefaultField', () => {
   describe('basic field generation', () => {
+    it('should set maxBytes metadata for BytesN parameter', () => {
+      const parameter: FunctionParameter = {
+        name: 'signature',
+        type: 'BytesN<65>',
+        displayName: 'Signature',
+        description: 'Compressed signature',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result).toMatchObject({
+        name: 'signature',
+        label: 'Signature',
+        type: 'bytes',
+        metadata: { maxBytes: 65 },
+        validation: { required: true },
+      });
+    });
     it('should generate field for Address parameter', () => {
       const parameter: FunctionParameter = {
         name: 'user_address',
@@ -271,6 +289,28 @@ describe('generateStellarDefaultField', () => {
       const result = generateStellarDefaultField(parameter);
 
       expect(result.validation).toEqual({ required: true });
+    });
+
+    it('should generate field for BytesN parameter', () => {
+      const parameter: FunctionParameter = {
+        name: 'signature',
+        type: 'BytesN<65>',
+        displayName: 'Signature',
+        description: 'Compressed signature',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result).toMatchObject({
+        name: 'signature',
+        label: 'Signature',
+        type: 'bytes',
+        metadata: { maxBytes: 65 },
+        placeholder: 'Enter Signature',
+        helperText: 'Compressed signature',
+        validation: { required: true },
+        width: 'full',
+      });
     });
   });
 
