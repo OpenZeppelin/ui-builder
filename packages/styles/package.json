@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-styles",
-  "version": "0.3.0",
+  "version": "0.10.0",
   "private": false,
   "description": "Centralized styling system for the OpenZeppelin UI Builder.",
   "type": "module",

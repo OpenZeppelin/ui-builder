@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-styles
 
+## 0.10.0
+
+### Patch Changes
+
+- [#172](https://github.com/OpenZeppelin/ui-builder/pull/172) [`5bf6ceb`](https://github.com/OpenZeppelin/ui-builder/commit/5bf6ceb81dacbe013eed92d6a0aee05d00c1863d) Thanks [@pasevin](https://github.com/pasevin)! - Rename packages from "@openzeppelin/contracts-ui-builder-_" to "@openzeppelin/ui-builder-_" and update imports across the monorepo. Legacy packages will be deprecated on npm with guidance to the new names.
+
 ## 0.3.0
 
 ### Minor Changes
