@@ -1,8 +1,4 @@
-import {
-  ExecutionConfig,
-  TransactionStatusUpdate,
-  TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
+import { ExecutionConfig, TransactionStatusUpdate, TxStatus } from '@openzeppelin/ui-builder-types';
 
 import { WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';

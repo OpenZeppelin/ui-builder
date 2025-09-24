@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-adapter-evm",
+  "name": "@openzeppelin/ui-builder-adapter-evm",
   "version": "0.9.0",
   "private": false,
-  "description": "EVM Adapter for Contracts UI Builder",
+  "description": "EVM Adapter for UI Builder",
   "keywords": [
     "openzeppelin",
     "transaction",
@@ -14,7 +14,7 @@
     "wagmi"
   ],
   "author": "Aleksandr Pasevin <aleksandr.pasevin@openzeppelin.com>",
-  "homepage": "https://github.com/OpenZeppelin/contracts-ui-builder#readme",
+  "homepage": "https://github.com/OpenZeppelin/ui-builder#readme",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -29,11 +29,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder.git",
+    "url": "https://github.com/OpenZeppelin/ui-builder.git",
     "directory": "packages/adapter-evm"
   },
   "bugs": {
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder/issues"
+    "url": "https://github.com/OpenZeppelin/ui-builder/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -47,10 +47,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ui-builder-react-core": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-types": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-ui": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "@openzeppelin/ui-builder-react-core": "workspace:^",
+    "@openzeppelin/ui-builder-types": "workspace:^",
+    "@openzeppelin/ui-builder-ui": "workspace:^",
+    "@openzeppelin/ui-builder-utils": "workspace:^",
     "@openzeppelin/relayer-sdk": "1.4.0",
     "@wagmi/connectors": "5.7.13",
     "@wagmi/core": "^2.20.3",

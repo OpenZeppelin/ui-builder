@@ -1,6 +1,6 @@
 # Analytics Feature Flag
 
-This document explains how to use the analytics feature flag to control Google Analytics tracking in the Contracts UI Builder.
+This document explains how to use the analytics feature flag to control Google Analytics tracking in the UI Builder.
 
 ## Default Configuration
 
@@ -29,7 +29,7 @@ VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=false
 
 ## JSON Configuration
 
-For the Contracts UI Builder application itself, you can use the `app.config.json` file:
+For the UI Builder application itself, you can use the `app.config.json` file:
 
 ```json
 {
@@ -93,7 +93,7 @@ The analytics feature flag controls:
 
 ### Tracked Events
 
-When analytics is enabled, the following user interactions **within the Contracts UI Builder** are tracked:
+When analytics is enabled, the following user interactions **within the UI Builder** are tracked:
 
 - **Ecosystem Selection**: When users select blockchain ecosystems (EVM, Solana, etc.) in the builder
 - **Network Selection**: When users choose specific networks within ecosystems in the builder

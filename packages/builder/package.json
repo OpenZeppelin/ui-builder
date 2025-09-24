@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-app",
+  "name": "@openzeppelin/ui-builder-app",
   "private": true,
   "version": "0.9.0",
   "type": "module",
@@ -30,17 +30,17 @@
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
     "@icons-pack/react-simple-icons": "^12.9.0",
-    "@openzeppelin/contracts-ui-builder-adapter-evm": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-adapter-midnight": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-adapter-solana": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-adapter-stellar": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-react-core": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-renderer": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-storage": "workspace:^",
-    "@openzeppelin/contracts-ui-builder-styles": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-types": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:^",
+    "@openzeppelin/ui-builder-adapter-evm": "workspace:*",
+    "@openzeppelin/ui-builder-adapter-midnight": "workspace:*",
+    "@openzeppelin/ui-builder-adapter-solana": "workspace:*",
+    "@openzeppelin/ui-builder-adapter-stellar": "workspace:*",
+    "@openzeppelin/ui-builder-react-core": "workspace:*",
+    "@openzeppelin/ui-builder-renderer": "workspace:*",
+    "@openzeppelin/ui-builder-storage": "workspace:^",
+    "@openzeppelin/ui-builder-styles": "workspace:*",
+    "@openzeppelin/ui-builder-types": "workspace:*",
+    "@openzeppelin/ui-builder-ui": "workspace:*",
+    "@openzeppelin/ui-builder-utils": "workspace:^",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -107,7 +107,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "url": "https://github.com/OpenZeppelin/ui-builder",
     "directory": "packages/builder"
   }
 }

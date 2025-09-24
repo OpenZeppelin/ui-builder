@@ -5,7 +5,7 @@
  * that can be imported and used with parameters.
  */
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 /**
  * Create a template processing plugin
  */

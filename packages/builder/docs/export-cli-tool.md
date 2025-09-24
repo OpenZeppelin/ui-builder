@@ -15,7 +15,7 @@ The Export CLI tool enables developers to:
 
 ### Installation
 
-The CLI tool is included with the Contracts UI Builder package. You can use it directly with pnpm:
+The CLI tool is included with the UI Builder package. You can use it directly with pnpm:
 
 ```bash
 pnpm export-app
@@ -288,7 +288,7 @@ Direct test runs will clean up files, while the CLI preserves them.
 If you're getting errors about missing workspace dependencies:
 
 ```
-ERROR: No matching version found for @openzeppelin/contracts-ui-builder-renderer@workspace:*
+ERROR: No matching version found for @openzeppelin/ui-builder-renderer@workspace:*
 ```
 
 Make sure you're:

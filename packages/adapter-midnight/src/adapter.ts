@@ -22,9 +22,9 @@ import type {
   RelayerDetailsRich,
   UiKitConfiguration,
   UserRpcProviderConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { isMidnightNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { MidnightContractArtifacts } from './types/artifacts';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';

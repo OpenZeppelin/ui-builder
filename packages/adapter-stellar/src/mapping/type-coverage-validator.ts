@@ -1,5 +1,5 @@
-import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { FieldType } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';
 import { mapStellarParameterTypeToFieldType } from './type-mapper';

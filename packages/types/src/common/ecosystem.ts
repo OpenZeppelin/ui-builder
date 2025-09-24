@@ -2,7 +2,7 @@
  * Blockchain Ecosystem Types
  *
  * This file defines core types related to blockchain ecosystems supported
- * by the Contracts UI Builder. It consolidates previously scattered
+ * by the UI Builder. It consolidates previously scattered
  * ecosystem-related types into a single source of truth.
  */
 

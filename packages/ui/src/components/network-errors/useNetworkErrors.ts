@@ -2,7 +2,7 @@
 
 import { useCallback, useContext } from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 
 import { NetworkErrorContext } from './NetworkErrorContext';
 

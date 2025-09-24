@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 
-import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { generateId, logger } from '@openzeppelin/ui-builder-utils';
 
 export interface BaseRecord {
   id: string;

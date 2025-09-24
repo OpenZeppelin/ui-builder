@@ -1,4 +1,4 @@
-import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
+import type { Connector } from '@openzeppelin/ui-builder-types';
 
 // This file will contain facade functions that provide a clean, high-level API
 // for wallet connection operations. It will use the raw functions from

@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-renderer",
+  "name": "@openzeppelin/ui-builder-renderer",
   "version": "0.9.0",
   "private": false,
   "description": "A specialized library for rendering customizable transaction forms for blockchain applications.",
@@ -54,7 +54,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "url": "https://github.com/OpenZeppelin/ui-builder",
     "directory": "packages/renderer"
   },
   "peerDependencies": {
@@ -64,9 +64,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
-    "@openzeppelin/contracts-ui-builder-types": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-ui": "workspace:*",
-    "@openzeppelin/contracts-ui-builder-utils": "workspace:*",
+    "@openzeppelin/ui-builder-types": "workspace:*",
+    "@openzeppelin/ui-builder-ui": "workspace:*",
+    "@openzeppelin/ui-builder-utils": "workspace:*",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-progress": "^1.1.7",

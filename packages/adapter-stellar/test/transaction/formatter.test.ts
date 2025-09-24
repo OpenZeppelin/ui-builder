@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-builder-types';
 
 import { formatStellarTransactionData } from '../../src/transaction/formatter';
 

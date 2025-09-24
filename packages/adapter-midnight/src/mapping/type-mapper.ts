@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/contracts-ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-builder-types';
 
 /**
  * Map a Midnight-specific parameter type to a form field type

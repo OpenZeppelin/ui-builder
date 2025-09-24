@@ -5,7 +5,7 @@
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-import type { AdapterConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { AdapterConfig } from '@openzeppelin/ui-builder-types';
 
 export const evmAdapterConfig: AdapterConfig = {
   /**

@@ -206,7 +206,7 @@ This design keeps the main adapter class clean and delegates the complex, method
 
 A robust adapter should allow its network-dependent configurations to be overridden at runtime. This is crucial for flexibility, allowing both the core development environment and exported applications to use custom settings (like private RPC endpoints or API keys) without modifying the adapter's source code.
 
-This project uses a centralized service (`@openzeppelin/contracts-ui-builder-utils/appConfigService`) for this purpose.
+This project uses a centralized service (`@openzeppelin/ui-builder-utils/appConfigService`) for this purpose.
 
 ### 7.1. Pattern
 
@@ -233,7 +233,7 @@ Just as API keys can be customized, the architecture also allows users to provid
 
 This feature is implemented using a pattern almost identical to the `appConfigService` override, but is designed for user-facing configuration that is persisted locally in the browser:
 
-1.  **`UserRpcConfigService`**: A dedicated service in `@openzeppelin/contracts-ui-builder-utils` that handles saving, retrieving, and managing user-defined RPC endpoints in `localStorage`.
+1.  **`UserRpcConfigService`**: A dedicated service in `@openzeppelin/ui-builder-utils` that handles saving, retrieving, and managing user-defined RPC endpoints in `localStorage`.
 2.  **Adapter Integration**: Each adapter must respect these user-provided endpoints. The `resolveRpcUrl` utility in the EVM adapter is a perfect example of this. It establishes a clear priority for which RPC endpoint to use.
 3.  **UI Component**: The `RpcSettingsPanel` in the `packages/ui` library provides a user interface for adding, testing, and saving custom RPC endpoints.
 
@@ -249,12 +249,12 @@ This layered approach guarantees that user preferences are prioritized, while st
 
 ### 7.5. User-Provided Explorer Configuration
 
-To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the Contracts UI Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
+To enhance flexibility and address rate-limiting issues with public API keys, the adapter architecture supports user-configurable block explorer settings. This allows users of the UI Builder—whether in the core development app or an exported application—to provide their own explorer URLs and API keys for each network. This configuration is persisted in the user's browser via `localStorage`.
 
 This system is parallel to the RPC configuration and follows a similar pattern:
 
 1.  **`UserExplorerConfig` Interface**: A standardized interface in `packages/types` defines the shape of a user's custom explorer configuration.
-2.  **`UserExplorerConfigService`**: A centralized service in `@openzeppelin/contracts-ui-builder-utils` manages the storage and retrieval of these configurations from `localStorage`.
+2.  **`UserExplorerConfigService`**: A centralized service in `@openzeppelin/ui-builder-utils` manages the storage and retrieval of these configurations from `localStorage`.
 3.  **Adapter-Level Integration**: Each adapter is responsible for handling this user-provided configuration.
     - It must implement `validateExplorerConfig` and `testExplorerConnection` methods on the `ContractAdapter` interface. These functions are used by the UI to allow users to verify their custom settings before saving them.
     - Adapter modules that interact with block explorers (e.g., for fetching contract ABIs or constructing explorer URLs) must be updated to prioritize the user's configuration.
@@ -291,7 +291,7 @@ The builder application uses a custom state management system built on React's `
 
 ### 8.2. Storage Integration
 
-The `@openzeppelin/contracts-ui-builder-storage` package provides persistent storage for contract UI configurations:
+The `@openzeppelin/ui-builder-storage` package provides persistent storage for contract UI configurations:
 
 - **IndexedDB Backend**: Uses Dexie.js for robust, performant local storage that works offline
 - **Auto-Save System**: Intelligent auto-saving with:

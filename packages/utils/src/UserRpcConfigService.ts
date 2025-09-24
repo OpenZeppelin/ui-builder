@@ -1,4 +1,4 @@
-import type { UserRpcProviderConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
 
 import { logger } from './logger';
 

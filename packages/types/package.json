@@ -1,8 +1,8 @@
 {
-  "name": "@openzeppelin/contracts-ui-builder-types",
+  "name": "@openzeppelin/ui-builder-types",
   "version": "0.9.0",
   "private": false,
-  "description": "Shared TypeScript type definitions for the OpenZeppelin Contracts UI Builder ecosystem.",
+  "description": "Shared TypeScript type definitions for the OpenZeppelin UI Builder ecosystem.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -44,7 +44,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenZeppelin/contracts-ui-builder",
+    "url": "https://github.com/OpenZeppelin/ui-builder",
     "directory": "packages/types"
   },
   "devDependencies": {

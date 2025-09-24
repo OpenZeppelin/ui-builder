@@ -1,7 +1,7 @@
 import type { ISupportedWallet } from '@creit.tech/stellar-wallets-kit';
 import { useCallback, useState } from 'react';
 
-import type { Connector } from '@openzeppelin/contracts-ui-builder-types';
+import type { Connector } from '@openzeppelin/ui-builder-types';
 
 import { useStellarWalletContext } from '../context';
 

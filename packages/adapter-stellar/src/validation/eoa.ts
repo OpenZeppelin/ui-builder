@@ -1,5 +1,5 @@
-import { EoaExecutionConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { EoaExecutionConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { StellarWalletConnectionStatus } from '../wallet/types';
 import { isValidAddress } from './address';

@@ -1,13 +1,9 @@
 import React, { useCallback } from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import {
-  FieldCondition,
-  FormFieldType,
-  FormValues,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { FieldCondition, FormFieldType, FormValues } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { fieldComponents } from './fieldRegistry';
 

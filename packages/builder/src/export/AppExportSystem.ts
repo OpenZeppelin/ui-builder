@@ -6,12 +6,8 @@
  * and ZipGenerator to produce a downloadable ZIP archive containing a
  * standalone app project.
  */
-import {
-  ContractAdapter,
-  ContractSchema,
-  NetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { ContractAdapter, ContractSchema, NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Lazy import types for dependency management
 import type { AppCodeGenerator } from './generators/AppCodeGenerator';

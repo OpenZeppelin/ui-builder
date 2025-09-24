@@ -1,8 +1,8 @@
 /**
- * Contracts UI Builder Types
+ * UI Builder Types
  *
  * This is the main entry point for all shared type definitions used across
- * the Contracts UI Builder ecosystem.
+ * the UI Builder ecosystem.
  *
  */
 

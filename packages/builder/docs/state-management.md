@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Contracts UI Builder uses a robust and performant state management system built on [Zustand](https://github.com/pmndrs/zustand). This approach provides excellent performance, type safety, and a first-class developer experience with a minimal API.
+The UI Builder uses a robust and performant state management system built on [Zustand](https://github.com/pmndrs/zustand). This approach provides excellent performance, type safety, and a first-class developer experience with a minimal API.
 
 ## Table of Contents
 
@@ -38,7 +38,7 @@ The Contracts UI Builder uses a robust and performant state management system bu
 - **Store Layer**: `uiBuilderStore` - A vanilla Zustand store for central state management.
 - **Hook Layer**: `useUIBuilderStore` - The primary React hook for component subscriptions.
 - **Business Logic Layer**: `useBuilder*` hooks - Business logic and state coordination.
-- **Storage Layer**: `@openzeppelin/contracts-ui-builder-storage` - Data persistence.
+- **Storage Layer**: `@openzeppelin/ui-builder-storage` - Data persistence.
 
 ## Core Components
 

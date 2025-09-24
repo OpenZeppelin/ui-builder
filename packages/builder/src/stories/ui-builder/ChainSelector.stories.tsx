@@ -1,13 +1,13 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import { Ecosystem } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
-import { ChainSelector } from '../../components/ContractsUIBuilder/StepChainSelection/index';
+import { ChainSelector } from '../../components/UIBuilder/StepChainSelection/index';
 
 const meta = {
-  title: 'Builder/ContractsUIBuilder/ChainSelector',
+  title: 'Builder/UIBuilder/ChainSelector',
   component: ChainSelector,
   parameters: {
     layout: 'centered',

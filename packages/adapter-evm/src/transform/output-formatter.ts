@@ -1,5 +1,5 @@
-import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractFunction } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { stringifyWithBigInt } from '../utils';
 

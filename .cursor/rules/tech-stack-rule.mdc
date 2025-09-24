@@ -8,15 +8,15 @@ alwaysApply: false
 
 This project uses a modern React + TypeScript frontend stack with Vite as the build tool, organized as a multi‑package monorepo. Key packages include:
 
-- **@openzeppelin/contracts-ui-builder-app (packages/builder)**: Main builder application with the UI and export system
-- **@openzeppelin/contracts-ui-builder-renderer (packages/renderer)**: Shared rendering library
-- **@openzeppelin/contracts-ui-builder-ui (packages/ui)**: Shared UI component library
-- **@openzeppelin/contracts-ui-builder-types (packages/types)**: Shared type system (single source of truth, includes ContractAdapter)
-- **@openzeppelin/contracts-ui-builder-styles (packages/styles)**: Centralized styling system
-- **@openzeppelin/contracts-ui-builder-utils (packages/utils)**: Shared utilities (logger, AppConfigService, cn, etc.)
-- **@openzeppelin/contracts-ui-builder-react-core (packages/react-core)**: Shared React providers/hooks (adapter and wallet state)
-- **@openzeppelin/contracts-ui-builder-storage (packages/storage)**: Dexie/IndexedDB persistence for builder history
-- **@openzeppelin/contracts-ui-builder-adapter-_ (packages/adapter-_)**: Chain‑specific adapters (EVM, Solana, Stellar, Midnight, ...)
+- **@openzeppelin/ui-builder-app (packages/builder)**: Main builder application with the UI and export system
+- **@openzeppelin/ui-builder-renderer (packages/renderer)**: Shared rendering library
+- **@openzeppelin/ui-builder-ui (packages/ui)**: Shared UI component library
+- **@openzeppelin/ui-builder-types (packages/types)**: Shared type system (single source of truth, includes ContractAdapter)
+- **@openzeppelin/ui-builder-styles (packages/styles)**: Centralized styling system
+- **@openzeppelin/ui-builder-utils (packages/utils)**: Shared utilities (logger, AppConfigService, cn, etc.)
+- **@openzeppelin/ui-builder-react-core (packages/react-core)**: Shared React providers/hooks (adapter and wallet state)
+- **@openzeppelin/ui-builder-storage (packages/storage)**: Dexie/IndexedDB persistence for builder history
+- **@openzeppelin/ui-builder-adapter-_ (packages/adapter-_)**: Chain‑specific adapters (EVM, Solana, Stellar, Midnight, ...)
 
 Key technologies include:
 
@@ -64,7 +64,7 @@ Guidelines for monorepo development:
 - Keep core rendering logic in the renderer package
 - The builder app imports shared libraries by published package names (no cross‑package source imports outside configured aliases/virtual modules)
 - Each package has its own tsconfig.json extending from the root tsconfig.base.json
-- Run commands with package filtering: `pnpm --filter=@openzeppelin/contracts-ui-builder-app <command>`
+- Run commands with package filtering: `pnpm --filter=@openzeppelin/ui-builder-app <command>`
 - Use workspace-level commands when applicable: `pnpm -r <command>` (runs in all packages)
 - Keep package.json scripts synchronized between packages for consistency
 
@@ -98,7 +98,7 @@ When writing TypeScript:
 - Ensure strict null checks by avoiding `!` assertions
 - Use path aliases for imports between packages:
   - Within builder: `@/` for src directory
-  - Use published package imports (e.g., `@openzeppelin/contracts-ui-builder-renderer`) and configured aliases
+  - Use published package imports (e.g., `@openzeppelin/ui-builder-renderer`) and configured aliases
 
 # Tailwind CSS v4
 

@@ -6,11 +6,11 @@ import {
   SquarePen,
 } from 'lucide-react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useAnalytics } from '../../../hooks/useAnalytics';
-import { recordHasMeaningfulContent } from '../../ContractsUIBuilder/utils/recordUtils';
+import { recordHasMeaningfulContent } from '../../UIBuilder/utils/recordUtils';
 import SidebarButton from './SidebarButton';
 
 interface MainActionsProps {
@@ -86,7 +86,7 @@ export default function MainActions({
       {/* Docs link below Import/Export */}
       <SidebarButton
         icon={<BookOpenText className="size-4" />}
-        href="https://docs.openzeppelin.com/contracts-ui-builder"
+        href="https://docs.openzeppelin.com/ui-builder"
         target="_blank"
         rel="noopener noreferrer"
       >

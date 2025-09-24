@@ -1,5 +1,7 @@
 # Tasks: Rename to 'UI Builder'
 
+Parent issue: #165
+
 **Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
@@ -17,6 +19,8 @@
 
 ## PR A: User-Facing Rename Sweep
 
+Tracking: Issue #169, PR #168
+
 - [x] T007 Update builder app title and visible strings in `packages/builder/index.html` and `packages/builder/src/App.tsx`
 - [x] T008 [P] Replace UI strings across builder components under `packages/builder/src/components/` referencing legacy name
 - [x] T009 [P] Update export templates text in `packages/builder/src/export/templates/typescript-react-vite/README.md` and `index.html`
@@ -28,26 +32,33 @@
 
 ## PR B: Codebase & Docs Rename
 
-- [ ] T015 Update repository description/title; prepare slug rename in `README.md`, `docs/antora.yml`, badges
+Tracking: Issue #170
+
+- [x] T015 Update repository description/title; prepare slug rename in `README.md`, `docs/antora.yml`, badges
 - [x] T016 [P] Update internal docs headings and section titles across `/docs/**` and `/packages/**/README.md`
 - [x] T017 [P] Update comments/JSDoc references to use "UI Builder" [P]
 - [x] T018 [P] Update links and image alt text in READMEs [P]
-- [ ] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
-- [ ] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
-- [ ] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
-- [ ] T022 Submit PR B
+- [x] T018a [P] Rename code identifiers (components/classes/functions) containing `ContractsUI*` to `UI*`; update all exports and imports
+- [x] T018b [P] Rename file and directory paths containing `ContractsUIBuilder` to `UIBuilder`; update import paths
+- [x] T018c Update Storybook stories, docs, and test snapshots to use new identifiers
+- [x] T019 Update `package.json` `homepage`, `repository`, `bugs` URLs across packages
+- [x] T020 Run T005 to validate no unintended legacy strings remain in codebase/docs
+- [x] T021 Build and test across monorepo; update any test snapshots referencing legacy strings
+- [x] T022 Submit PR B
 
 ## PR C: Packages & Imports + Migration
 
-- [ ] T023 Finalize mapping in `/specs/002-rename-to-ui-builder/data-model.md` `PackageMapping` table
-- [ ] T024 Update package names in package manifests across workspace (e.g., `packages/types/package.json`, `packages/utils/package.json`, `packages/ui/package.json`, others per mapping)
-- [ ] T025 Update internal workspace dependencies to new names
-- [ ] T026 Update import paths in source files referencing `@openzeppelin/contracts-ui-builder-*` (grep list from analysis) [P]
-- [ ] T027 Update CI publish workflows and Changesets to publish new names and deprecate legacy packages
-- [ ] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
-- [ ] T029 Full typecheck/build/test: `pnpm -r build && pnpm -r test`
-- [ ] T030 Post-publish verification script `/scripts/rename/post-publish-verify.sh` to `npm info` new and old packages
-- [ ] T031 Submit PR C with migration notes and mapping table in root `README.md`
+Tracking: Issue #171
+
+- [x] T023 Finalize mapping in `/specs/002-rename-to-ui-builder/data-model.md` `PackageMapping` table
+- [x] T024 Update package names in package manifests across workspace (e.g., `packages/types/package.json`, `packages/utils/package.json`, `packages/ui/package.json`, others per mapping)
+- [x] T025 Update internal workspace dependencies to new names
+- [x] T026 Update import paths in source files referencing `@openzeppelin/contracts-ui-builder-*` (grep list from analysis) [P]
+- [x] T027 Update CI publish workflows and Changesets to publish new names and deprecate legacy packages
+- [x] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
+- [x] T029 Full typecheck/build/test: `pnpm -r build && pnpm -r test`
+- [x] T030 Post-publish verification script `/scripts/rename/post-publish-verify.sh` to `npm info` new and old packages
+- [x] T031 Submit PR C (README migration notes omitted; mapping lives in `specs/002-rename-to-ui-builder/data-model.md`)
 
 ## Dependencies
 

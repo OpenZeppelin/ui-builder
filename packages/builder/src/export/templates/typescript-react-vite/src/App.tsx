@@ -15,7 +15,7 @@
  *
  * Example Snippet (Generated Content - simplified):
  * ```tsx
- * import { EvmAdapter } from '@openzeppelin/contracts-ui-builder-adapter-evm'; // Example
+ * import { EvmAdapter } from '@openzeppelin/ui-builder-adapter-evm'; // Example
  * import GeneratedForm from './components/GeneratedForm';
  *
  * interface AppProps {
@@ -37,7 +37,7 @@
 // We need a valid import path here just to make the *base* template structure work,
 // even though this App.tsx content is entirely replaced during export.
 // We import the dummy export from the placeholder GeneratedForm.tsx
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { GeneratedForm } from './components/GeneratedForm';
 

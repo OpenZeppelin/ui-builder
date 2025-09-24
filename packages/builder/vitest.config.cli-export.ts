@@ -40,7 +40,7 @@ export default defineConfig({
       '@styles': path.resolve(__dirname, '../styles/src'),
       // Define the aliases needed by crossPackageModulesProviderPlugin
       '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
-      '@openzeppelin/contracts-ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+      '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
       // Note: No need for @cross-package aliases here as the real plugin resolves paths directly
     },
   },

@@ -8,7 +8,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@styles/*": ["../styles/src/*"],
-      "@openzeppelin/contracts-ui-builder-types/*": ["../types/src/*"]
+      "@openzeppelin/ui-builder-types/*": ["../types/src/*"]
     },
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,

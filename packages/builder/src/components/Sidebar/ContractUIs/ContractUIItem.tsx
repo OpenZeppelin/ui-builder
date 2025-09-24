@@ -1,15 +1,15 @@
 import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import type { ContractUIRecord } from '@openzeppelin/contracts-ui-builder-storage';
+import type { ContractUIRecord } from '@openzeppelin/ui-builder-storage';
 import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useTypewriterEffect } from './hooks/useTypewriterEffect';
 

@@ -3,7 +3,7 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 /**
  * Generate default field configuration for a Midnight function parameter

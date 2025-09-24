@@ -1,6 +1,6 @@
-# EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
+# EVM Adapter (`@openzeppelin/ui-builder-adapter-evm`)
 
-This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the Contracts UI Builder.
+This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the UI Builder.
 
 It is responsible for:
 // ... (existing responsibilities) ...
@@ -15,7 +15,7 @@ It is responsible for:
 
 The `EvmNetworkConfig` objects defined in `src/networks/` (e.g., `ethereumMainnet`) each specify a default public `rpcUrl`.
 
-This default RPC URL can be overridden at runtime by the consuming application (either the main Contracts UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
+This default RPC URL can be overridden at runtime by the consuming application (either the main UI Builder app or an exported app) through the central `AppConfigService`. This service loads configurations from environment variables (for the builder app) or a `public/app.config.json` file (for exported apps).
 
 To override an RPC URL, the application's configuration should define an entry in the `rpcEndpoints` section, keyed by the network's string ID (e.g., `"ethereum-mainnet"`). For example:
 
@@ -153,7 +153,7 @@ export {
 Run the adapter tests to verify wagmi integration:
 
 ```bash
-pnpm --filter @openzeppelin/contracts-ui-builder-adapter-evm test
+pnpm --filter @openzeppelin/ui-builder-adapter-evm test
 ```
 
 The tests will verify that:

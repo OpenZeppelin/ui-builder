@@ -1,6 +1,6 @@
 import { Menu } from 'lucide-react';
 
-import { WalletConnectionHeader } from '@openzeppelin/contracts-ui-builder-react-core';
+import { WalletConnectionHeader } from '@openzeppelin/ui-builder-react-core';
 
 interface HeaderProps {
   title?: string;

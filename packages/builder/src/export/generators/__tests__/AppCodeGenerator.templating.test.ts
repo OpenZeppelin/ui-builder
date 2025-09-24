@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { EvmNetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
+import type { EvmNetworkConfig } from '@openzeppelin/ui-builder-types';
 
 import { createMinimalContractSchema, createMinimalFormConfig } from '../../utils/testConfig';
 import { AppCodeGenerator } from '../AppCodeGenerator';
@@ -588,7 +588,7 @@ const anotherFunction = () => {
     it('should format a complete React component with a form schema', async () => {
       const unformattedCode = `
       import { useState } from 'react';
-      import { TransactionForm } from '@openzeppelin/contracts-ui-builder-renderer';
+      import { TransactionForm } from '@openzeppelin/ui-builder-renderer';
       
       export default function GeneratedForm() {
         const formSchema = {

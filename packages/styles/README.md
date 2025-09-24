@@ -29,7 +29,7 @@ This monorepo utilizes a consistent styling approach driven by the consuming app
     - package-level JS proxy configs (`tailwind.config.cjs`, `postcss.config.cjs`) that `require('../../...')`
     - a per-package `components.json` file (regular JSON, not a symlink)
 3.  **Consumer-Driven Build:** The main application (`packages/builder`) or exported applications are responsible for the Tailwind CSS build process.
-4.  **Automatic Content Scanning:** Tailwind v4 automatically scans the source code of the application _and its dependencies_ (like `@openzeppelin/contracts-ui-builder-ui` and `@openzeppelin/contracts-ui-builder-renderer`) for utility class usage.
+4.  **Automatic Content Scanning:** Tailwind v4 automatically scans the source code of the application _and its dependencies_ (like `@openzeppelin/ui-builder-ui` and `@openzeppelin/ui-builder-renderer`) for utility class usage.
 5.  **CSS Generation:** The consumer app's build generates the final CSS file, including base styles from `global.css`, theme variables, and all necessary utility classes used throughout the application and its dependencies.
 
 **Key Point:** Library packages like `renderer` and `ui` do **not** build or ship their own CSS. Styling is entirely managed by the final application build, ensuring consistency and leveraging the shared theme from this `@styles` package.

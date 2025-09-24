@@ -1,8 +1,5 @@
-import type {
-  EcosystemWalletComponents,
-  UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { EcosystemWalletComponents, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../components';
 import { createRainbowKitComponents, validateRainbowKitConfig } from '../rainbowkit';

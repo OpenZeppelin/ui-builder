@@ -15,8 +15,8 @@ import type {
   Connector,
   StellarNetworkConfig,
   UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { StellarConnectionStatusListener, StellarWalletConnectionStatus } from '../types';
 

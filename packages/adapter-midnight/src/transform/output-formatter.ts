@@ -1,4 +1,4 @@
-import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
+import type { ContractFunction } from '@openzeppelin/ui-builder-types';
 
 /**
  * Formats a function result for display

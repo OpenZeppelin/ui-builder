@@ -9,8 +9,8 @@ import {
   ContractSchema,
   FormValues,
   ProxyInfo,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Loads a contract definition using the provided chain adapter.

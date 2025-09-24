@@ -1,8 +1,8 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import type { EnumValue, FormFieldType } from '@openzeppelin/contracts-ui-builder-types';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import type { EnumValue, FormFieldType } from '@openzeppelin/ui-builder-types';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';

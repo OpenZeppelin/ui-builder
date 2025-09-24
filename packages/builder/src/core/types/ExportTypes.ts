@@ -4,7 +4,7 @@
  * This file contains type definitions for the export system,
  * including template options, export configurations, and results.
  */
-import type { Ecosystem, UiKitConfiguration } from '@openzeppelin/contracts-ui-builder-types';
+import type { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 
 import type { ZipProgress } from '../../export/ZipGenerator';
 
@@ -92,7 +92,7 @@ export interface ExportOptions extends TemplateOptions {
 
   /**
    * UI Kit configuration chosen by the user in the builder UI.
-   * TODO: Implement UI in ContractsUIBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
+   * TODO: Implement UI in UIBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
    */
   uiKitConfiguration?: UiKitConfiguration;
 }

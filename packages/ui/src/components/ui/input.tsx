@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Input component that follows shadcn/ui styling and accessibility patterns

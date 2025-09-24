@@ -1,10 +1,10 @@
-# EVM Adapter (`@openzeppelin/contracts-ui-builder-adapter-evm`)
+# EVM Adapter (`@openzeppelin/ui-builder-adapter-evm`)
 
 This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the UI Builder.
 
 It is responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/contracts-ui-builder-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-builder-types`.
 - Defining and exporting specific EVM network configurations (e.g., Ethereum Mainnet, Sepolia Testnet) as `EvmNetworkConfig` objects. These are located in `src/networks/` and include details like RPC URLs, Chain IDs, explorer URLs, and native currency information.
 - Loading contract ABIs (from JSON strings or via Etherscan, using the `apiUrl` from the provided `EvmNetworkConfig`).
 - Mapping EVM-specific data types to the form field types used by the builder app.
@@ -85,7 +85,7 @@ adapter-evm/
 The `EvmAdapter` class is instantiated with a specific `EvmNetworkConfig` object, making it aware of the target network from its creation:
 
 ```typescript
-import { ethereumSepolia, EvmAdapter } from '@openzeppelin/contracts-ui-builder-adapter-evm';
+import { ethereumSepolia, EvmAdapter } from '@openzeppelin/ui-builder-adapter-evm';
 
 // Or any other exported EvmNetworkConfig
 

@@ -1,5 +1,5 @@
-import type { ContractSchema } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractSchema } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Placeholder
 export async function loadSolanaContract(source: string): Promise<ContractSchema> {

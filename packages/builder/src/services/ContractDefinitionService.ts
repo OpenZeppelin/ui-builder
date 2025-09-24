@@ -13,8 +13,8 @@
  * - Integration with React Suspense and Error Boundaries
  * - DevTools for debugging query states
  */
-import { ContractAdapter, FormValues } from '@openzeppelin/contracts-ui-builder-types';
-import { logger, simpleHash } from '@openzeppelin/contracts-ui-builder-utils';
+import { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import { logger, simpleHash } from '@openzeppelin/ui-builder-utils';
 
 import { ContractLoadResult, loadContractDefinitionWithMetadata } from './ContractLoader';
 

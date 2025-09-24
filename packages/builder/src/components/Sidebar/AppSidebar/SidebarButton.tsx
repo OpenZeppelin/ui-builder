@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 interface SidebarButtonProps {
   icon: ReactNode;

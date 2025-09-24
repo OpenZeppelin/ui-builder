@@ -2,8 +2,8 @@ import type {
   ContractSchema,
   MidnightNetworkConfig,
   NetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Queries a view function on a contract

@@ -9,13 +9,13 @@ import path from 'path';
 import JSZip from 'jszip';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem, NetworkConfig } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Import ecosystemManager utils
 import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';
 // Import others as needed for different ecosystem tests
-// import { solanaDevnet } from '@openzeppelin/contracts-ui-builder-adapter-solana';
+// import { solanaDevnet } from '@openzeppelin/ui-builder-adapter-solana';
 
 import { AppExportSystem } from '../AppExportSystem';
 import {

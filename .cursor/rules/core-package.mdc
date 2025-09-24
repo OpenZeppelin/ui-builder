@@ -4,21 +4,21 @@ globs:
 alwaysApply: false
 ---
 
-# Contracts UI Builder: App Package Rules (@app)
+# UI Builder: App Package Rules (@app)
 
 ## 1. Overview
 
-**Purpose:** The `packages/builder` package (`@openzeppelin/contracts-ui-builder-app`) is the main application hub for the Contracts UI Builder. It encompasses the primary user interface for constructing forms, the central **chain‑agnostic** logic, and the export system that generates standalone, runnable web application projects.
+**Purpose:** The `packages/builder` package (`@openzeppelin/ui-builder-app`) is the main application hub for the UI Builder. It encompasses the primary user interface for constructing forms, the central **chain‑agnostic** logic, and the export system that generates standalone, runnable web application projects.
 
-**Key Role:** Acts as the orchestrator, integrating functionalities from `@openzeppelin/contracts-ui-builder-renderer`, `@openzeppelin/contracts-ui-builder-styles`, `@openzeppelin/contracts-ui-builder-react-core`, and the various adapter packages (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`). It manages the application state (e.g., the multi‑step builder wizard) and delivers the primary user‑facing experience and export capabilities.
+**Key Role:** Acts as the orchestrator, integrating functionalities from `@openzeppelin/ui-builder-renderer`, `@openzeppelin/ui-builder-styles`, `@openzeppelin/ui-builder-react-core`, and the various adapter packages (e.g., `@openzeppelin/ui-builder-adapter-evm`). It manages the application state (e.g., the multi‑step builder wizard) and delivers the primary user‑facing experience and export capabilities.
 
 ## 2. Core Functionality
 
-- **Form Builder UI:** (`src/components/ContractsUIBuilder/`) Contains the multi‑step wizard and components allowing users to select a blockchain/contract/function, customize generated form fields (labels, validation, visibility), and preview the form in real time using the renderer package.
+- **Form Builder UI:** (`src/components/UIBuilder/`) Contains the multi‑step wizard and components allowing users to select a blockchain/contract/function, customize generated form fields (labels, validation, visibility), and preview the form in real time using the renderer package.
 - **Chain‑Agnostic Core:** (`src/core/`) Houses foundational logic independent of specific blockchains. This includes:
-  - Shared TypeScript types live in `@openzeppelin/contracts-ui-builder-types` (single source of truth). The `ContractAdapter` interface is defined at `packages/types/src/adapters/base.ts` and implemented by adapter packages.
-  - Utility functions: Prefer `@openzeppelin/contracts-ui-builder-utils` (e.g., `logger`, `AppConfigService`, `cn`) over ad‑hoc implementations.
-  - Reusable React providers/hooks are in `@openzeppelin/contracts-ui-builder-react-core`; component‑specific hooks reside with their components.
+  - Shared TypeScript types live in `@openzeppelin/ui-builder-types` (single source of truth). The `ContractAdapter` interface is defined at `packages/types/src/adapters/base.ts` and implemented by adapter packages.
+  - Utility functions: Prefer `@openzeppelin/ui-builder-utils` (e.g., `logger`, `AppConfigService`, `cn`) over ad‑hoc implementations.
+  - Reusable React providers/hooks are in `@openzeppelin/ui-builder-react-core`; component‑specific hooks reside with their components.
 - **Export System:** (`src/export/`) Generates a complete, standalone React + Vite project from the user's configuration. Includes:
   - `AdapterConfigLoader`: Loads adapter‑specific configuration for export.
   - `TemplateManager`: Manages base project templates (e.g., `typescript-react-vite`) under `src/export/templates/`.
@@ -30,30 +30,30 @@ alwaysApply: false
 
 ## 3. Architecture
 
-- **Monorepo Context:** Situated within the `contracts-ui-builder` pnpm monorepo. It is governed by root configurations (ESLint, Prettier, TypeScript, Vitest).
+- **Monorepo Context:** Situated within the `ui-builder` pnpm monorepo. It is governed by root configurations (ESLint, Prettier, TypeScript, Vitest).
 - **Package Dependencies:**
-  - Consumes `@openzeppelin/contracts-ui-builder-renderer` for displaying form previews and as a core dependency in exported projects.
-  - Consumes `@openzeppelin/contracts-ui-builder-styles` for the base theme and styles.
-  - Consumes various `@openzeppelin/contracts-ui-builder-adapter-*` packages for blockchain‑specific functionality.
-  - Consumes `@openzeppelin/contracts-ui-builder-react-core` for shared providers/hooks and context.
-- **Adapter Pattern:** This is a foundational design principle. The `ContractAdapter` interface is defined in `packages/types/src/adapters/base.ts`, but the concrete implementations reside in separate packages (e.g., `@openzeppelin/contracts-ui-builder-adapter-evm`). These external adapters _must_ strictly adhere to the `ContractAdapter` interface contract. Compliance is verified by the `lint:adapters` script and CI pipeline.
+  - Consumes `@openzeppelin/ui-builder-renderer` for displaying form previews and as a core dependency in exported projects.
+  - Consumes `@openzeppelin/ui-builder-styles` for the base theme and styles.
+  - Consumes various `@openzeppelin/ui-builder-adapter-*` packages for blockchain‑specific functionality.
+  - Consumes `@openzeppelin/ui-builder-react-core` for shared providers/hooks and context.
+- **Adapter Pattern:** This is a foundational design principle. The `ContractAdapter` interface is defined in `packages/types/src/adapters/base.ts`, but the concrete implementations reside in separate packages (e.g., `@openzeppelin/ui-builder-adapter-evm`). These external adapters _must_ strictly adhere to the `ContractAdapter` interface contract. Compliance is verified by the `lint:adapters` script and CI pipeline.
 - **Styling:**
   - Imports base styles and CSS variables from `@styles/global.css`.
   - Leverages Tailwind utility classes extensively for component styling.
   - Consumes centralized root configs (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`) via lightweight JS proxy files. **Does not** define its own theme; it inherits the centralized theme.
 - **State Management:** Primarily relies on standard React Hooks (`useState`, `useReducer`, `useContext`). The Context API is used for managing state across the multi-step form builder wizard.
-- **State Management:** Uses modular React hooks and providers (see `@openzeppelin/contracts-ui-builder-react-core` for adapter/wallet context) and focused builder hooks under `src/components/ContractsUIBuilder/hooks` for the multi-step wizard.
-- **Export System Flow:** User Interaction -> UI State (`BuilderFormConfig`) -> `FormSchemaFactory` (using an external Adapter) -> Render schema -> `AppExportSystem` (orchestrates `AppCodeGenerator`, `TemplateManager`, `PackageManager`, `StyleManager`) -> `ZipGenerator` -> Download.
-- **Vite Build & Plugins:** Uses Vite for the development server and production builds (`vite.config.ts`). The builder defines virtual modules to reliably load cross‑package assets/config and uses `import.meta.glob` for template discovery.
+  - **State Management:** Uses modular React hooks and providers (see `@openzeppelin/ui-builder-react-core` for adapter/wallet context) and focused builder hooks under `src/components/UIBuilder/hooks` for the multi-step wizard.
+  - **Export System Flow:** User Interaction -> UI State (`BuilderFormConfig`) -> `FormSchemaFactory` (using an external Adapter) -> Render schema -> `AppExportSystem` (orchestrates `AppCodeGenerator`, `TemplateManager`, `PackageManager`, `StyleManager`) -> `ZipGenerator` -> Download.
+  - **Vite Build & Plugins:** Uses Vite for the development server and production builds (`vite.config.ts`). The builder defines virtual modules to reliably load cross‑package assets/config and uses `import.meta.glob` for template discovery.
 
 ## 4. Coding Guidelines & Conventions
 
 - **General:** Strictly adhere to all root-level project guidelines: Conventional Commits (`pnpm commit`), ESLint/Prettier (`pnpm fix-all`), and TypeScript best practices. Consult the root `README.md` and `tech-stack-rule.mdc`.
 - **TypeScript:**
-  - Utilize shared types from `@openzeppelin/contracts-ui-builder-types` and local builder types under `packages/builder/src/**` where applicable.
-  - Use project path aliases (e.g., `@/` for `packages/builder/src`) and package namespaces like `@openzeppelin/contracts-ui-builder-renderer` and `@styles/`.
+  - Utilize shared types from `@openzeppelin/ui-builder-types` and local builder types under `packages/builder/src/**` where applicable.
+  - Use project path aliases (e.g., `@/` for `packages/builder/src`) and package namespaces like `@openzeppelin/ui-builder-renderer` and `@styles/`.
 - **React:**
-  - Use functional components and hooks. Extract complex, reusable logic into providers/hooks within `@openzeppelin/contracts-ui-builder-react-core` or local utilities.
+  - Use functional components and hooks. Extract complex, reusable logic into providers/hooks within `@openzeppelin/ui-builder-react-core` or local utilities.
 - **Adapter Development:**
   - Adapter development occurs in separate `packages/adapter-*` directories.
   - Adapters must rigorously implement every method and property from the `ContractAdapter` interface (from `packages/types`). All blockchain‑specific logic (API calls, type mapping, validation) must reside within its dedicated adapter package.
@@ -90,8 +90,8 @@ alwaysApply: false
 
 ## 6. Dependencies & Build
 
-- **Key Runtime Dependencies:** `react`, `react-dom`, `react-hook-form`, `jszip`, `@openzeppelin/contracts-ui-builder-renderer`, `@openzeppelin/contracts-ui-builder-styles`, `@openzeppelin/contracts-ui-builder-react-core`, and various `@openzeppelin/contracts-ui-builder-adapter-*` packages.
+- **Key Runtime Dependencies:** `react`, `react-dom`, `react-hook-form`, `jszip`, `@openzeppelin/ui-builder-renderer`, `@openzeppelin/ui-builder-styles`, `@openzeppelin/ui-builder-react-core`, and various `@openzeppelin/ui-builder-adapter-*` packages.
 - **Key Dev Dependencies:** `vite`, `typescript`, `@vitejs/plugin-react`, `tailwindcss`, `vitest`, `@testing-library/react`, `eslint`, `storybook`.
-- **Build Process:** `pnpm --filter @openzeppelin/contracts-ui-builder-app build` executes `vite build`.
-- **Development Server:** `pnpm --filter @openzeppelin/contracts-ui-builder-app dev` executes `vite`.
-- **Testing:** `pnpm --filter @openzeppelin/contracts-ui-builder-app test` executes `vitest run`.
+- **Build Process:** `pnpm --filter @openzeppelin/ui-builder-app build` executes `vite build`.
+- **Development Server:** `pnpm --filter @openzeppelin/ui-builder-app dev` executes `vite`.
+- **Testing:** `pnpm --filter @openzeppelin/ui-builder-app test` executes `vitest run`.

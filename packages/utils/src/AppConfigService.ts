@@ -8,11 +8,11 @@ import type {
   ServiceParameterConfig,
   UiKitName,
   UserRpcProviderConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import { logger } from './logger';
 
-// Changed from @openzeppelin/contracts-ui-builder-utils
+// Changed from @openzeppelin/ui-builder-utils
 
 /**
  * Type for the strategy array in initialize method.

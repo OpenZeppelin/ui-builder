@@ -23,9 +23,9 @@ export const rendererConfig: RendererConfig = {
     'class-variance-authority': '^0.7.0',
     clsx: '^2.0.0',
     'tailwind-merge': '^1.14.0',
-    '@openzeppelin/contracts-ui-builder-renderer': '^0.1.0',
-    '@openzeppelin/contracts-ui-builder-types': '^0.1.0',
-    '@openzeppelin/contracts-ui-builder-utils': '^0.1.0',
+    '@openzeppelin/ui-builder-renderer': '^0.1.0',
+    '@openzeppelin/ui-builder-types': '^0.1.0',
+    '@openzeppelin/ui-builder-utils': '^0.1.0',
   },
 
   // Field-specific dependencies

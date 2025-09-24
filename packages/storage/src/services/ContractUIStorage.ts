@@ -1,5 +1,5 @@
-import type { ContractDefinitionMetadata } from '@openzeppelin/contracts-ui-builder-types';
-import { generateId, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractDefinitionMetadata } from '@openzeppelin/ui-builder-types';
+import { generateId, logger } from '@openzeppelin/ui-builder-utils';
 
 import { DexieStorage } from '../base/DexieStorage';
 import { db } from '../database/db';

@@ -1,7 +1,7 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import type { FunctionParameter } from '@openzeppelin/contracts-ui-builder-types';
-import { isPlainObject, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
+import { isPlainObject, logger } from '@openzeppelin/ui-builder-utils';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { parseGenericType } from './generic-parser';

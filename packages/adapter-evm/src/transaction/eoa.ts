@@ -6,8 +6,8 @@ import {
   ExecutionConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { WriteContractParameters } from '../types';
 import { validateEoaConfig } from '../validation';

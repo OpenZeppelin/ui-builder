@@ -1,4 +1,4 @@
-import { isMapEntryArray, MapEntry } from '@openzeppelin/contracts-ui-builder-types';
+import { isMapEntryArray, MapEntry } from '@openzeppelin/ui-builder-types';
 
 import { validateMapEntries } from '../../utils/validation';
 

@@ -5,33 +5,33 @@ const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export
 
 // List of internal packages to update
 const packagesToUpdate = [
-  '@openzeppelin/contracts-ui-builder-adapter-evm',
-  '@openzeppelin/contracts-ui-builder-adapter-midnight',
-  '@openzeppelin/contracts-ui-builder-adapter-solana',
-  '@openzeppelin/contracts-ui-builder-adapter-stellar',
-  '@openzeppelin/contracts-ui-builder-react-core',
-  '@openzeppelin/contracts-ui-builder-renderer',
-  '@openzeppelin/contracts-ui-builder-storage',
-  '@openzeppelin/contracts-ui-builder-types',
-  '@openzeppelin/contracts-ui-builder-ui',
-  '@openzeppelin/contracts-ui-builder-utils',
+  '@openzeppelin/ui-builder-adapter-evm',
+  '@openzeppelin/ui-builder-adapter-midnight',
+  '@openzeppelin/ui-builder-adapter-solana',
+  '@openzeppelin/ui-builder-adapter-stellar',
+  '@openzeppelin/ui-builder-react-core',
+  '@openzeppelin/ui-builder-renderer',
+  '@openzeppelin/ui-builder-storage',
+  '@openzeppelin/ui-builder-types',
+  '@openzeppelin/ui-builder-ui',
+  '@openzeppelin/ui-builder-utils',
 ];
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/contracts-ui-builder-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-builder-types').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/contracts-ui-builder-types' -> 'types'
-    // e.g., '@openzeppelin/contracts-ui-builder-adapter-evm' -> 'adapter-evm'
+    // e.g., '@openzeppelin/ui-builder-types' -> 'types'
+    // e.g., '@openzeppelin/ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
-    let packageDirName = nameWithoutScope.replace('contracts-ui-builder-', '');
+    let packageDirName = nameWithoutScope.replace('ui-builder-', '');
 
     // Handle special case for renderer
-    if (packageName === '@openzeppelin/contracts-ui-builder-renderer') {
+    if (packageName === '@openzeppelin/ui-builder-renderer') {
       packageDirName = 'renderer';
     }
 
@@ -92,18 +92,15 @@ const updateSnapshots = () => {
 
   try {
     // Update snapshots for the export tests specifically (these are the tests that use package versions)
-    execSync(
-      'pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u',
-      {
-        cwd: path.resolve(__dirname, '..'),
-        stdio: 'inherit',
-      }
-    );
+    execSync('pnpm --filter @openzeppelin/ui-builder-app test src/export/__tests__/ -- -u', {
+      cwd: path.resolve(__dirname, '..'),
+      stdio: 'inherit',
+    });
     console.log('✅ Snapshots updated successfully!');
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
     console.log(
-      '⚠️  Please run "pnpm --filter @openzeppelin/contracts-ui-builder-app test src/export/__tests__/ -- -u" manually'
+      '⚠️  Please run "pnpm --filter @openzeppelin/ui-builder-app test src/export/__tests__/ -- -u" manually'
     );
   }
 };

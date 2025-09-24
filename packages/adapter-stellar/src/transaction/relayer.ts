@@ -7,16 +7,6 @@ import {
   xdr,
 } from '@stellar/stellar-sdk';
 
-import type {
-  ExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-  StellarNetworkConfig,
-  TransactionStatusUpdate,
-  TxStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
 import {
   Configuration,
   RelayersApi,
@@ -26,6 +16,16 @@ import {
   type StellarTransactionRequest,
   type StellarTransactionResponse,
 } from '@openzeppelin/relayer-sdk';
+import type {
+  ExecutionConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  RelayerExecutionConfig,
+  StellarNetworkConfig,
+  TransactionStatusUpdate,
+  TxStatus,
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { valueToScVal } from '../transform/input-parser';
 import { getStellarWalletConnectionStatus, signTransaction } from '../wallet/connection';

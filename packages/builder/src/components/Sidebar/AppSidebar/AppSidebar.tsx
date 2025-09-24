@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import ContractUIImportDialog from '../ContractUIs/ContractUIImportDialog';
 import SidebarContent from './SidebarContent';

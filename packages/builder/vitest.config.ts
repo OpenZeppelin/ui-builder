@@ -103,14 +103,32 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@styles': path.resolve(__dirname, '../styles'),
-        '@openzeppelin/contracts-ui-builder-utils': path.resolve(
+        '@openzeppelin/ui-builder-utils': path.resolve(
           __dirname,
           '../utils/src/index.ts'
         ),
+        '@openzeppelin/ui-builder-react-core': path.resolve(
+          __dirname,
+          '../react-core/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-ui': path.resolve(
+          __dirname,
+          '../ui/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-types': path.resolve(
+          __dirname,
+          '../types/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-renderer': path.resolve(
+          __dirname,
+          '../renderer/dist/index.js'
+        ),
       },
       dedupe: [
-        '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/contracts-ui-builder-types',
+        '@openzeppelin/ui-builder-renderer',
+        '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-builder-react-core',
+        '@openzeppelin/ui-builder-ui',
         'react',
         'react-dom',
       ],
@@ -118,15 +136,19 @@ export default defineConfig(
     // Add optimizeDeps for Vite to correctly process these linked workspace packages
     optimizeDeps: {
       include: [
-        '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/contracts-ui-builder-types',
+        '@openzeppelin/ui-builder-renderer',
+        '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-builder-react-core',
+        '@openzeppelin/ui-builder-ui',
       ],
     },
     // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
     ssr: {
       noExternal: [
-        '@openzeppelin/contracts-ui-builder-renderer',
-        '@openzeppelin/contracts-ui-builder-types',
+        '@openzeppelin/ui-builder-renderer',
+        '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-builder-react-core',
+        '@openzeppelin/ui-builder-ui',
       ],
     },
     test: {

@@ -1,5 +1,5 @@
-import { isEnumValue } from '@openzeppelin/contracts-ui-builder-types';
-import { isPlainObject, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { isEnumValue } from '@openzeppelin/ui-builder-types';
+import { isPlainObject, logger } from '@openzeppelin/ui-builder-utils';
 
 import { isLikelyEnumType } from '../../utils/type-detection';
 import { isGenericType, parseGeneric } from './generic-parser';

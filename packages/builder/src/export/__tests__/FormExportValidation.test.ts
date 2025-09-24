@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  EvmNetworkConfig,
-  SolanaNetworkConfig,
-} from '@openzeppelin/contracts-ui-builder-types';
+import type { EvmNetworkConfig, SolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
 
 import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -53,12 +50,12 @@ describe('AppExportValidation', () => {
           try {
             const pkg = JSON.parse(content);
             const deps = pkg.dependencies || {};
-            if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
-              return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
-            if (!deps['@openzeppelin/contracts-ui-builder-types'])
-              return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
-            if (!deps['@openzeppelin/contracts-ui-builder-adapter-evm'])
-              return 'Missing @openzeppelin/contracts-ui-builder-adapter-evm dependency';
+            if (!deps['@openzeppelin/ui-builder-renderer'])
+              return 'Missing @openzeppelin/ui-builder-renderer dependency';
+            if (!deps['@openzeppelin/ui-builder-types'])
+              return 'Missing @openzeppelin/ui-builder-types dependency';
+            if (!deps['@openzeppelin/ui-builder-adapter-evm'])
+              return 'Missing @openzeppelin/ui-builder-adapter-evm dependency';
             return true;
           } catch (e) {
             return `Invalid JSON in package.json: ${String(e)}`;
@@ -83,10 +80,8 @@ describe('AppExportValidation', () => {
     const packageJson = JSON.parse(files['package.json']);
     expect(packageJson).toHaveProperty('name');
     expect(packageJson).toHaveProperty('dependencies');
-    expect(packageJson.dependencies).toHaveProperty(
-      '@openzeppelin/contracts-ui-builder-adapter-evm'
-    );
-    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/contracts-ui-builder-types');
+    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+    expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
   });
 
   it('should export a valid Solana project structure', async () => {
@@ -129,12 +124,12 @@ describe('AppExportValidation', () => {
           try {
             const pkg = JSON.parse(content);
             const deps = pkg.dependencies || {};
-            if (!deps['@openzeppelin/contracts-ui-builder-renderer'])
-              return 'Missing @openzeppelin/contracts-ui-builder-renderer dependency';
-            if (!deps['@openzeppelin/contracts-ui-builder-types'])
-              return 'Missing @openzeppelin/contracts-ui-builder-types dependency';
-            if (!deps['@openzeppelin/contracts-ui-builder-adapter-solana'])
-              return 'Missing @openzeppelin/contracts-ui-builder-adapter-solana dependency';
+            if (!deps['@openzeppelin/ui-builder-renderer'])
+              return 'Missing @openzeppelin/ui-builder-renderer dependency';
+            if (!deps['@openzeppelin/ui-builder-types'])
+              return 'Missing @openzeppelin/ui-builder-types dependency';
+            if (!deps['@openzeppelin/ui-builder-adapter-solana'])
+              return 'Missing @openzeppelin/ui-builder-adapter-solana dependency';
             return true;
           } catch (e) {
             return `Invalid JSON in package.json: ${String(e)}`;

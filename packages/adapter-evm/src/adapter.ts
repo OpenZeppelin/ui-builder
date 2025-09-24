@@ -26,8 +26,8 @@ import type {
   UserExplorerConfig,
   UserRpcProviderConfig,
   WalletConnectionStatus,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { abiComparisonService } from './abi/comparison';
 import { EvmProviderKeys, type EvmContractDefinitionProviderKey } from './types/providers';

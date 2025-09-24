@@ -1,4 +1,4 @@
-import { appConfigService, logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Google Analytics service for tracking user interactions

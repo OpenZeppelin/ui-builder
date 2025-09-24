@@ -1,11 +1,7 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  Button,
-  NetworkSettingsDialog,
-  useNetworkErrors,
-} from '@openzeppelin/contracts-ui-builder-ui';
+import { Button, NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/ui-builder-ui';
 
 import { useWalletState } from '../hooks/WalletStateContext';
 import { WalletConnectionUI } from './WalletConnectionUI';

@@ -1,16 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type {
-  ComponentExclusionConfig,
-  UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ComponentExclusionConfig, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../../components';
 import { getResolvedWalletComponents } from '../uiKitService';
 
 // Mock the logger
-vi.mock('@openzeppelin/contracts-ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),

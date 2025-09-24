@@ -2,7 +2,7 @@
 import { type RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 // Import the custom configuration types from the EVM adapter
-import type { RainbowKitCustomizations } from '@openzeppelin/contracts-ui-builder-adapter-evm';
+import type { RainbowKitCustomizations } from '@openzeppelin/ui-builder-adapter-evm';
 
 // For WalletConnect project ID, appName, wallets, ssr options for getDefaultConfig
 // RainbowKit doesn't export a single neat type for all getDefaultConfig options other than `chains` and `transports`.
@@ -30,7 +30,7 @@ type InferredRainbowKitProviderProps = React.ComponentProps<typeof RainbowKitPro
 
 const rainbowKitAppConfig = {
   wagmiParams: {
-    appName: 'Contracts UI Builder (Core Dev)',
+    appName: 'UI Builder (Core Dev)',
     projectId: '9f7100fc84f2327968f7bb11d38a4c2b', // <<< WALLETCONNECT PROJECT ID
     // Example for custom wallet list (users should import types like `WalletList` or `Wallet` from RK if they use this)
     // wallets: [
@@ -48,7 +48,7 @@ const rainbowKitAppConfig = {
     showRecentTransactions: true,
     // coolMode: true,
     appInfo: {
-      appName: 'Contracts UI Builder',
+      appName: 'UI Builder',
       learnMoreUrl: 'https://openzeppelin.com',
     },
   } as Partial<InferredRainbowKitProviderProps>, // User can cast or ensure their object matches

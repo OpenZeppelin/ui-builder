@@ -6,14 +6,14 @@
 
 This project is currently in development.
 
-[![CI](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml)
-[![Coverage](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml)
-[![codecov](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder)
-[![Publish](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml)
-[![Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml)
-[![Dependency Review](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml)
-[![Update Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder)
+[![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
+[![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/OpenZeppelin/ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/ui-builder)
+[![Publish](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
+[![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
+[![Dependency Review](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml)
+[![Update Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
@@ -25,7 +25,7 @@ This project is currently in development.
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/contracts-ui-builder/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/ui-builder/maintainability)
 
 ## Table of Contents
 
@@ -88,14 +88,14 @@ This project is currently in development.
 
 This project is currently in development.
 
-[![CI](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/ci.yml)
-[![Coverage](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/coverage.yml)
-[![codecov](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/contracts-ui-builder)
-[![Publish](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/publish.yml)
-[![Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependencies.yml)
-[![Dependency Review](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/dependency-review.yml)
-[![Update Dependencies](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/contracts-ui-builder/actions/workflows/update-dependencies.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/contracts-ui-builder)
+[![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
+[![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
+[![codecov](https://codecov.io/gh/OpenZeppelin/ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/ui-builder)
+[![Publish](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
+[![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
+[![Dependency Review](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml)
+[![Update Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
@@ -107,7 +107,7 @@ This project is currently in development.
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/contracts-ui-builder/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/ui-builder/maintainability)
 
 ## Monorepo Structure
 
@@ -136,7 +136,7 @@ For more details, see the [Builder README](./packages/builder/README.md).
 
 ### React Core Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-react-core)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-react-core)
 
 Core React providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing adapter and wallet state.
 
@@ -144,7 +144,7 @@ For more details, see the [React Core README](./packages/react-core/README.md).
 
 ### Renderer Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-renderer)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-renderer)
 
 The `renderer` package provides a reusable library for rendering transaction forms and other components. It's published to npm and can be used independently of the main application.
 
@@ -160,9 +160,9 @@ For more details, see the [Renderer README](./packages/renderer/README.md).
 
 ### Types Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-types)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-types)
 
-The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the Contracts UI Builder.
+The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the UI Builder.
 
 Features:
 
@@ -175,7 +175,7 @@ For more details, see the [Types README](./packages/types/README.md).
 
 ### Styles Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-styles)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-styles)
 
 The `styles` package contains the centralized styling system used across all packages. It provides consistent theming, spacing, and component styles throughout the application.
 
@@ -190,7 +190,7 @@ For more details, see the [Styles README](./packages/styles/README.md).
 
 ### Storage Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-storage)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-storage)
 
 The `storage` package provides local storage services built on IndexedDB using Dexie.js for persisting contract UI configurations. It enables a complete history and auto-save system for the builder application.
 
@@ -208,7 +208,7 @@ For more details, see the [Storage README](./packages/storage/README.md).
 
 ### UI Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-ui)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-ui)
 
 Shared UI primitives and form field components for a consistent UX across builder and renderer.
 
@@ -216,7 +216,7 @@ For more details, see the [UI README](./packages/ui/README.md).
 
 ### Utils Package
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-utils)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-utils)
 
 Framework-agnostic utilities like logging, runtime configuration, validation, and helpers.
 
@@ -224,7 +224,7 @@ For more details, see the [Utils README](./packages/utils/README.md).
 
 ### EVM Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-evm)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-evm)
 
 _Status: Fully implemented._
 
@@ -234,7 +234,7 @@ For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md)
 
 ### Solana Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-solana)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-solana)
 
 _Status: Scaffolding._
 
@@ -244,7 +244,7 @@ For more details, see the [Solana Adapter README](./packages/adapter-solana/READ
 
 ### Stellar Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-stellar)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-stellar)
 
 _Status: Fully Implemented._
 
@@ -254,7 +254,7 @@ For more details, see the [Stellar Adapter README](./packages/adapter-stellar/RE
 
 ### Midnight Adapter
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/contracts-ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/contracts-ui-builder-adapter-midnight)
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-midnight)
 
 _Status: In progress._
 
@@ -309,8 +309,8 @@ For more details, see the [Midnight Adapter README](./packages/adapter-midnight/
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/OpenZeppelin/contracts-ui-builder.git
-   cd contracts-ui-builder
+   git clone https://github.com/OpenZeppelin/ui-builder.git
+   cd ui-builder
    ```
 
 2. Install dependencies:
@@ -394,7 +394,7 @@ This monorepo is organized into several specialized packages, each with a specif
 ### Configuration Structure
 
 ```text
-contracts-ui-builder/
+ui-builder/
 ├── .github/             # GitHub workflows and templates
 ├── .storybook/          # Storybook configuration
 ├── .husky/              # Git hooks
@@ -429,9 +429,9 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **CRUD Operations**: Complete lifecycle management for contract UI configurations
   - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
 
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/contracts-ui-builder-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
-  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/contracts-ui-builder-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
-  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/contracts-ui-builder-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
+- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `packages/types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/ui-builder-react-core`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+  - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-builder-react-core`) consumes this to set up the necessary app-wide context for the active adapter.
+  - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-builder-react-core`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 
 - **Renderer**: Shared library containing app rendering components and common utilities (like logging).
@@ -450,11 +450,11 @@ The application uses a modular, domain-driven adapter pattern to support multipl
 
 - **Styling System**: Centralized CSS variables and styling approach used across all packages.
 
-This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/contracts-ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
+This architecture allows for easy extension to support additional blockchain ecosystems without modifying the builder application logic. The `builder` package dynamically loads and uses adapters via `ecosystemManager.ts` and the provider model (from `@openzeppelin/ui-builder-react-core`) and the export system includes the specific adapter package needed for the target chain in exported forms. It utilizes **custom Vite plugins** to create **virtual modules**, enabling reliable loading of shared assets (like configuration files between packages) across package boundaries, ensuring consistency between development, testing, and exported builds.
 
 ## Project Constitution
 
-This project is governed by the Contracts UI Builder Constitution. Please read it before contributing changes that affect architecture, adapters, or tooling:
+This project is governed by the UI Builder Constitution. Please read it before contributing changes that affect architecture, adapters, or tooling:
 
 - [./.specify/memory/constitution.md](./.specify/memory/constitution.md)
 
@@ -488,7 +488,7 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/contracts-ui-builder-ui` package.
+The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/ui-builder-ui` package.
 
 These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
 
@@ -501,7 +501,7 @@ The project uses Storybook 8 for component documentation and development:
 pnpm storybook
 
 # Or start Storybook for a specific package
-pnpm --filter=@openzeppelin/contracts-ui-builder-renderer storybook
+pnpm --filter=@openzeppelin/ui-builder-renderer storybook
 ```
 
 Storybook stories are organized to:
@@ -620,15 +620,15 @@ To add support for a new blockchain ecosystem:
 
 1. **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
 2. **Define `package.json`**:
-   - Set the package name (e.g., `@openzeppelin/contracts-ui-builder-adapter-sui`).
-   - Add a dependency on `@openzeppelin/contracts-ui-builder-types` (`workspace:*`).
+   - Set the package name (e.g., `@openzeppelin/ui-builder-adapter-sui`).
+   - Add a dependency on `@openzeppelin/ui-builder-types` (`workspace:*`).
    - Add any chain-specific SDKs or libraries required by the adapter.
    - Include standard build scripts (refer to existing adapter packages).
    - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
 3. **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
 4. **Implement Adapter**:
    - Create `src/adapter.ts`.
-   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/contracts-ui-builder-types`.
+   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/ui-builder-types`.
    - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
    - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
 5. **Define Network Configurations**:\
@@ -638,7 +638,7 @@ To add support for a new blockchain ecosystem:
 6. **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
 7. **Register Ecosystem in Builder**:
    - Open `packages/builder/src/core/ecosystemManager.ts`.
-   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/contracts-ui-builder-adapter-sui';`).
+   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/ui-builder-adapter-sui';`).
    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
      - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
@@ -646,9 +646,9 @@ To add support for a new blockchain ecosystem:
    - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
 8. **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
 9. **Build & Test**:
-   - Build the new adapter package (`pnpm --filter @openzeppelin/contracts-ui-builder-adapter-<chain-name> build`).
+   - Build the new adapter package (`pnpm --filter @openzeppelin/ui-builder-adapter-<chain-name> build`).
    - Add relevant unit/integration tests.
-   - Ensure the builder application (`pnpm --filter @openzeppelin/contracts-ui-builder-app build`) and the export system still function correctly.
+   - Ensure the builder application (`pnpm --filter @openzeppelin/ui-builder-app build`) and the export system still function correctly.
 
 ## Commit Convention
 
@@ -733,7 +733,7 @@ During the export process, proxy configs and JSON are included to create standal
 
 ## Runtime Configuration
 
-Both the main Contracts UI Builder application and its exported forms support runtime configuration for certain parameters. This is primarily managed via an `AppConfigService` and allows customization without rebuilding the application code.
+Both the main UI Builder application and its exported forms support runtime configuration for certain parameters. This is primarily managed via an `AppConfigService` and allows customization without rebuilding the application code.
 
 ### Builder Application Configuration (Development)
 

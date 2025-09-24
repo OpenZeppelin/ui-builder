@@ -2,7 +2,7 @@ import { Ecosystem } from '../common/ecosystem';
 
 /**
  * Represents a parameter within a contract function or event. This is a generalized, internal
- * representation used by the Contracts UI Builder. Blockchain-specific adapters are
+ * representation used by the UI Builder. Blockchain-specific adapters are
  * responsible for mapping their native parameter types (e.g., from an EVM ABI or Solana IDL)
  * to this structure.
  */
@@ -121,7 +121,7 @@ export interface ContractEvent {
 
 /**
  * Represents the overall schema of a smart contract, including its functions and events.
- * This is a generalized, internal model used by the Contracts UI Builder.
+ * This is a generalized, internal model used by the UI Builder.
  * Blockchain-specific adapters are responsible for parsing a contract's native interface
  * (e.g., an EVM ABI JSON, Solana IDL) and transforming it into this `ContractSchema` structure.
  * The goal is to provide a consistent data model for the builder application to work with,

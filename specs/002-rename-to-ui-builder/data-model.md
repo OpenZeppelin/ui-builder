@@ -10,10 +10,23 @@
 
 - Purpose: Records mapping from legacy package names to new package names and status.
 - Fields: `oldName`, `newName`, `status` (planned | deprecated | published), `notes`.
-- Example rows (to be completed during PR C):
-  - `@openzeppelin/contracts-ui-builder-types` → `@openzeppelin/ui-builder-types`
-  - `@openzeppelin/contracts-ui-builder-utils` → `@openzeppelin/ui-builder-utils`
-  - `@openzeppelin/contracts-ui-builder-storage` → `@openzeppelin/ui-builder-storage`
+- Mapping table (finalized in PR C):
+
+| oldName                                             | newName                                   | status  | notes               |
+| --------------------------------------------------- | ----------------------------------------- | ------- | ------------------- |
+| @openzeppelin/contracts-ui-builder-react-core       | @openzeppelin/ui-builder-react-core       | planned |                     |
+| @openzeppelin/contracts-ui-builder-renderer         | @openzeppelin/ui-builder-renderer         | planned |                     |
+| @openzeppelin/contracts-ui-builder-types            | @openzeppelin/ui-builder-types            | planned |                     |
+| @openzeppelin/contracts-ui-builder-styles           | @openzeppelin/ui-builder-styles           | planned |                     |
+| @openzeppelin/contracts-ui-builder-storage          | @openzeppelin/ui-builder-storage          | planned |                     |
+| @openzeppelin/contracts-ui-builder-ui               | @openzeppelin/ui-builder-ui               | planned |                     |
+| @openzeppelin/contracts-ui-builder-utils            | @openzeppelin/ui-builder-utils            | planned |                     |
+| @openzeppelin/contracts-ui-builder-adapter-evm      | @openzeppelin/ui-builder-adapter-evm      | planned |                     |
+| @openzeppelin/contracts-ui-builder-adapter-solana   | @openzeppelin/ui-builder-adapter-solana   | planned |                     |
+| @openzeppelin/contracts-ui-builder-adapter-stellar  | @openzeppelin/ui-builder-adapter-stellar  | planned |                     |
+| @openzeppelin/contracts-ui-builder-adapter-midnight | @openzeppelin/ui-builder-adapter-midnight | planned |                     |
+| @openzeppelin/contracts-ui-builder-app              | @openzeppelin/ui-builder-app              | planned | private workspace   |
+| contracts-ui-builder-exported                       | ui-builder-exported                       | planned | export template app |
 
 ### RepoSlugMapping
 

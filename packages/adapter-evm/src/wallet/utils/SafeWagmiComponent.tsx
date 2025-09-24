@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useIsWagmiProviderInitialized } from '../hooks/useIsWagmiProviderInitialized';
 

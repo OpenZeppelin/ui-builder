@@ -368,7 +368,7 @@ gh workflow list
 gh workflow view "Staging Build"
 
 # Verify RC packages (when public)
-npm view @openzeppelin/contracts-ui-builder-adapter-evm --tag rc
+npm view @openzeppelin/ui-builder-adapter-evm --tag rc
 ```
 
 ---

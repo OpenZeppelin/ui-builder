@@ -1,7 +1,7 @@
 import { JSX, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { ContractFunction } from '@openzeppelin/contracts-ui-builder-types';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+import type { ContractFunction } from '@openzeppelin/ui-builder-types';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 interface FunctionResultProps {
   functionDetails: ContractFunction;

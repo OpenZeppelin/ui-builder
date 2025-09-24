@@ -9,8 +9,8 @@ import {
   Alert,
   AlertDescription,
   Button,
-} from '@openzeppelin/contracts-ui-builder-ui';
-import { cn } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Contract definition difference item (for comparing raw ABI, IDL, etc.)

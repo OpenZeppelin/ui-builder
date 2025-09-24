@@ -8,8 +8,8 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/contracts-ui-builder-types';
-import { getDefaultValueForType, logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-types';
+import { getDefaultValueForType, logger } from '@openzeppelin/ui-builder-utils';
 
 import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
 import { isLikelyEnumType } from '../utils/type-detection';

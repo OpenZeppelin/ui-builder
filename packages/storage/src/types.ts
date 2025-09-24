@@ -3,7 +3,7 @@ import type {
   ExecutionConfig,
   RenderFormSchema,
   UiKitConfiguration,
-} from '@openzeppelin/contracts-ui-builder-types';
+} from '@openzeppelin/ui-builder-types';
 
 import type { BaseRecord } from './base/DexieStorage';
 

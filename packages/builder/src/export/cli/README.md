@@ -1,6 +1,6 @@
-# Contracts UI Builder Export CLI
+# UI Builder Export CLI
 
-This is the command-line tool for exporting, building, and testing contracts UI builder applications.
+This is the command-line tool for exporting, building, and testing UI Builder applications.
 
 ## Documentation
 

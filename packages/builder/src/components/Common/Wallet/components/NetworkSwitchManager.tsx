@@ -3,14 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   useDerivedAccountStatus,
   useDerivedSwitchChainStatus,
-} from '@openzeppelin/contracts-ui-builder-react-core';
-import { ContractAdapter } from '@openzeppelin/contracts-ui-builder-types';
-import { logger } from '@openzeppelin/contracts-ui-builder-utils';
+} from '@openzeppelin/ui-builder-react-core';
+import { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Component that handles wallet network switching based on the selected network.
  *
- * This component is designed to be used in the ContractsUIBuilder itself rather than
+ * This component is designed to be used in the UIBuilder itself rather than
  * in the general wallet UI to ensure it has direct access to the adapter.
  */
 

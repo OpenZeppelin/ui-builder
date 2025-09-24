@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
   TextField,
-} from '@openzeppelin/contracts-ui-builder-ui';
+} from '@openzeppelin/ui-builder-ui';
 
 import { WizardLayout, WizardStep } from '../../components/Common/WizardLayout';
 
