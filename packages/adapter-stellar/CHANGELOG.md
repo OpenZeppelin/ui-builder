@@ -1,5 +1,16 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.10.1
+
+### Patch Changes
+
+- [#183](https://github.com/OpenZeppelin/ui-builder/pull/183) [`702ca91`](https://github.com/OpenZeppelin/ui-builder/commit/702ca91f01a35057e6d1c1809aa00bfd926bcd98) Thanks [@pasevin](https://github.com/pasevin)! - Fix BytesN parameter handling in Stellar forms so base64 inputs reuse the bytes field, propagate max byte hints, and convert to ScVal correctly.
+
+- Updated dependencies [[`47ee098`](https://github.com/OpenZeppelin/ui-builder/commit/47ee098b9d17241cb9323e0b644c3e36957ec358), [`702ca91`](https://github.com/OpenZeppelin/ui-builder/commit/702ca91f01a35057e6d1c1809aa00bfd926bcd98)]:
+  - @openzeppelin/ui-builder-utils@0.10.1
+  - @openzeppelin/ui-builder-types@0.10.1
+  - @openzeppelin/ui-builder-ui@0.10.1
+
 ## 0.10.0
 
 ### Minor Changes
