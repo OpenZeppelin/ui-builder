@@ -11,6 +11,15 @@ import {
 
 describe('parseStellarInput', () => {
   describe('primitive types', () => {
+    it('should parse BytesN values from base64', () => {
+      const base64Value =
+        'BHBgi1nbT7kAN+n2tiKV1CY4DiCM7FzECgIGz9YmB3lTMbbcA8xyq3mcW0QKKEtaW1tY6nzgfsPsHolWyNKkP5Q=';
+      const result = parseStellarInput(base64Value, 'BytesN<65>');
+
+      expect(result).toBeInstanceOf(Uint8Array);
+      expect((result as Uint8Array).length).toBe(65);
+    });
+
     it('should parse boolean values', () => {
       expect(parseStellarInput(true, 'Bool')).toBe(true);
       expect(parseStellarInput(false, 'Bool')).toBe(false);

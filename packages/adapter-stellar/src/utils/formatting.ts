@@ -114,6 +114,9 @@ export function convertStellarTypeToScValType(stellarType: string): string | str
     case 'DataUrl':
       return 'bytes';
     default:
+      if (/^BytesN<\d+>$/.test(stellarType)) {
+        return 'bytes';
+      }
       return stellarType.toLowerCase();
   }
 }

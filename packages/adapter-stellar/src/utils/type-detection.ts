@@ -157,3 +157,7 @@ export function isLikelyEnumType(parameterType: string): boolean {
 
   return enumPatterns.some((pattern) => pattern.test(parameterType));
 }
+
+export function isBytesNType(parameterType: string): boolean {
+  return /^BytesN<\d+>$/.test(parameterType);
+}
