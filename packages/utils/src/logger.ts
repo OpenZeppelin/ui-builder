@@ -84,19 +84,35 @@ export const logger = Logger.getInstance();
  * Defaults to disabled outside development to avoid runtime overhead and noise.
  */
 function getDefaultLoggerEnabled(): boolean {
-  // Vite/browser: `import.meta.env.DEV` is true in dev, false in prod builds
+  // Vite/browser context: prefer explicit export env over DEV flag
   try {
     // Use a narrow, typed access pattern to avoid depending on Vite types in this package
-    const viteEnvDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV;
-    if (typeof viteEnvDev === 'boolean') {
-      return viteEnvDev;
+    const viteEnv = (
+      import.meta as unknown as {
+        env?: { DEV?: boolean; MODE?: string; PROD?: boolean; VITE_EXPORT_ENV?: string };
+      }
+    ).env;
+
+    if (viteEnv) {
+      const exportEnv = String(viteEnv.VITE_EXPORT_ENV || '').toLowerCase();
+      // Force-disable logging for staging/production deployments regardless of DEV
+      if (exportEnv === 'staging' || exportEnv === 'production') {
+        return false;
+      }
+      if (typeof viteEnv.DEV === 'boolean') {
+        return viteEnv.DEV;
+      }
     }
   } catch {
     // Ignore environments where import.meta is not available or lacks env
   }
 
-  // Node/tsup: enable logging only in explicit development or test environments
+  // Node/tsup context: also honor VITE_EXPORT_ENV, then fall back to NODE_ENV
   if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+    const exportEnv = String(process.env.VITE_EXPORT_ENV || '').toLowerCase();
+    if (exportEnv === 'staging' || exportEnv === 'production') {
+      return false;
+    }
     const nodeEnv = process.env.NODE_ENV;
     return nodeEnv === 'development' || nodeEnv === 'test';
   }
