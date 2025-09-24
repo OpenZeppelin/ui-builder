@@ -95,10 +95,10 @@ function getDefaultLoggerEnabled(): boolean {
     // Ignore environments where import.meta is not available or lacks env
   }
 
-  // Node/tsup: consider development as the only environment with default logging
+  // Node/tsup: enable logging only in explicit development or test environments
   if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
     const nodeEnv = process.env.NODE_ENV;
-    return nodeEnv === 'development' || nodeEnv === undefined;
+    return nodeEnv === 'development' || nodeEnv === 'test';
   }
 
   // Safe fallback: disabled
