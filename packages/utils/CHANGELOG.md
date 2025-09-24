@@ -1,5 +1,14 @@
 # @openzeppelin/transaction-form-utils
 
+## 0.10.1
+
+### Patch Changes
+
+- [#181](https://github.com/OpenZeppelin/ui-builder/pull/181) [`47ee098`](https://github.com/OpenZeppelin/ui-builder/commit/47ee098b9d17241cb9323e0b644c3e36957ec358) Thanks [@pasevin](https://github.com/pasevin)! - Disable logs in staging/production by honoring VITE_EXPORT_ENV in logger defaults.
+  Also keep logs enabled only for development/test.
+- Updated dependencies [[`702ca91`](https://github.com/OpenZeppelin/ui-builder/commit/702ca91f01a35057e6d1c1809aa00bfd926bcd98)]:
+  - @openzeppelin/ui-builder-types@0.10.1
+
 ## 0.10.0
 
 ### Minor Changes
