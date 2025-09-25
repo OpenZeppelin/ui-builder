@@ -156,6 +156,30 @@ Stellar networks are exported from `src/networks/`. Each `StellarNetworkConfig` 
 
 See `src/networks/README.md` for details on adding networks and overriding RPC.
 
+## Stellar Asset Contract (SAC) Support
+
+The adapter fully supports Stellar Asset Contracts (SACs), which are special contracts that wrap native Stellar assets. SACs are automatically detected via RPC ledger entries and their specifications are loaded dynamically.
+
+### How SAC Support Works
+
+1. **Detection**: When loading a contract, the adapter checks its executable type via RPC
+2. **Specification Loading**: For SAC contracts, the adapter fetches the official SAC specification from GitHub
+3. **XDR Encoding**: The JSON spec is converted to XDR format using `@stellar/stellar-xdr-json`
+4. **UI Generation**: The adapter generates the same UI fields as regular WASM contracts
+
+### Technical Implementation Details
+
+#### WASM Loading Strategy
+
+The `@stellar/stellar-xdr-json` library requires a ~3MB WebAssembly module for XDR encoding. After extensive testing with various Vite bundling approaches (including `vite-plugin-wasm`, `vite-plugin-top-level-await`, and `?url` imports), we encountered persistent issues where Vite would serve HTML instead of the WASM binary, resulting in WebAssembly instantiation errors.
+
+**Solution**: The WASM module is loaded from CDN (`unpkg.com`) rather than bundled. This approach:
+
+- Avoids Vite bundling complexities and errors
+- Reduces bundle size by 3MB for users who don't use SAC contracts
+- Loads the WASM only when a SAC contract is actually detected (lazy loading)
+- Simplifies the build configuration
+
 ---
 
 This adapter generally follows the standard module structure and developer experience provided by the EVM adapter, while keeping the core app chain‑agnostic.

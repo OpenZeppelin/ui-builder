@@ -14,6 +14,8 @@ export interface StepContractDefinitionProps {
   definitionComparison?: {
     comparisonResult: ContractDefinitionComparisonResult;
   } | null;
+  // Loading state from the centralized contract definition service
+  isLoadingFromService?: boolean;
 }
 
 export interface ContractFormData {

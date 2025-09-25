@@ -202,5 +202,8 @@ export function useUIBuilderState() {
         initializePageState: lifecycle.initializePageState,
       },
     },
+
+    // Contract loading state from the centralized service
+    isLoadingContract: contractDefinition.isLoading,
   };
 }

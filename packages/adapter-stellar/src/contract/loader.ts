@@ -12,8 +12,10 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 import { getStellarExplorerAddressUrl } from '../configuration/explorer';
 import { extractStructFields, isStructType } from '../mapping/struct-fields';
 import { checkStellarFunctionStateMutability } from '../query/handler';
+import { getSacSpecArtifacts } from '../sac/spec-cache';
 import type { StellarContractArtifacts } from '../types/artifacts';
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
+import { getStellarContractType } from './type';
 
 /**
  * Load a Stellar contract using the official Stellar SDK approach
@@ -34,6 +36,39 @@ export async function loadStellarContractFromAddress(
     // Validate contract address
     if (!StellarSdk.StrKey.isValidContract(contractAddress)) {
       throw new Error(`Invalid contract address: ${contractAddress}`);
+    }
+
+    // Special-case: detect SAC and construct spec locally
+    try {
+      const execType = await getStellarContractType(contractAddress, networkConfig);
+
+      if (execType === 'contractExecutableStellarAsset') {
+        const { base64Entries, specEntries } = await getSacSpecArtifacts();
+        const spec = new StellarSdk.contract.Spec(base64Entries);
+
+        const functions = await extractFunctionsFromSpec(
+          spec,
+          contractAddress,
+          specEntries,
+          networkConfig
+        );
+
+        return {
+          name: `Stellar Asset Contract ${contractAddress.slice(0, 8)}...`,
+          ecosystem: 'stellar',
+          functions,
+          metadata: {
+            specEntries,
+          },
+        };
+      }
+    } catch (e) {
+      // If detection path fails unexpectedly, fall back to SDK client path below
+      logger.warn(
+        'loadStellarContractFromAddress',
+        'SAC detection failed, falling back to regular client:',
+        e
+      );
     }
 
     // Create contract client using the official Stellar SDK approach
