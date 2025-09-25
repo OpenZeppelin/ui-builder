@@ -22,7 +22,7 @@ import { StepContractDefinition } from './StepContractDefinition';
  * This component renders the multi-step wizard for building transaction apps..
  */
 export function UIBuilder() {
-  const { state, widget, actions } = useUIBuilderState();
+  const { state, widget, actions, isLoadingContract } = useUIBuilderState();
 
   // Track network switching state
   const [isAdapterReady, setIsAdapterReady] = useState(false);
@@ -167,6 +167,7 @@ export function UIBuilder() {
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
           definitionComparison={state.definitionComparison || null}
+          isLoadingFromService={isLoadingContract}
         />
       ),
       isValid: !!state.contractState.schema,

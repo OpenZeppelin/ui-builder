@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import { Control } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/ui-builder-renderer';
@@ -28,8 +29,13 @@ export function ContractFormFields({
         ))}
       </div>
 
-      {/* Loading Indicator */}
-      {isLoading && <p className="text-sm text-muted-foreground">Loading contract...</p>}
+      {/* Enhanced Loading Indicator */}
+      {isLoading && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Loading contract...</span>
+        </div>
+      )}
     </div>
   );
 }

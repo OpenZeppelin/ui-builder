@@ -16,6 +16,7 @@ export function StepContractDefinition({
   onToggleContractState,
   isWidgetExpanded,
   definitionComparison,
+  isLoadingFromService = false,
 }: StepContractDefinitionProps) {
   const [ignoreProxy, setIgnoreProxy] = useState(false);
 
@@ -119,7 +120,7 @@ export function StepContractDefinition({
         contractDefinitionInputs={contractDefinitionInputs}
         control={control}
         adapter={adapter}
-        isLoading={isLoading}
+        isLoading={isLoading || isLoadingFromService}
       />
 
       <ContractLoadingErrors
