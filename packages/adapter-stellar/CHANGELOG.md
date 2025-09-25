@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.11.0
+
+### Minor Changes
+
+- [#184](https://github.com/OpenZeppelin/ui-builder/pull/184) [`877b150`](https://github.com/OpenZeppelin/ui-builder/commit/877b1504df8f21395b276c2895190a7576cea2ba) Thanks [@pasevin](https://github.com/pasevin)! - Add Stellar Asset Contract support with CDN-backed spec loading and improved builder loading feedback for contract metadata.
+
 ## 0.10.1
 
 ### Patch Changes
