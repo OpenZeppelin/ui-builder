@@ -75,7 +75,7 @@ export async function encodeSacSpecEntries(jsonString: string): Promise<string[]
     const result: string[] = [];
     for (const entry of jsonData) {
       const stringified = stringify(entry);
-      if (stringified === null || stringified === undefined) {
+      if (!stringified) {
         throw new Error('Failed to stringify SAC spec entry before XDR encoding.');
       }
       const encoded = encode('ScSpecEntry', stringified);
