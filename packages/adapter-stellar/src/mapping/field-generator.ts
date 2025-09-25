@@ -14,6 +14,7 @@ import { getDefaultValueForType, logger } from '@openzeppelin/ui-builder-utils';
 import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
 import { isLikelyEnumType } from '../utils/type-detection';
 import { extractEnumVariants, isEnumType, type EnumMetadata } from './enum-metadata';
+import { extractStructFields, isStructType } from './struct-fields';
 import { mapStellarParameterTypeToFieldType } from './type-mapper';
 
 /**
@@ -25,7 +26,10 @@ function getDefaultValidationForType(): FieldValidation {
 }
 
 /**
- * Generate default field configuration for a Stellar function parameter.
+ * Generate default form configuration for a Stellar function parameter. Supports:
+ * - WASM artifacts: parameters arrive with baked-in enum metadata and struct components.
+ * - SAC runtime specs: metadata is fetched on demand, so we reconstruct the same shape from
+ *   `metadata.specEntries` to keep the UI identical across contract types.
  */
 export function generateStellarDefaultField<T extends FieldType = FieldType>(
   parameter: FunctionParameter,
@@ -44,6 +48,11 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
   }
 
   let enumMetadata: EnumMetadata | null = null;
+  // WASM artifacts still include `components` on struct inputs because we bake them during
+  // the build step. SAC contracts fetch their spec at runtime, so struct parameters show up
+  // without that data. Cache whatever the SAC spec gives us so the final field mirrors the
+  // WASM experience.
+  let structComponents: FunctionParameter[] | null = null;
   let finalFieldType = fieldType;
   let options: { label: string; value: string }[] | undefined;
 
@@ -74,6 +83,16 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
         variants: [], // Empty variants will trigger fallback UI
         isUnitOnly: false,
       };
+    }
+  }
+
+  // Same story here: WASM schemas already embed struct components, but SAC schemas only
+  // expose them inside the downloaded spec. Pull them out up front so the UI sees the
+  // same shape regardless of how the metadata was sourced.
+  if (specEntries && isStructType(specEntries, parameter.type)) {
+    const structFields = extractStructFields(specEntries, parameter.type);
+    if (structFields && structFields.length > 0) {
+      structComponents = structFields;
     }
   }
 
@@ -149,12 +168,17 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
   }
 
   // Preserve components for object and array-object types
-  if (parameter.components && (fieldType === 'object' || fieldType === 'array-object')) {
-    const result = {
-      ...baseField,
-      components: parameter.components,
-    };
-    return result;
+  if (fieldType === 'object' || fieldType === 'array-object') {
+    const componentsToUse = parameter.components || structComponents;
+    if (componentsToUse) {
+      // Prefer the baked-in WASM components, otherwise fall back to the SAC-derived
+      // components we cached above.
+      const result = {
+        ...baseField,
+        components: componentsToUse,
+      };
+      return result;
+    }
   }
 
   // Add enum metadata if available

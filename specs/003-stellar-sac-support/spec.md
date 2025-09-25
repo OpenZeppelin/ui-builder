@@ -103,12 +103,36 @@ As a user interacting with Soroban contracts in the Builder, I want to load and 
 - **NFR-001 (Performance)**: On cache hit, method discovery MUST complete in < 1s measured at the adapter boundary.
 - **NFR-002 (Responsiveness)**: On SAC fetch failure, an actionable error MUST be surfaced within < 3s.
 - **NFR-003 (Stability)**: SAC interaction MUST not degrade non-SAC flows; no increase in error rate vs baseline.
+- **NFR-004 (Architecture)**: SAC-specific helpers and caching utilities MUST remain internal to the Stellar adapter and MUST NOT be exported via the package barrel to preserve chain-agnostic boundaries.
 
 ### Key Entities
 
 - **SAC Contract**: A deployed instance of the Stellar Asset Contract identified by a contract ID on public/testnet networks.
 - **SAC Specification**: The canonical interface description for SAC, defining its callable methods and data types, obtained from the official Stellar source.
 - **User Session Cache**: An application-scoped in-memory cache that stores the previously fetched SAC specification for quick reuse in the same session.
+
+---
+
+## Implementation Notes (Post-Development)
+
+### WASM Loading Strategy
+
+During implementation, we discovered that the `@stellar/stellar-xdr-json` library requires a ~3MB WebAssembly module. Multiple approaches were tested with Vite:
+
+1. **Attempted**: `vite-plugin-wasm` and `vite-plugin-top-level-await` plugins
+2. **Attempted**: `?url` import syntax with various Vite configurations
+3. **Issue**: All bundling approaches resulted in WebAssembly instantiation errors (browser received HTML instead of WASM binary)
+
+**Final Solution**: Load WASM from CDN (`https://unpkg.com/@stellar/stellar-xdr-json@23.0.0/stellar_xdr_json_bg.wasm`)
+
+**Benefits**:
+
+- No bundle size impact (3MB WASM not included)
+- Lazy loading (only when SAC detected)
+- Simpler build configuration
+- Reliable cross-environment support
+
+**Trade-off**: Requires internet connection for SAC contracts (acceptable since SAC spec already requires GitHub fetch)
 
 ---
 

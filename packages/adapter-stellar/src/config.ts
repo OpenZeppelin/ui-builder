@@ -18,6 +18,11 @@ export const stellarAdapterConfig: AdapterConfig = {
       // Core Stellar libraries
       '@stellar/stellar-sdk': '^14.1.1',
 
+      // SAC (Stellar Asset Contract) support - dynamically loaded from CDN
+      // These are needed for XDR encoding when working with SAC contracts
+      '@stellar/stellar-xdr-json': '^23.0.0',
+      'lossless-json': '^4.0.2',
+
       // Wallet connection and integration
       '@creit.tech/stellar-wallets-kit': '^1.9.5',
 

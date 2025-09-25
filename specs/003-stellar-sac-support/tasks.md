@@ -1,45 +1,64 @@
 # Tasks: Stellar SAC Support
 
+**Status**: ✅ COMPLETE - All phases implemented and tested
+
 **Input**: Design documents from `/specs/003-stellar-sac-support/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
+## Implementation Summary
+
+- ✅ Successfully implemented SAC (Stellar Asset Contract) support
+- ✅ SAC detection via RPC ledger entries
+- ✅ Dynamic loading of SAC specifications from GitHub
+- ✅ XDR encoding using `@stellar/stellar-xdr-json` with CDN-loaded WASM
+- ✅ In-memory caching to avoid redundant fetches
+- ✅ Full UI parity with WASM contracts (enums, structs, all field types)
+- ✅ All tests passing (455 tests)
+- ✅ Documentation updated (README, inline comments, spec notes)
+
+## Key Technical Decisions
+
+1. **WASM Loading**: After extensive testing with Vite bundling approaches, implemented CDN loading for the 3MB WASM module to avoid bundling issues and reduce bundle size
+2. **Dynamic Imports**: SAC support code only loads when SAC contracts are actually used
+3. **Caching Strategy**: In-memory cache for SAC specs during session to minimize network requests
+
 ## Phase 3.1: Setup
 
-- [ ] T001 Ensure adapter-only scope per constitution (no chain-specific deps outside `packages/adapter-stellar`)
-- [ ] T002 Add dependencies in `packages/adapter-stellar/package.json`: `@stellar/stellar-xdr-json`, `lossless-json`
-- [ ] T003 [P] Install workspace deps and build: `pnpm -r install && pnpm -r build`
+- [x] T001 Ensure adapter-only scope per constitution (no chain-specific deps outside `packages/adapter-stellar`)
+- [x] T002 Add dependencies in `packages/adapter-stellar/package.json`: `@stellar/stellar-xdr-json`, `lossless-json`
+- [x] T003 [P] Install workspace deps and build: `pnpm -r install && pnpm -r build`
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 
-- [ ] T004 [P] Unit test: contract type detection (SAC vs Wasm) in `packages/adapter-stellar/test/contract/type-detection.test.ts`
-- [ ] T005 [P] Unit test: SAC spec fetch + XDR encode in `packages/adapter-stellar/test/sac/spec-encoding.test.ts`
-- [ ] T006 [P] Integration test: loader returns schema for SAC (functions present) in `packages/adapter-stellar/test/contract/loader-sac.test.ts`
-- [ ] T007 [P] Integration test: query flow works with SAC schema in `packages/adapter-stellar/test/query/sac-query.test.ts`
-- [ ] T008 [P] Unit test: SAC spec fetch failure surfaces friendly error in `packages/adapter-stellar/test/sac/spec-error.test.ts`
-- [ ] T009 [P] Integration test: cache behavior avoids refetch on second load in `packages/adapter-stellar/test/sac/spec-cache.test.ts`
-- [ ] T010 [P] Integration test: parity UX includes enum/struct fields via `metadata.specEntries` in `packages/adapter-stellar/test/mapping/sac-parity.test.ts`
+- [x] T004 [P] Unit test: contract type detection (SAC vs Wasm) in `packages/adapter-stellar/test/contract/type-detection.test.ts`
+- [x] T005 [P] Unit test: SAC spec fetch + XDR encode in `packages/adapter-stellar/test/sac/spec-encoding.test.ts`
+- [x] T006 [P] Integration test: loader returns schema for SAC (functions present) in `packages/adapter-stellar/test/contract/loader-sac.test.ts`
+- [x] T007 [P] Integration test: query flow works with SAC schema in `packages/adapter-stellar/test/query/sac-query.test.ts`
+- [x] T008 [P] Unit test: SAC spec fetch failure surfaces friendly error in `packages/adapter-stellar/test/sac/spec-error.test.ts`
+- [x] T009 [P] Integration test: cache behavior avoids refetch on second load in `packages/adapter-stellar/test/sac/spec-cache.test.ts`
+- [x] T010 [P] Integration test: parity UX includes enum/struct fields via `metadata.specEntries` in `packages/adapter-stellar/test/mapping/sac-parity.test.ts`
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 
-- [ ] T011 Implement contract type detection: `packages/adapter-stellar/src/contract/type.ts`
-- [ ] T012 Implement SAC spec source (runtime fetch + cache hook): `packages/adapter-stellar/src/sac/spec-source.ts`
-- [ ] T013 Implement XDR init/encode utilities: `packages/adapter-stellar/src/sac/xdr.ts`
-- [ ] T014 Integrate SAC branch into loader: `packages/adapter-stellar/src/contract/loader.ts` (inject `contract.Spec` and `specEntries`)
-- [ ] T015 Ensure mapping uses `metadata.specEntries` for enums/structs (no change if already present)
-- [ ] T016 Wire adapter barrel exports if needed: `packages/adapter-stellar/src/index.ts`
+- [x] T011 Implement contract type detection: `packages/adapter-stellar/src/contract/type.ts`
+- [x] T012 Implement SAC spec source (runtime fetch + cache hook): `packages/adapter-stellar/src/sac/spec-source.ts`
+- [x] T013 Implement XDR init/encode utilities: `packages/adapter-stellar/src/sac/xdr.ts`
+- [x] T014 Integrate SAC branch into loader: `packages/adapter-stellar/src/contract/loader.ts` (inject `contract.Spec` and `specEntries`)
+- [x] T015 Ensure mapping uses `metadata.specEntries` for enums/structs (no change if already present)
+- [x] T016 Wire adapter barrel exports if needed: `packages/adapter-stellar/src/index.ts`
 
 ## Phase 3.4: Integration & Validation
 
-- [ ] T017 Validate query path with SAC: `packages/adapter-stellar/src/query/handler.ts` (no changes expected; verify against tests)
-- [ ] T018 Validate transaction path with SAC: `packages/adapter-stellar/src/transaction/formatter.ts` (ensure inputs parsed OK)
-- [ ] T019 Add README updates: `packages/adapter-stellar/README.md` (SAC support, limits, caching)
-- [ ] T020 Add CHANGELOG entry: `packages/adapter-stellar/CHANGELOG.md`
+- [x] T017 Validate query path with SAC: `packages/adapter-stellar/src/query/handler.ts` (no changes expected; verify against tests)
+- [x] T018 Validate transaction path with SAC: `packages/adapter-stellar/src/transaction/formatter.ts` (ensure inputs parsed OK)
+- [x] T019 Add README updates: `packages/adapter-stellar/README.md` (SAC support, limits, caching) - COMPLETED
+- [x] T020 Add CHANGELOG entry: `packages/adapter-stellar/CHANGELOG.md` - COMPLETED
 
 ## Phase 3.5: Polish
 
-- [ ] T021 [P] Add error messages for SAC fetch/encode failures (user-friendly) with `logger`
-- [ ] T022 [P] Add lightweight in-memory caching guard (in addition to Query defaults)
-- [ ] T023 [P] Add docs note: public/testnet only; TODO for custom networks
+- [x] T021 [P] Add error messages for SAC fetch/encode failures (user-friendly) with `logger`
+- [x] T022 [P] Add lightweight in-memory caching guard (in addition to Query defaults)
+- [x] T023 [P] Add docs note: public/testnet only; TODO for custom networks - COMPLETED
 
 ## Dependencies
 
