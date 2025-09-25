@@ -1,6 +1,8 @@
 import { xdr } from '@stellar/stellar-sdk';
 import { parse, stringify } from 'lossless-json';
 
+import stellarXdrJsonPackage from '@stellar/stellar-xdr-json/package.json' assert { type: 'json' };
+
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
@@ -22,7 +24,11 @@ import { logger } from '@openzeppelin/ui-builder-utils';
  * Trade-off: Requires internet connection for SAC contracts, but this is acceptable since
  * SAC specs are already fetched from GitHub anyway.
  */
-const CDN_WASM_URL = 'https://unpkg.com/@stellar/stellar-xdr-json@23.0.0/stellar_xdr_json_bg.wasm';
+type PackageJson = { version?: string };
+
+const stellarXdrJsonVersion = (stellarXdrJsonPackage as PackageJson).version ?? '23.0.0';
+
+const CDN_WASM_URL = `https://unpkg.com/@stellar/stellar-xdr-json@${stellarXdrJsonVersion}/stellar_xdr_json_bg.wasm`;
 
 // Dynamically import the WASM module only when needed
 let initialized = false;
@@ -68,7 +74,11 @@ export async function encodeSacSpecEntries(jsonString: string): Promise<string[]
     const jsonData = parse(jsonString) as unknown[];
     const result: string[] = [];
     for (const entry of jsonData) {
-      const encoded = encode('ScSpecEntry', stringify(entry) || '');
+      const stringified = stringify(entry);
+      if (stringified === null || stringified === undefined) {
+        throw new Error('Failed to stringify SAC spec entry before XDR encoding.');
+      }
+      const encoded = encode('ScSpecEntry', stringified);
       result.push(encoded);
     }
     return result;
