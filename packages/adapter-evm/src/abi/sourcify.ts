@@ -62,7 +62,8 @@ export async function loadAbiFromSourcify(
 
     const normalizedAddress = address.toLowerCase();
     const contractName =
-      payload.metadata?.contractName || `Contract_${normalizedAddress.substring(0, 6).toUpperCase()}`;
+      payload.metadata?.contractName ||
+      `Contract_${normalizedAddress.substring(0, 6).toUpperCase()}`;
     const schema = transformAbiToSchema(abi, contractName, address);
 
     return { schema, originalAbi: JSON.stringify(abi) };
