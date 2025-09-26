@@ -24,7 +24,7 @@ import {
   type EvmContractDefinitionProviderKey,
 } from '../types/providers';
 import { loadAbiFromEtherscan } from './etherscan';
-import { getSourcifyRepoContractUrl, loadAbiFromSourcify } from './sourcify';
+import { getSourcifyContractAppUrl, loadAbiFromSourcify } from './sourcify';
 import { transformAbiToSchema } from './transformer';
 
 /**
@@ -172,7 +172,7 @@ function buildContractResult(
   if (sourceProvider === EvmProviderKeys.Etherscan) {
     fetchedFrom = getEvmExplorerAddressUrl(contractAddress, networkConfig) || undefined;
   } else if (sourceProvider === EvmProviderKeys.Sourcify) {
-    fetchedFrom = getSourcifyRepoContractUrl(networkConfig.chainId, contractAddress);
+    fetchedFrom = getSourcifyContractAppUrl(networkConfig.chainId, contractAddress);
   } else {
     // Fallback to resolved explorer URL when provider is unknown
     fetchedFrom = getEvmExplorerAddressUrl(contractAddress, networkConfig) || undefined;

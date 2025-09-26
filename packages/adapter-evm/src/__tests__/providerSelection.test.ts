@@ -76,7 +76,7 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     // Second call: Simulate Sourcify success
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ output: { abi: [] }, contractName: 'C' }),
+      json: async () => ({ abi: [], metadata: { contractName: 'C', output: { abi: [] } } }),
     });
 
     const artifacts: EvmContractArtifacts = {
@@ -84,7 +84,9 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     };
     const result = await loadEvmContract(artifacts, network);
     expect(result.source).toBe('fetched');
-    expect(result.metadata?.fetchedFrom).toContain('sourcify');
+    expect(result.metadata?.fetchedFrom).toBe(
+      'https://sourcify.dev/status/1/0x0000000000000000000000000000000000000001'
+    );
   });
 
   it('enforces per-provider timeout before moving to next provider', async () => {
@@ -158,7 +160,7 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     // First provider: sourcify success
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ output: { abi: [] }, contractName: 'C' }),
+      json: async () => ({ abi: [], metadata: { contractName: 'C', output: { abi: [] } } }),
     });
 
     const artifacts: EvmContractArtifacts = {
@@ -190,7 +192,7 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     // First provider per app default: sourcify
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ output: { abi: [] }, contractName: 'C' }),
+      json: async () => ({ abi: [], metadata: { contractName: 'C', output: { abi: [] } } }),
     });
 
     const artifacts: EvmContractArtifacts = {
