@@ -19,7 +19,7 @@ describe('EVM provider timeouts', () => {
     );
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ output: { abi: [] }, contractName: 'C' }),
+      json: async () => ({ abi: [], metadata: { output: { abi: [] } }, contractName: 'C' }),
     });
     vi.stubGlobal('fetch', mockFetch);
 
