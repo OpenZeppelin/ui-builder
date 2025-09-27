@@ -67,7 +67,7 @@ describe('EVM provenance links', () => {
     );
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ output: { abi: [] }, contractName: 'C' }),
+      json: async () => ({ abi: [], metadata: { contractName: 'C', output: { abi: [] } } }),
     });
     vi.stubGlobal('fetch', mockFetch);
 
@@ -89,7 +89,7 @@ describe('EVM provenance links', () => {
     };
     const result = await loadEvmContract(artifacts, network);
     expect(result.metadata?.fetchedFrom).toBe(
-      'https://repo.sourcify.dev/1/0x0000000000000000000000000000000000000001'
+      'https://sourcify.dev/status/1/0x0000000000000000000000000000000000000001'
     );
     vi.restoreAllMocks();
   });
