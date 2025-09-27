@@ -84,31 +84,6 @@ This project is currently in development.
   - [Builder Application Configuration (Development)](#builder-application-configuration-development)
   - [Exported Application Configuration](#exported-application-configuration)
 
-## Status
-
-This project is currently in development.
-
-[![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
-[![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
-[![codecov](https://codecov.io/gh/OpenZeppelin/ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/ui-builder)
-[![Publish](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
-[![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
-[![Dependency Review](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml)
-[![Update Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-brightgreen.svg)](https://conventionalcommits.org)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-[![Storybook](https://img.shields.io/badge/Storybook-FF4785?logo=storybook&logoColor=white)](https://storybook.js.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/ui-builder/maintainability)
-
 ## Monorepo Structure
 
 This project is organized as a monorepo with the following packages:
