@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.11.1
+
+### Patch Changes
+
+- [#186](https://github.com/OpenZeppelin/ui-builder/pull/186) [`f7d3d1f`](https://github.com/OpenZeppelin/ui-builder/commit/f7d3d1f37e41607f91fad7fe70204354243a933c) Thanks [@pasevin](https://github.com/pasevin)! - Simplify Sourcify integration by consuming API v2 directly and removing repo fallback logic.
+
 ## 0.10.0
 
 ### Minor Changes
