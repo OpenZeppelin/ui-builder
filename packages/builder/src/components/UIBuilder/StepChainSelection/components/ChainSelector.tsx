@@ -4,10 +4,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { EmptyState } from '@openzeppelin/ui-builder-ui';
+import { EmptyState, MidnightIcon } from '@openzeppelin/ui-builder-ui';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
-import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
 import {
   getEcosystemDescription,
   getEcosystemName,
@@ -169,13 +168,7 @@ export function ChainSelector({
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full">
                     {option.value === 'midnight' ? (
-                      <img
-                        src={MidnightLogoSvg}
-                        alt="Midnight"
-                        width={20}
-                        height={20}
-                        className={isDisabled ? 'opacity-50' : ''}
-                      />
+                      <MidnightIcon size={20} className={isDisabled ? 'opacity-50' : ''} />
                     ) : option.network ? (
                       <NetworkIcon
                         name={option.network}

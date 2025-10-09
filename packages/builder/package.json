@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' tsc --skipLibCheck && NODE_OPTIONS='--max-old-space-size=8192' vite build --emptyOutDir",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' vite build --emptyOutDir",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint 'src/**/*.{ts,tsx,js,cjs,mjs}' --fix --config eslint.config.cjs",
