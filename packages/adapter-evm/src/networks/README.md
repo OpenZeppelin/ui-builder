@@ -102,7 +102,7 @@ export const myNewNetworkMainnet: EvmNetworkConfig = {
   explorerUrl: 'https://explorer.mynewnetwork.io',
   apiUrl: 'https://api.explorer.mynewnetwork.io/api',
   primaryExplorerApiIdentifier: 'mynewnetwork-mainnet',
-  icon: 'mynewnetwork',
+  iconComponent: NetworkMyNewNetwork,
   nativeCurrency: {
     name: 'My Token',
     symbol: 'MTK',
