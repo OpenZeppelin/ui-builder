@@ -1,5 +1,41 @@
 # @openzeppelin/transaction-form-renderer
 
+## 0.13.0
+
+### Minor Changes
+
+- [#199](https://github.com/OpenZeppelin/ui-builder/pull/199) [`68c0aed`](https://github.com/OpenZeppelin/ui-builder/commit/68c0aed14f3597df8c52dc8667e420624399b8d2) Thanks [@pasevin](https://github.com/pasevin)! - Add BigInt field type for safe handling of large integers beyond JavaScript Number precision
+
+  **Breaking Behavior Changes:**
+  - Large integer types (64-bit and above) now map to `bigint` field type instead of `number`
+    - **EVM**: `uint64`, `uint128`, `uint256`, `int64`, `int128`, `int256`
+    - **Stellar**: `U64`, `U128`, `U256`, `I64`, `I128`, `I256`
+  - BigInt values are stored and transmitted as strings to prevent precision loss
+
+  **New Features:**
+  - Added new `BigIntField` component with built-in integer validation
+  - Added `createBigIntTransform()` for proper string-based value handling
+  - BigInt field now available in UI Builder field type dropdown under "Numeric" category
+
+  **Improvements:**
+  - Fixes uint256 truncation issue (#194)
+  - Prevents precision loss for values exceeding `Number.MAX_SAFE_INTEGER` (2^53-1)
+  - Simplified field generation by removing redundant type-specific validation logic from adapters
+  - Component-based validation ensures consistency across all blockchain ecosystems
+
+  **Technical Details:**
+  - `BigIntField` uses string storage to handle arbitrary-precision integers
+  - Integer-only validation via regex (`/^-?\d+$/`)
+  - Compatible field types properly ordered with `bigint` as recommended type
+  - Transform functions ensure safe conversion between UI and blockchain formats
+
+### Patch Changes
+
+- Updated dependencies [[`68c0aed`](https://github.com/OpenZeppelin/ui-builder/commit/68c0aed14f3597df8c52dc8667e420624399b8d2)]:
+  - @openzeppelin/ui-builder-types@0.13.0
+  - @openzeppelin/ui-builder-ui@0.13.0
+  - @openzeppelin/ui-builder-utils@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes
