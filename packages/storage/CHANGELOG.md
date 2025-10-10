@@ -1,5 +1,13 @@
 # @openzeppelin/ui-builder-storage
 
+## 0.13.0
+
+### Patch Changes
+
+- Updated dependencies [[`68c0aed`](https://github.com/OpenZeppelin/ui-builder/commit/68c0aed14f3597df8c52dc8667e420624399b8d2)]:
+  - @openzeppelin/ui-builder-types@0.13.0
+  - @openzeppelin/ui-builder-utils@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes
