@@ -9,6 +9,9 @@ import {
   getAccessibilityProps,
   getValidationStateClasses,
   handleEscapeKey,
+  INTEGER_HTML_PATTERN,
+  INTEGER_INPUT_PATTERN,
+  INTEGER_PATTERN,
   validateField,
 } from './utils';
 
@@ -59,10 +62,6 @@ export function BigIntField<TFieldValues extends FieldValues = FieldValues>({
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
-
-  // Integer validation patterns
-  const INTEGER_PATTERN = /^-?\d+$/; // For validation: requires at least one digit
-  const INTEGER_INPUT_PATTERN = /^-?\d*$/; // For input: allows typing minus sign before digits
 
   // Ensure validation includes integer-only pattern
   // This will be handled by validateField utility, avoiding duplication
@@ -222,7 +221,7 @@ export function BigIntField<TFieldValues extends FieldValues = FieldValues>({
                 data-slot="input"
                 onChange={handleInputChange}
                 inputMode="numeric"
-                pattern="-?[0-9]*"
+                pattern={INTEGER_HTML_PATTERN}
                 {...accessibilityProps}
                 aria-describedby={`${helperText ? descriptionId : ''} ${hasError ? errorId : ''}`}
                 disabled={readOnly}
