@@ -4,6 +4,8 @@
  * This file defines the TypeScript types for network configurations across different blockchain ecosystems.
  * It uses a discriminated union pattern with the 'ecosystem' property as the discriminant to ensure type safety.
  */
+import type React from 'react';
+
 import { Ecosystem, NetworkType } from '../common/ecosystem';
 
 /**
@@ -54,10 +56,16 @@ export interface BaseNetworkConfig {
   explorerUrl?: string;
 
   /**
-   * Optional icon name for the network (for use with @web3icons/react or similar)
-   * If not provided, the network property will be used as a fallback
+   * Optional React component for the network icon.
+   * This allows embedding the icon component directly in the network config,
+   * avoiding dynamic imports and improving build performance.
+   * If provided, this takes precedence over the icon string.
    */
-  icon?: string;
+  iconComponent?: React.ComponentType<{
+    size?: number;
+    className?: string;
+    variant?: 'mono' | 'branded';
+  }>;
 
   /**
    * A unique identifier for the specific explorer API service used by this network.

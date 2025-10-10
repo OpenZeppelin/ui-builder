@@ -1,3 +1,5 @@
+import { NetworkStellar } from '@web3icons/react';
+
 import { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 
 // Stellar Testnet
@@ -13,5 +15,5 @@ export const stellarTestnet: StellarNetworkConfig = {
   sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
   networkPassphrase: 'Test SDF Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/testnet',
-  icon: 'stellar',
+  iconComponent: NetworkStellar,
 };

@@ -53,6 +53,7 @@
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "@stellar/stellar-sdk": "^14.1.1",
     "@stellar/stellar-xdr-json": "^23.0.0",
+    "@web3icons/react": "^4.0.19",
     "lodash": "^4.17.21",
     "lossless-json": "^4.0.2",
     "lucide-react": "^0.510.0",
