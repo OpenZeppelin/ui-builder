@@ -67,7 +67,7 @@ export const stellarCustom: StellarNetworkConfig = {
   sorobanRpcUrl: 'https://soroban.custom.example',
   networkPassphrase: 'Custom Network Passphrase',
   explorerUrl: 'https://stellar.expert/explorer/custom',
-  icon: 'stellar',
+  iconComponent: NetworkStellarCustom,
 };
 ```
 
