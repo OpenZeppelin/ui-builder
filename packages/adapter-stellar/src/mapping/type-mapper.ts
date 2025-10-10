@@ -133,15 +133,15 @@ export function getStellarCompatibleFieldTypes(parameterType: string): FieldType
 
     // Unsigned integers
     U32: ['number', 'amount', 'text'],
-    U64: ['number', 'amount', 'text'],
-    U128: ['number', 'amount', 'text'],
-    U256: ['number', 'amount', 'text'],
+    U64: ['bigint', 'number', 'amount', 'text'],
+    U128: ['bigint', 'number', 'amount', 'text'],
+    U256: ['bigint', 'number', 'amount', 'text'],
 
     // Signed integers
     I32: ['number', 'amount', 'text'],
-    I64: ['number', 'amount', 'text'],
-    I128: ['number', 'amount', 'text'],
-    I256: ['number', 'amount', 'text'],
+    I64: ['bigint', 'number', 'text'],
+    I128: ['bigint', 'number', 'text'],
+    I256: ['bigint', 'number', 'text'],
 
     // Boolean
     Bool: ['checkbox', 'select', 'radio', 'text'],

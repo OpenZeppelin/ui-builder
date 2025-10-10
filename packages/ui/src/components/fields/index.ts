@@ -7,6 +7,7 @@ export * from './AmountField';
 export * from './ArrayField';
 export * from './ArrayObjectField';
 export * from './BaseField';
+export * from './BigIntField';
 export * from './BooleanField';
 export * from './BytesField';
 export * from './CodeEditorField';

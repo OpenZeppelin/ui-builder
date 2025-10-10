@@ -59,7 +59,7 @@ describe('generateStellarDefaultField', () => {
       expect(result).toMatchObject({
         name: 'amount',
         label: 'Amount',
-        type: 'number',
+        type: 'bigint',
         placeholder: 'Enter Amount',
         helperText: 'Token amount',
         width: 'full',

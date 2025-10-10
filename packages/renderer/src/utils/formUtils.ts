@@ -96,6 +96,29 @@ export function createNumberTransform(): FieldTransforms<number> {
 }
 
 /**
+ * Creates a transform for bigint fields (large integers beyond JS Number precision)
+ *
+ * @returns Transform functions for bigint fields
+ */
+export function createBigIntTransform(): FieldTransforms<string> {
+  return {
+    input: (value: unknown): string => {
+      if (value === undefined || value === null) return '';
+      return String(value);
+    },
+    output: (value: unknown): string => {
+      // Keep as string to avoid precision loss
+      const str = String(value || '');
+      // Return empty string if not a valid integer format
+      if (str && !/^-?\d+$/.test(str)) {
+        return '';
+      }
+      return str;
+    },
+  };
+}
+
+/**
  * Creates a transform for boolean fields
  *
  * @returns Transform functions for boolean fields
@@ -190,6 +213,8 @@ export function createTransformForFieldType(
     case 'number':
     case 'amount':
       return createNumberTransform() as FieldTransforms<unknown>;
+    case 'bigint':
+      return createBigIntTransform() as FieldTransforms<unknown>;
     case 'checkbox':
       return createBooleanTransform() as FieldTransforms<unknown>;
     case 'text':

@@ -14,6 +14,7 @@ export type FormValues = Record<string, unknown>;
 export type FieldType =
   | 'text'
   | 'number'
+  | 'bigint' // Large integer field for values beyond JavaScript Number precision
   | 'checkbox'
   | 'radio'
   | 'select'
@@ -45,6 +46,7 @@ export type FieldValue<T extends FieldType> = T extends
   | 'bytes'
   | 'code-editor'
   | 'blockchain-address'
+  | 'bigint' // BigInt field stores value as string
   ? string
   : T extends 'number' | 'amount'
     ? number
