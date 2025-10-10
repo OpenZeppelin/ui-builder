@@ -60,19 +60,22 @@ export function BigIntField<TFieldValues extends FieldValues = FieldValues>({
   const errorId = `${id}-error`;
   const descriptionId = `${id}-description`;
 
-  // Regular expression for integer validation (no decimals)
-  const INTEGER_REGEX = /^-?\d+$/;
+  // Integer validation patterns
+  const INTEGER_PATTERN = /^-?\d+$/; // For validation: requires at least one digit
+  const INTEGER_INPUT_PATTERN = /^-?\d*$/; // For input: allows typing minus sign before digits
+
+  // Ensure validation includes integer-only pattern
+  // This will be handled by validateField utility, avoiding duplication
+  const enhancedValidation = {
+    ...validation,
+    pattern: validation?.pattern || INTEGER_PATTERN,
+  };
 
   // Validation function for big integer strings
   const validateBigIntValue = (value: string): string | true => {
-    // Run standard validation first
-    const standardValidation = validateField(value, validation);
+    // Run standard validation with integer pattern (includes pattern validation)
+    const standardValidation = validateField(value, enhancedValidation);
     if (standardValidation !== true) return standardValidation as string;
-
-    // Validate integer format (no decimals)
-    if (!INTEGER_REGEX.test(value)) {
-      return 'Value must be a valid integer (no decimals)';
-    }
 
     // Run custom validator if provided
     if (validateBigInt) {
@@ -146,8 +149,8 @@ export function BigIntField<TFieldValues extends FieldValues = FieldValues>({
             }
 
             // Check if the input is a valid integer format
-            // Allow only digits and optional leading minus sign
-            if (/^-?\d*$/.test(rawValue)) {
+            // Allow only digits and optional leading minus sign (using input pattern)
+            if (INTEGER_INPUT_PATTERN.test(rawValue)) {
               field.onChange(rawValue);
             }
             // If invalid format, don't update (prevents non-numeric input)

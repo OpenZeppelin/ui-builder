@@ -146,9 +146,8 @@ export function validateField(value: unknown, validation?: FieldValidation): str
           : validation.pattern;
 
       if (!pattern.test(value)) {
-        // Provide more specific error messages for common patterns
-        const patternString = pattern.toString();
-        if (patternString === '/^-?\\d+$/') {
+        // Provide more specific error message for integer validation
+        if (!/^-?\d+$/.test(value) && /\d/.test(value)) {
           return 'Value must be a valid integer (no decimals)';
         }
         return 'Value does not match the required pattern';
