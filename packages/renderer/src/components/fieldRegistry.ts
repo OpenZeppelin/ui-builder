@@ -8,6 +8,7 @@ import {
   ArrayField,
   ArrayObjectField,
   BaseFieldProps,
+  BigIntField,
   BooleanField,
   BytesField,
   CodeEditorField,
@@ -35,6 +36,7 @@ export const fieldComponents: Record<
 > = {
   text: TextField,
   number: NumberField,
+  bigint: BigIntField,
   'blockchain-address': AddressField,
   checkbox: BooleanField,
   radio: RadioField,

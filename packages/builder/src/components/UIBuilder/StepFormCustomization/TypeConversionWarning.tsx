@@ -30,7 +30,7 @@ export function TypeConversionWarning({
 
     if (
       (originalParameterType?.includes('uint') || originalParameterType?.includes('int')) &&
-      !['number', 'amount'].includes(selectedType)
+      !['number', 'amount', 'bigint'].includes(selectedType)
     ) {
       return 'Converting from a numeric type may cause data validation issues during form submission.';
     }

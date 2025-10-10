@@ -28,32 +28,32 @@ describe('mapStellarParameterTypeToFieldType', () => {
       expect(mapStellarParameterTypeToFieldType('U32')).toBe('number');
     });
 
-    it('should map U64 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('U64')).toBe('number');
+    it('should map U64 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('U64')).toBe('bigint');
     });
 
-    it('should map U128 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('U128')).toBe('number');
+    it('should map U128 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('U128')).toBe('bigint');
     });
 
-    it('should map U256 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('U256')).toBe('number');
+    it('should map U256 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('U256')).toBe('bigint');
     });
 
     it('should map I32 to number', () => {
       expect(mapStellarParameterTypeToFieldType('I32')).toBe('number');
     });
 
-    it('should map I64 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('I64')).toBe('number');
+    it('should map I64 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('I64')).toBe('bigint');
     });
 
-    it('should map I128 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('I128')).toBe('number');
+    it('should map I128 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('I128')).toBe('bigint');
     });
 
-    it('should map I256 to number', () => {
-      expect(mapStellarParameterTypeToFieldType('I256')).toBe('number');
+    it('should map I256 to bigint', () => {
+      expect(mapStellarParameterTypeToFieldType('I256')).toBe('bigint');
     });
 
     it('should map Bytes to bytes', () => {
@@ -123,13 +123,24 @@ describe('getStellarCompatibleFieldTypes', () => {
       expect(result).toContain('text');
     });
 
-    it('should return compatible types for numeric types', () => {
-      const numericTypes = ['U32', 'U64', 'U128', 'U256', 'I32', 'I64', 'I128', 'I256'];
+    it('should return compatible types for small numeric types', () => {
+      const smallNumericTypes = ['U32', 'I32'];
 
-      numericTypes.forEach((type) => {
+      smallNumericTypes.forEach((type) => {
         const result = getStellarCompatibleFieldTypes(type);
         expect(result).toContain('number');
         expect(result).toContain('amount');
+        expect(result).toContain('text');
+      });
+    });
+
+    it('should return compatible types for large numeric types (64-bit+)', () => {
+      const largeNumericTypes = ['U64', 'U128', 'U256', 'I64', 'I128', 'I256'];
+
+      largeNumericTypes.forEach((type) => {
+        const result = getStellarCompatibleFieldTypes(type);
+        expect(result[0]).toBe('bigint'); // First (recommended) type
+        expect(result).toContain('number');
         expect(result).toContain('text');
       });
     });
