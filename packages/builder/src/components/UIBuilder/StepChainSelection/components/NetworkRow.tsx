@@ -4,14 +4,8 @@ import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
 import { Button, MidnightIcon } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
-<<<<<<< HEAD
-import { getNetworkIconName, ICON_SIZE } from '../utils/utils';
-=======
-import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
->>>>>>> main
+import { ICON_SIZE } from '../utils/utils';
 import { NetworkDetail } from './NetworkDetail';
-
-const ICON_SIZE = 16;
 
 export interface NetworkRowProps {
   network: NetworkConfig;
