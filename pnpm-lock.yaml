@@ -152,6 +152,9 @@ importers:
       '@wagmi/core':
         specifier: ^2.20.3
         version: 2.20.3(@tanstack/query-core@5.87.4)(@types/react@19.1.12)(react@19.1.1)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.1.1))(viem@2.37.5(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+      '@web3icons/react':
+        specifier: ^4.0.19
+        version: 4.0.26(react@19.1.1)(typescript@5.9.2)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -296,6 +299,9 @@ importers:
       '@stellar/stellar-xdr-json':
         specifier: ^23.0.0
         version: 23.0.0
+      '@web3icons/react':
+        specifier: ^4.0.19
+        version: 4.0.26(react@19.1.1)(typescript@5.9.2)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -412,8 +418,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@babel/runtime@7.28.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@web3icons/react':
-        specifier: ^4.0.19
-        version: 4.0.24(react@19.1.1)(typescript@5.9.2)
+        specifier: ^4.0.26
+        version: 4.0.26(react@19.1.1)(typescript@5.9.2)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -823,8 +829,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@babel/runtime@7.28.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@web3icons/react':
-        specifier: ^4.0.19
-        version: 4.0.24(react@19.1.1)(typescript@5.9.2)
+        specifier: ^4.0.26
+        version: 4.0.26(react@19.1.1)(typescript@5.9.2)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -4396,13 +4402,13 @@ packages:
   '@walletconnect/window-metadata@1.0.1':
     resolution: {integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==}
 
-  '@web3icons/common@0.11.18':
-    resolution: {integrity: sha512-YLw35hkWn07SP/yY/yR0C7lNAWsPk0I72i6l+Gu+fjm9ANyteaWShT0sPgWgNgECWma49McNqqq95q5T6SCB+w==}
+  '@web3icons/common@0.11.20':
+    resolution: {integrity: sha512-MTWgyHg6qzq9NfUcLnRvKqI5zNbEWUYjDTQmfDncJGXFruQrVGOyE+qDvj95Kq6+VJCfKyUBkQhQ9LUMmCK3pA==}
     peerDependencies:
       typescript: ^5.0.0
 
-  '@web3icons/react@4.0.24':
-    resolution: {integrity: sha512-zZ5zDrRKJZRICJCmHw4rjo04kpDIaziR7EuqeVuWXJTMSb4lP9W5o5kTo5MTyAlX7XOxk9pKGb6I0Smmcy1SGg==}
+  '@web3icons/react@4.0.26':
+    resolution: {integrity: sha512-Xu/PrV5IxRk/Emqn8JsooaU8Aeq56r74kO0pPMJBvVCDUs7OIcQyhKQONeD/RJfZbyUEbKyv6aHFefM+7/OGaw==}
     peerDependencies:
       react: ^18.2.0
 
@@ -15106,13 +15112,13 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
-  '@web3icons/common@0.11.18(typescript@5.9.2)':
+  '@web3icons/common@0.11.20(typescript@5.9.2)':
     dependencies:
       typescript: 5.9.2
 
-  '@web3icons/react@4.0.24(react@19.1.1)(typescript@5.9.2)':
+  '@web3icons/react@4.0.26(react@19.1.1)(typescript@5.9.2)':
     dependencies:
-      '@web3icons/common': 0.11.18(typescript@5.9.2)
+      '@web3icons/common': 0.11.20(typescript@5.9.2)
       react: 19.1.1
     transitivePeerDependencies:
       - typescript

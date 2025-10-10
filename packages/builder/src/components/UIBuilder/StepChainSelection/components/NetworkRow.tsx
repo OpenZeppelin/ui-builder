@@ -1,4 +1,3 @@
-import { NetworkIcon } from '@web3icons/react';
 import { Settings } from 'lucide-react';
 
 import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
@@ -6,8 +5,9 @@ import { Button } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import MidnightLogoSvg from '../../../../assets/icons/MidnightLogo.svg';
-import { getNetworkIconName, ICON_SIZE } from '../utils/utils';
 import { NetworkDetail } from './NetworkDetail';
+
+const ICON_SIZE = 16;
 
 export interface NetworkRowProps {
   network: NetworkConfig;
@@ -17,7 +17,6 @@ export interface NetworkRowProps {
 }
 
 export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: NetworkRowProps) {
-  const iconName = getNetworkIconName(network);
   const isTestnetLike = network.type === 'testnet' || network.type === 'devnet';
 
   return (
@@ -51,13 +50,8 @@ export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: Ne
               height={ICON_SIZE}
               className="flex-shrink-0"
             />
-          ) : iconName ? (
-            <NetworkIcon
-              name={iconName}
-              size={ICON_SIZE}
-              variant="branded"
-              className="flex-shrink-0"
-            />
+          ) : network.iconComponent ? (
+            <network.iconComponent size={ICON_SIZE} variant="branded" className="flex-shrink-0" />
           ) : (
             <div className="bg-muted flex-shrink-0 h-4 w-4 rounded-full"></div>
           )}

@@ -36,7 +36,6 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
   rpcUrl: 'http://localhost:8545', // Mock RPC URL
   nativeCurrency: { name: 'TestETH', symbol: 'TETH', decimals: 18 },
   apiUrl: 'https://api.etherscan.io/api', // Mock API URL, can be anything for tests not hitting network
-  icon: 'ethereum',
 };
 
 describe('EVM Adapter Integration Tests', () => {

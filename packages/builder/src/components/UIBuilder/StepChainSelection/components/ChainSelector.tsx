@@ -1,4 +1,4 @@
-import { NetworkIcon } from '@web3icons/react';
+import { NetworkEthereum, NetworkSolana, NetworkStellar } from '@web3icons/react';
 import { Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -177,12 +177,33 @@ export function ChainSelector({
                         className={isDisabled ? 'opacity-50' : ''}
                       />
                     ) : option.network ? (
-                      <NetworkIcon
-                        name={option.network}
-                        size={24}
-                        variant="branded"
-                        className={isDisabled ? 'opacity-50' : ''}
-                      />
+                      option.network === 'ethereum' ? (
+                        <NetworkEthereum
+                          size={24}
+                          variant="branded"
+                          className={isDisabled ? 'opacity-50' : ''}
+                        />
+                      ) : option.network === 'stellar' ? (
+                        <NetworkStellar
+                          size={24}
+                          variant="branded"
+                          className={isDisabled ? 'opacity-50' : ''}
+                        />
+                      ) : option.network === 'solana' ? (
+                        <NetworkSolana
+                          size={24}
+                          variant="branded"
+                          className={isDisabled ? 'opacity-50' : ''}
+                        />
+                      ) : (
+                        <div
+                          className={`h-6 w-6 rounded-full bg-muted flex items-center justify-center ${isDisabled ? 'opacity-50' : ''}`}
+                        >
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {option.label.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )
                     ) : (
                       <div
                         className={`h-6 w-6 rounded-full bg-muted flex items-center justify-center ${isDisabled ? 'opacity-50' : ''}`}
