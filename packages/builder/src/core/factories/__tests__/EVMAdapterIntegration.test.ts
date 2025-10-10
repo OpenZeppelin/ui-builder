@@ -36,7 +36,6 @@ const mockEvmNetworkConfig: EvmNetworkConfig = {
   rpcUrl: 'http://localhost:8545', // Mock RPC URL
   nativeCurrency: { name: 'TestETH', symbol: 'TETH', decimals: 18 },
   apiUrl: 'https://api.etherscan.io/api', // Mock API URL, can be anything for tests not hitting network
-  icon: 'ethereum',
 };
 
 describe('EVM Adapter Integration Tests', () => {
@@ -219,10 +218,10 @@ describe('EVM Adapter Integration Tests', () => {
       expect(recipientField?.type).toBe('blockchain-address');
       expect(recipientField?.transforms).toBeDefined();
 
-      // Check amount field (number type) - parameter name has underscore in the mock
+      // Check amount field (bigint type for uint256) - parameter name has underscore in the mock
       const amountField = formSchema.fields.find((f) => f.name === '_value');
       expect(amountField).toBeDefined();
-      expect(amountField?.type).toBe('number');
+      expect(amountField?.type).toBe('bigint');
       expect(amountField?.transforms).toBeDefined();
 
       // Test transforms for address field
@@ -239,14 +238,15 @@ describe('EVM Adapter Integration Tests', () => {
         expect(recipientField.transforms.output('invalid-address')).toBe('');
       }
 
-      // Test transforms for number field
+      // Test transforms for bigint field (stores as string to avoid precision loss)
       if (amountField?.transforms?.input && amountField?.transforms?.output) {
-        // Input transform (blockchain -> UI)
+        // Input transform (blockchain -> UI) - converts to string
         expect(amountField.transforms.input(1000)).toBe('1000');
+        expect(amountField.transforms.input('1000')).toBe('1000');
 
-        // Output transform (UI -> blockchain)
-        expect(amountField.transforms.output('1000')).toBe(1000);
-        expect(amountField.transforms.output('not-a-number')).toBe(0);
+        // Output transform (UI -> blockchain) - keeps as string
+        expect(amountField.transforms.output('1000')).toBe('1000');
+        expect(amountField.transforms.output('not-a-number')).toBe('');
       }
     });
 
@@ -270,10 +270,10 @@ describe('EVM Adapter Integration Tests', () => {
       expect(spenderField).toBeDefined();
       expect(spenderField?.type).toBe('blockchain-address');
 
-      // Check amount field (number type) - parameter name has underscore in the mock
+      // Check amount field (bigint type for uint256) - parameter name has underscore in the mock
       const amountField = formSchema.fields.find((f) => f.name === '_value');
       expect(amountField).toBeDefined();
-      expect(amountField?.type).toBe('number');
+      expect(amountField?.type).toBe('bigint');
     });
   });
 
@@ -369,19 +369,22 @@ describe('EVM Adapter Integration Tests', () => {
         expect(uint8Field.transforms.output('-1')).toBe(-1); // No range validation in transform
       }
 
-      // Test uint256 field
+      // Test uint256 field - now uses bigint to handle large values safely
       const uint256Function = intFixture.functions.find((f) => f.id === 'function-uint256');
       expect(uint256Function).toBeDefined();
       const uint256Schema = factory.generateFormSchema(adapter, intFixture, 'function-uint256');
 
       expect(uint256Schema.fields).toHaveLength(1);
       const uint256Field = uint256Schema.fields[0];
-      expect(uint256Field.type).toBe('number');
+      expect(uint256Field.type).toBe('bigint');
 
-      // Transform validation
+      // Transform validation - bigint stores as string to avoid precision loss
       if (uint256Field.transforms?.output) {
-        // Should handle large numbers (up to JS number limit)
-        expect(uint256Field.transforms.output('1000000000')).toBe(1000000000);
+        // Should handle large numbers as strings
+        expect(uint256Field.transforms.output('1000000000')).toBe('1000000000');
+        expect(uint256Field.transforms.output('340282366920938463463374607431768211455')).toBe(
+          '340282366920938463463374607431768211455'
+        );
       }
     });
   });

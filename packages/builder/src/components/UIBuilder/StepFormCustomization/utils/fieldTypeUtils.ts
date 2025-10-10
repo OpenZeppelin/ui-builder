@@ -31,6 +31,7 @@ export function getFieldTypeLabel(type: FieldType): string {
     email: 'Email Input',
     password: 'Password Input',
     number: 'Number Input',
+    bigint: 'Big Integer',
     amount: 'Token Amount',
     select: 'Dropdown Select',
     radio: 'Radio Buttons',
@@ -60,6 +61,7 @@ export function getFieldTypeOption(type: FieldType, disabled = false): FieldType
 const DEFAULT_FIELD_TYPES: FieldType[] = [
   'text',
   'number',
+  'bigint',
   'checkbox',
   'radio',
   'select',
@@ -105,7 +107,7 @@ export function getFieldTypeGroups(
   // Define field type categories
   const fieldTypeCategories: Record<string, FieldType[]> = {
     text: ['text', 'textarea', 'bytes', 'email', 'password'],
-    numeric: ['number', 'amount'],
+    numeric: ['number', 'bigint', 'amount'],
     selection: ['select', 'radio', 'checkbox', 'enum'],
     blockchain: ['blockchain-address'],
   };

@@ -1,3 +1,5 @@
+import { NetworkSolana } from '@web3icons/react';
+
 import { SolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
 
 // Placeholder for Solana Devnet
@@ -12,7 +14,7 @@ export const solanaDevnet: SolanaNetworkConfig = {
   rpcEndpoint: 'https://api.devnet.solana.com',
   commitment: 'confirmed',
   explorerUrl: 'https://explorer.solana.com/?cluster=devnet',
-  icon: 'solana',
+  iconComponent: NetworkSolana,
 };
 
 // Placeholder for Solana Testnet
@@ -27,7 +29,7 @@ export const solanaTestnet: SolanaNetworkConfig = {
   rpcEndpoint: 'https://api.testnet.solana.com',
   commitment: 'confirmed',
   explorerUrl: 'https://explorer.solana.com/?cluster=testnet',
-  icon: 'solana',
+  iconComponent: NetworkSolana,
 };
 
 // Add other Solana testnet/devnet networks if applicable

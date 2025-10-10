@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-adapter-stellar",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Stellar Adapter for UI Builder",
   "keywords": [
     "openzeppelin",
@@ -53,6 +53,7 @@
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "@stellar/stellar-sdk": "^14.1.1",
     "@stellar/stellar-xdr-json": "^23.0.0",
+    "@web3icons/react": "^4.0.19",
     "lodash": "^4.17.21",
     "lossless-json": "^4.0.2",
     "lucide-react": "^0.510.0",

@@ -1,4 +1,17 @@
 import {
+  NetworkArbitrumOne,
+  NetworkAvalanche,
+  NetworkBase,
+  NetworkBinanceSmartChain,
+  NetworkEthereum,
+  NetworkLinea,
+  NetworkMonad,
+  NetworkOptimism,
+  NetworkPolygon,
+  NetworkScroll,
+  NetworkZksync,
+} from '@web3icons/react';
+import {
   arbitrumSepolia as viemArbitrumSepolia,
   avalancheFuji as viemAvalancheFuji,
   baseSepolia as viemBaseSepolia,
@@ -29,7 +42,7 @@ export const ethereumSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'ethereum',
+  iconComponent: NetworkEthereum,
   nativeCurrency: {
     name: 'Sepolia Ether',
     symbol: 'ETH',
@@ -52,7 +65,7 @@ export const arbitrumSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'arbitrum',
+  iconComponent: NetworkArbitrumOne,
   nativeCurrency: {
     name: 'Arbitrum Sepolia Ether',
     symbol: 'ETH',
@@ -75,7 +88,7 @@ export const polygonAmoy: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'polygon',
+  iconComponent: NetworkPolygon,
   nativeCurrency: {
     name: 'MATIC',
     symbol: 'MATIC',
@@ -98,7 +111,7 @@ export const polygonZkEvmCardona: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'polygon',
+  iconComponent: NetworkPolygon,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -121,7 +134,7 @@ export const baseSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'base',
+  iconComponent: NetworkBase,
   nativeCurrency: {
     name: 'Sepolia Ether',
     symbol: 'ETH',
@@ -144,7 +157,7 @@ export const bscTestnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'bsc',
+  iconComponent: NetworkBinanceSmartChain,
   nativeCurrency: {
     name: 'BNB',
     symbol: 'BNB',
@@ -167,7 +180,7 @@ export const optimismSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'optimism',
+  iconComponent: NetworkOptimism,
   nativeCurrency: {
     name: 'Sepolia Ether',
     symbol: 'ETH',
@@ -191,7 +204,7 @@ export const avalancheFuji: TypedEvmNetworkConfig = {
   primaryExplorerApiIdentifier: 'etherscan-v2', // Unified identifier for V2 API
   supportsEtherscanV2: true,
   requiresExplorerApiKey: true,
-  icon: 'avalanche',
+  iconComponent: NetworkAvalanche,
   nativeCurrency: {
     name: 'Avalanche',
     symbol: 'AVAX',
@@ -215,7 +228,7 @@ export const zksyncSepoliaTestnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://block-explorer-api.sepolia.zksync.dev/api',
   primaryExplorerApiIdentifier: 'zksync-era-sepolia',
   supportsEtherscanV2: false,
-  icon: 'zksync',
+  iconComponent: NetworkZksync,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -238,7 +251,7 @@ export const scrollSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'scroll',
+  iconComponent: NetworkScroll,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -261,7 +274,7 @@ export const lineaSepolia: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'linea',
+  iconComponent: NetworkLinea,
   nativeCurrency: {
     name: 'Linea Ether',
     symbol: 'ETH',
@@ -284,7 +297,7 @@ export const monadTestnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'monad',
+  iconComponent: NetworkMonad,
   nativeCurrency: {
     name: 'Monad',
     symbol: 'MON',

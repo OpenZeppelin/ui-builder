@@ -1,4 +1,16 @@
 import {
+  NetworkArbitrumOne,
+  NetworkAvalanche,
+  NetworkBase,
+  NetworkBinanceSmartChain,
+  NetworkEthereum,
+  NetworkLinea,
+  NetworkOptimism,
+  NetworkPolygon,
+  NetworkScroll,
+  NetworkZksync,
+} from '@web3icons/react';
+import {
   arbitrum as viemArbitrum,
   avalanche as viemAvalanche,
   base as viemBase,
@@ -28,7 +40,7 @@ export const ethereumMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'ethereum',
+  iconComponent: NetworkEthereum,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -51,7 +63,7 @@ export const arbitrumMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'arbitrum',
+  iconComponent: NetworkArbitrumOne,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -74,7 +86,7 @@ export const polygonMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'polygon',
+  iconComponent: NetworkPolygon,
   nativeCurrency: {
     name: 'MATIC',
     symbol: 'MATIC',
@@ -97,7 +109,7 @@ export const polygonZkEvmMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'polygon',
+  iconComponent: NetworkPolygon,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -120,7 +132,7 @@ export const baseMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'base',
+  iconComponent: NetworkBase,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -143,7 +155,7 @@ export const bscMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'bsc',
+  iconComponent: NetworkBinanceSmartChain,
   nativeCurrency: {
     name: 'BNB',
     symbol: 'BNB',
@@ -166,7 +178,7 @@ export const optimismMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'optimism',
+  iconComponent: NetworkOptimism,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -189,7 +201,7 @@ export const avalancheMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'avalanche',
+  iconComponent: NetworkAvalanche,
   nativeCurrency: {
     name: 'Avalanche',
     symbol: 'AVAX',
@@ -213,7 +225,7 @@ export const zkSyncEraMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://block-explorer-api.mainnet.zksync.io/api',
   primaryExplorerApiIdentifier: 'zksync-era-mainnet',
   supportsEtherscanV2: false,
-  icon: 'zksync',
+  iconComponent: NetworkZksync,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -236,7 +248,7 @@ export const scrollMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'scroll',
+  iconComponent: NetworkScroll,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -259,7 +271,7 @@ export const lineaMainnet: TypedEvmNetworkConfig = {
   apiUrl: 'https://api.etherscan.io/v2/api',
   primaryExplorerApiIdentifier: 'etherscan-v2',
   supportsEtherscanV2: true,
-  icon: 'linea',
+  iconComponent: NetworkLinea,
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',

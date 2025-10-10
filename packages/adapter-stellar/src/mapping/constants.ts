@@ -3,6 +3,12 @@ import type { FieldType } from '@openzeppelin/ui-builder-types';
 /**
  * Stellar/Soroban-specific type mapping to default form field types.
  * Based on Soroban type system: https://developers.stellar.org/docs/learn/fundamentals/contract-development/types
+ *
+ * Note: Large integer types (U64, U128, U256, I64, I128, I256) are mapped to 'bigint'
+ * instead of 'number' to avoid JavaScript's Number precision limitations.
+ * JavaScript's Number type can only safely represent integers up to 2^53 - 1,
+ * but these types can hold much larger values. The BigIntField component stores values
+ * as strings and the Stellar adapter handles conversion automatically.
  */
 export const STELLAR_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   // Address types
@@ -15,15 +21,15 @@ export const STELLAR_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
 
   // Numeric types - unsigned integers
   U32: 'number',
-  U64: 'number',
-  U128: 'number',
-  U256: 'number',
+  U64: 'bigint',
+  U128: 'bigint',
+  U256: 'bigint',
 
   // Numeric types - signed integers
   I32: 'number',
-  I64: 'number',
-  I128: 'number',
-  I256: 'number',
+  I64: 'bigint',
+  I128: 'bigint',
+  I256: 'bigint',
 
   // Boolean type
   Bool: 'checkbox',

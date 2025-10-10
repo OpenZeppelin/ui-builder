@@ -5,6 +5,8 @@ import { FieldError } from 'react-hook-form';
 
 import { FieldValidation, MapEntry } from '@openzeppelin/ui-builder-types';
 
+import { INTEGER_PATTERN } from './integerValidation';
+
 /**
  * Determines if a field has an error
  */
@@ -146,6 +148,10 @@ export function validateField(value: unknown, validation?: FieldValidation): str
           : validation.pattern;
 
       if (!pattern.test(value)) {
+        // Provide more specific error message for integer validation
+        if (!INTEGER_PATTERN.test(value) && /\d/.test(value)) {
+          return 'Value must be a valid integer (no decimals)';
+        }
         return 'Value does not match the required pattern';
       }
     }

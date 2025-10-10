@@ -1,4 +1,3 @@
-import { NetworkIcon } from '@web3icons/react';
 import React from 'react';
 
 import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
@@ -14,14 +13,6 @@ interface NetworkStatusBadgeProps {
 // Define constants for consistency
 const ICON_SIZE = 16;
 
-function getNetworkIconName(network: NetworkConfig): string | null {
-  // TODO: submit a PR to web3icons to add midnight to the list of networks
-  if (network.ecosystem === 'midnight') {
-    return null;
-  }
-  return network.icon || network.network.toLowerCase();
-}
-
 /**
  * NetworkStatusBadge - Displays network information in a compact badge format
  * Shows the network icon, ecosystem, and name with dashed borders for testnet/devnet
@@ -32,7 +23,6 @@ export function NetworkStatusBadge({
 }: NetworkStatusBadgeProps): React.ReactElement | null {
   if (!network) return null;
 
-  const iconName = getNetworkIconName(network);
   const isTestnetLike = network.type === 'testnet' || network.type === 'devnet';
 
   return (
@@ -46,8 +36,8 @@ export function NetworkStatusBadge({
       {/* Network icon - reusing same icon component from NetworkRow */}
       {network.ecosystem === 'midnight' ? (
         <MidnightIcon size={ICON_SIZE} className="flex-shrink-0" />
-      ) : iconName ? (
-        <NetworkIcon name={iconName} size={ICON_SIZE} variant="branded" />
+      ) : network.iconComponent ? (
+        <network.iconComponent size={ICON_SIZE} variant="branded" />
       ) : (
         <div className="bg-muted-foreground/20 flex-shrink-0 h-4 w-4 rounded-full"></div>
       )}

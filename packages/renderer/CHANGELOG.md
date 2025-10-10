@@ -1,5 +1,14 @@
 # @openzeppelin/transaction-form-renderer
 
+## 0.12.0
+
+### Patch Changes
+
+- Updated dependencies [[`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500), [`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500)]:
+  - @openzeppelin/ui-builder-types@0.12.0
+  - @openzeppelin/ui-builder-ui@0.12.0
+  - @openzeppelin/ui-builder-utils@0.12.0
+
 ## 0.10.1
 
 ### Patch Changes

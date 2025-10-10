@@ -26,10 +26,10 @@ function extractArrayElementType(parameterType: string): string | null {
 }
 
 /**
- * Get default validation rules for a parameter type.
- * Only includes serializable validation rules - no custom functions.
+ * Get default validation rules for a parameter.
+ * Field-specific validation is handled by the field components themselves.
  */
-function getDefaultValidationForType(): FieldValidation {
+function getDefaultValidation(): FieldValidation {
   return { required: true };
 }
 
@@ -40,6 +40,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
   parameter: FunctionParameter
 ): FormFieldType<T> {
   const fieldType = mapEvmParamTypeToFieldType(parameter.type) as T;
+
   const baseField: FormFieldType<T> = {
     id: `field-${Math.random().toString(36).substring(2, 9)}`,
     name: parameter.name || parameter.type, // Use type if name missing
@@ -48,7 +49,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
     helperText: parameter.description || '',
     defaultValue: getDefaultValueForType(fieldType) as FieldValue<T>,
-    validation: getDefaultValidationForType(),
+    validation: getDefaultValidation(),
     width: 'full',
   };
 
@@ -64,7 +65,7 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
         elementType: elementFieldType,
         elementFieldConfig: {
           type: elementFieldType,
-          validation: getDefaultValidationForType(),
+          validation: getDefaultValidation(),
           placeholder: `Enter ${elementType}`,
         },
       };
