@@ -256,6 +256,9 @@ importers:
       '@solana/web3.js':
         specifier: ^1.98.4
         version: 1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@web3icons/react':
+        specifier: ^4.0.26
+        version: 4.0.26(react@19.1.1)(typescript@5.9.2)
       bs58:
         specifier: ^5.0.0
         version: 5.0.0
