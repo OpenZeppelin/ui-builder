@@ -22,7 +22,6 @@ const createMockConfig = (
   sorobanRpcUrl: sorobanRpcUrl || '', // Allow undefined or empty for testing error cases
   networkPassphrase: `Test ${id} Network`,
   explorerUrl: `https://stellar.expert/explorer/${id}`,
-  icon: 'stellar',
 });
 
 // Mock the appConfigService from the correct package
