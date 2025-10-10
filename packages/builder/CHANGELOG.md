@@ -1,5 +1,32 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.11.0
+
+### Minor Changes
+
+- [#196](https://github.com/OpenZeppelin/ui-builder/pull/196) [`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500) Thanks [@pasevin](https://github.com/pasevin)! - Embed icon components in network configs; remove legacy icon string and dynamic icon usage. Improves build time and output file count; no runtime bundle size increase.
+
+### Patch Changes
+
+- [#196](https://github.com/OpenZeppelin/ui-builder/pull/196) [`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500) Thanks [@pasevin](https://github.com/pasevin)! - Embed icon components in network configs; remove legacy icon string and dynamic icon usage.
+  - Build performance: dramatically reduced build time and output file count
+  - Runtime: no increase to runtime bundle size
+  - API: `iconComponent` added to BaseNetworkConfig; `icon` string removed
+  - Adapters: import specific `@web3icons/react` icons and set on configs
+  - UI: prefer `network.iconComponent` when present
+
+- Updated dependencies [[`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500), [`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500)]:
+  - @openzeppelin/ui-builder-types@0.12.0
+  - @openzeppelin/ui-builder-adapter-evm@0.12.0
+  - @openzeppelin/ui-builder-adapter-stellar@0.12.0
+  - @openzeppelin/ui-builder-adapter-solana@0.12.0
+  - @openzeppelin/ui-builder-ui@0.12.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.12.0
+  - @openzeppelin/ui-builder-react-core@0.12.0
+  - @openzeppelin/ui-builder-renderer@0.12.0
+  - @openzeppelin/ui-builder-storage@0.12.0
+  - @openzeppelin/ui-builder-utils@0.12.0
+
 ## 0.10.1
 
 ### Patch Changes
