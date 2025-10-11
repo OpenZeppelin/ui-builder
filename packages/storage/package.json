@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-storage",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "private": false,
   "description": "Local storage services for the OpenZeppelin UI Builder ecosystem.",
   "type": "module",
