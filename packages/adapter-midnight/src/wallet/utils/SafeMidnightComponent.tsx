@@ -16,7 +16,7 @@ export const SafeMidnightComponent = ({
 }) => {
   const context = useContext(MidnightWalletContext);
 
-  // If the context is not available, it means the MidnightWalletProvider
+  // If the context is not available, it means the MidnightWalletUiRoot
   // is not in the tree. Render the fallback to prevent a crash.
   if (!context) {
     return <>{fallback}</>;

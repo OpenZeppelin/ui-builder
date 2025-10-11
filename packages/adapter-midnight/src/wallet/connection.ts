@@ -1,21 +1,52 @@
-import type { Connector } from '@openzeppelin/ui-builder-types';
+/**
+ * Midnight Wallet Connection Facade
+ *
+ * High-level API for Midnight wallet connection and status management.
+ *
+ * ARCHITECTURE:
+ * - This module provides a facade over the LaceWalletImplementation.
+ * - UI components call these functions; they delegate to the singleton wallet implementation.
+ * - Event-driven architecture: callers subscribe to onMidnightWalletConnectionChange.
+ *
+ * DESIGN DECISIONS:
+ * 1. **Event Emulation**
+ *    - Lace DAppConnectorWalletAPI lacks native onAccountChange events.
+ *    - LaceWalletImplementation emulates events by polling api.state().
+ *    - Consumers use onMidnightWalletConnectionChange as if native events existed.
+ *
+ * 2. **Singleton Implementation**
+ *    - getMidnightWalletImplementation() returns a single shared instance.
+ *    - Ensures consistent state across all UI components.
+ *
+ * 3. **Lazy Initialization**
+ *    - getInitializedMidnightWalletImplementation() returns undefined if not yet ready.
+ *    - Used for non-blocking status checks.
+ *
+ * MIRRORS STELLAR ADAPTER:
+ * - This architecture directly mirrors adapter-stellar/src/wallet/connection.ts.
+ * - Provides consistent UX and API surface across ecosystem adapters.
+ */
 
-// This file will contain facade functions that provide a clean, high-level API
-// for wallet connection operations. It will use the raw functions from
-// midnight-implementation.ts to orchestrate connecting, disconnecting, and
-// checking wallet status.
+import type { Connector } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
+
+import { LaceWalletImplementation } from './implementation/lace-implementation';
+
+import type { MidnightWalletConnectionStatus } from './types';
+import {
+  getInitializedMidnightWalletImplementation,
+  getMidnightWalletImplementation,
+} from './utils';
 
 /**
- * Checks if a Midnight-compatible wallet (Lace) is available.
- * @returns `true` if the wallet extension is detected.
+ * Indicates if this adapter supports wallet connection
  */
 export const supportsMidnightWalletConnection = (): boolean => {
   return typeof window !== 'undefined' && !!window.midnight?.mnLace;
 };
 
 /**
- * Returns a list of available Midnight wallet connectors.
- * @returns An array of `Connector` objects, currently only Lace.
+ * Get available Midnight wallet connectors
  */
 export const getMidnightAvailableConnectors = async (): Promise<Connector[]> => {
   if (!supportsMidnightWalletConnection()) {
@@ -25,10 +56,37 @@ export const getMidnightAvailableConnectors = async (): Promise<Connector[]> => 
 };
 
 /**
- * Disconnects from the Midnight wallet.
+ * Disconnect from the Midnight wallet
  */
 export async function disconnectMidnightWallet(): Promise<{
   disconnected: boolean;
 }> {
-  return { disconnected: true };
+  try {
+    const impl = await getMidnightWalletImplementation();
+    impl.disconnect();
+    return { disconnected: true };
+  } catch (error) {
+    logger.warn('disconnectMidnightWallet', 'Unexpected error during disconnect', error);
+    return { disconnected: false };
+  }
+}
+
+/**
+ * Subscribe to Midnight wallet connection (account) changes
+ * @returns unsubscribe function
+ */
+export function getMidnightWalletConnectionStatus(): MidnightWalletConnectionStatus {
+  const impl = getInitializedMidnightWalletImplementation();
+  if (!impl) {
+    return { isConnected: false, status: 'disconnected' } as MidnightWalletConnectionStatus;
+  }
+  return impl.getWalletConnectionStatus();
+}
+
+export function onMidnightWalletConnectionChange(
+  callback: (current: MidnightWalletConnectionStatus, prev: MidnightWalletConnectionStatus) => void
+): () => void {
+  const initialized = getInitializedMidnightWalletImplementation();
+  const impl = initialized || new LaceWalletImplementation();
+  return impl.onWalletConnectionChange(callback);
 }

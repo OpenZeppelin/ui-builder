@@ -29,7 +29,7 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 import type { MidnightContractArtifacts } from './types/artifacts';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
-import { MidnightWalletProvider } from './wallet/components/MidnightWalletProvider';
+import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
 import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
@@ -60,7 +60,7 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public getEcosystemReactUiContextProvider(): React.FC<EcosystemReactUiProviderProps> {
-    return MidnightWalletProvider;
+    return MidnightWalletUiRoot;
   }
 
   public getEcosystemReactHooks(): EcosystemSpecificReactHooks {
@@ -97,13 +97,10 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
-    // This method is required by the ContractAdapter interface.
-    // In our React-based UI, the connection status is managed reactively by the
-    // MidnightWalletProvider. This function provides a non-reactive, one-time
-    // status check, which is not the source of truth for the UI components.
+    const status = connection.getMidnightWalletConnectionStatus();
     return {
-      isConnected: false,
-      address: undefined,
+      isConnected: !!status.isConnected,
+      address: status.address,
       chainId: this.networkConfig.id,
     };
   }
