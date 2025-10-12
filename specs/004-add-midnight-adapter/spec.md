@@ -1,9 +1,17 @@
 # Feature Specification: Add Midnight Adapter
 
-**Feature Branch**: `004-add-midnight-adapter`  
-**Created**: 2025-10-11  
-**Status**: Draft  
-**Input**: User description: "Add Midnight Adapter. Analyze other adapters evm & stellar. Analyze the the @src/ midnight deploy cli in this workspace thoroughly as a lot from this cli will be used in the midnigh adapter for the ui builder. focus on logical phases that can be tested manually as soon as possible. IMPORTANT do not assume the features from the deploy cli, analyze the actual UI Builder monorepo, and the existing adapters to understand the features they provide."
+**Branches (stacked)**:
+
+- `midnight/01-wallet`
+- `midnight/02-ingestion`
+- `midnight/03-auto-views`
+- `midnight/04-write-export`
+- `midnight/05-status`
+- `midnight/06-rpc`
+- `midnight/90-polish`  
+  **Created**: 2025-10-11  
+  **Status**: Draft  
+  **Input**: User description: "Add Midnight Adapter. Analyze other adapters evm & stellar. Analyze the the @src/ midnight deploy cli in this workspace thoroughly as a lot from this cli will be used in the midnigh adapter for the ui builder. focus on logical phases that can be tested manually as soon as possible. IMPORTANT do not assume the features from the deploy cli, analyze the actual UI Builder monorepo, and the existing adapters to understand the features they provide."
 
 ## User Scenarios & Testing _(mandatory)_
 
