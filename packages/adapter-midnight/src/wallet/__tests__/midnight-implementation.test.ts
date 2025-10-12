@@ -4,7 +4,7 @@ import {
 } from '@midnight-ntwrk/dapp-connector-api';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as implementation from '../midnight-implementation';
+import { LaceWalletImplementation } from '../implementation/lace-implementation';
 
 const mockApi: DAppConnectorWalletAPI = {
   state: vi.fn().mockResolvedValue({ address: 'test-address' }),
@@ -26,6 +26,7 @@ const mockLace: DAppConnectorAPI = {
 const originalWindow = global.window;
 
 describe('Midnight Wallet Implementation', () => {
+  let impl: LaceWalletImplementation;
   beforeEach(() => {
     // @ts-expect-error - We are intentionally overwriting the global window for tests
     global.window = {
@@ -34,29 +35,34 @@ describe('Midnight Wallet Implementation', () => {
       },
     };
     vi.clearAllMocks();
+    impl = new LaceWalletImplementation();
   });
 
   afterEach(() => {
     // Restore the original window object
     global.window = originalWindow;
-    implementation.disconnect();
+    impl.disconnect();
   });
 
   it('should call the enable method on the Lace wallet API', async () => {
-    const api = await implementation.connect();
+    const result = await impl.connect();
     expect(mockLace.enable).toHaveBeenCalledTimes(1);
-    expect(api).toBe(mockApi);
+    expect(result.connected).toBe(true);
   });
 
-  it('should throw an error if the wallet is not found', async () => {
+  it('should return an error if the wallet is not found', async () => {
     // @ts-expect-error - We are deleting a property from the mock window for this test case
     delete global.window.midnight.mnLace;
-    await expect(implementation.connect()).rejects.toThrow('Lace wallet not found.');
+    const result = await impl.connect();
+    expect(result.connected).toBe(false);
+    expect(result.error).toBe('Lace wallet not found.');
   });
 
-  it('should re-throw an error if the connection is rejected', async () => {
+  it('should return an error if the connection is rejected', async () => {
     const rejectionError = new Error('User rejected.');
     vi.spyOn(mockLace, 'enable').mockRejectedValueOnce(rejectionError);
-    await expect(implementation.connect()).rejects.toThrow(rejectionError);
+    const result = await impl.connect();
+    expect(result.connected).toBe(false);
+    expect(result.error).toBe('User rejected.');
   });
 });

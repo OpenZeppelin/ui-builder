@@ -1,8 +1,3 @@
-import {
-  testMidnightRpcConnection,
-  validateMidnightRpcEndpoint,
-} from 'packages/adapter-midnight/src/configuration';
-
 import type {
   AvailableUiKit,
   Connector,
@@ -33,6 +28,7 @@ import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
 import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
+import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { parseMidnightContractInterface, validateAndConvertMidnightArtifacts } from './utils';
 
 /**

@@ -40,7 +40,8 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'No tests for adapter-midnight package'"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
@@ -51,6 +52,8 @@
     "lucide-react": "^0.510.0"
   },
   "devDependencies": {
+    "vitest": "^3.2.4",
+    "jsdom": "^26.1.0",
     "@types/react": "^19.1.9",
     "eslint": "^9.32.0",
     "typescript": "^5.9.2"
