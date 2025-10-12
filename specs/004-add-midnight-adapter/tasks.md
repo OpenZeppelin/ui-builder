@@ -11,7 +11,7 @@
 
 - [ ] T000 Define and create stacked branches [seq]
   - Branch order and base:
-    1. midnight/01-wallet → base: 004-add-midnight-adapter
+    1. midnight/01-wallet → base: main
     2. midnight/02-ingestion → base: midnight/01-wallet
     3. midnight/03-auto-views → base: midnight/02-ingestion
     4. midnight/04-write-export → base: midnight/03-auto-views
@@ -25,7 +25,6 @@
 
 - [ ] T001 [US0] Configure feature branch context for developers [P]
   - Path: N/A
-  - Notes: Ensure branch `004-add-midnight-adapter` is active for all work
 - [ ] T002 [US0] Document dependency sync policy in README notes [P]
   - Path: specs/004-add-midnight-adapter/plan.md
   - Notes: Align adapter config vs export manifest per FR-017
@@ -46,14 +45,14 @@
 Goal: Connect Midnight wallet and reflect account status (wallet-only v1).
 Independent Test: Select Midnight network, click Connect, see connected address.
 
-- [ ] T006 [US1] Add missing unit tests for wallet adapter surface [P]
+- [x] T006 [US1] Add missing unit tests for wallet adapter surface [P]
   - Path: packages/adapter-midnight/src/wallet/_/**tests**/_.test.ts
-- [ ] T007 [US1] Verify provider root + hooks + components wiring [seq]
+- [x] T007 [US1] Verify provider root + hooks + components wiring [seq]
   - Path: packages/adapter-midnight/src/wallet/\*_/_
-- [ ] T008 [US1] Ensure supportsWalletConnection/getAvailableConnectors parity [seq]
+- [x] T008 [US1] Ensure supportsWalletConnection/getAvailableConnectors parity [seq]
   - Path: packages/adapter-midnight/src/adapter.ts
 
-- [ ] Checkpoint: User Story 1 is fully functional and independently testable
+- [x] Checkpoint: User Story 1 is fully functional and independently testable
 
 ## Phase 4: [US2] Contract ingestion (P2)
 

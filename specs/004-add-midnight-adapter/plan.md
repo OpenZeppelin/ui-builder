@@ -1,6 +1,6 @@
 # Implementation Plan: Add Midnight Adapter
 
-**Branch**: `004-add-midnight-adapter` | **Date**: 2025-10-11 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/004-add-midnight-adapter/spec.md
+**Branches (stacked)**: `midnight/01-wallet`, `midnight/02-ingestion`, `midnight/03-auto-views`, `midnight/04-write-export`, `midnight/05-status`, `midnight/06-rpc`, `midnight/90-polish` | **Date**: 2025-10-11 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/004-add-midnight-adapter/spec.md
 **Input**: Feature specification from `/specs/004-add-midnight-adapter/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.cursor/commands/speckit.plan.md` for the execution workflow.
