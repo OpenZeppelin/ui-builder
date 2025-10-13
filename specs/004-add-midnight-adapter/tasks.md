@@ -23,19 +23,19 @@
 
 ## Phase 1: Setup (Shared)
 
-- [ ] T001 [US0] Configure feature branch context for developers [P]
+- [x] T001 [US0] Configure feature branch context for developers [P]
   - Path: N/A
-- [ ] T002 [US0] Document dependency sync policy in README notes [P]
+- [x] T002 [US0] Document dependency sync policy in README notes [P]
   - Path: specs/004-add-midnight-adapter/plan.md
   - Notes: Align adapter config vs export manifest per FR-017
 
 ## Phase 2: Foundational (Blocking)
 
-- [ ] T003 [US0] Ensure ecosystem registration for Midnight exists and loads adapter [seq]
+- [x] T003 [US0] Ensure ecosystem registration for Midnight exists and loads adapter [seq]
   - Path: packages/builder/src/core/ecosystemManager.ts
 - [ ] T004 [US0] Persist contract definition inputs scaffolding [seq]
   - Path: packages/builder (storage service) + adapter-midnight integration
-- [ ] T005 [US0] Export manifest wiring for Midnight [seq]
+- [x] T005 [US0] Export manifest wiring for Midnight [seq]
   - Path: specs/004-add-midnight-adapter/contracts/export-manifest.md
 
 - [ ] Checkpoint: Foundation ready – user story implementation can begin
