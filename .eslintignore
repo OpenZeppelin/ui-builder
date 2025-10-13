@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+out/
+coverage/
+*.min.js
+.next/
+.nuxt/
+.output/
+.cache/
+.turbo/
+.vercel/
+.netlify/
+exports/
+packages/builder/test-results/
+
