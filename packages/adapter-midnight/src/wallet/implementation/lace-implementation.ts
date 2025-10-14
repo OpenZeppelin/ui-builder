@@ -2,6 +2,10 @@ import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api'
 
 import type { MidnightWalletConnectionStatus } from '../types';
 
+const INITIAL_POLL_DELAY_MS = 2000;
+const CONNECTED_POLL_DELAY_MS = 5000;
+const MAX_POLL_DELAY_MS = 15000;
+
 /**
  * LaceWalletImplementation
  *
@@ -44,7 +48,7 @@ export class LaceWalletImplementation {
     (status: MidnightWalletConnectionStatus, prevStatus: MidnightWalletConnectionStatus) => void
   >();
   private accountPollTimeout: NodeJS.Timeout | null = null;
-  private nextPollDelayMs = 2000;
+  private nextPollDelayMs = INITIAL_POLL_DELAY_MS;
   private lastKnownAddress: string | null = null;
 
   public async isEnabled(): Promise<boolean> {
@@ -92,7 +96,7 @@ export class LaceWalletImplementation {
       isConnected: this.lastKnownAddress !== null,
       address: this.lastKnownAddress ?? undefined,
       status: this.lastKnownAddress ? 'connected' : 'disconnected',
-    } as MidnightWalletConnectionStatus;
+    };
   }
 
   public onWalletConnectionChange(
@@ -123,7 +127,7 @@ export class LaceWalletImplementation {
   private startAccountPolling(): void {
     if (this.accountPollTimeout || !this.enabledApi) return;
     if (this.accountChangeListeners.size === 0) return;
-    this.nextPollDelayMs = 2000;
+    this.nextPollDelayMs = INITIAL_POLL_DELAY_MS;
     this.schedulePollOnce();
   }
 
@@ -138,7 +142,7 @@ export class LaceWalletImplementation {
         // - Reduces intrusive popups when user is on a different tab
         // - Exponential backoff ensures we don't hammer the wallet while tab is inactive
         if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-          this.nextPollDelayMs = Math.min(this.nextPollDelayMs * 2, 15000);
+          this.nextPollDelayMs = Math.min(this.nextPollDelayMs * 2, MAX_POLL_DELAY_MS);
           this.schedulePollOnce();
           return;
         }
@@ -167,12 +171,14 @@ export class LaceWalletImplementation {
         // - Connected: 5s (to detect account switches promptly)
         // - Disconnected/error: exponential backoff up to 15s (to avoid aggressive prompting)
         const connected = this.lastKnownAddress !== null;
-        this.nextPollDelayMs = connected ? 5000 : Math.min(this.nextPollDelayMs * 2, 15000);
+        this.nextPollDelayMs = connected
+          ? CONNECTED_POLL_DELAY_MS
+          : Math.min(this.nextPollDelayMs * 2, MAX_POLL_DELAY_MS);
       } catch {
         // DESIGN DECISION: Back off on error
         // - Errors typically occur before user approves or if wallet is locked
         // - Exponential backoff reduces prompt frequency during these states
-        this.nextPollDelayMs = Math.min(this.nextPollDelayMs * 2, 15000);
+        this.nextPollDelayMs = Math.min(this.nextPollDelayMs * 2, MAX_POLL_DELAY_MS);
       } finally {
         this.schedulePollOnce();
       }
@@ -184,7 +190,7 @@ export class LaceWalletImplementation {
       clearTimeout(this.accountPollTimeout);
       this.accountPollTimeout = null;
     }
-    this.nextPollDelayMs = 2000;
+    this.nextPollDelayMs = INITIAL_POLL_DELAY_MS;
   }
 
   private emit(
