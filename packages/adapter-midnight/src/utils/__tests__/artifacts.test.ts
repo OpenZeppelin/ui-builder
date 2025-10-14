@@ -9,7 +9,7 @@ describe('validateAndConvertMidnightArtifacts', () => {
   const validArtifacts = {
     contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
     privateStateId: 'my-unique-state-id',
-    contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+    contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
   };
 
   it('should return valid artifacts object as-is', () => {
@@ -41,33 +41,33 @@ describe('validateAndConvertMidnightArtifacts', () => {
   it('should throw error for artifacts missing contractAddress', () => {
     const invalidArtifacts = {
       privateStateId: 'my-unique-state-id',
-      contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+      contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 
   it('should throw error for artifacts missing privateStateId', () => {
     const invalidArtifacts = {
       contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
-      contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+      contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 
-  it('should throw error for artifacts missing contractSchema', () => {
+  it('should throw error for artifacts missing contractDefinition', () => {
     const invalidArtifacts = {
       contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
       privateStateId: 'my-unique-state-id',
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 
@@ -75,11 +75,11 @@ describe('validateAndConvertMidnightArtifacts', () => {
     const invalidArtifacts = {
       contractAddress: 123,
       privateStateId: 'my-unique-state-id',
-      contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+      contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 
@@ -87,23 +87,23 @@ describe('validateAndConvertMidnightArtifacts', () => {
     const invalidArtifacts = {
       contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
       privateStateId: 123,
-      contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+      contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 
-  it('should throw error for artifacts with non-string contractSchema', () => {
+  it('should throw error for artifacts with non-string contractDefinition', () => {
     const invalidArtifacts = {
       contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
       privateStateId: 'my-unique-state-id',
-      contractSchema: 123,
+      contractDefinition: 123,
     };
 
     expect(() => validateAndConvertMidnightArtifacts(invalidArtifacts)).toThrow(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   });
 

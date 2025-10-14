@@ -27,6 +27,12 @@ export interface ContractUIRecord extends BaseRecord {
   contractDefinitionOriginal?: string; // Original raw contract definition for data lineage (manual: same as contractDefinition, fetched: raw from explorer)
   contractDefinitionSource?: 'fetched' | 'manual';
   contractDefinitionMetadata?: ContractDefinitionMetadata; // Metadata about fetch process (excludes definition content)
+  /**
+   * Chain-agnostic contract definition artifacts required for adapters that need
+   * additional inputs beyond a single definition. Example: Midnight requires
+   * private state ID, compiled module, and optional witness code.
+   */
+  contractDefinitionArtifacts?: Record<string, unknown>;
 }
 
 export interface ContractUIExportData {

@@ -71,6 +71,8 @@ export function StepContractDefinition({
     contractAddressValue,
     currentContractAddress: contractState.address,
     networkId: networkConfig?.id,
+    adapter,
+    debouncedValues,
   });
 
   // Automatic contract loading

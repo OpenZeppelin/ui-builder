@@ -87,6 +87,8 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
       // Do not attempt loads for invalid/partial addresses while the user is typing
       if (!adapter.isValidAddress(address)) return;
 
+      // Upstream gating prevents early loads; loader preflight enforces safety.
+
       // Create unique key for this specific load attempt
       // This allows tracking failures per contract/definition combination
       const definitionHash =
@@ -164,7 +166,6 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
     },
     [adapter]
   );
-
   /**
    * Check if we should attempt to load based on form values
    * Prevents duplicate loads for the same form state

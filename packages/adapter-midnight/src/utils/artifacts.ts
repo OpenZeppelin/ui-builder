@@ -23,7 +23,7 @@ export function validateAndConvertMidnightArtifacts(
   // Validate that the object has the required structure
   if (!isMidnightContractArtifacts(source)) {
     throw new Error(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractSchema properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
     );
   }
 

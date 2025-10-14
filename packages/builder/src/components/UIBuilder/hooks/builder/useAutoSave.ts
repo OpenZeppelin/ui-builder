@@ -73,7 +73,8 @@ async function prepareRecordWithDefinition(
     currentState.contractState.metadata || undefined,
     shouldPreserveStoredDefinition
       ? storedOriginal
-      : currentState.contractState.definitionOriginal || undefined
+      : currentState.contractState.definitionOriginal || undefined,
+    currentState.contractState.contractDefinitionArtifacts || undefined
   );
 }
 
@@ -153,7 +154,8 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
               currentState.contractState.definitionJson,
               currentState.contractState.source ?? undefined,
               currentState.contractState.metadata || undefined,
-              currentState.contractState.definitionOriginal || undefined
+              currentState.contractState.definitionOriginal || undefined,
+              currentState.contractState.contractDefinitionArtifacts || undefined
             )
           : ({
               ...configToSave,
@@ -165,6 +167,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
               contractDefinitionMetadata: undefined,
               contractDefinitionOriginal: '',
               contractDefinitionSource: undefined,
+              contractDefinitionArtifacts: undefined,
             } as const);
 
         // Create new record
@@ -220,6 +223,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
             contractDefinitionMetadata: undefined,
             contractDefinitionOriginal: '',
             contractDefinitionSource: undefined,
+            contractDefinitionArtifacts: undefined,
           } as const);
 
       // Save configuration
@@ -261,6 +265,7 @@ export function useAutoSave(isLoadingSavedConfigRef: React.RefObject<boolean>): 
     contractDefinitionJson: state.contractState.definitionJson,
     contractDefinitionSource: state.contractState.source,
     contractDefinitionMetadata: state.contractState.metadata,
+    contractDefinitionArtifacts: state.contractState.contractDefinitionArtifacts,
   });
 
   /**

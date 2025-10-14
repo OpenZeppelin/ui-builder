@@ -29,7 +29,8 @@ import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
-import { parseMidnightContractInterface, validateAndConvertMidnightArtifacts } from './utils';
+import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
+import { validateAndConvertMidnightArtifacts } from './utils';
 
 /**
  * Midnight-specific adapter.
@@ -123,8 +124,8 @@ export class MidnightAdapter implements ContractAdapter {
           'A unique identifier for your private state instance. This ID is used to manage your personal encrypted data.',
       },
       {
-        id: 'contractSchema',
-        name: 'contractSchema',
+        id: 'contractDefinition',
+        name: 'contractDefinition',
         label: 'Contract Interface (.d.ts)',
         type: 'code-editor',
         validation: { required: true },
@@ -163,23 +164,44 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
-    // Convert and validate the input
     const artifacts = validateAndConvertMidnightArtifacts(source);
 
     this.artifacts = artifacts;
     logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
 
-    const { functions, events } = parseMidnightContractInterface(artifacts.contractSchema);
+    const result = await loadMidnightContract(artifacts, this.networkConfig);
+    return result.schema;
+  }
 
-    const schema: ContractSchema = {
-      name: 'MyMidnightContract', // TODO: Extract from artifacts if possible
-      ecosystem: 'midnight',
-      address: artifacts.contractAddress,
-      functions,
-      events,
+  public async loadContractWithMetadata(source: string | Record<string, unknown>): Promise<{
+    schema: ContractSchema;
+    source: 'fetched' | 'manual';
+    contractDefinitionOriginal?: string;
+    metadata?: {
+      fetchedFrom?: string;
+      contractName?: string;
+      verificationStatus?: 'verified' | 'unverified' | 'unknown';
+      fetchTimestamp?: Date;
+      definitionHash?: string;
     };
+    proxyInfo?: undefined;
+    contractDefinitionArtifacts?: Record<string, unknown>;
+  }> {
+    const artifacts = validateAndConvertMidnightArtifacts(source);
 
-    return schema;
+    this.artifacts = artifacts;
+    logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
+
+    const result = await loadMidnightContractWithMetadata(artifacts, this.networkConfig);
+
+    return {
+      schema: result.schema,
+      source: result.source,
+      contractDefinitionOriginal: result.contractDefinitionOriginal,
+      metadata: result.metadata,
+      contractDefinitionArtifacts: result.contractDefinitionArtifacts,
+      proxyInfo: result.proxyInfo,
+    };
   }
 
   public getWritableFunctions(contractSchema: ContractSchema): ContractFunction[] {

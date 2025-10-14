@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
@@ -50,9 +52,16 @@ export function useUIBuilderState() {
     adapter: activeAdapter,
   });
 
+  // Helper: check if adapter-declared required fields are missing in provided values
+  const hasMissingRequiredFields = useCallback(
+    (adapter: ContractAdapter | null | undefined, values: FormValues): boolean =>
+      hasMissingRequiredContractInputs(adapter, values),
+    []
+  );
+
   // Contract definition loading hook with automatic deduplication
   const contractDefinition = useContractDefinition({
-    onLoaded: (schema, formValues, source, metadata, originalDefinition) => {
+    onLoaded: (schema, formValues, source, metadata, originalDefinition, artifacts) => {
       // Update store with fresh contract definition
       uiBuilderStore.setContractDefinitionResult({
         schema,
@@ -60,6 +69,7 @@ export function useUIBuilderState() {
         source,
         metadata: metadata ?? {},
         original: originalDefinition ?? '',
+        contractDefinitionArtifacts: artifacts ?? null,
       });
     },
     onError: (err) => {
@@ -96,6 +106,15 @@ export function useUIBuilderState() {
       (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
         !state.selectedNetworkConfigId)
     ) {
+      // Prevent triggering loads for adapters (e.g., Midnight) that require multiple artifacts
+      const candidateValues = {
+        ...(state.contractState.formValues || ({} as FormValues)),
+        contractAddress: state.contractState.address,
+      } as FormValues;
+      if (hasMissingRequiredFields(activeAdapter, candidateValues)) {
+        return;
+      }
+
       // Build form values using the latest address from store to avoid stale resets
       const baseFormValues = state.contractState.formValues || { contractAddress: '' };
       const mergedFormValues = {
@@ -111,6 +130,7 @@ export function useUIBuilderState() {
     state.isLoadingConfiguration,
     activeAdapter?.networkConfig.id,
     contractDefinition.load,
+    hasMissingRequiredFields,
   ]);
 
   const contractWidget = useContractWidgetState();

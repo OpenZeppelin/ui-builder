@@ -24,6 +24,7 @@ export interface ContractState {
   metadata: ContractDefinitionMetadata | null;
   proxyInfo: ProxyInfo | null;
   error: string | null;
+  contractDefinitionArtifacts: Record<string, unknown> | null;
 }
 
 export interface UIBuilderState {
@@ -85,6 +86,7 @@ export interface UIBuilderActions {
       contractDefinitionOriginal?: string;
       contractDefinitionSource?: 'fetched' | 'manual';
       contractDefinitionMetadata?: ContractDefinitionMetadata;
+      contractDefinitionArtifacts?: Record<string, unknown>;
     }
   ) => void;
   setManualContractDefinition: (definition: string) => void;
@@ -96,6 +98,7 @@ export interface UIBuilderActions {
     metadata: ContractDefinitionMetadata;
     original: string;
     proxyInfo?: ProxyInfo | null;
+    contractDefinitionArtifacts?: Record<string, unknown> | null;
   }) => void;
   setContractDefinitionError: (error: string) => void;
   acceptCurrentContractDefinition: () => void;
@@ -111,6 +114,7 @@ const initialContractState: ContractState = {
   metadata: null,
   proxyInfo: null,
   error: null,
+  contractDefinitionArtifacts: null,
 };
 
 const initialState: UIBuilderState = {
@@ -205,6 +209,7 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         contractDefinitionOriginal?: string;
         contractDefinitionSource?: 'fetched' | 'manual';
         contractDefinitionMetadata?: ContractDefinitionMetadata;
+        contractDefinitionArtifacts?: Record<string, unknown>;
       }
     ) => {
       const determineStepFromSavedConfig = (config: typeof savedConfig): number => {
@@ -253,6 +258,11 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
               } catch {
                 formValues.contractDefinition = savedConfig.contractDefinition;
               }
+            }
+            // Rehydrate contract definition artifacts into form values generically
+            const artifacts = savedConfig.contractDefinitionArtifacts;
+            if (artifacts && typeof artifacts === 'object') {
+              Object.assign(formValues, artifacts);
             }
             return formValues;
           })(),
@@ -340,6 +350,7 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
               ? currentState.contractState.definitionOriginal // Keep stored baseline for comparison
               : result.original, // Normal case: use fresh as baseline
           definitionJson: result.original,
+          contractDefinitionArtifacts: result.contractDefinitionArtifacts || null,
         },
         needsContractDefinitionLoad: false,
       });

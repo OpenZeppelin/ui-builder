@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
@@ -8,6 +10,8 @@ interface UseFormSyncProps {
   contractAddressValue: string | undefined;
   currentContractAddress: string | null;
   networkId?: string | null;
+  adapter?: ContractAdapter | null;
+  debouncedValues?: FormValues;
 }
 
 /**
@@ -18,6 +22,8 @@ export function useFormSync({
   contractAddressValue,
   currentContractAddress,
   networkId,
+  adapter,
+  debouncedValues,
 }: UseFormSyncProps) {
   // Sync manual definition changes to the store
   useEffect(() => {
@@ -85,4 +91,37 @@ export function useFormSync({
       uiBuilderStore.resetDownstreamSteps('contract');
     }
   }, [contractAddressValue, currentContractAddress]);
+
+  // Sync adapter-declared artifact inputs generically into contractDefinitionArtifacts
+  useEffect(() => {
+    if (!adapter || !debouncedValues) return;
+    if (typeof adapter.getContractDefinitionInputs !== 'function') return;
+
+    try {
+      const inputs = adapter.getContractDefinitionInputs() || [];
+      // Collect values for inputs other than the canonical ones stored elsewhere
+      const artifacts: Record<string, unknown> = {};
+      for (const field of inputs as Array<{ name?: string; id?: string }>) {
+        const key = field.name || field.id || '';
+        if (!key || key === 'contractAddress' || key === 'contractDefinition') continue;
+        const value = (debouncedValues as Record<string, unknown>)[key];
+        if (value !== undefined) artifacts[key] = value as unknown;
+      }
+
+      // Update only if changed
+      const state = uiBuilderStore.getState();
+      const prev = state.contractState.contractDefinitionArtifacts || {};
+      const changed = JSON.stringify(prev) !== JSON.stringify(artifacts);
+      if (changed) {
+        uiBuilderStore.updateState((s) => ({
+          contractState: {
+            ...s.contractState,
+            contractDefinitionArtifacts: artifacts,
+          },
+        }));
+      }
+    } catch {
+      // no-op on adapter errors
+    }
+  }, [adapter, debouncedValues]);
 }

@@ -34,9 +34,11 @@ export function useAutoContractLoad({
 }: UseAutoContractLoadProps) {
   useEffect(() => {
     const attemptAutomaticLoad = async () => {
-      // Avoid duplicate loads: when the store indicates a load is needed,
-      // let the centralized store effect handle it instead of this hook.
-      if (needsContractDefinitionLoad) {
+      // Avoid duplicate loads during initial typing: if the store indicates a load is needed
+      // and the form isn't valid yet, let the centralized store effect handle it later.
+      // Once the form is valid (all required fields present), this hook should proceed
+      // to trigger the load with full, current form values.
+      if (needsContractDefinitionLoad && !formIsValid) {
         return;
       }
 

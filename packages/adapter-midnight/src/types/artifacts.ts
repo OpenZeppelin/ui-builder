@@ -10,7 +10,7 @@ export interface MidnightContractArtifacts {
   privateStateId: string;
 
   /** TypeScript interface definition from contract.d.ts (required) */
-  contractSchema: string;
+  contractDefinition: string;
 
   /** Optional compiled contract code from contract.cjs */
   contractModule?: string;
@@ -29,6 +29,6 @@ export function isMidnightContractArtifacts(obj: unknown): obj is MidnightContra
     obj !== null &&
     typeof record.contractAddress === 'string' &&
     typeof record.privateStateId === 'string' &&
-    typeof record.contractSchema === 'string'
+    typeof record.contractDefinition === 'string'
   );
 }
