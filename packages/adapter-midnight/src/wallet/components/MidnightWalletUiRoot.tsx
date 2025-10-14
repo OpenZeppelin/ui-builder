@@ -8,6 +8,8 @@ import { MidnightWalletContext } from '../context/MidnightWalletContext';
 import type { ExtendedDAppConnectorWalletAPI } from '../types';
 import { getMidnightWalletImplementation } from '../utils';
 
+const WALLET_CONNECTION_TIMEOUT_MS = 60000;
+
 interface MidnightWalletUiRootProps extends EcosystemReactUiProviderProps {
   children: ReactNode;
 }
@@ -109,7 +111,7 @@ export function MidnightWalletUiRoot({ children }: MidnightWalletUiRootProps) {
               activeUnsubscribeRef.current = null;
             }
             awaitingAuthRef.current = false;
-          }, 60000);
+          }, WALLET_CONNECTION_TIMEOUT_MS);
         }
       } catch (err) {
         logger.warn('MidnightWalletUiRoot', 'Auto-reconnect failed:', err);
@@ -157,7 +159,7 @@ export function MidnightWalletUiRoot({ children }: MidnightWalletUiRootProps) {
           activeUnsubscribeRef.current = null;
         }
         awaitingAuthRef.current = false;
-      }, 60000);
+      }, WALLET_CONNECTION_TIMEOUT_MS);
 
       // DESIGN DECISION: No immediate state read
       // - Calling api.state() here could re-prompt if wallet is locked

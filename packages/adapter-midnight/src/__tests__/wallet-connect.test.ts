@@ -50,11 +50,7 @@ describe('MidnightAdapter Wallet Connection', () => {
   it('disconnects wallet via connection facade', async () => {
     const res = await adapter.disconnectWallet();
     expect(res.disconnected).toBe(true);
-    // Narrow the type to access the mocked function without using 'any'
-    const mocked = connection as unknown as {
-      disconnectMidnightWallet: (...args: unknown[]) => unknown;
-    };
-    expect(mocked.disconnectMidnightWallet).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(connection.disconnectMidnightWallet)).toHaveBeenCalledTimes(1);
   });
 
   it('maps wallet connection status and injects chainId', () => {
