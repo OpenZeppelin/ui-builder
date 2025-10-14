@@ -16,14 +16,11 @@ This adapter has a fully implemented wallet connection feature, allowing users t
 
 ## Usage
 
-The `MidnightAdapter` is consumed by the `builder` application's `WalletStateProvider`. It exposes a React context provider (`MidnightWalletProvider`) and a set of facade hooks that are automatically used by the main application UI.
+The `MidnightAdapter` is consumed by the `builder` application's `WalletStateProvider`. It exposes a React context provider component (`MidnightWalletUiRoot`) and a set of facade hooks that are automatically used by the main application UI.
 
 ```typescript
 // In the builder application's adapter factory:
-import {
-  MidnightAdapter,
-  midnightTestnet,
-} from '@openzeppelin/ui-builder-adapter-midnight';
+import { MidnightAdapter, midnightTestnet } from '@openzeppelin/ui-builder-adapter-midnight';
 
 const networkConfig = midnightTestnet;
 const midnightAdapter = new MidnightAdapter(networkConfig);
