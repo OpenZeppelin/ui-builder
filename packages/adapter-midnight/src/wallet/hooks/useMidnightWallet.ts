@@ -13,9 +13,9 @@ export const useMidnightWallet = (): MidnightWalletContextType => {
   if (context === undefined) {
     throw new Error(
       'useMidnightWallet must be used within a MidnightWalletUiRoot.\n' +
-      'MidnightWalletUiRoot is the context provider for the Midnight wallet. ' +
-      'Wrap your component tree with <MidnightWalletUiRoot> (import from "packages/adapter-midnight/src/wallet/components/MidnightWalletUiRoot") ' +
-      'to provide access to the wallet context.'
+        'MidnightWalletUiRoot is the context provider for the Midnight wallet. ' +
+        'Wrap your component tree with <MidnightWalletUiRoot> (import from "packages/adapter-midnight/src/wallet/components/MidnightWalletUiRoot") ' +
+        'to provide access to the wallet context.'
     );
   }
   return context;
