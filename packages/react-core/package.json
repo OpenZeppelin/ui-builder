@@ -27,6 +27,7 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsup --watch",
     "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm run build",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --passWithNoTests",
