@@ -170,7 +170,10 @@ async function getProvidersForQuery(
   }
   setNetworkId(resolvedEnum as never);
   // @ts-expect-error: global workaround for patched providers
-  globalThis.__MIDNIGHT_NETWORK_ID__ = resolvedEnum;
+  if (!globalThis.__OPENZEPPELIN_MIDNIGHT__) {
+    globalThis.__OPENZEPPELIN_MIDNIGHT__ = {};
+  }
+  globalThis.__OPENZEPPELIN_MIDNIGHT__.networkId = resolvedEnum;
   logger.debug('getProvidersForQuery', `Set network ID to: ${networkName} (${numericNetworkId})`);
 
   // Create public data provider
