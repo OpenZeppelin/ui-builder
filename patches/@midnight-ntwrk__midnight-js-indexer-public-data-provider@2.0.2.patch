@@ -125,11 +125,15 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f1b9a50ad4b4d0bd741571b6cc52d25
 +    if (currentNetworkId === 'Undeployed' && globalThis.__MIDNIGHT_NETWORK_ID__) {
 +        currentNetworkId = globalThis.__MIDNIGHT_NETWORK_ID__;
 +        networkIdHex = networkIdToHex(currentNetworkId);
-+        console.log(`[IndexerProvider] Using global network ID override: ${currentNetworkId}`);
++        if (globalThis.__MIDNIGHT_DEBUG__) {
++            console.log(`[IndexerProvider] Using global network ID override: ${currentNetworkId}`);
++        }
 +    }
 +    
 +    const result = `${networkIdHex}${contractAddress}`;
-+    console.log(`[IndexerProvider] prependNetworkIdHex: NetworkID=${currentNetworkId}, Hex=${networkIdHex}, Input=${contractAddress}, Result=${result}`);
++    if (globalThis.__MIDNIGHT_DEBUG__) {
++        console.log(`[IndexerProvider] prependNetworkIdHex: NetworkID=${currentNetworkId}, Hex=${networkIdHex}, Input=${contractAddress}, Result=${result}`);
++    }
 +    return result;
 +};
  const zenToRx = (zenObservable) => new Rx.Observable((subscriber) => zenObservable.subscribe(subscriber));
