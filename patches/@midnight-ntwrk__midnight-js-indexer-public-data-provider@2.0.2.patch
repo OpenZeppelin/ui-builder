@@ -1,0 +1,150 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f1b9a50ad4b4d0bd741571b6cc52d250c9dd082 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,15 +1,16 @@
+ import { InvalidProtocolSchemeError, FailEntirely, FailFallible, SucceedEntirely } from '@midnight-ntwrk/midnight-js-types';
+ import { Transaction, ZswapChainState } from '@midnight-ntwrk/ledger';
+ import { ContractState } from '@midnight-ntwrk/compact-runtime';
+-import { ApolloClient, InMemoryCache } from '@apollo/client/core/core.cjs';
+-import { from, split } from '@apollo/client/link/core/core.cjs';
+-import { createHttpLink } from '@apollo/client/link/http/http.cjs';
+-import { RetryLink } from '@apollo/client/link/retry/retry.cjs';
+-import { getMainDefinition } from '@apollo/client/utilities/utilities.cjs';
+-import { GraphQLWsLink } from '@apollo/client/link/subscriptions/subscriptions.cjs';
++import { ApolloClient, InMemoryCache } from '@apollo/client/core';
++import { from, split } from '@apollo/client/link/core';
++import { createHttpLink } from '@apollo/client/link/http';
++import { RetryLink } from '@apollo/client/link/retry';
++import { getMainDefinition } from '@apollo/client/utilities';
++import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+ import { Buffer } from 'buffer';
+ import * as Rx from 'rxjs';
+-import fetch from 'cross-fetch';
++import * as crossFetch from 'cross-fetch';
++const fetch = crossFetch.default || crossFetch.fetch || globalThis.fetch;
+ import { createClient } from 'graphql-ws';
+ import * as ws from 'isomorphic-ws';
+ import { assertIsContractAddress } from '@midnight-ntwrk/midnight-js-utils';
+@@ -210,9 +211,81 @@ const maybeThrowErrors = (queryResult) => {
+     return maybeThrowGraphQLErrors(queryResult);
+ };
+ const toByteArray = (s) => Buffer.from(s, 'hex');
+-const deserializeContractState = (s) => ContractState.deserialize(toByteArray(s), getRuntimeNetworkId());
+-const deserializeZswapState = (s) => ZswapChainState.deserialize(toByteArray(s), getLedgerNetworkId());
+-const deserializeTransaction = (s) => Transaction.deserialize(toByteArray(s), getLedgerNetworkId());
++
++// ============================================================================
++// BROWSER COMPATIBILITY WORKAROUND: Module Singleton Issue
++// ============================================================================
++// PROBLEM: When using pnpm patches to fix browser compatibility issues, different
++// parts of the application load SEPARATE instances of the same module. This breaks
++// the Midnight SDK's module-level state management (setNetworkId/getNetworkId).
++//
++// SYMPTOM: Even after calling setNetworkId(NetworkId.TestNet), getNetworkId()
++// returns 'Undeployed' because it reads from a different module instance.
++//
++// SOLUTION: Use a global variable (globalThis.__MIDNIGHT_NETWORK_ID__) as the
++// single source of truth for network ID, bypassing the module singleton issue.
++//
++// WHY WE CAN'T FIX IT PROPERLY: This is a fundamental limitation of how pnpm
++// patches work. The only proper fix is for the Midnight SDK to either:
++// 1. Provide official browser-compatible packages, or
++// 2. Stop using module-level state for configuration
++//
++// These helper functions safely convert network IDs by:
++// 1. Checking the global override first
++// 2. Converting to numeric enum values directly (avoiding cross-module enum issues)
++// ============================================================================
++
++// Helper to get the correct network ID, accounting for module singleton issues
++const getEffectiveNetworkId = () => {
++    let currentNetworkId = getNetworkId();
++    // If we're still on the default Undeployed network, check if there's a global override
++    if (currentNetworkId === 'Undeployed' && globalThis.__MIDNIGHT_NETWORK_ID__) {
++        currentNetworkId = globalThis.__MIDNIGHT_NETWORK_ID__;
++    }
++    return currentNetworkId;
++};
++
++// Helper to convert NetworkId to runtime.NetworkId, handling module singletons
++// Returns numeric enum values: Undeployed=0, DevNet=1, TestNet=2, MainNet=3
++const toRuntimeNetworkIdSafe = (id) => {
++    const idStr = typeof id === 'string' ? id : id?.name || String(id);
++    switch (idStr) {
++        case 'Undeployed':
++            return 0; // runtime.NetworkId.Undeployed
++        case 'DevNet':
++            return 1; // runtime.NetworkId.DevNet
++        case 'TestNet':
++            return 2; // runtime.NetworkId.TestNet
++        case 'MainNet':
++            return 3; // runtime.NetworkId.MainNet
++        default:
++            console.error(`Invalid network ID: '${idStr}', defaulting to TestNet`);
++            return 2; // Default to TestNet
++    }
++};
++
++// Helper to convert NetworkId to ledger.NetworkId, handling module singletons
++// Returns numeric enum values: Undeployed=0, DevNet=1, TestNet=2, MainNet=3
++const toLedgerNetworkIdSafe = (id) => {
++    const idStr = typeof id === 'string' ? id : id?.name || String(id);
++    switch (idStr) {
++        case 'Undeployed':
++            return 0; // ledger.NetworkId.Undeployed
++        case 'DevNet':
++            return 1; // ledger.NetworkId.DevNet
++        case 'TestNet':
++            return 2; // ledger.NetworkId.TestNet
++        case 'MainNet':
++            return 3; // ledger.NetworkId.MainNet
++        default:
++            console.error(`Invalid network ID: '${idStr}', defaulting to TestNet`);
++            return 2; // Default to TestNet
++    }
++};
++
++const deserializeContractState = (s) => ContractState.deserialize(toByteArray(s), toRuntimeNetworkIdSafe(getEffectiveNetworkId()));
++const deserializeZswapState = (s) => ZswapChainState.deserialize(toByteArray(s), toLedgerNetworkIdSafe(getEffectiveNetworkId()));
++const deserializeTransaction = (s) => Transaction.deserialize(toByteArray(s), toLedgerNetworkIdSafe(getEffectiveNetworkId()));
+ /**
+  * This is a dirty hack. Prepends a network ID to the given contract address and
+  * returns the result. As of ledger 3.0.0, the running node and indexer store
+@@ -222,7 +295,22 @@ const deserializeTransaction = (s) => Transaction.deserialize(toByteArray(s), ge
+  *
+  * @param contractAddress The contract address to which to prepend the network ID.
+  */
+-const prependNetworkIdHex = (contractAddress) => `${networkIdToHex(getNetworkId())}${contractAddress}`;
++const prependNetworkIdHex = (contractAddress) => {
++    // WORKAROUND for module singleton issue: Try to get network ID from global first
++    let currentNetworkId = getNetworkId();
++    let networkIdHex = networkIdToHex(currentNetworkId);
++    
++    // If we're still on the default Undeployed network, check if there's a global override
++    if (currentNetworkId === 'Undeployed' && globalThis.__MIDNIGHT_NETWORK_ID__) {
++        currentNetworkId = globalThis.__MIDNIGHT_NETWORK_ID__;
++        networkIdHex = networkIdToHex(currentNetworkId);
++        console.log(`[IndexerProvider] Using global network ID override: ${currentNetworkId}`);
++    }
++    
++    const result = `${networkIdHex}${contractAddress}`;
++    console.log(`[IndexerProvider] prependNetworkIdHex: NetworkID=${currentNetworkId}, Hex=${networkIdHex}, Input=${contractAddress}, Result=${result}`);
++    return result;
++};
+ const zenToRx = (zenObservable) => new Rx.Observable((subscriber) => zenObservable.subscribe(subscriber));
+ /**
+  * The default time (in milliseconds) to wait between queries when polling.
+diff --git a/package.json b/package.json
+index 087aa93045a8ae22753ea3eabca49226dbec08ba..e271c4baa83b13acf4926df685c336147ecf0be1 100644
+--- a/package.json
++++ b/package.json
+@@ -25,6 +25,8 @@
+   },
+   "dependencies": {
+     "@apollo/client": "^3.13.8",
++    "@midnight-ntwrk/compact-runtime": "0.9.0",
++    "@midnight-ntwrk/ledger": "4.0.0",
+     "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
+     "@midnight-ntwrk/midnight-js-types": "2.0.2",
+     "buffer": "^6.0.3",

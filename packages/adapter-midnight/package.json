@@ -44,19 +44,28 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.9.0",
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
+    "@midnight-ntwrk/ledger": "4.0.0",
+    "@midnight-ntwrk/midnight-js-contracts": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-types": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "^2.0.2",
+    "@midnight-ntwrk/wallet-sdk-address-format": "2.0.0",
     "@openzeppelin/ui-builder-react-core": "workspace:^",
     "@openzeppelin/ui-builder-types": "workspace:*",
     "@openzeppelin/ui-builder-ui": "workspace:*",
     "@openzeppelin/ui-builder-utils": "workspace:^",
-    "lucide-react": "^0.510.0"
+    "@scure/base": "^2.0.0",
+    "lucide-react": "^0.510.0",
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "vitest": "^3.2.4",
-    "jsdom": "^26.1.0",
     "@types/react": "^19.1.9",
     "eslint": "^9.32.0",
-    "typescript": "^5.9.2"
+    "jsdom": "^26.1.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "react": "^19.0.0"

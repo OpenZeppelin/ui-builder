@@ -1,0 +1,58 @@
+diff --git a/dist/runtime.mjs b/dist/runtime.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..d301a7ca53721952b39a69540498ee90ceb41ac4
+--- /dev/null
++++ b/dist/runtime.mjs
+@@ -0,0 +1,31 @@
++// ESM wrapper for compact-runtime
++// This file wraps the CommonJS module to provide proper ESM exports for browser compatibility
++
++// Re-export everything from the CommonJS module
++import * as runtime from './runtime.js';
++export * from './runtime.js';
++
++// Explicitly export the key types that cause ESM import issues
++export const {
++  ContractState,
++  QueryContext,
++  QueryResults,
++  StateBoundedMerkleTree,
++  StateMap,
++  CostModel,
++  runProgram,
++  ContractOperation,
++  ContractMaintenanceAuthority,
++  // Export all other runtime functions
++  type_error,
++  convertFieldToBytes,
++  convertBytesToField,
++  convertBytesToUint,
++  addField,
++  subField,
++  mulField,
++} = runtime;
++
++// Export the whole module as default
++export default runtime;
++
+diff --git a/package.json b/package.json
+index 998f65a1517d9a625c35c45ab5e0f817c712b446..d0b6db70a33e673cc81857b21b48867521084554 100644
+--- a/package.json
++++ b/package.json
+@@ -17,8 +17,16 @@
+   "files": [
+     "dist"
+   ],
++  "exports": {
++    ".": {
++      "import": "./dist/runtime.mjs",
++      "require": "./dist/runtime.js",
++      "types": "./dist/runtime.d.ts"
++    }
++  },
+   "license": "Apache-2.0",
+   "main": "dist/runtime.js",
++  "module": "dist/runtime.mjs",
+   "name": "@midnight-ntwrk/compact-runtime",
+   "nixDependencies": [
+     "@midnight-ntwrk/onchain-runtime"

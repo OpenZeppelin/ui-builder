@@ -1,7 +1,10 @@
 import path from 'path';
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import wasm from 'vite-plugin-wasm';
 
 import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-provider';
 import { virtualContentLoaderPlugin } from './vite-plugins/virtual-content-loader';
@@ -22,6 +25,9 @@ import templatePlugin from './vite.template-plugin';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
+    // WASM support for Midnight packages
+    wasm(),
+    topLevelAwait(),
     react(),
     tailwindcss(),
     // Restore custom plugins
@@ -34,11 +40,10 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
       '@styles': path.resolve(__dirname, '../styles'),
       '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
-      '@openzeppelin/ui-builder-react-core': path.resolve(
-        __dirname,
-        '../react-core/src/index.ts'
-      ),
+      '@openzeppelin/ui-builder-react-core': path.resolve(__dirname, '../react-core/src/index.ts'),
       '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+      // Force buffer to use the browser-friendly version
+      buffer: 'buffer/',
     },
   },
   define: {
@@ -49,10 +54,50 @@ export default defineConfig(({ mode }) => ({
     // Mapping `global` to `globalThis` provides a safe browser shim.
     global: 'globalThis',
   },
+  optimizeDeps: {
+    // Add Node.js polyfills for browser compatibility
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+          process: true,
+        }),
+      ],
+    },
+    // Force pre-bundling of compact-runtime and its deps to convert CJS to ESM
+    include: ['@midnight-ntwrk/compact-runtime', 'object-inspect', 'cross-fetch'],
+    // Exclude Midnight packages with WASM/top-level await from pre-bundling
+    // These must be handled by the WASM plugins at runtime
+    exclude: [
+      '@midnight-ntwrk/onchain-runtime',
+      '@midnight-ntwrk/ledger',
+      '@midnight-ntwrk/zswap',
+      '@midnight-ntwrk/midnight-js-contracts',
+      '@midnight-ntwrk/midnight-js-indexer-public-data-provider',
+      '@midnight-ntwrk/midnight-js-types',
+      '@midnight-ntwrk/midnight-js-utils',
+      '@midnight-ntwrk/midnight-js-network-id',
+      '@midnight-ntwrk/wallet-sdk-address-format',
+      // Also exclude Apollo Client to avoid CommonJS/ESM conflicts
+      '@apollo/client',
+    ],
+  },
   build: {
     outDir: 'dist',
     // Optimize build for memory usage
     rollupOptions: {
+      // External Midnight WASM packages to prevent bundling Node.js-specific code
+      external: (id) => {
+        const midnightWasmPackages = [
+          '@midnight-ntwrk/zswap',
+          '@midnight-ntwrk/onchain-runtime',
+          '@midnight-ntwrk/ledger',
+        ];
+        return midnightWasmPackages.some((pkg) => id.includes(pkg));
+      },
       output: {
         // Split chunks to reduce memory usage during build
         manualChunks: {

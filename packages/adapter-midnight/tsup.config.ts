@@ -12,4 +12,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  // External WASM packages to prevent bundling Node.js-specific code
+  external: ['@midnight-ntwrk/zswap', '@midnight-ntwrk/onchain-runtime', '@midnight-ntwrk/ledger'],
 });
