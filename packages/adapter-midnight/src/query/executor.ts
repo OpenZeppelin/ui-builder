@@ -48,6 +48,8 @@ export class QueryExecutor {
   private readonly contractModule?: string;
   private readonly numericNetworkId?: number;
   private ledgerFunction?: (state: unknown) => unknown;
+  // Maximum allowed size (approximate, in characters) for compiled contract module code
+  private static readonly MAX_MODULE_CODE_SIZE = 2_000_000;
 
   /**
    * Create a new QueryExecutor instance
@@ -425,6 +427,9 @@ export class QueryExecutor {
    */
   private async loadLedgerFunction(moduleCode: string): Promise<(state: unknown) => unknown> {
     try {
+      // Validate the module code before evaluation to reduce risk of executing untrusted input.
+      this.validateContractModuleCode(moduleCode);
+
       // Import the compact-runtime dependency that the contract module needs
       const compactRuntime = await import('@midnight-ntwrk/compact-runtime');
 
@@ -471,6 +476,60 @@ export class QueryExecutor {
       logger.error('QueryExecutor', 'Failed to load ledger function:', error);
       throw new Error(
         `Failed to load ledger() function from contract module: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Performs basic validation of the compiled contract module code before evaluation.
+   *
+   * Security rationale:
+   * - The module code should come from a trusted source (e.g., user-provided artifacts).
+   * - We block usage of obvious dangerous globals/APIs (eval, Function constructor, DOM, fetch, etc.).
+   * - This is defense-in-depth and does not replace sandboxing or CSP.
+   *
+   * Consider enforcing a strict Content Security Policy (CSP) and/or evaluating in a sandboxed iframe
+   * if additional isolation is required for your deployment environment.
+   */
+  private validateContractModuleCode(moduleCode: string): void {
+    // Size guard (approximate; JS strings are UTF-16)
+    if (moduleCode.length > QueryExecutor.MAX_MODULE_CODE_SIZE) {
+      throw new ContractQueryError(
+        'Contract module code is too large to be evaluated safely',
+        this.contractAddressBech32
+      );
+    }
+
+    // Expected markers for Midnight compiled modules
+    if (!moduleCode.includes('@midnight-ntwrk/compact-runtime') || !moduleCode.includes('ledger')) {
+      logger.warn(
+        'QueryExecutor',
+        'Contract module code is missing expected markers; continuing with caution'
+      );
+    }
+
+    // Block obvious dangerous globals/APIs from being referenced
+    const blockedPatterns: RegExp[] = [
+      /\beval\s*\(/,
+      /\bFunction\s*\(/,
+      /\bwindow\./,
+      /\bdocument\./,
+      /\bXMLHttpRequest\b/,
+      /\bfetch\s*\(/,
+      /\blocalStorage\b/,
+      /\bsessionStorage\b/,
+      /\bnavigator\./,
+      /\bglobalThis\./,
+      /\bWebSocket\b/,
+    ];
+
+    const hits = blockedPatterns.filter((re) => re.test(moduleCode));
+    if (hits.length > 0) {
+      throw new ContractQueryError(
+        `Contract module uses disallowed globals/APIs (${hits
+          .map((r) => r.source)
+          .join(', ')}); aborting evaluation`,
+        this.contractAddressBech32
       );
     }
   }
