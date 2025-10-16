@@ -234,6 +234,9 @@ importers:
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider':
         specifier: ^2.0.2
         version: 2.0.2(patch_hash=rqhp3p6h7jahhydmzdnbyalnga)(@types/react@19.2.2)(bufferutil@4.0.9)(crossws@0.3.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(utf-8-validate@5.0.10)
+      '@midnight-ntwrk/midnight-js-network-id':
+        specifier: ^2.0.2
+        version: 2.0.2(patch_hash=kjmmxoytv6oioxv6n5ojvbwujy)
       '@midnight-ntwrk/midnight-js-types':
         specifier: ^2.0.2
         version: 2.0.2(patch_hash=45lvaawpx6xd6xcunk6gk74hqi)
@@ -20048,7 +20051,7 @@ snapshots:
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
+      '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
       abitype: 1.0.8(typescript@5.9.3)(zod@3.25.76)
@@ -20062,7 +20065,7 @@ snapshots:
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
+      '@noble/hashes': 1.8.0
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
       abitype: 1.0.8(typescript@5.9.3)(zod@4.1.12)

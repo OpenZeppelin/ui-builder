@@ -21,7 +21,6 @@ import type {
 import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
-import type { MidnightContractArtifacts } from './types/artifacts';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
 import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
@@ -30,7 +29,10 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
+import { formatMidnightFunctionResult } from './transform';
+import type { MidnightContractArtifacts } from './types';
 import { validateAndConvertMidnightArtifacts } from './utils';
+import { isValidAddress } from './validation';
 
 /**
  * Midnight-specific adapter.
@@ -110,8 +112,9 @@ export class MidnightAdapter implements ContractAdapter {
         label: 'Contract Address',
         type: 'blockchain-address',
         validation: { required: true },
-        placeholder: 'ct1q8ej4px...',
-        helperText: 'Enter the deployed Midnight contract address (Bech32m format).',
+        placeholder: '0200326c95873182775840764ae28e8750f73a68f236800171ebd92520e96a9fffb6',
+        helperText:
+          'Enter the deployed Midnight contract address (68-character hex string starting with 0200).',
       },
       {
         id: 'privateStateId',
@@ -247,16 +250,25 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public async queryViewFunction(
-    _contractAddress: string,
-    _functionId: string,
-    _params: unknown[],
-    _contractSchema?: ContractSchema
+    contractAddress: string,
+    functionId: string,
+    params: unknown[],
+    contractSchema?: ContractSchema
   ): Promise<unknown> {
-    throw new Error('queryViewFunction not implemented for MidnightAdapter.');
+    // Query Midnight contracts using the indexer public data provider
+    const { queryMidnightViewFunction } = await import('./query');
+    return queryMidnightViewFunction(
+      contractAddress,
+      functionId,
+      this.networkConfig,
+      params,
+      contractSchema,
+      this.artifacts?.contractModule // Pass the contract module for ledger() access
+    );
   }
 
-  public formatFunctionResult(decodedValue: unknown): string {
-    return JSON.stringify(decodedValue, null, 2);
+  public formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
+    return formatMidnightFunctionResult(decodedValue, functionDetails);
   }
 
   public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
@@ -275,9 +287,9 @@ export class MidnightAdapter implements ContractAdapter {
     return null; // No official explorer yet
   }
 
-  public isValidAddress(_address: string): boolean {
-    // Placeholder - add real Bech32m validation later
-    return true;
+  public isValidAddress(address: string): boolean {
+    // Validates both contract addresses (68-char hex) and user addresses (Bech32m)
+    return isValidAddress(address);
   }
 
   async getAvailableUiKits(): Promise<AvailableUiKit[]> {

@@ -1,7 +1,7 @@
 import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
-import { isValidAddress } from '../utils';
+import { isValidAddress } from '../validation';
 
 /**
  * @inheritdoc
@@ -36,11 +36,7 @@ export function validateMidnightExecutionConfig(config: ExecutionConfig): Promis
     if (!config.allowAny && !config.specificAddress) {
       return Promise.resolve('Specific EOA address is required.');
     }
-    if (
-      !config.allowAny &&
-      config.specificAddress &&
-      !isValidAddress(config.specificAddress) // Assuming isValidAddress is moved to utils
-    ) {
+    if (!config.allowAny && config.specificAddress && !isValidAddress(config.specificAddress)) {
       return Promise.resolve('Invalid EOA address format for Midnight.');
     }
     return Promise.resolve(true);
