@@ -96,7 +96,7 @@ export default defineConfig(({ mode }) => ({
           '@midnight-ntwrk/onchain-runtime',
           '@midnight-ntwrk/ledger',
         ];
-        return midnightWasmPackages.some((pkg) => id.includes(pkg));
+        return midnightWasmPackages.some((pkg) => id === pkg || id.startsWith(pkg + '/'));
       },
       output: {
         // Split chunks to reduce memory usage during build
