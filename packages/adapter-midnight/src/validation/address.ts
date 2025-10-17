@@ -194,6 +194,13 @@ export function validateUserAddress(address: string): {
       };
     }
 
+    // Check for Bech32m separator '1'
+    if (!trimmed.includes('1')) {
+      return {
+        isValid: false,
+        error: USER_VALIDATION_ERRORS.INVALID_FORMAT,
+      };
+    }
     // Decode Bech32m address
     const decoded = bech32m.decode(trimmed as `${string}1${string}`);
 
