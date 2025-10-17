@@ -10,6 +10,25 @@ export interface ProviderConfig {
 }
 
 /**
+ * Validates that the wallet config has all required URI properties.
+ * @param config The configuration object to validate
+ * @returns true if valid, false otherwise
+ */
+function isValidWalletConfig(config: unknown): boolean {
+  if (!config || typeof config !== 'object') {
+    return false;
+  }
+
+  const obj = config as Record<string, unknown>;
+  return (
+    typeof obj.indexerUri === 'string' &&
+    typeof obj.indexerWsUri === 'string' &&
+    typeof obj.substrateNodeUri === 'string' &&
+    typeof obj.proverServerUri === 'string'
+  );
+}
+
+/**
  * Attempts to get wallet configuration if wallet is available.
  * This respects user privacy preferences for indexer/node URIs.
  *
@@ -29,6 +48,20 @@ export async function getWalletConfigIfAvailable(): Promise<Partial<ProviderConf
     // Get service URI configuration from wallet (respects user privacy preferences)
     // Note: This is available even before connecting, on the top-level API
     const config = await window.midnight.mnLace.serviceUriConfig();
+
+    // Validate response structure
+    if (!isValidWalletConfig(config)) {
+      logger.warn('getWalletConfigIfAvailable', 'Wallet returned invalid configuration structure', {
+        missing: ['indexerUri', 'indexerWsUri', 'substrateNodeUri', 'proverServerUri'].filter(
+          (key) => {
+            const cfg = config as unknown as Record<string, unknown>;
+            return typeof cfg?.[key] !== 'string';
+          }
+        ),
+      });
+      return undefined;
+    }
+
     logger.info(
       'getWalletConfigIfAvailable',
       'Using wallet configuration (respecting user privacy preferences)',
@@ -46,12 +79,28 @@ export async function getWalletConfigIfAvailable(): Promise<Partial<ProviderConf
       networkId: undefined,
     };
   } catch (error) {
-    // Wallet not connected or getConfiguration() failed
-    logger.debug(
-      'getWalletConfigIfAvailable',
-      'Failed to get wallet configuration, will use network config',
-      error
-    );
+    // Handle specific error scenarios
+    if (error instanceof TypeError) {
+      logger.debug(
+        'getWalletConfigIfAvailable',
+        'Wallet API contract violation: method or property not found',
+        {
+          message: error.message,
+        }
+      );
+    } else if (error instanceof ReferenceError) {
+      logger.debug(
+        'getWalletConfigIfAvailable',
+        'Wallet reference error: wallet API not properly initialized',
+        {
+          message: error.message,
+        }
+      );
+    } else {
+      logger.debug('getWalletConfigIfAvailable', 'Failed to retrieve wallet configuration', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
     return undefined;
   }
 }
