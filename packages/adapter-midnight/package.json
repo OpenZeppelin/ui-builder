@@ -19,7 +19,8 @@
   "type": "module",
   "files": [
     "dist",
-    "src"
+    "src",
+    "patches"
   ],
   "publishConfig": {
     "access": "public"
@@ -38,7 +39,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:adapters": "node ../../lint-adapters.cjs",
-    "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
+    "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || (cd ../.. && node scripts/sync-patches-to-adapters.js && cd - && pnpm build)",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -81,6 +82,15 @@
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",
       "require": "./dist/config.cjs"
+    }
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch",
+      "@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch"
     }
   }
 }
