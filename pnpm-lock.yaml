@@ -21,7 +21,7 @@ patchedDependencies:
     hash: nbhed3fmcgozgfub7zsjor5rey
     path: patches/@midnight-ntwrk__compact-runtime@0.9.0.patch
   '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2':
-    hash: 26qhp7thfjdxprzvebandv5xy4
+    hash: m5p52z6oezhefoe6zzxb7petgm
     path: patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch
   '@midnight-ntwrk/midnight-js-network-id@2.0.2':
     hash: kjmmxoytv6oioxv6n5ojvbwujy
@@ -233,7 +233,7 @@ importers:
         version: 2.0.2
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider':
         specifier: ^2.0.2
-        version: 2.0.2(patch_hash=26qhp7thfjdxprzvebandv5xy4)(@types/react@19.2.2)(bufferutil@4.0.9)(crossws@0.3.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(utf-8-validate@5.0.10)
+        version: 2.0.2(patch_hash=m5p52z6oezhefoe6zzxb7petgm)(@types/react@19.2.2)(bufferutil@4.0.9)(crossws@0.3.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(utf-8-validate@5.0.10)
       '@midnight-ntwrk/midnight-js-network-id':
         specifier: ^2.0.2
         version: 2.0.2(patch_hash=kjmmxoytv6oioxv6n5ojvbwujy)
@@ -11399,7 +11399,7 @@ snapshots:
       '@midnight-ntwrk/midnight-js-types': 2.0.2(patch_hash=45lvaawpx6xd6xcunk6gk74hqi)
       '@midnight-ntwrk/midnight-js-utils': 2.0.2(patch_hash=pm5dwqwiijhp3oirh25ok5vazi)
 
-  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2(patch_hash=26qhp7thfjdxprzvebandv5xy4)(@types/react@19.2.2)(bufferutil@4.0.9)(crossws@0.3.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(utf-8-validate@5.0.10)':
+  '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2(patch_hash=m5p52z6oezhefoe6zzxb7petgm)(@types/react@19.2.2)(bufferutil@4.0.9)(crossws@0.3.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(utf-8-validate@5.0.10)':
     dependencies:
       '@apollo/client': 3.14.0(@types/react@19.2.2)(graphql-ws@6.0.6(crossws@0.3.5)(graphql@16.11.0)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@midnight-ntwrk/midnight-js-network-id': 2.0.2(patch_hash=kjmmxoytv6oioxv6n5ojvbwujy)
