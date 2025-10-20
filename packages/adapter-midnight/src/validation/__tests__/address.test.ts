@@ -284,7 +284,7 @@ describe('User Address Validation', () => {
     });
 
     it('should handle bech32m decoding errors', () => {
-      const invalidBech32 = 'notbech32';
+      const invalidBech32 = 'addr1invalid';
       mockBech32m.decode.mockImplementation(() => {
         throw new Error('Invalid bech32m');
       });
