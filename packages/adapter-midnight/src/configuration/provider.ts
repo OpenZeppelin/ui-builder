@@ -39,14 +39,14 @@ function isValidWalletConfig(config: unknown): boolean {
  */
 export async function getWalletConfigIfAvailable(): Promise<Partial<ProviderConfig> | undefined> {
   try {
-    // Check if wallet is available in browser
+    // Only support Lace wallet for now. If we add other wallets later,
+    // update this function accordingly.
     if (typeof window === 'undefined' || !window.midnight?.mnLace) {
       logger.debug('getWalletConfigIfAvailable', 'Lace wallet not available in browser');
       return undefined;
     }
 
-    // Get service URI configuration from wallet (respects user privacy preferences)
-    // Note: This is available even before connecting, on the top-level API
+    // Get service URI configuration from Lace (respects user privacy preferences)
     const config = await window.midnight.mnLace.serviceUriConfig();
 
     // Validate response structure
