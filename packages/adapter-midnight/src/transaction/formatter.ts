@@ -66,7 +66,7 @@ export function formatMidnightTransactionData(
       // Parser will handle array conversion
     }
 
-    return parseMidnightInput(param.type, valueToParse, param.type);
+    return parseMidnightInput(valueToParse, param.type);
   });
 
   // --- Step 4 & 5: Prepare Return Object --- //
