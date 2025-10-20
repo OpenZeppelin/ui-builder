@@ -155,9 +155,11 @@ function syncPatches() {
         packageJson.pnpm = {};
       }
 
-      packageJson.pnpm.patchedDependencies = {};
+      if (!packageJson.pnpm.patchedDependencies) {
+        packageJson.pnpm.patchedDependencies = {};
+      }
 
-      // Add patch references
+      // Add/overwrite patch references
       for (const patch of patches) {
         const key = `${patch.packageName}@${patch.version}`;
         const value = `patches/${patch.fileName}`;
