@@ -85,14 +85,14 @@ Independent Test: Load a contract with simple views and see results/empty state.
 Goal: Customize write form, execute via wallet, export working app.
 Independent Test: Execute in Builder, then export and run same flow.
 
-- [ ] T014 [US4] Implement `formatTransactionData` for write payloads [seq]
+- [x] T014 [US4] Implement `formatTransactionData` for write payloads [seq]
   - Path: packages/adapter-midnight/src/adapter.ts
-- [ ] T015 [US4] Implement wallet-only `signAndBroadcast` (prepare/balance→prove→submit) [seq]
+- [x] T015 [US4] Implement wallet-only `signAndBroadcast` (prepare/balance→prove→submit) [seq]
   - Path: packages/adapter-midnight/src/adapter.ts + utils
-- [ ] T016 [US4] Ensure export parity (packages, config, behavior) [seq]
+- [x] T016 [US4] Ensure export parity (packages, config, behavior) [seq]
   - Path: packages/adapter-midnight/src/config.ts + export manifest
 
-- [ ] Checkpoint: Write flow and export validated end-to-end
+- [x] Checkpoint: Write flow and export validated end-to-end
 
 ## Phase 7: [US5] Submit transaction status (P5)
 

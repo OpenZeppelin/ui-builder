@@ -1,0 +1,29 @@
+import type { ExecutionConfig, TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
+
+import type { WriteContractParameters } from '../types';
+import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
+
+/**
+ * Defines a common interface for different transaction execution strategies (e.g., EOA, Relayer).
+ * This allows the adapter to remain a lean orchestrator that selects the appropriate strategy
+ * at runtime based on the user's configuration.
+ */
+export interface ExecutionStrategy {
+  /**
+   * Executes a transaction according to the specific strategy.
+   *
+   * @param transactionData The contract write parameters, including contract address, function name, and args.
+   * @param executionConfig The configuration for the selected execution method.
+   * @param walletImplementation The wallet implementation to use for signing.
+   * @param onStatusChange A callback to report real-time status updates to the UI.
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer.
+   * @returns A promise that resolves to an object containing the final transaction hash.
+   */
+  execute(
+    transactionData: WriteContractParameters,
+    executionConfig: ExecutionConfig,
+    walletImplementation: LaceWalletImplementation,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<{ txHash: string }>;
+}

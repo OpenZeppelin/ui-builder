@@ -15,6 +15,7 @@ import type {
   MidnightNetworkConfig,
   RelayerDetails,
   RelayerDetailsRich,
+  TransactionStatusUpdate,
   UiKitConfiguration,
   UserRpcProviderConfig,
 } from '@openzeppelin/ui-builder-types';
@@ -29,10 +30,16 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
+import {
+  EoaExecutionStrategy,
+  formatMidnightTransactionData,
+  type ExecutionStrategy,
+} from './transaction';
 import { formatMidnightFunctionResult } from './transform';
-import type { MidnightContractArtifacts } from './types';
+import type { MidnightContractArtifacts, WriteContractParameters } from './types';
 import { validateAndConvertMidnightArtifacts } from './utils';
 import { isValidAddress } from './validation';
+import { getMidnightWalletImplementation } from './wallet';
 
 /**
  * Midnight-specific adapter.
@@ -230,19 +237,37 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public formatTransactionData(
-    _contractSchema: ContractSchema,
-    _functionId: string,
-    _submittedInputs: Record<string, unknown>,
-    _fields: FormFieldType[]
+    contractSchema: ContractSchema,
+    functionId: string,
+    submittedInputs: Record<string, unknown>,
+    fields: FormFieldType[]
   ): unknown {
-    throw new Error('formatTransactionData not implemented for MidnightAdapter.');
+    return formatMidnightTransactionData(contractSchema, functionId, submittedInputs, fields);
   }
 
   public async signAndBroadcast(
-    _transactionData: unknown,
-    _executionConfig?: ExecutionConfig
+    transactionData: unknown,
+    executionConfig: ExecutionConfig,
+    onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
-    throw new Error('signAndBroadcast not implemented for MidnightAdapter.');
+    const walletImplementation = await getMidnightWalletImplementation();
+    let strategy: ExecutionStrategy;
+
+    switch (executionConfig.method) {
+      case 'eoa':
+      default:
+        strategy = new EoaExecutionStrategy();
+        break;
+    }
+
+    return strategy.execute(
+      transactionData as WriteContractParameters,
+      executionConfig,
+      walletImplementation,
+      onStatusChange,
+      runtimeApiKey
+    );
   }
 
   public isViewFunction(functionDetails: ContractFunction): boolean {

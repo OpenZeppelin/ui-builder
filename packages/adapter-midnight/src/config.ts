@@ -5,22 +5,36 @@
  * when generating exported projects. It follows the AdapterConfig
  * interface to provide a structured approach to dependency management.
  */
-export const midnightAdapterConfig = {
-  /**
-   * Default app name to display in the wallet connection UI.
-   */
-  appName: 'OpenZeppelin UI Builder',
+import type { AdapterConfig } from '@openzeppelin/ui-builder-types';
 
+export const midnightAdapterConfig: AdapterConfig = {
   /**
    * Dependencies required by the Midnight adapter
    * These will be included in exported projects that use this adapter
    */
   dependencies: {
-    // FR-017: For v1, adapter export dependencies must match the export manifest.
-    // Only include runtime deps required by exported apps using the Midnight adapter.
+    // Runtime dependencies
     runtime: {
+      // Core Midnight libraries
       '@midnight-ntwrk/dapp-connector-api': '^3.0.0',
+      '@midnight-ntwrk/midnight-js-types': '^2.0.2',
+      '@midnight-ntwrk/midnight-js-utils': '^2.0.2',
+
+      // Reactive state management
+      rxjs: '^7.8.1',
+
+      // Cryptographic utilities
+      '@scure/base': '^2.0.0',
+
+      // UI framework
+      react: '^19.0.0',
+      'react-dom': '^19.0.0',
     },
-    dev: {},
+
+    // Development dependencies
+    dev: {
+      '@types/react': '^19.0.0',
+      '@types/react-dom': '^19.0.0',
+    },
   },
 };
