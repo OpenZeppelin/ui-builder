@@ -81,7 +81,7 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f14915e22d1bdb1a96ad040e9ca027f
 +        case 'MainNet':
 +            return 3; // runtime.NetworkId.MainNet
 +        default:
-+            console.error(\`Invalid network ID: '\${idStr}', defaulting to TestNet\`);
++            console.error(`Invalid network ID: '${idStr}', defaulting to TestNet`);
 +            return 2; // Default to TestNet
 +    }
 +};
@@ -100,7 +100,7 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f14915e22d1bdb1a96ad040e9ca027f
 +        case 'MainNet':
 +            return 3; // ledger.NetworkId.MainNet
 +        default:
-+            console.error(\`Invalid network ID: '\${idStr}', defaulting to TestNet\`);
++            console.error(`Invalid network ID: '${idStr}', defaulting to TestNet`);
 +            return 2; // Default to TestNet
 +    }
 +};
@@ -126,13 +126,13 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f14915e22d1bdb1a96ad040e9ca027f
 +        currentNetworkId = globalThis.__MIDNIGHT_NETWORK_ID__;
 +        networkIdHex = networkIdToHex(currentNetworkId);
 +        if (globalThis.__MIDNIGHT_DEBUG__) {
-+            console.log(\`[IndexerProvider] Using global network ID override: \${currentNetworkId}\`);
++            console.log(`[IndexerProvider] Using global network ID override: ${currentNetworkId}`);
 +        }
 +    }
 +    
-+    const result = \`\${networkIdHex}\${contractAddress}\`;
++    const result = `${networkIdHex}${contractAddress}`;
 +    if (globalThis.__MIDNIGHT_DEBUG__) {
-+        console.log(\`[IndexerProvider] prependNetworkIdHex: NetworkID=\${currentNetworkId}, Hex=\${networkIdHex}, Input=\${contractAddress}, Result=\${result}\`);
++        console.log(`[IndexerProvider] prependNetworkIdHex: NetworkID=${currentNetworkId}, Hex=${networkIdHex}, Input=${contractAddress}, Result=${result}`);
 +    }
 +    return result;
 +};
