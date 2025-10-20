@@ -73,12 +73,12 @@ Independent Test: Submit valid inputs and see callable functions list.
 Goal: Auto-display parameter-less view functions via ContractStateWidget.
 Independent Test: Load a contract with simple views and see results/empty state.
 
-- [ ] T012 [US3] Confirm `isViewFunction` usage and schema compatibility [P]
+- [x] T012 [US3] Confirm `isViewFunction` usage and schema compatibility [P]
   - Path: packages/adapter-midnight/src/adapter.ts
-- [ ] T013 [US3] Graceful error state integration [P]
+- [x] T013 [US3] Graceful error state integration [P]
   - Path: packages/renderer/src/components/ContractStateWidget/\*\*
 
-- [ ] Checkpoint: User Stories 1–3 are independently functional
+- [x] Checkpoint: User Stories 1–3 are independently functional
 
 ## Phase 6: [US4] Write form customize, execute, export (P4)
 

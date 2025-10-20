@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 18e4864ea079476c9a43f596bc3d58a189d3bdac..20e707eac1d6a846154b9d973f1b6aab040e12eb 100644
+--- a/package.json
++++ b/package.json
+@@ -26,6 +26,7 @@
+     "dist/"
+   ],
+   "dependencies": {
++    "@midnight-ntwrk/ledger": "4.0.0",
+     "rxjs": "^7.5.0"
+   }
+ }

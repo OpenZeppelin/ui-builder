@@ -1,0 +1,14 @@
+diff --git a/package.json b/package.json
+index e81ef6110f25278c40ff0d19d238780a88a50cf5..0d960a2d4cda9c680612e4b873a645f98089c0b8 100644
+--- a/package.json
++++ b/package.json
+@@ -24,5 +24,8 @@
+   },
+   "files": [
+     "dist/"
+-  ]
++  ],
++  "dependencies": {
++    "@midnight-ntwrk/wallet-sdk-address-format": "2.0.0"
++  }
+ }
