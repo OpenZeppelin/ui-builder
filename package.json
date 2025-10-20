@@ -31,6 +31,7 @@
     "format:check": "pnpm -r format:check",
     "fix-all": "pnpm format && pnpm lint:fix",
     "ui:add": "pnpm --filter=@openzeppelin/ui-builder-app ui:add",
+    "postinstall": "node scripts/remove-midnight-sourcemaps.js",
     "prepare": "husky install",
     "test:coverage": "pnpm -r test:coverage",
     "storybook": "storybook dev -p 6006",

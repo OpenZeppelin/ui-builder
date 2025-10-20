@@ -118,6 +118,10 @@ export default defineConfig(({ mode }) => ({
           ui: ['@radix-ui/react-accordion', '@radix-ui/react-checkbox', '@radix-ui/react-dialog'],
           web3: ['viem', 'wagmi', '@tanstack/react-query'],
         },
+        // Suppress sourcemap warnings for dependencies
+        sourcemapIgnoreList: (relativeSourcePath) => {
+          return relativeSourcePath.includes('@midnight-ntwrk');
+        },
       },
       // Reduce memory usage during rollup processing
       maxParallelFileOps: 2,
