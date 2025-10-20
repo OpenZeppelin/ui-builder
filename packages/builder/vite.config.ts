@@ -2,7 +2,7 @@ import path from 'path';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { createLogger, defineConfig } from 'vite';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
 
@@ -10,6 +10,18 @@ import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-
 import { virtualContentLoaderPlugin } from './vite-plugins/virtual-content-loader';
 
 import templatePlugin from './vite.template-plugin';
+
+// Create a custom logger to filter out sourcemap warnings for patched packages
+const logger = createLogger();
+const originalWarn = logger.warn;
+logger.warn = (msg, options) => {
+  // Suppress sourcemap warnings for patched Midnight SDK packages
+  // The patches fix browser compatibility but sourcemaps reference missing source files
+  if (msg.includes('Sourcemap') && msg.includes('@midnight-ntwrk')) {
+    return;
+  }
+  originalWarn(msg, options);
+};
 
 /**
  * Configuration for virtual modules
@@ -24,6 +36,7 @@ import templatePlugin from './vite.template-plugin';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  customLogger: logger,
   plugins: [
     // WASM support for Midnight packages
     wasm(),
