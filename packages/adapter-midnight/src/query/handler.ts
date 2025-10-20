@@ -169,11 +169,14 @@ async function getProvidersForQuery(
     );
   }
   setNetworkId(resolvedEnum as never);
-  // @ts-expect-error: global workaround for patched providers
-  if (!globalThis.__OPENZEPPELIN_MIDNIGHT__) {
-    globalThis.__OPENZEPPELIN_MIDNIGHT__ = {};
+  // Stash resolved networkId on a well-known global for patched providers
+  const globalMidnight = globalThis as unknown as {
+    __OPENZEPPELIN_MIDNIGHT__?: { networkId?: unknown };
+  };
+  if (!globalMidnight.__OPENZEPPELIN_MIDNIGHT__) {
+    globalMidnight.__OPENZEPPELIN_MIDNIGHT__ = {};
   }
-  globalThis.__OPENZEPPELIN_MIDNIGHT__.networkId = resolvedEnum;
+  globalMidnight.__OPENZEPPELIN_MIDNIGHT__.networkId = resolvedEnum;
   logger.debug('getProvidersForQuery', `Set network ID to: ${networkName} (${numericNetworkId})`);
 
   // Create public data provider
@@ -192,12 +195,22 @@ function getDefaultRpcUrl(networkConfig: MidnightNetworkConfig): string {
 
 function deriveIndexerUri(rpcUrl: string): string {
   const url = new URL(rpcUrl);
-  url.protocol = url.protocol.replace('ws', 'http');
+  // Map ws/wss -> http/https explicitly to avoid accidental partial replacements
+  if (url.protocol === 'ws:') {
+    url.protocol = 'http:';
+  } else if (url.protocol === 'wss:') {
+    url.protocol = 'https:';
+  }
   return `${url.origin}/indexer`;
 }
 
 function deriveIndexerWsUri(rpcUrl: string): string {
   const url = new URL(rpcUrl);
-  url.protocol = url.protocol.replace('http', 'ws');
+  // Map http/https -> ws/wss explicitly to avoid accidental partial replacements
+  if (url.protocol === 'http:') {
+    url.protocol = 'ws:';
+  } else if (url.protocol === 'https:') {
+    url.protocol = 'wss:';
+  }
   return `${url.origin}/indexer`;
 }

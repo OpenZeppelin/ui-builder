@@ -30,6 +30,7 @@ export const CONTRACT_VALIDATION_ERRORS = {
  */
 export const USER_VALIDATION_ERRORS = {
   INVALID_FORMAT: 'Invalid address format',
+  MISSING_SEPARATOR: 'Bech32m address missing separator "1"',
   INVALID_BECH32M: 'Invalid Bech32m encoding',
   INVALID_PREFIX: 'Invalid address prefix',
 } as const;
@@ -198,7 +199,7 @@ export function validateUserAddress(address: string): {
     if (!trimmed.includes('1')) {
       return {
         isValid: false,
-        error: USER_VALIDATION_ERRORS.INVALID_FORMAT,
+        error: USER_VALIDATION_ERRORS.MISSING_SEPARATOR,
       };
     }
     // Decode Bech32m address

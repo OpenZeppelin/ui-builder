@@ -12,12 +12,14 @@ export function formatMidnightFunctionResult(
   decodedValue: unknown,
   functionDetails: ContractFunction
 ): string {
-  if (!functionDetails.outputs || !Array.isArray(functionDetails.outputs)) {
+  // If outputs is undefined/null or not an array, treat as invalid schema
+  // Empty array (0 outputs) is valid and should be allowed
+  if (!Array.isArray(functionDetails.outputs)) {
     logger.warn(
       'formatMidnightFunctionResult',
-      `Output definition missing or invalid for function ${functionDetails.name}.`
+      `Invalid or missing outputs definition for function ${functionDetails.name}. If this function intentionally returns no values, set outputs: [] in the schema.`
     );
-    return '[Error: Output definition missing]';
+    return '[Error: Invalid outputs definition]';
   }
 
   try {
