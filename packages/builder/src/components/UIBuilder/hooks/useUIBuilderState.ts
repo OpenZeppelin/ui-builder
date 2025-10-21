@@ -38,6 +38,18 @@ export function useUIBuilderState() {
     void lifecycle.initializePageState();
   }, []); // Run only once
 
+  // Memoize address to avoid recalculating on every render
+  const memoAddress = useMemo(
+    () => state.contractState.address?.trim() || '',
+    [state.contractState.address]
+  );
+
+  // Memoize address validation result to avoid repeated validation calls across renders
+  const isValidAddr = useMemo(
+    () => (activeAdapter && memoAddress ? activeAdapter.isValidAddress(memoAddress) : false),
+    [activeAdapter, memoAddress]
+  );
+
   const autoSave = useAutoSave(isLoadingSavedConfigRef);
   const lifecycle = useBuilderLifecycle(isLoadingSavedConfigRef, savedConfigIdRef, autoSave);
   const navigation = useBuilderNavigation(isLoadingSavedConfigRef, savedConfigIdRef);
@@ -99,10 +111,10 @@ export function useUIBuilderState() {
     // Load if we need to and have the required data
     if (
       state.needsContractDefinitionLoad &&
-      state.contractState.address &&
+      memoAddress &&
       activeAdapter &&
-      // Avoid triggering loads while the user is still typing an invalid/partial address
-      activeAdapter.isValidAddress(state.contractState.address) &&
+      // Use memoized validation to avoid repeated isValidAddress calls
+      isValidAddr &&
       (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
         !state.selectedNetworkConfigId)
     ) {
@@ -125,7 +137,8 @@ export function useUIBuilderState() {
     }
   }, [
     state.needsContractDefinitionLoad,
-    state.contractState.address,
+    memoAddress,
+    isValidAddr,
     state.selectedNetworkConfigId,
     state.isLoadingConfiguration,
     activeAdapter?.networkConfig.id,

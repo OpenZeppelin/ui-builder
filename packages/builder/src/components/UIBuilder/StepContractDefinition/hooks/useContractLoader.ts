@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
-import { simpleHash } from '@openzeppelin/ui-builder-utils';
+import { hasMissingRequiredContractInputs, simpleHash } from '@openzeppelin/ui-builder-utils';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -169,7 +169,10 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
   /**
    * Check if we should attempt to load based on form values
    * Prevents duplicate loads for the same form state
+   * Memoizes validation results per address to avoid repeated isValidAddress calls during render loops
    */
+  const lastValidatedAddressRef = useRef<{ address: string; isValid: boolean } | null>(null);
+
   const canAttemptLoad = useCallback(
     (formValues: FormValues) => {
       if (loadingRef.current) return false;
@@ -179,7 +182,20 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
         typeof formValues.contractAddress === 'string'
           ? formValues.contractAddress.trim()
           : undefined;
-      if (!address || (adapter && !adapter.isValidAddress(address))) return false;
+      if (!address) return false;
+
+      // Cache validation result to avoid repeated isValidAddress calls on the same address
+      if (lastValidatedAddressRef.current?.address === address) {
+        if (!lastValidatedAddressRef.current.isValid) return false;
+      } else if (adapter && !adapter.isValidAddress(address)) {
+        lastValidatedAddressRef.current = { address, isValid: false };
+        return false;
+      } else {
+        lastValidatedAddressRef.current = { address, isValid: true };
+      }
+
+      // Gate on adapter-declared required inputs to avoid noisy preflight errors
+      if (adapter && hasMissingRequiredContractInputs(adapter, formValues)) return false;
 
       const currentAttempt = JSON.stringify(formValues);
       return currentAttempt !== lastAttemptedRef.current;
