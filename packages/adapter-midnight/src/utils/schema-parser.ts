@@ -4,6 +4,9 @@ import {
   ContractSchema,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
+import { logger } from '@openzeppelin/ui-builder-utils';
+
+const SYSTEM_LOG_TAG = '[SchemaParser]';
 
 /**
  * Parses the string content of a Midnight contract's .d.ts file.
@@ -16,6 +19,11 @@ export function parseMidnightContractInterface(
   const circuits = extractCircuits(interfaceContent);
   const queries = extractQueries(interfaceContent);
 
+  logger.info(
+    SYSTEM_LOG_TAG,
+    `Parsed d.ts → circuits:${Object.keys(circuits).length} queries:${Object.keys(queries).length}`
+  );
+
   const functions = [...Object.values(circuits), ...Object.values(queries)];
 
   // TODO: Extract events from the interface content.
@@ -26,32 +34,38 @@ export function parseMidnightContractInterface(
 
 function extractCircuits(content: string): Record<string, ContractFunction> {
   const circuits: Record<string, ContractFunction> = {};
-  const circuitsMatch = content.match(/export\s+type\s+Circuits\s*<[^>]*>\s*=\s*{([^}]*)}/s);
+  // Match: export (declare) type Circuits<...> = { ... }
+  const circuitsMatch = content.match(
+    /export\s+(?:declare\s+)?type\s+Circuits\s*<[^>]*>\s*=\s*{([\s\S]*?)}\s*;?/s
+  );
 
   if (circuitsMatch) {
     const circuitsContent = circuitsMatch[1];
-    const methodRegex = /(\w+)\s*\(\s*context\s*:[^,)]+(?:,\s*([^)]+))?\)/g;
+    const methodRegex = /(\w+)\s*\(\s*context\s*:[^,\)]+(?:,\s*([^\)]+))?\)/g;
     let match;
     while ((match = methodRegex.exec(circuitsContent)) !== null) {
       const name = match[1];
       const paramsText = match[2] || '';
       circuits[name] = {
-        id: name, // Simplified ID for now
+        id: name,
         name,
         displayName: name.charAt(0).toUpperCase() + name.slice(1),
         inputs: parseParameters(paramsText),
-        outputs: [], // Assuming no direct outputs from circuits for now
+        outputs: [], // Circuits don't expose return values directly
         modifiesState: true,
         type: 'function',
       };
     }
   }
+
   return circuits;
 }
 
 function extractQueries(content: string): Record<string, ContractFunction> {
   const queries: Record<string, ContractFunction> = {};
-  const ledgerMatch = content.match(/export\s+type\s+Ledger\s*=\s*{([^}]*)}/s);
+
+  // Match: export (declare) type Ledger = { readonly prop: Type; ... }
+  const ledgerMatch = content.match(/export\s+(?:declare\s+)?type\s+Ledger\s*=\s*{([\s\S]*?)}/s);
 
   if (ledgerMatch) {
     const ledgerContent = ledgerMatch[1];
@@ -72,6 +86,32 @@ function extractQueries(content: string): Record<string, ContractFunction> {
       };
     }
   }
+
+  // Also check for Queries type (some contracts might use method-style queries)
+  const queriesMatch = content.match(
+    /export\s+(?:declare\s+)?type\s+Queries\s*<[^>]*>\s*=\s*{([\s\S]*?)}/s
+  );
+
+  if (queriesMatch) {
+    const queriesContent = queriesMatch[1];
+    const methodRegex = /(\w+)\s*\(\s*([^)]*)\)/g;
+    let match;
+    while ((match = methodRegex.exec(queriesContent)) !== null) {
+      const name = match[1];
+      const paramsText = match[2] || '';
+      queries[name] = {
+        id: name,
+        name,
+        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        inputs: parseParameters(paramsText),
+        outputs: [],
+        modifiesState: false,
+        type: 'function',
+        stateMutability: 'view',
+      };
+    }
+  }
+
   return queries;
 }
 
