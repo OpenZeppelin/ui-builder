@@ -33,7 +33,8 @@ export type FieldType =
   | 'url'
   | 'select-grouped'
   | 'enum' // Enum field with variant picker and conditional payload inputs
-  | 'hidden';
+  | 'hidden'
+  | 'file-upload'; // File upload field with optional base64 conversion
 
 /**
  * Maps field types to their expected value types

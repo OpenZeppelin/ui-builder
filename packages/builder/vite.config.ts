@@ -58,6 +58,14 @@ export default defineConfig(({ mode }) => ({
       // Force buffer to use the browser-friendly version
       buffer: 'buffer/',
     },
+    // Dedupe critical Midnight runtime packages to ensure single WASM context
+    // This prevents WASM context fragmentation when evaluating contracts dynamically
+    dedupe: [
+      '@midnight-ntwrk/compact-runtime',
+      '@midnight-ntwrk/ledger',
+      '@midnight-ntwrk/zswap',
+      '@midnight-ntwrk/midnight-js-contracts',
+    ],
   },
   define: {
     'process.env': {},
@@ -80,20 +88,55 @@ export default defineConfig(({ mode }) => ({
         }),
       ],
     },
-    // Force pre-bundling of compact-runtime and its deps to convert CJS to ESM
-    include: ['@midnight-ntwrk/compact-runtime', 'object-inspect', 'cross-fetch'],
-    // Exclude Midnight packages with WASM/top-level await from pre-bundling
-    // These must be handled by the WASM plugins at runtime
-    exclude: [
-      '@midnight-ntwrk/onchain-runtime',
+    // Force pre-bundling of CommonJS packages to convert to ESM
+    // This is needed for Midnight SDK dependencies that have CJS/ESM interop issues
+    include: [
+      // Midnight SDK core runtime (CommonJS package that needs ESM conversion)
+      // Also included in dedupe to ensure single WASM context across dynamic contract evaluation
+      '@midnight-ntwrk/compact-runtime',
       '@midnight-ntwrk/ledger',
       '@midnight-ntwrk/zswap',
       '@midnight-ntwrk/midnight-js-contracts',
+      'object-inspect', // Required by compact-runtime
+
+      // HTTP utilities (CommonJS/UMD packages that need ESM conversion)
+      'cross-fetch',
+      'fetch-retry',
+
+      // Protobufjs (used by Midnight SDK for serialization)
+      // These CommonJS packages need to be pre-bundled to work in browser
+      'protobufjs',
+      '@protobufjs/float',
+      '@protobufjs/utf8',
+      '@protobufjs/base64',
+      '@protobufjs/inquire',
+      '@protobufjs/pool',
+      '@protobufjs/aspromise',
+      '@protobufjs/eventemitter',
+      '@protobufjs/fetch',
+      '@protobufjs/path',
+      '@protobufjs/codegen',
+
+      // LevelDB (used for private state storage in browser)
+      // These are CommonJS packages that need ESM conversion for browser use
+      'level',
+      'classic-level',
+      'abstract-level',
+      'browser-level',
+    ],
+    // Exclude Midnight packages with WASM/top-level await from pre-bundling
+    // These must be handled by the WASM plugins at runtime
+    // Note: ledger, zswap, and midnight-js-contracts are now in 'include' for deduping
+    exclude: [
+      '@midnight-ntwrk/onchain-runtime',
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider',
       '@midnight-ntwrk/midnight-js-types',
       '@midnight-ntwrk/midnight-js-utils',
       '@midnight-ntwrk/midnight-js-network-id',
       '@midnight-ntwrk/wallet-sdk-address-format',
+      '@midnight-ntwrk/midnight-js-http-client-proof-provider',
+      '@midnight-ntwrk/midnight-js-level-private-state-provider',
+      '@midnight-ntwrk/midnight-js-node-zk-config-provider',
       // Also exclude Apollo Client to avoid CommonJS/ESM conflicts
       '@apollo/client',
     ],

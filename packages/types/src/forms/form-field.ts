@@ -157,4 +157,11 @@ export interface FormFieldType<T extends FieldType = FieldType> {
     keyFieldConfig?: Partial<FormFieldType>;
     valueFieldConfig?: Partial<FormFieldType>;
   };
+
+  /**
+   * File upload field properties
+   */
+  accept?: string;
+  maxSize?: number;
+  convertToBase64?: boolean;
 }

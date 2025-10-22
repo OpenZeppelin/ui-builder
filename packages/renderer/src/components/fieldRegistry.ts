@@ -13,6 +13,7 @@ import {
   BytesField,
   CodeEditorField,
   EnumField,
+  FileUploadField,
   MapField,
   NumberField,
   ObjectField,
@@ -56,4 +57,5 @@ export const fieldComponents: Record<
   url: UrlField,
   enum: EnumField,
   hidden: () => null, // Return null for hidden type
+  'file-upload': FileUploadField,
 };
