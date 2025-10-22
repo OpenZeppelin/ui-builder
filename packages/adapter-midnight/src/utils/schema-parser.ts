@@ -16,20 +16,34 @@ const SYSTEM_LOG_TAG = '[SchemaParser]';
 export function parseMidnightContractInterface(
   interfaceContent: string
 ): Pick<ContractSchema, 'functions' | 'events'> {
-  const circuits = extractCircuits(interfaceContent);
-  const queries = extractQueries(interfaceContent);
+  try {
+    const circuits = extractCircuits(interfaceContent);
+    const ledgerProperties = extractLedgerProperties(interfaceContent);
 
-  logger.info(
-    SYSTEM_LOG_TAG,
-    `Parsed d.ts → circuits:${Object.keys(circuits).length} queries:${Object.keys(queries).length}`
-  );
+    logger.info(
+      SYSTEM_LOG_TAG,
+      `Parsed d.ts → circuits:${Object.keys(circuits).length} ledger:${Object.keys(ledgerProperties).length}`
+    );
 
-  const functions = [...Object.values(circuits), ...Object.values(queries)];
+    const functions = [...Object.values(circuits), ...Object.values(ledgerProperties)];
 
-  // TODO: Extract events from the interface content.
-  const events: ContractEvent[] = [];
+    // TODO: Extract events from the interface content.
+    const events: ContractEvent[] = [];
 
-  return { functions, events };
+    return { functions, events };
+  } catch (error) {
+    logger.error(SYSTEM_LOG_TAG, 'Failed to parse contract interface:', error);
+    throw new Error(
+      `Failed to parse Midnight contract interface: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+}
+
+/**
+ * Capitalizes the first letter of a string
+ */
+function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function extractCircuits(content: string): Record<string, ContractFunction> {
@@ -49,7 +63,7 @@ function extractCircuits(content: string): Record<string, ContractFunction> {
       circuits[name] = {
         id: name,
         name,
-        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        displayName: capitalizeFirst(name),
         inputs: parseParameters(paramsText),
         outputs: [], // Circuits don't expose return values directly
         modifiesState: true,
@@ -58,11 +72,17 @@ function extractCircuits(content: string): Record<string, ContractFunction> {
     }
   }
 
+  logger.debug(SYSTEM_LOG_TAG, `Extracted ${Object.keys(circuits).length} circuits`);
   return circuits;
 }
 
-function extractQueries(content: string): Record<string, ContractFunction> {
-  const queries: Record<string, ContractFunction> = {};
+/**
+ * Extracts ledger properties and query methods from the contract interface.
+ * Ledger properties are readonly state values, while Queries are parameterized methods.
+ * Both are treated as view functions in the UI.
+ */
+function extractLedgerProperties(content: string): Record<string, ContractFunction> {
+  const properties: Record<string, ContractFunction> = {};
 
   // Match: export (declare) type Ledger = { readonly prop: Type; ... }
   const ledgerMatch = content.match(/export\s+(?:declare\s+)?type\s+Ledger\s*=\s*{([\s\S]*?)}/s);
@@ -74,10 +94,10 @@ function extractQueries(content: string): Record<string, ContractFunction> {
     while ((match = propertyRegex.exec(ledgerContent)) !== null) {
       const name = match[1];
       const typeStr = match[2].trim();
-      queries[name] = {
+      properties[name] = {
         id: name,
         name,
-        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        displayName: capitalizeFirst(name),
         inputs: [],
         outputs: [{ name: 'value', type: typeStr }],
         modifiesState: false,
@@ -87,7 +107,7 @@ function extractQueries(content: string): Record<string, ContractFunction> {
     }
   }
 
-  // Also check for Queries type (some contracts might use method-style queries)
+  // Also check for Queries type (parameterized query methods)
   const queriesMatch = content.match(
     /export\s+(?:declare\s+)?type\s+Queries\s*<[^>]*>\s*=\s*{([\s\S]*?)}/s
   );
@@ -99,10 +119,10 @@ function extractQueries(content: string): Record<string, ContractFunction> {
     while ((match = methodRegex.exec(queriesContent)) !== null) {
       const name = match[1];
       const paramsText = match[2] || '';
-      queries[name] = {
+      properties[name] = {
         id: name,
         name,
-        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        displayName: capitalizeFirst(name),
         inputs: parseParameters(paramsText),
         outputs: [],
         modifiesState: false,
@@ -112,13 +132,89 @@ function extractQueries(content: string): Record<string, ContractFunction> {
     }
   }
 
-  return queries;
+  logger.debug(
+    SYSTEM_LOG_TAG,
+    `Extracted ${Object.keys(properties).length} ledger properties/queries`
+  );
+  return properties;
 }
 
+/**
+ * Parses function parameters from TypeScript signature text.
+ * Handles simple types and attempts to parse complex nested types.
+ *
+ * Note: This is a simplified parser that handles common cases.
+ * Complex generic types with nested brackets/colons may not parse correctly.
+ */
 function parseParameters(paramsText: string): FunctionParameter[] {
   if (!paramsText.trim()) return [];
-  return paramsText.split(',').map((param) => {
-    const [name, type] = param.split(':').map((s) => s.trim());
-    return { name, type };
-  });
+
+  try {
+    const params: FunctionParameter[] = [];
+    let currentParam = '';
+    let bracketDepth = 0;
+    let angleDepth = 0;
+
+    // Parse character by character to handle nested types
+    for (let i = 0; i < paramsText.length; i++) {
+      const char = paramsText[i];
+
+      if (char === '{' || char === '[') {
+        bracketDepth++;
+        currentParam += char;
+      } else if (char === '}' || char === ']') {
+        bracketDepth--;
+        currentParam += char;
+      } else if (char === '<') {
+        angleDepth++;
+        currentParam += char;
+      } else if (char === '>') {
+        angleDepth--;
+        currentParam += char;
+      } else if (char === ',' && bracketDepth === 0 && angleDepth === 0) {
+        // Top-level comma - this separates parameters
+        if (currentParam.trim()) {
+          params.push(parseParameter(currentParam.trim()));
+        }
+        currentParam = '';
+      } else {
+        currentParam += char;
+      }
+    }
+
+    // Don't forget the last parameter
+    if (currentParam.trim()) {
+      params.push(parseParameter(currentParam.trim()));
+    }
+
+    return params;
+  } catch (error) {
+    logger.warn(SYSTEM_LOG_TAG, `Failed to parse parameters: "${paramsText}"`, error);
+    // Fallback to simple split for backwards compatibility
+    return paramsText.split(',').map((param) => {
+      const [name, type] = param.split(':').map((s) => s.trim());
+      return { name: name || 'unknown', type: type || 'unknown' };
+    });
+  }
+}
+
+/**
+ * Parses a single parameter from "name: Type" format
+ */
+function parseParameter(paramText: string): FunctionParameter {
+  const colonIndex = paramText.indexOf(':');
+  if (colonIndex === -1) {
+    logger.warn(SYSTEM_LOG_TAG, `Invalid parameter format (missing colon): "${paramText}"`);
+    return { name: paramText.trim(), type: 'unknown' };
+  }
+
+  const name = paramText.substring(0, colonIndex).trim();
+  const type = paramText.substring(colonIndex + 1).trim();
+
+  if (!name) {
+    logger.warn(SYSTEM_LOG_TAG, `Parameter missing name: "${paramText}"`);
+    return { name: 'unknown', type: type || 'unknown' };
+  }
+
+  return { name, type: type || 'unknown' };
 }
