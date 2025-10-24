@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@openzeppelin/ui-builder-ui';
 import { cn, logger } from '@openzeppelin/ui-builder-utils';
@@ -24,8 +24,8 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
     });
   }, [activeAdapter, walletFacadeHooks]);
 
-  // Compute wallet components on each render so UI updates immediately when kits toggle
-  const walletComponents = (() => {
+  // Memoize wallet components to avoid unnecessary re-renders
+  const walletComponents = useMemo(() => {
     if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
       logger.debug(
         'WalletConnectionUI',
@@ -43,7 +43,7 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
       setIsError(true);
       return null;
     }
-  })();
+  }, [activeAdapter]);
 
   if (!walletComponents) {
     logger.debug(
