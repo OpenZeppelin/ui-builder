@@ -32,6 +32,8 @@ const PATCH_TO_ADAPTER_MAP = {
   '@midnight-ntwrk/midnight-js-types': 'adapter-midnight',
   '@midnight-ntwrk/midnight-js-network-id': 'adapter-midnight',
   '@midnight-ntwrk/midnight-js-utils': 'adapter-midnight',
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider': 'adapter-midnight',
+  '@midnight-ntwrk/midnight-js-contracts': 'adapter-midnight',
   '@midnight-ntwrk/compact-runtime': 'adapter-midnight',
 
   // Add mappings for other adapters here as needed:
@@ -66,10 +68,12 @@ function getAdapterForPackage(packageName) {
  * Main sync function.
  */
 function syncPatches() {
+  // eslint-disable-next-line no-console
   console.log('🔄 Syncing patches from root to adapter packages...\n');
 
   // Check if patches directory exists
   if (!fs.existsSync(PATCHES_DIR)) {
+    // eslint-disable-next-line no-console
     console.log('✅ No patches directory found. Nothing to sync.');
     return;
   }
@@ -78,10 +82,12 @@ function syncPatches() {
   const patchFiles = fs.readdirSync(PATCHES_DIR).filter((f) => f.endsWith('.patch'));
 
   if (patchFiles.length === 0) {
+    // eslint-disable-next-line no-console
     console.log('✅ No patch files found. Nothing to sync.');
     return;
   }
 
+  // eslint-disable-next-line no-console
   console.log(`Found ${patchFiles.length} patch file(s):\n`);
 
   // Group patches by adapter
@@ -91,6 +97,7 @@ function syncPatches() {
     const parsed = parsePatchFileName(patchFile);
 
     if (!parsed) {
+      // eslint-disable-next-line no-console
       console.warn(`⚠️  Skipping invalid patch filename: ${patchFile}`);
       continue;
     }
@@ -98,6 +105,7 @@ function syncPatches() {
     const adapter = getAdapterForPackage(parsed.packageName);
 
     if (!adapter) {
+      // eslint-disable-next-line no-console
       console.warn(`⚠️  No adapter mapping found for ${parsed.packageName}, skipping ${patchFile}`);
       continue;
     }
@@ -112,9 +120,11 @@ function syncPatches() {
       version: parsed.version,
     });
 
+    // eslint-disable-next-line no-console
     console.log(`  📦 ${patchFile} → ${adapter}`);
   }
 
+  // eslint-disable-next-line no-console
   console.log('');
 
   // Process each adapter
@@ -125,15 +135,18 @@ function syncPatches() {
 
     // Verify adapter exists
     if (!fs.existsSync(adapterDir)) {
+      // eslint-disable-next-line no-console
       console.error(`❌ Adapter directory not found: ${adapterDir}`);
       continue;
     }
 
+    // eslint-disable-next-line no-console
     console.log(`\n📂 Processing ${adapter}...`);
 
     // Create patches directory if it doesn't exist
     if (!fs.existsSync(adapterPatchesDir)) {
       fs.mkdirSync(adapterPatchesDir, { recursive: true });
+      // eslint-disable-next-line no-console
       console.log(`  ✨ Created patches directory`);
     }
 
@@ -143,6 +156,7 @@ function syncPatches() {
       const destPath = path.join(adapterPatchesDir, patch.fileName);
 
       fs.copyFileSync(srcPath, destPath);
+      // eslint-disable-next-line no-console
       console.log(`  ✅ Copied ${patch.fileName}`);
     }
 
@@ -177,10 +191,12 @@ function syncPatches() {
       // Write back package.json
       fs.writeFileSync(adapterPackageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
 
+      // eslint-disable-next-line no-console
       console.log(`  ✅ Updated package.json with ${patches.length} patch reference(s)`);
     }
   }
 
+  // eslint-disable-next-line no-console
   console.log('\n✅ Patch sync complete!\n');
 }
 
@@ -188,9 +204,7 @@ function syncPatches() {
 try {
   syncPatches();
 } catch (error) {
+  // eslint-disable-next-line no-console
   console.error('❌ Error syncing patches:', error);
   process.exit(1);
 }
-
-
-
