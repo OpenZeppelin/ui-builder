@@ -294,13 +294,19 @@ For more details, see the [Midnight Adapter README](./packages/adapter-midnight/
    pnpm install
    ```
 
-3. Start the development server:
+3. Build all packages:
+
+   ```bash
+   pnpm build
+   ```
+
+4. Start the development server:
 
    ```bash
    pnpm dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+5. Open your browser and navigate to `http://localhost:5173`
 
 ### Running with Docker (Recommended)
 
