@@ -12,6 +12,7 @@ import { type FieldType } from '../forms';
 import { type FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
+import type { AdapterExportBootstrap, AdapterExportContext } from './export';
 import type {
   AvailableUiKit,
   EcosystemReactUiProviderProps,
@@ -568,4 +569,20 @@ export interface ContractAdapter {
    * @returns A deterministic hash string for quick comparison
    */
   hashContractDefinition?(definition: string): string;
+
+  /**
+   * (Optional) Provides adapter-specific files and initialization code for exported applications.
+   * This method enables adapters to bundle ecosystem-specific artifacts (e.g., Midnight contract artifacts)
+   * into exported applications in a chain-agnostic manner.
+   *
+   * The method receives context including form configuration, contract schema, network configuration,
+   * and any adapter-specific artifacts stored during contract loading.
+   *
+   * Example use case: Midnight adapter bundles ZK proof artifacts, contract modules, and witness code
+   * needed for offline transaction execution in exported apps.
+   *
+   * @param context - Export context containing form config, schema, network, and artifacts
+   * @returns Bootstrap configuration with files to include and initialization code, or null if not needed
+   */
+  getExportBootstrapFiles?(context: AdapterExportContext): Promise<AdapterExportBootstrap | null>;
 }

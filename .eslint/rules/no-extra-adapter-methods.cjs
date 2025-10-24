@@ -80,6 +80,7 @@ module.exports = {
       'compareContractDefinitions',
       'validateContractDefinition',
       'hashContractDefinition',
+      'getExportBootstrapFiles',
     ];
 
     // Common standard methods and properties that are allowed
