@@ -27,9 +27,7 @@ Extract Artifacts (browser)
     ↓
 Parse Contract Definition (.d.ts/.d.cts)
     ↓
-Upload ZK Artifacts to Vite Server (base64)
-    ↓
-Store in Server Memory
+Register ZK Artifacts (in-memory)
     ↓
 User Initiates Transaction
     ↓
@@ -37,9 +35,9 @@ Dynamic Contract Evaluation (shared WASM context)
     ↓
 Create Transaction Options
     ↓
-Request ZK Artifacts from Vite Server
+Retrieve ZK Artifacts (from memory)
     ↓
-Submit to Proof Server
+Submit to Proof Server (with embedded keys)
     ↓
 Generate ZK Proof
     ↓
@@ -60,6 +58,11 @@ Browser Environment:
 │   ├── Parse TypeScript Interfaces
 │   └── Extract Circuits & Queries
 │
+├── EmbeddedZkConfigProvider (in-memory)
+│   ├── registerAll() - Store artifacts
+│   ├── get(circuitId) - Retrieve artifacts
+│   └── Global instance shared across transactions
+│
 ├── Contract Evaluator
 │   ├── Shared WASM Context
 │   ├── Dynamic Code Execution (new Function)
@@ -75,19 +78,8 @@ Browser Environment:
     ├── Provider Configuration
     └── Direct submitCallTx Invocation
 
-Vite Server (Node.js):
-├── ZK Artifacts Server Plugin
-│   ├── /__zk-upload (POST) - Receive artifacts from browser
-│   ├── /keys/{circuitId}.prover (GET) - Serve prover keys
-│   ├── /keys/{circuitId}.verifier (GET) - Serve verifier keys
-│   ├── /zkir/{circuitId}.bzkir (GET) - Serve ZKIR files
-│   └── /__zk-clear (POST) - Clear cache (dev only)
-│
-└── In-Memory Store
-    └── Map<contractAddress, Record<circuitId, ZkArtifact>>
-
 Midnight SDK:
-├── FetchZkConfigProvider (requests from Vite server)
+├── EmbeddedZkConfigProvider (provides keys from memory)
 ├── httpClientProofProvider (submits to proof server)
 └── submitCallTx (transaction submission)
 ```
@@ -283,7 +275,7 @@ export class EmbeddedZkConfigProvider {
 
     return {
       circuitId,
-      proverKey: artifact.prover,    // ~250KB Uint8Array
+      proverKey: artifact.prover, // ~250KB Uint8Array
       verifierKey: artifact.verifier, // ~250KB Uint8Array
       zkir: artifact.zkir || new Uint8Array(0), // ~50KB Uint8Array
     };
@@ -330,75 +322,7 @@ if (extractedArtifacts.zkArtifacts) {
 - ⚠️ **Memory Usage**: ~500KB-1MB per circuit kept in browser memory
 - ⚠️ **Single Contract**: Only one contract's artifacts at a time (acceptable for MVP)
 
-```typescript
-// Global store in Vite/Node.js context
-if (!globalThis.__VITE_ZK_ARTIFACTS_STORE__) {
-  globalThis.__VITE_ZK_ARTIFACTS_STORE__ = new Map();
-}
-
-const serverZkStore = globalThis.__VITE_ZK_ARTIFACTS_STORE__;
-
-export function zkArtifactsServerPlugin(): Plugin {
-  return {
-    name: 'zk-artifacts-server',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const url = req.url;
-
-        // Upload endpoint
-        if (url === '/__zk-upload' && req.method === 'POST') {
-          // Receive base64, decode to Uint8Array, store in memory
-          return handleZkArtifactUpload(req, res);
-        }
-
-        // Serve prover keys
-        if (url.match(/^\/keys\/([^/?]+)\.prover(?:\?|$)/)) {
-          const circuitId = url.match(/^\/keys\/([^/?]+)\.prover/)[1];
-          return handleZkArtifactRequest(circuitId, 'prover', res);
-        }
-
-        // Similar for .verifier and .bzkir files
-        next();
-      });
-    },
-  };
-}
-```
-
-**Part 3: FetchZkConfigProvider Configuration** (`packages/adapter-midnight/src/transaction/providers.ts`):
-
-```typescript
-const zkConfigProvider = new FetchZkConfigProvider(
-  window.location.origin, // Base URL = Vite dev server
-  fetch.bind(window)
-);
-```
-
-### Challenge 4: Base64 Encoding Corruption
-
-**Problem**: Initial implementation produced comma-separated string representations (`"4,0,167,189,..."`) instead of valid base64, causing proof server to reject keys with bogus version numbers.
-
-**Root Cause**: `Buffer.from(uint8Array).toString('base64')` was calling the default `Uint8Array.toString()` method (which produces comma-separated values) instead of our polyfill's custom `toString()` method.
-
-**Why It Failed**:
-
-1. `Buffer.from(uint8Array)` creates a NEW `Uint8Array` wrapper
-2. The new wrapper doesn't inherit the custom `toString()` method
-3. Falls back to `Array.prototype.toString()` = comma-separated values
-
-**Solution**: Bypass Buffer polyfill entirely for base64 encoding, using native `btoa()`:
-
-```typescript
-const toBase64 = (uint8Array: Uint8Array): string => {
-  let binary = '';
-  for (let i = 0; i < uint8Array.length; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
-  }
-  return btoa(binary);
-};
-```
-
-### Challenge 5: SDK Browser Incompatibilities
+### Challenge 4: Hex Encoding in SDK Utils
 
 **Problem**: Multiple SDK utility functions expect Node.js-specific behavior that doesn't work in browsers.
 
@@ -711,10 +635,11 @@ All SDK modifications are in `node_modules` and are **required** for browser com
 | ----------------------------------------------------------------------- | ------------------------- | ---------------------------- | -------------------------------- |
 | `@midnight-ntwrk/midnight-js-utils/dist/index.mjs`                      | `parseCoinPublicKeyToHex` | Buffer.toString('hex') fails | Direct Uint8Array→hex conversion |
 | `@midnight-ntwrk/midnight-js-utils/dist/index.mjs`                      | `parseEncPublicKeyToHex`  | Buffer.toString('hex') fails | Direct Uint8Array→hex conversion |
-| `@midnight-ntwrk/midnight-js-network-id/dist/index.mjs`                 | `toRuntimeNetworkId`      | runtime.NetworkId undefined  | Fallback enum definition         |
 | `@midnight-ntwrk/midnight-js-http-client-proof-provider/dist/index.mjs` | `proveTx`                 | Missing Content-Type header  | Add 'application/octet-stream'   |
 | `@dao-xyz/borsh/lib/esm/binary.js`                                      | `allocUnsafe`             | Captured at module load      | Runtime function wrapper         |
 | `@dao-xyz/borsh/lib/esm/binary.js`                                      | `stringLengthFn`          | Captured at module load      | Runtime function wrapper         |
+
+**Note**: The `@midnight-ntwrk/midnight-js-network-id` patch only adds dependencies (no code changes). Module singleton behavior is ensured by Vite's `dedupe` configuration in `vite.config.ts`.
 
 ### Patch Maintenance Strategy
 
@@ -1029,7 +954,7 @@ describe('Transaction Flow', () => {
 - `@midnight-ntwrk/compact-runtime` - Contract runtime
 - `@midnight-ntwrk/midnight-js-contracts` - Contract utilities
 - `@midnight-ntwrk/midnight-js-http-client-proof-provider` - Proof server client
-- `@midnight-ntwrk/midnight-js-fetch-zk-config-provider` - ZK config fetching
+- `@midnight-ntwrk/midnight-js-level-private-state-provider` - IndexedDB state storage
 
 **Development Dependencies**:
 
@@ -1045,19 +970,18 @@ packages/adapter-midnight/src/
 ├── utils/
 │   ├── zip-extractor.ts             # ZIP extraction & artifact parsing
 │   ├── schema-parser.ts             # Contract definition parsing
-│   └── artifacts.ts                 # Artifact validation & upload
+│   └── artifacts.ts                 # Artifact validation & registration
 ├── transaction/
 │   ├── eoa.ts                       # EOA transaction strategy
-│   ├── providers.ts                 # Provider configuration
+│   ├── providers.ts                 # Provider configuration & global instance
+│   ├── embedded-zk-config-provider.ts # In-memory ZK artifact provider
 │   ├── contract-evaluator.ts       # Dynamic contract evaluation
 │   └── witness-evaluator.ts        # Witness code evaluation
 └── networks/
     └── testnet.ts                   # Network configuration
 
 packages/builder/
-├── vite.config.ts                   # Vite configuration
-└── vite-plugins/
-    └── zk-artifacts-server.ts       # ZK artifact server plugin
+└── vite.config.ts                   # Vite configuration (deduplication)
 
 node_modules/ (monkey-patched)
 ├── @midnight-ntwrk/
@@ -1077,18 +1001,26 @@ node_modules/ (monkey-patched)
 
 ## Conclusion
 
-This implementation demonstrates that browser-based Midnight contract execution is feasible, but requires careful handling of WASM contexts, binary data encoding, and SDK compatibility issues. The monkey-patches are temporary solutions that should ideally be resolved through upstream SDK improvements.
+This implementation successfully achieves **true browser-based Midnight contract execution** without any backend server requirements. The solution handles WASM contexts, binary data encoding, and SDK compatibility challenges through a combination of polyfills, monkey-patches, and careful architecture decisions.
 
 The architecture prioritizes:
 
-1. **Zero Backend** - All contract loading and execution happens client-side
-2. **Developer Experience** - Simple ZIP upload workflow
+1. **Zero Backend** - Pure static deployment identical to EVM and Stellar adapters
+2. **Developer Experience** - Simple ZIP upload workflow with automatic artifact registration
 3. **Security** - Sandboxed code evaluation with controlled dependencies
-4. **Performance** - In-memory caching, lazy loading, efficient encoding
+4. **Performance** - In-memory artifact storage, lazy loading, efficient encoding
+5. **Production Ready** - Same code path in development and production
+
+Key Achievements:
+
+- ✅ **No Infrastructure Changes**: Deploy as static files to any CDN/hosting
+- ✅ **Pure Client-Side**: All ZK artifacts stored in browser memory
+- ✅ **Zero Network Overhead**: No artifact HTTP requests during transactions
+- ✅ **Simple Architecture**: Removed server plugin, HTTP endpoints, serialization layer
 
 Future work should focus on:
 
 1. Upstreaming browser compatibility fixes to Midnight SDK
 2. Improving error messages and debugging tools
 3. Adding comprehensive test coverage
-4. Optimizing for production use cases
+4. Optional IndexedDB persistence for multi-session artifact caching
