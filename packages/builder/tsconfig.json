@@ -16,6 +16,11 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
+  "include": [
+    "src/**/*",
+    "src/**/*.json",
+    "src/export/**/*.ts",
+    "../../exports/increment-form (3)"
+  ],
   "exclude": ["src/export/codeTemplates/*.template.tsx"]
 }
