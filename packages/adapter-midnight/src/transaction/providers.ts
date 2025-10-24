@@ -7,7 +7,7 @@ import type {
 } from '@midnight-ntwrk/midnight-js-types';
 
 import type { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { getWalletConfigIfAvailable } from '../configuration/provider';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
@@ -48,35 +48,68 @@ export async function createTransactionProviders(
   // Get wallet configuration (may include user privacy preferences)
   const walletConfig = await getWalletConfigIfAvailable();
 
-  // Resolve endpoints with precedence:
-  // 1. Wallet config (user privacy preferences)
-  // 2. Network config (explicit configuration)
-  // 3. Derived from RPC endpoint (fallback)
-  const defaultRpc = networkConfig.rpcEndpoints?.default;
-  if (!defaultRpc && (!networkConfig.indexerUri || !networkConfig.indexerWsUri)) {
+  // Resolve indexer endpoints with priority order (matches EVM/Stellar pattern):
+  // 1. User RPC override (custom dev/test endpoints)
+  // 2. Wallet config (Midnight-specific: respects user privacy preferences)
+  // 3. Network config (explicit configuration)
+  // 4. Derived from RPC endpoint (fallback)
+
+  let indexerUri: string;
+  let indexerWsUri: string;
+
+  // Priority 1: Check for user RPC override
+  const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
+  if (customRpcConfig?.url) {
+    // Derive indexer endpoints from custom RPC
+    indexerUri = deriveIndexerUri(customRpcConfig.url);
+    indexerWsUri = deriveIndexerWsUri(customRpcConfig.url);
+    logger.info('createTransactionProviders', 'Using user RPC override to derive indexer URIs', {
+      rpcUrl: customRpcConfig.url,
+      indexerUri,
+    });
+  } else if (walletConfig?.indexerUri && walletConfig?.indexerWsUri) {
+    // Priority 2: Respect user privacy preferences from wallet
+    indexerUri = walletConfig.indexerUri;
+    indexerWsUri = walletConfig.indexerWsUri;
+    logger.info(
+      'createTransactionProviders',
+      'Using wallet-provided indexer URIs (user privacy preferences)'
+    );
+  } else if (networkConfig.indexerUri && networkConfig.indexerWsUri) {
+    // Priority 3: Explicit network configuration
+    indexerUri = networkConfig.indexerUri;
+    indexerWsUri = networkConfig.indexerWsUri;
+    logger.info('createTransactionProviders', 'Using explicit network-configured indexer URIs');
+  } else {
+    // Priority 4: Derive from RPC endpoint as fallback
+    const defaultRpc = networkConfig.rpcEndpoints?.default;
+    if (!defaultRpc) {
+      throw new Error(
+        'No indexer URIs available. Please configure indexerUri/indexerWsUri in network config or provide an RPC endpoint.'
+      );
+    }
+    indexerUri = deriveIndexerUri(defaultRpc);
+    indexerWsUri = deriveIndexerWsUri(defaultRpc);
+    logger.info('createTransactionProviders', 'Derived indexer URIs from network RPC endpoint', {
+      rpcUrl: defaultRpc,
+      indexerUri,
+    });
+  }
+
+  // Proof server URI must come from wallet - there's no public proof server
+  if (!walletConfig?.proverServerUri) {
     throw new Error(
-      'Midnight network RPC endpoints are not configured. Please set networkConfig.rpcEndpoints.default or provide explicit indexer URIs.'
+      'Proof server URI not available. Please ensure the Lace wallet is connected and configured correctly. ' +
+        'The proof server is required for generating zero-knowledge proofs for transactions.'
     );
   }
 
-  const indexerUri = networkConfig.indexerUri || deriveIndexerUri(defaultRpc as string);
-  const indexerWsUri = networkConfig.indexerWsUri || deriveIndexerWsUri(defaultRpc as string);
-
-  // Proof server URI priority: wallet config > network config > derive from RPC
-  const networkConfigAny = networkConfig as unknown as Record<string, unknown>;
-  const proofServerUri =
-    walletConfig?.proverServerUri ||
-    (networkConfigAny.proofServerUri as string | undefined) ||
-    deriveProofServerUri(defaultRpc as string);
+  const proofServerUri = walletConfig.proverServerUri;
 
   logger.info('createTransactionProviders', 'Initializing providers', {
     indexerUri,
     proofServerUri,
-    proofServerSource: walletConfig?.proverServerUri
-      ? 'wallet'
-      : networkConfigAny.proofServerUri
-        ? 'network'
-        : 'derived',
+    proofServerSource: 'wallet',
   });
 
   // Dynamic imports to avoid loading at module initialization
@@ -99,9 +132,8 @@ export async function createTransactionProviders(
   ]);
 
   // 1. Private state provider (IndexedDB-backed for browser)
-  const privateStateProvider = levelPrivateStateProvider({
-    privateStateStoreName: `midnight-private-state-${networkConfig.id}`,
-  });
+  // Use defaults from the SDK to ensure consistency across environments
+  const privateStateProvider = levelPrivateStateProvider();
 
   // 2. ZK config provider (uses global embedded provider)
   // Artifacts are registered with this provider when the ZIP is uploaded
@@ -188,15 +220,5 @@ function deriveIndexerWsUri(rpcUrl: string): string {
   if (url.protocol === 'http:') url.protocol = 'ws:';
   else if (url.protocol === 'https:') url.protocol = 'wss:';
   url.pathname = '/api/v1/graphql';
-  return url.toString();
-}
-
-function deriveProofServerUri(rpcUrl: string): string {
-  const url = new URL(rpcUrl);
-  if (url.protocol === 'ws:') url.protocol = 'http:';
-  else if (url.protocol === 'wss:') url.protocol = 'https:';
-  // The proof server endpoint is at the root /prove-tx, not under /api/v1/proof
-  // Remove any existing path to get the base URL
-  url.pathname = '';
   return url.toString();
 }

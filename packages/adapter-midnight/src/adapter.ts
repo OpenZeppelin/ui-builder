@@ -1,4 +1,6 @@
 import type {
+  AdapterExportBootstrap,
+  AdapterExportContext,
   AvailableUiKit,
   Connector,
   ContractAdapter,
@@ -22,6 +24,7 @@ import type {
 import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { getMidnightExportBootstrapFiles } from './export/bootstrap';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
 import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
@@ -30,16 +33,11 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
-import {
-  EoaExecutionStrategy,
-  formatMidnightTransactionData,
-  type ExecutionStrategy,
-} from './transaction';
+import { formatMidnightTransactionData } from './transaction';
 import { formatMidnightFunctionResult } from './transform';
-import type { MidnightContractArtifacts, WriteContractParameters } from './types';
+import type { MidnightContractArtifacts } from './types';
 import { validateAndConvertMidnightArtifacts } from './utils';
 import { isValidAddress } from './validation';
-import { getMidnightWalletImplementation } from './wallet';
 
 /**
  * Midnight-specific adapter.
@@ -134,47 +132,22 @@ export class MidnightAdapter implements ContractAdapter {
           'A unique identifier for your private state instance. This ID is used to manage your personal encrypted data.',
       },
       {
-        id: 'contractDefinition',
-        name: 'contractDefinition',
-        label: 'Contract Interface (.d.ts)',
-        type: 'code-editor',
+        id: 'contractArtifactsZip',
+        name: 'contractArtifactsZip',
+        label: 'Contract Build Artifacts (ZIP)',
+        type: 'file-upload',
         validation: { required: true },
-        placeholder:
-          'export interface MyContract {\n  myMethod(param: string): Promise<void>;\n  // ... other methods\n}',
+        accept: '.zip',
         helperText:
-          "Paste the TypeScript interface definition from your contract.d.ts file. This defines the contract's available methods.",
-        codeEditorProps: {
-          language: 'typescript',
-          placeholder: 'Paste your contract interface here...',
-          maxHeight: '400px',
-        },
-      },
-      {
-        id: 'contractModule',
-        name: 'contractModule',
-        label: 'Compiled Contract Module (.cjs)',
-        type: 'textarea',
-        validation: { required: true },
-        placeholder: 'module.exports = { /* compiled contract code */ };',
-        helperText:
-          "Paste the compiled contract code from your contract.cjs file. This contains the contract's implementation.",
-      },
-      {
-        id: 'witnessCode',
-        name: 'witnessCode',
-        label: 'Witness Functions (Optional)',
-        type: 'textarea',
-        validation: { required: false },
-        placeholder:
-          '// Define witness functions for zero-knowledge proofs\nexport const witnesses = {\n  myWitness: (ctx) => {\n    return [ctx.privateState.myField, []];\n  }\n};',
-        helperText:
-          'Optional: Define witness functions that generate zero-knowledge proofs for your contract interactions. These functions determine what private data is used in proofs.',
+          "Select a ZIP file containing your compiled Midnight contract artifacts. The ZIP should include: contract module (.cjs), TypeScript definitions (.d.ts), witness code (witnesses.js), and ZK proof files (.prover, .verifier, .bzkir). Typically created by zipping your project's dist/ directory after running `compact build`. All processing happens locally in your browser.",
+        convertToBase64: true, // Convert to base64 for storage
+        maxSize: 10 * 1024 * 1024, // 10MB limit
       },
     ];
   }
 
   public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
-    const artifacts = validateAndConvertMidnightArtifacts(source);
+    const artifacts = await validateAndConvertMidnightArtifacts(source);
 
     this.artifacts = artifacts;
     logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
@@ -197,7 +170,7 @@ export class MidnightAdapter implements ContractAdapter {
     proxyInfo?: undefined;
     contractDefinitionArtifacts?: Record<string, unknown>;
   }> {
-    const artifacts = validateAndConvertMidnightArtifacts(source);
+    const artifacts = await validateAndConvertMidnightArtifacts(source);
 
     this.artifacts = artifacts;
     logger.info('MidnightAdapter', 'Contract artifacts stored.', this.artifacts);
@@ -242,7 +215,13 @@ export class MidnightAdapter implements ContractAdapter {
     submittedInputs: Record<string, unknown>,
     fields: FormFieldType[]
   ): unknown {
-    return formatMidnightTransactionData(contractSchema, functionId, submittedInputs, fields);
+    return formatMidnightTransactionData(
+      contractSchema,
+      functionId,
+      submittedInputs,
+      fields,
+      this.artifacts
+    );
   }
 
   public async signAndBroadcast(
@@ -251,20 +230,14 @@ export class MidnightAdapter implements ContractAdapter {
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
-    const walletImplementation = await getMidnightWalletImplementation();
-    let strategy: ExecutionStrategy;
+    // Orchestrate transaction execution by delegating to the transaction module
+    const { signAndBroadcastMidnightTransaction } = await import('./transaction');
 
-    switch (executionConfig.method) {
-      case 'eoa':
-      default:
-        strategy = new EoaExecutionStrategy();
-        break;
-    }
-
-    return strategy.execute(
-      transactionData as WriteContractParameters,
+    return signAndBroadcastMidnightTransaction(
+      transactionData,
       executionConfig,
-      walletImplementation,
+      this.networkConfig,
+      this.artifacts,
       onStatusChange,
       runtimeApiKey
     );
@@ -359,6 +332,15 @@ export class MidnightAdapter implements ContractAdapter {
   }> {
     // TODO: Implement Midnight-specific RPC validation when needed
     return testMidnightRpcConnection(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getExportBootstrapFiles(
+    context: AdapterExportContext
+  ): Promise<AdapterExportBootstrap | null> {
+    return getMidnightExportBootstrapFiles(context);
   }
 }
 

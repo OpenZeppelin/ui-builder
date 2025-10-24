@@ -11,5 +11,12 @@ export interface WriteContractParameters {
   functionName: string;
   args: unknown[];
   argTypes: string[]; // Parameter types for argument conversion
-  transactionOptions: Record<string, unknown>;
+  transactionOptions: Record<string, unknown> & {
+    _artifacts?: {
+      privateStateId: string;
+      contractModule?: string;
+      witnessCode?: string;
+      verifierKeys?: Record<string, unknown>;
+    };
+  };
 }

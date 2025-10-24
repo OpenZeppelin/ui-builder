@@ -49,16 +49,23 @@
     "@midnight-ntwrk/dapp-connector-api": "^3.0.0",
     "@midnight-ntwrk/ledger": "4.0.0",
     "@midnight-ntwrk/midnight-js-contracts": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^2.0.2",
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^2.0.2",
     "@midnight-ntwrk/midnight-js-network-id": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^2.0.2",
     "@midnight-ntwrk/midnight-js-types": "^2.0.2",
     "@midnight-ntwrk/midnight-js-utils": "^2.0.2",
     "@midnight-ntwrk/wallet-sdk-address-format": "2.0.0",
+    "@midnight-ntwrk/zswap": "4.0.0",
     "@openzeppelin/ui-builder-react-core": "workspace:^",
     "@openzeppelin/ui-builder-types": "workspace:*",
     "@openzeppelin/ui-builder-ui": "workspace:*",
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "@scure/base": "^2.0.0",
+    "@types/jszip": "^3.4.1",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.510.0",
     "rxjs": "^7.8.1"
   },
@@ -82,6 +89,11 @@
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",
       "require": "./dist/config.cjs"
+    },
+    "./vite-config": {
+      "types": "./dist/vite-config.d.ts",
+      "import": "./dist/vite-config.js",
+      "require": "./dist/vite-config.cjs"
     }
   },
   "pnpm": {
@@ -90,7 +102,9 @@
       "@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch"
+      "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-contracts@2.0.2": "patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch"
     }
   }
 }

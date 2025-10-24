@@ -5,10 +5,10 @@ import type {
 } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
-import type { WriteContractParameters } from '../types';
+import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
 import { getMidnightWalletImplementation } from '../wallet';
 import { EoaExecutionStrategy } from './eoa';
-import type { ExecutionStrategy } from './execution-strategy';
+import type { ExecutionStrategy, MidnightExecutionConfig } from './execution-strategy';
 
 const SYSTEM_LOG_TAG = 'adapter-midnight-sender';
 
@@ -20,6 +20,7 @@ const SYSTEM_LOG_TAG = 'adapter-midnight-sender';
  * @param transactionData - The formatted transaction data from formatMidnightTransactionData
  * @param executionConfig - Execution configuration specifying method (eoa/wallet only in v1)
  * @param networkConfig - Midnight network configuration
+ * @param adapterArtifacts - Contract artifacts from the adapter instance (fallback)
  * @param onStatusChange - Callback for transaction status updates
  * @param runtimeApiKey - Optional session-only API key for methods like Relayer
  * @returns Promise resolving to the transaction hash
@@ -28,6 +29,7 @@ export async function signAndBroadcastMidnightTransaction(
   transactionData: unknown,
   executionConfig: ExecutionConfig,
   networkConfig: MidnightNetworkConfig,
+  adapterArtifacts: MidnightContractArtifacts | null,
   onStatusChange?: (status: string, details: TransactionStatusUpdate) => void,
   runtimeApiKey?: string
 ): Promise<{ txHash: string }> {
@@ -63,10 +65,47 @@ export async function signAndBroadcastMidnightTransaction(
       break;
   }
 
+  // --- Prepare Artifacts --- //
+  // Extract artifacts from transaction data or fall back to adapter instance
+  const txArtifacts = txData.transactionOptions?._artifacts;
+
+  let executionArtifacts: MidnightExecutionConfig['artifacts'];
+
+  if (txArtifacts) {
+    // Use artifacts from transaction (already in correct format)
+    executionArtifacts = txArtifacts.contractModule
+      ? {
+          privateStateId: txArtifacts.privateStateId,
+          contractModule: txArtifacts.contractModule,
+          witnessCode: txArtifacts.witnessCode,
+          verifierKeys: txArtifacts.verifierKeys,
+        }
+      : undefined;
+  } else if (adapterArtifacts) {
+    // Use artifacts from adapter (need to map fields)
+    executionArtifacts = adapterArtifacts.contractModule
+      ? {
+          privateStateId: adapterArtifacts.privateStateId,
+          contractModule: adapterArtifacts.contractModule,
+          witnessCode: adapterArtifacts.witnessCode,
+          verifierKeys: adapterArtifacts.verifierKeys,
+        }
+      : undefined;
+  } else {
+    throw new Error('Contract artifacts are required for transaction execution but were not found');
+  }
+
+  // --- Augment Execution Config --- //
+  const augmentedConfig: MidnightExecutionConfig = {
+    executionConfig,
+    artifacts: executionArtifacts,
+    networkConfig,
+  };
+
   // --- Execute using selected strategy --- //
   return strategy.execute(
     txData,
-    executionConfig,
+    augmentedConfig,
     walletImplementation,
     onStatusChange || (() => {}),
     runtimeApiKey

@@ -108,27 +108,71 @@ function extractLedgerProperties(content: string): Record<string, ContractFuncti
   }
 
   // Also check for Queries type (parameterized query methods)
-  const queriesMatch = content.match(
-    /export\s+(?:declare\s+)?type\s+Queries\s*<[^>]*>\s*=\s*{([\s\S]*?)}/s
+  // We need to manually extract the content by tracking brace depth
+  const queriesStartMatch = content.match(
+    /export\s+(?:declare\s+)?type\s+Queries\s*<[^>]*>\s*=\s*{/
   );
 
-  if (queriesMatch) {
-    const queriesContent = queriesMatch[1];
-    const methodRegex = /(\w+)\s*\(\s*([^)]*)\)/g;
-    let match;
-    while ((match = methodRegex.exec(queriesContent)) !== null) {
-      const name = match[1];
-      const paramsText = match[2] || '';
-      properties[name] = {
-        id: name,
-        name,
-        displayName: capitalizeFirst(name),
-        inputs: parseParameters(paramsText),
-        outputs: [],
-        modifiesState: false,
-        type: 'function',
-        stateMutability: 'view',
-      };
+  if (queriesStartMatch) {
+    const startIndex = queriesStartMatch.index! + queriesStartMatch[0].length;
+    let braceCount = 1;
+    let endIndex = startIndex;
+
+    // Find the matching closing brace
+    for (let i = startIndex; i < content.length && braceCount > 0; i++) {
+      if (content[i] === '{') braceCount++;
+      else if (content[i] === '}') braceCount--;
+      if (braceCount > 0) endIndex = i + 1;
+    }
+
+    const queriesContent = content.substring(startIndex, endIndex);
+    // Parse methods with return types, handling complex nested types
+    // We need to parse character by character to handle nested braces in return types
+    let currentMethod = '';
+    let braceDepth = 0;
+    let angleDepth = 0;
+    let parenDepth = 0;
+
+    for (let i = 0; i < queriesContent.length; i++) {
+      const char = queriesContent[i];
+
+      if (char === '{') {
+        braceDepth++;
+        currentMethod += char;
+      } else if (char === '}') {
+        braceDepth--;
+        currentMethod += char;
+      } else if (char === '<') {
+        angleDepth++;
+        currentMethod += char;
+      } else if (char === '>') {
+        angleDepth--;
+        currentMethod += char;
+      } else if (char === '(') {
+        parenDepth++;
+        currentMethod += char;
+      } else if (char === ')') {
+        parenDepth--;
+        currentMethod += char;
+      } else if (
+        (char === ';' || char === ',') &&
+        braceDepth === 0 &&
+        angleDepth === 0 &&
+        parenDepth === 0
+      ) {
+        // End of method definition at top level
+        if (currentMethod.trim()) {
+          parseQueryMethod(currentMethod.trim(), properties);
+        }
+        currentMethod = '';
+      } else {
+        currentMethod += char;
+      }
+    }
+
+    // Don't forget the last method if there's no trailing semicolon
+    if (currentMethod.trim()) {
+      parseQueryMethod(currentMethod.trim(), properties);
     }
   }
 
@@ -137,6 +181,38 @@ function extractLedgerProperties(content: string): Record<string, ContractFuncti
     `Extracted ${Object.keys(properties).length} ledger properties/queries`
   );
   return properties;
+}
+
+/**
+ * Parses a single query method signature and adds it to the properties object
+ */
+function parseQueryMethod(methodText: string, properties: Record<string, ContractFunction>): void {
+  // Match: methodName(...params): ReturnType
+  const methodMatch = methodText.match(/^(\w+)\s*\((.*?)\)\s*:\s*(.+)$/s);
+  if (methodMatch) {
+    const name = methodMatch[1];
+    const paramsText = methodMatch[2] || '';
+    const returnType = methodMatch[3]?.trim() || 'unknown';
+
+    // Check for name collision with ledger properties
+    if (properties[name]) {
+      logger.warn(
+        SYSTEM_LOG_TAG,
+        `Name collision detected: Query method "${name}" overwrites ledger property with same name`
+      );
+    }
+
+    properties[name] = {
+      id: name,
+      name,
+      displayName: capitalizeFirst(name),
+      inputs: parseParameters(paramsText),
+      outputs: [{ name: 'value', type: returnType }],
+      modifiesState: false,
+      type: 'function',
+      stateMutability: 'view',
+    };
+  }
 }
 
 /**
@@ -164,12 +240,28 @@ function parseParameters(paramsText: string): FunctionParameter[] {
         currentParam += char;
       } else if (char === '}' || char === ']') {
         bracketDepth--;
+        // Validate depth never goes negative (indicates malformed input)
+        if (bracketDepth < 0) {
+          logger.warn(
+            SYSTEM_LOG_TAG,
+            `Malformed parameter text: unbalanced brackets/braces at position ${i} in "${paramsText}"`
+          );
+          throw new Error(`Unbalanced brackets/braces at position ${i}`);
+        }
         currentParam += char;
       } else if (char === '<') {
         angleDepth++;
         currentParam += char;
       } else if (char === '>') {
         angleDepth--;
+        // Validate depth never goes negative (indicates malformed input)
+        if (angleDepth < 0) {
+          logger.warn(
+            SYSTEM_LOG_TAG,
+            `Malformed parameter text: unbalanced angle brackets at position ${i} in "${paramsText}"`
+          );
+          throw new Error(`Unbalanced angle brackets at position ${i}`);
+        }
         currentParam += char;
       } else if (char === ',' && bracketDepth === 0 && angleDepth === 0) {
         // Top-level comma - this separates parameters
@@ -180,6 +272,22 @@ function parseParameters(paramsText: string): FunctionParameter[] {
       } else {
         currentParam += char;
       }
+    }
+
+    // Validate all brackets/angles are balanced at the end
+    if (bracketDepth !== 0) {
+      logger.warn(
+        SYSTEM_LOG_TAG,
+        `Malformed parameter text: unclosed brackets/braces (depth: ${bracketDepth}) in "${paramsText}"`
+      );
+      throw new Error(`Unclosed brackets/braces (depth: ${bracketDepth})`);
+    }
+    if (angleDepth !== 0) {
+      logger.warn(
+        SYSTEM_LOG_TAG,
+        `Malformed parameter text: unclosed angle brackets (depth: ${angleDepth}) in "${paramsText}"`
+      );
+      throw new Error(`Unclosed angle brackets (depth: ${angleDepth})`);
     }
 
     // Don't forget the last parameter

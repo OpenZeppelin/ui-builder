@@ -13,7 +13,7 @@ interface ZKConfig {
 /**
  * A ZkConfigProvider that uses embedded ZK artifacts from contract ZIP files.
  * Works entirely in-browser without requiring any server endpoints.
- * 
+ *
  * This provider stores the prover/verifier keys and ZKIR files extracted from
  * the contract ZIP and provides them to the proof server when generating proofs.
  */
@@ -40,13 +40,8 @@ export class EmbeddedZkConfigProvider {
    */
   async get(circuitId: string): Promise<ZKConfig | undefined> {
     const artifact = this.artifacts[circuitId];
-    
+
     if (!artifact) {
-      console.warn(
-        `[EmbeddedZkConfigProvider] No artifacts found for circuit: ${circuitId}`,
-        'Available circuits:',
-        Object.keys(this.artifacts)
-      );
       return undefined;
     }
 
@@ -73,4 +68,3 @@ export class EmbeddedZkConfigProvider {
     this.artifacts = {};
   }
 }
-

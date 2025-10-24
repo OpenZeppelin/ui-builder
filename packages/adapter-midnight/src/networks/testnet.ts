@@ -17,18 +17,4 @@ export const midnightTestnet: MidnightNetworkConfig = {
   indexerUri: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
   indexerWsUri: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
   // TODO: Add explorer URL when available
-  // explorerUrl: '...',
 };
-
-// Has been deprecated in favor of midnightTestnet
-// export const midnightDevnet: MidnightNetworkConfig = {
-//   id: 'midnight-devnet',
-//   exportConstName: 'midnightDevnet',
-//   name: 'Midnight Devnet',
-//   ecosystem: 'midnight',
-//   network: 'midnight-devnet',
-//   type: 'devnet',
-//   isTestnet: true,
-//   // Add Midnight-specific fields here when known
-//   // explorerUrl: '...',
-// };

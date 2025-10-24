@@ -3,9 +3,9 @@
  */
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { globalZkConfigProvider } from '../transaction/providers';
 import type { MidnightContractArtifacts } from '../types/artifacts';
 import { isMidnightContractArtifacts } from '../types/artifacts';
-import { globalZkConfigProvider } from '../transaction/providers';
 import { extractMidnightContractZip, fileToBase64 } from './zip-extractor';
 
 const SYSTEM_LOG_TAG = 'ArtifactsValidator';
@@ -48,6 +48,19 @@ export async function validateAndConvertMidnightArtifacts(
     // Extract artifacts from ZIP
     const extractedArtifacts = await extractMidnightContractZip(base64Data);
 
+    // Validate required fields from extraction
+    if (!extractedArtifacts.contractDefinition) {
+      throw new Error(
+        'Contract definition is missing from the extracted artifacts. The ZIP file may be corrupted or incomplete.'
+      );
+    }
+
+    if (!extractedArtifacts.contractModule) {
+      throw new Error(
+        'Contract module is missing from the extracted artifacts. The ZIP file may be corrupted or incomplete.'
+      );
+    }
+
     // Register ZK artifacts with the global provider (works in dev and production)
     if (extractedArtifacts.zkArtifacts) {
       globalZkConfigProvider.registerAll(extractedArtifacts.zkArtifacts);
@@ -58,21 +71,21 @@ export async function validateAndConvertMidnightArtifacts(
       );
     }
 
-    // Combine with address and privateStateId
+    // Validate required form fields
+    if (!source.contractAddress || !source.privateStateId) {
+      throw new Error('Contract address and private state ID are required.');
+    }
+
+    // Combine with address and privateStateId (all fields are now validated)
     const artifacts: MidnightContractArtifacts = {
       contractAddress: source.contractAddress as string,
       privateStateId: source.privateStateId as string,
-      contractDefinition: extractedArtifacts.contractDefinition!,
+      contractDefinition: extractedArtifacts.contractDefinition,
       contractModule: extractedArtifacts.contractModule,
       witnessCode: extractedArtifacts.witnessCode,
       verifierKeys: extractedArtifacts.verifierKeys,
       originalZipData: base64Data, // Store for auto-save
     };
-
-    // Validate required fields
-    if (!artifacts.contractAddress || !artifacts.privateStateId) {
-      throw new Error('Contract address and private state ID are required.');
-    }
 
     return artifacts;
   }

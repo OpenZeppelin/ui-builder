@@ -2,7 +2,7 @@ import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-builder-typ
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { parseMidnightInput } from '../transform';
-import type { WriteContractParameters } from '../types';
+import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
 
 /**
  * Formats transaction data for Midnight chains based on parsed inputs.
@@ -11,13 +11,15 @@ import type { WriteContractParameters } from '../types';
  * @param functionId The ID of the function being called.
  * @param submittedInputs The raw data submitted from the form.
  * @param fields The fields of the form schema.
+ * @param artifacts Optional contract artifacts needed for execution
  * @returns The formatted data payload suitable for signAndBroadcast.
  */
 export function formatMidnightTransactionData(
   contractSchema: ContractSchema,
   functionId: string,
   submittedInputs: Record<string, unknown>,
-  fields: FormFieldType[]
+  fields: FormFieldType[],
+  artifacts?: MidnightContractArtifacts | null
 ): WriteContractParameters {
   logger.info(
     'formatMidnightTransactionData',
@@ -40,6 +42,11 @@ export function formatMidnightTransactionData(
     }
     let value: unknown;
     if (fieldConfig.isHardcoded) {
+      if (fieldConfig.hardcodedValue === undefined) {
+        throw new Error(
+          `Field '${fieldConfig.name}' is marked as hardcoded but has no hardcodedValue defined.`
+        );
+      }
       value = fieldConfig.hardcodedValue;
     } else if (fieldConfig.isHidden) {
       throw new Error(`Field '${fieldConfig.name}' cannot be hidden without being hardcoded.`);
@@ -79,7 +86,17 @@ export function formatMidnightTransactionData(
     functionName: functionDetails.name,
     args: transformedArgs,
     argTypes: functionDetails.inputs.map((param) => param.type),
-    transactionOptions: {},
+    transactionOptions: {
+      // Pass artifacts for execution (will be extracted by adapter's signAndBroadcast)
+      _artifacts: artifacts
+        ? {
+            privateStateId: artifacts.privateStateId,
+            contractModule: artifacts.contractModule,
+            witnessCode: artifacts.witnessCode,
+            verifierKeys: artifacts.verifierKeys,
+          }
+        : undefined,
+    },
   };
 
   return paramsForSignAndBroadcast;

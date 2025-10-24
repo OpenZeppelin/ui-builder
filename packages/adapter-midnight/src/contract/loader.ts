@@ -61,6 +61,8 @@ export async function loadMidnightContractWithMetadata(
   if (artifacts.privateStateId) artifactsRecord.privateStateId = artifacts.privateStateId;
   if (artifacts.contractModule) artifactsRecord.contractModule = artifacts.contractModule;
   if (artifacts.witnessCode) artifactsRecord.witnessCode = artifacts.witnessCode;
+  if (artifacts.verifierKeys) artifactsRecord.verifierKeys = artifacts.verifierKeys;
+  if (artifacts.originalZipData) artifactsRecord.originalZipData = artifacts.originalZipData;
 
   return {
     ...base,
