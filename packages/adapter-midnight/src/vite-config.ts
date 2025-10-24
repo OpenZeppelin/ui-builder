@@ -97,7 +97,7 @@ export function getMidnightViteConfig(plugins: MidnightVitePlugins): UserConfig 
         '@midnight-ntwrk/ledger',
         '@midnight-ntwrk/zswap',
         '@midnight-ntwrk/midnight-js-contracts',
-        // NOTE: midnight-js-network-id is in `exclude` (not here) due to top-level await
+        '@midnight-ntwrk/midnight-js-network-id', // Has top-level await but MUST be pre-bundled
         'object-inspect', // Required by compact-runtime
 
         // HTTP utilities (CommonJS/UMD → ESM conversion)
@@ -142,7 +142,6 @@ export function getMidnightViteConfig(plugins: MidnightVitePlugins): UserConfig 
         '@midnight-ntwrk/onchain-runtime',
         '@midnight-ntwrk/midnight-js-types',
         '@midnight-ntwrk/midnight-js-utils',
-        '@midnight-ntwrk/midnight-js-network-id',
         '@midnight-ntwrk/wallet-sdk-address-format',
         '@midnight-ntwrk/midnight-js-http-client-proof-provider',
         '@midnight-ntwrk/midnight-js-level-private-state-provider',
