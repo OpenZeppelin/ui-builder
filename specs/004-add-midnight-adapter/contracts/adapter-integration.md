@@ -39,7 +39,6 @@
 ## Error Handling
 
 - Validation errors are user-friendly and localized to fields.
-- Submission errors show identifier context and indexing summary when applicable.
 
 ## Non‑Goals (v1)
 
