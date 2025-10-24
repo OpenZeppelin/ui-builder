@@ -10,6 +10,8 @@ yarn.lock
 # pnpm-lock.yaml - uncomment if using npm or yarn instead of pnpm
 # pnpm-lock.yaml
 .pnpm-debug.log*
+.pnpm-store/
+.packed-packages/
 
 # Build outputs
 dist/

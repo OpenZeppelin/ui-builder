@@ -107,7 +107,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid semver version strings', () => {
-      Object.entries(runtime).forEach(([pkg, version]) => {
+      Object.entries(runtime).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -126,7 +126,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid version strings', () => {
-      Object.entries(dev).forEach(([pkg, version]) => {
+      Object.entries(dev).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -143,7 +143,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid version strings', () => {
-      Object.entries(build).forEach(([pkg, version]) => {
+      Object.entries(build).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -261,10 +261,7 @@ describe('Midnight Adapter Config', () => {
       // Essential browser polyfills
       const requiredPolyfills = ['buffer', 'events'];
       requiredPolyfills.forEach((pkg) => {
-        expect(
-          runtime,
-          `Missing essential browser polyfill: ${pkg}`
-        ).toHaveProperty(pkg);
+        expect(runtime, `Missing essential browser polyfill: ${pkg}`).toHaveProperty(pkg);
       });
 
       // Essential Midnight SDK packages
@@ -274,10 +271,7 @@ describe('Midnight Adapter Config', () => {
         '@midnight-ntwrk/midnight-js-network-id',
       ];
       requiredMidnight.forEach((pkg) => {
-        expect(
-          runtime,
-          `Missing essential Midnight SDK package: ${pkg}`
-        ).toHaveProperty(pkg);
+        expect(runtime, `Missing essential Midnight SDK package: ${pkg}`).toHaveProperty(pkg);
       });
 
       // Essential for private state management
@@ -297,12 +291,10 @@ describe('Midnight Adapter Config', () => {
       const disallowedPackages = ['vitest', 'typescript', '@types/node', 'eslint'];
 
       disallowedPackages.forEach((pkg) => {
-        expect(
-          runtime,
-          `Unexpected development package in runtime: ${pkg}`
-        ).not.toHaveProperty(pkg);
+        expect(runtime, `Unexpected development package in runtime: ${pkg}`).not.toHaveProperty(
+          pkg
+        );
       });
     });
   });
 });
-
