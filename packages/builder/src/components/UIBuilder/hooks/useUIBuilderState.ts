@@ -144,6 +144,7 @@ export function useUIBuilderState() {
     activeAdapter?.networkConfig.id,
     contractDefinition.load,
     hasMissingRequiredFields,
+    state.contractState.formValues,
   ]);
 
   const contractWidget = useContractWidgetState();

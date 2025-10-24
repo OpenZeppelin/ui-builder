@@ -6,6 +6,7 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { useAnalytics } from '../../../hooks/useAnalytics';
 import { downloadBlob } from '../StepComplete/utils';
+import { uiBuilderStore } from './uiBuilderStore';
 
 // Lazy load AppExportSystem to prevent templates from loading on initial page load
 const AppExportSystemPromise = import('../../../export').then((module) => module.AppExportSystem);
@@ -41,6 +42,9 @@ export function useCompleteStepState() {
         const AppExportSystem = await AppExportSystemPromise;
         const exportSystem = new AppExportSystem();
 
+        // Get current state to extract artifacts
+        const state = uiBuilderStore.getState();
+
         // Determine export environment from build-time env var
         // - 'local' for CLI/development: uses workspace:* (latest local code)
         // - 'staging' for staging UI: uses RC versions (latest unpublished features)
@@ -57,6 +61,11 @@ export function useCompleteStepState() {
         const exportOptions = {
           ecosystem: networkConfig.ecosystem,
           env: exportEnv || 'production',
+          // Include adapter artifacts from the contract state for ecosystems that need them (e.g., Midnight)
+          adapterArtifacts: {
+            artifacts: state.contractState.contractDefinitionArtifacts,
+            definitionOriginal: state.contractState.definitionOriginal,
+          },
         };
 
         const result = await exportSystem.exportApp(

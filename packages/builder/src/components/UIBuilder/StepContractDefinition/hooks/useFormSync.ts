@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -111,14 +112,41 @@ export function useFormSync({
       // Update only if changed
       const state = uiBuilderStore.getState();
       const prev = state.contractState.contractDefinitionArtifacts || {};
-      const changed = JSON.stringify(prev) !== JSON.stringify(artifacts);
+
+      // Merge with existing artifacts to preserve fields like originalZipData that come from loading
+      const mergedArtifacts = { ...prev, ...artifacts };
+
+      const changed = JSON.stringify(prev) !== JSON.stringify(mergedArtifacts);
       if (changed) {
         uiBuilderStore.updateState((s) => ({
           contractState: {
             ...s.contractState,
-            contractDefinitionArtifacts: artifacts,
+            contractDefinitionArtifacts: mergedArtifacts,
           },
         }));
+
+        // Transition-based gating: only set needsContractDefinitionLoad when
+        // required adapter inputs change from missing -> present
+        const nowHasAll = adapter
+          ? !hasMissingRequiredContractInputs(adapter, {
+              ...(uiBuilderStore.getState().contractState.formValues || {}),
+              ...artifacts,
+            } as FormValues)
+          : false;
+
+        const prevHadAll = adapter
+          ? !hasMissingRequiredContractInputs(adapter, {
+              ...(uiBuilderStore.getState().contractState.formValues || {}),
+              ...(prev as Record<string, unknown>),
+            } as FormValues)
+          : false;
+
+        if (!prevHadAll && nowHasAll) {
+          uiBuilderStore.updateState((s) => ({
+            ...s,
+            needsContractDefinitionLoad: true,
+          }));
+        }
       }
     } catch {
       // no-op on adapter errors
