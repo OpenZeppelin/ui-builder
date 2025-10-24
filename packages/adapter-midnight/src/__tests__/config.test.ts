@@ -107,7 +107,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid semver version strings', () => {
-      Object.entries(runtime).forEach(([pkg, version]) => {
+      Object.entries(runtime).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -126,7 +126,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid version strings', () => {
-      Object.entries(dev).forEach(([pkg, version]) => {
+      Object.entries(dev ?? {}).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -143,7 +143,7 @@ describe('Midnight Adapter Config', () => {
     });
 
     it('should have valid version strings', () => {
-      Object.entries(build).forEach(([pkg, version]) => {
+      Object.entries(build ?? {}).forEach(([_pkg, version]) => {
         expect(version).toBeDefined();
         expect(typeof version).toBe('string');
         expect(version.length).toBeGreaterThan(0);
@@ -155,63 +155,72 @@ describe('Midnight Adapter Config', () => {
     const { viteConfig } = midnightAdapterConfig;
 
     it('should have imports array', () => {
-      expect(viteConfig.imports).toBeDefined();
-      expect(Array.isArray(viteConfig.imports)).toBe(true);
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig?.imports).toBeDefined();
+      expect(Array.isArray(viteConfig?.imports)).toBe(true);
     });
 
     it('should import required plugins', () => {
-      const importsStr = viteConfig.imports.join('\n');
+      expect(viteConfig).toBeDefined();
+      const importsStr = viteConfig!.imports.join('\n');
       expect(importsStr).toContain("import topLevelAwait from 'vite-plugin-top-level-await'");
       expect(importsStr).toContain("import wasm from 'vite-plugin-wasm'");
     });
 
     it('should import getMidnightViteConfig from vite-config', () => {
-      const importsStr = viteConfig.imports.join('\n');
+      expect(viteConfig).toBeDefined();
+      const importsStr = viteConfig!.imports.join('\n');
       expect(importsStr).toContain('getMidnightViteConfig');
       expect(importsStr).toContain('@openzeppelin/ui-builder-adapter-midnight/vite-config');
     });
 
     it('should have configInit that calls getMidnightViteConfig', () => {
-      expect(viteConfig.configInit).toBeDefined();
-      expect(typeof viteConfig.configInit).toBe('string');
-      expect(viteConfig.configInit).toContain('getMidnightViteConfig');
-      expect(viteConfig.configInit).toContain('wasm');
-      expect(viteConfig.configInit).toContain('topLevelAwait');
-      expect(viteConfig.configInit).toContain('midnightConfig');
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.configInit).toBeDefined();
+      expect(typeof viteConfig!.configInit).toBe('string');
+      expect(viteConfig!.configInit).toContain('getMidnightViteConfig');
+      expect(viteConfig!.configInit).toContain('wasm');
+      expect(viteConfig!.configInit).toContain('topLevelAwait');
+      expect(viteConfig!.configInit).toContain('midnightConfig');
     });
 
     it('should have plugins spread configuration', () => {
-      expect(viteConfig.plugins).toBeDefined();
-      expect(typeof viteConfig.plugins).toBe('string');
-      expect(viteConfig.plugins).toContain('midnightConfig.plugins');
-      expect(viteConfig.plugins).toContain('...');
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.plugins).toBeDefined();
+      expect(typeof viteConfig!.plugins).toBe('string');
+      expect(viteConfig!.plugins).toContain('midnightConfig.plugins');
+      expect(viteConfig!.plugins).toContain('...');
     });
 
     it('should have dedupe configuration', () => {
-      expect(viteConfig.dedupe).toBeDefined();
-      expect(typeof viteConfig.dedupe).toBe('string');
-      expect(viteConfig.dedupe).toContain('dedupe');
-      expect(viteConfig.dedupe).toContain('midnightConfig.resolve');
-      expect(viteConfig.dedupe).toContain('...');
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.dedupe).toBeDefined();
+      expect(typeof viteConfig!.dedupe).toBe('string');
+      expect(viteConfig!.dedupe).toContain('dedupe');
+      expect(viteConfig!.dedupe).toContain('midnightConfig.resolve');
+      expect(viteConfig!.dedupe).toContain('...');
     });
 
     it('should have optimizeDeps configuration', () => {
-      expect(viteConfig.optimizeDeps).toBeDefined();
-      expect(typeof viteConfig.optimizeDeps).toBe('object');
-      expect(viteConfig.optimizeDeps.include).toBeDefined();
-      expect(viteConfig.optimizeDeps.exclude).toBeDefined();
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.optimizeDeps).toBeDefined();
+      expect(typeof viteConfig!.optimizeDeps).toBe('object');
+      expect(viteConfig!.optimizeDeps?.include).toBeDefined();
+      expect(viteConfig!.optimizeDeps?.exclude).toBeDefined();
     });
 
     it('should have valid optimizeDeps include configuration', () => {
-      expect(viteConfig.optimizeDeps.include).toContain('include');
-      expect(viteConfig.optimizeDeps.include).toContain('midnightConfig.optimizeDeps');
-      expect(viteConfig.optimizeDeps.include).toContain('...');
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.optimizeDeps?.include).toContain('include');
+      expect(viteConfig!.optimizeDeps?.include).toContain('midnightConfig.optimizeDeps');
+      expect(viteConfig!.optimizeDeps?.include).toContain('...');
     });
 
     it('should have valid optimizeDeps exclude configuration', () => {
-      expect(viteConfig.optimizeDeps.exclude).toContain('exclude');
-      expect(viteConfig.optimizeDeps.exclude).toContain('midnightConfig.optimizeDeps');
-      expect(viteConfig.optimizeDeps.exclude).toContain('...');
+      expect(viteConfig).toBeDefined();
+      expect(viteConfig!.optimizeDeps?.exclude).toContain('exclude');
+      expect(viteConfig!.optimizeDeps?.exclude).toContain('midnightConfig.optimizeDeps');
+      expect(viteConfig!.optimizeDeps?.exclude).toContain('...');
     });
   });
 
@@ -219,7 +228,8 @@ describe('Midnight Adapter Config', () => {
     it('should have all Vite plugin imports listed in build dependencies', () => {
       const { build } = midnightAdapterConfig.dependencies;
       const { viteConfig } = midnightAdapterConfig;
-      const importsStr = viteConfig.imports.join('\n');
+      expect(viteConfig).toBeDefined();
+      const importsStr = viteConfig!.imports.join('\n');
 
       // If wasm is imported, it should be in build deps
       if (importsStr.includes('vite-plugin-wasm')) {
@@ -261,10 +271,7 @@ describe('Midnight Adapter Config', () => {
       // Essential browser polyfills
       const requiredPolyfills = ['buffer', 'events'];
       requiredPolyfills.forEach((pkg) => {
-        expect(
-          runtime,
-          `Missing essential browser polyfill: ${pkg}`
-        ).toHaveProperty(pkg);
+        expect(runtime, `Missing essential browser polyfill: ${pkg}`).toHaveProperty(pkg);
       });
 
       // Essential Midnight SDK packages
@@ -274,10 +281,7 @@ describe('Midnight Adapter Config', () => {
         '@midnight-ntwrk/midnight-js-network-id',
       ];
       requiredMidnight.forEach((pkg) => {
-        expect(
-          runtime,
-          `Missing essential Midnight SDK package: ${pkg}`
-        ).toHaveProperty(pkg);
+        expect(runtime, `Missing essential Midnight SDK package: ${pkg}`).toHaveProperty(pkg);
       });
 
       // Essential for private state management
@@ -297,12 +301,10 @@ describe('Midnight Adapter Config', () => {
       const disallowedPackages = ['vitest', 'typescript', '@types/node', 'eslint'];
 
       disallowedPackages.forEach((pkg) => {
-        expect(
-          runtime,
-          `Unexpected development package in runtime: ${pkg}`
-        ).not.toHaveProperty(pkg);
+        expect(runtime, `Unexpected development package in runtime: ${pkg}`).not.toHaveProperty(
+          pkg
+        );
       });
     });
   });
 });
-
