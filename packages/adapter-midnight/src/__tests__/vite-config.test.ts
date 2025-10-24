@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
 import type { Plugin } from 'vite';
+import { describe, expect, it, vi } from 'vitest';
 
 import { getMidnightViteConfig } from '../vite-config';
 import type { MidnightVitePlugins } from '../vite-config';
@@ -251,11 +251,12 @@ describe('Midnight Vite Config', () => {
       const config = getMidnightViteConfig(mockPlugins);
       const exclude = config.optimizeDeps?.exclude || [];
 
+      // Note: midnight-js-network-id is NOT in this list because it MUST be pre-bundled
+      // despite having top-level await (handled by vite-plugin-top-level-await)
       const wasmPackages = [
         '@midnight-ntwrk/onchain-runtime',
         '@midnight-ntwrk/midnight-js-types',
         '@midnight-ntwrk/midnight-js-utils',
-        '@midnight-ntwrk/midnight-js-network-id',
         '@midnight-ntwrk/wallet-sdk-address-format',
         '@midnight-ntwrk/midnight-js-http-client-proof-provider',
         '@midnight-ntwrk/midnight-js-level-private-state-provider',
@@ -288,16 +289,18 @@ describe('Midnight Vite Config', () => {
       });
     });
 
-    it('should have network-id in dedupe and exclude (not include)', () => {
+    it('should have network-id in dedupe and include (must be pre-bundled)', () => {
       const config = getMidnightViteConfig(mockPlugins);
       const dedupe = config.resolve?.dedupe || [];
       const include = config.optimizeDeps?.include || [];
       const exclude = config.optimizeDeps?.exclude || [];
 
-      // network-id needs deduplication but NOT pre-bundling (due to top-level await)
+      // network-id needs deduplication (singleton) AND pre-bundling
+      // Despite having top-level await, it MUST be pre-bundled or NetworkId enum is undefined
+      // The vite-plugin-top-level-await handles the top-level await syntax
       expect(dedupe).toContain('@midnight-ntwrk/midnight-js-network-id');
-      expect(exclude).toContain('@midnight-ntwrk/midnight-js-network-id');
-      expect(include).not.toContain('@midnight-ntwrk/midnight-js-network-id');
+      expect(include).toContain('@midnight-ntwrk/midnight-js-network-id');
+      expect(exclude).not.toContain('@midnight-ntwrk/midnight-js-network-id');
     });
 
     it('should not have conflicts between include and exclude', () => {
@@ -317,9 +320,10 @@ describe('Midnight Vite Config', () => {
       const include = config.optimizeDeps?.include || [];
 
       const duplicates = include.filter((item, index) => include.indexOf(item) !== index);
-      expect(duplicates.length, `Found duplicate entries in include: ${duplicates.join(', ')}`).toBe(
-        0
-      );
+      expect(
+        duplicates.length,
+        `Found duplicate entries in include: ${duplicates.join(', ')}`
+      ).toBe(0);
     });
 
     it('should not have duplicate entries in exclude', () => {
@@ -327,9 +331,10 @@ describe('Midnight Vite Config', () => {
       const exclude = config.optimizeDeps?.exclude || [];
 
       const duplicates = exclude.filter((item, index) => exclude.indexOf(item) !== index);
-      expect(duplicates.length, `Found duplicate entries in exclude: ${duplicates.join(', ')}`).toBe(
-        0
-      );
+      expect(
+        duplicates.length,
+        `Found duplicate entries in exclude: ${duplicates.join(', ')}`
+      ).toBe(0);
     });
 
     it('should not have duplicate entries in dedupe', () => {
@@ -446,4 +451,3 @@ describe('Midnight Vite Config', () => {
     });
   });
 });
-
