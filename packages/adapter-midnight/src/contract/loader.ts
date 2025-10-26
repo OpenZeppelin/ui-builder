@@ -63,6 +63,7 @@ export async function loadMidnightContractWithMetadata(
   if (artifacts.witnessCode) artifactsRecord.witnessCode = artifacts.witnessCode;
   if (artifacts.verifierKeys) artifactsRecord.verifierKeys = artifacts.verifierKeys;
   if (artifacts.originalZipData) artifactsRecord.originalZipData = artifacts.originalZipData;
+  if (artifacts.trimmedZipBase64) artifactsRecord.trimmedZipBase64 = artifacts.trimmedZipBase64;
 
   return {
     ...base,

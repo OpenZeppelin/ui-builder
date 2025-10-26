@@ -585,4 +585,27 @@ export interface ContractAdapter {
    * @returns Bootstrap configuration with files to include and initialization code, or null if not needed
    */
   getExportBootstrapFiles?(context: AdapterExportContext): Promise<AdapterExportBootstrap | null>;
+
+  /**
+   * Optional: guide when and how large artifacts should be persisted.
+   */
+  getArtifactPersistencePolicy?():
+    | {
+        mode: 'immediate' | 'deferredUntilFunctionSelected';
+        sizeThresholdBytes?: number;
+      }
+    | undefined;
+
+  /**
+   * Optional: prepare trimmed artifacts when a function is chosen.
+   */
+  prepareArtifactsForFunction?(args: {
+    functionId: string;
+    currentArtifacts: Record<string, unknown>;
+    definitionOriginal?: string | null;
+  }): Promise<{
+    persistableArtifacts?: Record<string, unknown>;
+    publicAssets?: Record<string, Uint8Array | Blob>;
+    bootstrapSource?: Record<string, unknown>;
+  }>;
 }

@@ -81,6 +81,8 @@ module.exports = {
       'validateContractDefinition',
       'hashContractDefinition',
       'getExportBootstrapFiles',
+      'getArtifactPersistencePolicy',
+      'prepareArtifactsForFunction',
     ];
 
     // Common standard methods and properties that are allowed

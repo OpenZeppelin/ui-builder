@@ -1,10 +1,12 @@
 import { Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ContractStateWidget } from '@openzeppelin/ui-builder-renderer';
 import { Ecosystem } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { STEP_INDICES } from './constants/stepIndices';
+import { isTrimmedOnlyArtifacts } from './hooks/uiBuilderStore';
 import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
@@ -23,6 +25,9 @@ import { StepContractDefinition } from './StepContractDefinition';
  */
 export function UIBuilder() {
   const { state, widget, actions, isLoadingContract } = useUIBuilderState();
+
+  // Check if we have trimmed-only artifacts
+  const isTrimmedOnly = useMemo(() => isTrimmedOnlyArtifacts(state), [state]);
 
   // Track network switching state
   const [isAdapterReady, setIsAdapterReady] = useState(false);
@@ -131,6 +136,35 @@ export function UIBuilder() {
     return decision;
   }, [state.selectedAdapter, state.networkToSwitchTo, isAdapterReady]);
 
+  // Wrapper to intercept step changes and prevent/override navigation when trimmed-only
+  const handleStepChange = useCallback(
+    (newStepIndex: number) => {
+      // When artifacts are trimmed-only, any navigation to the function-selector
+      // should redirect to the contract-definition step (re-upload required)
+      if (isTrimmedOnly && newStepIndex === STEP_INDICES.FUNCTION_SELECTOR) {
+        logger.info(
+          'UIBuilder',
+          'Blocked navigation to function-selector: trimmed artifacts require re-upload'
+        );
+        actions.navigation.onStepChange(STEP_INDICES.CONTRACT_DEFINITION);
+        return;
+      }
+
+      // If we're going from Customize (step 4) backwards and have trimmed-only artifacts,
+      // force landing on Contract Definition (step 2) instead of Function Selector (step 3)
+      if (
+        isTrimmedOnly &&
+        newStepIndex === STEP_INDICES.FUNCTION_SELECTOR &&
+        state.currentStepIndex === STEP_INDICES.FORM_CUSTOMIZATION
+      ) {
+        actions.navigation.onStepChange(STEP_INDICES.CONTRACT_DEFINITION);
+      } else {
+        actions.navigation.onStepChange(newStepIndex);
+      }
+    },
+    [isTrimmedOnly, state.currentStepIndex, actions.navigation]
+  );
+
   // Create sidebar widget when we have contract data
   const sidebarWidgetComponent = widget.sidebar ? (
     <ContractStateWidget
@@ -170,7 +204,7 @@ export function UIBuilder() {
           isLoadingFromService={isLoadingContract}
         />
       ),
-      isValid: !!state.contractState.schema,
+      isValid: !!state.contractState.schema && !isTrimmedOnly,
     },
     {
       id: 'function-selector',
@@ -257,7 +291,7 @@ export function UIBuilder() {
             sidebarWidget={sidebarWidgetComponent}
             isWidgetExpanded={state.isWidgetVisible}
             currentStepIndex={state.currentStepIndex}
-            onStepChange={actions.navigation.onStepChange}
+            onStepChange={handleStepChange}
           />
         </div>
       </div>

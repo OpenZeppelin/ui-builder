@@ -143,6 +143,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
           metadata: result.metadata ?? {},
           original: result.contractDefinitionOriginal ?? '',
           proxyInfo: result.proxyInfo,
+          contractDefinitionArtifacts: result.contractDefinitionArtifacts ?? null,
         });
       } catch (err) {
         // Update circuit breaker

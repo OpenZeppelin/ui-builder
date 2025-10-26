@@ -57,7 +57,14 @@ export interface AdapterExportBootstrap {
    * Key: relative path (e.g., 'src/midnight/artifacts.ts')
    * Value: file content as string
    */
-  files: Record<string, string>;
+  files?: Record<string, string>;
+
+  /**
+   * Binary files to add to the exported project (e.g., ZIP files).
+   * Key: relative path (e.g., 'public/midnight/contract.zip')
+   * Value: binary content as Uint8Array or Blob
+   */
+  binaryFiles?: Record<string, Uint8Array | Blob>;
 
   /**
    * Optional import statements to inject into main.tsx

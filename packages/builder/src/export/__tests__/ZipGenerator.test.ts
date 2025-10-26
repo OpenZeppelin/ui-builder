@@ -46,6 +46,49 @@ describe('ZipGenerator', () => {
       expect(packageJson).toBe('{"name":"test-project"}');
     });
 
+    it('should handle binary files (Uint8Array)', async () => {
+      const zipGenerator = new ZipGenerator();
+      const binaryContent = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // PNG header
+      const files = {
+        'package.json': '{"name":"test"}',
+        'public/logo.png': binaryContent,
+      };
+
+      const result = await zipGenerator.createZipFile(files, 'test-with-binary');
+
+      const zip = new JSZip();
+      const extracted = await zip.loadAsync(result.data);
+
+      const pngFile = extracted.file('public/logo.png');
+      expect(pngFile).toBeTruthy();
+
+      const extractedBinary = await pngFile?.async('uint8array');
+      expect(extractedBinary).toEqual(binaryContent);
+    });
+
+    it('should handle mixed string and binary files', async () => {
+      const zipGenerator = new ZipGenerator();
+      const files: Record<string, string | Uint8Array> = {
+        'index.html': '<html></html>',
+        'data.bin': new Uint8Array([1, 2, 3, 4]),
+        'src/app.ts': 'export const app = {};',
+      };
+
+      const result = await zipGenerator.createZipFile(files, 'mixed-content');
+
+      const zip = new JSZip();
+      const extracted = await zip.loadAsync(result.data);
+
+      const html = await extracted.file('index.html')?.async('string');
+      expect(html).toBe('<html></html>');
+
+      const binary = await extracted.file('data.bin')?.async('uint8array');
+      expect(binary).toEqual(new Uint8Array([1, 2, 3, 4]));
+
+      const ts = await extracted.file('src/app.ts')?.async('string');
+      expect(ts).toBe('export const app = {};');
+    });
+
     it('should report progress through the callback', async () => {
       const zipGenerator = new ZipGenerator();
       const files = {

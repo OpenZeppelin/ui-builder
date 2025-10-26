@@ -1,4 +1,5 @@
 import type {
+  AdapterExportContext,
   ContractAdapter,
   ContractSchema,
   NetworkConfig,
@@ -9,6 +10,7 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
 
 /**
  * Context for adapter bootstrap file generation
+ * Extends AdapterExportContext with BuilderFormConfig
  */
 export interface BootstrapContext {
   formConfig: BuilderFormConfig;
@@ -16,6 +18,7 @@ export interface BootstrapContext {
   networkConfig: NetworkConfig;
   artifacts?: Record<string, unknown> | null;
   definitionOriginal?: string | null;
+  functionId?: string;
 }
 
 /**
@@ -37,7 +40,7 @@ export interface BootstrapInfo {
  * @returns Bootstrap info for template injection, or null if not supported.
  */
 export async function generateAdapterBootstrapFiles(
-  projectFiles: Record<string, string>,
+  projectFiles: Record<string, string | Uint8Array | Blob>,
   adapter: ContractAdapter,
   context: BootstrapContext
 ): Promise<BootstrapInfo | null> {
@@ -49,7 +52,7 @@ export async function generateAdapterBootstrapFiles(
   }
 
   try {
-    const bootstrap = await adapter.getExportBootstrapFiles(context);
+    const bootstrap = await adapter.getExportBootstrapFiles(context as AdapterExportContext);
 
     if (!bootstrap) {
       logger.info(logSystem, 'Adapter returned no bootstrap files.');
@@ -63,6 +66,14 @@ export async function generateAdapterBootstrapFiles(
         `Adding ${Object.keys(bootstrap.files).length} bootstrap file(s) from adapter.`
       );
       Object.assign(projectFiles, bootstrap.files);
+    }
+
+    if (bootstrap.binaryFiles && Object.keys(bootstrap.binaryFiles).length > 0) {
+      logger.info(
+        logSystem,
+        `Adding ${Object.keys(bootstrap.binaryFiles).length} binary bootstrap file(s) from adapter.`
+      );
+      Object.assign(projectFiles, bootstrap.binaryFiles);
     }
 
     // Return bootstrap info for template injection

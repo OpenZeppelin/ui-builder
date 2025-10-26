@@ -1,5 +1,7 @@
 import type { AdapterExportBootstrap, AdapterExportContext } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { base64ToBytes, logger } from '@openzeppelin/ui-builder-utils';
+
+import { stripZipForFunction } from '../utils/zip-slimmer';
 
 const SYSTEM_LOG_TAG = 'MidnightAdapter:ExportBootstrap';
 
@@ -17,58 +19,53 @@ export async function getMidnightExportBootstrapFiles(
 ): Promise<AdapterExportBootstrap | null> {
   logger.info(SYSTEM_LOG_TAG, 'Generating Midnight export bootstrap files');
 
-  // Extract artifacts from context
-  const artifacts = context.artifacts;
+  const artifacts = context.artifacts || {};
+  const functionId = context.functionId || context.formConfig.functionId;
 
-  // Validate required fields
-  if (!artifacts || !artifacts.originalZipData) {
-    logger.warn(SYSTEM_LOG_TAG, 'Missing required ZIP data. Cannot generate bootstrap files.');
-    return null;
-  }
-
-  const zipData = artifacts.originalZipData as string;
   const contractAddress =
     context.formConfig.contractAddress || context.contractSchema.address || '';
-  const privateStateId = (artifacts.privateStateId as string) || '';
+  const privateStateId = (artifacts['privateStateId'] as string) || '';
 
-  // Validate critical fields
   if (!contractAddress || !privateStateId) {
-    logger.error(
-      SYSTEM_LOG_TAG,
-      'Missing contract address or private state ID. Cannot generate bootstrap files.'
-    );
+    logger.error(SYSTEM_LOG_TAG, 'Missing contract address or private state ID.');
     return null;
   }
 
-  // Generate the artifacts.ts file with just the ZIP data and metadata
-  const artifactsFileContent = `/**
- * Midnight Contract Artifacts
- *
- * This file contains the original contract ZIP file as a base64 string,
- * along with the contract address and private state ID. The adapter will
- * parse the ZIP file at runtime using the same logic as the builder.
- *
- * This approach keeps the exported file small and reuses existing parsing logic.
- */
+  const base64Zip =
+    (artifacts['trimmedZipBase64'] as string | undefined) ||
+    (artifacts['originalZipData'] as string | undefined);
 
+  if (!base64Zip) {
+    logger.warn(SYSTEM_LOG_TAG, 'No ZIP data found in artifacts; cannot add public asset.');
+    return null;
+  }
+
+  const originalBytes = base64ToBytes(base64Zip);
+  const zipBytes = functionId
+    ? await stripZipForFunction(originalBytes, functionId).catch(() => originalBytes)
+    : originalBytes;
+
+  const artifactsFileContent = `
 export const midnightArtifactsSource = {
   contractAddress: '${contractAddress}',
   privateStateId: '${privateStateId}',
-  contractArtifactsZip: '${zipData}',
+  contractArtifactsUrl: '/midnight/contract.zip',
 };
 `;
 
-  // Generate initialization code that passes the ZIP data to the adapter
-  const initCode = `// Load Midnight contract from ZIP file (same as builder does)
+  const initCode = `// Load Midnight contract from URL-based ZIP (same as builder does)
     if (typeof (adapter as any).loadContractWithMetadata === 'function') {
       await (adapter as any).loadContractWithMetadata(midnightArtifactsSource);
     }`;
 
-  logger.info(SYSTEM_LOG_TAG, 'Successfully generated Midnight bootstrap files with ZIP data');
+  logger.info(SYSTEM_LOG_TAG, 'Successfully generated Midnight bootstrap files with URL');
 
   return {
     files: {
       'src/midnight/artifacts.ts': artifactsFileContent,
+    },
+    binaryFiles: {
+      'public/midnight/contract.zip': zipBytes,
     },
     imports: ["import { midnightArtifactsSource } from './midnight/artifacts';"],
     initAfterAdapterConstruct: initCode,

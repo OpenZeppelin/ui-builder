@@ -191,6 +191,13 @@ export function useUIBuilderState() {
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
 
+  const handleFunctionSelected = useCallback(
+    (functionId: string | null) => {
+      void contract.functionSelected(functionId);
+    },
+    [contract]
+  ) as (functionId: string | null) => void;
+
   return {
     state: {
       ...state,
@@ -220,7 +227,7 @@ export function useUIBuilderState() {
         clearSwitchTo: network.clearSwitchTo,
       },
       contract: {
-        functionSelected: contract.functionSelected,
+        functionSelected: handleFunctionSelected,
         loadDefinition: contractDefinition.load,
       },
       config: {

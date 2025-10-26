@@ -225,10 +225,10 @@ export class AppExportSystem {
     exportOptions: ExportOptions,
     customFiles: Record<string, string>,
     adapter: ContractAdapter
-  ): Promise<Record<string, string>> {
+  ): Promise<Record<string, string | Uint8Array | Blob>> {
     logger.info('File Assembly', 'Starting file assembly process...');
 
-    const projectFiles = await addCoreTemplateFiles(
+    const projectFiles: Record<string, string | Uint8Array | Blob> = await addCoreTemplateFiles(
       this.templateManager!,
       exportOptions,
       customFiles
@@ -238,13 +238,18 @@ export class AppExportSystem {
     await generateAdapterSpecificFiles(projectFiles, adapter, formConfig);
 
     // Generate adapter bootstrap files if the adapter supports it
-    const bootstrapInfo = await generateAdapterBootstrapFiles(projectFiles, adapter, {
-      formConfig,
-      contractSchema,
-      networkConfig,
-      artifacts: exportOptions.adapterArtifacts?.artifacts,
-      definitionOriginal: exportOptions.adapterArtifacts?.definitionOriginal,
-    });
+    const bootstrapInfo = await generateAdapterBootstrapFiles(
+      projectFiles as unknown as Record<string, string>,
+      adapter,
+      {
+        formConfig,
+        contractSchema,
+        networkConfig,
+        artifacts: exportOptions.adapterArtifacts?.artifacts,
+        definitionOriginal: exportOptions.adapterArtifacts?.definitionOriginal,
+        functionId,
+      }
+    );
 
     await updatePackageJsonFile(
       projectFiles,
@@ -270,14 +275,21 @@ export class AppExportSystem {
    * using reliable template markers instead of fragile regex patterns.
    * @private
    */
-  private injectBootstrapCode(projectFiles: Record<string, string>, bootstrapInfo: BootstrapInfo) {
+  private injectBootstrapCode(
+    projectFiles: Record<string, string | Uint8Array | Blob>,
+    bootstrapInfo: BootstrapInfo
+  ) {
     const mainTsxPath = 'src/main.tsx';
-    if (!projectFiles[mainTsxPath]) {
-      logger.warn('Export System', 'main.tsx not found, skipping bootstrap injection');
+    const mainTsxContent = projectFiles[mainTsxPath];
+    if (!mainTsxContent || typeof mainTsxContent !== 'string') {
+      logger.warn(
+        'Export System',
+        'main.tsx not found or not a string, skipping bootstrap injection'
+      );
       return;
     }
 
-    let content = projectFiles[mainTsxPath];
+    let content = mainTsxContent;
 
     // Inject imports at the designated marker
     if (bootstrapInfo.imports.length > 0) {
@@ -309,13 +321,20 @@ export class AppExportSystem {
    *
    * @param files Map of file paths to content
    */
-  private async formatJsonFiles(files: Record<string, string>): Promise<void> {
+  private async formatJsonFiles(files: Record<string, string | Uint8Array | Blob>): Promise<void> {
     const jsonFiles = Object.keys(files).filter((path) => path.endsWith('.json'));
     for (const path of jsonFiles) {
-      try {
-        files[path] = await this.templateProcessor!.formatJson(files[path]);
-      } catch (error) {
-        logger.warn('File Assembly', `Failed to format ${path}, using unformatted version:`, error);
+      const content = files[path];
+      if (typeof content === 'string') {
+        try {
+          files[path] = await this.templateProcessor!.formatJson(content);
+        } catch (error) {
+          logger.warn(
+            'File Assembly',
+            `Failed to format ${path}, using unformatted version:`,
+            error
+          );
+        }
       }
     }
   }
@@ -329,7 +348,7 @@ export class AppExportSystem {
    * @returns A result containing the ZIP blob and filename
    */
   private async createZipFile(
-    files: Record<string, string>,
+    files: Record<string, string | Uint8Array | Blob>,
     fileName: string,
     onProgress?: (progress: ZipProgress) => void
   ) {

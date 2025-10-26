@@ -23,6 +23,9 @@ export interface MidnightContractArtifacts {
 
   /** Optional original ZIP data for auto-save functionality */
   originalZipData?: string;
+
+  /** Optional trimmed ZIP data (saved when artifacts are trimmed for a specific function) */
+  trimmedZipBase64?: string;
 }
 
 /**

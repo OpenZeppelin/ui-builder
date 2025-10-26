@@ -25,6 +25,7 @@ import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
+import { prepareArtifactsForFunction as prepareArtifacts } from './utils/artifact-preparation';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
 import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
@@ -341,6 +342,36 @@ export class MidnightAdapter implements ContractAdapter {
     context: AdapterExportContext
   ): Promise<AdapterExportBootstrap | null> {
     return getMidnightExportBootstrapFiles(context);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getArtifactPersistencePolicy():
+    | {
+        mode: 'immediate' | 'deferredUntilFunctionSelected';
+        sizeThresholdBytes?: number;
+      }
+    | undefined {
+    return {
+      mode: 'deferredUntilFunctionSelected',
+      sizeThresholdBytes: 15 * 1024 * 1024, // 15MB
+    };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async prepareArtifactsForFunction(args: {
+    functionId: string;
+    currentArtifacts: Record<string, unknown>;
+    definitionOriginal?: string | null;
+  }): Promise<{
+    persistableArtifacts?: Record<string, unknown>;
+    publicAssets?: Record<string, Uint8Array | Blob>;
+    bootstrapSource?: Record<string, unknown>;
+  }> {
+    return prepareArtifacts(args.functionId, args.currentArtifacts);
   }
 }
 
