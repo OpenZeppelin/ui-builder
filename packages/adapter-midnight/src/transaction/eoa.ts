@@ -163,28 +163,24 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
 
       // Step 8.1: Explicitly ensure private state if missing by hydrating via findDeployedContract
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const existingPrivateState = await (providers as any).privateStateProvider?.get(
-          privateStateId as unknown
-        );
+        const existingPrivateState = await providers.privateStateProvider.get(privateStateId);
         if (existingPrivateState == null) {
           logger.debug(
             SYSTEM_LOG_TAG,
             'Local private state missing; hydrating via findDeployedContract'
           );
           const { findDeployedContract } = await import('@midnight-ntwrk/midnight-js-contracts');
-          // Build a minimal contract object compatible with findDeployedContract
+          // Type assertion required: contractInstance is a dynamically evaluated contract module
+          // from user-uploaded code, so it has no compile-time type information. We assert to
+          // the minimal shape needed by findDeployedContract.
           const minimalContract = contractInstance as unknown as {
             impureCircuits: Record<string, unknown>;
           };
-          await findDeployedContract(
-            providers as unknown as Parameters<typeof findDeployedContract>[0],
-            {
-              contract: minimalContract as Parameters<typeof findDeployedContract>[1]['contract'],
-              contractAddress,
-              privateStateId,
-            } as Parameters<typeof findDeployedContract>[1]
-          );
+          await findDeployedContract(providers, {
+            contract: minimalContract as Parameters<typeof findDeployedContract>[1]['contract'],
+            contractAddress,
+            privateStateId,
+          });
         }
       } catch (hydrateErr) {
         logger.warn(
@@ -244,10 +240,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         // Preflight: If the local private state is missing, call without privateStateId and persist after
         let omitPrivateStateId = false;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const existingPrivateState = await (providers as any).privateStateProvider?.get(
-            privateStateId as unknown
-          );
+          const existingPrivateState = await providers.privateStateProvider.get(privateStateId);
           if (existingPrivateState == null) {
             omitPrivateStateId = true;
           }
@@ -266,15 +259,16 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
           );
         }
 
+        // Type assertion required: callOptions is dynamically constructed and txResult shape varies
+        // based on contract implementation. We assert to match the expected SDK parameter types.
         txResult = (await submitCallTx(
-          providers as unknown as Parameters<typeof submitCallTx>[0],
-          callOptions as unknown as Parameters<typeof submitCallTx>[1]
+          providers,
+          callOptions as Parameters<typeof submitCallTx>[1]
         )) as TxResult;
         if (omitPrivateStateId && txResult?.private?.nextPrivateState) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (providers as any).privateStateProvider?.set(
-              privateStateId as unknown,
+            await providers.privateStateProvider.set(
+              privateStateId,
               txResult.private.nextPrivateState
             );
             logger.debug(

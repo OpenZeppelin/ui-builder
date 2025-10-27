@@ -196,6 +196,10 @@ export async function createTransactionProviders(
     },
   };
 
+  // Type assertion: MidnightProviders is a generic type with specific circuit ID, private state ID,
+  // and private state type parameters. Since we're working with dynamically loaded contracts,
+  // we use the base MidnightProviders type without specific generics. The providers are correctly
+  // typed individually, so this cast is safe and simply widens the type for flexibility.
   return {
     privateStateProvider,
     zkConfigProvider,
@@ -203,7 +207,7 @@ export async function createTransactionProviders(
     publicDataProvider,
     walletProvider,
     midnightProvider,
-  } as unknown as MidnightProviders;
+  } as MidnightProviders;
 }
 
 // Helper functions (mirror query handler logic)

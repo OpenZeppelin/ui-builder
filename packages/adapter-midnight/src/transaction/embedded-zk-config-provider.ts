@@ -1,14 +1,7 @@
-import type { ZkArtifact } from '../utils/zip-extractor';
+import type { ProverKey, VerifierKey, ZKConfig, ZKIR } from '@midnight-ntwrk/midnight-js-types';
+import { ZKConfigProvider as BaseZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
 
-/**
- * ZK Configuration shape expected by the proof provider
- */
-interface ZKConfig {
-  circuitId: string;
-  proverKey: Uint8Array;
-  verifierKey: Uint8Array;
-  zkir: Uint8Array;
-}
+import type { ZkArtifact } from '../utils/zip-extractor';
 
 /**
  * A ZkConfigProvider that uses embedded ZK artifacts from contract ZIP files.
@@ -16,9 +9,13 @@ interface ZKConfig {
  *
  * This provider stores the prover/verifier keys and ZKIR files extracted from
  * the contract ZIP and provides them to the proof server when generating proofs.
+ *
+ * Extends the SDK's abstract ZKConfigProvider class to ensure type compatibility.
  */
-export class EmbeddedZkConfigProvider {
-  constructor(private artifacts: Record<string, ZkArtifact> = {}) {}
+export class EmbeddedZkConfigProvider extends BaseZKConfigProvider<string> {
+  constructor(private artifacts: Record<string, ZkArtifact> = {}) {
+    super();
+  }
 
   /**
    * Register ZK artifacts for a circuit
@@ -38,11 +35,11 @@ export class EmbeddedZkConfigProvider {
    * Get ZK configuration for a specific circuit
    * This is called by the SDK when creating the proof server payload
    */
-  async get(circuitId: string): Promise<ZKConfig | undefined> {
+  override async get(circuitId: string): Promise<ZKConfig<string>> {
     const artifact = this.artifacts[circuitId];
 
     if (!artifact) {
-      return undefined;
+      throw new Error(`No ZK artifacts found for circuit: ${circuitId}`);
     }
 
     // Return the configuration in the format expected by the proof provider
@@ -51,7 +48,40 @@ export class EmbeddedZkConfigProvider {
       proverKey: artifact.prover,
       verifierKey: artifact.verifier,
       zkir: artifact.zkir || new Uint8Array(0),
-    };
+    } as ZKConfig<string>;
+  }
+
+  /**
+   * Retrieves the ZKIR for the given circuit
+   */
+  override async getZKIR(circuitId: string): Promise<ZKIR> {
+    const artifact = this.artifacts[circuitId];
+    if (!artifact) {
+      throw new Error(`No ZK artifacts found for circuit: ${circuitId}`);
+    }
+    return (artifact.zkir || new Uint8Array(0)) as ZKIR;
+  }
+
+  /**
+   * Retrieves the prover key for the given circuit
+   */
+  override async getProverKey(circuitId: string): Promise<ProverKey> {
+    const artifact = this.artifacts[circuitId];
+    if (!artifact) {
+      throw new Error(`No ZK artifacts found for circuit: ${circuitId}`);
+    }
+    return artifact.prover as ProverKey;
+  }
+
+  /**
+   * Retrieves the verifier key for the given circuit
+   */
+  override async getVerifierKey(circuitId: string): Promise<VerifierKey> {
+    const artifact = this.artifacts[circuitId];
+    if (!artifact) {
+      throw new Error(`No ZK artifacts found for circuit: ${circuitId}`);
+    }
+    return artifact.verifier as VerifierKey;
   }
 
   /**
