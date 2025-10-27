@@ -79,6 +79,7 @@ export async function signAndBroadcastMidnightTransaction(
           contractModule: txArtifacts.contractModule,
           witnessCode: txArtifacts.witnessCode,
           verifierKeys: txArtifacts.verifierKeys,
+          organizerSecretKeyHex: txArtifacts.organizerSecretKeyHex,
         }
       : undefined;
   } else if (adapterArtifacts) {
@@ -89,6 +90,7 @@ export async function signAndBroadcastMidnightTransaction(
           contractModule: adapterArtifacts.contractModule,
           witnessCode: adapterArtifacts.witnessCode,
           verifierKeys: adapterArtifacts.verifierKeys,
+          organizerSecretKeyHex: adapterArtifacts.organizerSecretKeyHex,
         }
       : undefined;
   } else {

@@ -26,8 +26,8 @@ export function evaluateWitnessCode(witnessCode: string): Record<string, unknown
     // but we sandbox them for consistency and to prevent unintended global access
     const sandbox = {
       console: console, // Allow logging for debugging
-      // Witnesses don't need require, Buffer, or other globals
-      // They're called with context at runtime by the contract
+      Buffer: (globalThis as unknown as { Buffer?: unknown }).Buffer,
+      crypto: (globalThis as unknown as { crypto?: unknown }).crypto,
     };
 
     // Create the evaluator function with the sandbox

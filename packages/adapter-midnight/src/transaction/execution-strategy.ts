@@ -20,6 +20,7 @@ export interface MidnightExecutionConfig {
     contractModule: string;
     witnessCode?: string;
     verifierKeys?: Record<string, unknown>;
+    organizerSecretKeyHex?: string;
   };
   networkConfig?: MidnightNetworkConfig;
 }

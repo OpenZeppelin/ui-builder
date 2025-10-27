@@ -150,6 +150,16 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
       if (message.includes('undeployed') || message.includes('Undeployed')) {
         throw new Error(`Contract not deployed at address: ${contractAddress}`);
       }
+      if (
+        message.includes('organizerSecretKey') ||
+        message.includes('private state') ||
+        message.includes('Private state')
+      ) {
+        throw new Error(
+          'Private state not initialized or organizer secret key missing. ' +
+            'For organizer-only circuits, provide organizerSecretKeyHex in the contract configuration.'
+        );
+      }
 
       throw new Error(`Circuit call failed: ${message}`);
     }

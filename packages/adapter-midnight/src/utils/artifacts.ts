@@ -21,6 +21,17 @@ const SYSTEM_LOG_TAG = 'ArtifactsValidator';
 export async function validateAndConvertMidnightArtifacts(
   source: string | Record<string, unknown>
 ): Promise<MidnightContractArtifacts> {
+  logger.debug(
+    SYSTEM_LOG_TAG,
+    'Input source keys:',
+    Object.keys(source as Record<string, unknown>)
+  );
+  logger.debug(
+    SYSTEM_LOG_TAG,
+    'organizerSecretKeyHex in source:',
+    (source as Record<string, unknown>).organizerSecretKeyHex
+  );
+
   if (typeof source === 'string') {
     throw new Error(
       'Midnight adapter requires contract artifacts object, not just an address string.'
@@ -69,6 +80,7 @@ export async function validateAndConvertMidnightArtifacts(
       contractModule: extractedArtifacts.contractModule,
       witnessCode: extractedArtifacts.witnessCode,
       verifierKeys: extractedArtifacts.verifierKeys,
+      organizerSecretKeyHex: sourceRecord.organizerSecretKeyHex as string | undefined,
       // Note: do not set originalZipData when loading via URL
     };
   }
@@ -115,6 +127,7 @@ export async function validateAndConvertMidnightArtifacts(
       witnessCode: extractedArtifacts.witnessCode,
       verifierKeys: extractedArtifacts.verifierKeys,
       trimmedZipBase64: base64Data, // Preserve for persistence and export
+      organizerSecretKeyHex: sourceRecord.organizerSecretKeyHex as string | undefined,
       // Note: keep storage minimal; do not set originalZipData here
     };
   }
@@ -177,6 +190,7 @@ export async function validateAndConvertMidnightArtifacts(
       witnessCode: extractedArtifacts.witnessCode,
       verifierKeys: extractedArtifacts.verifierKeys,
       originalZipData: base64Data, // Store for auto-save
+      organizerSecretKeyHex: source.organizerSecretKeyHex as string | undefined,
     };
 
     return artifacts;

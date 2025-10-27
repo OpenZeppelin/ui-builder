@@ -106,6 +106,12 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
 
       const witnesses = evaluateWitnessCode(artifacts.witnessCode || '');
 
+      logger.debug(SYSTEM_LOG_TAG, 'Artifacts received for execution:', {
+        hasOrganizerKey: !!artifacts.organizerSecretKeyHex,
+        organizerKeyLength: artifacts.organizerSecretKeyHex?.length || 0,
+        privateStateId,
+      });
+
       // Step 4: Load and inject compact-runtime to ensure WASM context unity
       // This forces the evaluated contract to use the SAME runtime instance as the SDK
       const runtimeNs = await import('@midnight-ntwrk/compact-runtime');
@@ -119,6 +125,24 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       logger.debug(SYSTEM_LOG_TAG, 'Injecting shared compact-runtime', {
         version: (compactRuntime as { versionString?: string })?.versionString,
       });
+
+      // Seed private state if missing and organizerSecretKeyHex is provided
+      if (artifacts.organizerSecretKeyHex) {
+        try {
+          const existing = await providers.privateStateProvider.get(privateStateId);
+          if (existing == null) {
+            const hex = artifacts.organizerSecretKeyHex.trim().replace(/^0x/, '');
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < bytes.length; i++) {
+              bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+            }
+            await providers.privateStateProvider.set(privateStateId, { organizerSecretKey: bytes });
+            logger.debug(SYSTEM_LOG_TAG, 'Seeded private state with organizer secret key');
+          }
+        } catch (seedErr) {
+          logger.warn(SYSTEM_LOG_TAG, 'Failed to seed private state with organizer key:', seedErr);
+        }
+      }
 
       // Step 5: Create contract instance with injected dependencies
       // evaluateContractModule internally instantiates new Contract(witnesses)

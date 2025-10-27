@@ -144,6 +144,16 @@ export class MidnightAdapter implements ContractAdapter {
         convertToBase64: true, // Convert to base64 for storage
         maxSize: 10 * 1024 * 1024, // 10MB limit
       },
+      {
+        id: 'organizerSecretKeyHex',
+        name: 'organizerSecretKeyHex',
+        label: 'Organizer Secret Key (hex)',
+        type: 'text',
+        validation: { required: false },
+        placeholder: 'optional hex string (no 0x prefix)',
+        helperText:
+          'Optional: if your contract has organizer-only circuits (e.g., setName), provide the organizer secret key in hex to seed local private state. Leave empty for participant-only contracts.',
+      },
     ];
   }
 
