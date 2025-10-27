@@ -6,3 +6,4 @@ export * from './sender';
 export * from './providers';
 export * from './witness-evaluator';
 export * from './contract-evaluator';
+export * from './call-circuit';

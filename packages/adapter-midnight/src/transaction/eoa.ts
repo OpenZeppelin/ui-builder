@@ -3,6 +3,7 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { WriteContractParameters } from '../types';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
+import { callCircuit } from './call-circuit';
 import { evaluateContractModule } from './contract-evaluator';
 import type { ExecutionStrategy, MidnightExecutionConfig } from './execution-strategy';
 import { createTransactionProviders } from './providers';
@@ -139,66 +140,8 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         });
       }
 
-      // Step 7: Prepare to call transaction
-      // WORKAROUND: createCircuitCallTxInterface has issues with dynamically evaluated contracts
-      // Instead, we'll manually call the SDK functions to build and submit the transaction
-      const { submitCallTx } = await import('@midnight-ntwrk/midnight-js-contracts');
-
-      logger.debug(
-        SYSTEM_LOG_TAG,
-        'Preparing to manually build and submit transaction (bypassing interface)'
-      );
-
-      // Debug: Check provider structure
-      logger.debug(SYSTEM_LOG_TAG, 'Provider structure check:', {
-        hasWalletProvider: !!providers.walletProvider,
-        hasCoinPublicKey: !!providers.walletProvider?.coinPublicKey,
-        coinPublicKeyValue: providers.walletProvider?.coinPublicKey,
-        coinPublicKeyLength: providers.walletProvider?.coinPublicKey?.length,
-        coinPublicKeyType: typeof providers.walletProvider?.coinPublicKey,
-      });
-
-      // Step 8: Prepare to execute method
+      // Step 7: Signal transaction is about to be submitted
       onStatusChange('pendingSignature', {});
-
-      // Step 8.1: Explicitly ensure private state if missing by hydrating via findDeployedContract
-      try {
-        const existingPrivateState = await providers.privateStateProvider.get(privateStateId);
-        if (existingPrivateState == null) {
-          logger.debug(
-            SYSTEM_LOG_TAG,
-            'Local private state missing; hydrating via findDeployedContract'
-          );
-          const { findDeployedContract } = await import('@midnight-ntwrk/midnight-js-contracts');
-          // Type assertion required: contractInstance is a dynamically evaluated contract module
-          // from user-uploaded code, so it has no compile-time type information. We assert to
-          // the minimal shape needed by findDeployedContract.
-          const minimalContract = contractInstance as unknown as {
-            impureCircuits: Record<string, unknown>;
-          };
-          await findDeployedContract(providers, {
-            contract: minimalContract as Parameters<typeof findDeployedContract>[1]['contract'],
-            contractAddress,
-            privateStateId,
-          });
-        }
-      } catch (hydrateErr) {
-        logger.warn(
-          SYSTEM_LOG_TAG,
-          'ensurePrivateState hydration step failed (will rely on preflight fallback):',
-          hydrateErr
-        );
-      }
-
-      // Step 9: Execute the contract method directly using submitCallTx
-      // Build the transaction options manually
-      const txOptions = {
-        contract: contractInstance,
-        circuitId: transactionData.functionName,
-        contractAddress,
-        privateStateId,
-        args: transactionData.args,
-      };
 
       logger.info(
         SYSTEM_LOG_TAG,
@@ -206,121 +149,30 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         transactionData.args
       );
 
-      logger.debug(SYSTEM_LOG_TAG, 'Transaction options:', {
-        circuitId: txOptions.circuitId,
-        hasContract: !!txOptions.contract,
-        contractAddress: txOptions.contractAddress,
-        privateStateId: txOptions.privateStateId,
-        argsLength: txOptions.args.length,
+      // Step 8: Use callCircuit helper to execute the circuit with clean error handling
+      const result = await callCircuit({
+        contractInstance,
+        providers,
+        contractAddress,
+        circuitId: transactionData.functionName,
+        privateStateId,
+        args: transactionData.args,
       });
 
-      type TxResult = {
-        txHash?: string;
-        hash?: string;
-        deployTxData?: { public?: { txHash?: string } };
-        public?: { txHash?: string };
-        private?: { nextPrivateState?: unknown };
-      };
-      let txResult: TxResult | undefined;
-      try {
-        // Call submitCallTx directly with providers and options
-        logger.debug(SYSTEM_LOG_TAG, 'Calling submitCallTx directly');
-        logger.debug(SYSTEM_LOG_TAG, 'Full providers object:', {
-          hasPrivateStateProvider: !!providers.privateStateProvider,
-          hasZkConfigProvider: !!providers.zkConfigProvider,
-          hasProofProvider: !!providers.proofProvider,
-          hasPublicDataProvider: !!providers.publicDataProvider,
-          hasWalletProvider: !!providers.walletProvider,
-          hasMidnightProvider: !!providers.midnightProvider,
-          walletProviderKeys: providers.walletProvider ? Object.keys(providers.walletProvider) : [],
-          coinPublicKey: providers.walletProvider?.coinPublicKey,
-          encryptionPublicKey: providers.walletProvider?.encryptionPublicKey,
-        });
+      logger.info(SYSTEM_LOG_TAG, `Transaction submitted: ${result.txHash}`);
 
-        // Preflight: If the local private state is missing, call without privateStateId and persist after
-        let omitPrivateStateId = false;
-        try {
-          const existingPrivateState = await providers.privateStateProvider.get(privateStateId);
-          if (existingPrivateState == null) {
-            omitPrivateStateId = true;
-          }
-        } catch {
-          omitPrivateStateId = true;
-        }
+      onStatusChange('pendingConfirmation', { txHash: result.txHash });
 
-        const callOptions: Record<string, unknown> = omitPrivateStateId
-          ? { ...txOptions }
-          : (txOptions as unknown as Record<string, unknown>);
-        if (omitPrivateStateId) {
-          delete callOptions.privateStateId;
-          logger.debug(
-            SYSTEM_LOG_TAG,
-            'Local private state missing; omitting privateStateId for initial call'
-          );
-        }
-
-        // Type assertion required: callOptions is dynamically constructed and txResult shape varies
-        // based on contract implementation. We assert to match the expected SDK parameter types.
-        txResult = (await submitCallTx(
-          providers,
-          callOptions as Parameters<typeof submitCallTx>[1]
-        )) as TxResult;
-        if (omitPrivateStateId && txResult?.private?.nextPrivateState) {
-          try {
-            await providers.privateStateProvider.set(
-              privateStateId,
-              txResult.private.nextPrivateState
-            );
-            logger.debug(
-              SYSTEM_LOG_TAG,
-              'Persisted private state after initial call under ID:',
-              privateStateId
-            );
-          } catch {
-            // Best effort; do not fail the transaction if persistence fails
-          }
-        }
-        logger.debug(SYSTEM_LOG_TAG, 'Transaction result:', txResult);
-      } catch (callError: unknown) {
-        // Log more details about the error
-        const error = callError as { message?: string; stack?: string };
-        logger.error(SYSTEM_LOG_TAG, 'CallTx error details:', {
-          message: error.message,
-          stack: error.stack?.split('\n').slice(0, 5),
-        });
-        throw callError;
-      }
-
-      // Step 10: Extract transaction hash from result
-      // Pattern: deploy.ts lines 283-298 shows txHash is in deployTxData.public
-      const txHash =
-        txResult?.txHash ||
-        txResult?.hash ||
-        txResult?.deployTxData?.public?.txHash ||
-        txResult?.public?.txHash ||
-        `midnight_tx_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-
-      logger.info(SYSTEM_LOG_TAG, `Transaction submitted: ${txHash}`);
-
-      onStatusChange('pendingConfirmation', { txHash });
-
-      return { txHash };
+      return { txHash: result.txHash };
     } catch (error) {
       logger.error(SYSTEM_LOG_TAG, 'Transaction execution failed:', error);
 
-      // Handle user rejection
-      if (error instanceof Error && error.message.includes('User')) {
-        throw new Error('Transaction was rejected by user');
+      // Re-throw with potentially cleaner error message
+      if (error instanceof Error) {
+        throw error;
       }
 
-      // Handle proof errors
-      if (error instanceof Error && error.message.includes('proof')) {
-        throw new Error(`Zero-knowledge proof generation failed: ${error.message}`);
-      }
-
-      // Generic error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';
-      throw new Error(`Transaction failed: ${errorMessage}`);
+      throw new Error(`Transaction failed: Unknown error`);
     }
   }
 }
