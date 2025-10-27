@@ -46,7 +46,7 @@ export function initializeMidnightBrowserEnvironment(): void {
           if (encoding === 'hex') {
             const bytes = [];
             for (let i = 0; i < data.length; i += 2) {
-              bytes.push(parseInt(data.substr(i, 2), 16));
+              bytes.push(parseInt(data.substring(i, i + 2), 16));
             }
             uint8Array = new Uint8Array(bytes);
           } else if (encoding === 'base64') {
