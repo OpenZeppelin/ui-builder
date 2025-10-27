@@ -176,6 +176,15 @@ export async function extractMidnightContractZip(
         }
       }
 
+      // Warn if we hit the safety cap with remaining exports to process
+      if (queue.length > 0 && aggregate.length >= maxFiles) {
+        logger.warn(
+          SYSTEM_LOG_TAG,
+          `Re-export resolution hit safety cap of ${maxFiles} files with ${queue.length} files still pending. ` +
+            `Contract definition may be incomplete. Consider simplifying your re-export chain or increasing the limit.`
+        );
+      }
+
       return aggregate.join('\n');
     };
 
