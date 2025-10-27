@@ -94,7 +94,8 @@ async function prepareRecordWithDefinition(
   if (adapter && typeof adapter.getArtifactPersistencePolicy === 'function' && artifactsToSave) {
     const policy = adapter.getArtifactPersistencePolicy();
     if (policy?.mode === 'deferredUntilFunctionSelected') {
-      const threshold = policy.sizeThresholdBytes || 15 * 1024 * 1024;
+      const threshold =
+        policy.sizeThresholdBytes !== undefined ? policy.sizeThresholdBytes : 15 * 1024 * 1024;
       const originalZipData = (artifactsToSave as Record<string, unknown>).originalZipData as
         | string
         | undefined;

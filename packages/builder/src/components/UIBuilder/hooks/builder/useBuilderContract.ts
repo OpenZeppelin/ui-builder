@@ -60,7 +60,10 @@ export function useBuilderContract() {
 
             // Check if ZIP is heavy enough to warrant trimming
             if (originalZipData && typeof originalZipData === 'string') {
-              const threshold = policy.sizeThresholdBytes || 15 * 1024 * 1024;
+              const threshold =
+                policy.sizeThresholdBytes !== undefined
+                  ? policy.sizeThresholdBytes
+                  : 15 * 1024 * 1024;
               const estimatedSize = (originalZipData.length * 3) / 4;
 
               logger.info(
