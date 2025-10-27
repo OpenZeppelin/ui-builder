@@ -52,6 +52,7 @@ export async function prepareArtifactsForFunction(
         contractDefinition: currentArtifacts.contractDefinition,
         witnessCode: currentArtifacts.witnessCode,
         // Store the trimmed ZIP as base64 for later export
+        // Note: Buffer is available via the polyfill in browser-init.ts (loaded when adapter is imported)
         trimmedZipBase64: Buffer.from(slim).toString('base64'),
       },
       publicAssets: {

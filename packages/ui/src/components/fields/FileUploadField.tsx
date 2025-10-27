@@ -83,7 +83,12 @@ export function FileUploadField<TFieldValues extends FieldValues = FieldValues>(
       reader.onload = (): void => {
         if (typeof reader.result === 'string') {
           // Remove data URL prefix to get just base64
-          const base64 = reader.result.split(',')[1];
+          const parts = reader.result.split(',');
+          if (parts.length !== 2) {
+            reject(new Error('Invalid data URL format'));
+            return;
+          }
+          const base64 = parts[1];
           resolve(base64);
         } else {
           reject(new Error('Failed to convert file to base64'));

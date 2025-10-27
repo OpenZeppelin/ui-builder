@@ -50,7 +50,8 @@ function parsePatchFileName(fileName) {
   const match = fileName.match(/^(.+)@([^@]+)\.patch$/);
   if (!match) return null;
 
-  // Convert double underscore back to slash for scoped packages
+  // pnpm patch files use double underscores to encode slashes in scoped package names.
+  // This converts names like '@scope__package' back to '@scope/package'.
   const packageName = match[1].replace(/__/g, '/');
   const version = match[2];
 
