@@ -41,6 +41,21 @@ zip -r contract.zip dist/
 3. Enter parameters
 4. Click "Execute" - proof generation and signing handled automatically
 
+### Runtime-Only Organizer Secret (Organizer-Only Circuits)
+
+Some circuits require an organizer secret key. For security, the adapter treats this as a runtime-only credential:
+
+- Never requested or stored during artifact upload
+- Collected only at execution time (similar to a relayer API key)
+- Injected into the private state provider in-memory and never persisted
+
+How it works in the UI:
+
+- The Builder auto-adds a form field of type `runtimeSecret` for functions that require an organizer key (based on adapter-provided decorations).
+- This field appears in the form like any other field (not in the execution settings panel). The label and helper text are adapter-defined (e.g., "Organizer Secret Key (hex)").
+- Values from `runtimeSecret` fields are never persisted; they are removed from contract arguments and passed to the adapter at submit time.
+- The adapter seeds a runtime-only overlay of the private state so the secret is available just-in-time for proof generation and is stripped on any persistence operations.
+
 ## Architecture
 
 This adapter implements a pure browser-based solution with **lazy-loaded polyfills**:
@@ -94,7 +109,7 @@ The export process uses a **lean bundling approach** that keeps files small:
 
 **Bundled in the Export:**
 
-1. **Original ZIP file**: Base64-encoded contract artifacts ZIP
+1. **Original ZIP file**: Stored at `public/midnight/contract.zip` (keeps bundle small)
 2. **Contract Address**: Deployed contract address
 3. **Private State ID**: Contract's private state identifier
 
@@ -133,19 +148,19 @@ The exported `main.tsx` automatically loads artifacts during adapter initializat
 ```typescript
 const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
   const adapter = new MidnightAdapter(nc);
-  // Load contract from ZIP (same parsing logic as builder)
+  // Load contract from URL-based ZIP (same parsing logic as builder)
   await adapter.loadContractWithMetadata(midnightArtifactsSource);
   return adapter;
 };
 ```
 
-The `artifacts.ts` file contains the ZIP data:
+The `artifacts.ts` file contains the ZIP metadata and URL:
 
 ```typescript
 export const midnightArtifactsSource = {
   contractAddress: '0x...',
   privateStateId: 'counter',
-  contractArtifactsZip: 'UEsDBBQAA...', // base64 ZIP
+  contractArtifactsUrl: '/midnight/contract.zip',
 };
 ```
 

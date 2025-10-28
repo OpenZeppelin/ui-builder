@@ -746,35 +746,39 @@ yarn build
 
 ### 5. Organizer-Only Circuits Require Initialized Private State
 
-**Issue**: Circuits marked as organizer-only require a properly initialized private state with the organizer secret key. Without it, the proof server returns a 400 error.
+**Issue**: Circuits marked as organizer-only require an organizer secret key to seed private state before proof generation. Without it, the proof server returns a 400 error.
 
-**Current Behavior**:
+**Current Behavior (Runtime-Only Secret)**:
 
-- Calls to organizer-only circuits fail if `organizerSecretKeyHex` is not provided during artifact loading
-- The adapter validates private state presence and fails early with an actionable error
+- The organizer secret is prompted at execution time (never during artifact loading)
+- A runtime-only private state overlay injects the secret for the duration of the call
+- The secret is never persisted; writes strip `organizerSecretKey` before storage
 - For participant-only circuits without organizer logic, private state is optional
 
 **How to Use**:
 
-1. When loading contract artifacts via the UI, provide `organizerSecretKeyHex` in the "Organizer Secret Key (hex)" field if the contract has organizer-only circuits.
-2. The `EoaExecutionStrategy` will seed the private state from this key before executing any circuits.
+1. Execute an organizer-only circuit and enter the "Organizer Secret Key (hex)" when prompted in the form.
+2. The EOA execution strategy uses `createPrivateStateOverlay` to expose the secret in memory during `get(id)` and to strip it on `set(id)`.
 3. For organizer-less contracts (or participant-only ones), leave the field empty.
 
-**Example Error Message**:
+**Handling Missing Private State**:
 
-If you attempt to call an organizer-only circuit without providing `organizerSecretKeyHex`:
+The overlay treats underlying storage misses (e.g., IndexedDB "Entry not found") as `null` state, allowing the runtime key to be injected without error.
+
+**Example Error Message (legacy environments)**:
+
+If you attempt to call an organizer-only circuit without providing the runtime secret:
 
 ```
 Private state not initialized for this contract/privateStateId.
-For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts
-so the private state can be seeded.
+For organizer-only circuits, provide the organizer secret key at execution time so the private state can be seeded.
 ```
 
-**Future Solution**:
+**Future Improvements**:
 
-- Auto-detect organizer-only circuits from contract definition
-- Show hint in UI about which circuits require organizer key
-- Support batch circuit execution with auto-seeding
+- Auto-detect organizer-only circuits from contract definition and show contextual hints
+- UI indicators for organizer-only vs participant-only circuits
+- Optional ephemeral in-memory caching (short-lived) to reduce re-prompting
 
 ### 3. Error Messages
 
@@ -1023,29 +1027,29 @@ The Midnight adapter's `getContractDefinitionInputs()` does NOT include an organ
 - Private State ID
 - Contract build artifacts (ZIP)
 
-**2. Runtime-Only UI Prompt**
+**2. Runtime-Only Form Field (Builder)**
 
-In `ExecutionConfigDisplay.tsx`, when `executionConfig.method === 'eoa'` and `adapter?.networkConfig?.ecosystem === 'midnight'`, a `PasswordField` is rendered:
+The Builder auto-adds a `runtimeSecret` field to the form for functions that require an organizer key (based on adapter-provided function decorations). This field:
 
-```tsx
+- Appears in the form like any other field
+- Has an adapter-defined `label` and `helperText` (e.g., "Organizer Secret Key (hex)")
+- Includes `adapterBinding.key` used to route the secret to the adapter
+- Is never persisted and is removed from contract arguments at submit time
+
+Example shape:
+
+```ts
 {
-  executionConfig.method === 'eoa' && adapter?.networkConfig?.ecosystem === 'midnight' && (
-    <div className="px-6 pb-4">
-      <PasswordField
-        id="midnight-organizer-secret"
-        label="Organizer Secret Key (hex)"
-        name="runtimeApiKey"
-        control={control}
-        placeholder="Enter organizer secret key (hex, no 0x prefix)"
-        validation={{ required: false }}
-        helperText="Required only for organizer-only circuits (e.g., setName). Not stored."
-      />
-    </div>
-  );
+  id: 'runtime-secret-organizer',
+  name: 'organizerSecretKeyHex',
+  label: 'Organizer Secret Key (hex)',
+  type: 'runtimeSecret',
+  validation: { required: false },
+  adapterBinding: { key: 'organizerSecretKeyHex' },
 }
 ```
 
-The key is bound to the existing `runtimeApiKey` form field, which is passed through to `adapter.signAndBroadcast()` but never persisted.
+At execution, the renderer extracts values from all `runtimeSecret` fields and supplies them to the adapter without including them in the contract call arguments.
 
 **3. Seeding in EOA Strategy**
 
