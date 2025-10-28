@@ -63,7 +63,6 @@
     "@openzeppelin/ui-builder-types": "workspace:*",
     "@openzeppelin/ui-builder-ui": "workspace:*",
     "@openzeppelin/ui-builder-utils": "workspace:^",
-    "@scure/base": "^2.0.0",
     "@types/jszip": "^3.4.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.510.0",

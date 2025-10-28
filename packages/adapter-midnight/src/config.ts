@@ -39,9 +39,6 @@ export const midnightAdapterConfig: AdapterConfig = {
       // Reactive state management
       rxjs: '^7.8.1',
 
-      // Cryptographic utilities
-      '@scure/base': '^2.0.0',
-
       // ZIP file handling for contract artifacts
       jszip: '^3.10.1',
 

@@ -49,7 +49,6 @@ describe('Midnight Adapter Config', () => {
 
     it('should include required utility packages', () => {
       expect(runtime).toHaveProperty('rxjs');
-      expect(runtime).toHaveProperty('@scure/base');
       expect(runtime).toHaveProperty('jszip');
       expect(runtime).toHaveProperty('object-inspect');
       expect(runtime).toHaveProperty('cross-fetch');
