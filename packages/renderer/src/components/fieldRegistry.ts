@@ -58,4 +58,5 @@ export const fieldComponents: Record<
   enum: EnumField,
   hidden: () => null, // Return null for hidden type
   'file-upload': FileUploadField,
+  runtimeSecret: PasswordField,
 };

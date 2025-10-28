@@ -1,3 +1,4 @@
+import { AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -13,6 +14,7 @@ import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfig
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
 import { createDefaultFormValues } from '../utils/formUtils';
+import { extractRuntimeSecrets } from '../utils/runtimeSecretExtractor';
 import { DynamicFormField } from './DynamicFormField';
 import { TransactionStatusDisplay } from './transaction';
 
@@ -119,10 +121,14 @@ export function TransactionForm({
 
     try {
       setTxStatus('pendingSignature');
+
+      // Extract runtime secrets from form data and remove them from contract args
+      const { contractArgs, runtimeSecrets } = extractRuntimeSecrets(data, schema.fields);
+
       const formattedData = adapter.formatTransactionData(
         contractSchema,
         schema.functionId as string,
-        data,
+        contractArgs,
         schema.fields
       );
       logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
@@ -138,12 +144,17 @@ export function TransactionForm({
         }
       };
 
+      // Pass first runtime secret via runtimeApiKey parameter
+      // Adapters can implement getRuntimeFieldBinding() to customize secret handling
+      const firstSecretValue = Object.values(runtimeSecrets)[0];
+
       // The initial status is set by the strategy via the callback
       const { txHash: finalTxHash } = await adapter.signAndBroadcast(
         formattedData,
         executionConfig || { method: 'eoa', allowAny: true },
         onStatusChange,
-        runtimeApiKey
+        runtimeApiKey, // Execution method credential (e.g., relayer API key)
+        firstSecretValue // Adapter-specific runtime secret (e.g., organizer key)
       );
 
       logger.info('TransactionForm', `Transaction submitted with final hash: ${finalTxHash}`);
@@ -308,6 +319,14 @@ export function TransactionForm({
           noValidate
           onSubmit={methods.handleSubmit(executeTransaction)}
         >
+          {/* Display Execution Config Error (if any) */}
+          {executionConfigError && (
+            <div className="form-error rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+              <AlertCircle className="mr-2 h-4 w-4" />
+              {executionConfigError}
+            </div>
+          )}
+
           <div className="mb-6">{renderFormContent()}</div>
 
           {/* Execution Config Display - Placed above the form actions */}
