@@ -9,7 +9,7 @@ import type {
   RelayerExecutionConfig,
 } from '../execution';
 import { type FieldType } from '../forms';
-import { type FormFieldType } from '../forms/form-field';
+import type { FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
 import type { AdapterExportBootstrap, AdapterExportContext } from './export';
@@ -18,6 +18,7 @@ import type {
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   EcosystemWalletComponents,
+  FunctionDecorationsMap,
   UiKitConfiguration,
 } from './ui-enhancements';
 
@@ -156,12 +157,20 @@ export interface ContractAdapter {
 
   /**
    * Sign and broadcast a transaction
+   *
+   * @param transactionData - The formatted transaction data
+   * @param executionConfig - Configuration for the execution method (e.g., relayer settings)
+   * @param onStatusChange - Callback for transaction status updates
+   * @param runtimeApiKey - Optional API key or token for execution method (e.g., relayer API key)
+   * @param runtimeSecret - Optional runtime secret required by the adapter (e.g., organizer key for privacy circuits)
+   * @returns Transaction hash upon successful broadcast
    */
   signAndBroadcast: (
     transactionData: unknown,
     executionConfig: ExecutionConfig,
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
-    runtimeApiKey?: string
+    runtimeApiKey?: string,
+    runtimeSecret?: string
   ) => Promise<{ txHash: string }>;
 
   /**
@@ -608,4 +617,40 @@ export interface ContractAdapter {
     publicAssets?: Record<string, Uint8Array | Blob>;
     bootstrapSource?: Record<string, unknown>;
   }>;
+
+  /**
+   * (Optional) Returns metadata for a runtime secret field required by the ecosystem.
+   * This allows adapters to declare that forms should include a runtime-only secret field
+   * (not persisted, chain-specific e.g., organizer key for Midnight).
+   *
+   * When implemented, the builder will auto-add a 'runtimeSecret' field to forms for organizer-only functions,
+   * and the field can be customized like any other (hidden, hardcoded, etc.).
+   * The field value is passed to the adapter at execution time via the runtimeSecrets bag.
+   *
+   * @returns Binding metadata with key and display info, or undefined if not needed.
+   */
+  getRuntimeFieldBinding?():
+    | {
+        /**
+         * Unique key to bind the field value during execution (e.g., 'organizerSecret')
+         */
+        key: string;
+        /**
+         * Display label for the field
+         */
+        label: string;
+        /**
+         * Optional helper text for the field
+         */
+        helperText?: string;
+      }
+    | undefined;
+
+  /**
+   * (Optional) Returns a map of function IDs to their decorations.
+   * This allows adapters to add badges, notes, or other UI elements to specific functions.
+   *
+   * @returns A map of function IDs to their decorations.
+   */
+  getFunctionDecorations?(): Promise<FunctionDecorationsMap | undefined>;
 }

@@ -70,6 +70,8 @@ module.exports = {
       'getExportableWalletConfigFiles',
       'getSupportedContractDefinitionProviders',
       'getContractDefinitionInputs',
+      'getRuntimeFieldBinding',
+      'getFunctionDecorations',
       'getRelayers',
       'getRelayer',
       'getRelayerOptionsComponent',
