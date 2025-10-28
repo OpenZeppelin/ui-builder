@@ -1,5 +1,5 @@
 import type { TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { hexToBytes, logger } from '@openzeppelin/ui-builder-utils';
 
 import type { WriteContractParameters } from '../types';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
@@ -12,6 +12,77 @@ import { evaluateWitnessCode } from './witness-evaluator';
 const SYSTEM_LOG_TAG = 'MidnightEoaExecutionStrategy';
 
 /**
+ * Creates a runtime-only overlay for the private state provider that injects
+ * the organizer secret key without persisting it to IndexedDB.
+ * This is by design to avoid storing the sensitive key due to security reasons.
+ *
+ * @param baseProvider - The underlying private state provider (IndexedDB-backed)
+ * @param runtimeKeyHex - Optional runtime organizer secret key in hex format
+ * @returns Wrapped provider that injects key in-memory and strips it on writes
+ */
+export function createPrivateStateOverlay(
+  baseProvider: {
+    get: (id: string) => Promise<unknown>;
+    set: (id: string, state: unknown) => Promise<void>;
+  },
+  runtimeKeyHex?: string
+): typeof baseProvider {
+  let overlayKeyBytes: Uint8Array | undefined;
+
+  if (runtimeKeyHex) {
+    try {
+      overlayKeyBytes = hexToBytes(runtimeKeyHex);
+    } catch {
+      logger.warn(SYSTEM_LOG_TAG, 'Invalid organizer secret provided; ignoring at runtime');
+    }
+  }
+
+  return {
+    async get(id: string): Promise<unknown> {
+      let baseState: Record<string, unknown> | null | undefined;
+      try {
+        baseState = (await baseProvider.get(id)) as Record<string, unknown> | null | undefined;
+      } catch {
+        // Treat storage miss (e.g., IndexedDB "Entry not found") as no state present
+        baseState = null;
+      }
+
+      // Remove any persisted organizerSecretKey to enforce runtime-only behavior
+      let sanitized: unknown = null;
+      if (baseState && typeof baseState === 'object') {
+        const { organizerSecretKey: _organizerSecretKeyUnused, ...rest } = baseState as Record<
+          string,
+          unknown
+        >;
+        sanitized = Object.keys(rest).length > 0 ? rest : null;
+      }
+
+      if (overlayKeyBytes) {
+        // Return ephemeral state with organizerSecretKey injected; not persisted
+        const baseObj =
+          sanitized && typeof sanitized === 'object' ? (sanitized as Record<string, unknown>) : {};
+        return { ...baseObj, organizerSecretKey: overlayKeyBytes };
+      }
+
+      // Without runtime key, if no other state remains, signal missing state
+      return sanitized;
+    },
+
+    async set(id: string, state: unknown): Promise<void> {
+      // Strip organizerSecretKey before persisting updates
+      if (state && typeof state === 'object') {
+        const { organizerSecretKey: _organizerSecretKeyUnused2, ...rest } = state as Record<
+          string,
+          unknown
+        >;
+        return baseProvider.set(id, rest);
+      }
+      return baseProvider.set(id, state);
+    },
+  };
+}
+
+/**
  * Implements full EOA transaction execution for Midnight
  */
 export class EoaExecutionStrategy implements ExecutionStrategy {
@@ -20,7 +91,8 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
     executionConfig: MidnightExecutionConfig,
     walletImplementation: LaceWalletImplementation,
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    _runtimeApiKey?: string,
+    runtimeSecret?: string
   ): Promise<{ txHash: string }> {
     logger.info(SYSTEM_LOG_TAG, 'Executing EOA transaction', {
       contractAddress: transactionData.contractAddress,
@@ -107,8 +179,6 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       const witnesses = evaluateWitnessCode(artifacts.witnessCode || '');
 
       logger.debug(SYSTEM_LOG_TAG, 'Artifacts received for execution:', {
-        hasOrganizerKey: !!artifacts.organizerSecretKeyHex,
-        organizerKeyLength: artifacts.organizerSecretKeyHex?.length || 0,
         privateStateId,
       });
 
@@ -126,23 +196,14 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         version: (compactRuntime as { versionString?: string })?.versionString,
       });
 
-      // Seed private state if missing and organizerSecretKeyHex is provided
-      if (artifacts.organizerSecretKeyHex) {
-        try {
-          const existing = await providers.privateStateProvider.get(privateStateId);
-          if (existing == null) {
-            const hex = artifacts.organizerSecretKeyHex.trim().replace(/^0x/, '');
-            const bytes = new Uint8Array(hex.length / 2);
-            for (let i = 0; i < bytes.length; i++) {
-              bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-            }
-            await providers.privateStateProvider.set(privateStateId, { organizerSecretKey: bytes });
-            logger.debug(SYSTEM_LOG_TAG, 'Seeded private state with organizer secret key');
-          }
-        } catch (seedErr) {
-          logger.warn(SYSTEM_LOG_TAG, 'Failed to seed private state with organizer key:', seedErr);
-        }
-      }
+      // Step 4.1: Wrap private state provider with runtime-only organizer key overlay
+      const overlayPrivateStateProvider = createPrivateStateOverlay(
+        providers.privateStateProvider as {
+          get: (id: string) => Promise<unknown>;
+          set: (id: string, state: unknown) => Promise<void>;
+        },
+        runtimeSecret
+      );
 
       // Step 5: Create contract instance with injected dependencies
       // evaluateContractModule internally instantiates new Contract(witnesses)
@@ -173,10 +234,15 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         transactionData.args
       );
 
-      // Step 8: Use callCircuit helper to execute the circuit with clean error handling
+      // Step 8: Use callCircuit helper with patched providers (runtime-only private state overlay)
+      const patchedProviders = {
+        ...providers,
+        privateStateProvider: overlayPrivateStateProvider,
+      } as typeof providers;
+
       const result = await callCircuit({
         contractInstance,
-        providers,
+        providers: patchedProviders,
         contractAddress,
         circuitId: transactionData.functionName,
         privateStateId,
