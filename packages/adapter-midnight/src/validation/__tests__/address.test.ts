@@ -1,5 +1,4 @@
-import { bech32m } from '@scure/base';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
   CONTRACT_VALIDATION_ERRORS,
@@ -8,22 +7,11 @@ import {
   isValidAddress,
   isValidContractAddressFormat,
   isValidUserAddressFormat,
-  MIDNIGHT_ADDRESS_PREFIXES,
+  MIDNIGHT_ADDRESS_TYPES,
   USER_VALIDATION_ERRORS,
   validateContractAddress,
   validateUserAddress,
 } from '../address';
-
-// Mock the bech32m module
-vi.mock('@scure/base', () => ({
-  bech32m: {
-    decode: vi.fn(),
-  },
-}));
-
-const mockBech32m = bech32m as unknown as {
-  decode: ReturnType<typeof vi.fn>;
-};
 
 describe('Contract Address Validation', () => {
   describe('validateContractAddress', () => {
@@ -324,8 +312,10 @@ describe('User Address Validation', () => {
 
   describe('isValidUserAddressFormat', () => {
     it('should return true for addresses with valid prefixes', () => {
-      Object.values(MIDNIGHT_ADDRESS_PREFIXES).forEach((prefix) => {
-        const address = `${prefix}1testtesttesttest`;
+      Object.values(MIDNIGHT_ADDRESS_TYPES).forEach((prefix) => {
+        // The format checker now looks for addresses that contain the type
+        // and have a '1' separator, so we need longer addresses
+        const address = `${prefix}1testtesttesttesttesttest`;
         expect(isValidUserAddressFormat(address)).toBe(true);
       });
     });
@@ -336,7 +326,9 @@ describe('User Address Validation', () => {
     });
 
     it('should return false for too short addresses', () => {
+      // Updated threshold to 20 characters
       expect(isValidUserAddressFormat('addr1test')).toBe(false);
+      expect(isValidUserAddressFormat('addr1')).toBe(false);
     });
 
     it('should return false for empty or null', () => {
@@ -450,11 +442,11 @@ describe('Constants', () => {
     expect(USER_VALIDATION_ERRORS.INVALID_PREFIX).toBe('Invalid address prefix');
   });
 
-  it('should have correct MIDNIGHT_ADDRESS_PREFIXES', () => {
-    expect(MIDNIGHT_ADDRESS_PREFIXES.SHIELDED).toBe('addr');
-    expect(MIDNIGHT_ADDRESS_PREFIXES.UNSHIELDED).toBe('naddr');
-    expect(MIDNIGHT_ADDRESS_PREFIXES.DUST).toBe('dust');
-    expect(MIDNIGHT_ADDRESS_PREFIXES.COIN_PUBLIC_KEY).toBe('cpk');
-    expect(MIDNIGHT_ADDRESS_PREFIXES.ENCRYPTION_PUBLIC_KEY).toBe('epk');
+  it('should have correct MIDNIGHT_ADDRESS_TYPES', () => {
+    expect(MIDNIGHT_ADDRESS_TYPES.SHIELDED).toBe('addr');
+    expect(MIDNIGHT_ADDRESS_TYPES.UNSHIELDED).toBe('naddr');
+    expect(MIDNIGHT_ADDRESS_TYPES.DUST).toBe('dust');
+    expect(MIDNIGHT_ADDRESS_TYPES.COIN_PUBLIC_KEY).toBe('cpk');
+    expect(MIDNIGHT_ADDRESS_TYPES.ENCRYPTION_PUBLIC_KEY).toBe('epk');
   });
 });

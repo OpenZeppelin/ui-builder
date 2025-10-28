@@ -294,11 +294,13 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
-    return []; // Placeholder
+    const { getMidnightSupportedExecutionMethods } = await import('./configuration/execution');
+    return getMidnightSupportedExecutionMethods();
   }
 
-  public async validateExecutionConfig(_config: ExecutionConfig): Promise<true | string> {
-    return true; // No config to validate yet
+  public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
+    const { validateMidnightExecutionConfig } = await import('./configuration/execution');
+    return validateMidnightExecutionConfig(config);
   }
 
   public getExplorerUrl(_address: string): string | null {
