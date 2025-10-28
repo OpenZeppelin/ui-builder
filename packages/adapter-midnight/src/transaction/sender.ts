@@ -13,16 +13,22 @@ import type { ExecutionStrategy, MidnightExecutionConfig } from './execution-str
 const SYSTEM_LOG_TAG = 'adapter-midnight-sender';
 
 /**
- * Sign and broadcast a Midnight transaction using the appropriate execution strategy.
- * This follows the same architecture as the EVM adapter, delegating to specific
- * execution strategies based on the execution config method.
+ * Signs and broadcasts a Midnight transaction using the wallet implementation.
  *
- * @param transactionData - The formatted transaction data from formatMidnightTransactionData
- * @param executionConfig - Execution configuration specifying method (eoa/wallet only in v1)
+ * This function coordinates the complete transaction lifecycle for Midnight:
+ * 1. Validates the transaction data and network configuration
+ * 2. Retrieves the wallet implementation
+ * 3. Selects the appropriate execution strategy (currently only EOA)
+ * 4. Merges artifacts from transaction data and adapter
+ * 5. Executes the transaction via the selected strategy
+ *
+ * @param transactionData - The formatted transaction data
+ * @param executionConfig - Execution configuration (method, settings)
  * @param networkConfig - Midnight network configuration
- * @param adapterArtifacts - Contract artifacts from the adapter instance (fallback)
- * @param onStatusChange - Callback for transaction status updates
- * @param runtimeApiKey - Optional session-only API key for methods like Relayer
+ * @param adapterArtifacts - Contract artifacts (ZK proofs, verifier keys, etc.)
+ * @param onStatusChange - Optional callback for transaction status updates
+ * @param runtimeApiKey - Optional session-only API key for execution methods (currently unused; Midnight doesn't support relayers yet)
+ * @param runtimeSecret - Optional runtime secret for organizer-only circuits
  * @returns Promise resolving to the transaction hash
  */
 export async function signAndBroadcastMidnightTransaction(
@@ -31,7 +37,8 @@ export async function signAndBroadcastMidnightTransaction(
   networkConfig: MidnightNetworkConfig,
   adapterArtifacts: MidnightContractArtifacts | null,
   onStatusChange?: (status: string, details: TransactionStatusUpdate) => void,
-  runtimeApiKey?: string
+  runtimeApiKey?: string,
+  runtimeSecret?: string
 ): Promise<{ txHash: string }> {
   logger.info(SYSTEM_LOG_TAG, 'Sign & Broadcast Midnight Tx:', {
     data: transactionData,
@@ -66,36 +73,52 @@ export async function signAndBroadcastMidnightTransaction(
   }
 
   // --- Prepare Artifacts --- //
-  // Extract artifacts from transaction data or fall back to adapter instance
+  // Extract artifacts from transaction data and adapter instance
   const txArtifacts = txData.transactionOptions?._artifacts;
 
-  let executionArtifacts: MidnightExecutionConfig['artifacts'];
+  /**
+   * Merge two artifact sources, preferring non-null values from either side.
+   */
+  const mergeArtifacts = (
+    a?: MidnightContractArtifacts | null,
+    b?: MidnightContractArtifacts | null
+  ): MidnightExecutionConfig['artifacts'] | undefined => {
+    if (!a && !b) return undefined;
+    const left = a ?? ({} as MidnightContractArtifacts);
+    const right = b ?? ({} as MidnightContractArtifacts);
 
-  if (txArtifacts) {
-    // Use artifacts from transaction (already in correct format)
-    executionArtifacts = txArtifacts.contractModule
-      ? {
-          privateStateId: txArtifacts.privateStateId,
-          contractModule: txArtifacts.contractModule,
-          witnessCode: txArtifacts.witnessCode,
-          verifierKeys: txArtifacts.verifierKeys,
-          organizerSecretKeyHex: txArtifacts.organizerSecretKeyHex,
-        }
-      : undefined;
-  } else if (adapterArtifacts) {
-    // Use artifacts from adapter (need to map fields)
-    executionArtifacts = adapterArtifacts.contractModule
-      ? {
-          privateStateId: adapterArtifacts.privateStateId,
-          contractModule: adapterArtifacts.contractModule,
-          witnessCode: adapterArtifacts.witnessCode,
-          verifierKeys: adapterArtifacts.verifierKeys,
-          organizerSecretKeyHex: adapterArtifacts.organizerSecretKeyHex,
-        }
-      : undefined;
-  } else {
+    const privateStateId = left.privateStateId || right.privateStateId;
+    const contractModule = left.contractModule || right.contractModule;
+    const witnessCode = left.witnessCode || right.witnessCode;
+    const verifierKeys = left.verifierKeys || right.verifierKeys;
+
+    // Must have at least contractModule and privateStateId to be valid
+    if (!contractModule || !privateStateId) {
+      return undefined;
+    }
+
+    // Type is safe now after validation
+    const combined: MidnightExecutionConfig['artifacts'] = {
+      privateStateId,
+      contractModule,
+      witnessCode,
+      verifierKeys,
+    };
+
+    return combined;
+  };
+
+  // Merge transaction artifacts with adapter artifacts, giving priority to transaction but filling gaps from adapter
+  const combinedArtifacts = mergeArtifacts(
+    (txArtifacts as MidnightContractArtifacts | undefined) ?? null,
+    adapterArtifacts ?? null
+  );
+
+  if (!combinedArtifacts) {
     throw new Error('Contract artifacts are required for transaction execution but were not found');
   }
+
+  const executionArtifacts: MidnightExecutionConfig['artifacts'] = combinedArtifacts;
 
   // --- Augment Execution Config --- //
   const augmentedConfig: MidnightExecutionConfig = {
@@ -110,7 +133,8 @@ export async function signAndBroadcastMidnightTransaction(
     augmentedConfig,
     walletImplementation,
     onStatusChange || (() => {}),
-    runtimeApiKey
+    runtimeApiKey,
+    runtimeSecret
   );
 }
 

@@ -20,12 +20,11 @@ export async function getMidnightExportBootstrapFiles(
   logger.info(SYSTEM_LOG_TAG, 'Generating Midnight export bootstrap files');
 
   const artifacts = context.artifacts || {};
-  const functionId = context.functionId || context.formConfig.functionId;
+  const functionId = context.formConfig.functionId;
 
   const contractAddress =
     context.formConfig.contractAddress || context.contractSchema.address || '';
   const privateStateId = (artifacts['privateStateId'] as string) || '';
-  const organizerSecretKeyHex = (artifacts['organizerSecretKeyHex'] as string | undefined) || '';
 
   if (!contractAddress || !privateStateId) {
     logger.error(SYSTEM_LOG_TAG, 'Missing contract address or private state ID.');
@@ -50,7 +49,6 @@ export async function getMidnightExportBootstrapFiles(
 export const midnightArtifactsSource = {
   contractAddress: '${contractAddress}',
   privateStateId: '${privateStateId}',
-  ${organizerSecretKeyHex ? `organizerSecretKeyHex: '${organizerSecretKeyHex}',` : ''}
   contractArtifactsUrl: '/midnight/contract.zip',
 };
 `;

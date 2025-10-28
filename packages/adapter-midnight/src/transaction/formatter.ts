@@ -94,7 +94,6 @@ export function formatMidnightTransactionData(
             contractModule: artifacts.contractModule,
             witnessCode: artifacts.witnessCode,
             verifierKeys: artifacts.verifierKeys,
-            organizerSecretKeyHex: artifacts.organizerSecretKeyHex,
           }
         : undefined,
     },

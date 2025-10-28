@@ -33,18 +33,19 @@ export interface CallCircuitResult {
 }
 
 /**
- * Friendly circuit call wrapper that handles private state hydration, error mapping, and tx hash extraction.
+ * Friendly circuit call wrapper that handles private state validation, error mapping, and tx hash extraction.
  *
  * This helper encapsulates the boilerplate of:
- * 1. Calling findDeployedContract to ensure private state is available
- * 2. Handling missing private state gracefully
- * 3. Calling submitCallTx with proper error context
+ * 1. Validating that private state exists (required for all circuits)
+ * 2. Building transaction options with contractInstance, circuitId, and args
+ * 3. Calling submitCallTx with private state ID always included
  * 4. Persisting updated private state after the call
  * 5. Extracting and returning the transaction hash
  *
  * @param params Call parameters
  * @returns The transaction hash and optional updated private state
- * @throws Friendly error messages for common failure modes
+ * @throws Error if private state is not initialized (provide organizerSecretKeyHex if needed for organizer-only circuits)
+ * @throws Error with friendly message for common failure modes (proof generation, insufficient balance, etc.)
  */
 export async function callCircuit(params: CallCircuitParams): Promise<CallCircuitResult> {
   const { contractInstance, providers, contractAddress, circuitId, privateStateId, args } = params;
@@ -56,26 +57,8 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
   });
 
   try {
-    // Step 1: Attempt to hydrate private state from chain if missing locally
-    logger.debug(SYSTEM_LOG_TAG, 'Step 1: Ensuring private state is available');
-    try {
-      const { findDeployedContract } = await import('@midnight-ntwrk/midnight-js-contracts');
-      const minimalContract = contractInstance as unknown as {
-        impureCircuits: Record<string, unknown>;
-      };
-      await findDeployedContract(providers, {
-        contract: minimalContract as Parameters<typeof findDeployedContract>[1]['contract'],
-        contractAddress,
-        privateStateId,
-      });
-      logger.debug(SYSTEM_LOG_TAG, 'Private state hydrated successfully');
-    } catch (hydrateErr) {
-      logger.debug(
-        SYSTEM_LOG_TAG,
-        'Private state hydration failed (may succeed on initial call)',
-        hydrateErr
-      );
-    }
+    // Import submitCallTx at the start to avoid forward reference issues
+    const { submitCallTx } = await import('@midnight-ntwrk/midnight-js-contracts');
 
     // Step 2: Build transaction options
     logger.debug(SYSTEM_LOG_TAG, 'Step 2: Building transaction options');
@@ -87,33 +70,33 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
       args,
     };
 
-    // Step 3: Check if we should omit privateStateId (if still missing after hydration)
-    logger.debug(SYSTEM_LOG_TAG, 'Step 3: Checking private state availability');
-    let omitPrivateStateId = false;
+    // Step 3: Validating private state availability (required for all circuits)
+    logger.debug(SYSTEM_LOG_TAG, 'Step 3: Validating private state availability');
+    let existingPrivateState: unknown;
     try {
-      const existingPrivateState = await providers.privateStateProvider.get(privateStateId);
+      existingPrivateState = await providers.privateStateProvider.get(privateStateId);
       if (existingPrivateState == null) {
-        omitPrivateStateId = true;
-        logger.debug(
-          SYSTEM_LOG_TAG,
-          'Local private state missing; will call without privateStateId and persist after'
+        throw new Error(
+          'Private state not initialized for this contract/privateStateId. ' +
+            'For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts ' +
+            'so the private state can be seeded.'
         );
       }
-    } catch {
-      omitPrivateStateId = true;
+      logger.debug(SYSTEM_LOG_TAG, 'Private state validated successfully');
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('Private state not initialized')) {
+        throw err;
+      }
+      throw new Error(
+        `Failed to validate private state for circuit execution: ${err instanceof Error ? err.message : 'Unknown error'}`
+      );
     }
 
-    // Step 4: Build call options, omitting privateStateId if needed
-    const callOptions: Record<string, unknown> = omitPrivateStateId
-      ? { ...txOptions }
-      : (txOptions as unknown as Record<string, unknown>);
-    if (omitPrivateStateId) {
-      delete callOptions.privateStateId;
-    }
+    // Step 4: Build call options (always include privateStateId)
+    const callOptions = txOptions as Parameters<typeof submitCallTx>[1];
 
     // Step 5: Execute the circuit call
     logger.debug(SYSTEM_LOG_TAG, 'Step 5: Submitting circuit call');
-    const { submitCallTx } = await import('@midnight-ntwrk/midnight-js-contracts');
 
     type TxResult = {
       txHash?: string;
@@ -125,10 +108,7 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
 
     let txResult: TxResult | undefined;
     try {
-      txResult = (await submitCallTx(
-        providers,
-        callOptions as Parameters<typeof submitCallTx>[1]
-      )) as TxResult;
+      txResult = (await submitCallTx(providers, callOptions)) as TxResult;
       logger.debug(SYSTEM_LOG_TAG, 'Circuit call succeeded', {
         hasTxHash: !!txResult?.txHash,
         hasNextState: !!txResult?.private?.nextPrivateState,
@@ -150,14 +130,28 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
       if (message.includes('undeployed') || message.includes('Undeployed')) {
         throw new Error(`Contract not deployed at address: ${contractAddress}`);
       }
+
+      // If we explicitly validated local private state above, don't blame missing state.
+      const prover400 =
+        /Failed Proof Server response:.*code="400"/.test(message) ||
+        /status="Bad Request"/.test(message);
       if (
+        message.includes('Incorrect call transaction configuration') ||
+        message.includes('No private state found at private state ID') ||
         message.includes('organizerSecretKey') ||
-        message.includes('private state') ||
-        message.includes('Private state')
+        message.includes('Private state') ||
+        (prover400 && !existingPrivateState)
       ) {
         throw new Error(
           'Private state not initialized or organizer secret key missing. ' +
-            'For organizer-only circuits, provide organizerSecretKeyHex in the contract configuration.'
+            'For organizer-only circuits, provide organizerSecretKeyHex in the contract configuration ' +
+            'so the private state can be seeded.'
+        );
+      }
+
+      if (prover400) {
+        throw new Error(
+          'Proof server rejected the request (400). Please verify arguments and ZK artifacts are correct.'
         );
       }
 
@@ -165,7 +159,7 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
     }
 
     // Step 6: Persist updated private state if it was omitted and is now available
-    if (omitPrivateStateId && txResult?.private?.nextPrivateState) {
+    if (txResult?.private?.nextPrivateState) {
       logger.debug(SYSTEM_LOG_TAG, 'Step 6: Persisting updated private state');
       try {
         await providers.privateStateProvider.set(privateStateId, txResult.private.nextPrivateState);

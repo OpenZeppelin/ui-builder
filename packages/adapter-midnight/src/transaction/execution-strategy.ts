@@ -20,7 +20,6 @@ export interface MidnightExecutionConfig {
     contractModule: string;
     witnessCode?: string;
     verifierKeys?: Record<string, unknown>;
-    organizerSecretKeyHex?: string;
   };
   networkConfig?: MidnightNetworkConfig;
 }
@@ -38,7 +37,8 @@ export interface ExecutionStrategy {
    * @param executionConfig The configuration for the selected execution method (augmented with artifacts and network).
    * @param walletImplementation The wallet implementation to use for signing.
    * @param onStatusChange A callback to report real-time status updates to the UI.
-   * @param runtimeApiKey Optional session-only API key for methods like Relayer.
+   * @param runtimeApiKey Optional session-only API key for execution methods (currently unused; Midnight doesn't support relayers yet).
+   * @param runtimeSecret Optional runtime secret for organizer-only circuits.
    * @returns A promise that resolves to an object containing the final transaction hash.
    */
   execute(
@@ -46,6 +46,7 @@ export interface ExecutionStrategy {
     executionConfig: MidnightExecutionConfig,
     walletImplementation: LaceWalletImplementation,
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
-    runtimeApiKey?: string
+    runtimeApiKey?: string,
+    runtimeSecret?: string
   ): Promise<{ txHash: string }>;
 }

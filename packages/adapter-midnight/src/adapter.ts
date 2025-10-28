@@ -13,6 +13,7 @@ import type {
   ExecutionMethodDetail,
   FieldType,
   FormFieldType,
+  FunctionDecorationsMap,
   FunctionParameter,
   MidnightNetworkConfig,
   RelayerDetails,
@@ -24,6 +25,7 @@ import type {
 import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { FunctionDecorationsService } from './analysis/function-decorations-service';
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
 import { prepareArtifactsForFunction as prepareArtifacts } from './utils/artifact-preparation';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
@@ -51,6 +53,7 @@ export class MidnightAdapter implements ContractAdapter {
   readonly networkConfig: MidnightNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
   private artifacts: MidnightContractArtifacts | null = null;
+  private functionDecorationsService: FunctionDecorationsService;
 
   constructor(networkConfig: MidnightNetworkConfig) {
     if (!isMidnightNetworkConfig(networkConfig)) {
@@ -58,6 +61,7 @@ export class MidnightAdapter implements ContractAdapter {
     }
     this.networkConfig = networkConfig;
     this.initialAppServiceKitName = 'custom';
+    this.functionDecorationsService = new FunctionDecorationsService();
     logger.info(
       'MidnightAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
@@ -144,16 +148,6 @@ export class MidnightAdapter implements ContractAdapter {
         convertToBase64: true, // Convert to base64 for storage
         maxSize: 10 * 1024 * 1024, // 10MB limit
       },
-      {
-        id: 'organizerSecretKeyHex',
-        name: 'organizerSecretKeyHex',
-        label: 'Organizer Secret Key (hex)',
-        type: 'text',
-        validation: { required: false },
-        placeholder: 'optional hex string (no 0x prefix)',
-        helperText:
-          'Optional: if your contract has organizer-only circuits (e.g., setName), provide the organizer secret key in hex to seed local private state. Leave empty for participant-only contracts.',
-      },
     ];
   }
 
@@ -199,7 +193,7 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public getWritableFunctions(contractSchema: ContractSchema): ContractFunction[] {
-    return contractSchema.functions.filter((fn) => fn.modifiesState);
+    return contractSchema.functions.filter((fn: ContractFunction): boolean => fn.modifiesState);
   }
 
   public mapParameterTypeToFieldType(_parameterType: string): FieldType {
@@ -239,7 +233,8 @@ export class MidnightAdapter implements ContractAdapter {
     transactionData: unknown,
     executionConfig: ExecutionConfig,
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
-    runtimeApiKey?: string
+    runtimeApiKey?: string,
+    runtimeSecret?: string
   ): Promise<{ txHash: string }> {
     // Orchestrate transaction execution by delegating to the transaction module
     const { signAndBroadcastMidnightTransaction } = await import('./transaction');
@@ -250,8 +245,26 @@ export class MidnightAdapter implements ContractAdapter {
       this.networkConfig,
       this.artifacts,
       onStatusChange,
-      runtimeApiKey
+      runtimeApiKey,
+      runtimeSecret // Use runtimeSecret only for organizer key (Midnight doesn't support relayers yet)
     );
+  }
+
+  public async getFunctionDecorations(): Promise<FunctionDecorationsMap | undefined> {
+    if (!this.artifacts) {
+      logger.debug('MidnightAdapter', 'No artifacts loaded; skipping function decorations.');
+      return undefined;
+    }
+
+    return this.functionDecorationsService.analyzeFunctionDecorations(this.artifacts);
+  }
+
+  public getRuntimeFieldBinding() {
+    return {
+      key: 'organizerSecret',
+      label: 'Organizer Secret',
+      helperText: 'Hex-encoded organizer secret; used for organizer-only circuits and never stored',
+    };
   }
 
   public isViewFunction(functionDetails: ContractFunction): boolean {
