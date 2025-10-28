@@ -13,6 +13,7 @@ This document details the implementation of browser-based Midnight contract tran
 5. [Known Limitations](#known-limitations)
 6. [Future Improvements](#future-improvements)
 7. [Testing Guidelines](#testing-guidelines)
+8. [Organizer Key as Runtime-Only Secret](#organizer-key-as-runtime-only-secret)
 
 ---
 
@@ -743,6 +744,38 @@ yarn build
 - Contract selector UI
 - Lazy-load artifacts per contract
 
+### 5. Organizer-Only Circuits Require Initialized Private State
+
+**Issue**: Circuits marked as organizer-only require a properly initialized private state with the organizer secret key. Without it, the proof server returns a 400 error.
+
+**Current Behavior**:
+
+- Calls to organizer-only circuits fail if `organizerSecretKeyHex` is not provided during artifact loading
+- The adapter validates private state presence and fails early with an actionable error
+- For participant-only circuits without organizer logic, private state is optional
+
+**How to Use**:
+
+1. When loading contract artifacts via the UI, provide `organizerSecretKeyHex` in the "Organizer Secret Key (hex)" field if the contract has organizer-only circuits.
+2. The `EoaExecutionStrategy` will seed the private state from this key before executing any circuits.
+3. For organizer-less contracts (or participant-only ones), leave the field empty.
+
+**Example Error Message**:
+
+If you attempt to call an organizer-only circuit without providing `organizerSecretKeyHex`:
+
+```
+Private state not initialized for this contract/privateStateId.
+For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts
+so the private state can be seeded.
+```
+
+**Future Solution**:
+
+- Auto-detect organizer-only circuits from contract definition
+- Show hint in UI about which circuits require organizer key
+- Support batch circuit execution with auto-seeding
+
 ### 3. Error Messages
 
 **Issue**: Low-level SDK errors don't provide user-friendly feedback.
@@ -944,6 +977,148 @@ describe('Transaction Flow', () => {
 
 ---
 
+## Organizer Key as Runtime-Only Secret
+
+### Overview
+
+Organizer-only circuits require an organizer secret key to execute. To protect this sensitive material, the adapter treats the organizer secret key as a **runtime-only credential** that is:
+
+- **Never requested or stored** in contract definition
+- **Never persisted** in builder configuration or artifacts
+- **Prompted at execution time**, similar to a relayer API key
+- **Seeded locally** in the private state provider just-in-time before transaction execution
+- **Not transmitted** across the network (stays in private state provider)
+
+### Architecture
+
+```
+User Executes Transaction
+    ↓
+UI Prompts for Organizer Secret (Midnight EOA only)
+    ↓
+User Enters Secret (hex string, no 0x prefix)
+    ↓
+Secret Passed as runtime context (runtimeApiKey)
+    ↓
+EOA Strategy Receives Secret
+    ↓
+Hex Decode to Bytes
+    ↓
+Seed Private State Provider: { organizerSecretKey: bytes }
+    ↓
+callCircuit Executes with Seeded State
+    ↓
+Private State Provider Returns Updated State After Execution
+    ↓
+Updated State Persisted Locally (without secret)
+```
+
+### Implementation Details
+
+**1. No Storage in Contract Definition**
+
+The Midnight adapter's `getContractDefinitionInputs()` does NOT include an organizer secret key field. Users upload only:
+
+- Contract address
+- Private State ID
+- Contract build artifacts (ZIP)
+
+**2. Runtime-Only UI Prompt**
+
+In `ExecutionConfigDisplay.tsx`, when `executionConfig.method === 'eoa'` and `adapter?.networkConfig?.ecosystem === 'midnight'`, a `PasswordField` is rendered:
+
+```tsx
+{
+  executionConfig.method === 'eoa' && adapter?.networkConfig?.ecosystem === 'midnight' && (
+    <div className="px-6 pb-4">
+      <PasswordField
+        id="midnight-organizer-secret"
+        label="Organizer Secret Key (hex)"
+        name="runtimeApiKey"
+        control={control}
+        placeholder="Enter organizer secret key (hex, no 0x prefix)"
+        validation={{ required: false }}
+        helperText="Required only for organizer-only circuits (e.g., setName). Not stored."
+      />
+    </div>
+  );
+}
+```
+
+The key is bound to the existing `runtimeApiKey` form field, which is passed through to `adapter.signAndBroadcast()` but never persisted.
+
+**3. Seeding in EOA Strategy**
+
+In `EoaExecutionStrategy.execute()`, after providers are initialized and before contract instantiation:
+
+```typescript
+// Seed private state from runtime key if provided (runtime-only, never persisted)
+if (_runtimeApiKey) {
+  try {
+    const hex = _runtimeApiKey.trim().replace(/^0x/, '');
+    const bytes = hexToBytes(hex);
+    await providers.privateStateProvider.set(privateStateId, { organizerSecretKey: bytes });
+}
+```
+
+**4. No Persistence in Artifacts**
+
+The artifact payloads in `formatter.ts` never include `organizerSecretKeyHex`. The `_artifacts` object in transaction options contains only:
+
+- `privateStateId`
+- `contractModule`
+- `witnessCode`
+- `verifierKeys`
+
+**5. Fast Failure for Missing Secret**
+
+In `callCircuit.ts`, if private state is missing and no organizer secret was provided, a clear error is thrown:
+
+```
+Private state not initialized for this contract/privateStateId.
+For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts
+so the private state can be seeded.
+```
+
+### User Flow
+
+**For participant-only contracts** (no organizer circuits):
+
+1. Load contract (no organizer secret needed)
+2. Execute transaction
+3. Submit succeeds
+
+**For organizer-only circuits** (e.g., setName):
+
+1. Load contract (no secret requested)
+2. Execute transaction
+3. UI prompts: "Organizer Secret Key (hex)" field appears
+4. User enters the organizer secret key
+5. EOA strategy seeds private state with the secret
+6. Transaction proceeds with seeded state
+7. Proof generation succeeds
+8. Transaction submitted
+9. **Secret is NOT stored anywhere**
+
+Next time a different organizer-only circuit is executed, the user must provide the secret again.
+
+### Security Benefits
+
+- **Zero Storage**: Organizer secret never touches IndexedDB or local storage
+- **Session-Scoped**: Secret only exists in memory for the duration of the transaction
+- **No Network Leaks**: Secret never transmitted to proof server or backend
+- **Explicit Interaction**: User must consciously provide the secret each time it's needed
+- **No Accidental Exposure**: No risk of secret leaking in exported apps or backups
+
+### Future Improvements
+
+1. **Auto-Detection**: Automatically show the organizer secret prompt based on circuit analysis
+2. **UI Hints**: Display which circuits are organizer-only vs participant-only
+3. **Batch Execution**: Allow multiple organizer-only circuits in one session with single key entry
+4. **Ephemeral Caching**: Optional short-lived in-memory cache (e.g., 5 minutes) to reduce re-prompting
+
+---
+
 ## Appendix
 
 ### Dependencies
@@ -1017,6 +1192,77 @@ Key Achievements:
 - ✅ **Pure Client-Side**: All ZK artifacts stored in browser memory
 - ✅ **Zero Network Overhead**: No artifact HTTP requests during transactions
 - ✅ **Simple Architecture**: Removed server plugin, HTTP endpoints, serialization layer
+
+## 6. Organizer-Only Circuit Detection and UI Badges
+
+### Problem
+
+Midnight circuits often have gated logic that depends on organizer-only access (e.g., owner checks using `local_sk`). Users need to know:
+
+1. Which circuits require the organizer secret key
+2. What the organizer-only access means and why it's needed
+
+Traditional documentation or naming heuristics are error-prone and don't reflect the actual compiled contract behavior.
+
+### Solution: Runtime Detection via Instrumentation
+
+The adapter performs safe, ground-truth detection by dry-running circuits with instrumentation:
+
+**Detection Strategy:**
+
+- **Private-state Proxy**: Intercepts reads of `organizerSecretKey` in private state; flips a flag and returns zeroed bytes so execution proceeds
+- **Witness Wrapper**: Wraps known sensitive witnesses (`local_sk`, `set_owner_from_local_sk`, `compute_commitment_with_secret`, `check_pin`); flips the same flag on invocation
+- **Stubbed Proof Provider**: Throws a sentinel error before proof generation, ensuring no network calls or transaction submission
+- **Minimal Input Matrix**: Tests each circuit with 1–5 argument combinations (baseline + boolean/optional toggles) to handle branchy logic
+- **Concurrency Control**: Processes 3 circuits in parallel to keep UI responsive
+- **Caching**: Results cached per contract+privateStateId+artifactsHash to avoid repeated detection
+
+**Key Safety Properties:**
+
+- No secrets logged; only flags toggled
+- No persistence; detecting provider drops writes
+- No network calls; proof submission stubbed
+- Timeboxed execution (1.5s per attempt) with graceful timeout handling
+- Path-sensitive: if a circuit only guards access under specific branches, detection may require a tweaked input matrix (most owner checks happen early, so one pass typically suffices)
+
+**Limitations:**
+
+- If a circuit is purely conditional on user input (e.g., "only if age > 18 AND is_admin"), a naive input set might miss the condition. Mitigation: provide explicit input hints or run a broader matrix.
+- Detection is best-effort; complex circuits with deep branches may not be fully characterized with a minimal matrix.
+
+### Adapter API and UI Integration
+
+**New types** (in `packages/types/src/adapters/base.ts`):
+
+- `FunctionBadge`: Visual badge next to function (`{ text: string, variant?: 'info'|'warning'|'neutral' }`)
+- `FunctionDecoration`: Badges + optional notes for a function
+- `FunctionDecorationsMap`: Map of circuit ID to decorations
+
+**New adapter method** (in `ContractAdapter` interface):
+
+```typescript
+getFunctionDecorations?(): Promise<FunctionDecorationsMap | undefined>;
+```
+
+**Midnight adapter implementation** (in `packages/adapter-midnight/src/adapter.ts`):
+
+- Maintains `organizerOnlyCache` (Map<cacheKey, detectionResults>)
+- `getFunctionDecorations()` returns cached results or initiates async detection
+- Maps `{ organizerOnly: true }` to:
+  - Badge: "Organizer-only" (warning variant)
+  - Note: "This circuit requires an organizer secret key. The key is requested at execution time and never stored."
+
+**Renderer** (chain-agnostic, no Midnight-specific UI):
+
+- Function list component: Renders adapter-provided badges next to function names
+- Function selection panel (e.g., `TransactionForm`): Displays adapter-provided note in a neutral info alert
+
+### Future Enhancements
+
+1. **Background Detection**: Kick off detection async in the background after artifacts load; progressively update UI as circuits complete detection
+2. **Input Matrix Customization**: Allow users to provide explicit test cases for complex branchy circuits
+3. **Per-Branch Analysis**: Extended detection to map which input paths lead to organizer-only checks
+4. **Caching Persistence**: Store detection results in session storage or IndexedDB for multi-session performance
 
 Future work should focus on:
 

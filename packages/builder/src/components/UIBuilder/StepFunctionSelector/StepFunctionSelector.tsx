@@ -17,6 +17,7 @@ export function StepFunctionSelector({
   networkConfig,
   onToggleContractState,
   isWidgetExpanded,
+  adapter,
 }: StepFunctionSelectorProps) {
   const { contractState } = useStore(uiBuilderStoreVanilla);
 
@@ -67,6 +68,7 @@ export function StepFunctionSelector({
           functions={writableFunctions}
           selectedFunction={selectedFunction}
           onSelectFunction={selectFunction}
+          adapter={adapter}
         />
 
         {/* Show a message if no functions match the filter */}

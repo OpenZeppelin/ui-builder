@@ -26,9 +26,6 @@ export interface MidnightContractArtifacts {
 
   /** Optional trimmed ZIP data (saved when artifacts are trimmed for a specific function) */
   trimmedZipBase64?: string;
-
-  /** Optional: organizer secret key in hex to seed private state for organizer-only circuits */
-  organizerSecretKeyHex?: string;
 }
 
 /**

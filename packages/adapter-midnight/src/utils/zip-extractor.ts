@@ -246,19 +246,28 @@ export async function extractMidnightContractZip(
 
         const verifierBytes = await zip.files[verifierFile].async('uint8array');
 
-        // Try to find zkir file (can be .bzkir or .zkir)
-        const zkirFile = files.find(
-          (f) =>
-            (f.endsWith(`${circuitName}.bzkir`) || f.endsWith(`${circuitName}.zkir`)) &&
-            !/\/_\./.test(f)
+        // Try to find zkir file (prefer binary .bzkir; fall back to legacy .zkir)
+        const zkirFileB = files.find(
+          (f) => f.endsWith(`${circuitName}.bzkir`) && !/\/_.\./.test(f)
         );
+        const zkirFileZ = files.find((f) => f.endsWith(`${circuitName}.zkir`) && !/\/_.\./.test(f));
+        const zkirFile = zkirFileB || zkirFileZ;
 
         let zkirBytes: Uint8Array | undefined;
         if (zkirFile) {
           zkirBytes = await zip.files[zkirFile].async('uint8array');
-          logger.debug(SYSTEM_LOG_TAG, `Found zkir for ${circuitName}: ${zkirBytes.length} bytes`);
+          logger.debug(
+            SYSTEM_LOG_TAG,
+            `Found ${zkirFile.endsWith('.bzkir') ? 'bzkir' : 'zkir'} for ${circuitName}: ${zkirBytes.length} bytes`
+          );
+          if (!zkirFileB && zkirFileZ) {
+            logger.warn(
+              SYSTEM_LOG_TAG,
+              `Using legacy textual .zkir for ${circuitName}. Proof server may require binary .bzkir; if you encounter 400 errors, rebuild artifacts to include .bzkir.`
+            );
+          }
         } else {
-          logger.warn(SYSTEM_LOG_TAG, `No zkir file found for ${circuitName}`);
+          logger.warn(SYSTEM_LOG_TAG, `No zkir/bzkir file found for ${circuitName}`);
         }
 
         zkArtifacts[circuitName] = {
