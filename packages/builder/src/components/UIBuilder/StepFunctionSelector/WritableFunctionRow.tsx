@@ -1,9 +1,49 @@
+import { AlertCircle } from 'lucide-react';
+
+import type { FunctionDecoration } from '@openzeppelin/ui-builder-types';
+import { FunctionBadge, FunctionParameter } from '@openzeppelin/ui-builder-types';
 import { Button } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { WritableFunctionRowProps } from './types';
 
-export function WritableFunctionRow({ fn, isSelected, onSelect }: WritableFunctionRowProps) {
+/**
+ * Badge component for displaying function decorations
+ */
+function DecorationBadge({ decoration }: { decoration: FunctionDecoration }) {
+  if (!decoration.badges || decoration.badges.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-2 ml-2">
+      {decoration.badges.map((badge: FunctionBadge, idx: number) => (
+        <div
+          key={idx}
+          className={cn(
+            'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium',
+            badge.variant === 'warning'
+              ? 'bg-amber-100 text-amber-800'
+              : badge.variant === 'info'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-neutral-100 text-neutral-800'
+          )}
+          title={badge.tooltip || badge.text}
+        >
+          {badge.variant === 'warning' && <AlertCircle size={12} className="shrink-0" />}
+          <span>{badge.text}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function WritableFunctionRow({
+  fn,
+  isSelected,
+  onSelect,
+  decoration,
+}: WritableFunctionRowProps & { decoration?: FunctionDecoration }) {
   return (
     <div
       className={cn(
@@ -23,15 +63,21 @@ export function WritableFunctionRow({ fn, isSelected, onSelect }: WritableFuncti
         {/* Function details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="font-medium text-sm" title={fn.displayName}>
-                {fn.displayName}
-              </span>
+            <div className="flex flex-col gap-1 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm" title={fn.displayName}>
+                  {fn.displayName}
+                </span>
+                {decoration && <DecorationBadge decoration={decoration} />}
+              </div>
               {/* Function parameters inline for more compact layout */}
               <div className="text-xs text-muted-foreground">
                 {fn.inputs.length > 0 ? (
                   <span>
-                    Parameters: {fn.inputs.map((input) => input.name || input.type).join(', ')}
+                    Parameters:{' '}
+                    {fn.inputs
+                      .map((input: FunctionParameter) => input.name || input.type)
+                      .join(', ')}
                   </span>
                 ) : (
                   <span>No parameters</span>
