@@ -96,7 +96,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(
             <button
               type="button"
               onClick={onDismiss}
-              className={cn('shrink-0 transition-colors hover:opacity-70', styles.icon)}
+              className={cn('self-start shrink-0 transition-colors hover:opacity-70', styles.icon)}
               aria-label="Dismiss banner"
             >
               <X className="h-5 w-5" />

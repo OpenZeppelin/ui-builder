@@ -159,7 +159,7 @@ function mapDetectionToDecorations(
         ],
         note: {
           title: 'Organizer-only circuit (automated detection)',
-          body: 'Our analysis detected that this circuit likely requires an organizer secret key based on the compiled contract code. This is an automated detection that scans for identity witness calls (local_sk, organizer_key, etc.) in the function implementation and its helper methods.\n\nIf detected correctly, you will be prompted to provide your organizer secret key at execution time. The key is never stored and is only used for this transaction.\n\nNote: This detection is based on static code analysis and may occasionally produce false positives or miss edge cases.',
+          body: 'This circuit requires an organizer secret key. A form field will be added automatically where you can enter it when executing the transaction. The key is never stored and is only used for this transaction.\n\nNote: Detection is based on static code analysis and may occasionally produce false positives.',
         },
         requiresRuntimeSecret: true,
       };
