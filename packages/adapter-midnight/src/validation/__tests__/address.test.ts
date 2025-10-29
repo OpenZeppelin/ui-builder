@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { MidnightBech32m } from '@midnight-ntwrk/wallet-sdk-address-format';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   CONTRACT_VALIDATION_ERRORS,
@@ -12,6 +13,25 @@ import {
   validateContractAddress,
   validateUserAddress,
 } from '../address';
+
+// Mock the MidnightBech32m module
+vi.mock('@midnight-ntwrk/wallet-sdk-address-format', () => ({
+  MidnightBech32m: {
+    parse: vi.fn(),
+  },
+}));
+
+const mockParse = vi.mocked(MidnightBech32m.parse);
+
+// Type for mock return value - partial mock of MidnightBech32m
+type MockBech32mResult = {
+  type: string;
+  data: Uint8Array;
+};
+
+// Helper to cast mock return values safely
+const createMockBech32m = (result: MockBech32mResult) =>
+  result as unknown as ReturnType<typeof MidnightBech32m.parse>;
 
 describe('Contract Address Validation', () => {
   describe('validateContractAddress', () => {
@@ -164,26 +184,32 @@ describe('User Address Validation', () => {
 
   describe('validateUserAddress', () => {
     it('should validate a correct shielded address', () => {
-      const shieldedAddress = 'addr1test123';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'addr',
-        words: [1, 2, 3, 4],
-      });
+      const shieldedAddress =
+        'mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'addr',
+          data: new Uint8Array([1, 2, 3, 4]),
+        })
+      );
 
       const result = validateUserAddress(shieldedAddress);
 
       expect(result.isValid).toBe(true);
       expect(result.prefix).toBe('addr');
       expect(result.error).toBeUndefined();
-      expect(mockBech32m.decode).toHaveBeenCalledWith(shieldedAddress.toLowerCase());
+      expect(mockParse).toHaveBeenCalledWith(shieldedAddress.toLowerCase());
     });
 
     it('should validate a correct unshielded address', () => {
-      const unshieldedAddress = 'naddr1test456';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'naddr',
-        words: [5, 6, 7, 8],
-      });
+      const unshieldedAddress =
+        'mn_shield-naddr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'naddr',
+          data: new Uint8Array([5, 6, 7, 8]),
+        })
+      );
 
       const result = validateUserAddress(unshieldedAddress);
 
@@ -192,11 +218,14 @@ describe('User Address Validation', () => {
     });
 
     it('should validate dust addresses', () => {
-      const dustAddress = 'dust1test789';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'dust',
-        words: [9, 10, 11],
-      });
+      const dustAddress =
+        'mn_shield-dust_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'dust',
+          data: new Uint8Array([9, 10, 11]),
+        })
+      );
 
       const result = validateUserAddress(dustAddress);
 
@@ -205,11 +234,14 @@ describe('User Address Validation', () => {
     });
 
     it('should validate coin public keys', () => {
-      const cpkAddress = 'cpk1testxyz';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'cpk',
-        words: [12, 13, 14],
-      });
+      const cpkAddress =
+        'mn_shield-cpk_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'cpk',
+          data: new Uint8Array([12, 13, 14]),
+        })
+      );
 
       const result = validateUserAddress(cpkAddress);
 
@@ -218,11 +250,14 @@ describe('User Address Validation', () => {
     });
 
     it('should validate encryption public keys', () => {
-      const epkAddress = 'epk1testabc';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'epk',
-        words: [15, 16, 17],
-      });
+      const epkAddress =
+        'mn_shield-epk_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'epk',
+          data: new Uint8Array([15, 16, 17]),
+        })
+      );
 
       const result = validateUserAddress(epkAddress);
 
@@ -231,17 +266,14 @@ describe('User Address Validation', () => {
     });
 
     it('should reject invalid prefix', () => {
-      const invalidPrefix = 'invalid1test';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'invalid',
-        words: [1, 2, 3],
-      });
+      const invalidPrefix =
+        'mn_shield-invalid_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
 
       const result = validateUserAddress(invalidPrefix);
 
       expect(result.isValid).toBe(false);
       expect(result.error).toBe(USER_VALIDATION_ERRORS.INVALID_PREFIX);
-      expect(result.prefix).toBe('invalid');
+      expect(result.prefix).toBe('mn_shield-invalid_test');
     });
 
     it('should reject null or undefined', () => {
@@ -272,8 +304,9 @@ describe('User Address Validation', () => {
     });
 
     it('should handle bech32m decoding errors', () => {
-      const invalidBech32 = 'addr1invalid';
-      mockBech32m.decode.mockImplementation(() => {
+      const invalidBech32 =
+        'mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqinvalid';
+      mockParse.mockImplementation(() => {
         throw new Error('Invalid bech32m');
       });
 
@@ -284,29 +317,37 @@ describe('User Address Validation', () => {
     });
 
     it('should normalize addresses to lowercase before validation', () => {
-      const upperAddress = 'ADDR1TEST123';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'addr',
-        words: [1, 2, 3, 4],
-      });
+      const upperAddress =
+        'MN_SHIELD-ADDR_TEST1QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'addr',
+          data: new Uint8Array([1, 2, 3, 4]),
+        })
+      );
 
       const result = validateUserAddress(upperAddress);
 
       expect(result.isValid).toBe(true);
-      expect(mockBech32m.decode).toHaveBeenCalledWith(upperAddress.toLowerCase());
+      expect(mockParse).toHaveBeenCalledWith(upperAddress.toLowerCase());
     });
 
     it('should trim whitespace', () => {
-      const addressWithSpaces = '  addr1test123  ';
-      mockBech32m.decode.mockReturnValue({
-        prefix: 'addr',
-        words: [1, 2, 3, 4],
-      });
+      const addressWithSpaces =
+        '  mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq  ';
+      mockParse.mockReturnValue(
+        createMockBech32m({
+          type: 'addr',
+          data: new Uint8Array([1, 2, 3, 4]),
+        })
+      );
 
       const result = validateUserAddress(addressWithSpaces);
 
       expect(result.isValid).toBe(true);
-      expect(mockBech32m.decode).toHaveBeenCalledWith('addr1test123');
+      expect(mockParse).toHaveBeenCalledWith(
+        'mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'
+      );
     });
   });
 
@@ -360,11 +401,14 @@ describe('isValidAddress (generic validator)', () => {
   });
 
   it('should return true for valid user address (shielded)', () => {
-    const userAddress = 'addr1testtesttesttest';
-    mockBech32m.decode.mockReturnValue({
-      prefix: 'addr',
-      words: [1, 2, 3, 4],
-    });
+    const userAddress =
+      'mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+    mockParse.mockReturnValue(
+      createMockBech32m({
+        type: 'addr',
+        data: new Uint8Array([1, 2, 3, 4]),
+      })
+    );
 
     const result = isValidAddress(userAddress);
 
@@ -372,11 +416,14 @@ describe('isValidAddress (generic validator)', () => {
   });
 
   it('should return true for valid user address (unshielded)', () => {
-    const userAddress = 'naddr1testtesttesttest';
-    mockBech32m.decode.mockReturnValue({
-      prefix: 'naddr',
-      words: [1, 2, 3, 4],
-    });
+    const userAddress =
+      'mn_shield-naddr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+    mockParse.mockReturnValue(
+      createMockBech32m({
+        type: 'naddr',
+        data: new Uint8Array([1, 2, 3, 4]),
+      })
+    );
 
     const result = isValidAddress(userAddress);
 
@@ -398,21 +445,24 @@ describe('isValidAddress (generic validator)', () => {
     const result = isValidAddress(contractAddress);
 
     expect(result).toBe(true);
-    // bech32m.decode should not be called for contract addresses
-    expect(mockBech32m.decode).not.toHaveBeenCalled();
+    // MidnightBech32m.parse should not be called for contract addresses
+    expect(mockParse).not.toHaveBeenCalled();
   });
 
   it('should fall back to user address validation', () => {
-    const userAddress = 'addr1testtesttesttest';
-    mockBech32m.decode.mockReturnValue({
-      prefix: 'addr',
-      words: [1, 2, 3, 4],
-    });
+    const userAddress =
+      'mn_shield-addr_test1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+    mockParse.mockReturnValue(
+      createMockBech32m({
+        type: 'addr',
+        data: new Uint8Array([1, 2, 3, 4]),
+      })
+    );
 
     const result = isValidAddress(userAddress);
 
     expect(result).toBe(true);
-    expect(mockBech32m.decode).toHaveBeenCalled();
+    expect(mockParse).toHaveBeenCalled();
   });
 
   it('should handle addresses that look like neither contract nor user', () => {
