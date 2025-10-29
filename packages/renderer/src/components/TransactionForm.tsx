@@ -52,6 +52,7 @@ export function TransactionForm({
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
+  const [txStatusDetails, setTxStatusDetails] = useState<TransactionStatusUpdate | null>(null);
 
   // Derive networkConfig from the adapter instance
   const networkConfig = adapter.networkConfig;
@@ -73,6 +74,7 @@ export function TransactionForm({
     setTxError(null);
     setFormError(null);
     setExecutionConfigError(null);
+    setTxStatusDetails(null);
   }, [schema, methods]);
 
   // Effect to validate executionConfig
@@ -105,6 +107,7 @@ export function TransactionForm({
     setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
+    setTxStatusDetails(null);
 
     if (!adapter) {
       logger.error('TransactionForm', 'Adapter not provided.');
@@ -120,8 +123,6 @@ export function TransactionForm({
     }
 
     try {
-      setTxStatus('pendingSignature');
-
       // Extract runtime secrets from form data and remove them from contract args
       const { contractArgs, runtimeSecrets } = extractRuntimeSecrets(data, schema.fields);
 
@@ -136,6 +137,7 @@ export function TransactionForm({
       const onStatusChange = (status: string, details: TransactionStatusUpdate): void => {
         logger.info('TransactionForm', `Status Update: ${status}`, details);
         setTxStatus(status as TxStatus);
+        setTxStatusDetails(details);
         if (details.transactionId) {
           setTxHash(details.transactionId); // Show relayer ID
         }
@@ -260,6 +262,7 @@ export function TransactionForm({
     setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
+    setTxStatusDetails(null);
   };
 
   // Get explorer URL for the transaction
@@ -310,6 +313,8 @@ export function TransactionForm({
               error={txError}
               explorerUrl={txHash ? getExplorerTxUrl(txHash) : null}
               onClose={handleResetStatus}
+              customTitle={txStatusDetails?.title}
+              customMessage={txStatusDetails?.message}
             />
           </div>
         )}

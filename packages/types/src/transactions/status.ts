@@ -11,9 +11,12 @@ export type TxStatus =
 
 /**
  * Represents the details passed along with a status update.
- * It can contain a `transactionId` (from a relayer) or a `txHash` (from a direct broadcast).
+ * It can contain a `transactionId` (from a relayer), a `txHash` (from a direct broadcast),
+ * and optional UI copy that adapters may provide for a better chain-specific UX.
  */
 export type TransactionStatusUpdate = {
   transactionId?: string;
   txHash?: string;
+  title?: string;
+  message?: string;
 };

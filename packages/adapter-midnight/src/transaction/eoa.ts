@@ -226,7 +226,16 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       }
 
       // Step 7: Signal transaction is about to be submitted
-      onStatusChange('pendingSignature', {});
+      // Midnight SDK limitation: After the wallet signs, the SDK executes and polls the indexer internally.
+      // We cannot observe a distinct "submitted" vs "confirming" transition as separate lifecycle events.
+      // Adapters can provide a single combined message via TransactionStatusUpdate { title, message } for
+      // 'pendingSignature' to communicate both "waiting for signature" and "auto-confirmation" to users.
+      // Revisit when the Midnight SDK exposes more granular lifecycle events.
+      onStatusChange('pendingSignature', {
+        title: 'Waiting for Signature and Confirmation',
+        message:
+          'Please sign the transaction in your wallet. After signing, your transaction will be automatically submitted and confirmed by the Midnight network.',
+      });
 
       logger.info(
         SYSTEM_LOG_TAG,
@@ -251,7 +260,11 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
 
       logger.info(SYSTEM_LOG_TAG, `Transaction submitted: ${result.txHash}`);
 
-      onStatusChange('pendingConfirmation', { txHash: result.txHash });
+      onStatusChange('pendingConfirmation', {
+        txHash: result.txHash,
+        title: 'Confirming Transaction',
+        message: 'Your transaction is being confirmed on the Midnight network.',
+      });
 
       return { txHash: result.txHash };
     } catch (error) {
