@@ -64,8 +64,9 @@ export function createPrivateStateOverlay(
         return { ...baseObj, organizerSecretKey: overlayKeyBytes };
       }
 
-      // Without runtime key, if no other state remains, signal missing state
-      return sanitized;
+      // Without runtime key, return empty object if no state exists (some circuits need at least {} instead of null)
+      // Circuits that don't need state will handle empty object fine
+      return sanitized || {};
     },
 
     async set(id: string, state: unknown): Promise<void> {

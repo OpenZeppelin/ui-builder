@@ -69,7 +69,7 @@ describe('createPrivateStateOverlay', () => {
       expect(result.organizerSecretKey).toBeUndefined();
     });
 
-    it('should return null when state only contained organizerSecretKey', async () => {
+    it('should return empty object when state only contained organizerSecretKey', async () => {
       const persistedState = {
         organizerSecretKey: new Uint8Array([1, 2, 3]),
       };
@@ -80,7 +80,8 @@ describe('createPrivateStateOverlay', () => {
 
       const result = await overlay.get('test-id');
 
-      expect(result).toBeNull();
+      // Returns empty object instead of null (circuits need at least {} to work)
+      expect(result).toEqual({});
     });
 
     it('should handle null base state with runtime key', async () => {
@@ -103,7 +104,8 @@ describe('createPrivateStateOverlay', () => {
 
       const result = await overlay.get('test-id');
 
-      expect(result).toBeNull();
+      // Returns empty object instead of null (circuits need at least {} to work)
+      expect(result).toEqual({});
     });
 
     it('should accept hex key with 0x prefix', async () => {
@@ -237,8 +239,8 @@ describe('createPrivateStateOverlay', () => {
 
       const result = await overlay.get('test-id');
 
-      // Empty object returns null when no runtime key is valid
-      expect(result).toBeNull();
+      // Empty object returns {} when no runtime key is valid (circuits need at least {} to work)
+      expect(result).toEqual({});
 
       consoleWarnSpy.mockRestore();
     });
@@ -250,8 +252,8 @@ describe('createPrivateStateOverlay', () => {
 
       const result = await overlay.get('test-id');
 
-      // Empty object with no runtime key returns null
-      expect(result).toBeNull();
+      // Empty object with no runtime key returns {} (circuits need at least {} to work)
+      expect(result).toEqual({});
     });
   });
 

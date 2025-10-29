@@ -36,16 +36,16 @@ export interface CallCircuitResult {
  * Friendly circuit call wrapper that handles private state validation, error mapping, and tx hash extraction.
  *
  * This helper encapsulates the boilerplate of:
- * 1. Validating that private state exists (required for all circuits)
+ * 1. Checking private state availability (participant-only circuits may not require it)
  * 2. Building transaction options with contractInstance, circuitId, and args
  * 3. Calling submitCallTx with private state ID always included
- * 4. Persisting updated private state after the call
- * 5. Extracting and returning the transaction hash
+ * 4. Handling SDK errors and mapping them to friendly messages
+ * 5. Persisting updated private state after the call
+ * 6. Extracting and returning the transaction hash
  *
  * @param params Call parameters
  * @returns The transaction hash and optional updated private state
- * @throws Error if private state is not initialized (provide organizerSecretKeyHex if needed for organizer-only circuits)
- * @throws Error with friendly message for common failure modes (proof generation, insufficient balance, etc.)
+ * @throws Error with friendly message for common failure modes (proof generation, insufficient balance, missing private state for organizer-only circuits, etc.)
  */
 export async function callCircuit(params: CallCircuitParams): Promise<CallCircuitResult> {
   const { contractInstance, providers, contractAddress, circuitId, privateStateId, args } = params;
@@ -70,26 +70,31 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
       args,
     };
 
-    // Step 3: Validating private state availability (required for all circuits)
-    logger.debug(SYSTEM_LOG_TAG, 'Step 3: Validating private state availability');
-    let existingPrivateState: unknown;
+    // Step 3: Check private state availability, but don't fail preemptively
+    // For participant-only circuits, private state may not exist initially, which is fine.
+    // For organizer-only circuits, the overlay will inject the organizer key.
+    // Let the SDK handle actual validation and report errors appropriately.
+    logger.debug(SYSTEM_LOG_TAG, 'Step 3: Checking private state availability');
+    let existingPrivateState: unknown = null;
     try {
-      existingPrivateState = await providers.privateStateProvider.get(privateStateId);
-      if (existingPrivateState == null) {
-        throw new Error(
-          'Private state not initialized for this contract/privateStateId. ' +
-            'For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts ' +
-            'so the private state can be seeded.'
+      const state = await providers.privateStateProvider.get(privateStateId);
+      if (state == null) {
+        logger.debug(
+          SYSTEM_LOG_TAG,
+          'No existing private state found; proceeding (may be fine for participant-only circuits)'
         );
+      } else {
+        existingPrivateState = state;
+        logger.debug(SYSTEM_LOG_TAG, 'Private state found');
       }
-      logger.debug(SYSTEM_LOG_TAG, 'Private state validated successfully');
     } catch (err) {
-      if (err instanceof Error && err.message.includes('Private state not initialized')) {
-        throw err;
-      }
-      throw new Error(
-        `Failed to validate private state for circuit execution: ${err instanceof Error ? err.message : 'Unknown error'}`
+      // Treat storage read errors as missing state (not an error condition)
+      logger.debug(
+        SYSTEM_LOG_TAG,
+        'Failed to read private state (treating as missing and proceeding):',
+        err instanceof Error ? err.message : 'Unknown error'
       );
+      existingPrivateState = null;
     }
 
     // Step 4: Build call options (always include privateStateId)
@@ -117,6 +122,13 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
       const error = callError as { message?: string; code?: string };
       const message = error?.message || 'Unknown error';
 
+      // Log the actual SDK error for debugging
+      logger.debug(SYSTEM_LOG_TAG, 'SDK error received:', {
+        message,
+        code: error?.code,
+        hasExistingState: existingPrivateState != null,
+      });
+
       // Map common SDK errors to friendly messages
       if (message.includes('proof')) {
         throw new Error(`Zero-knowledge proof generation failed: ${message}`);
@@ -131,16 +143,22 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
         throw new Error(`Contract not deployed at address: ${contractAddress}`);
       }
 
-      // If we explicitly validated local private state above, don't blame missing state.
+      // Handle private state errors - be specific about what errors indicate missing organizer key
       const prover400 =
         /Failed Proof Server response:.*code="400"/.test(message) ||
         /status="Bad Request"/.test(message);
+
+      // Only map to organizer-only error if it's a specific error about missing organizer key
+      // The overlay now returns {} instead of null, so missing state errors indicate organizer key is needed
+      const isOrganizerKeyError =
+        message.includes('organizerSecretKey') ||
+        message.includes('No private state found at private state ID') ||
+        (message.includes('Private state') && message.includes('not initialized'));
+
       if (
         message.includes('Incorrect call transaction configuration') ||
-        message.includes('No private state found at private state ID') ||
-        message.includes('organizerSecretKey') ||
-        message.includes('Private state') ||
-        (prover400 && !existingPrivateState)
+        isOrganizerKeyError ||
+        (prover400 && !existingPrivateState && isOrganizerKeyError)
       ) {
         throw new Error(
           'Private state not initialized or organizer secret key missing. ' +
