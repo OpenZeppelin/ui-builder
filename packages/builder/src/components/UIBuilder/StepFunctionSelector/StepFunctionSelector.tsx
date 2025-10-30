@@ -25,7 +25,7 @@ export function StepFunctionSelector({
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
     useFunctionFilter(contractSchema);
 
-  const { selectFunction } = useFunctionSelection(onFunctionSelected);
+  const { selectFunction } = useFunctionSelection(onFunctionSelected, contractSchema);
 
   if (!contractSchema) {
     // If we have a definition but no schema yet, we're loading

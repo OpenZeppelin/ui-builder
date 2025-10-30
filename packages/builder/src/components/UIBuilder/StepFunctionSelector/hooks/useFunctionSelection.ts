@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import type { ContractSchema } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
@@ -10,12 +11,20 @@ interface UseFunctionSelectionResult {
 }
 
 export function useFunctionSelection(
-  onFunctionSelected: (functionId: string | null) => void
+  onFunctionSelected: (functionId: string | null) => void,
+  contractSchema: ContractSchema | null
 ): UseFunctionSelectionResult {
   const selectFunction = useCallback(
     (functionId: string, modifiesState: boolean) => {
-      // Only allow selection of functions that modify state
-      if (!modifiesState) return;
+      // Allow selection of functions that modify state OR can execute locally (executable functions)
+      // Chain-agnostic check: functions are executable if they modify state OR have stateMutability === 'pure'
+      const functionDetails = contractSchema?.functions.find((fn) => fn.id === functionId);
+      const canExecuteLocally = functionDetails?.stateMutability === 'pure';
+
+      if (!modifiesState && !canExecuteLocally) {
+        // Only block if it's not an executable function
+        return;
+      }
 
       // If loaded from a trimmed config (no original ZIP), block switching
       const state = uiBuilderStoreVanilla.getState();
@@ -40,7 +49,7 @@ export function useFunctionSelection(
 
       onFunctionSelected(functionId);
     },
-    [onFunctionSelected]
+    [onFunctionSelected, contractSchema]
   );
 
   return {

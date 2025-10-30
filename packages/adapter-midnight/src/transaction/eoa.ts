@@ -94,7 +94,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     _runtimeApiKey?: string,
     runtimeSecret?: string
-  ): Promise<{ txHash: string }> {
+  ): Promise<{ txHash: string; result?: unknown }> {
     logger.info(SYSTEM_LOG_TAG, 'Executing EOA transaction', {
       contractAddress: transactionData.contractAddress,
       functionName: transactionData.functionName,
@@ -267,7 +267,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         message: 'Your transaction is being confirmed on the Midnight network.',
       });
 
-      return { txHash: result.txHash };
+      return { txHash: result.txHash, result: result.result };
     } catch (error) {
       logger.error(SYSTEM_LOG_TAG, 'Transaction execution failed:', error);
 

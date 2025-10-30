@@ -39,7 +39,7 @@ export interface ExecutionStrategy {
    * @param onStatusChange A callback to report real-time status updates to the UI.
    * @param runtimeApiKey Optional session-only API key for execution methods (currently unused; Midnight doesn't support relayers yet).
    * @param runtimeSecret Optional runtime secret for organizer-only circuits.
-   * @returns A promise that resolves to an object containing the final transaction hash.
+   * @returns A promise that resolves to an object containing the final transaction hash and optional result.
    */
   execute(
     transactionData: WriteContractParameters,
@@ -48,5 +48,5 @@ export interface ExecutionStrategy {
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string,
     runtimeSecret?: string
-  ): Promise<{ txHash: string }>;
+  ): Promise<{ txHash: string; result?: unknown }>;
 }

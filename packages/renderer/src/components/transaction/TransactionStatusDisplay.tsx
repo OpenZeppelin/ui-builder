@@ -1,7 +1,11 @@
 import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import React from 'react';
 
-import type { TxStatus } from '@openzeppelin/ui-builder-types';
+import type {
+  ContractFunction,
+  FullContractAdapter,
+  TxStatus,
+} from '@openzeppelin/ui-builder-types';
 import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
@@ -17,6 +21,10 @@ interface TransactionStatusDisplayProps {
   // Optional adapter-provided copy
   customTitle?: string;
   customMessage?: string;
+  // Optional execution result and adapter for formatting
+  result?: unknown;
+  functionDetails?: ContractFunction;
+  adapter?: FullContractAdapter;
 }
 
 /**
@@ -62,6 +70,9 @@ export function TransactionStatusDisplay({
   className,
   customTitle,
   customMessage,
+  result,
+  functionDetails,
+  adapter,
 }: TransactionStatusDisplayProps): React.ReactElement | null {
   if (status === 'idle') {
     return null;
@@ -102,6 +113,20 @@ export function TransactionStatusDisplay({
 
   const title = customTitle || defaultTitle;
 
+  // Format result if available (chain-agnostic, adapter-led formatting)
+  let formattedResult: string | null = null;
+  if (result !== undefined && result !== null && adapter && functionDetails) {
+    try {
+      formattedResult = adapter.formatFunctionResult(result, functionDetails);
+    } catch {
+      // Fallback to JSON.stringify if formatting fails
+      formattedResult = JSON.stringify(result, null, 2);
+    }
+  } else if (result !== undefined && result !== null) {
+    // Fallback formatting when adapter/functionDetails not available
+    formattedResult = JSON.stringify(result, null, 2);
+  }
+
   let content: React.ReactNode = null;
   if (status === 'error') {
     content = (
@@ -119,9 +144,17 @@ export function TransactionStatusDisplay({
   } else {
     const messageText = customMessage || defaultMessage || '';
     content = (
-      <div>
-        <p>{messageText}</p>
+      <div className="space-y-3">
+        {messageText && <p>{messageText}</p>}
         {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
+        {formattedResult && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-sm font-medium mb-2">Result:</p>
+            <pre className="text-xs bg-muted p-3 rounded-md overflow-auto max-h-48">
+              {formattedResult}
+            </pre>
+          </div>
+        )}
       </div>
     );
   }

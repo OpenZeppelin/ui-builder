@@ -32,6 +32,7 @@ import {
   getMidnightCompatibleFieldTypes,
   mapMidnightParameterTypeToFieldType,
 } from './mapping/type-mapper';
+import type { WriteContractParameters } from './types/transaction';
 import { prepareArtifactsForFunction as prepareArtifacts } from './utils/artifact-preparation';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
@@ -41,10 +42,14 @@ import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
 import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
-import { formatMidnightTransactionData } from './transaction';
+import {
+  executeLocallyIfPossible,
+  formatMidnightTransactionData,
+  signAndBroadcastMidnightTransaction,
+} from './transaction';
 import { formatMidnightFunctionResult } from './transform';
 import type { MidnightContractArtifacts } from './types';
-import { validateAndConvertMidnightArtifacts } from './utils';
+import { isPureCircuit, validateAndConvertMidnightArtifacts } from './utils';
 import { isValidAddress } from './validation';
 
 /**
@@ -237,9 +242,17 @@ export class MidnightAdapter implements ContractAdapter {
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string,
     runtimeSecret?: string
-  ): Promise<{ txHash: string }> {
-    // Orchestrate transaction execution by delegating to the transaction module
-    const { signAndBroadcastMidnightTransaction } = await import('./transaction');
+  ): Promise<{ txHash: string; result?: unknown }> {
+    const txData = transactionData as WriteContractParameters;
+
+    // Try local execution first (for functions that can execute locally)
+    const localResult = await executeLocallyIfPossible(txData, this.artifacts, onStatusChange);
+
+    if (localResult) {
+      return localResult;
+    }
+
+    // Otherwise, route to blockchain transaction execution
 
     return signAndBroadcastMidnightTransaction(
       transactionData,
@@ -270,7 +283,9 @@ export class MidnightAdapter implements ContractAdapter {
   }
 
   public isViewFunction(functionDetails: ContractFunction): boolean {
-    return !functionDetails.modifiesState;
+    // Pure circuits are not view functions - they're computational functions that run locally
+    // View functions are read-only state queries (ledger properties, queries)
+    return !functionDetails.modifiesState && !isPureCircuit(functionDetails);
   }
 
   public async queryViewFunction(

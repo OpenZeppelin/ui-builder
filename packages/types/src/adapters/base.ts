@@ -163,7 +163,7 @@ export interface ContractAdapter {
    * @param onStatusChange - Callback for transaction status updates
    * @param runtimeApiKey - Optional API key or token for execution method (e.g., relayer API key)
    * @param runtimeSecret - Optional runtime secret required by the adapter (e.g., organizer key for privacy circuits)
-   * @returns Transaction hash upon successful broadcast
+   * @returns Transaction hash upon successful broadcast, and optionally the execution result if the ecosystem supports it
    */
   signAndBroadcast: (
     transactionData: unknown,
@@ -171,7 +171,7 @@ export interface ContractAdapter {
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string,
     runtimeSecret?: string
-  ) => Promise<{ txHash: string }>;
+  ) => Promise<{ txHash: string; result?: unknown }>;
 
   /**
    * Validate a blockchain address for this chain

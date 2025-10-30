@@ -6,6 +6,13 @@ import {
 } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import {
+  CIRCUITS_TYPE_REGEX,
+  extractImpureCircuits,
+  extractPureCircuits,
+  IMPURE_CIRCUIT_METHOD_REGEX,
+} from './circuit-type-utils';
+
 const SYSTEM_LOG_TAG = '[SchemaParser]';
 
 /**
@@ -21,9 +28,12 @@ export function parseMidnightContractInterface(
     const ledgerProperties = extractLedgerProperties(interfaceContent);
     const enums = extractEnums(interfaceContent);
 
+    const impureCount = Object.values(circuits).filter((c) => c.modifiesState).length;
+    const pureCount = Object.values(circuits).filter((c) => !c.modifiesState).length;
+
     logger.info(
       SYSTEM_LOG_TAG,
-      `Parsed d.ts → circuits:${Object.keys(circuits).length} ledger:${Object.keys(ledgerProperties).length}`
+      `Parsed d.ts → impure circuits:${impureCount} pure circuits:${pureCount} ledger:${Object.keys(ledgerProperties).length}`
     );
 
     const functions = [...Object.values(circuits), ...Object.values(ledgerProperties)];
@@ -55,27 +65,38 @@ function capitalizeFirst(str: string): string {
 
 function extractCircuits(content: string): Record<string, ContractFunction> {
   const circuits: Record<string, ContractFunction> = {};
-  // Match: export (declare) type Circuits<...> = { ... }
-  const circuitsMatch = content.match(
-    /export\s+(?:declare\s+)?type\s+Circuits\s*<[^>]*>\s*=\s*{([\s\S]*?)}\s*;?/s
-  );
 
-  if (circuitsMatch) {
-    const circuitsContent = circuitsMatch[1];
-    const methodRegex = /(\w+)\s*\(\s*context\s*:[^,\)]+(?:,\s*([^\)]+))?\)/g;
-    let match;
-    while ((match = methodRegex.exec(circuitsContent)) !== null) {
-      const name = match[1];
-      const paramsText = match[2] || '';
-      circuits[name] = {
-        id: name,
-        name,
-        displayName: capitalizeFirst(name),
-        inputs: parseParameters(paramsText),
-        outputs: [], // Circuits don't expose return values directly
-        modifiesState: true,
-        type: 'function',
-      };
+  // Extract ImpureCircuits (state-modifying circuits)
+  const impureCircuits = extractImpureCircuits(content, parseParameters, capitalizeFirst);
+  Object.assign(circuits, impureCircuits);
+
+  // Extract PureCircuits (read-only circuits that run locally)
+  const pureCircuits = extractPureCircuits(content, parseParameters, capitalizeFirst);
+  Object.assign(circuits, pureCircuits);
+
+  // Fallback: if neither ImpureCircuits nor PureCircuits exists, extract from Circuits
+  // This handles older contracts that only have Circuits<T>
+  if (Object.keys(circuits).length === 0) {
+    const circuitsMatch = content.match(CIRCUITS_TYPE_REGEX);
+
+    if (circuitsMatch) {
+      const circuitsContent = circuitsMatch[1];
+      const methodRegex = IMPURE_CIRCUIT_METHOD_REGEX;
+      let match;
+      while ((match = methodRegex.exec(circuitsContent)) !== null) {
+        const name = match[1];
+        const paramsText = match[2] || '';
+        circuits[name] = {
+          id: name,
+          name,
+          displayName: capitalizeFirst(name),
+          inputs: parseParameters(paramsText),
+          outputs: [], // Circuits don't expose return values directly
+          modifiesState: true, // Default to true for backwards compatibility
+          type: 'function',
+          stateMutability: 'nonpayable',
+        };
+      }
     }
   }
 

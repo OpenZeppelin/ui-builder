@@ -6,7 +6,7 @@ A browser-based adapter for executing Midnight smart contracts in the OpenZeppel
 
 - ✅ **Pure Client-Side Execution** - No backend server required
 - ✅ **ZIP Upload Workflow** - Simple contract artifact loading
-- ✅ **Zero-Knowledge Proofs** - Integrated proof generation via proof server
+- ✅ **Zero-Knowledge Proof Coordination** - Orchestrates proof generation via external proof server
 - ✅ **Lace Wallet Integration** - Native Midnight wallet support
 - ✅ **Production Ready** - Static deployment identical to EVM/Stellar adapters
 

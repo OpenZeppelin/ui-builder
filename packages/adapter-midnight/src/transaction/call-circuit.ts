@@ -32,6 +32,8 @@ export interface CallCircuitResult {
   txHash: string;
   /** Next private state if the circuit modified it (optional) */
   nextPrivateState?: unknown;
+  /** Return value from the circuit execution (if any) */
+  result?: unknown;
 }
 
 /**
@@ -105,20 +107,20 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
     // Step 5: Execute the circuit call
     logger.debug(SYSTEM_LOG_TAG, 'Step 5: Submitting circuit call');
 
-    type TxResult = {
-      txHash?: string;
-      hash?: string;
-      deployTxData?: { public?: { txHash?: string } };
-      public?: { txHash?: string };
-      private?: { nextPrivateState?: unknown };
-    };
+    // Use intersection type to preserve actual return type while allowing access to optional properties
+    type TxResult = Awaited<ReturnType<typeof submitCallTx>> & Record<string, unknown>;
 
     let txResult: TxResult | undefined;
     try {
       txResult = (await submitCallTx(providers, callOptions)) as TxResult;
       logger.debug(SYSTEM_LOG_TAG, 'Circuit call succeeded', {
-        hasTxHash: !!txResult?.txHash,
+        hasTxHash:
+          !!(txResult?.public as { txHash?: string })?.txHash ||
+          !!(txResult as { txHash?: string })?.txHash,
         hasNextState: !!txResult?.private?.nextPrivateState,
+        hasPublicResult: !!(txResult?.public as { result?: unknown })?.result,
+        hasResult: !!(txResult as { result?: unknown })?.result,
+        txResultKeys: txResult ? Object.keys(txResult) : [],
       });
     } catch (callError: unknown) {
       const error = callError as { message?: string; code?: string };
@@ -195,10 +197,11 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
 
     // Step 7: Extract transaction hash with fallback
     const txHash =
-      txResult?.txHash ||
-      txResult?.hash ||
-      txResult?.deployTxData?.public?.txHash ||
-      txResult?.public?.txHash ||
+      (txResult?.public as { txHash?: string })?.txHash ||
+      (txResult as { txHash?: string })?.txHash ||
+      (txResult as { hash?: string })?.hash ||
+      (txResult as { deployTxData?: { public?: { txHash?: string } } })?.deployTxData?.public
+        ?.txHash ||
       `midnight_tx_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
     logger.info(SYSTEM_LOG_TAG, `Circuit call complete: ${txHash}`);

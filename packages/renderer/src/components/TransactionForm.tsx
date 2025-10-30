@@ -53,6 +53,7 @@ export function TransactionForm({
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
   const [txStatusDetails, setTxStatusDetails] = useState<TransactionStatusUpdate | null>(null);
+  const [txResult, setTxResult] = useState<unknown | null>(null);
 
   // Derive networkConfig from the adapter instance
   const networkConfig = adapter.networkConfig;
@@ -66,6 +67,10 @@ export function TransactionForm({
   // Destructure necessary parts of formState to ensure re-renders
   const { isValid } = methods.formState;
 
+  // Determine if the current function can execute locally (chain-agnostic check)
+  const currentFunction = contractSchema?.functions.find((fn) => fn.id === schema.functionId);
+  const canExecuteLocally = currentFunction?.stateMutability === 'pure';
+
   // Reset form when schema changes
   useEffect(() => {
     methods.reset(createDefaultFormValues(schema.fields, schema.defaultValues));
@@ -75,6 +80,7 @@ export function TransactionForm({
     setFormError(null);
     setExecutionConfigError(null);
     setTxStatusDetails(null);
+    setTxResult(null);
   }, [schema, methods]);
 
   // Effect to validate executionConfig
@@ -108,6 +114,7 @@ export function TransactionForm({
     setTxHash(null);
     setTxError(null);
     setTxStatusDetails(null);
+    setTxResult(null);
 
     if (!adapter) {
       logger.error('TransactionForm', 'Adapter not provided.');
@@ -115,7 +122,10 @@ export function TransactionForm({
       setTxStatus('error');
       return;
     }
-    if (!isWalletConnected) {
+
+    // Check if this function can execute locally (doesn't require wallet connection)
+    // Chain-agnostic check: functions with stateMutability === 'pure' can execute locally
+    if (!canExecuteLocally && !isWalletConnected) {
       logger.warn('TransactionForm', 'Wallet not connected for submission.');
       setTxError('Please connect your wallet to submit the transaction.');
       setTxStatus('error');
@@ -151,7 +161,7 @@ export function TransactionForm({
       const firstSecretValue = Object.values(runtimeSecrets)[0];
 
       // The initial status is set by the strategy via the callback
-      const { txHash: finalTxHash } = await adapter.signAndBroadcast(
+      const { txHash: finalTxHash, result } = await adapter.signAndBroadcast(
         formattedData,
         executionConfig || { method: 'eoa', allowAny: true },
         onStatusChange,
@@ -161,6 +171,19 @@ export function TransactionForm({
 
       logger.info('TransactionForm', `Transaction submitted with final hash: ${finalTxHash}`);
       setTxHash(finalTxHash);
+
+      // Store result if provided (e.g., from local execution or blockchain transactions that return values)
+      if (result !== undefined) {
+        setTxResult(result);
+        logger.info('TransactionForm', 'Execution result received:', result);
+      }
+
+      // Functions that execute locally don't need confirmation - they complete immediately
+      if (canExecuteLocally) {
+        setTxStatus('success');
+        setTxError(null);
+        return;
+      }
 
       // --> Start: Wait for confirmation <--
       if (adapter.waitForTransactionConfirmation) {
@@ -263,6 +286,7 @@ export function TransactionForm({
     setTxHash(null);
     setTxError(null);
     setTxStatusDetails(null);
+    setTxResult(null);
   };
 
   // Get explorer URL for the transaction
@@ -315,6 +339,9 @@ export function TransactionForm({
               onClose={handleResetStatus}
               customTitle={txStatusDetails?.title}
               customMessage={txStatusDetails?.message}
+              result={txResult}
+              functionDetails={currentFunction}
+              adapter={adapter}
             />
           </div>
         )}
@@ -354,6 +381,8 @@ export function TransactionForm({
                 isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
                 isFormValid={isValid && executionConfigError === null}
                 variant={getButtonVariant()}
+                functionDetails={currentFunction}
+                canExecuteLocally={canExecuteLocally}
               />
             </div>
           </div>

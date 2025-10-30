@@ -4,6 +4,7 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 import { evaluateContractModule } from '../transaction/contract-evaluator';
 import { evaluateWitnessCode } from '../transaction/witness-evaluator';
 import type { MidnightContractArtifacts } from '../types';
+import { extractPureCircuits } from '../utils/circuit-type-utils';
 import { detectOrganizerOnlyBySource } from './organizer-only-detector';
 
 const SYSTEM_LOG_TAG = 'FunctionDecorationsService';
@@ -40,16 +41,18 @@ export class FunctionDecorationsService {
     logger.info(SYSTEM_LOG_TAG, 'Analyzing contract functions for decorations...');
 
     try {
-      const detectionResults = await this.detectOrganizerOnlyCircuits(artifacts);
-      const decorations = mapDetectionToDecorations(detectionResults);
+      const organizerOnlyResults = await this.detectOrganizerOnlyCircuits(artifacts);
+      const pureCircuitResults = await this.detectPureCircuits(artifacts);
+      const decorations = mapDetectionToDecorations(organizerOnlyResults, pureCircuitResults);
 
       // Cache results
       this.cache.set(cacheKey, decorations);
 
-      const decorationCount = Object.values(detectionResults).filter(Boolean).length;
+      const organizerCount = Object.values(organizerOnlyResults).filter(Boolean).length;
+      const pureCount = Object.values(pureCircuitResults).filter(Boolean).length;
       logger.info(
         SYSTEM_LOG_TAG,
-        `Analysis complete: ${decorationCount} organizer-only circuits identified`
+        `Analysis complete: ${organizerCount} organizer-only circuits, ${pureCount} pure circuits identified`
       );
 
       return decorations;
@@ -117,6 +120,94 @@ export class FunctionDecorationsService {
   }
 
   /**
+   * Detects pure circuits from artifacts
+   * Pure circuits are computational functions that run locally without blockchain interaction
+   * Detection is done by parsing the contract definition (.d.ts) to find PureCircuits type
+   *
+   * @private
+   */
+  private async detectPureCircuits(
+    artifacts: MidnightContractArtifacts
+  ): Promise<Record<string, boolean>> {
+    const results: Record<string, boolean> = {};
+
+    // Method 1: Parse contract definition to find PureCircuits type
+    if (artifacts.contractDefinition) {
+      logger.debug(SYSTEM_LOG_TAG, 'Detecting pure circuits from contract definition');
+
+      // Helper functions for extractPureCircuits
+      const parseParameters = (): [] => []; // Pure circuits don't need parameter parsing for detection
+      const capitalizeFirst = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
+
+      const pureCircuitsMap = extractPureCircuits(
+        artifacts.contractDefinition,
+        parseParameters,
+        capitalizeFirst
+      );
+
+      for (const circuitId of Object.keys(pureCircuitsMap)) {
+        results[circuitId] = true;
+        logger.debug(SYSTEM_LOG_TAG, `Found pure circuit in definition: ${circuitId}`);
+      }
+    }
+
+    // Method 2: Fallback to runtime evaluation if contract definition parsing didn't find any
+    if (Object.keys(results).length === 0 && artifacts.contractModule) {
+      logger.debug(SYSTEM_LOG_TAG, 'Falling back to runtime evaluation for pure circuit detection');
+      try {
+        // Step 1: Evaluate witness code
+        const witnessCode = artifacts.witnessCode || '';
+        const baseWitnesses = evaluateWitnessCode(witnessCode);
+
+        // Step 2: Load and inject compact-runtime
+        const runtimeNs = await import('@midnight-ntwrk/compact-runtime');
+        const compactRuntime = (runtimeNs as Record<string, unknown>)?.default ?? runtimeNs;
+
+        // Step 3: Evaluate contract module
+        const contractModule = artifacts.contractModule || '';
+        const contractInstance = evaluateContractModule(contractModule, baseWitnesses, {
+          '@midnight-ntwrk/compact-runtime': compactRuntime,
+        });
+
+        // Step 4: Extract pure circuits
+        if (contractInstance && typeof contractInstance === 'object') {
+          const instance = contractInstance as Record<string, unknown>;
+          const pureCircuitsMap = instance.pureCircuits as Record<string, unknown> | undefined;
+
+          if (pureCircuitsMap && Object.keys(pureCircuitsMap).length > 0) {
+            logger.debug(
+              SYSTEM_LOG_TAG,
+              `Found ${Object.keys(pureCircuitsMap).length} pure circuits via runtime evaluation`
+            );
+
+            // Map pure circuit names to true
+            for (const circuitName of Object.keys(pureCircuitsMap)) {
+              results[circuitName] = true;
+            }
+          }
+        }
+      } catch (error) {
+        logger.warn(
+          SYSTEM_LOG_TAG,
+          'Runtime evaluation failed for pure circuit detection',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    if (Object.keys(results).length > 0) {
+      logger.debug(
+        SYSTEM_LOG_TAG,
+        `Detected ${Object.keys(results).length} pure circuits: ${Object.keys(results).join(', ')}`
+      );
+    } else {
+      logger.debug(SYSTEM_LOG_TAG, 'No pure circuits detected');
+    }
+
+    return results;
+  }
+
+  /**
    * Generates a cache key from artifacts
    *
    * @private
@@ -137,16 +228,18 @@ export class FunctionDecorationsService {
 }
 
 /**
- * Maps organizer-only detection results to function decorations
+ * Maps detection results to function decorations
  *
  * @internal
  */
 function mapDetectionToDecorations(
-  detectionResults: Record<string, boolean>
+  organizerOnlyResults: Record<string, boolean>,
+  pureCircuitResults: Record<string, boolean>
 ): FunctionDecorationsMap {
   const decorations: FunctionDecorationsMap = {};
 
-  for (const [circuitId, isOrganizerOnly] of Object.entries(detectionResults)) {
+  // Map organizer-only circuits
+  for (const [circuitId, isOrganizerOnly] of Object.entries(organizerOnlyResults)) {
     if (isOrganizerOnly) {
       decorations[circuitId] = {
         badges: [
@@ -162,6 +255,29 @@ function mapDetectionToDecorations(
           body: 'This circuit requires an organizer secret key. A form field will be added automatically where you can enter it when executing the transaction. The key is never stored and is only used for this transaction.\n\nNote: Detection is based on static code analysis and may occasionally produce false positives.',
         },
         requiresRuntimeSecret: true,
+      };
+    }
+  }
+
+  // Map pure circuits (may combine with organizer-only if both apply)
+  for (const [circuitId, isPureCircuit] of Object.entries(pureCircuitResults)) {
+    if (isPureCircuit) {
+      const existing = decorations[circuitId];
+      decorations[circuitId] = {
+        ...existing,
+        badges: [
+          ...(existing?.badges || []),
+          {
+            text: 'Pure Circuit',
+            variant: 'info',
+            tooltip:
+              'Runs locally without blockchain interaction. This function executes entirely client-side and returns a result immediately.',
+          },
+        ],
+        note: existing?.note || {
+          title: 'Pure Circuit',
+          body: 'This circuit runs locally without submitting a transaction to the blockchain. It executes entirely client-side and returns a result immediately. No wallet connection is required.',
+        },
       };
     }
   }

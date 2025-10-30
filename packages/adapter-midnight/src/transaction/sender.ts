@@ -29,7 +29,7 @@ const SYSTEM_LOG_TAG = 'adapter-midnight-sender';
  * @param onStatusChange - Optional callback for transaction status updates
  * @param runtimeApiKey - Optional session-only API key for execution methods (currently unused; Midnight doesn't support relayers yet)
  * @param runtimeSecret - Optional runtime secret for organizer-only circuits
- * @returns Promise resolving to the transaction hash
+ * @returns Promise resolving to the transaction hash and optional result
  */
 export async function signAndBroadcastMidnightTransaction(
   transactionData: unknown,
@@ -39,7 +39,7 @@ export async function signAndBroadcastMidnightTransaction(
   onStatusChange?: (status: string, details: TransactionStatusUpdate) => void,
   runtimeApiKey?: string,
   runtimeSecret?: string
-): Promise<{ txHash: string }> {
+): Promise<{ txHash: string; result?: unknown }> {
   logger.info(SYSTEM_LOG_TAG, 'Sign & Broadcast Midnight Tx:', {
     data: transactionData,
     executionConfig,
