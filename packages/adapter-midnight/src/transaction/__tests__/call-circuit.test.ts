@@ -9,9 +9,9 @@ describe('callCircuit', () => {
   });
 
   it('should proceed with SDK call even when private state is missing (SDK will handle validation)', async () => {
-    const mockSubmitCallTx = vi.fn().mockRejectedValue(
-      new Error('No private state found at private state ID')
-    );
+    const mockSubmitCallTx = vi
+      .fn()
+      .mockRejectedValue(new Error('No private state found at private state ID'));
 
     vi.doMock('@midnight-ntwrk/midnight-js-contracts', () => ({
       submitCallTx: mockSubmitCallTx,
@@ -41,10 +41,8 @@ describe('callCircuit', () => {
       args: [],
     };
 
-    // Should proceed to SDK call and get mapped error from SDK
-    await expect(callCircuit(params)).rejects.toThrow(
-      /Private state not initialized or organizer secret key missing/
-    );
+    // Should proceed to SDK call and get enhanced error message
+    await expect(callCircuit(params)).rejects.toThrow(/Private state not initialized/);
 
     // Verify privateStateProvider was checked
     expect(mockProviders.privateStateProvider.get).toHaveBeenCalledWith('test-state-id');

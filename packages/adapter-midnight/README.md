@@ -199,17 +199,33 @@ pnpm dev
 
 For more on the export architecture, see [`docs/ADAPTER_ARCHITECTURE.md § 11.6`](../../docs/ADAPTER_ARCHITECTURE.md#116-including-adapter-artifacts-in-exported-apps).
 
-## Technical Details
+## Documentation
 
-For comprehensive implementation details, see [TRANSACTION_IMPLEMENTATION.md](./TRANSACTION_IMPLEMENTATION.md), which covers:
+This adapter includes comprehensive documentation covering all aspects of the Midnight integration:
 
-- Architecture overview and data flow
-- Technical challenges and solutions
-- WASM context isolation
-- Buffer polyfill implementation
-- ZK artifact distribution strategy
-- SDK compatibility patches
-- Testing guidelines
+### 📚 Core Documentation
+
+- **[TRANSACTION_IMPLEMENTATION.md](./TRANSACTION_IMPLEMENTATION.md)** - Complete implementation guide covering architecture, data flow, WASM context isolation, Buffer polyfills, ZK artifact distribution, SDK patches, and testing guidelines.
+
+- **[TYPE-COVERAGE.md](./TYPE-COVERAGE.md)** - Comprehensive type system reference with full coverage analysis of all Midnight types, UI component mappings, validation status against production contracts, and edge case handling.
+
+- **[BROWSER_COMPATIBILITY.md](./BROWSER_COMPATIBILITY.md)** - Browser compatibility strategy, polyfill implementation details, global namespace management, and debugging tips for browser-specific issues.
+
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history, breaking changes, new features, and migration guides for adapter updates.
+
+### 🔧 Component Documentation
+
+- **[Wallet Integration](./src/wallet/README.md)** - Lace wallet connection, state management, and provider configuration.
+
+### 📖 Quick Reference
+
+| Topic            | Document                      | Key Sections                       |
+| ---------------- | ----------------------------- | ---------------------------------- |
+| Getting Started  | This README                   | Quick Start, Architecture, Export  |
+| Transaction Flow | TRANSACTION_IMPLEMENTATION.md | §4-7: Providers, Execution, Proofs |
+| Type Mapping     | TYPE-COVERAGE.md              | Type Matrix, UI Components         |
+| Browser Setup    | BROWSER_COMPATIBILITY.md      | Polyfills, CommonJS Support        |
+| Wallet Setup     | src/wallet/README.md          | Connection, State, Errors          |
 
 ## Requirements
 

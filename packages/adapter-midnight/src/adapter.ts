@@ -27,6 +27,11 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { FunctionDecorationsService } from './analysis/function-decorations-service';
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
+import { generateMidnightDefaultField } from './mapping/field-generator';
+import {
+  getMidnightCompatibleFieldTypes,
+  mapMidnightParameterTypeToFieldType,
+} from './mapping/type-mapper';
 import { prepareArtifactsForFunction as prepareArtifacts } from './utils/artifact-preparation';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
@@ -196,22 +201,19 @@ export class MidnightAdapter implements ContractAdapter {
     return contractSchema.functions.filter((fn: ContractFunction): boolean => fn.modifiesState);
   }
 
-  public mapParameterTypeToFieldType(_parameterType: string): FieldType {
-    return 'text';
+  public mapParameterTypeToFieldType(parameterType: string): FieldType {
+    return mapMidnightParameterTypeToFieldType(parameterType);
   }
 
-  public getCompatibleFieldTypes(_parameterType: string): FieldType[] {
-    return ['text'];
+  public getCompatibleFieldTypes(parameterType: string): FieldType[] {
+    return getMidnightCompatibleFieldTypes(parameterType);
   }
 
-  public generateDefaultField(parameter: FunctionParameter): FormFieldType {
-    return {
-      id: parameter.name,
-      name: parameter.name,
-      label: parameter.name,
-      type: this.mapParameterTypeToFieldType(parameter.type),
-      validation: {},
-    };
+  public generateDefaultField(
+    parameter: FunctionParameter,
+    contractSchema?: ContractSchema
+  ): FormFieldType {
+    return generateMidnightDefaultField(parameter, contractSchema) as FormFieldType;
   }
 
   public formatTransactionData(

@@ -15,10 +15,11 @@ const SYSTEM_LOG_TAG = '[SchemaParser]';
  */
 export function parseMidnightContractInterface(
   interfaceContent: string
-): Pick<ContractSchema, 'functions' | 'events'> {
+): Pick<ContractSchema, 'functions' | 'events' | 'metadata'> {
   try {
     const circuits = extractCircuits(interfaceContent);
     const ledgerProperties = extractLedgerProperties(interfaceContent);
+    const enums = extractEnums(interfaceContent);
 
     logger.info(
       SYSTEM_LOG_TAG,
@@ -30,7 +31,13 @@ export function parseMidnightContractInterface(
     // TODO: Extract events from the interface content.
     const events: ContractEvent[] = [];
 
-    return { functions, events };
+    return {
+      functions,
+      events,
+      metadata: {
+        enums,
+      },
+    };
   } catch (error) {
     logger.error(SYSTEM_LOG_TAG, 'Failed to parse contract interface:', error);
     throw new Error(
@@ -74,6 +81,35 @@ function extractCircuits(content: string): Record<string, ContractFunction> {
 
   logger.debug(SYSTEM_LOG_TAG, `Extracted ${Object.keys(circuits).length} circuits`);
   return circuits;
+}
+
+/**
+ * Extract enums from the contract interface (export enum Name { a = 0, b = 1 })
+ * Returns a map: enumName -> array of variant objects { name, value }
+ */
+function extractEnums(content: string): Record<string, Array<{ name: string; value?: number }>> {
+  const result: Record<string, Array<{ name: string; value?: number }>> = {};
+  const enumRegex = /export\s+enum\s+(\w+)\s*\{([^}]+)\}/g;
+  let match: RegExpExecArray | null;
+  while ((match = enumRegex.exec(content)) !== null) {
+    const enumName = match[1];
+    const body = match[2];
+    const variants: Array<{ name: string; value?: number }> = [];
+    // Split by commas at top level
+    const parts = body.split(',');
+    for (const raw of parts) {
+      const part = raw.trim();
+      if (!part) continue;
+      const kv = part.split('=');
+      const name = kv[0].trim();
+      const value = kv[1] !== undefined ? Number(kv[1]) : undefined;
+      variants.push({ name, value: Number.isFinite(value) ? (value as number) : undefined });
+    }
+    if (variants.length > 0) {
+      result[enumName] = variants;
+    }
+  }
+  return result;
 }
 
 /**

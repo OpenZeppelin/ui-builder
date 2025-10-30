@@ -25,7 +25,9 @@ export async function loadMidnightContract(
 ): Promise<MidnightContractLoadResult> {
   logger.info('loadMidnightContract', 'Loading Midnight contract from artifacts');
 
-  const { functions, events } = parseMidnightContractInterface(artifacts.contractDefinition);
+  const { functions, events, metadata } = parseMidnightContractInterface(
+    artifacts.contractDefinition
+  );
 
   const schema: ContractSchema = {
     name: 'MyMidnightContract',
@@ -33,10 +35,11 @@ export async function loadMidnightContract(
     address: artifacts.contractAddress,
     functions,
     events,
+    metadata,
   };
 
   const definition = artifacts.contractDefinition || '';
-  const metadata = {
+  const loadMetadata = {
     fetchedFrom: 'local',
     verificationStatus: 'unknown' as const,
     fetchTimestamp: new Date(),
@@ -47,7 +50,7 @@ export async function loadMidnightContract(
     schema,
     source: 'manual',
     contractDefinitionOriginal: artifacts.contractDefinition,
-    metadata,
+    metadata: loadMetadata,
   };
 }
 

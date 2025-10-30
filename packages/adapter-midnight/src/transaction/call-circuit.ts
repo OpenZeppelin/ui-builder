@@ -2,6 +2,8 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { enhanceMidnightError, formatEnhancedError } from './error-enhancer';
+
 const SYSTEM_LOG_TAG = 'callCircuit';
 
 /**
@@ -208,6 +210,17 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     logger.error(SYSTEM_LOG_TAG, `Circuit call failed: ${message}`);
-    throw error;
+
+    // Enhance error message with user-friendly information
+    const enhanced = enhanceMidnightError(error, circuitId);
+    const friendlyMessage = formatEnhancedError(enhanced);
+
+    // Throw enhanced error with friendly message
+    const enhancedError = new Error(friendlyMessage);
+    // Preserve original stack trace if available
+    if (error instanceof Error && error.stack) {
+      enhancedError.stack = error.stack;
+    }
+    throw enhancedError;
   }
 }

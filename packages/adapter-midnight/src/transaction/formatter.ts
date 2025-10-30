@@ -3,6 +3,9 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { parseMidnightInput } from '../transform';
 import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
+import { isArrayType, isMaybeType, isVectorType } from '../utils/type-helpers';
+
+// (shared helpers imported from ../utils/type-helpers)
 
 /**
  * Formats transaction data for Midnight chains based on parsed inputs.
@@ -51,10 +54,18 @@ export function formatMidnightTransactionData(
     } else if (fieldConfig.isHidden) {
       throw new Error(`Field '${fieldConfig.name}' cannot be hidden without being hardcoded.`);
     } else {
+      // Handle optional (Maybe<T>) parameters: allow missing input → null
+      const maybe =
+        typeof expectedArg.type === 'string' ? isMaybeType(expectedArg.type) : { isMaybe: false };
       if (!(fieldConfig.name in submittedInputs)) {
-        throw new Error(`Missing submitted input for required field: ${fieldConfig.name}`);
+        if (maybe.isMaybe) {
+          value = null;
+        } else {
+          throw new Error(`Missing submitted input for required field: ${fieldConfig.name}`);
+        }
+      } else {
+        value = submittedInputs[fieldConfig.name];
       }
-      value = submittedInputs[fieldConfig.name];
     }
     orderedRawValues.push(value);
   }
@@ -62,15 +73,60 @@ export function formatMidnightTransactionData(
   // --- Step 3: Parse/Transform Values using the imported parser --- //
   const transformedArgs = expectedArgs.map((param, index) => {
     let valueToParse = orderedRawValues[index];
+    const fieldConfig = fields.find((f) => f.name === param.name);
 
-    // If the parameter type is an array and the raw value is an array,
-    // pass it as-is to the parser for proper handling
-    if (
-      typeof param.type === 'string' &&
-      param.type.includes('[]') &&
-      Array.isArray(valueToParse)
-    ) {
-      // Parser will handle array conversion
+    // Enum normalization: convert chain-agnostic enum value to Midnight enum number
+    function normalizeEnum(
+      value: unknown,
+      enumMeta?: {
+        name: string;
+        variants: Array<{ name: string; type: 'void' | 'tuple' | 'integer'; value?: number }>;
+      }
+    ): unknown {
+      if (!enumMeta) return value;
+      if (value && typeof value === 'object' && 'tag' in (value as Record<string, unknown>)) {
+        const tag = (value as { tag?: string }).tag;
+        const variant = enumMeta.variants.find((v) => v.name === tag);
+        if (variant) {
+          if (variant.type === 'integer' && typeof variant.value === 'number') return variant.value;
+          // Fallback: use index if numeric not provided
+          const idx = enumMeta.variants.findIndex((v) => v.name === tag);
+          return idx >= 0 ? idx : value;
+        }
+      }
+      if (typeof value === 'string') {
+        const variant = enumMeta.variants.find((v) => v.name === value);
+        if (variant) {
+          if (variant.type === 'integer' && typeof variant.value === 'number') return variant.value;
+          const idx = enumMeta.variants.findIndex((v) => v.name === value);
+          return idx >= 0 ? idx : value;
+        }
+      }
+      return value;
+    }
+
+    // If the parameter type is Array<T> and the raw value is already an array, pass through
+    if (typeof param.type === 'string') {
+      const arr = isArrayType(param.type);
+      const vec = isVectorType(param.type);
+      if ((arr.isArray || vec.isVector) && Array.isArray(valueToParse)) {
+        // Normalize enums inside arrays when elementType is enum
+        if (
+          fieldConfig &&
+          fieldConfig.type === 'array' &&
+          fieldConfig.elementType === 'enum' &&
+          fieldConfig.elementFieldConfig?.enumMetadata
+        ) {
+          valueToParse = (valueToParse as unknown[]).map((item) =>
+            normalizeEnum(item, fieldConfig.elementFieldConfig?.enumMetadata)
+          );
+        }
+      }
+    }
+
+    // Normalize single enum
+    if (fieldConfig && fieldConfig.type === 'enum' && fieldConfig.enumMetadata) {
+      valueToParse = normalizeEnum(valueToParse, fieldConfig.enumMetadata);
     }
 
     return parseMidnightInput(valueToParse, param.type);
