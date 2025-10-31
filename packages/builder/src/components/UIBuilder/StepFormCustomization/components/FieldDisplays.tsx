@@ -49,23 +49,23 @@ export function FieldHeader({
         <p className={`text-sm font-medium ${isRuntimeSecret ? 'text-amber-700' : ''}`}>
           {field.label}
         </p>
-        {isRuntimeSecret && onDeleteField && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive -right-1 relative text-red-500"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteField(index);
-            }}
-            aria-label="Remove runtime secret field"
-            title="Remove runtime secret field (can be re-added if needed)"
-          >
-            <X className="size-3.5" />
-          </Button>
-        )}
       </div>
+      {isRuntimeSecret && onDeleteField && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive text-red-500"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteField(index);
+          }}
+          aria-label="Remove runtime secret field"
+          title="Remove runtime secret field (can be re-added if needed)"
+        >
+          <X className="size-3.5" />
+        </Button>
+      )}
     </div>
   );
 }

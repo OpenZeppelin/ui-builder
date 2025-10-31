@@ -38,14 +38,14 @@ function formatErrorWithHash(errorMsg: string): React.ReactNode {
   const hashRegex = /(0x[a-fA-F0-9]{40,})/g;
 
   if (!hashRegex.test(errorMsg)) {
-    return <span className="wrap-break-word">{errorMsg}</span>;
+    return <span className="break-word">{errorMsg}</span>;
   }
 
   // If we found a hash, format it for better display
   const parts = errorMsg.split(hashRegex);
 
   return (
-    <span className="wrap-break-word">
+    <span className="break-word">
       {parts.map((part, i) => {
         if (part.match(/^0x[a-fA-F0-9]{40,}$/)) {
           // This part is a hash, format it specially
@@ -134,9 +134,9 @@ export function TransactionStatusDisplay({
         {error ? (
           formatErrorWithHash(error)
         ) : customMessage ? (
-          <span className="wrap-break-word">{customMessage}</span>
+          <span className="break-word">{customMessage}</span>
         ) : (
-          <span className="wrap-break-word">An unknown error occurred.</span>
+          <span className="break-word">An unknown error occurred.</span>
         )}
         {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
       </div>
