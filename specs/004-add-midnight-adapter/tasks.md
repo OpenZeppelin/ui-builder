@@ -98,16 +98,16 @@ Independent Test: Execute in Builder, then export and run same flow.
 Goal: Test connectivity with latency/success/failure feedback.
 Independent Test: Run Test Connection and see result with timing.
 
-- [ ] T017 [US5] Implement/verify validateRpcEndpoint/testMidnightRpcConnection [seq]
-  - Path: packages/adapter-midnight/src/configuration/\*_/_
+- [x] T017 [US5] Implement/verify validateRpcEndpoint/testMidnightRpcConnection [seq]
+- Path: packages/adapter-midnight/src/configuration/\*_/_
 
-- [ ] Checkpoint: Diagnostics requirements satisfied
+- [x] Checkpoint: Diagnostics requirements satisfied
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T018 [US9] Mapping parity (types/defaults/compatibility) per FR-018 [P]
+- [x] T018 [US9] Mapping parity (types/defaults/compatibility) per FR-018 [P]
   - Path: packages/adapter-midnight/src/mapping/\*_/_
-- [ ] T019 [US9] Update docs: adapter integration and export manifest sync [P]
+- [x] T019 [US9] Update docs: adapter integration and export manifest sync [P]
   - Path: specs/004-add-midnight-adapter/contracts/\*.md
 
 ## Dependencies & Execution Order
@@ -150,5 +150,5 @@ Task: "T008 [US1] Ensure supportsWalletConnection/getAvailableConnectors parity"
 
 ## Implementation Strategy
 
-- [ ] MVP: Complete US1 only (connect wallet & show account)
-- [ ] Incrementally deliver US2 → US3 → US4 (export) → US5
+- [x] MVP: Complete US1 only (connect wallet & show account)
+- [x] Incrementally deliver US2 → US3 → US4 (export) → US5

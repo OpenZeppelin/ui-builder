@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useAdapterContext } from '@openzeppelin/ui-builder-react-core';
+import { NetworkSettingsDialog } from '@openzeppelin/ui-builder-renderer';
 import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/ui-builder-ui';
+import { useNetworkErrors } from '@openzeppelin/ui-builder-ui';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { networkService } from '../../core/networks/service';
@@ -40,7 +41,6 @@ export function NetworkErrorHandler() {
 
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
   const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
-  const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
 
   // Get adapter for the settings network
   useEffect(() => {
@@ -54,30 +54,27 @@ export function NetworkErrorHandler() {
   }, [settingsNetwork, getAdapterForNetwork]);
 
   // Create a stable callback for opening network settings
-  const openNetworkSettings = useCallback(
-    async (networkId: string, tab: 'rpc' | 'explorer' = 'rpc') => {
-      try {
-        // Find the network by ID using the network service
-        const network = await networkService.getNetworkById(networkId);
+  const openNetworkSettings = useCallback(async (networkId: string) => {
+    try {
+      // Find the network by ID using the network service
+      const network = await networkService.getNetworkById(networkId);
 
-        if (network) {
-          setSettingsNetwork(network);
-          setDefaultTab(tab);
-          // The useEffect will handle getting the adapter
-        } else {
-          logger.error('NetworkErrorHandler', `Network not found: ${networkId}`);
-        }
-      } catch (error) {
-        logger.error('NetworkErrorHandler', 'Failed to open network settings:', error);
+      if (network) {
+        setSettingsNetwork(network);
+        // Dialog derives tabs from adapter.getNetworkServiceForms()
+        // The useEffect will handle getting the adapter
+      } else {
+        logger.error('NetworkErrorHandler', `Network not found: ${networkId}`);
       }
-    },
-    []
-  );
+    } catch (error) {
+      logger.error('NetworkErrorHandler', 'Failed to open network settings:', error);
+    }
+  }, []);
 
   // Register handler for opening network settings from error notifications
   useEffect(() => {
-    setOpenNetworkSettingsHandler((networkId: string, defaultTab?: 'rpc' | 'explorer') => {
-      void openNetworkSettings(networkId, defaultTab);
+    setOpenNetworkSettingsHandler((networkId: string) => {
+      void openNetworkSettings(networkId);
     });
   }, [openNetworkSettings, setOpenNetworkSettingsHandler]);
 
@@ -92,7 +89,6 @@ export function NetworkErrorHandler() {
       onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
       networkConfig={settingsNetwork}
       adapter={settingsAdapter}
-      defaultTab={defaultTab}
     />
   );
 }

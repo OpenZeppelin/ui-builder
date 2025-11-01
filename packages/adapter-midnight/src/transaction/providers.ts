@@ -7,7 +7,11 @@ import type {
 } from '@midnight-ntwrk/midnight-js-types';
 
 import type { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
+import {
+  logger,
+  userNetworkServiceConfigService,
+  userRpcConfigService,
+} from '@openzeppelin/ui-builder-utils';
 
 import { getWalletConfigIfAvailable } from '../configuration/provider';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
@@ -57,9 +61,17 @@ export async function createTransactionProviders(
   let indexerUri: string;
   let indexerWsUri: string;
 
-  // Priority 1: Check for user RPC override
+  // Priority 1: Check for user Indexer override
+  const userIndexer = userNetworkServiceConfigService.get(networkConfig.id, 'indexer') as {
+    httpUrl?: string;
+    wsUrl?: string;
+  } | null;
   const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
-  if (customRpcConfig?.url) {
+  if (userIndexer?.httpUrl && userIndexer?.wsUrl) {
+    indexerUri = userIndexer.httpUrl;
+    indexerWsUri = userIndexer.wsUrl;
+    logger.info('createTransactionProviders', 'Using user Indexer override', { indexerUri });
+  } else if (customRpcConfig?.url) {
     // Derive indexer endpoints from custom RPC
     indexerUri = deriveIndexerUri(customRpcConfig.url);
     indexerWsUri = deriveIndexerWsUri(customRpcConfig.url);
@@ -223,6 +235,6 @@ function deriveIndexerWsUri(rpcUrl: string): string {
   const url = new URL(rpcUrl);
   if (url.protocol === 'http:') url.protocol = 'ws:';
   else if (url.protocol === 'https:') url.protocol = 'wss:';
-  url.pathname = '/api/v1/graphql';
+  url.pathname = '/api/v1/graphql/ws';
   return url.toString();
 }

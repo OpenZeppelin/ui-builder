@@ -37,6 +37,9 @@ module.exports = {
     const interfaceMethods = [
       'networkConfig',
       'initialAppServiceKitName',
+      'getNetworkServiceForms',
+      'validateNetworkServiceConfig',
+      'testNetworkServiceConnection',
       'loadContract',
       'loadContractWithMetadata',
       'getWritableFunctions',

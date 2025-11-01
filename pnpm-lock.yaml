@@ -655,6 +655,9 @@ importers:
 
   packages/react-core:
     dependencies:
+      '@openzeppelin/ui-builder-renderer':
+        specifier: workspace:^
+        version: link:../renderer
       '@openzeppelin/ui-builder-types':
         specifier: workspace:^
         version: link:../types

@@ -75,6 +75,23 @@ export interface WalletConnectionStatus {
 }
 
 /**
+ * Adapter-declared networking configuration form.
+ * Rendered by the application using DynamicFormField components.
+ */
+export interface NetworkServiceForm {
+  /** Stable identifier for the service (e.g., 'rpc', 'explorer', 'indexer') */
+  id: string;
+  /** User-facing label for tabs/sections */
+  label: string;
+  /** Optional description shown above the form */
+  description?: string;
+  /** Whether this service supports connection testing via testNetworkServiceConnection */
+  supportsConnectionTest?: boolean;
+  /** Form schema fields using the standard FormFieldType */
+  fields: FormFieldType[];
+}
+
+/**
  * Minimal adapter interface for the renderer and contract interaction
  *
  * This is the base interface that all chain-specific adapters must implement.
@@ -653,4 +670,30 @@ export interface ContractAdapter {
    * @returns A map of function IDs to their decorations.
    */
   getFunctionDecorations?(): Promise<FunctionDecorationsMap | undefined>;
+
+  /**
+   * Returns network service forms (e.g., RPC, Explorer, Indexer) this adapter supports.
+   * The UI renders these via DynamicFormField without chain-specific UI code.
+   */
+  getNetworkServiceForms(): NetworkServiceForm[];
+
+  /**
+   * Optional validation for a given service configuration prior to save.
+   */
+  validateNetworkServiceConfig?(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean>;
+
+  /**
+   * Optional connectivity test for a given service configuration.
+   */
+  testNetworkServiceConnection?(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }>;
 }

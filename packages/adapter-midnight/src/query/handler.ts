@@ -2,11 +2,16 @@ import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-p
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
 import type {
+  ContractFunction,
   ContractSchema,
   MidnightNetworkConfig,
   NetworkConfig,
 } from '@openzeppelin/ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
+import {
+  logger,
+  userNetworkServiceConfigService,
+  userRpcConfigService,
+} from '@openzeppelin/ui-builder-utils';
 
 import { getWalletConfigIfAvailable } from '../configuration';
 import {
@@ -55,7 +60,9 @@ export async function queryMidnightViewFunction(
   }
 
   // Confirm the function exists and is view-only
-  const targetFunction = contractSchema.functions.find((fn) => fn.id === functionId);
+  const targetFunction = contractSchema.functions.find(
+    (fn: ContractFunction) => fn.id === functionId
+  );
   if (!targetFunction) {
     throw new Error(`Function with ID ${functionId} not found in contract schema.`);
   }
@@ -121,12 +128,20 @@ async function getProvidersForQuery(
   }
 ): Promise<{ providers: MidnightProviders; numericNetworkId?: number }> {
   // Resolve indexer endpoints with precedence
+  const userIndexer = userNetworkServiceConfigService.get(networkConfig.id, 'indexer') as {
+    httpUrl?: string;
+    wsUrl?: string;
+  } | null;
   const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
 
   let indexerUri: string;
   let indexerWsUri: string;
 
-  if (customRpcConfig?.url) {
+  if (userIndexer?.httpUrl && userIndexer?.wsUrl) {
+    indexerUri = userIndexer.httpUrl;
+    indexerWsUri = userIndexer.wsUrl;
+    logger.info('getProvidersForQuery', 'Using user Indexer override', { indexerUri });
+  } else if (customRpcConfig?.url) {
     // Derive indexer endpoints from user RPC override
     const derivedHttp = deriveIndexerUri(customRpcConfig.url);
     const derivedWs = deriveIndexerWsUri(customRpcConfig.url);
@@ -201,7 +216,8 @@ function deriveIndexerUri(rpcUrl: string): string {
   } else if (url.protocol === 'wss:') {
     url.protocol = 'https:';
   }
-  return `${url.origin}/indexer`;
+  url.pathname = '/api/v1/graphql';
+  return url.toString();
 }
 
 function deriveIndexerWsUri(rpcUrl: string): string {
@@ -212,5 +228,6 @@ function deriveIndexerWsUri(rpcUrl: string): string {
   } else if (url.protocol === 'https:') {
     url.protocol = 'wss:';
   }
-  return `${url.origin}/indexer`;
+  url.pathname = '/api/v1/graphql/ws';
+  return url.toString();
 }

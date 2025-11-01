@@ -16,16 +16,21 @@ import type {
   FunctionDecorationsMap,
   FunctionParameter,
   MidnightNetworkConfig,
+  NetworkServiceForm,
   RelayerDetails,
   RelayerDetailsRich,
   TransactionStatusUpdate,
   UiKitConfiguration,
-  UserRpcProviderConfig,
 } from '@openzeppelin/ui-builder-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { FunctionDecorationsService } from './analysis/function-decorations-service';
+import {
+  getMidnightNetworkServiceForms,
+  testMidnightNetworkServiceConnection,
+  validateMidnightNetworkServiceConfig,
+} from './configuration/network-services';
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
 import { generateMidnightDefaultField } from './mapping/field-generator';
 import {
@@ -40,7 +45,6 @@ import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
 import * as connection from './wallet/connection';
 import { midnightFacadeHooks } from './wallet/hooks/facade-hooks';
 
-import { testMidnightRpcConnection, validateMidnightRpcEndpoint } from './configuration';
 import { loadMidnightContract, loadMidnightContractWithMetadata } from './contract';
 import {
   executeLocallyIfPossible,
@@ -78,14 +82,23 @@ export class MidnightAdapter implements ContractAdapter {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   public getEcosystemReactUiContextProvider(): React.FC<EcosystemReactUiProviderProps> {
     return MidnightWalletUiRoot;
   }
 
+  /**
+   * @inheritdoc
+   */
   public getEcosystemReactHooks(): EcosystemSpecificReactHooks {
     return midnightFacadeHooks;
   }
 
+  /**
+   * @inheritdoc
+   */
   public getEcosystemWalletComponents(): EcosystemWalletComponents {
     return {
       ConnectButton,
@@ -93,14 +106,23 @@ export class MidnightAdapter implements ContractAdapter {
     };
   }
 
+  /**
+   * @inheritdoc
+   */
   public supportsWalletConnection(): boolean {
     return connection.supportsMidnightWalletConnection();
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getAvailableConnectors(): Promise<Connector[]> {
     return connection.getMidnightAvailableConnectors();
   }
 
+  /**
+   * @inheritdoc
+   */
   public connectWallet(
     _connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
@@ -111,10 +133,16 @@ export class MidnightAdapter implements ContractAdapter {
     return Promise.resolve({ connected: false, error: 'Method not supported.' });
   }
 
+  /**
+   * @inheritdoc
+   */
   public disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
     return connection.disconnectMidnightWallet();
   }
 
+  /**
+   * @inheritdoc
+   */
   public getWalletConnectionStatus(): { isConnected: boolean; address?: string; chainId?: string } {
     const status = connection.getMidnightWalletConnectionStatus();
     return {
@@ -124,6 +152,9 @@ export class MidnightAdapter implements ContractAdapter {
     };
   }
 
+  /**
+   * @inheritdoc
+   */
   public getContractDefinitionInputs(): FormFieldType[] {
     return [
       {
@@ -161,6 +192,9 @@ export class MidnightAdapter implements ContractAdapter {
     ];
   }
 
+  /**
+   * @inheritdoc
+   */
   public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
     const artifacts = await validateAndConvertMidnightArtifacts(source);
 
@@ -171,6 +205,9 @@ export class MidnightAdapter implements ContractAdapter {
     return result.schema;
   }
 
+  /**
+   * @inheritdoc
+   */
   public async loadContractWithMetadata(source: string | Record<string, unknown>): Promise<{
     schema: ContractSchema;
     source: 'fetched' | 'manual';
@@ -202,18 +239,30 @@ export class MidnightAdapter implements ContractAdapter {
     };
   }
 
+  /**
+   * @inheritdoc
+   */
   public getWritableFunctions(contractSchema: ContractSchema): ContractFunction[] {
     return contractSchema.functions.filter((fn: ContractFunction): boolean => fn.modifiesState);
   }
 
+  /**
+   * @inheritdoc
+   */
   public mapParameterTypeToFieldType(parameterType: string): FieldType {
     return mapMidnightParameterTypeToFieldType(parameterType);
   }
 
+  /**
+   * @inheritdoc
+   */
   public getCompatibleFieldTypes(parameterType: string): FieldType[] {
     return getMidnightCompatibleFieldTypes(parameterType);
   }
 
+  /**
+   * @inheritdoc
+   */
   public generateDefaultField(
     parameter: FunctionParameter,
     contractSchema?: ContractSchema
@@ -221,6 +270,9 @@ export class MidnightAdapter implements ContractAdapter {
     return generateMidnightDefaultField(parameter, contractSchema) as FormFieldType;
   }
 
+  /**
+   * @inheritdoc
+   */
   public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
@@ -236,6 +288,9 @@ export class MidnightAdapter implements ContractAdapter {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   public async signAndBroadcast(
     transactionData: unknown,
     executionConfig: ExecutionConfig,
@@ -265,6 +320,9 @@ export class MidnightAdapter implements ContractAdapter {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getFunctionDecorations(): Promise<FunctionDecorationsMap | undefined> {
     if (!this.artifacts) {
       logger.debug('MidnightAdapter', 'No artifacts loaded; skipping function decorations.');
@@ -274,6 +332,9 @@ export class MidnightAdapter implements ContractAdapter {
     return this.functionDecorationsService.analyzeFunctionDecorations(this.artifacts);
   }
 
+  /**
+   * @inheritdoc
+   */
   public getRuntimeFieldBinding() {
     return {
       key: 'organizerSecret',
@@ -282,12 +343,18 @@ export class MidnightAdapter implements ContractAdapter {
     };
   }
 
+  /**
+   * @inheritdoc
+   */
   public isViewFunction(functionDetails: ContractFunction): boolean {
     // Pure circuits are not view functions - they're computational functions that run locally
     // View functions are read-only state queries (ledger properties, queries)
     return !functionDetails.modifiesState && !isPureCircuit(functionDetails);
   }
 
+  /**
+   * @inheritdoc
+   */
   public async queryViewFunction(
     contractAddress: string,
     functionId: string,
@@ -306,33 +373,54 @@ export class MidnightAdapter implements ContractAdapter {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   public formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
     return formatMidnightFunctionResult(decodedValue, functionDetails);
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
     const { getMidnightSupportedExecutionMethods } = await import('./configuration/execution');
     return getMidnightSupportedExecutionMethods();
   }
 
+  /**
+   * @inheritdoc
+   */
   public async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
     const { validateMidnightExecutionConfig } = await import('./configuration/execution');
     return validateMidnightExecutionConfig(config);
   }
 
+  /**
+   * @inheritdoc
+   */
   public getExplorerUrl(_address: string): string | null {
     return null; // No official explorer yet
   }
 
+  /**
+   * @inheritdoc
+   */
   public getExplorerTxUrl(_txHash: string): string | null {
     return null; // No official explorer yet
   }
 
+  /**
+   * @inheritdoc
+   */
   public isValidAddress(address: string): boolean {
     // Validates both contract addresses (68-char hex) and user addresses (Bech32m)
     return isValidAddress(address);
   }
 
+  /**
+   * @inheritdoc
+   */
   async getAvailableUiKits(): Promise<AvailableUiKit[]> {
     return [
       {
@@ -343,11 +431,17 @@ export class MidnightAdapter implements ContractAdapter {
     ];
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getRelayers(_serviceUrl: string, _accessToken: string): Promise<RelayerDetails[]> {
     logger.warn('MidnightAdapter', 'getRelayers is not implemented for the Midnight adapter yet.');
     return Promise.resolve([]);
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getRelayer(
     _serviceUrl: string,
     _accessToken: string,
@@ -360,21 +454,28 @@ export class MidnightAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {
-    // TODO: Implement Midnight-specific RPC validation when needed
-    return validateMidnightRpcEndpoint(rpcConfig);
+  public getNetworkServiceForms(): NetworkServiceForm[] {
+    return getMidnightNetworkServiceForms();
   }
 
   /**
    * @inheritdoc
    */
-  public async testRpcConnection(rpcConfig: UserRpcProviderConfig): Promise<{
-    success: boolean;
-    latency?: number;
-    error?: string;
-  }> {
-    // TODO: Implement Midnight-specific RPC validation when needed
-    return testMidnightRpcConnection(rpcConfig);
+  public async validateNetworkServiceConfig(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean> {
+    return validateMidnightNetworkServiceConfig(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testNetworkServiceConnection(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{ success: boolean; latency?: number; error?: string }> {
+    return testMidnightNetworkServiceConnection(serviceId, values);
   }
 
   /**
