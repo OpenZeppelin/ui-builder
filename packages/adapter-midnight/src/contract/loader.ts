@@ -25,7 +25,9 @@ export async function loadMidnightContract(
 ): Promise<MidnightContractLoadResult> {
   logger.info('loadMidnightContract', 'Loading Midnight contract from artifacts');
 
-  const { functions, events } = parseMidnightContractInterface(artifacts.contractDefinition);
+  const { functions, events, metadata } = parseMidnightContractInterface(
+    artifacts.contractDefinition
+  );
 
   const schema: ContractSchema = {
     name: 'MyMidnightContract',
@@ -33,10 +35,11 @@ export async function loadMidnightContract(
     address: artifacts.contractAddress,
     functions,
     events,
+    metadata,
   };
 
   const definition = artifacts.contractDefinition || '';
-  const metadata = {
+  const loadMetadata = {
     fetchedFrom: 'local',
     verificationStatus: 'unknown' as const,
     fetchTimestamp: new Date(),
@@ -47,7 +50,7 @@ export async function loadMidnightContract(
     schema,
     source: 'manual',
     contractDefinitionOriginal: artifacts.contractDefinition,
-    metadata,
+    metadata: loadMetadata,
   };
 }
 
@@ -61,6 +64,9 @@ export async function loadMidnightContractWithMetadata(
   if (artifacts.privateStateId) artifactsRecord.privateStateId = artifacts.privateStateId;
   if (artifacts.contractModule) artifactsRecord.contractModule = artifacts.contractModule;
   if (artifacts.witnessCode) artifactsRecord.witnessCode = artifacts.witnessCode;
+  if (artifacts.verifierKeys) artifactsRecord.verifierKeys = artifacts.verifierKeys;
+  if (artifacts.originalZipData) artifactsRecord.originalZipData = artifacts.originalZipData;
+  if (artifacts.trimmedZipBase64) artifactsRecord.trimmedZipBase64 = artifacts.trimmedZipBase64;
 
   return {
     ...base,

@@ -60,6 +60,9 @@ export interface UIBuilderState {
 
   // Track if we're in new UI mode (creating new UI vs loading existing)
   isInNewUIMode: boolean;
+
+  // UI-only flag: true if loaded config contains only a trimmed ZIP (no original)
+  isTrimmedArtifactsLoaded: boolean;
 }
 
 // For clarity, we can define actions separately from the state.
@@ -135,6 +138,7 @@ const initialState: UIBuilderState = {
   needsContractDefinitionLoad: false,
   loadedConfigurationId: null,
   isInNewUIMode: false,
+  isTrimmedArtifactsLoaded: false,
 };
 
 export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActions>()(
@@ -224,7 +228,23 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         return STEP_INDICES.FORM_CUSTOMIZATION;
       };
 
-      const targetStepIndex = determineStepFromSavedConfig(savedConfig);
+      let targetStepIndex = determineStepFromSavedConfig(savedConfig);
+
+      // If saved record contains only trimmed artifacts (no original ZIP), force user to
+      // start at the contract definition step to re-upload the original ZIP.
+      const isTrimmedOnly = !!(
+        savedConfig.contractDefinitionArtifacts &&
+        typeof savedConfig.contractDefinitionArtifacts === 'object' &&
+        (savedConfig.contractDefinitionArtifacts as Record<string, unknown>).trimmedZipBase64 &&
+        !(savedConfig.contractDefinitionArtifacts as Record<string, unknown>).originalZipData
+      );
+      if (isTrimmedOnly) {
+        // If a function was previously selected, go directly to the form step
+        // so the UI renders for that function. Otherwise require re-upload.
+        targetStepIndex = savedConfig.functionId
+          ? STEP_INDICES.FORM_CUSTOMIZATION
+          : STEP_INDICES.CONTRACT_DEFINITION;
+      }
 
       if (savedConfig.contractAddress && savedConfig.networkId) {
         contractDefinitionService.reset(savedConfig.networkId, savedConfig.contractAddress);
@@ -241,6 +261,10 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
           definitionOriginal: savedConfig.contractDefinitionOriginal || null,
           source: savedConfig.contractDefinitionSource || null,
           metadata: savedConfig.contractDefinitionMetadata || null,
+          contractDefinitionArtifacts: (savedConfig.contractDefinitionArtifacts || null) as Record<
+            string,
+            unknown
+          > | null,
           formValues: (() => {
             const formValues: FormValues = {
               contractAddress: savedConfig.contractAddress,
@@ -259,10 +283,24 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
                 formValues.contractDefinition = savedConfig.contractDefinition;
               }
             }
-            // Rehydrate contract definition artifacts into form values generically
+            // Rehydrate contract definition artifacts into form values
+            // Only map originalZipData into contractArtifactsZip. If only a
+            // trimmed ZIP exists, we intentionally DO NOT prefill the file
+            // input to force re-upload of the full ZIP.
             const artifacts = savedConfig.contractDefinitionArtifacts;
             if (artifacts && typeof artifacts === 'object') {
-              Object.assign(formValues, artifacts);
+              const mapped: Record<string, unknown> = { ...(artifacts as Record<string, unknown>) };
+              if (typeof mapped.contractArtifactsZip === 'undefined') {
+                const original = mapped.originalZipData as string | undefined;
+                const trimmed = mapped.trimmedZipBase64 as string | undefined;
+                if (original && typeof original === 'string') {
+                  mapped.contractArtifactsZip = original;
+                } else if (trimmed && typeof trimmed === 'string' && savedConfig.functionId) {
+                  // Allow auto-load from trimmed ZIP only if a function was selected
+                  mapped.contractArtifactsZip = trimmed;
+                }
+              }
+              Object.assign(formValues, mapped);
             }
             return formValues;
           })(),
@@ -275,9 +313,25 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
         },
         currentStepIndex: targetStepIndex,
         isExecutionStepValid: !!savedConfig.executionConfig,
-        needsContractDefinitionLoad: !!savedConfig.contractDefinition,
+        needsContractDefinitionLoad: (() => {
+          if (!!savedConfig.contractDefinition) return true;
+          const a = savedConfig.contractDefinitionArtifacts as Record<string, unknown> | undefined;
+          if (!a) return false;
+          const hasOriginal = typeof a.originalZipData === 'string' && !!a.originalZipData;
+          const hasTrimmed = typeof a.trimmedZipBase64 === 'string' && !!a.trimmedZipBase64;
+          // Auto-load if we have original, or if we have trimmed and a function was saved
+          // NOTE: For trimmed-only with functionId, we jump to FORM_CUSTOMIZATION but still need
+          // the contract definition to be parsed to populate the schema
+          return hasOriginal || (hasTrimmed && !!savedConfig.functionId);
+        })(),
         loadedConfigurationId: id,
         isInNewUIMode: false,
+        isTrimmedArtifactsLoaded: !!(
+          savedConfig.contractDefinitionArtifacts &&
+          typeof savedConfig.contractDefinitionArtifacts === 'object' &&
+          (savedConfig.contractDefinitionArtifacts as Record<string, unknown>).trimmedZipBase64 &&
+          !(savedConfig.contractDefinitionArtifacts as Record<string, unknown>).originalZipData
+        ),
       });
     },
 
@@ -395,10 +449,20 @@ const subscribeWithSelector = <T>(
   return unsub;
 };
 
+// Helper to detect if artifacts are trimmed-only (no original ZIP available)
+export const isTrimmedOnlyArtifacts = (state: UIBuilderState): boolean => {
+  const artifacts = state.contractState.contractDefinitionArtifacts;
+  if (!artifacts || typeof artifacts !== 'object') return false;
+  const hasTrimmed = !!(artifacts as Record<string, unknown>)?.['trimmedZipBase64'];
+  const hasOriginal = !!(artifacts as Record<string, unknown>)?.['originalZipData'];
+  return hasTrimmed && !hasOriginal;
+};
+
 export const uiBuilderStore = {
   getState,
   subscribe,
   subscribeWithSelector,
+  isTrimmedOnlyArtifacts,
   setInitialState: uiBuilderStoreVanilla.getState().setInitialState,
   updateState: uiBuilderStoreVanilla.getState().updateState,
   resetDownstreamSteps: uiBuilderStoreVanilla.getState().resetDownstreamSteps,

@@ -37,6 +37,9 @@ module.exports = {
     const interfaceMethods = [
       'networkConfig',
       'initialAppServiceKitName',
+      'getNetworkServiceForms',
+      'validateNetworkServiceConfig',
+      'testNetworkServiceConnection',
       'loadContract',
       'loadContractWithMetadata',
       'getWritableFunctions',
@@ -70,6 +73,8 @@ module.exports = {
       'getExportableWalletConfigFiles',
       'getSupportedContractDefinitionProviders',
       'getContractDefinitionInputs',
+      'getRuntimeFieldBinding',
+      'getFunctionDecorations',
       'getRelayers',
       'getRelayer',
       'getRelayerOptionsComponent',
@@ -80,6 +85,9 @@ module.exports = {
       'compareContractDefinitions',
       'validateContractDefinition',
       'hashContractDefinition',
+      'getExportBootstrapFiles',
+      'getArtifactPersistencePolicy',
+      'prepareArtifactsForFunction',
     ];
 
     // Common standard methods and properties that are allowed

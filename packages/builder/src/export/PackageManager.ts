@@ -136,15 +136,26 @@ export class PackageManager {
 
   /**
    * Get chain-specific development dependencies from adapter config
+   * Includes both dev dependencies (type definitions) and build dependencies (Vite plugins).
+   *
    * @param ecosystem The ecosystem
    * @returns Record of package names to version ranges
    */
   private async getChainDevDependencies(ecosystem: Ecosystem): Promise<Record<string, string>> {
     const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
-    if (!adapterConfig || !adapterConfig.dependencies.dev) {
-      return {};
+    const devDeps: Record<string, string> = {};
+
+    // Add adapter-defined dev dependencies (e.g., @types packages)
+    if (adapterConfig?.dependencies.dev) {
+      Object.assign(devDeps, adapterConfig.dependencies.dev);
     }
-    return adapterConfig.dependencies.dev;
+
+    // Add adapter-defined build dependencies (e.g., Vite plugins)
+    if (adapterConfig?.dependencies.build) {
+      Object.assign(devDeps, adapterConfig.dependencies.build);
+    }
+
+    return devDeps;
   }
 
   /**
@@ -389,6 +400,11 @@ export class PackageManager {
       if (Object.keys(overrides).length > 0) {
         packageJson.overrides = overrides;
       }
+
+      // Note: Adapter patches (e.g., Midnight SDK patches) are automatically applied
+      // by pnpm when the adapter package is installed, as they are bundled with the
+      // adapter package and listed in the adapter's pnpm.patchedDependencies.
+      // No additional configuration needed in the exported app's package.json.
 
       // Add upgrade instructions if workspace dependencies are present
       this.addUpgradeInstructions(packageJson);

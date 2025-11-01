@@ -3,7 +3,7 @@ import {
   appConfigService,
   isValidUrl,
   logger,
-  userRpcConfigService,
+  userNetworkServiceConfigService,
 } from '@openzeppelin/ui-builder-utils';
 
 /**
@@ -16,6 +16,20 @@ import {
  */
 export function buildRpcUrl(config: UserRpcProviderConfig): string {
   return config.url;
+}
+
+/**
+ * Extracts the user-configured RPC URL from UserNetworkServiceConfigService.
+ *
+ * @param networkId - The network ID to get the RPC URL for
+ * @returns The RPC URL string if configured, undefined otherwise
+ */
+export function getUserRpcUrl(networkId: string): string | undefined {
+  const svcCfg = userNetworkServiceConfigService.get(networkId, 'rpc');
+  if (svcCfg && typeof svcCfg === 'object' && 'rpcUrl' in svcCfg) {
+    return (svcCfg as Record<string, unknown>).rpcUrl as string;
+  }
+  return undefined;
 }
 
 /**
@@ -33,20 +47,17 @@ export function resolveRpcUrl(networkConfig: EvmNetworkConfig): string {
   const logSystem = 'RpcResolver';
   const networkId = networkConfig.id;
 
-  // First priority: Check user-provided RPC configuration
-  const userRpcConfig = userRpcConfigService.getUserRpcConfig(networkId);
-  if (userRpcConfig) {
-    const userRpcUrl = buildRpcUrl(userRpcConfig);
-    if (isValidUrl(userRpcUrl)) {
-      logger.info(
-        logSystem,
-        `Using user-configured RPC URL for network ${networkId}: ${userRpcConfig.name || 'Custom'}`
-      );
-      return userRpcUrl;
+  // First priority: Check adapter-led service config (generic)
+  const userRpcUrl = getUserRpcUrl(networkId);
+  if (userRpcUrl) {
+    const userRpcUrlString = String(userRpcUrl);
+    if (isValidUrl(userRpcUrlString)) {
+      logger.info(logSystem, `Using user-configured RPC URL for network ${networkId}`);
+      return userRpcUrlString;
     } else {
       logger.warn(
         logSystem,
-        `User-configured RPC URL for ${networkId} is invalid: ${userRpcUrl}. Falling back.`
+        `User-configured RPC URL for ${networkId} is invalid: ${userRpcUrlString}. Falling back.`
       );
     }
   }

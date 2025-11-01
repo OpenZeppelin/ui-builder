@@ -89,7 +89,7 @@ describe('EVM provenance links', () => {
     };
     const result = await loadEvmContract(artifacts, network);
     expect(result.metadata?.fetchedFrom).toBe(
-      'https://sourcify.dev/status/1/0x0000000000000000000000000000000000000001'
+      'https://repo.sourcify.dev/1/0x0000000000000000000000000000000000000001'
     );
     vi.restoreAllMocks();
   });

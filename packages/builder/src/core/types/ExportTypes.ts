@@ -95,6 +95,18 @@ export interface ExportOptions extends TemplateOptions {
    * TODO: Implement UI in UIBuilder (e.g., StepFormCustomization) to allow users to set these options (kitName, kitConfig with exclusions, etc.).
    */
   uiKitConfiguration?: UiKitConfiguration;
+
+  /**
+   * Optional adapter-specific artifacts to include in the export.
+   * Used by adapters that need to bundle contract artifacts or other ecosystem-specific data.
+   * Example: Midnight adapter includes ZK proof artifacts, contract modules, and witness code.
+   */
+  adapterArtifacts?: {
+    /** Adapter-specific artifacts stored during contract loading */
+    artifacts?: Record<string, unknown> | null;
+    /** Original contract definition (e.g., TypeScript .d.ts for Midnight) */
+    definitionOriginal?: string | null;
+  };
 }
 
 /**

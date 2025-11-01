@@ -11,7 +11,7 @@ import type { BuilderFormConfig } from '../../core/types/FormTypes';
  * @param formConfig - The form configuration, containing the uiKitConfig.
  */
 export async function generateAdapterSpecificFiles(
-  projectFiles: Record<string, string>,
+  projectFiles: Record<string, string | Uint8Array | Blob>,
   adapter: ContractAdapter,
   formConfig: BuilderFormConfig
 ): Promise<void> {

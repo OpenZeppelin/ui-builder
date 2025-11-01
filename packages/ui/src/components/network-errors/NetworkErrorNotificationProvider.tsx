@@ -15,7 +15,7 @@ export function NetworkErrorNotificationProvider({
 }: NetworkErrorNotificationProviderProps): React.ReactNode {
   const [errors, setErrors] = useState<NetworkError[]>([]);
   const [openNetworkSettingsHandler, setOpenNetworkSettingsHandler] = useState<
-    ((networkId: string, defaultTab?: 'rpc' | 'explorer') => void) | undefined
+    ((networkId: string) => void) | undefined
   >();
   const errorDedupeRef = useRef<Map<string, number>>(new Map());
 
@@ -56,7 +56,7 @@ export function NetworkErrorNotificationProvider({
           ? {
               label: 'Configure',
               onClick: (): void => {
-                openNetworkSettingsHandler(networkId, type);
+                openNetworkSettingsHandler(networkId);
               },
             }
           : undefined,
@@ -80,12 +80,9 @@ export function NetworkErrorNotificationProvider({
     errorDedupeRef.current.clear();
   }, []);
 
-  const stableSetHandler = useCallback(
-    (handler: (networkId: string, defaultTab?: 'rpc' | 'explorer') => void) => {
-      setOpenNetworkSettingsHandler(() => handler);
-    },
-    []
-  );
+  const stableSetHandler = useCallback((handler: (networkId: string) => void) => {
+    setOpenNetworkSettingsHandler(() => handler);
+  }, []);
 
   const value = useMemo(
     () => ({

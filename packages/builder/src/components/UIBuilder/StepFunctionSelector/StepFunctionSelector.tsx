@@ -17,6 +17,7 @@ export function StepFunctionSelector({
   networkConfig,
   onToggleContractState,
   isWidgetExpanded,
+  adapter,
 }: StepFunctionSelectorProps) {
   const { contractState } = useStore(uiBuilderStoreVanilla);
 
@@ -24,7 +25,7 @@ export function StepFunctionSelector({
   const { filteredFunctions, writableFunctions, filterValue, setFilterValue } =
     useFunctionFilter(contractSchema);
 
-  const { selectFunction } = useFunctionSelection(onFunctionSelected);
+  const { selectFunction } = useFunctionSelection(onFunctionSelected, contractSchema);
 
   if (!contractSchema) {
     // If we have a definition but no schema yet, we're loading
@@ -67,6 +68,7 @@ export function StepFunctionSelector({
           functions={writableFunctions}
           selectedFunction={selectedFunction}
           onSelectFunction={selectFunction}
+          adapter={adapter}
         />
 
         {/* Show a message if no functions match the filter */}

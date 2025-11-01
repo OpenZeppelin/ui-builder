@@ -30,17 +30,19 @@ export function hexToBytes(hex: string): Uint8Array {
 
 /**
  * Convert a base64 string to Uint8Array using native browser APIs
- * @param base64 - Base64 encoded string
+ * Handles data URLs by stripping the prefix
+ * @param base64 - Base64 encoded string (with optional data URL prefix)
  * @returns Uint8Array representation
  */
 export function base64ToBytes(base64: string): Uint8Array {
-  const decoded = atob(base64);
-  const bytes = new Uint8Array(decoded.length);
-
-  for (let i = 0; i < decoded.length; i++) {
-    bytes[i] = decoded.charCodeAt(i);
+  // Handle data URLs by stripping the prefix
+  const cleaned = base64.includes(',') ? base64.split(',')[1] : base64;
+  const binaryString = atob(cleaned);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
-
   return bytes;
 }
 

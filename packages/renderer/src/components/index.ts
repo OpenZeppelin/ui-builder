@@ -17,3 +17,6 @@ export { ContractActionBar } from './ContractActionBar';
 
 // Execution config display
 export { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfigDisplay';
+
+// Network settings
+export { NetworkSettingsDialog } from './network/NetworkSettingsDialog';

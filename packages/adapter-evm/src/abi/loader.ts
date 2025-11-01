@@ -10,7 +10,7 @@ import {
   appConfigService,
   logger,
   simpleHash,
-  userExplorerConfigService,
+  userNetworkServiceConfigService,
   withTimeout,
 } from '@openzeppelin/ui-builder-utils';
 
@@ -26,15 +26,6 @@ import {
 import { loadAbiFromEtherscan } from './etherscan';
 import { getSourcifyContractAppUrl, loadAbiFromSourcify } from './sourcify';
 import { transformAbiToSchema } from './transformer';
-
-/**
- * Type guard to check if user config has defaultProvider field
- */
-function hasDefaultProvider(
-  config: unknown
-): config is { defaultProvider?: EvmContractDefinitionProviderKey } {
-  return config !== null && typeof config === 'object' && 'defaultProvider' in config;
-}
 
 /**
  * Loads and parses an ABI directly from a JSON string.
@@ -316,10 +307,13 @@ async function loadContractWithProxyDetection(
 ): Promise<EvmContractLoadResult> {
   try {
     // Determine provider precedence based on forced provider and user config
-    const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
-    const uiDefault: EvmContractDefinitionProviderKey | null = hasDefaultProvider(userConfig)
-      ? userConfig.defaultProvider || null
-      : null;
+    let uiDefault: EvmContractDefinitionProviderKey | null = null;
+    // 1) New generic per-service config
+    const svcCfg = userNetworkServiceConfigService.get(networkConfig.id, 'contract-definitions');
+    if (svcCfg && typeof svcCfg === 'object' && 'defaultProvider' in svcCfg) {
+      const raw = (svcCfg as Record<string, unknown>).defaultProvider;
+      if (isEvmProviderKey(raw)) uiDefault = raw as EvmContractDefinitionProviderKey;
+    }
     // App-config default provider (optional)
     const appDefaultRaw = appConfigService.getGlobalServiceParam(
       'contractdefinition',

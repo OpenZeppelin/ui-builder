@@ -157,4 +157,24 @@ export interface FormFieldType<T extends FieldType = FieldType> {
     keyFieldConfig?: Partial<FormFieldType>;
     valueFieldConfig?: Partial<FormFieldType>;
   };
+
+  /**
+   * File upload field properties
+   */
+  accept?: string;
+  maxSize?: number;
+  convertToBase64?: boolean;
+
+  /**
+   * (Optional) Adapter binding metadata for runtimeSecret fields.
+   * Specifies how this field's value should be bound to the adapter for execution.
+   * Only applicable when type is 'runtimeSecret'.
+   */
+  adapterBinding?: {
+    /**
+     * The key used to reference this field value during execution
+     * (e.g., 'organizerSecret' for Midnight)
+     */
+    key: string;
+  };
 }

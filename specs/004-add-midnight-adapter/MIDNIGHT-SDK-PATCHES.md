@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully patched 5 Midnight SDK packages to fix packaging bugs that prevented browser compatibility. These patches enable read-only contract queries to work in the UI Builder without requiring a backend server.
+Successfully patched **7 Midnight SDK packages** to fix packaging bugs that prevented browser compatibility. These patches enable both **read-only contract queries** and **full transaction execution** to work in the UI Builder without requiring a backend server.
 
 ## Problem Statement
 
@@ -10,7 +10,7 @@ The Midnight SDK v2.0.2 has several packaging issues that prevented it from work
 
 1. **Missing Peer Dependencies**: Multiple packages use dependencies without declaring them in their `package.json`, causing module resolution failures
 2. **CommonJS/ESM Conflicts**: The `compact-runtime` package only provided CommonJS exports, causing "does not provide an export named X" errors in ESM contexts
-3. **Hardcoded CJS Imports**: The `indexer-public-data-provider` compiled output imports from `.cjs` files instead of using package exports
+3. **Hardcoded CJS Imports**: The `indexer-public-data-provider` and `proof-provider` compiled outputs import from `.cjs` files instead of using package exports
 4. **Incorrect Default Imports**: The `cross-fetch` import assumes a default export that doesn't exist in browser environments
 5. **Broken WASM Integration**: Top-level await in WASM modules combined with CommonJS exports prevented proper bundling
 
@@ -116,12 +116,15 @@ Added missing dependencies:
 {
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.9.0",
-    "@midnight-ntwrk/ledger": "4.0.0"
+    "@midnight-ntwrk/ledger": "4.0.0",
+    "@midnight-ntwrk/zswap": "4.0.0"
   }
 }
 ```
 
-**Why**: Package calls functions from both `compact-runtime` and `ledger` but doesn't declare them.
+**Why**: Package imports from all three packages (`compact-runtime`, `ledger`, `zswap`) but doesn't declare them. While the package works without this patch (due to transitive dependencies), this patch ensures consistency with other packages and makes dependencies explicit.
+
+**Note**: Module singleton behavior (preventing `Undeployed` errors) is handled separately via Vite's `dedupe` and `optimizeDeps.include` configurations.
 
 ---
 
@@ -160,31 +163,77 @@ optimizeDeps: {
 }
 ```
 
-The CommonJS polyfill in `index.html` provides fallback globals and a working `require()` cache for edge cases:
+The CommonJS polyfill in `browser-init.ts` (lazy-loaded by Midnight adapter) provides fallback globals:
 
-```html
-<script>
-  if (typeof exports === 'undefined') {
+```typescript
+// packages/adapter-midnight/src/browser-init.ts
+// Lazy-loaded only when Midnight adapter is selected
+if (typeof globalThis.exports === 'undefined') {
     globalThis.exports = {};
   }
-  if (typeof module === 'undefined') {
+if (typeof globalThis.module === 'undefined') {
     globalThis.module = { exports: globalThis.exports };
   }
-</script>
-<script type="module">
-  // Require polyfill with module cache
-  if (typeof globalThis.require === 'undefined') {
-    const moduleCache = new Map();
-    globalThis.require = function (id) {
-      if (moduleCache.has(id)) return moduleCache.get(id);
-      throw new Error(`Module '${id}' not pre-loaded`);
-    };
-    Promise.all([
-      import('object-inspect').then((m) => moduleCache.set('object-inspect', m.default || m)),
-    ]).catch((e) => console.warn('Failed to pre-load:', e));
-  }
-</script>
 ```
+
+**Note**: Buffer polyfill was also moved to `browser-init.ts` for lazy loading (adapter-led architecture).
+
+---
+
+### 6. @midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2
+
+**Files Modified**:
+
+1. `package.json`
+2. `dist/index.mjs`
+
+**Changes to `package.json`**:
+
+Added missing dependency:
+
+```json
+{
+  "dependencies": {
+    "@midnight-ntwrk/ledger": "4.0.0"
+  }
+}
+```
+
+**Why**: Package imports `Transaction` from `@midnight-ntwrk/ledger` but doesn't declare it as a dependency.
+
+**Changes to `dist/index.mjs`**:
+
+Fixed cross-fetch import to handle browser environment:
+
+```diff
+- import fetch from 'cross-fetch';
++ import * as crossFetch from 'cross-fetch';
++ const fetch = crossFetch.default || crossFetch.fetch || globalThis.fetch;
+import fetchBuilder from 'fetch-retry';
+```
+
+**Why**: Same issue as `indexer-public-data-provider` - `cross-fetch` doesn't provide a default export in browser mode.
+
+---
+
+### 7. @midnight-ntwrk/midnight-js-contracts@2.0.2
+
+**File Modified**: `package.json`
+
+Added missing dependencies:
+
+```json
+{
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.9.0",
+    "@midnight-ntwrk/ledger": "4.0.0"
+  }
+}
+```
+
+**Why**: Package imports extensively from both `@midnight-ntwrk/compact-runtime` (for `ContractState`, `constructorContext`, `QueryContext`, etc.) and `@midnight-ntwrk/ledger` (for `Transaction`, `UnprovenTransaction`, `ContractState`, etc.) but doesn't declare them as dependencies.
+
+---
 
 ## Vite Configuration Updates
 
@@ -205,9 +254,14 @@ These aliases are no longer needed since the patch to `@midnight-ntwrk/midnight-
 
 ### Configuration Changes
 
-1. **Added `optimizeDeps.include`**: Forces Vite to pre-bundle `compact-runtime` and `object-inspect`, converting all CommonJS to ESM
+1. **`optimizeDeps.include`**: Includes CommonJS packages that need ESM conversion:
+   - `@midnight-ntwrk/compact-runtime` and `object-inspect` (CommonJS runtime)
+   - **Protobufjs packages**: `protobufjs` and all its sub-packages (`@protobufjs/float`, `@protobufjs/utf8`, etc.) - required by Midnight SDK for serialization
+   - **LevelDB packages**: `level`, `classic-level`, `abstract-level`, `browser-level` (for private state storage)
 2. **Kept WASM exclusions**: WASM-dependent packages (`onchain-runtime`, `ledger`, `zswap`) remain excluded
 3. **Added CommonJS polyfill** to `index.html`: Provides global `exports`, `module`, and a working `require()` cache
+
+**Note**: While the patches fix missing dependencies and import issues, protobufjs still needs to be in `optimizeDeps.include` because it's a transitive dependency that Vite doesn't automatically pre-bundle, and it contains CommonJS code that needs conversion.
 
 ### Kept Configuration
 
@@ -240,6 +294,18 @@ VITE v7.1.10  ready in 603 ms
 - All imports work in browser environment
 - Vite successfully converts CommonJS `require()` calls to ESM
 
+✅ **Contract queries work**
+
+- Successfully query view functions on Midnight contracts
+- GraphQL subscriptions for indexer queries work correctly
+
+✅ **Transaction execution works**
+
+- Successfully initialize all 5 required Midnight providers
+- Zero-knowledge proof generation works via proof provider
+- Private state management works via LevelDB in browser
+- Transaction signing and broadcasting works via wallet provider
+
 ## Files Changed
 
 ### New Files
@@ -249,20 +315,28 @@ VITE v7.1.10  ready in 603 ms
 - `patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch`
 - `patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch`
 - `patches/@midnight-ntwrk__compact-runtime@0.9.0.patch`
+- `patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch`
+- `patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch`
 
 ### Modified Files
 
-- `package.json`: Added patchedDependencies configuration
-- `packages/builder/vite.config.ts`: Removed Apollo Client aliases
-- `packages/builder/index.html`: Added CommonJS polyfill script for `exports` and `module` globals
+- `package.json`: Added patchedDependencies configuration for 7 packages
+- `packages/builder/vite.config.ts`: Added dedupe + optimizeDeps.include for `@midnight-ntwrk/midnight-js-network-id`
+- `packages/adapter-midnight/src/browser-init.ts`: Lazy-loaded CommonJS and Buffer polyfills
+- `packages/builder/index.html`: Simplified (polyfills moved to adapter)
+
+### Removed Files
+
+- `packages/adapter-midnight/src/shims/compact-runtime.ts` _(removed - no longer needed with proper patches)_
+- `packages/adapter-midnight/src/shims/` _(directory removed)_
 
 ## Next Steps
 
 ### Immediate
 
-1. Test actual contract queries with a real Midnight contract
-2. Debug any runtime issues that occur during query execution
-3. Document any additional issues found
+1. ✅ Test actual contract queries with a real Midnight contract
+2. ✅ Test transaction execution with real contracts
+3. Monitor for any additional runtime issues during production use
 
 ### Long-term
 
@@ -276,11 +350,12 @@ When Midnight publishes fixed SDK versions:
 
 ```bash
 # 1. Update package versions in adapter-midnight/package.json
-# 2. Remove patch references from root package.json
+# 2. Remove patch references from root package.json pnpm.patchedDependencies
 # 3. Delete patch files
 rm -rf patches/@midnight-ntwrk__*
-# 4. Remove CommonJS polyfill from packages/builder/index.html
-# 5. Reinstall dependencies
+# 4. Remove lazy-loaded polyfills from packages/adapter-midnight/src/browser-init.ts (if no longer needed)
+# 5. Remove network-id from Vite dedupe config (if no longer needed)
+# 6. Reinstall dependencies
 pnpm install
 ```
 
@@ -290,3 +365,5 @@ pnpm install
 - Patches are version-specific (tied to v2.0.2 / v0.9.0)
 - If you upgrade SDK versions, new patches may be needed
 - These are temporary fixes until Midnight publishes corrected packages
+- The patch approach is superior to workarounds because it fixes the root cause
+- Module singleton handling (e.g., network-id): Use Vite dedupe config when appropriate

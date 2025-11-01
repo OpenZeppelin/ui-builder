@@ -17,7 +17,7 @@ import type { PackageManager } from '../PackageManager';
  * @param exportOptions - Export customization options.
  */
 export async function updatePackageJsonFile(
-  projectFiles: Record<string, string>,
+  projectFiles: Record<string, string | Uint8Array | Blob>,
   packageManager: PackageManager,
   formConfig: BuilderFormConfig,
   networkConfig: NetworkConfig,
@@ -28,7 +28,7 @@ export async function updatePackageJsonFile(
   logger.info(logSystem, 'Updating package.json...');
   const originalPackageJson = projectFiles['package.json'];
 
-  if (originalPackageJson) {
+  if (originalPackageJson && typeof originalPackageJson === 'string') {
     projectFiles['package.json'] = await packageManager.updatePackageJson(
       originalPackageJson,
       formConfig,

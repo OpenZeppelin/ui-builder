@@ -94,7 +94,7 @@ function _generateGlobalServiceConfigPlaceholders(): GlobalServiceConfigs {
  * tailoring it to the specific network the form was exported for.
  */
 export async function generateAndAddAppConfig(
-  projectFiles: Record<string, string>,
+  projectFiles: Record<string, string | Uint8Array | Blob>,
   networkConfig: NetworkConfig,
   templateProcessor: TemplateProcessor,
   formConfig: BuilderFormConfig

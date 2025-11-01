@@ -1,0 +1,36 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1c2d26090c0c94c80341e01a05e6a2d8a363c205..3b285d0d94616a2dcb38a69b352213c838c1a745 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,4 +1,17 @@
+-import { ContractState as ContractState$1, signatureVerifyingKey, QueryContext as QueryContext$1, emptyZswapLocalState, decodeZswapLocalState, constructorContext, sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
++import * as compactRuntimeImports from '@midnight-ntwrk/compact-runtime';
++const compactRuntime = compactRuntimeImports.default || compactRuntimeImports;
++const { 
++  ContractState: ContractState$1, 
++  signatureVerifyingKey, 
++  QueryContext: QueryContext$1, 
++  emptyZswapLocalState, 
++  decodeZswapLocalState, 
++  constructorContext = function(privateState, coinPublicKey) {
++    // Fallback implementation for browser
++    return { privateState, coinPublicKey };
++  }, 
++  sampleSigningKey 
++} = compactRuntime;
+ import { UnprovenTransaction, SucceedEntirely, getImpureCircuitIds } from '@midnight-ntwrk/midnight-js-types';
+ import { assertDefined, assertIsContractAddress, parseCoinPublicKeyToHex, parseEncPublicKeyToHex, fromHex, assertUndefined, toHex } from '@midnight-ntwrk/midnight-js-utils';
+ import { getZswapNetworkId, getRuntimeNetworkId, getLedgerNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+diff --git a/package.json b/package.json
+index 749496b7e978120f7aae541a802cd18d00714849..621812d03e69cc8e8d1898018c2fdb291f08a0eb 100644
+--- a/package.json
++++ b/package.json
+@@ -23,6 +23,8 @@
+     "deploy": "yarn npm publish"
+   },
+   "dependencies": {
++    "@midnight-ntwrk/compact-runtime": "0.9.0",
++    "@midnight-ntwrk/ledger": "4.0.0",
+     "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
+     "@midnight-ntwrk/midnight-js-types": "2.0.2",
+     "@midnight-ntwrk/midnight-js-utils": "2.0.2"

@@ -25,6 +25,8 @@ import { App } from './App';
 
 import './styles.css';
 
+/*@@ADAPTER_BOOTSTRAP_IMPORTS_INJECTION_POINT@@*/
+
 /*------------TEMPLATE COMMENT START------------*/
 /**
  * The Generator will replace NetworkConfigPlaceholder with the actual config object or an import to it.
@@ -42,7 +44,9 @@ const exportedNetworkConfig = NetworkConfigPlaceholder;
 const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
   if (nc.id === exportedNetworkConfig.id) {
     // The network config type matches what the adapter expects at generation time
-    return new AdapterPlaceholder(nc as typeof exportedNetworkConfig);
+    const adapter = new AdapterPlaceholder(nc as typeof exportedNetworkConfig);
+    /*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@*/
+    return adapter;
   }
   // This path should ideally not be reached in a single-form export context
   // if nc.id always matches exportedNetworkConfig.id.

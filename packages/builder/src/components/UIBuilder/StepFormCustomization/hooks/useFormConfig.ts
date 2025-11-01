@@ -34,6 +34,7 @@ export function useFormConfig({
     existingFormConfig || null
   );
   const configInitialized = useRef(!!existingFormConfig);
+  const previousFieldCountRef = useRef(formConfig?.fields.length ?? 0);
 
   /**
    * Effect 1: Reset config when the selected function is cleared.
@@ -100,6 +101,82 @@ export function useFormConfig({
       }
     }
   }, [contractSchema, selectedFunction, adapter, onFormConfigUpdated, configInitialized.current]);
+
+  /**
+   * Effect 4: Auto-add runtime secret field for functions requiring a runtime secret.
+   * When a function is marked as requiring a runtime secret,
+   * and the adapter provides runtime field binding, ensure the field is present in the form.
+   * Users can remove it or customize it (hide, hardcode) like other fields.
+   */
+  useEffect(() => {
+    if (!formConfig || !adapter || !selectedFunction) {
+      return;
+    }
+
+    // Don't re-add if user explicitly removed it
+    if (previousFieldCountRef.current > formConfig.fields.length) {
+      return;
+    }
+
+    // Check if this function needs a runtime secret
+    const checkNeedSecret = async () => {
+      try {
+        const decorations = await adapter.getFunctionDecorations?.();
+        const functionDecoration = decorations?.[selectedFunction];
+        const needsSecret = functionDecoration?.requiresRuntimeSecret;
+        const bindingInfo = adapter.getRuntimeFieldBinding?.();
+
+        if (!needsSecret || !bindingInfo) {
+          return;
+        }
+
+        // Check if runtimeSecret field already exists
+        const hasRuntimeSecretField = formConfig.fields.some(
+          (f) => f.type === 'runtimeSecret' && f.adapterBinding?.key === bindingInfo.key
+        );
+
+        if (!hasRuntimeSecretField) {
+          // Auto-add the runtime secret field
+          const runtimeSecretField: FormFieldType = {
+            id: `runtime-secret-${bindingInfo.key}`,
+            name: bindingInfo.key,
+            label: bindingInfo.label,
+            type: 'runtimeSecret',
+            placeholder: 'Enter secret value',
+            helperText: bindingInfo.helperText,
+            validation: { required: false }, // Not required to submit, but needed for execution if function requires runtime secret
+            adapterBinding: { key: bindingInfo.key },
+            originalParameterType: 'runtimeSecret', // Signal to field editor that this is a runtime secret
+          };
+
+          const updatedFields = [...formConfig.fields, runtimeSecretField];
+          const updatedConfig = updateFormConfig(formConfig, {
+            fields: updatedFields,
+            contractAddress: formConfig.contractAddress,
+          });
+
+          setFormConfig(updatedConfig);
+          onFormConfigUpdated(updatedConfig);
+        }
+      } catch (error) {
+        logger.debug(
+          'useFormConfig',
+          'Error checking for runtime secret auto-add:',
+          error instanceof Error ? error.message : String(error)
+        );
+        // Silently fail; not critical if auto-add doesn't work
+      }
+    };
+
+    void checkNeedSecret();
+  }, [formConfig, adapter, selectedFunction, onFormConfigUpdated]);
+
+  /**
+   * Track field count changes to detect when user removes runtime secret field
+   */
+  useEffect(() => {
+    previousFieldCountRef.current = formConfig?.fields.length ?? 0;
+  }, [formConfig?.fields.length]);
 
   /**
    * Updates a specific field in the form configuration.

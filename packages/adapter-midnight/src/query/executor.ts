@@ -103,7 +103,7 @@ export class QueryExecutor {
 
     logger.debug(
       'QueryExecutor',
-      `Executing query: ${functionId} with timeout ${effectiveTimeout}ms`
+      `Executing query: ${functionId} with ${params.length} parameter(s), timeout ${effectiveTimeout}ms`
     );
 
     try {
@@ -153,11 +153,12 @@ export class QueryExecutor {
    * @param params Parameters for the query
    * @returns The query result
    */
-  private async executeQuery(methodName: string, _params: unknown[]): Promise<unknown> {
+  private async executeQuery(methodName: string, params: unknown[]): Promise<unknown> {
     try {
       logger.debug(
         'QueryExecutor',
-        `Querying contract state for address: ${this.contractAddressHex}`
+        `Querying contract state for address: ${this.contractAddressHex}, method: ${methodName}, params:`,
+        params
       );
       await this.logCurrentNetwork();
       const queryResult = await this.fetchContractState();
@@ -190,7 +191,7 @@ export class QueryExecutor {
       await this.ensureLedgerFunctionLoaded();
 
       const ledgerState = this.getLedgerState(stateData);
-      const result = this.getFieldFromLedgerState(ledgerState, methodName);
+      const result = this.getFieldOrCallMethodFromLedgerState(ledgerState, methodName, params);
       logger.debug('QueryExecutor', `Extracted field '${methodName}':`, result);
 
       // Convert to JSON-serializable format
@@ -400,11 +401,14 @@ export class QueryExecutor {
   }
 
   /**
-   * Safely selects a field from the ledger state, with helpful error messages
+   * Safely selects a field or calls a method from the ledger state, with helpful error messages.
+   * For parameterless queries, returns the field value directly.
+   * For queries with parameters, invokes the method if it's a function.
    */
-  private getFieldFromLedgerState(
+  private getFieldOrCallMethodFromLedgerState(
     ledgerState: Record<string, unknown>,
-    methodName: string
+    methodName: string,
+    params: unknown[]
   ): unknown {
     if (!(methodName in ledgerState)) {
       throw new ContractQueryError(
@@ -413,7 +417,37 @@ export class QueryExecutor {
         this.contractAddressBech32
       );
     }
-    return ledgerState[methodName];
+
+    const field = ledgerState[methodName];
+
+    // If no params and field is not a function, return directly
+    if (params.length === 0 && typeof field !== 'function') {
+      return field;
+    }
+
+    // If params provided, field must be a function
+    if (params.length > 0 && typeof field !== 'function') {
+      throw new ContractQueryError(
+        `Field '${methodName}' is not a function but parameters were provided. ` +
+          `Cannot call a non-function field with parameters.`,
+        this.contractAddressBech32
+      );
+    }
+
+    // If field is a function, call it with params
+    if (typeof field === 'function') {
+      try {
+        return field(...params);
+      } catch (error) {
+        throw new ContractQueryError(
+          `Failed to call method '${methodName}' with parameters: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          this.contractAddressBech32
+        );
+      }
+    }
+
+    // Default: return the field value
+    return field;
   }
   /**
    * Loads the ledger() function from the compiled contract module.

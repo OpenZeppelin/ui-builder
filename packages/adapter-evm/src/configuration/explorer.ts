@@ -2,7 +2,7 @@ import { NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-builder-type
 import {
   appConfigService,
   logger,
-  userExplorerConfigService,
+  userNetworkServiceConfigService,
 } from '@openzeppelin/ui-builder-utils';
 
 import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
@@ -32,22 +32,17 @@ export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): Use
     ? appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier)
     : undefined;
 
-  // 1. Check for user-configured explorer, but merge missing fields with app defaults
-  const userConfig = userExplorerConfigService.getUserExplorerConfig(networkConfig.id);
-  if (userConfig) {
+  // 1. Check for user-configured explorer via new generic service
+  const rawCfg = userNetworkServiceConfigService.get(networkConfig.id, 'explorer');
+  if (rawCfg && typeof rawCfg === 'object') {
+    const userCfg = rawCfg as Record<string, unknown>;
     logger.info('ExplorerConfig', `Using user-configured explorer for ${networkConfig.name}`);
     return {
-      // Prefer user overrides when provided
-      explorerUrl: userConfig.explorerUrl ?? networkConfig.explorerUrl,
-      apiUrl: userConfig.apiUrl ?? networkConfig.apiUrl,
-      // If user did not provide an API key, fall back to global V2 key (when applicable)
-      // then to app-configured per-explorer identifier key
-      apiKey: userConfig.apiKey ?? globalV2ApiKey ?? appApiKey,
-      name: userConfig.name ?? `${networkConfig.name} Explorer`,
-      isCustom: userConfig.isCustom ?? false,
-      applyToAllNetworks: userConfig.applyToAllNetworks,
-      appliedNetworkIds: userConfig.appliedNetworkIds,
-      defaultProvider: userConfig.defaultProvider,
+      explorerUrl: (userCfg.explorerUrl as string | undefined) ?? networkConfig.explorerUrl,
+      apiUrl: (userCfg.apiUrl as string | undefined) ?? networkConfig.apiUrl,
+      apiKey: (userCfg.apiKey as string | undefined) ?? globalV2ApiKey ?? appApiKey,
+      name: `${networkConfig.name} Explorer`,
+      isCustom: true,
     };
   }
 

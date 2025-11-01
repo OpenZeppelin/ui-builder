@@ -1,5 +1,5 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f1b9a50ad4b4d0bd741571b6cc52d250c9dd082 100644
+index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f14915e22d1bdb1a96ad040e9ca027fb997eaa0 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -1,15 +1,16 @@
@@ -111,7 +111,7 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f1b9a50ad4b4d0bd741571b6cc52d25
  /**
   * This is a dirty hack. Prepends a network ID to the given contract address and
   * returns the result. As of ledger 3.0.0, the running node and indexer store
-@@ -222,7 +295,22 @@ const deserializeTransaction = (s) => Transaction.deserialize(toByteArray(s), ge
+@@ -222,7 +295,26 @@ const deserializeTransaction = (s) => Transaction.deserialize(toByteArray(s), ge
   *
   * @param contractAddress The contract address to which to prepend the network ID.
   */
@@ -140,15 +140,17 @@ index 4ad258e0db216750eb3b1d231fdf0923049221ee..2f1b9a50ad4b4d0bd741571b6cc52d25
  /**
   * The default time (in milliseconds) to wait between queries when polling.
 diff --git a/package.json b/package.json
-index 087aa93045a8ae22753ea3eabca49226dbec08ba..e271c4baa83b13acf4926df685c336147ecf0be1 100644
+index 087aa93045a8ae22753ea3eabca49226dbec08ba..1e7e26036eaade8d64b711715b82b6ee4bb70bdd 100644
 --- a/package.json
 +++ b/package.json
-@@ -25,6 +25,8 @@
-   },
-   "dependencies": {
-     "@apollo/client": "^3.13.8",
+@@ -34,7 +34,9 @@
+     "isomorphic-ws": "^5.0.0",
+     "rxjs": "^7.5.0",
+     "ws": "^8.14.2",
+-    "zen-observable-ts": "^1.1.0"
++    "zen-observable-ts": "^1.1.0",
 +    "@midnight-ntwrk/compact-runtime": "0.9.0",
-+    "@midnight-ntwrk/ledger": "4.0.0",
-     "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
-     "@midnight-ntwrk/midnight-js-types": "2.0.2",
-     "buffer": "^6.0.3",
++    "@midnight-ntwrk/ledger": "4.0.0"
+   },
+   "devDependencies": {
+     "@graphql-codegen/cli": "^5.0.3",

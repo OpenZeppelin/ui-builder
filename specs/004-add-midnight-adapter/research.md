@@ -10,7 +10,6 @@
 
 - Execution methods v1: Direct wallet signing only (relayer deferred).
 - Required contract inputs: Use `getContractDefinitionInputs()` from adapter (`contractAddress`, `privateStateId`, `.d.ts` schema, `.cjs` module, optional `witnessCode`).
-- Post-submission status: Show transaction identifier + indexing check summary (no public explorer dependency).
 
 ## Best Practices (Referenced Adapters)
 
@@ -21,8 +20,8 @@
 ## Patterns from Midnight Deploy CLI to Adapt
 
 - Contract discovery/serialization: Use parsing/validation utils analogous to CLI flows; keep logic inside adapter `utils`.
-- Transaction building/execution: Adapt CLI patterns (balance/prove/submit sequencing abstracted behind wallet APIs) to the adapter’s `signAndBroadcast` with wallet-only method; surface identifier and indexing summary.
-- Indexing/confirmation heuristics: Translate into friendly UI summaries; surface identifier and “indexing may take time”, avoid long blocking waits.
+- Transaction building/execution: Adapt CLI patterns (balance/prove/submit sequencing abstracted behind wallet APIs) to the adapter’s `signAndBroadcast` with wallet-only method.
+- Indexing/confirmation heuristics: Translate into friendly UI summaries; avoid long blocking waits.
 - Wallet lifecycle: Wallet module is complete; add unit tests mirroring CLI expectations (sync, address confirmation) where applicable.
 
 ## Decisions

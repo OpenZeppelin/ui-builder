@@ -13,7 +13,7 @@ import { modifyTailwindConfigContentForExport } from '../utils/tailwindUtils';
  * @param templateProcessor - Instance of TemplateProcessor for formatting.
  */
 export async function addStyleAndRootConfigFiles(
-  projectFiles: Record<string, string>,
+  projectFiles: Record<string, string | Uint8Array | Blob>,
   styleManager: StyleManager,
   templateProcessor: TemplateProcessor
 ): Promise<void> {

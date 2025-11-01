@@ -365,7 +365,7 @@ export const FieldEditor = React.memo(
           originalParameterType={originalParameterType}
         />
 
-        <FieldAdvancedSettings control={control} />
+        <FieldAdvancedSettings control={control} fieldType={selectedType} />
       </div>
     );
   },

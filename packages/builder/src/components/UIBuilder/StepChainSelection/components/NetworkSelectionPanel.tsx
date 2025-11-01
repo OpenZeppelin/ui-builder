@@ -2,8 +2,9 @@ import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { useAdapterContext } from '@openzeppelin/ui-builder-react-core';
+import { NetworkSettingsDialog } from '@openzeppelin/ui-builder-renderer';
 import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { Input, NetworkSettingsDialog } from '@openzeppelin/ui-builder-ui';
+import { Input } from '@openzeppelin/ui-builder-ui';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { getEcosystemName } from '../../../../core/ecosystems/registry';
@@ -26,7 +27,6 @@ export function NetworkSelectionPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
   const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
-  const [defaultTab] = useState<'rpc' | 'explorer'>('rpc');
   const { getAdapterForNetwork } = useAdapterContext();
 
   // Get adapter for the settings network
@@ -148,7 +148,6 @@ export function NetworkSelectionPanel({
         onOpenChange={(open: boolean) => !open && handleCloseNetworkSettings()}
         networkConfig={settingsNetwork}
         adapter={settingsAdapter}
-        defaultTab={defaultTab}
       />
     </div>
   );

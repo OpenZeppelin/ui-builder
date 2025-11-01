@@ -32,7 +32,8 @@ export function useFunctionFilter(contractSchema: ContractSchema | null): UseFun
 
   // Memoize function categories
   const writableFunctions = useMemo(() => {
-    return filteredFunctions.filter((fn) => fn.modifiesState);
+    // Include functions that modify state OR can execute locally (executable functions)
+    return filteredFunctions.filter((fn) => fn.modifiesState || fn.stateMutability === 'pure');
   }, [filteredFunctions]);
 
   return {

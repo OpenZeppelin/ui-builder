@@ -1,4 +1,5 @@
 import type {
+  ContractAdapter,
   ContractFunction,
   ContractSchema,
   NetworkConfig,
@@ -11,6 +12,7 @@ export interface StepFunctionSelectorProps {
   networkConfig?: NetworkConfig | null;
   onToggleContractState?: () => void;
   isWidgetExpanded?: boolean;
+  adapter?: ContractAdapter;
 }
 
 export interface FilterControlsProps {

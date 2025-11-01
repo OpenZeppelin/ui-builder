@@ -1,3 +1,4 @@
+import type { ContractFunction } from '@openzeppelin/ui-builder-types';
 import { ButtonProps, LoadingButton } from '@openzeppelin/ui-builder-ui';
 
 export interface TransactionExecuteButtonProps {
@@ -20,6 +21,18 @@ export interface TransactionExecuteButtonProps {
    * Button variant
    */
   variant?: ButtonProps['variant'];
+
+  /**
+   * Optional function details to determine if local execution is possible
+   * Functions with stateMutability === 'pure' can execute locally without wallet
+   */
+  functionDetails?: ContractFunction;
+
+  /**
+   * Whether this function can execute locally without wallet connection
+   * If true, the wallet connection check is bypassed
+   */
+  canExecuteLocally?: boolean;
 }
 
 /**
@@ -36,17 +49,31 @@ export function TransactionExecuteButton({
   isSubmitting,
   isFormValid,
   variant = 'default',
+  functionDetails,
+  canExecuteLocally = false,
 }: TransactionExecuteButtonProps): React.ReactElement {
+  // Check if this function can execute locally (chain-agnostic check)
+  // Prefer explicit prop, fallback to functionDetails if not provided
+  const canExecute = canExecuteLocally || functionDetails?.stateMutability === 'pure';
+
+  const buttonText = canExecute
+    ? isSubmitting
+      ? 'Executing...'
+      : 'Execute Locally'
+    : isSubmitting
+      ? 'Executing...'
+      : 'Execute Transaction';
+
   return (
     <LoadingButton
       type="submit"
-      disabled={!isWalletConnected || !isFormValid}
+      disabled={(!isWalletConnected && !canExecute) || !isFormValid}
       loading={isSubmitting}
       variant={variant}
       size="lg"
       className="w-full md:w-auto"
     >
-      {isSubmitting ? 'Executing...' : 'Execute Transaction'}
+      {buttonText}
     </LoadingButton>
   );
 }

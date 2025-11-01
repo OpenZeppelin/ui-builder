@@ -302,7 +302,7 @@ describe('formatMidnightFunctionResult', () => {
         outputs: undefined as unknown as Array<{ name: string; type: string }>,
       };
       const result = formatMidnightFunctionResult(42, func);
-      expect(result).toBe('[Error: Output definition missing]');
+      expect(result).toBe('[Error: Invalid outputs definition]');
     });
   });
 

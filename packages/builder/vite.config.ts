@@ -1,8 +1,8 @@
 import path from 'path';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { createLogger, defineConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
 
@@ -10,6 +10,18 @@ import { crossPackageModulesProviderPlugin } from './vite-plugins/cross-package-
 import { virtualContentLoaderPlugin } from './vite-plugins/virtual-content-loader';
 
 import templatePlugin from './vite.template-plugin';
+
+// Create a custom logger to filter out sourcemap warnings for patched packages
+const logger = createLogger();
+const originalWarn = logger.warn;
+logger.warn = (msg, options) => {
+  // Suppress sourcemap warnings for patched Midnight SDK packages
+  // The patches fix browser compatibility but sourcemaps reference missing source files
+  if (msg.includes('Sourcemap') && msg.includes('@midnight-ntwrk')) {
+    return;
+  }
+  originalWarn(msg, options);
+};
 
 /**
  * Configuration for virtual modules
@@ -22,99 +34,113 @@ import templatePlugin from './vite.template-plugin';
  * packages/builder/src/docs/cross-package-imports.md
  */
 
+// Import Midnight adapter's Vite configuration
+// This is where Midnight-specific build config lives - it's exported from the adapter
+// so it can be reused in exported applications. See: docs/ADAPTER_ARCHITECTURE.md § 11
+//
+// NOTE: We use a lazy dynamic import here to avoid blocking the config loading.
+// The builder can safely import from adapters as they are dev dependencies.
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [
-    // WASM support for Midnight packages
-    wasm(),
-    topLevelAwait(),
-    react(),
-    tailwindcss(),
-    // Restore custom plugins
-    templatePlugin(),
-    virtualContentLoaderPlugin(),
-    crossPackageModulesProviderPlugin(),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@styles': path.resolve(__dirname, '../styles'),
-      '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
-      '@openzeppelin/ui-builder-react-core': path.resolve(__dirname, '../react-core/src/index.ts'),
-      '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
-      // Force buffer to use the browser-friendly version
-      buffer: 'buffer/',
-    },
-  },
-  define: {
-    'process.env': {},
-    // Some transitive dependencies referenced by wallet stacks expect Node's `global` in the browser.
-    // In particular, chains of imports like randombytes -> @near-js/crypto -> @hot-wallet/sdk
-    // can throw "ReferenceError: global is not defined" during runtime without this alias.
-    // Mapping `global` to `globalThis` provides a safe browser shim.
-    global: 'globalThis',
-  },
-  optimizeDeps: {
-    // Add Node.js polyfills for browser compatibility
-    esbuildOptions: {
-      define: {
-        global: 'globalThis',
-      },
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          buffer: true,
-          process: true,
-        }),
-      ],
-    },
-    // Force pre-bundling of compact-runtime and its deps to convert CJS to ESM
-    include: ['@midnight-ntwrk/compact-runtime', 'object-inspect', 'cross-fetch'],
-    // Exclude Midnight packages with WASM/top-level await from pre-bundling
-    // These must be handled by the WASM plugins at runtime
-    exclude: [
-      '@midnight-ntwrk/onchain-runtime',
-      '@midnight-ntwrk/ledger',
-      '@midnight-ntwrk/zswap',
-      '@midnight-ntwrk/midnight-js-contracts',
-      '@midnight-ntwrk/midnight-js-indexer-public-data-provider',
-      '@midnight-ntwrk/midnight-js-types',
-      '@midnight-ntwrk/midnight-js-utils',
-      '@midnight-ntwrk/midnight-js-network-id',
-      '@midnight-ntwrk/wallet-sdk-address-format',
-      // Also exclude Apollo Client to avoid CommonJS/ESM conflicts
-      '@apollo/client',
+export default defineConfig(async (): Promise<UserConfig> => {
+  // Dynamically load Midnight config
+  const { getMidnightViteConfig } = await import(
+    '@openzeppelin/ui-builder-adapter-midnight/vite-config'
+  );
+  const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });
+
+  return {
+    customLogger: logger,
+    plugins: [
+      // ==============================================================================
+      // MIDNIGHT ADAPTER: WASM & Top-Level Await Support
+      // ==============================================================================
+      // Configuration imported from @openzeppelin/ui-builder-adapter-midnight/vite-config
+      // See: docs/ADAPTER_ARCHITECTURE.md § "Build-Time Requirements"
+      ...(midnightConfig.plugins || []),
+
+      // Core framework plugins
+      react(),
+      tailwindcss(),
+
+      // Custom builder plugins
+      templatePlugin(),
+      virtualContentLoaderPlugin(),
+      crossPackageModulesProviderPlugin(),
     ],
-  },
-  build: {
-    outDir: 'dist',
-    // Optimize build for memory usage
-    rollupOptions: {
-      // External Midnight WASM packages to prevent bundling Node.js-specific code
-      external: (id) => {
-        const midnightWasmPackages = [
-          '@midnight-ntwrk/zswap',
-          '@midnight-ntwrk/onchain-runtime',
-          '@midnight-ntwrk/ledger',
-        ];
-        return midnightWasmPackages.some((pkg) => id === pkg || id.startsWith(pkg + '/'));
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@styles': path.resolve(__dirname, '../styles'),
+        '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
+        '@openzeppelin/ui-builder-react-core': path.resolve(
+          __dirname,
+          '../react-core/src/index.ts'
+        ),
+        '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
+        // Force buffer to use the browser-friendly version
+        buffer: 'buffer/',
       },
-      output: {
-        // Split chunks to reduce memory usage during build
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-accordion', '@radix-ui/react-checkbox', '@radix-ui/react-dialog'],
-          web3: ['viem', 'wagmi', '@tanstack/react-query'],
+
+      // ============================================================================
+      // MIDNIGHT ADAPTER: Module Deduplication
+      // ============================================================================
+      // Configuration imported from @openzeppelin/ui-builder-adapter-midnight/vite-config
+      // See: docs/ADAPTER_ARCHITECTURE.md § "Build-Time Requirements"
+      dedupe: [...(midnightConfig.resolve?.dedupe || [])],
+    },
+    define: {
+      'process.env': {},
+      // Some transitive dependencies referenced by wallet stacks expect Node's `global` in the browser.
+      // In particular, chains of imports like randombytes -> @near-js/crypto -> @hot-wallet/sdk
+      // can throw "ReferenceError: global is not defined" during runtime without this alias.
+      // Mapping `global` to `globalThis` provides a safe browser shim.
+      global: 'globalThis',
+    },
+
+    // ==============================================================================
+    // DEPENDENCY PRE-BUNDLING & OPTIMIZATION
+    // ==============================================================================
+    optimizeDeps: {
+      esbuildOptions: {
+        define: {
+          global: 'globalThis',
         },
       },
-      // Reduce memory usage during rollup processing
-      maxParallelFileOps: 2,
+
+      // ----------------------------------------------------------------------------
+      // MIDNIGHT ADAPTER: Pre-Bundling Configuration
+      // ----------------------------------------------------------------------------
+      // Configuration imported from @openzeppelin/ui-builder-adapter-midnight/vite-config
+      // See: docs/ADAPTER_ARCHITECTURE.md § "Build-Time Requirements"
+      include: [...(midnightConfig.optimizeDeps?.include || [])],
+      exclude: [...(midnightConfig.optimizeDeps?.exclude || [])],
     },
-    // Increase chunk size warning limit to reduce warnings
-    chunkSizeWarningLimit: 1000,
-    // Reduce source map generation to save memory
-    sourcemap: false,
-    // Remove console and debugger in staging/production builds
-    minify: 'esbuild',
-    esbuild: mode === 'development' ? {} : { drop: ['console', 'debugger'] },
-  },
-}));
+    build: {
+      outDir: 'dist',
+      // Optimize build for memory usage
+      rollupOptions: {
+        output: {
+          // Split chunks to reduce memory usage during build
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@radix-ui/react-accordion', '@radix-ui/react-checkbox', '@radix-ui/react-dialog'],
+            web3: ['viem', 'wagmi', '@tanstack/react-query'],
+          },
+          // Suppress sourcemap warnings for dependencies
+          sourcemapIgnoreList: (relativeSourcePath: string) => {
+            return relativeSourcePath.includes('@midnight-ntwrk');
+          },
+        },
+        // Reduce memory usage during rollup processing
+        maxParallelFileOps: 2,
+      },
+      // Increase chunk size warning limit to reduce warnings
+      chunkSizeWarningLimit: 2000,
+      // Reduce source map generation to save memory
+      sourcemap: false,
+      // Remove console and debugger in staging/production builds
+      minify: 'esbuild',
+    },
+  };
+});

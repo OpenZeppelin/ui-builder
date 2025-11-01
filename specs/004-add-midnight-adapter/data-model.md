@@ -44,11 +44,6 @@
 - ExecutionConfig (v1)
   - method: 'wallet'
 
-- TxStatus
-  - identifier: string
-  - indexingObserved: boolean
-  - message?: string
-
 - ExportManifest
   - packages: string[] (adapter + peers)
   - config: Record<string, unknown>
@@ -59,7 +54,7 @@
 - WalletConnection relates to Network via chainId/network id.
 - ContractArtifacts produce ContractSchema via adapter `loadContract`.
 - ContractSchema provides FunctionDefinition used to build forms and TransactionPayload.
-- TransactionPayload is executed with ExecutionConfig producing TxStatus.
+
 - ExportManifest composes required pieces for the exported React app to function.
 
 ## Validation Rules

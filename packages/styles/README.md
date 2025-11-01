@@ -101,6 +101,29 @@ During the export process:
 3. The styles from this package are included in the exported project
 4. The result is a self-contained project with proper styling
 
+### Testing Exported Apps in the Monorepo
+
+When testing exported applications locally within the monorepo workspace (before publishing packages), you need to ensure Tailwind CSS scans the source files of unpublished packages rather than trying to use built distributions.
+
+**Workaround:** Use the `source()` function in your exported app's CSS entry file to point Tailwind to the monorepo root:
+
+```css
+/* In exports/your-app/src/styles.css */
+@import 'tailwindcss' source('../../../');
+```
+
+The `source()` function is a Tailwind v4 feature that sets the base path for automatic content detection. By pointing it to the monorepo root (`../../../` from `exports/your-app/src/`), Tailwind will correctly scan all source files in `packages/ui`, `packages/renderer`, and other workspace packages.
+
+**Why this is needed:**
+
+- When packages are published, consumers import the built CSS and everything works normally
+- When testing locally with unpublished packages, Tailwind's JIT compiler needs access to source files to:
+  - Parse `@apply` directives
+  - Include all CSS variables and theme definitions
+  - Scan component source code for utility classes
+
+**Note:** This workaround should only be used for local testing. When the exported app is deployed or used as a standalone project with published packages, the standard `@import 'tailwindcss';` should be used.
+
 ## Utilities
 
 (Add details about any utility functions or components provided by this package if applicable)

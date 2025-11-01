@@ -6,39 +6,6 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { type WagmiConfigChains } from '../types';
 
-// Cache to prevent duplicate config creation and WalletConnect double initialization
-const cacheInstanceId = Math.random().toString(36).substring(7);
-const configCache = new Map<string, Config>();
-logger.debug('rainbowkit/config-service', 'NEW configCache INSTANCE CREATED', cacheInstanceId);
-
-/**
- * Creates a cache key from the configuration to prevent duplicate config creation
- */
-function createConfigCacheKey(
-  userFullNativeConfig: Record<string, unknown> | undefined | null,
-  chains: readonly Chain[]
-): string {
-  const wagmiParamsContent = userFullNativeConfig?.wagmiParams;
-  const chainIds = chains.map((c) => c.id).sort();
-  const keyObject = {
-    wagmiParams: wagmiParamsContent,
-    chainIds: chainIds,
-  };
-  const configHash = JSON.stringify(keyObject);
-  logger.debug(
-    'rainbowkit/config-service:createConfigCacheKey',
-    'Key generation input - userFullNativeConfig.wagmiParams:',
-    wagmiParamsContent,
-    'Key generation input - chainIds:',
-    chainIds,
-    'Generated Key Object for stringify:',
-    keyObject,
-    'Generated Hash:',
-    configHash
-  );
-  return configHash;
-}
-
 /**
  * Creates a Wagmi configuration for RainbowKit using getDefaultConfig
  *
@@ -58,39 +25,6 @@ export async function createRainbowKitWagmiConfig(
   getRpcEndpointOverride: (networkId: string) => string | { http?: string; ws?: string } | undefined
 ): Promise<Config | null> {
   try {
-    const cacheKey = createConfigCacheKey(userFullNativeConfig, chains);
-    logger.info(
-      'rainbowkit/config-service:createRainbowKitWagmiConfig',
-      'Attempting to get/create config. Cache Key:',
-      cacheKey,
-      'Using cache instance ID:',
-      cacheInstanceId
-    );
-
-    const cachedConfig = configCache.get(cacheKey);
-
-    if (cachedConfig) {
-      logger.info(
-        'rainbowkit/config-service:createRainbowKitWagmiConfig',
-        'CACHE HIT. Returning cached RainbowKit Wagmi config.',
-        {
-          cacheKey,
-          cacheInstanceId,
-          cachedConfigObjectId:
-            typeof cachedConfig?.storage === 'object' && cachedConfig.storage !== null
-              ? 'WagmiStorageObject'
-              : String(cachedConfig?.storage),
-        }
-      );
-      return cachedConfig;
-    } else {
-      logger.warn(
-        'rainbowkit/config-service:createRainbowKitWagmiConfig',
-        'CACHE MISS. Proceeding to create new RainbowKit Wagmi config.',
-        { cacheKey, cacheSize: configCache.size, cacheInstanceId }
-      );
-    }
-
     const { getDefaultConfig } = await import('@rainbow-me/rainbowkit');
     if (!getDefaultConfig) {
       logger.error(
@@ -139,11 +73,12 @@ export async function createRainbowKitWagmiConfig(
           const rpcOverrideSetting = getRpcEndpointOverride(appNetworkIdString);
           let httpRpcOverride: string | undefined;
 
+          // Extract HTTP RPC URL from override setting
           if (typeof rpcOverrideSetting === 'string') {
             httpRpcOverride = rpcOverrideSetting;
-          } else if (typeof rpcOverrideSetting === 'object') {
+          } else if (typeof rpcOverrideSetting === 'object' && rpcOverrideSetting) {
             // Handle both RpcEndpointConfig and UserRpcProviderConfig
-            if (rpcOverrideSetting?.http) {
+            if ('http' in rpcOverrideSetting && rpcOverrideSetting.http) {
               httpRpcOverride = rpcOverrideSetting.http;
             } else if ('url' in rpcOverrideSetting && rpcOverrideSetting.url) {
               // Handle UserRpcProviderConfig
@@ -181,17 +116,6 @@ export async function createRainbowKitWagmiConfig(
     // This aligns with our principle of not mimicking complex third-party types for pass-through configuration.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config = getDefaultConfig(finalConfigOptions as any);
-
-    configCache.set(cacheKey, config);
-    logger.info(
-      'rainbowkit/config-service:createRainbowKitWagmiConfig',
-      'New config created and cached. Cache Size now:',
-      configCache.size,
-      {
-        cacheKey,
-        cacheInstanceId,
-      }
-    );
 
     logger.info(
       'rainbowkit/config-service',

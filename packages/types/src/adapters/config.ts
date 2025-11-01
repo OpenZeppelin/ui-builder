@@ -4,6 +4,44 @@
  */
 
 /**
+ * Vite configuration fragments for adapters with special build requirements
+ */
+export interface ViteConfigInfo {
+  /**
+   * Import statements needed in vite.config.ts
+   * @example ["import wasm from 'vite-plugin-wasm';", "import topLevelAwait from 'vite-plugin-top-level-await';"]
+   */
+  imports: string[];
+
+  /**
+   * Initialization code to run at the top of defineConfig
+   * @example "const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });"
+   */
+  configInit?: string;
+
+  /**
+   * Plugin entries to add to the plugins array
+   * @example "...midnightConfig.plugins,"
+   */
+  plugins?: string;
+
+  /**
+   * Dedupe configuration
+   * @example "dedupe: [...(midnightConfig.resolve?.dedupe || [])],"
+   */
+  dedupe?: string;
+
+  /**
+   * OptimizeDeps configuration
+   * @example { include: "...", exclude: "..." }
+   */
+  optimizeDeps?: {
+    include?: string;
+    exclude?: string;
+  };
+}
+
+/**
  * Configuration for blockchain adapters.
  * This interface defines the structure for adapter-specific configuration
  * including dependencies required by the adapter for exported projects.
@@ -28,7 +66,32 @@ export interface AdapterConfig {
      * @example { "@types/react": "^18.0.0" }
      */
     dev?: Record<string, string>;
+
+    /**
+     * Build tool dependencies required by this adapter (e.g., Vite plugins, bundler config).
+     * These will be included in the `devDependencies` of the exported `package.json`.
+     * Used by adapters with special build requirements (e.g., Midnight's WASM support).
+     *
+     * @example { "vite-plugin-wasm": "^3.3.0", "vite-plugin-top-level-await": "^1.4.4" }
+     */
+    build?: Record<string, string>;
   };
+
+  /**
+   * Optional Vite configuration fragments for adapters with special build requirements.
+   * When present, the export system will generate a vite.config.ts that includes these configurations.
+   *
+   * @example
+   * ```typescript
+   * viteConfig: {
+   *   imports: ["import wasm from 'vite-plugin-wasm';"],
+   *   configInit: "const config = getAdapterConfig({ wasm });",
+   *   plugins: "...config.plugins,"
+   * }
+   * ```
+   */
+  viteConfig?: ViteConfigInfo;
+
   /**
    * Overrides for transitive dependencies.
    * These will be included in the `overrides` section of the exported `package.json`.
@@ -41,6 +104,11 @@ export interface AdapterConfig {
   /**
    * Optional UI kits that can be used with this adapter.
    * Each UI kit can specify its own set of dependencies and overrides.
+   *
+   * Note: Package patches are automatically applied when the adapter is installed.
+   * Adapters that require patches (e.g., Midnight SDK fixes) bundle them in their
+   * package and configure pnpm.patchedDependencies in their own package.json.
+   * No additional configuration is needed in exported apps.
    */
   uiKits?: Record<
     string,

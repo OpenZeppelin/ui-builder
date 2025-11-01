@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateBytes, validateBytesSimple } from '../bytesValidation';
+import { getBytesSize, validateBytes, validateBytesSimple } from '../bytesValidation';
 
 describe('bytesValidation', () => {
   describe('validateBytes', () => {
@@ -330,6 +330,33 @@ describe('bytesValidation', () => {
         expect(result.detectedFormat).toBe('hex');
         expect(result.byteSize).toBe(32);
       });
+    });
+  });
+
+  describe('getBytesSize', () => {
+    it('extracts size from Bytes<N>', () => {
+      expect(getBytesSize('Bytes<32>')).toBe(32);
+      expect(getBytesSize('Bytes<64>')).toBe(64);
+      expect(getBytesSize('Bytes<256>')).toBe(256);
+      expect(getBytesSize('Bytes<1>')).toBe(1);
+    });
+
+    it('returns undefined for dynamic Uint8Array', () => {
+      expect(getBytesSize('Uint8Array')).toBeUndefined();
+      expect(getBytesSize('bytes')).toBeUndefined();
+      expect(getBytesSize('byteslike')).toBeUndefined();
+    });
+
+    it('is case-insensitive', () => {
+      expect(getBytesSize('bytes<32>')).toBe(32);
+      expect(getBytesSize('BYTES<64>')).toBe(64);
+      expect(getBytesSize('Bytes<128>')).toBe(128);
+    });
+
+    it('handles whitespace', () => {
+      // Note: getBytesSize uses strict regex, so whitespace should fail
+      // But let's test to document behavior
+      expect(getBytesSize('Bytes< 32 >')).toBeUndefined();
     });
   });
 });

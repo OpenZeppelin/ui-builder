@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService, userExplorerConfigService } from '@openzeppelin/ui-builder-utils';
+import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-builder-utils';
 
 import { loadEvmContract } from '../abi/loader';
 import type { TypedEvmNetworkConfig } from '../types';
@@ -13,10 +13,8 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     vi.stubGlobal('fetch', mockFetch);
     // Initialize app config with empty defaults for deterministic behavior
     vi.spyOn(appConfigService, 'initialize').mockResolvedValue();
-    // Reset user explorer config
-    vi.spyOn(userExplorerConfigService, 'getUserExplorerConfig').mockReturnValue(
-      null as unknown as ReturnType<typeof userExplorerConfigService.getUserExplorerConfig>
-    );
+    // Reset user network service config
+    vi.spyOn(userNetworkServiceConfigService, 'get').mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -85,7 +83,7 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
     const result = await loadEvmContract(artifacts, network);
     expect(result.source).toBe('fetched');
     expect(result.metadata?.fetchedFrom).toBe(
-      'https://sourcify.dev/status/1/0x0000000000000000000000000000000000000001'
+      'https://repo.sourcify.dev/1/0x0000000000000000000000000000000000000001'
     );
   });
 
@@ -151,17 +149,24 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
       chainId: 1,
     } as unknown as TypedEvmNetworkConfig;
 
-    vi.spyOn(userExplorerConfigService, 'getUserExplorerConfig').mockReturnValue({
-      isCustom: true,
-      name: 'Custom',
-      defaultProvider: 'sourcify',
-    } as unknown as ReturnType<typeof userExplorerConfigService.getUserExplorerConfig>);
+    // Reset mock to ensure clean state
+    mockFetch.mockReset();
 
-    // First provider: sourcify success
+    // Mock the new service config service to return sourcify as default provider
+    vi.spyOn(userNetworkServiceConfigService, 'get').mockImplementation((networkId, serviceId) => {
+      if (networkId === 'ethereum-mainnet' && serviceId === 'contract-definitions') {
+        return { defaultProvider: 'sourcify' };
+      }
+      return null;
+    });
+
+    // Mock fetch for Sourcify API call (should be the first and only call since it succeeds)
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      status: 200,
+      statusText: 'OK',
       json: async () => ({ abi: [], metadata: { contractName: 'C', output: { abi: [] } } }),
-    });
+    } as Response);
 
     const artifacts: EvmContractArtifacts = {
       contractAddress: '0x0000000000000000000000000000000000000001',
@@ -184,9 +189,8 @@ describe('EVM provider selection (etherscan → sourcify, forced/app/ui preceden
       chainId: 1,
     } as unknown as TypedEvmNetworkConfig;
 
-    vi.spyOn(userExplorerConfigService, 'getUserExplorerConfig').mockReturnValue(
-      null as unknown as ReturnType<typeof userExplorerConfigService.getUserExplorerConfig>
-    );
+    // Mock userNetworkServiceConfigService to return null (no UI default)
+    vi.spyOn(userNetworkServiceConfigService, 'get').mockReturnValue(null);
     vi.spyOn(appConfigService, 'getGlobalServiceParam').mockReturnValue('sourcify');
 
     // First provider per app default: sourcify

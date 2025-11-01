@@ -1,10 +1,10 @@
 import { createPublicClient, http, isAddress, type Chain, type PublicClient } from 'viem';
 
 import type { ContractSchema, FunctionParameter } from '@openzeppelin/ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { createAbiFunctionItem } from '../abi';
-import { resolveRpcUrl } from '../configuration';
+import { getUserRpcUrl, resolveRpcUrl } from '../configuration';
 import { parseEvmInput } from '../transform';
 import type { TypedEvmNetworkConfig } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
@@ -19,10 +19,8 @@ async function getPublicClientForQuery(
   walletImplementation: WagmiWalletImplementation,
   networkConfig: TypedEvmNetworkConfig
 ): Promise<PublicClient> {
-  // First check if there's a custom RPC configuration
-  const customRpcConfig = userRpcConfigService.getUserRpcConfig(networkConfig.id);
-
-  if (customRpcConfig) {
+  // First check if there's a custom RPC configuration via generic service
+  if (getUserRpcUrl(networkConfig.id)) {
     // Always create a new client with custom RPC when configured
     const resolvedRpc = resolveRpcUrl(networkConfig);
     return createPublicClientWithRpc(networkConfig, resolvedRpc);

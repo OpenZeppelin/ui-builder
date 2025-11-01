@@ -139,7 +139,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
       </div>
 
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] flex flex-col">
-        <DialogHeader className="border-b pb-4 flex-shrink-0">
+        <DialogHeader className="border-b pb-4 shrink-0">
           <div className="flex items-start justify-between">
             <DialogTitle className="flex items-center gap-2 text-xl">
               Execution Method
@@ -151,7 +151,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-grow">
+        <div className="overflow-y-auto grow">
           <div className="p-6">{getExecutionContent()}</div>
 
           {executionConfig.method === 'relayer' && (
@@ -172,7 +172,7 @@ export const ExecutionConfigDisplay: React.FC<ExecutionConfigDisplayProps> = ({
             <div className="px-6 pb-4">
               <Alert variant="destructive" className="p-3 border border-red-300">
                 <div className="flex items-start">
-                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                   <AlertDescription className="pl-2 text-sm">{displayError}</AlertDescription>
                 </div>
               </Alert>

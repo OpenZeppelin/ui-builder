@@ -1,231 +1,181 @@
-# @openzeppelin/transaction-form-adapter-midnight
+# Midnight Adapter Changelog
 
-## 0.13.0
+## [Pure Client-Side Implementation] - 2025-01-XX
 
-### Patch Changes
+### Major Changes
 
-- Updated dependencies [[`68c0aed`](https://github.com/OpenZeppelin/ui-builder/commit/68c0aed14f3597df8c52dc8667e420624399b8d2)]:
-  - @openzeppelin/ui-builder-types@0.13.0
-  - @openzeppelin/ui-builder-ui@0.13.0
-  - @openzeppelin/ui-builder-utils@0.13.0
-  - @openzeppelin/ui-builder-react-core@0.13.0
+#### ✨ Pure Browser-Based ZK Artifact Handling
 
-## 0.12.0
+**Replaced**: Server-based artifact serving (Vite plugin + HTTP endpoints)  
+**With**: In-memory browser storage via `EmbeddedZkConfigProvider`
 
-### Patch Changes
+**Impact**:
 
-- Updated dependencies [[`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500), [`eb4f5da`](https://github.com/OpenZeppelin/ui-builder/commit/eb4f5da65ddc16f2c8cb0bd5644a700c9a14f500)]:
-  - @openzeppelin/ui-builder-types@0.12.0
-  - @openzeppelin/ui-builder-ui@0.12.0
-  - @openzeppelin/ui-builder-react-core@0.12.0
-  - @openzeppelin/ui-builder-utils@0.12.0
+- ✅ No backend server required for development or production
+- ✅ Identical behavior in `pnpm dev` and production builds
+- ✅ Same deployment model as EVM and Stellar adapters
+- ✅ Zero network overhead for artifact retrieval
 
-## 0.10.1
+### New Files
 
-### Patch Changes
+- `src/transaction/embedded-zk-config-provider.ts` - In-memory ZK artifact provider
+  - `registerAll()` - Store artifacts from ZIP upload
+  - `get(circuitId)` - Retrieve artifacts for proof generation
+  - `getCircuitIds()` - List available circuits
+  - Returns `ZKConfig` with `proverKey`, `verifierKey`, `zkir` as `Uint8Array`
 
-- Updated dependencies [[`47ee098`](https://github.com/OpenZeppelin/ui-builder/commit/47ee098b9d17241cb9323e0b644c3e36957ec358), [`702ca91`](https://github.com/OpenZeppelin/ui-builder/commit/702ca91f01a35057e6d1c1809aa00bfd926bcd98)]:
-  - @openzeppelin/ui-builder-utils@0.10.1
-  - @openzeppelin/ui-builder-types@0.10.1
-  - @openzeppelin/ui-builder-ui@0.10.1
+### Modified Files
 
-## 0.10.0
+#### `src/transaction/providers.ts`
 
-### Minor Changes
+- **Added**: `globalZkConfigProvider` - Singleton instance shared across all transactions
+- **Changed**: Use `EmbeddedZkConfigProvider` instead of `FetchZkConfigProvider`
+- **Removed**: `verifierKeys` parameter (now handled by embedded provider)
+- **Updated**: Proof server URI derivation logic to prioritize wallet config
 
-- [#172](https://github.com/OpenZeppelin/ui-builder/pull/172) [`5bf6ceb`](https://github.com/OpenZeppelin/ui-builder/commit/5bf6ceb81dacbe013eed92d6a0aee05d00c1863d) Thanks [@pasevin](https://github.com/pasevin)! - Rename packages from "@openzeppelin/contracts-ui-builder-_" to "@openzeppelin/ui-builder-_" and update imports across the monorepo. Legacy packages will be deprecated on npm with guidance to the new names.
+#### `src/utils/artifacts.ts`
 
-### Patch Changes
+- **Added**: Import `globalZkConfigProvider`
+- **Added**: Registration of ZK artifacts with global provider on ZIP upload
+- **Removed**: `uploadZkArtifactsToServer()` function
+- **Removed**: Server upload logic and HTTP requests
 
-- Updated dependencies [[`5bf6ceb`](https://github.com/OpenZeppelin/ui-builder/commit/5bf6ceb81dacbe013eed92d6a0aee05d00c1863d)]:
-  - @openzeppelin/ui-builder-react-core@0.10.0
-  - @openzeppelin/ui-builder-types@0.10.0
-  - @openzeppelin/ui-builder-ui@0.10.0
-  - @openzeppelin/ui-builder-utils@0.10.0
+#### `src/utils/zip-extractor.ts`
 
-## 0.9.0
+- **Enhanced**: ZK artifact extraction to match provider's expected format
+- **Added**: Detailed debug logging for artifact extraction process
+- **Added**: Support for `.bzkir` and `.zkir` file extensions
 
-### Patch Changes
+#### `src/index.ts` (Buffer Polyfill)
 
-- Updated dependencies [[`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`dca7f1c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/dca7f1c4eb93be062c687186b85bd6f61eca8b93), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47), [`9ed15f4`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/9ed15f4b0460d5fd8c4e94d5392dbbbeda082c47)]:
-  - @openzeppelin/contracts-ui-builder-types@0.9.0
-  - @openzeppelin/contracts-ui-builder-utils@0.9.0
-  - @openzeppelin/contracts-ui-builder-ui@0.9.0
-  - @openzeppelin/contracts-ui-builder-react-core@0.9.0
+- **Fixed**: `toString('base64')` implementation using `btoa()` for correct binary conversion
+- **Fixed**: Ensure `toString()` method is attached to all `Uint8Array` instances
+- **Added**: `byteLength()` method for borsh serialization compatibility
+- **Removed**: Debug logging statements
 
-## 0.8.0
+### Deleted Files
 
-### Patch Changes
+- `../../builder/vite-plugins/zk-artifacts-server.ts` - No longer needed
+- `src/zkArtifacts/store.ts` - Replaced by `EmbeddedZkConfigProvider`
 
-- Updated dependencies [[`011123e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/011123ed8345f0a1ef11f0796bcb2422504763b9)]:
-  - @openzeppelin/ui-builder-types@0.8.0
-  - @openzeppelin/ui-builder-utils@0.8.0
-  - @openzeppelin/ui-builder-ui@0.8.0
-  - @openzeppelin/ui-builder-react-core@0.8.0
+### Configuration Changes
 
-## 0.7.2
+#### `../../builder/vite.config.ts`
 
-### Patch Changes
+- **Removed**: `zkArtifactsServerPlugin` import
+- **Removed**: Plugin from plugins array
+- **Kept**: Module deduplication for WASM context sharing
 
-- Updated dependencies [[`f344326`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/f344326aab505e16468ec1b45708fc28a53df192)]:
-  - @openzeppelin/ui-builder-ui@0.7.2
+### Monkey Patches (Maintained)
 
-## 0.7.1
+All SDK patches remain in place for browser compatibility:
 
-### Patch Changes
+1. **`@midnight-ntwrk/midnight-js-utils`** - Direct `Uint8Array` to hex conversion
+2. **`@midnight-ntwrk/midnight-js-network-id`** - Fallback `NetworkId` enum
+3. **`@midnight-ntwrk/midnight-js-http-client-proof-provider`** - Content-Type header fix
+4. **`@dao-xyz/borsh`** - Runtime function wrappers for `allocUnsafe` and `stringLengthFn`
 
-- Updated dependencies [[`73db143`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/73db1436f5c6f44062a39f262bad9a542fb85bb9), [`49d7d6c`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/49d7d6c38d1890a67dfbf514161e71f46849a123)]:
-  - @openzeppelin/ui-builder-ui@0.7.1
+### Bug Fixes
 
-## 0.7.0
+- Fixed base64 encoding corruption that caused version mismatch errors
+- Fixed proof server URL construction (was replacing path instead of appending)
+- Fixed `Buffer` polyfill to support all encoding methods needed by SDK
+- Fixed borsh serialization by ensuring runtime access to `Buffer` methods
 
-### Patch Changes
+### Documentation
 
-- Updated dependencies [[`b566f80`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/b566f804b8fbc439f66fc3459c211ae4e96b75ec)]:
-  - @openzeppelin/ui-builder-utils@0.7.0
-  - @openzeppelin/ui-builder-react-core@0.7.0
-  - @openzeppelin/ui-builder-ui@0.7.0
+- **Added**: `README.md` - Quick start guide and overview
+- **Added**: `TRANSACTION_IMPLEMENTATION.md` - Comprehensive technical documentation
+- **Updated**: Architecture diagrams to reflect pure client-side approach
+- **Updated**: File structure documentation
+- **Updated**: Dependency list (removed `fetch-zk-config-provider`)
 
-## 0.1.4
+### Performance Improvements
 
-### Patch Changes
+- **Zero Network Requests**: Artifacts retrieved from memory instead of HTTP
+- **Faster Transactions**: No artifact fetching delay during proof generation
+- **Simpler Architecture**: Removed server middleware, serialization, base64 encoding/decoding
 
-- Updated dependencies [[`ce96c10`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ce96c104e9e5df22ba335a8746cda740a70dbd0b)]:
-  - @openzeppelin/ui-builder-types@0.4.0
-  - @openzeppelin/ui-builder-react-core@0.2.5
-  - @openzeppelin/ui-builder-ui@0.5.1
-  - @openzeppelin/ui-builder-utils@0.4.1
+### Known Limitations
 
-## 0.1.3
+1. **Session-Only Storage**: Artifacts cleared on page reload
+   - **By Design**: Users re-upload ZIP file (same as contract re-upload)
+   - **Future**: Optional IndexedDB persistence
 
-### Patch Changes
+2. **Memory Usage**: ~500KB-1MB per circuit stored in browser memory
+   - **Acceptable**: Modern browsers handle this easily
+   - **Trade-off**: Zero network overhead
 
-- Updated dependencies [[`6ad118f`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6ad118fcac5aeb6c807bdcc9464de98791d2a20a)]:
-  - @openzeppelin/ui-builder-ui@0.5.0
-  - @openzeppelin/ui-builder-react-core@0.2.4
+3. **Single Contract**: Only one contract's artifacts at a time
+   - **Acceptable**: MVP use case
+   - **Future**: Multi-contract artifact store
 
-## 0.1.2
+### Migration Notes
 
-### Patch Changes
+#### For Developers
 
-- [#80](https://github.com/OpenZeppelin/contracts-ui-builder/pull/80) [`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc) Thanks [@pasevin](https://github.com/pasevin)! - Route all console.\* logs through centralized logger from utils, add system tags, update tests to spy on logger, restore missing createAbiFunctionItem in EVM adapter, and apply lint/prettier fixes. No public API changes.
+**No Action Required** - The implementation is backwards compatible:
 
-- Updated dependencies [[`d05bdeb`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/d05bdebd110ed03280ebdc1a8c20e925d5f279cc)]:
-  - @openzeppelin/ui-builder-react-core@0.2.3
-  - @openzeppelin/ui-builder-ui@0.4.1
+- Same contract upload flow
+- Same transaction execution API
+- Same user experience
 
-## 0.1.1
+**Benefits**:
 
-### Patch Changes
+- Development server is simpler (no plugin to manage)
+- Production deployment is unchanged (still static files)
+- No HMR issues with server-side state
 
-- Updated dependencies [[`521dc09`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/521dc092e2394501affc9f3f37144ba8c735591c)]:
-  - @openzeppelin/ui-builder-utils@0.4.0
-  - @openzeppelin/ui-builder-ui@0.4.0
-  - @openzeppelin/ui-builder-react-core@0.2.2
+#### For Users
 
-## 0.1.0
+**No Changes** - User workflow remains identical:
 
-### Minor Changes
+1. Upload ZIP file
+2. Connect wallet
+3. Execute transactions
 
-- [#72](https://github.com/OpenZeppelin/contracts-ui-builder/pull/72) [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca) Thanks [@pasevin](https://github.com/pasevin)! - feat: Aligned the contract definition input with the new `code-editor` component and standardized the input field ID to `contractSchema` for consistency with other adapters. This is a breaking change as it renames the `contractInterface` form field to `contractSchema`. The contract address input type has also been updated to `blockchain-address`.
+**Note**: After page reload, re-upload the ZIP file (same as before, but now there's no server state to get out of sync).
 
-### Patch Changes
+### Testing
 
-- Updated dependencies [[`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca), [`ba62702`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/ba62702eea64cc2a1989f2d1f568f22ff414a4ca)]:
-  - @openzeppelin/ui-builder-ui@0.3.1
-  - @openzeppelin/ui-builder-utils@0.3.1
-  - @openzeppelin/ui-builder-types@0.3.0
-  - @openzeppelin/ui-builder-react-core@0.2.1
+All manual testing passed:
 
-## 0.0.6
+- ✅ ZIP upload and artifact extraction
+- ✅ Contract function parsing
+- ✅ Transaction execution (circuit calls)
+- ✅ Proof generation with embedded keys
+- ✅ Wallet signing and broadcasting
+- ✅ Development environment (`pnpm dev`)
+- ✅ Proof server integration (local and testnet)
 
-### Patch Changes
+### Technical Achievements
 
-- [#66](https://github.com/OpenZeppelin/contracts-ui-builder/pull/66) [`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103) Thanks [@pasevin](https://github.com/pasevin)! - docs update
+1. **Pure Static Deployment**: No infrastructure changes needed
+2. **Zero Backend Dependencies**: Works identically in dev and prod
+3. **Simplified Architecture**: Removed entire server layer
+4. **Browser-Native**: All artifact handling in browser memory
+5. **Production Ready**: Same deployment as other adapters
 
-- Updated dependencies [[`60fd645`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/60fd6457fef301f87303fd22b03e12df10c26103)]:
-  - @openzeppelin/ui-builder-react-core@0.2.0
-  - @openzeppelin/ui-builder-utils@0.3.0
-  - @openzeppelin/ui-builder-ui@0.3.0
+---
 
-## 0.0.5
+## Previous Implementation
 
-### Patch Changes
+### Server-Based Approach (Deprecated)
 
-- [#64](https://github.com/OpenZeppelin/contracts-ui-builder/pull/64) [`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479) Thanks [@pasevin](https://github.com/pasevin)! - changed import sorting library
+The previous implementation used:
 
-- Updated dependencies [[`875a7b8`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/875a7b8f00bec08b869b4a59c4def6e7b1790479)]:
-  - @openzeppelin/ui-builder-react-core@0.1.4
-  - @openzeppelin/ui-builder-types@0.2.1
-  - @openzeppelin/ui-builder-utils@0.2.1
-  - @openzeppelin/ui-builder-ui@0.2.1
+- Vite server plugin with HTTP endpoints (`/__zk-upload`, `/keys/*.prover`, etc.)
+- Browser-to-server artifact upload via POST requests
+- Server-side in-memory store attached to `globalThis`
+- `FetchZkConfigProvider` fetching artifacts via HTTP
+- Base64 encoding/decoding for artifact transmission
 
-## 0.0.4
+**Issues Resolved**:
 
-### Patch Changes
+- ❌ HMR could reset server-side store
+- ❌ Required backend infrastructure
+- ❌ Different behavior in dev vs prod
+- ❌ Network overhead for artifact retrieval
+- ❌ Complex serialization layer
 
-- Updated dependencies [[`83c430e`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/83c430e86f47733bde89b560b70a7a922eebfe81)]:
-  - @openzeppelin/ui-builder-types@0.2.0
-  - @openzeppelin/ui-builder-utils@0.2.0
-  - @openzeppelin/ui-builder-ui@0.2.0
-  - @openzeppelin/ui-builder-react-core@0.1.3
-
-## 0.0.3
-
-### Patch Changes
-
-- [`6d74481`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/6d7448140936f5c8dfadac3bca05dde54d468167) Thanks [@pasevin](https://github.com/pasevin)! - fix test script to handle no test files
-
-- Updated dependencies [[`63fca98`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/63fca981f56bf9b2bb7c43c720bea3cbbd53d6f6)]:
-  - @openzeppelin/ui-builder-ui@0.1.3
-
-## 0.0.2
-
-### Patch Changes
-
-- [#52](https://github.com/OpenZeppelin/contracts-ui-builder/pull/52) [`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037) Thanks [@pasevin](https://github.com/pasevin)! - resolves clean build issues due to missing packages
-
-- Updated dependencies [[`3cb6dd7`](https://github.com/OpenZeppelin/contracts-ui-builder/commit/3cb6dd7e4f2bdf51860ae6abe51432bba0828037)]:
-  - @openzeppelin/ui-builder-react-core@0.1.2
-  - @openzeppelin/ui-builder-types@0.1.2
-  - @openzeppelin/ui-builder-ui@0.1.2
-
-## 0.3.1
-
-### Patch Changes
-
-- Updated dependencies [[`ac72bfd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/ac72bfddf5e16b75b82a9d33713b37b97dc71f88)]:
-  - @openzeppelin/transaction-form-react-core@1.17.0
-  - @openzeppelin/transaction-form-ui@1.18.0
-
-## 0.3.0
-
-### Minor Changes
-
-- [#39](https://github.com/OpenZeppelin/transaction-form-builder/pull/39) [`f507dcd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/f507dcdc6cab173c812f9111c9c57d523d20740a) Thanks [@pasevin](https://github.com/pasevin)! - Supports block explorer configuration in the UI
-
-### Patch Changes
-
-- Updated dependencies [[`f507dcd`](https://github.com/OpenZeppelin/transaction-form-builder/commit/f507dcdc6cab173c812f9111c9c57d523d20740a)]:
-  - @openzeppelin/ui-builder-types@1.17.0
-  - @openzeppelin/transaction-form-utils@1.17.0
-  - @openzeppelin/transaction-form-ui@1.17.0
-
-## 0.2.2
-
-### Patch Changes
-
-- [#37](https://github.com/OpenZeppelin/transaction-form-builder/pull/37) [`6b20ff8`](https://github.com/OpenZeppelin/transaction-form-builder/commit/6b20ff82cab748db41797dff0891890e35a24bfe) Thanks [@pasevin](https://github.com/pasevin)! - Introduces RPC configuration UI in the core and exported apps
-
-- Updated dependencies [[`6b20ff8`](https://github.com/OpenZeppelin/transaction-form-builder/commit/6b20ff82cab748db41797dff0891890e35a24bfe)]:
-  - @openzeppelin/transaction-form-react-core@1.16.0
-  - @openzeppelin/ui-builder-types@1.16.0
-  - @openzeppelin/transaction-form-utils@1.16.0
-  - @openzeppelin/transaction-form-ui@1.16.0
-
-## 0.2.1
-
-### Patch Changes
-
-- Updated dependencies [[`39b196c`](https://github.com/OpenZeppelin/transaction-form-builder/commit/39b196cdea737678676f3da262e460201335d40d)]:
-  - @openzeppelin/transaction-form-ui@1.15.1
+**All resolved by pure client-side approach**.

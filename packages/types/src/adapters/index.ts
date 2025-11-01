@@ -18,6 +18,9 @@ export * from './config';
 // Re-export UI enhancements
 export * from './ui-enhancements';
 
+// Re-export export bootstrapping types
+export * from './export';
+
 /**
  * Combined adapter interface with all capabilities
  *

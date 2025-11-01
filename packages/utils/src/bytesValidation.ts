@@ -214,3 +214,25 @@ export function validateBytesSimple(
   const result = validateBytes(value, options);
   return result.isValid ? true : result.error || 'Invalid bytes format';
 }
+
+/**
+ * Extracts the size from a Bytes<N> type string, or returns undefined for dynamic Uint8Array
+ *
+ * @param type - Type string (e.g., "Bytes<32>", "Uint8Array", "bytes")
+ * @returns Size in bytes if fixed-size, undefined if dynamic
+ *
+ * @example
+ * ```typescript
+ * getBytesSize('Bytes<32>') // → 32
+ * getBytesSize('Bytes<64>') // → 64
+ * getBytesSize('Uint8Array') // → undefined
+ * getBytesSize('bytes') // → undefined
+ * ```
+ */
+export function getBytesSize(type: string): number | undefined {
+  const match = type.match(/^Bytes<(\d+)>$/i);
+  if (match) {
+    return Number.parseInt(match[1], 10);
+  }
+  return undefined; // Dynamic size (Uint8Array)
+}

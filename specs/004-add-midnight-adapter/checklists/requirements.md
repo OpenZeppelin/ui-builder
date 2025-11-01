@@ -31,4 +31,4 @@
 
 ## Notes
 
-All clarifications resolved: Q1=A (wallet only), Q2=use adapter `getContractDefinitionInputs`, Q3=C (identifier + indexing summary).
+All clarifications resolved: Q1=A (wallet only), Q2=use adapter `getContractDefinitionInputs`.

@@ -1,7 +1,11 @@
 import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import React from 'react';
 
-import type { TxStatus } from '@openzeppelin/ui-builder-types';
+import type {
+  ContractFunction,
+  FullContractAdapter,
+  TxStatus,
+} from '@openzeppelin/ui-builder-types';
 import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
@@ -14,6 +18,13 @@ interface TransactionStatusDisplayProps {
   explorerUrl?: string | null; // URL for the transaction hash link
   onClose?: () => void; // Callback to close/reset the display
   className?: string; // Allow custom styling
+  // Optional adapter-provided copy
+  customTitle?: string;
+  customMessage?: string;
+  // Optional execution result and adapter for formatting
+  result?: unknown;
+  functionDetails?: ContractFunction;
+  adapter?: FullContractAdapter;
 }
 
 /**
@@ -27,14 +38,14 @@ function formatErrorWithHash(errorMsg: string): React.ReactNode {
   const hashRegex = /(0x[a-fA-F0-9]{40,})/g;
 
   if (!hashRegex.test(errorMsg)) {
-    return <span className="break-words">{errorMsg}</span>;
+    return <span className="break-word">{errorMsg}</span>;
   }
 
   // If we found a hash, format it for better display
   const parts = errorMsg.split(hashRegex);
 
   return (
-    <span className="break-words">
+    <span className="break-word">
       {parts.map((part, i) => {
         if (part.match(/^0x[a-fA-F0-9]{40,}$/)) {
           // This part is a hash, format it specially
@@ -57,75 +68,101 @@ export function TransactionStatusDisplay({
   explorerUrl,
   onClose,
   className,
+  customTitle,
+  customMessage,
+  result,
+  functionDetails,
+  adapter,
 }: TransactionStatusDisplayProps): React.ReactElement | null {
   if (status === 'idle') {
     return null;
   }
 
   let variant: 'default' | 'destructive' | 'success' = 'default';
-  let title = '';
+  let defaultTitle = '';
+  let defaultMessage: string | null = null;
   let icon: React.ReactNode = null;
-  let content: React.ReactNode = null;
 
   if (status === 'pendingSignature') {
-    title = 'Pending Signature';
+    defaultTitle = 'Pending Signature';
     icon = <Loader2 className="size-5 animate-spin text-primary" />;
-    content = (
-      <div>
-        <p>Please check your connected wallet to sign the transaction.</p>
-        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
-      </div>
-    );
+    // Default copy covers both signature and auto-confirmation in one message (chain-agnostic).
+    defaultMessage =
+      'Please check your wallet to sign. After signing, your transaction will be submitted and confirmed automatically.';
     variant = 'default';
   } else if (status === 'pendingConfirmation') {
-    title = 'Processing Transaction';
+    defaultTitle = 'Processing Transaction';
     icon = <Loader2 className="size-5 animate-spin text-primary" />;
-    content = (
-      <div>
-        <p>Waiting for the transaction to be confirmed on the blockchain...</p>
-        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
-      </div>
-    );
+    defaultMessage = 'Waiting for the transaction to be confirmed on the blockchain...';
     variant = 'default';
   } else if (status === 'pendingRelayer') {
-    title = 'Waiting for Relayer';
+    defaultTitle = 'Waiting for Relayer';
     icon = <Loader2 className="size-5 animate-spin text-primary" />;
-    content = (
-      <div>
-        <p>
-          The transaction is pending with the relayer and will be submitted to the blockchain
-          shortly.
-        </p>
-        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
-      </div>
-    );
+    defaultMessage = 'The transaction is pending with the relayer and will be submitted shortly.';
     variant = 'default';
   } else if (status === 'success') {
-    title = 'Transaction Successful';
+    defaultTitle = 'Transaction Successful';
     icon = <CheckCircle className="size-5 text-green-600" />;
-    content = (
-      <div>
-        <p>Your transaction has been confirmed.</p>
-        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
-      </div>
-    );
+    defaultMessage = 'Your transaction has been confirmed.';
     variant = 'success';
   } else if (status === 'error') {
-    title = 'Transaction Failed';
+    defaultTitle = 'Transaction Failed';
     icon = <AlertCircle className="size-5 text-destructive" />;
+    variant = 'destructive';
+  }
+
+  const title = customTitle || defaultTitle;
+
+  // Format result if available (chain-agnostic, adapter-led formatting)
+  let formattedResult: string | null = null;
+  if (result !== undefined && result !== null && adapter && functionDetails) {
+    try {
+      formattedResult = adapter.formatFunctionResult(result, functionDetails);
+    } catch {
+      // Fallback to JSON.stringify if formatting fails
+      formattedResult = JSON.stringify(result, null, 2);
+    }
+  } else if (result !== undefined && result !== null) {
+    // Fallback formatting when adapter/functionDetails not available
+    formattedResult = JSON.stringify(result, null, 2);
+  }
+
+  let content: React.ReactNode = null;
+  if (status === 'error') {
     content = (
       <div>
-        {formatErrorWithHash(error || 'An unknown error occurred.')}
+        {error ? (
+          formatErrorWithHash(error)
+        ) : customMessage ? (
+          <span className="break-word">{customMessage}</span>
+        ) : (
+          <span className="break-word">An unknown error occurred.</span>
+        )}
         {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
       </div>
     );
-    variant = 'destructive';
+  } else {
+    const messageText = customMessage || defaultMessage || '';
+    content = (
+      <div className="space-y-3">
+        {messageText && <p>{messageText}</p>}
+        {txHash && <TransactionHashDisplay txHash={txHash} explorerUrl={explorerUrl || null} />}
+        {formattedResult && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-sm font-medium mb-2">Result:</p>
+            <pre className="text-xs bg-muted p-3 rounded-md overflow-auto max-h-48">
+              {formattedResult}
+            </pre>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
     <Alert variant={variant} className={cn('relative py-4 px-5 overflow-hidden', className)}>
       <div className="flex items-start">
-        <div className="flex-shrink-0 mr-3 mt-0.5">{icon}</div>
+        <div className="shrink-0 mr-3 mt-0.5">{icon}</div>
         <div className="flex-1 min-w-0">
           <AlertTitle className="mb-1 text-base font-medium">{title}</AlertTitle>
           <AlertDescription className="text-sm overflow-hidden">{content}</AlertDescription>
@@ -134,7 +171,7 @@ export function TransactionStatusDisplay({
           <Button
             variant="ghost"
             size="icon"
-            className="flex-shrink-0 -mr-1 -mt-1 h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-background/80"
+            className="shrink-0 -mr-1 -mt-1 h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-background/80"
             onClick={onClose}
             aria-label="Reset Status"
           >

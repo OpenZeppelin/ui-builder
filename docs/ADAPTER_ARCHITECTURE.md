@@ -354,7 +354,314 @@ The EVM adapter provides a sophisticated implementation of this pattern to handl
 
 This architecture effectively isolates the complexity of managing different UI libraries within the adapter, allowing the builder application to simply request the UI components and hooks it needs without knowing the specific implementation details.
 
-## 11. Architecture Boundaries & Constitution
+## 11. Build-Time Requirements & Configuration
+
+Most adapters require zero build-time configuration—they're pure JavaScript/TypeScript packages that work out-of-the-box with Vite's default settings (e.g., EVM, Stellar). However, some blockchain SDKs have special requirements that necessitate build system configuration.
+
+### 11.1. When Build Configuration is Needed
+
+Adapters may require build-time configuration when their underlying SDK has any of these characteristics:
+
+1. **WASM Modules**: The SDK contains WebAssembly binaries that need special loading
+2. **Module Format Issues**: The SDK uses CommonJS in a way that doesn't auto-convert cleanly to ESM
+3. **Singleton State**: The SDK relies on global singletons that break if the module is loaded multiple times
+4. **Node.js Polyfills**: The SDK expects Node.js globals (Buffer, process, global) in the browser
+5. **Top-Level Await**: The SDK uses top-level await for initialization
+
+### 11.2. Principle: Keep It Centralized
+
+**All build configuration must live in `packages/builder/vite.config.ts`**, not scattered across adapter packages. This is because:
+
+- Vite's bundler operates at the **application level**, not package level
+- Configuration like `dedupe`, `optimizeDeps`, and global polyfills affects the entire dependency graph
+- Developers need one place to understand the complete build pipeline
+- Build issues are easier to debug when config is explicit and searchable
+
+**Exception**: Adapters can export Vite plugins for HTML transformations (e.g., injecting polyfills), but these must be explicitly imported and added to the plugins array in the main config.
+
+### 11.3. Case Study: Midnight Adapter
+
+The Midnight adapter serves as the reference implementation for an adapter with complex build requirements. Here's what it needs and why:
+
+#### Required Vite Plugins
+
+```typescript
+// packages/builder/vite.config.ts
+plugins: [
+  wasm(), // Handles .wasm file imports and async loading
+  topLevelAwait(), // Supports top-level await in WASM initialization
+  // ... other plugins
+];
+```
+
+**Why**: Midnight SDK packages like `@midnight-ntwrk/compact-runtime` contain WASM binaries that use top-level await for initialization. Without these plugins, imports fail.
+
+#### Module Deduplication
+
+```typescript
+dedupe: [
+  '@midnight-ntwrk/compact-runtime',
+  '@midnight-ntwrk/ledger',
+  '@midnight-ntwrk/zswap',
+  '@midnight-ntwrk/midnight-js-contracts',
+  '@midnight-ntwrk/midnight-js-network-id', // CRITICAL: Singleton
+];
+```
+
+**Why**: The Midnight SDK uses global singleton state. For example, `@midnight-ntwrk/midnight-js-network-id` exports `setNetworkId()` and `getNetworkId()` functions that maintain a global network identifier. If Vite creates multiple instances of this module (one for the adapter, one dynamically imported during contract evaluation), calls to `setNetworkId()` affect one instance while `getNetworkId()` reads from another, causing "Undeployed" errors.
+
+**Without `dedupe`**: You get module instance fragmentation → broken singleton state.
+
+#### Dependency Pre-Bundling
+
+```typescript
+optimizeDeps: {
+  include: [
+    // Force ESM conversion
+    '@midnight-ntwrk/compact-runtime',
+    '@midnight-ntwrk/ledger',
+    // ... and their CommonJS dependencies
+    'protobufjs',
+    'object-inspect',
+  ],
+  exclude: [
+    // Don't pre-bundle packages with WASM
+    '@midnight-ntwrk/onchain-runtime',
+  ]
+}
+```
+
+**Why**: The Midnight SDK is published as CommonJS, but Vite and modern browsers expect ESM. Pre-bundling forces esbuild to convert these packages to ESM format during dev server startup. The `exclude` list prevents pre-bundling of packages that contain WASM, as they must be handled by `vite-plugin-wasm` at runtime.
+
+#### Buffer Polyfill
+
+The Midnight SDK requires `Buffer` in the browser (used by `@dao-xyz/borsh` for binary serialization). Two approaches:
+
+1. **Runtime Polyfill** (Current): The adapter's `browser-init.ts` provides a minimal `Buffer` polyfill that's loaded before any SDK code
+2. **Build-Time Plugin** (Removed as redundant): `@esbuild-plugins/node-globals-polyfill` was tested but found unnecessary since runtime polyfill loads first
+
+### 11.4. Documentation Requirements
+
+When adding an adapter that requires build configuration:
+
+1. **Add section markers** in `vite.config.ts` clearly labeling adapter-specific config:
+
+   ```typescript
+   // ============================================================================
+   // [ADAPTER NAME]: [Configuration Type]
+   // ============================================================================
+   // Explanation of why this is needed
+   ```
+
+2. **Update this section** (`§ 11`) with:
+   - A brief summary of what the adapter needs
+   - Why each piece of configuration is required
+   - What breaks if the configuration is removed
+
+3. **Document in adapter's README**: Link back to this architecture doc and explain that build configuration is in `packages/builder/vite.config.ts`
+
+### 11.5. Testing Build Configuration
+
+Before committing build configuration changes:
+
+1. **Test removal**: Comment out the config and verify what actually breaks
+2. **Test dev mode**: `pnpm dev` - ensure hot reload works
+3. **Test build**: `pnpm build` - ensure production builds succeed
+4. **Test the adapter**: Execute a transaction using the adapter in dev mode
+5. **Clear cache**: `rm -rf packages/builder/node_modules/.vite` between tests
+
+### 11.6. Including Adapter Artifacts in Exported Apps
+
+Some adapters need to bundle ecosystem-specific artifacts into exported applications to enable offline transaction execution. The Midnight adapter, for example, bundles ZK proof artifacts, contract modules, and witness code.
+
+#### 11.6.1. Architecture
+
+The artifact bundling system is **adapter-led** and **chain-agnostic**:
+
+1. **Adapter Interface Extension**: Adapters can implement the optional `getExportBootstrapFiles()` method
+2. **Export Pipeline Integration**: The export system automatically calls this method and includes returned files
+3. **Template Injection**: Bootstrap imports and initialization code are injected into the exported app's `main.tsx`
+4. **Zero Impact on Other Adapters**: Non-participating adapters (EVM, Stellar) are unaffected
+
+#### 11.6.2. Implementing in an Adapter
+
+To bundle artifacts in your adapter:
+
+**Step 1: Implement `getExportBootstrapFiles()`**
+
+```typescript
+// packages/adapter-yourchain/src/export/bootstrap.ts
+import type { AdapterExportBootstrap, AdapterExportContext } from '@openzeppelin/ui-builder-types';
+
+export async function getYourChainExportBootstrapFiles(
+  context: AdapterExportContext
+): Promise<AdapterExportBootstrap | null> {
+  // Extract artifacts from context
+  const artifacts = context.artifacts;
+  const definitionOriginal = context.definitionOriginal;
+
+  if (!artifacts || !definitionOriginal) {
+    return null; // No artifacts to bundle
+  }
+
+  // Generate artifact file content
+  const artifactsFileContent = `
+    export const yourChainArtifacts = {
+      address: '${context.formConfig.contractAddress}',
+      // ... your artifact structure
+    };
+  `;
+
+  return {
+    files: {
+      'src/yourchain/artifacts.ts': artifactsFileContent,
+    },
+    imports: ["import { yourChainArtifacts } from './yourchain/artifacts';"],
+    initAfterAdapterConstruct: `
+      // Preload artifacts into adapter
+      if (typeof (adapter as any).loadContractWithMetadata === 'function') {
+        await (adapter as any).loadContractWithMetadata(yourChainArtifacts);
+      }
+    `,
+  };
+}
+```
+
+**Step 2: Wire into Adapter**
+
+```typescript
+// packages/adapter-yourchain/src/adapter.ts
+import { getYourChainExportBootstrapFiles } from './export/bootstrap';
+
+export class YourChainAdapter implements ContractAdapter {
+  // ... existing methods
+
+  public async getExportBootstrapFiles(
+    context: AdapterExportContext
+  ): Promise<AdapterExportBootstrap | null> {
+    return getYourChainExportBootstrapFiles(context);
+  }
+}
+```
+
+#### 11.6.3. What Happens During Export
+
+1. **Export Pipeline** (`AppExportSystem.ts`):
+   - Pulls artifacts from builder state: `contractState.contractDefinitionArtifacts` and `contractState.definitionOriginal`
+   - Passes them to the assembler via `exportOptions.adapterArtifacts`
+
+2. **Assembler** (`generateAdapterBootstrapFiles.ts`):
+   - Checks if adapter implements `getExportBootstrapFiles()`
+   - Calls it with context (formConfig, contractSchema, networkConfig, artifacts)
+   - Adds returned files to the project
+   - Returns bootstrap info for template injection
+
+3. **Template Injection** (`AppExportSystem.injectBootstrapCode()`):
+   - Injects imports after `import './styles.css';` in `main.tsx`
+   - Injects initialization code after adapter construction in `resolveAdapter()`
+
+#### 11.6.4. Exported App Structure
+
+For a Midnight export, the generated app includes:
+
+```
+exports/your-app/
+├── src/
+│   ├── midnight/
+│   │   └── artifacts.ts          # ← Bundled artifacts
+│   ├── main.tsx                   # ← With injected imports/init
+│   ├── App.tsx
+│   └── components/
+│       └── GeneratedForm.tsx
+├── package.json
+└── vite.config.ts
+```
+
+The `main.tsx` will contain:
+
+```typescript
+import './styles.css';
+
+import { midnightArtifacts } from './midnight/artifacts'; // ← Injected
+
+const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
+  if (nc.id === exportedNetworkConfig.id) {
+    const adapter = new MidnightAdapter(nc as typeof exportedNetworkConfig);
+    // Preload Midnight contract artifacts into adapter
+    if (typeof (adapter as any).loadContractWithMetadata === 'function') {
+      await (adapter as any).loadContractWithMetadata(midnightArtifacts); // ← Injected
+    }
+    return adapter;
+  }
+  // ...
+};
+```
+
+#### 11.6.5. Midnight Adapter Case Study
+
+The Midnight adapter uses a **lean bundling approach** that keeps exported files small:
+
+**What Gets Bundled:**
+
+- ✅ **Original ZIP file** (base64-encoded)
+- ✅ **Contract address** and **private state ID**
+
+**What Gets Parsed at Runtime:**
+
+- Contract definition (TypeScript `.d.ts`)
+- Contract module (`.cjs`)
+- Witness code (`witnesses.js`)
+- Verifier keys (`.prover`/`.verifier`)
+- ZK artifacts for proof generation
+
+**Implementation:** `packages/adapter-midnight/src/export/bootstrap.ts`
+
+```typescript
+export const midnightArtifactsSource = {
+  contractAddress: '0x...',
+  privateStateId: 'counter',
+  contractArtifactsZip: 'UEsDBBQAA...', // base64 ZIP data
+};
+```
+
+The adapter's `loadContractWithMetadata` method receives this object and:
+
+1. Extracts the ZIP file (same logic as builder upload)
+2. Parses all artifacts from the ZIP
+3. Registers ZK proof files with the global provider
+4. Returns the parsed contract schema
+
+**Benefits:**
+
+- ✅ **Small export size**
+- ✅ **Code reuse** (same ZIP parsing logic as builder)
+- ✅ **Maintainable** (single source of truth for parsing)
+- ✅ **Future-proof** (ZIP format changes don't require export updates)
+
+These artifacts enable:
+
+- ✅ Offline transaction execution (no network fetch)
+- ✅ ZK proof generation in the browser
+- ✅ Contract state queries via the indexer
+- ✅ Full transaction functionality without runtime artifact loading
+
+#### 11.6.6. Testing
+
+1. **Export a Midnight app** from the builder with a loaded contract
+2. **Check for artifacts file**: `exports/your-app/src/midnight/artifacts.ts`
+3. **Verify main.tsx injection**: Look for import and init code
+4. **Run the exported app**: `cd exports/your-app && npm install && npm run dev`
+5. **Execute a transaction**: Confirm it works without runtime artifact loading
+
+### 11.7. Future: Exported Applications (Historical Note)
+
+When users export applications built with the UI Builder, build configuration requirements follow them:
+
+- The export template (`packages/builder/src/export/templates/`) includes its own `vite.config.ts`
+- Adapter-specific configuration is conditionally included in exported configs based on which adapter is used
+- **Update (2025)**: Adapter artifact bundling is now implemented via `getExportBootstrapFiles()` (see § 11.6)
+
+## 12. Architecture Boundaries & Constitution
 
 All adapter work must comply with the project constitution. Read it before implementing or modifying adapters:
 
