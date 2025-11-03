@@ -65,6 +65,7 @@
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "@types/jszip": "^3.4.1",
     "jszip": "^3.10.1",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.510.0",
     "rxjs": "^7.8.1"
   },
