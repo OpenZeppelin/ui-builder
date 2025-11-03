@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -43,6 +44,8 @@ logger.warn = (msg, options) => {
 
 // https://vitejs.dev/config/
 export default defineConfig(async (): Promise<UserConfig> => {
+  const require = createRequire(import.meta.url);
+  const bufferPolyfillPath = require.resolve('buffer/');
   // Dynamically load Midnight config
   const { getMidnightViteConfig } = await import(
     '@openzeppelin/ui-builder-adapter-midnight/vite-config'
@@ -78,8 +81,9 @@ export default defineConfig(async (): Promise<UserConfig> => {
           '../react-core/src/index.ts'
         ),
         '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
-        // Force buffer to use the browser-friendly version
-        buffer: 'buffer/',
+        // Node built-ins polyfills for browser using absolute paths
+        buffer: bufferPolyfillPath,
+        'buffer/': bufferPolyfillPath,
       },
 
       // ============================================================================
