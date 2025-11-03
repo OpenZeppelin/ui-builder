@@ -14,7 +14,6 @@
 
 - [x] CHK004 Is “wallet‑only v1” execution clearly defined and exclusions listed? [Clarity, Spec §FR-011; Non‑Goals]
 - [x] CHK005 Are contract inputs unambiguously defined with required/optional flags? [Clarity, Spec §FR-012]
-- [x] CHK006 Is post‑submission status precisely defined (identifier + indexing summary)? [Clarity, Spec §FR-013]
 
 ## Requirement Consistency
 
@@ -35,7 +34,7 @@
 ## Edge Case Coverage
 
 - [x] CHK014 Are boundary cases listed (no explorer, indexing delays, missing deps in exports)? [Edge Case, Spec §Edge Cases]
-- [x] CHK015 Are network diagnostics behaviors specified (success/failure, latency)? [Edge Case, Spec §User Story 6]
+- [x] CHK015 Are network diagnostics behaviors specified (success/failure, latency)? [Edge Case, Spec §User Story 5]
 
 ## Non‑Functional Requirements
 

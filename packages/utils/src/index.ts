@@ -1,8 +1,11 @@
 export * from './contractInputs';
+export * from './requiredInputs';
+export * from './addressNormalization';
 export * from './logger';
 export * from './AppConfigService';
 export * from './UserRpcConfigService';
 export * from './UserExplorerConfigService';
+export * from './UserNetworkServiceConfigService';
 export * from './fieldDefaults';
 export * from './typeguards';
 export * from './cn';
@@ -16,3 +19,4 @@ export * from './bytesConversion';
 export * from './environment';
 export * from './RouterService';
 export * from './deepLink';
+export * from './sanitize';

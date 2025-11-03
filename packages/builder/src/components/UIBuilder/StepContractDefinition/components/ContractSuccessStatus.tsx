@@ -1,4 +1,4 @@
-import { CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import type {
@@ -7,7 +7,7 @@ import type {
   ContractSchema,
   ProxyInfo,
 } from '@openzeppelin/ui-builder-types';
-import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/ui-builder-ui';
+import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
@@ -36,6 +36,9 @@ interface ContractSuccessStatusProps {
   loadedConfigurationId: string | null;
   adapter: ContractAdapter;
   onIgnoreProxy: () => void;
+  requiresManualReload: boolean;
+  onManualReload: () => void;
+  isReloading: boolean;
 }
 
 /**
@@ -54,6 +57,9 @@ export function ContractSuccessStatus({
   definitionComparison,
   adapter,
   onIgnoreProxy,
+  requiresManualReload,
+  onManualReload,
+  isReloading,
 }: ContractSuccessStatusProps) {
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
   const { updateContractUI } = useContractUIStorage();
@@ -171,12 +177,33 @@ export function ContractSuccessStatus({
         />
       )}
 
-      {/* Success Message */}
-      <Alert variant="success" className="p-4">
-        <CheckCircle className="size-5" />
-        <AlertTitle>Contract loaded</AlertTitle>
-        <AlertDescription>{successMessage}</AlertDescription>
-      </Alert>
+      {/* Success / Manual Reload Message */}
+      {requiresManualReload ? (
+        <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-300" />
+          <div className="flex flex-1 flex-col gap-2">
+            <AlertTitle className="text-amber-900 dark:text-amber-100">
+              Contract inputs changed
+            </AlertTitle>
+            <AlertDescription className="text-amber-900/80 dark:text-amber-100/80">
+              The contract artifacts or required fields were modified. Reload to apply the updated
+              contract before continuing.
+            </AlertDescription>
+            <div>
+              <Button onClick={onManualReload} size="sm" disabled={isReloading} className="mt-1">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {isReloading ? 'Reloading…' : 'Reload contract'}
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      ) : (
+        <Alert variant="success" className="p-4">
+          <CheckCircle className="size-5" />
+          <AlertTitle>Contract loaded</AlertTitle>
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Contract Definition Comparison Modal */}
       {definitionComparison?.comparisonResult && (

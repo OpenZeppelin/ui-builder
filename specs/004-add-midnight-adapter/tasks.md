@@ -15,9 +15,8 @@
     2. midnight/02-ingestion → base: midnight/01-wallet
     3. midnight/03-auto-views → base: midnight/02-ingestion
     4. midnight/04-write-export → base: midnight/03-auto-views
-    5. midnight/05-status → base: midnight/04-write-export
-    6. midnight/06-rpc → base: midnight/05-status
-    7. midnight/90-polish → base: midnight/06-rpc
+    5. midnight/06-rpc → base: midnight/04-write-export
+    6. midnight/90-polish → base: midnight/06-rpc
   - PR titles: “Midnight v1 – 01 Wallet”, “Midnight v1 – 02 Ingestion”, …
   - Commit messages: Conventional Commits; small, scoped edits per branch
 
@@ -85,40 +84,30 @@ Independent Test: Load a contract with simple views and see results/empty state.
 Goal: Customize write form, execute via wallet, export working app.
 Independent Test: Execute in Builder, then export and run same flow.
 
-- [ ] T014 [US4] Implement `formatTransactionData` for write payloads [seq]
+- [x] T014 [US4] Implement `formatTransactionData` for write payloads [seq]
   - Path: packages/adapter-midnight/src/adapter.ts
-- [ ] T015 [US4] Implement wallet-only `signAndBroadcast` (prepare/balance→prove→submit) [seq]
+- [x] T015 [US4] Implement wallet-only `signAndBroadcast` (prepare/balance→prove→submit) [seq]
   - Path: packages/adapter-midnight/src/adapter.ts + utils
-- [ ] T016 [US4] Ensure export parity (packages, config, behavior) [seq]
+- [x] T016 [US4] Ensure export parity (packages, config, behavior) [seq]
   - Path: packages/adapter-midnight/src/config.ts + export manifest
 
-- [ ] Checkpoint: Write flow and export validated end-to-end
+- [x] Checkpoint: Write flow and export validated end-to-end
 
-## Phase 7: [US5] Submit transaction status (P5)
-
-Goal: Surface identifier + indexing summary on submission.
-Independent Test: After approval, see identifier and indexing summary.
-
-- [ ] T017 [US5] Add status mapping utilities and UI messages [P]
-  - Path: packages/adapter-midnight/src/utils + builder messaging
-
-- [ ] Checkpoint: Submission status requirements satisfied
-
-## Phase 8: [US6] RPC connectivity (P6)
+## Phase 7: [US5] RPC connectivity (P5)
 
 Goal: Test connectivity with latency/success/failure feedback.
 Independent Test: Run Test Connection and see result with timing.
 
-- [ ] T018 [US6] Implement/verify validateRpcEndpoint/testMidnightRpcConnection [seq]
-  - Path: packages/adapter-midnight/src/configuration/\*_/_
+- [x] T017 [US5] Implement/verify validateRpcEndpoint/testMidnightRpcConnection [seq]
+- Path: packages/adapter-midnight/src/configuration/\*_/_
 
-- [ ] Checkpoint: Diagnostics requirements satisfied
+- [x] Checkpoint: Diagnostics requirements satisfied
 
-## Phase 9: Polish & Cross-Cutting
+## Phase 8: Polish & Cross-Cutting
 
-- [ ] T019 [US9] Mapping parity (types/defaults/compatibility) per FR-018 [P]
+- [x] T018 [US9] Mapping parity (types/defaults/compatibility) per FR-018 [P]
   - Path: packages/adapter-midnight/src/mapping/\*_/_
-- [ ] T020 [US9] Update docs: adapter integration and export manifest sync [P]
+- [x] T019 [US9] Update docs: adapter integration and export manifest sync [P]
   - Path: specs/004-add-midnight-adapter/contracts/\*.md
 
 ## Dependencies & Execution Order
@@ -128,7 +117,7 @@ Independent Test: Run Test Connection and see result with timing.
 - Setup (Phase 1): No dependencies – can start immediately
 - Foundational (Phase 2): Depends on Setup completion – BLOCKS all user stories
 - User Stories (Phase 3+): Depend on Foundational completion
-  - Proceed in priority order (P1 → P2 → P3 → P4 → P5 → P6) or in parallel after Phase 2
+  - Proceed in priority order (P1 → P2 → P3 → P4 → P5) or in parallel after Phase 2
 - Polish (Final Phase): Depends on desired user stories being complete
 
 ### User Story Dependencies
@@ -138,7 +127,6 @@ Independent Test: Run Test Connection and see result with timing.
 - User Story 3 (P3): Starts after Foundational – independent (may integrate with US1/US2)
 - User Story 4 (P4): Starts after Foundational – independent (logically follows US2/US3 outputs)
 - User Story 5 (P5): Starts after Foundational – independent
-- User Story 6 (P6): Starts after Foundational – independent
 
 ## Parallel Opportunities
 
@@ -146,9 +134,8 @@ Independent Test: Run Test Connection and see result with timing.
 - [ ] US2: T011 [P]
 - [ ] US3: T012–T013 [P]
 - [ ] US4: None (sequential payload→sign)
-- [ ] US5: T017 [P]
-- [ ] US6: None
-- [ ] Polish: T019–T020 [P]
+- [ ] US5: None
+- [ ] Polish: T018–T019 [P]
 
 ## Parallel Example: User Story 1
 
@@ -163,5 +150,5 @@ Task: "T008 [US1] Ensure supportsWalletConnection/getAvailableConnectors parity"
 
 ## Implementation Strategy
 
-- [ ] MVP: Complete US1 only (connect wallet & show account)
-- [ ] Incrementally deliver US2 → US3 → US4 (export) → US5 → US6
+- [x] MVP: Complete US1 only (connect wallet & show account)
+- [x] Incrementally deliver US2 → US3 → US4 (export) → US5

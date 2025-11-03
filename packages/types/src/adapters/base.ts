@@ -9,14 +9,16 @@ import type {
   RelayerExecutionConfig,
 } from '../execution';
 import { type FieldType } from '../forms';
-import { type FormFieldType } from '../forms/form-field';
+import type { FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
+import type { AdapterExportBootstrap, AdapterExportContext } from './export';
 import type {
   AvailableUiKit,
   EcosystemReactUiProviderProps,
   EcosystemSpecificReactHooks,
   EcosystemWalletComponents,
+  FunctionDecorationsMap,
   UiKitConfiguration,
 } from './ui-enhancements';
 
@@ -70,6 +72,23 @@ export interface WalletConnectionStatus {
     name?: string;
     type?: string;
   };
+}
+
+/**
+ * Adapter-declared networking configuration form.
+ * Rendered by the application using DynamicFormField components.
+ */
+export interface NetworkServiceForm {
+  /** Stable identifier for the service (e.g., 'rpc', 'explorer', 'indexer') */
+  id: string;
+  /** User-facing label for tabs/sections */
+  label: string;
+  /** Optional description shown above the form */
+  description?: string;
+  /** Whether this service supports connection testing via testNetworkServiceConnection */
+  supportsConnectionTest?: boolean;
+  /** Form schema fields using the standard FormFieldType */
+  fields: FormFieldType[];
 }
 
 /**
@@ -155,13 +174,21 @@ export interface ContractAdapter {
 
   /**
    * Sign and broadcast a transaction
+   *
+   * @param transactionData - The formatted transaction data
+   * @param executionConfig - Configuration for the execution method (e.g., relayer settings)
+   * @param onStatusChange - Callback for transaction status updates
+   * @param runtimeApiKey - Optional API key or token for execution method (e.g., relayer API key)
+   * @param runtimeSecret - Optional runtime secret required by the adapter (e.g., organizer key for privacy circuits)
+   * @returns Transaction hash upon successful broadcast, and optionally the execution result if the ecosystem supports it
    */
   signAndBroadcast: (
     transactionData: unknown,
     executionConfig: ExecutionConfig,
     onStatusChange: (status: string, details: TransactionStatusUpdate) => void,
-    runtimeApiKey?: string
-  ) => Promise<{ txHash: string }>;
+    runtimeApiKey?: string,
+    runtimeSecret?: string
+  ) => Promise<{ txHash: string; result?: unknown }>;
 
   /**
    * Validate a blockchain address for this chain
@@ -568,4 +595,105 @@ export interface ContractAdapter {
    * @returns A deterministic hash string for quick comparison
    */
   hashContractDefinition?(definition: string): string;
+
+  /**
+   * (Optional) Provides adapter-specific files and initialization code for exported applications.
+   * This method enables adapters to bundle ecosystem-specific artifacts (e.g., Midnight contract artifacts)
+   * into exported applications in a chain-agnostic manner.
+   *
+   * The method receives context including form configuration, contract schema, network configuration,
+   * and any adapter-specific artifacts stored during contract loading.
+   *
+   * Example use case: Midnight adapter bundles ZK proof artifacts, contract modules, and witness code
+   * needed for offline transaction execution in exported apps.
+   *
+   * @param context - Export context containing form config, schema, network, and artifacts
+   * @returns Bootstrap configuration with files to include and initialization code, or null if not needed
+   */
+  getExportBootstrapFiles?(context: AdapterExportContext): Promise<AdapterExportBootstrap | null>;
+
+  /**
+   * Optional: guide when and how large artifacts should be persisted.
+   */
+  getArtifactPersistencePolicy?():
+    | {
+        mode: 'immediate' | 'deferredUntilFunctionSelected';
+        sizeThresholdBytes?: number;
+      }
+    | undefined;
+
+  /**
+   * Optional: prepare trimmed artifacts when a function is chosen.
+   */
+  prepareArtifactsForFunction?(args: {
+    functionId: string;
+    currentArtifacts: Record<string, unknown>;
+    definitionOriginal?: string | null;
+  }): Promise<{
+    persistableArtifacts?: Record<string, unknown>;
+    publicAssets?: Record<string, Uint8Array | Blob>;
+    bootstrapSource?: Record<string, unknown>;
+  }>;
+
+  /**
+   * (Optional) Returns metadata for a runtime secret field required by the ecosystem.
+   * This allows adapters to declare that forms should include a runtime-only secret field
+   * (not persisted, chain-specific e.g., organizer key for Midnight).
+   *
+   * When implemented, the builder will auto-add a 'runtimeSecret' field to forms for organizer-only functions,
+   * and the field can be customized like any other (hidden, hardcoded, etc.).
+   * The field value is passed to the adapter at execution time via the runtimeSecrets bag.
+   *
+   * @returns Binding metadata with key and display info, or undefined if not needed.
+   */
+  getRuntimeFieldBinding?():
+    | {
+        /**
+         * Unique key to bind the field value during execution (e.g., 'organizerSecret')
+         */
+        key: string;
+        /**
+         * Display label for the field
+         */
+        label: string;
+        /**
+         * Optional helper text for the field
+         */
+        helperText?: string;
+      }
+    | undefined;
+
+  /**
+   * (Optional) Returns a map of function IDs to their decorations.
+   * This allows adapters to add badges, notes, or other UI elements to specific functions.
+   *
+   * @returns A map of function IDs to their decorations.
+   */
+  getFunctionDecorations?(): Promise<FunctionDecorationsMap | undefined>;
+
+  /**
+   * Returns network service forms (e.g., RPC, Explorer, Indexer) this adapter supports.
+   * The UI renders these via DynamicFormField without chain-specific UI code.
+   */
+  getNetworkServiceForms(): NetworkServiceForm[];
+
+  /**
+   * Optional validation for a given service configuration prior to save.
+   */
+  validateNetworkServiceConfig?(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean>;
+
+  /**
+   * Optional connectivity test for a given service configuration.
+   */
+  testNetworkServiceConnection?(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{
+    success: boolean;
+    latency?: number;
+    error?: string;
+  }>;
 }

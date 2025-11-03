@@ -3,9 +3,9 @@ import { Control, useFormState, useWatch } from 'react-hook-form';
 
 import { DynamicFormField } from '@openzeppelin/ui-builder-renderer';
 import { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-types';
-import { BooleanField, SelectGroupedField, TextField } from '@openzeppelin/ui-builder-ui';
+import { Banner, BooleanField, SelectGroupedField, TextField } from '@openzeppelin/ui-builder-ui';
 
-import { OptionGroup } from './utils/fieldTypeUtils';
+import { OptionGroup, shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
 import { FieldEditorFormValues } from './types';
 
@@ -141,22 +141,26 @@ export function FieldBasicSettings({
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <TextField
-        id="field-label"
-        name="label"
-        label="Field Label"
-        control={control}
-        placeholder="Enter field label"
-      />
+      <div className={!shouldShowFieldTypeSelector(fieldType) ? 'md:col-span-2' : ''}>
+        <TextField
+          id="field-label"
+          name="label"
+          label="Field Label"
+          control={control}
+          placeholder="Enter field label"
+        />
+      </div>
 
-      <SelectGroupedField
-        id="field-type"
-        name="type"
-        label="Field Type"
-        control={control}
-        groups={fieldTypeGroups}
-        placeholder="Select field type"
-      />
+      {shouldShowFieldTypeSelector(fieldType) && (
+        <SelectGroupedField
+          id="field-type"
+          name="type"
+          label="Field Type"
+          control={control}
+          groups={fieldTypeGroups}
+          placeholder="Select field type"
+        />
+      )}
 
       <div className="md:col-span-2">
         <TextField
@@ -188,6 +192,12 @@ export function FieldBasicSettings({
 
       {isHardcoded && adapter && (
         <div className="space-y-4 border-t pt-4 md:col-span-2">
+          {fieldType === 'runtimeSecret' && (
+            <Banner variant="warning" title="Security Notice" dismissible={false}>
+              This runtime secret will be hardcoded and included in your exported application.
+              Ensure you understand the risks of exposing this value to your users.
+            </Banner>
+          )}
           <DynamicFormField
             key={`hardcoded-${field.id}-${fieldType}`}
             field={hardcodedFieldConfig}

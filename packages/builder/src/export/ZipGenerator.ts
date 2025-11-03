@@ -75,7 +75,7 @@ export class ZipGenerator {
    * @returns Promise resolving to the ZIP file data (Blob or Buffer)
    */
   async createZipFile(
-    files: Record<string, string>,
+    files: Record<string, string | Uint8Array | Blob>,
     fileName: string,
     options: ZipOptions = {}
   ): Promise<ZipResult> {
@@ -89,8 +89,8 @@ export class ZipGenerator {
         // Normalize path for consistent structure
         const normalizedPath = this.normalizePath(path);
 
-        // Add file to ZIP
-        zip.file(normalizedPath, content);
+        // Add file to ZIP (JSZip accepts string | Uint8Array | Blob)
+        zip.file(normalizedPath, content as string | Uint8Array | Blob);
         processedFiles++;
 
         // Report progress if callback provided

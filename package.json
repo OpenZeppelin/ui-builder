@@ -15,9 +15,11 @@
     "docker:dev": "docker-compose up --build",
     "docs": "oz-docs -c docs",
     "docs:watch": "oz-docs watch docs",
-    "build": "pnpm clean && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
+    "sync-patches": "node scripts/sync-patches-to-adapters.js",
+    "build": "pnpm clean && pnpm sync-patches && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
+    "test:export": "bash scripts/test-exported-app-local.sh",
     "coverage": "pnpm -r coverage",
     "preview": "pnpm --filter=@openzeppelin/ui-builder-app preview",
     "lint": "pnpm -r lint",
@@ -30,6 +32,7 @@
     "format:check": "pnpm -r format:check",
     "fix-all": "pnpm format && pnpm lint:fix",
     "ui:add": "pnpm --filter=@openzeppelin/ui-builder-app ui:add",
+    "postinstall": "node scripts/remove-midnight-sourcemaps.js",
     "prepare": "husky install",
     "test:coverage": "pnpm -r test:coverage",
     "storybook": "storybook dev -p 6006",
@@ -109,11 +112,13 @@
       "@wagmi/core": "^2.20.3"
     },
     "patchedDependencies": {
-      "@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch",
       "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch",
-      "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch"
+      "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch",
+      "@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-contracts": "patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch",
+      "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch"
     }
   },
   "dependencies": {

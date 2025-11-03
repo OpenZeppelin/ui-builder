@@ -27,10 +27,8 @@ export interface NetworkErrorContextValue {
   ) => void;
   clearError: (id: string) => void;
   clearAllErrors: () => void;
-  onOpenNetworkSettings?: (networkId: string, defaultTab?: 'rpc' | 'explorer') => void;
-  setOpenNetworkSettingsHandler: (
-    handler: (networkId: string, defaultTab?: 'rpc' | 'explorer') => void
-  ) => void;
+  onOpenNetworkSettings?: (networkId: string) => void;
+  setOpenNetworkSettingsHandler: (handler: (networkId: string) => void) => void;
 }
 
 export function useNetworkErrors(): NetworkErrorContextValue {

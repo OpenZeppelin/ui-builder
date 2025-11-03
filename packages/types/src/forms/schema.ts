@@ -80,4 +80,12 @@ export interface RenderFormSchema extends CommonFormProperties {
    * Note: Also stored at top-level in ContractUIRecord for database indexing/queries.
    */
   contractAddress: string;
+
+  /**
+   * Runtime-only secret values keyed by adapter binding key.
+   * These are populated from runtimeSecret fields at execution time.
+   * Not persisted; for fields like organizer keys that should only exist at runtime.
+   * Example: { organizerSecret: '0xabcd...' }
+   */
+  runtimeSecrets?: Record<string, string>;
 }

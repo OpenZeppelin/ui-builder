@@ -55,12 +55,14 @@ export function useContractWidgetState() {
       adapter: FullContractAdapter,
       networkConfig: NetworkConfig | null
     ) => {
-      if (!contractSchema || !contractAddress || !networkConfig) return null;
+      if (!contractAddress || !networkConfig) return null;
 
-      // Check if contract has any simple view functions (no parameters)
-      const hasViewFunctions = contractSchema.functions
-        .filter((fn) => adapter.isViewFunction(fn))
-        .some((fn) => fn.inputs.length === 0);
+      // Compute view functions only if schema is present
+      const hasViewFunctions =
+        !!contractSchema &&
+        contractSchema.functions
+          .filter((fn) => adapter.isViewFunction(fn))
+          .some((fn) => fn.inputs.length === 0);
 
       return {
         contractSchema,

@@ -6,7 +6,6 @@
 - `midnight/02-ingestion`
 - `midnight/03-auto-views`
 - `midnight/04-write-export`
-- `midnight/05-status`
 - `midnight/06-rpc`
 - `midnight/90-polish`  
   **Created**: 2025-10-11  
@@ -84,27 +83,12 @@ Users select a write function, customize the generated form, execute the transac
 
 **Acceptance Scenarios**:
 
-1. **Given** a write function, **When** the user customizes the form and executes with valid inputs, **Then** the transaction is signed via wallet and status/identifier with indexing summary is shown.
+1. **Given** a write function, **When** the user customizes the form and executes with valid inputs, **Then** the transaction is signed via wallet and a success confirmation is shown.
 2. **Given** the export step, **When** the user generates a React app, **Then** the app includes all required Midnight adapter dependencies and can run the same form and transaction successfully.
 
 ---
 
-### User Story 5 - Sign and broadcast a transaction (Priority: P5)
-
-Users can sign and submit a prepared transaction using their connected Midnight wallet and see a submission status and identifier.
-
-**Why this priority**: Unlocks end‑to‑end interaction; milestone beyond read‑only.
-
-**Independent Test**: From a prepared transaction, click Submit, approve in wallet, and verify the Builder shows a submitted identifier and status feedback.
-
-**Acceptance Scenarios**:
-
-1. **Given** a prepared transaction and connected wallet, **When** the user confirms in the wallet, **Then** the Builder shows a submitted identifier and a success status, alongside an indexing check summary.
-2. **Given** the user rejects in the wallet, **When** control returns to the Builder, **Then** the UI shows a clear rejection message and returns to a safe state.
-
----
-
-### User Story 6 - Test RPC connectivity (Priority: P6)
+### User Story 5 - Test RPC connectivity (Priority: P5)
 
 Users can run a network connectivity check for the selected Midnight network and see latency/success feedback.
 
@@ -134,8 +118,7 @@ Users can run a network connectivity check for the selected Midnight network and
 - Contract definition inputs are malformed or incomplete.
 - A function marked view is actually unavailable at runtime.
 - Long‑running operations (e.g., proofing) exceed user attention thresholds.
-- No public explorer available; transaction status still needs to be communicated.
-- Indexing delays cause data to be temporarily unavailable after submission.
+
 - Exported app missing dependencies or adapter configuration for Midnight.
 
 ## Requirements _(mandatory)_
@@ -153,14 +136,13 @@ Users can run a network connectivity check for the selected Midnight network and
 - **FR-004 (Validation)**: The Builder MUST validate contract inputs and display actionable error messages on failure.
 - **FR-005 (View Calls)**: Users MUST be able to execute read‑only functions and see decoded results or clear errors (v1: parameter‑less auto‑views; no parameter input UI).
 - **FR-006 (Prepare Transaction)**: Users MUST be able to populate a write function for execution. (No separate preview UI in v1; follow existing Builder behavior.)
-- **FR-007 (Sign & Broadcast)**: Users MUST be able to sign and submit a transaction using their connected wallet and see a submission identifier and status feedback.
+- **FR-007 (Sign & Broadcast)**: Users MUST be able to sign and submit a transaction using their connected wallet.
 - **FR-008 (Connectivity Test)**: Users MUST be able to test network connectivity and see success/failure and latency.
 - **FR-009 (Status & Errors)**: All operations MUST provide progress feedback and human‑readable errors without exposing internal details.
 - **FR-010 (Parity with Adapters)**: Behaviors MUST be consistent with established patterns in EVM and Stellar adapters where applicable (e.g., network‑aware, phased execution, diagnostics).
 
 **FR-011 (Execution Methods v1)**: Initial release MUST support direct wallet signing only; relayer or other methods are out of scope for v1.
 **FR-012 (Required Contract Inputs)**: The contract definition inputs MUST match `getContractDefinitionInputs()` in the adapter: `contractAddress` (required), `privateStateId` (required), `contractSchema` (.d.ts, required), `contractModule` (.cjs, required), and optional `witnessCode`.
-**FR-013 (Post‑Submission Status)**: After successful submission, the UI MUST display a transaction identifier and an indexing check summary that indicates whether indexing has been observed or may require additional time.
 **FR-014 (Automatic View Rendering)**: The system MUST automatically render parameter‑less view functions via `ContractStateWidget` with graceful error handling.
 **FR-015 (Export Parity)**: The export feature MUST include Midnight adapter dependencies and configuration so the generated React app runs wallet connection, contract loading, simple views, and write‑function execution consistent with in‑Builder behavior.
 **FR-016 (Contract Ingestion Persistence)**: The system MUST persist necessary contract definition inputs for later steps and reliably load the contract schema; failure cases must show actionable errors.
@@ -176,7 +158,7 @@ Users can run a network connectivity check for the selected Midnight network and
 - **FunctionDefinition**: A callable function’s metadata, including whether it modifies state.
 - **TransactionPayload**: Prepared data derived from user inputs for a write function.
 - **ExecutionConfig**: For v1, defaults to direct wallet signing only.
-- **TxStatus**: Submission identifier and progress states shown to the user.
+
 - **ExportManifest**: The list of packages, configuration, and files required for a Midnight‑ready exported app.
 
 ## Dependencies & Assumptions (optional)
@@ -198,5 +180,5 @@ Users can run a network connectivity check for the selected Midnight network and
 - **SC-001**: Users can connect or cancel the wallet flow and return to a stable UI state in under 30 seconds.
 - **SC-002**: Contract loading with valid inputs completes with a visible function list in under 10 seconds, 90% of the time.
 - **SC-003**: 95% of view calls with valid inputs return a readable result or a clear error message within 5 seconds.
-- **SC-004**: 90% of transaction submissions with user approval return a submission identifier and success message without requiring a page reload.
+- **SC-004**: 90% of transaction submissions with user approval return a success confirmation without requiring a page reload.
 - **SC-005**: Network test feedback appears in under 5 seconds for reachable endpoints and shows a clear failure message for unreachable ones.
