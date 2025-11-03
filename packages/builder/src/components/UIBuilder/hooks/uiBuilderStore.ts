@@ -25,6 +25,8 @@ export interface ContractState {
   proxyInfo: ProxyInfo | null;
   error: string | null;
   contractDefinitionArtifacts: Record<string, unknown> | null;
+  requiredInputSnapshot: Record<string, unknown> | null;
+  requiresManualReload: boolean;
 }
 
 export interface UIBuilderState {
@@ -102,9 +104,11 @@ export interface UIBuilderActions {
     original: string;
     proxyInfo?: ProxyInfo | null;
     contractDefinitionArtifacts?: Record<string, unknown> | null;
+    requiredInputSnapshot?: Record<string, unknown> | null;
   }) => void;
   setContractDefinitionError: (error: string) => void;
   acceptCurrentContractDefinition: () => void;
+  markManualReloadRequired: () => void;
 }
 
 const initialContractState: ContractState = {
@@ -118,6 +122,8 @@ const initialContractState: ContractState = {
   proxyInfo: null,
   error: null,
   contractDefinitionArtifacts: null,
+  requiredInputSnapshot: null,
+  requiresManualReload: false,
 };
 
 const initialState: UIBuilderState = {
@@ -265,6 +271,8 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
             string,
             unknown
           > | null,
+          requiredInputSnapshot: null,
+          requiresManualReload: false,
           formValues: (() => {
             const formValues: FormValues = {
               contractAddress: savedConfig.contractAddress,
@@ -347,6 +355,8 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
             ...state.contractState.formValues,
             contractDefinition: definition,
           },
+          requiredInputSnapshot: null,
+          requiresManualReload: false,
         },
         needsContractDefinitionLoad: true,
       }));
@@ -373,6 +383,8 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
             ...state.contractState.formValues,
             contractDefinition: undefined,
           },
+          requiredInputSnapshot: null,
+          requiresManualReload: false,
         },
       }));
     },
@@ -405,6 +417,11 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
               : result.original, // Normal case: use fresh as baseline
           definitionJson: result.original,
           contractDefinitionArtifacts: result.contractDefinitionArtifacts || null,
+          requiredInputSnapshot:
+            typeof result.requiredInputSnapshot !== 'undefined'
+              ? result.requiredInputSnapshot
+              : currentState.contractState.requiredInputSnapshot,
+          requiresManualReload: false,
         },
         needsContractDefinitionLoad: false,
       });
@@ -428,6 +445,24 @@ export const uiBuilderStoreVanilla = createStore<UIBuilderState & UIBuilderActio
           definitionOriginal: state.contractState.definitionJson,
         },
       }));
+    },
+
+    markManualReloadRequired: () => {
+      const currentState = get();
+      if (!currentState.contractState.requiredInputSnapshot) {
+        return;
+      }
+
+      if (currentState.contractState.requiresManualReload) {
+        return;
+      }
+
+      set({
+        contractState: {
+          ...currentState.contractState,
+          requiresManualReload: true,
+        },
+      });
     },
   })
 );
@@ -473,4 +508,5 @@ export const uiBuilderStore = {
   setContractDefinitionResult: uiBuilderStoreVanilla.getState().setContractDefinitionResult,
   setContractDefinitionError: uiBuilderStoreVanilla.getState().setContractDefinitionError,
   acceptCurrentContractDefinition: uiBuilderStoreVanilla.getState().acceptCurrentContractDefinition,
+  markManualReloadRequired: uiBuilderStoreVanilla.getState().markManualReloadRequired,
 };

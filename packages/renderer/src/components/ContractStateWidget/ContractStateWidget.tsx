@@ -1,5 +1,5 @@
 import { FileText, Loader2, Minimize2 } from 'lucide-react';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect, useMemo, useState } from 'react';
 
 import type {
   ContractFunction,
@@ -41,12 +41,21 @@ export function ContractStateWidget({
 
   const networkConfig = adapter?.networkConfig;
 
+  // Preserve the last known schema so transient reloads don't flip the UI to a loading state
+  const [lastSchema, setLastSchema] = useState<ContractSchema | null>(contractSchema ?? null);
+  useEffect(() => {
+    if (contractSchema) {
+      setLastSchema(contractSchema);
+    }
+  }, [contractSchema]);
+  const effectiveSchema = useMemo(() => contractSchema ?? lastSchema, [contractSchema, lastSchema]);
+
   useEffect((): void => {
-    if (!contractSchema || !adapter) return;
+    if (!effectiveSchema || !adapter) return;
     // Filter functions to only simple view functions (no parameters)
-    const viewFns = contractSchema.functions.filter((fn) => adapter.isViewFunction(fn));
+    const viewFns = effectiveSchema.functions.filter((fn) => adapter.isViewFunction(fn));
     setViewFunctions(viewFns.filter((fn) => fn.inputs.length === 0));
-  }, [contractSchema, adapter]);
+  }, [effectiveSchema, adapter]);
 
   // Control the animation state based on isVisible prop changes
   useEffect(() => {
@@ -136,7 +145,7 @@ export function ContractStateWidget({
               <p className="font-medium text-center">Error loading contract state</p>
               <p className="mt-1 text-xs text-center">{error.message}</p>
             </div>
-          ) : !contractSchema || !adapter ? (
+          ) : (!effectiveSchema && !lastSchema) || !adapter ? (
             <div className="flex flex-col items-center justify-center h-full space-y-3 py-6">
               <Loader2 className="h-8 w-8 text-primary animate-spin opacity-70" />
               <div className="text-center space-y-1">
@@ -148,12 +157,12 @@ export function ContractStateWidget({
                 </p>
               </div>
             </div>
-          ) : viewFunctions.length > 0 ? (
+          ) : viewFunctions.length > 0 && effectiveSchema ? (
             <ViewFunctionsPanel
               functions={viewFunctions}
               contractAddress={contractAddress}
               adapter={adapter}
-              contractSchema={contractSchema}
+              contractSchema={effectiveSchema}
               className="flex-grow flex flex-col min-h-0"
             />
           ) : (

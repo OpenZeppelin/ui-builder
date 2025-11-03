@@ -4,6 +4,7 @@ import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/
 import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
+import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
 interface UseAutoContractLoadProps {
   debouncedValues: FormValues;
@@ -63,6 +64,11 @@ export function useAutoContractLoad({
         (adapter && hasMissingRequiredContractInputs(adapter, debouncedValues)) ||
         !canAttemptLoad(debouncedValues)
       ) {
+        return;
+      }
+
+      const { contractState } = uiBuilderStore.getState();
+      if (contractState.requiredInputSnapshot) {
         return;
       }
 

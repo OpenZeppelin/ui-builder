@@ -44,6 +44,7 @@ export function StepContractDefinition({
     definitionJson: contractDefinitionJson,
     error: contractDefinitionError,
     source: contractDefinitionSource,
+    requiresManualReload,
   } = contractState;
 
   const contractDefinitionInputs = useMemo(
@@ -97,6 +98,12 @@ export function StepContractDefinition({
     adapter,
     debouncedValues,
   });
+
+  const handleManualReload = useCallback(() => {
+    if (!debouncedValues) return;
+    markAttempted(debouncedValues);
+    void loadContract(debouncedValues);
+  }, [debouncedValues, loadContract, markAttempted]);
 
   // Automatic contract loading
   useAutoContractLoad({
@@ -174,6 +181,9 @@ export function StepContractDefinition({
           loadedConfigurationId={loadedConfigurationId}
           adapter={adapter}
           onIgnoreProxy={handleIgnoreProxy}
+          requiresManualReload={requiresManualReload}
+          onManualReload={handleManualReload}
+          isReloading={isLoading}
         />
       )}
     </div>

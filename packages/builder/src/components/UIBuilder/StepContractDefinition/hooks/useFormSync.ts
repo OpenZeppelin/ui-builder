@@ -1,7 +1,12 @@
 import { useEffect } from 'react';
 
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
-import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
+import {
+  buildRequiredInputSnapshot,
+  hasMissingRequiredContractInputs,
+  normalizeAddress,
+  requiredSnapshotsEqual,
+} from '@openzeppelin/ui-builder-utils';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -39,32 +44,57 @@ export function useFormSync({
 
   // Sync contract address to store for auto-save
   useEffect(() => {
-    if (contractAddressValue && typeof contractAddressValue === 'string') {
-      // Only update if address changed to prevent unnecessary updates
-      if (currentContractAddress !== contractAddressValue) {
-        // Reset dedup state for the previous address so re-typing it will reload
+    const normalizedInput = normalizeAddress(contractAddressValue);
+    const normalizedCurrent = normalizeAddress(currentContractAddress);
+
+    if (normalizedInput) {
+      // Only treat as changed if the normalized values differ
+      if (normalizedCurrent !== normalizedInput) {
         if (networkId && currentContractAddress) {
           contractDefinitionService.reset(networkId, currentContractAddress);
         }
-        uiBuilderStore.updateState((s) => ({
-          contractState: {
-            ...s.contractState,
-            // Update the active address and clear any loaded schema/error to force a reload
-            address: contractAddressValue,
-            schema: null,
-            error: null,
-            // Clear contract definition fields so storage doesn't compare against previous contract
-            definitionJson: null,
-            definitionOriginal: null,
-            source: null,
-            metadata: null,
-          },
-          // Mark that we need to (re)load the contract definition for the new address
-          needsContractDefinitionLoad: true,
-        }));
 
-        // Reset function selection and form config to avoid ABI mismatch with the new address
-        uiBuilderStore.resetDownstreamSteps('contract');
+        uiBuilderStore.updateState((s) => {
+          const nextFormValues: FormValues = {
+            ...(s.contractState.formValues || {}),
+            contractAddress: contractAddressValue ?? '',
+          } as FormValues;
+
+          if (!s.contractState.requiredInputSnapshot) {
+            return {
+              contractState: {
+                ...s.contractState,
+                address: contractAddressValue ?? null,
+                schema: null,
+                error: null,
+                definitionJson: null,
+                definitionOriginal: null,
+                source: null,
+                metadata: null,
+                formValues: nextFormValues,
+                requiredInputSnapshot: null,
+                requiresManualReload: false,
+              },
+              needsContractDefinitionLoad: true,
+            };
+          }
+
+          return {
+            contractState: {
+              ...s.contractState,
+              address: contractAddressValue ?? null,
+              error: null,
+              formValues: nextFormValues,
+            },
+          };
+        });
+
+        const state = uiBuilderStore.getState();
+        if (state.contractState.requiredInputSnapshot) {
+          uiBuilderStore.markManualReloadRequired();
+        } else {
+          uiBuilderStore.resetDownstreamSteps('contract');
+        }
       }
     } else if (currentContractAddress) {
       // If the input was cleared, reflect that in the store and stop loading attempts
@@ -84,6 +114,8 @@ export function useFormSync({
           metadata: null,
           // Ensure form defaults also reflect the cleared input so it isn't reinstated by a reset
           formValues: { contractAddress: '' },
+          requiredInputSnapshot: null,
+          requiresManualReload: false,
         },
         needsContractDefinitionLoad: false,
       }));
@@ -91,7 +123,7 @@ export function useFormSync({
       // Also reset downstream when address is cleared entirely
       uiBuilderStore.resetDownstreamSteps('contract');
     }
-  }, [contractAddressValue, currentContractAddress]);
+  }, [contractAddressValue, currentContractAddress, networkId]);
 
   // Sync adapter-declared artifact inputs generically into contractDefinitionArtifacts
   useEffect(() => {
@@ -141,7 +173,11 @@ export function useFormSync({
             } as FormValues)
           : false;
 
-        if (!prevHadAll && nowHasAll) {
+        if (
+          !prevHadAll &&
+          nowHasAll &&
+          !uiBuilderStore.getState().contractState.requiredInputSnapshot
+        ) {
           uiBuilderStore.updateState((s) => ({
             ...s,
             needsContractDefinitionLoad: true,
@@ -150,6 +186,20 @@ export function useFormSync({
       }
     } catch {
       // no-op on adapter errors
+    }
+  }, [adapter, debouncedValues]);
+
+  useEffect(() => {
+    if (!adapter || !debouncedValues) return;
+    const state = uiBuilderStore.getState();
+    const snapshot = state.contractState.requiredInputSnapshot;
+    if (!snapshot) return;
+
+    const currentSnapshot = buildRequiredInputSnapshot(adapter, debouncedValues);
+    if (!currentSnapshot) return;
+
+    if (!requiredSnapshotsEqual(snapshot, currentSnapshot)) {
+      uiBuilderStore.markManualReloadRequired();
     }
   }, [adapter, debouncedValues]);
 }

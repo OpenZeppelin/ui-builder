@@ -1,7 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
-import { hasMissingRequiredContractInputs, simpleHash } from '@openzeppelin/ui-builder-utils';
+import {
+  buildRequiredInputSnapshot,
+  hasMissingRequiredContractInputs,
+  simpleHash,
+} from '@openzeppelin/ui-builder-utils';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';
@@ -144,6 +148,7 @@ export function useContractLoader({ adapter, ignoreProxy }: UseContractLoaderPro
           original: result.contractDefinitionOriginal ?? '',
           proxyInfo: result.proxyInfo,
           contractDefinitionArtifacts: result.contractDefinitionArtifacts ?? null,
+          requiredInputSnapshot: buildRequiredInputSnapshot(adapter, data),
         });
       } catch (err) {
         // Update circuit breaker

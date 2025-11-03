@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
-import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
+import {
+  buildRequiredInputSnapshot,
+  hasMissingRequiredContractInputs,
+} from '@openzeppelin/ui-builder-utils';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
@@ -82,6 +85,7 @@ export function useUIBuilderState() {
         metadata: metadata ?? {},
         original: originalDefinition ?? '',
         contractDefinitionArtifacts: artifacts ?? null,
+        requiredInputSnapshot: buildRequiredInputSnapshot(activeAdapter, formValues),
       });
     },
     onError: (err) => {
@@ -161,10 +165,7 @@ export function useUIBuilderState() {
 
   const sidebarWidget = useMemo(
     () =>
-      state.contractState.schema &&
-      state.contractState.address &&
-      activeAdapter &&
-      activeNetworkConfig
+      state.contractState.address && activeAdapter && activeNetworkConfig
         ? contractWidget.createWidgetProps(
             state.contractState.schema,
             state.contractState.address,
