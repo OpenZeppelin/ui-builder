@@ -1,5 +1,6 @@
 export * from './contractInputs';
 export * from './requiredInputs';
+export * from './addressNormalization';
 export * from './logger';
 export * from './AppConfigService';
 export * from './UserRpcConfigService';

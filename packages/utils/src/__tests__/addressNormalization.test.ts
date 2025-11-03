@@ -83,4 +83,3 @@ describe('addressesEqual', () => {
     expect(addressesEqual(address2, address3)).toBe(true);
   });
 });
-
