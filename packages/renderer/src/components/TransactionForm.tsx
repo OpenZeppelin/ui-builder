@@ -1,3 +1,4 @@
+import { AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -13,6 +14,7 @@ import { ExecutionConfigDisplay } from './ExecutionConfigDisplay/ExecutionConfig
 import { TransactionExecuteButton } from './transaction/TransactionExecuteButton';
 
 import { createDefaultFormValues } from '../utils/formUtils';
+import { extractRuntimeSecrets } from '../utils/runtimeSecretExtractor';
 import { DynamicFormField } from './DynamicFormField';
 import { TransactionStatusDisplay } from './transaction';
 
@@ -50,6 +52,8 @@ export function TransactionForm({
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
+  const [txStatusDetails, setTxStatusDetails] = useState<TransactionStatusUpdate | null>(null);
+  const [txResult, setTxResult] = useState<unknown | null>(null);
 
   // Derive networkConfig from the adapter instance
   const networkConfig = adapter.networkConfig;
@@ -63,6 +67,10 @@ export function TransactionForm({
   // Destructure necessary parts of formState to ensure re-renders
   const { isValid } = methods.formState;
 
+  // Determine if the current function can execute locally (chain-agnostic check)
+  const currentFunction = contractSchema?.functions.find((fn) => fn.id === schema.functionId);
+  const canExecuteLocally = currentFunction?.stateMutability === 'pure';
+
   // Reset form when schema changes
   useEffect(() => {
     methods.reset(createDefaultFormValues(schema.fields, schema.defaultValues));
@@ -71,6 +79,8 @@ export function TransactionForm({
     setTxError(null);
     setFormError(null);
     setExecutionConfigError(null);
+    setTxStatusDetails(null);
+    setTxResult(null);
   }, [schema, methods]);
 
   // Effect to validate executionConfig
@@ -103,6 +113,8 @@ export function TransactionForm({
     setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
+    setTxStatusDetails(null);
+    setTxResult(null);
 
     if (!adapter) {
       logger.error('TransactionForm', 'Adapter not provided.');
@@ -110,7 +122,10 @@ export function TransactionForm({
       setTxStatus('error');
       return;
     }
-    if (!isWalletConnected) {
+
+    // Check if this function can execute locally (doesn't require wallet connection)
+    // Chain-agnostic check: functions with stateMutability === 'pure' can execute locally
+    if (!canExecuteLocally && !isWalletConnected) {
       logger.warn('TransactionForm', 'Wallet not connected for submission.');
       setTxError('Please connect your wallet to submit the transaction.');
       setTxStatus('error');
@@ -118,11 +133,13 @@ export function TransactionForm({
     }
 
     try {
-      setTxStatus('pendingSignature');
+      // Extract runtime secrets from form data and remove them from contract args
+      const { contractArgs, runtimeSecrets } = extractRuntimeSecrets(data, schema.fields);
+
       const formattedData = adapter.formatTransactionData(
         contractSchema,
         schema.functionId as string,
-        data,
+        contractArgs,
         schema.fields
       );
       logger.info('TransactionForm', 'Formatted transaction data:', formattedData);
@@ -130,6 +147,7 @@ export function TransactionForm({
       const onStatusChange = (status: string, details: TransactionStatusUpdate): void => {
         logger.info('TransactionForm', `Status Update: ${status}`, details);
         setTxStatus(status as TxStatus);
+        setTxStatusDetails(details);
         if (details.transactionId) {
           setTxHash(details.transactionId); // Show relayer ID
         }
@@ -138,16 +156,34 @@ export function TransactionForm({
         }
       };
 
+      // Pass first runtime secret via runtimeApiKey parameter
+      // Adapters can implement getRuntimeFieldBinding() to customize secret handling
+      const firstSecretValue = Object.values(runtimeSecrets)[0];
+
       // The initial status is set by the strategy via the callback
-      const { txHash: finalTxHash } = await adapter.signAndBroadcast(
+      const { txHash: finalTxHash, result } = await adapter.signAndBroadcast(
         formattedData,
         executionConfig || { method: 'eoa', allowAny: true },
         onStatusChange,
-        runtimeApiKey
+        runtimeApiKey, // Execution method credential (e.g., relayer API key)
+        firstSecretValue // Adapter-specific runtime secret (e.g., organizer key)
       );
 
       logger.info('TransactionForm', `Transaction submitted with final hash: ${finalTxHash}`);
       setTxHash(finalTxHash);
+
+      // Store result if provided (e.g., from local execution or blockchain transactions that return values)
+      if (result !== undefined) {
+        setTxResult(result);
+        logger.info('TransactionForm', 'Execution result received:', result);
+      }
+
+      // Functions that execute locally don't need confirmation - they complete immediately
+      if (canExecuteLocally) {
+        setTxStatus('success');
+        setTxError(null);
+        return;
+      }
 
       // --> Start: Wait for confirmation <--
       if (adapter.waitForTransactionConfirmation) {
@@ -249,6 +285,8 @@ export function TransactionForm({
     setTxStatus('idle');
     setTxHash(null);
     setTxError(null);
+    setTxStatusDetails(null);
+    setTxResult(null);
   };
 
   // Get explorer URL for the transaction
@@ -299,6 +337,11 @@ export function TransactionForm({
               error={txError}
               explorerUrl={txHash ? getExplorerTxUrl(txHash) : null}
               onClose={handleResetStatus}
+              customTitle={txStatusDetails?.title}
+              customMessage={txStatusDetails?.message}
+              result={txResult}
+              functionDetails={currentFunction}
+              adapter={adapter}
             />
           </div>
         )}
@@ -308,6 +351,14 @@ export function TransactionForm({
           noValidate
           onSubmit={methods.handleSubmit(executeTransaction)}
         >
+          {/* Display Execution Config Error (if any) */}
+          {executionConfigError && (
+            <div className="form-error rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+              <AlertCircle className="mr-2 h-4 w-4" />
+              {executionConfigError}
+            </div>
+          )}
+
           <div className="mb-6">{renderFormContent()}</div>
 
           {/* Execution Config Display - Placed above the form actions */}
@@ -330,6 +381,8 @@ export function TransactionForm({
                 isSubmitting={txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation'}
                 isFormValid={isValid && executionConfigError === null}
                 variant={getButtonVariant()}
+                functionDetails={currentFunction}
+                canExecuteLocally={canExecuteLocally}
               />
             </div>
           </div>

@@ -9,6 +9,7 @@ import type {
   FieldType,
   FormFieldType,
   FunctionParameter,
+  NetworkServiceForm,
   RelayerDetails,
   RelayerDetailsRich,
   SolanaNetworkConfig,
@@ -20,6 +21,12 @@ import { isSolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import {
+  getSolanaNetworkServiceForms,
+  testSolanaNetworkServiceConnection,
+  validateSolanaNetworkServiceConfig,
+} from './configuration/network-services';
+
+import {
   getSolanaExplorerAddressUrl,
   getSolanaExplorerTxUrl,
   getSolanaSupportedExecutionMethods,
@@ -27,7 +34,6 @@ import {
   validateSolanaExecutionConfig,
   validateSolanaRpcEndpoint,
 } from './configuration';
-// Import implementations from modules
 import {
   generateSolanaDefaultField,
   getSolanaCompatibleFieldTypes,
@@ -69,6 +75,24 @@ export class SolanaAdapter implements ContractAdapter {
       'SolanaAdapter',
       `Adapter initialized for network: ${networkConfig.name} (ID: ${networkConfig.id})`
     );
+  }
+
+  public getNetworkServiceForms(): NetworkServiceForm[] {
+    return getSolanaNetworkServiceForms();
+  }
+
+  public async validateNetworkServiceConfig(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean> {
+    return validateSolanaNetworkServiceConfig(serviceId, values);
+  }
+
+  public async testNetworkServiceConnection(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{ success: boolean; latency?: number; error?: string }> {
+    return testSolanaNetworkServiceConnection(serviceId, values);
   }
 
   async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {

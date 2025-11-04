@@ -82,6 +82,7 @@ export function useBuilderLifecycle(
           contractDefinitionOriginal: savedUI.contractDefinitionOriginal,
           contractDefinitionSource: savedUI.contractDefinitionSource,
           contractDefinitionMetadata: savedUI.contractDefinitionMetadata,
+          contractDefinitionArtifacts: savedUI.contractDefinitionArtifacts,
         });
 
         // Set the active network to trigger wallet connection and network switch

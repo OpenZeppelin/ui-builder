@@ -11,7 +11,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 'my-unique-state-id',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -23,7 +23,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 'my-unique-state-id',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
         contractModule: 'module.exports = {};',
         witnessCode: 'export const witnesses = {};',
       };
@@ -53,7 +53,7 @@ describe('Midnight Contract Artifacts', () => {
     it('should return false for object without contractAddress', () => {
       const artifacts = {
         privateStateId: 'my-unique-state-id',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -64,7 +64,7 @@ describe('Midnight Contract Artifacts', () => {
     it('should return false for object without privateStateId', () => {
       const artifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -72,7 +72,7 @@ describe('Midnight Contract Artifacts', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false for object without contractSchema', () => {
+    it('should return false for object without contractDefinition', () => {
       const artifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 'my-unique-state-id',
@@ -87,7 +87,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts = {
         contractAddress: 123,
         privateStateId: 'my-unique-state-id',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -99,7 +99,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 123,
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -107,11 +107,11 @@ describe('Midnight Contract Artifacts', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false for object with non-string contractSchema', () => {
+    it('should return false for object with non-string contractDefinition', () => {
       const artifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 'my-unique-state-id',
-        contractSchema: 123,
+        contractDefinition: 123,
       };
 
       const result = isMidnightContractArtifacts(artifacts);
@@ -123,7 +123,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts = {
         contractAddress: 'ct1q8ej4px2k3z9x5y6w7v8u9t0r1s2q3p4o5n6m7l8k9j0h1g2f3e4d5c6b7a8z9x0',
         privateStateId: 'my-unique-state-id',
-        contractSchema: 'export interface MyContract { test(): Promise<void>; }',
+        contractDefinition: 'export interface MyContract { test(): Promise<void>; }',
         extraProperty: 'should be ignored',
         anotherExtra: 42,
       };
@@ -137,7 +137,7 @@ describe('Midnight Contract Artifacts', () => {
       const artifacts = {
         contractAddress: '',
         privateStateId: '',
-        contractSchema: '',
+        contractDefinition: '',
       };
 
       const result = isMidnightContractArtifacts(artifacts);

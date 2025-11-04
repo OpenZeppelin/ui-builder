@@ -9,11 +9,10 @@ export interface SourcifyAbiResult {
   originalAbi: string;
 }
 
-const SOURCIFY_APP_BASE = 'https://sourcify.dev';
+const SOURCIFY_APP_BASE = 'https://repo.sourcify.dev';
 
 export function getSourcifyContractAppUrl(chainId: number, address: string): string {
-  const normalizedAddress = address.toLowerCase();
-  return `${SOURCIFY_APP_BASE}/status/${chainId}/${normalizedAddress}`;
+  return `${SOURCIFY_APP_BASE}/${chainId}/${address}`;
 }
 
 const SOURCIFY_API_BASE = 'https://sourcify.dev/server/v2';

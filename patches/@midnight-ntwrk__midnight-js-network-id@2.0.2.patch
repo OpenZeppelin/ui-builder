@@ -1,0 +1,16 @@
+diff --git a/package.json b/package.json
+index 39b11e0d413c5987259cf6a528ccb18689447b7a..e7ac9b6b41fb1e383e1271374be595647d4d56fc 100644
+--- a/package.json
++++ b/package.json
+@@ -24,5 +24,10 @@
+   },
+   "files": [
+     "dist/"
+-  ]
++  ],
++  "dependencies": {
++    "@midnight-ntwrk/compact-runtime": "0.9.0",
++    "@midnight-ntwrk/ledger": "4.0.0",
++    "@midnight-ntwrk/zswap": "4.0.0"
++  }
+ }

@@ -349,6 +349,17 @@ function getFieldSpecificProps(
         enumMetadata: field.enumMetadata,
         renderPayloadField: renderFunctions.renderPayloadField,
       };
+    case 'select':
+      // Pass options through to SelectField
+      return {
+        options: field.options || [],
+        defaultValue: (field.defaultValue as string | undefined) || undefined,
+      };
+    case 'radio':
+      // Pass options through to RadioField
+      return {
+        options: field.options || [],
+      };
     case 'map':
       // Extract map-specific props using memoized render functions
       return {

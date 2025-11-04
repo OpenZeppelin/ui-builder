@@ -1,7 +1,8 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Button, NetworkSettingsDialog, useNetworkErrors } from '@openzeppelin/ui-builder-ui';
+import { NetworkSettingsDialog } from '@openzeppelin/ui-builder-renderer';
+import { Button, useNetworkErrors } from '@openzeppelin/ui-builder-ui';
 
 import { useWalletState } from '../hooks/WalletStateContext';
 import { WalletConnectionUI } from './WalletConnectionUI';
@@ -16,14 +17,13 @@ export const WalletConnectionWithSettings: React.FC = () => {
 
   // Network settings dialog state
   const [showNetworkSettings, setShowNetworkSettings] = useState(false);
-  const [defaultTab, setDefaultTab] = useState<'rpc' | 'explorer'>('rpc');
 
   // Create a stable callback for opening network settings
   const openNetworkSettings = useCallback(
-    (networkId: string, tab: 'rpc' | 'explorer' = 'rpc') => {
+    (networkId: string) => {
       // In exported apps, we only support the current network
+      // The dialog will show tabs based on adapter.getNetworkServiceForms()
       if (activeNetworkConfig && networkId === activeNetworkConfig.id) {
-        setDefaultTab(tab);
         setShowNetworkSettings(true);
       }
     },
@@ -64,7 +64,6 @@ export const WalletConnectionWithSettings: React.FC = () => {
         onOpenChange={setShowNetworkSettings}
         networkConfig={activeNetworkConfig}
         adapter={activeAdapter}
-        defaultTab={defaultTab}
       />
     </>
   );

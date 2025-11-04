@@ -1,6 +1,7 @@
 export * from './accordion';
 export * from './address-display';
 export * from './alert';
+export * from './banner';
 export * from './button';
 export * from './card';
 export * from './checkbox';

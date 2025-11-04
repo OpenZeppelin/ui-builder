@@ -39,6 +39,31 @@ To run a specific test suite:
 pnpm --filter @openzeppelin/ui-builder-app test src/export/__tests__/ExportStructureTests.test.ts
 ```
 
+### Testing Exported Apps Locally
+
+To test an exported app (via UI) with local packages (useful for testing unreleased changes):
+
+```bash
+pnpm test:export "exports/your-app-name"
+```
+
+This command will:
+
+1. Build all local packages
+2. Pack them to `.tgz` files
+3. Copy the exported app to a temporary directory
+4. Replace all `@openzeppelin/ui-builder-*` dependencies with local `file:` paths
+5. Copy Midnight SDK patches (if applicable)
+6. Update Tailwind 4 import to use local monorepo source
+7. Install dependencies with fresh lock file
+8. Optionally start the dev server for manual testing
+
+This is particularly useful for:
+
+- Testing adapter changes before publishing
+- Debugging export issues with local modifications
+- Validating that exported apps work with the latest monorepo code
+
 ## Test Categories
 
 ### Structure Tests
@@ -220,9 +245,7 @@ it('should export with workspace dependencies for local development', async () =
   const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
 
   const packageJson = JSON.parse(files['package.json']);
-  expect(packageJson.dependencies['@openzeppelin/ui-builder-renderer']).toBe(
-    'workspace:*'
-  );
+  expect(packageJson.dependencies['@openzeppelin/ui-builder-renderer']).toBe('workspace:*');
 });
 
 it('should export with published dependencies for production', async () => {

@@ -1,3 +1,4 @@
+import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 
@@ -90,6 +91,22 @@ export function useExecutionMethodState({
     [adapter, onUpdateConfig]
   );
 
+  // Debounced version for user input changes to prevent excessive re-renders
+  const debouncedValidateConfig = useMemo(
+    () =>
+      debounce((config: ExecutionConfig | undefined) => {
+        validateExecutionConfigForBuilder(config);
+      }, 300),
+    [validateExecutionConfigForBuilder]
+  );
+
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedValidateConfig.cancel();
+    };
+  }, [debouncedValidateConfig]);
+
   //---------------------------------------------------------------------------
   // Effects
   //---------------------------------------------------------------------------
@@ -163,7 +180,7 @@ export function useExecutionMethodState({
     validateExecutionConfigForBuilder(configToValidate);
   }, [currentConfigKey, validateExecutionConfigForBuilder]);
 
-  // Effect 3: Watch for user form input changes and trigger validation
+  // Effect 3: Watch for user form input changes and trigger debounced validation
   useEffect(() => {
     const watchCallback: WatchObserver<ExecutionMethodFormData> = (value, { type }) => {
       if (type === undefined) {
@@ -171,11 +188,12 @@ export function useExecutionMethodState({
       }
       const mappedConfig = mapFormDataToExecutionConfig(value as ExecutionMethodFormData);
       const newConfig = ensureCompleteConfig(mappedConfig);
-      validateExecutionConfigForBuilder(newConfig);
+      // Use debounced validation for user input to prevent excessive re-renders
+      debouncedValidateConfig(newConfig);
     };
     const subscription = watch(watchCallback);
     return () => subscription.unsubscribe();
-  }, [watch, validateExecutionConfigForBuilder]);
+  }, [watch, debouncedValidateConfig]);
 
   // Effect 4: Watch specifically for selectedRelayerDetails and transactionOptions changes
   useEffect(() => {

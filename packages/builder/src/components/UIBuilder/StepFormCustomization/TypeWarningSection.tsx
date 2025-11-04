@@ -29,6 +29,11 @@ export function TypeWarningSection({
   adapter,
   originalParameterType,
 }: TypeWarningSectionProps) {
+  // Skip warning for runtime secret fields (not blockchain parameters)
+  if (originalParameterType === 'runtimeSecret' || selectedType === 'runtimeSecret') {
+    return null;
+  }
+
   // Only show warning if adapter and original parameter type are available
   if (!adapter || !originalParameterType) {
     return null;

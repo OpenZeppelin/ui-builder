@@ -43,7 +43,8 @@ const MAX_POLL_DELAY_MS = 15000;
  */
 export class LaceWalletImplementation {
   private enabledApi: DAppConnectorWalletAPI | null = null;
-  private connectInFlight = false;
+  private connectPromise: Promise<{ connected: boolean; address?: string; error?: string }> | null =
+    null;
   private accountChangeListeners = new Set<
     (status: MidnightWalletConnectionStatus, prevStatus: MidnightWalletConnectionStatus) => void
   >();
@@ -60,29 +61,43 @@ export class LaceWalletImplementation {
     if (typeof window === 'undefined' || !window.midnight?.mnLace) {
       return { connected: false, error: 'Lace wallet not found.' };
     }
-    try {
-      // DESIGN DECISION: Guard against multiple enable() calls
-      // - React Strict Mode can trigger effects twice in development
-      // - User might click "Connect" button rapidly
-      // - We prevent re-prompting by checking both enabledApi and connectInFlight
-      if (!this.enabledApi && !this.connectInFlight) {
-        this.connectInFlight = true;
-        const api = await window.midnight.mnLace.enable();
-        this.enabledApi = api;
-        this.connectInFlight = false;
-      }
-      // DESIGN DECISION: Do not start polling here; wait until a listener subscribes
-      // This prevents premature state() calls that could re-trigger popups during wallet unlock
-      return { connected: true, address: this.lastKnownAddress ?? undefined };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to connect';
-      this.connectInFlight = false;
-      return { connected: false, error: message };
+
+    // DESIGN DECISION: Guard against multiple enable() calls
+    // - React Strict Mode can trigger effects twice in development
+    // - User might click "Connect" button rapidly
+    // - If a connection is already in progress, wait for it to complete
+    // - This prevents race conditions where a second caller receives false positive status
+    if (this.connectPromise) {
+      return this.connectPromise;
     }
+
+    // If already connected, return immediately
+    if (this.enabledApi) {
+      return { connected: true, address: this.lastKnownAddress ?? undefined };
+    }
+
+    // Start new connection and store the promise
+    this.connectPromise = (async () => {
+      try {
+        const api = await window.midnight!.mnLace.enable();
+        this.enabledApi = api;
+        this.connectPromise = null;
+        // DESIGN DECISION: Do not start polling here; wait until a listener subscribes
+        // This prevents premature state() calls that could re-trigger popups during wallet unlock
+        return { connected: true, address: this.lastKnownAddress ?? undefined };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to connect';
+        this.connectPromise = null;
+        return { connected: false, error: message };
+      }
+    })();
+
+    return this.connectPromise;
   }
 
   public disconnect(): void {
     this.enabledApi = null;
+    this.connectPromise = null;
     this.stopAccountPolling();
     this.lastKnownAddress = null;
   }
@@ -141,10 +156,17 @@ export class LaceWalletImplementation {
         // DESIGN DECISION: Pause polling when document is hidden
         // - Reduces intrusive popups when user is on a different tab
         // - Exponential backoff ensures we don't hammer the wallet while tab is inactive
+        // - Reset delay when tab becomes visible to restore responsive polling
         if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
           this.nextPollDelayMs = Math.min(this.nextPollDelayMs * 2, MAX_POLL_DELAY_MS);
           this.schedulePollOnce();
           return;
+        }
+
+        // Reset delay if it was increased due to tab being hidden
+        // This ensures responsive polling when user returns to the tab
+        if (this.nextPollDelayMs > CONNECTED_POLL_DELAY_MS && this.lastKnownAddress !== null) {
+          this.nextPollDelayMs = CONNECTED_POLL_DELAY_MS;
         }
 
         // DESIGN DECISION: Stop polling if all listeners unsubscribe

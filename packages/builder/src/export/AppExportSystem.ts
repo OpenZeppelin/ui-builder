@@ -19,9 +19,11 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
+  generateAdapterBootstrapFiles,
   generateAdapterSpecificFiles,
   generateAndAddAppConfig,
   updatePackageJsonFile,
+  type BootstrapInfo,
 } from './assemblers';
 import type { PackageManager } from './PackageManager';
 import type { StyleManager } from './StyleManager';
@@ -177,6 +179,7 @@ export class AppExportSystem {
       logger.info('Export System', 'Assembling project files...');
       const projectFiles = await this.assembleProjectFiles(
         formConfig,
+        contractSchema,
         networkConfig,
         functionId,
         exportOptions,
@@ -216,15 +219,16 @@ export class AppExportSystem {
    */
   private async assembleProjectFiles(
     formConfig: BuilderFormConfig,
+    contractSchema: ContractSchema,
     networkConfig: NetworkConfig,
     functionId: string,
     exportOptions: ExportOptions,
     customFiles: Record<string, string>,
     adapter: ContractAdapter
-  ): Promise<Record<string, string>> {
+  ): Promise<Record<string, string | Uint8Array | Blob>> {
     logger.info('File Assembly', 'Starting file assembly process...');
 
-    const projectFiles = await addCoreTemplateFiles(
+    const projectFiles: Record<string, string | Uint8Array | Blob> = await addCoreTemplateFiles(
       this.templateManager!,
       exportOptions,
       customFiles
@@ -232,6 +236,21 @@ export class AppExportSystem {
     await addStyleAndRootConfigFiles(projectFiles, this.styleManager!, this.templateProcessor!);
     await generateAndAddAppConfig(projectFiles, networkConfig, this.templateProcessor!, formConfig);
     await generateAdapterSpecificFiles(projectFiles, adapter, formConfig);
+
+    // Generate adapter bootstrap files if the adapter supports it
+    const bootstrapInfo = await generateAdapterBootstrapFiles(
+      projectFiles as unknown as Record<string, string>,
+      adapter,
+      {
+        formConfig,
+        contractSchema,
+        networkConfig,
+        artifacts: exportOptions.adapterArtifacts?.artifacts,
+        definitionOriginal: exportOptions.adapterArtifacts?.definitionOriginal,
+        functionId,
+      }
+    );
+
     await updatePackageJsonFile(
       projectFiles,
       this.packageManager!,
@@ -242,8 +261,59 @@ export class AppExportSystem {
     );
     await this.formatJsonFiles(projectFiles);
 
+    // Inject bootstrap code into main.tsx if provided
+    if (bootstrapInfo) {
+      this.injectBootstrapCode(projectFiles, bootstrapInfo);
+    }
+
     logger.info('File Assembly', 'File assembly complete.');
     return projectFiles;
+  }
+
+  /**
+   * Injects bootstrap imports and initialization code into main.tsx
+   * using reliable template markers instead of fragile regex patterns.
+   * @private
+   */
+  private injectBootstrapCode(
+    projectFiles: Record<string, string | Uint8Array | Blob>,
+    bootstrapInfo: BootstrapInfo
+  ) {
+    const mainTsxPath = 'src/main.tsx';
+    const mainTsxContent = projectFiles[mainTsxPath];
+    if (!mainTsxContent || typeof mainTsxContent !== 'string') {
+      logger.warn(
+        'Export System',
+        'main.tsx not found or not a string, skipping bootstrap injection'
+      );
+      return;
+    }
+
+    let content = mainTsxContent;
+
+    // Inject imports at the designated marker
+    if (bootstrapInfo.imports.length > 0) {
+      const importsStr = '\n' + bootstrapInfo.imports.join('\n');
+      content = content.replace(
+        /\/\*@@ADAPTER_BOOTSTRAP_IMPORTS_INJECTION_POINT@@\*\//,
+        importsStr
+      );
+    } else {
+      // Remove the marker if no imports
+      content = content.replace(/\/\*@@ADAPTER_BOOTSTRAP_IMPORTS_INJECTION_POINT@@\*\/\n?/, '');
+    }
+
+    // Inject initialization code at the designated marker
+    if (bootstrapInfo.initAfterAdapterConstruct) {
+      const initCode = '\n    ' + bootstrapInfo.initAfterAdapterConstruct;
+      content = content.replace(/\/\*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@\*\//, initCode);
+    } else {
+      // Remove the marker if no initialization code
+      content = content.replace(/\s*\/\*@@ADAPTER_BOOTSTRAP_CODE_INJECTION_POINT@@\*\//, '');
+    }
+
+    projectFiles[mainTsxPath] = content;
+    logger.info('Export System', 'Bootstrap code injected into main.tsx via template markers');
   }
 
   /**
@@ -251,13 +321,20 @@ export class AppExportSystem {
    *
    * @param files Map of file paths to content
    */
-  private async formatJsonFiles(files: Record<string, string>): Promise<void> {
+  private async formatJsonFiles(files: Record<string, string | Uint8Array | Blob>): Promise<void> {
     const jsonFiles = Object.keys(files).filter((path) => path.endsWith('.json'));
     for (const path of jsonFiles) {
-      try {
-        files[path] = await this.templateProcessor!.formatJson(files[path]);
-      } catch (error) {
-        logger.warn('File Assembly', `Failed to format ${path}, using unformatted version:`, error);
+      const content = files[path];
+      if (typeof content === 'string') {
+        try {
+          files[path] = await this.templateProcessor!.formatJson(content);
+        } catch (error) {
+          logger.warn(
+            'File Assembly',
+            `Failed to format ${path}, using unformatted version:`,
+            error
+          );
+        }
       }
     }
   }
@@ -271,7 +348,7 @@ export class AppExportSystem {
    * @returns A result containing the ZIP blob and filename
    */
   private async createZipFile(
-    files: Record<string, string>,
+    files: Record<string, string | Uint8Array | Blob>,
     fileName: string,
     onProgress?: (progress: ZipProgress) => void
   ) {

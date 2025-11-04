@@ -23,6 +23,7 @@ import { http, PublicClient, WalletClient, type Chain } from 'viem';
 import type { Connector, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
 
+import { getUserRpcUrl } from '../../configuration/rpc';
 import { evmNetworks } from '../../networks';
 import { getWagmiConfigForRainbowKit } from '../rainbowkit';
 import { type WagmiConfigChains } from '../types';
@@ -176,16 +177,20 @@ export class WagmiWalletImplementation {
         let rpcUrlToUse: string | undefined = chainDefinition.rpcUrls.default?.http?.[0];
         const appNetworkIdString = viemChainIdToAppNetworkId[chainDefinition.id];
         if (appNetworkIdString) {
-          const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
-          let httpRpcOverride: string | undefined;
-          if (typeof rpcOverrideSetting === 'string') {
-            httpRpcOverride = rpcOverrideSetting;
-          } else if (typeof rpcOverrideSetting === 'object') {
-            // Handle both RpcEndpointConfig and UserRpcProviderConfig
-            if ('http' in rpcOverrideSetting && rpcOverrideSetting.http) {
-              httpRpcOverride = rpcOverrideSetting.http;
-            } else if ('url' in rpcOverrideSetting && rpcOverrideSetting.url) {
-              httpRpcOverride = rpcOverrideSetting.url;
+          // Prefer user-configured RPC from generic service
+          let httpRpcOverride: string | undefined = getUserRpcUrl(appNetworkIdString);
+          // Fallback to AppConfigService override if no user config
+          if (!httpRpcOverride) {
+            const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(appNetworkIdString);
+            if (typeof rpcOverrideSetting === 'string') {
+              httpRpcOverride = rpcOverrideSetting;
+            } else if (typeof rpcOverrideSetting === 'object') {
+              // Handle both RpcEndpointConfig and UserRpcProviderConfig
+              if ('http' in rpcOverrideSetting && rpcOverrideSetting.http) {
+                httpRpcOverride = rpcOverrideSetting.http;
+              } else if ('url' in rpcOverrideSetting && rpcOverrideSetting.url) {
+                httpRpcOverride = rpcOverrideSetting.url;
+              }
             }
           }
           if (httpRpcOverride) {
@@ -227,6 +232,12 @@ export class WagmiWalletImplementation {
   private getRpcOverrideForRainbowKit(
     networkId: string
   ): string | { http?: string; ws?: string } | undefined {
+    // Prefer user-configured RPC from generic service first
+    const userRpcUrl = getUserRpcUrl(networkId);
+    if (userRpcUrl) {
+      return { http: userRpcUrl };
+    }
+
     const rpcOverrideSetting = appConfigService.getRpcEndpointOverride(networkId);
 
     if (typeof rpcOverrideSetting === 'string') {
@@ -322,9 +333,8 @@ export class WagmiWalletImplementation {
       );
     }
 
-    if (!this.defaultInstanceConfig) {
-      this.defaultInstanceConfig = this.createDefaultConfig();
-    }
+    // Always rebuild default config to reflect latest RPC overrides/user settings
+    this.defaultInstanceConfig = this.createDefaultConfig();
     return this.defaultInstanceConfig;
   }
 

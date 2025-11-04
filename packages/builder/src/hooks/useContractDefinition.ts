@@ -27,7 +27,8 @@ interface UseContractDefinitionOptions {
     formValues: FormValues,
     source: ContractLoadResult['source'],
     metadata?: ContractDefinitionMetadata,
-    originalDefinition?: string
+    originalDefinition?: string,
+    artifacts?: Record<string, unknown> | null
   ) => void;
 
   /**
@@ -98,7 +99,8 @@ export function useContractDefinition(
           formValues,
           result.source,
           metadata,
-          result.contractDefinitionOriginal
+          result.contractDefinitionOriginal,
+          result.contractDefinitionArtifacts || null
         );
       }
     },
