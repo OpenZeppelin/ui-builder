@@ -82,11 +82,12 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
       return import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
       return import('@openzeppelin/ui-builder-adapter-midnight');
-    default:
+    default: {
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
         `Adapter package module not defined for ecosystem: ${String(_exhaustiveCheck)}`
       );
+    }
   }
 }
 
@@ -249,8 +250,12 @@ export function getAdapterConfigLoader(
       return () => import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
       return () => import('@openzeppelin/ui-builder-adapter-midnight');
-    default:
-      return undefined;
+    default: {
+      const _exhaustiveCheck: never = ecosystem;
+      throw new Error(
+        `No adapter constructor loader logic for ${ecosystem}. Please add it to the ecosystemRegistry. Exhaustive check: ${String(_exhaustiveCheck)}`
+      );
+    }
   }
 }
 

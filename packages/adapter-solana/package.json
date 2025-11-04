@@ -71,6 +71,11 @@
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",
       "require": "./dist/config.cjs"
+    },
+    "./vite-config": {
+      "types": "./dist/vite-config.d.ts",
+      "import": "./dist/vite-config.js",
+      "require": "./dist/vite-config.cjs"
     }
   }
 }
