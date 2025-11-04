@@ -10,7 +10,7 @@ import {
   FormValues,
   ProxyInfo,
 } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-builder-utils';
 
 /**
  * Loads a contract definition using the provided chain adapter.
@@ -50,6 +50,7 @@ export interface ContractLoadResult {
   schema: ContractSchema;
   source: 'fetched' | 'manual';
   contractDefinitionOriginal?: string;
+  contractDefinitionArtifacts?: Record<string, unknown>;
   metadata?: {
     fetchedFrom?: string;
     contractName?: string;
@@ -77,6 +78,12 @@ export async function loadContractDefinitionWithMetadata(
   try {
     if (!artifacts || Object.keys(artifacts).length === 0) {
       throw new Error('Contract definition input is empty.');
+    }
+
+    // Defensive preflight: ensure all adapter-declared required fields are present
+    const missing = getMissingRequiredContractInputs(adapter, artifacts);
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`);
     }
 
     // Use adapter's enhanced method if available

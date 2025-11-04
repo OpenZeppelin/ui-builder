@@ -86,7 +86,7 @@ Edge cases (for testing)
 ### Provider notes: Sourcify (EVM)
 
 - **API**: Sourcify is now queried via their API v2 endpoint (`https://sourcify.dev/server/v2/contract/<chainId>/<address>?fields=abi,metadata`). The response already includes the ABI, so no repository fallback is needed.
-- **Viewer page**: [Sourcify contract status (USDT)](https://sourcify.dev/status/1/0xdac17f958d2ee523a2206206994597c13d831ec7)
+- **Viewer page**: [Sourcify contract status (USDT)](https://repo.sourcify.dev/1/0xdac17f958d2ee523a2206206994597c13d831ec7)
 
 ### Tips
 

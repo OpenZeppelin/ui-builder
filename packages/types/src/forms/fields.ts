@@ -33,7 +33,9 @@ export type FieldType =
   | 'url'
   | 'select-grouped'
   | 'enum' // Enum field with variant picker and conditional payload inputs
-  | 'hidden';
+  | 'hidden'
+  | 'file-upload' // File upload field with optional base64 conversion
+  | 'runtimeSecret'; // Runtime-only secret field not sent as contract argument
 
 /**
  * Maps field types to their expected value types
@@ -66,7 +68,9 @@ export type FieldValue<T extends FieldType> = T extends
                   ? Record<string, unknown>[]
                   : T extends 'map'
                     ? MapEntry[]
-                    : unknown;
+                    : T extends 'runtimeSecret'
+                      ? string // Runtime secrets are always strings (hex or similar)
+                      : unknown;
 
 /**
  * Shared condition interface for both validation and visibility rules

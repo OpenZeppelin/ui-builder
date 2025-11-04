@@ -3,7 +3,7 @@ import React from 'react';
 import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
-import MidnightLogoSvg from '../../assets/icons/MidnightLogo.svg';
+import { MidnightIcon } from '../icons/MidnightIcon';
 
 interface NetworkStatusBadgeProps {
   network: NetworkConfig | null;
@@ -35,7 +35,7 @@ export function NetworkStatusBadge({
     >
       {/* Network icon - reusing same icon component from NetworkRow */}
       {network.ecosystem === 'midnight' ? (
-        <img src={MidnightLogoSvg} alt="Midnight" width={ICON_SIZE} height={ICON_SIZE} />
+        <MidnightIcon size={ICON_SIZE} className="flex-shrink-0" />
       ) : network.iconComponent ? (
         <network.iconComponent size={ICON_SIZE} variant="branded" />
       ) : (

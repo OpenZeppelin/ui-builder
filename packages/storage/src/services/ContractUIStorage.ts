@@ -152,7 +152,8 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
     contractDefinition?: string,
     contractDefinitionSource?: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
-    contractDefinitionOriginal?: string
+    contractDefinitionOriginal?: string,
+    contractDefinitionArtifacts?: Record<string, unknown>
   ): Omit<ContractUIRecord, 'id' | 'createdAt' | 'updatedAt'> {
     const recordWithDefinition = {
       ...record,
@@ -160,6 +161,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
       contractDefinition,
       contractDefinitionOriginal,
       contractDefinitionMetadata,
+      contractDefinitionArtifacts,
     };
 
     return recordWithDefinition;
@@ -173,7 +175,8 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
     contractDefinition: string,
     contractDefinitionSource: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
-    contractDefinitionOriginal?: string
+    contractDefinitionOriginal?: string,
+    contractDefinitionArtifacts?: Record<string, unknown>
   ): Promise<void> {
     try {
       const existing = await this.get(id);
@@ -186,6 +189,7 @@ export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
         contractDefinitionOriginal,
         contractDefinitionSource,
         contractDefinitionMetadata,
+        contractDefinitionArtifacts,
         updatedAt: new Date(),
       };
 

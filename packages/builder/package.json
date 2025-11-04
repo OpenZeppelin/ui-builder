@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' tsc --skipLibCheck && NODE_OPTIONS='--max-old-space-size=8192' vite build --emptyOutDir",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' vite build --emptyOutDir",
+    "typecheck": "tsc -p tsconfig.typecheck.json --skipLibCheck",
     "lint": "eslint 'src/**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --config eslint.config.cjs",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix --config eslint.config.cjs",
     "lint:all-fix": "eslint 'src/**/*.{ts,tsx,js,cjs,mjs}' --fix --config eslint.config.cjs",
@@ -57,6 +58,7 @@
     "@types/jszip": "^3.4.1",
     "@uiw/react-textarea-code-editor": "^3.1.1",
     "@web3icons/react": "^4.0.26",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fast-equals": "^5.2.2",
@@ -76,6 +78,13 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.9.0",
+    "@midnight-ntwrk/ledger": "4.0.0",
+    "@midnight-ntwrk/midnight-js-contracts": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-network-id": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-types": "^2.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "^2.0.2",
+    "@midnight-ntwrk/zswap": "4.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
@@ -103,6 +112,8 @@
     "tailwindcss": "^4.1.11",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
     "vitest": "^3.2.4"
   },
   "repository": {

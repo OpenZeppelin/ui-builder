@@ -17,7 +17,7 @@ export interface MidnightWalletContextType {
 /**
  * React Context for the Midnight wallet.
  *
- * It's initialized with `undefined` and will be provided a value by `MidnightWalletProvider`.
+ * It's initialized with `undefined` and will be provided a value by `MidnightWalletUiRoot`.
  * A custom hook (`useMidnightWallet`) will ensure the context is accessed correctly
  * within the provider's component tree.
  */

@@ -92,9 +92,8 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
     textColorClass: 'text-indigo-900',
     // Note: midnight uses a custom SVG, so no networkIconName
     defaultFeatureConfig: {
-      enabled: false,
+      enabled: true,
       showInUI: true,
-      disabledLabel: 'Coming Soon',
     },
   },
   solana: {

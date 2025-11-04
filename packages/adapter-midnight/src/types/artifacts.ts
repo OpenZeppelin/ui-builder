@@ -10,13 +10,22 @@ export interface MidnightContractArtifacts {
   privateStateId: string;
 
   /** TypeScript interface definition from contract.d.ts (required) */
-  contractSchema: string;
+  contractDefinition: string;
 
   /** Optional compiled contract code from contract.cjs */
   contractModule?: string;
 
   /** Optional witness functions for zero-knowledge proofs */
   witnessCode?: string;
+
+  /** Optional verifier keys for ZK proofs (from keys directory) */
+  verifierKeys?: Record<string, unknown>;
+
+  /** Optional original ZIP data for auto-save functionality */
+  originalZipData?: string;
+
+  /** Optional trimmed ZIP data (saved when artifacts are trimmed for a specific function) */
+  trimmedZipBase64?: string;
 }
 
 /**
@@ -29,6 +38,6 @@ export function isMidnightContractArtifacts(obj: unknown): obj is MidnightContra
     obj !== null &&
     typeof record.contractAddress === 'string' &&
     typeof record.privateStateId === 'string' &&
-    typeof record.contractSchema === 'string'
+    typeof record.contractDefinition === 'string'
   );
 }

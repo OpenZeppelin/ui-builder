@@ -1,3 +1,19 @@
+node_modules/
+dist/
+build/
+out/
+coverage/
+exports/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.next/
+.nuxt/
+.output/
+.cache/
+.turbo/
+.vercel/
+.netlify/
 # Build outputs
 dist/
 build/

@@ -8,12 +8,18 @@
     "paths": {
       "@/*": ["./src/*"],
       "@styles/*": ["../styles/src/*"],
-      "@openzeppelin/ui-builder-types/*": ["../types/src/*"]
+      "@openzeppelin/ui-builder-types/*": ["../types/src/*"],
+      "@openzeppelin/ui-builder-ui": ["../ui/src/index.ts"],
+      "@openzeppelin/ui-builder-ui/*": ["../ui/src/*"]
     },
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*", "src/**/*.json", "src/export/**/*.ts"],
+  "include": [
+    "src/**/*",
+    "src/**/*.json",
+    "src/export/**/*.ts"
+  ],
   "exclude": ["src/export/codeTemplates/*.template.tsx"]
 }

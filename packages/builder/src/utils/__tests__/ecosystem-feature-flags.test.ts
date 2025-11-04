@@ -125,9 +125,9 @@ describe('ecosystem-feature-flags', () => {
   });
 
   describe('getEnabledEcosystems', () => {
-    it('should return EVM and Stellar by default', () => {
+    it('should return EVM, Stellar, Midnight by default', () => {
       const enabled = getEnabledEcosystems();
-      expect(enabled).toEqual(['evm', 'stellar']);
+      expect(enabled).toEqual(['evm', 'stellar', 'midnight']);
     });
 
     it('should include ecosystems enabled by feature flags', () => {
@@ -138,7 +138,7 @@ describe('ecosystem-feature-flags', () => {
       });
 
       const enabled = getEnabledEcosystems();
-      expect(enabled).toEqual(['evm', 'stellar', 'solana']);
+      expect(enabled).toEqual(['evm', 'stellar', 'midnight', 'solana']);
     });
   });
 });

@@ -40,6 +40,11 @@ interface ResponsiveFieldsLayoutProps {
    * Map of field IDs to their validation error status
    */
   fieldValidationErrors?: Map<string, boolean>;
+
+  /**
+   * Optional callback when a field should be deleted (used for runtime secret fields)
+   */
+  onDeleteField?: (index: number) => void;
 }
 
 /**
@@ -61,6 +66,7 @@ export function ResponsiveFieldsLayout({
   onUpdateField,
   onFieldValidationChange,
   fieldValidationErrors,
+  onDeleteField,
 }: ResponsiveFieldsLayoutProps) {
   // Show first field if none is selected but fields exist
   const effectiveSelectedIndex = selectedFieldIndex ?? 0;
@@ -106,6 +112,7 @@ export function ResponsiveFieldsLayout({
         selectedFieldIndex={selectedFieldIndex}
         onSelectField={onSelectField}
         fieldValidationErrors={fieldValidationErrors}
+        onDeleteField={onDeleteField}
       />
       <div className="col-span-2">
         {selectedField && (

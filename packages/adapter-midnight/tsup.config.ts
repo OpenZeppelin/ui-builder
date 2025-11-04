@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/config.ts', 'src/vite-config.ts'],
   format: ['cjs', 'esm'],
   dts: {
     compilerOptions: {
@@ -12,4 +12,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  // External WASM packages to prevent bundling Node.js-specific code
+  external: ['@midnight-ntwrk/zswap', '@midnight-ntwrk/onchain-runtime', '@midnight-ntwrk/ledger'],
 });

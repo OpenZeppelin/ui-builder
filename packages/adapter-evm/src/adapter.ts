@@ -17,6 +17,7 @@ import type {
   FunctionParameter,
   NativeConfigLoader,
   NetworkConfig,
+  NetworkServiceForm,
   ProxyInfo,
   RelayerDetails,
   RelayerDetailsRich,
@@ -30,6 +31,11 @@ import type {
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { abiComparisonService } from './abi/comparison';
+import {
+  getEvmNetworkServiceForms,
+  testEvmNetworkServiceConnection,
+  validateEvmNetworkServiceConfig,
+} from './configuration/network-services';
 import { EvmProviderKeys, type EvmContractDefinitionProviderKey } from './types/providers';
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
@@ -122,6 +128,33 @@ export class EvmAdapter implements ContractAdapter {
     // The actual EvmUiKitManager.configure call (which drives UI setup) is deferred.
     // It's typically triggered by WalletStateProvider after this adapter instance is fully initialized and provided to it,
     // ensuring that loadConfigModule (for user native configs) is available.
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getNetworkServiceForms(): NetworkServiceForm[] {
+    return getEvmNetworkServiceForms(this.networkConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateNetworkServiceConfig(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean> {
+    return validateEvmNetworkServiceConfig(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testNetworkServiceConnection(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{ success: boolean; latency?: number; error?: string }> {
+    return testEvmNetworkServiceConnection(serviceId, values, this.networkConfig);
   }
 
   /**
