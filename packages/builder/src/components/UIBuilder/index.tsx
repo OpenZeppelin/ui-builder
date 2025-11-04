@@ -217,7 +217,7 @@ export function UIBuilder() {
           networkConfig={state.selectedNetwork}
           onToggleContractState={widget.toggle}
           isWidgetExpanded={state.isWidgetVisible}
-          adapter={state.selectedAdapter}
+          adapter={state.selectedAdapter ?? undefined}
         />
       ),
       isValid: !!state.selectedFunction,
