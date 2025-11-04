@@ -1,7 +1,7 @@
 ---
 '@openzeppelin/ui-builder-types': minor
 '@openzeppelin/ui-builder-ui': minor
-'@openzeppelin/ui-builder-builder': minor
+'@openzeppelin/ui-builder-app': minor
 '@openzeppelin/ui-builder-renderer': minor
 '@openzeppelin/ui-builder-adapter-midnight': minor
 ---
