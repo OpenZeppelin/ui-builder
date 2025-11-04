@@ -16,7 +16,19 @@ This project was generated using the [OpenZeppelin UI Builder](https://builder.o
    pnpm install
    ```
 
-2. Start the development server:
+2. Build the project (required for Tailwind CSS compilation):
+
+   ```bash
+   npm run build
+   # or
+   yarn build
+   # or
+   pnpm build
+   ```
+
+   > **Note:** This build step is required before running the development server due to how Tailwind CSS v4 processes styles. The build ensures all Tailwind utilities are properly compiled and available in your application.
+
+3. Start the development server:
 
    ```bash
    npm run dev
@@ -26,7 +38,7 @@ This project was generated using the [OpenZeppelin UI Builder](https://builder.o
    pnpm dev
    ```
 
-3. Open your browser and navigate to [http://localhost:5173](http://localhost:5173)
+4. Open your browser and navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Project Structure
 
