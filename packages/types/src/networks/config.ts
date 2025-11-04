@@ -172,6 +172,37 @@ export interface StellarNetworkConfig extends BaseNetworkConfig {
 export interface MidnightNetworkConfig extends BaseNetworkConfig {
   ecosystem: 'midnight';
 
+  /**
+   * Midnight Network ID enum value
+   * Maps to @midnight-ntwrk/midnight-js-network-id NetworkId enum
+   * Single source of truth for network identity when mapping is not provided.
+   */
+  /**
+   * Mapping of numeric network ID to its enum name.
+   * Example: { 2: 'TestNet' }
+   */
+  networkId: Partial<Record<2 | 3 | 1 | 0, 'TestNet' | 'MainNet' | 'DevNet' | 'Undeployed'>>;
+
+  /**
+   * RPC endpoints for the Midnight network
+   */
+  rpcEndpoints?: {
+    default?: string;
+    [key: string]: string | undefined;
+  };
+
+  /**
+   * Indexer GraphQL HTTP endpoint
+   * Used for querying blockchain state
+   */
+  indexerUri?: string;
+
+  /**
+   * Indexer GraphQL WebSocket endpoint
+   * Used for real-time blockchain state subscriptions
+   */
+  indexerWsUri?: string;
+
   // Additional Midnight-specific properties can be added here as the protocol evolves
 }
 

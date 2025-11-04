@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 
-import type { ContractSchema, FormValues } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-builder-types';
+import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
+import { uiBuilderStore } from '../../hooks/uiBuilderStore';
 
 interface UseAutoContractLoadProps {
   debouncedValues: FormValues;
@@ -15,6 +17,7 @@ interface UseAutoContractLoadProps {
   canAttemptLoad: (values: FormValues) => boolean;
   markAttempted: (values: FormValues) => void;
   loadContract: (values: FormValues) => Promise<void>;
+  adapter?: ContractAdapter | null;
 }
 
 /**
@@ -31,6 +34,7 @@ export function useAutoContractLoad({
   canAttemptLoad,
   markAttempted,
   loadContract,
+  adapter,
 }: UseAutoContractLoadProps) {
   useEffect(() => {
     const attemptAutomaticLoad = async () => {
@@ -54,7 +58,17 @@ export function useAutoContractLoad({
         }
       }
 
-      if (!formIsValid || !canAttemptLoad(debouncedValues)) {
+      // Block auto-loads until adapter-declared required inputs are present
+      if (
+        !formIsValid ||
+        (adapter && hasMissingRequiredContractInputs(adapter, debouncedValues)) ||
+        !canAttemptLoad(debouncedValues)
+      ) {
+        return;
+      }
+
+      const { contractState } = uiBuilderStore.getState();
+      if (contractState.requiredInputSnapshot) {
         return;
       }
 
@@ -82,5 +96,6 @@ export function useAutoContractLoad({
     contractSchema,
     canAttemptLoad,
     markAttempted,
+    adapter,
   ]);
 }

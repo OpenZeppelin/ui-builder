@@ -175,3 +175,46 @@ export type UiKitName =
   // Generic options
   | 'custom'
   | 'none';
+
+/**
+ * Badge variant for function decorations
+ */
+export type FunctionBadgeVariant = 'info' | 'warning' | 'neutral';
+
+/**
+ * Badge displayed next to a function in the UI
+ */
+export interface FunctionBadge {
+  /** Display text for the badge */
+  text: string;
+  /** Visual variant of the badge */
+  variant?: FunctionBadgeVariant;
+  /** Optional tooltip text shown on hover */
+  tooltip?: string;
+}
+
+/**
+ * Decoration for a contract function (badges, notes, etc.)
+ */
+export interface FunctionDecoration {
+  /** Array of badges to display next to the function */
+  badges?: FunctionBadge[];
+  /** Optional note to display when the function is selected */
+  note?: {
+    /** Optional title for the note */
+    title?: string;
+    /** Body text of the note */
+    body: string;
+  };
+  /**
+   * (Optional) If true, the form should auto-add a runtime secret field (if adapter provides getRuntimeFieldBinding).
+   * Used to mark functions like organizer-only circuits that require credentials.
+   * User can customize (hide, hardcode) or remove the field after auto-add.
+   */
+  requiresRuntimeSecret?: boolean;
+}
+
+/**
+ * Map of function IDs to their decorations
+ */
+export type FunctionDecorationsMap = Record<string, FunctionDecoration>;

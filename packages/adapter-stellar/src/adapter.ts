@@ -15,6 +15,7 @@ import type {
   FormFieldType,
   FunctionParameter,
   NativeConfigLoader,
+  NetworkServiceForm,
   RelayerDetails,
   RelayerDetailsRich,
   StellarNetworkConfig,
@@ -27,6 +28,11 @@ import type {
 import { isStellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import {
+  getStellarNetworkServiceForms,
+  testStellarNetworkServiceConnection,
+  validateStellarNetworkServiceConfig,
+} from './configuration/network-services';
 // Import functions from modules
 import { loadStellarContract, loadStellarContractWithMetadata } from './contract/loader';
 import { StellarRelayerOptions } from './transaction/components';
@@ -73,8 +79,6 @@ import {
 
 /**
  * Stellar-specific adapter implementation using explicit method delegation.
- *
- * NOTE: Contains placeholder implementations for most functionalities.
  */
 export class StellarAdapter implements ContractAdapter {
   readonly networkConfig: StellarNetworkConfig;
@@ -117,7 +121,33 @@ export class StellarAdapter implements ContractAdapter {
     );
   }
 
-  // --- Contract Loading --- //
+  /**
+   * @inheritdoc
+   */
+  public getNetworkServiceForms(): NetworkServiceForm[] {
+    return getStellarNetworkServiceForms();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async validateNetworkServiceConfig(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<boolean> {
+    return validateStellarNetworkServiceConfig(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async testNetworkServiceConnection(
+    serviceId: string,
+    values: Record<string, unknown>
+  ): Promise<{ success: boolean; latency?: number; error?: string }> {
+    return testStellarNetworkServiceConnection(serviceId, values);
+  }
+
   /**
    * NOTE about artifact inputs (single input with auto-detection):
    *
@@ -141,6 +171,9 @@ export class StellarAdapter implements ContractAdapter {
    *   user-provided content. This ensures auto-save captures and restores the
    *   manual contract definition exactly like the EVM/Midnight flows.
    * - Provide clear UI hints about supported formats (JSON spec or Wasm binary).
+   */
+  /**
+   * @inheritdoc
    */
   public getContractDefinitionInputs(): FormFieldType[] {
     return [
@@ -197,11 +230,16 @@ export class StellarAdapter implements ContractAdapter {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   getWritableFunctions(contractSchema: ContractSchema): ContractSchema['functions'] {
     return getStellarWritableFunctions(contractSchema);
   }
 
-  // --- Type Mapping & Field Generation --- //
+  /**
+   * @inheritdoc
+   */
   mapParameterTypeToFieldType(parameterType: string): FieldType {
     return mapStellarParameterTypeToFieldType(parameterType);
   }
@@ -215,7 +253,9 @@ export class StellarAdapter implements ContractAdapter {
     return generateStellarDefaultField(parameter, contractSchema);
   }
 
-  // --- Transaction Formatting & Execution --- //
+  /**
+   * @inheritdoc
+   */
   public formatTransactionData(
     contractSchema: ContractSchema,
     functionId: string,
@@ -239,17 +279,16 @@ export class StellarAdapter implements ContractAdapter {
     );
   }
 
-  // NOTE: waitForTransactionConfirmation? is optional in the interface.
-  // Since the imported function is currently undefined, we omit the method here.
-  // If implemented in ./transaction/sender.ts later, add the method back:
-  // async waitForTransactionConfirmation?(...) { ... }
-
-  // --- View Function Querying --- //
+  /**
+   * @inheritdoc
+   */
   isViewFunction(functionDetails: ContractFunction): boolean {
     return isStellarViewFunction(functionDetails);
   }
 
-  // Implement queryViewFunction with the correct signature from ContractAdapter
+  /**
+   * @inheritdoc
+   */
   async queryViewFunction(
     contractAddress: string,
     functionId: string,
@@ -266,25 +305,46 @@ export class StellarAdapter implements ContractAdapter {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   formatFunctionResult(decodedValue: unknown, functionDetails: ContractFunction): string {
     return formatStellarFunctionResult(decodedValue, functionDetails);
   }
 
-  // --- Wallet Interaction --- //
+  /**
+   * @inheritdoc
+   */
   supportsWalletConnection(): boolean {
     return supportsStellarWalletConnection();
   }
+
+  /**
+   * @inheritdoc
+   */
   async getAvailableConnectors(): Promise<Connector[]> {
     return getStellarAvailableConnectors();
   }
+
+  /**
+   * @inheritdoc
+   */
   async connectWallet(
     connectorId: string
   ): Promise<{ connected: boolean; address?: string; error?: string }> {
     return connectStellarWallet(connectorId);
   }
+
+  /**
+   * @inheritdoc
+   */
   async disconnectWallet(): Promise<{ disconnected: boolean; error?: string }> {
     return disconnectStellarWallet();
   }
+
+  /**
+   * @inheritdoc
+   */
   getWalletConnectionStatus(): StellarWalletConnectionStatus {
     const impl = getInitializedStellarWalletImplementation();
     if (!impl) {
@@ -326,21 +386,31 @@ export class StellarAdapter implements ContractAdapter {
     );
   }
 
-  // --- Configuration & Metadata --- //
+  /**
+   * @inheritdoc
+   */
   async getSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {
     return getStellarSupportedExecutionMethods();
   }
+
+  /**
+   * @inheritdoc
+   */
   async validateExecutionConfig(config: ExecutionConfig): Promise<true | string> {
     const walletStatus = this.getWalletConnectionStatus();
     return validateStellarExecutionConfig(config, walletStatus);
   }
 
-  // Implement getExplorerUrl with the correct signature from ContractAdapter
+  /**
+   * @inheritdoc
+   */
   getExplorerUrl(address: string): string | null {
     return getStellarExplorerAddressUrl(address, this.networkConfig);
   }
 
-  // Implement getExplorerTxUrl with the correct signature from ContractAdapter
+  /**
+   * @inheritdoc
+   */
   getExplorerTxUrl?(txHash: string): string | null {
     if (getStellarExplorerTxUrl) {
       return getStellarExplorerTxUrl(txHash, this.networkConfig);
@@ -348,11 +418,16 @@ export class StellarAdapter implements ContractAdapter {
     return null;
   }
 
-  // --- Validation --- //
+  /**
+   * @inheritdoc
+   */
   isValidAddress(address: string, addressType?: string): boolean {
     return isStellarValidAddress(address, addressType as StellarAddressType);
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getAvailableUiKits(): Promise<AvailableUiKit[]> {
     return [
       {
@@ -449,6 +524,9 @@ export class StellarAdapter implements ContractAdapter {
     return stellarFacadeHooks;
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getRelayers(serviceUrl: string, accessToken: string): Promise<RelayerDetails[]> {
     const relayerStrategy = new RelayerExecutionStrategy();
     try {
@@ -459,6 +537,9 @@ export class StellarAdapter implements ContractAdapter {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   public async getRelayer(
     serviceUrl: string,
     accessToken: string,
@@ -479,8 +560,7 @@ export class StellarAdapter implements ContractAdapter {
   }
 
   /**
-   * Returns a React component for configuring Stellar-specific relayer transaction options.
-   * @returns The Stellar relayer options component
+   * @inheritdoc
    */
   public getRelayerOptionsComponent():
     | React.ComponentType<{

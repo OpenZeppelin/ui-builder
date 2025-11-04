@@ -1,8 +1,9 @@
 import { FormInput } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 import {
+  ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   NetworkConfig,
@@ -10,17 +11,21 @@ import {
 } from '@openzeppelin/ui-builder-types';
 import { EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/ui-builder-ui';
 
-import { useFieldSelection } from './hooks/useFieldSelection';
-import { useFormConfig } from './hooks/useFormConfig';
 import { ensureCompleteConfig } from './utils/executionUtils';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { ActionBar } from '../../Common/ActionBar';
 import { useWizardStepUiState } from '../hooks/useWizardStepUiState';
-import { UiKitSettings } from './components';
+import { FunctionNoteSection, RuntimeSecretButton, UiKitSettings } from './components';
 import { ExecutionMethodSettings } from './ExecutionMethodSettings';
 import { FormPreview } from './FormPreview';
 import { GeneralSettings } from './GeneralSettings';
+import {
+  useExecutionValidation,
+  useFieldSelection,
+  useFormConfig,
+  useGetFunctionNote,
+} from './hooks';
 import { ResponsiveFieldsLayout } from './ResponsiveFieldsLayout';
 
 // TODO: Enhance the UiKitSettings component to support more advanced options from UiKitConfiguration,
@@ -40,6 +45,7 @@ interface StepFormCustomizationProps {
   onUiKitConfigUpdated: (config: UiKitConfiguration) => void;
   currentUiKitConfig?: UiKitConfiguration;
   currentFormConfig?: BuilderFormConfig | null;
+  adapter?: ContractAdapter;
 }
 
 export function StepFormCustomization({
@@ -54,17 +60,32 @@ export function StepFormCustomization({
   onUiKitConfigUpdated,
   currentUiKitConfig,
   currentFormConfig,
+  adapter: adapterProp,
 }: StepFormCustomizationProps) {
   const {
-    stepUiState: { activeTab, previewMode, selectedFieldIndex },
+    stepUiState: { activeTab, previewMode, selectedFieldIndex, bannerDismissed },
     setStepUiState: setUiState,
   } = useWizardStepUiState('stepCustomize', {
     activeTab: 'general',
     previewMode: false,
     selectedFieldIndex: null as number | null,
+    bannerDismissed: false,
   });
 
   const { activeAdapter: adapter, isAdapterLoading: adapterLoading } = useWalletState();
+
+  // Find the selected function details using memoization
+  const selectedFunctionDetails = useMemo(() => {
+    return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
+  }, [contractSchema, selectedFunction]);
+
+  // Fetch function decorations to check if this function requires a runtime secret
+  const effectiveAdapter = adapterProp ?? adapter ?? undefined;
+  const functionNote = useGetFunctionNote(
+    effectiveAdapter,
+    selectedFunction,
+    selectedFunctionDetails
+  );
 
   const {
     formConfig: baseFormConfigFromHook,
@@ -87,14 +108,8 @@ export function StepFormCustomization({
   const [fieldValidationErrors, setFieldValidationErrors] = useState<Map<string, boolean>>(
     new Map()
   );
-  const executionValidRef = useRef<boolean>(true); // Track execution config validity
 
-  // Find the selected function details using memoization
-  const selectedFunctionDetails = useMemo(() => {
-    return contractSchema?.functions.find((fn) => fn.id === selectedFunction) || null;
-  }, [contractSchema, selectedFunction]);
-
-  // Callback for field components to report validation status
+  // Handle field validation changes
   const onFieldValidationChange = useCallback((fieldId: string, hasError: boolean) => {
     setFieldValidationErrors((prev) => {
       const next = new Map(prev);
@@ -107,32 +122,39 @@ export function StepFormCustomization({
     });
   }, []);
 
-  // Enhanced execution config update handler that combines validations
-  const handleExecutionConfigUpdated = useCallback(
-    (execConfig: ExecutionConfig | undefined, isExecutionValid: boolean) => {
-      executionValidRef.current = isExecutionValid;
-      // Update the global state with combined validation result
-      const combinedIsValid =
-        isExecutionValid &&
-        Array.from(fieldValidationErrors.values()).every((hasError) => !hasError);
-      onExecutionConfigUpdated?.(execConfig, combinedIsValid);
-    },
-    [fieldValidationErrors, onExecutionConfigUpdated]
+  // Manage combined execution and field validation
+  const { handleExecutionConfigUpdated } = useExecutionValidation(
+    fieldValidationErrors,
+    currentExecutionConfig,
+    onExecutionConfigUpdated
   );
 
-  // Update combined validation whenever field validation changes
-  useEffect(() => {
-    if (onExecutionConfigUpdated) {
-      const combinedIsValid =
-        executionValidRef.current &&
-        Array.from(fieldValidationErrors.values()).every((hasError) => !hasError);
-      // Get current execution config from the current state
-      onExecutionConfigUpdated(currentExecutionConfig, combinedIsValid);
-    }
-  }, [fieldValidationErrors, currentExecutionConfig, onExecutionConfigUpdated]);
+  // Handle field deletion
+  const handleDeleteField = useCallback(
+    (index: number) => {
+      if (!baseFormConfigFromHook) return;
 
+      const updatedFields = baseFormConfigFromHook.fields.filter((_, i) => i !== index);
+      const updatedConfig: BuilderFormConfig = {
+        ...baseFormConfigFromHook,
+        fields: updatedFields,
+      };
+
+      onFormConfigUpdated(updatedConfig);
+
+      // Select first field if available, otherwise none
+      const newIndex = Math.min(index, updatedFields.length - 1);
+      if (newIndex >= 0) {
+        setUiState({ selectedFieldIndex: newIndex });
+      } else {
+        setUiState({ selectedFieldIndex: null });
+      }
+    },
+    [baseFormConfigFromHook, onFormConfigUpdated, setUiState]
+  );
+
+  // Handle UI Kit config updates
   const handleUiKitConfigUpdate = (config: UiKitConfiguration) => {
-    // For runtime UI updates, exclude customCode to prevent reinitialization
     const runtimeConfig: UiKitConfiguration = {
       kitName: config.kitName,
       kitConfig: config.kitConfig,
@@ -161,16 +183,15 @@ export function StepFormCustomization({
 
   // Ensure execution config validation happens on mount if no config exists
   useEffect(() => {
-    if (adapter && handleExecutionConfigUpdated && !currentExecutionConfig) {
-      // Create a default EOA config and validate it
+    if (effectiveAdapter && handleExecutionConfigUpdated && !currentExecutionConfig) {
       const defaultConfig = ensureCompleteConfig({ method: 'eoa', allowAny: true });
       if (defaultConfig) {
-        // For the initial validation, we know EOA with allowAny is always valid
         handleExecutionConfigUpdated(defaultConfig, true);
       }
     }
-  }, [adapter, currentExecutionConfig, handleExecutionConfigUpdated]);
+  }, [effectiveAdapter, currentExecutionConfig, handleExecutionConfigUpdated]);
 
+  // Auto-select first field when fields tab becomes active
   useEffect(() => {
     if (
       activeTab === 'fields' &&
@@ -181,9 +202,7 @@ export function StepFormCustomization({
       selectField(0);
     }
     // We intentionally omit `selectedFieldIndex` from the dependency array.
-    // Including it would cause the effect to re-run after the first field is selected,
-    // which is unnecessary and not the intended behavior. This effect should only
-    // set the *initial* selection when the tab becomes active.
+    // This effect should only set the *initial* selection when the tab becomes active.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, baseFormConfigFromHook, selectField]);
 
@@ -191,6 +210,7 @@ export function StepFormCustomization({
     setUiState({ previewMode: !previewMode });
   };
 
+  // Validation checks
   if (
     !contractSchema ||
     !selectedFunction ||
@@ -212,7 +232,7 @@ export function StepFormCustomization({
     );
   }
 
-  if (!adapter && networkConfig) {
+  if (!effectiveAdapter && networkConfig) {
     return (
       <div className="py-8 text-center text-red-600">
         <p>
@@ -223,7 +243,7 @@ export function StepFormCustomization({
     );
   }
 
-  if (!adapter) {
+  if (!effectiveAdapter) {
     return (
       <div className="py-8 text-center">
         <p>Adapter not available. Please ensure network is selected and supported.</p>
@@ -244,6 +264,13 @@ export function StepFormCustomization({
           onTogglePreview={handleTogglePreview}
         />
       )}
+
+      {/* Function decoration banner - shown above tabs, dismissible */}
+      <FunctionNoteSection
+        note={functionNote}
+        isDismissed={bannerDismissed}
+        onDismiss={() => setUiState({ bannerDismissed: true })}
+      />
 
       {previewMode ? (
         <FormPreview
@@ -300,16 +327,29 @@ export function StepFormCustomization({
                     description="This function doesn't require any input parameters, so there are no form fields to customize. You can proceed to configure the execution method or preview your form."
                   />
                 ) : (
-                  adapter && (
-                    <ResponsiveFieldsLayout
-                      fields={baseFormConfigFromHook.fields}
-                      selectedFieldIndex={selectedFieldIndex}
-                      onSelectField={selectField}
-                      adapter={adapter}
-                      onUpdateField={updateField}
-                      onFieldValidationChange={onFieldValidationChange}
-                      fieldValidationErrors={fieldValidationErrors}
-                    />
+                  effectiveAdapter && (
+                    <>
+                      <ResponsiveFieldsLayout
+                        fields={baseFormConfigFromHook.fields}
+                        selectedFieldIndex={selectedFieldIndex}
+                        onSelectField={selectField}
+                        adapter={effectiveAdapter}
+                        onUpdateField={updateField}
+                        onFieldValidationChange={onFieldValidationChange}
+                        fieldValidationErrors={fieldValidationErrors}
+                        onDeleteField={handleDeleteField}
+                      />
+
+                      {/* Show "Re-add Runtime Secret" button if function requires it but field was deleted */}
+                      {functionNote &&
+                        !baseFormConfigFromHook.fields.some((f) => f.type === 'runtimeSecret') && (
+                          <RuntimeSecretButton
+                            adapter={effectiveAdapter}
+                            formConfig={baseFormConfigFromHook}
+                            onFormConfigUpdated={onFormConfigUpdated}
+                          />
+                        )}
+                    </>
                   )
                 )}
               </div>
@@ -321,9 +361,9 @@ export function StepFormCustomization({
             className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
             forceMount
           >
-            {adapter && (
+            {effectiveAdapter && (
               <ExecutionMethodSettings
-                adapter={adapter}
+                adapter={effectiveAdapter}
                 currentConfig={currentExecutionConfig}
                 onUpdateConfig={handleExecutionConfigUpdated}
                 isWidgetExpanded={isWidgetExpanded}
@@ -336,9 +376,9 @@ export function StepFormCustomization({
             className="mt-4 rounded-md border p-4 data-[state=inactive]:hidden"
             forceMount
           >
-            {adapter && (
+            {effectiveAdapter && (
               <UiKitSettings
-                adapter={adapter}
+                adapter={effectiveAdapter}
                 onUpdateConfig={handleUiKitConfigUpdate}
                 currentConfig={currentUiKitConfig}
               />

@@ -41,6 +41,11 @@ export interface SelectFieldProps<TFieldValues extends FieldValues = FieldValues
    * Custom validation function for select values
    */
   validateSelect?: (value: string) => boolean | string;
+
+  /**
+   * Optional default value used when the field has no value yet
+   */
+  defaultValue?: string;
 }
 
 /**
@@ -72,6 +77,7 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
   validation,
   options = [],
   validateSelect,
+  defaultValue,
 }: SelectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -92,6 +98,7 @@ export function SelectField<TFieldValues extends FieldValues = FieldValues>({
       <Controller
         control={control}
         name={name}
+        defaultValue={defaultValue as unknown as undefined}
         rules={{
           validate: (value) => {
             // Handle required validation explicitly

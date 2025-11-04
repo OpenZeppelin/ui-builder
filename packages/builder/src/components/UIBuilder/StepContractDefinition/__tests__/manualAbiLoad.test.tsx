@@ -130,6 +130,7 @@ describe('Manual ABI loading deduplication', () => {
         metadata: null,
         proxyInfo: null,
         error: null,
+        contractDefinitionArtifacts: null,
       },
       needsContractDefinitionLoad: true,
     });

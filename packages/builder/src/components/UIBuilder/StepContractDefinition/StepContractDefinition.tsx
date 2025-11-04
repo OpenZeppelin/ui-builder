@@ -3,8 +3,18 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCallback, useMemo, useState } from 'react';
 
 import { ActionBar } from '../../Common/ActionBar';
-import { uiBuilderStoreVanilla, type UIBuilderState } from '../hooks/uiBuilderStore';
-import { ContractFormFields, ContractLoadingErrors, ContractSuccessStatus } from './components';
+import { STEP_INDICES } from '../constants/stepIndices';
+import {
+  isTrimmedOnlyArtifacts,
+  uiBuilderStoreVanilla,
+  type UIBuilderState,
+} from '../hooks/uiBuilderStore';
+import {
+  ContractFormFields,
+  ContractLoadingErrors,
+  ContractSuccessStatus,
+  TrimmedArtifactsBanner,
+} from './components';
 import { useAutoContractLoad, useContractForm, useContractLoader, useFormSync } from './hooks';
 import { StepContractDefinitionProps } from './types';
 
@@ -20,11 +30,12 @@ export function StepContractDefinition({
 }: StepContractDefinitionProps) {
   const [ignoreProxy, setIgnoreProxy] = useState(false);
 
-  const { contractState, needsContractDefinitionLoad } = useStore(
+  const { contractState, needsContractDefinitionLoad, artifactsAreTrimmed } = useStore(
     uiBuilderStoreVanilla,
     useShallow((state: UIBuilderState) => ({
       contractState: state.contractState,
       needsContractDefinitionLoad: state.needsContractDefinitionLoad,
+      artifactsAreTrimmed: isTrimmedOnlyArtifacts(state),
     }))
   );
 
@@ -33,12 +44,25 @@ export function StepContractDefinition({
     definitionJson: contractDefinitionJson,
     error: contractDefinitionError,
     source: contractDefinitionSource,
+    requiresManualReload,
   } = contractState;
 
   const contractDefinitionInputs = useMemo(
     () => (adapter ? adapter.getContractDefinitionInputs() : []),
     [adapter]
   );
+
+  // Get adapter name for banner
+  const adapterName = useMemo(() => {
+    return adapter?.networkConfig?.ecosystem || 'Contract';
+  }, [adapter]);
+
+  // Handler to navigate to saved function when user wants to view it
+  const handleViewSavedFunction = useCallback(() => {
+    uiBuilderStoreVanilla.getState().updateState(() => ({
+      currentStepIndex: STEP_INDICES.FORM_CUSTOMIZATION,
+    }));
+  }, []);
 
   // Form management
   const {
@@ -74,6 +98,12 @@ export function StepContractDefinition({
     adapter,
     debouncedValues,
   });
+
+  const handleManualReload = useCallback(() => {
+    if (!debouncedValues) return;
+    markAttempted(debouncedValues);
+    void loadContract(debouncedValues);
+  }, [debouncedValues, loadContract, markAttempted]);
 
   // Automatic contract loading
   useAutoContractLoad({
@@ -118,6 +148,14 @@ export function StepContractDefinition({
         isWidgetExpanded={isWidgetExpanded}
       />
 
+      {/* Show banner if artifacts have been trimmed */}
+      {artifactsAreTrimmed && loadedConfigurationId && (
+        <TrimmedArtifactsBanner
+          adapterName={adapterName}
+          onViewSavedFunction={handleViewSavedFunction}
+        />
+      )}
+
       <ContractFormFields
         contractDefinitionInputs={contractDefinitionInputs}
         control={control}
@@ -143,6 +181,9 @@ export function StepContractDefinition({
           loadedConfigurationId={loadedConfigurationId}
           adapter={adapter}
           onIgnoreProxy={handleIgnoreProxy}
+          requiresManualReload={requiresManualReload}
+          onManualReload={handleManualReload}
+          isReloading={isLoading}
         />
       )}
     </div>

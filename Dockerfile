@@ -49,10 +49,10 @@ RUN pnpm install --frozen-lockfile || (echo "Install failed, clearing caches and
 RUN --mount=type=secret,id=etherscan_api_key \
     sh -c 'if [ -f /run/secrets/etherscan_api_key ]; then \
         export VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=$(cat /run/secrets/etherscan_api_key) && \
-        NODE_OPTIONS="--max-old-space-size=8192" pnpm -r build; \
+        pnpm build; \
     else \
         echo "Warning: Building without Etherscan API key" && \
-        NODE_OPTIONS="--max-old-space-size=8192" pnpm -r build; \
+        pnpm build; \
     fi'
 
 # Runtime stage - using a slim image for a smaller footprint

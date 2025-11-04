@@ -17,6 +17,15 @@ export interface MidnightContractArtifacts {
 
   /** Optional witness functions for zero-knowledge proofs */
   witnessCode?: string;
+
+  /** Optional verifier keys for ZK proofs (from keys directory) */
+  verifierKeys?: Record<string, unknown>;
+
+  /** Optional original ZIP data for auto-save functionality */
+  originalZipData?: string;
+
+  /** Optional trimmed ZIP data (saved when artifacts are trimmed for a specific function) */
+  trimmedZipBase64?: string;
 }
 
 /**

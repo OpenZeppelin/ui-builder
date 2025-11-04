@@ -89,6 +89,20 @@ function getCategoryLabel(category: string): string {
 }
 
 /**
+ * Check if a field should display the "Field Type" dropdown selector
+ * Some field types (like runtime secrets) have a fixed type and don't need selection
+ */
+export function shouldShowFieldTypeSelector(fieldType?: string): boolean {
+  // Runtime secret fields have a fixed type - no need for dropdown
+  if (fieldType === 'runtimeSecret') {
+    return false;
+  }
+
+  // All other field types can be converted/customized
+  return true;
+}
+
+/**
  * Generate field type groups based on adapter and parameter type
  */
 export function getFieldTypeGroups(

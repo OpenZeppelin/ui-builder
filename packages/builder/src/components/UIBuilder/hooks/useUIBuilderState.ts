@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
-import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
+import {
+  buildRequiredInputSnapshot,
+  hasMissingRequiredContractInputs,
+} from '@openzeppelin/ui-builder-utils';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';
@@ -38,6 +41,18 @@ export function useUIBuilderState() {
     void lifecycle.initializePageState();
   }, []); // Run only once
 
+  // Memoize address to avoid recalculating on every render
+  const memoAddress = useMemo(
+    () => state.contractState.address?.trim() || '',
+    [state.contractState.address]
+  );
+
+  // Memoize address validation result to avoid repeated validation calls across renders
+  const isValidAddr = useMemo(
+    () => (activeAdapter && memoAddress ? activeAdapter.isValidAddress(memoAddress) : false),
+    [activeAdapter, memoAddress]
+  );
+
   const autoSave = useAutoSave(isLoadingSavedConfigRef);
   const lifecycle = useBuilderLifecycle(isLoadingSavedConfigRef, savedConfigIdRef, autoSave);
   const navigation = useBuilderNavigation(isLoadingSavedConfigRef, savedConfigIdRef);
@@ -70,6 +85,7 @@ export function useUIBuilderState() {
         metadata: metadata ?? {},
         original: originalDefinition ?? '',
         contractDefinitionArtifacts: artifacts ?? null,
+        requiredInputSnapshot: buildRequiredInputSnapshot(activeAdapter, formValues),
       });
     },
     onError: (err) => {
@@ -99,10 +115,10 @@ export function useUIBuilderState() {
     // Load if we need to and have the required data
     if (
       state.needsContractDefinitionLoad &&
-      state.contractState.address &&
+      memoAddress &&
       activeAdapter &&
-      // Avoid triggering loads while the user is still typing an invalid/partial address
-      activeAdapter.isValidAddress(state.contractState.address) &&
+      // Use memoized validation to avoid repeated isValidAddress calls
+      isValidAddr &&
       (state.selectedNetworkConfigId === activeAdapter.networkConfig.id ||
         !state.selectedNetworkConfigId)
     ) {
@@ -125,12 +141,14 @@ export function useUIBuilderState() {
     }
   }, [
     state.needsContractDefinitionLoad,
-    state.contractState.address,
+    memoAddress,
+    isValidAddr,
     state.selectedNetworkConfigId,
     state.isLoadingConfiguration,
     activeAdapter?.networkConfig.id,
     contractDefinition.load,
     hasMissingRequiredFields,
+    state.contractState.formValues,
   ]);
 
   const contractWidget = useContractWidgetState();
@@ -147,10 +165,7 @@ export function useUIBuilderState() {
 
   const sidebarWidget = useMemo(
     () =>
-      state.contractState.schema &&
-      state.contractState.address &&
-      activeAdapter &&
-      activeNetworkConfig
+      state.contractState.address && activeAdapter && activeNetworkConfig
         ? contractWidget.createWidgetProps(
             state.contractState.schema,
             state.contractState.address,
@@ -176,6 +191,13 @@ export function useUIBuilderState() {
       state.contractState.schema
     );
   }, [completeStep, state, activeNetworkConfig, activeAdapter]);
+
+  const handleFunctionSelected = useCallback(
+    (functionId: string | null) => {
+      void contract.functionSelected(functionId);
+    },
+    [contract]
+  ) as (functionId: string | null) => void;
 
   return {
     state: {
@@ -206,7 +228,7 @@ export function useUIBuilderState() {
         clearSwitchTo: network.clearSwitchTo,
       },
       contract: {
-        functionSelected: contract.functionSelected,
+        functionSelected: handleFunctionSelected,
         loadDefinition: contractDefinition.load,
       },
       config: {

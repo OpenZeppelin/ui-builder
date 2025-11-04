@@ -1,0 +1,26 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 4f09d50581ee63311d650a3b5de85c4dc4e2b4f2..1d8324c30d385ef0fd844f7a3fc3c31a6e1758db 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,5 +1,7 @@
+-import fetch from 'cross-fetch';
+-import fetchBuilder from 'fetch-retry';
++import * as crossFetch from 'cross-fetch';
++const fetch = crossFetch.default || crossFetch.fetch || globalThis.fetch;
++import * as fetchRetryModule from 'fetch-retry';
++const fetchBuilder = fetchRetryModule.default || fetchRetryModule;
+ import { Transaction } from '@midnight-ntwrk/ledger';
+ import { BinaryWriter } from '@dao-xyz/borsh';
+ import { InvalidProtocolSchemeError, createUnbalancedTx } from '@midnight-ntwrk/midnight-js-types';
+diff --git a/package.json b/package.json
+index 9da095a5d61d00965150ac2925796116e53b7977..a0bdeebad6e2ce642e2d79156ec6d4790642f553 100644
+--- a/package.json
++++ b/package.json
+@@ -27,6 +27,7 @@
+   ],
+   "dependencies": {
+     "@dao-xyz/borsh": "^5.1.5",
++    "@midnight-ntwrk/ledger": "4.0.0",
+     "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
+     "@midnight-ntwrk/midnight-js-types": "2.0.2",
+     "cross-fetch": "^4.0.0",
