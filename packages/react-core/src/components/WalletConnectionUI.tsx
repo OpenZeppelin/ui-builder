@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@openzeppelin/ui-builder-ui';
 import { cn, logger } from '@openzeppelin/ui-builder-utils';
@@ -24,8 +24,8 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
     });
   }, [activeAdapter, walletFacadeHooks]);
 
-  // Memoize wallet components to avoid unnecessary re-renders
-  const walletComponents = useMemo(() => {
+  // Compute wallet components on each render to ensure UI kit changes are reflected immediately
+  const walletComponents = (() => {
     if (!activeAdapter || typeof activeAdapter.getEcosystemWalletComponents !== 'function') {
       logger.debug(
         'WalletConnectionUI',
@@ -43,7 +43,7 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
       setIsError(true);
       return null;
     }
-  }, [activeAdapter]);
+  })();
 
   if (!walletComponents) {
     logger.debug(
@@ -71,16 +71,6 @@ export const WalletConnectionUI: React.FC<WalletConnectionUIProps> = ({ classNam
         </Button>
       </div>
     );
-  }
-
-  // Ensure walletComponents is not null before destructuring
-  if (!walletComponents) {
-    // This case should ideally be caught above, but as a safeguard:
-    logger.debug(
-      'WalletConnectionUI',
-      '[Debug] walletComponents is null before rendering, rendering null.'
-    );
-    return null;
   }
 
   return (
