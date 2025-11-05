@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { setStellarConnectedAddress } from '../connection';
 import { stellarUiKitManager } from './stellarUiKitManager';
 
 /**
@@ -31,9 +32,31 @@ export function StellarWalletsKitConnectButton() {
       container: containerRef.current,
       onConnect: ({ address }) => {
         logger.info('StellarWalletsKitConnectButton', `Connected to address: ${address}`);
+        // Inform the adapter's wallet implementation so the context updates
+        // This ensures the Execute Transaction button and other components
+        // recognize the wallet connection state
+        try {
+          setStellarConnectedAddress(address ?? null);
+        } catch (error) {
+          logger.warn(
+            'StellarWalletsKitConnectButton',
+            'Failed to set connected address in adapter implementation:',
+            error
+          );
+        }
       },
       onDisconnect: () => {
         logger.info('StellarWalletsKitConnectButton', 'Disconnected');
+        // Inform the implementation we are no longer connected
+        try {
+          setStellarConnectedAddress(null);
+        } catch (error) {
+          logger.warn(
+            'StellarWalletsKitConnectButton',
+            'Failed to clear connected address in adapter implementation:',
+            error
+          );
+        }
       },
       buttonText: 'Connect Wallet',
     });
