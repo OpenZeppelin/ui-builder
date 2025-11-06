@@ -6,11 +6,14 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
+import { useEffect, useState } from 'react';
+
 import {
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
 } from '@openzeppelin/ui-builder-react-core';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import { Footer } from '@openzeppelin/ui-builder-ui';
 
 // @ts-expect-error - This import will be processed during code generation
@@ -21,21 +24,22 @@ import GeneratedForm from './components/GeneratedForm';
  *
  * Main application component that wraps the form.
  * Uses useWalletState to get the active adapter.
+ * Caches the adapter once available to prevent form remounts during wallet connection.
  */
 export function App() {
-  const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { activeAdapter } = useWalletState();
   const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
 
-  if (isAdapterLoading) {
-    return <div className="app-loading">Loading adapter...</div>;
-  }
-  if (!activeAdapter) {
-    return (
-      <div className="app-error">
-        Adapter not available. Please ensure network is selected and supported.
-      </div>
-    );
-  }
+  // Persist the adapter used by the form once it first becomes available to avoid remounts
+  // This prevents form resets when the adapter briefly transitions during wallet connection
+  const [adapterForForm, setAdapterForForm] = useState<ContractAdapter | null>(null);
+
+  useEffect(() => {
+    if (activeAdapter) {
+      // Don't replace an existing adapter instance to keep the form mounted
+      setAdapterForForm((prev) => prev ?? activeAdapter);
+    }
+  }, [activeAdapter]);
 
   return (
     <div className="app">
@@ -57,7 +61,12 @@ export function App() {
 
       <main className="main">
         <div className="container">
-          <GeneratedForm adapter={activeAdapter} isWalletConnected={isWalletConnectedForForm} />
+          {adapterForForm ? (
+            <GeneratedForm adapter={adapterForForm} isWalletConnected={isWalletConnectedForForm} />
+          ) : (
+            // Only shown before the first adapter resolves, never shown again
+            <div className="app-loading">Loading adapter...</div>
+          )}
         </div>
       </main>
 
