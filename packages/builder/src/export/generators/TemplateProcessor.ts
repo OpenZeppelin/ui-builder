@@ -223,9 +223,10 @@ export class TemplateProcessor {
       try {
         // We can inject the JSON directly without parsing and re-stringifying
         // Prettier will format it properly at the end
+        // Replace the return statement inside useMemo
         processedTemplate = processedTemplate.replace(
-          /const formSchema: RenderFormSchema = \{\};/g,
-          `const formSchema: RenderFormSchema = ${options.formConfigJSON};`
+          /return \{\}; \/\*@@FORM_SCHEMA_JSON@@\*\//g,
+          `return ${options.formConfigJSON};`
         );
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject form schema:', error);
@@ -236,10 +237,10 @@ export class TemplateProcessor {
     // Inject ContractSchema JSON if provided
     if (options?.contractSchemaJSON) {
       try {
+        // Replace the return statement inside useMemo
         processedTemplate = processedTemplate.replace(
-          // Assume a similar placeholder variable assignment
-          /const contractSchema: ContractSchema = \{\}; \/\*@@CONTRACT_SCHEMA_JSON@@\*\//g,
-          `const contractSchema: ContractSchema = ${options.contractSchemaJSON};`
+          /return \{\}; \/\*@@CONTRACT_SCHEMA_JSON@@\*\//g,
+          `return ${options.contractSchemaJSON};`
         );
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject contract schema:', error);
@@ -250,10 +251,11 @@ export class TemplateProcessor {
     // Inject execution config JSON if provided
     if (options?.executionConfigJSON) {
       try {
-        const regex =
-          /const executionConfig: ExecutionConfig \| undefined = undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g;
-        const replacement = `const executionConfig: ExecutionConfig | undefined = ${options.executionConfigJSON};`;
-        processedTemplate = processedTemplate.replace(regex, replacement);
+        // Replace the return statement inside useMemo
+        processedTemplate = processedTemplate.replace(
+          /return undefined; \/\*@@EXECUTION_CONFIG_JSON@@\*\//g,
+          `return ${options.executionConfigJSON};`
+        );
       } catch (error) {
         logger.error('TemplateProcessor', 'Failed to inject execution config:', error);
         throw error;
