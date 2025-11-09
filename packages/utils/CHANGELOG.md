@@ -1,5 +1,22 @@
 # @openzeppelin/transaction-form-utils
 
+## 0.14.0
+
+### Minor Changes
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Add `getBytesSize` utility function to extract size from `Bytes<N>` type strings. This function parses type strings like "Bytes<32>" and returns the size as a number, or undefined for dynamic types like "Uint8Array". Useful for validating fixed-size byte arrays in adapters.
+
+### Patch Changes
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Midnight adapter contract ingestion and shared gating
+  - Midnight: move loading to contract/loader; return contractDefinitionArtifacts; keep adapter thin.
+  - Builder: replace local required-field gating with shared utils (getMissingRequiredContractInputs); remove redundant helper.
+  - Utils: add contractInputs shared helpers and tests.
+  - Storage/App/UI: persist and rehydrate contractDefinitionArtifacts; auto-save triggers on artifact changes.
+
+- Updated dependencies [[`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00)]:
+  - @openzeppelin/ui-builder-types@0.14.0
+
 ## 0.13.0
 
 ### Minor Changes

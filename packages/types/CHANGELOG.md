@@ -1,5 +1,45 @@
 # @openzeppelin/ui-builder-types
 
+## 0.14.0
+
+### Minor Changes
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Implement runtime-only secret field support with dual-credential execution
+  - Add FunctionBadge, FunctionDecoration, and FunctionDecorationsMap types to types/adapters/ui-enhancements.ts
+  - Extend ContractAdapter.signAndBroadcast to accept optional runtimeApiKey and runtimeSecret parameters
+  - Add adapterBinding field to FormFieldType for adapter-specific credential binding
+  - Implement Banner component for reusable notification/warning display in ui package
+  - Add runtimeSecret field type with adapter-driven UI rendering in builder:
+    - Hide "Field Type" dropdown for runtime secret fields
+    - Hide "Required Field" toggle for runtime secret fields
+    - Make "Field Label" span full width when Field Type is hidden
+    - Add security warning banner when hardcoded values are used
+  - Extract runtime secret display logic into separate components (RuntimeSecretFieldDisplay, ParameterFieldDisplay)
+  - Extract field header (icon, label, delete button) into FieldHeader component
+  - Implement reusable hooks for function notes (useGetFunctionNote) and execution validation (useExecutionValidation)
+  - Create FunctionNoteSection and RuntimeSecretButton components for modular form customization
+  - Add runtimeSecretExtractor utility for clean credential handling during transaction execution
+  - Support hardcoded readonly runtime secrets with proper field extraction
+  - Implement FunctionDecorationsService in adapter-midnight for organizer-only circuit detection
+  - Fix private state overlay to handle provider storage misses gracefully
+  - Update transaction execution flow to pass both relayer API keys and adapter-specific secrets
+
+### Patch Changes
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Add FileUploadField component with drag-and-drop support
+  - Add new FileUploadField component to UI package with comprehensive file upload functionality
+  - Implement drag-and-drop file upload with visual feedback states
+  - Add file size validation with customizable limits
+  - Add file type validation via accept prop
+  - Include optional base64 conversion for storage
+  - Provide visual feedback for upload states (idle, processing, success, error)
+  - Full accessibility support with ARIA attributes and keyboard navigation
+  - Integration with React Hook Form for validation
+  - Add file-upload field type to types package
+  - Register FileUploadField in renderer field registry
+
+  Usage: Designed primarily for uploading contract artifacts (ZIP files) in Midnight adapter, but suitable for any file upload needs across the application.
+
 ## 0.13.0
 
 ### Minor Changes

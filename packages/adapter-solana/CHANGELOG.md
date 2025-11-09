@@ -1,5 +1,22 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 0.14.0
+
+### Minor Changes
+
+- [#221](https://github.com/OpenZeppelin/ui-builder/pull/221) [`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575) Thanks [@pasevin](https://github.com/pasevin)! - Standardize adapter Vite configuration pattern
+  - Add vite-config.ts export to all adapters for build-time configuration isolation
+  - Export getEvmViteConfig(), getSolanaViteConfig(), and getStellarViteConfig() functions
+  - Include module deduplication configurations for adapter-specific dependencies
+  - Update package.json exports and tsup.config.ts to include vite-config builds
+  - Ensures each adapter's build requirements are isolated and don't interfere with others
+
+### Patch Changes
+
+- Updated dependencies [[`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00)]:
+  - @openzeppelin/ui-builder-types@0.14.0
+  - @openzeppelin/ui-builder-utils@0.14.0
+
 ## 0.13.0
 
 ### Patch Changes

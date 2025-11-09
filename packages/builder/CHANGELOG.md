@@ -1,5 +1,57 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.12.0
+
+### Minor Changes
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Implement runtime-only secret field support with dual-credential execution
+  - Add FunctionBadge, FunctionDecoration, and FunctionDecorationsMap types to types/adapters/ui-enhancements.ts
+  - Extend ContractAdapter.signAndBroadcast to accept optional runtimeApiKey and runtimeSecret parameters
+  - Add adapterBinding field to FormFieldType for adapter-specific credential binding
+  - Implement Banner component for reusable notification/warning display in ui package
+  - Add runtimeSecret field type with adapter-driven UI rendering in builder:
+    - Hide "Field Type" dropdown for runtime secret fields
+    - Hide "Required Field" toggle for runtime secret fields
+    - Make "Field Label" span full width when Field Type is hidden
+    - Add security warning banner when hardcoded values are used
+  - Extract runtime secret display logic into separate components (RuntimeSecretFieldDisplay, ParameterFieldDisplay)
+  - Extract field header (icon, label, delete button) into FieldHeader component
+  - Implement reusable hooks for function notes (useGetFunctionNote) and execution validation (useExecutionValidation)
+  - Create FunctionNoteSection and RuntimeSecretButton components for modular form customization
+  - Add runtimeSecretExtractor utility for clean credential handling during transaction execution
+  - Support hardcoded readonly runtime secrets with proper field extraction
+  - Implement FunctionDecorationsService in adapter-midnight for organizer-only circuit detection
+  - Fix private state overlay to handle provider storage misses gracefully
+  - Update transaction execution flow to pass both relayer API keys and adapter-specific secrets
+
+### Patch Changes
+
+- [#221](https://github.com/OpenZeppelin/ui-builder/pull/221) [`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575) Thanks [@pasevin](https://github.com/pasevin)! - Fix EVM network loading regression in preview/production builds
+  - Fix issue where EVM networks failed to load in preview/docker modes while other adapters worked
+  - Implement adapter-specific Vite configuration pattern for better isolation and fault tolerance
+  - Add dynamic loading of adapter Vite configs with graceful error handling
+  - Create vite-config.ts exports for EVM, Solana, and Stellar adapters
+  - Ensure Midnight adapter's WASM plugins don't interfere with other adapters' dynamic imports
+  - Add build-time validation to enforce vite-config pattern across all adapters
+
+- [#205](https://github.com/OpenZeppelin/ui-builder/pull/205) [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00) Thanks [@pasevin](https://github.com/pasevin)! - Midnight adapter contract ingestion and shared gating
+  - Midnight: move loading to contract/loader; return contractDefinitionArtifacts; keep adapter thin.
+  - Builder: replace local required-field gating with shared utils (getMissingRequiredContractInputs); remove redundant helper.
+  - Utils: add contractInputs shared helpers and tests.
+  - Storage/App/UI: persist and rehydrate contractDefinitionArtifacts; auto-save triggers on artifact changes.
+
+- Updated dependencies [[`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575), [`8422e81`](https://github.com/OpenZeppelin/ui-builder/commit/8422e81cd4425d5fc596ac805bc130a80030fc93), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00)]:
+  - @openzeppelin/ui-builder-adapter-evm@0.14.0
+  - @openzeppelin/ui-builder-adapter-solana@0.14.0
+  - @openzeppelin/ui-builder-adapter-stellar@0.14.0
+  - @openzeppelin/ui-builder-ui@0.14.0
+  - @openzeppelin/ui-builder-types@0.14.0
+  - @openzeppelin/ui-builder-renderer@0.14.0
+  - @openzeppelin/ui-builder-react-core@0.14.0
+  - @openzeppelin/ui-builder-adapter-midnight@0.14.0
+  - @openzeppelin/ui-builder-storage@0.14.0
+  - @openzeppelin/ui-builder-utils@0.14.0
+
 ## 0.11.1
 
 ### Patch Changes
