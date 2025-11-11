@@ -91,21 +91,23 @@ export function ChainSelector({
     [onNetworkSelect, selectedEcosystem, trackNetworkSelection]
   );
 
-  // Initialize with the default ecosystem if it's enabled
+  // Keep the selector in sync with the ecosystem provided by the store/UI state
   useEffect(() => {
-    if (!selectedEcosystem && !selectedNetworkId) {
-      // Only set initial ecosystem if it's enabled
-      if (isEcosystemEnabled(initialEcosystem)) {
-        setSelectedEcosystem(initialEcosystem);
-      } else {
-        // If initial ecosystem is disabled, find the first enabled one
-        const enabledEcosystems = getVisibleEcosystems().filter(isEcosystemEnabled);
-        if (enabledEcosystems.length > 0) {
-          setSelectedEcosystem(enabledEcosystems[0]);
-        }
-      }
+    const visibleEcosystems = getVisibleEcosystems();
+
+    if (initialEcosystem && visibleEcosystems.includes(initialEcosystem)) {
+      setSelectedEcosystem(initialEcosystem);
+      setValue('ecosystem', initialEcosystem);
+      return;
     }
-  }, [initialEcosystem, selectedEcosystem, selectedNetworkId]);
+
+    // Fallback: pick the first enabled ecosystem if the provided one is hidden
+    const enabledFallback = visibleEcosystems.find(isEcosystemEnabled) || null;
+    setSelectedEcosystem(enabledFallback ?? null);
+    if (enabledFallback) {
+      setValue('ecosystem', enabledFallback);
+    }
+  }, [initialEcosystem, setValue]);
 
   // If we have a selectedNetworkId and no ecosystem, we need to fetch the network to determine its ecosystem
   useEffect(() => {

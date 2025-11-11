@@ -173,6 +173,12 @@ export function useBuilderLifecycle(
         return;
       }
 
+      uiBuilderStore.updateState((state) =>
+        state.selectedEcosystem === urlEcosystem
+          ? state
+          : { selectedEcosystem: urlEcosystem as Ecosystem }
+      );
+
       // Resolve network using utility (ecosystem-aware, chain-agnostic)
       const resolvedNetworkId = await resolveNetworkIdFromDeepLink(
         urlEcosystem as Ecosystem,
