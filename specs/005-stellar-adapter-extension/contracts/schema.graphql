@@ -1,0 +1,68 @@
+# GraphQL Contracts: Stellar Adapter Extension — Access Control
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  accessControlCapabilities(contract: ID!): AccessControlCapabilities!
+  ownership(contract: ID!): OwnershipInfo!
+  currentRoles(contract: ID!): [RoleAssignment!]!
+  history(contract: ID!, role: ID): [HistoryEntry!]!
+}
+
+type Mutation {
+  grantRole(contract: ID!, role: ID!, account: String!): Operation!
+  revokeRole(contract: ID!, role: ID!, account: String!): Operation!
+  transferOwnership(contract: ID!, newOwner: String!): Operation!
+  exportSnapshot(contract: ID!): AccessSnapshot!
+}
+
+type AccessControlCapabilities {
+  hasOwnable: Boolean!
+  hasAccessControl: Boolean!
+  hasEnumerableRoles: Boolean!
+  supportsHistory: Boolean!
+  verifiedAgainstOZInterfaces: Boolean!
+  notes: [String!]
+}
+
+type OwnershipInfo {
+  owner: String
+}
+
+type RoleIdentifier {
+  id: ID!
+  label: String
+}
+
+type RoleAssignment {
+  role: RoleIdentifier!
+  members: [String!]!
+}
+
+type AccessSnapshot {
+  roles: [RoleAssignment!]!
+  ownership: OwnershipInfo
+}
+
+enum RoleChangeType {
+  GRANTED
+  REVOKED
+}
+
+type HistoryEntry {
+  role: RoleIdentifier!
+  account: String!
+  changeType: RoleChangeType!
+  txId: ID!
+  timestamp: String
+  ledger: Int
+}
+
+type Operation {
+  id: ID!
+}***
+
+
