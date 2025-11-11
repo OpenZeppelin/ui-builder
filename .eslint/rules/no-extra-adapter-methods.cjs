@@ -88,6 +88,7 @@ module.exports = {
       'getExportBootstrapFiles',
       'getArtifactPersistencePolicy',
       'prepareArtifactsForFunction',
+      'getAccessControlService',
     ];
 
     // Common standard methods and properties that are allowed

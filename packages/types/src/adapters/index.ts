@@ -21,6 +21,9 @@ export * from './ui-enhancements';
 // Re-export export bootstrapping types
 export * from './export';
 
+// Re-export access control types
+export * from './access-control';
+
 /**
  * Combined adapter interface with all capabilities
  *

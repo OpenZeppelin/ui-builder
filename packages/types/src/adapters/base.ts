@@ -1,3 +1,4 @@
+import type { AccessControlService } from '../access-control';
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type { ProxyInfo } from '../contracts/proxy';
@@ -696,4 +697,12 @@ export interface ContractAdapter {
     latency?: number;
     error?: string;
   }>;
+
+  /**
+   * Optional accessor for the Access Control service.
+   * Returns an AccessControlService instance if the adapter supports access control operations.
+   *
+   * @returns The AccessControlService instance, or undefined if not supported
+   */
+  getAccessControlService?(): AccessControlService | undefined;
 }

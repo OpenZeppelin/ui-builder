@@ -2,19 +2,19 @@
 
 ## Phase 1 — Setup
 
-- [ ] T001 Ensure feature branch is checked out: 005-stellar-adapter-extension
-- [ ] T002 Verify workspace scripts and tooling: pnpm, vitest, tsup, lint configs
-- [ ] T003 Add changeset stub for adapter/types/utils (no version bump yet)
+- [x] T001 Ensure feature branch is checked out: 005-stellar-adapter-extension
+- [x] T002 Verify workspace scripts and tooling: pnpm, vitest, tsup, lint configs
+- [x] T003 Add changeset stub for adapter/types/utils (no version bump yet)
 
 ## Phase 2 — Foundational (blocking prerequisites)
 
-- [ ] T004 Create shared interfaces in packages/types/src/access-control.ts
-- [ ] T005 Update packages/types/src/adapters/base.ts with getAccessControlService? signature
-- [ ] T006 Update tooling rule @no-extra-adapter-methods.cjs to allow getAccessControlService
-- [ ] T007 [P] Add snapshot helpers in packages/utils/src/access/snapshot.ts
-- [ ] T008 Extend Stellar NetworkConfig for optional indexer endpoints in packages/types/src/networks/config.ts
-- [ ] T009 [P] Add/verify Stellar network service form/validation for indexer in packages/adapter-stellar/src/configuration/network-services.ts
-- [ ] T010 Provide per‑network indexer defaults when stable (testnet/mainnet) in packages/adapter-stellar/src/networks/\*.ts
+- [x] T004 Create shared interfaces in packages/types/src/access-control.ts
+- [x] T005 Update packages/types/src/adapters/base.ts with getAccessControlService? signature
+- [x] T006 Update tooling rule @no-extra-adapter-methods.cjs to allow getAccessControlService
+- [x] T007 [P] Add snapshot helpers in packages/utils/src/access/snapshot.ts
+- [x] T008 Extend Stellar NetworkConfig for optional indexer endpoints in packages/types/src/networks/config.ts
+- [x] T009 [P] Add/verify Stellar network service form/validation for indexer in packages/adapter-stellar/src/configuration/network-services.ts
+- [x] T010 Provide per‑network indexer defaults when stable (testnet/mainnet) in packages/adapter-stellar/src/networks/\*.ts
 
 ## Phase 3 — US1 (P1): Inspect roles and ownership
 
