@@ -197,7 +197,9 @@ function resolveExportPath(baseDir: string, targetPath: string): string[] {
 }
 
 /**
- * Appends witness type definitions to contract definition
+ * Appends witness type definitions to contract definition.
+ * This enhances the contract definition with witness type information,
+ * which is used for identity secret key property derivation.
  */
 async function appendWitnessTypeDefinitions(
   zip: JSZip,
@@ -210,16 +212,19 @@ async function appendWitnessTypeDefinitions(
     );
 
     if (witnessDtsFiles.length === 0) {
+      logger.debug(SYSTEM_LOG_TAG, 'No witness .d.ts files found in ZIP');
       return existingDefinition;
     }
 
+    logger.debug(SYSTEM_LOG_TAG, `Found ${witnessDtsFiles.length} witness .d.ts file(s)`);
     const contents = await Promise.all(witnessDtsFiles.map((p) => zip.files[p].async('string')));
 
     return [existingDefinition, ...contents].filter(Boolean).join('\n\n');
   } catch (err) {
-    logger.debug(
+    // Log at warning level since this could affect identity secret derivation
+    logger.warn(
       SYSTEM_LOG_TAG,
-      'Failed to append witness .d.ts to contractDefinition:',
+      'Failed to append witness type definitions to contract definition. This may affect automatic detection of identity secret key property name.',
       err instanceof Error ? err.message : String(err)
     );
     return existingDefinition;
