@@ -3,9 +3,8 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { parseMidnightInput } from '../transform';
 import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import { isArrayType, isMaybeType, isVectorType } from '../utils/type-helpers';
-
-// (shared helpers imported from ../utils/type-helpers)
 
 /**
  * Extract identity secret key property name from runtime secret field metadata.
@@ -24,8 +23,8 @@ function extractSecretPropertyName(fields: FormFieldType[]): string | undefined 
     identitySecretKeyPropertyName?: string;
   };
 
-  const propName = meta.identitySecretKeyPropertyName?.trim();
-  return propName && propName.length > 0 ? propName : undefined;
+  // Use shared resolver to apply trim validation without default fallback
+  return resolveSecretPropertyName(meta);
 }
 
 /**

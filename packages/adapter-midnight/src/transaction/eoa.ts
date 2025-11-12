@@ -2,6 +2,7 @@ import type { TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
 import { hexToBytes, logger } from '@openzeppelin/ui-builder-utils';
 
 import type { WriteContractParameters } from '../types';
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
 import { callCircuit } from './call-circuit';
 import { evaluateContractModule } from './contract-evaluator';
@@ -197,13 +198,11 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
 
       // Step 4.1: Wrap private state provider with runtime-only secret overlay
       // Determine property name from function-specific config (Customize step) or fallback
-      const configuredProp = (
-        transactionData as {
-          _secretConfig?: { identitySecretKeyPropertyName?: string };
-        }
-      )?._secretConfig?.identitySecretKeyPropertyName?.trim();
-      const identitySecretProp =
-        configuredProp && configuredProp.length > 0 ? configuredProp : 'organizerSecretKey';
+      const identitySecretProp = resolveSecretPropertyName(
+        (transactionData as { _secretConfig?: { identitySecretKeyPropertyName?: string } })
+          ._secretConfig,
+        'organizerSecretKey' // Provide explicit default for eoa.ts
+      )!; // Safe to assert non-null since we provide a default
 
       const overlayPrivateStateProvider = createPrivateStateOverlay(
         providers.privateStateProvider as {

@@ -2,6 +2,7 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import { enhanceMidnightError, formatEnhancedError } from './error-enhancer';
 
 const SYSTEM_LOG_TAG = 'callCircuit';
@@ -156,9 +157,11 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
 
       // Only map to identity-secret error if it's a specific error about missing secret key
       // The overlay now returns {} instead of null, so missing state errors indicate secret key is needed
-      const configuredProp = params.identitySecretKeyPropertyName?.trim();
-      const secretProp =
-        configuredProp && configuredProp.length > 0 ? configuredProp : 'organizerSecretKey';
+      const secretProp = resolveSecretPropertyName(
+        { identitySecretKeyPropertyName: params.identitySecretKeyPropertyName },
+        'organizerSecretKey'
+      )!; // Safe to assert non-null since we provide a default
+
       const isIdentitySecretError =
         message.includes(secretProp) ||
         message.includes('No private state found at private state ID') ||
