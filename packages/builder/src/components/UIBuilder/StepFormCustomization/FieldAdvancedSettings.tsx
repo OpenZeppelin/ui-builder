@@ -1,6 +1,7 @@
 import { Control } from 'react-hook-form';
 
-import { BooleanField, TextAreaField } from '@openzeppelin/ui-builder-ui';
+import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-types';
+import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-builder-ui';
 
 import { shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 
@@ -16,6 +17,14 @@ interface FieldAdvancedSettingsProps {
    * The current field type to determine which settings to display
    */
   fieldType?: string;
+  /**
+   * Optional adapter to drive adapter-specific settings (e.g., runtimeSecret extras)
+   */
+  adapter?: ContractAdapter;
+  /**
+   * Current field snapshot for metadata inspection
+   */
+  field?: FormFieldType;
 }
 
 /**
@@ -29,9 +38,25 @@ interface FieldAdvancedSettingsProps {
  * @param props.control - React Hook Form control instance
  * @param props.fieldType - The current field type
  */
-export function FieldAdvancedSettings({ control, fieldType }: FieldAdvancedSettingsProps) {
+export function FieldAdvancedSettings({ control, fieldType, adapter }: FieldAdvancedSettingsProps) {
+  const propertyCfg = adapter?.getRuntimeFieldBinding?.()?.propertyNameInput;
+  const showIdentityProp =
+    fieldType === 'runtimeSecret' &&
+    !!(propertyCfg?.visible ?? (propertyCfg?.metadataKey ? true : false));
+
   return (
     <>
+      {showIdentityProp && propertyCfg?.metadataKey && (
+        <TextField
+          id="identity-secret-prop"
+          name={`adapterBinding.metadata.${propertyCfg.metadataKey}`}
+          label={propertyCfg.label || 'Secret Key Property Name'}
+          control={control}
+          placeholder={propertyCfg.placeholder || 'e.g., secretKey'}
+          helperText={propertyCfg.helperText}
+        />
+      )}
+
       <TextAreaField
         id="field-description"
         name="description"
