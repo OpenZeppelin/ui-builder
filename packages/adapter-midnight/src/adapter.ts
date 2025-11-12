@@ -352,9 +352,6 @@ export class MidnightAdapter implements ContractAdapter {
 
     // Build helper text with proper empty string handling
     const hasDetectedProperty = derivedProp && derivedProp.length > 0;
-    const detectionMessage = hasDetectedProperty
-      ? `Detected "${derivedProp}" in your artifacts. Change if your contract uses a different private-state property (e.g., organizerSecretKey, secretKey, ownerKey). `
-      : '';
     const generalGuidance =
       'Midnight contracts differ: the identity secret may be stored under different private-state property names. You can find this in your generated types (PrivateState in .d.ts) or in witnesses code (privateState.<prop>). The secret is injected at runtime and never persisted.';
 
@@ -369,7 +366,13 @@ export class MidnightAdapter implements ContractAdapter {
         placeholder: 'e.g., secretKey',
         defaultValue: derivedProp,
         visible: true,
-        helperText: detectionMessage + generalGuidance,
+        helperText: [
+          hasDetectedProperty &&
+            `Detected "${derivedProp}" in your artifacts. Change if your contract uses a different private-state property (e.g., organizerSecretKey, secretKey, ownerKey).`,
+          generalGuidance,
+        ]
+          .filter(Boolean)
+          .join(' '),
       },
     };
   }

@@ -17,7 +17,8 @@ export interface ExtendedRuntimeBinding {
  * seeding property name input default if adapter provides it.
  *
  * @param binding - Extended runtime binding from adapter
- * @returns Metadata object with seeded property name, or undefined
+ * @returns Metadata object with seeded property name if applicable,
+ *          or the original metadata, or undefined if no metadata exists
  */
 export function buildInitialMetadata(
   binding: ExtendedRuntimeBinding

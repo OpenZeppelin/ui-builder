@@ -39,14 +39,13 @@ interface FieldAdvancedSettingsProps {
 export function FieldAdvancedSettings({ control, fieldType, adapter }: FieldAdvancedSettingsProps) {
   const propertyCfg = adapter?.getRuntimeFieldBinding?.()?.propertyNameInput;
   const showIdentityProp =
-    fieldType === 'runtimeSecret' &&
-    !!(propertyCfg?.visible ?? (propertyCfg?.metadataKey ? true : false));
+    fieldType === 'runtimeSecret' && (propertyCfg?.visible ?? !!propertyCfg?.metadataKey);
 
   return (
     <>
       {showIdentityProp && propertyCfg?.metadataKey && (
         <TextField
-          id="identity-secret-prop"
+          id={`identity-secret-prop-${propertyCfg.metadataKey}`}
           name={`adapterBinding.metadata.${propertyCfg.metadataKey}`}
           label={propertyCfg.label || 'Secret Key Property Name'}
           control={control}

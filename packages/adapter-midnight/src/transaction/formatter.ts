@@ -8,7 +8,8 @@ import { isArrayType, isMaybeType, isVectorType } from '../utils/type-helpers';
 
 /**
  * Extract identity secret key property name from runtime secret field metadata.
- * Returns undefined if no runtimeSecret field exists or if the property name is empty.
+ * Returns undefined if no runtimeSecret field exists, if the property name is empty,
+ * or if it's not a valid JavaScript identifier.
  */
 function extractSecretPropertyName(fields: FormFieldType[]): string | undefined {
   const runtimeSecretField = fields.find(
@@ -24,7 +25,23 @@ function extractSecretPropertyName(fields: FormFieldType[]): string | undefined 
   };
 
   // Use shared resolver to apply trim validation without default fallback
-  return resolveSecretPropertyName(meta);
+  const propName = resolveSecretPropertyName(meta);
+
+  if (!propName) {
+    return undefined;
+  }
+
+  // Validate it's a valid JavaScript identifier
+  // Must start with letter, underscore, or $, followed by letters, digits, underscores, or $
+  if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(propName)) {
+    logger.warn(
+      'formatMidnightTransactionData',
+      `Invalid property name "${propName}". Must be a valid JavaScript identifier. Ignoring.`
+    );
+    return undefined;
+  }
+
+  return propName;
 }
 
 /**

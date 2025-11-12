@@ -32,7 +32,8 @@ export function deriveIdentitySecretPropertyName(
       for (const match of privateStateBlocks) {
         const body = match[1] || '';
         // Extract readonly <name>: <type>;
-        const fields = Array.from(body.matchAll(/readonly\s+(\w+)\s*:\s*([^;]+);/g)).map((m) => ({
+        // Stop at comment start (/), semicolon, or newline to avoid capturing inline comments
+        const fields = Array.from(body.matchAll(/readonly\s+(\w+)\s*:\s*([^;/\n]+)/g)).map((m) => ({
           name: m[1],
           type: (m[2] || '').trim(),
         }));

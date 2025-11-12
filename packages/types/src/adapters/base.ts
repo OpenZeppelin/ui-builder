@@ -105,7 +105,10 @@ export interface RuntimeSecretPropertyInput {
   helperText?: string;
   /** Optional placeholder text */
   placeholder?: string;
-  /** Optional default value to seed when the field is auto-added */
+  /**
+   * Optional default value to seed when the field is auto-added.
+   * If metadata[metadataKey] already has a value, that value takes precedence.
+   */
   defaultValue?: string;
   /** Whether to render the control (default: true when metadataKey provided) */
   visible?: boolean;

@@ -216,15 +216,20 @@ async function appendWitnessTypeDefinitions(
       return existingDefinition;
     }
 
-    logger.debug(SYSTEM_LOG_TAG, `Found ${witnessDtsFiles.length} witness .d.ts file(s)`);
     const contents = await Promise.all(witnessDtsFiles.map((p) => zip.files[p].async('string')));
+    logger.debug(
+      SYSTEM_LOG_TAG,
+      `Appending ${contents.length} witness type definition(s) to contract definition`
+    );
 
     return [existingDefinition, ...contents].filter(Boolean).join('\n\n');
   } catch (err) {
     // Log at warning level since this could affect identity secret derivation
     logger.warn(
       SYSTEM_LOG_TAG,
-      'Failed to append witness type definitions to contract definition. This may affect automatic detection of identity secret key property name.',
+      'Failed to append witness type definitions to contract definition. ' +
+        'Identity secret key property name will default to "organizerSecretKey". ' +
+        'You can manually configure this in the Customize step if your contract uses a different property name.',
       err instanceof Error ? err.message : String(err)
     );
     return existingDefinition;

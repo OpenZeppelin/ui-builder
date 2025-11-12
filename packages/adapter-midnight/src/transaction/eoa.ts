@@ -197,7 +197,8 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       });
 
       // Step 4.1: Wrap private state provider with runtime-only secret overlay
-      // Determine property name from function-specific config (Customize step) or fallback
+      // Extract function-specific property name from Customize step metadata.
+      // Falls back to 'organizerSecretKey' if not configured or empty.
       const identitySecretProp = resolveSecretPropertyName(
         (transactionData as { _secretConfig?: { identitySecretKeyPropertyName?: string } })
           ._secretConfig,
