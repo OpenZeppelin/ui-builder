@@ -156,7 +156,9 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
 
       // Only map to identity-secret error if it's a specific error about missing secret key
       // The overlay now returns {} instead of null, so missing state errors indicate secret key is needed
-      const secretProp = params.identitySecretKeyPropertyName || 'organizerSecretKey';
+      const configuredProp = params.identitySecretKeyPropertyName?.trim();
+      const secretProp =
+        configuredProp && configuredProp.length > 0 ? configuredProp : 'organizerSecretKey';
       const isIdentitySecretError =
         message.includes(secretProp) ||
         message.includes('No private state found at private state ID') ||

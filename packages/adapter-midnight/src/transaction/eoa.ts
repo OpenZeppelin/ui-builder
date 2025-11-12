@@ -197,12 +197,13 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
 
       // Step 4.1: Wrap private state provider with runtime-only secret overlay
       // Determine property name from function-specific config (Customize step) or fallback
+      const configuredProp = (
+        transactionData as {
+          _secretConfig?: { identitySecretKeyPropertyName?: string };
+        }
+      )?._secretConfig?.identitySecretKeyPropertyName?.trim();
       const identitySecretProp =
-        (
-          transactionData as {
-            _secretConfig?: { identitySecretKeyPropertyName?: string };
-          }
-        )?._secretConfig?.identitySecretKeyPropertyName?.trim() || 'organizerSecretKey';
+        configuredProp && configuredProp.length > 0 ? configuredProp : 'organizerSecretKey';
 
       const overlayPrivateStateProvider = createPrivateStateOverlay(
         providers.privateStateProvider as {

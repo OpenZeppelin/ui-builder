@@ -37,7 +37,7 @@ export function deriveIdentitySecretPropertyName(
           type: (m[2] || '').trim(),
         }));
 
-        const candidates = fields.filter((f) => /^Uint8Array(\s*\|\s*null)?$/i.test(f.type));
+        const candidates = fields.filter((f) => /^Uint8Array(\s*\|\s*null)?$/.test(f.type));
 
         if (candidates.length === 1) {
           const name = candidates[0].name;

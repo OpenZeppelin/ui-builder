@@ -25,7 +25,7 @@ function extractSecretPropertyName(fields: FormFieldType[]): string | undefined 
   };
 
   const propName = meta.identitySecretKeyPropertyName?.trim();
-  return propName || undefined;
+  return propName && propName.length > 0 ? propName : undefined;
 }
 
 /**
