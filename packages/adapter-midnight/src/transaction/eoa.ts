@@ -2,6 +2,7 @@ import type { TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
 import { hexToBytes, logger } from '@openzeppelin/ui-builder-utils';
 
 import type { WriteContractParameters } from '../types';
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
 import { callCircuit } from './call-circuit';
 import { evaluateContractModule } from './contract-evaluator';
@@ -13,11 +14,12 @@ const SYSTEM_LOG_TAG = 'MidnightEoaExecutionStrategy';
 
 /**
  * Creates a runtime-only overlay for the private state provider that injects
- * the organizer secret key without persisting it to IndexedDB.
+ * the identity secret key without persisting it to IndexedDB.
  * This is by design to avoid storing the sensitive key due to security reasons.
  *
  * @param baseProvider - The underlying private state provider (IndexedDB-backed)
- * @param runtimeKeyHex - Optional runtime organizer secret key in hex format
+ * @param runtimeKeyHex - Optional runtime identity secret key in hex format
+ * @param secretPropName - Name of the private state property that holds the secret (e.g., 'organizerSecretKey', 'secretKey')
  * @returns Wrapped provider that injects key in-memory and strips it on writes
  */
 export function createPrivateStateOverlay(
@@ -25,7 +27,8 @@ export function createPrivateStateOverlay(
     get: (id: string) => Promise<unknown>;
     set: (id: string, state: unknown) => Promise<void>;
   },
-  runtimeKeyHex?: string
+  runtimeKeyHex: string | undefined,
+  secretPropName: string
 ): typeof baseProvider {
   let overlayKeyBytes: Uint8Array | undefined;
 
@@ -33,7 +36,7 @@ export function createPrivateStateOverlay(
     try {
       overlayKeyBytes = hexToBytes(runtimeKeyHex);
     } catch {
-      logger.warn(SYSTEM_LOG_TAG, 'Invalid organizer secret provided; ignoring at runtime');
+      logger.warn(SYSTEM_LOG_TAG, 'Invalid identity secret provided; ignoring at runtime');
     }
   }
 
@@ -47,21 +50,19 @@ export function createPrivateStateOverlay(
         baseState = null;
       }
 
-      // Remove any persisted organizerSecretKey to enforce runtime-only behavior
+      // Remove any persisted secret key to enforce runtime-only behavior
       let sanitized: unknown = null;
       if (baseState && typeof baseState === 'object') {
-        const { organizerSecretKey: _organizerSecretKeyUnused, ...rest } = baseState as Record<
-          string,
-          unknown
-        >;
+        const rest = { ...(baseState as Record<string, unknown>) };
+        delete rest[secretPropName];
         sanitized = Object.keys(rest).length > 0 ? rest : null;
       }
 
       if (overlayKeyBytes) {
-        // Return ephemeral state with organizerSecretKey injected; not persisted
+        // Return ephemeral state with secret injected; not persisted
         const baseObj =
           sanitized && typeof sanitized === 'object' ? (sanitized as Record<string, unknown>) : {};
-        return { ...baseObj, organizerSecretKey: overlayKeyBytes };
+        return { ...baseObj, [secretPropName]: overlayKeyBytes };
       }
 
       // Without runtime key, return empty object if no state exists (some circuits need at least {} instead of null)
@@ -70,12 +71,10 @@ export function createPrivateStateOverlay(
     },
 
     async set(id: string, state: unknown): Promise<void> {
-      // Strip organizerSecretKey before persisting updates
+      // Strip secret before persisting updates
       if (state && typeof state === 'object') {
-        const { organizerSecretKey: _organizerSecretKeyUnused2, ...rest } = state as Record<
-          string,
-          unknown
-        >;
+        const rest = { ...(state as Record<string, unknown>) };
+        delete rest[secretPropName];
         return baseProvider.set(id, rest);
       }
       return baseProvider.set(id, state);
@@ -197,13 +196,22 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         version: (compactRuntime as { versionString?: string })?.versionString,
       });
 
-      // Step 4.1: Wrap private state provider with runtime-only organizer key overlay
+      // Step 4.1: Wrap private state provider with runtime-only secret overlay
+      // Extract function-specific property name from Customize step metadata.
+      // Falls back to 'organizerSecretKey' if not configured or empty.
+      const identitySecretProp = resolveSecretPropertyName(
+        (transactionData as { _secretConfig?: { identitySecretKeyPropertyName?: string } })
+          ._secretConfig,
+        'organizerSecretKey' // Provide explicit default for eoa.ts
+      )!; // Safe to assert non-null since we provide a default
+
       const overlayPrivateStateProvider = createPrivateStateOverlay(
         providers.privateStateProvider as {
           get: (id: string) => Promise<unknown>;
           set: (id: string, state: unknown) => Promise<void>;
         },
-        runtimeSecret
+        runtimeSecret,
+        identitySecretProp
       );
 
       // Step 5: Create contract instance with injected dependencies
@@ -257,6 +265,7 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         circuitId: transactionData.functionName,
         privateStateId,
         args: transactionData.args,
+        identitySecretKeyPropertyName: identitySecretProp,
       });
 
       logger.info(SYSTEM_LOG_TAG, `Transaction submitted: ${result.txHash}`);

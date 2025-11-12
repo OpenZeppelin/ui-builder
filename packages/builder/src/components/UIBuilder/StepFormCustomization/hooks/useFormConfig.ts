@@ -14,6 +14,7 @@ import {
   generateFormConfig,
   updateFormConfig,
 } from '../../../../services/FormGenerator';
+import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runtime-secret-helpers';
 
 interface UseFormConfigProps {
   contractSchema: ContractSchema | null;
@@ -136,6 +137,9 @@ export function useFormConfig({
         );
 
         if (!hasRuntimeSecretField) {
+          const binding = bindingInfo as ExtendedRuntimeBinding;
+          const metadata = buildInitialMetadata(binding);
+
           // Auto-add the runtime secret field
           const runtimeSecretField: FormFieldType = {
             id: `runtime-secret-${bindingInfo.key}`,
@@ -145,7 +149,10 @@ export function useFormConfig({
             placeholder: 'Enter secret value',
             helperText: bindingInfo.helperText,
             validation: { required: false }, // Not required to submit, but needed for execution if function requires runtime secret
-            adapterBinding: { key: bindingInfo.key },
+            adapterBinding: {
+              key: bindingInfo.key,
+              ...(metadata ? { metadata } : {}),
+            },
             originalParameterType: 'runtimeSecret', // Signal to field editor that this is a runtime secret
           };
 
