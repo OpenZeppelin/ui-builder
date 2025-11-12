@@ -1,5 +1,13 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`faff555`](https://github.com/OpenZeppelin/ui-builder/commit/faff555be188b679c8ba9c22e9e01b4a9c22ecff)]:
+  - @openzeppelin/ui-builder-types@0.15.0
+  - @openzeppelin/ui-builder-utils@0.15.0
+
 ## 0.14.0
 
 ### Minor Changes
