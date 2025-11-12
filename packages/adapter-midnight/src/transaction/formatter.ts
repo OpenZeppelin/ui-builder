@@ -8,6 +8,27 @@ import { isArrayType, isMaybeType, isVectorType } from '../utils/type-helpers';
 // (shared helpers imported from ../utils/type-helpers)
 
 /**
+ * Extract identity secret key property name from runtime secret field metadata.
+ * Returns undefined if no runtimeSecret field exists or if the property name is empty.
+ */
+function extractSecretPropertyName(fields: FormFieldType[]): string | undefined {
+  const runtimeSecretField = fields.find(
+    (f) => f.type === 'runtimeSecret' && f.adapterBinding?.key
+  );
+
+  if (!runtimeSecretField?.adapterBinding?.metadata) {
+    return undefined;
+  }
+
+  const meta = runtimeSecretField.adapterBinding.metadata as {
+    identitySecretKeyPropertyName?: string;
+  };
+
+  const propName = meta.identitySecretKeyPropertyName?.trim();
+  return propName || undefined;
+}
+
+/**
  * Formats transaction data for Midnight chains based on parsed inputs.
  *
  * @param contractSchema The contract schema.
@@ -137,11 +158,16 @@ export function formatMidnightTransactionData(
     throw new Error('Contract address is missing or invalid in the provided schema.');
   }
 
+  // Derive per-function secret configuration from runtimeSecret field metadata
+  const propName = extractSecretPropertyName(fields);
+  const secretConfig = propName ? { identitySecretKeyPropertyName: propName } : undefined;
+
   const paramsForSignAndBroadcast: WriteContractParameters = {
     contractAddress: contractSchema.address,
     functionName: functionDetails.name,
     args: transformedArgs,
     argTypes: functionDetails.inputs.map((param) => param.type),
+    ...(secretConfig ? { _secretConfig: secretConfig } : {}),
     transactionOptions: {
       // Pass artifacts for execution (will be extracted by adapter's signAndBroadcast)
       _artifacts: artifacts

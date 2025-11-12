@@ -19,6 +19,7 @@ import type {
   NetworkServiceForm,
   RelayerDetails,
   RelayerDetailsRich,
+  RuntimeSecretPropertyInput,
   TransactionStatusUpdate,
   UiKitConfiguration,
 } from '@openzeppelin/ui-builder-types';
@@ -39,6 +40,7 @@ import {
 } from './mapping/type-mapper';
 import type { WriteContractParameters } from './types/transaction';
 import { prepareArtifactsForFunction as prepareArtifacts } from './utils/artifact-preparation';
+import { deriveIdentitySecretPropertyName } from './utils/identity-secret-derivation';
 import { CustomAccountDisplay } from './wallet/components/account/AccountDisplay';
 import { ConnectButton } from './wallet/components/connect/ConnectButton';
 import { MidnightWalletUiRoot } from './wallet/components/MidnightWalletUiRoot';
@@ -335,11 +337,35 @@ export class MidnightAdapter implements ContractAdapter {
   /**
    * @inheritdoc
    */
-  public getRuntimeFieldBinding() {
+  public getRuntimeFieldBinding(): {
+    key: string;
+    label: string;
+    helperText?: string;
+    metadata?: Record<string, unknown>;
+    propertyNameInput?: RuntimeSecretPropertyInput;
+  } {
+    // Attempt to derive a sane default from artifacts; keep editable
+    const derivedProp =
+      this.artifacts?.identitySecretKeyPropertyName ||
+      deriveIdentitySecretPropertyName(this.artifacts) ||
+      '';
     return {
       key: 'organizerSecret',
-      label: 'Organizer Secret',
-      helperText: 'Hex-encoded organizer secret; used for organizer-only circuits and never stored',
+      label: 'Identity Secret',
+      helperText:
+        'Hex-encoded identity secret; used for identity-restricted circuits and never stored',
+      propertyNameInput: {
+        metadataKey: 'identitySecretKeyPropertyName',
+        label: 'Secret Key Property Name',
+        placeholder: 'e.g., secretKey',
+        defaultValue: derivedProp,
+        visible: true,
+        helperText:
+          (derivedProp
+            ? `Detected "${derivedProp}" in your artifacts. Change if your contract uses a different private-state property (e.g., organizerSecretKey, secretKey, ownerKey). `
+            : '') +
+          'Midnight contracts differ: the identity secret may be stored under different private-state property names. You can find this in your generated types (PrivateState in .d.ts) or in witnesses code (privateState.<prop>). The secret is injected at runtime and never persisted.',
+      },
     };
   }
 
