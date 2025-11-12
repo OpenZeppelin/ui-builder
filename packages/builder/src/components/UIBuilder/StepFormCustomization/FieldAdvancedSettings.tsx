@@ -1,6 +1,6 @@
 import { Control } from 'react-hook-form';
 
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-builder-ui';
 
 import { shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
@@ -21,22 +21,20 @@ interface FieldAdvancedSettingsProps {
    * Optional adapter to drive adapter-specific settings (e.g., runtimeSecret extras)
    */
   adapter?: ContractAdapter;
-  /**
-   * Current field snapshot for metadata inspection
-   */
-  field?: FormFieldType;
 }
 
 /**
  * Component for editing advanced field settings like description and validation.
  *
  * Provides form controls for:
+ * - Adapter-specific property inputs (e.g., identity secret key property name for Midnight)
  * - Field description (optional explanatory text)
  * - Required field validation (hidden for runtime-only fields like runtime secrets)
  *
  * @param props - Component props
  * @param props.control - React Hook Form control instance
  * @param props.fieldType - The current field type
+ * @param props.adapter - Optional adapter for adapter-specific field configurations
  */
 export function FieldAdvancedSettings({ control, fieldType, adapter }: FieldAdvancedSettingsProps) {
   const propertyCfg = adapter?.getRuntimeFieldBinding?.()?.propertyNameInput;
