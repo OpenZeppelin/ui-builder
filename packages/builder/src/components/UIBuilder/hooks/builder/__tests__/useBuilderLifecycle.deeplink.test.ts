@@ -4,9 +4,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { uiBuilderStore } from '../../uiBuilderStore';
 import { useBuilderLifecycle } from '../useBuilderLifecycle';
 
-const { parseDeepLinkMock, setActiveNetworkIdMock } = vi.hoisted(() => ({
+const {
+  parseDeepLinkMock,
+  setActiveNetworkIdMock,
+  trackEcosystemSelectionMock,
+  trackNetworkSelectionMock,
+} = vi.hoisted(() => ({
   parseDeepLinkMock: vi.fn(),
   setActiveNetworkIdMock: vi.fn(),
+  trackEcosystemSelectionMock: vi.fn(),
+  trackNetworkSelectionMock: vi.fn(),
 }));
 
 vi.mock('@openzeppelin/ui-builder-utils', () => ({
@@ -39,6 +46,13 @@ vi.mock('@openzeppelin/ui-builder-react-core', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useAnalytics', () => ({
+  useAnalytics: () => ({
+    trackEcosystemSelection: trackEcosystemSelectionMock,
+    trackNetworkSelection: trackNetworkSelectionMock,
+  }),
+}));
+
 describe('useBuilderLifecycle deep link ecosystem sync', () => {
   const createRefs = () => ({
     loadingRef: { current: false },
@@ -68,5 +82,37 @@ describe('useBuilderLifecycle deep link ecosystem sync', () => {
     });
 
     expect(uiBuilderStore.getState().selectedEcosystem).toBe('stellar');
+  });
+
+  it('tracks ecosystem selection from deep link', async () => {
+    parseDeepLinkMock.mockReturnValue({ ecosystem: 'stellar' });
+
+    const { loadingRef, savedIdRef } = createRefs();
+    const autoSave = { pause: vi.fn(), resume: vi.fn(), isPaused: false };
+
+    const { result } = renderHook(() => useBuilderLifecycle(loadingRef, savedIdRef, autoSave));
+
+    await act(async () => {
+      await result.current.initializePageState();
+    });
+
+    expect(trackEcosystemSelectionMock).toHaveBeenCalledWith('stellar');
+  });
+
+  it('does not track ecosystem selection if ecosystem did not change', async () => {
+    // Start with evm already selected
+    uiBuilderStore.updateState(() => ({ selectedEcosystem: 'evm' }));
+    parseDeepLinkMock.mockReturnValue({ ecosystem: 'evm' });
+
+    const { loadingRef, savedIdRef } = createRefs();
+    const autoSave = { pause: vi.fn(), resume: vi.fn(), isPaused: false };
+
+    const { result } = renderHook(() => useBuilderLifecycle(loadingRef, savedIdRef, autoSave));
+
+    await act(async () => {
+      await result.current.initializePageState();
+    });
+
+    expect(trackEcosystemSelectionMock).not.toHaveBeenCalled();
   });
 });
