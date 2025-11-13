@@ -15,9 +15,11 @@ type TemplateRegistry = Record<string, Record<string, string>>;
 // Template files are loaded lazily using Vite's import.meta.glob
 // This allows code-splitting so the template files are only loaded when needed
 // We exclude placeholder .tsx files that contain invalid syntax which will be overwritten
+// Note: Vite's import.meta.glob doesn't pick up dotfiles by default, so we explicitly include them
 const templateFiles = import.meta.glob<string>(
   [
     './templates/**/*',
+    './templates/**/.*', // Explicitly include dotfiles like .gitignore
     '!./templates/**/src/App.tsx',
     '!./templates/**/src/main.tsx',
     '!./templates/**/src/components/GeneratedForm.tsx',
