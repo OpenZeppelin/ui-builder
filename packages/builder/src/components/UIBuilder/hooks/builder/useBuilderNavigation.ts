@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
+import { hasMeaningfulContent } from '../../utils/meaningfulContent';
 import { uiBuilderStore } from '../uiBuilderStore';
 
 /**
@@ -29,39 +30,44 @@ export function useBuilderNavigation(
           savedConfigIdRef.current &&
           !currentState.isInNewUIMode;
 
-        // Check if we have meaningful content even in new UI mode
-        const hasMeaningfulContent = !!(
-          currentState.selectedNetworkConfigId ||
-          currentState.contractState.address ||
-          currentState.selectedFunction
-        );
+        // Check if we have meaningful content even in new UI mode (beyond just network selection)
+        const hasMeaningfulContentCheck = hasMeaningfulContent(currentState);
 
-        // Determine if we should preserve the existing record
+        // Determine if we should preserve the network selection and record
         const shouldPreserveRecord =
-          isLoadingSavedConfigRef.current || isExistingMeaningfulRecord || hasMeaningfulContent;
+          isLoadingSavedConfigRef.current ||
+          isExistingMeaningfulRecord ||
+          hasMeaningfulContentCheck;
 
-        // Always preserve network selection when going back to ecosystem step
-        // Only reset contract and downstream data
+        // Reset downstream steps (contract and beyond)
         uiBuilderStore.resetDownstreamSteps('ecosystem');
 
         if (shouldPreserveRecord) {
-          // Keep the existing record
+          // Keep the existing record and network selection in store
+          // but ALWAYS unmount wallet on network selection screen
+          // Explicitly preserve ecosystem and network ID to ensure they remain set
           uiBuilderStore.updateState(() => ({
             isInNewUIMode: false,
+            selectedEcosystem: currentState.selectedEcosystem,
+            selectedNetworkConfigId: currentState.selectedNetworkConfigId,
           }));
         } else {
-          // Clear the saved record reference but keep network
+          // No meaningful content: clear network and record, but preserve ecosystem tab for UX
+          // This ensures users stay on the same ecosystem tab (e.g., Stellar) when going back
           savedConfigIdRef.current = null;
           uiBuilderStore.updateState(() => ({
+            selectedNetworkConfigId: null,
+            // Keep selectedEcosystem to maintain tab selection
+            selectedEcosystem: currentState.selectedEcosystem,
+            networkToSwitchTo: null,
             loadedConfigurationId: null,
             isInNewUIMode: true,
           }));
         }
 
-        // Ensure wallet's active network matches the store's selected network
-        if (currentState.selectedNetworkConfigId) {
-          setActiveNetworkId(currentState.selectedNetworkConfigId);
-        }
+        // ALWAYS clear the active network to unmount the wallet on network selection screen
+        // The wallet should only be visible after a network is selected (step 1+)
+        setActiveNetworkId(null);
       }
     },
     [setActiveNetworkId, isLoadingSavedConfigRef, savedConfigIdRef]

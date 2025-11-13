@@ -55,24 +55,39 @@ describe('AutoSaveGuards', () => {
   });
 
   describe('hasMeaningfulContent', () => {
-    it('should return true if selectedNetworkConfigId is present', () => {
-      mockGetState.mockReturnValue({ selectedNetworkConfigId: 'net-1' });
+    it('should return true if contractState.address is present', () => {
+      mockGetState.mockReturnValue({ contractState: { address: '0x123' } });
+      expect(AutoSaveGuards.hasMeaningfulContent(mockGetState())).toBe(true);
+    });
+
+    it('should return true if contractState.schema is present', () => {
+      mockGetState.mockReturnValue({ contractState: { schema: {} } });
       expect(AutoSaveGuards.hasMeaningfulContent(mockGetState())).toBe(true);
     });
 
     it('should return true if selectedFunction is present', () => {
-      mockGetState.mockReturnValue({ selectedFunction: 'myFunction' });
+      mockGetState.mockReturnValue({ selectedFunction: 'myFunction', contractState: {} });
       expect(AutoSaveGuards.hasMeaningfulContent(mockGetState())).toBe(true);
     });
 
     it('should return true if formConfig is present', () => {
-      mockGetState.mockReturnValue({ formConfig: { title: 'Test' } });
+      mockGetState.mockReturnValue({ formConfig: { title: 'Test' }, contractState: {} });
       expect(AutoSaveGuards.hasMeaningfulContent(mockGetState())).toBe(true);
     });
 
     it('should return false if no meaningful content is present', () => {
       mockGetState.mockReturnValue({
-        selectedNetworkConfigId: null,
+        contractState: {},
+        selectedFunction: null,
+        formConfig: null,
+      });
+      expect(AutoSaveGuards.hasMeaningfulContent(mockGetState())).toBe(false);
+    });
+
+    it('should return false if only selectedNetworkConfigId is present (not meaningful)', () => {
+      mockGetState.mockReturnValue({
+        selectedNetworkConfigId: 'net-1',
+        contractState: {},
         selectedFunction: null,
         formConfig: null,
       });
@@ -85,7 +100,7 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: true,
         loadedConfigurationId: null,
-        selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       expect(AutoSaveGuards.needsRecordCreation(mockGetState())).toBe(true);
     });
@@ -94,7 +109,7 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: false,
         loadedConfigurationId: null,
-        selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       expect(AutoSaveGuards.needsRecordCreation(mockGetState())).toBe(false);
     });
@@ -103,7 +118,7 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: true,
         loadedConfigurationId: 'some-id',
-        selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       expect(AutoSaveGuards.needsRecordCreation(mockGetState())).toBe(false);
     });
@@ -112,7 +127,8 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: true,
         loadedConfigurationId: null,
-        selectedNetworkConfigId: null,
+        selectedNetworkConfigId: 'net-1', // Network alone is not meaningful
+        contractState: {},
       });
       expect(AutoSaveGuards.needsRecordCreation(mockGetState())).toBe(false);
     });
@@ -138,7 +154,8 @@ describe('AutoSaveGuards', () => {
     it('should not proceed if there is no meaningful content', () => {
       mockGetState.mockReturnValue({
         loadedConfigurationId: 'some-id',
-        selectedNetworkConfigId: null,
+        selectedNetworkConfigId: 'net-1', // Network alone is not meaningful
+        contractState: {},
       });
       const result = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
@@ -151,7 +168,7 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: true,
         loadedConfigurationId: null,
-        selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       const result = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
@@ -164,7 +181,7 @@ describe('AutoSaveGuards', () => {
       mockGetState.mockReturnValue({
         isInNewUIMode: false,
         loadedConfigurationId: null,
-        selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       const result = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
@@ -178,6 +195,7 @@ describe('AutoSaveGuards', () => {
         isInNewUIMode: false,
         loadedConfigurationId: 'existing-id',
         selectedNetworkConfigId: 'net-1',
+        contractState: { address: '0x123' },
       });
       const result = AutoSaveGuards.shouldProceedWithAutoSave(
         isLoadingSavedConfigRef,
