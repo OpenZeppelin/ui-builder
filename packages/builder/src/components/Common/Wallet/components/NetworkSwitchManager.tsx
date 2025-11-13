@@ -36,17 +36,17 @@ export const NetworkSwitchManager: React.FC<{
     isMountedRef.current = true;
     logger.info(
       'NetworkSwitchManager',
-      `🔌 Mounted with target: ${targetNetworkId}, current attempt status: ${hasAttemptedSwitch}`
+      `Mounted with target: ${targetNetworkId}, current attempt status: ${hasAttemptedSwitch}`
     );
     setHasAttemptedSwitch(false);
     return () => {
-      logger.info('NetworkSwitchManager', `🔌 Unmounting, was for target: ${targetNetworkId}`);
+      logger.info('NetworkSwitchManager', `Unmounting, was for target: ${targetNetworkId}`);
       isMountedRef.current = false;
     };
   }, [targetNetworkId, hasAttemptedSwitch]);
 
   useEffect(() => {
-    logger.info('NetworkSwitchManager', '💡 State Update:', {
+    logger.info('NetworkSwitchManager', 'State Update:', {
       target: targetNetworkId,
       adapterNetwork: adapter.networkConfig.id,
       isSwitching: isSwitchingNetworkViaHook,
@@ -69,14 +69,20 @@ export const NetworkSwitchManager: React.FC<{
 
   // Main Orchestration & Pre-flight Effect
   useEffect(() => {
-    const completeOperation = (logMessage?: string) => {
+    const completeOperation = (
+      logMessage?: string,
+      options: { notifyComplete?: boolean } = { notifyComplete: true }
+    ) => {
       if (logMessage) logger.info('NetworkSwitchManager', logMessage);
-      if (isMountedRef.current && onNetworkSwitchComplete) onNetworkSwitchComplete();
+      if (options.notifyComplete && isMountedRef.current && onNetworkSwitchComplete)
+        onNetworkSwitchComplete();
       if (isMountedRef.current) setHasAttemptedSwitch(false);
     };
 
     if (!execSwitchNetwork) {
-      completeOperation('No switchChain function available from hook. Operation complete.');
+      completeOperation('No switchChain function available from hook. Operation halted.', {
+        notifyComplete: false,
+      });
       return;
     }
 
@@ -107,16 +113,23 @@ export const NetworkSwitchManager: React.FC<{
     // === Pre-flight checks for the current targetNetworkId ===
     if (adapter.networkConfig.id !== targetNetworkId) {
       completeOperation(
-        `CRITICAL: Adapter (${adapter.networkConfig.id}) vs Target (${targetNetworkId}) mismatch. Operation complete.`
+        `CRITICAL: Adapter (${adapter.networkConfig.id}) vs Target (${targetNetworkId}) mismatch. Operation halted.`,
+        {
+          notifyComplete: false,
+        }
       );
       return;
     }
     if (!isConnected) {
-      completeOperation('Wallet not connected (derived status). Operation complete.');
+      completeOperation('Wallet not connected (derived status). Awaiting connection.', {
+        notifyComplete: false,
+      });
       return;
     }
     if (!('chainId' in adapter.networkConfig)) {
-      completeOperation('Target network config missing chainId. Operation complete.');
+      completeOperation(
+        'Network does not support chain switching (non-EVM). Operation complete (no-op).'
+      );
       return;
     }
     const targetChainToBeSwitchedTo = Number(adapter.networkConfig.chainId);
@@ -136,7 +149,7 @@ export const NetworkSwitchManager: React.FC<{
       }
       logger.info(
         'NetworkSwitchManager',
-        `🚀 Attempting switch to ${targetChainToBeSwitchedTo} via derived hook.`
+        `Attempting switch to ${targetChainToBeSwitchedTo} via derived hook.`
       );
       setHasAttemptedSwitch(true); // Mark that this specific attempt for this target is now starting
       execSwitchNetwork({ chainId: targetChainToBeSwitchedTo });
