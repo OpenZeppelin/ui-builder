@@ -87,6 +87,7 @@ const mockAdapterInstance: ContractAdapter = {
   getContractDefinitionInputs: vi.fn(() => []),
   getRelayers: vi.fn().mockResolvedValue([]),
   getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
+  getNetworkServiceForms: vi.fn(() => []),
 };
 
 describe('FormSchemaFactory', () => {

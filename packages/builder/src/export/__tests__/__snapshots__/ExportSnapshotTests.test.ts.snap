@@ -15,11 +15,14 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 `;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
-"import {
+"import { useEffect, useState } from 'react';
+
+import {
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
 } from '@openzeppelin/ui-builder-react-core';
+import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import { Footer } from '@openzeppelin/ui-builder-ui';
 
 import GeneratedForm from './components/GeneratedForm';
@@ -29,21 +32,22 @@ import GeneratedForm from './components/GeneratedForm';
  *
  * Main application component that wraps the form.
  * Uses useWalletState to get the active adapter.
+ * Caches the adapter once available to prevent form remounts during wallet connection.
  */
 export function App() {
-  const { activeAdapter, isAdapterLoading } = useWalletState();
+  const { activeAdapter } = useWalletState();
   const { isConnected: isWalletConnectedForForm } = useDerivedAccountStatus();
 
-  if (isAdapterLoading) {
-    return <div className="app-loading">Loading adapter...</div>;
-  }
-  if (!activeAdapter) {
-    return (
-      <div className="app-error">
-        Adapter not available. Please ensure network is selected and supported.
-      </div>
-    );
-  }
+  // Persist the adapter used by the form once it first becomes available to avoid remounts
+  // This prevents form resets when the adapter briefly transitions during wallet connection
+  const [adapterForForm, setAdapterForForm] = useState<ContractAdapter | null>(null);
+
+  useEffect(() => {
+    if (activeAdapter) {
+      // Don't replace an existing adapter instance to keep the form mounted
+      setAdapterForForm((prev) => prev ?? activeAdapter);
+    }
+  }, [activeAdapter]);
 
   return (
     <div className="app">
@@ -65,7 +69,12 @@ export function App() {
 
       <main className="main">
         <div className="container">
-          <GeneratedForm adapter={activeAdapter} isWalletConnected={isWalletConnectedForForm} />
+          {adapterForForm ? (
+            <GeneratedForm adapter={adapterForForm} isWalletConnected={isWalletConnectedForForm} />
+          ) : (
+            // Only shown before the first adapter resolves, never shown again
+            <div className="app-loading">Loading adapter...</div>
+          )}
         </div>
       </main>
 
@@ -79,7 +88,7 @@ export function App() {
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
-"import { useState } from 'react';
+"import { useMemo, useState } from 'react';
 
 import {
   ContractActionBar,
@@ -93,6 +102,7 @@ import type {
   RenderFormSchema,
 } from '@openzeppelin/ui-builder-types';
 import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -116,74 +126,84 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   */
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, _setLoadError] = useState<Error | null>(null);
+
   // Form schema generated from the builder and transformed by FormSchemaFactory
-  const formSchema: RenderFormSchema = {
-    functionId: 'transfer',
-    layout: {
-      columns: 1,
-      spacing: 'normal',
-      labelPosition: 'top',
-    },
-    validation: {
-      mode: 'onChange',
-      showErrors: 'inline',
-    },
-    theme: {},
-    contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
-    id: 'form-transfer',
-    title: 'Transfer',
-    description: 'Form for interacting with the Transfer function.',
-    fields: [
-      {
-        id: '[id]',
-        name: 'testParam',
-        label: 'Test Parameter',
-        type: 'text',
-        placeholder: 'Enter test parameter',
-        helperText: 'Description for Test Parameter',
-        validation: {
-          required: true,
-        },
+  // Memoized to maintain stable reference across re-renders and prevent form resets
+  const formSchema: RenderFormSchema = useMemo(() => {
+    return {
+      functionId: 'transfer',
+      layout: {
+        columns: 1,
+        spacing: 'normal',
+        labelPosition: 'top',
       },
-    ],
-    submitButton: {
-      text: 'Execute Transfer',
-      loadingText: 'Processing...',
-      variant: 'primary',
-    },
-  }; /*@@FORM_SCHEMA_JSON@@*/
+      validation: {
+        mode: 'onChange',
+        showErrors: 'inline',
+      },
+      theme: {},
+      contractAddress: '0xe34139463bA50bD61336E0c446Bd8C0867c6fE65',
+      id: 'form-transfer',
+      title: 'Transfer',
+      description: 'Form for interacting with the Transfer function.',
+      fields: [
+        {
+          id: '[id]',
+          name: 'testParam',
+          label: 'Test Parameter',
+          type: 'text',
+          placeholder: 'Enter test parameter',
+          helperText: 'Description for Test Parameter',
+          validation: {
+            required: true,
+          },
+        },
+      ],
+      submitButton: {
+        text: 'Execute Transfer',
+        loadingText: 'Processing...',
+        variant: 'primary',
+      },
+    };
+  }, []);
 
   // Contract schema injected by generator (loaded or imported by the user)
-  const contractSchema: ContractSchema = {
-    ecosystem: 'evm',
-    name: 'MockContract',
-    address: '0x1234567890123456789012345678901234567890',
-    functions: [
-      {
-        id: 'transfer',
-        name: 'transfer',
-        displayName: 'Transfer',
-        inputs: [],
-        type: 'function',
-        modifiesState: true,
-      },
-      {
-        id: 'viewFunction',
-        name: 'viewFunction',
-        displayName: 'View Function',
-        inputs: [],
-        type: 'function',
-        modifiesState: false,
-        stateMutability: 'view',
-      },
-    ],
-  };
+  // Memoized to maintain stable reference across re-renders and prevent form resets
+  const contractSchema: ContractSchema = useMemo(() => {
+    return {
+      ecosystem: 'evm',
+      name: 'MockContract',
+      address: '0x1234567890123456789012345678901234567890',
+      functions: [
+        {
+          id: 'transfer',
+          name: 'transfer',
+          displayName: 'Transfer',
+          inputs: [],
+          type: 'function',
+          modifiesState: true,
+        },
+        {
+          id: 'viewFunction',
+          name: 'viewFunction',
+          displayName: 'View Function',
+          inputs: [],
+          type: 'function',
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+      ],
+    };
+  }, []);
 
   // Execution configuration selected in the builder
-  const executionConfig: ExecutionConfig | undefined = {
-    method: 'eoa',
-    allowAny: true,
-  };
+  // Memoized to maintain stable reference across re-renders
+  const executionConfig: ExecutionConfig | undefined = useMemo(() => {
+    return {
+      method: 'eoa',
+      allowAny: true,
+    };
+  }, []);
 
   const contractAddress = formSchema.contractAddress;
 
@@ -234,9 +254,14 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
       )}
 
       <div className="flex gap-4">
-        {/* Contract State Widget on the left side - matching builder app layout */}
-        {contractAddress && isWidgetVisible && (
-          <div className="w-[300px] flex-shrink-0">
+        {/* Contract State Widget on the left side - always mounted to prevent remount churn */}
+        {contractAddress && (
+          <div
+            className={cn(
+              'shrink-0 transition-all',
+              isWidgetVisible ? 'md:w-80 md:mr-6' : 'md:w-0'
+            )}
+          >
             <div className="sticky top-4">
               <ContractStateWidget
                 contractSchema={schemaToUse}
@@ -276,12 +301,12 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/ui-builder-adapter-evm": "^0.13.0",
-    "@openzeppelin/ui-builder-react-core": "^0.13.0",
-    "@openzeppelin/ui-builder-renderer": "^0.13.0",
-    "@openzeppelin/ui-builder-types": "^0.13.0",
-    "@openzeppelin/ui-builder-ui": "^0.13.0",
-    "@openzeppelin/ui-builder-utils": "^0.13.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.15.0",
+    "@openzeppelin/ui-builder-react-core": "^0.15.0",
+    "@openzeppelin/ui-builder-renderer": "^0.15.0",
+    "@openzeppelin/ui-builder-types": "^0.15.0",
+    "@openzeppelin/ui-builder-ui": "^0.15.0",
+    "@openzeppelin/ui-builder-utils": "^0.15.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",
@@ -323,12 +348,12 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for package.json with Solana dependencies > package-json-solana 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/ui-builder-adapter-evm": "^0.13.0",
-    "@openzeppelin/ui-builder-react-core": "^0.13.0",
-    "@openzeppelin/ui-builder-renderer": "^0.13.0",
-    "@openzeppelin/ui-builder-types": "^0.13.0",
-    "@openzeppelin/ui-builder-ui": "^0.13.0",
-    "@openzeppelin/ui-builder-utils": "^0.13.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.15.0",
+    "@openzeppelin/ui-builder-react-core": "^0.15.0",
+    "@openzeppelin/ui-builder-renderer": "^0.15.0",
+    "@openzeppelin/ui-builder-types": "^0.15.0",
+    "@openzeppelin/ui-builder-ui": "^0.15.0",
+    "@openzeppelin/ui-builder-utils": "^0.15.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",

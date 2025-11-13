@@ -34,7 +34,8 @@ const ERROR_PATTERNS = {
   typeMismatch: /expected value of type\s+(.+?)\s+but received\s+(.+)/is,
 
   // Private state errors
-  privateStateError: /No private state found|private state|organizer secret key/i,
+  privateStateError:
+    /No private state found|private state|organizer secret key|identity secret key/i,
 
   // Proof generation errors
   proofError: /proof|prover|zkSnark/i,
@@ -160,7 +161,7 @@ export function enhanceMidnightError(error: unknown, functionName?: string): Enh
       originalMessage,
       userMessage: `Private state not initialized${fnContext}.`,
       suggestions: [
-        'If this is an organizer-only function, ensure the organizer secret key is configured.',
+        'If this function requires an identity secret, ensure the secret is configured in the form.',
         'For participant functions, try calling a public function first to initialize state.',
         'Check that the contract has been properly deployed and the private state ID is correct.',
       ],

@@ -25,9 +25,7 @@ export function generateStellarWalletsKitConfigFile(
 import { 
   StellarWalletsKit, 
   WalletNetwork, 
-  allowAllModules,
-  WalletConnectModule,
-  WalletConnectAllowedMethods
+  allowAllModules
 } from '@creit.tech/stellar-wallets-kit';
 
 /**
@@ -62,22 +60,7 @@ export const stellarWalletsKitConfig = {
  */
 export function createStellarWalletsKit(): StellarWalletsKit {
   const modules = [
-    ...allowAllModules(),
-    ${
-      walletConnectProjectId
-        ? `
-    // WalletConnect module with custom configuration
-    new WalletConnectModule({
-      url: window.location.origin,
-      projectId: stellarWalletsKitConfig.walletConnectProjectId,
-      method: WalletConnectAllowedMethods.SIGN,
-      description: stellarWalletsKitConfig.appName,
-      name: stellarWalletsKitConfig.appName,
-      icons: [],
-      network: stellarWalletsKitConfig.network,
-    }),`
-        : ''
-    }
+    ...allowAllModules()
   ];
 
   return new StellarWalletsKit({

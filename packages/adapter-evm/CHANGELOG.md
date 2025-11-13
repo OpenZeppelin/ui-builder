@@ -1,5 +1,42 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`faff555`](https://github.com/OpenZeppelin/ui-builder/commit/faff555be188b679c8ba9c22e9e01b4a9c22ecff)]:
+  - @openzeppelin/ui-builder-types@0.15.0
+  - @openzeppelin/ui-builder-react-core@0.15.0
+  - @openzeppelin/ui-builder-ui@0.15.0
+  - @openzeppelin/ui-builder-utils@0.15.0
+
+## 0.14.0
+
+### Minor Changes
+
+- [#221](https://github.com/OpenZeppelin/ui-builder/pull/221) [`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575) Thanks [@pasevin](https://github.com/pasevin)! - Standardize adapter Vite configuration pattern
+  - Add vite-config.ts export to all adapters for build-time configuration isolation
+  - Export getEvmViteConfig(), getSolanaViteConfig(), and getStellarViteConfig() functions
+  - Include module deduplication configurations for adapter-specific dependencies
+  - Update package.json exports and tsup.config.ts to include vite-config builds
+  - Ensures each adapter's build requirements are isolated and don't interfere with others
+
+### Patch Changes
+
+- [#221](https://github.com/OpenZeppelin/ui-builder/pull/221) [`98c1f33`](https://github.com/OpenZeppelin/ui-builder/commit/98c1f33bd446d24d22562ba7087e14bf9ff31575) Thanks [@pasevin](https://github.com/pasevin)! - Fix EVM network loading regression in preview/production builds
+  - Fix issue where EVM networks failed to load in preview/docker modes while other adapters worked
+  - Implement adapter-specific Vite configuration pattern for better isolation and fault tolerance
+  - Add dynamic loading of adapter Vite configs with graceful error handling
+  - Create vite-config.ts exports for EVM, Solana, and Stellar adapters
+  - Ensure Midnight adapter's WASM plugins don't interfere with other adapters' dynamic imports
+  - Add build-time validation to enforce vite-config pattern across all adapters
+
+- Updated dependencies [[`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`8422e81`](https://github.com/OpenZeppelin/ui-builder/commit/8422e81cd4425d5fc596ac805bc130a80030fc93), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00)]:
+  - @openzeppelin/ui-builder-ui@0.14.0
+  - @openzeppelin/ui-builder-types@0.14.0
+  - @openzeppelin/ui-builder-react-core@0.14.0
+  - @openzeppelin/ui-builder-utils@0.14.0
+
 ## 0.13.0
 
 ### Minor Changes

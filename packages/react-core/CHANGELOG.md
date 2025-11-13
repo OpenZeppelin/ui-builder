@@ -1,5 +1,31 @@
 # @openzeppelin/transaction-form-react-core
 
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`faff555`](https://github.com/OpenZeppelin/ui-builder/commit/faff555be188b679c8ba9c22e9e01b4a9c22ecff)]:
+  - @openzeppelin/ui-builder-types@0.15.0
+  - @openzeppelin/ui-builder-renderer@0.15.0
+  - @openzeppelin/ui-builder-ui@0.15.0
+  - @openzeppelin/ui-builder-utils@0.15.0
+
+## 0.14.0
+
+### Patch Changes
+
+- [#222](https://github.com/OpenZeppelin/ui-builder/pull/222) [`8422e81`](https://github.com/OpenZeppelin/ui-builder/commit/8422e81cd4425d5fc596ac805bc130a80030fc93) Thanks [@pasevin](https://github.com/pasevin)! - Fix Stellar UI kit wallet connection and Execute Transaction button issues
+  - Fix WalletConnectionUI to recompute wallet components on each render, ensuring UI kit changes are reflected immediately when toggling between "Stellar Wallets Kit Custom" and "Stellar Wallets Kit"
+  - Fix StellarWalletsKitConnectButton to propagate connection state changes to adapter's wallet implementation, ensuring Execute Transaction button enables when wallet is connected
+  - Wire active StellarWalletsKit instance into wallet implementation for proper kit instance management across connect/disconnect/sign operations
+  - Ensure connection state flows correctly through context hooks so useDerivedAccountStatus properly detects wallet connection
+
+- Updated dependencies [[`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00), [`6ebbdc2`](https://github.com/OpenZeppelin/ui-builder/commit/6ebbdc2d98cbb053e043eb4c9c97900d44643c00)]:
+  - @openzeppelin/ui-builder-ui@0.14.0
+  - @openzeppelin/ui-builder-types@0.14.0
+  - @openzeppelin/ui-builder-renderer@0.14.0
+  - @openzeppelin/ui-builder-utils@0.14.0
+
 ## 0.13.0
 
 ### Patch Changes

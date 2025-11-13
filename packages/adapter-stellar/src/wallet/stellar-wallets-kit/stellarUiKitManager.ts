@@ -3,6 +3,8 @@ import { allowAllModules, StellarWalletsKit, WalletNetwork } from '@creit.tech/s
 import type { StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { getStellarWalletImplementation } from '../utils/stellarWalletImplementationManager';
+
 export interface StellarUiKitManagerState {
   isConfigured: boolean;
   isInitializing: boolean;
@@ -112,6 +114,26 @@ async function configure(newFullUiKitConfig: UiKitConfiguration): Promise<void> 
       state.kitProviderComponent = null;
       state.isKitAssetsLoaded = true;
       state.error = null;
+
+      // Wire the active kit into the wallet implementation
+      // This ensures signing and other operations use the correct kit instance
+      if (state.networkConfig) {
+        try {
+          const impl = await getStellarWalletImplementation(state.networkConfig);
+          impl.setActiveStellarKit(kit);
+          logger.debug(
+            'StellarUiKitManager:configure',
+            'Active kit wired into wallet implementation for stellar-wallets-kit'
+          );
+        } catch (error) {
+          logger.warn(
+            'StellarUiKitManager:configure',
+            'Failed to attach active kit to wallet implementation:',
+            error
+          );
+        }
+      }
+
       logger.info(
         'StellarUiKitManager:configure',
         'Stellar Wallets Kit configured with built-in UI and all wallet modules'
@@ -128,6 +150,26 @@ async function configure(newFullUiKitConfig: UiKitConfiguration): Promise<void> 
       state.kitProviderComponent = null;
       state.isKitAssetsLoaded = true;
       state.error = null;
+
+      // Wire the active kit into the wallet implementation
+      // This ensures signing and other operations use the correct kit instance
+      if (state.networkConfig) {
+        try {
+          const impl = await getStellarWalletImplementation(state.networkConfig);
+          impl.setActiveStellarKit(kit);
+          logger.debug(
+            'StellarUiKitManager:configure',
+            'Active kit wired into wallet implementation for custom'
+          );
+        } catch (error) {
+          logger.warn(
+            'StellarUiKitManager:configure',
+            'Failed to attach active kit to wallet implementation:',
+            error
+          );
+        }
+      }
+
       logger.info(
         'StellarUiKitManager:configure',
         'Stellar Wallets Kit configured for custom UI components'
@@ -138,6 +180,25 @@ async function configure(newFullUiKitConfig: UiKitConfiguration): Promise<void> 
       state.kitProviderComponent = null;
       state.isKitAssetsLoaded = false;
       state.error = null;
+
+      // Clear the active kit from the wallet implementation
+      if (state.networkConfig) {
+        try {
+          const impl = await getStellarWalletImplementation(state.networkConfig);
+          impl.setActiveStellarKit(null);
+          logger.debug(
+            'StellarUiKitManager:configure',
+            'Active kit cleared from wallet implementation for none'
+          );
+        } catch (error) {
+          logger.warn(
+            'StellarUiKitManager:configure',
+            'Failed to clear active kit from wallet implementation:',
+            error
+          );
+        }
+      }
+
       logger.info('StellarUiKitManager:configure', 'UI kit set to "none", no wallet UI provided');
     } else {
       throw new Error(`Unknown UI kit name: ${newKitName}`);

@@ -368,33 +368,136 @@ Adapters may require build-time configuration when their underlying SDK has any 
 4. **Node.js Polyfills**: The SDK expects Node.js globals (Buffer, process, global) in the browser
 5. **Top-Level Await**: The SDK uses top-level await for initialization
 
-### 11.2. Principle: Keep It Centralized
+### 11.2. Adapter-Specific Vite Configuration Pattern
 
-**All build configuration must live in `packages/builder/vite.config.ts`**, not scattered across adapter packages. This is because:
+**All adapters must export their build-time requirements via a standardized `vite-config.ts` file**, following the pattern established by the Midnight adapter.
 
-- Vite's bundler operates at the **application level**, not package level
-- Configuration like `dedupe`, `optimizeDeps`, and global polyfills affects the entire dependency graph
-- Developers need one place to understand the complete build pipeline
-- Build issues are easier to debug when config is explicit and searchable
+#### Design Rationale
 
-**Exception**: Adapters can export Vite plugins for HTML transformations (e.g., injecting polyfills), but these must be explicitly imported and added to the plugins array in the main config.
+This approach was adopted to solve a critical issue: when adapters with complex build requirements (like Midnight's WASM plugins) had their configuration hardcoded in the builder's `vite.config.ts`, it could interfere with other adapters' dynamic imports, causing build failures and runtime errors.
+
+**Key Benefits:**
+
+- **Isolation**: Each adapter's build requirements are isolated and don't interfere with others
+- **Fail-Fast**: If any adapter's config fails to load, the build fails immediately with clear error messages
+- **Maintainability**: Build requirements live with the adapter code, not scattered in a central config
+- **Extensibility**: New adapters can add their own requirements without modifying shared config
+- **Chain-Agnostic Builder**: The builder app remains chain-agnostic while adapters declare their needs
+- **Performance**: No bundle size or runtime impact - config loading happens at build time only
+- **Automatic Discovery**: New adapters are automatically included when their config exports are added
+
+**Prior Approach (Deprecated):**
+
+Previously, all build configuration lived in `packages/builder/vite.config.ts`. This caused issues:
+
+- Global plugin application could break other adapters
+- Hard to isolate which adapter needed which config
+- Adding new adapters required modifying shared config
+- Silent failures could lead to broken builds in production
+
+The new pattern solves these issues by ensuring all adapters are properly configured before the build proceeds.
+
+#### 11.2.1. Standard Pattern
+
+Every adapter **must** export a Vite configuration function:
+
+```typescript
+// packages/adapter-<chain>/src/vite-config.ts
+import type { UserConfig } from 'vite';
+
+export function get<Chain>ViteConfig(): UserConfig {
+  return {
+    plugins: [], // Adapter-specific plugins (e.g., WASM for Midnight)
+    resolve: {
+      dedupe: [], // Modules that must be singletons
+    },
+    optimizeDeps: {
+      include: [], // Packages to pre-bundle
+      exclude: [], // Packages to exclude from pre-bundling
+    },
+  };
+}
+```
+
+#### 11.2.2. Package Configuration
+
+Each adapter package must:
+
+1. **Export the config** in `package.json`:
+
+   ```json
+   {
+     "exports": {
+       "./vite-config": {
+         "types": "./dist/vite-config.d.ts",
+         "import": "./dist/vite-config.js",
+         "require": "./dist/vite-config.cjs"
+       }
+     }
+   }
+   ```
+
+2. **Include in build** in `tsup.config.ts`:
+   ```typescript
+   entry: ['src/index.ts', 'src/vite-config.ts'];
+   ```
+
+#### 11.2.3. Builder Integration
+
+The builder app (`packages/builder/vite.config.ts`) dynamically loads and merges all adapter configs:
+
+```typescript
+async function loadAdapterViteConfigs() {
+  // Load each adapter's config with fail-fast error handling
+  // Merge plugins, dedupe, and optimizeDeps from all adapters
+  // If any adapter's config fails to load, the build fails immediately
+}
+```
+
+This approach ensures:
+
+- **Fail-Fast Behavior**: If any adapter's config fails to load, the build fails immediately with clear error messages
+- **Automatic Discovery**: New adapters are automatically included when added
+- **Centralized Merging**: All configs are merged in one place for visibility
+
+#### 11.2.4. When Adapters Need Configuration
+
+Most adapters (EVM, Solana, Stellar) export minimal configs (empty arrays) for consistency. Configuration is only required when adapters have:
+
+- WASM modules requiring special plugins
+- Module deduplication needs (singleton state)
+- CommonJS → ESM conversion requirements
+- Dependency pre-bundling needs
 
 ### 11.3. Case Study: Midnight Adapter
 
-The Midnight adapter serves as the reference implementation for an adapter with complex build requirements. Here's what it needs and why:
+The Midnight adapter serves as the reference implementation for an adapter with complex build requirements. Its configuration is exported from `packages/adapter-midnight/src/vite-config.ts` and automatically loaded by the builder.
 
 #### Required Vite Plugins
 
 ```typescript
-// packages/builder/vite.config.ts
-plugins: [
-  wasm(), // Handles .wasm file imports and async loading
-  topLevelAwait(), // Supports top-level await in WASM initialization
-  // ... other plugins
-];
+// packages/adapter-midnight/src/vite-config.ts
+export function getMidnightViteConfig(plugins: MidnightVitePlugins): UserConfig {
+  return {
+    plugins: [
+      plugins.wasm(), // Handles .wasm file imports and async loading
+      plugins.topLevelAwait(), // Supports top-level await in WASM initialization
+    ],
+    // ... rest of config
+  };
+}
 ```
 
 **Why**: Midnight SDK packages like `@midnight-ntwrk/compact-runtime` contain WASM binaries that use top-level await for initialization. Without these plugins, imports fail.
+
+**How It's Loaded**: The builder's `vite.config.ts` dynamically imports and merges this config:
+
+```typescript
+const { getMidnightViteConfig } = await import(
+  '@openzeppelin/ui-builder-adapter-midnight/vite-config'
+);
+const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });
+```
 
 #### Module Deduplication
 
@@ -440,27 +543,39 @@ The Midnight SDK requires `Buffer` in the browser (used by `@dao-xyz/borsh` for 
 1. **Runtime Polyfill** (Current): The adapter's `browser-init.ts` provides a minimal `Buffer` polyfill that's loaded before any SDK code
 2. **Build-Time Plugin** (Removed as redundant): `@esbuild-plugins/node-globals-polyfill` was tested but found unnecessary since runtime polyfill loads first
 
-### 11.4. Documentation Requirements
+### 11.4. Validation & Enforcement
+
+The vite-config pattern is **enforced at build time** via an automated validation script:
+
+```bash
+pnpm validate:vite-configs
+```
+
+This script (located at `scripts/validate-adapter-vite-configs.cjs`) automatically runs during `pnpm build` and validates that all adapters:
+
+- ✅ Have `src/vite-config.ts` file
+- ✅ Export the correct function (`get<Chain>ViteConfig`)
+- ✅ Have `package.json` export for `./vite-config`
+- ✅ Include `vite-config.ts` in `tsup.config.ts` entry array
+
+**The build will fail if any adapter doesn't comply with this pattern.**
+
+### 11.5. Documentation Requirements
 
 When adding an adapter that requires build configuration:
 
-1. **Add section markers** in `vite.config.ts` clearly labeling adapter-specific config:
-
-   ```typescript
-   // ============================================================================
-   // [ADAPTER NAME]: [Configuration Type]
-   // ============================================================================
-   // Explanation of why this is needed
-   ```
-
-2. **Update this section** (`§ 11`) with:
+1. **Create `src/vite-config.ts`** in your adapter package following the standard pattern
+2. **Export the config** in `package.json` and include in `tsup.config.ts` (see § 11.2.2)
+3. **Run validation**: `pnpm validate:vite-configs` to verify compliance
+4. **Document in adapter's README**: Explain what build requirements your adapter has and why
+5. **Update this section** (`§ 11`) with:
    - A brief summary of what the adapter needs
    - Why each piece of configuration is required
    - What breaks if the configuration is removed
 
-3. **Document in adapter's README**: Link back to this architecture doc and explain that build configuration is in `packages/builder/vite.config.ts`
+**Note**: The builder automatically loads your adapter's config - no manual integration needed.
 
-### 11.5. Testing Build Configuration
+### 11.6. Testing Build Configuration
 
 Before committing build configuration changes:
 
@@ -470,11 +585,11 @@ Before committing build configuration changes:
 4. **Test the adapter**: Execute a transaction using the adapter in dev mode
 5. **Clear cache**: `rm -rf packages/builder/node_modules/.vite` between tests
 
-### 11.6. Including Adapter Artifacts in Exported Apps
+### 11.7. Including Adapter Artifacts in Exported Apps
 
 Some adapters need to bundle ecosystem-specific artifacts into exported applications to enable offline transaction execution. The Midnight adapter, for example, bundles ZK proof artifacts, contract modules, and witness code.
 
-#### 11.6.1. Architecture
+#### 11.7.1. Architecture
 
 The artifact bundling system is **adapter-led** and **chain-agnostic**:
 
@@ -483,7 +598,7 @@ The artifact bundling system is **adapter-led** and **chain-agnostic**:
 3. **Template Injection**: Bootstrap imports and initialization code are injected into the exported app's `main.tsx`
 4. **Zero Impact on Other Adapters**: Non-participating adapters (EVM, Stellar) are unaffected
 
-#### 11.6.2. Implementing in an Adapter
+#### 11.7.2. Implementing in an Adapter
 
 To bundle artifacts in your adapter:
 
@@ -544,7 +659,7 @@ export class YourChainAdapter implements ContractAdapter {
 }
 ```
 
-#### 11.6.3. What Happens During Export
+#### 11.7.3. What Happens During Export
 
 1. **Export Pipeline** (`AppExportSystem.ts`):
    - Pulls artifacts from builder state: `contractState.contractDefinitionArtifacts` and `contractState.definitionOriginal`
@@ -560,7 +675,7 @@ export class YourChainAdapter implements ContractAdapter {
    - Injects imports after `import './styles.css';` in `main.tsx`
    - Injects initialization code after adapter construction in `resolveAdapter()`
 
-#### 11.6.4. Exported App Structure
+#### 11.7.4. Exported App Structure
 
 For a Midnight export, the generated app includes:
 
@@ -597,7 +712,7 @@ const resolveAdapter = async (nc: NetworkConfig): Promise<ContractAdapter> => {
 };
 ```
 
-#### 11.6.5. Midnight Adapter Case Study
+#### 11.7.5. Midnight Adapter Case Study
 
 The Midnight adapter uses a **lean bundling approach** that keeps exported files small:
 
@@ -645,7 +760,7 @@ These artifacts enable:
 - ✅ Contract state queries via the indexer
 - ✅ Full transaction functionality without runtime artifact loading
 
-#### 11.6.6. Testing
+#### 11.7.6. Testing
 
 1. **Export a Midnight app** from the builder with a loaded contract
 2. **Check for artifacts file**: `exports/your-app/src/midnight/artifacts.ts`
@@ -653,13 +768,13 @@ These artifacts enable:
 4. **Run the exported app**: `cd exports/your-app && npm install && npm run dev`
 5. **Execute a transaction**: Confirm it works without runtime artifact loading
 
-### 11.7. Future: Exported Applications (Historical Note)
+### 11.8. Future: Exported Applications (Historical Note)
 
 When users export applications built with the UI Builder, build configuration requirements follow them:
 
 - The export template (`packages/builder/src/export/templates/`) includes its own `vite.config.ts`
 - Adapter-specific configuration is conditionally included in exported configs based on which adapter is used
-- **Update (2025)**: Adapter artifact bundling is now implemented via `getExportBootstrapFiles()` (see § 11.6)
+- **Update (2025)**: Adapter artifact bundling is now implemented via `getExportBootstrapFiles()` (see § 11.7)
 
 ## 12. Architecture Boundaries & Constitution
 
@@ -670,6 +785,7 @@ All adapter work must comply with the project constitution. Read it before imple
 Key non‑negotiables for adapters (summary):
 
 - Chain‑agnostic core: All chain‑specific code, polyfills, and dependencies belong only in `packages/adapter-*`.
+  - **Build-time exception**: The builder `package.json` may include adapter SDK dependencies (e.g., `@wagmi/core`, `@stellar/stellar-sdk`, `@solana/web3.js`) for build-time resolution only. These are **never imported in builder source code** and are only needed for Rollup to resolve adapter dist file imports during production builds. This is a technical necessity and does not violate chain-agnostic principles.
 - EVM adapter is the architectural template; mirror its structure, naming, and patterns.
 - Implement `ContractAdapter` exactly; do not add extra public methods beyond the interface.
 - Adapters are network‑aware (constructed with a `NetworkConfig` and must use it internally).

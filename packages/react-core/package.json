@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-react-core",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "private": false,
   "description": "Core React context providers and hooks for the OpenZeppelin UI Builder.",
   "type": "module",

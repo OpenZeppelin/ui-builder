@@ -35,6 +35,7 @@ export async function prepareArtifactsForFunction(
         contractModule: currentArtifacts.contractModule,
         contractDefinition: currentArtifacts.contractDefinition,
         witnessCode: currentArtifacts.witnessCode,
+        identitySecretKeyPropertyName: currentArtifacts.identitySecretKeyPropertyName,
       },
     };
   }
@@ -51,6 +52,7 @@ export async function prepareArtifactsForFunction(
         contractModule: currentArtifacts.contractModule,
         contractDefinition: currentArtifacts.contractDefinition,
         witnessCode: currentArtifacts.witnessCode,
+        identitySecretKeyPropertyName: currentArtifacts.identitySecretKeyPropertyName,
         // Store the trimmed ZIP as base64 for later export
         // Note: Buffer is available via the polyfill in browser-init.ts (loaded when adapter is imported)
         trimmedZipBase64: Buffer.from(slim).toString('base64'),
@@ -61,6 +63,7 @@ export async function prepareArtifactsForFunction(
       bootstrapSource: {
         contractAddress: currentArtifacts.contractAddress,
         privateStateId: currentArtifacts.privateStateId,
+        identitySecretKeyPropertyName: currentArtifacts.identitySecretKeyPropertyName,
         contractArtifactsUrl: '/midnight/contract.zip',
       },
     };
@@ -72,6 +75,7 @@ export async function prepareArtifactsForFunction(
         contractModule: currentArtifacts.contractModule,
         contractDefinition: currentArtifacts.contractDefinition,
         witnessCode: currentArtifacts.witnessCode,
+        identitySecretKeyPropertyName: currentArtifacts.identitySecretKeyPropertyName,
       },
     };
   }

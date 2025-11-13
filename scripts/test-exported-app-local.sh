@@ -60,6 +60,9 @@ PACKAGES=(
   "packages/renderer"
   "packages/react-core"
   "packages/adapter-midnight"
+  "packages/adapter-stellar"
+  "packages/adapter-evm"
+  "packages/adapter-solana"
 )
 
 for pkg in "${PACKAGES[@]}"; do
@@ -146,59 +149,89 @@ echo -e "\n  ${GREEN}✓${NC} Updated package.json with local package paths"
 
 echo -e "\n${YELLOW}Step 5: Copying Midnight SDK patches...${NC}"
 
-# Copy patches from the adapter to the test directory
-ADAPTER_DIR="$SCRIPT_DIR/packages/adapter-midnight"
-if [ -d "$ADAPTER_DIR/patches" ]; then
-  mkdir -p patches
-  cp -r "$ADAPTER_DIR/patches"/* patches/ 2>/dev/null || true
-  echo -e "  ${GREEN}✓${NC} Copied $(ls -1 patches/ | wc -l | tr -d ' ') patch files"
-  
-  # Add patchedDependencies to package.json
-  node -e "
-  const fs = require('fs');
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  
-  // Add pnpm.patchedDependencies from the adapter
-  if (!pkg.pnpm) {
-    pkg.pnpm = {};
-  }
-  
-  pkg.pnpm.patchedDependencies = {
-    '@midnight-ntwrk/compact-runtime@0.9.0': 'patches/@midnight-ntwrk__compact-runtime@0.9.0.patch',
-    '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch',
-    '@midnight-ntwrk/midnight-js-network-id@2.0.2': 'patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch',
-    '@midnight-ntwrk/midnight-js-types@2.0.2': 'patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch',
-    '@midnight-ntwrk/midnight-js-utils@2.0.2': 'patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch',
-    '@midnight-ntwrk/midnight-js-contracts@2.0.2': 'patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch',
-    '@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch'
-  };
-  
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-  console.log('  ✓ Added pnpm.patchedDependencies to package.json');
-  "
+# Check if the exported app uses Midnight adapter
+if node -e "const pkg = require('./package.json'); const deps = {...(pkg.dependencies || {}), ...(pkg.devDependencies || {})}; process.exit(deps['@openzeppelin/ui-builder-adapter-midnight'] ? 0 : 1);" 2>/dev/null; then
+  # Copy patches from the adapter to the test directory
+  ADAPTER_DIR="$SCRIPT_DIR/packages/adapter-midnight"
+  if [ -d "$ADAPTER_DIR/patches" ]; then
+    mkdir -p patches
+    cp -r "$ADAPTER_DIR/patches"/* patches/ 2>/dev/null || true
+    echo -e "  ${GREEN}✓${NC} Copied $(ls -1 patches/ | wc -l | tr -d ' ') patch files"
+    
+    # Add patchedDependencies to package.json
+    node -e "
+    const fs = require('fs');
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    
+    // Add pnpm.patchedDependencies from the adapter
+    if (!pkg.pnpm) {
+      pkg.pnpm = {};
+    }
+    
+    pkg.pnpm.patchedDependencies = {
+      '@midnight-ntwrk/compact-runtime@0.9.0': 'patches/@midnight-ntwrk__compact-runtime@0.9.0.patch',
+      '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch',
+      '@midnight-ntwrk/midnight-js-network-id@2.0.2': 'patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch',
+      '@midnight-ntwrk/midnight-js-types@2.0.2': 'patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch',
+      '@midnight-ntwrk/midnight-js-utils@2.0.2': 'patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch',
+      '@midnight-ntwrk/midnight-js-contracts@2.0.2': 'patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch',
+      '@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch'
+    };
+    
+    fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+    console.log('  ✓ Added pnpm.patchedDependencies to package.json');
+    "
+  else
+    echo -e "  ${YELLOW}⚠${NC}  No patches directory found in adapter"
+  fi
 else
-  echo -e "  ${YELLOW}⚠${NC}  No patches directory found in adapter"
+  echo -e "  ${BLUE}ℹ${NC}  Exported app does not use Midnight adapter, skipping patches"
 fi
 
 # Remove lock file to ensure fresh install
 rm -f pnpm-lock.yaml
 echo -e "  ${GREEN}✓${NC} Removed pnpm-lock.yaml for fresh install"
 
-echo -e "\n${YELLOW}Step 6: Updating Tailwind 4 import for local testing...${NC}"
+echo -e "\n${YELLOW}Step 6: Configuring Tailwind for local testing...${NC}"
 
-# Update Tailwind import in styles.css to use local source
+# Update Tailwind import to use source() directive pointing to monorepo root
+# This is needed because Tailwind needs to scan source files from unpublished packages
+# We use an absolute path to the monorepo root (SCRIPT_DIR) since we're in /tmp/
 if [ -f "src/styles.css" ]; then
-  # Replace @import 'tailwindcss'; with @import 'tailwindcss' source('../../../');
-  sed -i.bak "s/@import 'tailwindcss';/@import 'tailwindcss' source('..\/..\/..\/');/g" src/styles.css
+  # Escape the path for use in sed (replace / with \/)
+  MONOREPO_ROOT_ESCAPED=$(echo "$SCRIPT_DIR" | sed 's/\//\\\//g')
+  
+  # Remove any existing source() directive first
+  sed -i.bak "s/@import 'tailwindcss' source('[^']*');/@import 'tailwindcss';/g" src/styles.css
+  sed -i.bak "s/@import \"tailwindcss\" source(\"[^\"]*\");/@import \"tailwindcss\";/g" src/styles.css
+  
+  # Add source() directive with absolute path to monorepo root
+  # Replace @import 'tailwindcss'; with @import 'tailwindcss' source('/path/to/monorepo');
+  sed -i.bak "s/@import 'tailwindcss';/@import 'tailwindcss' source('${MONOREPO_ROOT_ESCAPED}');/g" src/styles.css
+  sed -i.bak "s/@import \"tailwindcss\";/@import \"tailwindcss\" source(\"${MONOREPO_ROOT_ESCAPED}\");/g" src/styles.css
+  
   rm -f src/styles.css.bak
-  echo -e "  ${GREEN}✓${NC} Updated Tailwind import in src/styles.css"
+  echo -e "  ${GREEN}✓${NC} Updated Tailwind import to use source() pointing to monorepo root"
+  echo -e "  ${BLUE}ℹ${NC}  Tailwind will scan source files from local packages"
 else
-  echo -e "  ${YELLOW}⚠${NC}  src/styles.css not found, skipping Tailwind update"
+  echo -e "  ${YELLOW}⚠${NC}  src/styles.css not found"
 fi
 
 # Install dependencies
 echo -e "\n  Installing dependencies..."
-pnpm install 2>&1 | grep -E "(Progress|resolving|Packages:|Done|Downloaded|Reused)" || true
+if pnpm install; then
+  echo -e "  ${GREEN}✓${NC} Dependencies installed successfully"
+else
+  echo -e "  ${RED}✗${NC} Failed to install dependencies"
+  echo -e "${RED}Error: pnpm install failed. Check the output above for details.${NC}"
+  exit 1
+fi
+
+# Verify node_modules exists
+if [ ! -d "node_modules" ]; then
+  echo -e "${RED}Error: node_modules directory not found after installation${NC}"
+  exit 1
+fi
 
 echo ""
 echo -e "${GREEN}=== Setup Complete! ===${NC}"

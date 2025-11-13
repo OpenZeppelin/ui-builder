@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-adapter-stellar",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "description": "Stellar Adapter for UI Builder",
   "keywords": [
     "openzeppelin",
@@ -78,6 +78,11 @@
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",
       "require": "./dist/config.cjs"
+    },
+    "./vite-config": {
+      "types": "./dist/vite-config.d.ts",
+      "import": "./dist/vite-config.js",
+      "require": "./dist/vite-config.cjs"
     }
   }
 }

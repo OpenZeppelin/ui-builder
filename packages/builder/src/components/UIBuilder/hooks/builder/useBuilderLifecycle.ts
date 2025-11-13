@@ -9,6 +9,7 @@ import { logger, parseDeepLink, routerService } from '@openzeppelin/ui-builder-u
 import { extractDeepLinkParams, resolveNetworkIdFromDeepLink } from '@/core/deeplink';
 import { getNetworkById } from '@/core/ecosystemManager';
 import { BuilderFormConfig } from '@/core/types/FormTypes';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 import { uiBuilderStore } from '../uiBuilderStore';
 
@@ -25,6 +26,7 @@ export function useBuilderLifecycle(
   autoSave: { pause: () => void; resume: () => void; isPaused: boolean }
 ) {
   const { setActiveNetworkId } = useWalletState();
+  const { trackEcosystemSelection, trackNetworkSelection } = useAnalytics();
 
   const handleLoadContractUI = useCallback(
     async (id: string) => {
@@ -173,6 +175,20 @@ export function useBuilderLifecycle(
         return;
       }
 
+      // Update store with deep-linked ecosystem
+      const wasEcosystemUpdated = uiBuilderStore.getState().selectedEcosystem !== urlEcosystem;
+      uiBuilderStore.updateState((state) =>
+        state.selectedEcosystem === urlEcosystem
+          ? state
+          : { selectedEcosystem: urlEcosystem as Ecosystem }
+      );
+
+      // Track ecosystem selection from deep link (only if it changed)
+      if (wasEcosystemUpdated) {
+        trackEcosystemSelection(urlEcosystem);
+        logger.info('Deep link', `Ecosystem selected via deep link: ${urlEcosystem}`);
+      }
+
       // Resolve network using utility (ecosystem-aware, chain-agnostic)
       const resolvedNetworkId = await resolveNetworkIdFromDeepLink(
         urlEcosystem as Ecosystem,
@@ -183,6 +199,10 @@ export function useBuilderLifecycle(
       if (resolvedNetworkId && urlAddress) {
         const network = await getNetworkById(resolvedNetworkId);
         if (network) {
+          // Track network selection from deep link
+          trackNetworkSelection(network.id, urlEcosystem);
+          logger.info('Deep link', `Network selected via deep link: ${network.id}`);
+
           // Select network and set to switch; also set pendingNetworkId so the
           // auto-advance effect moves from CHAIN_SELECT to CONTRACT_DEFINITION
           uiBuilderStore.updateState(() => ({
@@ -228,7 +248,7 @@ export function useBuilderLifecycle(
     } finally {
       globalPageInitializationInProgress = false;
     }
-  }, [savedConfigIdRef]);
+  }, [setActiveNetworkId, trackEcosystemSelection, trackNetworkSelection]);
 
   const handleResetAfterDelete = useCallback(() => {
     try {

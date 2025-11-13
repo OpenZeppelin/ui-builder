@@ -146,19 +146,19 @@ describe('Export Snapshot Tests', () => {
       const evmFormComponent = prepareForSnapshot(evmFiles.formComponent);
       const solanaFormComponent = prepareForSnapshot(solanaFiles.formComponent);
 
-      // Both should be React components
+      // Both should be React components with useMemo import
       expect(evmFormComponent).toContain('import');
-      expect(evmFormComponent).toContain("from 'react'");
+      expect(evmFormComponent).toMatch(/import.*useMemo.*from ['"]react['"]/);
       expect(solanaFormComponent).toContain('import');
-      expect(solanaFormComponent).toContain("from 'react'");
+      expect(solanaFormComponent).toMatch(/import.*useMemo.*from ['"]react['"]/);
 
       // Both should render TransactionForm
       expect(evmFormComponent).toMatch(/return\s*\([\s\S]*?<TransactionForm/);
       expect(solanaFormComponent).toMatch(/return\s*\([\s\S]*?<TransactionForm/);
 
-      // Both should have similar form schema structures
-      expect(evmFormComponent).toMatch(/const formSchema/);
-      expect(solanaFormComponent).toMatch(/const formSchema/);
+      // Both should have similar form schema structures with useMemo
+      expect(evmFormComponent).toMatch(/const formSchema.*useMemo/);
+      expect(solanaFormComponent).toMatch(/const formSchema.*useMemo/);
     });
 
     it('should verify App component similarities across chains', async () => {

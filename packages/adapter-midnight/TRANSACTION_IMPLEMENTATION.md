@@ -13,7 +13,7 @@ This document details the implementation of browser-based Midnight contract tran
 5. [Known Limitations](#known-limitations)
 6. [Future Improvements](#future-improvements)
 7. [Testing Guidelines](#testing-guidelines)
-8. [Organizer Key as Runtime-Only Secret](#organizer-key-as-runtime-only-secret)
+8. [Identity Secret as Runtime-Only Credential](#identity-secret-as-runtime-only-credential)
 
 ---
 
@@ -981,11 +981,11 @@ describe('Transaction Flow', () => {
 
 ---
 
-## Organizer Key as Runtime-Only Secret
+## Identity Secret as Runtime-Only Credential
 
 ### Overview
 
-Organizer-only circuits require an organizer secret key to execute. To protect this sensitive material, the adapter treats the organizer secret key as a **runtime-only credential** that is:
+Some circuits require an identity secret key to execute (often called organizer/owner key in specific contracts). To protect this sensitive material, the adapter treats the identity secret key as a **runtime-only credential** that is:
 
 - **Never requested or stored** in contract definition
 - **Never persisted** in builder configuration or artifacts
@@ -998,7 +998,7 @@ Organizer-only circuits require an organizer secret key to execute. To protect t
 ```
 User Executes Transaction
     ↓
-UI Prompts for Organizer Secret (Midnight EOA only)
+UI Prompts for Identity Secret (Midnight EOA only)
     ↓
 User Enters Secret (hex string, no 0x prefix)
     ↓
@@ -1008,7 +1008,7 @@ EOA Strategy Receives Secret
     ↓
 Hex Decode to Bytes
     ↓
-Seed Private State Provider: { organizerSecretKey: bytes }
+Seed Private State Provider: { <identitySecretKeyPropertyName>: bytes } // default: organizerSecretKey
     ↓
 callCircuit Executes with Seeded State
     ↓
@@ -1029,10 +1029,10 @@ The Midnight adapter's `getContractDefinitionInputs()` does NOT include an organ
 
 **2. Runtime-Only Form Field (Builder)**
 
-The Builder auto-adds a `runtimeSecret` field to the form for functions that require an organizer key (based on adapter-provided function decorations). This field:
+The Builder auto-adds a `runtimeSecret` field to the form for functions that require an identity secret (based on adapter-provided function decorations). This field:
 
 - Appears in the form like any other field
-- Has an adapter-defined `label` and `helperText` (e.g., "Organizer Secret Key (hex)")
+- Has an adapter-defined `label` and `helperText` (e.g., "Identity Secret Key (hex)")
 - Includes `adapterBinding.key` used to route the secret to the adapter
 - Is never persisted and is removed from contract arguments at submit time
 
@@ -1042,7 +1042,7 @@ Example shape:
 {
   id: 'runtime-secret-organizer',
   name: 'organizerSecretKeyHex',
-  label: 'Organizer Secret Key (hex)',
+  label: 'Identity Secret Key (hex)',
   type: 'runtimeSecret',
   validation: { required: false },
   adapterBinding: { key: 'organizerSecretKeyHex' },
@@ -1076,11 +1076,11 @@ The artifact payloads in `formatter.ts` never include `organizerSecretKeyHex`. T
 
 **5. Fast Failure for Missing Secret**
 
-In `callCircuit.ts`, if private state is missing and no organizer secret was provided, a clear error is thrown:
+In `callCircuit.ts`, if private state is missing and no identity secret was provided, a clear error is thrown:
 
 ```
 Private state not initialized for this contract/privateStateId.
-For organizer-only circuits, provide organizerSecretKeyHex when loading artifacts
+For identity-restricted circuits, provide the Identity Secret Key in the form
 so the private state can be seeded.
 ```
 
