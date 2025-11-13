@@ -131,6 +131,8 @@ describe('Manual ABI loading deduplication', () => {
         proxyInfo: null,
         error: null,
         contractDefinitionArtifacts: null,
+        requiredInputSnapshot: null,
+        requiresManualReload: false,
       },
       needsContractDefinitionLoad: true,
     });

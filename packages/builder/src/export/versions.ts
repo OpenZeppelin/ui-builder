@@ -6,14 +6,14 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/ui-builder-adapter-evm': '0.13.0',
-  '@openzeppelin/ui-builder-adapter-midnight': '0.13.0',
-  '@openzeppelin/ui-builder-adapter-solana': '0.13.0',
-  '@openzeppelin/ui-builder-adapter-stellar': '0.13.0',
-  '@openzeppelin/ui-builder-react-core': '0.13.0',
-  '@openzeppelin/ui-builder-renderer': '0.13.0',
-  '@openzeppelin/ui-builder-storage': '0.13.0',
-  '@openzeppelin/ui-builder-types': '0.13.0',
-  '@openzeppelin/ui-builder-ui': '0.13.0',
-  '@openzeppelin/ui-builder-utils': '0.13.0',
+  '@openzeppelin/ui-builder-adapter-evm': '0.15.0',
+  '@openzeppelin/ui-builder-adapter-midnight': '0.15.0',
+  '@openzeppelin/ui-builder-adapter-solana': '0.15.0',
+  '@openzeppelin/ui-builder-adapter-stellar': '0.15.0',
+  '@openzeppelin/ui-builder-react-core': '0.15.0',
+  '@openzeppelin/ui-builder-renderer': '0.15.0',
+  '@openzeppelin/ui-builder-storage': '0.15.0',
+  '@openzeppelin/ui-builder-types': '0.15.0',
+  '@openzeppelin/ui-builder-ui': '0.15.0',
+  '@openzeppelin/ui-builder-utils': '0.15.0',
 };

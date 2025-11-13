@@ -244,15 +244,15 @@ function mapDetectionToDecorations(
       decorations[circuitId] = {
         badges: [
           {
-            text: 'Organizer-only',
+            text: 'Identity-restricted',
             variant: 'warning',
             tooltip:
-              'Detected based on code analysis. This function appears to require organizer credentials. The system scans for identity witness calls in the compiled contract code.',
+              'Detected based on code analysis. This function appears to require an identity secret. The system scans for identity witness calls in the compiled contract code.',
           },
         ],
         note: {
-          title: 'Organizer-only circuit (automated detection)',
-          body: 'This circuit requires an organizer secret key. A form field will be added automatically where you can enter it when executing the transaction. The key is never stored and is only used for this transaction.\n\nNote: Detection is based on static code analysis and may occasionally produce false positives.',
+          title: 'Identity-restricted circuit (automated detection)',
+          body: 'This circuit requires an identity secret. A form field will be added automatically where you can enter it when executing the transaction. The secret is never stored and is only used for this transaction.\n\nNote: Detection is based on static code analysis and may occasionally produce false positives.',
         },
         requiresRuntimeSecret: true,
       };

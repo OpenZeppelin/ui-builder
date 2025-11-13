@@ -359,9 +359,12 @@ function example() {
 
     it('should format the form schema correctly when injecting it', async () => {
       const template = `
+        import { useMemo } from 'react';
         import { RenderFormSchema } from '../types';
         
-        const formSchema: RenderFormSchema = {};
+        const formSchema: RenderFormSchema = useMemo(() => {
+          return {}; /*@@FORM_SCHEMA_JSON@@*/
+        }, []);
         
         function renderForm() {
           return renderWithSchema(formSchema);
@@ -394,9 +397,8 @@ function example() {
         formConfigJSON: JSON.stringify(formConfig),
       });
 
-      // The processed output should have the JSON inserted, but not yet formatted
-      // We'll format the entire code later with formatFinalCode
-      expect(processed).toContain('const formSchema: RenderFormSchema = {');
+      // The processed output should have the JSON inserted inside useMemo
+      expect(processed).toContain('const formSchema: RenderFormSchema = useMemo');
 
       // We now just check for the existence of these properties in any format
       expect(processed).toContain('functionId');
@@ -494,9 +496,12 @@ const anotherFunction = () => {
 
     it('should inject form schema when formConfigJSON is provided', async () => {
       const template = `
+        import { useMemo } from 'react';
         import { RenderFormSchema } from '../types';
         
-        const formSchema: RenderFormSchema = {};
+        const formSchema: RenderFormSchema = useMemo(() => {
+          return {}; /*@@FORM_SCHEMA_JSON@@*/
+        }, []);
         
         function renderForm() {
           return renderWithSchema(formSchema);
@@ -513,9 +518,10 @@ const anotherFunction = () => {
         formConfigJSON: JSON.stringify(formConfig),
       });
 
-      // Check that JSON was inserted correctly in any format
-      expect(processed).not.toContain('const formSchema: RenderFormSchema = {};');
-      expect(processed).toContain('const formSchema: RenderFormSchema = {');
+      // Check that JSON was inserted correctly inside useMemo
+      expect(processed).not.toContain('return {}; /*@@FORM_SCHEMA_JSON@@*/');
+      expect(processed).toContain('const formSchema: RenderFormSchema = useMemo');
+      expect(processed).toContain('return {');
 
       // Check for these properties in any format
       expect(processed).toContain('fields');

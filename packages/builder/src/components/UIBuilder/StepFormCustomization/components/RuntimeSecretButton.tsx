@@ -2,6 +2,7 @@ import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-ty
 import { Button } from '@openzeppelin/ui-builder-ui';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
+import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runtime-secret-helpers';
 
 interface RuntimeSecretButtonProps {
   adapter: ContractAdapter;
@@ -25,6 +26,9 @@ export function RuntimeSecretButton({
   }
 
   const handleReaddRuntimeSecret = () => {
+    const binding = bindingInfo as ExtendedRuntimeBinding;
+    const metadata = buildInitialMetadata(binding);
+
     const runtimeSecretField: FormFieldType = {
       id: `runtime-secret-${bindingInfo.key}`,
       name: bindingInfo.key,
@@ -33,7 +37,10 @@ export function RuntimeSecretButton({
       placeholder: 'Enter secret value',
       helperText: bindingInfo.helperText,
       validation: { required: false },
-      adapterBinding: { key: bindingInfo.key },
+      adapterBinding: {
+        key: bindingInfo.key,
+        ...(metadata ? { metadata } : {}),
+      },
       originalParameterType: 'runtimeSecret',
     };
 

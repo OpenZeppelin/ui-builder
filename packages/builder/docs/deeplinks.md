@@ -61,6 +61,26 @@ Mixing aliases + forced provider
 ?ecosystem=evm&networkId=ethereum-sepolia&identifier=0x753E2CFc06cF3bD485B846238828a9DA543BFF41&service=sourcify
 ```
 
+### Examples (Ecosystem-Only)
+
+Pre-select an ecosystem without specifying a network or contract. The user will land on the chain selection step with the ecosystem already selected, then manually choose a network.
+
+```text
+# EVM ecosystem only
+?ecosystem=evm
+
+# Stellar ecosystem only
+?ecosystem=stellar
+
+# Solana ecosystem only
+?ecosystem=solana
+
+# Midnight ecosystem only
+?ecosystem=midnight
+```
+
+**Use case:** Perfect for redirecting users from external tools (e.g., Wizard "Builder UI" button) to the UI Builder with a pre-selected blockchain ecosystem.
+
 Edge cases (for testing)
 
 ```text
@@ -70,7 +90,7 @@ Edge cases (for testing)
 # Missing network → should not auto-load; expect UI prompt
 ?ecosystem=evm&address=0x753E2CFc06cF3bD485B846238828a9DA543BFF41
 
-# Missing address → should not auto-load; expect UI prompt
+# Missing address → pre-selects ecosystem and network, user provides address manually
 ?ecosystem=evm&networkId=ethereum-sepolia
 
 # Unknown chainId (EVM) → shows message and prompts selection

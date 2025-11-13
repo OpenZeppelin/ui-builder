@@ -70,8 +70,8 @@ describe('Form Component Tests', () => {
     it('should generate a valid React component with proper imports', async () => {
       const { formComponentCode } = await extractFormComponent('evm');
 
-      // Check for React import (modern React doesn't require default import)
-      expect(formComponentCode).toMatch(/import.*from ['"]react['"]/);
+      // Check for React import with useMemo (modern React doesn't require default import)
+      expect(formComponentCode).toMatch(/import.*useMemo.*from ['"]react['"]/);
 
       // Check for TransactionForm import - handle multi-line imports
       expect(formComponentCode).toContain('TransactionForm');
@@ -110,8 +110,11 @@ describe('Form Component Tests', () => {
     it('should transform builder config to render schema correctly', async () => {
       const { formComponentCode } = await extractFormComponent('evm', 'transfer');
 
-      // Check for schema declaration
-      expect(formComponentCode).toMatch(/const formSchema: RenderFormSchema =/);
+      // Check for schema declaration with useMemo (memoized to prevent form resets)
+      expect(formComponentCode).toMatch(/const formSchema: RenderFormSchema = useMemo/);
+
+      // Check for useMemo import
+      expect(formComponentCode).toMatch(/import.*useMemo.*from ['"]react['"]/);
 
       // Check for fields array in the TypeScript format
       expect(formComponentCode).toMatch(/fields:\s*\[/);

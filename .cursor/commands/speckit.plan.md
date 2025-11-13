@@ -38,7 +38,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 2. **Generate and dispatch research agents**:
 
-   ```
+   ```text
    For each unknown in Technical Context:
      Task: "Research {unknown} for {feature context}"
    For each technology choice:
@@ -73,7 +73,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Add only new technology from current plan
    - Preserve manual additions between markers
 
-**Output**: data-model.md, /contracts/\*, quickstart.md, agent-specific file
+**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
 
 ## Key rules
 

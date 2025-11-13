@@ -104,6 +104,18 @@ describe('Export Structure Tests', () => {
     });
 
     // REMOVED TESTS for includeAdapters true/false as the src/adapters dir is gone
+
+    it('should include .gitignore file with node_modules entry', async () => {
+      const { files, fileList } = await testExportStructure(mockEvmNetworkConfig);
+
+      // Verify .gitignore exists
+      expect(fileList).toContain('.gitignore');
+
+      // Verify .gitignore has node_modules entry
+      const gitignoreContent = files['.gitignore'];
+      expect(gitignoreContent).toBeDefined();
+      expect(gitignoreContent).toContain('node_modules');
+    });
   });
 
   describe('Chain-Specific Exports', () => {

@@ -6,7 +6,7 @@
  * - "@@param-name@@" - Template variable markers (consistent across all templates)
  */
 /*------------TEMPLATE COMMENT END------------*/
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   ContractActionBar,
@@ -20,6 +20,7 @@ import type {
   RenderFormSchema,
 } from '@openzeppelin/ui-builder-types';
 import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -43,28 +44,38 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
   */
   const [isWidgetVisible, setIsWidgetVisible] = useState(false);
   const [loadError, _setLoadError] = useState<Error | null>(null);
+
   // Form schema generated from the builder and transformed by FormSchemaFactory
+  // Memoized to maintain stable reference across re-renders and prevent form resets
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty object that will be replaced at generation time with a properly
   // transformed RenderFormSchema that includes all necessary properties
   /*------------TEMPLATE COMMENT END------------*/
   // @ts-expect-error - Placeholder
-  const formSchema: RenderFormSchema = {}; /*@@FORM_SCHEMA_JSON@@*/
+  const formSchema: RenderFormSchema = useMemo(() => {
+    return {}; /*@@FORM_SCHEMA_JSON@@*/
+  }, []);
 
   // Contract schema injected by generator (loaded or imported by the user)
+  // Memoized to maintain stable reference across re-renders and prevent form resets
   /*------------TEMPLATE COMMENT START------------*/
   // This is an empty object that will be replaced at generation time with a properly
   // transformed ContractSchema that includes all necessary properties
   /*------------TEMPLATE COMMENT END------------*/
   // @ts-expect-error - Placeholder
-  const contractSchema: ContractSchema = {}; /*@@CONTRACT_SCHEMA_JSON@@*/
+  const contractSchema: ContractSchema = useMemo(() => {
+    return {}; /*@@CONTRACT_SCHEMA_JSON@@*/
+  }, []);
 
   // Execution configuration selected in the builder
+  // Memoized to maintain stable reference across re-renders
   /*------------TEMPLATE COMMENT START------------*/
   // This will be replaced at generation time with the stringified ExecutionConfig or 'undefined'.
   // Use 'unknown' for the placeholder type. Assign undefined and use comment marker for replacement.
   /*------------TEMPLATE COMMENT END------------*/
-  const executionConfig: ExecutionConfig | undefined = undefined; /*@@EXECUTION_CONFIG_JSON@@*/
+  const executionConfig: ExecutionConfig | undefined = useMemo(() => {
+    return undefined; /*@@EXECUTION_CONFIG_JSON@@*/
+  }, []);
 
   const contractAddress = formSchema.contractAddress;
 
@@ -115,9 +126,14 @@ export default function GeneratedForm({ adapter, isWalletConnected }: GeneratedF
       )}
 
       <div className="flex gap-4">
-        {/* Contract State Widget on the left side - matching builder app layout */}
-        {contractAddress && isWidgetVisible && (
-          <div className="w-[300px] flex-shrink-0">
+        {/* Contract State Widget on the left side - always mounted to prevent remount churn */}
+        {contractAddress && (
+          <div
+            className={cn(
+              'shrink-0 transition-all',
+              isWidgetVisible ? 'md:w-80 md:mr-6' : 'md:w-0'
+            )}
+          >
             <div className="sticky top-4">
               <ContractStateWidget
                 contractSchema={schemaToUse}
