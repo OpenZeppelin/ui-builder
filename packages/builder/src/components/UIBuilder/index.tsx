@@ -6,6 +6,7 @@ import { Ecosystem } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { STEP_INDICES } from './constants/stepIndices';
+import { useWalletReconnectionHandler } from './hooks/builder/useWalletReconnectionHandler';
 import { isTrimmedOnlyArtifacts } from './hooks/uiBuilderStore';
 import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
@@ -31,6 +32,13 @@ export function UIBuilder() {
 
   // Track network switching state
   const [isAdapterReady, setIsAdapterReady] = useState(false);
+
+  // Handle wallet reconnection with mismatched chain
+  useWalletReconnectionHandler(
+    state.selectedNetworkConfigId,
+    state.selectedAdapter,
+    state.networkToSwitchTo
+  );
 
   // Store the latest selected network ID
   const latestNetworkIdRef = useRef<string | null>(null);
