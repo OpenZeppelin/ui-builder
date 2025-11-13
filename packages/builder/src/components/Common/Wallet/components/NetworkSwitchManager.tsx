@@ -43,7 +43,10 @@ export const NetworkSwitchManager: React.FC<{
       logger.info('NetworkSwitchManager', `Unmounting, was for target: ${targetNetworkId}`);
       isMountedRef.current = false;
     };
-  }, [targetNetworkId, hasAttemptedSwitch]);
+    // hasAttemptedSwitch is intentionally omitted from deps: we only want to reset when targetNetworkId changes,
+    // not when hasAttemptedSwitch itself changes (which would cause unnecessary re-renders)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetNetworkId]);
 
   useEffect(() => {
     logger.info('NetworkSwitchManager', 'State Update:', {
