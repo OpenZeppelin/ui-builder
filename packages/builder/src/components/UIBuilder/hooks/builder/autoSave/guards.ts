@@ -1,5 +1,6 @@
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { hasMeaningfulContent } from '../../../utils/meaningfulContent';
 import { uiBuilderStore } from '../../uiBuilderStore';
 
 /**
@@ -39,14 +40,10 @@ export class AutoSaveGuards {
 
   /**
    * Check if there's meaningful content to save
-   * Network selection is considered the threshold for meaningful content
+   * Delegates to centralized hasMeaningfulContent utility
    */
   static hasMeaningfulContent(currentState: ReturnType<typeof uiBuilderStore.getState>): boolean {
-    const hasContent = !!(
-      currentState.selectedNetworkConfigId ||
-      currentState.selectedFunction ||
-      currentState.formConfig
-    );
+    const hasContent = hasMeaningfulContent(currentState);
 
     if (!hasContent) {
       logger.info('builder', 'No meaningful content to auto-save yet');
