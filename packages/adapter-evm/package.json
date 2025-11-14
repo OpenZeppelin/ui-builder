@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-adapter-evm",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "private": false,
   "description": "EVM Adapter for UI Builder",
   "keywords": [
