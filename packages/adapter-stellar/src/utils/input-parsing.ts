@@ -10,6 +10,7 @@ import type {
   SorobanMapEntry,
 } from '../transform/input-parser';
 import { convertStellarTypeToScValType } from './formatting';
+import { compareScValsByXdr } from './xdr-ordering';
 
 const SYSTEM_LOG_TAG = 'StellarInputParsingUtils';
 
@@ -260,8 +261,14 @@ export function convertObjectToMap(mapArray: SorobanMapEntry[]): {
   mapType: Record<string, string | string[]>;
 } {
   try {
-    const mapVal = mapArray.reduce((acc: Record<string, unknown>, pair) => {
-      const key = pair['0'].value as string;
+    const sortedEntries = [...mapArray].sort((a, b) => {
+      const aKey = getScValFromPrimitive(a['0'] as SorobanArgumentValue);
+      const bKey = getScValFromPrimitive(b['0'] as SorobanArgumentValue);
+      return compareScValsByXdr(aKey, bKey);
+    });
+
+    const mapVal = sortedEntries.reduce((acc: Record<string, unknown>, pair) => {
+      const key = String(pair['0'].value);
 
       if (Array.isArray(pair['1'])) {
         // Handle nested array values
@@ -270,13 +277,23 @@ export function convertObjectToMap(mapArray: SorobanMapEntry[]): {
       } else {
         // Handle primitive values
         const value = pair['1'].value;
-        acc[key] = pair['1'].type === 'bool' ? value === 'true' : value;
+        if (pair['1'].type === 'bool') {
+          if (typeof value === 'boolean') {
+            acc[key] = value;
+          } else if (typeof value === 'string') {
+            acc[key] = value === 'true';
+          } else {
+            acc[key] = Boolean(value);
+          }
+        } else {
+          acc[key] = value;
+        }
       }
       return acc;
     }, {});
 
-    const mapType = mapArray.reduce((acc: Record<string, string[]>, pair) => {
-      const key = pair['0'].value as string;
+    const mapType = sortedEntries.reduce((acc: Record<string, string[]>, pair) => {
+      const key = String(pair['0'].value);
       const keyTypeHint = convertStellarTypeToScValType(pair['0'].type);
       const valueTypeHint = convertStellarTypeToScValType(pair['1'].type);
       acc[key] = [
