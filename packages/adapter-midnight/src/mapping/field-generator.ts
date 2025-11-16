@@ -3,11 +3,13 @@ import { startCase } from 'lodash';
 import type {
   ContractSchema,
   FieldType,
+  FieldValidation,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
+import { enhanceNumericValidation, type NumericBoundsMap } from '@openzeppelin/ui-builder-utils';
 
-import { isVectorType } from '../utils/type-helpers';
+import { isUintType, isVectorType } from '../utils/type-helpers';
 import { mapMidnightParameterTypeToFieldType } from './type-mapper';
 
 // --- Helpers --------------------------------------------------------------- //
@@ -67,6 +69,39 @@ function parseObjectLiteralComponents(type: string): FunctionParameter[] {
 }
 
 /**
+ * Extracts numeric bounds from Midnight Uint type strings (e.g., 'Uint<0..255>').
+ * Returns bounds map for use with enhanceNumericValidation.
+ */
+function extractUintBounds(type: string): NumericBoundsMap | null {
+  if (!isUintType(type)) {
+    return null;
+  }
+
+  // Match Uint<0..MAX> pattern
+  const match = type.match(/^Uint<\s*0\s*\.\.\s*(\d+)\s*>$/i);
+  if (!match) {
+    return null;
+  }
+
+  const max = Number.parseInt(match[1], 10);
+  if (Number.isNaN(max)) {
+    return null;
+  }
+
+  // Return a bounds map keyed by the exact type string
+  return {
+    [type]: { min: 0, max },
+  };
+}
+
+/**
+ * Get default validation rules for a parameter.
+ */
+function getDefaultValidation(required = true): FieldValidation {
+  return { required };
+}
+
+/**
  * Generate default field configuration for a Midnight function parameter.
  * Handles arrays, inline object literals, and Maybe<T> optionality.
  *
@@ -108,12 +143,20 @@ export function generateMidnightDefaultField<T extends FieldType = FieldType>(
     fieldType = 'enum' as T;
   }
 
+  // Extract numeric bounds for Uint types
+  const uintBounds = extractUintBounds(baseType);
+  const midnightBounds: NumericBoundsMap = uintBounds || {};
+
+  // Build base validation
+  let baseValidation = getDefaultValidation(!maybe.isMaybe);
+  baseValidation = enhanceNumericValidation(baseValidation, baseType, midnightBounds);
+
   const fieldBase: FormFieldType<T> = {
     id: `${parameter.name}`,
     name: parameter.name || 'param',
     label: parameter.displayName || startCase(parameter.name || 'param'),
     type: fieldType,
-    validation: { required: !maybe.isMaybe },
+    validation: baseValidation,
   } as FormFieldType<T>;
 
   // Attach enum metadata if available
@@ -162,6 +205,14 @@ export function generateMidnightDefaultField<T extends FieldType = FieldType>(
         ? ('enum' as FieldType)
         : (mapMidnightParameterTypeToFieldType(elementType) as FieldType);
 
+    // Extract numeric bounds for array element Uint types
+    const elementUintBounds = extractUintBounds(elementType);
+    const elementBounds: NumericBoundsMap = elementUintBounds || {};
+
+    // Build element validation with bounds
+    let elementValidation = getDefaultValidation(true);
+    elementValidation = enhanceNumericValidation(elementValidation, elementType, elementBounds);
+
     const baseArrayField: FormFieldType<T> = {
       ...fieldBase,
       type: 'array' as T,
@@ -176,6 +227,10 @@ export function generateMidnightDefaultField<T extends FieldType = FieldType>(
               max: vectorInfo.size || vectorMeta?.size,
             }
           : {}),
+      },
+      elementFieldConfig: {
+        type: elementFieldType,
+        validation: elementValidation,
       },
     } as FormFieldType<T>;
 
