@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, ContractSchema } from '@openzeppelin/ui-builder-types';
 import { FieldType, FormValues } from '@openzeppelin/ui-builder-types';
 import {
   AddressField,
@@ -33,7 +33,9 @@ import {
  */
 export const fieldComponents: Record<
   FieldType,
-  React.ComponentType<BaseFieldProps<FormValues> & { adapter?: ContractAdapter }>
+  React.ComponentType<
+    BaseFieldProps<FormValues> & { adapter?: ContractAdapter; contractSchema?: ContractSchema }
+  >
 > = {
   text: TextField,
   number: NumberField,

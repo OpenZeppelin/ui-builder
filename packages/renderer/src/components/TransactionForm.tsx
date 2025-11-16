@@ -243,6 +243,7 @@ export function TransactionForm({
             control={methods.control}
             error={errors[field.name]?.message as string}
             adapter={adapter}
+            contractSchema={contractSchema}
           />
         ))}
       </div>
