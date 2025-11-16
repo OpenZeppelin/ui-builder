@@ -181,6 +181,29 @@ describe('generateStellarDefaultField', () => {
         },
       });
     });
+
+    it('should create components for tuple parameters', () => {
+      const parameter: FunctionParameter = {
+        name: 'config',
+        type: 'Tuple<ScString, U32>',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.type).toBe('object');
+      expect(result.components).toEqual([
+        {
+          name: 'item_0',
+          type: 'ScString',
+          displayName: 'Value 1 (ScString)',
+        },
+        {
+          name: 'item_1',
+          type: 'U32',
+          displayName: 'Value 2 (U32)',
+        },
+      ]);
+    });
   });
 
   describe('fallback scenarios', () => {
@@ -260,9 +283,103 @@ describe('generateStellarDefaultField', () => {
       expect(result).toMatchObject({
         name: 'user_list',
         label: 'User List',
-        type: 'array-object',
-        components: parameter.components,
+        type: 'array',
+        elementFieldConfig: {
+          type: 'object',
+          components: parameter.components,
+        },
       });
+    });
+  });
+
+  describe('numeric bounds validation', () => {
+    it('should apply bounds for U32 type', () => {
+      const parameter: FunctionParameter = {
+        name: 'count',
+        type: 'U32',
+        displayName: 'Count',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.validation.min).toBe(0);
+      expect(result.validation.max).toBe(4_294_967_295);
+    });
+
+    it('should apply bounds for U8 type', () => {
+      const parameter: FunctionParameter = {
+        name: 'byte',
+        type: 'U8',
+        displayName: 'Byte',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.validation.min).toBe(0);
+      expect(result.validation.max).toBe(255);
+    });
+
+    it('should apply bounds for I8 type', () => {
+      const parameter: FunctionParameter = {
+        name: 'signedByte',
+        type: 'I8',
+        displayName: 'Signed Byte',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.validation.min).toBe(-128);
+      expect(result.validation.max).toBe(127);
+    });
+
+    it('should apply bounds for I32 type', () => {
+      const parameter: FunctionParameter = {
+        name: 'signedInt',
+        type: 'I32',
+        displayName: 'Signed Int',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.validation.min).toBe(-2_147_483_648);
+      expect(result.validation.max).toBe(2_147_483_647);
+    });
+
+    it('should apply bounds to Vec<U32> element fields', () => {
+      const parameter: FunctionParameter = {
+        name: 'counts',
+        type: 'Vec<U32>',
+        displayName: 'Counts',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.elementFieldConfig).toBeDefined();
+      expect(result.elementFieldConfig!.validation).toBeDefined();
+      expect(result.elementFieldConfig!.validation!.min).toBe(0);
+      expect(result.elementFieldConfig!.validation!.max).toBe(4_294_967_295);
+    });
+
+    it('should apply bounds to map key/value fields', () => {
+      const parameter: FunctionParameter = {
+        name: 'scores',
+        type: 'Map<U32, I32>',
+        displayName: 'Scores',
+      };
+
+      const result = generateStellarDefaultField(parameter);
+
+      expect(result.mapMetadata).toBeDefined();
+      const keyConfig = result.mapMetadata!.keyFieldConfig;
+      const valueConfig = result.mapMetadata!.valueFieldConfig;
+      expect(keyConfig).toBeDefined();
+      expect(valueConfig).toBeDefined();
+      expect(keyConfig!.validation).toBeDefined();
+      expect(valueConfig!.validation).toBeDefined();
+      expect(keyConfig!.validation!.min).toBe(0);
+      expect(keyConfig!.validation!.max).toBe(4_294_967_295);
+      expect(valueConfig!.validation!.min).toBe(-2_147_483_648);
+      expect(valueConfig!.validation!.max).toBe(2_147_483_647);
     });
   });
 

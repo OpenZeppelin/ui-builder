@@ -9,12 +9,18 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
-import { getDefaultValueForType, logger } from '@openzeppelin/ui-builder-utils';
+import {
+  enhanceNumericValidation,
+  getDefaultValueForType,
+  logger,
+  type NumericBoundsMap,
+} from '@openzeppelin/ui-builder-utils';
 
 import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
 import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 import { extractEnumVariants, isEnumType, type EnumMetadata } from './enum-metadata';
 import { extractStructFields, isStructType } from './struct-fields';
+import { buildTupleComponents } from './tuple-components';
 import { mapStellarParameterTypeToFieldType } from './type-mapper';
 
 /**
@@ -24,6 +30,19 @@ import { mapStellarParameterTypeToFieldType } from './type-mapper';
 function getDefaultValidationForType(): FieldValidation {
   return { required: true };
 }
+
+/**
+ * Stellar/Soroban numeric type bounds.
+ * Maps Stellar type names to their min/max value constraints.
+ */
+const STELLAR_NUMERIC_BOUNDS: NumericBoundsMap = {
+  U8: { min: 0, max: 255 },
+  U16: { min: 0, max: 65_535 },
+  U32: { min: 0, max: 4_294_967_295 },
+  I8: { min: -128, max: 127 },
+  I16: { min: -32_768, max: 32_767 },
+  I32: { min: -2_147_483_648, max: 2_147_483_647 },
+};
 
 /**
  * Generate default form configuration for a Stellar function parameter. Supports:
@@ -56,11 +75,13 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
   let finalFieldType = fieldType;
   let options: { label: string; value: string }[] | undefined;
 
-  // Check if this parameter is an enum type and extract metadata
-  if (isLikelyEnumType(parameter.type)) {
-    if (specEntries && isEnumType(specEntries, parameter.type)) {
+  // Check if this parameter is an enum type (by spec or heuristic) and extract metadata
+  const enumDetectedBySpec = !!(specEntries && isEnumType(specEntries, parameter.type));
+  const enumDetectedHeuristic = isLikelyEnumType(parameter.type);
+  if (enumDetectedBySpec || enumDetectedHeuristic) {
+    if (enumDetectedBySpec) {
       // We have spec entries, extract full metadata
-      enumMetadata = extractEnumVariants(specEntries, parameter.type);
+      enumMetadata = extractEnumVariants(specEntries!, parameter.type);
       if (enumMetadata) {
         if (enumMetadata.isUnitOnly) {
           // Unit-only enums can use select/radio with options
@@ -96,6 +117,13 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
     }
   }
 
+  if (!structComponents) {
+    const tupleComponents = buildTupleComponents(parameter.type, specEntries);
+    if (tupleComponents && tupleComponents.length > 0) {
+      structComponents = tupleComponents;
+    }
+  }
+
   const baseField: FormFieldType<T> = {
     id: `field-${Math.random().toString(36).substring(2, 9)}`,
     name: parameter.name || parameter.type, // Use type if name missing
@@ -111,6 +139,12 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
     options,
   };
 
+  baseField.validation = enhanceNumericValidation(
+    baseField.validation,
+    parameter.type,
+    STELLAR_NUMERIC_BOUNDS
+  );
+
   // Propagate max byte length for BytesN types so the UI can enforce it
   if (isBytesNType(parameter.type)) {
     const sizeMatch = parameter.type.match(/^BytesN<(\d+)>$/);
@@ -124,23 +158,66 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
     }
   }
 
-  // For array types, provide element type information
-  if (fieldType === 'array') {
+  // For array types (including arrays of complex types), provide element type information
+  if (fieldType === 'array' || fieldType === 'array-object') {
     const elementType = extractVecElementType(parameter.type);
     if (elementType) {
       const elementFieldType = mapStellarParameterTypeToFieldType(elementType);
 
-      // Add array-specific properties
+      // Check if the element type is an enum or struct and needs additional metadata
+      let elementEnumMetadata: EnumMetadata | undefined;
+      let elementComponents: FunctionParameter[] | undefined;
+      let finalElementFieldType = elementFieldType;
+
+      // Extract enum metadata for array elements
+      if (isLikelyEnumType(elementType)) {
+        if (specEntries && isEnumType(specEntries, elementType)) {
+          elementEnumMetadata = extractEnumVariants(specEntries, elementType) ?? undefined;
+          if (elementEnumMetadata) {
+            // Override field type based on enum characteristics
+            finalElementFieldType = elementEnumMetadata.isUnitOnly ? 'select' : 'enum';
+          }
+        }
+      }
+
+      // Extract struct components for array elements
+      if (specEntries && isStructType(specEntries, elementType)) {
+        const structFields = extractStructFields(specEntries, elementType);
+        if (structFields && structFields.length > 0) {
+          elementComponents = structFields;
+          finalElementFieldType = 'object';
+        }
+      }
+
+      // For array-object, if we have components from the parameter, use them
+      if (fieldType === 'array-object' && parameter.components) {
+        elementComponents = parameter.components;
+        finalElementFieldType = 'object';
+      }
+
+      // Build element validation with bounds
+      let elementValidation: FieldValidation = { required: true };
+      elementValidation = enhanceNumericValidation(
+        elementValidation,
+        elementType,
+        STELLAR_NUMERIC_BOUNDS
+      );
+
+      // Add array-specific properties with full element metadata
       const arrayField = {
         ...baseField,
+        type: 'array' as FieldType, // Always use 'array' as the field type
         elementType: elementFieldType,
         elementFieldConfig: {
-          type: elementFieldType,
-          validation: { required: true },
+          type: finalElementFieldType,
+          validation: elementValidation,
           placeholder: `Enter ${elementType}`,
+          originalParameterType: elementType,
+          ...(elementEnumMetadata && { enumMetadata: elementEnumMetadata }),
+          ...(elementComponents && { components: elementComponents }),
         },
       };
-      return arrayField;
+      return arrayField as unknown as FormFieldType<T>;
     }
   }
 
@@ -159,13 +236,21 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
           valueType: valueFieldType,
           keyFieldConfig: {
             type: keyFieldType,
-            validation: { required: true },
+            validation: enhanceNumericValidation(
+              { required: true },
+              mapTypes.keyType,
+              STELLAR_NUMERIC_BOUNDS
+            ),
             placeholder: `Enter ${mapTypes.keyType}`,
             originalParameterType: mapTypes.keyType,
           },
           valueFieldConfig: {
             type: valueFieldType,
-            validation: { required: true },
+            validation: enhanceNumericValidation(
+              { required: true },
+              mapTypes.valueType,
+              STELLAR_NUMERIC_BOUNDS
+            ),
             placeholder: `Enter ${mapTypes.valueType}`,
             originalParameterType: mapTypes.valueType,
           },
