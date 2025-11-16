@@ -20,7 +20,33 @@ describe('EVM Field Generator', () => {
 
       expect(field.type).toBe('number');
       expect(field.validation.required).toBe(true);
+      expect(field.validation.min).toBe(0);
+      expect(field.validation.max).toBe(4_294_967_295);
       expect(field.validation.pattern).toBeUndefined();
+    });
+
+    it('should apply numeric bounds for uint8', () => {
+      const param = createParam('uint8', 'byte');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.validation.min).toBe(0);
+      expect(field.validation.max).toBe(255);
+    });
+
+    it('should apply numeric bounds for int8', () => {
+      const param = createParam('int8', 'signedByte');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.validation.min).toBe(-128);
+      expect(field.validation.max).toBe(127);
+    });
+
+    it('should apply numeric bounds for int32', () => {
+      const param = createParam('int32', 'signedInt');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.validation.min).toBe(-2_147_483_648);
+      expect(field.validation.max).toBe(2_147_483_647);
     });
 
     it('should generate a bigint field for uint128', () => {
@@ -84,6 +110,17 @@ describe('EVM Field Generator', () => {
       expect(field.elementFieldConfig).toBeDefined();
       expect(field.elementFieldConfig?.type).toBe('bigint');
       // Integer validation is handled by BigIntField component internally
+    });
+
+    it('should apply numeric bounds to array element fields', () => {
+      const param = createParam('uint32[]', 'counts');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('array');
+      expect(field.elementFieldConfig).toBeDefined();
+      expect(field.elementFieldConfig!.validation).toBeDefined();
+      expect(field.elementFieldConfig!.validation!.min).toBe(0);
+      expect(field.elementFieldConfig!.validation!.max).toBe(4_294_967_295);
     });
 
     it('should include proper field metadata', () => {
