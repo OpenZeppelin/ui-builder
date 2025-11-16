@@ -92,6 +92,15 @@ describe('Enum Field End-to-End Integration', () => {
             name: 'choice',
             type: 'DemoEnum',
             displayName: 'Choice',
+            enumMetadata: {
+              name: 'DemoEnum',
+              variants: [
+                { name: 'One', type: 'void' },
+                { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+                { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+              ],
+              isUnitOnly: false,
+            },
           },
         ],
         transactionOptions: {},
@@ -155,6 +164,15 @@ describe('Enum Field End-to-End Integration', () => {
             name: 'choice',
             type: 'DemoEnum',
             displayName: 'Choice',
+            enumMetadata: {
+              name: 'DemoEnum',
+              variants: [
+                { name: 'One', type: 'void' },
+                { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+                { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+              ],
+              isUnitOnly: false,
+            },
           },
         ],
         transactionOptions: {},
@@ -218,6 +236,15 @@ describe('Enum Field End-to-End Integration', () => {
             name: 'choice',
             type: 'DemoEnum',
             displayName: 'Choice',
+            enumMetadata: {
+              name: 'DemoEnum',
+              variants: [
+                { name: 'One', type: 'void' },
+                { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+                { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+              ],
+              isUnitOnly: false,
+            },
           },
         ],
         transactionOptions: {},
@@ -320,11 +347,29 @@ describe('Enum Field End-to-End Integration', () => {
             name: 'choice1',
             type: 'DemoEnum',
             displayName: 'First Choice',
+            enumMetadata: {
+              name: 'DemoEnum',
+              variants: [
+                { name: 'One', type: 'void' },
+                { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+                { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+              ],
+              isUnitOnly: false,
+            },
           },
           {
             name: 'choice2',
             type: 'DemoEnum',
             displayName: 'Second Choice',
+            enumMetadata: {
+              name: 'DemoEnum',
+              variants: [
+                { name: 'One', type: 'void' },
+                { name: 'Two', type: 'tuple', payloadTypes: ['U32'] },
+                { name: 'Three', type: 'tuple', payloadTypes: ['ScString'] },
+              ],
+              isUnitOnly: false,
+            },
           },
         ],
         transactionOptions: {},
