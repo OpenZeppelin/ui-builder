@@ -1,5 +1,5 @@
 import React from 'react';
-import { Controller, FieldValues } from 'react-hook-form';
+import { Controller, FieldPath, FieldValues, PathValue } from 'react-hook-form';
 
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
@@ -80,6 +80,7 @@ export function BooleanField<TFieldValues extends FieldValues = FieldValues>({
       <Controller
         control={control}
         name={name}
+        defaultValue={false as PathValue<TFieldValues, FieldPath<TFieldValues>>}
         rules={{
           validate: (value) => {
             // Handle required validation specifically

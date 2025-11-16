@@ -220,7 +220,7 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
           const handleAddEntry = (): void => {
             // Set flag to prevent sync interference during add operation
             isReplacingRef.current = true;
-            append({ key: '', value: '' } as FieldValues[typeof name]);
+            append(createDefaultEntry(mapMetadata) as FieldValues[typeof name]);
 
             // Reset flag after operation
             queueMicrotask(() => {
@@ -262,7 +262,10 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
                       ...mapMetadata?.keyFieldConfig,
                       id: `${id}-key-${index}`,
                       name: `${name}.${index}.key`,
-                      label: 'Key',
+                      label: formatLabeledType(
+                        'Key',
+                        mapMetadata?.keyFieldConfig?.originalParameterType || mapMetadata?.keyType
+                      ),
                       type: mapMetadata?.keyFieldConfig?.type || 'text',
                       validation: { required: true, ...mapMetadata?.keyFieldConfig?.validation },
                       placeholder: mapMetadata?.keyFieldConfig?.placeholder || 'Enter key',
@@ -275,7 +278,11 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
                       ...mapMetadata?.valueFieldConfig,
                       id: `${id}-value-${index}`,
                       name: `${name}.${index}.value`,
-                      label: 'Value',
+                      label: formatLabeledType(
+                        'Value',
+                        mapMetadata?.valueFieldConfig?.originalParameterType ||
+                          mapMetadata?.valueType
+                      ),
                       type: mapMetadata?.valueFieldConfig?.type || 'text',
                       validation: { required: true, ...mapMetadata?.valueFieldConfig?.validation },
                       placeholder: mapMetadata?.valueFieldConfig?.placeholder || 'Enter value',
@@ -353,3 +360,40 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
 
 // Set displayName manually for better debugging
 MapField.displayName = 'MapField';
+
+function formatLabeledType(baseLabel: string, typeHint?: string): string {
+  if (!typeHint) {
+    return baseLabel;
+  }
+  return `${baseLabel} (${typeHint})`;
+}
+
+function getDefaultValueForField(field?: Partial<FormFieldType>): unknown {
+  const fieldType = field?.type;
+  switch (fieldType) {
+    case 'checkbox':
+      return false;
+    case 'number':
+    case 'bigint':
+    case 'amount':
+    case 'text':
+    case 'textarea':
+    case 'blockchain-address':
+    case 'bytes':
+    case 'select':
+    case 'radio':
+      return '';
+    default:
+      return '';
+  }
+}
+
+function createDefaultEntry(mapMetadata?: MapFieldProps['mapMetadata']): {
+  key: unknown;
+  value: unknown;
+} {
+  return {
+    key: getDefaultValueForField(mapMetadata?.keyFieldConfig),
+    value: getDefaultValueForField(mapMetadata?.valueFieldConfig),
+  };
+}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 
-import type { EnumValue, FormFieldType } from '@openzeppelin/ui-builder-types';
+import type { EnumValue, FormFieldType, FunctionParameter } from '@openzeppelin/ui-builder-types';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { Input } from '../ui/input';
@@ -26,8 +26,12 @@ export interface EnumVariant {
   type: 'void' | 'tuple' | 'integer';
   /** For tuple variants: array of payload type names (e.g., ['U32', 'ScString']) */
   payloadTypes?: string[];
+  /** Optional nested component definitions for tuple payload entries */
+  payloadComponents?: (FunctionParameter[] | undefined)[];
   /** For integer variants: the numeric value */
   value?: number;
+  /** Flag indicating if this variant has a single Tuple payload (for serialization) */
+  isSingleTuplePayload?: boolean;
 }
 
 /**
@@ -332,13 +336,16 @@ export function EnumField<TFieldValues extends FieldValues = FieldValues>({
                         id: `${id}-payload-${index}`,
                         name: `${name}.values.${index}`,
                         label: payloadType,
-                        type: 'text', // Default to text, will be mapped by adapter in DynamicFormField
+                        type: 'text' as FormFieldType['type'],
                         validation: {},
                         placeholder: `Enter ${payloadType} value`,
                         helperText: undefined,
                         width: 'full',
                         originalParameterType: payloadType,
                         readOnly: readOnly, // Inherit readOnly state from parent
+                        ...(selectedVariant.payloadComponents?.[index] && {
+                          components: selectedVariant.payloadComponents[index],
+                        }),
                       };
 
                       return (
