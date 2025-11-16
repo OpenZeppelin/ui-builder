@@ -1,9 +1,12 @@
 import { xdr } from '@stellar/stellar-sdk';
 
+import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 // Import the type extraction utility from the shared utils module
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';
+import { extractStructFields, isStructType } from './struct-fields';
+import { buildTupleComponents } from './tuple-components';
 
 /**
  * Represents a single enum variant with its type and optional payload information
@@ -15,8 +18,12 @@ export interface EnumVariant {
   type: 'void' | 'tuple' | 'integer';
   /** For tuple variants: array of payload type names (e.g., ['U32', 'ScString']) */
   payloadTypes?: string[];
+  /** Optional detailed component metadata for payload types */
+  payloadComponents?: (FunctionParameter[] | undefined)[];
   /** For integer variants: the numeric value */
   value?: number;
+  /** Flag indicating if this variant has a single Tuple payload that needs wrapping during serialization */
+  isSingleTuplePayload?: boolean;
 }
 
 /**
@@ -80,14 +87,61 @@ export function extractEnumVariants(
         ) {
           // Tuple case (variant with payload)
           const tupleCase = caseEntry.tupleCase();
-          const payloadTypes = tupleCase
+          const rawPayloadTypes = tupleCase
             .type()
             .map((typeDef) => extractSorobanTypeFromScSpec(typeDef));
+
+          // Track if we have a single Tuple payload that needs special handling
+          const isSingleTuplePayload =
+            rawPayloadTypes.length === 1 && rawPayloadTypes[0].startsWith('Tuple<');
+
+          // Flatten tuple payloads for UI rendering
+          // Example: Some((Address, i128)) → payloadTypes: ['Address', 'I128'] for UI
+          // But we keep the original structure info for serialization
+          const flattenedPayloadTypes: string[] = [];
+          const flattenedPayloadComponents: (FunctionParameter[] | undefined)[] = [];
+
+          for (const payloadType of rawPayloadTypes) {
+            if (payloadType.startsWith('Tuple<')) {
+              // Extract tuple components and add them individually for UI rendering
+              const tupleComponents = buildTupleComponents(payloadType, entries);
+              if (tupleComponents && tupleComponents.length > 0) {
+                tupleComponents.forEach((component) => {
+                  flattenedPayloadTypes.push(component.type);
+                  if (isStructType(entries, component.type)) {
+                    flattenedPayloadComponents.push(
+                      extractStructFields(entries, component.type) ?? undefined
+                    );
+                  } else {
+                    flattenedPayloadComponents.push(component.components);
+                  }
+                });
+              } else {
+                flattenedPayloadTypes.push(payloadType);
+                flattenedPayloadComponents.push(undefined);
+              }
+            } else if (isStructType(entries, payloadType)) {
+              flattenedPayloadTypes.push(payloadType);
+              flattenedPayloadComponents.push(
+                extractStructFields(entries, payloadType) ?? undefined
+              );
+            } else {
+              flattenedPayloadTypes.push(payloadType);
+              flattenedPayloadComponents.push(undefined);
+            }
+          }
 
           variants.push({
             name: tupleCase.name().toString(),
             type: 'tuple',
-            payloadTypes,
+            payloadTypes: flattenedPayloadTypes,
+            ...(flattenedPayloadComponents.some(
+              (components) => components && components.length > 0
+            ) && {
+              payloadComponents: flattenedPayloadComponents,
+            }),
+            // Store metadata about whether this needs tuple wrapping during serialization
+            ...(isSingleTuplePayload && { isSingleTuplePayload: true }),
           });
           isUnitOnly = false;
         }

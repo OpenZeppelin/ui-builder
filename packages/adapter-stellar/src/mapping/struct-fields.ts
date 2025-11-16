@@ -43,10 +43,20 @@ export function extractStructFields(
         const fieldName = field.name().toString();
         const fieldType = extractSorobanTypeFromScSpec(field.type());
 
-        structFields.push({
+        const fieldParam: FunctionParameter = {
           name: fieldName,
           type: fieldType,
-        });
+        };
+
+        // Recursively extract nested struct components
+        if (isStructType(entries, fieldType)) {
+          const nestedFields = extractStructFields(entries, fieldType);
+          if (nestedFields && nestedFields.length > 0) {
+            fieldParam.components = nestedFields;
+          }
+        }
+
+        structFields.push(fieldParam);
       }
 
       return structFields;
