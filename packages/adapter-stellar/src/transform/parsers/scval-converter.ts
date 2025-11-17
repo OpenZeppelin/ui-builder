@@ -4,6 +4,7 @@ import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-ty
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { convertEnumToScVal } from '../../utils/input-parsing';
+import { isPrimitiveParamType } from '../../utils/stellar-types';
 import { isBytesNType, isLikelyEnumType } from '../../utils/type-detection';
 import { compareScValsByXdr } from '../../utils/xdr-ordering';
 import { parseGenericType } from './generic-parser';
@@ -46,25 +47,6 @@ export function valueToScVal(
   // This handles the common case where callers don't need recursive parsing
   const parseValue = parseInnerValue || ((val: unknown) => val);
   const genericInfo = parseGenericType(parameterType);
-  const PRIMITIVE_PARAM_TYPES = new Set([
-    'Bool',
-    'ScString',
-    'ScSymbol',
-    'Address',
-    'Bytes',
-    'U8',
-    'U16',
-    'U32',
-    'U64',
-    'U128',
-    'U256',
-    'I8',
-    'I16',
-    'I32',
-    'I64',
-    'I128',
-    'I256',
-  ]);
 
   // Helper: detect SorobanArgumentValue wrapper { type, value }
   const isTypedWrapper = (v: unknown): v is { type: string; value: unknown } =>
@@ -202,7 +184,7 @@ export function valueToScVal(
       );
     }
 
-    if (!PRIMITIVE_PARAM_TYPES.has(parameterType) && isStructType(value, parameterType)) {
+    if (!isPrimitiveParamType(parameterType) && isStructType(value, parameterType)) {
       return convertStructToScVal(
         value as Record<string, unknown>,
         parameterType,

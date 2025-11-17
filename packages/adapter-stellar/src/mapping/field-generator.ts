@@ -34,6 +34,10 @@ function getDefaultValidationForType(): FieldValidation {
 /**
  * Stellar/Soroban numeric type bounds.
  * Maps Stellar type names to their min/max value constraints.
+ *
+ * Note: U64, U128, U256, I64, I128, and I256 are not included here because they exceed
+ * JavaScript's Number.MAX_SAFE_INTEGER (2^53 - 1). These types are mapped to 'bigint' field type
+ * and handle validation through BigIntField component's internal validation mechanism.
  */
 const STELLAR_NUMERIC_BOUNDS: NumericBoundsMap = {
   U8: { min: 0, max: 255 },

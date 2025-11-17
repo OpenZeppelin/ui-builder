@@ -3,6 +3,7 @@ import React from 'react';
 import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import type { FormFieldType } from '@openzeppelin/ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
 
 import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
@@ -368,40 +369,16 @@ function formatLabeledType(baseLabel: string, typeHint?: string): string {
   return `${baseLabel} (${typeHint})`;
 }
 
-function getDefaultValueForField(field?: Partial<FormFieldType>): unknown {
-  const fieldType = field?.type;
-  switch (fieldType) {
-    case 'checkbox':
-      return false;
-    case 'object':
-      return {};
-    case 'array':
-    case 'array-object':
-    case 'map':
-      return [];
-    case 'enum':
-      return '';
-    case 'number':
-    case 'bigint':
-    case 'amount':
-    case 'text':
-    case 'textarea':
-    case 'blockchain-address':
-    case 'bytes':
-    case 'select':
-    case 'radio':
-      return '';
-    default:
-      return '';
-  }
-}
-
 function createDefaultEntry(mapMetadata?: MapFieldProps['mapMetadata']): {
   key: unknown;
   value: unknown;
 } {
   return {
-    key: getDefaultValueForField(mapMetadata?.keyFieldConfig),
-    value: getDefaultValueForField(mapMetadata?.valueFieldConfig),
+    key: mapMetadata?.keyFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.keyFieldConfig.type)
+      : '',
+    value: mapMetadata?.valueFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.valueFieldConfig.type)
+      : '',
   };
 }

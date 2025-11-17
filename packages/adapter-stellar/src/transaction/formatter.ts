@@ -11,7 +11,8 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { extractEnumVariants, isEnumType } from '../mapping/enum-metadata';
 import { parseStellarInput } from '../transform';
-import { isLikelyEnumType } from '../utils/type-detection';
+import { isPrimitiveParamType } from '../utils/stellar-types';
+import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 
 /**
  * Stellar transaction data structure that will be passed to signAndBroadcast
@@ -153,24 +154,7 @@ export function formatStellarTransactionData(
                 // Keep SorobanArgumentValue wrapper for primitive payloads to satisfy tests and simple paths.
                 // For complex payloads (structs/tuples/maps/vec/enums), return raw values and let valueToScVal handle serialization.
                 const isPrimitivePayload =
-                  expectedType === 'Bool' ||
-                  expectedType === 'ScString' ||
-                  expectedType === 'ScSymbol' ||
-                  expectedType === 'Address' ||
-                  expectedType === 'Bytes' ||
-                  /^BytesN<\d+>$/.test(expectedType) ||
-                  expectedType === 'U8' ||
-                  expectedType === 'U16' ||
-                  expectedType === 'U32' ||
-                  expectedType === 'U64' ||
-                  expectedType === 'U128' ||
-                  expectedType === 'U256' ||
-                  expectedType === 'I8' ||
-                  expectedType === 'I16' ||
-                  expectedType === 'I32' ||
-                  expectedType === 'I64' ||
-                  expectedType === 'I128' ||
-                  expectedType === 'I256';
+                  isPrimitiveParamType(expectedType) || isBytesNType(expectedType);
 
                 if (isPrimitivePayload) {
                   return { type: expectedType, value: processedValue };
