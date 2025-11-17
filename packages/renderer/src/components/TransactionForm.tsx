@@ -282,14 +282,6 @@ export function TransactionForm({
     }
   };
 
-  const handleResetStatus = (): void => {
-    setTxStatus('idle');
-    setTxHash(null);
-    setTxError(null);
-    setTxStatusDetails(null);
-    setTxResult(null);
-  };
-
   // Get explorer URL for the transaction
   const getExplorerTxUrl = (hash: string): string | null => {
     if (!adapter || !hash || !networkConfig) return null;
@@ -337,7 +329,6 @@ export function TransactionForm({
               txHash={txHash}
               error={txError}
               explorerUrl={txHash ? getExplorerTxUrl(txHash) : null}
-              onClose={handleResetStatus}
               customTitle={txStatusDetails?.title}
               customMessage={txStatusDetails?.message}
               result={txResult}

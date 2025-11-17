@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import React from 'react';
 
 import type {
@@ -6,7 +6,7 @@ import type {
   FullContractAdapter,
   TxStatus,
 } from '@openzeppelin/ui-builder-types';
-import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { TransactionHashDisplay } from './TransactionHashDisplay';
@@ -16,7 +16,6 @@ interface TransactionStatusDisplayProps {
   txHash: string | null;
   error: string | null;
   explorerUrl?: string | null; // URL for the transaction hash link
-  onClose?: () => void; // Callback to close/reset the display
   className?: string; // Allow custom styling
   // Optional adapter-provided copy
   customTitle?: string;
@@ -66,7 +65,6 @@ export function TransactionStatusDisplay({
   txHash,
   error,
   explorerUrl,
-  onClose,
   className,
   customTitle,
   customMessage,
@@ -167,17 +165,6 @@ export function TransactionStatusDisplay({
           <AlertTitle className="mb-1 text-base font-medium">{title}</AlertTitle>
           <AlertDescription className="text-sm overflow-hidden">{content}</AlertDescription>
         </div>
-        {onClose && (status === 'success' || status === 'error') && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 -mr-1 -mt-1 h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-background/80"
-            onClick={onClose}
-            aria-label="Reset Status"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
       </div>
     </Alert>
   );
