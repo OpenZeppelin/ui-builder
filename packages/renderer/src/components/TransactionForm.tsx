@@ -19,6 +19,11 @@ import { DynamicFormField } from './DynamicFormField';
 import { TransactionStatusDisplay } from './transaction';
 
 /**
+ * Transaction states that should disable the form (pending operations)
+ */
+const PENDING_STATES: TxStatus[] = ['pendingSignature', 'pendingConfirmation', 'pendingRelayer'];
+
+/**
  * Transaction Form Component
  *
  * This is the main entry point for the app rendering system. It represents the top level of
@@ -339,7 +344,7 @@ export function TransactionForm({
         )}
 
         <form
-          className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation' || txStatus === 'pendingRelayer' ? 'opacity-70 pointer-events-none' : ''}`}
+          className={`transaction-form flex flex-col ${getLayoutClasses()} ${PENDING_STATES.includes(txStatus) ? 'opacity-70 pointer-events-none' : ''}`}
           noValidate
           onSubmit={methods.handleSubmit(executeTransaction)}
         >

@@ -39,6 +39,46 @@ export interface EnumMetadata {
 }
 
 /**
+ * Helper function to flatten a single payload type.
+ * Handles tuples, structs, and primitive types differently.
+ *
+ * @param payloadType - The type to flatten
+ * @param entries - Spec entries for struct/enum resolution
+ * @param flattenedTypes - Array to accumulate flattened type names
+ * @param flattenedComponents - Array to accumulate component metadata
+ */
+function flattenPayloadType(
+  payloadType: string,
+  entries: xdr.ScSpecEntry[],
+  flattenedTypes: string[],
+  flattenedComponents: (FunctionParameter[] | undefined)[]
+): void {
+  if (payloadType.startsWith('Tuple<')) {
+    // Extract tuple components and add them individually for UI rendering
+    const tupleComponents = buildTupleComponents(payloadType, entries);
+    if (tupleComponents && tupleComponents.length > 0) {
+      tupleComponents.forEach((component) => {
+        flattenedTypes.push(component.type);
+        if (isStructType(entries, component.type)) {
+          flattenedComponents.push(extractStructFields(entries, component.type) ?? undefined);
+        } else {
+          flattenedComponents.push(component.components);
+        }
+      });
+    } else {
+      flattenedTypes.push(payloadType);
+      flattenedComponents.push(undefined);
+    }
+  } else if (isStructType(entries, payloadType)) {
+    flattenedTypes.push(payloadType);
+    flattenedComponents.push(extractStructFields(entries, payloadType) ?? undefined);
+  } else {
+    flattenedTypes.push(payloadType);
+    flattenedComponents.push(undefined);
+  }
+}
+
+/**
  * Extracts enum variant metadata from Stellar contract spec entries
  *
  * @param entries Array of ScSpecEntry from contract spec
@@ -102,33 +142,12 @@ export function extractEnumVariants(
           const flattenedPayloadComponents: (FunctionParameter[] | undefined)[] = [];
 
           for (const payloadType of rawPayloadTypes) {
-            if (payloadType.startsWith('Tuple<')) {
-              // Extract tuple components and add them individually for UI rendering
-              const tupleComponents = buildTupleComponents(payloadType, entries);
-              if (tupleComponents && tupleComponents.length > 0) {
-                tupleComponents.forEach((component) => {
-                  flattenedPayloadTypes.push(component.type);
-                  if (isStructType(entries, component.type)) {
-                    flattenedPayloadComponents.push(
-                      extractStructFields(entries, component.type) ?? undefined
-                    );
-                  } else {
-                    flattenedPayloadComponents.push(component.components);
-                  }
-                });
-              } else {
-                flattenedPayloadTypes.push(payloadType);
-                flattenedPayloadComponents.push(undefined);
-              }
-            } else if (isStructType(entries, payloadType)) {
-              flattenedPayloadTypes.push(payloadType);
-              flattenedPayloadComponents.push(
-                extractStructFields(entries, payloadType) ?? undefined
-              );
-            } else {
-              flattenedPayloadTypes.push(payloadType);
-              flattenedPayloadComponents.push(undefined);
-            }
+            flattenPayloadType(
+              payloadType,
+              entries,
+              flattenedPayloadTypes,
+              flattenedPayloadComponents
+            );
           }
 
           variants.push({

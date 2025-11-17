@@ -95,7 +95,9 @@ export function convertStructToScVal(
       let elementValue = structObj[key];
 
       if (typeof elementValue === 'undefined') {
-        throw new Error(`Missing tuple value for "${key}" in struct type "${parameterType}"`);
+        throw new Error(
+          `Missing tuple value for "${key}" in struct type "${parameterType}". Received: ${JSON.stringify(structObj)}`
+        );
       }
 
       // If the element is a string and its type is likely an enum, wrap it as { tag: value }

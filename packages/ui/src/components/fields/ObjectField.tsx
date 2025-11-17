@@ -152,6 +152,10 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                     id: `${id}-${component.name}`,
                     name: `${name}.${component.name}`,
                     label: component.displayName || component.name,
+                    // Validation merging precedence:
+                    // 1. Spread generatedField.validation (adapter-provided bounds, etc.)
+                    // 2. Override 'required' from parent validation if specified
+                    // This preserves min/max bounds while allowing parent to control required state
                     validation: {
                       ...generatedField.validation, // Preserve validation from adapter (includes min/max bounds)
                       required: validation?.required, // Override required from parent
