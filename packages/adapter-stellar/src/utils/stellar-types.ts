@@ -33,4 +33,3 @@ export const PRIMITIVE_STELLAR_TYPES = new Set([
 export function isPrimitiveParamType(type: string): boolean {
   return PRIMITIVE_STELLAR_TYPES.has(type);
 }
-
