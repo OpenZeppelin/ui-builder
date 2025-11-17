@@ -279,12 +279,12 @@ function splitTopLevelTypes(content: string): string[] {
   let start = 0;
   let level = 0;
 
-  for (let i = 0; i < content.length; i++) {
+  for (let i = 0; i < content.length; i += 1) {
     const char = content[i];
     if (char === '<') {
-      level++;
+      level += 1;
     } else if (char === '>') {
-      level--;
+      level -= 1;
     } else if (char === ',' && level === 0) {
       const segment = content.slice(start, i).trim();
       if (segment) {

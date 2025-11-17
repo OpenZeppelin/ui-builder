@@ -18,6 +18,33 @@ import {
 } from './index';
 
 /**
+ * Helper function to format a label with an optional type hint
+ */
+function formatLabeledType(baseLabel: string, typeHint?: string): string {
+  if (!typeHint) {
+    return baseLabel;
+  }
+  return `${baseLabel} (${typeHint})`;
+}
+
+/**
+ * Helper function to create a default map entry with appropriate default values for key and value types
+ */
+function createDefaultEntry(mapMetadata?: MapFieldProps['mapMetadata']): {
+  key: unknown;
+  value: unknown;
+} {
+  return {
+    key: mapMetadata?.keyFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.keyFieldConfig.type)
+      : '',
+    value: mapMetadata?.valueFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.valueFieldConfig.type)
+      : '',
+  };
+}
+
+/**
  * MapField component properties
  */
 export interface MapFieldProps<TFieldValues extends FieldValues = FieldValues>
@@ -361,24 +388,3 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
 
 // Set displayName manually for better debugging
 MapField.displayName = 'MapField';
-
-function formatLabeledType(baseLabel: string, typeHint?: string): string {
-  if (!typeHint) {
-    return baseLabel;
-  }
-  return `${baseLabel} (${typeHint})`;
-}
-
-function createDefaultEntry(mapMetadata?: MapFieldProps['mapMetadata']): {
-  key: unknown;
-  value: unknown;
-} {
-  return {
-    key: mapMetadata?.keyFieldConfig?.type
-      ? getDefaultValueForType(mapMetadata.keyFieldConfig.type)
-      : '',
-    value: mapMetadata?.valueFieldConfig?.type
-      ? getDefaultValueForType(mapMetadata.valueFieldConfig.type)
-      : '',
-  };
-}

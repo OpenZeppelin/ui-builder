@@ -12,20 +12,9 @@ import { parsePrimitive } from './primitive-parser';
 import { convertStructToScVal, isStructType } from './struct-parser';
 import type { SorobanEnumValue } from './types';
 
-type EnumAwareFunctionParameter = FunctionParameter & {
-  enumMetadata?: {
-    name: string;
-    variants: Array<{
-      name: string;
-      type: 'void' | 'tuple' | 'integer';
-      payloadTypes?: string[];
-      payloadComponents?: (FunctionParameter[] | undefined)[];
-      value?: number;
-      isSingleTuplePayload?: boolean;
-    }>;
-    isUnitOnly: boolean;
-  };
-};
+// FunctionParameter already includes enumMetadata in its type definition (from @openzeppelin/ui-builder-types)
+// No need for a separate type wrapper
+type EnumAwareFunctionParameter = FunctionParameter;
 
 /**
  * Converts a value to ScVal with comprehensive generic type support.
@@ -76,7 +65,10 @@ export function valueToScVal(
         numericValue = byTag?.value;
       }
       if (numericValue === undefined || Number.isNaN(numericValue)) {
-        throw new Error(`Invalid integer enum value for ${parameterType}: ${String(value)}`);
+        const validNames = enumMetadata.variants.map((v) => v.name).join(', ');
+        throw new Error(
+          `Invalid integer enum value for ${parameterType}: ${String(value)}. Expected one of: ${validNames}`
+        );
       }
       return nativeToScVal(numericValue, { type: 'u32' });
     }
@@ -116,15 +108,11 @@ export function valueToScVal(
 
       // Tuple variant - convert each payload value with proper types
       let payloadScVals: xdr.ScVal[];
-      let variant:
-        | {
-            name: string;
-            type: string;
-            payloadTypes?: string[];
-            payloadComponents?: (FunctionParameter[] | undefined)[];
-            isSingleTuplePayload?: boolean;
-          }
-        | undefined;
+      // Use the variant type from EnumAwareFunctionParameter's enumMetadata
+      type EnumVariant = NonNullable<
+        EnumAwareFunctionParameter['enumMetadata']
+      >['variants'][number];
+      let variant: EnumVariant | undefined;
 
       if (enumMetadata) {
         variant = enumMetadata.variants.find((variantEntry) => variantEntry.name === enumValue.tag);
@@ -133,12 +121,15 @@ export function valueToScVal(
           return convertEnumToScVal(enumValue as SorobanEnumValue);
         }
         // Convert each payload value with its corresponding type
-        payloadScVals = variant.payloadTypes.map((payloadType, index) => {
-          const payloadSchema = variant!.payloadComponents?.[index]
+        // variant is guaranteed to be defined here due to the check above
+        const payloadTypes = variant.payloadTypes;
+        const payloadComponents = variant.payloadComponents;
+        payloadScVals = payloadTypes.map((payloadType, index) => {
+          const payloadSchema = payloadComponents?.[index]
             ? {
                 name: `payload_${index}`,
                 type: payloadType,
-                components: variant!.payloadComponents[index],
+                components: payloadComponents[index],
               }
             : { name: `payload_${index}`, type: payloadType };
 
@@ -343,8 +334,9 @@ export function valueToScVal(
         }
 
         if (typeof elementValue === 'undefined') {
+          const expectedTypes = tupleComponents.map((c) => c.type).join(', ');
           throw new Error(
-            `Missing tuple value for "${key}" in parameter "${paramSchema.name ?? 'unknown'}"`
+            `Missing tuple value for "${key}" in parameter "${paramSchema.name ?? 'unknown'}". Expected ${tupleComponents.length} values of types [${expectedTypes}] but received: ${JSON.stringify(value)}`
           );
         }
 
