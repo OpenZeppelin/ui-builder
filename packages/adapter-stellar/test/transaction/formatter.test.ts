@@ -1078,5 +1078,74 @@ describe('formatStellarTransactionData', () => {
         expect(result.args[0]).toBe('not an enum value');
       });
     });
+
+    it('should preserve existing schema components when field components are absent', () => {
+      const tupleSchema: ContractSchema = {
+        name: 'TupleStructContract',
+        address: mockContractAddress,
+        ecosystem: 'stellar',
+        functions: [
+          {
+            id: 'tuple_strukt_TupleStruct',
+            name: 'tuple_strukt',
+            displayName: 'Tuple Strukt',
+            type: 'function',
+            modifiesState: true,
+            inputs: [
+              {
+                name: 'tuple_strukt',
+                type: 'TupleStruct',
+                components: [
+                  {
+                    name: '0',
+                    type: 'Test',
+                    components: [
+                      { name: 'a', type: 'U32' },
+                      { name: 'b', type: 'Bool' },
+                      { name: 'c', type: 'ScSymbol' },
+                    ],
+                  },
+                  {
+                    name: '1',
+                    type: 'SimpleEnum',
+                  },
+                ],
+              },
+            ],
+            outputs: [],
+            stateMutability: 'nonpayable',
+          },
+        ],
+      };
+
+      const submittedInputs = {
+        tuple_strukt: {
+          '0': { a: 1, b: true, c: 'sym' },
+          '1': 'First',
+        },
+      };
+
+      const fields: FormFieldType[] = [
+        {
+          id: 'field-1',
+          name: 'tuple_strukt',
+          label: 'Tuple Strukt',
+          type: 'object',
+          placeholder: 'Enter tuple struct',
+          validation: { required: true },
+          width: 'full',
+        },
+      ];
+
+      const result = formatStellarTransactionData(
+        tupleSchema,
+        'tuple_strukt_TupleStruct',
+        submittedInputs,
+        fields
+      );
+
+      expect(result.argSchema?.[0].components?.[0].components).toHaveLength(3);
+      expect(result.argSchema?.[0].components?.[0].components?.[0].name).toBe('a');
+    });
   });
 });

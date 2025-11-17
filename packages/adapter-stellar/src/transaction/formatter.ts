@@ -11,6 +11,8 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { extractEnumVariants, isEnumType } from '../mapping/enum-metadata';
 import { parseStellarInput } from '../transform';
+import { isPrimitiveParamType } from '../utils/stellar-types';
+import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 
 /**
  * Stellar transaction data structure that will be passed to signAndBroadcast
@@ -22,6 +24,50 @@ export interface StellarTransactionData {
   argTypes: string[]; // Parameter types for nativeToScVal type hints
   argSchema?: FunctionParameter[]; // Full parameter schema with struct field info
   transactionOptions: Record<string, unknown>;
+}
+
+/**
+ * Recursively enriches a parameter with enum metadata from specEntries.
+ * This ensures enum types get the metadata they need for proper ScVal conversion.
+ */
+function enrichParameterWithEnumMetadata(
+  param: FunctionParameter,
+  specEntries: xdr.ScSpecEntry[] | undefined
+): FunctionParameter {
+  if (!specEntries) {
+    return param;
+  }
+
+  const enriched: FunctionParameter = { ...param };
+
+  // Add enum metadata if this is an enum type
+  if (isLikelyEnumType(param.type) && isEnumType(specEntries, param.type)) {
+    const enumMetadata = extractEnumVariants(specEntries, param.type);
+    if (enumMetadata) {
+      enriched.enumMetadata = enumMetadata;
+    }
+  }
+
+  // For Vec<EnumType>, extract the element type's enum metadata
+  const vecMatch = param.type.match(/^Vec<([^>]+)>$/);
+  if (vecMatch) {
+    const elementType = vecMatch[1];
+    if (isLikelyEnumType(elementType) && isEnumType(specEntries, elementType)) {
+      const enumMetadata = extractEnumVariants(specEntries, elementType);
+      if (enumMetadata) {
+        enriched.enumMetadata = enumMetadata;
+      }
+    }
+  }
+
+  // Recursively process components for struct types
+  if (enriched.components && enriched.components.length > 0) {
+    enriched.components = enriched.components.map((component) =>
+      enrichParameterWithEnumMetadata(component, specEntries)
+    );
+  }
+
+  return enriched;
 }
 
 /**
@@ -101,16 +147,19 @@ export function formatStellarTransactionData(
             const processedValues = enumValue.values.map(
               (rawValue: unknown, payloadIndex: number) => {
                 const expectedType = selectedVariant.payloadTypes![payloadIndex];
-                if (expectedType) {
-                  // Use parseStellarInput to convert the raw value to the proper type
-                  const processedValue = parseStellarInput(rawValue, expectedType);
-                  // Create SorobanArgumentValue structure for getScValFromArg
-                  return {
-                    type: expectedType,
-                    value: processedValue,
-                  };
+                if (!expectedType) {
+                  return rawValue;
                 }
-                return rawValue;
+                const processedValue = parseStellarInput(rawValue, expectedType);
+                // Keep SorobanArgumentValue wrapper for primitive payloads to satisfy tests and simple paths.
+                // For complex payloads (structs/tuples/maps/vec/enums), return raw values and let valueToScVal handle serialization.
+                const isPrimitivePayload =
+                  isPrimitiveParamType(expectedType) || isBytesNType(expectedType);
+
+                if (isPrimitivePayload) {
+                  return { type: expectedType, value: processedValue };
+                }
+                return processedValue;
               }
             );
             // Return the enum with processed payload values
@@ -146,12 +195,91 @@ export function formatStellarTransactionData(
   }
 
   // --- Step 5: Prepare Return Object --- //
+  const fieldByName = new Map<string, FormFieldType>();
+  fields.forEach((field) => fieldByName.set(field.name, field));
+
+  // Extract specEntries from contract metadata for enum enrichment
+  const specEntries = contractSchema.metadata?.specEntries as xdr.ScSpecEntry[] | undefined;
+
+  const argSchemaWithComponents = functionDetails.inputs.map((param) => {
+    const field = fieldByName.get(param.name);
+
+    // Build enhanced schema with components and enum metadata from the field
+    const enhanced: FunctionParameter = { ...param };
+
+    // Prefer existing components from param, otherwise use field components
+    if (param.components && param.components.length > 0) {
+      enhanced.components = param.components;
+    } else if (field?.components && field.components.length > 0) {
+      enhanced.components = field.components;
+    }
+
+    // Add enum metadata from field if available
+    if (field?.enumMetadata) {
+      enhanced.enumMetadata = field.enumMetadata;
+    }
+
+    // For array fields, check if elementFieldConfig has enum metadata or components
+    // This is needed for Vec<EnumType> or Vec<StructType>
+    if (param.type.startsWith('Vec<') && field?.elementFieldConfig) {
+      if (field.elementFieldConfig.enumMetadata) {
+        enhanced.enumMetadata = field.elementFieldConfig.enumMetadata;
+      }
+      if (field.elementFieldConfig.components) {
+        enhanced.components = field.elementFieldConfig.components;
+      }
+    }
+
+    // For struct fields, enrich the components with enum metadata from nested fields
+    if (enhanced.components && enhanced.components.length > 0) {
+      enhanced.components = enhanced.components.map((component) => {
+        // Build the nested field name (e.g., "complex_struct.base_asset")
+        const nestedFieldName = `${param.name}.${component.name}`;
+        const nestedField = fieldByName.get(nestedFieldName);
+
+        if (nestedField) {
+          const enrichedComponent: FunctionParameter = { ...component };
+
+          // Add enum metadata from nested field
+          if (nestedField.enumMetadata) {
+            enrichedComponent.enumMetadata = nestedField.enumMetadata;
+          }
+
+          // Add components from nested field
+          if (nestedField.components) {
+            enrichedComponent.components = nestedField.components;
+          }
+
+          // For nested array fields, extract elementFieldConfig metadata
+          if (component.type.startsWith('Vec<') && nestedField.elementFieldConfig) {
+            if (nestedField.elementFieldConfig.enumMetadata) {
+              enrichedComponent.enumMetadata = nestedField.elementFieldConfig.enumMetadata;
+            }
+            if (nestedField.elementFieldConfig.components) {
+              enrichedComponent.components = nestedField.elementFieldConfig.components;
+            }
+          }
+
+          return enrichedComponent;
+        }
+
+        return component;
+      });
+    }
+
+    // Use specEntries to enrich with enum metadata for any enum types that weren't in the fields
+    // This handles nested enums in structs where the nested fields aren't in the fields array
+    const finalEnhanced = enrichParameterWithEnumMetadata(enhanced, specEntries);
+
+    return finalEnhanced;
+  });
+
   const stellarTransactionData: StellarTransactionData = {
     contractAddress: contractSchema.address,
     functionName: functionDetails.name,
     args: transformedArgs,
     argTypes: functionDetails.inputs.map((param) => param.type), // Include parameter types for ScVal conversion
-    argSchema: functionDetails.inputs, // Include full parameter schema with struct field definitions
+    argSchema: argSchemaWithComponents, // Include full parameter schema with struct/tuple field definitions
     transactionOptions: {
       // Add any Stellar-specific transaction options here
       // For example: fee, timeout, memo, etc.

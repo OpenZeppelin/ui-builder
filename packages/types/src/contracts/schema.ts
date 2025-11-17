@@ -37,6 +37,22 @@ export interface FunctionParameter {
    * Adapters populate this based on the structure of the complex type.
    */
   components?: FunctionParameter[];
+
+  /**
+   * Optional enum metadata for adapters to describe variant structure.
+   */
+  enumMetadata?: {
+    name: string;
+    variants: Array<{
+      name: string;
+      type: 'void' | 'tuple' | 'integer';
+      payloadTypes?: string[];
+      payloadComponents?: (FunctionParameter[] | undefined)[];
+      value?: number;
+      isSingleTuplePayload?: boolean;
+    }>;
+    isUnitOnly: boolean;
+  };
 }
 
 /**

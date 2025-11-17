@@ -229,4 +229,70 @@ describe('extractEnumVariants', () => {
       isUnitOnly: false,
     });
   });
+
+  it('should include payload components for struct and tuple payloads', () => {
+    const mockEntries: xdr.ScSpecEntry[] = [
+      {
+        switch: () => xdr.ScSpecEntryKind.scSpecEntryUdtStructV0(),
+        value: () => ({
+          name: () => ({ toString: () => 'InnerStruct' }),
+        }),
+        udtStructV0: () => ({
+          fields: () => [
+            {
+              name: () => ({ toString: () => 'count' }),
+              type: () => ({
+                switch: () => xdr.ScSpecType.scSpecTypeU32(),
+              }),
+            },
+          ],
+        }),
+      } as unknown as xdr.ScSpecEntry,
+      {
+        switch: () => xdr.ScSpecEntryKind.scSpecEntryUdtUnionV0(),
+        value: () => ({
+          name: () => ({ toString: () => 'PayloadEnum' }),
+        }),
+        udtUnionV0: () => ({
+          name: () => ({ toString: () => 'PayloadEnum' }),
+          doc: () => ({ toString: () => 'Enum with structured payloads' }),
+          cases: () => [
+            {
+              switch: () => xdr.ScSpecUdtUnionCaseV0Kind.scSpecUdtUnionCaseTupleV0(),
+              tupleCase: () => ({
+                name: () => ({ toString: () => 'StructVariant' }),
+                doc: () => ({ toString: () => 'Struct payload' }),
+                type: () => [
+                  {
+                    switch: () => xdr.ScSpecType.scSpecTypeUdt(),
+                    udt: () => ({
+                      name: () => ({ toString: () => 'InnerStruct' }),
+                    }),
+                  },
+                  {
+                    switch: () => xdr.ScSpecType.scSpecTypeTuple(),
+                    tuple: () => ({
+                      valueTypes: () => [
+                        { switch: () => xdr.ScSpecType.scSpecTypeU32() },
+                        { switch: () => xdr.ScSpecType.scSpecTypeBool() },
+                      ],
+                    }),
+                  },
+                ],
+              }),
+            },
+          ],
+        }),
+      } as unknown as xdr.ScSpecEntry,
+    ];
+
+    const result = extractEnumVariants(mockEntries, 'PayloadEnum');
+
+    // Tuple payloads ARE flattened for UI, but marked with isSingleTuplePayload
+    expect(result?.variants[0].payloadTypes).toEqual(['InnerStruct', 'U32', 'Bool']);
+    expect(result?.variants[0].isSingleTuplePayload).toBeUndefined(); // Not a single tuple (has 2 payloads)
+    expect(result?.variants[0].payloadComponents?.[0]).toEqual([{ name: 'count', type: 'U32' }]);
+    expect(result?.variants[0].payloadComponents?.[1]).toBeUndefined(); // Primitive
+    expect(result?.variants[0].payloadComponents?.[2]).toBeUndefined(); // Primitive
+  });
 });

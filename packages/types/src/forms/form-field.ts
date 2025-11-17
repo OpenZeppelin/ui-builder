@@ -142,6 +142,7 @@ export interface FormFieldType<T extends FieldType = FieldType> {
       name: string;
       type: 'void' | 'tuple' | 'integer';
       payloadTypes?: string[];
+      payloadComponents?: (FunctionParameter[] | undefined)[];
       value?: number;
     }>;
     isUnitOnly: boolean;

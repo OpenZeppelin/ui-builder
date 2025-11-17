@@ -108,6 +108,30 @@ export function extractOptionElementType(parameterType: string): ExtractionResul
 }
 
 /**
+ * Safely extracts the element types from a Stellar Tuple type.
+ *
+ * @param parameterType - The parameter type (e.g., 'Tuple<U32, Bool>')
+ * @returns Array of element types or null if not a Tuple type
+ */
+export function extractTupleTypes(parameterType: string): ExtractionResult<string[]> {
+  if (!isValidTypeString(parameterType) || !parameterType.startsWith('Tuple<')) {
+    return null;
+  }
+
+  const innerContent = extractGenericInnerType(parameterType, 'Tuple');
+  if (!innerContent) {
+    return null;
+  }
+
+  const parts = splitTopLevelTypes(innerContent);
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return parts;
+}
+
+/**
  * Generic function to extract inner content from generic types.
  *
  * @param parameterType - The full parameter type
@@ -245,4 +269,35 @@ function hasInvalidCharacters(str: string): boolean {
   // Only allow alphanumeric, angle brackets, commas, underscores, and spaces
   // Note: Parentheses are NOT allowed in Stellar type strings
   return !/^[A-Za-z0-9<>,\s_]+$/.test(str);
+}
+
+/**
+ * Splits a comma-separated list of types while respecting nested generics.
+ */
+function splitTopLevelTypes(content: string): string[] {
+  const types: string[] = [];
+  let start = 0;
+  let level = 0;
+
+  for (let i = 0; i < content.length; i += 1) {
+    const char = content[i];
+    if (char === '<') {
+      level += 1;
+    } else if (char === '>') {
+      level -= 1;
+    } else if (char === ',' && level === 0) {
+      const segment = content.slice(start, i).trim();
+      if (segment) {
+        types.push(segment);
+      }
+      start = i + 1;
+    }
+  }
+
+  const lastSegment = content.slice(start).trim();
+  if (lastSegment) {
+    types.push(lastSegment);
+  }
+
+  return types;
 }

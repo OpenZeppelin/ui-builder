@@ -7,7 +7,11 @@ import type {
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
+import {
+  enhanceNumericValidation,
+  getDefaultValueForType,
+  type NumericBoundsMap,
+} from '@openzeppelin/ui-builder-utils';
 
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 
@@ -34,6 +38,23 @@ function getDefaultValidation(): FieldValidation {
 }
 
 /**
+ * EVM numeric type bounds.
+ * Maps EVM type names to their min/max value constraints.
+ * Note: uint64, uint128, uint256, int64, int128, int256 exceed JavaScript's Number.MAX_SAFE_INTEGER
+ * and are handled via BigInt fields, so bounds are not applied here.
+ */
+const EVM_NUMERIC_BOUNDS: NumericBoundsMap = {
+  uint: { min: 0 },
+  uint8: { min: 0, max: 255 },
+  uint16: { min: 0, max: 65_535 },
+  uint32: { min: 0, max: 4_294_967_295 },
+  int: {},
+  int8: { min: -128, max: 127 },
+  int16: { min: -32_768, max: 32_767 },
+  int32: { min: -2_147_483_648, max: 2_147_483_647 },
+};
+
+/**
  * Generate default field configuration for an EVM function parameter.
  */
 export function generateEvmDefaultField<T extends FieldType = FieldType>(
@@ -49,7 +70,11 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     placeholder: `Enter ${parameter.displayName || parameter.name || parameter.type}`,
     helperText: parameter.description || '',
     defaultValue: getDefaultValueForType(fieldType) as FieldValue<T>,
-    validation: getDefaultValidation(),
+    validation: enhanceNumericValidation(
+      getDefaultValidation(),
+      parameter.type,
+      EVM_NUMERIC_BOUNDS
+    ),
     width: 'full',
   };
 
@@ -65,7 +90,11 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
         elementType: elementFieldType,
         elementFieldConfig: {
           type: elementFieldType,
-          validation: getDefaultValidation(),
+          validation: enhanceNumericValidation(
+            getDefaultValidation(),
+            elementType,
+            EVM_NUMERIC_BOUNDS
+          ),
           placeholder: `Enter ${elementType}`,
         },
       };
