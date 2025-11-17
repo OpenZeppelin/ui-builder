@@ -146,24 +146,23 @@ export function valueToScVal(
 
       if (enumMetadata) {
         variant = enumMetadata.variants.find((variantEntry) => variantEntry.name === enumValue.tag);
-        if (variant && variant.payloadTypes) {
-          // Convert each payload value with its corresponding type
-          payloadScVals = variant.payloadTypes.map((payloadType, index) => {
-            const payloadSchema = variant!.payloadComponents?.[index]
-              ? {
-                  name: `payload_${index}`,
-                  type: payloadType,
-                  components: variant!.payloadComponents[index],
-                }
-              : { name: `payload_${index}`, type: payloadType };
-
-            const val = payloadValues[index];
-            return valueToScVal(val, payloadType, payloadSchema, parseValue);
-          });
-        } else {
-          // No variant metadata - use convertEnumToScVal fallback
+        if (!variant || !variant.payloadTypes) {
+          // No variant metadata or payloadTypes - use convertEnumToScVal fallback
           return convertEnumToScVal(enumValue as SorobanEnumValue);
         }
+        // Convert each payload value with its corresponding type
+        payloadScVals = variant.payloadTypes.map((payloadType, index) => {
+          const payloadSchema = variant!.payloadComponents?.[index]
+            ? {
+                name: `payload_${index}`,
+                type: payloadType,
+                components: variant!.payloadComponents[index],
+              }
+            : { name: `payload_${index}`, type: payloadType };
+
+          const val = payloadValues[index];
+          return valueToScVal(val, payloadType, payloadSchema, parseValue);
+        });
       } else {
         // No enum metadata - use convertEnumToScVal fallback
         return convertEnumToScVal(enumValue as SorobanEnumValue);
@@ -187,6 +186,12 @@ export function valueToScVal(
       paramSchema?.components &&
       paramSchema.components.length
     ) {
+      // Runtime validation: ensure array length matches schema components
+      if (possibleEnumValue.length !== paramSchema.components.length) {
+        throw new Error(
+          `Tuple-struct value length (${possibleEnumValue.length}) does not match schema components (${paramSchema.components.length}) for type ${parameterType}`
+        );
+      }
       return convertStructToScVal(
         possibleEnumValue as unknown as Record<string, unknown>,
         parameterType,

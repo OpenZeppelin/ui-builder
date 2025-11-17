@@ -373,6 +373,14 @@ function getDefaultValueForField(field?: Partial<FormFieldType>): unknown {
   switch (fieldType) {
     case 'checkbox':
       return false;
+    case 'object':
+      return {};
+    case 'array':
+    case 'array-object':
+    case 'map':
+      return [];
+    case 'enum':
+      return '';
     case 'number':
     case 'bigint':
     case 'amount':

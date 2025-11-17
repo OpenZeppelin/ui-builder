@@ -67,7 +67,6 @@ describe('ComplexStruct Full Integration Test', () => {
 
   it('should format and serialize complete ComplexStruct transaction', () => {
     // Step 1: Generate field configuration as the UI would
-    const parameter = complexStructContractSchema.functions[0].inputs[0];
 
     // Mock field with enum metadata (normally comes from generateStellarDefaultField with specEntries)
     const fieldWithMetadata: FormFieldType = {

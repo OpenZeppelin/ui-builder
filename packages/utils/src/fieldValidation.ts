@@ -19,7 +19,7 @@ export type NumericBoundsMap = Record<string, { min?: number; max?: number }>;
  * ```typescript
  * const stellarBounds = { U32: { min: 0, max: 4_294_967_295 } };
  * const validation = enhanceNumericValidation(undefined, 'U32', stellarBounds);
- * // Returns: { required: true, min: 0, max: 4_294_967_295 }
+ * // Returns: { min: 0, max: 4_294_967_295 }
  * ```
  */
 export function enhanceNumericValidation(
