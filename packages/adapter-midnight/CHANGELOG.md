@@ -1,5 +1,19 @@
 # Midnight Adapter Changelog
 
+## 0.16.0
+
+### Minor Changes
+
+- [#238](https://github.com/OpenZeppelin/ui-builder/pull/238) [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195) Thanks [@pasevin](https://github.com/pasevin)! - Add shared numeric validation bounds utility and enhance all adapters to apply type-specific min/max validation for integer types. Numeric bounds are now automatically applied to form fields based on chain-specific type names (e.g., uint32, U32, Uint<0..255>), improving input validation and user experience.
+
+### Patch Changes
+
+- Updated dependencies [[`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195), [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195)]:
+  - @openzeppelin/ui-builder-utils@0.16.0
+  - @openzeppelin/ui-builder-types@0.16.0
+  - @openzeppelin/ui-builder-ui@0.16.0
+  - @openzeppelin/ui-builder-react-core@0.16.0
+
 ## 0.15.0
 
 ### Minor Changes

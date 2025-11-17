@@ -301,12 +301,12 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for package.json structure > package-json-evm 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/ui-builder-adapter-evm": "^0.15.1",
-    "@openzeppelin/ui-builder-react-core": "^0.15.0",
-    "@openzeppelin/ui-builder-renderer": "^0.15.0",
-    "@openzeppelin/ui-builder-types": "^0.15.0",
-    "@openzeppelin/ui-builder-ui": "^0.15.0",
-    "@openzeppelin/ui-builder-utils": "^0.15.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.16.0",
+    "@openzeppelin/ui-builder-react-core": "^0.16.0",
+    "@openzeppelin/ui-builder-renderer": "^0.16.0",
+    "@openzeppelin/ui-builder-types": "^0.16.0",
+    "@openzeppelin/ui-builder-ui": "^0.16.0",
+    "@openzeppelin/ui-builder-utils": "^0.16.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",
@@ -348,12 +348,12 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot for package.json with Solana dependencies > package-json-solana 1`] = `
 {
   "dependencies": {
-    "@openzeppelin/ui-builder-adapter-evm": "^0.15.1",
-    "@openzeppelin/ui-builder-react-core": "^0.15.0",
-    "@openzeppelin/ui-builder-renderer": "^0.15.0",
-    "@openzeppelin/ui-builder-types": "^0.15.0",
-    "@openzeppelin/ui-builder-ui": "^0.15.0",
-    "@openzeppelin/ui-builder-utils": "^0.15.0",
+    "@openzeppelin/ui-builder-adapter-evm": "^0.16.0",
+    "@openzeppelin/ui-builder-react-core": "^0.16.0",
+    "@openzeppelin/ui-builder-renderer": "^0.16.0",
+    "@openzeppelin/ui-builder-types": "^0.16.0",
+    "@openzeppelin/ui-builder-ui": "^0.16.0",
+    "@openzeppelin/ui-builder-utils": "^0.16.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.0.0",

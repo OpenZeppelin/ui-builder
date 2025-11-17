@@ -1,5 +1,20 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.16.0
+
+### Minor Changes
+
+- [#238](https://github.com/OpenZeppelin/ui-builder/pull/238) [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195) Thanks [@pasevin](https://github.com/pasevin)! - Add shared numeric validation bounds utility and enhance all adapters to apply type-specific min/max validation for integer types. Numeric bounds are now automatically applied to form fields based on chain-specific type names (e.g., uint32, U32, Uint<0..255>), improving input validation and user experience.
+
+- [#238](https://github.com/OpenZeppelin/ui-builder/pull/238) [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195) Thanks [@pasevin](https://github.com/pasevin)! - Enhance Stellar adapter to properly handle complex Soroban types including enums with payloads, nested structs, tuples, and maps. Improvements include: enum metadata extraction and propagation through transaction pipeline, proper tuple payload serialization with ScVec wrapping, integer-only enum support (e.g., RoyalCard), XDR-based map/struct field sorting for canonical ordering, browser-compatible XDR comparison utilities, enhanced enum detection using spec entries, and improved validation bounds preservation in nested object fields. Fixes transaction execution errors for complex_struct and other functions with complex type parameters.
+
+### Patch Changes
+
+- Updated dependencies [[`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195), [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195)]:
+  - @openzeppelin/ui-builder-utils@0.16.0
+  - @openzeppelin/ui-builder-types@0.16.0
+  - @openzeppelin/ui-builder-ui@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes
