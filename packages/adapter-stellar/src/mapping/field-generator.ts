@@ -211,7 +211,7 @@ export function generateStellarDefaultField<T extends FieldType = FieldType>(
       const arrayField = {
         ...baseField,
         type: 'array' as FieldType, // Always use 'array' as the field type
-        elementType: elementFieldType,
+        elementType: finalElementFieldType,
         elementFieldConfig: {
           type: finalElementFieldType,
           validation: elementValidation,
