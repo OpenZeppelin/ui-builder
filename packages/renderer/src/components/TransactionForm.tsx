@@ -339,7 +339,7 @@ export function TransactionForm({
         )}
 
         <form
-          className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus !== 'idle' ? 'opacity-70 pointer-events-none' : ''}`}
+          className={`transaction-form flex flex-col ${getLayoutClasses()} ${txStatus === 'pendingSignature' || txStatus === 'pendingConfirmation' || txStatus === 'pendingRelayer' ? 'opacity-70 pointer-events-none' : ''}`}
           noValidate
           onSubmit={methods.handleSubmit(executeTransaction)}
         >
