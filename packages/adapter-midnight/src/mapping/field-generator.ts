@@ -248,6 +248,7 @@ export function generateMidnightDefaultField<T extends FieldType = FieldType>(
       return {
         ...baseArrayField,
         elementFieldConfig: {
+          ...baseArrayField.elementFieldConfig,
           enumMetadata,
         },
       } as FormFieldType<T>;
