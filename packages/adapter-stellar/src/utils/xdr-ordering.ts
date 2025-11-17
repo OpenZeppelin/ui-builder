@@ -26,9 +26,11 @@ function getBytes(scVal: xdr.ScVal): Uint8Array {
     return xdrValue;
   }
 
-  const result = new Uint8Array(xdrValue.length);
-  for (let index = 0; index < xdrValue.length; index += 1) {
-    result[index] = xdrValue[index];
+  // Handle array-like objects (e.g., Buffer in Node.js)
+  const arrayLike = xdrValue as ArrayLike<number>;
+  const result = new Uint8Array(arrayLike.length);
+  for (let index = 0; index < arrayLike.length; index += 1) {
+    result[index] = arrayLike[index];
   }
   return result;
 }
