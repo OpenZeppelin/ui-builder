@@ -3,6 +3,7 @@
  *
  * Tests: T020 - Grant/revoke role roundtrip with mocked RPC
  *        T024 - Transfer ownership roundtrip with mocked RPC
+ *        T027 - Export snapshot parity with current reads
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -20,15 +21,19 @@ import {
 import { readCurrentRoles, readOwnership } from '../../src/access-control/onchain-reader';
 import { StellarAccessControlService } from '../../src/access-control/service';
 
-// Mock the logger
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
-  logger: {
-    info: vi.fn(),
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+// Mock the logger but keep validateSnapshot real
+vi.mock('@openzeppelin/ui-builder-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openzeppelin/ui-builder-utils')>();
+  return {
+    ...actual,
+    logger: {
+      info: vi.fn(),
+      debug: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
+  };
+});
 
 // Mock the onchain-reader module
 vi.mock('../../src/access-control/onchain-reader', () => ({
@@ -691,6 +696,332 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
       const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
 
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
+    });
+  });
+});
+
+describe('Access Control Service - Export Snapshot (T027)', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockContractSchema: ContractSchema;
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const TEST_OWNER = 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5';
+  const TEST_ACCOUNT_1 = 'GCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTC';
+  const TEST_ACCOUNT_2 = 'GDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCDEF';
+  const TEST_ROLE_ADMIN = 'admin';
+  const TEST_ROLE_MINTER = 'minter';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockContractSchema = {
+      ecosystem: 'stellar',
+      address: TEST_CONTRACT,
+      functions: [
+        {
+          id: 'get_owner',
+          name: 'get_owner',
+          displayName: 'get_owner',
+          type: 'function',
+          inputs: [],
+          outputs: [{ name: 'owner', type: 'Address' }],
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+        {
+          id: 'has_role',
+          name: 'has_role',
+          displayName: 'has_role',
+          type: 'function',
+          inputs: [
+            { name: 'account', type: 'Address' },
+            { name: 'role', type: 'Symbol' },
+          ],
+          outputs: [{ name: 'result', type: 'u32' }],
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+      ],
+    };
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('Snapshot Parity Tests', () => {
+    /**
+     * These tests verify that exportSnapshot faithfully represents current state
+     * by comparing the snapshot to fresh reads from getOwnership and getCurrentRoles
+     */
+
+    it('should export snapshot that matches current ownership', async () => {
+      // Mock: Contract has an owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: No roles
+      vi.mocked(readCurrentRoles).mockResolvedValue([]);
+
+      // Get fresh ownership
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify parity
+      expect(snapshot.ownership).toEqual(ownership);
+      expect(snapshot.ownership?.owner).toBe(TEST_OWNER);
+    });
+
+    it('should export snapshot that matches current roles', async () => {
+      // Setup: Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [
+        TEST_ROLE_ADMIN,
+        TEST_ROLE_MINTER,
+      ]);
+
+      // Mock: Contract has roles
+      const mockRoles = [
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [TEST_ACCOUNT_1, TEST_ACCOUNT_2],
+        },
+        {
+          role: { id: TEST_ROLE_MINTER, label: TEST_ROLE_MINTER },
+          members: [TEST_ACCOUNT_1],
+        },
+      ];
+
+      vi.mocked(readCurrentRoles).mockResolvedValue(mockRoles);
+
+      // Mock: No ownership
+      vi.mocked(readOwnership).mockRejectedValue(new Error('Not Ownable'));
+
+      // Get fresh roles
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify parity
+      expect(snapshot.roles).toEqual(roles);
+      expect(snapshot.roles).toHaveLength(2);
+      expect(snapshot.roles[0].members).toEqual([TEST_ACCOUNT_1, TEST_ACCOUNT_2]);
+      expect(snapshot.roles[1].members).toEqual([TEST_ACCOUNT_1]);
+    });
+
+    it('should export snapshot that matches both ownership and roles', async () => {
+      // Setup: Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock: Contract has ownership and roles
+      const mockOwnership = { owner: TEST_OWNER };
+      const mockRoles = [
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [TEST_ACCOUNT_1],
+        },
+      ];
+
+      vi.mocked(readOwnership).mockResolvedValue(mockOwnership);
+      vi.mocked(readCurrentRoles).mockResolvedValue(mockRoles);
+
+      // Get fresh reads
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify parity
+      expect(snapshot.ownership).toEqual(ownership);
+      expect(snapshot.roles).toEqual(roles);
+      expect(snapshot.ownership?.owner).toBe(TEST_OWNER);
+      expect(snapshot.roles[0].members).toContain(TEST_ACCOUNT_1);
+    });
+
+    it('should export empty snapshot when contract has no ownership or roles', async () => {
+      // Mock: Contract has neither ownership nor roles
+      vi.mocked(readOwnership).mockRejectedValue(new Error('Not Ownable'));
+      vi.mocked(readCurrentRoles).mockResolvedValue([]);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify empty snapshot
+      expect(snapshot.roles).toEqual([]);
+      expect(snapshot.ownership).toBeUndefined();
+    });
+
+    it('should export snapshot with null owner when ownership exists but no owner set', async () => {
+      // Mock: Contract is Ownable but owner is null
+      vi.mocked(readOwnership).mockResolvedValue({ owner: null });
+      vi.mocked(readCurrentRoles).mockResolvedValue([]);
+
+      // Get fresh ownership
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify parity
+      expect(snapshot.ownership).toEqual(ownership);
+      expect(snapshot.ownership?.owner).toBeNull();
+    });
+
+    it('should handle multiple calls returning consistent snapshots', async () => {
+      // Setup
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      const mockOwnership = { owner: TEST_OWNER };
+      const mockRoles = [
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [TEST_ACCOUNT_1],
+        },
+      ];
+
+      vi.mocked(readOwnership).mockResolvedValue(mockOwnership);
+      vi.mocked(readCurrentRoles).mockResolvedValue(mockRoles);
+
+      // Export snapshot twice
+      const snapshot1 = await service.exportSnapshot(TEST_CONTRACT);
+      const snapshot2 = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify consistency
+      expect(snapshot1).toEqual(snapshot2);
+      expect(snapshot1.ownership).toEqual(snapshot2.ownership);
+      expect(snapshot1.roles).toEqual(snapshot2.roles);
+    });
+  });
+
+  describe('Snapshot Validation', () => {
+    it('should produce valid snapshot structure', async () => {
+      // Setup
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      vi.mocked(readOwnership).mockResolvedValue({ owner: TEST_OWNER });
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [TEST_ACCOUNT_1],
+        },
+      ]);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify structure
+      expect(snapshot).toHaveProperty('roles');
+      expect(snapshot).toHaveProperty('ownership');
+      expect(Array.isArray(snapshot.roles)).toBe(true);
+      expect(typeof snapshot.ownership).toBe('object');
+    });
+
+    it('should handle roles with empty member lists', async () => {
+      // Setup
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      vi.mocked(readOwnership).mockResolvedValue({ owner: TEST_OWNER });
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [], // Empty members list
+        },
+      ]);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify snapshot handles empty members
+      expect(snapshot.roles).toHaveLength(1);
+      expect(snapshot.roles[0].members).toEqual([]);
+    });
+
+    it('should handle roles with multiple members', async () => {
+      // Setup
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      const multipleMembers = [TEST_ACCOUNT_1, TEST_ACCOUNT_2, TEST_OWNER];
+
+      vi.mocked(readOwnership).mockResolvedValue({ owner: TEST_OWNER });
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: multipleMembers,
+        },
+      ]);
+
+      // Export snapshot
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify all members are included
+      expect(snapshot.roles[0].members).toEqual(multipleMembers);
+      expect(snapshot.roles[0].members).toHaveLength(3);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle ownership read failure gracefully', async () => {
+      // Setup
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock: Ownership fails, but roles succeed
+      vi.mocked(readOwnership).mockRejectedValue(new Error('Contract not Ownable'));
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: TEST_ROLE_ADMIN },
+          members: [TEST_ACCOUNT_1],
+        },
+      ]);
+
+      // Export snapshot should not throw
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify snapshot has roles but no ownership
+      expect(snapshot.roles).toHaveLength(1);
+      expect(snapshot.ownership).toBeUndefined();
+    });
+
+    it('should handle roles read failure gracefully', async () => {
+      // Mock: Ownership succeeds, but roles fail
+      vi.mocked(readOwnership).mockResolvedValue({ owner: TEST_OWNER });
+      vi.mocked(readCurrentRoles).mockRejectedValue(new Error('Contract not registered'));
+
+      // Export snapshot should not throw
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify snapshot has ownership but no roles
+      expect(snapshot.ownership?.owner).toBe(TEST_OWNER);
+      expect(snapshot.roles).toEqual([]);
+    });
+
+    it('should handle both reads failing gracefully', async () => {
+      // Mock: Both reads fail
+      vi.mocked(readOwnership).mockRejectedValue(new Error('Not Ownable'));
+      vi.mocked(readCurrentRoles).mockRejectedValue(new Error('Not registered'));
+
+      // Export snapshot should not throw
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+
+      // Verify empty snapshot
+      expect(snapshot.roles).toEqual([]);
+      expect(snapshot.ownership).toBeUndefined();
     });
   });
 });
