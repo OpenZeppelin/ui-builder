@@ -7,6 +7,7 @@ export * from './UserRpcConfigService';
 export * from './UserExplorerConfigService';
 export * from './UserNetworkServiceConfigService';
 export * from './fieldDefaults';
+export * from './fieldValidation';
 export * from './typeguards';
 export * from './cn';
 export * from './formatting';

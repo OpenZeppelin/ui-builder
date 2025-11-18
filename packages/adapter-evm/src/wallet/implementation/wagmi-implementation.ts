@@ -99,6 +99,7 @@ export class WagmiWalletImplementation {
   private unsubscribe?: ReturnType<typeof watchAccount>;
   private initialized: boolean = false;
   private walletConnectProjectId?: string;
+  private rpcConfigUnsubscribe?: () => void;
 
   /**
    * Constructs the WagmiWalletImplementation.
@@ -121,7 +122,48 @@ export class WagmiWalletImplementation {
       LOG_SYSTEM,
       'WagmiWalletImplementation instance initialized (Wagmi config creation deferred).'
     );
+    // Subscribe to RPC configuration changes to invalidate cached config
+    this.setupRpcConfigListener();
     // No config created here by default anymore.
+  }
+
+  /**
+   * Sets up a listener for RPC configuration changes to invalidate the cached Wagmi config
+   * when user changes RPC settings.
+   */
+  private setupRpcConfigListener(): void {
+    // Import dynamically to avoid circular dependencies
+    import('@openzeppelin/ui-builder-utils')
+      .then(({ userRpcConfigService }) => {
+        // Subscribe to all RPC config changes
+        this.rpcConfigUnsubscribe = userRpcConfigService.subscribe('*', (event) => {
+          if (event.type === 'rpc-config-changed' || event.type === 'rpc-config-cleared') {
+            logger.info(
+              LOG_SYSTEM,
+              `RPC config changed for network ${event.networkId}. Invalidating cached Wagmi config.`
+            );
+            // Invalidate the cached config to force recreation with new RPC settings
+            this.defaultInstanceConfig = null;
+          }
+        });
+      })
+      .catch((error) => {
+        logger.error(LOG_SYSTEM, 'Failed to setup RPC config listener:', error);
+      });
+  }
+
+  /**
+   * Cleanup method to unsubscribe from RPC config changes
+   */
+  public cleanup(): void {
+    if (this.rpcConfigUnsubscribe) {
+      this.rpcConfigUnsubscribe();
+      this.rpcConfigUnsubscribe = undefined;
+    }
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = undefined;
+    }
   }
 
   /**
@@ -333,8 +375,12 @@ export class WagmiWalletImplementation {
       );
     }
 
-    // Always rebuild default config to reflect latest RPC overrides/user settings
-    this.defaultInstanceConfig = this.createDefaultConfig();
+    // Reuse existing default config if available, only create if needed
+    // This ensures wallet connection state is preserved across network switches
+    // Config is automatically invalidated when RPC settings change via setupRpcConfigListener()
+    if (!this.defaultInstanceConfig) {
+      this.defaultInstanceConfig = this.createDefaultConfig();
+    }
     return this.defaultInstanceConfig;
   }
 

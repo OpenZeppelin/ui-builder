@@ -6,6 +6,7 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 import { globalZkConfigProvider } from '../transaction/providers';
 import type { MidnightContractArtifacts } from '../types/artifacts';
 import { isMidnightContractArtifacts } from '../types/artifacts';
+import { deriveIdentitySecretPropertyName } from './identity-secret-derivation';
 import { extractMidnightContractZip, fileToBase64 } from './zip-extractor';
 
 const SYSTEM_LOG_TAG = 'ArtifactsValidator';
@@ -62,7 +63,7 @@ export async function validateAndConvertMidnightArtifacts(
       throw new Error('Contract address and private state ID are required.');
     }
 
-    return {
+    const artifacts: MidnightContractArtifacts = {
       contractAddress: sourceRecord.contractAddress as string,
       privateStateId: sourceRecord.privateStateId as string,
       contractDefinition: extractedArtifacts.contractDefinition,
@@ -71,6 +72,10 @@ export async function validateAndConvertMidnightArtifacts(
       verifierKeys: extractedArtifacts.verifierKeys,
       // Note: do not set originalZipData when loading via URL
     };
+    // Derive and store contract-level default for identity secret key property
+    artifacts.identitySecretKeyPropertyName =
+      deriveIdentitySecretPropertyName(artifacts) ?? undefined;
+    return artifacts;
   }
 
   // Support loading from a previously trimmed ZIP saved in IndexedDB
@@ -107,7 +112,7 @@ export async function validateAndConvertMidnightArtifacts(
       throw new Error('Contract address and private state ID are required.');
     }
 
-    return {
+    const artifacts: MidnightContractArtifacts = {
       contractAddress: sourceRecord.contractAddress as string,
       privateStateId: sourceRecord.privateStateId as string,
       contractDefinition: extractedArtifacts.contractDefinition,
@@ -117,6 +122,9 @@ export async function validateAndConvertMidnightArtifacts(
       trimmedZipBase64: base64Data, // Preserve for persistence and export
       // Note: keep storage minimal; do not set originalZipData here
     };
+    artifacts.identitySecretKeyPropertyName =
+      deriveIdentitySecretPropertyName(artifacts) ?? undefined;
+    return artifacts;
   }
 
   // Check if this is a ZIP upload
@@ -179,6 +187,8 @@ export async function validateAndConvertMidnightArtifacts(
       originalZipData: base64Data, // Store for auto-save
     };
 
+    artifacts.identitySecretKeyPropertyName =
+      deriveIdentitySecretPropertyName(artifacts) ?? undefined;
     return artifacts;
   }
 

@@ -66,6 +66,13 @@ export function parseStellarInput(value: unknown, parameterType: string): unknow
       return value;
     }
 
+    // Accept array-shaped values for struct-like types (e.g., tuple structs with numeric keys).
+    // RHF treats numeric path segments as arrays, so a struct with fields "0", "1" can arrive as an array.
+    // Pass through; valueToScVal/convertStructToScVal will serialize correctly using the schema.
+    if (Array.isArray(value)) {
+      return value;
+    }
+
     // For other types, try to return raw value with validation
     if (typeof value === 'string' || typeof value === 'number') {
       return value;

@@ -120,7 +120,7 @@ describe('enhanceMidnightError', () => {
       expect(enhanced.userMessage).toContain('Private state not initialized');
       expect(enhanced.userMessage).toContain('organizerOnlyFunction');
       expect(enhanced.suggestions).toBeDefined();
-      expect(enhanced.suggestions?.[0]).toContain('organizer secret key');
+      expect(enhanced.suggestions?.[0]).toContain('identity secret');
     });
 
     it('should detect organizer secret key errors', () => {

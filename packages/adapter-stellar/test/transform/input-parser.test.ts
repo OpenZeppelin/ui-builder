@@ -8,6 +8,7 @@ import {
   type SorobanEnumValue,
   type SorobanMapEntry,
 } from '../../src/transform/input-parser';
+import { convertObjectToMap } from '../../src/utils/input-parsing';
 
 describe('parseStellarInput', () => {
   describe('primitive types', () => {
@@ -300,6 +301,40 @@ describe('getScValsFromArgs', () => {
 
       const result = getScValsFromArgs(args);
       expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('convertObjectToMap', () => {
+    it('should sort numeric keys consistently', () => {
+      const entries: SorobanMapEntry[] = [
+        {
+          '0': { value: '10', type: 'U32' } as SorobanArgumentValue,
+          '1': { value: 'first', type: 'ScString' } as SorobanArgumentValue,
+        },
+        {
+          '0': { value: '2', type: 'U32' } as SorobanArgumentValue,
+          '1': { value: 'second', type: 'ScString' } as SorobanArgumentValue,
+        },
+        {
+          '0': { value: '1', type: 'U32' } as SorobanArgumentValue,
+          '1': { value: 'third', type: 'ScString' } as SorobanArgumentValue,
+        },
+      ];
+
+      const { mapVal } = convertObjectToMap(entries);
+      expect(Object.keys(mapVal)).toEqual(['1', '2', '10']);
+    });
+
+    it('should preserve boolean false values', () => {
+      const entries: SorobanMapEntry[] = [
+        {
+          '0': { value: '123', type: 'U32' } as SorobanArgumentValue,
+          '1': { value: 'false', type: 'bool' } as SorobanArgumentValue,
+        },
+      ];
+
+      const { mapVal } = convertObjectToMap(entries);
+      expect(mapVal['123']).toBe(false);
     });
   });
 

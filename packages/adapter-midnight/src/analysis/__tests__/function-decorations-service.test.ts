@@ -41,6 +41,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: { setName: new Uint8Array() },
@@ -68,7 +69,7 @@ describe('FunctionDecorationsService', () => {
       expect(result).toBeDefined();
       expect(result?.setName).toBeDefined();
       expect(result?.setName?.badges).toHaveLength(1);
-      expect(result?.setName?.badges?.[0].text).toBe('Organizer-only');
+      expect(result?.setName?.badges?.[0].text).toBe('Identity-restricted');
       expect(result?.setName?.requiresRuntimeSecret).toBe(true);
       expect(result?.getName).toBeUndefined();
     });
@@ -77,6 +78,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: { setName: new Uint8Array() },
@@ -114,6 +116,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts1: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'v1',
+        contractDefinition: '',
         contractModule: 'code1',
         witnessCode: 'witness1',
         verifierKeys: {},
@@ -122,6 +125,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts2: MidnightContractArtifacts = {
         contractAddress: '0x456',
         privateStateId: 'v2',
+        contractDefinition: '',
         contractModule: 'code2',
         witnessCode: 'witness2',
         verifierKeys: {},
@@ -156,6 +160,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: {},
@@ -174,6 +179,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: {},
@@ -191,6 +197,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: {},
@@ -214,6 +221,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'contract code',
         witnessCode: 'witness code',
         verifierKeys: {},
@@ -254,6 +262,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'code',
         witnessCode: 'witness',
         verifierKeys: {},
@@ -268,7 +277,7 @@ describe('FunctionDecorationsService', () => {
       const result = await service.analyzeFunctionDecorations(artifacts);
 
       const badge = result?.setName?.badges?.[0];
-      expect(badge?.text).toBe('Organizer-only');
+      expect(badge?.text).toBe('Identity-restricted');
       expect(badge?.variant).toBe('warning');
       expect(badge?.tooltip).toContain('code analysis');
     });
@@ -277,6 +286,7 @@ describe('FunctionDecorationsService', () => {
       const artifacts: MidnightContractArtifacts = {
         contractAddress: '0x123',
         privateStateId: 'test_v1',
+        contractDefinition: '',
         contractModule: 'code',
         witnessCode: 'witness',
         verifierKeys: {},
@@ -291,8 +301,8 @@ describe('FunctionDecorationsService', () => {
       const result = await service.analyzeFunctionDecorations(artifacts);
 
       const note = result?.setName?.note;
-      expect(note?.title).toContain('Organizer-only');
-      expect(note?.body).toContain('organizer secret key');
+      expect(note?.title).toContain('Identity-restricted');
+      expect(note?.body).toContain('identity secret');
       expect(note?.body).toContain('static code analysis');
     });
   });

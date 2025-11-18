@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-types",
-  "version": "0.14.0",
+  "version": "0.16.0",
   "private": false,
   "description": "Shared TypeScript type definitions for the OpenZeppelin UI Builder ecosystem.",
   "type": "module",

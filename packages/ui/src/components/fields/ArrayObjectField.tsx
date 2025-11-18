@@ -4,6 +4,7 @@ import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from
 
 import type {
   ContractAdapter,
+  ContractSchema,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
@@ -64,6 +65,11 @@ export interface ArrayObjectFieldProps<TFieldValues extends FieldValues = FieldV
    * Essential for correctly determining field types for object properties.
    */
   adapter?: ContractAdapter;
+
+  /**
+   * Optional contract schema to enrich nested field generation.
+   */
+  contractSchema?: ContractSchema;
 }
 
 /**
@@ -95,6 +101,7 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
   defaultCollapsed = false,
   readOnly,
   adapter,
+  contractSchema,
 }: ArrayObjectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -285,7 +292,10 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                                 );
                               }
 
-                              const generatedField = adapter.generateDefaultField(component);
+                              const generatedField = adapter.generateDefaultField(
+                                component,
+                                contractSchema
+                              );
 
                               // Override with array object-specific configuration
                               const propertyField: FormFieldType = {
@@ -294,9 +304,8 @@ export function ArrayObjectField<TFieldValues extends FieldValues = FieldValues>
                                 name: `${name}.${index}.${component.name}`,
                                 label: component.displayName || component.name,
                                 validation: {
-                                  // TODO: This makes each property required if the parent array item's object is considered required.
-                                  // Re-evaluate if this is the desired behavior or if properties should have independent required flags.
-                                  required: validation?.required,
+                                  ...generatedField.validation, // Preserve validation from adapter (includes min/max bounds)
+                                  required: validation?.required, // Override required from parent
                                 },
                                 placeholder: `Enter ${component.displayName || component.name}`,
                                 helperText:

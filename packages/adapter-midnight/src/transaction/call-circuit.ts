@@ -2,6 +2,7 @@ import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import { enhanceMidnightError, formatEnhancedError } from './error-enhancer';
 
 const SYSTEM_LOG_TAG = 'callCircuit';
@@ -22,6 +23,8 @@ export interface CallCircuitParams {
   privateStateId: string;
   /** Arguments to pass to the circuit */
   args: unknown[];
+  /** Optional configured private-state property that holds the identity secret key */
+  identitySecretKeyPropertyName?: string;
 }
 
 /**
@@ -152,21 +155,26 @@ export async function callCircuit(params: CallCircuitParams): Promise<CallCircui
         /Failed Proof Server response:.*code="400"/.test(message) ||
         /status="Bad Request"/.test(message);
 
-      // Only map to organizer-only error if it's a specific error about missing organizer key
-      // The overlay now returns {} instead of null, so missing state errors indicate organizer key is needed
-      const isOrganizerKeyError =
-        message.includes('organizerSecretKey') ||
+      // Only map to identity-secret error if it's a specific error about missing secret key
+      // The overlay now returns {} instead of null, so missing state errors indicate secret key is needed
+      const secretProp = resolveSecretPropertyName(
+        { identitySecretKeyPropertyName: params.identitySecretKeyPropertyName },
+        'organizerSecretKey'
+      )!; // Safe to assert non-null since we provide a default
+
+      const isIdentitySecretError =
+        message.includes(secretProp) ||
         message.includes('No private state found at private state ID') ||
         (message.includes('Private state') && message.includes('not initialized'));
 
       if (
         message.includes('Incorrect call transaction configuration') ||
-        isOrganizerKeyError ||
-        (prover400 && !existingPrivateState && isOrganizerKeyError)
+        isIdentitySecretError ||
+        (prover400 && !existingPrivateState && isIdentitySecretError)
       ) {
         throw new Error(
-          'Private state not initialized or organizer secret key missing. ' +
-            'For organizer-only circuits, provide organizerSecretKeyHex in the contract configuration ' +
+          'Private state not initialized or identity secret key missing. ' +
+            'For identity-restricted circuits, provide the Identity Secret Key in the form ' +
             'so the private state can be seeded.'
         );
       }

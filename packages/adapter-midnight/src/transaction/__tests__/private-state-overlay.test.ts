@@ -25,7 +25,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue(persistedState);
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -44,7 +44,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue(persistedState);
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -61,7 +61,7 @@ describe('createPrivateStateOverlay', () => {
 
       baseProvider.get.mockResolvedValue(persistedState);
 
-      const overlay = createPrivateStateOverlay(baseProvider); // No runtime key
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey'); // No runtime key
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -76,7 +76,7 @@ describe('createPrivateStateOverlay', () => {
 
       baseProvider.get.mockResolvedValue(persistedState);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       const result = await overlay.get('test-id');
 
@@ -88,7 +88,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue(null);
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -100,7 +100,7 @@ describe('createPrivateStateOverlay', () => {
     it('should handle undefined base state', async () => {
       baseProvider.get.mockResolvedValue(undefined);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       const result = await overlay.get('test-id');
 
@@ -112,7 +112,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue({});
 
       const runtimeKey = '0xabcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -123,7 +123,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue({});
 
       const runtimeKey = 'ABCD1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result = (await overlay.get('test-id')) as Record<string, unknown>;
 
@@ -135,7 +135,7 @@ describe('createPrivateStateOverlay', () => {
     it('should strip organizerSecretKey before persisting', async () => {
       baseProvider.set.mockResolvedValue(undefined);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       const stateWithKey = {
         someField: 'value',
@@ -154,7 +154,7 @@ describe('createPrivateStateOverlay', () => {
     it('should persist state without organizerSecretKey as-is', async () => {
       baseProvider.set.mockResolvedValue(undefined);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       const stateWithoutKey = {
         someField: 'value',
@@ -169,7 +169,7 @@ describe('createPrivateStateOverlay', () => {
     it('should handle null state writes', async () => {
       baseProvider.set.mockResolvedValue(undefined);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       await overlay.set('test-id', null);
 
@@ -179,7 +179,7 @@ describe('createPrivateStateOverlay', () => {
     it('should handle undefined state writes', async () => {
       baseProvider.set.mockResolvedValue(undefined);
 
-      const overlay = createPrivateStateOverlay(baseProvider);
+      const overlay = createPrivateStateOverlay(baseProvider, undefined, 'organizerSecretKey');
 
       await overlay.set('test-id', undefined);
 
@@ -190,7 +190,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.set.mockResolvedValue(undefined);
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const state1 = {
         field1: 'value1',
@@ -216,7 +216,7 @@ describe('createPrivateStateOverlay', () => {
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const invalidKey = 'not-valid-hex';
-      const overlay = createPrivateStateOverlay(baseProvider, invalidKey);
+      const overlay = createPrivateStateOverlay(baseProvider, invalidKey, 'organizerSecretKey');
 
       baseProvider.get.mockResolvedValue({ someField: 'value' });
 
@@ -233,7 +233,7 @@ describe('createPrivateStateOverlay', () => {
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const invalidKey = 'abc'; // Odd length
-      const overlay = createPrivateStateOverlay(baseProvider, invalidKey);
+      const overlay = createPrivateStateOverlay(baseProvider, invalidKey, 'organizerSecretKey');
 
       baseProvider.get.mockResolvedValue({});
 
@@ -248,7 +248,7 @@ describe('createPrivateStateOverlay', () => {
     it('should handle empty hex string', async () => {
       baseProvider.get.mockResolvedValue({});
 
-      const overlay = createPrivateStateOverlay(baseProvider, '');
+      const overlay = createPrivateStateOverlay(baseProvider, '', 'organizerSecretKey');
 
       const result = await overlay.get('test-id');
 
@@ -262,7 +262,7 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.set.mockResolvedValue(undefined);
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       // Attempt to write with organizerSecretKey matching runtime key
       const attemptedState = {
@@ -282,13 +282,28 @@ describe('createPrivateStateOverlay', () => {
       baseProvider.get.mockResolvedValue({ field: 'value' });
 
       const runtimeKey = 'abcd1234';
-      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey);
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'organizerSecretKey');
 
       const result1 = (await overlay.get('id1')) as Record<string, unknown>;
       const result2 = (await overlay.get('id2')) as Record<string, unknown>;
 
       expect(result1.organizerSecretKey).toEqual(new Uint8Array([0xab, 0xcd, 0x12, 0x34]));
       expect(result2.organizerSecretKey).toEqual(new Uint8Array([0xab, 0xcd, 0x12, 0x34]));
+    });
+  });
+
+  describe('custom secret property name', () => {
+    it('should inject and strip using a custom property name', async () => {
+      baseProvider.get.mockResolvedValue({ someField: 'x', secretKey: new Uint8Array([9, 9, 9]) });
+      const runtimeKey = 'abcd1234';
+      const overlay = createPrivateStateOverlay(baseProvider, runtimeKey, 'secretKey');
+
+      const readState = (await overlay.get('id')) as Record<string, unknown>;
+      expect(readState.secretKey).toEqual(new Uint8Array([0xab, 0xcd, 0x12, 0x34]));
+      expect(readState.organizerSecretKey).toBeUndefined();
+
+      await overlay.set('id', { someField: 'y', secretKey: new Uint8Array([0, 1]) });
+      expect(baseProvider.set).toHaveBeenCalledWith('id', { someField: 'y' });
     });
   });
 });

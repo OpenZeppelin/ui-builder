@@ -3,6 +3,7 @@ import React from 'react';
 import { Controller, FieldValues, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import type { FormFieldType } from '@openzeppelin/ui-builder-types';
+import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
 
 import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
@@ -15,6 +16,33 @@ import {
   useMapFieldSync,
   validateMapStructure,
 } from './index';
+
+/**
+ * Helper function to format a label with an optional type hint
+ */
+function formatLabeledType(baseLabel: string, typeHint?: string): string {
+  if (!typeHint) {
+    return baseLabel;
+  }
+  return `${baseLabel} (${typeHint})`;
+}
+
+/**
+ * Helper function to create a default map entry with appropriate default values for key and value types
+ */
+function createDefaultEntry(mapMetadata?: MapFieldProps['mapMetadata']): {
+  key: unknown;
+  value: unknown;
+} {
+  return {
+    key: mapMetadata?.keyFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.keyFieldConfig.type)
+      : '',
+    value: mapMetadata?.valueFieldConfig?.type
+      ? getDefaultValueForType(mapMetadata.valueFieldConfig.type)
+      : '',
+  };
+}
 
 /**
  * MapField component properties
@@ -220,7 +248,7 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
           const handleAddEntry = (): void => {
             // Set flag to prevent sync interference during add operation
             isReplacingRef.current = true;
-            append({ key: '', value: '' } as FieldValues[typeof name]);
+            append(createDefaultEntry(mapMetadata) as FieldValues[typeof name]);
 
             // Reset flag after operation
             queueMicrotask(() => {
@@ -262,7 +290,10 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
                       ...mapMetadata?.keyFieldConfig,
                       id: `${id}-key-${index}`,
                       name: `${name}.${index}.key`,
-                      label: 'Key',
+                      label: formatLabeledType(
+                        'Key',
+                        mapMetadata?.keyFieldConfig?.originalParameterType || mapMetadata?.keyType
+                      ),
                       type: mapMetadata?.keyFieldConfig?.type || 'text',
                       validation: { required: true, ...mapMetadata?.keyFieldConfig?.validation },
                       placeholder: mapMetadata?.keyFieldConfig?.placeholder || 'Enter key',
@@ -275,7 +306,11 @@ export function MapField<TFieldValues extends FieldValues = FieldValues>({
                       ...mapMetadata?.valueFieldConfig,
                       id: `${id}-value-${index}`,
                       name: `${name}.${index}.value`,
-                      label: 'Value',
+                      label: formatLabeledType(
+                        'Value',
+                        mapMetadata?.valueFieldConfig?.originalParameterType ||
+                          mapMetadata?.valueType
+                      ),
                       type: mapMetadata?.valueFieldConfig?.type || 'text',
                       validation: { required: true, ...mapMetadata?.valueFieldConfig?.validation },
                       placeholder: mapMetadata?.valueFieldConfig?.placeholder || 'Enter value',

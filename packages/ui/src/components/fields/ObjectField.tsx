@@ -3,6 +3,7 @@ import { Control, Controller, FieldValues, useFormContext } from 'react-hook-for
 
 import type {
   ContractAdapter,
+  ContractSchema,
   FormFieldType,
   FunctionParameter,
 } from '@openzeppelin/ui-builder-types';
@@ -48,6 +49,11 @@ export interface ObjectFieldProps<TFieldValues extends FieldValues = FieldValues
    * Essential for correctly determining field types for object properties.
    */
   adapter?: ContractAdapter;
+
+  /**
+   * Optional contract schema for nested metadata (structs/enums).
+   */
+  contractSchema?: ContractSchema;
 }
 
 /**
@@ -75,6 +81,7 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
   showCard = true,
   readOnly,
   adapter,
+  contractSchema,
 }: ObjectFieldProps<TFieldValues>): React.ReactElement {
   const isRequired = !!validation?.required;
   const errorId = `${id}-error`;
@@ -137,7 +144,7 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                     );
                   }
 
-                  const generatedField = adapter.generateDefaultField(component);
+                  const generatedField = adapter.generateDefaultField(component, contractSchema);
 
                   // Override with object-specific configuration
                   const propertyField: FormFieldType = {
@@ -145,12 +152,13 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                     id: `${id}-${component.name}`,
                     name: `${name}.${component.name}`,
                     label: component.displayName || component.name,
+                    // Validation merging precedence:
+                    // 1. Spread generatedField.validation (adapter-provided bounds, etc.)
+                    // 2. Override 'required' from parent validation if specified
+                    // This preserves min/max bounds while allowing parent to control required state
                     validation: {
-                      // TODO: This makes each property required if the parent object is required.
-                      // This might be too strict. Consider allowing individual properties to be optional
-                      // even if the parent object itself is "present" (i.e., not null/undefined).
-                      // This would require more sophisticated validation schema definition.
-                      required: validation?.required, // Inherit required from parent
+                      ...generatedField.validation, // Preserve validation from adapter (includes min/max bounds)
+                      required: validation?.required, // Override required from parent
                     },
                     placeholder: `Enter ${component.displayName || component.name}`,
                     helperText:
@@ -162,9 +170,6 @@ export function ObjectField<TFieldValues extends FieldValues = FieldValues>({
                     ...(component.components && {
                       components: component.components,
                     }),
-                    // TODO: Consider passing `adapter` down to nested `propertyField` if it's an object/array-object itself,
-                    // so it doesn't rely on `renderProperty` (DynamicFormField) to re-inject it.
-                    // This might be implicitly handled if `renderProperty` is DynamicFormField which gets adapter.
                   };
 
                   return (

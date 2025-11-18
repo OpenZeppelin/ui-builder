@@ -276,7 +276,7 @@ describe('Struct ScVal Conversion', () => {
 
       expect(() => {
         valueToScVal(complexStructValue, 'ComplexStruct', complexStructSchema);
-      }).toThrow('invalid type (vec<u128>) specified for string value');
+      }).toThrow('Cannot convert klkjlk to a BigInt');
     });
   });
 });

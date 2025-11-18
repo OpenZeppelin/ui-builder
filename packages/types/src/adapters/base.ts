@@ -93,6 +93,29 @@ export interface NetworkServiceForm {
 }
 
 /**
+ * Configuration for an adapter-driven dynamic property input in the Customize step.
+ * When provided via getRuntimeFieldBinding().propertyNameInput, the builder renders
+ * a TextField control and persists the value under field.adapterBinding.metadata[metadataKey].
+ */
+export interface RuntimeSecretPropertyInput {
+  /** Metadata key to persist the value under field.adapterBinding.metadata */
+  metadataKey: string;
+  /** Optional label override for the input */
+  label?: string;
+  /** Optional helper text to display below the input */
+  helperText?: string;
+  /** Optional placeholder text */
+  placeholder?: string;
+  /**
+   * Optional default value to seed when the field is auto-added.
+   * If metadata[metadataKey] already has a value, that value takes precedence.
+   */
+  defaultValue?: string;
+  /** Whether to render the control (default: true when metadataKey provided) */
+  visible?: boolean;
+}
+
+/**
  * Minimal adapter interface for the renderer and contract interaction
  *
  * This is the base interface that all chain-specific adapters must implement.
@@ -661,6 +684,17 @@ export interface ContractAdapter {
          * Optional helper text for the field
          */
         helperText?: string;
+        /**
+         * Optional adapter-specific metadata for the runtimeSecret field.
+         * The builder does not interpret keys here; it simply persists them with the field.
+         */
+        metadata?: Record<string, unknown>;
+        /**
+         * Optional generic configuration for an additional "property name" input that the builder
+         * may render under the runtime secret field. This remains chain-agnostic: the adapter
+         * specifies which metadata key to use and optional UI hints.
+         */
+        propertyNameInput?: RuntimeSecretPropertyInput;
       }
     | undefined;
 

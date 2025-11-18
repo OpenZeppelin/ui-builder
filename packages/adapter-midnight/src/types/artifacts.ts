@@ -9,6 +9,13 @@ export interface MidnightContractArtifacts {
   /** Unique identifier for private state instance (required) */
   privateStateId: string;
 
+  /**
+   * Contract-level identity secret key property name (derived from artifacts).
+   * Example: 'organizerSecretKey', 'secretKey'. Used as a default for all functions.
+   * Functions may override this in Customize if needed.
+   */
+  identitySecretKeyPropertyName?: string;
+
   /** TypeScript interface definition from contract.d.ts (required) */
   contractDefinition: string;
 

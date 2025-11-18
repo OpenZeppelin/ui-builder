@@ -4,11 +4,17 @@ import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-ty
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { convertEnumToScVal } from '../../utils/input-parsing';
-import { isBytesNType } from '../../utils/type-detection';
+import { isPrimitiveParamType } from '../../utils/stellar-types';
+import { isBytesNType, isLikelyEnumType } from '../../utils/type-detection';
+import { compareScValsByXdr } from '../../utils/xdr-ordering';
 import { parseGenericType } from './generic-parser';
 import { parsePrimitive } from './primitive-parser';
 import { convertStructToScVal, isStructType } from './struct-parser';
 import type { SorobanEnumValue } from './types';
+
+// FunctionParameter already includes enumMetadata in its type definition (from @openzeppelin/ui-builder-types)
+// No need for a separate type wrapper
+type EnumAwareFunctionParameter = FunctionParameter;
 
 /**
  * Converts a value to ScVal with comprehensive generic type support.
@@ -31,19 +37,152 @@ export function valueToScVal(
   const parseValue = parseInnerValue || ((val: unknown) => val);
   const genericInfo = parseGenericType(parameterType);
 
+  // Helper: detect SorobanArgumentValue wrapper { type, value }
+  const isTypedWrapper = (v: unknown): v is { type: string; value: unknown } =>
+    !!v &&
+    typeof v === 'object' &&
+    'type' in (v as Record<string, unknown>) &&
+    'value' in (v as Record<string, unknown>);
+
+  const enumMetadata = (paramSchema as EnumAwareFunctionParameter | undefined)?.enumMetadata;
+  const possibleEnumValue =
+    typeof value === 'string' && (enumMetadata || isLikelyEnumType(parameterType))
+      ? { tag: value }
+      : value;
+
   if (!genericInfo) {
-    // Check if this is an enum object (has 'tag' or 'enum' property)
-    if (isEnumValue(value) || (typeof value === 'object' && value !== null && 'enum' in value)) {
-      return convertEnumToScVal(value as SorobanEnumValue);
+    // Integer-only enums (discriminant enums) → encode as u32 (matches Lab behavior)
+    if (enumMetadata && enumMetadata.variants.every((v) => v.type === 'integer')) {
+      // Derive numeric discriminant from name, tag, or numeric input
+      let numericValue: number | undefined;
+      if (typeof value === 'string') {
+        const byName = enumMetadata.variants.find((v) => v.name === value);
+        numericValue = byName?.value ?? Number(value);
+      } else if (typeof value === 'number') {
+        numericValue = value;
+      } else if (isEnumValue(value)) {
+        const byTag = enumMetadata.variants.find((v) => v.name === value.tag);
+        numericValue = byTag?.value;
+      }
+      if (numericValue === undefined || Number.isNaN(numericValue)) {
+        const validNames = enumMetadata.variants.map((v) => v.name).join(', ');
+        throw new Error(
+          `Invalid integer enum value for ${parameterType}: ${String(value)}. Expected one of: ${validNames}`
+        );
+      }
+      return nativeToScVal(numericValue, { type: 'u32' });
+    }
+    // If a typed wrapper is provided, convert directly using the wrapped type/value
+    if (isTypedWrapper(possibleEnumValue)) {
+      const wrapped = possibleEnumValue;
+      const parsed = parsePrimitive(wrapped.value, wrapped.type);
+      const finalVal = parsed !== null ? parsed : wrapped.value;
+      const scValType = convertStellarTypeToScValType(wrapped.type);
+      const typeHint = Array.isArray(scValType) ? scValType[0] : scValType;
+      return nativeToScVal(finalVal, { type: typeHint });
     }
 
-    // Check if this is a struct type
-    if (isStructType(value, parameterType)) {
+    // Check if this is an enum object (has 'tag' or 'enum' property)
+    if (
+      isEnumValue(possibleEnumValue) ||
+      (typeof possibleEnumValue === 'object' &&
+        possibleEnumValue !== null &&
+        'enum' in possibleEnumValue)
+    ) {
+      const enumValue = possibleEnumValue as { tag: string; values?: unknown[]; enum?: number };
+
+      // Handle integer enums
+      if ('enum' in enumValue && typeof enumValue.enum === 'number') {
+        return nativeToScVal(enumValue.enum, { type: 'u32' });
+      }
+
+      // Handle tagged enums with metadata for proper type conversion
+      const tagSymbol = nativeToScVal(enumValue.tag, { type: 'symbol' });
+
+      if (!enumValue.values || enumValue.values.length === 0) {
+        // Unit variant - ScVec containing single ScSymbol
+        return xdr.ScVal.scvVec([tagSymbol]);
+      }
+
+      const payloadValues = enumValue.values as unknown[];
+
+      // Tuple variant - convert each payload value with proper types
+      let payloadScVals: xdr.ScVal[];
+      // Use the variant type from EnumAwareFunctionParameter's enumMetadata
+      type EnumVariant = NonNullable<
+        EnumAwareFunctionParameter['enumMetadata']
+      >['variants'][number];
+      let variant: EnumVariant | undefined;
+
+      if (enumMetadata) {
+        variant = enumMetadata.variants.find((variantEntry) => variantEntry.name === enumValue.tag);
+        if (!variant || !variant.payloadTypes) {
+          // No variant metadata or payloadTypes - use convertEnumToScVal fallback
+          return convertEnumToScVal(enumValue as SorobanEnumValue);
+        }
+        // Convert each payload value with its corresponding type
+        // variant is guaranteed to be defined here due to the check above
+        const payloadTypes = variant.payloadTypes;
+        const payloadComponents = variant.payloadComponents;
+        payloadScVals = payloadTypes.map((payloadType, index) => {
+          const payloadSchema = payloadComponents?.[index]
+            ? {
+                name: `payload_${index}`,
+                type: payloadType,
+                components: payloadComponents[index],
+              }
+            : { name: `payload_${index}`, type: payloadType };
+
+          const val = payloadValues[index];
+          return valueToScVal(val, payloadType, payloadSchema, parseValue);
+        });
+      } else {
+        // No enum metadata - use convertEnumToScVal fallback
+        return convertEnumToScVal(enumValue as SorobanEnumValue);
+      }
+
+      // For single Tuple payload, wrap all payload ScVals in another ScVec
+      // Example: Some((Address, i128)) → ScVec([Symbol("Some"), ScVec([Address, I128])])
+      if (variant?.isSingleTuplePayload) {
+        const tuplePayloadVec = xdr.ScVal.scvVec(payloadScVals);
+        return xdr.ScVal.scvVec([tagSymbol, tuplePayloadVec]);
+      }
+
+      // Return ScVec with tag symbol followed by payload values
+      return xdr.ScVal.scvVec([tagSymbol, ...payloadScVals]);
+    }
+
+    // Check if this is a struct or tuple type
+    // Accept array-shaped values for tuple-structs when schema components are provided
+    if (
+      Array.isArray(possibleEnumValue) &&
+      paramSchema?.components &&
+      paramSchema.components.length
+    ) {
+      // Runtime validation: ensure array length matches schema components
+      if (possibleEnumValue.length !== paramSchema.components.length) {
+        throw new Error(
+          `Tuple-struct value length (${possibleEnumValue.length}) does not match schema components (${paramSchema.components.length}) for type ${parameterType}`
+        );
+      }
+      return convertStructToScVal(
+        possibleEnumValue as unknown as Record<string, unknown>,
+        parameterType,
+        paramSchema,
+        parseValue,
+        (innerValue, innerType, innerSchema) =>
+          valueToScVal(innerValue, innerType, innerSchema, parseInnerValue)
+      );
+    }
+
+    if (!isPrimitiveParamType(parameterType) && isStructType(value, parameterType)) {
       return convertStructToScVal(
         value as Record<string, unknown>,
         parameterType,
         paramSchema,
-        parseValue
+        parseValue,
+        (innerValue, innerType, innerSchema) =>
+          valueToScVal(innerValue, innerType, innerSchema, parseInnerValue)
       );
     }
 
@@ -84,7 +223,28 @@ export function valueToScVal(
       // Handle Vec<T> types
       const innerType = parameters[0];
       if (Array.isArray(value)) {
-        const convertedElements = value.map((element) => valueToScVal(element, innerType));
+        // For enum element types, we need to pass enum metadata
+        // Check if paramSchema has enumMetadata or components that should be used for elements
+        let elementSchema: FunctionParameter | undefined;
+        if (enumMetadata) {
+          // This Vec is of enum type - pass the enum metadata to each element
+          elementSchema = {
+            name: 'element',
+            type: innerType,
+            enumMetadata,
+          } as EnumAwareFunctionParameter;
+        } else if (paramSchema?.components) {
+          // This Vec is of struct type - pass the components to each element
+          elementSchema = {
+            name: 'element',
+            type: innerType,
+            components: paramSchema.components,
+          };
+        }
+
+        const convertedElements = value.map((element) =>
+          valueToScVal(element, innerType, elementSchema, parseValue)
+        );
         return nativeToScVal(convertedElements);
       }
       return nativeToScVal(value);
@@ -94,8 +254,7 @@ export function valueToScVal(
       // Handle Map<K,V> types in Stellar SDK format
       if (Array.isArray(value)) {
         // Expect Stellar SDK format: [{ 0: {value, type}, 1: {value, type} }, ...]
-        const convertedValue: Record<string, unknown> = {};
-        const typeHints: Record<string, string[]> = {};
+        const mapEntries: xdr.ScMapEntry[] = [];
 
         value.forEach(
           (entry: { 0: { value: string; type: string }; 1: { value: string; type: string } }) => {
@@ -111,7 +270,6 @@ export function valueToScVal(
             }
 
             // Process key and value through parsePrimitive for bytes conversion
-            // This ensures bytes strings are converted to Uint8Array before nativeToScVal
             let processedKey: unknown = entry[0].value;
             let processedValue: unknown = entry[1].value;
 
@@ -127,24 +285,69 @@ export function valueToScVal(
               processedValue = valuePrimitive;
             }
 
-            // Use the processed key as the object key (convert to string if needed)
-            const keyString =
-              typeof processedKey === 'string' ? processedKey : String(processedKey);
-            convertedValue[keyString] = processedValue;
-
+            // Create ScVals for key and value
             const keyScValType = convertStellarTypeToScValType(entry[0].type);
+            const keyTypeHint = Array.isArray(keyScValType) ? keyScValType[0] : keyScValType;
+            const keyScVal = nativeToScVal(processedKey, { type: keyTypeHint });
+
             const valueScValType = convertStellarTypeToScValType(entry[1].type);
-            typeHints[keyString] = [
-              Array.isArray(keyScValType) ? keyScValType[0] : keyScValType,
-              Array.isArray(valueScValType) ? valueScValType[0] : valueScValType,
-            ];
+            const valueTypeHint = Array.isArray(valueScValType)
+              ? valueScValType[0]
+              : valueScValType;
+            const valueScVal = nativeToScVal(processedValue, { type: valueTypeHint });
+
+            mapEntries.push(
+              new xdr.ScMapEntry({
+                key: keyScVal,
+                val: valueScVal,
+              })
+            );
           }
         );
 
-        return nativeToScVal(convertedValue, { type: typeHints });
+        // Sort map entries by XDR-encoded keys (required by Soroban)
+        const sortedMapEntries = mapEntries.sort((a, b) => compareScValsByXdr(a.key(), b.key()));
+        return xdr.ScVal.scvMap(sortedMapEntries);
       }
 
       return nativeToScVal(value);
+    }
+
+    case 'Tuple': {
+      if (!paramSchema?.components || paramSchema.components.length === 0) {
+        throw new Error(
+          `Tuple parameter "${paramSchema?.name ?? 'unknown'}" is missing component metadata`
+        );
+      }
+
+      const tupleComponents = paramSchema.components;
+      const tupleValues: xdr.ScVal[] = [];
+
+      tupleComponents.forEach((component, index) => {
+        const key = component.name ?? `item_${index}`;
+        let elementValue: unknown;
+
+        if (Array.isArray(value)) {
+          elementValue = value[index];
+        } else if (value && typeof value === 'object') {
+          elementValue = (value as Record<string, unknown>)[key];
+        }
+
+        if (typeof elementValue === 'undefined') {
+          const expectedTypes = tupleComponents.map((c) => c.type).join(', ');
+          throw new Error(
+            `Missing tuple value for "${key}" in parameter "${paramSchema.name ?? 'unknown'}". Expected ${tupleComponents.length} values of types [${expectedTypes}] but received: ${JSON.stringify(value)}`
+          );
+        }
+
+        if (typeof elementValue === 'string' && isLikelyEnumType(component.type)) {
+          elementValue = { tag: elementValue };
+        }
+
+        tupleValues.push(valueToScVal(elementValue, component.type, component, parseInnerValue));
+      });
+
+      return xdr.ScVal.scvVec(tupleValues);
     }
 
     case 'Option': {
@@ -155,7 +358,21 @@ export function valueToScVal(
         return nativeToScVal(null); // None variant
       } else {
         // Some variant - convert the inner value
-        return valueToScVal(value, innerType);
+        let innerSchema: FunctionParameter | undefined;
+        if (enumMetadata) {
+          innerSchema = {
+            name: 'inner',
+            type: innerType,
+            ...({ enumMetadata } as unknown as Record<string, unknown>),
+          } as unknown as FunctionParameter;
+        } else if (paramSchema?.components) {
+          innerSchema = {
+            name: 'inner',
+            type: innerType,
+            components: paramSchema.components,
+          };
+        }
+        return valueToScVal(value, innerType, innerSchema, parseInnerValue);
       }
     }
 

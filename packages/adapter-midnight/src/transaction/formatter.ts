@@ -3,9 +3,46 @@ import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { parseMidnightInput } from '../transform';
 import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
+import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import { isArrayType, isMaybeType, isVectorType } from '../utils/type-helpers';
 
-// (shared helpers imported from ../utils/type-helpers)
+/**
+ * Extract identity secret key property name from runtime secret field metadata.
+ * Returns undefined if no runtimeSecret field exists, if the property name is empty,
+ * or if it's not a valid JavaScript identifier.
+ */
+function extractSecretPropertyName(fields: FormFieldType[]): string | undefined {
+  const runtimeSecretField = fields.find(
+    (f) => f.type === 'runtimeSecret' && f.adapterBinding?.key
+  );
+
+  if (!runtimeSecretField?.adapterBinding?.metadata) {
+    return undefined;
+  }
+
+  const meta = runtimeSecretField.adapterBinding.metadata as {
+    identitySecretKeyPropertyName?: string;
+  };
+
+  // Use shared resolver to apply trim validation without default fallback
+  const propName = resolveSecretPropertyName(meta);
+
+  if (!propName) {
+    return undefined;
+  }
+
+  // Validate it's a valid JavaScript identifier
+  // Must start with letter, underscore, or $, followed by letters, digits, underscores, or $
+  if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(propName)) {
+    logger.warn(
+      'formatMidnightTransactionData',
+      `Invalid property name "${propName}". Must be a valid JavaScript identifier. Ignoring.`
+    );
+    return undefined;
+  }
+
+  return propName;
+}
 
 /**
  * Formats transaction data for Midnight chains based on parsed inputs.
@@ -137,11 +174,16 @@ export function formatMidnightTransactionData(
     throw new Error('Contract address is missing or invalid in the provided schema.');
   }
 
+  // Derive per-function secret configuration from runtimeSecret field metadata
+  const propName = extractSecretPropertyName(fields);
+  const secretConfig = propName ? { identitySecretKeyPropertyName: propName } : undefined;
+
   const paramsForSignAndBroadcast: WriteContractParameters = {
     contractAddress: contractSchema.address,
     functionName: functionDetails.name,
     args: transformedArgs,
     argTypes: functionDetails.inputs.map((param) => param.type),
+    ...(secretConfig ? { _secretConfig: secretConfig } : {}),
     transactionOptions: {
       // Pass artifacts for execution (will be extracted by adapter's signAndBroadcast)
       _artifacts: artifacts

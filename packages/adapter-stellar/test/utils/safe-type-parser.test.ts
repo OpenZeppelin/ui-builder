@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   extractMapTypes,
   extractOptionElementType,
+  extractTupleTypes,
   extractVecElementType,
   isValidTypeString,
 } from '../../src/utils/safe-type-parser';
@@ -254,6 +255,35 @@ describe('safe-type-parser', () => {
         const longString = 'Option<' + 'U'.repeat(2000) + '>';
         expect(extractOptionElementType(longString)).toBeNull();
       });
+    });
+  });
+
+  describe('extractTupleTypes', () => {
+    it('should extract tuple element types', () => {
+      expect(extractTupleTypes('Tuple<U32, Bool>')).toEqual(['U32', 'Bool']);
+      expect(extractTupleTypes('Tuple<ScString, Address, U64>')).toEqual([
+        'ScString',
+        'Address',
+        'U64',
+      ]);
+    });
+
+    it('should handle nested generics within tuple', () => {
+      expect(extractTupleTypes('Tuple<Vec<U32>, Map<Symbol, Bytes>>')).toEqual([
+        'Vec<U32>',
+        'Map<Symbol, Bytes>',
+      ]);
+      expect(extractTupleTypes('Tuple<Option<U32>, Tuple<Vec<U32>, Bool>>')).toEqual([
+        'Option<U32>',
+        'Tuple<Vec<U32>, Bool>',
+      ]);
+    });
+
+    it('should return null for invalid tuple strings', () => {
+      expect(extractTupleTypes('Tuple<')).toBeNull();
+      expect(extractTupleTypes('Tuple')).toBeNull();
+      expect(extractTupleTypes('Tuple<>')).toBeNull();
+      expect(extractTupleTypes('U32')).toBeNull();
     });
   });
 

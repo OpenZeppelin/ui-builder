@@ -10,7 +10,7 @@ import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useAnalytics } from '../../../hooks/useAnalytics';
-import { recordHasMeaningfulContent } from '../../UIBuilder/utils/recordUtils';
+import { recordHasMeaningfulContent } from '../../UIBuilder/utils/meaningfulContent';
 import SidebarButton from './SidebarButton';
 
 interface MainActionsProps {

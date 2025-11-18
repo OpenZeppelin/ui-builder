@@ -20,7 +20,7 @@ export function MapEntryRow({
   index,
 }: Props): React.ReactElement {
   return (
-    <div className="flex-1 grid grid-cols-2 gap-2">
+    <div className="flex-1 grid grid-cols-1 gap-2 md:grid-cols-2">
       <div className="flex flex-col gap-1">
         {renderKeyField ? (
           <>
@@ -38,7 +38,7 @@ export function MapEntryRow({
         )}
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 md:items-center md:justify-center">
         {renderValueField ? (
           renderValueField(valueField, index)
         ) : (

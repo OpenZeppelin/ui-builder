@@ -1,5 +1,50 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 0.16.0
+
+### Minor Changes
+
+- [#238](https://github.com/OpenZeppelin/ui-builder/pull/238) [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195) Thanks [@pasevin](https://github.com/pasevin)! - Add shared numeric validation bounds utility and enhance all adapters to apply type-specific min/max validation for integer types. Numeric bounds are now automatically applied to form fields based on chain-specific type names (e.g., uint32, U32, Uint<0..255>), improving input validation and user experience.
+
+### Patch Changes
+
+- Updated dependencies [[`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195), [`9a92127`](https://github.com/OpenZeppelin/ui-builder/commit/9a921273e858b58f3fc1ef7456ee67339c186195)]:
+  - @openzeppelin/ui-builder-utils@0.16.0
+  - @openzeppelin/ui-builder-types@0.16.0
+  - @openzeppelin/ui-builder-ui@0.16.0
+  - @openzeppelin/ui-builder-react-core@0.16.0
+
+## 0.15.1
+
+### Patch Changes
+
+- [#236](https://github.com/OpenZeppelin/ui-builder/pull/236) [`c13561d`](https://github.com/OpenZeppelin/ui-builder/commit/c13561d6f1327c57ed1d7555df34048b68505345) Thanks [@pasevin](https://github.com/pasevin)! - Fix EVM wallet network switching on reconnection and improve UX consistency
+
+  **Builder App**
+  - Fix wallet reconnection network switch: automatically re-queue network switch when user disconnects and reconnects wallet in same session
+  - Centralize "meaningful content" criteria to ensure consistent behavior across auto-save, navigation, and record filtering
+  - Improve network selection UX: wallet widget now properly unmounts when navigating back to network list
+  - Preserve ecosystem tab selection when going back without meaningful content
+  - Fix NetworkSwitchManager to not notify completion on error conditions
+  - Extract wallet reconnection logic into dedicated `useWalletReconnectionHandler` hook for better code organization
+
+  **EVM Adapter**
+  - Add RPC configuration listener to automatically invalidate cached Wagmi config when user changes RPC settings
+  - Preserve wallet connection state across network switches by reusing Wagmi config instance
+  - Add cleanup() method for proper resource management
+
+  Fixes #228
+
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [[`faff555`](https://github.com/OpenZeppelin/ui-builder/commit/faff555be188b679c8ba9c22e9e01b4a9c22ecff)]:
+  - @openzeppelin/ui-builder-types@0.15.0
+  - @openzeppelin/ui-builder-react-core@0.15.0
+  - @openzeppelin/ui-builder-ui@0.15.0
+  - @openzeppelin/ui-builder-utils@0.15.0
+
 ## 0.14.0
 
 ### Minor Changes

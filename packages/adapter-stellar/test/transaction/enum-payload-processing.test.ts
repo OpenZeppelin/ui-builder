@@ -223,6 +223,48 @@ describe('Enum Payload Processing in formatStellarTransactionData', () => {
   });
 
   describe('Edge cases and fallbacks', () => {
+    it('should keep complex struct payloads raw for TupleStruct', async () => {
+      // Setup mocks - complex payload type
+      mockIsEnumType.mockReturnValue(true);
+      mockExtractEnumVariants.mockReturnValue({
+        name: 'DemoEnum',
+        variants: [{ name: 'Tuple', type: 'tuple', payloadTypes: ['TupleStruct'] }],
+        isUnitOnly: false,
+      });
+
+      const { formatStellarTransactionData: mockedFormatter } = await import(
+        '../../src/transaction/formatter'
+      );
+
+      // TupleStruct value expressed as array (tuple elements): [Test struct, SimpleEnum]
+      const tupleStructValue = [
+        { a: 1, b: true, c: 'sym' }, // Test struct
+        'Second', // SimpleEnum
+      ];
+
+      const submittedInputs = {
+        choice: {
+          tag: 'Tuple',
+          values: [tupleStructValue],
+        },
+      };
+
+      const result = mockedFormatter(
+        createMockSchema(),
+        'set_enum_DemoEnum',
+        submittedInputs,
+        createMockFields()
+      );
+
+      expect(result.contractAddress).toBe(mockContractAddress);
+      expect(result.functionName).toBe('set_enum');
+      expect(result.args).toHaveLength(1);
+      // Complex payload should be kept raw; conversion happens in valueToScVal using schema
+      expect(result.args[0]).toEqual({
+        tag: 'Tuple',
+        values: [tupleStructValue],
+      });
+    });
     it('should handle enum values when variant is not found in metadata', async () => {
       // Setup mocks - return metadata but without the requested variant
       mockIsEnumType.mockReturnValue(true);

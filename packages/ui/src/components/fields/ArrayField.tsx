@@ -306,12 +306,13 @@ export function ArrayField<TFieldValues extends FieldValues = FieldValues>({
               ) : (
                 fields.map((field, index) => {
                   // Create field configuration for array element
+                  // Spread elementFieldConfig first to preserve all properties (including enumMetadata, components)
                   const elementField: FormFieldType = {
-                    ...elementFieldConfig, // Allow overrides for optional props, but controlled keys follow next
+                    ...elementFieldConfig, // Include all props from config (enumMetadata, components, etc.)
                     id: field.id, // Use RHF field.id for stable, unique keys per item
                     name: `${name}.${index}`, // RHF name for the element
                     label: elementFieldConfig?.label || '', // Label for the element's field (can be empty if not desired)
-                    type: elementType,
+                    type: elementFieldConfig?.type || elementType, // Prefer elementFieldConfig.type if available
                     validation: elementFieldConfig?.validation || {},
                     placeholder: elementFieldConfig?.placeholder,
                     helperText: elementFieldConfig?.helperText,

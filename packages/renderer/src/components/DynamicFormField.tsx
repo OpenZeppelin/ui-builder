@@ -1,7 +1,11 @@
 import React, { useCallback } from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import type {
+  ContractAdapter,
+  ContractSchema,
+  FunctionParameter,
+} from '@openzeppelin/ui-builder-types';
 import { FieldCondition, FormFieldType, FormValues } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
@@ -27,6 +31,11 @@ interface DynamicFormFieldProps {
    * The adapter for chain-specific validation and formatting
    */
   adapter: ContractAdapter;
+
+  /**
+   * Optional contract schema for nested metadata lookups
+   */
+  contractSchema?: ContractSchema;
 
   /**
    * The field error message, if any (Kept for potential direct use, though RHF handles it)
@@ -102,21 +111,37 @@ export function DynamicFormField({
   field,
   control,
   adapter,
+  contractSchema,
 }: DynamicFormFieldProps): React.ReactElement | null {
   // Memoized render functions to prevent unnecessary re-renders
   // These must be called before any early returns to satisfy React Hooks rules
   const renderPayloadField = useCallback(
     (payloadField: FormFieldType, payloadIndex: number): React.ReactElement => {
-      // Map the payload type to appropriate field type using the adapter
-      const mappedFieldType = adapter.mapParameterTypeToFieldType(
-        payloadField.originalParameterType || 'text'
-      );
+      let enhancedPayloadField: FormFieldType;
 
-      // Create enhanced field with proper type mapping
-      const enhancedPayloadField: FormFieldType = {
-        ...payloadField,
-        type: mappedFieldType,
-      };
+      if (payloadField.originalParameterType) {
+        const generatedField = adapter.generateDefaultField(
+          {
+            name: payloadField.name || `payload_${payloadIndex}`,
+            type: payloadField.originalParameterType,
+          } as FunctionParameter,
+          contractSchema
+        );
+
+        enhancedPayloadField = {
+          ...generatedField,
+          ...payloadField,
+          type: generatedField.type,
+          label: payloadField.label ?? generatedField.label,
+          placeholder: payloadField.placeholder ?? generatedField.placeholder,
+          helperText: payloadField.helperText ?? generatedField.helperText,
+        };
+      } else {
+        enhancedPayloadField = {
+          ...payloadField,
+          type: payloadField.type ?? 'text',
+        };
+      }
 
       return (
         <DynamicFormField
@@ -124,10 +149,11 @@ export function DynamicFormField({
           field={enhancedPayloadField}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       );
     },
-    [field.id, control, adapter]
+    [field.id, control, adapter, contractSchema]
   );
 
   const renderKeyField = useCallback(
@@ -151,10 +177,11 @@ export function DynamicFormField({
           field={enhancedKeyField}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       );
     },
-    [field.id, field.readOnly, control, adapter]
+    [field.id, field.readOnly, control, adapter, contractSchema]
   );
 
   const renderValueField = useCallback(
@@ -178,10 +205,11 @@ export function DynamicFormField({
           field={enhancedValueField}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       );
     },
-    [field.id, field.readOnly, control, adapter]
+    [field.id, field.readOnly, control, adapter, contractSchema]
   );
 
   // Check if the field should be rendered based on visibility conditions
@@ -200,11 +228,15 @@ export function DynamicFormField({
   }
 
   // Get field-specific props based on type
-  const fieldSpecificProps = getFieldSpecificProps(field, {
-    renderPayloadField,
-    renderKeyField,
-    renderValueField,
-  });
+  const fieldSpecificProps = getFieldSpecificProps(
+    field,
+    {
+      renderPayloadField,
+      renderKeyField,
+      renderValueField,
+    },
+    contractSchema
+  );
 
   // Add render functions for complex fields
   const enhancedProps = {
@@ -221,6 +253,7 @@ export function DynamicFormField({
           }}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       ),
     }),
@@ -236,6 +269,7 @@ export function DynamicFormField({
           }}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       ),
     }),
@@ -255,6 +289,7 @@ export function DynamicFormField({
           }}
           control={control}
           adapter={adapter}
+          contractSchema={contractSchema}
         />
       ),
     }),
@@ -274,6 +309,7 @@ export function DynamicFormField({
       name={field.name}
       adapter={adapter}
       readOnly={field.readOnly}
+      contractSchema={contractSchema}
       {...enhancedProps}
     />
   );
@@ -293,7 +329,8 @@ interface RenderFunctions {
  */
 function getFieldSpecificProps(
   field: FormFieldType,
-  renderFunctions: RenderFunctions
+  renderFunctions: RenderFunctions,
+  contractSchema?: ContractSchema
 ): Record<string, unknown> {
   switch (field.type) {
     case 'number':
@@ -316,6 +353,7 @@ function getFieldSpecificProps(
       return {
         components: field.components || [],
         showCard: true,
+        contractSchema,
       };
     case 'array-object':
       // Extract array-object-specific props

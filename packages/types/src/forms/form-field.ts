@@ -142,6 +142,7 @@ export interface FormFieldType<T extends FieldType = FieldType> {
       name: string;
       type: 'void' | 'tuple' | 'integer';
       payloadTypes?: string[];
+      payloadComponents?: (FunctionParameter[] | undefined)[];
       value?: number;
     }>;
     isUnitOnly: boolean;
@@ -176,5 +177,10 @@ export interface FormFieldType<T extends FieldType = FieldType> {
      * (e.g., 'organizerSecret' for Midnight)
      */
     key: string;
+    /**
+     * Optional adapter-specific metadata for runtime secret fields.
+     * Adapters can opt-in to additional Customize step controls by supplying metadata.
+     */
+    metadata?: Record<string, unknown>;
   };
 }
