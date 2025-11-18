@@ -2,6 +2,7 @@
  * Unit tests for Access Control Service
  *
  * Tests: T020 - Grant/revoke role roundtrip with mocked RPC
+ *        T024 - Transfer ownership roundtrip with mocked RPC
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,8 +15,9 @@ import type {
 import {
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
+  assembleTransferOwnershipAction,
 } from '../../src/access-control/actions';
-import { readCurrentRoles } from '../../src/access-control/onchain-reader';
+import { readCurrentRoles, readOwnership } from '../../src/access-control/onchain-reader';
 import { StellarAccessControlService } from '../../src/access-control/service';
 
 // Mock the logger
@@ -479,6 +481,216 @@ describe('Access Control Service (T020)', () => {
       const txData = assembleGrantRoleAction(contractAddr, TEST_ROLE, TEST_ACCOUNT);
 
       expect(txData.contractAddress).toBe(contractAddr);
+    });
+  });
+});
+
+describe('Access Control Service - Transfer Ownership (T024)', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockExecutionConfig: EoaExecutionConfig;
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const CURRENT_OWNER = 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5';
+  const NEW_OWNER = 'GCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTC';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockExecutionConfig = {
+      method: 'eoa',
+      allowAny: false,
+      specificAddress: CURRENT_OWNER,
+    };
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('Action Assembly', () => {
+    it('should assemble transfer_ownership action with correct parameters', () => {
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+
+      expect(txData).toEqual({
+        contractAddress: TEST_CONTRACT,
+        functionName: 'transfer_ownership',
+        args: [NEW_OWNER],
+        argTypes: ['Address'],
+        argSchema: undefined,
+        transactionOptions: {},
+      });
+    });
+  });
+
+  describe('Expected Behavior (Roundtrip Tests)', () => {
+    /**
+     * These tests verify that transferOwnership correctly calls transaction execution.
+     * The mock transaction sender returns a successful tx hash.
+     * The mock readOwnership simulates what would happen on-chain after the transaction.
+     */
+
+    it('should transfer ownership and verify via getOwnership', async () => {
+      // Setup: Mock current owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: CURRENT_OWNER,
+      });
+
+      // Verify: Current owner
+      let ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(CURRENT_OWNER);
+
+      // Mock: After transfer, ownership is updated
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: NEW_OWNER,
+      });
+
+      // Action: Transfer ownership
+      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+
+      // Verify: Transaction was submitted
+      expect(result.id).toBeDefined();
+      expect(result.id).toMatch(/^[A-Fa-f0-9]{64}$/); // Stellar transaction hash pattern
+
+      // Verify: Ownership was transferred (roundtrip)
+      ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(NEW_OWNER);
+    });
+
+    it('should perform complete transfer-verify roundtrip', async () => {
+      // Mock progression: current owner -> new owner
+      vi.mocked(readOwnership)
+        .mockResolvedValueOnce({
+          // Step 1: Initially current owner
+          owner: CURRENT_OWNER,
+        })
+        .mockResolvedValueOnce({
+          // Step 3: After transfer, new owner
+          owner: NEW_OWNER,
+        });
+
+      // Step 1: Verify current owner
+      let ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(CURRENT_OWNER);
+
+      // Step 2: Transfer ownership
+      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+      expect(result.id).toBeDefined();
+      expect(result.id).toMatch(/^[A-Fa-f0-9]{64}$/);
+
+      // Step 3: Verify new owner
+      ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(NEW_OWNER);
+    });
+
+    it('should handle ownership transfer to contract address', async () => {
+      const newContractOwner = 'CBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBD3KN';
+
+      // Mock progression: current owner -> new contract owner
+      vi.mocked(readOwnership)
+        .mockResolvedValueOnce({
+          owner: CURRENT_OWNER,
+        })
+        .mockResolvedValueOnce({
+          owner: newContractOwner,
+        });
+
+      // Step 1: Verify current owner
+      let ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(CURRENT_OWNER);
+
+      // Step 2: Transfer to contract address
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        newContractOwner,
+        mockExecutionConfig
+      );
+
+      expect(result.id).toBeDefined();
+
+      // Step 3: Verify new contract owner
+      ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(newContractOwner);
+    });
+
+    it('should handle ownership transfer when no owner exists', async () => {
+      // Mock progression: null owner -> new owner set
+      vi.mocked(readOwnership)
+        .mockResolvedValueOnce({
+          owner: null,
+        })
+        .mockResolvedValueOnce({
+          owner: NEW_OWNER,
+        });
+
+      // Step 1: Verify no owner
+      let ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBeNull();
+
+      // Step 2: Transfer ownership
+      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+
+      expect(result.id).toBeDefined();
+
+      // Step 3: Verify new owner is set
+      ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe(NEW_OWNER);
+    });
+  });
+
+  describe('Transaction Data Validation', () => {
+    it('should validate transfer_ownership transaction structure', () => {
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+
+      // Verify all required fields are present
+      expect(txData.contractAddress).toBe(TEST_CONTRACT);
+      expect(txData.functionName).toBe('transfer_ownership');
+      expect(txData.args).toHaveLength(1);
+      expect(txData.argTypes).toHaveLength(1);
+      expect(txData.argTypes[0]).toBe('Address');
+      expect(txData.args[0]).toBe(NEW_OWNER);
+    });
+
+    it('should handle new_owner parameter correctly', () => {
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+
+      // Verify new_owner is the first and only argument
+      expect(txData.args[0]).toBe(NEW_OWNER);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle long Stellar account addresses', () => {
+      const longAddress = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, longAddress);
+
+      expect(txData.args[0]).toBe(longAddress);
+    });
+
+    it('should handle contract addresses as new owner', () => {
+      const contractAddr = 'CBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBD3KN';
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, contractAddr);
+
+      expect(txData.args[0]).toBe(contractAddr);
+      expect(txData.contractAddress).toBe(TEST_CONTRACT);
+    });
+
+    it('should preserve contract address in transaction data', () => {
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+
+      expect(txData.contractAddress).toBe(TEST_CONTRACT);
     });
   });
 });

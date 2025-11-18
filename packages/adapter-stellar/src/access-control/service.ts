@@ -266,6 +266,12 @@ export class StellarAccessControlService implements AccessControlService {
     // Assemble the transaction data
     const txData = assembleTransferOwnershipAction(contractAddress, newOwner);
 
+    logger.debug('StellarAccessControlService.transferOwnership', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+      argTypes: txData.argTypes,
+    });
+
     // Execute the transaction
     const result = await signAndBroadcastStellarTransaction(
       txData,
@@ -273,6 +279,11 @@ export class StellarAccessControlService implements AccessControlService {
       this.networkConfig,
       onStatusChange,
       runtimeApiKey
+    );
+
+    logger.info(
+      'StellarAccessControlService.transferOwnership',
+      `Ownership transferred. TxHash: ${result.txHash}`
     );
 
     return { id: result.txHash };
