@@ -19,7 +19,7 @@ import type {
   TransactionStatusUpdate,
   TxStatus,
 } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import {
@@ -294,6 +294,7 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to access snapshot
+   * @throws Error if snapshot validation fails
    */
   async exportSnapshot(contractAddress: string): Promise<AccessSnapshot> {
     logger.info(
@@ -319,15 +320,25 @@ export class StellarAccessControlService implements AccessControlService {
       // Contract may not be registered or have no roles, continue with empty roles array
     }
 
-    logger.debug('StellarAccessControlService.exportSnapshot', 'Snapshot created:', {
-      hasOwnership: !!ownership?.owner,
-      roleCount: roles.length,
-    });
-
-    return {
+    const snapshot: AccessSnapshot = {
       roles,
       ownership,
     };
+
+    // Validate snapshot using utils
+    if (!validateSnapshot(snapshot)) {
+      const errorMsg = `Invalid snapshot structure for contract ${contractAddress}`;
+      logger.error('StellarAccessControlService.exportSnapshot', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    logger.debug('StellarAccessControlService.exportSnapshot', 'Snapshot created and validated:', {
+      hasOwnership: !!ownership?.owner,
+      roleCount: roles.length,
+      totalMembers: roles.reduce((sum, r) => sum + r.members.length, 0),
+    });
+
+    return snapshot;
   }
 
   /**

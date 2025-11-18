@@ -42,7 +42,7 @@
 
 ## Phase 6 — US4 (P2): Export snapshot
 
-- [ ] T026 [US4] Implement exportSnapshot in packages/adapter-stellar/src/access-control/service.ts (use utils snapshot)
+- [x] T026 [US4] Implement exportSnapshot in packages/adapter-stellar/src/access-control/service.ts (use utils snapshot)
 - [ ] T027 [P] [US4] Unit tests: snapshot parity vs current reads in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 7 — US5 (P3): History when available
