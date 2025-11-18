@@ -157,9 +157,18 @@ export interface AccessControlService {
    * Transfer ownership of the contract
    * @param contractAddress The contract address
    * @param newOwner The new owner address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
    */
-  transferOwnership(contractAddress: string, newOwner: string): Promise<OperationResult>;
+  transferOwnership(
+    contractAddress: string,
+    newOwner: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
 
   /**
    * Export a snapshot of current access control state

@@ -22,7 +22,11 @@ import type {
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
-import { assembleGrantRoleAction, assembleRevokeRoleAction } from './actions';
+import {
+  assembleGrantRoleAction,
+  assembleRevokeRoleAction,
+  assembleTransferOwnershipAction,
+} from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 
@@ -242,16 +246,36 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @param newOwner The new owner address
-   * @returns Promise resolving to operation result
-   * @throws Error - Not yet implemented (US3)
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
    */
-  async transferOwnership(contractAddress: string, newOwner: string): Promise<OperationResult> {
+  async transferOwnership(
+    contractAddress: string,
+    newOwner: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
     logger.info(
       'StellarAccessControlService.transferOwnership',
       `Transferring ownership to ${newOwner} on ${contractAddress}`
     );
 
-    throw new Error('transferOwnership not yet implemented (US3)');
+    // Assemble the transaction data
+    const txData = assembleTransferOwnershipAction(contractAddress, newOwner);
+
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
+
+    return { id: result.txHash };
   }
 
   /**
