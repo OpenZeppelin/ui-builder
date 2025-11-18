@@ -18,48 +18,48 @@
 
 ## Phase 3 — US1 (P1): Inspect roles and ownership
 
-- [x] T011 [US1] Implement capability detection in packages/adapter-stellar/src/feature-detection.ts
-- [ ] T012 [US1] Implement on-chain ownership/roles reader in packages/adapter-stellar/src/onchain-reader.ts
-- [ ] T013 [US1] Implement AccessControlService surface in packages/adapter-stellar/src/services/access-control.ts (getCapabilities/getOwnership/getCurrentRoles)
+- [x] T011 [US1] Implement capability detection in packages/adapter-stellar/src/access-control/feature-detection.ts
+- [x] T012 [US1] Implement on-chain ownership/roles reader in packages/adapter-stellar/src/access-control/onchain-reader.ts
+- [ ] T013 [US1] Implement AccessControlService surface in packages/adapter-stellar/src/access-control/service.ts (getCapabilities/getOwnership/getCurrentRoles)
 - [ ] T014 [US1] Wire service accessor on adapter and capability flags exposure in packages/adapter-stellar/src/index.ts
-- [ ] T015 [P] [US1] Unit tests: detection in packages/adapter-stellar/tests/detection.spec.ts
-- [ ] T016 [P] [US1] Unit tests: on-chain reader in packages/adapter-stellar/tests/access-control.spec.ts
-- [ ] T017 [P] [US1] Unit tests: reject non‑OZ access-control contracts (UnsupportedContractFeatures) in packages/adapter-stellar/tests/detection.spec.ts
+- [ ] T015 [P] [US1] Unit tests: detection in packages/adapter-stellar/tests/access-control/detection.spec.ts
+- [ ] T016 [P] [US1] Unit tests: on-chain reader in packages/adapter-stellar/tests/access-control/onchain-reader.spec.ts
+- [ ] T017 [P] [US1] Unit tests: reject non‑OZ access-control contracts (UnsupportedContractFeatures) in packages/adapter-stellar/tests/access-control/detection.spec.ts
 
 ## Phase 4 — US2 (P1): Manage role membership (grant/revoke)
 
-- [ ] T018 [US2] Implement action assembly in packages/adapter-stellar/src/actions.ts (grantRole/revokeRole)
-- [ ] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/services/access-control.ts
-- [ ] T020 [P] [US2] Unit tests: grant/revoke roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control.spec.ts
+- [ ] T018 [US2] Implement action assembly in packages/adapter-stellar/src/access-control/actions.ts (grantRole/revokeRole)
+- [ ] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
+- [ ] T020 [P] [US2] Unit tests: grant/revoke roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 5 — US3 (P2): Transfer ownership
 
-- [ ] T021 [US3] Implement transferOwnership action in packages/adapter-stellar/src/actions.ts
-- [ ] T022 [US3] Expose transferOwnership via AccessControlService in packages/adapter-stellar/src/services/access-control.ts
-- [ ] T023 [P] [US3] Unit tests: transfer ownership roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control.spec.ts
+- [ ] T021 [US3] Implement transferOwnership action in packages/adapter-stellar/src/access-control/actions.ts
+- [ ] T022 [US3] Expose transferOwnership via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
+- [ ] T023 [P] [US3] Unit tests: transfer ownership roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 6 — US4 (P2): Export snapshot
 
-- [ ] T024 [US4] Implement exportSnapshot in packages/adapter-stellar/src/services/access-control.ts (use utils snapshot)
-- [ ] T025 [P] [US4] Unit tests: snapshot parity vs current reads in packages/adapter-stellar/tests/access-control.spec.ts
+- [ ] T024 [US4] Implement exportSnapshot in packages/adapter-stellar/src/access-control/service.ts (use utils snapshot)
+- [ ] T025 [P] [US4] Unit tests: snapshot parity vs current reads in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 7 — US5 (P3): History when available
 
-- [ ] T026 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/indexer/indexer-client.ts
-- [ ] T027 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/services/access-control.ts
-- [ ] T028 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/indexer-client.spec.ts
-- [ ] T029 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/merger.spec.ts
-- [ ] T030 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/indexer-client.spec.ts
+- [ ] T026 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
+- [ ] T027 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/access-control/service.ts
+- [ ] T028 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
+- [ ] T029 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts
+- [ ] T030 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
 
 ## Final Phase — Polish & Cross-Cutting
 
-- [ ] T031 Add error taxonomy in packages/adapter-stellar/src/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
+- [ ] T031 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
 - [ ] T032 Ensure address validation uses shared source in all entry points
 - [ ] T033 Update README/CHANGELOG fragments (adapter/types/utils) as needed
 - [ ] T034 Add changeset entries and finalize versions for publish
 - [ ] T035 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
-- [ ] T036 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/perf.spec.ts
-- [ ] T037 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/perf.spec.ts
+- [ ] T036 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
+- [ ] T037 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
 
 ## Dependencies & Order
 
