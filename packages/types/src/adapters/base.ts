@@ -29,13 +29,6 @@ export interface ExecutionMethodDetail {
 }
 
 /**
- * Transaction execution configuration.
- * Note: Stored both at ContractUIRecord top-level (persistent) and in BuilderFormConfig (transient during editing).
- * Re-exported from '../execution' for convenience.
- */
-export type { ExecutionConfig };
-
-/**
  * Represents a wallet connector option available for connection.
  */
 export type Connector = {
