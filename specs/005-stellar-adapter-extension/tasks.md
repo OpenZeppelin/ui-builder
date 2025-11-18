@@ -20,7 +20,7 @@
 
 - [x] T011 [US1] Implement capability detection in packages/adapter-stellar/src/access-control/feature-detection.ts
 - [x] T012 [US1] Implement on-chain ownership/roles reader in packages/adapter-stellar/src/access-control/onchain-reader.ts
-- [ ] T013 [US1] Implement AccessControlService surface in packages/adapter-stellar/src/access-control/service.ts (getCapabilities/getOwnership/getCurrentRoles)
+- [x] T013 [US1] Implement AccessControlService surface in packages/adapter-stellar/src/access-control/service.ts (getCapabilities/getOwnership/getCurrentRoles)
 - [ ] T014 [US1] Wire service accessor on adapter and capability flags exposure in packages/adapter-stellar/src/index.ts
 - [ ] T015 [P] [US1] Unit tests: detection in packages/adapter-stellar/tests/access-control/detection.spec.ts
 - [ ] T016 [P] [US1] Unit tests: on-chain reader in packages/adapter-stellar/tests/access-control/onchain-reader.spec.ts
