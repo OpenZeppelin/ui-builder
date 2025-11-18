@@ -18,6 +18,7 @@ import type {
 } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { assembleGrantRoleAction, assembleRevokeRoleAction } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 
@@ -145,7 +146,6 @@ export class StellarAccessControlService implements AccessControlService {
    * @param roleId The role identifier
    * @param account The account to grant the role to
    * @returns Promise resolving to operation result
-   * @throws Error - Not yet implemented (US2)
    */
   async grantRole(
     contractAddress: string,
@@ -157,7 +157,21 @@ export class StellarAccessControlService implements AccessControlService {
       `Granting role ${roleId} to ${account} on ${contractAddress}`
     );
 
-    throw new Error('grantRole not yet implemented (US2)');
+    // Assemble the transaction data
+    const txData = assembleGrantRoleAction(contractAddress, roleId, account);
+
+    // TODO: Wire up execution flow with ExecutionConfig and status callback
+    // For now, the transaction data is prepared but not executed
+    // The full execution will be implemented when we have the execution context
+    logger.debug('StellarAccessControlService.grantRole', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+      argTypes: txData.argTypes,
+    });
+
+    throw new Error(
+      'grantRole execution not yet wired up. Transaction data preparation is implemented but requires ExecutionConfig and wallet context for execution.'
+    );
   }
 
   /**
@@ -167,7 +181,6 @@ export class StellarAccessControlService implements AccessControlService {
    * @param roleId The role identifier
    * @param account The account to revoke the role from
    * @returns Promise resolving to operation result
-   * @throws Error - Not yet implemented (US2)
    */
   async revokeRole(
     contractAddress: string,
@@ -179,7 +192,21 @@ export class StellarAccessControlService implements AccessControlService {
       `Revoking role ${roleId} from ${account} on ${contractAddress}`
     );
 
-    throw new Error('revokeRole not yet implemented (US2)');
+    // Assemble the transaction data
+    const txData = assembleRevokeRoleAction(contractAddress, roleId, account);
+
+    // TODO: Wire up execution flow with ExecutionConfig and status callback
+    // For now, the transaction data is prepared but not executed
+    // The full execution will be implemented when we have the execution context
+    logger.debug('StellarAccessControlService.revokeRole', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+      argTypes: txData.argTypes,
+    });
+
+    throw new Error(
+      'revokeRole execution not yet wired up. Transaction data preparation is implemented but requires ExecutionConfig and wallet context for execution.'
+    );
   }
 
   /**

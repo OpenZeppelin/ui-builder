@@ -28,8 +28,8 @@
 
 ## Phase 4 — US2 (P1): Manage role membership (grant/revoke)
 
-- [ ] T018 [US2] Implement action assembly in packages/adapter-stellar/src/access-control/actions.ts (grantRole/revokeRole)
-- [ ] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
+- [x] T018 [US2] Implement action assembly in packages/adapter-stellar/src/access-control/actions.ts (grantRole/revokeRole)
+- [x] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
 - [ ] T020 [P] [US2] Unit tests: grant/revoke roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 5 — US3 (P2): Transfer ownership
