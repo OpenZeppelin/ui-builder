@@ -5,17 +5,8 @@
  * These types are used across adapters to provide a consistent interface for access control operations.
  */
 
-import type {
-  EoaExecutionConfig,
-  MultisigExecutionConfig,
-  RelayerExecutionConfig,
-} from '../execution';
+import type { ExecutionConfig } from '../execution';
 import type { TransactionStatusUpdate, TxStatus } from '../transactions/status';
-
-/**
- * Execution configuration type (union of all execution methods)
- */
-type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
 
 /**
  * Capabilities of an access control contract

@@ -1,13 +1,7 @@
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type { ProxyInfo } from '../contracts/proxy';
-import type {
-  EoaExecutionConfig,
-  MultisigExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-} from '../execution';
+import type { ExecutionConfig, RelayerDetails, RelayerDetailsRich } from '../execution';
 import { type FieldType } from '../forms';
 import type { FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
@@ -37,8 +31,9 @@ export interface ExecutionMethodDetail {
 /**
  * Transaction execution configuration.
  * Note: Stored both at ContractUIRecord top-level (persistent) and in BuilderFormConfig (transient during editing).
+ * Re-exported from '../execution' for convenience.
  */
-export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
+export type { ExecutionConfig };
 
 /**
  * Represents a wallet connector option available for connection.
