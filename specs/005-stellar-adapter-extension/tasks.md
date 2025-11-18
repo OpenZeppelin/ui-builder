@@ -35,7 +35,7 @@
 
 ## Phase 5 — US3 (P2): Transfer ownership
 
-- [ ] T022 [US3] Implement transferOwnership action in packages/adapter-stellar/src/access-control/actions.ts
+- [x] T022 [US3] Implement transferOwnership action in packages/adapter-stellar/src/access-control/actions.ts
 - [ ] T023 [US3] Expose transferOwnership via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
 - [ ] T024 [P] [US3] Unit tests: transfer ownership roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
 - [ ] T025 [US3] Wire up transaction execution with wallet context and ExecutionConfig in packages/adapter-stellar/src/access-control/service.ts (transferOwnership) and unskip roundtrip tests
