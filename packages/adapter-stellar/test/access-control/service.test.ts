@@ -420,41 +420,6 @@ describe('Access Control Service (T020)', () => {
       adminRole = roles.find((r) => r.role.id === TEST_ROLE);
       expect(adminRole?.members).not.toContain(TEST_ACCOUNT);
     });
-
-    /**
-     * These tests verify idempotent behavior and are skipped because they require:
-     * 1. Actual contract deployment or sophisticated mock state management
-     * 2. Verification that duplicate grants/revokes don't create duplicate members
-     * The current mock setup returns static responses and doesn't track state mutations.
-     */
-    it.skip('should handle multiple role grants idempotently', async () => {
-      // Setup
-      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
-
-      // Grant role twice
-      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
-      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
-
-      // Verify: Account only appears once in members
-      const roles = await service.getCurrentRoles(TEST_CONTRACT);
-      const adminRole = roles.find((r) => r.role.id === TEST_ROLE);
-      const accountOccurrences = adminRole?.members.filter((m) => m === TEST_ACCOUNT).length;
-      expect(accountOccurrences).toBe(1);
-    });
-
-    it.skip('should handle multiple role revocations idempotently', async () => {
-      // Setup: Assume role is granted
-      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
-
-      // Revoke role twice
-      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
-      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
-
-      // Verify: No errors thrown (idempotent)
-      const roles = await service.getCurrentRoles(TEST_CONTRACT);
-      const adminRole = roles.find((r) => r.role.id === TEST_ROLE);
-      expect(adminRole?.members).not.toContain(TEST_ACCOUNT);
-    });
   });
 
   describe('Transaction Data Validation', () => {
