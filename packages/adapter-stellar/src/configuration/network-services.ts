@@ -117,8 +117,10 @@ export async function testStellarNetworkServiceConnection(
 
   if (serviceId === 'indexer') {
     const indexerUri = values.indexerUri;
+
+    // If no indexer URI is provided, indexer is optional - return success (nothing to test)
     if (!indexerUri || typeof indexerUri !== 'string' || indexerUri.trim() === '') {
-      return { success: false, error: 'Indexer URI is required' };
+      return { success: true };
     }
 
     if (!isValidUrl(indexerUri)) {
