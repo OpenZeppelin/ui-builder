@@ -1,4 +1,3 @@
-import type { AccessControlService } from '../access-control';
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type { ProxyInfo } from '../contracts/proxy';
@@ -13,6 +12,7 @@ import { type FieldType } from '../forms';
 import type { FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
+import type { AccessControlService } from './access-control';
 import type { AdapterExportBootstrap, AdapterExportContext } from './export';
 import type {
   AvailableUiKit,

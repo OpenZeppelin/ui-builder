@@ -18,7 +18,7 @@
 
 ## Phase 3 — US1 (P1): Inspect roles and ownership
 
-- [ ] T011 [US1] Implement capability detection in packages/adapter-stellar/src/feature-detection.ts
+- [x] T011 [US1] Implement capability detection in packages/adapter-stellar/src/feature-detection.ts
 - [ ] T012 [US1] Implement on-chain ownership/roles reader in packages/adapter-stellar/src/onchain-reader.ts
 - [ ] T013 [US1] Implement AccessControlService surface in packages/adapter-stellar/src/services/access-control.ts (getCapabilities/getOwnership/getCurrentRoles)
 - [ ] T014 [US1] Wire service accessor on adapter and capability flags exposure in packages/adapter-stellar/src/index.ts
