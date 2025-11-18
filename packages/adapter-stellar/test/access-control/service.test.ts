@@ -421,6 +421,12 @@ describe('Access Control Service (T020)', () => {
       expect(adminRole?.members).not.toContain(TEST_ACCOUNT);
     });
 
+    /**
+     * These tests verify idempotent behavior and are skipped because they require:
+     * 1. Actual contract deployment or sophisticated mock state management
+     * 2. Verification that duplicate grants/revokes don't create duplicate members
+     * The current mock setup returns static responses and doesn't track state mutations.
+     */
     it.skip('should handle multiple role grants idempotently', async () => {
       // Setup
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
