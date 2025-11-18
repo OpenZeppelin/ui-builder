@@ -47,7 +47,7 @@
 
 ## Phase 7 — US5 (P3): History when available
 
-- [ ] T028 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
+- [x] T028 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
 - [ ] T029 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/access-control/service.ts
 - [ ] T030 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
 - [ ] T031 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts

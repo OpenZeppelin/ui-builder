@@ -101,6 +101,23 @@ export interface UserExplorerConfig {
 }
 
 /**
+ * Configuration for indexer endpoints.
+ * Similar to RPC endpoint config but specifically for blockchain data indexers.
+ */
+export interface IndexerEndpointConfig {
+  http?: string;
+  ws?: string;
+}
+
+/**
+ * A collection of indexer endpoint overrides, keyed by network ID (e.g., networkConfig.id).
+ * Values can be a simple string (assumed to be HTTP) or an IndexerEndpointConfig object.
+ */
+export interface NetworkSpecificIndexerEndpoints {
+  [networkId: string]: string | IndexerEndpointConfig | undefined;
+}
+
+/**
  * A collection of RPC endpoint overrides, keyed by network ID (e.g., networkConfig.id).
  * Values can be a simple string (assumed to be HTTP), an RpcEndpointConfig object,
  * or a UserRpcProviderConfig for user-configured endpoints.
@@ -128,6 +145,9 @@ export interface AppRuntimeConfig {
 
   /** RPC endpoint overrides for different networks. */
   rpcEndpoints?: NetworkSpecificRpcEndpoints;
+
+  /** Indexer endpoint overrides for different networks (for historical data queries). */
+  indexerEndpoints?: NetworkSpecificIndexerEndpoints;
 
   // Add other global or feature-specific settings here as needed.
   // Example:

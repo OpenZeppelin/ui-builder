@@ -8,7 +8,12 @@ The goal of this package is to centralize common logic that is not tied to any s
 
 ## Key Exports
 
-- **`AppConfigService`**: A singleton service responsible for loading and providing runtime configuration. It can load settings from Vite environment variables (for the builder app) or a `public/app.config.json` file (for exported apps), allowing for flexible configuration of RPC URLs, API keys, and other parameters.
+- **`AppConfigService`**: A singleton service responsible for loading and providing runtime configuration. It can load settings from Vite environment variables (for the builder app) or a `public/app.config.json` file (for exported apps), allowing for flexible configuration of RPC URLs, API keys, indexer endpoints, and other parameters.
+  - **RPC Endpoints**: Override default RPC URLs per network via `getRpcEndpointOverride(networkId)`.
+  - **Indexer Endpoints**: Override default indexer URLs per network via `getIndexerEndpointOverride(networkId)` for historical data queries.
+  - **API Keys**: Retrieve explorer API keys via `getExplorerApiKey(serviceId)`.
+  - **Global Services**: Access global service parameters like WalletConnect project IDs.
+  - **Feature Flags**: Check feature enablement via `isFeatureEnabled(flagName)`.
 - **`logger`**: A pre-configured singleton logger for consistent, leveled logging across all packages. It can be enabled, disabled, or have its level changed globally.
 - **`generateId`**: A utility for generating unique IDs, used for form fields and other components.
 - **`cn`**: A utility (a wrapper around `clsx` and `tailwind-merge`) for conditionally joining CSS class names, essential for building dynamic and themeable UI components with Tailwind CSS.

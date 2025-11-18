@@ -725,6 +725,7 @@ Key configurable items include:
 - **Explorer API Keys:** For services like Etherscan, PolygonScan, etc., used by adapters to fetch ABIs. Example: `VITE_APP_CFG_API_KEY_ETHERSCAN_MAINNET="your_key"`.
 - **WalletConnect Project ID:** For EVM adapter's WalletConnect functionality. Example: `VITE_APP_CFG_SERVICE_WALLETCONNECT_PROJECT_ID="your_id"`.
 - **RPC URL Overrides:** To use custom RPC endpoints instead of public defaults for specific networks. Example: `VITE_APP_CFG_RPC_ENDPOINT_ETHEREUM_MAINNET="https://your_custom_rpc.com"`.
+- **Indexer Endpoint Overrides:** To configure GraphQL indexer endpoints for historical blockchain data queries (e.g., access control events). Example: `VITE_APP_CFG_INDEXER_ENDPOINT_STELLAR_TESTNET="https://your_indexer.com/graphql"`.
 
 ### Exported Application Configuration
 
@@ -735,6 +736,7 @@ The structure of this JSON file includes sections for:
 - `networkServiceConfigs`: For explorer API keys, keyed by a service identifier (e.g., `"etherscan-mainnet"`).
 - `globalServiceConfigs`: For global service parameters (e.g., `walletconnect.projectId`).
 - `rpcEndpoints`: For RPC URL overrides, keyed by the network ID (e.g., `"ethereum-mainnet"`).
+- `indexerEndpoints`: For indexer endpoint overrides, keyed by the network ID (e.g., `"stellar-testnet"`). Values can be strings (HTTP URL) or objects with `http` and `ws` properties.
 
 Refer to the README included with the exported application for detailed instructions on configuring `public/app.config.json`.
 

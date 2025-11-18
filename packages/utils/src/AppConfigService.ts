@@ -2,6 +2,7 @@ import type {
   AppRuntimeConfig,
   FeatureFlags,
   GlobalServiceConfigs,
+  IndexerEndpointConfig,
   NetworkServiceConfigs,
   NetworkSpecificRpcEndpoints,
   RpcEndpointConfig,
@@ -46,6 +47,7 @@ export class AppConfigService {
       networkServiceConfigs: {},
       globalServiceConfigs: {},
       rpcEndpoints: {},
+      indexerEndpoints: {},
       featureFlags: {},
       defaultLanguage: 'en',
     };
@@ -240,6 +242,15 @@ export class AppConfigService {
         }
       }
 
+      if (externalConfig.indexerEndpoints) {
+        if (!this.config.indexerEndpoints) this.config.indexerEndpoints = {};
+        for (const networkKey in externalConfig.indexerEndpoints) {
+          if (Object.prototype.hasOwnProperty.call(externalConfig.indexerEndpoints, networkKey)) {
+            this.config.indexerEndpoints[networkKey] = externalConfig.indexerEndpoints[networkKey];
+          }
+        }
+      }
+
       if (externalConfig.featureFlags) {
         this.config.featureFlags = {
           ...(this.config.featureFlags || {}),
@@ -322,6 +333,19 @@ export class AppConfigService {
       logger.warn(LOG_SYSTEM, 'getRpcEndpointOverride called before initialization.');
     }
     return this.config.rpcEndpoints?.[networkId];
+  }
+
+  /**
+   * Get the indexer endpoint override for a specific network.
+   * Indexer endpoints are used for querying historical blockchain data.
+   * @param networkId The network identifier (e.g., 'stellar-testnet')
+   * @returns The indexer endpoint configuration, or undefined if not configured
+   */
+  public getIndexerEndpointOverride(networkId: string): string | IndexerEndpointConfig | undefined {
+    if (!this.isInitialized) {
+      logger.warn(LOG_SYSTEM, 'getIndexerEndpointOverride called before initialization.');
+    }
+    return this.config.indexerEndpoints?.[networkId];
   }
 
   /**
