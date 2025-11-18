@@ -261,13 +261,13 @@ export async function readCurrentRoles(
   const assignments: RoleAssignment[] = [];
 
   for (const roleId of roleIds) {
+    const role: RoleIdentifier = {
+      id: roleId,
+      label: roleId.replace(/_/g, ' ').toLowerCase(),
+    };
+
     try {
       const members = await enumerateRoleMembers(contractAddress, roleId, networkConfig);
-
-      const role: RoleIdentifier = {
-        id: roleId,
-        label: roleId.replace(/_/g, ' ').toLowerCase(),
-      };
 
       assignments.push({
         role,
@@ -277,7 +277,11 @@ export async function readCurrentRoles(
       logger.debug('readCurrentRoles', `Role ${roleId} has ${members.length} members`);
     } catch (error) {
       logger.warn('readCurrentRoles', `Failed to read role ${roleId}:`, error);
-      // Continue with other roles
+      // Add role with empty members array to maintain array length consistency
+      assignments.push({
+        role,
+        members: [],
+      });
     }
   }
 
