@@ -220,8 +220,14 @@ export class StellarAccessControlService implements AccessControlService {
       // Contract may not be Ownable, continue without ownership
     }
 
-    // Read roles
-    const roles = await this.getCurrentRoles(contractAddress);
+    // Read roles (if contract is registered and has roles)
+    let roles: RoleAssignment[] = [];
+    try {
+      roles = await this.getCurrentRoles(contractAddress);
+    } catch (error) {
+      logger.debug('StellarAccessControlService.exportSnapshot', 'Roles not available:', error);
+      // Contract may not be registered or have no roles, continue with empty roles array
+    }
 
     logger.debug('StellarAccessControlService.exportSnapshot', 'Snapshot created:', {
       hasOwnership: !!ownership?.owner,
