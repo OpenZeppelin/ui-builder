@@ -31,40 +31,43 @@
 - [x] T018 [US2] Implement action assembly in packages/adapter-stellar/src/access-control/actions.ts (grantRole/revokeRole)
 - [x] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
 - [x] T020 [P] [US2] Unit tests: grant/revoke roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
+- [ ] T021 [US2] Wire up transaction execution with wallet context and ExecutionConfig in packages/adapter-stellar/src/access-control/service.ts (grantRole/revokeRole) and unskip roundtrip tests
 
 ## Phase 5 — US3 (P2): Transfer ownership
 
-- [ ] T021 [US3] Implement transferOwnership action in packages/adapter-stellar/src/access-control/actions.ts
-- [ ] T022 [US3] Expose transferOwnership via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
-- [ ] T023 [P] [US3] Unit tests: transfer ownership roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
+- [ ] T022 [US3] Implement transferOwnership action in packages/adapter-stellar/src/access-control/actions.ts
+- [ ] T023 [US3] Expose transferOwnership via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
+- [ ] T024 [P] [US3] Unit tests: transfer ownership roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
+- [ ] T025 [US3] Wire up transaction execution with wallet context and ExecutionConfig in packages/adapter-stellar/src/access-control/service.ts (transferOwnership) and unskip roundtrip tests
 
 ## Phase 6 — US4 (P2): Export snapshot
 
-- [ ] T024 [US4] Implement exportSnapshot in packages/adapter-stellar/src/access-control/service.ts (use utils snapshot)
-- [ ] T025 [P] [US4] Unit tests: snapshot parity vs current reads in packages/adapter-stellar/tests/access-control/service.spec.ts
+- [ ] T026 [US4] Implement exportSnapshot in packages/adapter-stellar/src/access-control/service.ts (use utils snapshot)
+- [ ] T027 [P] [US4] Unit tests: snapshot parity vs current reads in packages/adapter-stellar/tests/access-control/service.spec.ts
 
 ## Phase 7 — US5 (P3): History when available
 
-- [ ] T026 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
-- [ ] T027 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/access-control/service.ts
-- [ ] T028 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
-- [ ] T029 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts
-- [ ] T030 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
+- [ ] T028 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
+- [ ] T029 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/access-control/service.ts
+- [ ] T030 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
+- [ ] T031 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts
+- [ ] T032 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
 
 ## Final Phase — Polish & Cross-Cutting
 
-- [ ] T031 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
-- [ ] T032 Ensure address validation uses shared source in all entry points
-- [ ] T033 Update README/CHANGELOG fragments (adapter/types/utils) as needed
-- [ ] T034 Add changeset entries and finalize versions for publish
-- [ ] T035 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
-- [ ] T036 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
-- [ ] T037 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
+- [ ] T033 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
+- [ ] T034 Ensure address validation uses shared source in all entry points
+- [ ] T035 Update README/CHANGELOG fragments (adapter/types/utils) as needed
+- [ ] T036 Add changeset entries and finalize versions for publish
+- [ ] T037 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
+- [ ] T038 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
+- [ ] T039 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
 
 ## Dependencies & Order
 
 - Phase 1 → Phase 2 → US1 (P1) → US2 (P1) → US3 (P2) → US4 (P2) → US5 (P3) → Polish
-- Critical edges: T004–T006 before T013/T014; T008–T010 before T026; Utils snapshot (T007) before T024
+- Critical edges: T004–T006 before T013/T014; T008–T010 before T028; Utils snapshot (T007) before T026
+- Transaction execution wiring (T021, T025) depends on action assembly and service stubs being in place
 
 ## Parallel Opportunities
 
@@ -72,10 +75,10 @@
   - T007 utils snapshot
   - T009 network services validation
   - T015–T017 US1 tests
-  - T020 US2 tests
-  - T023 US3 tests
-  - T025 US4 tests
-  - T028–T030 US5 tests
+  - T020 US2 tests (documentation of expected behavior)
+  - T024 US3 tests
+  - T027 US4 tests
+  - T030–T032 US5 tests
 
 ## Independent Test Criteria (per story)
 
