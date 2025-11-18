@@ -5,12 +5,17 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractSchema, StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type {
+  ContractSchema,
+  EoaExecutionConfig,
+  StellarNetworkConfig,
+} from '@openzeppelin/ui-builder-types';
 
 import {
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
 } from '../../src/access-control/actions';
+import { readCurrentRoles } from '../../src/access-control/onchain-reader';
 import { StellarAccessControlService } from '../../src/access-control/service';
 
 // Mock the logger
@@ -30,10 +35,18 @@ vi.mock('../../src/access-control/onchain-reader', () => ({
   getAdmin: vi.fn(),
 }));
 
+// Mock the transaction sender
+vi.mock('../../src/transaction/sender', () => ({
+  signAndBroadcastStellarTransaction: vi.fn().mockResolvedValue({
+    txHash: 'a'.repeat(64), // Mock transaction hash
+  }),
+}));
+
 describe('Access Control Service (T020)', () => {
   let service: StellarAccessControlService;
   let mockNetworkConfig: StellarNetworkConfig;
   let mockContractSchema: ContractSchema;
+  let mockExecutionConfig: EoaExecutionConfig;
 
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   const TEST_ROLE = 'admin';
@@ -238,6 +251,11 @@ describe('Access Control Service (T020)', () => {
       ],
     };
 
+    mockExecutionConfig = {
+      method: 'eoa',
+      address: TEST_ACCOUNT,
+    };
+
     service = new StellarAccessControlService(mockNetworkConfig);
   });
 
@@ -269,65 +287,35 @@ describe('Access Control Service (T020)', () => {
     });
   });
 
-  describe('Service Methods - Current Implementation', () => {
-    beforeEach(() => {
-      // Register contract with the service
-      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
-    });
-
-    it('should throw informative error for grantRole (execution not wired)', async () => {
-      await expect(service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT)).rejects.toThrow(
-        'grantRole execution not yet wired up'
-      );
-    });
-
-    it('should throw informative error for revokeRole (execution not wired)', async () => {
-      await expect(service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT)).rejects.toThrow(
-        'revokeRole execution not yet wired up'
-      );
-    });
-
-    it('should prepare transaction data before throwing (grantRole)', async () => {
-      try {
-        await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      } catch (error) {
-        // Expected error
-        expect(error).toBeDefined();
-      }
-
-      // Verify that action assembly was called
-      const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      expect(txData.functionName).toBe('grant_role');
-      expect(txData.args).toEqual([TEST_ACCOUNT, TEST_ROLE]);
-    });
-
-    it('should prepare transaction data before throwing (revokeRole)', async () => {
-      try {
-        await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      } catch (error) {
-        // Expected error
-        expect(error).toBeDefined();
-      }
-
-      // Verify that action assembly was called
-      const txData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      expect(txData.functionName).toBe('revoke_role');
-      expect(txData.args).toEqual([TEST_ACCOUNT, TEST_ROLE]);
-    });
-  });
-
-  describe('Expected Behavior (Roundtrip Tests - To Be Implemented)', () => {
+  describe('Expected Behavior (Roundtrip Tests)', () => {
     /**
-     * These tests document the expected behavior once execution is wired up.
-     * They are currently skipped but serve as specification for the full implementation.
+     * These tests verify that grantRole/revokeRole correctly call transaction execution.
+     * The mock transaction sender returns a successful tx hash.
+     * The mock readCurrentRoles simulates what would happen on-chain after the transaction.
      */
 
-    it.skip('should grant role and verify via getCurrentRoles', async () => {
+    beforeEach(() => {
+      // Mock readCurrentRoles to return role data that includes our test account
+      // This simulates what the on-chain state would be after a successful grant
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE, name: TEST_ROLE },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+    });
+
+    it('should grant role and verify via getCurrentRoles', async () => {
       // Setup: Register contract
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
 
       // Action: Grant role
-      const result = await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      const result = await service.grantRole(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        mockExecutionConfig
+      );
 
       // Verify: Transaction was submitted
       expect(result.id).toBeDefined();
@@ -340,12 +328,25 @@ describe('Access Control Service (T020)', () => {
       expect(adminRole?.members).toContain(TEST_ACCOUNT);
     });
 
-    it.skip('should revoke role and verify via getCurrentRoles', async () => {
+    it('should revoke role and verify via getCurrentRoles', async () => {
       // Setup: Register contract and assume role is already granted
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
 
+      // Mock: After revoke, the account should not be in members
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE, name: TEST_ROLE },
+          members: [], // Empty after revoke
+        },
+      ]);
+
       // Action: Revoke role
-      const result = await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      const result = await service.revokeRole(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        mockExecutionConfig
+      );
 
       // Verify: Transaction was submitted
       expect(result.id).toBeDefined();
@@ -357,9 +358,33 @@ describe('Access Control Service (T020)', () => {
       expect(adminRole?.members).not.toContain(TEST_ACCOUNT);
     });
 
-    it.skip('should perform complete grant-verify-revoke-verify roundtrip', async () => {
+    it('should perform complete grant-verify-revoke-verify roundtrip', async () => {
       // Setup
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
+
+      // Mock progression: empty -> has member -> empty again
+      vi.mocked(readCurrentRoles)
+        .mockResolvedValueOnce([
+          // Step 1: Initially no members
+          {
+            role: { id: TEST_ROLE, name: TEST_ROLE },
+            members: [],
+          },
+        ])
+        .mockResolvedValueOnce([
+          // Step 3: After grant, member is present
+          {
+            role: { id: TEST_ROLE, name: TEST_ROLE },
+            members: [TEST_ACCOUNT],
+          },
+        ])
+        .mockResolvedValueOnce([
+          // Step 5: After revoke, member is gone
+          {
+            role: { id: TEST_ROLE, name: TEST_ROLE },
+            members: [],
+          },
+        ]);
 
       // Step 1: Verify role is not initially granted
       let roles = await service.getCurrentRoles(TEST_CONTRACT);
@@ -367,7 +392,12 @@ describe('Access Control Service (T020)', () => {
       expect(adminRole?.members).not.toContain(TEST_ACCOUNT);
 
       // Step 2: Grant role
-      const grantResult = await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      const grantResult = await service.grantRole(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        mockExecutionConfig
+      );
       expect(grantResult.id).toBeDefined();
 
       // Step 3: Verify role is granted
@@ -376,7 +406,12 @@ describe('Access Control Service (T020)', () => {
       expect(adminRole?.members).toContain(TEST_ACCOUNT);
 
       // Step 4: Revoke role
-      const revokeResult = await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      const revokeResult = await service.revokeRole(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        mockExecutionConfig
+      );
       expect(revokeResult.id).toBeDefined();
 
       // Step 5: Verify role is revoked

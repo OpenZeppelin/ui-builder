@@ -31,7 +31,7 @@
 - [x] T018 [US2] Implement action assembly in packages/adapter-stellar/src/access-control/actions.ts (grantRole/revokeRole)
 - [x] T019 [US2] Expose grantRole/revokeRole via AccessControlService in packages/adapter-stellar/src/access-control/service.ts
 - [x] T020 [P] [US2] Unit tests: grant/revoke roundtrip (mock RPC) in packages/adapter-stellar/tests/access-control/service.spec.ts
-- [ ] T021 [US2] Wire up transaction execution with wallet context and ExecutionConfig in packages/adapter-stellar/src/access-control/service.ts (grantRole/revokeRole) and unskip roundtrip tests
+- [x] T021 [US2] Wire up transaction execution with wallet context and ExecutionConfig in packages/adapter-stellar/src/access-control/service.ts (grantRole/revokeRole) and unskip roundtrip tests
 
 ## Phase 5 — US3 (P2): Transfer ownership
 

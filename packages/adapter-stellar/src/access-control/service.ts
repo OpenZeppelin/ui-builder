@@ -10,14 +10,18 @@ import type {
   AccessControlService,
   AccessSnapshot,
   ContractSchema,
+  ExecutionConfig,
   HistoryEntry,
   OperationResult,
   OwnershipInfo,
   RoleAssignment,
   StellarNetworkConfig,
+  TransactionStatusUpdate,
+  TxStatus,
 } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import { assembleGrantRoleAction, assembleRevokeRoleAction } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
@@ -145,12 +149,18 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @param roleId The role identifier
    * @param account The account to grant the role to
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
    */
   async grantRole(
     contractAddress: string,
     roleId: string,
-    account: string
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
     logger.info(
       'StellarAccessControlService.grantRole',
@@ -160,18 +170,24 @@ export class StellarAccessControlService implements AccessControlService {
     // Assemble the transaction data
     const txData = assembleGrantRoleAction(contractAddress, roleId, account);
 
-    // TODO: Wire up execution flow with ExecutionConfig and status callback
-    // For now, the transaction data is prepared but not executed
-    // The full execution will be implemented when we have the execution context
     logger.debug('StellarAccessControlService.grantRole', 'Transaction data prepared:', {
       contractAddress: txData.contractAddress,
       functionName: txData.functionName,
       argTypes: txData.argTypes,
     });
 
-    throw new Error(
-      'grantRole execution not yet wired up. Transaction data preparation is implemented but requires ExecutionConfig and wallet context for execution.'
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
     );
+
+    logger.info('StellarAccessControlService.grantRole', `Role granted. TxHash: ${result.txHash}`);
+
+    return { id: result.txHash };
   }
 
   /**
@@ -180,12 +196,18 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @param roleId The role identifier
    * @param account The account to revoke the role from
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
    */
   async revokeRole(
     contractAddress: string,
     roleId: string,
-    account: string
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
     logger.info(
       'StellarAccessControlService.revokeRole',
@@ -195,18 +217,24 @@ export class StellarAccessControlService implements AccessControlService {
     // Assemble the transaction data
     const txData = assembleRevokeRoleAction(contractAddress, roleId, account);
 
-    // TODO: Wire up execution flow with ExecutionConfig and status callback
-    // For now, the transaction data is prepared but not executed
-    // The full execution will be implemented when we have the execution context
     logger.debug('StellarAccessControlService.revokeRole', 'Transaction data prepared:', {
       contractAddress: txData.contractAddress,
       functionName: txData.functionName,
       argTypes: txData.argTypes,
     });
 
-    throw new Error(
-      'revokeRole execution not yet wired up. Transaction data preparation is implemented but requires ExecutionConfig and wallet context for execution.'
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
     );
+
+    logger.info('StellarAccessControlService.revokeRole', `Role revoked. TxHash: ${result.txHash}`);
+
+    return { id: result.txHash };
   }
 
   /**

@@ -5,6 +5,18 @@
  * These types are used across adapters to provide a consistent interface for access control operations.
  */
 
+import type {
+  EoaExecutionConfig,
+  MultisigExecutionConfig,
+  RelayerExecutionConfig,
+} from '../execution';
+import type { TransactionStatusUpdate, TxStatus } from '../transactions/status';
+
+/**
+ * Execution configuration type (union of all execution methods)
+ */
+type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
+
 /**
  * Capabilities of an access control contract
  */
@@ -117,18 +129,38 @@ export interface AccessControlService {
    * @param contractAddress The contract address
    * @param roleId The role identifier
    * @param account The account to grant the role to
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
    */
-  grantRole(contractAddress: string, roleId: string, account: string): Promise<OperationResult>;
+  grantRole(
+    contractAddress: string,
+    roleId: string,
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
 
   /**
    * Revoke a role from an account
    * @param contractAddress The contract address
    * @param roleId The role identifier
    * @param account The account to revoke the role from
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
    */
-  revokeRole(contractAddress: string, roleId: string, account: string): Promise<OperationResult>;
+  revokeRole(
+    contractAddress: string,
+    roleId: string,
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
 
   /**
    * Transfer ownership of the contract
