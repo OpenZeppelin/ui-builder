@@ -253,7 +253,8 @@ describe('Access Control Service (T020)', () => {
 
     mockExecutionConfig = {
       method: 'eoa',
-      address: TEST_ACCOUNT,
+      allowAny: false,
+      specificAddress: TEST_ACCOUNT,
     };
 
     service = new StellarAccessControlService(mockNetworkConfig);
@@ -299,7 +300,7 @@ describe('Access Control Service (T020)', () => {
       // This simulates what the on-chain state would be after a successful grant
       vi.mocked(readCurrentRoles).mockResolvedValue([
         {
-          role: { id: TEST_ROLE, name: TEST_ROLE },
+          role: { id: TEST_ROLE, label: TEST_ROLE },
           members: [TEST_ACCOUNT],
         },
       ]);
@@ -335,7 +336,7 @@ describe('Access Control Service (T020)', () => {
       // Mock: After revoke, the account should not be in members
       vi.mocked(readCurrentRoles).mockResolvedValue([
         {
-          role: { id: TEST_ROLE, name: TEST_ROLE },
+          role: { id: TEST_ROLE, label: TEST_ROLE },
           members: [], // Empty after revoke
         },
       ]);
@@ -367,21 +368,21 @@ describe('Access Control Service (T020)', () => {
         .mockResolvedValueOnce([
           // Step 1: Initially no members
           {
-            role: { id: TEST_ROLE, name: TEST_ROLE },
+            role: { id: TEST_ROLE, label: TEST_ROLE },
             members: [],
           },
         ])
         .mockResolvedValueOnce([
           // Step 3: After grant, member is present
           {
-            role: { id: TEST_ROLE, name: TEST_ROLE },
+            role: { id: TEST_ROLE, label: TEST_ROLE },
             members: [TEST_ACCOUNT],
           },
         ])
         .mockResolvedValueOnce([
           // Step 5: After revoke, member is gone
           {
-            role: { id: TEST_ROLE, name: TEST_ROLE },
+            role: { id: TEST_ROLE, label: TEST_ROLE },
             members: [],
           },
         ]);
@@ -425,8 +426,8 @@ describe('Access Control Service (T020)', () => {
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
 
       // Grant role twice
-      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
+      await service.grantRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
 
       // Verify: Account only appears once in members
       const roles = await service.getCurrentRoles(TEST_CONTRACT);
@@ -440,8 +441,8 @@ describe('Access Control Service (T020)', () => {
       service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE]);
 
       // Revoke role twice
-      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
-      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
+      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
+      await service.revokeRole(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT, mockExecutionConfig);
 
       // Verify: No errors thrown (idempotent)
       const roles = await service.getCurrentRoles(TEST_CONTRACT);
