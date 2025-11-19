@@ -28,6 +28,7 @@ import {
   assembleTransferOwnershipAction,
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
+import { createIndexerClient, StellarIndexerClient } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 
 /**
@@ -44,8 +45,11 @@ interface StellarAccessControlContext {
  */
 export class StellarAccessControlService implements AccessControlService {
   private readonly contractContexts = new Map<string, StellarAccessControlContext>();
+  private readonly indexerClient: StellarIndexerClient;
 
-  constructor(private readonly networkConfig: StellarNetworkConfig) {}
+  constructor(private readonly networkConfig: StellarNetworkConfig) {
+    this.indexerClient = createIndexerClient(networkConfig);
+  }
 
   /**
    * Registers a contract with its schema and known roles
@@ -87,7 +91,7 @@ export class StellarAccessControlService implements AccessControlService {
     }
 
     // Check if indexer is configured
-    const indexerAvailable = !!(this.networkConfig.indexerUri || this.networkConfig.indexerWsUri);
+    const indexerAvailable = await this.indexerClient.checkAvailability();
 
     const capabilities = detectAccessControlCapabilities(context.contractSchema, indexerAvailable);
 
@@ -363,7 +367,16 @@ export class StellarAccessControlService implements AccessControlService {
       options
     );
 
-    throw new Error('getHistory not yet implemented (US5)');
+    const isAvailable = await this.indexerClient.checkAvailability();
+    if (!isAvailable) {
+      logger.warn(
+        'StellarAccessControlService.getHistory',
+        `Indexer not available for network ${this.networkConfig.id}, returning empty history`
+      );
+      return [];
+    }
+
+    return this.indexerClient.queryHistory(contractAddress, options);
   }
 
   /**
