@@ -19,20 +19,20 @@ const LOG_SYSTEM = 'StellarIndexerClient';
  * GraphQL query response types for indexer
  */
 interface IndexerHistoryEntry {
-  role: {
-    id: string;
-    label?: string;
-  };
+  id: string;
+  role?: string; // Nullable for Ownership events
   account: string;
-  changeType: 'GRANTED' | 'REVOKED';
-  txId: string;
-  timestamp?: string;
-  ledger?: number;
+  type: 'ROLE_GRANTED' | 'ROLE_REVOKED' | 'OWNERSHIP_TRANSFER_COMPLETED';
+  txHash: string;
+  timestamp: string;
+  blockHeight: string;
 }
 
 interface IndexerHistoryResponse {
   data?: {
-    history?: IndexerHistoryEntry[];
+    accessControlEvents?: {
+      nodes: IndexerHistoryEntry[];
+    };
   };
   errors?: Array<{
     message: string;
@@ -135,6 +135,7 @@ export class StellarIndexerClient {
       throw new Error('No indexer HTTP endpoint configured');
     }
 
+    // Build query with server-side filtering
     const query = this.buildHistoryQuery(contractAddress, options);
     const variables = this.buildQueryVariables(contractAddress, options);
 
@@ -156,12 +157,12 @@ export class StellarIndexerClient {
         throw new Error(`Indexer query errors: ${errorMessages}`);
       }
 
-      if (!result.data?.history) {
+      if (!result.data?.accessControlEvents?.nodes) {
         logger.debug(LOG_SYSTEM, `No history data returned for contract ${contractAddress}`);
         return [];
       }
 
-      return this.transformIndexerEntries(result.data.history);
+      return this.transformIndexerEntries(result.data.accessControlEvents.nodes);
     } catch (error) {
       logger.error(
         LOG_SYSTEM,
@@ -247,25 +248,30 @@ export class StellarIndexerClient {
   }
 
   /**
-   * Build GraphQL query for history
+   * Build GraphQL query for history with SubQuery filtering
    */
   private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
-    const roleFilter = options?.roleId ? ', role: $role' : '';
-    const accountFilter = options?.account ? ', account: $account' : '';
-    const limitClause = options?.limit ? ', limit: $limit' : '';
+    const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
+    const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
+    const limitClause = options?.limit ? ', first: $limit' : '';
 
     return `
-      query GetHistory($contract: ID!${roleFilter ? ', $role: ID' : ''}${accountFilter ? ', $account: String' : ''}${limitClause ? ', $limit: Int' : ''}) {
-        history(contract: $contract${roleFilter}${accountFilter}${limitClause}) {
-          role {
-            id
-            label
+      query GetHistory($contract: String!${options?.roleId ? ', $role: String' : ''}${options?.account ? ', $account: String' : ''}${options?.limit ? ', $limit: Int' : ''}) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}
           }
-          account
-          changeType
-          txId
-          timestamp
-          ledger
+          orderBy: TIMESTAMP_DESC${limitClause}
+        ) {
+          nodes {
+            id
+            role
+            account
+            type
+            txHash
+            timestamp
+            blockHeight
+          }
         }
       }
     `;
@@ -301,17 +307,27 @@ export class StellarIndexerClient {
   private transformIndexerEntries(entries: IndexerHistoryEntry[]): HistoryEntry[] {
     return entries.map((entry) => {
       const role: RoleIdentifier = {
-        id: entry.role.id,
-        ...(entry.role.label ? { label: entry.role.label } : {}),
+        id: entry.role || 'OWNER', // Map ownership events to special role or null
       };
+
+      // Map SubQuery event types to internal types
+      let changeType: 'GRANTED' | 'REVOKED';
+      if (entry.type === 'ROLE_GRANTED') {
+        changeType = 'GRANTED';
+      } else if (entry.type === 'ROLE_REVOKED') {
+        changeType = 'REVOKED';
+      } else {
+        // Treat ownership transfer as a grant for now, or handle differently if HistoryEntry supports it
+        changeType = 'GRANTED';
+      }
 
       return {
         role,
         account: entry.account,
-        changeType: entry.changeType,
-        txId: entry.txId,
-        ...(entry.timestamp ? { timestamp: entry.timestamp } : {}),
-        ...(entry.ledger !== undefined ? { ledger: entry.ledger } : {}),
+        changeType,
+        txId: entry.txHash,
+        timestamp: entry.timestamp,
+        ledger: parseInt(entry.blockHeight, 10),
       };
     });
   }
