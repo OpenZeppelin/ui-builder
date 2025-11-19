@@ -9,7 +9,7 @@ type Query {
   accessControlCapabilities(contract: ID!): AccessControlCapabilities!
   ownership(contract: ID!): OwnershipInfo!
   currentRoles(contract: ID!): [RoleAssignment!]!
-  history(contract: ID!, role: ID): [HistoryEntry!]!
+  history(contract: ID!, role: ID, account: String, limit: Int): [HistoryEntry!]!
 }
 
 type Mutation {

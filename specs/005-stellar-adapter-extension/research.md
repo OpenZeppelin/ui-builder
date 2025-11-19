@@ -59,6 +59,12 @@ Derivation rule (clarified): Derivation is DISABLED by default. It is only enabl
 - Alternatives considered: Attempt to support arbitrary/custom AC contracts; Rejected due to variability and increased risk/maintenance.
 - Reference: [OpenZeppelin Stellar Access Control](https://github.com/OpenZeppelin/stellar-contracts/tree/main/packages/access)
 
+10. SubQuery Indexer Adoption
+
+- Decision: Use SubQuery Managed Service for indexing Access Control and Ownable events.
+- Rationale: Provides robust, scalable indexing with built-in server-side filtering, pagination, and sorting, eliminating the need for complex client-side filtering logic.
+- Alternatives considered: Custom bespoke indexer (high maintenance), pure on-chain logs (inefficient/limited filtering).
+
 ## Open Questions (resolved)
 
 - Default indexer endpoints: NetworkConfig may ship defaults for official networks when stable endpoints are available; otherwise leave unset. Operators can override via runtime configuration. Derivation from RPC is optional and only used when a safe, known pattern exists.
