@@ -62,15 +62,16 @@ const stellarTestnet: StellarNetworkConfig = {
 #### Deployment
 
 The indexer is production-ready and compatible with:
-- SubQuery Managed Service (recommended for production)
-- OnFinality Indexing Service
-- Self-hosted infrastructure
+
+- **SubQuery Network** (decentralized, recommended for production)
+- Self-hosted infrastructure (Docker)
 
 For deployment instructions, see the [Indexer Deployment Guide](https://github.com/OpenZeppelin/stellar-access-control-indexer/blob/main/DEPLOYMENT.md).
 
 #### Graceful Degradation
 
 If no indexer is configured or the indexer is unavailable:
+
 - On-chain queries (roles, ownership) work normally
 - Historical queries return an empty array with a warning
 - UI remains functional for all current-state operations

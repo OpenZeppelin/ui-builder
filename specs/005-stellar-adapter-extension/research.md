@@ -64,6 +64,12 @@ Derivation rule (clarified): Derivation is DISABLED by default. It is only enabl
 - Decision: Use SubQuery Managed Service for indexing Access Control and Ownable events.
 - Rationale: Provides robust, scalable indexing with built-in server-side filtering, pagination, and sorting, eliminating the need for complex client-side filtering logic.
 - Alternatives considered: Custom bespoke indexer (high maintenance), pure on-chain logs (inefficient/limited filtering).
+- Implementation: Production-ready indexer deployed at `stellar-access-control-indexer` repository capturing all 9 OpenZeppelin events:
+  - **Access Control Events (6):** role_granted, role_revoked, role_admin_changed, admin_transfer_initiated, admin_transfer_completed, admin_renounced
+  - **Ownable Events (3):** ownership_transfer, ownership_transfer_completed, ownership_renounced
+- Key learnings: Event structures from deployed OpenZeppelin contracts include Map wrappers (e.g., `{ caller: Address }`) and variable topic/value placement requiring robust fallback logic in handlers.
+- Testing: 26 unit tests covering ScVal decoding, event structure variations, and all event types.
+- Documentation: Comprehensive README with deployment guide, event structure notes, and SubQuery Managed Service integration instructions.
 
 ## Open Questions (resolved)
 

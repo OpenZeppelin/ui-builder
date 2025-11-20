@@ -49,19 +49,22 @@
 
 - [x] T028 [US5] Implement indexer client with config precedence in packages/adapter-stellar/src/access-control/indexer-client.ts
 - [x] T029 [US5] Implement getHistory + filtering in packages/adapter-stellar/src/access-control/service.ts
-- [ ] T030 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
-- [ ] T031 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts
-- [ ] T032 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
+- [x] T030 [P] [US5] SubQuery indexer implementation complete - captures all 9 OpenZeppelin events (role_granted, role_revoked, role_admin_changed, admin_transfer_initiated, admin_transfer_completed, admin_renounced, ownership_transfer, ownership_transfer_completed, ownership_renounced). Tested locally with Docker; production deployment to SubQuery Network and adapter integration testing pending.
+- [ ] T030a [US5] Deploy SubQuery indexer to SubQuery Network (IPFS + production deployment)
+- [ ] T030b [US5] Integration test: Stellar adapter queries indexer for getHistory with real deployed indexer
+- [ ] T031 [P] [US5] Unit tests: history queries (mock GraphQL) in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
+- [ ] T032 [P] [US5] Unit tests: merge on-chain + indexer, edge cases in packages/adapter-stellar/tests/access-control/merger.spec.ts
+- [ ] T033 [P] [US5] Unit tests: no indexer configured/unreachable → supportsHistory=false and graceful fallback in packages/adapter-stellar/tests/access-control/indexer-client.spec.ts
 
 ## Final Phase — Polish & Cross-Cutting
 
-- [ ] T033 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
-- [ ] T034 Ensure address validation uses shared source in all entry points
-- [ ] T035 Update README/CHANGELOG fragments (adapter/types/utils) as needed
-- [ ] T036 Add changeset entries and finalize versions for publish
-- [ ] T037 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
-- [ ] T038 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
-- [ ] T039 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
+- [ ] T034 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
+- [ ] T035 Ensure address validation uses shared source in all entry points
+- [ ] T036 Update README/CHANGELOG fragments (adapter/types/utils) as needed
+- [ ] T037 Add changeset entries and finalize versions for publish
+- [ ] T038 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
+- [ ] T039 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
+- [ ] T040 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
 
 ## Dependencies & Order
 

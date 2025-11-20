@@ -1,4 +1,6 @@
 # GraphQL Contracts: Stellar Adapter Extension — Access Control
+# This schema documents the API surface exposed by the Stellar adapter's AccessControlService
+# Note: The actual indexer uses SubQuery's schema format (see stellar-access-control-indexer/schema.graphql)
 
 schema {
   query: Query
@@ -6,16 +8,30 @@ schema {
 }
 
 type Query {
+  # Get contract capabilities (detects AccessControl, Ownable, enumeration support)
   accessControlCapabilities(contract: ID!): AccessControlCapabilities!
+
+  # Get current owner (Ownable contracts)
   ownership(contract: ID!): OwnershipInfo!
+
+  # Get current role assignments (AccessControl contracts)
   currentRoles(contract: ID!): [RoleAssignment!]!
+
+  # Get historical events (requires indexer)
   history(contract: ID!, role: ID, account: String, limit: Int): [HistoryEntry!]!
 }
 
 type Mutation {
+  # Grant a role to an account
   grantRole(contract: ID!, role: ID!, account: String!): Operation!
+
+  # Revoke a role from an account
   revokeRole(contract: ID!, role: ID!, account: String!): Operation!
+
+  # Transfer ownership to a new owner (2-step process)
   transferOwnership(contract: ID!, newOwner: String!): Operation!
+
+  # Export complete snapshot of current state
   exportSnapshot(contract: ID!): AccessSnapshot!
 }
 
@@ -47,22 +63,32 @@ type AccessSnapshot {
   ownership: OwnershipInfo
 }
 
-enum RoleChangeType {
-  GRANTED
-  REVOKED
+enum EventType {
+  ROLE_GRANTED
+  ROLE_REVOKED
+  ROLE_ADMIN_CHANGED
+  ADMIN_TRANSFER_INITIATED
+  ADMIN_TRANSFER_COMPLETED
+  ADMIN_RENOUNCED
+  OWNERSHIP_TRANSFER_STARTED
+  OWNERSHIP_TRANSFER_COMPLETED
+  OWNERSHIP_RENOUNCED
 }
 
 type HistoryEntry {
-  role: RoleIdentifier!
+  id: ID!
+  contract: String!
+  role: String
   account: String!
-  changeType: RoleChangeType!
-  txId: ID!
+  admin: String
+  type: EventType!
+  txHash: String!
   timestamp: String
-  ledger: Int
+  ledger: Int!
+  blockHeight: String!
 }
 
 type Operation {
   id: ID!
-}***
-
-
+  status: String
+}
