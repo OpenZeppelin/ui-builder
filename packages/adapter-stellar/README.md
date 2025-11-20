@@ -32,6 +32,51 @@ The Builder application’s “Customize” step passes an `ExecutionConfig` to 
 
 ---
 
+## Access Control Support
+
+The Stellar adapter includes first-class support for OpenZeppelin Access Control and Ownable contracts through a dedicated service module.
+
+### Features
+
+- **Feature Detection**: Automatically detects contracts implementing AccessControl, Ownable, or both
+- **Role Management**: Query current roles, grant/revoke roles, check permissions
+- **Ownership Management**: Transfer ownership, query current owner
+- **Historical Queries**: View complete history of role changes and ownership transfers via SubQuery indexer
+- **Server-Side Filtering**: Filter events by contract, role, account, and limit (when indexer is available)
+
+### Indexer Integration
+
+For historical queries (e.g., `getHistory()`), the adapter integrates with the [Stellar Access Control Indexer](https://github.com/OpenZeppelin/stellar-access-control-indexer), a SubQuery project that indexes Access Control and Ownable events.
+
+#### Configuring the Indexer
+
+Add `indexerUri` to your `StellarNetworkConfig`:
+
+```typescript
+const stellarTestnet: StellarNetworkConfig = {
+  // ... other config
+  indexerUri: 'https://api.subquery.network/sq/openzeppelin/stellar-access-control-indexer',
+};
+```
+
+#### Deployment
+
+The indexer is production-ready and compatible with:
+- SubQuery Managed Service (recommended for production)
+- OnFinality Indexing Service
+- Self-hosted infrastructure
+
+For deployment instructions, see the [Indexer Deployment Guide](https://github.com/OpenZeppelin/stellar-access-control-indexer/blob/main/DEPLOYMENT.md).
+
+#### Graceful Degradation
+
+If no indexer is configured or the indexer is unavailable:
+- On-chain queries (roles, ownership) work normally
+- Historical queries return an empty array with a warning
+- UI remains functional for all current-state operations
+
+---
+
 ## Wallet Integration & UI
 
 All wallet integration logic, UI components, facade hooks, and the UI context provider for Stellar are located in `src/wallet/`.
@@ -53,6 +98,7 @@ This adapter follows the standard module structure outlined in the main project 
 ```text
 adapter-stellar/
 ├── src/
+│   ├── access-control/          # Access Control & Ownable support (service, indexer)
 │   ├── configuration/           # Adapter-specific configuration (RPC, explorer, execution)
 │   ├── contract/                # Contract loading & metadata
 │   ├── mapping/                 # Soroban ↔ form field mapping & generators
