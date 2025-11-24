@@ -56,19 +56,29 @@ function _generateRpcEndpointsConfigSection(
 
 function _generateIndexerEndpointsConfigSection(
   networkConfig: NetworkConfig
-): Record<string, string | { http: string; ws?: string; _comment?: string }> {
-  const indexerConfig: Record<string, string | { http: string; ws?: string; _comment?: string }> =
+): Record<string, string | { http?: string; ws?: string; _comment?: string }> {
+  const indexerConfig: Record<string, string | { http?: string; ws?: string; _comment?: string }> =
     {};
   const indexerNetworkIdKey = networkConfig.id;
 
   // Only add indexer config if the network has default indexer endpoints (indicating support)
   if (networkConfig.indexerUri || networkConfig.indexerWsUri) {
-    indexerConfig[indexerNetworkIdKey] = {
-      http: networkConfig.indexerUri || 'https://your-indexer.example/graphql',
-      ws: networkConfig.indexerWsUri,
+    const config: { http?: string; ws?: string; _comment?: string } = {
       _comment:
         'Optional. Used for querying historical blockchain data (e.g., access control events). Remove if not needed.',
     };
+
+    // Only set http if indexerUri is actually provided
+    if (networkConfig.indexerUri) {
+      config.http = networkConfig.indexerUri;
+    }
+
+    // Only set ws if indexerWsUri is actually provided
+    if (networkConfig.indexerWsUri) {
+      config.ws = networkConfig.indexerWsUri;
+    }
+
+    indexerConfig[indexerNetworkIdKey] = config;
   } else {
     indexerConfig._comment =
       'Indexer endpoints are optional and used for historical data queries. Add entries keyed by network ID (e.g., "stellar-testnet": { "http": "https://indexer.example/graphql" }) if needed.';
