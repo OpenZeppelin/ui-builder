@@ -40,6 +40,8 @@
     "lint:adapters": "node ../../lint-adapters.cjs",
     "prepublishOnly": "[ \"$SKIP_PUBLISH_BUILD\" = \"true\" ] || pnpm build",
     "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --passWithNoTests --exclude '**/indexer-integration.test.ts'",
+    "test:integration": "vitest run --passWithNoTests test/access-control/indexer-integration.test.ts",
     "test:types": "vitest run src/contract/__tests__/complete-type-coverage.test.ts",
     "typecheck": "tsc --noEmit",
     "validate-stellar-types": "node scripts/check-stellar-sdk-types.js",
