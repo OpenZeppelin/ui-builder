@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+description: Exa/Ref research guidelines (prioritize Exa; minimal Ref usage)
+---
+
+# Research Guidelines (Exa + Ref MCP)
+
+This rule outlines how to use Exa and Ref for research. It emphasizes starting with Exa for code-context and only moving to Ref for documentation verification when needed.
+
+## Priority Order
+
+1. Prefer Exa overall. Within Exa, call `get_code_context_exa` first for code-aware context.
+2. Use `web_search_exa` only if `get_code_context_exa` does not surface useful results.
+3. Use Ref only when explicitly requested by the user, results from Exa contradict each other, or after two unsuccessful attempts to fix an external API/library where documentation changes are suspected due to model cut-off.
+
+## Ref Usage Rules
+
+- Use only `ref_search_documentation` for Ref lookups.
+- Never use `search_docs` or `my_docs`.
+- Use `ref_read_url` to read primary docs pages (documentation sites, quickstarts, or specific API pages) when:
+  - The user requests specific docs/quickstart pages, or
+  - They would materially clarify/validate details found via Exa.
+
+## Operational Flow
+
+1. Start with Exa → `get_code_context_exa` using a precise, code-oriented query.
+2. If insufficient, try Exa → `web_search_exa` for targeted top sources.
+3. If integration still fails, asks for official docs:
+   - Switch to Ref → `ref_search_documentation` with specific library/framework and version when known.
+   - Open selected sources with Ref → `ref_read_url` to extract authoritative details.
+4. When code changes depend on docs, annotate critical links and versions in comments.
+
+## Notes
+
+- Keep queries specific and focused; prefer several small, targeted queries over one broad query
+- Use Ref sparingly; it is for authoritative verification or when documentation drift is suspected
