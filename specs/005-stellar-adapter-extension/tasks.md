@@ -60,8 +60,8 @@
 
 - [x] T034 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
 - [x] T035 Ensure address validation uses shared source in all entry points - Created validation.ts module with validateContractAddress, validateAccountAddress, and normalizeStellarAddress utilities. Added validation at all service entry points (registerContract, getCapabilities, getOwnership, getCurrentRoles, grantRole, revokeRole, transferOwnership, exportSnapshot, getHistory, getAdminAccount). Created comprehensive test suite (25 tests) in validation.test.ts.
-- [ ] T036 Update README/CHANGELOG fragments (adapter/types/utils) as needed
-- [ ] T037 Add changeset entries and finalize versions for publish
+- [x] T036 Update README/CHANGELOG fragments (adapter/types/utils) as needed - Updated adapter-stellar CHANGELOG.md with comprehensive access control feature documentation. Updated types README.md to document AccessControlService interface and related types, getAccessControlService method, and indexer configuration fields. Updated utils README.md to document access control utilities (snapshot, errors) and address normalization utilities.
+- [x] T037 Add changeset entries and finalize versions for publish - Updated .changeset/cute-llamas-tap.md with detailed minor version changes for adapter-stellar, types, and utils packages. Changeset properly documents all access control features, type additions, and utility exports. Ready for version bump to 0.17.0.
 - [ ] T038 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
 - [ ] T039 [P] Add lightweight perf checks for SC‑001 (capabilities/roles load ≤ 3s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts
 - [ ] T040 [P] Add lightweight perf checks for SC‑003 (snapshot export ≤ 2s with mocks) in packages/adapter-stellar/tests/access-control/perf.spec.ts

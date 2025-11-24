@@ -106,11 +106,21 @@ Interfaces for blockchain-specific adapters:
   - `getRelayers?`: An optional method to fetch a list of available relayers for the adapter's ecosystem.
   - `getRelayer?`: An optional method to fetch detailed information about a specific relayer.
   - `getRelayerOptionsComponent?`: An optional method that returns a React component for configuring relayer-specific options (e.g., custom gas settings).
+  - `getAccessControlService?`: An optional method that returns an `AccessControlService` instance for managing access control and ownership on contracts (e.g., OpenZeppelin AccessControl and Ownable patterns).
   - `configureUiKit?`: To inform the adapter about a desired UI kit (e.g., for wallet connection modals) and its configuration. The `kitConfig` within this configuration can include an optional `components: { exclude: [...] }` property to prevent specific default UI components (like `NetworkSwitcher`) from being provided by the adapter.
   - `getEcosystemReactUiContextProvider?`: To obtain a React component that sets up necessary UI context (like WagmiProvider for EVM).
   - `getEcosystemReactHooks?`: To get a set of facade React hooks for common wallet operations, abstracting direct library hook usage. Adapters implementing this should aim to return objects from these hooks with conventionally named properties (e.g., `{ isConnected, address, chainId }` for an account hook, or `{ switchChain, isPending, error }` for a network switching hook) to ensure consistent consumption.
   - `getEcosystemWalletComponents?`: To retrieve standardized UI components (e.g., Connect Button) sourced from the configured UI kit or a basic custom implementation provided by the adapter.
     These optional methods allow the main application to leverage advanced UI patterns of specific ecosystems (like EVM with `wagmi/react`) while remaining decoupled from the underlying libraries.
+
+- `AccessControlService`: Interface for access control and ownership management operations on contracts. Provides chain-agnostic methods for:
+  - Capability detection (`getCapabilities`): Determine if a contract implements AccessControl, Ownable, or both
+  - Ownership management (`getOwnership`, `transferOwnership`): Query and transfer contract ownership
+  - Role management (`getCurrentRoles`, `grantRole`, `revokeRole`): Query, grant, and revoke roles
+  - Snapshot export (`exportSnapshot`): Export current access control state
+  - History queries (`getHistory`): Query historical role changes and ownership transfers (when indexer is available)
+
+  Related types include `AccessControlCapabilities`, `OwnershipInfo`, `RoleAssignment`, `AccessSnapshot`, `HistoryEntry`, and `OperationResult`. See `./src/adapters/access-control.ts` for full type definitions.
 
 ### Config Types (`./src/config`)
 
@@ -150,6 +160,7 @@ Types for defining specific blockchain network configurations:
 - Interfaces for common properties (`BaseNetworkConfig`) and ecosystem-specific details (`EvmNetworkConfig`, `SolanaNetworkConfig`, `StellarNetworkConfig`, `MidnightNetworkConfig`).
 - The discriminated union type `NetworkConfig` representing any valid network configuration.
 - Type guard functions (e.g., `isEvmNetworkConfig(config)`) to safely narrow down the `NetworkConfig` union type.
+- Optional indexer configuration: `BaseNetworkConfig` includes optional `indexerUri` and `indexerWsUri` fields for configuring GraphQL endpoints for historical data queries (e.g., access control event history).
 - (These are primarily defined within `config.ts`)
 
 ### Execution Types (`./src/execution`)

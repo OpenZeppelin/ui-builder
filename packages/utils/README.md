@@ -17,6 +17,15 @@ The goal of this package is to centralize common logic that is not tied to any s
 - **`logger`**: A pre-configured singleton logger for consistent, leveled logging across all packages. It can be enabled, disabled, or have its level changed globally.
 - **`generateId`**: A utility for generating unique IDs, used for form fields and other components.
 - **`cn`**: A utility (a wrapper around `clsx` and `tailwind-merge`) for conditionally joining CSS class names, essential for building dynamic and themeable UI components with Tailwind CSS.
+- **Access Control Utilities** (`./src/access/`): Chain-agnostic utilities for access control operations:
+  - **`validateSnapshot`**: Validates the structure of an `AccessSnapshot` object
+  - **`serializeSnapshot`**: Serializes an access snapshot to JSON string
+  - **`deserializeSnapshot`**: Deserializes a JSON string to an access snapshot
+  - **`createEmptySnapshot`**: Creates an empty snapshot with no roles and no ownership
+  - **`findRoleAssignment`**: Finds a role assignment by role ID
+  - **`compareSnapshots`**: Compares two snapshots and returns differences
+  - **`isAccessControlError`**: Type guard to check if an error is an AccessControlError
+- **Address Normalization** (`normalizeAddress`, `addressesEqual`): Utilities for normalizing and comparing addresses in a chain-agnostic way.
 - **Type Guards and Helpers**: Various other small, reusable functions like `getDefaultValueForType`.
 
 ## Package Structure
@@ -24,6 +33,7 @@ The goal of this package is to centralize common logic that is not tied to any s
 ```text
 utils/
 ├── src/
+│   ├── access/                 # Access control utilities (snapshot, errors)
 │   ├── config/                 # Configuration management
 │   ├── logger/                 # Logging utilities
 │   ├── ui/                     # UI utility functions
