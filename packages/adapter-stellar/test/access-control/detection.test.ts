@@ -249,9 +249,7 @@ describe('Access Control Feature Detection (T015)', () => {
 
       expect(() => {
         validateAccessControlSupport(capabilities);
-      }).toThrow(
-        'UnsupportedContractFeatures: Contract does not implement OpenZeppelin Ownable or AccessControl interfaces'
-      );
+      }).toThrow('Contract does not implement OpenZeppelin Ownable or AccessControl interfaces');
     });
 
     it('should throw UnsupportedContractFeatures when interfaces do not conform to OZ standards', () => {
@@ -261,9 +259,7 @@ describe('Access Control Feature Detection (T015)', () => {
 
       expect(() => {
         validateAccessControlSupport(capabilities);
-      }).toThrow(
-        'UnsupportedContractFeatures: Contract interfaces do not conform to OpenZeppelin standards'
-      );
+      }).toThrow('Contract interfaces do not conform to OpenZeppelin standards');
     });
 
     it('should throw UnsupportedContractFeatures for AccessControl with insufficient optional functions', () => {
@@ -279,9 +275,7 @@ describe('Access Control Feature Detection (T015)', () => {
 
       expect(() => {
         validateAccessControlSupport(capabilities);
-      }).toThrow(
-        'UnsupportedContractFeatures: Contract interfaces do not conform to OpenZeppelin standards'
-      );
+      }).toThrow('Contract interfaces do not conform to OpenZeppelin standards');
     });
 
     it('should pass validation for compliant Ownable contract', () => {
@@ -347,7 +341,7 @@ describe('Access Control Feature Detection (T015)', () => {
 
       expect(() => {
         validateAccessControlSupport(capabilities);
-      }).toThrow('UnsupportedContractFeatures');
+      }).toThrow('Contract interfaces do not conform to OpenZeppelin standards');
     });
 
     it('should reject custom contract with partial AccessControl implementation', () => {
@@ -362,7 +356,7 @@ describe('Access Control Feature Detection (T015)', () => {
 
       expect(() => {
         validateAccessControlSupport(capabilities);
-      }).toThrow('UnsupportedContractFeatures');
+      }).toThrow('Contract interfaces do not conform to OpenZeppelin standards');
     });
   });
 });

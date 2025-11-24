@@ -12,6 +12,7 @@ import type {
   RoleIdentifier,
   StellarNetworkConfig,
 } from '@openzeppelin/ui-builder-types';
+import { OperationFailed } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { queryStellarViewFunction } from '../query/handler';
@@ -90,7 +91,12 @@ export async function readOwnership(
     return { owner: ownerAddress };
   } catch (error) {
     logger.error('readOwnership', 'Failed to read ownership:', error);
-    throw new Error(`Failed to read ownership: ${(error as Error).message}`);
+    throw new OperationFailed(
+      `Failed to read ownership: ${(error as Error).message}`,
+      contractAddress,
+      'readOwnership',
+      error as Error
+    );
   }
 }
 
@@ -239,7 +245,12 @@ export async function enumerateRoleMembers(
     return members;
   } catch (error) {
     logger.error('enumerateRoleMembers', `Failed to enumerate role ${roleId}:`, error);
-    throw new Error(`Failed to enumerate role members: ${(error as Error).message}`);
+    throw new OperationFailed(
+      `Failed to enumerate role members: ${(error as Error).message}`,
+      contractAddress,
+      'enumerateRoleMembers',
+      error as Error
+    );
   }
 }
 

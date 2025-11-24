@@ -11,6 +11,11 @@ import type {
   RoleIdentifier,
   StellarNetworkConfig,
 } from '@openzeppelin/ui-builder-types';
+import {
+  ConfigurationInvalid,
+  IndexerUnavailable,
+  OperationFailed,
+} from '@openzeppelin/ui-builder-types';
 import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
 
 const LOG_SYSTEM = 'StellarIndexerClient';
@@ -119,7 +124,8 @@ export class StellarIndexerClient {
    * @param contractAddress The contract address to query
    * @param options Optional filtering options
    * @returns Promise resolving to array of history entries
-   * @throws Error if indexer is not available or query fails
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
    */
   async queryHistory(
     contractAddress: string,
@@ -127,12 +133,20 @@ export class StellarIndexerClient {
   ): Promise<HistoryEntry[]> {
     const isAvailable = await this.checkAvailability();
     if (!isAvailable) {
-      throw new Error(`Indexer not available for network ${this.networkConfig.id}`);
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
     }
 
     const endpoints = this.resolveIndexerEndpoints();
     if (!endpoints.http) {
-      throw new Error('No indexer HTTP endpoint configured');
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
     }
 
     // Build query with server-side filtering
@@ -147,14 +161,22 @@ export class StellarIndexerClient {
       });
 
       if (!response.ok) {
-        throw new Error(`Indexer query failed with status ${response.status}`);
+        throw new OperationFailed(
+          `Indexer query failed with status ${response.status}`,
+          contractAddress,
+          'queryHistory'
+        );
       }
 
       const result = (await response.json()) as IndexerHistoryResponse;
 
       if (result.errors && result.errors.length > 0) {
         const errorMessages = result.errors.map((e) => e.message).join('; ');
-        throw new Error(`Indexer query errors: ${errorMessages}`);
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'queryHistory'
+        );
       }
 
       if (!result.data?.accessControlEvents?.nodes) {

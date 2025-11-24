@@ -19,6 +19,7 @@ import type {
   TransactionStatusUpdate,
   TxStatus,
 } from '@openzeppelin/ui-builder-types';
+import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-builder-types';
 import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
@@ -87,7 +88,11 @@ export class StellarAccessControlService implements AccessControlService {
 
     const context = this.contractContexts.get(contractAddress);
     if (!context) {
-      throw new Error(`Contract ${contractAddress} not registered. Call registerContract() first.`);
+      throw new ConfigurationInvalid(
+        'Contract not registered. Call registerContract() first.',
+        contractAddress,
+        'contractAddress'
+      );
     }
 
     // Check if indexer is configured
@@ -135,7 +140,11 @@ export class StellarAccessControlService implements AccessControlService {
 
     const context = this.contractContexts.get(contractAddress);
     if (!context) {
-      throw new Error(`Contract ${contractAddress} not registered. Call registerContract() first.`);
+      throw new ConfigurationInvalid(
+        'Contract not registered. Call registerContract() first.',
+        contractAddress,
+        'contractAddress'
+      );
     }
 
     const roleIds = context.knownRoleIds || [];
@@ -333,7 +342,7 @@ export class StellarAccessControlService implements AccessControlService {
     if (!validateSnapshot(snapshot)) {
       const errorMsg = `Invalid snapshot structure for contract ${contractAddress}`;
       logger.error('StellarAccessControlService.exportSnapshot', errorMsg);
-      throw new Error(errorMsg);
+      throw new OperationFailed(errorMsg, contractAddress, 'exportSnapshot');
     }
 
     logger.debug('StellarAccessControlService.exportSnapshot', 'Snapshot created and validated:', {

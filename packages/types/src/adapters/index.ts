@@ -24,6 +24,9 @@ export * from './export';
 // Re-export access control types
 export * from './access-control';
 
+// Re-export access control error types
+export * from './access-control-errors';
+
 /**
  * Combined adapter interface with all capabilities
  *

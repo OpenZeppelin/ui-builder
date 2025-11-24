@@ -440,7 +440,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
       const client = new StellarIndexerClient(noIndexerConfig);
 
       await expect(client.queryHistory(TEST_CONTRACT)).rejects.toThrow(
-        'Indexer not available for network stellar-testnet'
+        'Indexer not available for this network'
       );
     });
 

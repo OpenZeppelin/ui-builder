@@ -58,7 +58,7 @@
 
 ## Final Phase — Polish & Cross-Cutting
 
-- [ ] T034 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
+- [x] T034 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
 - [ ] T035 Ensure address validation uses shared source in all entry points
 - [ ] T036 Update README/CHANGELOG fragments (adapter/types/utils) as needed
 - [ ] T037 Add changeset entries and finalize versions for publish

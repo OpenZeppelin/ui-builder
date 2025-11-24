@@ -7,6 +7,7 @@
  */
 
 import type { AccessControlCapabilities, ContractSchema } from '@openzeppelin/ui-builder-types';
+import { UnsupportedContractFeatures } from '@openzeppelin/ui-builder-types';
 
 /**
  * Known OpenZeppelin Ownable function signatures
@@ -153,22 +154,27 @@ function verifyOZInterface(
  * Validates that a contract supports access control operations
  *
  * @param capabilities The detected capabilities
- * @throws Error if contract doesn't support required operations
+ * @param contractAddress Optional contract address for error context
+ * @throws UnsupportedContractFeatures if contract doesn't support required operations
  */
 export function validateAccessControlSupport(
-  capabilities: AccessControlCapabilities
+  capabilities: AccessControlCapabilities,
+  contractAddress?: string
 ): asserts capabilities is
   | (AccessControlCapabilities & { hasOwnable: true })
   | (AccessControlCapabilities & { hasAccessControl: true }) {
   if (!capabilities.hasOwnable && !capabilities.hasAccessControl) {
-    throw new Error(
-      'UnsupportedContractFeatures: Contract does not implement OpenZeppelin Ownable or AccessControl interfaces'
+    throw new UnsupportedContractFeatures(
+      'Contract does not implement OpenZeppelin Ownable or AccessControl interfaces',
+      contractAddress,
+      ['Ownable', 'AccessControl']
     );
   }
 
   if (!capabilities.verifiedAgainstOZInterfaces) {
-    throw new Error(
-      'UnsupportedContractFeatures: Contract interfaces do not conform to OpenZeppelin standards'
+    throw new UnsupportedContractFeatures(
+      'Contract interfaces do not conform to OpenZeppelin standards',
+      contractAddress
     );
   }
 }
