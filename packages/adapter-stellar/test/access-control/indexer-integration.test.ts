@@ -23,6 +23,7 @@ import { StellarIndexerClient } from '../../src/access-control/indexer-client';
 
 // Test configuration
 const DEPLOYED_INDEXER_URL =
+  process.env.INDEXER_URL ||
   'https://gateway.subquery.network/query/QmQPfNvnWX1pk8DjQoKysncNE9JfpwAZVLGTez7feVsquQ?apikey=DJ6P3I8S7YJEK29WK8F617OB';
 const TEST_CONTRACT = 'CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2';
 const KNOWN_EVENT_BLOCK = 1688170;
