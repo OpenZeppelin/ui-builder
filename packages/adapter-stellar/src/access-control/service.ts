@@ -31,6 +31,7 @@ import {
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, StellarIndexerClient } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
+import { validateAccountAddress, validateAddress, validateContractAddress } from './validation';
 
 /**
  * Context for Stellar Access Control operations
@@ -58,12 +59,16 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @param contractSchema The contract schema (required for capability detection)
    * @param knownRoleIds Optional array of known role identifiers
+   * @throws ConfigurationInvalid if the contract address is invalid
    */
   registerContract(
     contractAddress: string,
     contractSchema: ContractSchema,
     knownRoleIds?: string[]
   ): void {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     this.contractContexts.set(contractAddress, {
       contractSchema,
       knownRoleIds,
@@ -79,8 +84,12 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to capabilities
+   * @throws ConfigurationInvalid if the contract address is invalid or contract not registered
    */
   async getCapabilities(contractAddress: string): Promise<AccessControlCapabilities> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     logger.info(
       'StellarAccessControlService.getCapabilities',
       `Detecting capabilities for ${contractAddress}`
@@ -116,8 +125,12 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to ownership information
+   * @throws ConfigurationInvalid if the contract address is invalid
    */
   async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     logger.info('StellarAccessControlService.getOwnership', `Reading owner for ${contractAddress}`);
 
     return readOwnership(contractAddress, this.networkConfig);
@@ -131,8 +144,12 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to array of role assignments
+   * @throws ConfigurationInvalid if the contract address is invalid or contract not registered
    */
   async getCurrentRoles(contractAddress: string): Promise<RoleAssignment[]> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     logger.info(
       'StellarAccessControlService.getCurrentRoles',
       `Reading roles for ${contractAddress}`
@@ -170,6 +187,7 @@ export class StellarAccessControlService implements AccessControlService {
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
+   * @throws ConfigurationInvalid if addresses are invalid
    */
   async grantRole(
     contractAddress: string,
@@ -179,6 +197,10 @@ export class StellarAccessControlService implements AccessControlService {
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<OperationResult> {
+    // Validate addresses
+    validateContractAddress(contractAddress);
+    validateAccountAddress(account, 'account');
+
     logger.info(
       'StellarAccessControlService.grantRole',
       `Granting role ${roleId} to ${account} on ${contractAddress}`
@@ -217,6 +239,7 @@ export class StellarAccessControlService implements AccessControlService {
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result
+   * @throws ConfigurationInvalid if addresses are invalid
    */
   async revokeRole(
     contractAddress: string,
@@ -226,6 +249,10 @@ export class StellarAccessControlService implements AccessControlService {
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<OperationResult> {
+    // Validate addresses
+    validateContractAddress(contractAddress);
+    validateAccountAddress(account, 'account');
+
     logger.info(
       'StellarAccessControlService.revokeRole',
       `Revoking role ${roleId} from ${account} on ${contractAddress}`
@@ -263,6 +290,7 @@ export class StellarAccessControlService implements AccessControlService {
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result with transaction ID
+   * @throws ConfigurationInvalid if addresses are invalid
    */
   async transferOwnership(
     contractAddress: string,
@@ -271,6 +299,11 @@ export class StellarAccessControlService implements AccessControlService {
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
   ): Promise<OperationResult> {
+    // Validate addresses
+    // newOwner can be either an account address (G...) or contract address (C...)
+    validateContractAddress(contractAddress);
+    validateAddress(newOwner, 'newOwner');
+
     logger.info(
       'StellarAccessControlService.transferOwnership',
       `Transferring ownership to ${newOwner} on ${contractAddress}`
@@ -308,8 +341,12 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @returns Promise resolving to access snapshot
    * @throws Error if snapshot validation fails
+   * @throws ConfigurationInvalid if the contract address is invalid
    */
   async exportSnapshot(contractAddress: string): Promise<AccessSnapshot> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     logger.info(
       'StellarAccessControlService.exportSnapshot',
       `Exporting snapshot for ${contractAddress}`
@@ -360,7 +397,7 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @param options Optional filtering options
    * @returns Promise resolving to array of history entries, or empty array if not supported
-   * @throws Error - Not yet implemented (US5)
+   * @throws ConfigurationInvalid if the contract address is invalid
    */
   async getHistory(
     contractAddress: string,
@@ -370,6 +407,14 @@ export class StellarAccessControlService implements AccessControlService {
       limit?: number;
     }
   ): Promise<HistoryEntry[]> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    // Validate account if provided
+    if (options?.account) {
+      validateAccountAddress(options.account, 'options.account');
+    }
+
     logger.info(
       'StellarAccessControlService.getHistory',
       `Fetching history for ${contractAddress}`,
@@ -393,8 +438,12 @@ export class StellarAccessControlService implements AccessControlService {
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to admin address or null
+   * @throws ConfigurationInvalid if the contract address is invalid
    */
   async getAdminAccount(contractAddress: string): Promise<string | null> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
     logger.info(
       'StellarAccessControlService.getAdminAccount',
       `Reading admin for ${contractAddress}`

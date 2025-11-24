@@ -59,7 +59,7 @@
 ## Final Phase — Polish & Cross-Cutting
 
 - [x] T034 Add error taxonomy in packages/adapter-stellar/src/access-control/errors.ts (UnsupportedContractFeatures, PermissionDenied, IndexerUnavailable, ConfigurationInvalid, OperationFailed)
-- [ ] T035 Ensure address validation uses shared source in all entry points
+- [x] T035 Ensure address validation uses shared source in all entry points - Created validation.ts module with validateContractAddress, validateAccountAddress, and normalizeStellarAddress utilities. Added validation at all service entry points (registerContract, getCapabilities, getOwnership, getCurrentRoles, grantRole, revokeRole, transferOwnership, exportSnapshot, getHistory, getAdminAccount). Created comprehensive test suite (25 tests) in validation.test.ts.
 - [ ] T036 Update README/CHANGELOG fragments (adapter/types/utils) as needed
 - [ ] T037 Add changeset entries and finalize versions for publish
 - [ ] T038 Add CI connectivity checks for default Stellar indexer endpoints (testnet/mainnet)
