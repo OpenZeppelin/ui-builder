@@ -213,7 +213,7 @@ This project uses a centralized service (`@openzeppelin/ui-builder-utils/appConf
 - **Centralized Service**: The `appConfigService` is responsible for loading configuration from different sources:
   - **Vite Environment Variables**: For the core development application (e.g., `VITE_APP_CFG_...`).
   - **`app.config.json`**: For exported, standalone applications.
-- **Adapter Integration**: Adapter modules that require configurable values (e.g., the `query` module for RPC URLs or the `abi` module for Etherscan API keys) should use this service to retrieve them.
+- **Adapter Integration**: Adapter modules that require configurable values (e.g., the `query` module for RPC URLs, the `abi` module for Etherscan API keys, or the `indexer` module for historical data endpoints) should use this service to retrieve them.
 - **Precedence**: The service provides a clear precedence: a runtime value from the service always overrides the default value hardcoded in the adapter's `NetworkConfig` object.
 
 ### 7.2. Example: Resolving an RPC URL
@@ -227,7 +227,18 @@ The `resolveRpcUrl` utility in the EVM adapter demonstrates this pattern:
 
 This ensures that developers and end-users have a reliable way to configure critical network parameters.
 
-### 7.3. User-Provided RPC Configuration
+### 7.3. Example: Resolving Indexer Endpoints
+
+The Stellar adapter's indexer client demonstrates a similar pattern for optional indexer endpoints:
+
+1.  It first asks `appConfigService` for an indexer endpoint override for the given network ID.
+2.  If an override exists (as a string or `IndexerEndpointConfig` object with `http`/`ws` properties), it's used.
+3.  If not, it falls back to the default `indexerUri`/`indexerWsUri` from the `networkConfig` object.
+4.  If neither is available, indexer functionality gracefully degrades (history queries return empty, `supportsHistory` is `false`).
+
+This pattern allows for optional features that can be enabled when configured without breaking core functionality.
+
+### 7.4. User-Provided RPC Configuration
 
 Just as API keys can be customized, the architecture also allows users to provide their own custom RPC endpoints for any network. This is essential for users who need to connect to private nodes, use paid RPC services for higher reliability, or simply wish to avoid public endpoints.
 

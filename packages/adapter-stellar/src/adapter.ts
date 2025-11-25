@@ -1,6 +1,7 @@
 import type React from 'react';
 
 import type {
+  AccessControlService,
   AvailableUiKit,
   Connector,
   ContractAdapter,
@@ -28,6 +29,7 @@ import type {
 import { isStellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { createStellarAccessControlService } from './access-control/service';
 import {
   getStellarNetworkServiceForms,
   testStellarNetworkServiceConnection,
@@ -83,12 +85,16 @@ import {
 export class StellarAdapter implements ContractAdapter {
   readonly networkConfig: StellarNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
+  private readonly accessControlService: AccessControlService;
 
   constructor(networkConfig: StellarNetworkConfig) {
     if (!isStellarNetworkConfig(networkConfig)) {
       throw new Error('StellarAdapter requires a valid Stellar network configuration.');
     }
     this.networkConfig = networkConfig;
+
+    // Initialize Access Control Service
+    this.accessControlService = createStellarAccessControlService(networkConfig);
 
     // Set the network config in the wallet UI kit manager
     stellarUiKitManager.setNetworkConfig(networkConfig);
@@ -614,6 +620,13 @@ export class StellarAdapter implements ContractAdapter {
       pending: 'Pending Transactions',
       lastTransaction: 'Last Transaction',
     };
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getAccessControlService(): AccessControlService {
+    return this.accessControlService;
   }
 }
 

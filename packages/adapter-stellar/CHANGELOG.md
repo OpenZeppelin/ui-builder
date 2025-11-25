@@ -1,5 +1,28 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 0.17.0
+
+### Minor Changes
+
+- Add Access Control and Ownable support for Stellar (Soroban) contracts
+  - Implement `AccessControlService` interface with full support for OpenZeppelin Access Control and Ownable patterns
+  - Add capability detection to identify contracts implementing AccessControl, Ownable, or both
+  - Support role management: query current roles, grant/revoke roles, check permissions
+  - Support ownership management: transfer ownership, query current owner
+  - Add historical queries via SubQuery indexer integration for complete role change and ownership transfer history
+  - Implement server-side filtering by contract, role, account, and limit
+  - Add graceful degradation when indexer is unavailable (on-chain queries continue to work)
+  - Add comprehensive address validation using shared utilities at all service entry points
+  - Export access control service via `getAccessControlService()` method on `StellarAdapter`
+  - Add snapshot export functionality for current access control state
+  - Support both account addresses (G...) and contract addresses (C...) for ownership transfers
+
+### Patch Changes
+
+- Updated dependencies:
+  - @openzeppelin/ui-builder-types@0.17.0
+  - @openzeppelin/ui-builder-utils@0.17.0
+
 ## 0.16.0
 
 ### Minor Changes

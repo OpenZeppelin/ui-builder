@@ -1,3 +1,8 @@
+---
+description: Use this rule when you are building any form UI.
+alwaysApply: false
+---
+
 # Tailwind CSS Styling Standards for UI Builder
 
 ## Overview

@@ -54,6 +54,39 @@ function _generateRpcEndpointsConfigSection(
   return rpcConfig;
 }
 
+function _generateIndexerEndpointsConfigSection(
+  networkConfig: NetworkConfig
+): Record<string, string | { http?: string; ws?: string; _comment?: string }> {
+  const indexerConfig: Record<string, string | { http?: string; ws?: string; _comment?: string }> =
+    {};
+  const indexerNetworkIdKey = networkConfig.id;
+
+  // Only add indexer config if the network has default indexer endpoints (indicating support)
+  if (networkConfig.indexerUri || networkConfig.indexerWsUri) {
+    const config: { http?: string; ws?: string; _comment?: string } = {
+      _comment:
+        'Optional. Used for querying historical blockchain data (e.g., access control events). Remove if not needed.',
+    };
+
+    // Only set http if indexerUri is actually provided
+    if (networkConfig.indexerUri) {
+      config.http = networkConfig.indexerUri;
+    }
+
+    // Only set ws if indexerWsUri is actually provided
+    if (networkConfig.indexerWsUri) {
+      config.ws = networkConfig.indexerWsUri;
+    }
+
+    indexerConfig[indexerNetworkIdKey] = config;
+  } else {
+    indexerConfig._comment =
+      'Indexer endpoints are optional and used for historical data queries. Add entries keyed by network ID (e.g., "stellar-testnet": { "http": "https://indexer.example/graphql" }) if needed.';
+  }
+
+  return indexerConfig;
+}
+
 // Type alias for the wallet UI service config structure
 type WalletUiServiceConfig = {
   [key: string]: { kitName: string; kitConfig: object } | string;
@@ -105,12 +138,13 @@ export async function generateAndAddAppConfig(
 
   const explorerInfo = _generateExplorerApiConfigSection(networkConfig, logSystem);
   const rpcEndpointsConfig = _generateRpcEndpointsConfigSection(networkConfig);
+  const indexerEndpointsConfig = _generateIndexerEndpointsConfigSection(networkConfig);
   const globalServicePlaceholders = _generateGlobalServiceConfigPlaceholders();
 
   const appConfigContent = {
     _readme: [
       "This is an example configuration file. To use it, rename this file to 'app.config.json' in the 'public' directory.",
-      'Then, fill in your actual API keys, WalletConnect Project ID, and custom RPC URLs as needed.',
+      'Then, fill in your actual API keys, WalletConnect Project ID, custom RPC URLs, and indexer endpoints as needed.',
       'The baked-in defaults for this exported form will be used if this file is not renamed or if specific settings are omitted.',
       explorerInfo.specificNote,
       'API keys and other sensitive information should be managed securely.',
@@ -121,6 +155,7 @@ export async function generateAndAddAppConfig(
     },
     globalServiceConfigs: globalServicePlaceholders,
     rpcEndpoints: rpcEndpointsConfig,
+    indexerEndpoints: indexerEndpointsConfig,
     featureFlags: {
       exampleFeatureInExportedApp: true,
     },

@@ -1,6 +1,7 @@
-import type { ContractAdapter, ExecutionConfig } from '../adapters/base';
+import type { ContractAdapter } from '../adapters/base';
 import type { EnumValue, MapEntry } from '../common';
 import type { ContractSchema } from '../contracts/schema';
+import type { ExecutionConfig } from '../execution';
 import type { RenderFormSchema } from './schema';
 
 /**

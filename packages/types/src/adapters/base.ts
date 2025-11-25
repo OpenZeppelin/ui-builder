@@ -1,17 +1,12 @@
 import type { UserExplorerConfig, UserRpcProviderConfig } from '../config';
 import { type ContractFunction, type ContractSchema, type FunctionParameter } from '../contracts';
 import type { ProxyInfo } from '../contracts/proxy';
-import type {
-  EoaExecutionConfig,
-  MultisigExecutionConfig,
-  RelayerDetails,
-  RelayerDetailsRich,
-  RelayerExecutionConfig,
-} from '../execution';
+import type { ExecutionConfig, RelayerDetails, RelayerDetailsRich } from '../execution';
 import { type FieldType } from '../forms';
 import type { FormFieldType } from '../forms/form-field';
 import { type NetworkConfig } from '../networks';
 import { TransactionStatusUpdate } from '../transactions';
+import type { AccessControlService } from './access-control';
 import type { AdapterExportBootstrap, AdapterExportContext } from './export';
 import type {
   AvailableUiKit,
@@ -32,12 +27,6 @@ export interface ExecutionMethodDetail {
   description?: string;
   disabled?: boolean;
 }
-
-/**
- * Transaction execution configuration.
- * Note: Stored both at ContractUIRecord top-level (persistent) and in BuilderFormConfig (transient during editing).
- */
-export type ExecutionConfig = EoaExecutionConfig | RelayerExecutionConfig | MultisigExecutionConfig;
 
 /**
  * Represents a wallet connector option available for connection.
@@ -730,4 +719,12 @@ export interface ContractAdapter {
     latency?: number;
     error?: string;
   }>;
+
+  /**
+   * Optional accessor for the Access Control service.
+   * Returns an AccessControlService instance if the adapter supports access control operations.
+   *
+   * @returns The AccessControlService instance, or undefined if not supported
+   */
+  getAccessControlService?(): AccessControlService | undefined;
 }

@@ -1,5 +1,5 @@
 ---
-description: 
+description: Use this rule when you are building any UI.
 globs: "*.ts", "*.tsx", "*.cjs", "*.json", "*.yml"
 alwaysApply: false
 ---

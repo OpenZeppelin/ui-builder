@@ -1,0 +1,365 @@
+/**
+ * Stellar Indexer Client
+ *
+ * Provides access to historical access control events via a GraphQL indexer.
+ * Implements config precedence: runtime override > network-config default > derived-from-RPC (if safe) > none.
+ */
+
+import type {
+  HistoryEntry,
+  IndexerEndpointConfig,
+  RoleIdentifier,
+  StellarNetworkConfig,
+} from '@openzeppelin/ui-builder-types';
+import {
+  ConfigurationInvalid,
+  IndexerUnavailable,
+  OperationFailed,
+} from '@openzeppelin/ui-builder-types';
+import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
+
+const LOG_SYSTEM = 'StellarIndexerClient';
+
+/**
+ * GraphQL query response types for indexer
+ */
+interface IndexerHistoryEntry {
+  id: string;
+  role?: string; // Nullable for Ownership events
+  account: string;
+  type: 'ROLE_GRANTED' | 'ROLE_REVOKED' | 'OWNERSHIP_TRANSFER_COMPLETED';
+  txHash: string;
+  timestamp: string;
+  blockHeight: string;
+}
+
+interface IndexerHistoryResponse {
+  data?: {
+    accessControlEvents?: {
+      nodes: IndexerHistoryEntry[];
+    };
+  };
+  errors?: Array<{
+    message: string;
+  }>;
+}
+
+/**
+ * Options for querying history
+ */
+export interface IndexerHistoryOptions {
+  roleId?: string;
+  account?: string;
+  limit?: number;
+}
+
+/**
+ * Stellar Indexer Client
+ * Handles GraphQL queries to the configured indexer for historical access control data
+ */
+export class StellarIndexerClient {
+  private readonly networkConfig: StellarNetworkConfig;
+  private resolvedEndpoints: IndexerEndpointConfig | null = null;
+  private availabilityChecked = false;
+  private isAvailable = false;
+
+  constructor(networkConfig: StellarNetworkConfig) {
+    this.networkConfig = networkConfig;
+  }
+
+  /**
+   * Check if indexer is available and configured
+   * @returns True if indexer endpoints are configured and reachable
+   */
+  async checkAvailability(): Promise<boolean> {
+    if (this.availabilityChecked) {
+      return this.isAvailable;
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      logger.info(LOG_SYSTEM, `No indexer configured for network ${this.networkConfig.id}`);
+      this.availabilityChecked = true;
+      this.isAvailable = false;
+      return false;
+    }
+
+    try {
+      // Simple connectivity check with a minimal query
+      const response = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: '{ __typename }',
+        }),
+      });
+
+      if (response.ok) {
+        logger.info(
+          LOG_SYSTEM,
+          `Indexer available for network ${this.networkConfig.id} at ${endpoints.http}`
+        );
+        this.isAvailable = true;
+      } else {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer endpoint ${endpoints.http} returned status ${response.status}`
+        );
+        this.isAvailable = false;
+      }
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Failed to connect to indexer at ${endpoints.http}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      this.isAvailable = false;
+    }
+
+    this.availabilityChecked = true;
+    return this.isAvailable;
+  }
+
+  /**
+   * Query history entries for a contract
+   * @param contractAddress The contract address to query
+   * @param options Optional filtering options
+   * @returns Promise resolving to array of history entries
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
+   */
+  async queryHistory(
+    contractAddress: string,
+    options?: IndexerHistoryOptions
+  ): Promise<HistoryEntry[]> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
+    }
+
+    // Build query with server-side filtering
+    const query = this.buildHistoryQuery(contractAddress, options);
+    const variables = this.buildQueryVariables(contractAddress, options);
+
+    try {
+      const response = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (!response.ok) {
+        throw new OperationFailed(
+          `Indexer query failed with status ${response.status}`,
+          contractAddress,
+          'queryHistory'
+        );
+      }
+
+      const result = (await response.json()) as IndexerHistoryResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        const errorMessages = result.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'queryHistory'
+        );
+      }
+
+      if (!result.data?.accessControlEvents?.nodes) {
+        logger.debug(LOG_SYSTEM, `No history data returned for contract ${contractAddress}`);
+        return [];
+      }
+
+      return this.transformIndexerEntries(result.data.accessControlEvents.nodes);
+    } catch (error) {
+      logger.error(
+        LOG_SYSTEM,
+        `Failed to query indexer history: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Resolve indexer endpoints with config precedence
+   * Priority:
+   * 1. Runtime override from AppConfigService
+   * 2. Network config defaults (indexerUri/indexerWsUri)
+   * 3. Derived from RPC (if safe pattern exists)
+   * 4. None (returns empty object)
+   *
+   * @returns Resolved indexer endpoints
+   */
+  private resolveIndexerEndpoints(): IndexerEndpointConfig {
+    if (this.resolvedEndpoints) {
+      return this.resolvedEndpoints;
+    }
+
+    const networkId = this.networkConfig.id;
+    const endpoints: IndexerEndpointConfig = {};
+
+    // Priority 1: Check AppConfigService for runtime override
+    const indexerOverride = appConfigService.getIndexerEndpointOverride(networkId);
+    if (indexerOverride) {
+      if (typeof indexerOverride === 'string') {
+        endpoints.http = indexerOverride;
+        logger.info(
+          LOG_SYSTEM,
+          `Using runtime indexer override for ${networkId}: ${indexerOverride}`
+        );
+      } else if (typeof indexerOverride === 'object') {
+        if ('http' in indexerOverride && indexerOverride.http) {
+          endpoints.http = indexerOverride.http;
+        }
+        if ('ws' in indexerOverride && indexerOverride.ws) {
+          endpoints.ws = indexerOverride.ws;
+        }
+        logger.info(
+          LOG_SYSTEM,
+          `Using runtime indexer override for ${networkId}: http=${endpoints.http}, ws=${endpoints.ws}`
+        );
+      }
+      this.resolvedEndpoints = endpoints;
+      return endpoints;
+    }
+
+    // Priority 2: Network config defaults
+    if (this.networkConfig.indexerUri) {
+      endpoints.http = this.networkConfig.indexerUri;
+      logger.info(
+        LOG_SYSTEM,
+        `Using network config indexer URI for ${networkId}: ${endpoints.http}`
+      );
+    }
+    if (this.networkConfig.indexerWsUri) {
+      endpoints.ws = this.networkConfig.indexerWsUri;
+      logger.debug(
+        LOG_SYSTEM,
+        `Using network config indexer WS URI for ${networkId}: ${endpoints.ws}`
+      );
+    }
+
+    if (endpoints.http || endpoints.ws) {
+      this.resolvedEndpoints = endpoints;
+      return endpoints;
+    }
+
+    // Priority 3: Derive from RPC (only if safe, known pattern exists)
+    // Currently DISABLED - no safe derivation pattern implemented
+    // This would be enabled in the future when indexer/RPC relationship is well-defined
+    logger.debug(LOG_SYSTEM, `No indexer derivation pattern available for ${networkId}`);
+
+    // Priority 4: None - no indexer configured
+    logger.debug(LOG_SYSTEM, `No indexer endpoints configured for ${networkId}`);
+    this.resolvedEndpoints = endpoints;
+    return endpoints;
+  }
+
+  /**
+   * Build GraphQL query for history with SubQuery filtering
+   */
+  private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
+    const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
+    const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
+    const limitClause = options?.limit ? ', first: $limit' : '';
+
+    return `
+      query GetHistory($contract: String!${options?.roleId ? ', $role: String' : ''}${options?.account ? ', $account: String' : ''}${options?.limit ? ', $limit: Int' : ''}) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}
+          }
+          orderBy: TIMESTAMP_DESC${limitClause}
+        ) {
+          nodes {
+            id
+            role
+            account
+            type
+            txHash
+            timestamp
+            blockHeight
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Build query variables
+   */
+  private buildQueryVariables(
+    contractAddress: string,
+    options?: IndexerHistoryOptions
+  ): Record<string, unknown> {
+    const variables: Record<string, unknown> = {
+      contract: contractAddress,
+    };
+
+    if (options?.roleId) {
+      variables.role = options.roleId;
+    }
+    if (options?.account) {
+      variables.account = options.account;
+    }
+    if (options?.limit) {
+      variables.limit = options.limit;
+    }
+
+    return variables;
+  }
+
+  /**
+   * Transform indexer entries to standard HistoryEntry format
+   */
+  private transformIndexerEntries(entries: IndexerHistoryEntry[]): HistoryEntry[] {
+    return entries.map((entry) => {
+      const role: RoleIdentifier = {
+        id: entry.role || 'OWNER', // Map ownership events to special role or null
+      };
+
+      // Map SubQuery event types to internal types
+      let changeType: 'GRANTED' | 'REVOKED';
+      if (entry.type === 'ROLE_GRANTED') {
+        changeType = 'GRANTED';
+      } else if (entry.type === 'ROLE_REVOKED') {
+        changeType = 'REVOKED';
+      } else {
+        // Treat ownership transfer as a grant for now, or handle differently if HistoryEntry supports it
+        changeType = 'GRANTED';
+      }
+
+      return {
+        role,
+        account: entry.account,
+        changeType,
+        txId: entry.txHash,
+        timestamp: entry.timestamp,
+        ledger: parseInt(entry.blockHeight, 10),
+      };
+    });
+  }
+}
+
+/**
+ * Factory function to create an indexer client for a network
+ * @param networkConfig The Stellar network configuration
+ * @returns A new indexer client instance
+ */
+export function createIndexerClient(networkConfig: StellarNetworkConfig): StellarIndexerClient {
+  return new StellarIndexerClient(networkConfig);
+}

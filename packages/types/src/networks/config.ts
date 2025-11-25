@@ -74,6 +74,18 @@ export interface BaseNetworkConfig {
    * Should align with keys in AppRuntimeConfig.networkServiceConfigs
    */
   primaryExplorerApiIdentifier?: string;
+
+  /**
+   * Optional indexer GraphQL HTTP endpoint
+   * Used for querying historical blockchain data (e.g., access control events)
+   */
+  indexerUri?: string;
+
+  /**
+   * Optional indexer GraphQL WebSocket endpoint
+   * Used for real-time blockchain data subscriptions
+   */
+  indexerWsUri?: string;
 }
 
 /**
@@ -190,18 +202,6 @@ export interface MidnightNetworkConfig extends BaseNetworkConfig {
     default?: string;
     [key: string]: string | undefined;
   };
-
-  /**
-   * Indexer GraphQL HTTP endpoint
-   * Used for querying blockchain state
-   */
-  indexerUri?: string;
-
-  /**
-   * Indexer GraphQL WebSocket endpoint
-   * Used for real-time blockchain state subscriptions
-   */
-  indexerWsUri?: string;
 
   // Additional Midnight-specific properties can be added here as the protocol evolves
 }
