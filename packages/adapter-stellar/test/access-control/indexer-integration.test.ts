@@ -340,8 +340,6 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
 
       // Verify we can identify what roles this account received/lost
       const grants = accountHistory.filter((e) => e.changeType === 'GRANTED');
-      const revocations = accountHistory.filter((e) => e.changeType === 'REVOKED');
-
       // At least one grant should exist (we filtered by an account that appears)
       expect(grants.length).toBeGreaterThan(0);
 
