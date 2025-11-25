@@ -709,9 +709,6 @@ describe('Access Control Service - Export Snapshot (T027)', () => {
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   const TEST_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
   const TEST_ACCOUNT_1 = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
-  // Use a different valid address for TEST_ACCOUNT_2 to avoid duplicates in snapshot validation
-  // This is a valid Stellar address (all zeros with valid checksum)
-  const TEST_ACCOUNT_2 = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
   const TEST_ROLE_ADMIN = 'admin';
   const TEST_ROLE_MINTER = 'minter';
 
