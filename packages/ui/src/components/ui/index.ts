@@ -18,6 +18,7 @@ export * from './network-status-badge';
 export * from './progress';
 export * from './radio-group';
 export * from './select';
+export * from './sidebar';
 export * from './tabs';
 export * from './textarea';
 export * from './tooltip';
