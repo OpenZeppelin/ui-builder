@@ -103,25 +103,30 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@styles': path.resolve(__dirname, '../styles'),
-        '@openzeppelin/ui-builder-utils': path.resolve(
-          __dirname,
-          '../utils/src/index.ts'
-        ),
+        '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
         '@openzeppelin/ui-builder-react-core': path.resolve(
           __dirname,
           '../react-core/dist/index.js'
         ),
-        '@openzeppelin/ui-builder-ui': path.resolve(
+        '@openzeppelin/ui-builder-ui': path.resolve(__dirname, '../ui/dist/index.js'),
+        '@openzeppelin/ui-builder-types': path.resolve(__dirname, '../types/dist/index.js'),
+        '@openzeppelin/ui-builder-renderer': path.resolve(__dirname, '../renderer/dist/index.js'),
+        // Adapter packages - required for export tests that use ecosystemManager
+        '@openzeppelin/ui-builder-adapter-evm': path.resolve(
           __dirname,
-          '../ui/dist/index.js'
+          '../adapter-evm/dist/index.js'
         ),
-        '@openzeppelin/ui-builder-types': path.resolve(
+        '@openzeppelin/ui-builder-adapter-solana': path.resolve(
           __dirname,
-          '../types/dist/index.js'
+          '../adapter-solana/dist/index.js'
         ),
-        '@openzeppelin/ui-builder-renderer': path.resolve(
+        '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
           __dirname,
-          '../renderer/dist/index.js'
+          '../adapter-stellar/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
+          __dirname,
+          '../adapter-midnight/dist/index.js'
         ),
       },
       dedupe: [
@@ -129,6 +134,10 @@ export default defineConfig(
         '@openzeppelin/ui-builder-types',
         '@openzeppelin/ui-builder-react-core',
         '@openzeppelin/ui-builder-ui',
+        '@openzeppelin/ui-builder-adapter-evm',
+        '@openzeppelin/ui-builder-adapter-solana',
+        '@openzeppelin/ui-builder-adapter-stellar',
+        '@openzeppelin/ui-builder-adapter-midnight',
         'react',
         'react-dom',
       ],
@@ -140,6 +149,10 @@ export default defineConfig(
         '@openzeppelin/ui-builder-types',
         '@openzeppelin/ui-builder-react-core',
         '@openzeppelin/ui-builder-ui',
+        '@openzeppelin/ui-builder-adapter-evm',
+        '@openzeppelin/ui-builder-adapter-solana',
+        '@openzeppelin/ui-builder-adapter-stellar',
+        '@openzeppelin/ui-builder-adapter-midnight',
       ],
     },
     // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
@@ -149,6 +162,10 @@ export default defineConfig(
         '@openzeppelin/ui-builder-types',
         '@openzeppelin/ui-builder-react-core',
         '@openzeppelin/ui-builder-ui',
+        '@openzeppelin/ui-builder-adapter-evm',
+        '@openzeppelin/ui-builder-adapter-solana',
+        '@openzeppelin/ui-builder-adapter-stellar',
+        '@openzeppelin/ui-builder-adapter-midnight',
       ],
     },
     test: {
