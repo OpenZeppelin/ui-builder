@@ -11,6 +11,7 @@ export * from './empty-state';
 export * from './external-link';
 export * from './footer';
 export * from './form';
+export * from './header';
 export * from './input';
 export * from './label';
 export * from './loading-button';
