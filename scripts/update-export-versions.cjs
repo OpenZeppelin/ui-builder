@@ -94,10 +94,15 @@ const updateSnapshots = () => {
 
   try {
     // Update snapshots for the export tests specifically (these are the tests that use package versions)
-    execSync('pnpm --filter @openzeppelin/ui-builder-app test src/export/__tests__/ -- -u', {
-      cwd: path.resolve(__dirname, '..'),
-      stdio: 'inherit',
-    });
+    // Note: We use `exec vitest run -u` instead of `test -- -u` because the -u flag must come
+    // before the test path for vitest to recognize it as the update snapshots flag
+    execSync(
+      'pnpm --filter @openzeppelin/ui-builder-app exec vitest run -u src/export/__tests__/',
+      {
+        cwd: path.resolve(__dirname, '..'),
+        stdio: 'inherit',
+      }
+    );
     console.log('✅ Snapshots updated successfully!');
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);
@@ -105,7 +110,7 @@ const updateSnapshots = () => {
       '⚠️  Snapshot update failed. This will cause CI failures if versions.ts is committed without matching snapshots.'
     );
     console.error(
-      '   To fix manually, run: pnpm --filter @openzeppelin/ui-builder-app test src/export/__tests__/ -- -u'
+      '   To fix manually, run: pnpm --filter @openzeppelin/ui-builder-app exec vitest run -u src/export/__tests__/'
     );
     // Exit with error code to prevent committing mismatched versions
     process.exit(1);
