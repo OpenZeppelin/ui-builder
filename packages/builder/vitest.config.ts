@@ -5,6 +5,27 @@ import { defineConfig, mergeConfig } from 'vitest/config';
 import { sharedVitestConfig } from '../../vitest.shared.config';
 
 /**
+ * Adapter package paths for test resolution.
+ * Maps package names to their dist entry points.
+ * This is needed because Vite 7.2+ has stricter resolution for dynamic imports.
+ */
+const adapterPackagePaths: Record<string, string> = {
+  '@openzeppelin/ui-builder-adapter-evm': path.resolve(__dirname, '../adapter-evm/dist/index.js'),
+  '@openzeppelin/ui-builder-adapter-solana': path.resolve(
+    __dirname,
+    '../adapter-solana/dist/index.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
+    __dirname,
+    '../adapter-stellar/dist/index.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
+    __dirname,
+    '../adapter-midnight/dist/index.js'
+  ),
+};
+
+/**
  * Virtual module mocks for testing
  *
  * Define mock implementations for all virtual modules used in the application.
@@ -94,6 +115,25 @@ export default defineConfig(
           if (originalId in virtualModuleMocks) {
             // Return the mock implementation
             return virtualModuleMocks[originalId];
+          }
+          return null;
+        },
+      },
+
+      /**
+       * ADAPTER PACKAGE RESOLVER
+       *
+       * This plugin resolves adapter packages to their dist entry points.
+       * Required because Vite 7.2+ has stricter resolution for dynamic imports
+       * and the standard resolve.alias doesn't work reliably for dynamic imports
+       * like: await import("@openzeppelin/ui-builder-adapter-evm")
+       */
+      {
+        name: 'test-adapter-package-resolver',
+        enforce: 'pre',
+        resolveId(id: string) {
+          if (id in adapterPackagePaths) {
+            return adapterPackagePaths[id];
           }
           return null;
         },
