@@ -5,6 +5,8 @@ import { cn } from '@openzeppelin/ui-builder-utils';
 export interface SidebarLayoutProps {
   /** Content for the sidebar header (e.g., logo) */
   header?: ReactNode;
+  /** Content to be displayed below the header but above the scrollable area */
+  subHeader?: ReactNode;
   /** Main scrollable content area */
   children: ReactNode;
   /** Content for the fixed footer (e.g., nav icons) */
@@ -29,6 +31,7 @@ export interface SidebarLayoutProps {
  */
 export function SidebarLayout({
   header,
+  subHeader,
   children,
   footer,
   className,
@@ -52,7 +55,10 @@ export function SidebarLayout({
         style={{ width: widthStyle }}
       >
         {/* Fixed Header */}
-        {header && <div className="flex-shrink-0 px-8 pt-12">{header}</div>}
+        {header && <div className="shrink-0 px-8 pt-12">{header}</div>}
+
+        {/* Fixed SubHeader */}
+        {subHeader && <div className="shrink-0 px-8 mt-6">{subHeader}</div>}
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-8 pb-24">{children}</div>
@@ -93,7 +99,10 @@ export function SidebarLayout({
           >
             <div className="flex h-full flex-col">
               {/* Mobile Header */}
-              {header && <div className="flex-shrink-0 px-6 pt-10 pb-4">{header}</div>}
+              {header && <div className="shrink-0 px-6 pt-10 pb-4">{header}</div>}
+
+              {/* Mobile SubHeader */}
+              {subHeader && <div className="shrink-0 px-6 pb-4">{subHeader}</div>}
 
               {/* Mobile Scrollable Content */}
               <div className="flex-1 overflow-y-auto px-6 pb-20">{children}</div>
