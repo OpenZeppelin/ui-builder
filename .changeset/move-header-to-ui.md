@@ -1,5 +1,5 @@
 ---
-"@openzeppelin/ui-builder-ui": minor
+'@openzeppelin/ui-builder-ui': minor
 ---
 
 Move Header component to UI package
