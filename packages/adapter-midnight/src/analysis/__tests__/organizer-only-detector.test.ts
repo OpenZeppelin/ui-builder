@@ -167,10 +167,14 @@ describe('organizer-only-detector', () => {
   describe('detectOrganizerOnlyBySource', () => {
     it('should detect direct witness calls', () => {
       const circuitMap = {
-        setName: function (context: unknown, name: string) {
-          return this.witnesses.local_sk(context);
+        setName: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          _context: unknown,
+          _name: string
+        ): unknown {
+          return this.witnesses.local_sk(_context);
         },
-        getName: function (context: unknown) {
+        getName: function (this: { witnesses: unknown }, _context: unknown) {
           return 'name';
         },
       };
@@ -187,12 +191,15 @@ describe('organizer-only-detector', () => {
 
     it('should detect destructured witness access', () => {
       const circuitMap = {
-        setOwnerFromSk: function (context: unknown) {
+        setOwnerFromSk: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           const { local_sk } = this.witnesses;
           const sk = local_sk(context);
           return sk;
         },
-        getOwner: function () {
+        getOwner: function (this: { witnesses: unknown }): string {
           return 'owner';
         },
       };
@@ -212,22 +219,37 @@ describe('organizer-only-detector', () => {
 
       for (const alias of aliases) {
         // Create a function with the witness call inline using the alias
-        let circuitFn: () => unknown;
+        let circuitFn: (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ) => unknown;
         if (alias === 'local_sk') {
-          circuitFn = function (context: unknown) {
+          circuitFn = function (
+            this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+            context: unknown
+          ): unknown {
             return this.witnesses.local_sk(context);
           };
         } else if (alias === 'local_secret_key') {
-          circuitFn = function (context: unknown) {
+          circuitFn = function (
+            this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+            context: unknown
+          ): unknown {
             return this.witnesses.local_secret_key(context);
           };
         } else if (alias === 'organizer_key') {
-          circuitFn = function (context: unknown) {
+          circuitFn = function (
+            this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+            context: unknown
+          ): unknown {
             return this.witnesses.organizer_key(context);
           };
         } else {
           // set_owner_from_local_sk
-          circuitFn = function (context: unknown) {
+          circuitFn = function (
+            this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+            context: unknown
+          ): unknown {
             return this.witnesses.set_owner_from_local_sk(context);
           };
         }
@@ -248,10 +270,17 @@ describe('organizer-only-detector', () => {
 
     it('should not flag circuits that use non-identity witnesses', () => {
       const circuitMap = {
-        checkPin: function (context: unknown, pin: number) {
+        checkPin: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown,
+          pin: number
+        ): unknown {
           return this.witnesses.check_pin(context, pin);
         },
-        getAlias: function (context: unknown) {
+        getAlias: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           return this.witnesses.get_local_alias(context);
         },
       };
@@ -268,7 +297,10 @@ describe('organizer-only-detector', () => {
 
     it('should return empty when no identity witnesses present', () => {
       const circuitMap = {
-        setName: function (context: unknown) {
+        setName: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           return this.witnesses.check_pin(context, 1234);
         },
       };
@@ -285,7 +317,10 @@ describe('organizer-only-detector', () => {
 
     it('should handle non-function circuit values gracefully', () => {
       const circuitMap = {
-        realCircuit: function (context: unknown) {
+        realCircuit: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           return this.witnesses.local_sk(context);
         },
         fakeCircuit: 'not a function',
@@ -305,10 +340,16 @@ describe('organizer-only-detector', () => {
 
     it('should handle mixed direct and destructured patterns', () => {
       const circuitMap = {
-        circuit1: function (context: unknown) {
+        circuit1: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           return this.witnesses.local_sk(context);
         },
-        circuit2: function (context: unknown) {
+        circuit2: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           const { organizer_key } = this.witnesses;
           return organizer_key(context);
         },
@@ -342,7 +383,10 @@ describe('organizer-only-detector', () => {
 
     it('should handle empty witnesses', () => {
       const circuitMap = {
-        setName: function (context: unknown) {
+        setName: function (
+          this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
+          context: unknown
+        ): unknown {
           return this.witnesses.local_sk(context);
         },
       };

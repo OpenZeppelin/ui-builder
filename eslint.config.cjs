@@ -15,7 +15,10 @@ const jsdocPlugin = require('eslint-plugin-jsdoc');
 
 // Extract rules from recommended configs
 const typescriptRecommendedRules = getPluginConfigs(typescriptPlugin, 'recommended');
-const reactRecommendedRules = getPluginConfigs(reactPlugin, 'recommended');
+const reactRecommendedRulesRaw = getPluginConfigs(reactPlugin, 'recommended');
+// Remove jsx-uses-react from recommended rules - it marks React as used even when disabled
+const reactRecommendedRules = { ...reactRecommendedRulesRaw };
+delete reactRecommendedRules['react/jsx-uses-react'];
 const reactHooksRecommendedRules = getPluginConfigs(reactHooksPlugin, 'recommended');
 
 // Detect if we're in a package context by checking for custom adapter plugin
@@ -139,6 +142,7 @@ const baseConfig = [
       ...reactRecommendedRules,
       ...reactHooksRecommendedRules,
       'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
       'react/prop-types': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
@@ -150,6 +154,7 @@ const baseConfig = [
     plugins: {
       import: importPlugin,
       'unused-imports': unusedImportsPlugin,
+      react: reactPlugin,
     },
     rules: {
       // Disallow direct console usage; use logger utility instead
@@ -159,7 +164,7 @@ const baseConfig = [
       'import/no-duplicates': 'error',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
-        'warn',
+        'error',
         {
           vars: 'all',
           varsIgnorePattern: '^_',
