@@ -157,8 +157,6 @@ const baseConfig = [
       react: reactPlugin,
     },
     rules: {
-      'react/jsx-uses-react': 'off',
-      'react/react-in-jsx-scope': 'off',
       // Disallow direct console usage; use logger utility instead
       'no-console': 'error',
       'import/first': 'error',
