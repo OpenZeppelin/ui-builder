@@ -169,10 +169,10 @@ describe('organizer-only-detector', () => {
       const circuitMap = {
         setName: function (
           this: { witnesses: Record<string, (arg: unknown, ...rest: unknown[]) => unknown> },
-          _context: unknown,
-          _name: string
+          context: unknown,
+          name: string
         ) {
-          return this.witnesses.local_sk(_context);
+          return this.witnesses.local_sk(context);
         },
         getName: function (this: { witnesses: unknown }, _context: unknown) {
           return 'name';
