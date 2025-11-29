@@ -94,6 +94,7 @@ export function AddressDisplay({
 
       {showCopyButton && (
         <button
+          type="button"
           onClick={handleCopy}
           className={cn(
             'shrink-0 text-slate-500',
