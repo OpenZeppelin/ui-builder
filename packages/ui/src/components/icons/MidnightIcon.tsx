@@ -3,13 +3,19 @@ import React from 'react';
 export interface MidnightIconProps {
   size?: number;
   className?: string;
+  variant?: 'mono' | 'branded';
 }
 
 /**
  * MidnightIcon - SVG icon for the Midnight blockchain
  * Inline SVG to ensure it renders correctly when this package is consumed as a library
  */
-export function MidnightIcon({ size = 16, className = '' }: MidnightIconProps): React.ReactElement {
+export function MidnightIcon({
+  size = 16,
+  className = '',
+  variant: _variant,
+}: MidnightIconProps): React.ReactElement {
+  // variant is accepted for API consistency but not used as MidnightIcon is always branded
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
