@@ -19,7 +19,7 @@ export function NetworkIcon({
   variant = 'branded',
 }: NetworkIconProps): React.ReactElement {
   if (network.ecosystem === 'midnight') {
-    return <MidnightIcon size={size} className={cn('shrink-0', className)} />;
+    return <MidnightIcon size={size} variant={variant} className={cn('shrink-0', className)} />;
   }
 
   if (network.iconComponent) {
@@ -32,6 +32,7 @@ export function NetworkIcon({
     <div
       className={cn('bg-muted shrink-0 rounded-full', className)}
       style={{ width: size, height: size }}
+      aria-hidden="true"
     />
   );
 }

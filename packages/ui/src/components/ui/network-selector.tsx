@@ -2,6 +2,7 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import * as React from 'react';
 
 import type { NetworkType } from '@openzeppelin/ui-builder-types';
+import { cn } from '@openzeppelin/ui-builder-utils';
 
 import {
   Button,
@@ -43,7 +44,7 @@ export function NetworkSelector<T>({
   filterNetwork,
   className,
   placeholder = 'Select Network',
-}: NetworkSelectorProps<T>): React.ReactNode {
+}: NetworkSelectorProps<T>): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
 
@@ -79,7 +80,7 @@ export function NetworkSelector<T>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${className}`}
+          className={cn('w-full justify-between', className)}
         >
           <span className="flex items-center gap-2 truncate">
             {selectedNetwork ? (
@@ -115,6 +116,7 @@ export function NetworkSelector<T>({
               }
             }}
             className="h-9 w-full border-0 bg-transparent p-0 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+            aria-label="Search networks"
           />
         </div>
         <div className="max-h-[300px] overflow-y-auto p-1">
