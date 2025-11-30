@@ -1,7 +1,7 @@
 import { Settings } from 'lucide-react';
 
 import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { Button, MidnightIcon } from '@openzeppelin/ui-builder-ui';
+import { Button, NetworkIcon } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { ICON_SIZE } from '../utils/utils';
@@ -39,14 +39,8 @@ export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: Ne
       {/* Network info display area */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Network icon */}
-        <div className="flex-shrink-0">
-          {network.ecosystem === 'midnight' ? (
-            <MidnightIcon size={ICON_SIZE} className="flex-shrink-0" />
-          ) : network.iconComponent ? (
-            <network.iconComponent size={ICON_SIZE} variant="branded" className="flex-shrink-0" />
-          ) : (
-            <div className="bg-muted flex-shrink-0 h-4 w-4 rounded-full"></div>
-          )}
+        <div className="shrink-0">
+          <NetworkIcon network={network} size={ICON_SIZE} className="shrink-0" />
         </div>
 
         {/* Network name and details */}

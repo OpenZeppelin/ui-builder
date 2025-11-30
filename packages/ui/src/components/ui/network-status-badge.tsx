@@ -3,7 +3,7 @@ import React from 'react';
 import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
-import { MidnightIcon } from '../icons/MidnightIcon';
+import { NetworkIcon } from './network-icon';
 
 interface NetworkStatusBadgeProps {
   network: NetworkConfig | null;
@@ -33,14 +33,8 @@ export function NetworkStatusBadge({
         className
       )}
     >
-      {/* Network icon - reusing same icon component from NetworkRow */}
-      {network.ecosystem === 'midnight' ? (
-        <MidnightIcon size={ICON_SIZE} className="flex-shrink-0" />
-      ) : network.iconComponent ? (
-        <network.iconComponent size={ICON_SIZE} variant="branded" />
-      ) : (
-        <div className="bg-muted-foreground/20 flex-shrink-0 h-4 w-4 rounded-full"></div>
-      )}
+      {/* Network icon */}
+      <NetworkIcon network={network} size={ICON_SIZE} />
 
       {/* Combined ecosystem + network name */}
       <div className="flex items-baseline gap-1.5">
