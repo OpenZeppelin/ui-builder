@@ -1,10 +1,9 @@
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import type { Ecosystem, EcosystemFeatureConfig } from '@openzeppelin/ui-builder-types';
 import { appConfigService } from '@openzeppelin/ui-builder-utils';
 
 import {
   getAvailableEcosystems,
   getEcosystemDefaultFeatureConfig,
-  type EcosystemFeatureConfig,
 } from '../core/ecosystems/registry';
 
 /**
