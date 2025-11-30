@@ -40,7 +40,7 @@ export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: Ne
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Network icon */}
         <div className="shrink-0">
-          <NetworkIcon network={network} size={ICON_SIZE} className="shrink-0" />
+          <NetworkIcon network={network} size={ICON_SIZE} />
         </div>
 
         {/* Network name and details */}
