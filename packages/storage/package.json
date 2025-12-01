@@ -2,14 +2,14 @@
   "name": "@openzeppelin/ui-builder-storage",
   "version": "0.16.0",
   "private": false,
-  "description": "Local storage services for the OpenZeppelin UI Builder ecosystem.",
+  "description": "Universal, app-agnostic storage abstraction built on Dexie.js for IndexedDB.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./src/index.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
@@ -50,10 +50,12 @@
     "directory": "packages/storage"
   },
   "dependencies": {
-    "@openzeppelin/ui-builder-types": "workspace:^",
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.39.0",
@@ -63,9 +65,5 @@
     "fake-indexeddb": "^6.0.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "sonner": "^2.0.5"
   }
 }

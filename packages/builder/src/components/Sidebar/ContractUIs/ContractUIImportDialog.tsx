@@ -36,12 +36,6 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
       return;
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError('File size must be less than 10MB');
-      return;
-    }
-
     setError(null);
     setIsImporting(true);
 
@@ -95,6 +89,7 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
                 disabled={isImporting}
               >
                 <ArrowDownToLine className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
               </Button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
@@ -104,7 +99,6 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
             <p className="font-medium">File requirements:</p>
             <ul className="mt-1 space-y-1 text-muted-foreground">
               <li>• JSON format (.json extension)</li>
-              <li>• Maximum size: 10MB</li>
               <li>• Must be a valid Contract UI export</li>
             </ul>
           </div>

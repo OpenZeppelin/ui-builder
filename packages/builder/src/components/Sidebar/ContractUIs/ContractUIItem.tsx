@@ -1,7 +1,6 @@
 import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import type { ContractUIRecord } from '@openzeppelin/ui-builder-storage';
 import {
   Button,
   DropdownMenu,
@@ -14,6 +13,7 @@ import { cn } from '@openzeppelin/ui-builder-utils';
 import { useTypewriterEffect } from './hooks/useTypewriterEffect';
 
 import { useContractUIOperationState } from '../../../hooks/useStorageOperations';
+import type { ContractUIRecord } from '../../../storage';
 import ContractUIDeleteDialog from './ContractUIDeleteDialog';
 import ContractUIRenameDialog from './ContractUIRenameDialog';
 

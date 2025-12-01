@@ -1,4 +1,4 @@
-import Dexie, { Table } from 'dexie';
+import Dexie, { IndexableType, Table } from 'dexie';
 
 import { generateId, logger } from '@openzeppelin/ui-builder-utils';
 
@@ -120,6 +120,69 @@ export abstract class DexieStorage<T extends BaseRecord> {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Failed to clear ${this.tableName}`, errorMessage);
       throw new Error(`Failed to clear ${this.tableName} records`);
+    }
+  }
+
+  /**
+   * Bulk add records to the table.
+   * Note: Bulk operations do not trigger 'creating' hooks, so timestamps must be set manually.
+   */
+  async bulkAdd(records: T[]): Promise<string[]> {
+    try {
+      const keys = await this.table.bulkAdd(records, { allKeys: true });
+      logger.info(`${this.tableName} bulk add`, `Count: ${keys.length}`);
+      return keys as string[];
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to bulk add ${this.tableName}`, errorMessage);
+      throw new Error(`Failed to bulk add ${this.tableName} records`);
+    }
+  }
+
+  /**
+   * Bulk put (upsert) records to the table.
+   * Note: Bulk operations do not trigger hooks, so timestamps must be set manually.
+   */
+  async bulkPut(records: T[]): Promise<void> {
+    try {
+      await this.table.bulkPut(records);
+      logger.info(`${this.tableName} bulk put`, `Count: ${records.length}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to bulk put ${this.tableName}`, errorMessage);
+      throw new Error(`Failed to bulk put ${this.tableName} records`);
+    }
+  }
+
+  /**
+   * Bulk delete records by IDs.
+   */
+  async bulkDelete(ids: string[]): Promise<void> {
+    try {
+      await this.table.bulkDelete(ids);
+      logger.info(`${this.tableName} bulk delete`, `Count: ${ids.length}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to bulk delete ${this.tableName}`, errorMessage);
+      throw new Error(`Failed to bulk delete ${this.tableName} records`);
+    }
+  }
+
+  /**
+   * Find records by an indexed field.
+   * @param index - The index name (must be defined in the Dexie schema)
+   * @param value - The value to search for
+   * @returns Array of matching records
+   */
+  async findByIndex(index: string, value: IndexableType): Promise<T[]> {
+    try {
+      const results = await this.table.where(index).equals(value).toArray();
+      logger.info(`${this.tableName} findByIndex`, `Index: ${index}, Count: ${results.length}`);
+      return results;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to findByIndex ${this.tableName}`, errorMessage);
+      throw new Error(`Failed to query ${this.tableName} by index ${index}`);
     }
   }
 }
