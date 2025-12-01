@@ -34,7 +34,7 @@ vi.mock('sonner', () => ({
   },
 }));
 
-vi.mock('../../../../storage', () => ({
+vi.mock('../../../../../storage', () => ({
   contractUIStorage: {
     get: vi.fn(),
   },

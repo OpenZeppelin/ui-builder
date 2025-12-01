@@ -115,13 +115,7 @@
       "glob": "^11.1.0"
     },
     "patchedDependencies": {
-      "@midnight-ntwrk/midnight-js-types@2.0.2": "patches/@midnight-ntwrk__midnight-js-types@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-utils@2.0.2": "patches/@midnight-ntwrk__midnight-js-utils@2.0.2.patch",
-      "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch",
-      "@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2": "patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-contracts": "patches/@midnight-ntwrk__midnight-js-contracts@2.0.2.patch",
-      "@midnight-ntwrk/midnight-js-network-id@2.0.2": "patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch"
+      "@midnight-ntwrk/compact-runtime@0.9.0": "patches/@midnight-ntwrk__compact-runtime@0.9.0.patch"
     }
   },
   "dependencies": {

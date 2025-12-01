@@ -36,6 +36,13 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
       return;
     }
 
+    // Validate file size (200MB limit to prevent memory issues)
+    const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File size exceeds maximum limit of 200MB');
+      return;
+    }
+
     setError(null);
     setIsImporting(true);
 
@@ -100,6 +107,7 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
             <ul className="mt-1 space-y-1 text-muted-foreground">
               <li>• JSON format (.json extension)</li>
               <li>• Must be a valid Contract UI export</li>
+              <li>• Maximum size: 200MB</li>
             </ul>
           </div>
         </div>
