@@ -126,15 +126,33 @@ describe('EntityStorage', () => {
     });
 
     it('should handle update errors gracefully', async () => {
+      // First create a record so the update can find it
+      const id = await storage.save({ name: 'Test', value: 1 });
+
       const updateSpy = vi
         .spyOn(storage['table'], 'update')
         .mockRejectedValue(new Error('Database error'));
 
-      await expect(storage.update('some-id', { name: 'Updated' })).rejects.toThrow(
-        'Database error'
-      );
+      await expect(storage.update(id, { name: 'Updated' })).rejects.toThrow('Database error');
 
       updateSpy.mockRestore();
+    });
+
+    it('should reject updates that would exceed maxRecordSizeBytes', async () => {
+      // Create storage with small limit
+      const smallStorage = new TestStorage(testDb, { maxRecordSizeBytes: 50 });
+
+      // Save a small record first
+      const id = await smallStorage.save({ name: 'Short', value: 1 });
+
+      // Try to update with data that would exceed the limit
+      await expect(
+        smallStorage.update(id, { name: 'This name is way too long and will exceed the limit' })
+      ).rejects.toThrow('testRecords/record-too-large');
+
+      // Original record should be unchanged
+      const record = await smallStorage.get(id);
+      expect(record!.name).toBe('Short');
     });
   });
 

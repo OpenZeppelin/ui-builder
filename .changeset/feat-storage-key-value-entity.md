@@ -6,7 +6,7 @@ Add `KeyValueStorage` base class and rename `DexieStorage` to `EntityStorage`.
 
 New features:
 
-- **`KeyValueStorage<V>`**: Base class for key-value stores using `&key` primary key schema. Includes `set`, `get`, `getOrDefault`, `delete`, `has`, `keys`, `clear`, `setMany`, `getMany`, `deleteMany` methods with configurable key length and value size limits.
+- **`KeyValueStorage<V>`**: Base class for key-value stores using `&key` primary key schema. Includes `set`, `get`, `getOrDefault`, `delete`, `has`, `keys`, `getAll`, `clear`, `count`, `setMany`, `getMany`, `deleteMany` methods with configurable key length and value size limits.
 - **`EntityStorage<T>`**: Renamed from `DexieStorage` for clarity. Now includes configurable `maxRecordSizeBytes` option (default 10MB) and quota error handling.
 - **Shared utilities**: `isQuotaError()` and `withQuotaHandling()` exported for custom storage implementations.
 

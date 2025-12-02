@@ -145,12 +145,23 @@ export abstract class EntityStorage<T extends BaseRecord> {
    *
    * @param id - The record ID to update
    * @param updates - Partial record with fields to update
-   * @throws Error if record not found or quota is exceeded
+   * @throws Error if record not found, validation fails, or quota is exceeded
    */
   async update(id: string, updates: Partial<T>): Promise<void> {
     return await withQuotaHandling(this.tableName, async () => {
+      // Fetch existing record to validate merged size
+      const existing = await this.table.get(id);
+      if (!existing) {
+        throw new Error(`No record found with id: ${id}`);
+      }
+
       // Remove fields that shouldn't be updated
       const { id: _, createdAt: _createdAt, ...validUpdates } = updates;
+
+      // Validate merged record size
+      const { id: _existingId, createdAt: _existingCreatedAt, updatedAt: _existingUpdatedAt, ...existingData } = existing;
+      const mergedData = { ...existingData, ...validUpdates };
+      this.validateRecord(mergedData as Omit<T, 'id' | 'createdAt' | 'updatedAt'>);
 
       // The updating hook will add updatedAt automatically
       // Note: We use 'any' type assertion here because Dexie's TypeScript definitions
@@ -235,8 +246,15 @@ export abstract class EntityStorage<T extends BaseRecord> {
    *
    * @param records - Array of complete records to add
    * @returns Array of generated IDs
+   * @throws Error if any record exceeds size limit or quota is exceeded
    */
   async bulkAdd(records: T[]): Promise<string[]> {
+    // Validate all records first
+    for (const record of records) {
+      const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = record;
+      this.validateRecord(recordData as Omit<T, 'id' | 'createdAt' | 'updatedAt'>);
+    }
+
     return await withQuotaHandling(this.tableName, async () => {
       const keys = await this.table.bulkAdd(records, { allKeys: true });
       logger.info(`${this.tableName} bulk add`, `Count: ${keys.length}`);
@@ -249,8 +267,15 @@ export abstract class EntityStorage<T extends BaseRecord> {
    * Note: Bulk operations do not trigger hooks, so timestamps must be set manually.
    *
    * @param records - Array of complete records to upsert
+   * @throws Error if any record exceeds size limit or quota is exceeded
    */
   async bulkPut(records: T[]): Promise<void> {
+    // Validate all records first
+    for (const record of records) {
+      const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, ...recordData } = record;
+      this.validateRecord(recordData as Omit<T, 'id' | 'createdAt' | 'updatedAt'>);
+    }
+
     return await withQuotaHandling(this.tableName, async () => {
       await this.table.bulkPut(records);
       logger.info(`${this.tableName} bulk put`, `Count: ${records.length}`);

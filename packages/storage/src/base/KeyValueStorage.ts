@@ -37,7 +37,7 @@ const DEFAULT_OPTIONS: Required<KeyValueStorageOptions> = {
 /**
  * Abstract base class for key-value storage using IndexedDB via Dexie.
  *
- * Unlike `DexieStorage<T>` which uses auto-generated `id` fields,
+ * Unlike `EntityStorage<T>` which uses auto-generated `id` fields,
  * this class is designed for key-value stores where the `key` field
  * is the primary key (schema: `&key`).
  *
@@ -107,6 +107,14 @@ export abstract class KeyValueStorage<V = unknown> {
     // undefined is not allowed (use delete instead)
     if (value === undefined) {
       throw new Error(`${this.tableName}/invalid-value`);
+    }
+
+    // Check size for strings
+    if (typeof value === 'string') {
+      if (value.length > this.options.maxValueSizeBytes) {
+        throw new Error(`${this.tableName}/value-too-large`);
+      }
+      return;
     }
 
     // Check serialized size for objects/arrays
@@ -254,21 +262,27 @@ export abstract class KeyValueStorage<V = unknown> {
   async setMany(entries: Record<string, V> | Map<string, V>): Promise<void> {
     const items = entries instanceof Map ? Array.from(entries.entries()) : Object.entries(entries);
 
+    // Validate all keys and values first
+    const normalizedKeys = items.map(([key]) => this.validateKey(key));
+    items.forEach(([, value]) => this.validateValue(value));
+
+    // Fetch all existing records in a single bulkGet for performance
+    const existingRecords = await this.table.bulkGet(normalizedKeys);
+    const existingMap = new Map(
+      existingRecords.filter((r): r is KeyValueRecord<V> => r !== undefined).map((r) => [r.key, r])
+    );
+
     const now = new Date();
-    const records: KeyValueRecord<V>[] = [];
-
-    for (const [key, value] of items) {
-      const normalizedKey = this.validateKey(key);
-      this.validateValue(value);
-
-      const existing = await this.table.get(normalizedKey);
-      records.push({
+    const records: KeyValueRecord<V>[] = items.map(([, value], index) => {
+      const normalizedKey = normalizedKeys[index];
+      const existing = existingMap.get(normalizedKey);
+      return {
         key: normalizedKey,
         value,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
-      });
-    }
+      };
+    });
 
     await withQuotaHandling(this.tableName, async () => {
       await this.table.bulkPut(records);
