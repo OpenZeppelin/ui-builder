@@ -255,9 +255,11 @@ export abstract class KeyValueStorage<V = unknown> {
 
   /**
    * Sets multiple key-value pairs at once.
-   * Note: This is not atomic - some entries may succeed while others fail.
+   * All entries are validated before writing. If validation fails, no entries are written.
+   * Note: The bulkPut operation itself may be non-atomic if quota or database errors occur.
    *
    * @param entries - Object or Map of key-value pairs
+   * @throws Error if any key or value validation fails
    */
   async setMany(entries: Record<string, V> | Map<string, V>): Promise<void> {
     const items = entries instanceof Map ? Array.from(entries.entries()) : Object.entries(entries);
