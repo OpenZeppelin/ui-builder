@@ -96,7 +96,7 @@ export default function ContractUIImportDialog({ open, onOpenChange }: ImportDia
                 disabled={isImporting}
               >
                 <ArrowDownToLine className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">Select import file</span>
               </Button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}

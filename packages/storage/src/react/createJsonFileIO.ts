@@ -1,5 +1,17 @@
 type OnError = (title: string, err: unknown) => void;
 
+/**
+ * Creates file I/O utilities for importing and exporting data as JSON files with error handling.
+ *
+ * @param functions Object containing export and import functions
+ * @param functions.exportJson Function that exports data to a JSON string
+ * @param functions.importJson Function that imports data from a JSON string
+ * @param options Configuration options
+ * @param options.filePrefix Prefix for the downloaded filename
+ * @param options.onError Optional error handler called with a title and the error
+ * @param options.shouldExport Optional function to determine if export should proceed based on parsed data. Defaults to always true.
+ * @returns Object containing exportAsFile and importFromFile functions
+ */
 export function createJsonFileIO(
   {
     exportJson,
@@ -11,17 +23,22 @@ export function createJsonFileIO(
   {
     filePrefix,
     onError,
+    shouldExport,
   }: {
     filePrefix: string;
     onError?: OnError;
+    shouldExport?: (parsed: unknown) => boolean;
   }
 ) {
   const exportAsFile = async (ids?: string[]) => {
     try {
       const jsonData = await exportJson(ids);
       const parsed = JSON.parse(jsonData);
-      const count = parsed?.configurations?.length ?? 0;
-      if (count === 0) return;
+
+      // Check if export should proceed (allows custom validation logic)
+      if (shouldExport && !shouldExport(parsed)) {
+        return;
+      }
 
       const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

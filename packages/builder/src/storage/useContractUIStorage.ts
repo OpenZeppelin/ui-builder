@@ -28,7 +28,8 @@ export interface UseContractUIStorageReturn {
     contractDefinition: string,
     contractDefinitionSource: 'fetched' | 'manual',
     contractDefinitionMetadata?: ContractDefinitionMetadata,
-    contractDefinitionOriginal?: string
+    contractDefinitionOriginal?: string,
+    contractDefinitionArtifacts?: Record<string, unknown>
   ) => Promise<void>;
   getRecordsNeedingDefinitionRefresh: (thresholdHours?: number) => Promise<ContractUIRecord[]>;
   compareStoredDefinition: (
@@ -57,6 +58,11 @@ const useBase = createRepositoryHook<ContractUIRecord, typeof contractUIStorage>
     exportJson: (ids?: string[]) => contractUIStorage.export(ids),
     importJson: (json: string) => contractUIStorage.import(json),
     filePrefix: 'contract-uis',
+    shouldExport: (parsed: unknown) => {
+      // Only export if there are configurations
+      const data = parsed as { configurations?: unknown[] };
+      return (data?.configurations?.length ?? 0) > 0;
+    },
   },
   expose: (repo) => ({
     duplicateContractUI: (id: string) => repo.duplicate(id),
