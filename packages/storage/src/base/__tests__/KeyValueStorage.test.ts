@@ -4,7 +4,7 @@
 import Dexie from 'dexie';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { KeyValueStorage, type KeyValueRecord } from '../KeyValueStorage';
+import { KeyValueStorage } from '../KeyValueStorage';
 
 // Concrete implementation for testing
 class TestKVStorage extends KeyValueStorage<string> {

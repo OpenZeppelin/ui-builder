@@ -159,7 +159,12 @@ export abstract class EntityStorage<T extends BaseRecord> {
       const { id: _, createdAt: _createdAt, ...validUpdates } = updates;
 
       // Validate merged record size
-      const { id: _existingId, createdAt: _existingCreatedAt, updatedAt: _existingUpdatedAt, ...existingData } = existing;
+      const {
+        id: _existingId,
+        createdAt: _existingCreatedAt,
+        updatedAt: _existingUpdatedAt,
+        ...existingData
+      } = existing;
       const mergedData = { ...existingData, ...validUpdates };
       this.validateRecord(mergedData as Omit<T, 'id' | 'createdAt' | 'updatedAt'>);
 
