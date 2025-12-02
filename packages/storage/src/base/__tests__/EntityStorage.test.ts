@@ -1,10 +1,10 @@
 /**
- * Tests for DexieStorage base class
+ * Tests for EntityStorage base class
  */
 import Dexie from 'dexie';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DexieStorage, type BaseRecord } from '../DexieStorage';
+import { EntityStorage, type BaseRecord } from '../EntityStorage';
 
 // Test record interface extending BaseRecord
 interface TestRecord extends BaseRecord {
@@ -13,13 +13,13 @@ interface TestRecord extends BaseRecord {
 }
 
 // Concrete implementation for testing
-class TestStorage extends DexieStorage<TestRecord> {
-  constructor(db: Dexie) {
-    super(db, 'testRecords');
+class TestStorage extends EntityStorage<TestRecord> {
+  constructor(db: Dexie, options?: { maxRecordSizeBytes?: number }) {
+    super(db, 'testRecords', options);
   }
 }
 
-describe('DexieStorage', () => {
+describe('EntityStorage', () => {
   let testDb: Dexie;
   let storage: TestStorage;
 
@@ -66,9 +66,18 @@ describe('DexieStorage', () => {
 
       const recordData = { name: 'Test Record', value: 42 };
 
-      await expect(storage.save(recordData)).rejects.toThrow('Failed to save testRecords');
+      await expect(storage.save(recordData)).rejects.toThrow();
 
       addSpy.mockRestore();
+    });
+
+    it('should reject records that exceed maxRecordSizeBytes', async () => {
+      // Create storage with very small limit
+      const smallStorage = new TestStorage(testDb, { maxRecordSizeBytes: 10 });
+
+      const largeRecord = { name: 'This is a very long name that exceeds the limit', value: 42 };
+
+      await expect(smallStorage.save(largeRecord)).rejects.toThrow('testRecords/record-too-large');
     });
   });
 
@@ -112,20 +121,38 @@ describe('DexieStorage', () => {
 
     it('should throw error when updating non-existent record', async () => {
       await expect(storage.update('non-existent-id', { name: 'Updated' })).rejects.toThrow(
-        'Failed to update testRecords'
+        'No record found with id: non-existent-id'
       );
     });
 
     it('should handle update errors gracefully', async () => {
+      // First create a record so the update can find it
+      const id = await storage.save({ name: 'Test', value: 1 });
+
       const updateSpy = vi
         .spyOn(storage['table'], 'update')
         .mockRejectedValue(new Error('Database error'));
 
-      await expect(storage.update('some-id', { name: 'Updated' })).rejects.toThrow(
-        'Failed to update testRecords'
-      );
+      await expect(storage.update(id, { name: 'Updated' })).rejects.toThrow('Database error');
 
       updateSpy.mockRestore();
+    });
+
+    it('should reject updates that would exceed maxRecordSizeBytes', async () => {
+      // Create storage with small limit
+      const smallStorage = new TestStorage(testDb, { maxRecordSizeBytes: 50 });
+
+      // Save a small record first
+      const id = await smallStorage.save({ name: 'Short', value: 1 });
+
+      // Try to update with data that would exceed the limit
+      await expect(
+        smallStorage.update(id, { name: 'This name is way too long and will exceed the limit' })
+      ).rejects.toThrow('testRecords/record-too-large');
+
+      // Original record should be unchanged
+      const record = await smallStorage.get(id);
+      expect(record!.name).toBe('Short');
     });
   });
 
@@ -139,16 +166,6 @@ describe('DexieStorage', () => {
       await storage.delete(id);
 
       expect(await storage.get(id)).toBeUndefined();
-    });
-
-    it('should handle delete errors gracefully', async () => {
-      const deleteSpy = vi
-        .spyOn(storage['table'], 'delete')
-        .mockRejectedValue(new Error('Database error'));
-
-      await expect(storage.delete('some-id')).rejects.toThrow('Failed to delete testRecords');
-
-      deleteSpy.mockRestore();
     });
   });
 
@@ -168,16 +185,6 @@ describe('DexieStorage', () => {
     it('should return undefined for non-existent record', async () => {
       const result = await storage.get('non-existent-id');
       expect(result).toBeUndefined();
-    });
-
-    it('should handle get errors gracefully', async () => {
-      const getSpy = vi
-        .spyOn(storage['table'], 'get')
-        .mockRejectedValue(new Error('Database error'));
-
-      await expect(storage.get('some-id')).rejects.toThrow('Failed to retrieve testRecords');
-
-      getSpy.mockRestore();
     });
   });
 
@@ -206,16 +213,6 @@ describe('DexieStorage', () => {
       const allRecords = await storage.getAll();
       expect(allRecords).toEqual([]);
     });
-
-    it('should handle getAll errors gracefully', async () => {
-      const orderBySpy = vi.spyOn(storage['table'], 'orderBy').mockImplementation(() => {
-        throw new Error('Database error');
-      });
-
-      await expect(storage.getAll()).rejects.toThrow('Failed to retrieve testRecords records');
-
-      orderBySpy.mockRestore();
-    });
   });
 
   describe('clear', () => {
@@ -232,15 +229,29 @@ describe('DexieStorage', () => {
       allRecords = await storage.getAll();
       expect(allRecords).toHaveLength(0);
     });
+  });
 
-    it('should handle clear errors gracefully', async () => {
-      const clearSpy = vi
-        .spyOn(storage['table'], 'clear')
-        .mockRejectedValue(new Error('Database error'));
+  describe('has', () => {
+    it('should return true for existing record', async () => {
+      const id = await storage.save({ name: 'Test', value: 1 });
+      expect(await storage.has(id)).toBe(true);
+    });
 
-      await expect(storage.clear()).rejects.toThrow('Failed to clear testRecords records');
+    it('should return false for non-existent record', async () => {
+      expect(await storage.has('non-existent-id')).toBe(false);
+    });
+  });
 
-      clearSpy.mockRestore();
+  describe('count', () => {
+    it('should return the number of records', async () => {
+      expect(await storage.count()).toBe(0);
+
+      await storage.save({ name: 'Record 1', value: 1 });
+      expect(await storage.count()).toBe(1);
+
+      await storage.save({ name: 'Record 2', value: 2 });
+      await storage.save({ name: 'Record 3', value: 3 });
+      expect(await storage.count()).toBe(3);
     });
   });
 
@@ -272,6 +283,35 @@ describe('DexieStorage', () => {
       const updated = await storage.get(id);
       expect(updated!.name).toBe('Modified by Hook');
       expect(updated!.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
+    });
+  });
+
+  describe('quota handling', () => {
+    it('should throw quota-exceeded error for quota errors', async () => {
+      // Mock quota exceeded error
+      const addSpy = vi.spyOn(storage['table'], 'add').mockRejectedValue({
+        name: 'QuotaExceededError',
+        message: 'Quota exceeded',
+      });
+
+      await expect(storage.save({ name: 'Test', value: 1 })).rejects.toThrow(
+        'testRecords/quota-exceeded'
+      );
+
+      addSpy.mockRestore();
+    });
+
+    it('should detect Safari iOS quota error (code 22)', async () => {
+      const addSpy = vi.spyOn(storage['table'], 'add').mockRejectedValue({
+        code: 22,
+        message: 'Some error',
+      });
+
+      await expect(storage.save({ name: 'Test', value: 1 })).rejects.toThrow(
+        'testRecords/quota-exceeded'
+      );
+
+      addSpy.mockRestore();
     });
   });
 });

@@ -1,6 +1,12 @@
 // Base classes
-export { DexieStorage } from './base/DexieStorage';
-export type { BaseRecord } from './base/DexieStorage';
+export { EntityStorage } from './base/EntityStorage';
+export type { BaseRecord, EntityStorageOptions } from './base/EntityStorage';
+
+export { KeyValueStorage } from './base/KeyValueStorage';
+export type { KeyValueRecord, KeyValueStorageOptions } from './base/KeyValueStorage';
+
+// Utilities
+export { isQuotaError, withQuotaHandling } from './base/utils';
 
 // Core utilities
 export { createDexieDatabase } from './core';
