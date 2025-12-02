@@ -1,13 +1,19 @@
-import { DexieStorage } from '@openzeppelin/ui-builder-storage';
+import { EntityStorage } from '@openzeppelin/ui-builder-storage';
 import type { ContractDefinitionMetadata } from '@openzeppelin/ui-builder-types';
 import { generateId, logger } from '@openzeppelin/ui-builder-utils';
 
 import { db } from './database';
 import type { ContractUIExportData, ContractUIRecord } from './types';
 
-export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
+/**
+ * Storage for Contract UI configurations.
+ * Uses a higher record size limit (50MB) to accommodate large contract definitions
+ * and source code (e.g., Midnight contracts with compiled modules).
+ */
+export class ContractUIStorage extends EntityStorage<ContractUIRecord> {
   constructor() {
-    super(db, 'contractUIs');
+    // 50MB limit for records containing large contract definitions/source code
+    super(db, 'contractUIs', { maxRecordSizeBytes: 50 * 1024 * 1024 });
   }
 
   async duplicate(id: string): Promise<string> {
