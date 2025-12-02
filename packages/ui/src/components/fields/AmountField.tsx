@@ -224,7 +224,7 @@ export function AmountField<TFieldValues extends FieldValues = FieldValues>({
                         (newValue) => {
                           field.onChange(formatCurrency(newValue));
                         },
-                        parseAmount(field.value) || 0,
+                        parseAmount(field.value || ''),
                         step,
                         min,
                         max

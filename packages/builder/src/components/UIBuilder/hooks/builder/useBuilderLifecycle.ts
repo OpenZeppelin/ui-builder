@@ -2,7 +2,6 @@ import { toast } from 'sonner';
 import { useCallback } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import { contractUIStorage } from '@openzeppelin/ui-builder-storage';
 import { ContractSchema, type Ecosystem } from '@openzeppelin/ui-builder-types';
 import { logger, parseDeepLink, routerService } from '@openzeppelin/ui-builder-utils';
 
@@ -11,6 +10,7 @@ import { getNetworkById } from '@/core/ecosystemManager';
 import { BuilderFormConfig } from '@/core/types/FormTypes';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
+import { contractUIStorage } from '../../../../storage';
 import { uiBuilderStore } from '../uiBuilderStore';
 
 // Global lock to prevent multiple page initializations

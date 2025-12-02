@@ -149,8 +149,8 @@ echo -e "\n  ${GREEN}✓${NC} Updated package.json with local package paths"
 
 echo -e "\n${YELLOW}Step 5: Copying Midnight SDK patches...${NC}"
 
-# Check if the exported app uses Midnight adapter
-if node -e "const pkg = require('./package.json'); const deps = {...(pkg.dependencies || {}), ...(pkg.devDependencies || {})}; process.exit(deps['@openzeppelin/ui-builder-adapter-midnight'] ? 0 : 1);" 2>/dev/null; then
+# Check if the exported app uses any Midnight packages
+if node -e "const pkg = require('./package.json'); const deps = {...(pkg.dependencies || {}), ...(pkg.devDependencies || {})}; const hasMidnight = Object.keys(deps).some(k => k.startsWith('@midnight-ntwrk/')); process.exit(hasMidnight ? 0 : 1);" 2>/dev/null; then
   # Copy patches from the adapter to the test directory
   ADAPTER_DIR="$SCRIPT_DIR/packages/adapter-midnight"
   if [ -d "$ADAPTER_DIR/patches" ]; then
@@ -158,17 +158,16 @@ if node -e "const pkg = require('./package.json'); const deps = {...(pkg.depende
     cp -r "$ADAPTER_DIR/patches"/* patches/ 2>/dev/null || true
     echo -e "  ${GREEN}✓${NC} Copied $(ls -1 patches/ | wc -l | tr -d ' ') patch files"
     
-    # Add patchedDependencies to package.json
+    # Add patchedDependencies to package.json (only for packages that exist in dependencies)
     node -e "
     const fs = require('fs');
     const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     
-    // Add pnpm.patchedDependencies from the adapter
-    if (!pkg.pnpm) {
-      pkg.pnpm = {};
-    }
+    // Get all dependencies
+    const allDeps = {...(pkg.dependencies || {}), ...(pkg.devDependencies || {})};
     
-    pkg.pnpm.patchedDependencies = {
+    // All available patches from the adapter
+    const availablePatches = {
       '@midnight-ntwrk/compact-runtime@0.9.0': 'patches/@midnight-ntwrk__compact-runtime@0.9.0.patch',
       '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch',
       '@midnight-ntwrk/midnight-js-network-id@2.0.2': 'patches/@midnight-ntwrk__midnight-js-network-id@2.0.2.patch',
@@ -178,8 +177,33 @@ if node -e "const pkg = require('./package.json'); const deps = {...(pkg.depende
       '@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2': 'patches/@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch'
     };
     
+    // Add pnpm.patchedDependencies and pnpm.overrides only for packages that are actually in dependencies
+    if (!pkg.pnpm) {
+      pkg.pnpm = {};
+    }
+    if (!pkg.pnpm.overrides) {
+      pkg.pnpm.overrides = {};
+    }
+    
+    pkg.pnpm.patchedDependencies = {};
+    
+    for (const [pkgWithVersion, patchPath] of Object.entries(availablePatches)) {
+      // Extract package name without version (e.g., '@midnight-ntwrk/compact-runtime')
+      const pkgName = pkgWithVersion.split('@').slice(0, -1).join('@');
+      const version = pkgWithVersion.split('@').pop();
+      
+      // Check if this package is in dependencies
+      if (allDeps[pkgName]) {
+        pkg.pnpm.patchedDependencies[pkgWithVersion] = patchPath;
+        // Force the exact version that has a patch
+        pkg.pnpm.overrides[pkgName] = version;
+      }
+    }
+    
     fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-    console.log('  ✓ Added pnpm.patchedDependencies to package.json');
+    const patchCount = Object.keys(pkg.pnpm.patchedDependencies).length;
+    console.log('  ✓ Added ' + patchCount + ' patchedDependencies to package.json');
+    console.log('  ✓ Added ' + patchCount + ' version overrides to ensure patches match');
     "
   else
     echo -e "  ${YELLOW}⚠${NC}  No patches directory found in adapter"

@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 
-import { UseContractUIStorageReturn } from '@openzeppelin/ui-builder-storage';
-
+import type { UseContractUIStorageReturn } from '../storage';
 import { ContractUIStorageContext } from './ContractUIStorageContext';
 
 /**

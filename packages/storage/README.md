@@ -1,20 +1,22 @@
 # @openzeppelin/ui-builder-storage
 
-Local storage services for the OpenZeppelin UI Builder ecosystem.
+A React-first storage abstraction built on Dexie.js for IndexedDB. This package provides a reusable foundation for creating type-safe storage services that can be used across multiple applications.
 
 ## Description
 
-This package provides a reusable storage infrastructure built on top of IndexedDB using Dexie.js. It includes a generic base class for creating type-safe storage services, along with specific implementations for Contract UI configurations.
+This package provides a generic storage infrastructure built on top of IndexedDB using Dexie.js. It includes a base class for creating type-safe storage services, a React live-query hook, database creation utilities, and helpful abstractions. Each consuming application defines its own database name, schema, and domain-specific storage classes.
 
 ## Features
 
 - 🗄️ **Generic Storage Base Class**: Extensible `DexieStorage` class for creating new storage services
-- 🔄 **Reactive Updates**: Live queries with `dexie-react-hooks` for automatic UI updates
-- 🔒 **Type Safety**: Full TypeScript support with proper type definitions
-- 🚀 **Performance**: Optimized for handling 1000+ records efficiently
-- 🔧 **CRUD Operations**: Complete Create, Read, Update, Delete functionality
-- 📦 **Import/Export**: Built-in JSON import/export capabilities
-- 🔄 **Multi-tab Sync**: Automatic synchronization across browser tabs
+- ⚛️ **React Support**: `useLiveQuery` re-exported for convenience
+- 🔧 **App-Agnostic Schemas**: Each app defines its own DB name and stores
+- 🔒 **Type Safety**: Full TypeScript support
+- 🚀 **Performance**: Optimized for large datasets
+- 📦 **CRUD Operations**: Create, Read, Update, Delete helpers
+- 🔄 **Bulk Operations**: Efficient bulk add/put/delete
+- 🔍 **Index Queries**: Query by indexed fields
+- 🧰 **Ecosystem utilities**: Uses `@openzeppelin/ui-builder-utils` for logging and ID generation
 
 ## Installation
 
@@ -22,95 +24,109 @@ This package provides a reusable storage infrastructure built on top of IndexedD
 pnpm add @openzeppelin/ui-builder-storage
 ```
 
-## Usage
+## Quick Start
 
-### Basic Usage
+### 1. Define Your Database Schema
 
 ```typescript
-import { useContractUIStorage } from '@openzeppelin/ui-builder-storage';
+import { createDexieDatabase } from '@openzeppelin/ui-builder-storage';
 
-function MyComponent() {
-  const {
-    contractUIs,
-    isLoading,
-    saveContractUI,
-    updateContractUI,
-    deleteContractUI,
-    exportContractUIs,
-    importContractUIs
-  } = useContractUIStorage();
+export const db = createDexieDatabase('MyApp', [
+  {
+    version: 1,
+    stores: {
+      items: '++id, name, createdAt, updatedAt',
+      settings: '&key',
+    },
+  },
+  {
+    version: 2,
+    stores: {
+      items: '++id, name, createdAt, updatedAt, category',
+      settings: '&key',
+    },
+    upgrade: async (trans) => {
+      // Migration logic for version 2
+      // Access db via trans.db if needed
+    },
+  },
+]);
+```
 
-  // Save a new configuration
-  const handleSave = async () => {
-    const id = await saveContractUI({
-      title: 'My Contract UI',
-      ecosystem: 'evm',
-      networkId: '1',
-      contractAddress: '0x...',
-      functionId: 'transfer',
-      formConfig: { /* ... */ }
-    });
-  };
+### 2. Define Your Record Types
 
-  // Export configurations
-  const handleExport = async () => {
-    await exportContractUIs(); // Exports all
-    // or
-    await exportContractUIs(['id1', 'id2']); // Export specific
-  };
+```typescript
+import type { BaseRecord } from '@openzeppelin/ui-builder-storage';
 
-  return (
-    <div>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul>
-          {contractUIs?.map(ui => (
-            <li key={ui.id}>{ui.title}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+export interface ItemRecord extends BaseRecord {
+  name: string;
+  category?: string;
+}
+
+export interface SettingRecord extends BaseRecord {
+  key: string;
+  value: unknown;
 }
 ```
 
-### Creating a Custom Storage Service
+### 3. Create Storage Services
 
 ```typescript
-import { db, DexieStorage } from '@openzeppelin/ui-builder-storage';
+import { DexieStorage, useLiveQuery } from '@openzeppelin/ui-builder-storage';
 
-interface TransactionRecord extends BaseRecord {
-  hash: string;
-  networkId: string;
-  status: 'pending' | 'confirmed' | 'failed';
-  timestamp: Date;
-}
+import { db } from './database';
+import type { ItemRecord } from './types';
 
-class TransactionStorage extends DexieStorage<TransactionRecord> {
+export class ItemStorage extends DexieStorage<ItemRecord> {
   constructor() {
-    super(db, 'transactions');
+    super(db, 'items');
   }
 
-  async getByHash(hash: string): Promise<TransactionRecord | undefined> {
-    return await this.table.where('hash').equals(hash).first();
+  async getByName(name: string): Promise<ItemRecord | undefined> {
+    return await this.findByIndex('name', name).then((results) => results[0]);
   }
 
-  async getPending(): Promise<TransactionRecord[]> {
-    return await this.table.where('status').equals('pending').toArray();
+  async getByCategory(category: string): Promise<ItemRecord[]> {
+    return await this.findByIndex('category', category);
   }
 }
 
-export const transactionStorage = new TransactionStorage();
+export const itemStorage = new ItemStorage();
+
+export function useItems() {
+  const items = useLiveQuery(() => itemStorage.getAll());
+  const isLoading = items === undefined;
+  return { items, isLoading };
+}
 ```
 
 ## API Reference
+
+### `createDexieDatabase(name, versions)`
+
+Creates a configured Dexie database instance with versioned stores.
+
+**Parameters:**
+
+- `name: string` - Database name (e.g., 'UIBuilder', 'RoleManager')
+- `versions: DbVersion[]` - Array of version definitions
+
+**Returns:** `Dexie` - Configured database instance
 
 ### `DexieStorage<T>`
 
 Generic base class for creating storage services.
 
-#### Methods
+**Constructor:**
+
+```typescript
+constructor(
+  db: Dexie,
+  tableName: string,
+)
+```
+
+**Methods:**
 
 - `save(record: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<string>`
 - `update(id: string, updates: Partial<T>): Promise<void>`
@@ -118,40 +134,10 @@ Generic base class for creating storage services.
 - `get(id: string): Promise<T | undefined>`
 - `getAll(): Promise<T[]>`
 - `clear(): Promise<void>`
-
-### `useContractUIStorage()`
-
-React hook for Contract UI storage operations.
-
-#### Returns
-
-- `contractUIs: ContractUIRecord[] | undefined` - Array of saved configurations
-- `isLoading: boolean` - Loading state
-- `saveContractUI` - Save a new configuration
-- `updateContractUI` - Update an existing configuration
-- `deleteContractUI` - Delete a configuration
-- `deleteAllContractUIs` - Delete all configurations
-- `duplicateContractUI` - Duplicate a configuration
-- `exportContractUIs` - Export configurations as JSON
-- `importContractUIs` - Import configurations from file
-
-## Types
-
-### `ContractUIRecord`
-
-```typescript
-interface ContractUIRecord extends BaseRecord {
-  title: string;
-  ecosystem: string;
-  networkId: string;
-  contractAddress: string;
-  functionId: string;
-  formConfig: RenderFormSchema;
-  executionConfig?: ExecutionConfig;
-  uiKitConfig?: UiKitConfiguration;
-  metadata?: Record<string, unknown>;
-}
-```
+- `bulkAdd(records: T[]): Promise<string[]>`
+- `bulkPut(records: T[]): Promise<void>`
+- `bulkDelete(ids: string[]): Promise<void>`
+- `findByIndex(index: string, value: IndexableType): Promise<T[]>`
 
 ### `BaseRecord`
 
@@ -163,26 +149,42 @@ interface BaseRecord {
 }
 ```
 
+## Examples
+
+### UI Builder App
+
+```typescript
+// packages/builder/src/storage/database.ts
+import { createDexieDatabase } from '@openzeppelin/ui-builder-storage';
+
+export const db = createDexieDatabase('UIBuilder', [
+  {
+    version: 1,
+    stores: {
+      contractUIs: '++id, title, createdAt, updatedAt, ecosystem, networkId, contractAddress, functionId',
+    },
+  },
+]);
+
+// packages/builder/src/storage/ContractUIStorage.ts
+import { DexieStorage } from '@openzeppelin/ui-builder-storage';
+import { db } from './database';
+import type { ContractUIRecord } from './types';
+
+export class ContractUIStorage extends DexieStorage<ContractUIRecord> {
+  constructor() {
+    super(db, 'contractUIs');
+  }
+  // Domain-specific methods...
+}
+```
+
 ## Development
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Build the package
 pnpm build
-
-# Run tests
 pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Lint code
-pnpm lint
-
-# Format code
-pnpm format
 ```
 
 ## License

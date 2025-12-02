@@ -90,6 +90,20 @@ export const midnightAdapterConfig: AdapterConfig = {
   },
 
   /**
+   * Package version overrides to ensure exact versions that have patches
+   * These force pnpm to install the exact versions for which patches exist
+   */
+  overrides: {
+    '@midnight-ntwrk/compact-runtime': '0.9.0',
+    '@midnight-ntwrk/midnight-js-contracts': '2.0.2',
+    '@midnight-ntwrk/midnight-js-network-id': '2.0.2',
+    '@midnight-ntwrk/midnight-js-types': '2.0.2',
+    '@midnight-ntwrk/midnight-js-utils': '2.0.2',
+    '@midnight-ntwrk/midnight-js-indexer-public-data-provider': '2.0.2',
+    '@midnight-ntwrk/midnight-js-http-client-proof-provider': '2.0.2',
+  },
+
+  /**
    * Vite configuration for exported applications
    * Provides the necessary build configuration for Midnight SDK's WASM modules
    */

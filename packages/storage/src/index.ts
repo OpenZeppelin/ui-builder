@@ -2,15 +2,15 @@
 export { DexieStorage } from './base/DexieStorage';
 export type { BaseRecord } from './base/DexieStorage';
 
-// Services
-export { ContractUIStorage, contractUIStorage } from './services/ContractUIStorage';
+// Core utilities
+export { createDexieDatabase } from './core';
+export type { DbVersion } from './core';
 
-// Hooks
-export { useContractUIStorage } from './hooks/useContractUIStorage';
-export type { UseContractUIStorageReturn } from './hooks/useContractUIStorage';
-
-// Types
-export type { ContractUIRecord, ContractUIExportData } from './types';
-
-// Database (for advanced usage)
-export { db } from './database/db';
+// React utilities
+export {
+  useLiveQuery,
+  createLiveQueryHook,
+  createCrudHook,
+  createJsonFileIO,
+  createRepositoryHook,
+} from './react';

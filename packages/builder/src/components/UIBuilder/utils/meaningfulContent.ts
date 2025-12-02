@@ -1,5 +1,4 @@
-import type { ContractUIRecord } from '@openzeppelin/ui-builder-storage';
-
+import type { ContractUIRecord } from '../../../storage';
 import type { uiBuilderStore } from '../hooks/uiBuilderStore';
 
 /**

@@ -1,9 +1,8 @@
 import { Loader2 } from 'lucide-react';
 
-import type { ContractUIRecord } from '@openzeppelin/ui-builder-storage';
-
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../hooks/useStorageOperations';
+import type { ContractUIRecord } from '../../../storage';
 import { recordHasMeaningfulContent } from '../../UIBuilder/utils/meaningfulContent';
 import ContractUIItem from './ContractUIItem';
 

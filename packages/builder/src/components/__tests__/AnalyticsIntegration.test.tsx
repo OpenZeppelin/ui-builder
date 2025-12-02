@@ -28,7 +28,7 @@ vi.mock('@openzeppelin/ui-builder-utils', () => ({
   cn: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/ui-builder-storage', () => ({
+vi.mock('../../../contexts/useContractUIStorage', () => ({
   useContractUIStorage: vi.fn(),
 }));
 

@@ -3,16 +3,12 @@ import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import {
-  contractUIStorage,
-  ContractUIStorage,
-  type ContractUIRecord,
-} from '@openzeppelin/ui-builder-storage';
 import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';
+import { contractUIStorage, ContractUIStorage, type ContractUIRecord } from '../../../../storage';
 import { uiBuilderStore, type UIBuilderState } from '../uiBuilderStore';
 import { useUIBuilderStore } from '../useUIBuilderStore';
 import {
