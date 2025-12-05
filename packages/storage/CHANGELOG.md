@@ -1,5 +1,49 @@
 # @openzeppelin/ui-builder-storage
 
+## 1.0.0
+
+### Major Changes
+
+- [#257](https://github.com/OpenZeppelin/ui-builder/pull/257) [`923e016`](https://github.com/OpenZeppelin/ui-builder/commit/923e01634b94d6bf421a57f67aac4512e9b9b091) Thanks [@pasevin](https://github.com/pasevin)! - Refactor storage package to be React-first, app-agnostic, and easier to consume across apps.
+
+  Highlights:
+  - New React utilities: `useLiveQuery` (re-export), `createLiveQueryHook`, `createCrudHook`, `createJsonFileIO`, `createRepositoryHook`.
+  - Core: `DexieStorage` now uses `@openzeppelin/ui-builder-utils` (`logger`, `generateId`); `createDexieDatabase` helper for versioned Dexie setup.
+  - Exports consolidated at the root (no `./react` subpath).
+  - Dependencies: add `dexie-react-hooks`; keep `react` as a peer dependency.
+
+  BREAKING CHANGES:
+  - Remove builder-specific exports from this package: `ContractUIStorage`, `contractUIStorage`, `useContractUIStorage`, `db`, and `ContractUIRecord`/`ContractUIExportData` types.
+  - Consumers must define app-local repositories/types and use the new React helpers.
+
+  Migration (typical):
+  - Move app-specific repositories (e.g., `ContractUIStorage`) and types into the app.
+  - Create the Dexie instance in the app with `createDexieDatabase`.
+  - Use the new React helpers to replace ad-hoc storage hooks (e.g., `createRepositoryHook`).
+
+### Minor Changes
+
+- [#258](https://github.com/OpenZeppelin/ui-builder/pull/258) [`4a496fe`](https://github.com/OpenZeppelin/ui-builder/commit/4a496fe6522d4f7f30602ac25856e1a711025d7c) Thanks [@pasevin](https://github.com/pasevin)! - Add `KeyValueStorage` base class and rename `DexieStorage` to `EntityStorage`.
+
+  New features:
+  - **`KeyValueStorage<V>`**: Base class for key-value stores using `&key` primary key schema. Includes `set`, `get`, `getOrDefault`, `delete`, `has`, `keys`, `getAll`, `clear`, `count`, `setMany`, `getMany`, `deleteMany` methods with configurable key length and value size limits.
+  - **`EntityStorage<T>`**: Renamed from `DexieStorage` for clarity. Now includes configurable `maxRecordSizeBytes` option (default 10MB) and quota error handling.
+  - **Shared utilities**: `isQuotaError()` and `withQuotaHandling()` exported for custom storage implementations.
+
+  Improvements:
+  - Both base classes now handle `QuotaExceededError` consistently across browsers (including Safari iOS code 22).
+  - Record/value size validation prevents accidental quota exhaustion.
+  - Builder app's `ContractUIStorage` now uses 50MB limit for large contract definitions.
+
+  Migration:
+  - Replace `DexieStorage` imports with `EntityStorage` (same API).
+  - For key-value stores, extend `KeyValueStorage` instead of implementing custom logic.
+
+### Patch Changes
+
+- Updated dependencies [[`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48)]:
+  - @openzeppelin/ui-builder-utils@1.0.0
+
 ## 0.16.0
 
 ### Patch Changes
