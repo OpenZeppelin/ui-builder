@@ -1,5 +1,15 @@
 # @openzeppelin/transaction-form-react-core
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [[`7561580`](https://github.com/OpenZeppelin/ui-builder/commit/75615803c8c4e9848ffd469a19e5e684a92579fb), [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48), [`f911a9e`](https://github.com/OpenZeppelin/ui-builder/commit/f911a9ef64ad60d6b8381006f41ff398a7765e96), [`c0cb6d1`](https://github.com/OpenZeppelin/ui-builder/commit/c0cb6d1ab87c1e60e6d3c4532107cd525aaaea19), [`d74dafc`](https://github.com/OpenZeppelin/ui-builder/commit/d74dafcb83d3bc87b89aed19abc7362a5c34c02a), [`fbc8ecd`](https://github.com/OpenZeppelin/ui-builder/commit/fbc8ecd527dd879b209b02878db210eadf49208c), [`f9cf1c7`](https://github.com/OpenZeppelin/ui-builder/commit/f9cf1c7018d5baffeda8da6b747710bad941ce3e)]:
+  - @openzeppelin/ui-builder-ui@1.0.0
+  - @openzeppelin/ui-builder-types@1.0.0
+  - @openzeppelin/ui-builder-utils@1.0.0
+  - @openzeppelin/ui-builder-renderer@1.0.0
+
 ## 0.16.0
 
 ### Patch Changes
