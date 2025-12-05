@@ -92,6 +92,23 @@ describe('AppConfigService', () => {
       expect(config.rpcEndpoints?.['polygon-mainnet']).toBe('https://polygon.customrpc.com');
     });
 
+    it('should parse VITE_APP_CFG_INDEXER_ENDPOINT_ variables correctly', async () => {
+      mockViteEnv['VITE_APP_CFG_INDEXER_ENDPOINT_STELLAR_TESTNET'] =
+        'https://indexer.stellar-testnet.com?apikey=test123';
+      mockViteEnv['VITE_APP_CFG_INDEXER_ENDPOINT_STELLAR_MAINNET'] =
+        'https://indexer.stellar-mainnet.com?apikey=prod456';
+
+      await appConfigServiceInstance.initialize([{ type: 'viteEnv', env: mockViteEnv }]);
+      const config = appConfigServiceInstance.getConfig();
+
+      expect(config.indexerEndpoints?.['stellar-testnet']).toBe(
+        'https://indexer.stellar-testnet.com?apikey=test123'
+      );
+      expect(config.indexerEndpoints?.['stellar-mainnet']).toBe(
+        'https://indexer.stellar-mainnet.com?apikey=prod456'
+      );
+    });
+
     it('should parse VITE_APP_CFG_FEATURE_FLAG_ variables correctly', async () => {
       mockViteEnv['VITE_APP_CFG_FEATURE_FLAG_SHOW_COOL_THING'] = 'true';
       mockViteEnv['VITE_APP_CFG_FEATURE_FLAG_HIDE_OLD_THING'] = 'false';
@@ -536,6 +553,27 @@ describe('AppConfigService', () => {
       ).toBeUndefined();
     });
 
+    it('getIndexerEndpointOverride should return correct indexer URL', async () => {
+      // Re-initialize with indexer endpoint
+      appConfigServiceInstance = new AppConfigService();
+      await appConfigServiceInstance.initialize([
+        {
+          type: 'viteEnv',
+          env: {
+            VITE_APP_CFG_INDEXER_ENDPOINT_STELLAR_TESTNET:
+              'https://indexer.stellar.com?apikey=test',
+          },
+        },
+      ]);
+
+      expect(appConfigServiceInstance.getIndexerEndpointOverride('stellar-testnet')).toBe(
+        'https://indexer.stellar.com?apikey=test'
+      );
+      expect(
+        appConfigServiceInstance.getIndexerEndpointOverride('non-existent-network')
+      ).toBeUndefined();
+    });
+
     it('getTypedNestedConfig should return typed nested configuration', async () => {
       // Setup a configuration with nested objects
       const jsonConfig = {
@@ -664,13 +702,19 @@ describe('AppConfigService', () => {
         'getRpcEndpointOverride called before initialization.'
       );
 
+      freshInstance.getIndexerEndpointOverride('test');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'AppConfigService',
+        'getIndexerEndpointOverride called before initialization.'
+      );
+
       freshInstance.getTypedNestedConfig('test', 'config');
       expect(logger.warn).toHaveBeenCalledWith(
         'AppConfigService',
         'getTypedNestedConfig called before initialization.'
       );
 
-      expect(logger.warn).toHaveBeenCalledTimes(5);
+      expect(logger.warn).toHaveBeenCalledTimes(6);
     });
   });
 

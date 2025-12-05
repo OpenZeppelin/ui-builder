@@ -72,6 +72,7 @@ export class AppConfigService {
     const loadedNetworkServiceConfigs: NetworkServiceConfigs = {};
     const loadedGlobalServiceConfigs: GlobalServiceConfigs = {};
     const loadedRpcEndpoints: NetworkSpecificRpcEndpoints = {};
+    const loadedIndexerEndpoints: Record<string, string> = {};
     const loadedFeatureFlags: FeatureFlags = {};
 
     for (const key in env) {
@@ -134,6 +135,13 @@ export class AppConfigService {
             loadedRpcEndpoints[networkId] = value;
             logger.debug(LOG_SYSTEM, `Loaded RPC override for ${networkId}: ${value}`);
           }
+        } else if (key.startsWith(`${VITE_ENV_PREFIX}INDEXER_ENDPOINT_`)) {
+          const networkIdSuffix = key.substring(`${VITE_ENV_PREFIX}INDEXER_ENDPOINT_`.length);
+          const networkId = networkIdSuffix.toLowerCase().replace(/_/g, '-');
+          if (networkId) {
+            loadedIndexerEndpoints[networkId] = value;
+            logger.debug(LOG_SYSTEM, `Loaded indexer endpoint for ${networkId}: ${value}`);
+          }
         } else if (key.startsWith(`${VITE_ENV_PREFIX}FEATURE_FLAG_`)) {
           const flagNameSuffix = key.substring(`${VITE_ENV_PREFIX}FEATURE_FLAG_`.length);
           const flagName = flagNameSuffix.toLowerCase();
@@ -164,6 +172,14 @@ export class AppConfigService {
       for (const networkKey in loadedRpcEndpoints) {
         if (Object.prototype.hasOwnProperty.call(loadedRpcEndpoints, networkKey)) {
           this.config.rpcEndpoints[networkKey] = loadedRpcEndpoints[networkKey];
+        }
+      }
+    }
+    if (Object.keys(loadedIndexerEndpoints).length > 0) {
+      if (!this.config.indexerEndpoints) this.config.indexerEndpoints = {};
+      for (const networkKey in loadedIndexerEndpoints) {
+        if (Object.prototype.hasOwnProperty.call(loadedIndexerEndpoints, networkKey)) {
+          this.config.indexerEndpoints[networkKey] = loadedIndexerEndpoints[networkKey];
         }
       }
     }
