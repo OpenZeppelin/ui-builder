@@ -3,7 +3,6 @@ import {
   Address,
   BASE_FEE,
   Contract,
-  Keypair,
   nativeToScVal,
   rpc as StellarRpc,
   TransactionBuilder,
@@ -61,9 +60,12 @@ async function createSimulationTransaction(
 ): Promise<TransactionBuilder> {
   try {
     // Create a dummy source account for simulation
-    // We'll use a well-known testnet account for simulation
-    const dummyKeypair = Keypair.random();
-    const sourceAccount = new Account(dummyKeypair.publicKey(), '0');
+    // For simulations, we only need a valid public key - no private key required.
+    // Using a hardcoded test public key avoids Keypair.random() issues in test environments
+    // where @noble/curves crypto may not work correctly.
+    // This is a valid Stellar public key (the "zero" key derived from 32 zero bytes).
+    const SIMULATION_PUBLIC_KEY = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+    const sourceAccount = new Account(SIMULATION_PUBLIC_KEY, '0');
 
     // Create contract instance
     const contract = new Contract(contractAddress);
