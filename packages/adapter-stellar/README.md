@@ -79,6 +79,7 @@ service.addKnownRoleIds(contractAddress, ['new_role', 'another_role']);
 ```
 
 Role IDs are validated against Soroban Symbol constraints:
+
 - Must start with a letter or underscore
 - Can contain only alphanumeric characters and underscores
 - Maximum 32 characters
