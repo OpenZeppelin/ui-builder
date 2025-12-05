@@ -7,9 +7,10 @@
  * Prerequisites:
  * - SubQuery indexer deployed to SubQuery Network
  * - Indexer URL: https://gateway.subquery.network/query/Qmd8a4poui4srG6QhwgH6ugADZgHNHrEtpNhpdndsSqsUY
- *   (API key can be provided via INDEXER_URL environment variable if needed)
- * - Contract: CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2
- * - Known event at block: 1688170 (Ownership Transfer Started)
+ *   (API key is required for SubQuery Network gateway access)
+ * - Contract: CAUVLSYWAXHN2JIXESSUUGIMLJK6LLI3B5TPXNW5XZUJFVCJJHOASE24
+ * - Known roles: minter, operator, approver, transfer, viewer, pauser, burner (7 unique roles)
+ * - Known event at block: 1944610 (minter role granted)
  *
  * IMPORTANT: These tests require an active Node Operator syncing the deployed project.
  * Tests will gracefully SKIP if the indexer is not operational, which is expected
@@ -23,11 +24,18 @@ import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { StellarIndexerClient } from '../../src/access-control/indexer-client';
 
 // Test configuration
+// Note: API key is required for SubQuery Network gateway access
+// Set INDEXER_URL environment variable with your API key, e.g.:
+// INDEXER_URL="https://gateway.subquery.network/query/Qmd8a4poui4srG6QhwgH6ugADZgHNHrEtpNhpdndsSqsUY?apikey=YOUR_API_KEY"
 const DEPLOYED_INDEXER_URL =
   process.env.INDEXER_URL ||
   'https://gateway.subquery.network/query/Qmd8a4poui4srG6QhwgH6ugADZgHNHrEtpNhpdndsSqsUY';
-const TEST_CONTRACT = 'CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2';
-const KNOWN_EVENT_BLOCK = 1688170;
+const TEST_CONTRACT = 'CAUVLSYWAXHN2JIXESSUUGIMLJK6LLI3B5TPXNW5XZUJFVCJJHOASE24';
+const KNOWN_EVENT_BLOCK = 1944610;
+const KNOWN_EVENT_ACCOUNT = 'GCVGY3LHODJPKEPRIQ5JAKJ33FZMEANJ5ELXHEPN3GUJITYGVS6KA5QU';
+const KNOWN_EVENT_ROLE = 'minter';
+const EXPECTED_ROLE_COUNT = 7;
+const EXPECTED_ROLES = ['minter', 'operator', 'approver', 'transfer', 'viewer', 'pauser', 'burner'];
 
 // Mock network config with deployed indexer
 const testNetworkConfig: StellarNetworkConfig = {
@@ -196,7 +204,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
   });
 
   describe('History Query - Known Event Verification', () => {
-    it('should find the known ownership transfer event at block 1688170', async () => {
+    it('should find the known minter role grant event at the expected block', async () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
@@ -207,9 +215,10 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
 
       expect(knownEvent).toBeDefined();
       if (knownEvent) {
-        // Verify it's the ownership transfer we know about
-        expect(knownEvent.account).toBe('GDGI6UJHEWGBZ3XYADMI75DKM7EMGSL7M4JTX3S52CMVFUL4JXMNMKQO');
-        expect(knownEvent.changeType).toBe('GRANTED'); // Ownership transfer mapped as grant
+        // Verify it's the role grant we know about
+        expect(knownEvent.account).toBe(KNOWN_EVENT_ACCOUNT);
+        expect(knownEvent.role.id).toBe(KNOWN_EVENT_ROLE);
+        expect(knownEvent.changeType).toBe('GRANTED');
         expect(knownEvent.ledger).toBe(KNOWN_EVENT_BLOCK);
       }
     }, 15000);
@@ -350,5 +359,116 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         expect(event.txId).toMatch(/^[a-f0-9]{64}$/);
       }
     }, 20000);
+  });
+
+  describe('Role Discovery', () => {
+    it('should discover all expected role IDs from historical events', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      const roleIds = await client.discoverRoleIds(TEST_CONTRACT);
+
+      expect(roleIds).toBeDefined();
+      expect(Array.isArray(roleIds)).toBe(true);
+      // The test contract should have exactly 7 unique roles
+      expect(roleIds.length).toBe(EXPECTED_ROLE_COUNT);
+
+      // Verify all expected roles are discovered
+      for (const expectedRole of EXPECTED_ROLES) {
+        expect(roleIds).toContain(expectedRole);
+      }
+    }, 15000);
+
+    it('should return unique role IDs (no duplicates)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      const roleIds = await client.discoverRoleIds(TEST_CONTRACT);
+
+      // Check for uniqueness
+      const uniqueRoles = new Set(roleIds);
+      expect(roleIds.length).toBe(uniqueRoles.size);
+      // Contract has multiple grants per role (e.g., 3 minter grants) but should dedupe to 7
+      expect(roleIds.length).toBe(EXPECTED_ROLE_COUNT);
+    }, 15000);
+
+    it('should return role IDs as strings', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      const roleIds = await client.discoverRoleIds(TEST_CONTRACT);
+
+      for (const roleId of roleIds) {
+        expect(typeof roleId).toBe('string');
+        expect(roleId.length).toBeGreaterThan(0);
+      }
+    }, 15000);
+
+    it('should return empty array for contract with no role events', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Use a valid but non-existent contract address
+      const fakeContract = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
+      const roleIds = await client.discoverRoleIds(fakeContract);
+
+      expect(roleIds).toBeDefined();
+      expect(Array.isArray(roleIds)).toBe(true);
+      expect(roleIds.length).toBe(0);
+    }, 15000);
+
+    it('should throw error when indexer is unavailable', async () => {
+      const invalidConfig: StellarNetworkConfig = {
+        ...testNetworkConfig,
+        indexerUri: undefined,
+      };
+      const noIndexerClient = new StellarIndexerClient(invalidConfig);
+
+      await expect(noIndexerClient.discoverRoleIds(TEST_CONTRACT)).rejects.toThrow(
+        'Indexer not available'
+      );
+    }, 15000);
+
+    it('should discover roles consistent with history query', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Get discovered role IDs
+      const discoveredRoles = await client.discoverRoleIds(TEST_CONTRACT);
+
+      // Get all history and extract unique roles manually
+      const history = await client.queryHistory(TEST_CONTRACT);
+      const historyRoles = new Set<string>();
+      for (const entry of history) {
+        // Only count actual roles, not ownership events (OWNER)
+        if (entry.role && entry.role.id && entry.role.id !== 'OWNER') {
+          historyRoles.add(entry.role.id);
+        }
+      }
+
+      // Discovered roles should match roles from history
+      expect(discoveredRoles.length).toBe(historyRoles.size);
+      for (const role of discoveredRoles) {
+        expect(historyRoles.has(role)).toBe(true);
+      }
+    }, 20000);
+
+    it('should discover specific roles including minter, operator, and approver', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      const roleIds = await client.discoverRoleIds(TEST_CONTRACT);
+
+      // These roles have multiple grants in the history
+      expect(roleIds).toContain('minter');
+      expect(roleIds).toContain('operator');
+      expect(roleIds).toContain('approver');
+    }, 15000);
   });
 });

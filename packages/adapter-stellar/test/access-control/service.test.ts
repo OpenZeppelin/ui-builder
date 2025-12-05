@@ -1028,3 +1028,416 @@ describe('Access Control Service - Export Snapshot (T027)', () => {
     });
   });
 });
+
+// Mock the indexer client for discovery tests
+vi.mock('../../src/access-control/indexer-client', () => ({
+  createIndexerClient: vi.fn(),
+  StellarIndexerClient: vi.fn(),
+}));
+
+describe('Access Control Service - Role Discovery', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockContractSchema: ContractSchema;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+  };
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const TEST_ROLE_ADMIN = 'admin';
+  const TEST_ROLE_MINTER = 'minter';
+  const TEST_ACCOUNT = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockContractSchema = {
+      ecosystem: 'stellar',
+      address: TEST_CONTRACT,
+      functions: [
+        {
+          id: 'has_role',
+          name: 'has_role',
+          displayName: 'has_role',
+          type: 'function',
+          inputs: [
+            { name: 'account', type: 'Address' },
+            { name: 'role', type: 'Symbol' },
+          ],
+          outputs: [{ name: 'result', type: 'u32' }],
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+        {
+          id: 'grant_role',
+          name: 'grant_role',
+          displayName: 'grant_role',
+          type: 'function',
+          inputs: [
+            { name: 'account', type: 'Address' },
+            { name: 'role', type: 'Symbol' },
+          ],
+          outputs: [],
+          modifiesState: true,
+          stateMutability: 'nonpayable',
+        },
+        {
+          id: 'revoke_role',
+          name: 'revoke_role',
+          displayName: 'revoke_role',
+          type: 'function',
+          inputs: [
+            { name: 'account', type: 'Address' },
+            { name: 'role', type: 'Symbol' },
+          ],
+          outputs: [],
+          modifiesState: true,
+          stateMutability: 'nonpayable',
+        },
+        {
+          id: 'get_role_member_count',
+          name: 'get_role_member_count',
+          displayName: 'get_role_member_count',
+          type: 'function',
+          inputs: [{ name: 'role', type: 'Symbol' }],
+          outputs: [{ name: 'count', type: 'u32' }],
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+        {
+          id: 'get_role_member',
+          name: 'get_role_member',
+          displayName: 'get_role_member',
+          type: 'function',
+          inputs: [
+            { name: 'role', type: 'Symbol' },
+            { name: 'index', type: 'u32' },
+          ],
+          outputs: [{ name: 'member', type: 'Address' }],
+          modifiesState: false,
+          stateMutability: 'view',
+        },
+      ],
+    };
+
+    // Setup mock indexer client
+    mockIndexerClient = {
+      checkAvailability: vi.fn(),
+      discoverRoleIds: vi.fn(),
+      queryHistory: vi.fn(),
+    };
+
+    // Override the createIndexerClient to return our mock
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('discoverKnownRoleIds()', () => {
+    it('should return explicitly provided knownRoleIds without querying indexer', async () => {
+      // Register contract with explicit role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [
+        TEST_ROLE_ADMIN,
+        TEST_ROLE_MINTER,
+      ]);
+
+      // Discover roles
+      const roleIds = await service.discoverKnownRoleIds(TEST_CONTRACT);
+
+      // Verify explicit roles returned
+      expect(roleIds).toEqual([TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+      // Indexer should not be queried
+      expect(mockIndexerClient.checkAvailability).not.toHaveBeenCalled();
+      expect(mockIndexerClient.discoverRoleIds).not.toHaveBeenCalled();
+    });
+
+    it('should discover roles via indexer when not explicitly provided', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer availability and discovery
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.discoverRoleIds.mockResolvedValue([TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+
+      // Discover roles
+      const roleIds = await service.discoverKnownRoleIds(TEST_CONTRACT);
+
+      // Verify discovered roles returned
+      expect(roleIds).toEqual([TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+      expect(mockIndexerClient.checkAvailability).toHaveBeenCalled();
+      expect(mockIndexerClient.discoverRoleIds).toHaveBeenCalledWith(TEST_CONTRACT);
+    });
+
+    it('should cache discovered roles and not re-query indexer', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.discoverRoleIds.mockResolvedValue([TEST_ROLE_ADMIN]);
+
+      // First discovery
+      const roleIds1 = await service.discoverKnownRoleIds(TEST_CONTRACT);
+      expect(roleIds1).toEqual([TEST_ROLE_ADMIN]);
+      expect(mockIndexerClient.discoverRoleIds).toHaveBeenCalledTimes(1);
+
+      // Second discovery should use cache
+      const roleIds2 = await service.discoverKnownRoleIds(TEST_CONTRACT);
+      expect(roleIds2).toEqual([TEST_ROLE_ADMIN]);
+      // Indexer should NOT be called again
+      expect(mockIndexerClient.discoverRoleIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when indexer is unavailable', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer unavailable
+      mockIndexerClient.checkAvailability.mockResolvedValue(false);
+
+      // Discover roles
+      const roleIds = await service.discoverKnownRoleIds(TEST_CONTRACT);
+
+      // Verify empty array returned
+      expect(roleIds).toEqual([]);
+      expect(mockIndexerClient.checkAvailability).toHaveBeenCalled();
+      expect(mockIndexerClient.discoverRoleIds).not.toHaveBeenCalled();
+    });
+
+    it('should not retry discovery after failure', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer error
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.discoverRoleIds.mockRejectedValue(new Error('Network error'));
+
+      // First discovery fails
+      const roleIds1 = await service.discoverKnownRoleIds(TEST_CONTRACT);
+      expect(roleIds1).toEqual([]);
+
+      // Reset mock to return success
+      mockIndexerClient.discoverRoleIds.mockResolvedValue([TEST_ROLE_ADMIN]);
+
+      // Second discovery should not retry (uses cached "attempted" flag)
+      const roleIds2 = await service.discoverKnownRoleIds(TEST_CONTRACT);
+      expect(roleIds2).toEqual([]);
+      // Should only have been called once (before failure was recorded)
+      expect(mockIndexerClient.discoverRoleIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      await expect(service.discoverKnownRoleIds(TEST_CONTRACT)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+  });
+
+  describe('getCurrentRoles() with Discovery', () => {
+    it('should use discovered roles when knownRoleIds not provided', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer discovery
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.discoverRoleIds.mockResolvedValue([TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Get current roles
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Verify discovery was used and roles returned
+      expect(mockIndexerClient.discoverRoleIds).toHaveBeenCalledWith(TEST_CONTRACT);
+      expect(readCurrentRoles).toHaveBeenCalledWith(
+        TEST_CONTRACT,
+        [TEST_ROLE_ADMIN],
+        mockNetworkConfig
+      );
+      expect(roles).toHaveLength(1);
+      expect(roles[0].role.id).toBe(TEST_ROLE_ADMIN);
+    });
+
+    it('should use explicit knownRoleIds without discovery', async () => {
+      // Register contract with explicit role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Get current roles
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Verify indexer was NOT queried
+      expect(mockIndexerClient.checkAvailability).not.toHaveBeenCalled();
+      expect(mockIndexerClient.discoverRoleIds).not.toHaveBeenCalled();
+
+      // Verify roles returned correctly
+      expect(readCurrentRoles).toHaveBeenCalledWith(
+        TEST_CONTRACT,
+        [TEST_ROLE_ADMIN],
+        mockNetworkConfig
+      );
+      expect(roles).toHaveLength(1);
+    });
+
+    it('should return empty array when no roles found and discovery fails', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer unavailable
+      mockIndexerClient.checkAvailability.mockResolvedValue(false);
+
+      // Get current roles
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Verify empty array returned
+      expect(roles).toEqual([]);
+      expect(readCurrentRoles).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addKnownRoleIds()', () => {
+    it('should add role IDs to a registered contract with no prior roles', () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Add role IDs
+      const result = service.addKnownRoleIds(TEST_CONTRACT, [TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+
+      // Verify roles were added
+      expect(result).toEqual([TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+    });
+
+    it('should merge with existing known role IDs', () => {
+      // Register contract with initial role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Add more role IDs
+      const result = service.addKnownRoleIds(TEST_CONTRACT, [TEST_ROLE_MINTER]);
+
+      // Verify roles were merged
+      expect(result).toEqual([TEST_ROLE_ADMIN, TEST_ROLE_MINTER]);
+    });
+
+    it('should deduplicate role IDs', () => {
+      // Register contract with initial role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Add duplicate role IDs
+      const result = service.addKnownRoleIds(TEST_CONTRACT, [
+        TEST_ROLE_ADMIN,
+        TEST_ROLE_MINTER,
+        TEST_ROLE_ADMIN,
+      ]);
+
+      // Verify duplicates were removed
+      expect(result).toHaveLength(2);
+      expect(result).toContain(TEST_ROLE_ADMIN);
+      expect(result).toContain(TEST_ROLE_MINTER);
+    });
+
+    it('should validate role IDs and reject invalid ones', () => {
+      // Register contract
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Try to add invalid role IDs
+      expect(() => service.addKnownRoleIds(TEST_CONTRACT, [''])).toThrow('non-empty string');
+      expect(() => service.addKnownRoleIds(TEST_CONTRACT, ['123invalid'])).toThrow(
+        'invalid characters'
+      );
+      expect(() => service.addKnownRoleIds(TEST_CONTRACT, ['admin-role'])).toThrow(
+        'invalid characters'
+      );
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', () => {
+      expect(() => service.addKnownRoleIds(TEST_CONTRACT, [TEST_ROLE_ADMIN])).toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should return existing roles when adding empty array', () => {
+      // Register contract with initial role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Add empty array
+      const result = service.addKnownRoleIds(TEST_CONTRACT, []);
+
+      // Verify existing roles returned
+      expect(result).toEqual([TEST_ROLE_ADMIN]);
+    });
+
+    it('should merge with discovered roles if no known roles exist', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Mock indexer discovery
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.discoverRoleIds.mockResolvedValue([TEST_ROLE_ADMIN]);
+
+      // First discover roles
+      await service.discoverKnownRoleIds(TEST_CONTRACT);
+
+      // Then add more roles
+      const result = service.addKnownRoleIds(TEST_CONTRACT, [TEST_ROLE_MINTER]);
+
+      // Verify roles were merged with discovered roles
+      expect(result).toContain(TEST_ROLE_ADMIN);
+      expect(result).toContain(TEST_ROLE_MINTER);
+    });
+
+    it('should make added roles available for getCurrentRoles()', async () => {
+      // Register contract without role IDs
+      service.registerContract(TEST_CONTRACT, mockContractSchema);
+
+      // Add role IDs
+      service.addKnownRoleIds(TEST_CONTRACT, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Get current roles - should NOT attempt discovery since we have known roles
+      const roles = await service.getCurrentRoles(TEST_CONTRACT);
+
+      // Verify roles returned and no discovery attempted
+      expect(roles).toHaveLength(1);
+      expect(mockIndexerClient.discoverRoleIds).not.toHaveBeenCalled();
+    });
+  });
+});

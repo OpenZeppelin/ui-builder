@@ -31,7 +31,12 @@ import {
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, StellarIndexerClient } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
-import { validateAccountAddress, validateAddress, validateContractAddress } from './validation';
+import {
+  validateAccountAddress,
+  validateAddress,
+  validateContractAddress,
+  validateRoleIds,
+} from './validation';
 
 /**
  * Context for Stellar Access Control operations
@@ -39,7 +44,12 @@ import { validateAccountAddress, validateAddress, validateContractAddress } from
  */
 interface StellarAccessControlContext {
   contractSchema: ContractSchema;
+  /** Role IDs explicitly provided via registerContract() */
   knownRoleIds?: string[];
+  /** Role IDs discovered via indexer query (cached) */
+  discoveredRoleIds?: string[];
+  /** Flag to prevent repeated discovery attempts when indexer is unavailable */
+  roleDiscoveryAttempted?: boolean;
 }
 
 /**
@@ -59,7 +69,7 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @param contractSchema The contract schema (required for capability detection)
    * @param knownRoleIds Optional array of known role identifiers
-   * @throws ConfigurationInvalid if the contract address is invalid
+   * @throws ConfigurationInvalid if the contract address or role IDs are invalid
    */
   registerContract(
     contractAddress: string,
@@ -69,14 +79,72 @@ export class StellarAccessControlService implements AccessControlService {
     // Validate contract address
     validateContractAddress(contractAddress);
 
+    // Validate and deduplicate role IDs if provided
+    const validatedRoleIds = knownRoleIds ? validateRoleIds(knownRoleIds) : undefined;
+
     this.contractContexts.set(contractAddress, {
       contractSchema,
-      knownRoleIds,
+      knownRoleIds: validatedRoleIds,
     });
 
     logger.debug('StellarAccessControlService.registerContract', `Registered ${contractAddress}`, {
-      roleCount: knownRoleIds?.length || 0,
+      roleCount: validatedRoleIds?.length || 0,
     });
+  }
+
+  /**
+   * Adds additional known role IDs to a registered contract
+   *
+   * This method allows consumers to manually add role IDs that may not have been
+   * discovered via the indexer (e.g., newly created roles that haven't been granted yet).
+   * Role IDs are validated and deduplicated before being added.
+   *
+   * @param contractAddress The contract address
+   * @param roleIds Array of role identifiers to add
+   * @throws ConfigurationInvalid if the contract address is invalid, contract not registered, or role IDs are invalid
+   * @returns The updated array of all known role IDs for the contract
+   */
+  addKnownRoleIds(contractAddress: string, roleIds: string[]): string[] {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    const context = this.contractContexts.get(contractAddress);
+    if (!context) {
+      throw new ConfigurationInvalid(
+        'Contract not registered. Call registerContract() first.',
+        contractAddress,
+        'contractAddress'
+      );
+    }
+
+    // Validate the new role IDs
+    const validatedNewRoleIds = validateRoleIds(roleIds);
+
+    if (validatedNewRoleIds.length === 0) {
+      logger.debug(
+        'StellarAccessControlService.addKnownRoleIds',
+        `No valid role IDs to add for ${contractAddress}`
+      );
+      return context.knownRoleIds || context.discoveredRoleIds || [];
+    }
+
+    // Merge with existing role IDs (prioritize knownRoleIds over discoveredRoleIds)
+    const existingRoleIds = context.knownRoleIds || context.discoveredRoleIds || [];
+    const mergedRoleIds = [...new Set([...existingRoleIds, ...validatedNewRoleIds])];
+
+    // Update the context - always store as knownRoleIds since user is explicitly providing them
+    context.knownRoleIds = mergedRoleIds;
+
+    logger.info(
+      'StellarAccessControlService.addKnownRoleIds',
+      `Added ${validatedNewRoleIds.length} role ID(s) for ${contractAddress}`,
+      {
+        added: validatedNewRoleIds,
+        total: mergedRoleIds.length,
+      }
+    );
+
+    return mergedRoleIds;
   }
 
   /**
@@ -139,8 +207,8 @@ export class StellarAccessControlService implements AccessControlService {
   /**
    * Gets current role assignments for a contract
    *
-   * Uses the known role IDs registered with the contract. For contracts with enumerable roles,
-   * the role IDs should be discovered and registered first.
+   * Uses the known role IDs registered with the contract. If no role IDs were provided
+   * via registerContract(), attempts to discover them dynamically via the indexer.
    *
    * @param contractAddress The contract address
    * @returns Promise resolving to array of role assignments
@@ -164,12 +232,22 @@ export class StellarAccessControlService implements AccessControlService {
       );
     }
 
-    const roleIds = context.knownRoleIds || [];
+    // Use known role IDs if provided, otherwise attempt discovery
+    let roleIds = context.knownRoleIds || [];
+
+    if (roleIds.length === 0) {
+      // Attempt to discover roles via indexer
+      logger.debug(
+        'StellarAccessControlService.getCurrentRoles',
+        'No role IDs provided, attempting discovery via indexer'
+      );
+      roleIds = await this.discoverKnownRoleIds(contractAddress);
+    }
 
     if (roleIds.length === 0) {
       logger.warn(
         'StellarAccessControlService.getCurrentRoles',
-        'No role IDs registered for this contract, returning empty array'
+        'No role IDs available (neither provided nor discoverable), returning empty array'
       );
       return [];
     }
@@ -450,6 +528,102 @@ export class StellarAccessControlService implements AccessControlService {
     );
 
     return getAdmin(contractAddress, this.networkConfig);
+  }
+
+  /**
+   * Discovers known role IDs for a contract by querying historical events from the indexer
+   *
+   * This method queries all role_granted and role_revoked events from the indexer and
+   * extracts unique role identifiers. Results are cached to avoid repeated queries.
+   *
+   * If knownRoleIds were provided via registerContract(), those take precedence and
+   * this method returns them without querying the indexer.
+   *
+   * @param contractAddress The contract address to discover roles for
+   * @returns Promise resolving to array of unique role identifiers
+   * @throws ConfigurationInvalid if contract address is invalid or contract not registered
+   */
+  async discoverKnownRoleIds(contractAddress: string): Promise<string[]> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    const context = this.contractContexts.get(contractAddress);
+    if (!context) {
+      throw new ConfigurationInvalid(
+        'Contract not registered. Call registerContract() first.',
+        contractAddress,
+        'contractAddress'
+      );
+    }
+
+    // If knownRoleIds were explicitly provided, return them (they take precedence)
+    if (context.knownRoleIds && context.knownRoleIds.length > 0) {
+      logger.debug(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Using ${context.knownRoleIds.length} explicitly provided role IDs for ${contractAddress}`
+      );
+      return context.knownRoleIds;
+    }
+
+    // Return cached discovered roles if available
+    if (context.discoveredRoleIds) {
+      logger.debug(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Using ${context.discoveredRoleIds.length} cached discovered role IDs for ${contractAddress}`
+      );
+      return context.discoveredRoleIds;
+    }
+
+    // If we already attempted discovery and found nothing, don't retry
+    if (context.roleDiscoveryAttempted) {
+      logger.debug(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Discovery already attempted for ${contractAddress}, returning empty array`
+      );
+      return [];
+    }
+
+    logger.info(
+      'StellarAccessControlService.discoverKnownRoleIds',
+      `Discovering role IDs via indexer for ${contractAddress}`
+    );
+
+    // Check if indexer is available
+    const isAvailable = await this.indexerClient.checkAvailability();
+    if (!isAvailable) {
+      logger.warn(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Indexer not available for network ${this.networkConfig.id}, cannot discover roles`
+      );
+      // Mark as attempted so we don't retry
+      context.roleDiscoveryAttempted = true;
+      return [];
+    }
+
+    try {
+      // Query indexer for unique role IDs
+      const roleIds = await this.indexerClient.discoverRoleIds(contractAddress);
+
+      // Cache the results
+      context.discoveredRoleIds = roleIds;
+      context.roleDiscoveryAttempted = true;
+
+      logger.info(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Discovered ${roleIds.length} role(s) for ${contractAddress}`,
+        { roles: roleIds }
+      );
+
+      return roleIds;
+    } catch (error) {
+      logger.error(
+        'StellarAccessControlService.discoverKnownRoleIds',
+        `Failed to discover roles: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Mark as attempted so we don't retry on transient errors
+      context.roleDiscoveryAttempted = true;
+      return [];
+    }
   }
 }
 

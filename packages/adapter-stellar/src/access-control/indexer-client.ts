@@ -45,6 +45,22 @@ interface IndexerHistoryResponse {
 }
 
 /**
+ * Response type for role discovery query
+ */
+interface IndexerRoleDiscoveryResponse {
+  data?: {
+    accessControlEvents?: {
+      nodes: Array<{
+        role: string | null;
+      }>;
+    };
+  };
+  errors?: Array<{
+    message: string;
+  }>;
+}
+
+/**
  * Options for querying history
  */
 export interface IndexerHistoryOptions {
@@ -195,6 +211,99 @@ export class StellarIndexerClient {
   }
 
   /**
+   * Discover all unique role identifiers for a contract by querying historical events
+   *
+   * Queries all ROLE_GRANTED and ROLE_REVOKED events and extracts unique role values.
+   * This enables role enumeration even when knownRoleIds are not provided.
+   *
+   * @param contractAddress The contract address to discover roles for
+   * @returns Promise resolving to array of unique role identifiers
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
+   */
+  async discoverRoleIds(contractAddress: string): Promise<string[]> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
+    }
+
+    logger.info(LOG_SYSTEM, `Discovering role IDs for contract ${contractAddress}`);
+
+    const query = this.buildRoleDiscoveryQuery();
+    const variables = { contract: contractAddress };
+
+    try {
+      const response = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (!response.ok) {
+        throw new OperationFailed(
+          `Indexer query failed with status ${response.status}`,
+          contractAddress,
+          'discoverRoleIds'
+        );
+      }
+
+      const result = (await response.json()) as IndexerRoleDiscoveryResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        const errorMessages = result.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'discoverRoleIds'
+        );
+      }
+
+      if (!result.data?.accessControlEvents?.nodes) {
+        logger.debug(LOG_SYSTEM, `No role events found for contract ${contractAddress}`);
+        return [];
+      }
+
+      // Extract unique role IDs, filtering out null/undefined values (ownership events)
+      const uniqueRoles = new Set<string>();
+      for (const node of result.data.accessControlEvents.nodes) {
+        if (node.role) {
+          uniqueRoles.add(node.role);
+        }
+      }
+
+      const roleIds = Array.from(uniqueRoles);
+      logger.info(
+        LOG_SYSTEM,
+        `Discovered ${roleIds.length} unique role(s) for ${contractAddress}`,
+        {
+          roles: roleIds,
+        }
+      );
+
+      return roleIds;
+    } catch (error) {
+      logger.error(
+        LOG_SYSTEM,
+        `Failed to discover role IDs: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Resolve indexer endpoints with config precedence
    * Priority:
    * 1. Runtime override from AppConfigService
@@ -321,6 +430,28 @@ export class StellarIndexerClient {
     }
 
     return variables;
+  }
+
+  /**
+   * Build GraphQL query for role discovery
+   * Queries all ROLE_GRANTED and ROLE_REVOKED events to extract unique role identifiers
+   * Note: EventType is a GraphQL enum, so values must not be quoted
+   */
+  private buildRoleDiscoveryQuery(): string {
+    return `
+      query DiscoverRoles($contract: String!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            type: { in: [ROLE_GRANTED, ROLE_REVOKED] }
+          }
+        ) {
+          nodes {
+            role
+          }
+        }
+      }
+    `;
   }
 
   /**

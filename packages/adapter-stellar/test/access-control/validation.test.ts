@@ -13,6 +13,8 @@ import {
   validateAccountAddress,
   validateAddresses,
   validateContractAddress,
+  validateRoleId,
+  validateRoleIds,
 } from '../../src/access-control/validation';
 
 describe('validateContractAddress', () => {
@@ -154,5 +156,97 @@ describe('normalizeStellarAddress', () => {
 
   it('should handle whitespace-only string', () => {
     expect(normalizeStellarAddress('   ')).toBe('');
+  });
+});
+
+describe('validateRoleId', () => {
+  it('should accept valid role IDs', () => {
+    expect(() => validateRoleId('admin')).not.toThrow();
+    expect(() => validateRoleId('minter')).not.toThrow();
+    expect(() => validateRoleId('ADMIN')).not.toThrow();
+    expect(() => validateRoleId('role_admin')).not.toThrow();
+    expect(() => validateRoleId('_private')).not.toThrow();
+    expect(() => validateRoleId('role123')).not.toThrow();
+  });
+
+  it('should reject empty string', () => {
+    expect(() => validateRoleId('')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('')).toThrow('roleId is required and must be a non-empty string');
+  });
+
+  it('should reject null/undefined', () => {
+    expect(() => validateRoleId(null as unknown as string)).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId(undefined as unknown as string)).toThrow(ConfigurationInvalid);
+  });
+
+  it('should reject whitespace-only string', () => {
+    expect(() => validateRoleId('   ')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('   ')).toThrow('cannot be empty or whitespace-only');
+  });
+
+  it('should reject role IDs exceeding maximum length (32 chars)', () => {
+    const longRoleId = 'a'.repeat(33);
+    expect(() => validateRoleId(longRoleId)).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId(longRoleId)).toThrow('exceeds maximum length of 32 characters');
+  });
+
+  it('should accept role IDs at maximum length (32 chars)', () => {
+    const maxRoleId = 'a'.repeat(32);
+    expect(() => validateRoleId(maxRoleId)).not.toThrow();
+  });
+
+  it('should reject role IDs starting with a number', () => {
+    expect(() => validateRoleId('123admin')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('123admin')).toThrow('contains invalid characters');
+  });
+
+  it('should reject role IDs with special characters', () => {
+    expect(() => validateRoleId('admin-role')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('admin.role')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('admin role')).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleId('admin@role')).toThrow(ConfigurationInvalid);
+  });
+
+  it('should use custom parameter name in error message', () => {
+    expect(() => validateRoleId('', 'customRole')).toThrow('customRole');
+  });
+});
+
+describe('validateRoleIds', () => {
+  it('should accept valid role ID arrays', () => {
+    expect(validateRoleIds(['admin', 'minter'])).toEqual(['admin', 'minter']);
+    expect(validateRoleIds(['ADMIN'])).toEqual(['ADMIN']);
+  });
+
+  it('should accept empty array', () => {
+    expect(validateRoleIds([])).toEqual([]);
+  });
+
+  it('should deduplicate role IDs', () => {
+    expect(validateRoleIds(['admin', 'admin', 'minter', 'admin'])).toEqual(['admin', 'minter']);
+  });
+
+  it('should trim whitespace from role IDs', () => {
+    expect(validateRoleIds(['  admin  ', 'minter'])).toEqual(['admin', 'minter']);
+  });
+
+  it('should reject non-array input', () => {
+    expect(() => validateRoleIds('admin' as unknown as string[])).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleIds('admin' as unknown as string[])).toThrow('must be an array');
+  });
+
+  it('should reject invalid role IDs in array', () => {
+    expect(() => validateRoleIds(['admin', ''])).toThrow(ConfigurationInvalid);
+    expect(() => validateRoleIds(['admin', '123invalid'])).toThrow(ConfigurationInvalid);
+  });
+
+  it('should report index in error message for invalid role ID', () => {
+    expect(() => validateRoleIds(['admin', 'minter', ''])).toThrow('roleIds[2]');
+  });
+
+  it('should use custom parameter name in error message', () => {
+    expect(() => validateRoleIds(null as unknown as string[], 'customRoles')).toThrow(
+      'customRoles'
+    );
   });
 });
