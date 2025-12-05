@@ -41,8 +41,48 @@ The Stellar adapter includes first-class support for OpenZeppelin Access Control
 - **Feature Detection**: Automatically detects contracts implementing AccessControl, Ownable, or both
 - **Role Management**: Query current roles, grant/revoke roles, check permissions
 - **Ownership Management**: Transfer ownership, query current owner
+- **Dynamic Role Discovery**: Automatically discover role IDs via indexer when not explicitly provided
 - **Historical Queries**: View complete history of role changes and ownership transfers via SubQuery indexer
 - **Server-Side Filtering**: Filter events by contract, role, account, and limit (when indexer is available)
+
+### Role Discovery
+
+Since OpenZeppelin's Stellar contracts don't expose a `get_all_roles()` method, the adapter supports multiple ways to obtain role identifiers:
+
+#### 1. Explicit Role IDs (Recommended for known contracts)
+
+```typescript
+const service = adapter.getAccessControlService();
+service.registerContract(contractAddress, schema, ['admin', 'minter', 'burner']);
+```
+
+#### 2. Dynamic Discovery via Indexer
+
+If no role IDs are provided, the service automatically queries the indexer for historical `ROLE_GRANTED` and `ROLE_REVOKED` events:
+
+```typescript
+// Register without role IDs - discovery happens automatically
+service.registerContract(contractAddress, schema);
+
+// Or explicitly discover roles
+const roles = await service.discoverKnownRoleIds(contractAddress);
+// => ['admin', 'minter', 'burner']
+```
+
+#### 3. Adding Roles Manually
+
+For newly created roles that haven't been granted yet (no historical events), you can add them manually:
+
+```typescript
+// Add roles that may not exist in historical events
+service.addKnownRoleIds(contractAddress, ['new_role', 'another_role']);
+```
+
+Role IDs are validated against Soroban Symbol constraints:
+
+- Must start with a letter or underscore
+- Can contain only alphanumeric characters and underscores
+- Maximum 32 characters
 
 ### Indexer Integration
 

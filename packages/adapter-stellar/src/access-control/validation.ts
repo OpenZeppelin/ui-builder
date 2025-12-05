@@ -110,3 +110,85 @@ export function validateAddresses(contractAddress: string, accountAddress: strin
 export function normalizeStellarAddress(address: string): string {
   return normalizeAddress(address);
 }
+
+/**
+ * Maximum length for a Soroban Symbol (role identifier)
+ * Soroban symbols are limited to 32 characters
+ */
+const MAX_ROLE_ID_LENGTH = 32;
+
+/**
+ * Valid pattern for Soroban Symbol characters
+ * Symbols can contain alphanumeric characters and underscores
+ */
+const VALID_ROLE_ID_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+/**
+ * Validates a role identifier (Soroban Symbol)
+ *
+ * Role IDs must be:
+ * - Non-empty strings
+ * - Max 32 characters (Soroban Symbol limit)
+ * - Start with a letter or underscore
+ * - Contain only alphanumeric characters and underscores
+ *
+ * @param roleId The role identifier to validate
+ * @param paramName Optional parameter name for error messages
+ * @throws ConfigurationInvalid if the role ID is invalid
+ */
+export function validateRoleId(roleId: string, paramName = 'roleId'): void {
+  if (!roleId || typeof roleId !== 'string') {
+    throw new ConfigurationInvalid(
+      `${paramName} is required and must be a non-empty string`,
+      roleId,
+      paramName
+    );
+  }
+
+  const trimmed = roleId.trim();
+  if (trimmed === '') {
+    throw new ConfigurationInvalid(
+      `${paramName} cannot be empty or whitespace-only`,
+      roleId,
+      paramName
+    );
+  }
+
+  if (trimmed.length > MAX_ROLE_ID_LENGTH) {
+    throw new ConfigurationInvalid(
+      `${paramName} exceeds maximum length of ${MAX_ROLE_ID_LENGTH} characters: "${trimmed}" (${trimmed.length} chars)`,
+      roleId,
+      paramName
+    );
+  }
+
+  if (!VALID_ROLE_ID_PATTERN.test(trimmed)) {
+    throw new ConfigurationInvalid(
+      `${paramName} contains invalid characters: "${trimmed}". Role IDs must start with a letter or underscore and contain only alphanumeric characters and underscores.`,
+      roleId,
+      paramName
+    );
+  }
+}
+
+/**
+ * Validates an array of role identifiers
+ *
+ * @param roleIds The array of role identifiers to validate
+ * @param paramName Optional parameter name for error messages
+ * @throws ConfigurationInvalid if any role ID is invalid or if the array is invalid
+ * @returns The validated and deduplicated array of role IDs
+ */
+export function validateRoleIds(roleIds: string[], paramName = 'roleIds'): string[] {
+  if (!Array.isArray(roleIds)) {
+    throw new ConfigurationInvalid(`${paramName} must be an array`, String(roleIds), paramName);
+  }
+
+  // Validate each role ID
+  for (let i = 0; i < roleIds.length; i++) {
+    validateRoleId(roleIds[i], `${paramName}[${i}]`);
+  }
+
+  // Deduplicate and return
+  return [...new Set(roleIds.map((r) => r.trim()))];
+}
