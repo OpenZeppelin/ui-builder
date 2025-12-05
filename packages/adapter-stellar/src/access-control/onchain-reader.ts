@@ -163,7 +163,15 @@ export async function getRoleMemberCount(
       inputs
     );
 
-    return typeof result === 'number' ? result : 0;
+    // Handle both number and string results (formatter may return string for large numbers)
+    if (typeof result === 'number') {
+      return result;
+    }
+    if (typeof result === 'string') {
+      const parsed = parseInt(result, 10);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
   } catch (error) {
     logger.error('getRoleMemberCount', `Failed to get member count for role ${roleId}:`, error);
     return 0;
