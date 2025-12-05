@@ -53,9 +53,9 @@
     "directory": "packages/react-core"
   },
   "dependencies": {
+    "@openzeppelin/ui-builder-renderer": "workspace:^",
     "@openzeppelin/ui-builder-types": "workspace:^",
     "@openzeppelin/ui-builder-ui": "workspace:^",
-    "@openzeppelin/ui-builder-renderer": "workspace:^",
     "@openzeppelin/ui-builder-utils": "workspace:^",
     "lucide-react": "^0.510.0"
   },
@@ -73,8 +73,8 @@
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
