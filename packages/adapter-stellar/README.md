@@ -58,7 +58,7 @@ service.registerContract(contractAddress, schema, ['admin', 'minter', 'burner'])
 
 #### 2. Dynamic Discovery via Indexer
 
-If no role IDs are provided, the service automatically queries the indexer for historical `role_granted` and `role_revoked` events:
+If no role IDs are provided, the service automatically queries the indexer for historical `ROLE_GRANTED` and `ROLE_REVOKED` events:
 
 ```typescript
 // Register without role IDs - discovery happens automatically
