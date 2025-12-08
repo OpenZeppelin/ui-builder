@@ -185,7 +185,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
   /**
    * Comprehensive Pagination Tests
    *
-   * Uses a contract with 30+ role change events to thoroughly verify pagination behavior.
+   * Uses a contract with 80+ role change events to thoroughly verify pagination behavior.
    * Contract: CAHHWNLOHIGFHYG7VOXNVK5EKLL25RIGNGUFLTTUUWZSQW5GGIPGXDKT
    */
   describe('History Query - Pagination Verification', () => {
@@ -210,11 +210,6 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         return;
       }
 
-      // Helper to create a unique key for an event
-      // Note: txId alone is not unique - multiple events can happen in same transaction
-      const getEventKey = (item: (typeof firstPage.items)[0]) =>
-        `${item.txId}-${item.role.id}-${item.account}-${item.changeType}`;
-
       const pageSize = 5;
       const seenEventKeys = new Set<string>();
       let totalItems = 0;
@@ -227,6 +222,11 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       let firstPage = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
         limit: pageSize,
       });
+
+      // Helper to create a unique key for an event
+      // Note: txId alone is not unique - multiple events can happen in same transaction
+      const getEventKey = (item: (typeof firstPage.items)[0]) =>
+        `${item.txId}-${item.role.id}-${item.account}-${item.changeType}`;
 
       for (const item of firstPage.items) {
         seenEventKeys.add(getEventKey(item));
@@ -288,12 +288,12 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         return;
       }
 
+      // Get first 10 items with page size 10
+      const largePage = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit: 10 });
+
       // Helper to create a unique key for an event
       const getEventKey = (item: (typeof largePage.items)[0]) =>
         `${item.txId}-${item.role.id}-${item.account}-${item.changeType}`;
-
-      // Get first 10 items with page size 10
-      const largePage = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit: 10 });
 
       // Get same items with smaller pages
       const smallPage1 = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit: 5 });
@@ -395,13 +395,13 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
 
       // Paginate through filtered results
       const pageSize = 2;
-      const filteredItems: typeof page1.items = [];
 
       let page1 = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
         roleId: targetRole,
         limit: pageSize,
       });
 
+      const filteredItems: typeof page1.items = [];
       filteredItems.push(...page1.items);
 
       while (page1.pageInfo.hasNextPage && page1.pageInfo.endCursor) {
