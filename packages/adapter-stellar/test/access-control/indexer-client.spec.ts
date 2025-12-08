@@ -835,4 +835,270 @@ describe('StellarIndexerClient (T031, T033)', () => {
       expect(typeof history[0].ledger).toBe('number');
     });
   });
+
+  describe('queryLatestGrants()', () => {
+    const TEST_ROLE = 'admin';
+    const TEST_ACCOUNT_1 = 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5';
+    const TEST_ACCOUNT_2 = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+    it('should return empty map for empty member array', async () => {
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const result = await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, []);
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(0);
+      // Should not make any fetch calls
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should query and return grant info for members', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock latest grants query
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            accessControlEvents: {
+              nodes: [
+                {
+                  account: TEST_ACCOUNT_1,
+                  txHash: 'a'.repeat(64),
+                  timestamp: '2024-01-15T10:00:00Z',
+                  blockHeight: '5000',
+                },
+                {
+                  account: TEST_ACCOUNT_2,
+                  txHash: 'b'.repeat(64),
+                  timestamp: '2024-01-10T08:00:00Z',
+                  blockHeight: '4000',
+                },
+              ],
+            },
+          },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const result = await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [
+        TEST_ACCOUNT_1,
+        TEST_ACCOUNT_2,
+      ]);
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(2);
+
+      // Check first account's grant info
+      const grant1 = result.get(TEST_ACCOUNT_1);
+      expect(grant1).toBeDefined();
+      expect(grant1?.timestamp).toBe('2024-01-15T10:00:00Z');
+      expect(grant1?.txId).toBe('a'.repeat(64));
+      expect(grant1?.ledger).toBe(5000);
+
+      // Check second account's grant info
+      const grant2 = result.get(TEST_ACCOUNT_2);
+      expect(grant2).toBeDefined();
+      expect(grant2?.timestamp).toBe('2024-01-10T08:00:00Z');
+      expect(grant2?.txId).toBe('b'.repeat(64));
+      expect(grant2?.ledger).toBe(4000);
+    });
+
+    it('should only keep first (latest) grant per account when multiple events exist', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock query with multiple events for same account (ordered DESC by timestamp)
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            accessControlEvents: {
+              nodes: [
+                {
+                  account: TEST_ACCOUNT_1,
+                  txHash: 'latest-tx',
+                  timestamp: '2024-01-20T12:00:00Z', // Latest
+                  blockHeight: '6000',
+                },
+                {
+                  account: TEST_ACCOUNT_1,
+                  txHash: 'older-tx',
+                  timestamp: '2024-01-10T08:00:00Z', // Older
+                  blockHeight: '4000',
+                },
+              ],
+            },
+          },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const result = await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1]);
+
+      expect(result.size).toBe(1);
+      const grant = result.get(TEST_ACCOUNT_1);
+      expect(grant?.txId).toBe('latest-tx');
+      expect(grant?.timestamp).toBe('2024-01-20T12:00:00Z');
+    });
+
+    it('should construct correct GraphQL query with filters', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock query response
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: { accessControlEvents: { nodes: [] } },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1, TEST_ACCOUNT_2]);
+
+      // Verify the query structure
+      const queryCall = fetchSpy.mock.calls[1];
+      const body = JSON.parse(queryCall[1]?.body as string);
+
+      // Check query contains expected filters
+      expect(body.query).toContain('query LatestGrants');
+      expect(body.query).toContain('$contract: String!');
+      expect(body.query).toContain('$role: String!');
+      expect(body.query).toContain('$accounts: [String!]!');
+      expect(body.query).toContain('type: { equalTo: ROLE_GRANTED }');
+      expect(body.query).toContain('account: { in: $accounts }');
+      expect(body.query).toContain('orderBy: TIMESTAMP_DESC');
+
+      // Check variables
+      expect(body.variables).toMatchObject({
+        contract: TEST_CONTRACT,
+        role: TEST_ROLE,
+        accounts: [TEST_ACCOUNT_1, TEST_ACCOUNT_2],
+      });
+    });
+
+    it('should return empty map when no events found', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock empty response
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: { accessControlEvents: { nodes: [] } },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const result = await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1]);
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(0);
+    });
+
+    it('should throw when indexer is unavailable', async () => {
+      const noIndexerConfig: StellarNetworkConfig = {
+        ...mockNetworkConfig,
+        indexerUri: undefined,
+      };
+
+      const client = new StellarIndexerClient(noIndexerConfig);
+
+      await expect(
+        client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1])
+      ).rejects.toThrow('Indexer not available');
+    });
+
+    it('should throw when indexer returns error status', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock error response
+      fetchSpy.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+
+      await expect(
+        client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1])
+      ).rejects.toThrow('Indexer query failed with status 500');
+    });
+
+    it('should throw when indexer returns GraphQL errors', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock GraphQL error response
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          errors: [{ message: 'Invalid query syntax' }],
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+
+      await expect(
+        client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [TEST_ACCOUNT_1])
+      ).rejects.toThrow('Indexer query errors: Invalid query syntax');
+    });
+
+    it('should handle partial results (some members have grants, some do not)', async () => {
+      // Mock availability check
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      // Mock response with only one account having grants
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            accessControlEvents: {
+              nodes: [
+                {
+                  account: TEST_ACCOUNT_1,
+                  txHash: 'only-tx',
+                  timestamp: '2024-01-15T10:00:00Z',
+                  blockHeight: '5000',
+                },
+              ],
+            },
+          },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const result = await client.queryLatestGrants(TEST_CONTRACT, TEST_ROLE, [
+        TEST_ACCOUNT_1,
+        TEST_ACCOUNT_2,
+      ]);
+
+      expect(result.size).toBe(1);
+      expect(result.has(TEST_ACCOUNT_1)).toBe(true);
+      expect(result.has(TEST_ACCOUNT_2)).toBe(false);
+    });
+  });
 });

@@ -10,6 +10,8 @@ import type {
   AccessControlService,
   AccessSnapshot,
   ContractSchema,
+  EnrichedRoleAssignment,
+  EnrichedRoleMember,
   ExecutionConfig,
   HistoryEntry,
   OperationResult,
@@ -253,6 +255,129 @@ export class StellarAccessControlService implements AccessControlService {
     }
 
     return readCurrentRoles(contractAddress, roleIds, this.networkConfig);
+  }
+
+  /**
+   * Gets current role assignments with enriched member information including grant timestamps
+   *
+   * This method returns role assignments with detailed metadata about when each member
+   * was granted the role. If the indexer is unavailable, it gracefully degrades to
+   * returning members without timestamp information.
+   *
+   * @param contractAddress The contract address
+   * @returns Promise resolving to array of enriched role assignments
+   * @throws ConfigurationInvalid if the contract address is invalid or contract not registered
+   */
+  async getCurrentRolesEnriched(contractAddress: string): Promise<EnrichedRoleAssignment[]> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    logger.info(
+      'StellarAccessControlService.getCurrentRolesEnriched',
+      `Reading enriched roles for ${contractAddress}`
+    );
+
+    // First, get the current role assignments via on-chain queries
+    const currentRoles = await this.getCurrentRoles(contractAddress);
+
+    if (currentRoles.length === 0) {
+      return [];
+    }
+
+    // Check indexer availability for enrichment
+    const indexerAvailable = await this.indexerClient.checkAvailability();
+
+    if (!indexerAvailable) {
+      logger.debug(
+        'StellarAccessControlService.getCurrentRolesEnriched',
+        'Indexer not available, returning roles without timestamps'
+      );
+      // Graceful degradation: return enriched structure without timestamps
+      return this.convertToEnrichedWithoutTimestamps(currentRoles);
+    }
+
+    // Enrich each role with grant timestamps from the indexer
+    const enrichedAssignments: EnrichedRoleAssignment[] = [];
+
+    for (const roleAssignment of currentRoles) {
+      const enrichedMembers = await this.enrichMembersWithGrantInfo(
+        contractAddress,
+        roleAssignment.role.id,
+        roleAssignment.members
+      );
+
+      enrichedAssignments.push({
+        role: roleAssignment.role,
+        members: enrichedMembers,
+      });
+    }
+
+    logger.debug(
+      'StellarAccessControlService.getCurrentRolesEnriched',
+      `Enriched ${enrichedAssignments.length} role(s) with grant timestamps`
+    );
+
+    return enrichedAssignments;
+  }
+
+  /**
+   * Converts standard role assignments to enriched format without timestamps
+   * Used when indexer is unavailable (graceful degradation)
+   */
+  private convertToEnrichedWithoutTimestamps(
+    roleAssignments: RoleAssignment[]
+  ): EnrichedRoleAssignment[] {
+    return roleAssignments.map((assignment) => ({
+      role: assignment.role,
+      members: assignment.members.map((address) => ({
+        address,
+        // Timestamps are undefined when indexer is unavailable
+      })),
+    }));
+  }
+
+  /**
+   * Enriches member addresses with grant information from the indexer
+   */
+  private async enrichMembersWithGrantInfo(
+    contractAddress: string,
+    roleId: string,
+    memberAddresses: string[]
+  ): Promise<EnrichedRoleMember[]> {
+    if (memberAddresses.length === 0) {
+      return [];
+    }
+
+    try {
+      // Query indexer for grant information
+      const grantInfoMap = await this.indexerClient.queryLatestGrants(
+        contractAddress,
+        roleId,
+        memberAddresses
+      );
+
+      // Build enriched members, using grant info when available
+      return memberAddresses.map((address) => {
+        const grantInfo = grantInfoMap.get(address);
+        if (grantInfo) {
+          return {
+            address,
+            grantedAt: grantInfo.timestamp,
+            grantedTxId: grantInfo.txId,
+            grantedLedger: grantInfo.ledger,
+          };
+        }
+        // No grant info found (shouldn't happen for current members, but handle gracefully)
+        return { address };
+      });
+    } catch (error) {
+      logger.warn(
+        'StellarAccessControlService.enrichMembersWithGrantInfo',
+        `Failed to fetch grant info for role ${roleId}, returning members without timestamps: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Graceful degradation on error
+      return memberAddresses.map((address) => ({ address }));
+    }
   }
 
   /**

@@ -61,6 +61,18 @@ interface IndexerRoleDiscoveryResponse {
 }
 
 /**
+ * Grant information for a specific member
+ */
+export interface GrantInfo {
+  /** ISO8601 timestamp of the grant */
+  timestamp: string;
+  /** Transaction ID of the grant */
+  txId: string;
+  /** Block/ledger number of the grant */
+  ledger: number;
+}
+
+/**
  * Options for querying history
  */
 export interface IndexerHistoryOptions {
@@ -304,6 +316,117 @@ export class StellarIndexerClient {
   }
 
   /**
+   * Query the latest grant events for a set of members with a specific role
+   *
+   * Returns the most recent ROLE_GRANTED event for each member address.
+   * This is used to enrich role assignments with grant timestamps.
+   *
+   * @param contractAddress The contract address
+   * @param roleId The role identifier to query
+   * @param memberAddresses Array of member addresses to look up
+   * @returns Promise resolving to a Map of address -> GrantInfo
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
+   */
+  async queryLatestGrants(
+    contractAddress: string,
+    roleId: string,
+    memberAddresses: string[]
+  ): Promise<Map<string, GrantInfo>> {
+    if (memberAddresses.length === 0) {
+      return new Map();
+    }
+
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
+    }
+
+    logger.debug(
+      LOG_SYSTEM,
+      `Querying latest grants for ${memberAddresses.length} member(s) with role ${roleId}`
+    );
+
+    const query = this.buildLatestGrantsQuery();
+    const variables = {
+      contract: contractAddress,
+      role: roleId,
+      accounts: memberAddresses,
+    };
+
+    try {
+      const response = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (!response.ok) {
+        throw new OperationFailed(
+          `Indexer query failed with status ${response.status}`,
+          contractAddress,
+          'queryLatestGrants'
+        );
+      }
+
+      const result = (await response.json()) as IndexerHistoryResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        const errorMessages = result.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'queryLatestGrants'
+        );
+      }
+
+      if (!result.data?.accessControlEvents?.nodes) {
+        logger.debug(LOG_SYSTEM, `No grant events found for role ${roleId}`);
+        return new Map();
+      }
+
+      // Build map of address -> latest grant info
+      // Since we order by TIMESTAMP_DESC, we take the first occurrence per account
+      const grantMap = new Map<string, GrantInfo>();
+      for (const entry of result.data.accessControlEvents.nodes) {
+        if (!grantMap.has(entry.account)) {
+          grantMap.set(entry.account, {
+            timestamp: entry.timestamp,
+            txId: entry.txHash,
+            ledger: parseInt(entry.blockHeight, 10),
+          });
+        }
+      }
+
+      logger.debug(
+        LOG_SYSTEM,
+        `Found grant info for ${grantMap.size} of ${memberAddresses.length} member(s)`
+      );
+
+      return grantMap;
+    } catch (error) {
+      logger.error(
+        LOG_SYSTEM,
+        `Failed to query latest grants: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Resolve indexer endpoints with config precedence
    * Priority:
    * 1. Runtime override from AppConfigService
@@ -448,6 +571,34 @@ export class StellarIndexerClient {
         ) {
           nodes {
             role
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Build GraphQL query for latest grants
+   * Queries ROLE_GRANTED events for a specific role and set of accounts
+   * Ordered by timestamp descending so first occurrence per account is the latest
+   */
+  private buildLatestGrantsQuery(): string {
+    return `
+      query LatestGrants($contract: String!, $role: String!, $accounts: [String!]!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            role: { equalTo: $role }
+            account: { in: $accounts }
+            type: { equalTo: ROLE_GRANTED }
+          }
+          orderBy: TIMESTAMP_DESC
+        ) {
+          nodes {
+            account
+            txHash
+            timestamp
+            blockHeight
           }
         }
       }
