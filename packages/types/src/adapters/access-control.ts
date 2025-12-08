@@ -55,6 +55,32 @@ export interface RoleAssignment {
 }
 
 /**
+ * Enriched role member with grant metadata
+ * Used when historical data is available via indexer
+ */
+export interface EnrichedRoleMember {
+  /** The member's address */
+  address: string;
+  /** ISO8601 timestamp of when the role was granted (undefined if indexer unavailable) */
+  grantedAt?: string;
+  /** Transaction ID of the grant operation */
+  grantedTxId?: string;
+  /** Block/ledger number of the grant operation */
+  grantedLedger?: number;
+}
+
+/**
+ * Enriched role assignment with detailed member information
+ * Includes grant timestamps when indexer data is available
+ */
+export interface EnrichedRoleAssignment {
+  /** The role identifier */
+  role: RoleIdentifier;
+  /** Array of enriched member information */
+  members: EnrichedRoleMember[];
+}
+
+/**
  * Snapshot of access control state at a point in time
  */
 export interface AccessSnapshot {
@@ -114,6 +140,18 @@ export interface AccessControlService {
    * @returns Promise resolving to array of role assignments
    */
   getCurrentRoles(contractAddress: string): Promise<RoleAssignment[]>;
+
+  /**
+   * Get current role assignments with enriched member information
+   *
+   * Returns role assignments with metadata about when each member was granted
+   * the role. If the indexer is unavailable, gracefully degrades to returning
+   * members without timestamp information.
+   *
+   * @param contractAddress The contract address
+   * @returns Promise resolving to array of enriched role assignments
+   */
+  getCurrentRolesEnriched(contractAddress: string): Promise<EnrichedRoleAssignment[]>;
 
   /**
    * Grant a role to an account

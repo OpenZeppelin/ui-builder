@@ -475,6 +475,117 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       expect(roleIds).toContain('approver');
     }, 15000);
   });
+
+  describe('queryLatestGrants()', () => {
+    it('should query latest grants for known members', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // The known event account should have grant info for minter role
+      const grantMap = await client.queryLatestGrants(TEST_CONTRACT, KNOWN_EVENT_ROLE, [
+        KNOWN_EVENT_ACCOUNT,
+      ]);
+
+      expect(grantMap).toBeInstanceOf(Map);
+      expect(grantMap.size).toBe(1);
+
+      const grantInfo = grantMap.get(KNOWN_EVENT_ACCOUNT);
+      expect(grantInfo).toBeDefined();
+      expect(grantInfo?.timestamp).toBeDefined();
+      expect(grantInfo?.txId).toBeDefined();
+      expect(grantInfo?.ledger).toBeDefined();
+
+      // Verify the known event block
+      expect(grantInfo?.ledger).toBe(KNOWN_EVENT_BLOCK);
+    }, 15000);
+
+    it('should return empty map for accounts with no grants', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Use a fake account that has no grants
+      const fakeAccount = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPWDQT';
+      const grantMap = await client.queryLatestGrants(TEST_CONTRACT, KNOWN_EVENT_ROLE, [
+        fakeAccount,
+      ]);
+
+      expect(grantMap).toBeInstanceOf(Map);
+      expect(grantMap.size).toBe(0);
+    }, 15000);
+
+    it('should handle multiple accounts in a single query', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First, get some history to find additional accounts with the minter role
+      const history = await client.queryHistory(TEST_CONTRACT, {
+        roleId: KNOWN_EVENT_ROLE,
+        limit: 5,
+      });
+
+      const accountsWithRole = [...new Set(history.map((e) => e.account))].slice(0, 3);
+
+      if (accountsWithRole.length < 2) {
+        console.log('  ⏭️ Skipping: Not enough accounts with minter role for batch test');
+        return;
+      }
+
+      const grantMap = await client.queryLatestGrants(
+        TEST_CONTRACT,
+        KNOWN_EVENT_ROLE,
+        accountsWithRole
+      );
+
+      expect(grantMap).toBeInstanceOf(Map);
+      // Should have at least one grant (may not have all if some were later revoked and re-granted)
+      expect(grantMap.size).toBeGreaterThan(0);
+      expect(grantMap.size).toBeLessThanOrEqual(accountsWithRole.length);
+
+      // Verify structure of returned grants
+      for (const [account, grant] of grantMap) {
+        expect(accountsWithRole).toContain(account);
+        expect(typeof grant.timestamp).toBe('string');
+        expect(typeof grant.txId).toBe('string');
+        expect(typeof grant.ledger).toBe('number');
+      }
+    }, 20000);
+
+    it('should return the latest grant when account was granted multiple times', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Query full history for the known account
+      const history = await client.queryHistory(TEST_CONTRACT, {
+        roleId: KNOWN_EVENT_ROLE,
+        account: KNOWN_EVENT_ACCOUNT,
+      });
+
+      const grants = history.filter((e) => e.changeType === 'GRANTED');
+
+      if (grants.length > 1) {
+        // If there are multiple grants, queryLatestGrants should return the most recent
+        const grantMap = await client.queryLatestGrants(TEST_CONTRACT, KNOWN_EVENT_ROLE, [
+          KNOWN_EVENT_ACCOUNT,
+        ]);
+
+        const latestGrant = grantMap.get(KNOWN_EVENT_ACCOUNT);
+        expect(latestGrant).toBeDefined();
+
+        // The returned grant should match the first (most recent) grant from history
+        expect(latestGrant?.ledger).toBe(grants[0].ledger);
+      } else {
+        // Single grant case - just verify we get the expected one
+        const grantMap = await client.queryLatestGrants(TEST_CONTRACT, KNOWN_EVENT_ROLE, [
+          KNOWN_EVENT_ACCOUNT,
+        ]);
+        expect(grantMap.size).toBe(1);
+      }
+    }, 15000);
+  });
 });
 
 /**

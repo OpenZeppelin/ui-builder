@@ -1440,4 +1440,263 @@ describe('Access Control Service - Role Discovery', () => {
       expect(mockIndexerClient.discoverRoleIds).not.toHaveBeenCalled();
     });
   });
+
+  describe('getCurrentRolesEnriched()', () => {
+    it('should return enriched roles with timestamps when indexer is available', async () => {
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Mock indexer availability and grant info
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryLatestGrants = vi.fn().mockResolvedValue(
+        new Map([
+          [
+            TEST_ACCOUNT,
+            {
+              timestamp: '2024-01-15T10:00:00Z',
+              txId: 'a'.repeat(64),
+              ledger: 5000,
+            },
+          ],
+        ])
+      );
+
+      // Get enriched roles
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(1);
+      expect(enrichedRoles[0].role.id).toBe(TEST_ROLE_ADMIN);
+      expect(enrichedRoles[0].members).toHaveLength(1);
+
+      const member = enrichedRoles[0].members[0];
+      expect(member.address).toBe(TEST_ACCOUNT);
+      expect(member.grantedAt).toBe('2024-01-15T10:00:00Z');
+      expect(member.grantedTxId).toBe('a'.repeat(64));
+      expect(member.grantedLedger).toBe(5000);
+    });
+
+    it('should return enriched roles without timestamps when indexer is unavailable (graceful degradation)', async () => {
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Mock indexer unavailable
+      mockIndexerClient.checkAvailability.mockResolvedValue(false);
+
+      // Get enriched roles
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(1);
+      expect(enrichedRoles[0].role.id).toBe(TEST_ROLE_ADMIN);
+      expect(enrichedRoles[0].members).toHaveLength(1);
+
+      const member = enrichedRoles[0].members[0];
+      expect(member.address).toBe(TEST_ACCOUNT);
+      // Timestamps should be undefined when indexer unavailable
+      expect(member.grantedAt).toBeUndefined();
+      expect(member.grantedTxId).toBeUndefined();
+      expect(member.grantedLedger).toBeUndefined();
+    });
+
+    it('should return empty array when no roles exist', async () => {
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock no roles found
+      vi.mocked(readCurrentRoles).mockResolvedValue([]);
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toEqual([]);
+    });
+
+    it('should handle multiple roles with multiple members', async () => {
+      const TEST_ACCOUNT_2 = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+      // Register contract with multiple roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [
+        TEST_ROLE_ADMIN,
+        TEST_ROLE_MINTER,
+      ]);
+
+      // Mock on-chain role reading with multiple roles and members
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT, TEST_ACCOUNT_2],
+        },
+        {
+          role: { id: TEST_ROLE_MINTER, label: 'minter' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Mock indexer availability and grant info for each role
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryLatestGrants = vi
+        .fn()
+        .mockResolvedValueOnce(
+          // First call for admin role
+          new Map([
+            [
+              TEST_ACCOUNT,
+              {
+                timestamp: '2024-01-10T10:00:00Z',
+                txId: 'admin-grant-1',
+                ledger: 1000,
+              },
+            ],
+            [
+              TEST_ACCOUNT_2,
+              {
+                timestamp: '2024-01-12T12:00:00Z',
+                txId: 'admin-grant-2',
+                ledger: 2000,
+              },
+            ],
+          ])
+        )
+        .mockResolvedValueOnce(
+          // Second call for minter role
+          new Map([
+            [
+              TEST_ACCOUNT,
+              {
+                timestamp: '2024-01-15T15:00:00Z',
+                txId: 'minter-grant',
+                ledger: 3000,
+              },
+            ],
+          ])
+        );
+
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(2);
+
+      // Verify admin role
+      const adminRole = enrichedRoles.find((r) => r.role.id === TEST_ROLE_ADMIN);
+      expect(adminRole).toBeDefined();
+      expect(adminRole?.members).toHaveLength(2);
+      expect(adminRole?.members[0].grantedAt).toBe('2024-01-10T10:00:00Z');
+      expect(adminRole?.members[1].grantedAt).toBe('2024-01-12T12:00:00Z');
+
+      // Verify minter role
+      const minterRole = enrichedRoles.find((r) => r.role.id === TEST_ROLE_MINTER);
+      expect(minterRole).toBeDefined();
+      expect(minterRole?.members).toHaveLength(1);
+      expect(minterRole?.members[0].grantedAt).toBe('2024-01-15T15:00:00Z');
+    });
+
+    it('should handle partial grant info (some members have grants, some do not)', async () => {
+      const TEST_ACCOUNT_2 = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT, TEST_ACCOUNT_2],
+        },
+      ]);
+
+      // Mock indexer with only partial grant info
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryLatestGrants = vi.fn().mockResolvedValue(
+        new Map([
+          // Only TEST_ACCOUNT has grant info
+          [
+            TEST_ACCOUNT,
+            {
+              timestamp: '2024-01-15T10:00:00Z',
+              txId: 'partial-grant',
+              ledger: 5000,
+            },
+          ],
+        ])
+      );
+
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(1);
+      expect(enrichedRoles[0].members).toHaveLength(2);
+
+      // First member should have grant info
+      expect(enrichedRoles[0].members[0].address).toBe(TEST_ACCOUNT);
+      expect(enrichedRoles[0].members[0].grantedAt).toBe('2024-01-15T10:00:00Z');
+
+      // Second member should have no grant info
+      expect(enrichedRoles[0].members[1].address).toBe(TEST_ACCOUNT_2);
+      expect(enrichedRoles[0].members[1].grantedAt).toBeUndefined();
+    });
+
+    it('should gracefully handle indexer query errors', async () => {
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [TEST_ACCOUNT],
+        },
+      ]);
+
+      // Mock indexer available but query fails
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryLatestGrants = vi.fn().mockRejectedValue(new Error('Network timeout'));
+
+      // Should not throw, but return roles without timestamps
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(1);
+      expect(enrichedRoles[0].members[0].address).toBe(TEST_ACCOUNT);
+      expect(enrichedRoles[0].members[0].grantedAt).toBeUndefined();
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      await expect(service.getCurrentRolesEnriched(TEST_CONTRACT)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should handle roles with empty member arrays', async () => {
+      // Register contract with roles
+      service.registerContract(TEST_CONTRACT, mockContractSchema, [TEST_ROLE_ADMIN]);
+
+      // Mock on-chain role reading with empty members
+      vi.mocked(readCurrentRoles).mockResolvedValue([
+        {
+          role: { id: TEST_ROLE_ADMIN, label: 'admin' },
+          members: [],
+        },
+      ]);
+
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+
+      const enrichedRoles = await service.getCurrentRolesEnriched(TEST_CONTRACT);
+
+      expect(enrichedRoles).toHaveLength(1);
+      expect(enrichedRoles[0].role.id).toBe(TEST_ROLE_ADMIN);
+      expect(enrichedRoles[0].members).toEqual([]);
+    });
+  });
 });
