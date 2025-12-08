@@ -170,16 +170,6 @@ export class MidnightAdapter implements ContractAdapter {
           'Enter the deployed Midnight contract address (68-character hex string starting with 0200).',
       },
       {
-        id: 'privateStateId',
-        name: 'privateStateId',
-        label: 'Private State ID',
-        type: 'text',
-        validation: { required: true },
-        placeholder: 'my-unique-state-id',
-        helperText:
-          'A unique identifier for your private state instance. This ID is used to manage your personal encrypted data.',
-      },
-      {
         id: 'contractArtifactsZip',
         name: 'contractArtifactsZip',
         label: 'Contract Build Artifacts (ZIP)',

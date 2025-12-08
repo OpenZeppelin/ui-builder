@@ -87,13 +87,14 @@ export async function signAndBroadcastMidnightTransaction(
     const left = a ?? ({} as MidnightContractArtifacts);
     const right = b ?? ({} as MidnightContractArtifacts);
 
+    // privateStateId is optional - will be auto-generated at execution time if not provided
     const privateStateId = left.privateStateId || right.privateStateId;
     const contractModule = left.contractModule || right.contractModule;
     const witnessCode = left.witnessCode || right.witnessCode;
     const verifierKeys = left.verifierKeys || right.verifierKeys;
 
-    // Must have at least contractModule and privateStateId to be valid
-    if (!contractModule || !privateStateId) {
+    // Must have at least contractModule to be valid (privateStateId is auto-generated if missing)
+    if (!contractModule) {
       return undefined;
     }
 

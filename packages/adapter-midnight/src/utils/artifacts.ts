@@ -59,13 +59,13 @@ export async function validateAndConvertMidnightArtifacts(
     }
 
     const sourceRecord = source as Record<string, unknown>;
-    if (!sourceRecord.contractAddress || !sourceRecord.privateStateId) {
-      throw new Error('Contract address and private state ID are required.');
+    if (!sourceRecord.contractAddress) {
+      throw new Error('Contract address is required.');
     }
 
     const artifacts: MidnightContractArtifacts = {
       contractAddress: sourceRecord.contractAddress as string,
-      privateStateId: sourceRecord.privateStateId as string,
+      privateStateId: sourceRecord.privateStateId as string | undefined,
       contractDefinition: extractedArtifacts.contractDefinition,
       contractModule: extractedArtifacts.contractModule,
       witnessCode: extractedArtifacts.witnessCode,
@@ -108,13 +108,13 @@ export async function validateAndConvertMidnightArtifacts(
     }
 
     const sourceRecord = source as Record<string, unknown>;
-    if (!sourceRecord.contractAddress || !sourceRecord.privateStateId) {
-      throw new Error('Contract address and private state ID are required.');
+    if (!sourceRecord.contractAddress) {
+      throw new Error('Contract address is required.');
     }
 
     const artifacts: MidnightContractArtifacts = {
       contractAddress: sourceRecord.contractAddress as string,
-      privateStateId: sourceRecord.privateStateId as string,
+      privateStateId: sourceRecord.privateStateId as string | undefined,
       contractDefinition: extractedArtifacts.contractDefinition,
       contractModule: extractedArtifacts.contractModule,
       witnessCode: extractedArtifacts.witnessCode,
@@ -171,15 +171,16 @@ export async function validateAndConvertMidnightArtifacts(
       );
     }
 
-    // Validate required form fields
-    if (!source.contractAddress || !source.privateStateId) {
-      throw new Error('Contract address and private state ID are required.');
+    // Validate required form fields (privateStateId is auto-generated at transaction time)
+    if (!source.contractAddress) {
+      throw new Error('Contract address is required.');
     }
 
-    // Combine with address and privateStateId (all fields are now validated)
+    // Combine with address (privateStateId will be auto-generated at transaction time)
     const artifacts: MidnightContractArtifacts = {
       contractAddress: source.contractAddress as string,
-      privateStateId: source.privateStateId as string,
+      // privateStateId is optional - auto-generated at transaction time from contract + wallet address
+      privateStateId: source.privateStateId as string | undefined,
       contractDefinition: extractedArtifacts.contractDefinition,
       contractModule: extractedArtifacts.contractModule,
       witnessCode: extractedArtifacts.witnessCode,
@@ -195,7 +196,7 @@ export async function validateAndConvertMidnightArtifacts(
   // Legacy path: direct artifacts object
   if (!isMidnightContractArtifacts(source)) {
     throw new Error(
-      'Invalid contract artifacts provided. Expected an object with contractAddress, privateStateId, and contractDefinition properties.'
+      'Invalid contract artifacts provided. Expected an object with contractAddress and contractDefinition properties.'
     );
   }
 

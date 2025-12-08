@@ -16,7 +16,8 @@ export interface MidnightExecutionConfig {
   executionConfig: ExecutionConfig;
   // Add Midnight-specific fields
   artifacts?: {
-    privateStateId: string;
+    // privateStateId is optional - auto-generated at execution time from contract + wallet address
+    privateStateId?: string;
     contractModule: string;
     witnessCode?: string;
     verifierKeys?: Record<string, unknown>;
