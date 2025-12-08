@@ -8,6 +8,8 @@
 import type {
   HistoryEntry,
   IndexerEndpointConfig,
+  PageInfo,
+  PaginatedHistoryResult,
   RoleIdentifier,
   StellarNetworkConfig,
 } from '@openzeppelin/ui-builder-types';
@@ -33,10 +35,16 @@ interface IndexerHistoryEntry {
   blockHeight: string;
 }
 
+interface IndexerPageInfo {
+  hasNextPage: boolean;
+  endCursor?: string;
+}
+
 interface IndexerHistoryResponse {
   data?: {
     accessControlEvents?: {
       nodes: IndexerHistoryEntry[];
+      pageInfo: IndexerPageInfo;
     };
   };
   errors?: Array<{
@@ -73,12 +81,14 @@ export interface GrantInfo {
 }
 
 /**
- * Options for querying history
+ * Options for querying history with pagination
  */
 export interface IndexerHistoryOptions {
   roleId?: string;
   account?: string;
   limit?: number;
+  /** Cursor for fetching the next page */
+  cursor?: string;
 }
 
 /**
@@ -148,17 +158,17 @@ export class StellarIndexerClient {
   }
 
   /**
-   * Query history entries for a contract
+   * Query history entries for a contract with pagination support
    * @param contractAddress The contract address to query
-   * @param options Optional filtering options
-   * @returns Promise resolving to array of history entries
+   * @param options Optional filtering and pagination options
+   * @returns Promise resolving to paginated history result
    * @throws IndexerUnavailable if indexer is not available
    * @throws OperationFailed if query fails
    */
   async queryHistory(
     contractAddress: string,
     options?: IndexerHistoryOptions
-  ): Promise<HistoryEntry[]> {
+  ): Promise<PaginatedHistoryResult> {
     const isAvailable = await this.checkAvailability();
     if (!isAvailable) {
       throw new IndexerUnavailable(
@@ -177,7 +187,7 @@ export class StellarIndexerClient {
       );
     }
 
-    // Build query with server-side filtering
+    // Build query with server-side filtering and pagination
     const query = this.buildHistoryQuery(contractAddress, options);
     const variables = this.buildQueryVariables(contractAddress, options);
 
@@ -209,10 +219,19 @@ export class StellarIndexerClient {
 
       if (!result.data?.accessControlEvents?.nodes) {
         logger.debug(LOG_SYSTEM, `No history data returned for contract ${contractAddress}`);
-        return [];
+        return {
+          items: [],
+          pageInfo: { hasNextPage: false },
+        };
       }
 
-      return this.transformIndexerEntries(result.data.accessControlEvents.nodes);
+      const items = this.transformIndexerEntries(result.data.accessControlEvents.nodes);
+      const pageInfo: PageInfo = {
+        hasNextPage: result.data.accessControlEvents.pageInfo.hasNextPage,
+        endCursor: result.data.accessControlEvents.pageInfo.endCursor,
+      };
+
+      return { items, pageInfo };
     } catch (error) {
       logger.error(
         LOG_SYSTEM,
@@ -502,20 +521,32 @@ export class StellarIndexerClient {
   }
 
   /**
-   * Build GraphQL query for history with SubQuery filtering
+   * Build GraphQL query for history with SubQuery filtering and pagination
    */
   private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
     const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
     const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
     const limitClause = options?.limit ? ', first: $limit' : '';
+    const cursorClause = options?.cursor ? ', after: $cursor' : '';
+
+    // Build variable declarations
+    const varDeclarations = [
+      '$contract: String!',
+      options?.roleId ? '$role: String' : '',
+      options?.account ? '$account: String' : '',
+      options?.limit ? '$limit: Int' : '',
+      options?.cursor ? '$cursor: Cursor' : '',
+    ]
+      .filter(Boolean)
+      .join(', ');
 
     return `
-      query GetHistory($contract: String!${options?.roleId ? ', $role: String' : ''}${options?.account ? ', $account: String' : ''}${options?.limit ? ', $limit: Int' : ''}) {
+      query GetHistory(${varDeclarations}) {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }${roleFilter}${accountFilter}
           }
-          orderBy: TIMESTAMP_DESC${limitClause}
+          orderBy: TIMESTAMP_DESC${limitClause}${cursorClause}
         ) {
           nodes {
             id
@@ -526,13 +557,17 @@ export class StellarIndexerClient {
             timestamp
             blockHeight
           }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
         }
       }
     `;
   }
 
   /**
-   * Build query variables
+   * Build query variables including pagination cursor
    */
   private buildQueryVariables(
     contractAddress: string,
@@ -550,6 +585,9 @@ export class StellarIndexerClient {
     }
     if (options?.limit) {
       variables.limit = options.limit;
+    }
+    if (options?.cursor) {
+      variables.cursor = options.cursor;
     }
 
     return variables;

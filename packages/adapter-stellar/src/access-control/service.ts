@@ -13,9 +13,10 @@ import type {
   EnrichedRoleAssignment,
   EnrichedRoleMember,
   ExecutionConfig,
-  HistoryEntry,
+  HistoryQueryOptions,
   OperationResult,
   OwnershipInfo,
+  PaginatedHistoryResult,
   RoleAssignment,
   StellarNetworkConfig,
   TransactionStatusUpdate,
@@ -595,21 +596,20 @@ export class StellarAccessControlService implements AccessControlService {
   }
 
   /**
-   * Gets history of role changes
+   * Gets history of role changes with pagination support
+   *
+   * Supports cursor-based pagination. Use `pageInfo.endCursor` from the response
+   * as the `cursor` option in subsequent calls to fetch more pages.
    *
    * @param contractAddress The contract address
-   * @param options Optional filtering options
-   * @returns Promise resolving to array of history entries, or empty array if not supported
+   * @param options Optional filtering and pagination options
+   * @returns Promise resolving to paginated history result, or empty result if not supported
    * @throws ConfigurationInvalid if the contract address is invalid
    */
   async getHistory(
     contractAddress: string,
-    options?: {
-      roleId?: string;
-      account?: string;
-      limit?: number;
-    }
-  ): Promise<HistoryEntry[]> {
+    options?: HistoryQueryOptions
+  ): Promise<PaginatedHistoryResult> {
     // Validate contract address
     validateContractAddress(contractAddress);
 
@@ -630,7 +630,10 @@ export class StellarAccessControlService implements AccessControlService {
         'StellarAccessControlService.getHistory',
         `Indexer not available for network ${this.networkConfig.id}, returning empty history`
       );
-      return [];
+      return {
+        items: [],
+        pageInfo: { hasNextPage: false },
+      };
     }
 
     return this.indexerClient.queryHistory(contractAddress, options);
