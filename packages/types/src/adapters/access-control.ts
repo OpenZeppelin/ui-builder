@@ -109,6 +109,40 @@ export interface HistoryEntry {
 }
 
 /**
+ * Pagination info for cursor-based pagination
+ */
+export interface PageInfo {
+  /** Whether there are more items after the current page */
+  hasNextPage: boolean;
+  /** Cursor to use for fetching the next page */
+  endCursor?: string;
+}
+
+/**
+ * Paginated result for history queries
+ */
+export interface PaginatedHistoryResult {
+  /** Array of history entries */
+  items: HistoryEntry[];
+  /** Pagination information */
+  pageInfo: PageInfo;
+}
+
+/**
+ * Options for querying history with pagination
+ */
+export interface HistoryQueryOptions {
+  /** Filter by role identifier */
+  roleId?: string;
+  /** Filter by account address */
+  account?: string;
+  /** Maximum number of items to return (page size) */
+  limit?: number;
+  /** Cursor for fetching the next page */
+  cursor?: string;
+}
+
+/**
  * Result of an operation (grant, revoke, transfer)
  */
 export interface OperationResult {
@@ -217,16 +251,16 @@ export interface AccessControlService {
 
   /**
    * Get history of role changes (if supported)
+   *
+   * Supports cursor-based pagination. Use `pageInfo.endCursor` from the response
+   * as the `cursor` option in subsequent calls to fetch more pages.
+   *
    * @param contractAddress The contract address
-   * @param options Optional filtering options
-   * @returns Promise resolving to array of history entries, or empty array if not supported
+   * @param options Optional filtering and pagination options
+   * @returns Promise resolving to paginated history result, or empty result if not supported
    */
   getHistory(
     contractAddress: string,
-    options?: {
-      roleId?: string;
-      account?: string;
-      limit?: number;
-    }
-  ): Promise<HistoryEntry[]>;
+    options?: HistoryQueryOptions
+  ): Promise<PaginatedHistoryResult>;
 }

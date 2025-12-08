@@ -120,14 +120,17 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toBeDefined();
-      expect(Array.isArray(history)).toBe(true);
-      expect(history.length).toBeGreaterThan(0);
+      expect(result).toBeDefined();
+      expect(result.items).toBeDefined();
+      expect(Array.isArray(result.items)).toBe(true);
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.pageInfo).toBeDefined();
+      expect(typeof result.pageInfo.hasNextPage).toBe('boolean');
 
       // Verify structure of first entry
-      const firstEntry = history[0];
+      const firstEntry = result.items[0];
       expect(firstEntry).toHaveProperty('role');
       expect(firstEntry).toHaveProperty('account');
       expect(firstEntry).toHaveProperty('changeType');
@@ -146,12 +149,278 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const limitedHistory = await client.queryHistory(TEST_CONTRACT, { limit: 5 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 5 });
 
-      expect(limitedHistory).toBeDefined();
-      expect(limitedHistory.length).toBeLessThanOrEqual(5);
-      expect(limitedHistory.length).toBeGreaterThan(0);
+      expect(result).toBeDefined();
+      expect(result.items.length).toBeLessThanOrEqual(5);
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.pageInfo).toBeDefined();
     }, 15000);
+
+    it('should support cursor-based pagination', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+      // Get first page
+      const firstPage = await client.queryHistory(TEST_CONTRACT, { limit: 2 });
+
+      expect(firstPage.items.length).toBeLessThanOrEqual(2);
+
+      // If there are more pages, test pagination
+      if (firstPage.pageInfo.hasNextPage && firstPage.pageInfo.endCursor) {
+        const secondPage = await client.queryHistory(TEST_CONTRACT, {
+          limit: 2,
+          cursor: firstPage.pageInfo.endCursor,
+        });
+
+        expect(secondPage.items).toBeDefined();
+        // Items should be different from first page
+        if (secondPage.items.length > 0 && firstPage.items.length > 0) {
+          expect(secondPage.items[0].txId).not.toBe(firstPage.items[0].txId);
+        }
+      }
+    }, 15000);
+  });
+
+  /**
+   * Comprehensive Pagination Tests
+   *
+   * Uses a contract with 30+ role change events to thoroughly verify pagination behavior.
+   * Contract: CAHHWNLOHIGFHYG7VOXNVK5EKLL25RIGNGUFLTTUUWZSQW5GGIPGXDKT
+   */
+  describe('History Query - Pagination Verification', () => {
+    // Contract with many role changes for pagination testing
+    const PAGINATION_TEST_CONTRACT = 'CAHHWNLOHIGFHYG7VOXNVK5EKLL25RIGNGUFLTTUUWZSQW5GGIPGXDKT';
+    const MIN_EXPECTED_EVENTS = 30;
+
+    it('should have enough events for pagination testing', async () => {
+      if (!indexerAvailable) {
+        return;
+      }
+
+      // Query without limit to get total count
+      const allEvents = await client.queryHistory(PAGINATION_TEST_CONTRACT);
+
+      console.log(`  📊 Contract has ${allEvents.items.length} events indexed`);
+      expect(allEvents.items.length).toBeGreaterThanOrEqual(MIN_EXPECTED_EVENTS);
+    }, 20000);
+
+    it('should correctly paginate through all events with small page size', async () => {
+      if (!indexerAvailable) {
+        return;
+      }
+
+      // Helper to create a unique key for an event
+      // Note: txId alone is not unique - multiple events can happen in same transaction
+      const getEventKey = (item: (typeof firstPage.items)[0]) =>
+        `${item.txId}-${item.role.id}-${item.account}-${item.changeType}`;
+
+      const pageSize = 5;
+      const seenEventKeys = new Set<string>();
+      let totalItems = 0;
+      let duplicateCount = 0;
+      let cursor: string | undefined = undefined;
+      let pageCount = 0;
+      const maxPages = 20; // Safety limit
+
+      // Fetch first page
+      let firstPage = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+        limit: pageSize,
+      });
+
+      for (const item of firstPage.items) {
+        seenEventKeys.add(getEventKey(item));
+      }
+      totalItems += firstPage.items.length;
+      pageCount++;
+      cursor = firstPage.pageInfo.endCursor;
+
+      console.log(
+        `  📄 Page ${pageCount}: ${firstPage.items.length} items, hasNextPage: ${firstPage.pageInfo.hasNextPage}`
+      );
+
+      // Paginate through remaining pages
+      while (firstPage.pageInfo.hasNextPage && cursor && pageCount < maxPages) {
+        const nextPage = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+          limit: pageSize,
+          cursor,
+        });
+
+        pageCount++;
+        console.log(
+          `  📄 Page ${pageCount}: ${nextPage.items.length} items, hasNextPage: ${nextPage.pageInfo.hasNextPage}`
+        );
+
+        // Track duplicates (can happen with timestamp-based sorting when events have same timestamp)
+        for (const newItem of nextPage.items) {
+          const key = getEventKey(newItem);
+          if (seenEventKeys.has(key)) {
+            duplicateCount++;
+            console.log(`  ⚠️ Duplicate found (expected with same-timestamp events): ${key}`);
+          } else {
+            seenEventKeys.add(key);
+          }
+        }
+
+        totalItems += nextPage.items.length;
+        cursor = nextPage.pageInfo.endCursor;
+        firstPage = nextPage;
+      }
+
+      console.log(
+        `  ✅ Total: ${seenEventKeys.size} unique events across ${pageCount} pages (${duplicateCount} duplicates)`
+      );
+
+      // Verify we got all expected unique events
+      expect(seenEventKeys.size).toBeGreaterThanOrEqual(MIN_EXPECTED_EVENTS);
+
+      // Duplicates should be minimal (only at page boundaries with same-timestamp events)
+      // Allow up to 10% duplicates (can happen when multiple events have the same timestamp)
+      const duplicateRate = duplicateCount / totalItems;
+      expect(duplicateRate).toBeLessThan(0.1);
+
+      // Verify pagination terminated properly
+      expect(firstPage.pageInfo.hasNextPage).toBe(false);
+    }, 60000); // Longer timeout for multiple pages
+
+    it('should return consistent results with different page sizes', async () => {
+      if (!indexerAvailable) {
+        return;
+      }
+
+      // Helper to create a unique key for an event
+      const getEventKey = (item: (typeof largePage.items)[0]) =>
+        `${item.txId}-${item.role.id}-${item.account}-${item.changeType}`;
+
+      // Get first 10 items with page size 10
+      const largePage = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit: 10 });
+
+      // Get same items with smaller pages
+      const smallPage1 = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit: 5 });
+      const smallPage2 = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+        limit: 5,
+        cursor: smallPage1.pageInfo.endCursor,
+      });
+
+      // Combine small pages
+      const combinedSmallPages = [...smallPage1.items, ...smallPage2.items];
+
+      // Both approaches should yield same count
+      expect(combinedSmallPages.length).toBe(largePage.items.length);
+
+      // Both approaches should yield the same set of events
+      // (order may differ slightly if events have same timestamp)
+      const largePageKeys = new Set(largePage.items.map(getEventKey));
+      const smallPagesKeys = new Set(combinedSmallPages.map(getEventKey));
+
+      expect(smallPagesKeys.size).toBe(largePageKeys.size);
+      for (const key of smallPagesKeys) {
+        expect(largePageKeys.has(key)).toBe(true);
+      }
+    }, 30000);
+
+    it('should respect limit while maintaining cursor continuity', async () => {
+      if (!indexerAvailable) {
+        return;
+      }
+
+      const limit = 3;
+
+      // Get 3 pages
+      const page1 = await client.queryHistory(PAGINATION_TEST_CONTRACT, { limit });
+      expect(page1.items.length).toBeLessThanOrEqual(limit);
+
+      if (!page1.pageInfo.hasNextPage) {
+        console.log('  ⏭️ Not enough events for multi-page test');
+        return;
+      }
+
+      const page2 = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+        limit,
+        cursor: page1.pageInfo.endCursor,
+      });
+      expect(page2.items.length).toBeLessThanOrEqual(limit);
+
+      if (!page2.pageInfo.hasNextPage) {
+        return;
+      }
+
+      const page3 = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+        limit,
+        cursor: page2.pageInfo.endCursor,
+      });
+      expect(page3.items.length).toBeLessThanOrEqual(limit);
+
+      // Verify timestamps are in descending order across pages
+      const allTimestamps = [
+        ...page1.items.map((e) => new Date(e.timestamp!).getTime()),
+        ...page2.items.map((e) => new Date(e.timestamp!).getTime()),
+        ...page3.items.map((e) => new Date(e.timestamp!).getTime()),
+      ];
+
+      for (let i = 0; i < allTimestamps.length - 1; i++) {
+        expect(allTimestamps[i]).toBeGreaterThanOrEqual(allTimestamps[i + 1]);
+      }
+    }, 30000);
+
+    it('should work with filters and pagination combined', async () => {
+      if (!indexerAvailable) {
+        return;
+      }
+
+      // First, get all events to find a role with multiple entries
+      const allResult = await client.queryHistory(PAGINATION_TEST_CONTRACT);
+      const roleCount = new Map<string, number>();
+
+      for (const entry of allResult.items) {
+        const roleId = entry.role.id;
+        roleCount.set(roleId, (roleCount.get(roleId) || 0) + 1);
+      }
+
+      // Find a role with enough entries for pagination
+      let targetRole: string | undefined;
+      for (const [role, count] of roleCount) {
+        if (count >= 5) {
+          targetRole = role;
+          break;
+        }
+      }
+
+      if (!targetRole) {
+        console.log('  ⏭️ No role with 5+ events for filter+pagination test');
+        return;
+      }
+
+      console.log(`  🎯 Testing pagination with roleId filter: ${targetRole}`);
+
+      // Paginate through filtered results
+      const pageSize = 2;
+      const filteredItems: typeof page1.items = [];
+
+      let page1 = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+        roleId: targetRole,
+        limit: pageSize,
+      });
+
+      filteredItems.push(...page1.items);
+
+      while (page1.pageInfo.hasNextPage && page1.pageInfo.endCursor) {
+        const nextPage = await client.queryHistory(PAGINATION_TEST_CONTRACT, {
+          roleId: targetRole,
+          limit: pageSize,
+          cursor: page1.pageInfo.endCursor,
+        });
+        filteredItems.push(...nextPage.items);
+        page1 = nextPage;
+      }
+
+      // Verify all items match the filter
+      for (const item of filteredItems) {
+        expect(item.role.id).toBe(targetRole);
+      }
+
+      console.log(`  ✅ Retrieved ${filteredItems.length} filtered items via pagination`);
+    }, 45000);
   });
 
   describe('History Query - Filtering', () => {
@@ -160,19 +429,19 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         return; // Skip test if indexer is not available
       }
       // First get all history to find a valid account
-      const allHistory = await client.queryHistory(TEST_CONTRACT);
-      expect(allHistory.length).toBeGreaterThan(0);
+      const allResult = await client.queryHistory(TEST_CONTRACT);
+      expect(allResult.items.length).toBeGreaterThan(0);
 
-      const targetAccount = allHistory[0].account;
+      const targetAccount = allResult.items[0].account;
 
       // Now filter by that account
-      const filteredHistory = await client.queryHistory(TEST_CONTRACT, {
+      const filteredResult = await client.queryHistory(TEST_CONTRACT, {
         account: targetAccount,
       });
 
-      expect(filteredHistory.length).toBeGreaterThan(0);
+      expect(filteredResult.items.length).toBeGreaterThan(0);
       // Verify all entries match the filter
-      for (const entry of filteredHistory) {
+      for (const entry of filteredResult.items) {
         expect(entry.account).toBe(targetAccount);
       }
     }, 15000);
@@ -182,22 +451,22 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         return; // Skip test if indexer is not available
       }
       // Query without filter first to see what roles exist
-      const allHistory = await client.queryHistory(TEST_CONTRACT);
+      const allResult = await client.queryHistory(TEST_CONTRACT);
 
       // Find an entry with an actual role (not ownership)
-      const roleEntry = allHistory.find((e) => e.role && e.role.id !== 'OWNER');
+      const roleEntry = allResult.items.find((e) => e.role && e.role.id !== 'OWNER');
 
       if (roleEntry) {
         const targetRole = roleEntry.role.id;
 
         // Query with role filter
-        const filteredHistory = await client.queryHistory(TEST_CONTRACT, {
+        const filteredResult = await client.queryHistory(TEST_CONTRACT, {
           roleId: targetRole,
         });
 
-        expect(filteredHistory.length).toBeGreaterThan(0);
+        expect(filteredResult.items.length).toBeGreaterThan(0);
         // Verify all entries match the filter
-        for (const entry of filteredHistory) {
+        for (const entry of filteredResult.items) {
           expect(entry.role.id).toBe(targetRole);
         }
       } else {
@@ -212,10 +481,10 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
       // Find the event at the known block
-      const knownEvent = history.find((e) => e.ledger === KNOWN_EVENT_BLOCK);
+      const knownEvent = result.items.find((e) => e.ledger === KNOWN_EVENT_BLOCK);
 
       expect(knownEvent).toBeDefined();
       if (knownEvent) {
@@ -233,14 +502,14 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
 
-      expect(history.length).toBeGreaterThan(1);
+      expect(result.items.length).toBeGreaterThan(1);
 
       // Verify descending order
-      for (let i = 0; i < history.length - 1; i++) {
-        const currentTimestamp = new Date(history[i].timestamp!).getTime();
-        const nextTimestamp = new Date(history[i + 1].timestamp!).getTime();
+      for (let i = 0; i < result.items.length - 1; i++) {
+        const currentTimestamp = new Date(result.items[i].timestamp!).getTime();
+        const nextTimestamp = new Date(result.items[i + 1].timestamp!).getTime();
         expect(currentTimestamp).toBeGreaterThanOrEqual(nextTimestamp);
       }
     }, 15000);
@@ -249,9 +518,9 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT, { limit: 5 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 5 });
 
-      for (const entry of history) {
+      for (const entry of result.items) {
         expect(entry.timestamp).toBeDefined();
         // Should be parseable as a date
         const parsed = new Date(entry.timestamp!);
@@ -263,17 +532,18 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
   });
 
   describe('History Query - Error Handling', () => {
-    it('should return empty array for contract with no events', async () => {
+    it('should return empty result for contract with no events', async () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
       // Use a valid but non-existent contract address
       const fakeContract = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
-      const history = await client.queryHistory(fakeContract);
+      const result = await client.queryHistory(fakeContract);
 
-      expect(history).toBeDefined();
-      expect(Array.isArray(history)).toBe(true);
-      expect(history.length).toBe(0);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.items)).toBe(true);
+      expect(result.items.length).toBe(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
     }, 15000);
 
     it('should throw error when indexer is unavailable', async () => {
@@ -294,9 +564,9 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
 
-      for (const entry of history) {
+      for (const entry of result.items) {
         expect(entry.txId).toBeDefined();
         expect(entry.txId.length).toBeGreaterThan(0);
         // Stellar tx hash is 64 character hex string
@@ -308,9 +578,9 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
 
-      for (const entry of history) {
+      for (const entry of result.items) {
         expect(entry.ledger).toBeDefined();
         expect(typeof entry.ledger).toBe('number');
         expect(entry.ledger).toBeGreaterThan(0);
@@ -321,9 +591,9 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available
       }
-      const history = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+      const result = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
 
-      for (const entry of history) {
+      for (const entry of result.items) {
         expect(entry.role).toBeDefined();
         expect(entry.role.id).toBeDefined();
         expect(typeof entry.role.id).toBe('string');
@@ -338,26 +608,26 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         return; // Skip test if indexer is not available
       }
       // Scenario: Check recent activity for a specific account
-      const allHistory = await client.queryHistory(TEST_CONTRACT, { limit: 20 });
-      expect(allHistory.length).toBeGreaterThan(0);
+      const allResult = await client.queryHistory(TEST_CONTRACT, { limit: 20 });
+      expect(allResult.items.length).toBeGreaterThan(0);
 
-      const targetAccount = allHistory[0].account;
+      const targetAccount = allResult.items[0].account;
 
       // Get last 10 events for this account
-      const accountHistory = await client.queryHistory(TEST_CONTRACT, {
+      const accountResult = await client.queryHistory(TEST_CONTRACT, {
         account: targetAccount,
         limit: 10,
       });
 
-      expect(accountHistory.length).toBeGreaterThan(0);
+      expect(accountResult.items.length).toBeGreaterThan(0);
 
       // Verify we can identify what roles this account received/lost
-      const grants = accountHistory.filter((e) => e.changeType === 'GRANTED');
+      const grants = accountResult.items.filter((e) => e.changeType === 'GRANTED');
       // At least one grant should exist (we filtered by an account that appears)
       expect(grants.length).toBeGreaterThan(0);
 
       // Verify we have timeline information
-      for (const event of accountHistory) {
+      for (const event of accountResult.items) {
         expect(event.timestamp).toBeDefined();
         expect(event.ledger).toBeGreaterThan(0);
         expect(event.txId).toMatch(/^[a-f0-9]{64}$/);
@@ -446,9 +716,9 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       const discoveredRoles = await client.discoverRoleIds(TEST_CONTRACT);
 
       // Get all history and extract unique roles manually
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
       const historyRoles = new Set<string>();
-      for (const entry of history) {
+      for (const entry of result.items) {
         // Only count actual roles, not ownership events (OWNER)
         if (entry.role && entry.role.id && entry.role.id !== 'OWNER') {
           historyRoles.add(entry.role.id);
@@ -521,12 +791,12 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       }
 
       // First, get some history to find additional accounts with the minter role
-      const history = await client.queryHistory(TEST_CONTRACT, {
+      const result = await client.queryHistory(TEST_CONTRACT, {
         roleId: KNOWN_EVENT_ROLE,
         limit: 5,
       });
 
-      const accountsWithRole = [...new Set(history.map((e) => e.account))].slice(0, 3);
+      const accountsWithRole = [...new Set(result.items.map((e) => e.account))].slice(0, 3);
 
       if (accountsWithRole.length < 2) {
         console.log('  ⏭️ Skipping: Not enough accounts with minter role for batch test');
@@ -559,12 +829,12 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       }
 
       // Query full history for the known account
-      const history = await client.queryHistory(TEST_CONTRACT, {
+      const result = await client.queryHistory(TEST_CONTRACT, {
         roleId: KNOWN_EVENT_ROLE,
         account: KNOWN_EVENT_ACCOUNT,
       });
 
-      const grants = history.filter((e) => e.changeType === 'GRANTED');
+      const grants = result.items.filter((e) => e.changeType === 'GRANTED');
 
       if (grants.length > 1) {
         // If there are multiple grants, queryLatestGrants should return the most recent

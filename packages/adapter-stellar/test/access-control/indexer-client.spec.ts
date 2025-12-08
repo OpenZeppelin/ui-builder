@@ -184,16 +184,20 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '2000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toHaveLength(2);
-      expect(history[0]).toMatchObject({
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0]).toMatchObject({
         role: { id: 'admin' },
         account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
         changeType: 'GRANTED',
@@ -201,11 +205,12 @@ describe('StellarIndexerClient (T031, T033)', () => {
         timestamp: '2024-01-01T00:00:00Z',
         ledger: 1000,
       });
-      expect(history[1]).toMatchObject({
+      expect(result.items[1]).toMatchObject({
         role: { id: 'admin' },
         changeType: 'REVOKED',
         ledger: 2000,
       });
+      expect(result.pageInfo.hasNextPage).toBe(false);
     });
 
     it('should query history with role filter', async () => {
@@ -230,6 +235,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '3000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
@@ -237,10 +246,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
       const client = new StellarIndexerClient(mockNetworkConfig);
       const options: IndexerHistoryOptions = { roleId: 'minter' };
-      const history = await client.queryHistory(TEST_CONTRACT, options);
+      const result = await client.queryHistory(TEST_CONTRACT, options);
 
-      expect(history).toHaveLength(1);
-      expect(history[0].role.id).toBe('minter');
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].role.id).toBe('minter');
 
       // Verify query variables include role filter
       const lastCall = fetchSpy.mock.calls[1];
@@ -276,6 +285,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '4000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
@@ -283,10 +296,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
       const client = new StellarIndexerClient(mockNetworkConfig);
       const options: IndexerHistoryOptions = { account: testAccount };
-      const history = await client.queryHistory(TEST_CONTRACT, options);
+      const result = await client.queryHistory(TEST_CONTRACT, options);
 
-      expect(history).toHaveLength(1);
-      expect(history[0].account).toBe(testAccount);
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].account).toBe(testAccount);
 
       // Verify query variables include account filter
       const lastCall = fetchSpy.mock.calls[1];
@@ -320,6 +333,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '5000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: true,
+                endCursor: 'cursor123',
+              },
             },
           },
         }),
@@ -327,9 +344,11 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
       const client = new StellarIndexerClient(mockNetworkConfig);
       const options: IndexerHistoryOptions = { limit: 10 };
-      const history = await client.queryHistory(TEST_CONTRACT, options);
+      const result = await client.queryHistory(TEST_CONTRACT, options);
 
-      expect(history).toHaveLength(1);
+      expect(result.items).toHaveLength(1);
+      expect(result.pageInfo.hasNextPage).toBe(true);
+      expect(result.pageInfo.endCursor).toBe('cursor123');
 
       // Verify query variables include limit
       const lastCall = fetchSpy.mock.calls[1];
@@ -366,6 +385,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '6000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
@@ -377,9 +400,9 @@ describe('StellarIndexerClient (T031, T033)', () => {
         account: testAccount,
         limit: 5,
       };
-      const history = await client.queryHistory(TEST_CONTRACT, options);
+      const result = await client.queryHistory(TEST_CONTRACT, options);
 
-      expect(history).toHaveLength(1);
+      expect(result.items).toHaveLength(1);
 
       // Verify all filters are applied
       const lastCall = fetchSpy.mock.calls[1];
@@ -390,6 +413,59 @@ describe('StellarIndexerClient (T031, T033)', () => {
         account: testAccount,
         limit: 5,
       });
+    });
+
+    it('should query history with cursor for pagination', async () => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ data: { __typename: 'Query' } }),
+      } as Response);
+
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            accessControlEvents: {
+              nodes: [
+                {
+                  id: 'event-2',
+                  role: 'admin',
+                  account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
+                  type: 'ROLE_GRANTED',
+                  txHash: 'g'.repeat(64),
+                  timestamp: '2024-01-07T00:00:00Z',
+                  blockHeight: '7000',
+                },
+              ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
+            },
+          },
+        }),
+      } as Response);
+
+      const client = new StellarIndexerClient(mockNetworkConfig);
+      const options: IndexerHistoryOptions = {
+        limit: 10,
+        cursor: 'previousCursor123',
+      };
+      const result = await client.queryHistory(TEST_CONTRACT, options);
+
+      expect(result.items).toHaveLength(1);
+      expect(result.pageInfo.hasNextPage).toBe(false);
+
+      // Verify cursor is included in query variables
+      const lastCall = fetchSpy.mock.calls[1];
+      const body = JSON.parse(lastCall[1]?.body as string);
+      expect(body.variables).toMatchObject({
+        contract: TEST_CONTRACT,
+        limit: 10,
+        cursor: 'previousCursor123',
+      });
+      expect(body.query).toContain('$cursor: Cursor');
+      expect(body.query).toContain('after: $cursor');
     });
   });
 
@@ -416,17 +492,21 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '7000',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toHaveLength(1);
-      expect(history[0].role.id).toBe('OWNER'); // Should map null role to 'OWNER'
-      expect(history[0].changeType).toBe('GRANTED'); // Ownership transfer treated as GRANTED
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].role.id).toBe('OWNER'); // Should map null role to 'OWNER'
+      expect(result.items[0].changeType).toBe('GRANTED'); // Ownership transfer treated as GRANTED
     });
   });
 
@@ -482,7 +562,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
       );
     });
 
-    it('should return empty array when no events found', async () => {
+    it('should return empty result when no events found', async () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ data: { __typename: 'Query' } }),
@@ -494,18 +574,23 @@ describe('StellarIndexerClient (T031, T033)', () => {
           data: {
             accessControlEvents: {
               nodes: [],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toEqual([]);
+      expect(result.items).toEqual([]);
+      expect(result.pageInfo.hasNextPage).toBe(false);
     });
 
-    it('should return empty array when data is null', async () => {
+    it('should return empty result when data is null', async () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({ data: { __typename: 'Query' } }),
@@ -519,9 +604,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toEqual([]);
+      expect(result.items).toEqual([]);
+      expect(result.pageInfo.hasNextPage).toBe(false);
     });
 
     it('should throw when fetch throws unexpected error', async () => {
@@ -737,17 +823,21 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '12345',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history).toHaveLength(1);
+      expect(result.items).toHaveLength(1);
 
-      const entry = history[0];
+      const entry = result.items[0];
       expect(entry).toMatchObject({
         role: {
           id: 'pauser',
@@ -790,15 +880,19 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '12346',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history[0].changeType).toBe('REVOKED');
+      expect(result.items[0].changeType).toBe('REVOKED');
     });
 
     it('should parse blockHeight string to number', async () => {
@@ -823,16 +917,20 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   blockHeight: '999999',
                 },
               ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: undefined,
+              },
             },
           },
         }),
       } as Response);
 
       const client = new StellarIndexerClient(mockNetworkConfig);
-      const history = await client.queryHistory(TEST_CONTRACT);
+      const result = await client.queryHistory(TEST_CONTRACT);
 
-      expect(history[0].ledger).toBe(999999);
-      expect(typeof history[0].ledger).toBe('number');
+      expect(result.items[0].ledger).toBe(999999);
+      expect(typeof result.items[0].ledger).toBe('number');
     });
   });
 
