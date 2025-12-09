@@ -8,6 +8,7 @@
 import type {
   HistoryChangeType,
   HistoryEntry,
+  HistoryQueryOptions,
   IndexerEndpointConfig,
   PageInfo,
   PaginatedHistoryResult,
@@ -79,27 +80,6 @@ export interface GrantInfo {
   txId: string;
   /** Block/ledger number of the grant */
   ledger: number;
-}
-
-/**
- * Options for querying history with pagination
- */
-export interface IndexerHistoryOptions {
-  roleId?: string;
-  account?: string;
-  /** Filter by change type (grant, revoke, or ownership transfer) */
-  changeType?: HistoryChangeType;
-  /** Filter by transaction ID (exact match) */
-  txId?: string;
-  /** Filter by timestamp - return events on or after this time (ISO8601 format) */
-  timestampFrom?: string;
-  /** Filter by timestamp - return events on or before this time (ISO8601 format) */
-  timestampTo?: string;
-  /** Filter by ledger/block number (exact match) */
-  ledger?: number;
-  limit?: number;
-  /** Cursor for fetching the next page */
-  cursor?: string;
 }
 
 /**
@@ -178,7 +158,7 @@ export class StellarIndexerClient {
    */
   async queryHistory(
     contractAddress: string,
-    options?: IndexerHistoryOptions
+    options?: HistoryQueryOptions
   ): Promise<PaginatedHistoryResult> {
     const isAvailable = await this.checkAvailability();
     if (!isAvailable) {
@@ -547,7 +527,7 @@ export class StellarIndexerClient {
   /**
    * Build GraphQL query for history with SubQuery filtering and pagination
    */
-  private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
+  private buildHistoryQuery(_contractAddress: string, options?: HistoryQueryOptions): string {
     const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
     const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
     // Type filter uses inline enum value (consistent with buildLatestGrantsQuery pattern)
@@ -570,7 +550,7 @@ export class StellarIndexerClient {
     const cursorClause = options?.cursor ? ', after: $cursor' : '';
 
     // Build variable declarations
-    // Note: SubQuery uses Datetime for timestamp filters and BigInt for blockHeight
+    // Note: SubQuery uses Datetime for timestamp filters and BigFloat for blockHeight filtering
     const varDeclarations = [
       '$contract: String!',
       options?.roleId ? '$role: String' : '',
@@ -616,7 +596,7 @@ export class StellarIndexerClient {
    */
   private buildQueryVariables(
     contractAddress: string,
-    options?: IndexerHistoryOptions
+    options?: HistoryQueryOptions
   ): Record<string, unknown> {
     const variables: Record<string, unknown> = {
       contract: contractAddress,
