@@ -91,6 +91,11 @@ export interface AccessSnapshot {
 }
 
 /**
+ * Change type for history events (grant, revoke, or ownership transfer)
+ */
+export type HistoryChangeType = 'GRANTED' | 'REVOKED' | 'TRANSFERRED';
+
+/**
  * History entry for role changes (adapter-specific, when history is supported)
  */
 export interface HistoryEntry {
@@ -99,7 +104,7 @@ export interface HistoryEntry {
   /** The account that was granted or revoked */
   account: string;
   /** Type of change */
-  changeType: 'GRANTED' | 'REVOKED';
+  changeType: HistoryChangeType;
   /** Transaction identifier */
   txId: string;
   /** Optional timestamp (ISO8601 format) */
@@ -127,11 +132,6 @@ export interface PaginatedHistoryResult {
   /** Pagination information */
   pageInfo: PageInfo;
 }
-
-/**
- * Change type for filtering history events
- */
-export type HistoryChangeType = 'GRANTED' | 'REVOKED' | 'TRANSFERRED';
 
 /**
  * Options for querying history with pagination

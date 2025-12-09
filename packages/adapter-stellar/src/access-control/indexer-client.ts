@@ -669,17 +669,19 @@ export class StellarIndexerClient {
   private transformIndexerEntries(entries: IndexerHistoryEntry[]): HistoryEntry[] {
     return entries.map((entry) => {
       const role: RoleIdentifier = {
-        id: entry.role || 'OWNER', // Map ownership events to special role or null
+        id: entry.role || 'OWNER', // Map ownership events to special role
       };
 
       // Map SubQuery event types to internal types
-      let changeType: 'GRANTED' | 'REVOKED';
+      let changeType: HistoryChangeType;
       if (entry.type === 'ROLE_GRANTED') {
         changeType = 'GRANTED';
       } else if (entry.type === 'ROLE_REVOKED') {
         changeType = 'REVOKED';
+      } else if (entry.type === 'OWNERSHIP_TRANSFER_COMPLETED') {
+        changeType = 'TRANSFERRED';
       } else {
-        // Treat ownership transfer as a grant for now, or handle differently if HistoryEntry supports it
+        // Default to GRANTED for unknown types (shouldn't happen)
         changeType = 'GRANTED';
       }
 
