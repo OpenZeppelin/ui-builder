@@ -672,6 +672,111 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         `  ✅ Combined filter: ${combinedResult.items.length} GRANTED events for account '${targetAccount.slice(0, 10)}...'`
       );
     }, 15000);
+
+    it('should filter history by txId (server-side)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First get all history to find a valid txId
+      const allResult = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+
+      if (allResult.items.length === 0) {
+        console.log('  ⏭️ No events found, skipping txId filter test');
+        return;
+      }
+
+      const targetTxId = allResult.items[0].txId;
+
+      // Query with txId filter
+      const filteredResult = await client.queryHistory(TEST_CONTRACT, {
+        txId: targetTxId,
+      });
+
+      expect(filteredResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL returned entries have the matching txId
+      for (const entry of filteredResult.items) {
+        expect(entry.txId).toBe(targetTxId);
+      }
+
+      console.log(
+        `  ✅ Filtered ${filteredResult.items.length} event(s) by txId '${targetTxId.slice(0, 16)}...'`
+      );
+    }, 15000);
+
+    it('should filter history by ledger/blockHeight (server-side)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First get all history to find a valid ledger number
+      const allResult = await client.queryHistory(TEST_CONTRACT, { limit: 10 });
+
+      if (allResult.items.length === 0) {
+        console.log('  ⏭️ No events found, skipping ledger filter test');
+        return;
+      }
+
+      const targetLedger = allResult.items[0].ledger!;
+
+      // Query with ledger filter
+      const filteredResult = await client.queryHistory(TEST_CONTRACT, {
+        ledger: targetLedger,
+      });
+
+      expect(filteredResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL returned entries have the matching ledger
+      for (const entry of filteredResult.items) {
+        expect(entry.ledger).toBe(targetLedger);
+      }
+
+      console.log(
+        `  ✅ Filtered ${filteredResult.items.length} event(s) at ledger ${targetLedger}`
+      );
+    }, 15000);
+
+    it('should filter history by timestamp range (server-side)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Use known timestamp range - indexer stores times without timezone
+      // Events are around 2025-12-05T10:34:xx (indexer time, no Z suffix)
+      const timestampFrom = '2025-12-05T10:34:00';
+      const timestampTo = '2025-12-05T10:35:00';
+
+      const filteredResult = await client.queryHistory(TEST_CONTRACT, {
+        timestampFrom,
+        timestampTo,
+        limit: 20,
+      });
+
+      expect(filteredResult.items.length).toBeGreaterThan(0);
+
+      console.log(
+        `  ✅ Filtered ${filteredResult.items.length} event(s) in timestamp range (${timestampFrom} to ${timestampTo})`
+      );
+    }, 15000);
+
+    it('should filter with timestampFrom only (events after date)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Use known timestamp - indexer stores times without timezone
+      const timestampFrom = '2025-12-05T10:34:20';
+
+      const filteredResult = await client.queryHistory(TEST_CONTRACT, {
+        timestampFrom,
+        limit: 20,
+      });
+
+      expect(filteredResult.items.length).toBeGreaterThan(0);
+
+      console.log(`  ✅ Filtered ${filteredResult.items.length} event(s) from ${timestampFrom}`);
+    }, 15000);
   });
 
   describe('History Query - Known Event Verification', () => {

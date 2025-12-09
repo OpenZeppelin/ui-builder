@@ -143,6 +143,14 @@ export interface HistoryQueryOptions {
   account?: string;
   /** Filter by change type (grant, revoke, or ownership transfer) */
   changeType?: HistoryChangeType;
+  /** Filter by transaction ID (exact match) */
+  txId?: string;
+  /** Filter by timestamp - return events on or after this time (format: '2025-12-05T10:34:00', no timezone) */
+  timestampFrom?: string;
+  /** Filter by timestamp - return events on or before this time (format: '2025-12-05T10:34:00', no timezone) */
+  timestampTo?: string;
+  /** Filter by ledger/block number (exact match) */
+  ledger?: number;
   /** Maximum number of items to return (page size) */
   limit?: number;
   /** Cursor for fetching the next page */

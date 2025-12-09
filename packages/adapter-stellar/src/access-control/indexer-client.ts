@@ -89,6 +89,14 @@ export interface IndexerHistoryOptions {
   account?: string;
   /** Filter by change type (grant, revoke, or ownership transfer) */
   changeType?: HistoryChangeType;
+  /** Filter by transaction ID (exact match) */
+  txId?: string;
+  /** Filter by timestamp - return events on or after this time (ISO8601 format) */
+  timestampFrom?: string;
+  /** Filter by timestamp - return events on or before this time (ISO8601 format) */
+  timestampTo?: string;
+  /** Filter by ledger/block number (exact match) */
+  ledger?: number;
   limit?: number;
   /** Cursor for fetching the next page */
   cursor?: string;
@@ -546,14 +554,31 @@ export class StellarIndexerClient {
     const typeFilter = options?.changeType
       ? `, type: { equalTo: ${this.mapChangeTypeToGraphQLEnum(options.changeType)} }`
       : '';
+    const txFilter = options?.txId ? ', txHash: { equalTo: $txHash }' : '';
+    // Build combined timestamp filter to avoid duplicate keys
+    const timestampConditions: string[] = [];
+    if (options?.timestampFrom) {
+      timestampConditions.push('greaterThanOrEqualTo: $timestampFrom');
+    }
+    if (options?.timestampTo) {
+      timestampConditions.push('lessThanOrEqualTo: $timestampTo');
+    }
+    const timestampFilter =
+      timestampConditions.length > 0 ? `, timestamp: { ${timestampConditions.join(', ')} }` : '';
+    const ledgerFilter = options?.ledger ? ', blockHeight: { equalTo: $blockHeight }' : '';
     const limitClause = options?.limit ? ', first: $limit' : '';
     const cursorClause = options?.cursor ? ', after: $cursor' : '';
 
     // Build variable declarations
+    // Note: SubQuery uses Datetime for timestamp filters and BigInt for blockHeight
     const varDeclarations = [
       '$contract: String!',
       options?.roleId ? '$role: String' : '',
       options?.account ? '$account: String' : '',
+      options?.txId ? '$txHash: String' : '',
+      options?.timestampFrom ? '$timestampFrom: Datetime' : '',
+      options?.timestampTo ? '$timestampTo: Datetime' : '',
+      options?.ledger ? '$blockHeight: BigFloat' : '',
       options?.limit ? '$limit: Int' : '',
       options?.cursor ? '$cursor: Cursor' : '',
     ]
@@ -564,7 +589,7 @@ export class StellarIndexerClient {
       query GetHistory(${varDeclarations}) {
         accessControlEvents(
           filter: {
-            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}${txFilter}${timestampFilter}${ledgerFilter}
           }
           orderBy: TIMESTAMP_DESC${limitClause}${cursorClause}
         ) {
@@ -602,6 +627,19 @@ export class StellarIndexerClient {
     }
     if (options?.account) {
       variables.account = options.account;
+    }
+    if (options?.txId) {
+      variables.txHash = options.txId;
+    }
+    if (options?.timestampFrom) {
+      variables.timestampFrom = options.timestampFrom;
+    }
+    if (options?.timestampTo) {
+      variables.timestampTo = options.timestampTo;
+    }
+    if (options?.ledger) {
+      // GraphQL expects blockHeight as string
+      variables.blockHeight = String(options.ledger);
     }
     if (options?.limit) {
       variables.limit = options.limit;
