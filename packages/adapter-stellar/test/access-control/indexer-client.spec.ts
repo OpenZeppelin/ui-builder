@@ -506,7 +506,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].role.id).toBe('OWNER'); // Should map null role to 'OWNER'
-      expect(result.items[0].changeType).toBe('GRANTED'); // Ownership transfer treated as GRANTED
+      expect(result.items[0].changeType).toBe('TRANSFERRED'); // Ownership transfer maps to TRANSFERRED
     });
   });
 
@@ -733,7 +733,12 @@ describe('StellarIndexerClient (T031, T033)', () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          data: { accessControlEvents: { nodes: [] } },
+          data: {
+            accessControlEvents: {
+              nodes: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
         }),
       } as Response);
 
@@ -774,7 +779,12 @@ describe('StellarIndexerClient (T031, T033)', () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          data: { accessControlEvents: { nodes: [] } },
+          data: {
+            accessControlEvents: {
+              nodes: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
         }),
       } as Response);
 
