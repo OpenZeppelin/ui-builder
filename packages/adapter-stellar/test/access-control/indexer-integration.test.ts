@@ -474,6 +474,172 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         expect(true).toBe(true);
       }
     }, 15000);
+
+    it('should filter history by changeType GRANTED (server-side)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Query with changeType filter for GRANTED events only
+      const grantedResult = await client.queryHistory(TEST_CONTRACT, {
+        changeType: 'GRANTED',
+        limit: 20,
+      });
+
+      expect(grantedResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL returned entries have changeType: 'GRANTED'
+      for (const entry of grantedResult.items) {
+        expect(entry.changeType).toBe('GRANTED');
+      }
+
+      console.log(`  ✅ Filtered ${grantedResult.items.length} GRANTED events (server-side)`);
+    }, 15000);
+
+    it('should filter history by changeType REVOKED (server-side)', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First check if there are any REVOKED events
+      const allResult = await client.queryHistory(TEST_CONTRACT);
+      const hasRevokedEvents = allResult.items.some((e) => e.changeType === 'REVOKED');
+
+      if (!hasRevokedEvents) {
+        console.log('  ⏭️ No REVOKED events in contract, skipping filter test');
+        return;
+      }
+
+      // Query with changeType filter for REVOKED events only
+      const revokedResult = await client.queryHistory(TEST_CONTRACT, {
+        changeType: 'REVOKED',
+        limit: 20,
+      });
+
+      expect(revokedResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL returned entries have changeType: 'REVOKED'
+      for (const entry of revokedResult.items) {
+        expect(entry.changeType).toBe('REVOKED');
+      }
+
+      console.log(`  ✅ Filtered ${revokedResult.items.length} REVOKED events (server-side)`);
+    }, 15000);
+
+    it('should combine changeType filter with pagination', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // Get first page of GRANTED events
+      const page1 = await client.queryHistory(TEST_CONTRACT, {
+        changeType: 'GRANTED',
+        limit: 5,
+      });
+
+      expect(page1.items.length).toBeGreaterThan(0);
+
+      // All items on page 1 should be GRANTED
+      for (const entry of page1.items) {
+        expect(entry.changeType).toBe('GRANTED');
+      }
+
+      // If there's a next page, verify it also contains only GRANTED events
+      if (page1.pageInfo.hasNextPage && page1.pageInfo.endCursor) {
+        const page2 = await client.queryHistory(TEST_CONTRACT, {
+          changeType: 'GRANTED',
+          limit: 5,
+          cursor: page1.pageInfo.endCursor,
+        });
+
+        // All items on page 2 should also be GRANTED
+        for (const entry of page2.items) {
+          expect(entry.changeType).toBe('GRANTED');
+        }
+
+        console.log(
+          `  ✅ changeType filter works across pages: page1=${page1.items.length}, page2=${page2.items.length} GRANTED events`
+        );
+      } else {
+        console.log(
+          `  ✅ changeType filter works: ${page1.items.length} GRANTED events (single page)`
+        );
+      }
+    }, 20000);
+
+    it('should combine changeType filter with roleId filter', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First get all history to find a role with GRANTED events
+      const allResult = await client.queryHistory(TEST_CONTRACT);
+      const grantedEntry = allResult.items.find(
+        (e) => e.changeType === 'GRANTED' && e.role && e.role.id !== 'OWNER'
+      );
+
+      if (!grantedEntry) {
+        console.log('  ⏭️ No role GRANTED events found, skipping combined filter test');
+        return;
+      }
+
+      const targetRole = grantedEntry.role.id;
+
+      // Query with both changeType and roleId filters
+      const combinedResult = await client.queryHistory(TEST_CONTRACT, {
+        changeType: 'GRANTED',
+        roleId: targetRole,
+        limit: 10,
+      });
+
+      expect(combinedResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL entries match BOTH filters
+      for (const entry of combinedResult.items) {
+        expect(entry.changeType).toBe('GRANTED');
+        expect(entry.role.id).toBe(targetRole);
+      }
+
+      console.log(
+        `  ✅ Combined filter: ${combinedResult.items.length} GRANTED events for role '${targetRole}'`
+      );
+    }, 15000);
+
+    it('should combine changeType filter with account filter', async () => {
+      if (!indexerAvailable) {
+        return; // Skip test if indexer is not available
+      }
+
+      // First get all history to find an account with GRANTED events
+      const allResult = await client.queryHistory(TEST_CONTRACT);
+      const grantedEntry = allResult.items.find((e) => e.changeType === 'GRANTED');
+
+      if (!grantedEntry) {
+        console.log('  ⏭️ No GRANTED events found, skipping combined filter test');
+        return;
+      }
+
+      const targetAccount = grantedEntry.account;
+
+      // Query with both changeType and account filters
+      const combinedResult = await client.queryHistory(TEST_CONTRACT, {
+        changeType: 'GRANTED',
+        account: targetAccount,
+        limit: 10,
+      });
+
+      expect(combinedResult.items.length).toBeGreaterThan(0);
+
+      // Verify ALL entries match BOTH filters
+      for (const entry of combinedResult.items) {
+        expect(entry.changeType).toBe('GRANTED');
+        expect(entry.account).toBe(targetAccount);
+      }
+
+      console.log(
+        `  ✅ Combined filter: ${combinedResult.items.length} GRANTED events for account '${targetAccount.slice(0, 10)}...'`
+      );
+    }, 15000);
   });
 
   describe('History Query - Known Event Verification', () => {

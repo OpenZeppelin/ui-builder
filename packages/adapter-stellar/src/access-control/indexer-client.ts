@@ -6,6 +6,7 @@
  */
 
 import type {
+  HistoryChangeType,
   HistoryEntry,
   IndexerEndpointConfig,
   PageInfo,
@@ -86,6 +87,8 @@ export interface GrantInfo {
 export interface IndexerHistoryOptions {
   roleId?: string;
   account?: string;
+  /** Filter by change type (grant, revoke, or ownership transfer) */
+  changeType?: HistoryChangeType;
   limit?: number;
   /** Cursor for fetching the next page */
   cursor?: string;
@@ -521,11 +524,28 @@ export class StellarIndexerClient {
   }
 
   /**
+   * Maps internal changeType to GraphQL EventType enum
+   * GraphQL enum values: ROLE_GRANTED, ROLE_REVOKED, OWNERSHIP_TRANSFER_COMPLETED
+   */
+  private mapChangeTypeToGraphQLEnum(changeType: HistoryChangeType): string {
+    const mapping: Record<HistoryChangeType, string> = {
+      GRANTED: 'ROLE_GRANTED',
+      REVOKED: 'ROLE_REVOKED',
+      TRANSFERRED: 'OWNERSHIP_TRANSFER_COMPLETED',
+    };
+    return mapping[changeType];
+  }
+
+  /**
    * Build GraphQL query for history with SubQuery filtering and pagination
    */
   private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
     const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
     const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
+    // Type filter uses inline enum value (consistent with buildLatestGrantsQuery pattern)
+    const typeFilter = options?.changeType
+      ? `, type: { equalTo: ${this.mapChangeTypeToGraphQLEnum(options.changeType)} }`
+      : '';
     const limitClause = options?.limit ? ', first: $limit' : '';
     const cursorClause = options?.cursor ? ', after: $cursor' : '';
 
@@ -544,7 +564,7 @@ export class StellarIndexerClient {
       query GetHistory(${varDeclarations}) {
         accessControlEvents(
           filter: {
-            contract: { equalTo: $contract }${roleFilter}${accountFilter}
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}
           }
           orderBy: TIMESTAMP_DESC${limitClause}${cursorClause}
         ) {

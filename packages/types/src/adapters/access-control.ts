@@ -129,6 +129,11 @@ export interface PaginatedHistoryResult {
 }
 
 /**
+ * Change type for filtering history events
+ */
+export type HistoryChangeType = 'GRANTED' | 'REVOKED' | 'TRANSFERRED';
+
+/**
  * Options for querying history with pagination
  */
 export interface HistoryQueryOptions {
@@ -136,6 +141,8 @@ export interface HistoryQueryOptions {
   roleId?: string;
   /** Filter by account address */
   account?: string;
+  /** Filter by change type (grant, revoke, or ownership transfer) */
+  changeType?: HistoryChangeType;
   /** Maximum number of items to return (page size) */
   limit?: number;
   /** Cursor for fetching the next page */

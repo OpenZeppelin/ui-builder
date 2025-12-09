@@ -733,7 +733,12 @@ describe('StellarIndexerClient (T031, T033)', () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          data: { accessControlEvents: { nodes: [] } },
+          data: {
+            accessControlEvents: {
+              nodes: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
         }),
       } as Response);
 
@@ -774,7 +779,12 @@ describe('StellarIndexerClient (T031, T033)', () => {
       fetchSpy.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          data: { accessControlEvents: { nodes: [] } },
+          data: {
+            accessControlEvents: {
+              nodes: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
         }),
       } as Response);
 
