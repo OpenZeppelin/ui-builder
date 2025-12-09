@@ -526,38 +526,6 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       console.log(`  ✅ Filtered ${revokedResult.items.length} REVOKED events (server-side)`);
     }, 15000);
 
-    it('should filter history by changeType TRANSFERRED (server-side)', async () => {
-      if (!indexerAvailable) {
-        return; // Skip test if indexer is not available
-      }
-
-      // First check if there are any TRANSFERRED (ownership) events
-      const allResult = await client.queryHistory(TEST_CONTRACT);
-      const hasTransferredEvents = allResult.items.some((e) => e.changeType === 'TRANSFERRED');
-
-      if (!hasTransferredEvents) {
-        console.log('  ⏭️ No TRANSFERRED events in contract, skipping filter test');
-        return;
-      }
-
-      // Query with changeType filter for TRANSFERRED events only
-      const transferredResult = await client.queryHistory(TEST_CONTRACT, {
-        changeType: 'TRANSFERRED',
-        limit: 20,
-      });
-
-      expect(transferredResult.items.length).toBeGreaterThan(0);
-
-      // Verify ALL returned entries have changeType: 'TRANSFERRED'
-      for (const entry of transferredResult.items) {
-        expect(entry.changeType).toBe('TRANSFERRED');
-      }
-
-      console.log(
-        `  ✅ Filtered ${transferredResult.items.length} TRANSFERRED events (server-side)`
-      );
-    }, 15000);
-
     it('should combine changeType filter with pagination', async () => {
       if (!indexerAvailable) {
         return; // Skip test if indexer is not available

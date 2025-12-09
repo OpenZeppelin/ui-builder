@@ -134,6 +134,11 @@ export interface PaginatedHistoryResult {
 }
 
 /**
+ * Change type for filtering history events
+ */
+export type HistoryChangeType = 'GRANTED' | 'REVOKED' | 'TRANSFERRED';
+
+/**
  * Options for querying history with pagination
  */
 export interface HistoryQueryOptions {
