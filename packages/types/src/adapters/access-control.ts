@@ -14,6 +14,8 @@ import type { TransactionStatusUpdate, TxStatus } from '../transactions/status';
 export interface AccessControlCapabilities {
   /** Whether the contract implements Ownable */
   hasOwnable: boolean;
+  /** Whether the contract supports two-step transfer with expiration (e.g. Stellar Ownable) */
+  hasTwoStepOwnable: boolean;
   /** Whether the contract implements AccessControl */
   hasAccessControl: boolean;
   /** Whether roles can be enumerated directly (vs requiring event reconstruction) */
@@ -27,11 +29,68 @@ export interface AccessControlCapabilities {
 }
 
 /**
+ * Ownership state enumeration for two-step Ownable contracts
+ *
+ * - 'owned': Contract has an active owner with no pending transfer
+ * - 'pending': Ownership transfer initiated, awaiting acceptance
+ * - 'expired': Previous transfer attempt expired without completion
+ * - 'renounced': Contract has no owner (ownership was renounced)
+ */
+export type OwnershipState = 'owned' | 'pending' | 'expired' | 'renounced';
+
+/**
+ * Pending ownership transfer details for two-step Ownable contracts
+ *
+ * Contains information about an initiated but not yet accepted ownership transfer.
+ */
+export interface PendingOwnershipTransfer {
+  /** Address designated to receive ownership */
+  pendingOwner: string;
+  /** Block/ledger number by which transfer must be accepted */
+  expirationBlock: number;
+  /** ISO8601 timestamp of transfer initiation (from indexer) */
+  initiatedAt?: string;
+  /** Transaction ID of the initiation (from indexer) */
+  initiatedTxId?: string;
+  /** Block/ledger number at which transfer was initiated (from indexer) */
+  initiatedBlock?: number;
+}
+
+/**
  * Ownership information
+ *
+ * Extended to support two-step Ownable contracts with pending transfer state.
+ *
+ * @example Owned state (basic)
+ * ```typescript
+ * { owner: '0xABC...123', state: 'owned' }
+ * ```
+ *
+ * @example Pending state
+ * ```typescript
+ * {
+ *   owner: '0xABC...123',
+ *   state: 'pending',
+ *   pendingTransfer: {
+ *     pendingOwner: '0xDEF...456',
+ *     expirationBlock: 12345678,
+ *     initiatedAt: '2025-12-10T10:30:00Z',
+ *   }
+ * }
+ * ```
+ *
+ * @example Renounced state
+ * ```typescript
+ * { owner: null, state: 'renounced' }
+ * ```
  */
 export interface OwnershipInfo {
   /** The current owner address, or null if no owner */
   owner: string | null;
+  /** Current ownership state (optional for backward compatibility) */
+  state?: OwnershipState;
+  /** Pending transfer details (present when state is 'pending') */
+  pendingTransfer?: PendingOwnershipTransfer;
 }
 
 /**

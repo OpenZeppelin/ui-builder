@@ -54,6 +54,9 @@ export function detectAccessControlCapabilities(
   // Detect Ownable
   const hasOwnable = OWNABLE_FUNCTIONS.required.every((fnName) => functionNames.has(fnName));
 
+  // Detect two-step Ownable (has accept_ownership function)
+  const hasTwoStepOwnable = hasOwnable && functionNames.has('accept_ownership');
+
   // Detect AccessControl
   const hasAccessControl = ACCESS_CONTROL_FUNCTIONS.required.every((fnName) =>
     functionNames.has(fnName)
@@ -69,14 +72,19 @@ export function detectAccessControlCapabilities(
   const verifiedAgainstOZInterfaces = verifyOZInterface(
     functionNames,
     hasOwnable,
-    hasAccessControl
+    hasAccessControl,
+    hasTwoStepOwnable
   );
 
   // Collect notes about detected capabilities
   const notes: string[] = [];
 
   if (hasOwnable) {
-    notes.push('OpenZeppelin Ownable interface detected');
+    if (hasTwoStepOwnable) {
+      notes.push('OpenZeppelin two-step Ownable interface detected (with accept_ownership)');
+    } else {
+      notes.push('OpenZeppelin Ownable interface detected');
+    }
   }
 
   if (hasAccessControl) {
@@ -99,6 +107,7 @@ export function detectAccessControlCapabilities(
 
   return {
     hasOwnable,
+    hasTwoStepOwnable,
     hasAccessControl,
     hasEnumerableRoles,
     supportsHistory,
@@ -113,26 +122,39 @@ export function detectAccessControlCapabilities(
  * @param functionNames Set of function names in the contract
  * @param hasOwnable Whether Ownable was detected
  * @param hasAccessControl Whether AccessControl was detected
+ * @param hasTwoStepOwnable Whether two-step Ownable was detected
  * @returns True if verified against OZ interfaces
  */
 function verifyOZInterface(
   functionNames: Set<string>,
   hasOwnable: boolean,
-  hasAccessControl: boolean
+  hasAccessControl: boolean,
+  hasTwoStepOwnable = false
 ): boolean {
   // If no OZ patterns detected, not applicable
   if (!hasOwnable && !hasAccessControl) {
     return false;
   }
 
-  // Verify Ownable optional functions (at least 2 of 3 should be present)
+  // Verify Ownable optional functions
+  // For two-step Ownable, require at least 3 of 4 optional functions
+  // For basic Ownable, at least 2 of 3 (excluding accept_ownership)
   if (hasOwnable) {
     const ownableOptionalCount = OWNABLE_FUNCTIONS.optional.filter((fnName) =>
       functionNames.has(fnName)
     ).length;
 
-    if (ownableOptionalCount < 2) {
-      return false;
+    if (hasTwoStepOwnable) {
+      // Two-step Ownable should have at least 3 of 4 optional functions
+      // (transfer_ownership, accept_ownership, renounce_ownership, and accept_ownership is guaranteed)
+      if (ownableOptionalCount < 3) {
+        return false;
+      }
+    } else {
+      // Basic Ownable should have at least 2 of 3 optional functions
+      if (ownableOptionalCount < 2) {
+        return false;
+      }
     }
   }
 

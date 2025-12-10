@@ -31,10 +31,38 @@ interface IndexerHistoryEntry {
   id: string;
   role?: string; // Nullable for Ownership events
   account: string;
-  type: 'ROLE_GRANTED' | 'ROLE_REVOKED' | 'OWNERSHIP_TRANSFER_COMPLETED';
+  type:
+    | 'ROLE_GRANTED'
+    | 'ROLE_REVOKED'
+    | 'OWNERSHIP_TRANSFER_COMPLETED'
+    | 'OWNERSHIP_TRANSFER_INITIATED';
   txHash: string;
   timestamp: string;
   blockHeight: string;
+  /** Previous owner at time of transfer initiation (for OWNERSHIP_TRANSFER_INITIATED) */
+  previousOwner?: string;
+  /** Ledger sequence by which transfer must be accepted (for OWNERSHIP_TRANSFER_INITIATED) */
+  liveUntilLedger?: number;
+}
+
+/**
+ * Ownership transfer initiation event from indexer
+ *
+ * Contains details about a pending two-step ownership transfer.
+ */
+export interface OwnershipTransferInitiatedEvent {
+  /** Previous owner at time of initiation */
+  previousOwner: string;
+  /** Pending owner address (new_owner) */
+  pendingOwner: string;
+  /** Ledger sequence for expiration (live_until_ledger) */
+  liveUntilLedger: number;
+  /** Transaction hash of the initiation */
+  txHash: string;
+  /** ISO8601 timestamp of the event */
+  timestamp: string;
+  /** Ledger sequence of the event */
+  blockHeight: number;
 }
 
 interface IndexerPageInfo {
@@ -47,6 +75,21 @@ interface IndexerHistoryResponse {
     accessControlEvents?: {
       nodes: IndexerHistoryEntry[];
       pageInfo: IndexerPageInfo;
+    };
+  };
+  errors?: Array<{
+    message: string;
+  }>;
+}
+
+/**
+ * Response type for ownership transfer queries
+ */
+interface IndexerOwnershipTransferResponse {
+  data?: {
+    accessControlEvents?: {
+      nodes: IndexerHistoryEntry[];
+      pageInfo?: IndexerPageInfo;
     };
   };
   errors?: Array<{
@@ -434,6 +477,203 @@ export class StellarIndexerClient {
       );
       throw error;
     }
+  }
+
+  /**
+   * Query the latest pending ownership transfer for a contract
+   *
+   * Queries the indexer for `OWNERSHIP_TRANSFER_INITIATED` events and checks if
+   * a corresponding `OWNERSHIP_TRANSFER_COMPLETED` event exists after the initiation.
+   * If no completion event exists, returns the pending transfer details.
+   *
+   * @param contractAddress The contract address to query
+   * @returns Promise resolving to pending transfer info, or null if no pending transfer
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
+   *
+   * @example
+   * ```typescript
+   * const pending = await client.queryPendingOwnershipTransfer('CABC...XYZ');
+   * if (pending) {
+   *   console.log(`Pending owner: ${pending.pendingOwner}`);
+   *   console.log(`Expires at ledger: ${pending.liveUntilLedger}`);
+   * }
+   * ```
+   */
+  async queryPendingOwnershipTransfer(
+    contractAddress: string
+  ): Promise<OwnershipTransferInitiatedEvent | null> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
+    }
+
+    logger.info(LOG_SYSTEM, `Querying pending ownership transfer for ${contractAddress}`);
+
+    // Step 1: Query latest OWNERSHIP_TRANSFER_INITIATED event
+    const initiationQuery = this.buildOwnershipTransferInitiatedQuery();
+    const initiationVariables = { contract: contractAddress };
+
+    try {
+      const initiationResponse = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: initiationQuery, variables: initiationVariables }),
+      });
+
+      if (!initiationResponse.ok) {
+        throw new OperationFailed(
+          `Indexer query failed with status ${initiationResponse.status}`,
+          contractAddress,
+          'queryPendingOwnershipTransfer'
+        );
+      }
+
+      const initiationResult =
+        (await initiationResponse.json()) as IndexerOwnershipTransferResponse;
+
+      if (initiationResult.errors && initiationResult.errors.length > 0) {
+        const errorMessages = initiationResult.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'queryPendingOwnershipTransfer'
+        );
+      }
+
+      const initiatedNodes = initiationResult.data?.accessControlEvents?.nodes;
+      if (!initiatedNodes || initiatedNodes.length === 0) {
+        logger.debug(LOG_SYSTEM, `No ownership transfer initiated for ${contractAddress}`);
+        return null;
+      }
+
+      const latestInitiation = initiatedNodes[0];
+
+      // Step 2: Check if a completion event exists after the initiation
+      const completionQuery = this.buildOwnershipTransferCompletedQuery();
+      const completionVariables = {
+        contract: contractAddress,
+        afterTimestamp: latestInitiation.timestamp,
+      };
+
+      const completionResponse = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: completionQuery, variables: completionVariables }),
+      });
+
+      if (!completionResponse.ok) {
+        throw new OperationFailed(
+          `Indexer completion query failed with status ${completionResponse.status}`,
+          contractAddress,
+          'queryPendingOwnershipTransfer'
+        );
+      }
+
+      const completionResult =
+        (await completionResponse.json()) as IndexerOwnershipTransferResponse;
+
+      const completedNodes = completionResult.data?.accessControlEvents?.nodes;
+      if (completedNodes && completedNodes.length > 0) {
+        // Transfer was completed after initiation - no pending transfer
+        logger.debug(LOG_SYSTEM, `Ownership transfer was completed for ${contractAddress}`);
+        return null;
+      }
+
+      // No completion - return pending transfer info
+      logger.info(
+        LOG_SYSTEM,
+        `Found pending ownership transfer for ${contractAddress}: ${latestInitiation.account}`
+      );
+
+      return {
+        previousOwner: latestInitiation.previousOwner || '',
+        pendingOwner: latestInitiation.account,
+        liveUntilLedger: latestInitiation.liveUntilLedger || 0,
+        txHash: latestInitiation.txHash,
+        timestamp: latestInitiation.timestamp,
+        blockHeight: parseInt(latestInitiation.blockHeight, 10),
+      };
+    } catch (error) {
+      if (error instanceof IndexerUnavailable || error instanceof OperationFailed) {
+        throw error;
+      }
+      logger.error(
+        LOG_SYSTEM,
+        `Failed to query pending ownership transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw new OperationFailed(
+        `Failed to query pending ownership transfer: ${(error as Error).message}`,
+        contractAddress,
+        'queryPendingOwnershipTransfer'
+      );
+    }
+  }
+
+  /**
+   * Build GraphQL query for OWNERSHIP_TRANSFER_INITIATED events
+   */
+  private buildOwnershipTransferInitiatedQuery(): string {
+    return `
+      query GetOwnershipTransferInitiated($contract: String!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            type: { equalTo: OWNERSHIP_TRANSFER_INITIATED }
+          }
+          orderBy: TIMESTAMP_DESC
+          first: 1
+        ) {
+          nodes {
+            id
+            account
+            previousOwner
+            liveUntilLedger
+            txHash
+            timestamp
+            blockHeight
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Build GraphQL query for OWNERSHIP_TRANSFER_COMPLETED events after a given timestamp
+   */
+  private buildOwnershipTransferCompletedQuery(): string {
+    return `
+      query GetOwnershipTransferCompleted($contract: String!, $afterTimestamp: Datetime!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            type: { equalTo: OWNERSHIP_TRANSFER_COMPLETED }
+            timestamp: { greaterThan: $afterTimestamp }
+          }
+          orderBy: TIMESTAMP_DESC
+          first: 1
+        ) {
+          nodes {
+            id
+            txHash
+            timestamp
+          }
+        }
+      }
+    `;
   }
 
   /**

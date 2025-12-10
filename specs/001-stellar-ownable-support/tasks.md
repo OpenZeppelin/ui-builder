@@ -20,11 +20,11 @@
 
 **Purpose**: Type definitions and project structure for two-step Ownable support
 
-- [ ] T001 [P] Extend `OwnershipInfo` interface with `state` and `pendingTransfer` fields in `packages/types/src/adapters/access-control.ts`
-- [ ] T002 [P] Add `PendingOwnershipTransfer` interface in `packages/types/src/adapters/access-control.ts`
-- [ ] T003 [P] Add `OwnershipState` type (`'owned' | 'pending' | 'expired' | 'renounced'`) in `packages/types/src/adapters/access-control.ts`
-- [ ] T004 [P] Extend `AccessControlCapabilities` with `hasTwoStepOwnable` flag in `packages/types/src/adapters/access-control.ts`
-- [ ] T005 Re-export new types from `packages/types/src/adapters/index.ts`
+- [x] T001 [P] Extend `OwnershipInfo` interface with `state` and `pendingTransfer` fields in `packages/types/src/adapters/access-control.ts`
+- [x] T002 [P] Add `PendingOwnershipTransfer` interface in `packages/types/src/adapters/access-control.ts`
+- [x] T003 [P] Add `OwnershipState` type (`'owned' | 'pending' | 'expired' | 'renounced'`) in `packages/types/src/adapters/access-control.ts`
+- [x] T004 [P] Extend `AccessControlCapabilities` with `hasTwoStepOwnable` flag in `packages/types/src/adapters/access-control.ts`
+- [x] T005 Re-export new types from `packages/types/src/adapters/index.ts`
 
 ---
 
@@ -36,18 +36,18 @@
 
 ### Tests for Foundational
 
-- [ ] T006 [P] Create test file `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts` with test structure
-- [ ] T007 [P] Write failing test for `getCurrentLedger()` returning ledger sequence number
-- [ ] T008 [P] Write failing test for `OWNERSHIP_TRANSFER_INITIATED` event parsing in indexer
+- [x] T006 [P] Create test file `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts` with test structure
+- [x] T007 [P] Write failing test for `getCurrentLedger()` returning ledger sequence number
+- [x] T008 [P] Write failing test for `OWNERSHIP_TRANSFER_INITIATED` event parsing in indexer
 
 ### Implementation for Foundational
 
-- [ ] T009 [P] Add `getCurrentLedger()` method in `packages/adapter-stellar/src/access-control/onchain-reader.ts` using Soroban RPC `getLatestLedger`
-- [ ] T010 [P] Add `OWNERSHIP_TRANSFER_INITIATED` event type to indexer client in `packages/adapter-stellar/src/access-control/indexer-client.ts`
-- [ ] T011 [P] Add `OwnershipTransferInitiatedEvent` interface in `packages/adapter-stellar/src/access-control/indexer-client.ts`
-- [ ] T012 Add `queryPendingOwnershipTransfer()` method in `packages/adapter-stellar/src/access-control/indexer-client.ts`
-- [ ] T013 [P] Add expiration validation helper `validateExpirationLedger()` in `packages/adapter-stellar/src/access-control/validation.ts`
-- [ ] T014 Verify tests from T007-T008 now pass
+- [x] T009 [P] Add `getCurrentLedger()` method in `packages/adapter-stellar/src/access-control/onchain-reader.ts` using Soroban RPC `getLatestLedger`
+- [x] T010 [P] Add `OWNERSHIP_TRANSFER_INITIATED` event type to indexer client in `packages/adapter-stellar/src/access-control/indexer-client.ts`
+- [x] T011 [P] Add `OwnershipTransferInitiatedEvent` interface in `packages/adapter-stellar/src/access-control/indexer-client.ts`
+- [x] T012 Add `queryPendingOwnershipTransfer()` method in `packages/adapter-stellar/src/access-control/indexer-client.ts`
+- [x] T013 [P] Add expiration validation helper `validateExpirationLedger()` in `packages/adapter-stellar/src/access-control/validation.ts`
+- [x] T014 Verify tests from T007-T008 now pass
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 

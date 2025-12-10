@@ -5,6 +5,8 @@
  * using on-chain queries. Supports both Ownable and AccessControl patterns.
  */
 
+import { rpc as StellarRpc } from '@stellar/stellar-sdk';
+
 import type {
   ContractSchema,
   OwnershipInfo,
@@ -374,5 +376,45 @@ export async function getAdmin(
   } catch (error) {
     logger.error('getAdmin', 'Failed to read admin:', error);
     return null;
+  }
+}
+
+/**
+ * Gets the current ledger sequence number from the Soroban RPC
+ *
+ * Used for two-step Ownable contracts to:
+ * - Calculate appropriate expiration ledgers for ownership transfers
+ * - Validate expiration ledgers before submitting transactions
+ * - Determine if pending ownership transfers have expired
+ *
+ * @param networkConfig The network configuration containing the Soroban RPC URL
+ * @returns Promise resolving to the current ledger sequence number
+ * @throws OperationFailed if the RPC call fails
+ *
+ * @example
+ * ```typescript
+ * const currentLedger = await getCurrentLedger(networkConfig);
+ * // Set expiration to ~1 hour from now (~720 ledgers at 5s/ledger)
+ * const expirationLedger = currentLedger + 720;
+ * ```
+ */
+export async function getCurrentLedger(networkConfig: StellarNetworkConfig): Promise<number> {
+  logger.info('getCurrentLedger', `Fetching current ledger from ${networkConfig.sorobanRpcUrl}`);
+
+  try {
+    const server = new StellarRpc.Server(networkConfig.sorobanRpcUrl);
+    const latestLedger = await server.getLatestLedger();
+
+    logger.debug('getCurrentLedger', `Current ledger: ${latestLedger.sequence}`);
+
+    return latestLedger.sequence;
+  } catch (error) {
+    logger.error('getCurrentLedger', 'Failed to fetch current ledger:', error);
+    throw new OperationFailed(
+      `Failed to get current ledger: ${(error as Error).message}`,
+      networkConfig.sorobanRpcUrl,
+      'getCurrentLedger',
+      error as Error
+    );
   }
 }

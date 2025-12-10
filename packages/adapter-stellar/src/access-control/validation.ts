@@ -192,3 +192,53 @@ export function validateRoleIds(roleIds: string[], paramName = 'roleIds'): strin
   // Deduplicate and return
   return [...new Set(roleIds.map((r) => r.trim()))];
 }
+
+/**
+ * Result of expiration ledger validation
+ */
+export interface ExpirationValidationResult {
+  /** Whether the expiration ledger is valid */
+  valid: boolean;
+  /** The current ledger sequence (for reference) */
+  currentLedger: number;
+  /** Error message if validation failed */
+  error?: string;
+}
+
+/**
+ * Validates an expiration ledger against the current ledger sequence
+ *
+ * For two-step Ownable contracts, the expiration ledger must be strictly greater
+ * than the current ledger (per FR-020: expirationLedger == currentLedger is invalid).
+ *
+ * @param expirationLedger The proposed expiration ledger sequence
+ * @param currentLedger The current ledger sequence number
+ * @returns Validation result with valid flag, currentLedger, and optional error message
+ *
+ * @example
+ * ```typescript
+ * const currentLedger = await getCurrentLedger(networkConfig);
+ * const result = validateExpirationLedger(expirationLedger, currentLedger);
+ * if (!result.valid) {
+ *   throw new ConfigurationInvalid(result.error, 'expirationLedger');
+ * }
+ * ```
+ */
+export function validateExpirationLedger(
+  expirationLedger: number,
+  currentLedger: number
+): ExpirationValidationResult {
+  // Per FR-020: expirationLedger must be strictly greater than currentLedger
+  if (expirationLedger <= currentLedger) {
+    return {
+      valid: false,
+      currentLedger,
+      error: `Expiration ledger ${expirationLedger} has already passed or equals current ledger. Current ledger is ${currentLedger}. Expiration must be strictly greater than current ledger.`,
+    };
+  }
+
+  return {
+    valid: true,
+    currentLedger,
+  };
+}
