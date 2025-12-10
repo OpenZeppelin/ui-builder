@@ -128,6 +128,7 @@ This package aims to decouple the builder application logic from the direct mana
 The `NetworkSwitchManager` component handles automatic wallet network switching when users select a different EVM network. It's a headless component (renders nothing) that manages the switch lifecycle.
 
 ```tsx
+import { useState } from 'react';
 import { NetworkSwitchManager } from '@openzeppelin/ui-builder-react-core';
 
 function MyApp() {
