@@ -25,8 +25,13 @@ export {
   type DerivedConnectStatus,
 } from './hooks/useDerivedConnectStatus';
 export { useDerivedDisconnect, type DerivedDisconnectStatus } from './hooks/useDerivedDisconnect';
+export { useWalletReconnectionHandler } from './hooks/useWalletReconnectionHandler';
 
 // UI Components
 export { WalletConnectionHeader } from './components/WalletConnectionHeader';
 export { WalletConnectionUI } from './components/WalletConnectionUI';
 export { WalletConnectionWithSettings } from './components/WalletConnectionWithSettings';
+export {
+  NetworkSwitchManager,
+  type NetworkSwitchManagerProps,
+} from './components/NetworkSwitchManager';

@@ -1,18 +1,20 @@
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import {
+  NetworkSwitchManager,
+  useWalletReconnectionHandler,
+} from '@openzeppelin/ui-builder-react-core';
 import { ContractStateWidget } from '@openzeppelin/ui-builder-renderer';
 import { Ecosystem } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import { STEP_INDICES } from './constants/stepIndices';
-import { useWalletReconnectionHandler } from './hooks/builder/useWalletReconnectionHandler';
-import { isTrimmedOnlyArtifacts } from './hooks/uiBuilderStore';
+import { isTrimmedOnlyArtifacts, uiBuilderStore } from './hooks/uiBuilderStore';
 import { ChainSelector } from './StepChainSelection/index';
 import { StepFormCustomization } from './StepFormCustomization/index';
 import { StepFunctionSelector } from './StepFunctionSelector/index';
 
-import { NetworkSwitchManager } from '../Common/Wallet/components/NetworkSwitchManager';
 import type { WizardStep } from '../Common/WizardLayout';
 import { WizardLayout } from '../Common/WizardLayout';
 import { HeroSection } from './HeroSection';
@@ -33,11 +35,17 @@ export function UIBuilder() {
   // Track network switching state
   const [isAdapterReady, setIsAdapterReady] = useState(false);
 
+  // Callback to re-queue network switch when wallet reconnects with wrong chain
+  const handleRequeueNetworkSwitch = useCallback((networkId: string) => {
+    uiBuilderStore.updateState(() => ({ networkToSwitchTo: networkId }));
+  }, []);
+
   // Handle wallet reconnection with mismatched chain
   useWalletReconnectionHandler(
     state.selectedNetworkConfigId,
     state.selectedAdapter,
-    state.networkToSwitchTo
+    state.networkToSwitchTo,
+    handleRequeueNetworkSwitch
   );
 
   // Store the latest selected network ID
