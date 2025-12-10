@@ -1,27 +1,42 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  useDerivedAccountStatus,
-  useDerivedSwitchChainStatus,
-} from '@openzeppelin/ui-builder-react-core';
 import { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
+
+import { useDerivedAccountStatus } from '../hooks/useDerivedAccountStatus';
+import { useDerivedSwitchChainStatus } from '../hooks/useDerivedSwitchChainStatus';
+
+/**
+ * Props for the NetworkSwitchManager component.
+ */
+export interface NetworkSwitchManagerProps {
+  /** The adapter instance for the target network */
+  adapter: ContractAdapter;
+  /** The network ID we want to switch to */
+  targetNetworkId: string;
+  /** Callback when network switch completes (success or error) */
+  onNetworkSwitchComplete?: () => void;
+}
 
 /**
  * Component that handles wallet network switching based on the selected network.
  *
- * This component is designed to be used in the UIBuilder itself rather than
- * in the general wallet UI to ensure it has direct access to the adapter.
+ * This component manages the lifecycle of network switching operations,
+ * coordinating between the wallet's current chain state and the target network.
+ * It's designed to be used in any application that needs seamless wallet network switching.
+ *
+ * Features:
+ * - Automatically initiates network switch when mounted with a target network
+ * - Handles EVM chain switching gracefully
+ * - No-ops for non-EVM networks that don't support chain switching
+ * - Tracks switch attempts to prevent duplicate operations
+ * - Provides completion callback for parent components to handle state cleanup
  */
-
-// Comments and local types referencing specific libraries (e.g., wagmi) should be avoided here.
-// This component should rely on the generic facade hooks provided by the adapter.
-
-export const NetworkSwitchManager: React.FC<{
-  adapter: ContractAdapter;
-  targetNetworkId: string;
-  onNetworkSwitchComplete?: () => void;
-}> = ({ adapter, targetNetworkId, onNetworkSwitchComplete }) => {
+export const NetworkSwitchManager: React.FC<NetworkSwitchManagerProps> = ({
+  adapter,
+  targetNetworkId,
+  onNetworkSwitchComplete,
+}) => {
   const isMountedRef = useRef(true);
   const [hasAttemptedSwitch, setHasAttemptedSwitch] = useState(false);
 
