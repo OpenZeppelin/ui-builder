@@ -167,6 +167,7 @@ function MyApp() {
 The `useWalletReconnectionHandler` hook detects when a wallet reconnects to a different chain than expected and invokes a callback to re-queue the network switch.
 
 ```tsx
+import { useCallback, useState } from 'react';
 import { useWalletReconnectionHandler } from '@openzeppelin/ui-builder-react-core';
 
 function MyApp() {
