@@ -35,34 +35,36 @@ interface IndexerHistoryEntry {
     | 'ROLE_GRANTED'
     | 'ROLE_REVOKED'
     | 'OWNERSHIP_TRANSFER_COMPLETED'
-    | 'OWNERSHIP_TRANSFER_INITIATED';
+    | 'OWNERSHIP_TRANSFER_STARTED';
   txHash: string;
   timestamp: string;
   blockHeight: string;
-  /** Previous owner at time of transfer initiation (for OWNERSHIP_TRANSFER_INITIATED) */
-  previousOwner?: string;
-  /** Ledger sequence by which transfer must be accepted (for OWNERSHIP_TRANSFER_INITIATED) */
-  liveUntilLedger?: number;
+  /** Ledger sequence of the event */
+  ledger?: string;
+  /** Admin/owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED) */
+  admin?: string;
 }
 
 /**
- * Ownership transfer initiation event from indexer
+ * Ownership Transfer Started Event
  *
- * Contains details about a pending two-step ownership transfer.
+ * Contains details about a pending two-step ownership transfer from the indexer.
+ *
+ * Note: The indexer does not store `live_until_ledger` expiration value.
+ * To determine if a pending transfer has expired, the caller must query
+ * the contract's on-chain state directly using `get_pending_owner()`.
  */
-export interface OwnershipTransferInitiatedEvent {
-  /** Previous owner at time of initiation */
+export interface OwnershipTransferStartedEvent {
+  /** Previous owner (admin) who initiated the transfer */
   previousOwner: string;
-  /** Pending owner address (new_owner) */
+  /** Pending owner address (account) - the new owner */
   pendingOwner: string;
-  /** Ledger sequence for expiration (live_until_ledger) */
-  liveUntilLedger: number;
   /** Transaction hash of the initiation */
   txHash: string;
   /** ISO8601 timestamp of the event */
   timestamp: string;
   /** Ledger sequence of the event */
-  blockHeight: number;
+  ledger: number;
 }
 
 interface IndexerPageInfo {
@@ -496,13 +498,13 @@ export class StellarIndexerClient {
    * const pending = await client.queryPendingOwnershipTransfer('CABC...XYZ');
    * if (pending) {
    *   console.log(`Pending owner: ${pending.pendingOwner}`);
-   *   console.log(`Expires at ledger: ${pending.liveUntilLedger}`);
+   *   console.log(`Transfer started at ledger: ${pending.ledger}`);
    * }
    * ```
    */
   async queryPendingOwnershipTransfer(
     contractAddress: string
-  ): Promise<OwnershipTransferInitiatedEvent | null> {
+  ): Promise<OwnershipTransferStartedEvent | null> {
     const isAvailable = await this.checkAvailability();
     if (!isAvailable) {
       throw new IndexerUnavailable(
@@ -523,8 +525,8 @@ export class StellarIndexerClient {
 
     logger.info(LOG_SYSTEM, `Querying pending ownership transfer for ${contractAddress}`);
 
-    // Step 1: Query latest OWNERSHIP_TRANSFER_INITIATED event
-    const initiationQuery = this.buildOwnershipTransferInitiatedQuery();
+    // Step 1: Query latest OWNERSHIP_TRANSFER_STARTED event
+    const initiationQuery = this.buildOwnershipTransferStartedQuery();
     const initiationVariables = { contract: contractAddress };
 
     try {
@@ -596,16 +598,15 @@ export class StellarIndexerClient {
       // No completion - return pending transfer info
       logger.info(
         LOG_SYSTEM,
-        `Found pending ownership transfer for ${contractAddress}: ${latestInitiation.account}`
+        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.account}`
       );
 
       return {
-        previousOwner: latestInitiation.previousOwner || '',
+        previousOwner: latestInitiation.admin || '',
         pendingOwner: latestInitiation.account,
-        liveUntilLedger: latestInitiation.liveUntilLedger || 0,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
-        blockHeight: parseInt(latestInitiation.blockHeight, 10),
+        ledger: parseInt(latestInitiation.ledger || latestInitiation.blockHeight, 10),
       };
     } catch (error) {
       if (error instanceof IndexerUnavailable || error instanceof OperationFailed) {
@@ -624,15 +625,25 @@ export class StellarIndexerClient {
   }
 
   /**
-   * Build GraphQL query for OWNERSHIP_TRANSFER_INITIATED events
+   * Build GraphQL query for OWNERSHIP_TRANSFER_STARTED events
+   *
+   * Note: The OpenZeppelin Stellar contract emits `ownership_transfer` event
+   * which is indexed as `OWNERSHIP_TRANSFER_STARTED`.
+   *
+   * Schema mapping:
+   * - `account`: pending new owner
+   * - `admin`: current owner who initiated the transfer
+   * - `ledger`: block height of the event
+   *
+   * Note: `live_until_ledger` is NOT stored in the indexer schema.
    */
-  private buildOwnershipTransferInitiatedQuery(): string {
+  private buildOwnershipTransferStartedQuery(): string {
     return `
-      query GetOwnershipTransferInitiated($contract: String!) {
+      query GetOwnershipTransferStarted($contract: String!) {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { equalTo: OWNERSHIP_TRANSFER_INITIATED }
+            type: { equalTo: OWNERSHIP_TRANSFER_STARTED }
           }
           orderBy: TIMESTAMP_DESC
           first: 1
@@ -640,11 +651,10 @@ export class StellarIndexerClient {
           nodes {
             id
             account
-            previousOwner
-            liveUntilLedger
+            admin
             txHash
             timestamp
-            blockHeight
+            ledger
           }
         }
       }

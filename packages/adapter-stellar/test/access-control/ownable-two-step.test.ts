@@ -131,7 +131,7 @@ describe('Two-Step Ownable Support', () => {
           ok: true,
           json: vi.fn().mockResolvedValue({ data: { __typename: 'Query' } }),
         })
-        // Second call - initiation event query
+        // Second call - initiation event query (using new schema)
         .mockResolvedValueOnce({
           ok: true,
           json: vi.fn().mockResolvedValue({
@@ -140,13 +140,12 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'test-event-1',
-                    type: 'OWNERSHIP_TRANSFER_INITIATED',
+                    type: 'OWNERSHIP_TRANSFER_STARTED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
-                    previousOwner: 'GOLDOWNER123456789ABCDEFGHIJK',
-                    liveUntilLedger: 12350000,
+                    admin: 'GOLDOWNER123456789ABCDEFGHIJK', // admin = previous owner
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    blockHeight: '12340000',
+                    ledger: '12340000', // Note: liveUntilLedger is NOT stored in indexer
                   },
                 ],
                 pageInfo: { hasNextPage: false },
@@ -174,7 +173,8 @@ describe('Two-Step Ownable Support', () => {
       expect(result).toBeDefined();
       expect(result?.pendingOwner).toBe('GNEWOWNER123456789ABCDEFGHIJK');
       expect(result?.previousOwner).toBe('GOLDOWNER123456789ABCDEFGHIJK');
-      expect(result?.liveUntilLedger).toBe(12350000);
+      expect(result?.ledger).toBe(12340000);
+      // Note: liveUntilLedger is NOT available from indexer - must query on-chain
     });
 
     it('should return null when no pending transfer exists', async () => {

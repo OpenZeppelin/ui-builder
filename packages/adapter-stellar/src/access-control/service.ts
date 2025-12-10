@@ -33,7 +33,13 @@ import {
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, StellarIndexerClient } from './indexer-client';
-import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
+import {
+  getAdmin,
+  getCurrentLedger,
+  readCurrentRoles,
+  readOwnership,
+  readPendingOwner,
+} from './onchain-reader';
 import {
   validateAccountAddress,
   validateAddress,
@@ -192,19 +198,169 @@ export class StellarAccessControlService implements AccessControlService {
   }
 
   /**
-   * Gets the current owner of an Ownable contract
+   * Gets the current owner and ownership state of an Ownable contract
+   *
+   * Retrieves the current owner via on-chain query, then checks for pending
+   * two-step transfers via indexer to determine the ownership state:
+   * - 'owned': Has owner, no pending transfer
+   * - 'pending': Has owner, pending transfer not yet expired
+   * - 'expired': Has owner, pending transfer has expired
+   * - 'renounced': No owner (null)
+   *
+   * Gracefully degrades when indexer is unavailable, returning basic ownership
+   * info with 'owned' state and logging a warning.
    *
    * @param contractAddress The contract address
-   * @returns Promise resolving to ownership information
+   * @returns Promise resolving to ownership information with state
    * @throws ConfigurationInvalid if the contract address is invalid
    */
   async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
     // Validate contract address
     validateContractAddress(contractAddress);
 
-    logger.info('StellarAccessControlService.getOwnership', `Reading owner for ${contractAddress}`);
+    // T025: INFO logging for ownership queries per NFR-004
+    logger.info(
+      'StellarAccessControlService.getOwnership',
+      `Reading ownership status for ${contractAddress}`
+    );
 
-    return readOwnership(contractAddress, this.networkConfig);
+    // T020: Call get_owner() for current owner
+    const basicOwnership = await readOwnership(contractAddress, this.networkConfig);
+
+    // T018/T023: Renounced state - owner is null
+    if (basicOwnership.owner === null) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has renounced ownership`
+      );
+      return {
+        owner: null,
+        state: 'renounced',
+      };
+    }
+
+    // T024/T019: Check indexer availability for pending transfer detection
+    const indexerAvailable = await this.indexerClient.checkAvailability();
+
+    if (!indexerAvailable) {
+      // T026: WARN logging for indexer unavailability per NFR-006
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Indexer unavailable for ${this.networkConfig.id}: pending transfer status cannot be determined`
+      );
+      // T024: Graceful degradation - return basic ownership with 'owned' state
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T021: Query indexer for pending transfer
+    let pendingTransfer;
+    try {
+      pendingTransfer = await this.indexerClient.queryPendingOwnershipTransfer(contractAddress);
+    } catch (error) {
+      // T026: Graceful degradation on indexer query error
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to query pending transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T015/T023: No pending transfer in indexer - state is 'owned'
+    if (!pendingTransfer) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has owner with no pending transfer`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // Indexer found a pending transfer event - now get expiration from on-chain
+    // The indexer doesn't store live_until_ledger, so we query get_pending_owner()
+    let onChainPending;
+    try {
+      onChainPending = await readPendingOwner(contractAddress, this.networkConfig);
+    } catch (error) {
+      // If on-chain query fails, use indexer data without expiration check
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to get on-chain pending owner: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    // If no on-chain pending owner, the transfer may have been completed or expired
+    if (!onChainPending) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has no on-chain pending owner (transfer may have completed or expired)`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T022: Get current ledger to check expiration
+    let currentLedger: number;
+    try {
+      currentLedger = await getCurrentLedger(this.networkConfig);
+    } catch (error) {
+      // Graceful degradation if ledger query fails
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to get current ledger: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Return owned state since we can't determine expiration
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T022/T023: Determine state based on expiration
+    // Per FR-020: expirationLedger must be > currentLedger, so >= means expired
+    const isExpired = currentLedger >= onChainPending.liveUntilLedger;
+
+    // Build pending transfer info for the response
+    const pendingTransferInfo = {
+      pendingOwner: onChainPending.pendingOwner,
+      expirationBlock: onChainPending.liveUntilLedger,
+      initiatedAt: pendingTransfer.timestamp,
+      initiatedTxId: pendingTransfer.txHash,
+      initiatedBlock: pendingTransfer.ledger,
+    };
+
+    if (isExpired) {
+      // T017/T023: Expired state
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has expired pending transfer (current: ${currentLedger}, expiration: ${onChainPending.liveUntilLedger})`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'expired',
+        pendingTransfer: pendingTransferInfo,
+      };
+    }
+
+    // T016/T023: Pending state
+    logger.debug(
+      'StellarAccessControlService.getOwnership',
+      `Contract ${contractAddress} has pending transfer to ${onChainPending.pendingOwner} (expires at ledger ${onChainPending.liveUntilLedger})`
+    );
+    return {
+      owner: basicOwnership.owner,
+      state: 'pending',
+      pendingTransfer: pendingTransferInfo,
+    };
   }
 
   /**

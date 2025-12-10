@@ -61,24 +61,40 @@
 
 ---
 
-### 4. OwnershipTransferEvent
+### 4. OwnershipTransferStartedEvent
 
-**Description**: Historical record of an ownership transfer initiation event.
+**Description**: Historical record of an ownership transfer initiation event from the indexer.
 
 **Location**: `packages/adapter-stellar/src/access-control/indexer-client.ts`
 
-| Field             | Type     | Required | Description                 |
-| ----------------- | -------- | -------- | --------------------------- |
-| `previousOwner`   | `string` | Yes      | Owner at time of initiation |
-| `newOwner`        | `string` | Yes      | Pending owner address       |
-| `liveUntilLedger` | `number` | Yes      | Expiration ledger sequence  |
-| `txHash`          | `string` | Yes      | Transaction hash            |
-| `timestamp`       | `string` | Yes      | ISO8601 timestamp           |
-| `blockHeight`     | `number` | Yes      | Ledger sequence of event    |
+| Field           | Type     | Required | Description                              |
+| --------------- | -------- | -------- | ---------------------------------------- |
+| `previousOwner` | `string` | Yes      | Owner (admin) who initiated the transfer |
+| `pendingOwner`  | `string` | Yes      | Pending owner address (account)          |
+| `txHash`        | `string` | Yes      | Transaction hash                         |
+| `timestamp`     | `string` | Yes      | ISO8601 timestamp                        |
+| `ledger`        | `number` | Yes      | Ledger sequence of event                 |
+
+**Note**: The indexer does NOT store `live_until_ledger` (expiration). To determine expiration, the service must query the contract's on-chain state via `get_pending_owner()`.
 
 ---
 
-### 5. AccessControlCapabilities (Extended)
+### 5. PendingOwnerInfo (On-Chain)
+
+**Description**: Pending owner information retrieved directly from the contract via `get_pending_owner()`.
+
+**Location**: `packages/adapter-stellar/src/access-control/onchain-reader.ts`
+
+| Field             | Type     | Required | Description                                        |
+| ----------------- | -------- | -------- | -------------------------------------------------- |
+| `pendingOwner`    | `string` | Yes      | Pending owner address                              |
+| `liveUntilLedger` | `number` | Yes      | Ledger sequence by which transfer must be accepted |
+
+**Note**: This is the only source for `liveUntilLedger` since the indexer does not store it.
+
+---
+
+### 6. AccessControlCapabilities (Extended)
 
 **Description**: Extended capabilities to indicate two-step Ownable support.
 
@@ -167,16 +183,22 @@
 ```
 1. Client calls getOwnership(contractAddress)
 2. Service calls get_owner() on contract → owner address
-3. Service checks indexer availability
-4. If available:
-   a. Query latest ownership_transfer event
-   b. Query ownership_transfer_completed after initiation
-   c. If no completion found:
+3. If owner is null → return 'renounced' state
+4. Service checks indexer availability
+5. If indexer available:
+   a. Query latest OWNERSHIP_TRANSFER_STARTED event
+   b. Query OWNERSHIP_TRANSFER_COMPLETED after initiation
+   c. If no completion found (pending transfer exists):
+      - Call get_pending_owner() on-chain to get expiration (liveUntilLedger)
       - Query current ledger
-      - Compare with live_until_ledger
+      - Compare current ledger with liveUntilLedger
       - Determine state (pending vs expired)
-5. Return OwnershipInfo with state and pending details
+6. If indexer unavailable:
+   - Return 'owned' state with warning (cannot determine pending status)
+7. Return OwnershipInfo with state and pending details
 ```
+
+**Key Insight**: The indexer only tells us IF a transfer was started. To determine WHEN it expires, we must query the contract directly via `get_pending_owner()` which returns `Option<(Address, u32)>` with the expiration ledger.
 
 ### Initiating Transfer
 

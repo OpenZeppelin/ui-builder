@@ -38,13 +38,14 @@
 
 - [x] T006 [P] Create test file `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts` with test structure
 - [x] T007 [P] Write failing test for `getCurrentLedger()` returning ledger sequence number
-- [x] T008 [P] Write failing test for `OWNERSHIP_TRANSFER_INITIATED` event parsing in indexer
+- [x] T008 [P] Write failing test for `OWNERSHIP_TRANSFER_STARTED` event parsing in indexer
 
 ### Implementation for Foundational
 
 - [x] T009 [P] Add `getCurrentLedger()` method in `packages/adapter-stellar/src/access-control/onchain-reader.ts` using Soroban RPC `getLatestLedger`
-- [x] T010 [P] Add `OWNERSHIP_TRANSFER_INITIATED` event type to indexer client in `packages/adapter-stellar/src/access-control/indexer-client.ts`
-- [x] T011 [P] Add `OwnershipTransferInitiatedEvent` interface in `packages/adapter-stellar/src/access-control/indexer-client.ts`
+- [x] T010 [P] Add `OWNERSHIP_TRANSFER_STARTED` event type to indexer client in `packages/adapter-stellar/src/access-control/indexer-client.ts`
+- [x] T011 [P] Add `OwnershipTransferStartedEvent` interface in `packages/adapter-stellar/src/access-control/indexer-client.ts` (note: does NOT include `liveUntilLedger` - must query on-chain)
+- [x] T011a [P] Add `readPendingOwner()` function in `packages/adapter-stellar/src/access-control/onchain-reader.ts` to query `get_pending_owner()` for expiration
 - [x] T012 Add `queryPendingOwnershipTransfer()` method in `packages/adapter-stellar/src/access-control/indexer-client.ts`
 - [x] T013 [P] Add expiration validation helper `validateExpirationLedger()` in `packages/adapter-stellar/src/access-control/validation.ts`
 - [x] T014 Verify tests from T007-T008 now pass
@@ -61,24 +62,24 @@
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Write failing test for `getOwnership()` returning basic owner (no pending) in `packages/adapter-stellar/test/access-control/service.test.ts`
-- [ ] T016 [P] [US1] Write failing test for `getOwnership()` returning pending state with pending owner and expiration
-- [ ] T017 [P] [US1] Write failing test for `getOwnership()` returning expired state when `currentLedger > expirationLedger`
-- [ ] T018 [P] [US1] Write failing test for `getOwnership()` returning renounced state when owner is null
-- [ ] T019 [P] [US1] Write failing test for graceful degradation when indexer unavailable (returns owner only with warning)
+- [x] T015 [P] [US1] Write failing test for `getOwnership()` returning basic owner (no pending) in `packages/adapter-stellar/test/access-control/service.test.ts`
+- [x] T016 [P] [US1] Write failing test for `getOwnership()` returning pending state with pending owner and expiration
+- [x] T017 [P] [US1] Write failing test for `getOwnership()` returning expired state when `currentLedger > expirationLedger`
+- [x] T018 [P] [US1] Write failing test for `getOwnership()` returning renounced state when owner is null
+- [x] T019 [P] [US1] Write failing test for graceful degradation when indexer unavailable (returns owner only with warning)
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Enhance `getOwnership()` method in `packages/adapter-stellar/src/access-control/service.ts` to call `get_owner()` for current owner
-- [ ] T021 [US1] Add indexer query for pending transfer in `getOwnership()` flow in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T022 [US1] Add expiration check logic comparing `live_until_ledger` with current ledger in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T023 [US1] Add state determination logic (owned/pending/expired/renounced) in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T024 [US1] Add graceful degradation for indexer unavailability in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T025 [US1] Add INFO logging for ownership queries per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T026 [US1] Add WARN logging for indexer unavailability per NFR-006 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T027 [US1] Verify tests T015-T019 now pass
+- [x] T020 [US1] Enhance `getOwnership()` method in `packages/adapter-stellar/src/access-control/service.ts` to call `get_owner()` for current owner
+- [x] T021 [US1] Add indexer query for pending transfer in `getOwnership()` flow in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T022 [US1] Add expiration check logic comparing `live_until_ledger` with current ledger in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T023 [US1] Add state determination logic (owned/pending/expired/renounced) in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T024 [US1] Add graceful degradation for indexer unavailability in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T025 [US1] Add INFO logging for ownership queries per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T026 [US1] Add WARN logging for indexer unavailability per NFR-006 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T027 [US1] Verify tests T015-T019 now pass
 
-**Checkpoint**: User Story 1 complete - ownership status viewing is fully functional and independently testable
+**Checkpoint**: User Story 1 complete - ownership status viewing is fully functional and independently testable ✅
 
 ---
 
@@ -312,3 +313,30 @@ With multiple developers after Foundational complete:
 - Each user story is independently testable at its checkpoint
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
+
+---
+
+## Implementation Notes (Post-Phase 3)
+
+### Indexer Schema Discovery (2025-12-10)
+
+During integration testing, we discovered the actual indexer schema differs from initial assumptions:
+
+**Event Types:**
+
+- Contract emits: `ownership_transfer` → Indexed as: `OWNERSHIP_TRANSFER_STARTED`
+- Contract emits: `ownership_transfer_completed` → Indexed as: `OWNERSHIP_TRANSFER_COMPLETED`
+
+**Schema Fields:**
+
+- `account` = pending new owner
+- `admin` = previous owner who initiated transfer
+- `ledger` = block height of event
+- ⚠️ `live_until_ledger` is **NOT stored** in the indexer
+
+**Architecture Decision:**
+Since the indexer doesn't store expiration, the service now:
+
+1. Uses indexer to detect IF a pending transfer exists
+2. Calls on-chain `get_pending_owner()` to get the actual expiration ledger
+3. Compares with current ledger to determine state (pending vs expired)

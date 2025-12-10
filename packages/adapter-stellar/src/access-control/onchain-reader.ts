@@ -103,6 +103,88 @@ export async function readOwnership(
 }
 
 /**
+ * Pending owner information from on-chain query
+ */
+export interface PendingOwnerInfo {
+  /** Pending owner address */
+  pendingOwner: string;
+  /** Ledger sequence by which transfer must be accepted */
+  liveUntilLedger: number;
+}
+
+/**
+ * Reads the pending owner from a two-step Ownable contract
+ *
+ * Calls `get_pending_owner()` which returns `Option<(Address, u32)>` where:
+ * - Address: the pending new owner
+ * - u32: the live_until_ledger (expiration)
+ *
+ * @param contractAddress The contract address
+ * @param networkConfig The network configuration
+ * @returns Pending owner info, or null if no pending transfer
+ */
+export async function readPendingOwner(
+  contractAddress: string,
+  networkConfig: StellarNetworkConfig
+): Promise<PendingOwnerInfo | null> {
+  logger.info('readPendingOwner', `Reading pending owner for contract ${contractAddress}`);
+
+  try {
+    const result = await queryAccessControlFunction(
+      contractAddress,
+      'get_pending_owner',
+      [],
+      networkConfig
+    );
+
+    // get_pending_owner returns Option<(Address, u32)>
+    // When there's no pending owner, returns None (null/undefined)
+    if (result === undefined || result === null) {
+      logger.debug('readPendingOwner', 'No pending owner');
+      return null;
+    }
+
+    // Result should be a tuple [Address, u32]
+    if (Array.isArray(result) && result.length === 2) {
+      const pendingOwner = typeof result[0] === 'string' ? result[0] : String(result[0]);
+      const liveUntilLedger =
+        typeof result[1] === 'number' ? result[1] : parseInt(String(result[1]), 10);
+
+      logger.debug(
+        'readPendingOwner',
+        `Pending owner: ${pendingOwner}, expires at ledger: ${liveUntilLedger}`
+      );
+
+      return { pendingOwner, liveUntilLedger };
+    }
+
+    // Handle case where result is an object with named fields
+    if (typeof result === 'object' && result !== null) {
+      const obj = result as Record<string, unknown>;
+      const pendingOwner = obj.pendingOwner || obj[0];
+      const liveUntilLedger = obj.liveUntilLedger || obj[1];
+
+      if (pendingOwner !== undefined && liveUntilLedger !== undefined) {
+        return {
+          pendingOwner: String(pendingOwner),
+          liveUntilLedger: Number(liveUntilLedger),
+        };
+      }
+    }
+
+    logger.warn('readPendingOwner', `Unexpected result format: ${JSON.stringify(result)}`);
+    return null;
+  } catch (error) {
+    // Contract may not support two-step ownership - this is not an error
+    logger.debug(
+      'readPendingOwner',
+      `get_pending_owner not available: ${(error as Error).message}`
+    );
+    return null;
+  }
+}
+
+/**
  * Checks if an account has a specific role
  *
  * @param contractAddress The contract address

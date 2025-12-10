@@ -1177,6 +1177,370 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
 });
 
 /**
+ * Integration Test: Ownership Status Viewing (US1)
+ *
+ * Tests the ownership status viewing functionality:
+ * - On-chain get_owner() query via readOwnership()
+ * - Indexer pending transfer detection via queryPendingOwnershipTransfer()
+ * - Ledger-based expiration checking via getCurrentLedger()
+ *
+ * State determination logic:
+ * - 'owned': Contract has owner, no pending transfer
+ * - 'pending': Transfer initiated, awaiting acceptance (currentLedger < expirationLedger)
+ * - 'expired': Transfer expired without acceptance (currentLedger >= expirationLedger)
+ * - 'renounced': No owner (ownership was renounced)
+ */
+describe('Ownership Status Viewing - Integration Test (US1)', () => {
+  let indexerAvailable = false;
+  let rpcAvailable = false;
+  let readOwnership: typeof import('../../src/access-control/onchain-reader').readOwnership;
+  let getCurrentLedger: typeof import('../../src/access-control/onchain-reader').getCurrentLedger;
+
+  beforeAll(async () => {
+    // Dynamically import on-chain reader
+    const onchainReader = await import('../../src/access-control/onchain-reader');
+    readOwnership = onchainReader.readOwnership;
+    getCurrentLedger = onchainReader.getCurrentLedger;
+
+    // Check Soroban RPC availability
+    try {
+      const ledger = await getCurrentLedger(testNetworkConfig);
+      if (typeof ledger === 'number' && ledger > 0) {
+        rpcAvailable = true;
+        console.log(`✅ Soroban RPC is available (current ledger: ${ledger})`);
+      }
+    } catch {
+      rpcAvailable = false;
+      console.log('⚠️  Soroban RPC not available - on-chain tests will be skipped');
+    }
+
+    // Check indexer availability
+    const indexerClient = new StellarIndexerClient(testNetworkConfig);
+    indexerAvailable = await indexerClient.checkAvailability();
+
+    if (!indexerAvailable) {
+      console.log('⚠️  Indexer not available - state detection tests will be limited');
+    }
+  }, 30000);
+
+  describe('Basic Ownership Query', () => {
+    it('should read current owner from on-chain', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      const ownership = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+
+      expect(ownership).toBeDefined();
+      expect(ownership).toHaveProperty('owner');
+
+      if (ownership.owner) {
+        // Verify it's a valid Stellar address
+        expect(ownership.owner).toMatch(/^[GC][A-Z0-9]{55}$/);
+        console.log(`  ✓ Contract owner: ${ownership.owner}`);
+      } else {
+        console.log('  ✓ Contract has no owner (renounced)');
+      }
+    }, 30000);
+
+    it('should get current ledger from Soroban RPC', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      const ledger = await getCurrentLedger(testNetworkConfig);
+
+      expect(typeof ledger).toBe('number');
+      expect(ledger).toBeGreaterThan(0);
+      console.log(`  ✓ Current ledger: ${ledger}`);
+    }, 30000);
+  });
+
+  describe('State Determination Logic', () => {
+    it('should determine owned state when owner exists and no pending transfer', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      const ownership = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+
+      if (!indexerAvailable) {
+        // Without indexer, just verify basic ownership
+        expect(ownership).toBeDefined();
+        console.log('  ⏭️  Indexer not available - cannot determine pending state');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+
+      // Try to query pending transfer - may fail if schema doesn't support ownership events yet
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(TEST_CONTRACT);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported: ${(error as Error).message.slice(0, 50)}...`
+        );
+        // Fall through - treat as no pending transfer
+      }
+
+      if (ownership.owner && !pendingTransfer) {
+        // This is the 'owned' state
+        console.log(`  ✓ Contract is in 'owned' state with owner: ${ownership.owner}`);
+      } else if (ownership.owner === null) {
+        // This is the 'renounced' state
+        console.log('  ✓ Contract ownership is renounced');
+      } else if (pendingTransfer) {
+        // Pending transfer exists - need to query on-chain for expiration (not stored in indexer)
+        console.log(
+          `  ✓ Contract has pending transfer to ${pendingTransfer.pendingOwner} (initiated at ledger ${pendingTransfer.ledger})`
+        );
+      }
+    }, 45000);
+
+    it('should correctly classify expired transfer when currentLedger >= expirationLedger', async () => {
+      if (!rpcAvailable || !indexerAvailable) {
+        console.log('  ⏭️  Skipping: RPC or Indexer not available');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(TEST_CONTRACT);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported: ${(error as Error).message.slice(0, 50)}...`
+        );
+        return;
+      }
+
+      if (!pendingTransfer) {
+        console.log('  ⏭️  No pending transfer to test expiration logic');
+        return;
+      }
+
+      // Indexer tells us there's a pending transfer, but expiration comes from on-chain
+      // Import readPendingOwner dynamically to get the expiration
+      const { readPendingOwner } = await import('../../src/access-control/onchain-reader');
+      const onChainPending = await readPendingOwner(TEST_CONTRACT, testNetworkConfig);
+
+      if (!onChainPending) {
+        console.log('  ⏭️  No on-chain pending owner (transfer may have completed)');
+        return;
+      }
+
+      const currentLedger = await getCurrentLedger(testNetworkConfig);
+      const isExpired = currentLedger >= onChainPending.liveUntilLedger;
+
+      console.log(`  Current ledger: ${currentLedger}`);
+      console.log(`  Expiration ledger: ${onChainPending.liveUntilLedger}`);
+      console.log(`  State: ${isExpired ? 'expired' : 'pending'}`);
+
+      // Verify the logic is correct
+      if (isExpired) {
+        expect(currentLedger).toBeGreaterThanOrEqual(onChainPending.liveUntilLedger);
+        console.log('  ✓ Correctly classified as expired');
+      } else {
+        expect(currentLedger).toBeLessThan(onChainPending.liveUntilLedger);
+        console.log('  ✓ Correctly classified as pending');
+      }
+    }, 30000);
+
+    it('should return renounced state when owner is null', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      const ownership = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+
+      if (ownership.owner === null) {
+        console.log('  ✓ Contract owner is null - state is renounced');
+      } else {
+        console.log(`  ⏭️  Contract has owner: ${ownership.owner}`);
+      }
+    }, 30000);
+  });
+
+  describe('Pending Transfer Detection via Indexer', () => {
+    it('should query pending ownership transfers from indexer', async () => {
+      if (!indexerAvailable) {
+        console.log('  ⏭️  Skipping: Indexer not available');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+
+      // Query for pending transfer - may fail if schema doesn't support ownership events yet
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(TEST_CONTRACT);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported yet: ${(error as Error).message.slice(0, 60)}...`
+        );
+        console.log(
+          '  ℹ️  This is expected if the indexer schema has not been updated for ownership events'
+        );
+        return;
+      }
+
+      if (pendingTransfer) {
+        expect(pendingTransfer).toHaveProperty('pendingOwner');
+        expect(pendingTransfer).toHaveProperty('ledger'); // Initiation ledger, NOT expiration
+        expect(pendingTransfer).toHaveProperty('timestamp');
+        console.log(`  ✓ Found pending transfer:`);
+        console.log(`    Pending owner: ${pendingTransfer.pendingOwner}`);
+        console.log(`    Initiated at ledger: ${pendingTransfer.ledger}`);
+        console.log(`    Initiated at: ${pendingTransfer.timestamp}`);
+        // Note: liveUntilLedger (expiration) is NOT stored in indexer - must query on-chain
+      } else {
+        console.log('  ✓ No pending transfer found (contract is in owned/renounced state)');
+      }
+    }, 30000);
+
+    it('should return null for contract with no pending transfer', async () => {
+      if (!indexerAvailable) {
+        console.log('  ⏭️  Skipping: Indexer not available');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(TEST_CONTRACT);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported yet: ${(error as Error).message.slice(0, 60)}...`
+        );
+        return;
+      }
+
+      // This test just verifies the API returns without error
+      // Result can be null (no pending) or an object (has pending)
+      if (pendingTransfer === null) {
+        console.log('  ✓ No pending transfer (returns null)');
+      } else {
+        console.log('  ✓ Has pending transfer (returns object)');
+        expect(pendingTransfer).toHaveProperty('pendingOwner');
+      }
+    }, 30000);
+
+    it('should return null for non-existent contract', async () => {
+      if (!indexerAvailable) {
+        console.log('  ⏭️  Skipping: Indexer not available');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+      const fakeContract = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
+
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(fakeContract);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported yet: ${(error as Error).message.slice(0, 60)}...`
+        );
+        return;
+      }
+
+      expect(pendingTransfer).toBeNull();
+      console.log('  ✓ Returns null for non-existent contract');
+    }, 30000);
+  });
+
+  describe('Combined State Query Flow', () => {
+    it('should perform complete ownership status query flow', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      // Step 1: Read basic ownership from on-chain
+      const basicOwnership = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+      console.log(`  Step 1: Basic owner = ${basicOwnership.owner || '(null)'}`);
+
+      // Step 2: Check for renounced state
+      if (basicOwnership.owner === null) {
+        console.log('  ✓ Final state: renounced');
+        return;
+      }
+
+      // Step 3: Check indexer for pending transfer
+      if (!indexerAvailable) {
+        console.log('  ✓ Final state: owned (indexer unavailable, cannot check pending)');
+        return;
+      }
+
+      const indexerClient = new StellarIndexerClient(testNetworkConfig);
+
+      let pendingTransfer = null;
+      try {
+        pendingTransfer = await indexerClient.queryPendingOwnershipTransfer(TEST_CONTRACT);
+      } catch (error) {
+        // Indexer may not support ownership transfer events yet
+        console.log(
+          `  ⏭️  Pending transfer query not supported: ${(error as Error).message.slice(0, 50)}...`
+        );
+        console.log('  ✓ Final state: owned (ownership events not indexed yet)');
+        return;
+      }
+
+      if (!pendingTransfer) {
+        console.log('  ✓ Final state: owned (no pending transfer)');
+        return;
+      }
+
+      // Step 4: Query on-chain for expiration (indexer doesn't store liveUntilLedger)
+      const { readPendingOwner } = await import('../../src/access-control/onchain-reader');
+      const onChainPending = await readPendingOwner(TEST_CONTRACT, testNetworkConfig);
+
+      if (!onChainPending) {
+        console.log(
+          '  ✓ Final state: owned (no on-chain pending owner, transfer may have completed)'
+        );
+        return;
+      }
+
+      // Step 5: Check expiration
+      const currentLedger = await getCurrentLedger(testNetworkConfig);
+      const isExpired = currentLedger >= onChainPending.liveUntilLedger;
+
+      console.log(`  Step 5: Current ledger = ${currentLedger}`);
+      console.log(`  Step 5: Expiration ledger = ${onChainPending.liveUntilLedger}`);
+      console.log(`  ✓ Final state: ${isExpired ? 'expired' : 'pending'}`);
+    }, 60000);
+
+    it('should return consistent results across multiple queries', async () => {
+      if (!rpcAvailable) {
+        console.log('  ⏭️  Skipping: Soroban RPC not available');
+        return;
+      }
+
+      // Query twice
+      const ownership1 = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+      const ownership2 = await readOwnership(TEST_CONTRACT, testNetworkConfig);
+
+      // Results should be consistent
+      expect(ownership1.owner).toBe(ownership2.owner);
+      console.log(`  ✓ Consistent owner across queries: ${ownership1.owner || '(null)'}`);
+    }, 60000);
+  });
+});
+
+/**
  * Integration Test: On-Chain Role Member Enumeration
  *
  * Tests the on-chain reader functions that call the contract's

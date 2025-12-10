@@ -108,7 +108,7 @@ The system must automatically detect whether a Stellar contract implements the O
 - **FR-004**: System MUST fetch and display the current owner address by invoking the `get_owner` contract method.
 - **FR-005**: System MUST determine pending transfer status by querying `ownership_transfer` events from the indexer.
 - **FR-006**: System MUST determine transfer completion by querying `ownership_transfer_completed` events from the indexer.
-- **FR-007**: System MUST calculate transfer expiration by comparing the `live_until_ledger` value against the current ledger sequence.
+- **FR-007**: System MUST calculate transfer expiration by comparing the `live_until_ledger` value (from on-chain `get_pending_owner()`) against the current ledger sequence.
 - **FR-008**: System MUST present ownership state as one of: "Owned" (active owner, no pending transfer), "Pending" (transfer initiated, awaiting acceptance), or "Expired" (previous transfer attempt expired).
 
 **Ownership Transfer Operations**
@@ -123,9 +123,10 @@ The system must automatically detect whether a Stellar contract implements the O
 
 **Indexer Integration**
 
-- **FR-014**: System MUST query the indexer for `ownership_transfer` events to discover pending transfer initiation details.
-- **FR-015**: System MUST query the indexer for `ownership_transfer_completed` events to confirm ownership acceptance.
-- **FR-016**: System MUST extract `live_until_ledger` values from ownership transfer events for expiration checking.
+- **FR-014**: System MUST query the indexer for `OWNERSHIP_TRANSFER_STARTED` events to discover pending transfer initiation details.
+- **FR-015**: System MUST query the indexer for `OWNERSHIP_TRANSFER_COMPLETED` events to confirm ownership acceptance.
+- **FR-016**: System MUST query `live_until_ledger` via on-chain `get_pending_owner()` call (indexer does not store expiration values).
+- **FR-016a**: If indexer indicates a pending transfer but on-chain query returns no pending owner, treat as 'owned' state (transfer may have completed or expired).
 
 **Ledger Sequence**
 
@@ -198,15 +199,16 @@ The system must automatically detect whether a Stellar contract implements the O
 
 ## Assumptions
 
-- The OpenZeppelin Stellar Ownable module follows the documented interface with `get_owner`, `transfer_ownership(new_owner, live_until_ledger)`, and `accept_ownership()` methods.
-- The indexer is the authoritative source for historical ownership events since pending owner and expiration are not exposed via contract getters.
+- The OpenZeppelin Stellar Ownable module follows the documented interface with `get_owner`, `get_pending_owner`, `transfer_ownership(new_owner, live_until_ledger)`, and `accept_ownership()` methods.
+- The indexer provides historical event data for `OWNERSHIP_TRANSFER_STARTED` and `OWNERSHIP_TRANSFER_COMPLETED` events but does NOT store `live_until_ledger` expiration values.
+- The contract's `get_pending_owner()` method returns `Option<(Address, u32)>` where the u32 is the `live_until_ledger` expiration.
 - The Horizon API or Stellar RPC provides access to the current ledger sequence number for expiration calculations.
-- Ownership transfer events include sufficient metadata to reconstruct transfer state (new owner address, `live_until_ledger` value).
 - A contract can only have one pending transfer at a time; initiating a new transfer invalidates any previous pending transfer.
 - The adapter will use existing `queryViewFunction` and `invokeFunction` patterns for contract interactions.
 
 ## Dependencies
 
-- Stellar indexer service must support querying `ownership_transfer` and `ownership_transfer_completed` events.
+- Stellar indexer service must support querying `OWNERSHIP_TRANSFER_STARTED` and `OWNERSHIP_TRANSFER_COMPLETED` events.
 - Access to current ledger sequence via Horizon API or Stellar RPC.
+- On-chain `get_pending_owner()` method available on Ownable contracts to retrieve expiration ledger.
 - Existing adapter infrastructure for contract method invocation and event querying.

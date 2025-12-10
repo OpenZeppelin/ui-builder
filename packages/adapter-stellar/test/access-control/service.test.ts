@@ -40,6 +40,8 @@ vi.mock('../../src/access-control/onchain-reader', () => ({
   readOwnership: vi.fn(),
   readCurrentRoles: vi.fn(),
   getAdmin: vi.fn(),
+  getCurrentLedger: vi.fn(),
+  readPendingOwner: vi.fn(),
 }));
 
 // Mock the transaction sender
@@ -494,12 +496,18 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
   let service: StellarAccessControlService;
   let mockNetworkConfig: StellarNetworkConfig;
   let mockExecutionConfig: EoaExecutionConfig;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
 
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   const CURRENT_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
   const NEW_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     mockNetworkConfig = {
@@ -521,6 +529,19 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
       allowAny: false,
       specificAddress: CURRENT_OWNER,
     };
+
+    // Setup mock indexer client (unavailable by default for basic ownership tests)
+    mockIndexerClient = {
+      checkAvailability: vi.fn().mockResolvedValue(false),
+      queryPendingOwnershipTransfer: vi.fn().mockResolvedValue(null),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
 
     service = new StellarAccessControlService(mockNetworkConfig);
   });
@@ -705,6 +726,12 @@ describe('Access Control Service - Export Snapshot (T027)', () => {
   let service: StellarAccessControlService;
   let mockNetworkConfig: StellarNetworkConfig;
   let mockContractSchema: ContractSchema;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
 
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   const TEST_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
@@ -712,7 +739,7 @@ describe('Access Control Service - Export Snapshot (T027)', () => {
   const TEST_ROLE_ADMIN = 'admin';
   const TEST_ROLE_MINTER = 'minter';
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     mockNetworkConfig = {
@@ -758,6 +785,19 @@ describe('Access Control Service - Export Snapshot (T027)', () => {
         },
       ],
     };
+
+    // Setup mock indexer client (unavailable by default for basic snapshot tests)
+    mockIndexerClient = {
+      checkAvailability: vi.fn().mockResolvedValue(false),
+      queryPendingOwnershipTransfer: vi.fn().mockResolvedValue(null),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
 
     service = new StellarAccessControlService(mockNetworkConfig);
   });
@@ -1043,6 +1083,7 @@ describe('Access Control Service - Role Discovery', () => {
     checkAvailability: ReturnType<typeof vi.fn>;
     discoverRoleIds: ReturnType<typeof vi.fn>;
     queryHistory: ReturnType<typeof vi.fn>;
+    queryLatestGrants: ReturnType<typeof vi.fn>;
   };
 
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
@@ -1141,6 +1182,7 @@ describe('Access Control Service - Role Discovery', () => {
       checkAvailability: vi.fn(),
       discoverRoleIds: vi.fn(),
       queryHistory: vi.fn(),
+      queryLatestGrants: vi.fn(),
     };
 
     // Override the createIndexerClient to return our mock
@@ -1697,6 +1739,286 @@ describe('Access Control Service - Role Discovery', () => {
       expect(enrichedRoles).toHaveLength(1);
       expect(enrichedRoles[0].role.id).toBe(TEST_ROLE_ADMIN);
       expect(enrichedRoles[0].members).toEqual([]);
+    });
+  });
+});
+
+/**
+ * Unit tests for Two-Step Ownership State (Phase 3: US1)
+ *
+ * Tests: T015 - getOwnership() returning basic owner (no pending)
+ *        T016 - getOwnership() returning pending state with pending owner and expiration
+ *        T017 - getOwnership() returning expired state when currentLedger > expirationLedger
+ *        T018 - getOwnership() returning renounced state when owner is null
+ *        T019 - Graceful degradation when indexer unavailable
+ */
+describe('Access Control Service - Two-Step Ownership State (US1)', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const TEST_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+  const PENDING_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+      indexerUri: 'http://localhost:3000/graphql',
+    };
+
+    // Setup mock indexer client
+    mockIndexerClient = {
+      checkAvailability: vi.fn(),
+      queryPendingOwnershipTransfer: vi.fn(),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    // Override the createIndexerClient to return our mock
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('getOwnership() with State (T015-T019)', () => {
+    /**
+     * T015: getOwnership() returning basic owner (no pending)
+     * Verifies that when no pending transfer exists, state is 'owned'
+     */
+    it('T015: should return basic owner with state "owned" when no pending transfer exists', async () => {
+      // Mock: Contract has an owner, no pending transfer
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: Indexer available but no pending transfer
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue(null);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      expect(ownership.owner).toBe(TEST_OWNER);
+      expect(ownership.state).toBe('owned');
+      expect(ownership.pendingTransfer).toBeUndefined();
+    });
+
+    /**
+     * T016: getOwnership() returning pending state with pending owner and expiration
+     * Verifies that when a pending transfer exists and not expired, state is 'pending'
+     */
+    it('T016: should return pending state with pending owner and expiration when transfer is pending', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = 12350000; // Future ledger - not expired
+
+      // Mock: Contract has an owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: currentLedger - 100,
+      });
+
+      // Mock: On-chain readPendingOwner returns expiration (liveUntilLedger comes from on-chain)
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      vi.mocked(readPendingOwner).mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        liveUntilLedger: expirationLedger,
+      });
+
+      // Mock: getCurrentLedger returns a ledger before expiration
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      expect(ownership.owner).toBe(TEST_OWNER);
+      expect(ownership.state).toBe('pending');
+      expect(ownership.pendingTransfer).toBeDefined();
+      expect(ownership.pendingTransfer?.pendingOwner).toBe(PENDING_OWNER);
+      expect(ownership.pendingTransfer?.expirationBlock).toBe(expirationLedger);
+      expect(ownership.pendingTransfer?.initiatedAt).toBe('2025-01-15T10:00:00Z');
+    });
+
+    /**
+     * T017: getOwnership() returning expired state when currentLedger > expirationLedger
+     * Verifies that when pending transfer has expired, state is 'expired'
+     */
+    it('T017: should return expired state when pending transfer has expired', async () => {
+      const expirationLedger = 12340000;
+      const currentLedger = 12350000; // Current ledger is past expiration
+
+      // Mock: Contract has an owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: expirationLedger - 1000,
+      });
+
+      // Mock: On-chain readPendingOwner returns expiration (liveUntilLedger comes from on-chain)
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      vi.mocked(readPendingOwner).mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        liveUntilLedger: expirationLedger,
+      });
+
+      // Mock: getCurrentLedger returns a ledger after expiration
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      expect(ownership.owner).toBe(TEST_OWNER);
+      expect(ownership.state).toBe('expired');
+      expect(ownership.pendingTransfer).toBeDefined();
+      expect(ownership.pendingTransfer?.pendingOwner).toBe(PENDING_OWNER);
+    });
+
+    /**
+     * T018: getOwnership() returning renounced state when owner is null
+     * Verifies that when owner is null/renounced, state is 'renounced'
+     */
+    it('T018: should return renounced state when owner is null', async () => {
+      // Mock: Contract has no owner (renounced)
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: null,
+      });
+
+      // Mock: Indexer available but no pending transfer
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue(null);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      expect(ownership.owner).toBeNull();
+      expect(ownership.state).toBe('renounced');
+      expect(ownership.pendingTransfer).toBeUndefined();
+    });
+
+    /**
+     * T019: Graceful degradation when indexer unavailable
+     * Verifies that when indexer is unavailable, returns owner only with warning
+     */
+    it('T019: should return owner with "owned" state and warning when indexer unavailable (graceful degradation)', async () => {
+      // Mock: Contract has an owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: Indexer unavailable
+      mockIndexerClient.checkAvailability.mockResolvedValue(false);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      // Should still return basic ownership info
+      expect(ownership.owner).toBe(TEST_OWNER);
+      // State defaults to 'owned' when indexer unavailable (cannot determine pending state)
+      expect(ownership.state).toBe('owned');
+      // No pending transfer info without indexer
+      expect(ownership.pendingTransfer).toBeUndefined();
+    });
+
+    /**
+     * Additional test: Edge case - expiration at boundary
+     */
+    it('should handle boundary case where currentLedger equals expirationLedger (expired)', async () => {
+      const ledger = 12340000;
+
+      // Mock: Contract has an owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: ledger - 100,
+      });
+
+      // Mock: On-chain readPendingOwner returns expiration at boundary
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      vi.mocked(readPendingOwner).mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        liveUntilLedger: ledger,
+      });
+
+      // Mock: Current ledger equals expiration ledger
+      vi.mocked(getCurrentLedger).mockResolvedValue(ledger);
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      // At boundary, should be considered expired per FR-020
+      expect(ownership.state).toBe('expired');
+    });
+
+    /**
+     * Additional test: Renounced owner with pending transfer should still be renounced
+     */
+    it('should return renounced state even if pending transfer exists when owner is null', async () => {
+      // Mock: Contract has no owner (renounced)
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: null,
+      });
+
+      // Mock: Indexer shows old pending transfer (before renounce)
+      // Note: This won't be queried since renounced check happens first
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: 12340000,
+      });
+
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+
+      // Renounced takes precedence
+      expect(ownership.owner).toBeNull();
+      expect(ownership.state).toBe('renounced');
     });
   });
 });
