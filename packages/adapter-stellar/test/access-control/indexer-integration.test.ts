@@ -755,6 +755,14 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
 
       expect(filteredResult.items.length).toBeGreaterThan(0);
 
+      // Verify all returned events have timestamps within the specified range
+      for (const item of filteredResult.items) {
+        if (item.timestamp) {
+          expect(item.timestamp >= timestampFrom).toBe(true);
+          expect(item.timestamp <= timestampTo).toBe(true);
+        }
+      }
+
       console.log(
         `  ✅ Filtered ${filteredResult.items.length} event(s) in timestamp range (${timestampFrom} to ${timestampTo})`
       );
@@ -774,6 +782,13 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
       });
 
       expect(filteredResult.items.length).toBeGreaterThan(0);
+
+      // Verify all returned events have timestamps on or after timestampFrom
+      for (const item of filteredResult.items) {
+        if (item.timestamp) {
+          expect(item.timestamp >= timestampFrom).toBe(true);
+        }
+      }
 
       console.log(`  ✅ Filtered ${filteredResult.items.length} event(s) from ${timestampFrom}`);
     }, 15000);

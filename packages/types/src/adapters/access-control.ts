@@ -145,9 +145,9 @@ export interface HistoryQueryOptions {
   changeType?: HistoryChangeType;
   /** Filter by transaction ID (exact match) */
   txId?: string;
-  /** Filter by timestamp - return events on or after this time (format: '2025-12-05T10:34:00', no timezone) */
+  /** Filter by timestamp - return events on or after this time (format: 'YYYY-MM-DDTHH:mm:ss', no timezone) */
   timestampFrom?: string;
-  /** Filter by timestamp - return events on or before this time (format: '2025-12-05T10:34:00', no timezone) */
+  /** Filter by timestamp - return events on or before this time (format: 'YYYY-MM-DDTHH:mm:ss', no timezone) */
   timestampTo?: string;
   /** Filter by ledger/block number (exact match) */
   ledger?: number;
