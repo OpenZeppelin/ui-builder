@@ -93,22 +93,22 @@
 
 ### Tests for User Story 2
 
-- [ ] T028 [P] [US2] Write failing test for `transferOwnership()` with valid expiration in `packages/adapter-stellar/test/access-control/service.test.ts`
-- [ ] T029 [P] [US2] Write failing test for `transferOwnership()` rejection when expiration <= current ledger
-- [ ] T030 [P] [US2] Write failing test for `assembleTransferOwnershipAction()` with `live_until_ledger` parameter in `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts`
-- [ ] T031 [P] [US2] Write failing test for error message when non-owner attempts transfer
+- [x] T028 [P] [US2] Write failing test for `transferOwnership()` with valid expiration in `packages/adapter-stellar/test/access-control/service.test.ts`
+- [x] T029 [P] [US2] Write failing test for `transferOwnership()` rejection when expiration <= current ledger
+- [x] T030 [P] [US2] Write failing test for `assembleTransferOwnershipAction()` with `live_until_ledger` parameter in `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts`
+- [x] T031 [P] [US2] Write failing test for error message when non-owner attempts transfer
 
 ### Implementation for User Story 2
 
-- [ ] T032 [US2] Update `assembleTransferOwnershipAction()` to include `live_until_ledger` parameter in `packages/adapter-stellar/src/access-control/actions.ts`
-- [ ] T033 [US2] Update `transferOwnership()` method signature to require `expirationLedger` parameter in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T034 [US2] Add client-side expiration validation (must be > current ledger) in `transferOwnership()` in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T035 [US2] Add boundary condition check (expirationLedger == currentLedger is invalid) per FR-020 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T036 [US2] Add specific error messages per FR-018 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T037 [US2] Add INFO logging for transfer initiation per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T038 [US2] Verify tests T028-T031 now pass
+- [x] T032 [US2] Update `assembleTransferOwnershipAction()` to include `live_until_ledger` parameter in `packages/adapter-stellar/src/access-control/actions.ts`
+- [x] T033 [US2] Update `transferOwnership()` method signature to require `expirationLedger` parameter in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T034 [US2] Add client-side expiration validation (must be > current ledger) in `transferOwnership()` in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T035 [US2] Add boundary condition check (expirationLedger == currentLedger is invalid) per FR-020 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T036 [US2] Add specific error messages per FR-018 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T037 [US2] Add INFO logging for transfer initiation per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T038 [US2] Verify tests T028-T031 now pass
 
-**Checkpoint**: User Story 2 complete - ownership transfer initiation is fully functional
+**Checkpoint**: User Story 2 complete - ownership transfer initiation is fully functional ✅
 
 ---
 

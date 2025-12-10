@@ -44,6 +44,7 @@ import {
   validateAccountAddress,
   validateAddress,
   validateContractAddress,
+  validateExpirationLedger,
   validateRoleIds,
 } from './validation';
 
@@ -642,19 +643,25 @@ export class StellarAccessControlService implements AccessControlService {
   }
 
   /**
-   * Transfers ownership of the contract
+   * Transfers ownership of the contract using two-step transfer
+   *
+   * Initiates a two-step ownership transfer with an expiration ledger.
+   * The pending owner must call acceptOwnership() before the expiration
+   * ledger to complete the transfer.
    *
    * @param contractAddress The contract address
-   * @param newOwner The new owner address
+   * @param newOwner The new owner address (pending owner)
+   * @param expirationLedger The ledger sequence by which the transfer must be accepted
    * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result with transaction ID
-   * @throws ConfigurationInvalid if addresses are invalid
+   * @throws ConfigurationInvalid if addresses are invalid or expiration is invalid
    */
   async transferOwnership(
     contractAddress: string,
     newOwner: string,
+    expirationLedger: number,
     executionConfig: ExecutionConfig,
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
@@ -664,18 +671,35 @@ export class StellarAccessControlService implements AccessControlService {
     validateContractAddress(contractAddress);
     validateAddress(newOwner, 'newOwner');
 
+    // T037: INFO logging for transfer initiation per NFR-004
     logger.info(
       'StellarAccessControlService.transferOwnership',
-      `Transferring ownership to ${newOwner} on ${contractAddress}`
+      `Initiating two-step ownership transfer to ${newOwner} on ${contractAddress} with expiration at ledger ${expirationLedger}`
     );
 
-    // Assemble the transaction data
-    const txData = assembleTransferOwnershipAction(contractAddress, newOwner);
+    // T034/T035: Client-side expiration validation (must be > current ledger)
+    const currentLedger = await getCurrentLedger(this.networkConfig);
+    const validationResult = validateExpirationLedger(expirationLedger, currentLedger);
+
+    if (!validationResult.valid) {
+      // T036: Specific error messages per FR-018
+      throw new ConfigurationInvalid(
+        validationResult.error ||
+          `Expiration ledger ${expirationLedger} must be strictly greater than current ledger ${currentLedger}.`,
+        String(expirationLedger),
+        'expirationLedger'
+      );
+    }
+
+    // Assemble the transaction data with live_until_ledger parameter
+    const txData = assembleTransferOwnershipAction(contractAddress, newOwner, expirationLedger);
 
     logger.debug('StellarAccessControlService.transferOwnership', 'Transaction data prepared:', {
       contractAddress: txData.contractAddress,
       functionName: txData.functionName,
       argTypes: txData.argTypes,
+      expirationLedger,
+      currentLedger,
     });
 
     // Execute the transaction
@@ -689,7 +713,7 @@ export class StellarAccessControlService implements AccessControlService {
 
     logger.info(
       'StellarAccessControlService.transferOwnership',
-      `Ownership transferred. TxHash: ${result.txHash}`
+      `Ownership transfer initiated. TxHash: ${result.txHash}, pending owner: ${newOwner}, expires at ledger: ${expirationLedger}`
     );
 
     return { id: result.txHash };

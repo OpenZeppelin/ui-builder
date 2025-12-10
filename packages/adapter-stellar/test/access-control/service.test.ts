@@ -506,6 +506,7 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
   const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   const CURRENT_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
   const NEW_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+  const DEFAULT_EXPIRATION_LEDGER = 12350000;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -547,14 +548,18 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
   });
 
   describe('Action Assembly', () => {
-    it('should assemble transfer_ownership action with correct parameters', () => {
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+    it('should assemble transfer_ownership action with correct parameters (two-step)', () => {
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'transfer_ownership',
-        args: [NEW_OWNER],
-        argTypes: ['Address'],
+        args: [NEW_OWNER, DEFAULT_EXPIRATION_LEDGER],
+        argTypes: ['Address', 'u32'],
         argSchema: undefined,
         transactionOptions: {},
       });
@@ -567,6 +572,14 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
      * The mock transaction sender returns a successful tx hash.
      * The mock readOwnership simulates what would happen on-chain after the transaction.
      */
+
+    const CURRENT_LEDGER = 12340000;
+
+    beforeEach(async () => {
+      // Mock getCurrentLedger for all roundtrip tests
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(CURRENT_LEDGER);
+    });
 
     it('should transfer ownership and verify via getOwnership', async () => {
       // Setup: Mock current owner
@@ -583,8 +596,13 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
         owner: NEW_OWNER,
       });
 
-      // Action: Transfer ownership
-      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+      // Action: Transfer ownership with expiration
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER,
+        mockExecutionConfig
+      );
 
       // Verify: Transaction was submitted
       expect(result.id).toBeDefined();
@@ -611,8 +629,13 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
       let ownership = await service.getOwnership(TEST_CONTRACT);
       expect(ownership.owner).toBe(CURRENT_OWNER);
 
-      // Step 2: Transfer ownership
-      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+      // Step 2: Transfer ownership with expiration
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER,
+        mockExecutionConfig
+      );
       expect(result.id).toBeDefined();
       expect(result.id).toMatch(/^[A-Fa-f0-9]{64}$/);
 
@@ -638,10 +661,11 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
       let ownership = await service.getOwnership(TEST_CONTRACT);
       expect(ownership.owner).toBe(CURRENT_OWNER);
 
-      // Step 2: Transfer to contract address
+      // Step 2: Transfer to contract address with expiration
       const result = await service.transferOwnership(
         TEST_CONTRACT,
         newContractOwner,
+        DEFAULT_EXPIRATION_LEDGER,
         mockExecutionConfig
       );
 
@@ -666,8 +690,13 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
       let ownership = await service.getOwnership(TEST_CONTRACT);
       expect(ownership.owner).toBeNull();
 
-      // Step 2: Transfer ownership
-      const result = await service.transferOwnership(TEST_CONTRACT, NEW_OWNER, mockExecutionConfig);
+      // Step 2: Transfer ownership with expiration
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER,
+        mockExecutionConfig
+      );
 
       expect(result.id).toBeDefined();
 
@@ -678,44 +707,69 @@ describe('Access Control Service - Transfer Ownership (T024)', () => {
   });
 
   describe('Transaction Data Validation', () => {
-    it('should validate transfer_ownership transaction structure', () => {
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+    it('should validate transfer_ownership transaction structure (two-step)', () => {
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
       // Verify all required fields are present
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
       expect(txData.functionName).toBe('transfer_ownership');
-      expect(txData.args).toHaveLength(1);
-      expect(txData.argTypes).toHaveLength(1);
+      expect(txData.args).toHaveLength(2);
+      expect(txData.argTypes).toHaveLength(2);
       expect(txData.argTypes[0]).toBe('Address');
+      expect(txData.argTypes[1]).toBe('u32');
       expect(txData.args[0]).toBe(NEW_OWNER);
+      expect(txData.args[1]).toBe(DEFAULT_EXPIRATION_LEDGER);
     });
 
-    it('should handle new_owner parameter correctly', () => {
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+    it('should handle new_owner and expiration parameters correctly', () => {
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
-      // Verify new_owner is the first and only argument
+      // Verify arguments: new_owner first, live_until_ledger second
       expect(txData.args[0]).toBe(NEW_OWNER);
+      expect(txData.args[1]).toBe(DEFAULT_EXPIRATION_LEDGER);
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle long Stellar account addresses', () => {
       const longAddress = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, longAddress);
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        longAddress,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
       expect(txData.args[0]).toBe(longAddress);
+      expect(txData.args[1]).toBe(DEFAULT_EXPIRATION_LEDGER);
     });
 
     it('should handle contract addresses as new owner', () => {
       const contractAddr = 'CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2';
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, contractAddr);
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        contractAddr,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
       expect(txData.args[0]).toBe(contractAddr);
+      expect(txData.args[1]).toBe(DEFAULT_EXPIRATION_LEDGER);
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
     });
 
     it('should preserve contract address in transaction data', () => {
-      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER);
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        DEFAULT_EXPIRATION_LEDGER
+      );
 
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
     });
@@ -2019,6 +2073,258 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
       // Renounced takes precedence
       expect(ownership.owner).toBeNull();
       expect(ownership.state).toBe('renounced');
+    });
+  });
+});
+
+/**
+ * Unit tests for Two-Step Ownership Transfer (Phase 4: US2)
+ *
+ * Tests: T028 - transferOwnership() with valid expiration
+ *        T029 - transferOwnership() rejection when expiration <= current ledger
+ *        T031 - Error message when non-owner attempts transfer
+ */
+describe('Access Control Service - Two-Step Ownership Transfer (US2)', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockExecutionConfig: EoaExecutionConfig;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const CURRENT_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+  const NEW_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockExecutionConfig = {
+      method: 'eoa',
+      allowAny: false,
+      specificAddress: CURRENT_OWNER,
+    };
+
+    // Setup mock indexer client
+    mockIndexerClient = {
+      checkAvailability: vi.fn().mockResolvedValue(false),
+      queryPendingOwnershipTransfer: vi.fn().mockResolvedValue(null),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('transferOwnership() with expiration (T028)', () => {
+    /**
+     * T028: transferOwnership() with valid expiration
+     * Verifies that two-step transfer with valid expiration ledger initiates transfer correctly
+     */
+    it('T028: should initiate two-step ownership transfer with valid expiration ledger', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = currentLedger + 8640; // ~12 hours in ledgers
+
+      // Mock: getCurrentLedger returns current ledger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Mock: Current owner
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: CURRENT_OWNER,
+      });
+
+      // Action: Transfer ownership with expiration
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        expirationLedger,
+        mockExecutionConfig
+      );
+
+      // Verify: Transaction was submitted
+      expect(result.id).toBeDefined();
+      expect(result.id).toMatch(/^[A-Fa-f0-9]{64}$/); // Stellar transaction hash pattern
+    });
+
+    /**
+     * T028: Verify transfer data includes live_until_ledger
+     */
+    it('T028: should include live_until_ledger parameter in transfer transaction', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = currentLedger + 720; // ~1 hour
+
+      // Mock: getCurrentLedger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Import transaction sender to verify arguments
+      const { signAndBroadcastStellarTransaction } = await import('../../src/transaction/sender');
+
+      // Action: Transfer ownership with expiration
+      await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        expirationLedger,
+        mockExecutionConfig
+      );
+
+      // Verify: Transaction data includes live_until_ledger
+      expect(signAndBroadcastStellarTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contractAddress: TEST_CONTRACT,
+          functionName: 'transfer_ownership',
+          args: [NEW_OWNER, expirationLedger],
+          argTypes: ['Address', 'u32'],
+        }),
+        mockExecutionConfig,
+        mockNetworkConfig,
+        undefined,
+        undefined
+      );
+    });
+  });
+
+  describe('transferOwnership() expiration validation (T029)', () => {
+    /**
+     * T029: transferOwnership() rejection when expiration <= current ledger
+     * Verifies that transfers with expired or boundary expiration are rejected
+     */
+    it('T029: should reject transfer when expiration ledger has already passed', async () => {
+      const currentLedger = 12350000;
+      const expiredLedger = 12340000; // In the past
+
+      // Mock: getCurrentLedger returns current ledger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Action & Verify: Should reject with specific error message
+      await expect(
+        service.transferOwnership(TEST_CONTRACT, NEW_OWNER, expiredLedger, mockExecutionConfig)
+      ).rejects.toThrow(/expiration ledger/i);
+    });
+
+    /**
+     * T029 + T035: Boundary condition - expiration equals current ledger
+     */
+    it('T029/T035: should reject transfer when expiration ledger equals current ledger (boundary condition)', async () => {
+      const currentLedger = 12340000;
+      const boundaryLedger = currentLedger; // Equal to current - invalid per FR-020
+
+      // Mock: getCurrentLedger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Action & Verify: Should reject at boundary
+      await expect(
+        service.transferOwnership(TEST_CONTRACT, NEW_OWNER, boundaryLedger, mockExecutionConfig)
+      ).rejects.toThrow(/must be strictly greater/i);
+    });
+
+    /**
+     * T029: Verify specific error message format per FR-018
+     */
+    it('T029: should include current and expiration ledger values in error message (per FR-018)', async () => {
+      const currentLedger = 12350000;
+      const expiredLedger = 12340000;
+
+      // Mock: getCurrentLedger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Action & Verify: Error message should include both ledger values
+      await expect(
+        service.transferOwnership(TEST_CONTRACT, NEW_OWNER, expiredLedger, mockExecutionConfig)
+      ).rejects.toThrow(
+        new RegExp(`${expiredLedger}.*${currentLedger}|${currentLedger}.*${expiredLedger}`)
+      );
+    });
+  });
+
+  describe('transferOwnership() authorization (T031)', () => {
+    /**
+     * T031: Error message when non-owner attempts transfer
+     * Note: Authorization is enforced on-chain, but the error should be user-friendly
+     * This test verifies the client-side validation passes valid requests through
+     * The on-chain rejection is tested via integration tests
+     */
+    it('T031: should allow transfer initiation for valid addresses (authorization checked on-chain)', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = currentLedger + 720;
+
+      // Mock: getCurrentLedger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Action: Non-owner (different from contract owner) initiates transfer
+      // The actual authorization check happens on-chain
+      const nonOwnerConfig: EoaExecutionConfig = {
+        method: 'eoa',
+        allowAny: false,
+        specificAddress: NEW_OWNER, // Using a different address
+      };
+
+      // This should not throw client-side - authorization is on-chain
+      const result = await service.transferOwnership(
+        TEST_CONTRACT,
+        CURRENT_OWNER, // Transferring to original owner
+        expirationLedger,
+        nonOwnerConfig
+      );
+
+      // Transaction is submitted (on-chain will reject if not authorized)
+      expect(result.id).toBeDefined();
+    });
+  });
+
+  describe('transferOwnership() logging (T037)', () => {
+    /**
+     * T037: INFO logging for transfer initiation per NFR-004
+     */
+    it('T037: should log transfer initiation at INFO level', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = currentLedger + 720;
+      const { logger } = await import('@openzeppelin/ui-builder-utils');
+
+      // Mock: getCurrentLedger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // Action: Transfer ownership
+      await service.transferOwnership(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        expirationLedger,
+        mockExecutionConfig
+      );
+
+      // Verify: INFO logging occurred
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('transferOwnership'),
+        expect.stringContaining(NEW_OWNER)
+      );
     });
   });
 });

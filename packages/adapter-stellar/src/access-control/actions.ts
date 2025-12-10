@@ -73,17 +73,22 @@ export function assembleRevokeRoleAction(
 /**
  * Assembles transaction data for transferring ownership of a contract
  *
+ * For two-step Ownable contracts, this initiates a transfer that must be accepted
+ * by the pending owner before the expiration ledger.
+ *
  * @param contractAddress The contract address
  * @param newOwner The new owner address
+ * @param liveUntilLedger The ledger sequence by which the transfer must be accepted
  * @returns Transaction data ready for execution
  */
 export function assembleTransferOwnershipAction(
   contractAddress: string,
-  newOwner: string
+  newOwner: string,
+  liveUntilLedger: number
 ): StellarTransactionData {
   logger.info(
     'assembleTransferOwnershipAction',
-    `Assembling transfer_ownership action to ${newOwner}`
+    `Assembling transfer_ownership action to ${newOwner} with expiration at ledger ${liveUntilLedger}`
   );
 
   // Arguments for transfer_ownership(new_owner: Address)
@@ -91,8 +96,8 @@ export function assembleTransferOwnershipAction(
   return {
     contractAddress,
     functionName: 'transfer_ownership',
-    args: [newOwner],
-    argTypes: ['Address'],
+    args: [newOwner, liveUntilLedger],
+    argTypes: ['Address', 'u32'],
     argSchema: undefined,
     transactionOptions: {},
   };

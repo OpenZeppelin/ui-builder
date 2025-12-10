@@ -301,8 +301,15 @@ export interface AccessControlService {
 
   /**
    * Transfer ownership of the contract
+   *
+   * For two-step Ownable contracts (e.g., Stellar), the expirationBlock parameter
+   * specifies when the pending transfer expires. The pending owner must call
+   * acceptOwnership() before this block/ledger to complete the transfer.
+   *
    * @param contractAddress The contract address
    * @param newOwner The new owner address
+   * @param expirationBlock For two-step transfers: the block/ledger number by which the transfer
+   *   must be accepted. Required for chains with two-step Ownable (e.g., Stellar).
    * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
@@ -311,6 +318,7 @@ export interface AccessControlService {
   transferOwnership(
     contractAddress: string,
     newOwner: string,
+    expirationBlock: number,
     executionConfig: ExecutionConfig,
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string

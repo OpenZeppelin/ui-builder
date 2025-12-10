@@ -316,4 +316,75 @@ describe('Two-Step Ownable Support', () => {
       expect(result.currentLedger).toBe(currentLedger);
     });
   });
+
+  /**
+   * Tests for assembleTransferOwnershipAction() with live_until_ledger (T030)
+   * Phase 4: User Story 2 - Initiate Ownership Transfer
+   */
+  describe('assembleTransferOwnershipAction() with live_until_ledger (T030)', () => {
+    const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+    const NEW_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+    it('T030: should assemble transfer_ownership action with live_until_ledger parameter', async () => {
+      const expirationLedger = 12350000;
+
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER, expirationLedger);
+
+      // Verify transaction data structure
+      expect(txData.contractAddress).toBe(TEST_CONTRACT);
+      expect(txData.functionName).toBe('transfer_ownership');
+
+      // Verify both arguments: new_owner and live_until_ledger
+      expect(txData.args).toHaveLength(2);
+      expect(txData.args[0]).toBe(NEW_OWNER);
+      expect(txData.args[1]).toBe(expirationLedger);
+
+      // Verify argument types
+      expect(txData.argTypes).toHaveLength(2);
+      expect(txData.argTypes[0]).toBe('Address');
+      expect(txData.argTypes[1]).toBe('u32'); // Ledger sequence is u32
+    });
+
+    it('T030: should preserve argument order (new_owner, live_until_ledger)', async () => {
+      const expirationLedger = 12345678;
+
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER, expirationLedger);
+
+      // First argument should be the address, second should be the ledger
+      expect(txData.args[0]).toBe(NEW_OWNER);
+      expect(typeof txData.args[1]).toBe('number');
+      expect(txData.args[1]).toBe(expirationLedger);
+    });
+
+    it('T030: should handle large ledger sequence numbers', async () => {
+      // Ledger sequences can be large (u32 max is 4,294,967,295)
+      const largeLedger = 2147483647; // Near max safe integer in JS
+
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleTransferOwnershipAction(TEST_CONTRACT, NEW_OWNER, largeLedger);
+
+      expect(txData.args[1]).toBe(largeLedger);
+    });
+
+    it('T030: should handle contract address as new owner with expiration', async () => {
+      const contractNewOwner = 'CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2';
+      const expirationLedger = 12360000;
+
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        contractNewOwner,
+        expirationLedger
+      );
+
+      expect(txData.args[0]).toBe(contractNewOwner);
+      expect(txData.args[1]).toBe(expirationLedger);
+    });
+  });
 });
