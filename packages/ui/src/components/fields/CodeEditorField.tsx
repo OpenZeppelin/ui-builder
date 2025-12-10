@@ -8,12 +8,16 @@ import { ErrorMessage } from './utils';
 /**
  * CodeEditorField component properties
  */
-export interface CodeEditorFieldProps<TFieldValues extends FieldValues = FieldValues>
-  extends React.ComponentPropsWithoutRef<'div'> {
+export interface CodeEditorFieldProps<TFieldValues extends FieldValues = FieldValues> {
   /**
    * Unique identifier for the field
    */
   id: string;
+
+  /**
+   * Optional CSS class name for the container
+   */
+  className?: string;
 
   /**
    * Field name for form control
@@ -126,7 +130,6 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
   readOnly = false,
   validateCode,
   className,
-  ...props
 }: CodeEditorFieldProps<TFieldValues>): React.ReactElement {
   // Convert height strings to numbers for native props with robust parsing
   function extractPixelValue(val: string | number, fallback: number): number {
@@ -139,7 +142,7 @@ export function CodeEditorField<TFieldValues extends FieldValues = FieldValues>(
   const maxHeightNum = extractPixelValue(maxHeight, 400);
 
   return (
-    <div className={className} {...props}>
+    <div className={className}>
       {label && (
         <label htmlFor={id} className="block text-sm font-medium text-foreground mb-2">
           {label}
