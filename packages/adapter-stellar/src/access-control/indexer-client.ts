@@ -8,6 +8,7 @@
 import type {
   HistoryChangeType,
   HistoryEntry,
+  HistoryQueryOptions,
   IndexerEndpointConfig,
   PageInfo,
   PaginatedHistoryResult,
@@ -79,19 +80,6 @@ export interface GrantInfo {
   txId: string;
   /** Block/ledger number of the grant */
   ledger: number;
-}
-
-/**
- * Options for querying history with pagination
- */
-export interface IndexerHistoryOptions {
-  roleId?: string;
-  account?: string;
-  /** Filter by change type (grant, revoke, or ownership transfer) */
-  changeType?: HistoryChangeType;
-  limit?: number;
-  /** Cursor for fetching the next page */
-  cursor?: string;
 }
 
 /**
@@ -170,7 +158,7 @@ export class StellarIndexerClient {
    */
   async queryHistory(
     contractAddress: string,
-    options?: IndexerHistoryOptions
+    options?: HistoryQueryOptions
   ): Promise<PaginatedHistoryResult> {
     const isAvailable = await this.checkAvailability();
     if (!isAvailable) {
@@ -539,21 +527,38 @@ export class StellarIndexerClient {
   /**
    * Build GraphQL query for history with SubQuery filtering and pagination
    */
-  private buildHistoryQuery(_contractAddress: string, options?: IndexerHistoryOptions): string {
+  private buildHistoryQuery(_contractAddress: string, options?: HistoryQueryOptions): string {
     const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
     const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
     // Type filter uses inline enum value (consistent with buildLatestGrantsQuery pattern)
     const typeFilter = options?.changeType
       ? `, type: { equalTo: ${this.mapChangeTypeToGraphQLEnum(options.changeType)} }`
       : '';
+    const txFilter = options?.txId ? ', txHash: { equalTo: $txHash }' : '';
+    // Build combined timestamp filter to avoid duplicate keys
+    const timestampConditions: string[] = [];
+    if (options?.timestampFrom) {
+      timestampConditions.push('greaterThanOrEqualTo: $timestampFrom');
+    }
+    if (options?.timestampTo) {
+      timestampConditions.push('lessThanOrEqualTo: $timestampTo');
+    }
+    const timestampFilter =
+      timestampConditions.length > 0 ? `, timestamp: { ${timestampConditions.join(', ')} }` : '';
+    const ledgerFilter = options?.ledger ? ', blockHeight: { equalTo: $blockHeight }' : '';
     const limitClause = options?.limit ? ', first: $limit' : '';
     const cursorClause = options?.cursor ? ', after: $cursor' : '';
 
     // Build variable declarations
+    // Note: SubQuery uses Datetime for timestamp filters and BigFloat for blockHeight filtering
     const varDeclarations = [
       '$contract: String!',
       options?.roleId ? '$role: String' : '',
       options?.account ? '$account: String' : '',
+      options?.txId ? '$txHash: String' : '',
+      options?.timestampFrom ? '$timestampFrom: Datetime' : '',
+      options?.timestampTo ? '$timestampTo: Datetime' : '',
+      options?.ledger ? '$blockHeight: BigFloat' : '',
       options?.limit ? '$limit: Int' : '',
       options?.cursor ? '$cursor: Cursor' : '',
     ]
@@ -564,7 +569,7 @@ export class StellarIndexerClient {
       query GetHistory(${varDeclarations}) {
         accessControlEvents(
           filter: {
-            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}${txFilter}${timestampFilter}${ledgerFilter}
           }
           orderBy: TIMESTAMP_DESC${limitClause}${cursorClause}
         ) {
@@ -591,7 +596,7 @@ export class StellarIndexerClient {
    */
   private buildQueryVariables(
     contractAddress: string,
-    options?: IndexerHistoryOptions
+    options?: HistoryQueryOptions
   ): Record<string, unknown> {
     const variables: Record<string, unknown> = {
       contract: contractAddress,
@@ -602,6 +607,19 @@ export class StellarIndexerClient {
     }
     if (options?.account) {
       variables.account = options.account;
+    }
+    if (options?.txId) {
+      variables.txHash = options.txId;
+    }
+    if (options?.timestampFrom) {
+      variables.timestampFrom = options.timestampFrom;
+    }
+    if (options?.timestampTo) {
+      variables.timestampTo = options.timestampTo;
+    }
+    if (options?.ledger) {
+      // GraphQL expects blockHeight as string
+      variables.blockHeight = String(options.ledger);
     }
     if (options?.limit) {
       variables.limit = options.limit;
