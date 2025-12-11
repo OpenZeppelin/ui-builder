@@ -73,26 +73,57 @@ export function assembleRevokeRoleAction(
 /**
  * Assembles transaction data for transferring ownership of a contract
  *
+ * For two-step Ownable contracts, this initiates a transfer that must be accepted
+ * by the pending owner before the expiration ledger.
+ *
  * @param contractAddress The contract address
  * @param newOwner The new owner address
+ * @param liveUntilLedger The ledger sequence by which the transfer must be accepted
  * @returns Transaction data ready for execution
  */
 export function assembleTransferOwnershipAction(
   contractAddress: string,
-  newOwner: string
+  newOwner: string,
+  liveUntilLedger: number
 ): StellarTransactionData {
   logger.info(
     'assembleTransferOwnershipAction',
-    `Assembling transfer_ownership action to ${newOwner}`
+    `Assembling transfer_ownership action to ${newOwner} with expiration at ledger ${liveUntilLedger}`
   );
 
-  // Arguments for transfer_ownership(new_owner: Address)
+  // Arguments for transfer_ownership(new_owner: Address, live_until_ledger: u32)
   // Note: args are raw values that will be converted to ScVal by the transaction execution flow
   return {
     contractAddress,
     functionName: 'transfer_ownership',
-    args: [newOwner],
-    argTypes: ['Address'],
+    args: [newOwner, liveUntilLedger],
+    argTypes: ['Address', 'u32'],
+    argSchema: undefined,
+    transactionOptions: {},
+  };
+}
+
+/**
+ * Assembles transaction data for accepting a pending ownership transfer
+ *
+ * For two-step Ownable contracts, this completes a pending transfer initiated by
+ * the current owner. Must be called by the pending owner before the expiration ledger.
+ *
+ * @param contractAddress The contract address
+ * @returns Transaction data ready for execution
+ */
+export function assembleAcceptOwnershipAction(contractAddress: string): StellarTransactionData {
+  logger.info(
+    'assembleAcceptOwnershipAction',
+    `Assembling accept_ownership action for ${contractAddress}`
+  );
+
+  // accept_ownership() has no arguments - caller must be the pending owner
+  return {
+    contractAddress,
+    functionName: 'accept_ownership',
+    args: [],
+    argTypes: [],
     argSchema: undefined,
     transactionOptions: {},
   };

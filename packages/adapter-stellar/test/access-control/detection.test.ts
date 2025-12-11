@@ -36,7 +36,7 @@ function createContractSchema(functionNames: string[]): ContractSchema {
 
 describe('Access Control Feature Detection (T015)', () => {
   describe('detectAccessControlCapabilities', () => {
-    it('should detect Ownable-only contract', () => {
+    it('should detect Ownable-only contract (two-step)', () => {
       const schema = createContractSchema([
         'get_owner',
         'transfer_ownership',
@@ -47,11 +47,14 @@ describe('Access Control Feature Detection (T015)', () => {
       const capabilities = detectAccessControlCapabilities(schema);
 
       expect(capabilities.hasOwnable).toBe(true);
+      expect(capabilities.hasTwoStepOwnable).toBe(true);
       expect(capabilities.hasAccessControl).toBe(false);
       expect(capabilities.hasEnumerableRoles).toBe(false);
       expect(capabilities.supportsHistory).toBe(false);
       expect(capabilities.verifiedAgainstOZInterfaces).toBe(true);
-      expect(capabilities.notes).toContain('OpenZeppelin Ownable interface detected');
+      expect(capabilities.notes).toContain(
+        'OpenZeppelin two-step Ownable interface detected (with accept_ownership)'
+      );
     });
 
     it('should detect AccessControl-only contract', () => {
@@ -75,7 +78,7 @@ describe('Access Control Feature Detection (T015)', () => {
       expect(capabilities.notes).toContain('OpenZeppelin AccessControl interface detected');
     });
 
-    it('should detect contract with both Ownable and AccessControl', () => {
+    it('should detect contract with both Ownable (two-step) and AccessControl', () => {
       const schema = createContractSchema([
         'get_owner',
         'transfer_ownership',
@@ -93,10 +96,13 @@ describe('Access Control Feature Detection (T015)', () => {
       const capabilities = detectAccessControlCapabilities(schema);
 
       expect(capabilities.hasOwnable).toBe(true);
+      expect(capabilities.hasTwoStepOwnable).toBe(true);
       expect(capabilities.hasAccessControl).toBe(true);
       expect(capabilities.hasEnumerableRoles).toBe(false);
       expect(capabilities.verifiedAgainstOZInterfaces).toBe(true);
-      expect(capabilities.notes).toContain('OpenZeppelin Ownable interface detected');
+      expect(capabilities.notes).toContain(
+        'OpenZeppelin two-step Ownable interface detected (with accept_ownership)'
+      );
       expect(capabilities.notes).toContain('OpenZeppelin AccessControl interface detected');
     });
 
@@ -213,13 +219,35 @@ describe('Access Control Feature Detection (T015)', () => {
       expect(capabilities.verifiedAgainstOZInterfaces).toBe(false);
     });
 
-    it('should pass verification with minimum required optional functions for Ownable', () => {
-      // Has exactly 2 optional functions
-      const schema = createContractSchema(['get_owner', 'transfer_ownership', 'accept_ownership']);
+    it('should pass verification with minimum required optional functions for two-step Ownable', () => {
+      // Two-step Ownable requires at least 3 of 4 optional functions
+      // (transfer_ownership, accept_ownership, renounce_ownership)
+      const schema = createContractSchema([
+        'get_owner',
+        'transfer_ownership',
+        'accept_ownership',
+        'renounce_ownership',
+      ]);
 
       const capabilities = detectAccessControlCapabilities(schema);
 
       expect(capabilities.hasOwnable).toBe(true);
+      expect(capabilities.hasTwoStepOwnable).toBe(true);
+      expect(capabilities.verifiedAgainstOZInterfaces).toBe(true);
+    });
+
+    it('should pass verification with minimum required optional functions for basic Ownable', () => {
+      // Basic Ownable (without accept_ownership) requires at least 2 optional functions
+      const schema = createContractSchema([
+        'get_owner',
+        'transfer_ownership',
+        'renounce_ownership',
+      ]);
+
+      const capabilities = detectAccessControlCapabilities(schema);
+
+      expect(capabilities.hasOwnable).toBe(true);
+      expect(capabilities.hasTwoStepOwnable).toBe(false);
       expect(capabilities.verifiedAgainstOZInterfaces).toBe(true);
     });
 

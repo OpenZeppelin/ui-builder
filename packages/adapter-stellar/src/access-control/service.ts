@@ -27,17 +27,25 @@ import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import {
+  assembleAcceptOwnershipAction,
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
   assembleTransferOwnershipAction,
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, StellarIndexerClient } from './indexer-client';
-import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
+import {
+  getAdmin,
+  getCurrentLedger,
+  readCurrentRoles,
+  readOwnership,
+  readPendingOwner,
+} from './onchain-reader';
 import {
   validateAccountAddress,
   validateAddress,
   validateContractAddress,
+  validateExpirationLedger,
   validateRoleIds,
 } from './validation';
 
@@ -192,19 +200,181 @@ export class StellarAccessControlService implements AccessControlService {
   }
 
   /**
-   * Gets the current owner of an Ownable contract
+   * Gets the current owner and ownership state of an Ownable contract
+   *
+   * Retrieves the current owner via on-chain query, then checks for pending
+   * two-step transfers via indexer to determine the ownership state:
+   * - 'owned': Has owner, no pending transfer
+   * - 'pending': Has owner, pending transfer not yet expired
+   * - 'expired': Has owner, pending transfer has expired
+   * - 'renounced': No owner (null)
+   *
+   * Gracefully degrades when indexer is unavailable, returning basic ownership
+   * info with 'owned' state and logging a warning.
    *
    * @param contractAddress The contract address
-   * @returns Promise resolving to ownership information
+   * @returns Promise resolving to ownership information with state
    * @throws ConfigurationInvalid if the contract address is invalid
+   *
+   * @example
+   * ```typescript
+   * const ownership = await service.getOwnership(contractAddress);
+   * console.log('Owner:', ownership.owner);
+   * console.log('State:', ownership.state); // 'owned' | 'pending' | 'expired' | 'renounced'
+   *
+   * if (ownership.state === 'pending' && ownership.pendingTransfer) {
+   *   console.log('Pending owner:', ownership.pendingTransfer.pendingOwner);
+   *   console.log('Expires at ledger:', ownership.pendingTransfer.expirationBlock);
+   * }
+   * ```
    */
   async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
     // Validate contract address
     validateContractAddress(contractAddress);
 
-    logger.info('StellarAccessControlService.getOwnership', `Reading owner for ${contractAddress}`);
+    // T025: INFO logging for ownership queries per NFR-004
+    logger.info(
+      'StellarAccessControlService.getOwnership',
+      `Reading ownership status for ${contractAddress}`
+    );
 
-    return readOwnership(contractAddress, this.networkConfig);
+    // T020: Call get_owner() for current owner
+    const basicOwnership = await readOwnership(contractAddress, this.networkConfig);
+
+    // T018/T023: Renounced state - owner is null
+    if (basicOwnership.owner === null) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has renounced ownership`
+      );
+      return {
+        owner: null,
+        state: 'renounced',
+      };
+    }
+
+    // T024/T019: Check indexer availability for pending transfer detection
+    const indexerAvailable = await this.indexerClient.checkAvailability();
+
+    if (!indexerAvailable) {
+      // T026: WARN logging for indexer unavailability per NFR-006
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Indexer unavailable for ${this.networkConfig.id}: pending transfer status cannot be determined`
+      );
+      // T024: Graceful degradation - return basic ownership with 'owned' state
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T021: Query indexer for pending transfer
+    let pendingTransfer;
+    try {
+      pendingTransfer = await this.indexerClient.queryPendingOwnershipTransfer(contractAddress);
+    } catch (error) {
+      // T026: Graceful degradation on indexer query error
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to query pending transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T015/T023: No pending transfer in indexer - state is 'owned'
+    if (!pendingTransfer) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has owner with no pending transfer`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // Indexer found a pending transfer event - now get expiration from on-chain
+    // The indexer doesn't store live_until_ledger, so we query get_pending_owner()
+    let onChainPending;
+    try {
+      onChainPending = await readPendingOwner(contractAddress, this.networkConfig);
+    } catch (error) {
+      // If on-chain query fails, use indexer data without expiration check
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to get on-chain pending owner: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    // If no on-chain pending owner, the transfer may have been completed or expired
+    if (!onChainPending) {
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has no on-chain pending owner (transfer may have completed or expired)`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T022: Get current ledger to check expiration
+    let currentLedger: number;
+    try {
+      currentLedger = await getCurrentLedger(this.networkConfig);
+    } catch (error) {
+      // Graceful degradation if ledger query fails
+      logger.warn(
+        'StellarAccessControlService.getOwnership',
+        `Failed to get current ledger: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Return owned state since we can't determine expiration
+      return {
+        owner: basicOwnership.owner,
+        state: 'owned',
+      };
+    }
+
+    // T022/T023: Determine state based on expiration
+    // Per FR-020: expirationLedger must be > currentLedger, so >= means expired
+    const isExpired = currentLedger >= onChainPending.liveUntilLedger;
+
+    // Build pending transfer info for the response
+    const pendingTransferInfo = {
+      pendingOwner: onChainPending.pendingOwner,
+      expirationBlock: onChainPending.liveUntilLedger,
+      initiatedAt: pendingTransfer.timestamp,
+      initiatedTxId: pendingTransfer.txHash,
+      initiatedBlock: pendingTransfer.ledger,
+    };
+
+    if (isExpired) {
+      // T017/T023: Expired state
+      logger.debug(
+        'StellarAccessControlService.getOwnership',
+        `Contract ${contractAddress} has expired pending transfer (current: ${currentLedger}, expiration: ${onChainPending.liveUntilLedger})`
+      );
+      return {
+        owner: basicOwnership.owner,
+        state: 'expired',
+        pendingTransfer: pendingTransferInfo,
+      };
+    }
+
+    // T016/T023: Pending state
+    logger.debug(
+      'StellarAccessControlService.getOwnership',
+      `Contract ${contractAddress} has pending transfer to ${onChainPending.pendingOwner} (expires at ledger ${onChainPending.liveUntilLedger})`
+    );
+    return {
+      owner: basicOwnership.owner,
+      state: 'pending',
+      pendingTransfer: pendingTransferInfo,
+    };
   }
 
   /**
@@ -486,19 +656,40 @@ export class StellarAccessControlService implements AccessControlService {
   }
 
   /**
-   * Transfers ownership of the contract
+   * Transfers ownership of the contract using two-step transfer
+   *
+   * Initiates a two-step ownership transfer with an expiration ledger.
+   * The pending owner must call acceptOwnership() before the expiration
+   * ledger to complete the transfer.
    *
    * @param contractAddress The contract address
-   * @param newOwner The new owner address
+   * @param newOwner The new owner address (pending owner)
+   * @param expirationLedger The ledger sequence by which the transfer must be accepted
    * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
    * @param onStatusChange Optional callback for status updates
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result with transaction ID
-   * @throws ConfigurationInvalid if addresses are invalid
+   * @throws ConfigurationInvalid if addresses are invalid or expiration is invalid
+   *
+   * @example
+   * ```typescript
+   * // Calculate expiration ~12 hours from now (Stellar ledgers advance ~5s each)
+   * const currentLedger = await getCurrentLedger(networkConfig);
+   * const expirationLedger = currentLedger + 8640; // 12 * 60 * 60 / 5
+   *
+   * const result = await service.transferOwnership(
+   *   contractAddress,
+   *   newOwnerAddress,
+   *   expirationLedger,
+   *   executionConfig
+   * );
+   * console.log('Transfer initiated, txHash:', result.id);
+   * ```
    */
   async transferOwnership(
     contractAddress: string,
     newOwner: string,
+    expirationLedger: number,
     executionConfig: ExecutionConfig,
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
     runtimeApiKey?: string
@@ -508,18 +699,35 @@ export class StellarAccessControlService implements AccessControlService {
     validateContractAddress(contractAddress);
     validateAddress(newOwner, 'newOwner');
 
+    // T037: INFO logging for transfer initiation per NFR-004
     logger.info(
       'StellarAccessControlService.transferOwnership',
-      `Transferring ownership to ${newOwner} on ${contractAddress}`
+      `Initiating two-step ownership transfer to ${newOwner} on ${contractAddress} with expiration at ledger ${expirationLedger}`
     );
 
-    // Assemble the transaction data
-    const txData = assembleTransferOwnershipAction(contractAddress, newOwner);
+    // T034/T035: Client-side expiration validation (must be > current ledger)
+    const currentLedger = await getCurrentLedger(this.networkConfig);
+    const validationResult = validateExpirationLedger(expirationLedger, currentLedger);
+
+    if (!validationResult.valid) {
+      // T036: Specific error messages per FR-018
+      throw new ConfigurationInvalid(
+        validationResult.error ||
+          `Expiration ledger ${expirationLedger} must be strictly greater than current ledger ${currentLedger}.`,
+        String(expirationLedger),
+        'expirationLedger'
+      );
+    }
+
+    // Assemble the transaction data with live_until_ledger parameter
+    const txData = assembleTransferOwnershipAction(contractAddress, newOwner, expirationLedger);
 
     logger.debug('StellarAccessControlService.transferOwnership', 'Transaction data prepared:', {
       contractAddress: txData.contractAddress,
       functionName: txData.functionName,
       argTypes: txData.argTypes,
+      expirationLedger,
+      currentLedger,
     });
 
     // Execute the transaction
@@ -533,7 +741,76 @@ export class StellarAccessControlService implements AccessControlService {
 
     logger.info(
       'StellarAccessControlService.transferOwnership',
-      `Ownership transferred. TxHash: ${result.txHash}`
+      `Ownership transfer initiated. TxHash: ${result.txHash}, pending owner: ${newOwner}, expires at ledger: ${expirationLedger}`
+    );
+
+    return { id: result.txHash };
+  }
+
+  /**
+   * Accepts a pending ownership transfer (two-step transfer)
+   *
+   * Must be called by the pending owner (the address specified in transferOwnership)
+   * before the expiration ledger. The on-chain contract validates:
+   * 1. Caller is the pending owner
+   * 2. Transfer has not expired
+   *
+   * @param contractAddress The contract address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   * @throws ConfigurationInvalid if contract address is invalid
+   * @throws OperationFailed if on-chain rejection (expired or unauthorized)
+   *
+   * @example
+   * ```typescript
+   * // Check ownership state before accepting
+   * const ownership = await service.getOwnership(contractAddress);
+   * if (ownership.state === 'pending') {
+   *   const result = await service.acceptOwnership(contractAddress, executionConfig);
+   *   console.log('Ownership accepted, txHash:', result.id);
+   * }
+   * ```
+   */
+  async acceptOwnership(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    // T047: INFO logging for acceptance operations per NFR-004
+    logger.info(
+      'StellarAccessControlService.acceptOwnership',
+      `Accepting pending ownership transfer for ${contractAddress}`
+    );
+
+    // T045: Per spec clarification, expiration is enforced on-chain
+    // No pre-check required - the contract will reject if expired or caller is not pending owner
+
+    // T043: Assemble the accept_ownership transaction data
+    const txData = assembleAcceptOwnershipAction(contractAddress);
+
+    logger.debug('StellarAccessControlService.acceptOwnership', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+    });
+
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
+
+    logger.info(
+      'StellarAccessControlService.acceptOwnership',
+      `Ownership transfer accepted. TxHash: ${result.txHash}`
     );
 
     return { id: result.txHash };
@@ -758,8 +1035,22 @@ export class StellarAccessControlService implements AccessControlService {
 /**
  * Factory function to create a StellarAccessControlService instance
  *
+ * Creates a service instance configured for a specific Stellar network.
+ * The service supports both Ownable and AccessControl patterns including
+ * two-step ownership transfers with ledger-based expiration.
+ *
  * @param networkConfig The Stellar network configuration
  * @returns A new StellarAccessControlService instance
+ *
+ * @example
+ * ```typescript
+ * import { createStellarAccessControlService } from '@openzeppelin/ui-builder-adapter-stellar';
+ *
+ * const service = createStellarAccessControlService(networkConfig);
+ * service.registerContract(contractAddress, contractSchema);
+ *
+ * const ownership = await service.getOwnership(contractAddress);
+ * ```
  */
 export function createStellarAccessControlService(
   networkConfig: StellarNetworkConfig
