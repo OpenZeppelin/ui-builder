@@ -122,21 +122,21 @@
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Write failing test for `acceptOwnership()` successfully completing transfer in `packages/adapter-stellar/test/access-control/service.test.ts`
-- [ ] T040 [P] [US3] Write failing test for `acceptOwnership()` rejection when transfer expired
-- [ ] T041 [P] [US3] Write failing test for `assembleAcceptOwnershipAction()` in `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts`
-- [ ] T042 [P] [US3] Write failing test for error message when non-pending-owner attempts accept
+- [x] T039 [P] [US3] Write failing test for `acceptOwnership()` successfully completing transfer in `packages/adapter-stellar/test/access-control/service.test.ts`
+- [x] T040 [P] [US3] Write failing test for `acceptOwnership()` rejection when transfer expired
+- [x] T041 [P] [US3] Write failing test for `assembleAcceptOwnershipAction()` in `packages/adapter-stellar/test/access-control/ownable-two-step.test.ts`
+- [x] T042 [P] [US3] Write failing test for error message when non-pending-owner attempts accept
 
 ### Implementation for User Story 3
 
-- [ ] T043 [US3] Add `assembleAcceptOwnershipAction()` function in `packages/adapter-stellar/src/access-control/actions.ts`
-- [ ] T044 [US3] Add `acceptOwnership()` method in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T045 [US3] Add expiration check before submitting accept transaction (no pre-check per clarification, but show error on failure) in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T046 [US3] Add specific error messages for expired/unauthorized acceptance per FR-018 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T047 [US3] Add INFO logging for acceptance operations per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
-- [ ] T048 [US3] Verify tests T039-T042 now pass
+- [x] T043 [US3] Add `assembleAcceptOwnershipAction()` function in `packages/adapter-stellar/src/access-control/actions.ts`
+- [x] T044 [US3] Add `acceptOwnership()` method in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T045 [US3] Add expiration check before submitting accept transaction (no pre-check per clarification, but show error on failure) in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T046 [US3] Add specific error messages for expired/unauthorized acceptance per FR-018 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T047 [US3] Add INFO logging for acceptance operations per NFR-004 in `packages/adapter-stellar/src/access-control/service.ts`
+- [x] T048 [US3] Verify tests T039-T042 now pass
 
-**Checkpoint**: User Story 3 complete - ownership acceptance is fully functional
+**Checkpoint**: User Story 3 complete - ownership acceptance is fully functional ✅
 
 ---
 

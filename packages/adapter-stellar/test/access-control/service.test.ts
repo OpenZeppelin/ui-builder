@@ -2328,3 +2328,201 @@ describe('Access Control Service - Two-Step Ownership Transfer (US2)', () => {
     });
   });
 });
+
+/**
+ * Unit tests for Accept Ownership Transfer (Phase 5: US3)
+ *
+ * Tests: T039 - acceptOwnership() successfully completing transfer
+ *        T040 - acceptOwnership() rejection when transfer expired
+ *        T042 - Error message when non-pending-owner attempts accept
+ */
+describe('Access Control Service - Accept Ownership Transfer (US3)', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockExecutionConfig: EoaExecutionConfig;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+  const CURRENT_OWNER = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+  const PENDING_OWNER = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockExecutionConfig = {
+      method: 'eoa',
+      allowAny: false,
+      specificAddress: PENDING_OWNER, // Pending owner accepts
+    };
+
+    // Setup mock indexer client
+    mockIndexerClient = {
+      checkAvailability: vi.fn().mockResolvedValue(false),
+      queryPendingOwnershipTransfer: vi.fn().mockResolvedValue(null),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('acceptOwnership() success (T039)', () => {
+    /**
+     * T039: acceptOwnership() successfully completing transfer
+     * Verifies that pending owner can accept ownership transfer
+     */
+    it('T039: should successfully accept pending ownership transfer', async () => {
+      // Action: Accept ownership
+      const result = await service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig);
+
+      // Verify: Transaction was submitted
+      expect(result.id).toBeDefined();
+      expect(result.id).toMatch(/^[A-Fa-f0-9]{64}$/); // Stellar transaction hash pattern
+    });
+
+    /**
+     * T039: Verify accept_ownership function is called
+     */
+    it('T039: should call accept_ownership function on contract', async () => {
+      // Import transaction sender to verify arguments
+      const { signAndBroadcastStellarTransaction } = await import('../../src/transaction/sender');
+
+      // Action: Accept ownership
+      await service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig);
+
+      // Verify: Transaction data is correct
+      expect(signAndBroadcastStellarTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contractAddress: TEST_CONTRACT,
+          functionName: 'accept_ownership',
+          args: [],
+          argTypes: [],
+        }),
+        mockExecutionConfig,
+        mockNetworkConfig,
+        undefined,
+        undefined
+      );
+    });
+  });
+
+  describe('acceptOwnership() expiration handling (T040)', () => {
+    /**
+     * T040: acceptOwnership() handles expired transfer
+     * Note: Expiration is enforced on-chain. The client can optionally pre-check
+     * but per clarification, the main error comes from on-chain rejection.
+     * This test verifies the client-side behavior when on-chain rejects.
+     */
+    it('T040: should allow acceptance attempt (expiration enforced on-chain)', async () => {
+      // The acceptance attempt goes through client-side
+      // On-chain will reject if expired, but client doesn't pre-check per spec clarification
+      const result = await service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig);
+
+      // Transaction is submitted (on-chain will reject if expired)
+      expect(result.id).toBeDefined();
+    });
+
+    /**
+     * T040: acceptOwnership() with expired transfer shows appropriate error
+     * Simulates on-chain rejection due to expired transfer
+     */
+    it('T040: should propagate error when on-chain rejects due to expired transfer', async () => {
+      // Mock: Transaction sender rejects (simulating on-chain rejection)
+      const { signAndBroadcastStellarTransaction } = await import('../../src/transaction/sender');
+      vi.mocked(signAndBroadcastStellarTransaction).mockRejectedValueOnce(
+        new Error('Contract error: ownership transfer has expired')
+      );
+
+      // Action & Verify: Error is propagated
+      await expect(service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig)).rejects.toThrow(
+        /expired/i
+      );
+    });
+  });
+
+  describe('acceptOwnership() authorization (T042)', () => {
+    /**
+     * T042: Error message when non-pending-owner attempts accept
+     * Note: Authorization is enforced on-chain, but the error should be user-friendly
+     */
+    it('T042: should propagate error when on-chain rejects due to unauthorized caller', async () => {
+      // Mock: Transaction sender rejects (simulating on-chain authorization rejection)
+      const { signAndBroadcastStellarTransaction } = await import('../../src/transaction/sender');
+      vi.mocked(signAndBroadcastStellarTransaction).mockRejectedValueOnce(
+        new Error('Contract error: caller is not the pending owner')
+      );
+
+      // Non-pending owner tries to accept
+      const nonPendingOwnerConfig: EoaExecutionConfig = {
+        method: 'eoa',
+        allowAny: false,
+        specificAddress: CURRENT_OWNER, // Original owner, not pending owner
+      };
+
+      // Action & Verify: Error is propagated
+      await expect(service.acceptOwnership(TEST_CONTRACT, nonPendingOwnerConfig)).rejects.toThrow(
+        /pending owner|unauthorized|not.*owner/i
+      );
+    });
+
+    /**
+     * T042: Verify client allows acceptance attempt for any address
+     * Authorization is enforced on-chain
+     */
+    it('T042: should allow acceptance attempt for any valid address (authorization checked on-chain)', async () => {
+      const nonPendingOwnerConfig: EoaExecutionConfig = {
+        method: 'eoa',
+        allowAny: false,
+        specificAddress: CURRENT_OWNER, // Different address
+      };
+
+      // This should not throw client-side - authorization is on-chain
+      const result = await service.acceptOwnership(TEST_CONTRACT, nonPendingOwnerConfig);
+
+      // Transaction is submitted (on-chain will reject if not authorized)
+      expect(result.id).toBeDefined();
+    });
+  });
+
+  describe('acceptOwnership() logging (T047)', () => {
+    /**
+     * T047: INFO logging for acceptance operations per NFR-004
+     */
+    it('T047: should log acceptance operation at INFO level', async () => {
+      const { logger } = await import('@openzeppelin/ui-builder-utils');
+
+      // Action: Accept ownership
+      await service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig);
+
+      // Verify: INFO logging occurred
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('acceptOwnership'),
+        expect.stringContaining(TEST_CONTRACT)
+      );
+    });
+  });
+});

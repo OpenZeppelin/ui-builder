@@ -27,6 +27,7 @@ import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import {
+  assembleAcceptOwnershipAction,
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
   assembleTransferOwnershipAction,
@@ -714,6 +715,65 @@ export class StellarAccessControlService implements AccessControlService {
     logger.info(
       'StellarAccessControlService.transferOwnership',
       `Ownership transfer initiated. TxHash: ${result.txHash}, pending owner: ${newOwner}, expires at ledger: ${expirationLedger}`
+    );
+
+    return { id: result.txHash };
+  }
+
+  /**
+   * Accepts a pending ownership transfer (two-step transfer)
+   *
+   * Must be called by the pending owner (the address specified in transferOwnership)
+   * before the expiration ledger. The on-chain contract validates:
+   * 1. Caller is the pending owner
+   * 2. Transfer has not expired
+   *
+   * @param contractAddress The contract address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   * @throws ConfigurationInvalid if contract address is invalid
+   * @throws OperationFailed if on-chain rejection (expired or unauthorized)
+   */
+  async acceptOwnership(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    // T047: INFO logging for acceptance operations per NFR-004
+    logger.info(
+      'StellarAccessControlService.acceptOwnership',
+      `Accepting pending ownership transfer for ${contractAddress}`
+    );
+
+    // T045: Per spec clarification, expiration is enforced on-chain
+    // No pre-check required - the contract will reject if expired or caller is not pending owner
+
+    // T043: Assemble the accept_ownership transaction data
+    const txData = assembleAcceptOwnershipAction(contractAddress);
+
+    logger.debug('StellarAccessControlService.acceptOwnership', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+    });
+
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
+
+    logger.info(
+      'StellarAccessControlService.acceptOwnership',
+      `Ownership transfer accepted. TxHash: ${result.txHash}`
     );
 
     return { id: result.txHash };

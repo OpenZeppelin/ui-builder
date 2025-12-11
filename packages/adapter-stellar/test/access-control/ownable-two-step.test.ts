@@ -387,4 +387,57 @@ describe('Two-Step Ownable Support', () => {
       expect(txData.args[1]).toBe(expirationLedger);
     });
   });
+
+  /**
+   * Tests for assembleAcceptOwnershipAction() (T041)
+   * Phase 5: User Story 3 - Accept Ownership Transfer
+   */
+  describe('assembleAcceptOwnershipAction() (T041)', () => {
+    const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+
+    it('T041: should assemble accept_ownership action with no parameters', async () => {
+      const { assembleAcceptOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleAcceptOwnershipAction(TEST_CONTRACT);
+
+      // Verify transaction data structure
+      expect(txData.contractAddress).toBe(TEST_CONTRACT);
+      expect(txData.functionName).toBe('accept_ownership');
+
+      // accept_ownership() has no arguments
+      expect(txData.args).toHaveLength(0);
+      expect(txData.argTypes).toHaveLength(0);
+    });
+
+    it('T041: should return valid StellarTransactionData structure', async () => {
+      const { assembleAcceptOwnershipAction } = await import('../../src/access-control/actions');
+
+      const txData = assembleAcceptOwnershipAction(TEST_CONTRACT);
+
+      // Verify all required fields are present
+      expect(txData).toHaveProperty('contractAddress');
+      expect(txData).toHaveProperty('functionName');
+      expect(txData).toHaveProperty('args');
+      expect(txData).toHaveProperty('argTypes');
+      expect(txData).toHaveProperty('argSchema');
+      expect(txData).toHaveProperty('transactionOptions');
+    });
+
+    it('T041: should handle different contract addresses', async () => {
+      const { assembleAcceptOwnershipAction } = await import('../../src/access-control/actions');
+
+      const contract1 = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+      const contract2 = 'CANM3Y2GVGH6ACSHUORZ56ZFZ2FSFX6XEWPJYW7BNZVAXKSEQMBTDWD2';
+
+      const txData1 = assembleAcceptOwnershipAction(contract1);
+      const txData2 = assembleAcceptOwnershipAction(contract2);
+
+      expect(txData1.contractAddress).toBe(contract1);
+      expect(txData2.contractAddress).toBe(contract2);
+
+      // Both should have same function name
+      expect(txData1.functionName).toBe('accept_ownership');
+      expect(txData2.functionName).toBe('accept_ownership');
+    });
+  });
 });
