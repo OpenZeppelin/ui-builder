@@ -150,19 +150,19 @@
 
 ### Tests for User Story 4
 
-- [ ] T049 [P] [US4] Write failing test for detecting two-step Ownable via `accept_ownership` entry point in `packages/adapter-stellar/test/access-control/detection.test.ts`
-- [ ] T050 [P] [US4] Write failing test for `hasTwoStepOwnable` capability flag in `packages/adapter-stellar/test/access-control/detection.test.ts`
-- [ ] T051 [P] [US4] Write failing test for contracts WITHOUT `accept_ownership` returning `hasTwoStepOwnable: false`
+- [x] T049 [P] [US4] Write failing test for detecting two-step Ownable via `accept_ownership` entry point in `packages/adapter-stellar/test/access-control/detection.test.ts`
+- [x] T050 [P] [US4] Write failing test for `hasTwoStepOwnable` capability flag in `packages/adapter-stellar/test/access-control/detection.test.ts`
+- [x] T051 [P] [US4] Write failing test for contracts WITHOUT `accept_ownership` returning `hasTwoStepOwnable: false`
 
 ### Implementation for User Story 4
 
-- [ ] T052 [US4] Update `detectAccessControlCapabilities()` to check for `accept_ownership` entry point in `packages/adapter-stellar/src/access-control/feature-detection.ts`
-- [ ] T053 [US4] Set `hasTwoStepOwnable` flag based on presence of `accept_ownership` in `packages/adapter-stellar/src/access-control/feature-detection.ts`
-- [ ] T054 [US4] Update Ownable verification to require 3 of 4 optional functions for two-step in `packages/adapter-stellar/src/access-control/feature-detection.ts`
-- [ ] T055 [US4] Add capability notes for two-step Ownable detection in `packages/adapter-stellar/src/access-control/feature-detection.ts`
-- [ ] T056 [US4] Verify tests T049-T051 now pass
+- [x] T052 [US4] Update `detectAccessControlCapabilities()` to check for `accept_ownership` entry point in `packages/adapter-stellar/src/access-control/feature-detection.ts`
+- [x] T053 [US4] Set `hasTwoStepOwnable` flag based on presence of `accept_ownership` in `packages/adapter-stellar/src/access-control/feature-detection.ts`
+- [x] T054 [US4] Update Ownable verification to require 3 of 4 optional functions for two-step in `packages/adapter-stellar/src/access-control/feature-detection.ts`
+- [x] T055 [US4] Add capability notes for two-step Ownable detection in `packages/adapter-stellar/src/access-control/feature-detection.ts`
+- [x] T056 [US4] Verify tests T049-T051 now pass
 
-**Checkpoint**: User Story 4 complete - feature detection identifies two-step Ownable contracts
+**Checkpoint**: User Story 4 complete - feature detection identifies two-step Ownable contracts ✅
 
 ---
 
