@@ -1,7 +1,7 @@
 # Data Model: Stellar Ownable Two-Step Transfer
 
 **Date**: 2025-12-10  
-**Feature**: 001-stellar-ownable-support
+**Feature**: 006-stellar-ownable-support
 
 ## Entities
 

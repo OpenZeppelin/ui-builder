@@ -1,6 +1,6 @@
 # Feature Specification: Stellar Ownable Protocol Support
 
-**Feature Branch**: `001-stellar-ownable-support`  
+**Feature Branch**: `006-stellar-ownable-support`  
 **Created**: December 10, 2025  
 **Status**: Draft  
 **Input**: User description: "Extend Stellar Access Control module to support Ownable protocols two-step ownership transfer, and block expiration features."

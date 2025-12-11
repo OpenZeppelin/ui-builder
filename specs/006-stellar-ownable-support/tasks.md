@@ -1,6 +1,6 @@
 # Tasks: Stellar Ownable Two-Step Transfer Support
 
-**Input**: Design documents from `/specs/001-stellar-ownable-support/`  
+**Input**: Design documents from `/specs/006-stellar-ownable-support/`  
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, contracts/ ✅  
 **Generated**: 2025-12-10
 

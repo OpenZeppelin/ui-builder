@@ -1,7 +1,7 @@
 # Implementation Plan: Stellar Ownable Two-Step Transfer Support
 
-**Branch**: `001-stellar-ownable-support` | **Date**: 2025-12-10 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-stellar-ownable-support/spec.md`
+**Branch**: `006-stellar-ownable-support` | **Date**: 2025-12-10 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/006-stellar-ownable-support/spec.md`
 
 ## Summary
 
@@ -44,7 +44,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ### Documentation (this feature)
 
 ```text
-specs/001-stellar-ownable-support/
+specs/006-stellar-ownable-support/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output
 ├── data-model.md        # Phase 1 output
