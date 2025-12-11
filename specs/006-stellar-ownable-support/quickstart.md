@@ -38,15 +38,21 @@ console.log('Ownership state:', ownership.state);
 
 if (ownership.state === 'pending' && ownership.pendingTransfer) {
   console.log('Pending owner:', ownership.pendingTransfer.pendingOwner);
-  console.log('Expires at ledger:', ownership.pendingTransfer.expirationLedger);
+  console.log('Expires at ledger:', ownership.pendingTransfer.expirationBlock);
 }
 ```
 
 ### 2. Initiate Ownership Transfer
 
 ```typescript
+import {
+  createStellarAccessControlService,
+  getCurrentLedger,
+  validateExpirationLedger,
+} from '@openzeppelin/ui-builder-adapter-stellar';
+
 // Get current ledger for expiration calculation
-const currentLedger = await service.getCurrentLedger();
+const currentLedger = await getCurrentLedger(networkConfig);
 
 // Set expiration to ~12 hours from now
 // Stellar ledgers advance every ~5 seconds
@@ -54,7 +60,7 @@ const currentLedger = await service.getCurrentLedger();
 const expirationLedger = currentLedger + 8640;
 
 // Validate expiration before submitting
-const validation = await service.validateExpirationLedger(expirationLedger);
+const validation = validateExpirationLedger(expirationLedger, currentLedger);
 if (!validation.valid) {
   throw new Error(validation.error);
 }
@@ -97,11 +103,12 @@ console.log('Ownership accepted, txHash:', result.id);
 
 ## Understanding Ownership States
 
-| State     | Description                                    | Next Actions                                    |
-| --------- | ---------------------------------------------- | ----------------------------------------------- |
-| `owned`   | Contract has active owner, no pending transfer | Owner can initiate transfer                     |
-| `pending` | Transfer initiated, awaiting acceptance        | Pending owner can accept; owner can re-transfer |
-| `expired` | Previous transfer expired without acceptance   | Owner can initiate new transfer                 |
+| State       | Description                                     | Next Actions                                    |
+| ----------- | ----------------------------------------------- | ----------------------------------------------- |
+| `owned`     | Contract has active owner, no pending transfer  | Owner can initiate transfer                     |
+| `pending`   | Transfer initiated, awaiting acceptance         | Pending owner can accept; owner can re-transfer |
+| `expired`   | Previous transfer expired without acceptance    | Owner can initiate new transfer                 |
+| `renounced` | Contract has no owner (ownership was renounced) | None - contract is permanently ownerless        |
 
 ## Handling Edge Cases
 
@@ -185,11 +192,13 @@ function calculateExpirationLedger(currentLedger: number, hours: number): number
 ## Error Handling
 
 ```typescript
+import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-builder-types';
+
 try {
   await service.transferOwnership(/* ... */);
 } catch (error) {
   if (error instanceof ConfigurationInvalid) {
-    // Expiration ledger already passed
+    // Expiration ledger already passed or invalid address
     console.error('Invalid expiration:', error.message);
   } else if (error instanceof OperationFailed) {
     // Transaction failed on-chain

@@ -588,6 +588,16 @@ export class StellarIndexerClient {
       const completionResult =
         (await completionResponse.json()) as IndexerOwnershipTransferResponse;
 
+      // Check for GraphQL errors in completion query (same as initiation query)
+      if (completionResult.errors && completionResult.errors.length > 0) {
+        const errorMessages = completionResult.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer completion query errors: ${errorMessages}`,
+          contractAddress,
+          'queryPendingOwnershipTransfer'
+        );
+      }
+
       const completedNodes = completionResult.data?.accessControlEvents?.nodes;
       if (completedNodes && completedNodes.length > 0) {
         // Transfer was completed after initiation - no pending transfer
@@ -595,14 +605,24 @@ export class StellarIndexerClient {
         return null;
       }
 
-      // No completion - return pending transfer info
+      // No completion - validate required fields before returning pending transfer info
+      // The admin field is required for OWNERSHIP_TRANSFER_STARTED events
+      if (!latestInitiation.admin) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without admin field for ${contractAddress}. ` +
+            `This indicates incomplete indexer data. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
       logger.info(
         LOG_SYSTEM,
         `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.account}`
       );
 
       return {
-        previousOwner: latestInitiation.admin || '',
+        previousOwner: latestInitiation.admin,
         pendingOwner: latestInitiation.account,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,

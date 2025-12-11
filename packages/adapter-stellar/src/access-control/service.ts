@@ -215,6 +215,18 @@ export class StellarAccessControlService implements AccessControlService {
    * @param contractAddress The contract address
    * @returns Promise resolving to ownership information with state
    * @throws ConfigurationInvalid if the contract address is invalid
+   *
+   * @example
+   * ```typescript
+   * const ownership = await service.getOwnership(contractAddress);
+   * console.log('Owner:', ownership.owner);
+   * console.log('State:', ownership.state); // 'owned' | 'pending' | 'expired' | 'renounced'
+   *
+   * if (ownership.state === 'pending' && ownership.pendingTransfer) {
+   *   console.log('Pending owner:', ownership.pendingTransfer.pendingOwner);
+   *   console.log('Expires at ledger:', ownership.pendingTransfer.expirationBlock);
+   * }
+   * ```
    */
   async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
     // Validate contract address
@@ -658,6 +670,21 @@ export class StellarAccessControlService implements AccessControlService {
    * @param runtimeApiKey Optional session-only API key for methods like Relayer
    * @returns Promise resolving to operation result with transaction ID
    * @throws ConfigurationInvalid if addresses are invalid or expiration is invalid
+   *
+   * @example
+   * ```typescript
+   * // Calculate expiration ~12 hours from now (Stellar ledgers advance ~5s each)
+   * const currentLedger = await getCurrentLedger(networkConfig);
+   * const expirationLedger = currentLedger + 8640; // 12 * 60 * 60 / 5
+   *
+   * const result = await service.transferOwnership(
+   *   contractAddress,
+   *   newOwnerAddress,
+   *   expirationLedger,
+   *   executionConfig
+   * );
+   * console.log('Transfer initiated, txHash:', result.id);
+   * ```
    */
   async transferOwnership(
     contractAddress: string,
@@ -735,6 +762,16 @@ export class StellarAccessControlService implements AccessControlService {
    * @returns Promise resolving to operation result with transaction ID
    * @throws ConfigurationInvalid if contract address is invalid
    * @throws OperationFailed if on-chain rejection (expired or unauthorized)
+   *
+   * @example
+   * ```typescript
+   * // Check ownership state before accepting
+   * const ownership = await service.getOwnership(contractAddress);
+   * if (ownership.state === 'pending') {
+   *   const result = await service.acceptOwnership(contractAddress, executionConfig);
+   *   console.log('Ownership accepted, txHash:', result.id);
+   * }
+   * ```
    */
   async acceptOwnership(
     contractAddress: string,
@@ -998,8 +1035,22 @@ export class StellarAccessControlService implements AccessControlService {
 /**
  * Factory function to create a StellarAccessControlService instance
  *
+ * Creates a service instance configured for a specific Stellar network.
+ * The service supports both Ownable and AccessControl patterns including
+ * two-step ownership transfers with ledger-based expiration.
+ *
  * @param networkConfig The Stellar network configuration
  * @returns A new StellarAccessControlService instance
+ *
+ * @example
+ * ```typescript
+ * import { createStellarAccessControlService } from '@openzeppelin/ui-builder-adapter-stellar';
+ *
+ * const service = createStellarAccessControlService(networkConfig);
+ * service.registerContract(contractAddress, contractSchema);
+ *
+ * const ownership = await service.getOwnership(contractAddress);
+ * ```
  */
 export function createStellarAccessControlService(
   networkConfig: StellarNetworkConfig

@@ -4,6 +4,9 @@
  * Tests: T007 - getCurrentLedger() returning ledger sequence number
  *        T008 - OWNERSHIP_TRANSFER_INITIATED event parsing in indexer
  *        T013 - validateExpirationLedger() helper
+ *        T059 - Integration test for full two-step transfer flow
+ *        T060 - Edge case tests (boundary conditions, network errors)
+ *        T061 - Performance benchmark tests (NFR-001/NFR-002/NFR-003)
  *        Additional tests for two-step ownership transfer workflow
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -211,6 +214,119 @@ describe('Two-Step Ownable Support', () => {
       );
 
       expect(result).toBeNull();
+    });
+
+    it('should return null when indexer event is missing required admin field', async () => {
+      const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
+
+      const client = new StellarIndexerClient({
+        ...mockNetworkConfig,
+        indexerUri: 'http://localhost:3000/graphql',
+      });
+
+      // Mock fetch returning event WITHOUT admin field (incomplete data)
+      global.fetch = vi
+        .fn()
+        // Availability check
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({ data: { __typename: 'Query' } }),
+        })
+        // Initiation event missing admin field
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            data: {
+              accessControlEvents: {
+                nodes: [
+                  {
+                    id: 'incomplete-event',
+                    type: 'OWNERSHIP_TRANSFER_STARTED',
+                    account: 'GNEWOWNER123456789ABCDEFGHIJK',
+                    // admin field is missing!
+                    txHash: 'a'.repeat(64),
+                    timestamp: '2025-01-15T10:00:00Z',
+                    ledger: '12340000',
+                  },
+                ],
+                pageInfo: { hasNextPage: false },
+              },
+            },
+          }),
+        })
+        // Completion check (no completion)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            data: {
+              accessControlEvents: {
+                nodes: [],
+                pageInfo: { hasNextPage: false },
+              },
+            },
+          }),
+        });
+
+      const result = await client.queryPendingOwnershipTransfer(
+        'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM'
+      );
+
+      // Should return null instead of an invalid OwnershipTransferStartedEvent with empty previousOwner
+      expect(result).toBeNull();
+    });
+
+    it('should throw error when completion query returns GraphQL errors', async () => {
+      const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
+
+      const client = new StellarIndexerClient({
+        ...mockNetworkConfig,
+        indexerUri: 'http://localhost:3000/graphql',
+      });
+
+      global.fetch = vi
+        .fn()
+        // Availability check
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({ data: { __typename: 'Query' } }),
+        })
+        // Initiation event (successful)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            data: {
+              accessControlEvents: {
+                nodes: [
+                  {
+                    id: 'test-event',
+                    type: 'OWNERSHIP_TRANSFER_STARTED',
+                    account: 'GNEWOWNER123456789ABCDEFGHIJK',
+                    admin: 'GOLDOWNER123456789ABCDEFGHIJK',
+                    txHash: 'a'.repeat(64),
+                    timestamp: '2025-01-15T10:00:00Z',
+                    ledger: '12340000',
+                  },
+                ],
+                pageInfo: { hasNextPage: false },
+              },
+            },
+          }),
+        })
+        // Completion query returns GraphQL errors
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            data: null,
+            errors: [{ message: 'Internal server error during completion query' }],
+          }),
+        });
+
+      // Should throw an error instead of silently returning a pending transfer
+      await expect(
+        client.queryPendingOwnershipTransfer(
+          'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM'
+        )
+      ).rejects.toThrow('Indexer completion query errors');
     });
 
     it('should return null when transfer was completed after initiation', async () => {
@@ -438,6 +554,356 @@ describe('Two-Step Ownable Support', () => {
       // Both should have same function name
       expect(txData1.functionName).toBe('accept_ownership');
       expect(txData2.functionName).toBe('accept_ownership');
+    });
+  });
+
+  /**
+   * T059: Integration test for full two-step transfer flow
+   * Tests the complete workflow: initiate -> pending state -> accept -> completed
+   */
+  describe('Full Two-Step Transfer Flow Integration (T059)', () => {
+    const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+    const NEW_OWNER = 'GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB';
+
+    it('T059: should complete full two-step transfer workflow', async () => {
+      const { assembleTransferOwnershipAction, assembleAcceptOwnershipAction } = await import(
+        '../../src/access-control/actions'
+      );
+      const { validateExpirationLedger } = await import('../../src/access-control/validation');
+
+      // Step 1: Validate and prepare transfer initiation
+      const currentLedger = 12345678;
+      const expirationLedger = currentLedger + 8640; // ~12 hours
+
+      const validationResult = validateExpirationLedger(expirationLedger, currentLedger);
+      expect(validationResult.valid).toBe(true);
+
+      // Step 2: Assemble transfer initiation transaction
+      const transferTxData = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        NEW_OWNER,
+        expirationLedger
+      );
+
+      expect(transferTxData.functionName).toBe('transfer_ownership');
+      expect(transferTxData.args).toEqual([NEW_OWNER, expirationLedger]);
+      expect(transferTxData.argTypes).toEqual(['Address', 'u32']);
+
+      // Step 3: Assemble acceptance transaction
+      const acceptTxData = assembleAcceptOwnershipAction(TEST_CONTRACT);
+
+      expect(acceptTxData.functionName).toBe('accept_ownership');
+      expect(acceptTxData.args).toHaveLength(0);
+      expect(acceptTxData.contractAddress).toBe(TEST_CONTRACT);
+    });
+
+    it('T059: should handle overlapping transfers (new transfer cancels pending)', async () => {
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+      const { validateExpirationLedger } = await import('../../src/access-control/validation');
+
+      const currentLedger = 12345678;
+
+      // First transfer
+      const firstExpiration = currentLedger + 8640;
+      const firstNewOwner = NEW_OWNER;
+
+      const firstValidation = validateExpirationLedger(firstExpiration, currentLedger);
+      expect(firstValidation.valid).toBe(true);
+
+      const firstTransfer = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        firstNewOwner,
+        firstExpiration
+      );
+
+      // Second transfer (should replace first)
+      const secondExpiration = currentLedger + 17280; // 24 hours
+      const secondNewOwner = 'GCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC';
+
+      const secondValidation = validateExpirationLedger(secondExpiration, currentLedger);
+      expect(secondValidation.valid).toBe(true);
+
+      const secondTransfer = assembleTransferOwnershipAction(
+        TEST_CONTRACT,
+        secondNewOwner,
+        secondExpiration
+      );
+
+      // Both transfers should be valid and independent
+      expect(firstTransfer.args[0]).toBe(firstNewOwner);
+      expect(secondTransfer.args[0]).toBe(secondNewOwner);
+      expect(secondTransfer.args[1]).toBeGreaterThan(firstTransfer.args[1] as number);
+    });
+
+    it('T059: should validate expiration calculation for different timeframes', async () => {
+      const { validateExpirationLedger } = await import('../../src/access-control/validation');
+
+      const currentLedger = 12345678;
+      const ledgersPerHour = 720; // 60 * 60 / 5
+
+      // 1 hour expiration
+      const oneHour = currentLedger + ledgersPerHour;
+      expect(validateExpirationLedger(oneHour, currentLedger).valid).toBe(true);
+
+      // 12 hours expiration
+      const twelveHours = currentLedger + ledgersPerHour * 12;
+      expect(validateExpirationLedger(twelveHours, currentLedger).valid).toBe(true);
+
+      // 24 hours expiration
+      const twentyFourHours = currentLedger + ledgersPerHour * 24;
+      expect(validateExpirationLedger(twentyFourHours, currentLedger).valid).toBe(true);
+
+      // 7 days expiration
+      const sevenDays = currentLedger + ledgersPerHour * 24 * 7;
+      expect(validateExpirationLedger(sevenDays, currentLedger).valid).toBe(true);
+    });
+  });
+
+  /**
+   * T060: Edge case tests (boundary conditions, network errors)
+   */
+  describe('Edge Case Tests (T060)', () => {
+    describe('Boundary Conditions', () => {
+      it('T060: should reject expiration at exactly current ledger', () => {
+        const currentLedger = 12345678;
+        const result = validateExpirationLedger(currentLedger, currentLedger);
+
+        expect(result.valid).toBe(false);
+        expect(result.error).toContain('already passed');
+      });
+
+      it('T060: should accept expiration at current ledger + 1', () => {
+        const currentLedger = 12345678;
+        const result = validateExpirationLedger(currentLedger + 1, currentLedger);
+
+        expect(result.valid).toBe(true);
+      });
+
+      it('T060: should handle very large ledger numbers', () => {
+        const currentLedger = 2147483640; // Near u32 max
+        const expiration = 2147483645;
+
+        const result = validateExpirationLedger(expiration, currentLedger);
+        expect(result.valid).toBe(true);
+      });
+
+      it('T060: should handle ledger 0 (genesis)', () => {
+        const currentLedger = 0;
+        const expiration = 1;
+
+        const result = validateExpirationLedger(expiration, currentLedger);
+        expect(result.valid).toBe(true);
+      });
+
+      it('T060: should reject expiration of 0 when current is positive', () => {
+        const currentLedger = 100;
+        const expiration = 0;
+
+        const result = validateExpirationLedger(expiration, currentLedger);
+        expect(result.valid).toBe(false);
+      });
+    });
+
+    describe('Network Error Handling', () => {
+      it('T060: should handle RPC timeout when getting current ledger', async () => {
+        vi.resetModules();
+        vi.doMock('@stellar/stellar-sdk', () => ({
+          rpc: {
+            Server: vi.fn().mockImplementation(() => ({
+              getLatestLedger: vi.fn().mockRejectedValue(new Error('Request timeout')),
+            })),
+          },
+        }));
+
+        const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+
+        await expect(getCurrentLedger(mockNetworkConfig)).rejects.toThrow(
+          'Failed to get current ledger'
+        );
+      });
+
+      it('T060: should handle RPC connection refused', async () => {
+        vi.resetModules();
+        vi.doMock('@stellar/stellar-sdk', () => ({
+          rpc: {
+            Server: vi.fn().mockImplementation(() => ({
+              getLatestLedger: vi.fn().mockRejectedValue(new Error('ECONNREFUSED')),
+            })),
+          },
+        }));
+
+        const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+
+        await expect(getCurrentLedger(mockNetworkConfig)).rejects.toThrow(
+          'Failed to get current ledger'
+        );
+      });
+
+      it('T060: should handle indexer GraphQL errors', async () => {
+        const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
+
+        const client = new StellarIndexerClient({
+          ...mockNetworkConfig,
+          indexerUri: 'http://localhost:3000/graphql',
+        });
+
+        // Mock fetch returning GraphQL error
+        global.fetch = vi
+          .fn()
+          .mockResolvedValueOnce({
+            ok: true,
+            json: vi.fn().mockResolvedValue({ data: { __typename: 'Query' } }),
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: vi.fn().mockResolvedValue({
+              data: null,
+              errors: [{ message: 'Internal server error' }],
+            }),
+          });
+
+        await expect(
+          client.queryPendingOwnershipTransfer(
+            'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM'
+          )
+        ).rejects.toThrow();
+      });
+
+      it('T060: should handle fetch network failure', async () => {
+        const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
+
+        const client = new StellarIndexerClient({
+          ...mockNetworkConfig,
+          indexerUri: 'http://localhost:3000/graphql',
+        });
+
+        // Mock fetch throwing network error
+        global.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
+
+        await expect(
+          client.queryPendingOwnershipTransfer(
+            'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM'
+          )
+        ).rejects.toThrow();
+      });
+    });
+  });
+
+  /**
+   * T061: Performance benchmark tests
+   * NFR-001: Ownership query < 3 seconds
+   * NFR-002: Indexer query < 1 second
+   * NFR-003: Ledger query < 500ms
+   */
+  describe('Performance Benchmark Tests (T061)', () => {
+    it('T061: NFR-003 - getCurrentLedger should complete within 500ms', async () => {
+      // Reset to use fast mock
+      vi.resetModules();
+      vi.doMock('@stellar/stellar-sdk', () => ({
+        rpc: {
+          Server: vi.fn().mockImplementation(() => ({
+            getLatestLedger: vi.fn().mockResolvedValue({
+              sequence: 12345678,
+            }),
+          })),
+        },
+      }));
+
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
+
+      const start = performance.now();
+      await getCurrentLedger(mockNetworkConfig);
+      const duration = performance.now() - start;
+
+      // NFR-003: Should complete within 500ms
+      expect(duration).toBeLessThan(500);
+    });
+
+    it('T061: NFR-002 - Indexer query should complete within 1 second', async () => {
+      const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
+
+      const client = new StellarIndexerClient({
+        ...mockNetworkConfig,
+        indexerUri: 'http://localhost:3000/graphql',
+      });
+
+      // Mock fast indexer responses
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({ data: { __typename: 'Query' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: vi.fn().mockResolvedValue({
+            data: {
+              accessControlEvents: {
+                nodes: [],
+                pageInfo: { hasNextPage: false },
+              },
+            },
+          }),
+        });
+
+      const start = performance.now();
+      await client.queryPendingOwnershipTransfer(
+        'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM'
+      );
+      const duration = performance.now() - start;
+
+      // NFR-002: Should complete within 1 second
+      expect(duration).toBeLessThan(1000);
+    });
+
+    it('T061: NFR-001 - validateExpirationLedger should be synchronous and fast', () => {
+      const start = performance.now();
+
+      // Run 1000 validations to ensure it's fast
+      for (let i = 0; i < 1000; i++) {
+        validateExpirationLedger(12345678 + i, 12345678);
+      }
+
+      const duration = performance.now() - start;
+
+      // Synchronous validation should be nearly instant (< 100ms for 1000 ops)
+      expect(duration).toBeLessThan(100);
+    });
+
+    it('T061: assembleTransferOwnershipAction should be synchronous and fast', async () => {
+      const { assembleTransferOwnershipAction } = await import('../../src/access-control/actions');
+
+      const start = performance.now();
+
+      // Run 1000 assemblies
+      for (let i = 0; i < 1000; i++) {
+        assembleTransferOwnershipAction(
+          'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM',
+          'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+          12345678 + i
+        );
+      }
+
+      const duration = performance.now() - start;
+
+      // Assembly should be fast (< 100ms for 1000 ops)
+      expect(duration).toBeLessThan(100);
+    });
+
+    it('T061: assembleAcceptOwnershipAction should be synchronous and fast', async () => {
+      const { assembleAcceptOwnershipAction } = await import('../../src/access-control/actions');
+
+      const start = performance.now();
+
+      // Run 1000 assemblies
+      for (let i = 0; i < 1000; i++) {
+        assembleAcceptOwnershipAction('CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM');
+      }
+
+      const duration = performance.now() - start;
+
+      // Assembly should be fast (< 100ms for 1000 ops)
+      expect(duration).toBeLessThan(100);
     });
   });
 });

@@ -195,13 +195,25 @@ export function validateRoleIds(roleIds: string[], paramName = 'roleIds'): strin
 
 /**
  * Result of expiration ledger validation
+ *
+ * Returned by {@link validateExpirationLedger} to indicate whether
+ * a proposed expiration ledger is valid for a two-step ownership transfer.
+ *
+ * @example
+ * ```typescript
+ * const currentLedger = await getCurrentLedger(networkConfig);
+ * const result = validateExpirationLedger(expirationLedger, currentLedger);
+ * if (!result.valid) {
+ *   throw new ConfigurationInvalid(result.error!, String(expirationLedger), 'expirationLedger');
+ * }
+ * ```
  */
 export interface ExpirationValidationResult {
-  /** Whether the expiration ledger is valid */
+  /** Whether the expiration ledger is valid (must be strictly greater than current ledger) */
   valid: boolean;
-  /** The current ledger sequence (for reference) */
+  /** The current ledger sequence used for comparison */
   currentLedger: number;
-  /** Error message if validation failed */
+  /** Human-readable error message if validation failed */
   error?: string;
 }
 

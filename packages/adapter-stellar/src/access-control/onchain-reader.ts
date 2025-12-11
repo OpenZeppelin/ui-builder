@@ -104,11 +104,23 @@ export async function readOwnership(
 
 /**
  * Pending owner information from on-chain query
+ *
+ * Returned by {@link readPendingOwner} when a two-step ownership transfer is pending.
+ * Contains the pending owner address and expiration ledger sequence.
+ *
+ * @example
+ * ```typescript
+ * const pending = await readPendingOwner(contractAddress, networkConfig);
+ * if (pending) {
+ *   console.log(`Pending owner: ${pending.pendingOwner}`);
+ *   console.log(`Expires at ledger: ${pending.liveUntilLedger}`);
+ * }
+ * ```
  */
 export interface PendingOwnerInfo {
-  /** Pending owner address */
+  /** The address of the pending new owner */
   pendingOwner: string;
-  /** Ledger sequence by which transfer must be accepted */
+  /** The ledger sequence by which the transfer must be accepted (expiration) */
   liveUntilLedger: number;
 }
 
