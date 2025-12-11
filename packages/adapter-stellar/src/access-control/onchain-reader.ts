@@ -171,7 +171,8 @@ export async function readPendingOwner(
     }
 
     // Handle case where result is an object with named fields
-    if (typeof result === 'object' && result !== null) {
+    // Note: null already handled above, and Soroban RPC won't return Date/RegExp
+    if (typeof result === 'object') {
       const obj = result as Record<string, unknown>;
       const pendingOwner = obj.pendingOwner || obj[0];
       const liveUntilLedger = obj.liveUntilLedger || obj[1];
