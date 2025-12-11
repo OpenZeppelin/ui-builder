@@ -655,6 +655,7 @@ export class StellarIndexerClient {
             txHash
             timestamp
             ledger
+            blockHeight
           }
         }
       }
