@@ -14,6 +14,7 @@ import type {
 } from '@openzeppelin/ui-builder-types';
 import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
 
+import { CALLER_PLACEHOLDER } from '../access-control/actions';
 import { valueToScVal } from '../transform/input-parser';
 import { getStellarWalletConnectionStatus, signTransaction } from '../wallet/connection';
 import { ExecutionStrategy } from './execution-strategy';
@@ -93,8 +94,14 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
         networkPassphrase: stellarConfig.networkPassphrase,
       });
 
+      // Replace CALLER_PLACEHOLDER with the connected wallet address
+      // This supports OpenZeppelin Stellar access control functions that require a caller parameter
+      const resolvedArgs = txData.args.map((arg) =>
+        arg === CALLER_PLACEHOLDER ? connectedAddress : arg
+      );
+
       // Add the contract call operation (convert args to ScVal with comprehensive type support)
-      const scValArgs = txData.args.map((arg, index) => {
+      const scValArgs = resolvedArgs.map((arg, index) => {
         const argType = txData.argTypes[index];
         const argSchema = txData.argSchema?.[index]; // Pass schema for struct field type resolution
 
