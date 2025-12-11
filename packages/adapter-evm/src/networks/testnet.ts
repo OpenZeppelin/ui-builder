@@ -17,6 +17,7 @@ import {
   baseSepolia as viemBaseSepolia,
   bscTestnet as viemBscTestnet,
   lineaSepolia as viemLineaSepolia,
+  mantraDuKongEVMTestnet as viemMantraDuKongEVMTestnet,
   monadTestnet as viemMonadTestnet,
   optimismSepolia as viemOptimismSepolia,
   polygonAmoy as viemPolygonAmoy,
@@ -304,6 +305,30 @@ export const monadTestnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemMonadTestnet,
+};
+
+export const mantraDuKongEVMTestnet: TypedEvmNetworkConfig = {
+  id: 'mantra-dukong-evm-testnet',
+  exportConstName: 'mantraDuKongEVMTestnet',
+  name: 'Mantra DuKong EVM Testnet',
+  ecosystem: 'evm',
+  network: 'mantra-dukong',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 5887,
+  rpcUrl: viemMantraDuKongEVMTestnet.rpcUrls.default.http[0],
+  explorerUrl: 'https://mantrascan.io/dukong',
+  // MANTRA Chain is not using Etherscan, so leaving the following 2 fields empty.
+  apiUrl: '',
+  primaryExplorerApiIdentifier: '',
+  supportsEtherscanV2: false,
+  icon: 'mantra',
+  nativeCurrency: {
+    name: 'MANTRA',
+    symbol: 'OM',
+    decimals: 18,
+  },
+  viemChain: viemMantraDuKongEVMTestnet,
 };
 
 // TODO: Add other EVM testnet networks as needed (e.g., Arbitrum Sepolia)
