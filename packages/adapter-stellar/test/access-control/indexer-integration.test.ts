@@ -1295,9 +1295,9 @@ describe('Ownership Status Viewing - Integration Test (US1)', () => {
         // This is the 'renounced' state
         console.log('  ✓ Contract ownership is renounced');
       } else if (pendingTransfer) {
-        // Pending transfer exists - need to query on-chain for expiration (not stored in indexer)
+        // Pending transfer exists - indexer now stores liveUntilLedger for expiration checking
         console.log(
-          `  ✓ Contract has pending transfer to ${pendingTransfer.pendingOwner} (initiated at ledger ${pendingTransfer.ledger})`
+          `  ✓ Contract has pending transfer to ${pendingTransfer.pendingOwner} (initiated at ledger ${pendingTransfer.ledger}, expires at ledger ${pendingTransfer.liveUntilLedger})`
         );
       }
     }, 45000);
@@ -1395,13 +1395,14 @@ describe('Ownership Status Viewing - Integration Test (US1)', () => {
 
       if (pendingTransfer) {
         expect(pendingTransfer).toHaveProperty('pendingOwner');
-        expect(pendingTransfer).toHaveProperty('ledger'); // Initiation ledger, NOT expiration
+        expect(pendingTransfer).toHaveProperty('ledger'); // Initiation ledger
         expect(pendingTransfer).toHaveProperty('timestamp');
+        expect(pendingTransfer).toHaveProperty('liveUntilLedger'); // Expiration ledger
         console.log(`  ✓ Found pending transfer:`);
         console.log(`    Pending owner: ${pendingTransfer.pendingOwner}`);
         console.log(`    Initiated at ledger: ${pendingTransfer.ledger}`);
         console.log(`    Initiated at: ${pendingTransfer.timestamp}`);
-        // Note: liveUntilLedger (expiration) is NOT stored in indexer - must query on-chain
+        console.log(`    Expires at ledger: ${pendingTransfer.liveUntilLedger}`);
       } else {
         console.log('  ✓ No pending transfer found (contract is in owned/renounced state)');
       }
@@ -1503,7 +1504,8 @@ describe('Ownership Status Viewing - Integration Test (US1)', () => {
         return;
       }
 
-      // Step 4: Query on-chain for expiration (indexer doesn't store liveUntilLedger)
+      // Step 4: Indexer now provides liveUntilLedger, but we can optionally verify on-chain
+      // For this integration test, we verify on-chain to ensure consistency
       const { readPendingOwner } = await import('../../src/access-control/onchain-reader');
       const onChainPending = await readPendingOwner(TEST_CONTRACT, testNetworkConfig);
 
@@ -1514,12 +1516,14 @@ describe('Ownership Status Viewing - Integration Test (US1)', () => {
         return;
       }
 
-      // Step 5: Check expiration
+      // Step 5: Check expiration (using indexer's liveUntilLedger)
       const currentLedger = await getCurrentLedger(testNetworkConfig);
-      const isExpired = currentLedger >= onChainPending.liveUntilLedger;
+      const isExpired = currentLedger >= pendingTransfer.liveUntilLedger;
 
       console.log(`  Step 5: Current ledger = ${currentLedger}`);
-      console.log(`  Step 5: Expiration ledger = ${onChainPending.liveUntilLedger}`);
+      console.log(
+        `  Step 5: Expiration ledger = ${pendingTransfer.liveUntilLedger} (from indexer)`
+      );
       console.log(`  ✓ Final state: ${isExpired ? 'expired' : 'pending'}`);
     }, 60000);
 
