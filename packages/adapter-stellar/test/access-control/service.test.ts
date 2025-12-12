@@ -17,6 +17,7 @@ import {
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
   assembleTransferOwnershipAction,
+  CALLER_PLACEHOLDER,
 } from '../../src/access-control/actions';
 import { readCurrentRoles, readOwnership } from '../../src/access-control/onchain-reader';
 import { StellarAccessControlService } from '../../src/access-control/service';
@@ -270,27 +271,69 @@ describe('Access Control Service (T020)', () => {
   });
 
   describe('Action Assembly', () => {
-    it('should assemble grant_role action with correct parameters', () => {
+    it('should assemble grant_role action with correct parameters including caller (v0.5.x signature)', () => {
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
+      // v0.5.x signature: grant_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'grant_role',
-        args: [TEST_ACCOUNT, TEST_ROLE],
-        argTypes: ['Address', 'Symbol'],
+        args: [CALLER_PLACEHOLDER, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
     });
 
-    it('should assemble revoke_role action with correct parameters', () => {
+    it('should assemble grant_role action with explicit caller', () => {
+      const explicitCaller = 'GCALLER123456789012345678901234567890123456789012345678';
+      const txData = assembleGrantRoleAction(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        explicitCaller
+      );
+
+      // v0.5.x signature: grant_role(caller, account, role)
+      expect(txData).toEqual({
+        contractAddress: TEST_CONTRACT,
+        functionName: 'grant_role',
+        args: [explicitCaller, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
+        argSchema: undefined,
+        transactionOptions: {},
+      });
+    });
+
+    it('should assemble revoke_role action with correct parameters including caller (v0.5.x signature)', () => {
       const txData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
+      // v0.5.x signature: revoke_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'revoke_role',
-        args: [TEST_ACCOUNT, TEST_ROLE],
-        argTypes: ['Address', 'Symbol'],
+        args: [CALLER_PLACEHOLDER, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
+        argSchema: undefined,
+        transactionOptions: {},
+      });
+    });
+
+    it('should assemble revoke_role action with explicit caller', () => {
+      const explicitCaller = 'GCALLER123456789012345678901234567890123456789012345678';
+      const txData = assembleRevokeRoleAction(
+        TEST_CONTRACT,
+        TEST_ROLE,
+        TEST_ACCOUNT,
+        explicitCaller
+      );
+
+      // v0.5.x signature: revoke_role(caller, account, role)
+      expect(txData).toEqual({
+        contractAddress: TEST_CONTRACT,
+        functionName: 'revoke_role',
+        args: [explicitCaller, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
@@ -436,35 +479,41 @@ describe('Access Control Service (T020)', () => {
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
       // Verify all required fields are present
+      // OpenZeppelin Stellar AccessControl v0.5.x requires: caller, account, role
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
       expect(txData.functionName).toBe('grant_role');
-      expect(txData.args).toHaveLength(2);
-      expect(txData.argTypes).toHaveLength(2);
-      expect(txData.argTypes[0]).toBe('Address');
-      expect(txData.argTypes[1]).toBe('Symbol');
+      expect(txData.args).toHaveLength(3);
+      expect(txData.argTypes).toHaveLength(3);
+      expect(txData.argTypes[0]).toBe('Address'); // caller
+      expect(txData.argTypes[1]).toBe('Address'); // account
+      expect(txData.argTypes[2]).toBe('Symbol'); // role
     });
 
     it('should validate revoke_role transaction structure', () => {
       const txData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
       // Verify all required fields are present
+      // OpenZeppelin Stellar AccessControl v0.5.x requires: caller, account, role
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
       expect(txData.functionName).toBe('revoke_role');
-      expect(txData.args).toHaveLength(2);
-      expect(txData.argTypes).toHaveLength(2);
-      expect(txData.argTypes[0]).toBe('Address');
-      expect(txData.argTypes[1]).toBe('Symbol');
+      expect(txData.args).toHaveLength(3);
+      expect(txData.argTypes).toHaveLength(3);
+      expect(txData.argTypes[0]).toBe('Address'); // caller
+      expect(txData.argTypes[1]).toBe('Address'); // account
+      expect(txData.argTypes[2]).toBe('Symbol'); // role
     });
 
-    it('should preserve argument order (account, role)', () => {
+    it('should preserve argument order (caller, account, role) - v0.5.x signature', () => {
       const grantTxData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
       const revokeTxData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
-      // Both functions should have consistent arg order: account first, then role
-      expect(grantTxData.args[0]).toBe(TEST_ACCOUNT);
-      expect(grantTxData.args[1]).toBe(TEST_ROLE);
-      expect(revokeTxData.args[0]).toBe(TEST_ACCOUNT);
-      expect(revokeTxData.args[1]).toBe(TEST_ROLE);
+      // Both functions should have consistent arg order: caller, account, role (v0.5.x)
+      expect(grantTxData.args[0]).toBe(CALLER_PLACEHOLDER); // caller
+      expect(grantTxData.args[1]).toBe(TEST_ACCOUNT); // account
+      expect(grantTxData.args[2]).toBe(TEST_ROLE); // role
+      expect(revokeTxData.args[0]).toBe(CALLER_PLACEHOLDER); // caller
+      expect(revokeTxData.args[1]).toBe(TEST_ACCOUNT); // account
+      expect(revokeTxData.args[2]).toBe(TEST_ROLE); // role
     });
   });
 
@@ -473,14 +522,16 @@ describe('Access Control Service (T020)', () => {
       const specialRole = 'admin_role';
       const txData = assembleGrantRoleAction(TEST_CONTRACT, specialRole, TEST_ACCOUNT);
 
-      expect(txData.args[1]).toBe(specialRole);
+      // v0.5.x: args = [caller, account, role] - role is at index 2
+      expect(txData.args[2]).toBe(specialRole);
     });
 
     it('should handle long Stellar addresses', () => {
       const longAddress = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, longAddress);
 
-      expect(txData.args[0]).toBe(longAddress);
+      // v0.5.x: args = [caller, account, role] - account is at index 1
+      expect(txData.args[1]).toBe(longAddress);
     });
 
     it('should handle contract addresses correctly', () => {

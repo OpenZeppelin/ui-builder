@@ -27,6 +27,7 @@ import type {
 } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { CALLER_PLACEHOLDER } from '../access-control/actions';
 import { valueToScVal } from '../transform/input-parser';
 import { getStellarWalletConnectionStatus, signTransaction } from '../wallet/connection';
 import { ExecutionStrategy } from './execution-strategy';
@@ -371,7 +372,13 @@ export class RelayerExecutionStrategy implements ExecutionStrategy {
       networkPassphrase: stellarConfig.networkPassphrase,
     });
 
-    const scValArgs = txData.args.map((arg, index) => {
+    // Replace CALLER_PLACEHOLDER with the connected wallet address
+    // This supports OpenZeppelin Stellar access control functions that require a caller parameter
+    const resolvedArgs = txData.args.map((arg) =>
+      arg === CALLER_PLACEHOLDER ? connectedAddress : arg
+    );
+
+    const scValArgs = resolvedArgs.map((arg, index) => {
       const argType = txData.argTypes[index];
       const argSchema = txData.argSchema?.[index];
       return valueToScVal(arg, argType, argSchema);
