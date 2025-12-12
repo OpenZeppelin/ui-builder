@@ -314,18 +314,21 @@ export class StellarAccessControlService implements AccessControlService {
     // This guards against stale indexer data but adds latency
     if (verifyOnChain) {
       let onChainPending;
+      let verificationFailed = false;
       try {
         onChainPending = await readPendingOwner(contractAddress, this.networkConfig);
       } catch (error) {
         // If on-chain query fails, log warning and continue with indexer data
+        verificationFailed = true;
         logger.warn(
           'StellarAccessControlService.getOwnership',
           `Failed to verify on-chain pending owner: ${error instanceof Error ? error.message : String(error)}. Using indexer data.`
         );
       }
 
-      // If no on-chain pending owner, the transfer may have been completed or expired
-      if (!onChainPending) {
+      // If verification succeeded but no on-chain pending owner, the transfer may have been completed or expired
+      // Skip this check if verification failed - we'll continue with indexer data instead
+      if (!verificationFailed && !onChainPending) {
         logger.debug(
           'StellarAccessControlService.getOwnership',
           `Contract ${contractAddress} has no on-chain pending owner (transfer may have completed or expired)`

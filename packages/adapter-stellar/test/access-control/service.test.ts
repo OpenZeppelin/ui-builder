@@ -1994,6 +1994,46 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
     });
 
     /**
+     * T016d: getOwnership() with on-chain verification - verification fails with error
+     * Verifies that when on-chain verification throws, we continue with indexer data
+     */
+    it('T016d: should continue with indexer data when on-chain verification fails with error', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = 12350000;
+
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Indexer returns valid pending transfer
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: currentLedger - 100,
+        liveUntilLedger: expirationLedger,
+      });
+
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      // On-chain verification throws an error (network issue, RPC unavailable, etc.)
+      vi.mocked(readPendingOwner).mockRejectedValue(new Error('RPC connection failed'));
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // With on-chain verification - should fall back to indexer data
+      const ownership = await service.getOwnership(TEST_CONTRACT, { verifyOnChain: true });
+
+      // Should return pending state from indexer data, not 'owned'
+      expect(ownership.state).toBe('pending');
+      expect(ownership.pendingTransfer).toBeDefined();
+      expect(ownership.pendingTransfer?.pendingOwner).toBe(PENDING_OWNER);
+      expect(ownership.pendingTransfer?.expirationBlock).toBe(expirationLedger);
+    });
+
+    /**
      * T017: getOwnership() returning expired state when currentLedger > expirationLedger (fast path)
      * Verifies that when pending transfer has expired, state is 'expired'
      */
