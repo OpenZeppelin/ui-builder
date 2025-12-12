@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '../ui/select';
 import { BaseFieldProps } from './BaseField';
+import { ErrorMessage } from './utils';
 
 /**
  * Option item for select fields with visual indicators
@@ -195,17 +196,13 @@ export function SelectGroupedField<TFieldValues extends FieldValues = FieldValue
 
               {/* Display helper text */}
               {helperText && (
-                <div id={descriptionId} data-slot="form-description">
+                <div id={descriptionId} className="text-muted-foreground text-sm">
                   {helperText}
                 </div>
               )}
 
               {/* Display error message */}
-              {error && (
-                <div id={errorId} data-slot="form-message">
-                  {error.message}
-                </div>
-              )}
+              <ErrorMessage error={error} id={errorId} />
             </>
           );
         }}
