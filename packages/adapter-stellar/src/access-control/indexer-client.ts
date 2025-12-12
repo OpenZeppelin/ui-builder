@@ -43,16 +43,16 @@ interface IndexerHistoryEntry {
   ledger?: string;
   /** Admin/owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED) */
   admin?: string;
+  /** Expiration ledger for pending transfers (OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
+  liveUntilLedger?: number;
 }
 
 /**
  * Ownership Transfer Started Event
  *
  * Contains details about a pending two-step ownership transfer from the indexer.
- *
- * Note: The indexer does not store `live_until_ledger` expiration value.
- * To determine if a pending transfer has expired, the caller must query
- * the contract's on-chain state directly using `get_pending_owner()`.
+ * Includes the expiration ledger (`liveUntilLedger`) for determining if the
+ * transfer has expired without requiring an additional on-chain query.
  */
 export interface OwnershipTransferStartedEvent {
   /** Previous owner (admin) who initiated the transfer */
@@ -65,6 +65,8 @@ export interface OwnershipTransferStartedEvent {
   timestamp: string;
   /** Ledger sequence of the event */
   ledger: number;
+  /** Expiration ledger - transfer must be accepted before this ledger */
+  liveUntilLedger: number;
 }
 
 interface IndexerPageInfo {
@@ -616,9 +618,22 @@ export class StellarIndexerClient {
         return null;
       }
 
+      // Validate liveUntilLedger is present (required for expiration checking)
+      if (
+        latestInitiation.liveUntilLedger === undefined ||
+        latestInitiation.liveUntilLedger === null
+      ) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without liveUntilLedger for ${contractAddress}. ` +
+            `This may indicate an older indexer version. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
       logger.info(
         LOG_SYSTEM,
-        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.account}`
+        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.account}, expires at ledger ${latestInitiation.liveUntilLedger}`
       );
 
       return {
@@ -627,6 +642,7 @@ export class StellarIndexerClient {
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
         ledger: parseInt(latestInitiation.ledger || latestInitiation.blockHeight, 10),
+        liveUntilLedger: latestInitiation.liveUntilLedger,
       };
     } catch (error) {
       if (error instanceof IndexerUnavailable || error instanceof OperationFailed) {
@@ -654,8 +670,7 @@ export class StellarIndexerClient {
    * - `account`: pending new owner
    * - `admin`: current owner who initiated the transfer
    * - `ledger`: block height of the event
-   *
-   * Note: `live_until_ledger` is NOT stored in the indexer schema.
+   * - `liveUntilLedger`: expiration ledger for the pending transfer
    */
   private buildOwnershipTransferStartedQuery(): string {
     return `
@@ -676,6 +691,7 @@ export class StellarIndexerClient {
             timestamp
             ledger
             blockHeight
+            liveUntilLedger
           }
         }
       }
