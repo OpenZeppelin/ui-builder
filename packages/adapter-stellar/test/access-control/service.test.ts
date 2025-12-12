@@ -271,14 +271,15 @@ describe('Access Control Service (T020)', () => {
   });
 
   describe('Action Assembly', () => {
-    it('should assemble grant_role action with correct parameters including caller', () => {
+    it('should assemble grant_role action with correct parameters including caller (v0.5.x signature)', () => {
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
+      // v0.5.x signature: grant_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'grant_role',
-        args: [TEST_ACCOUNT, TEST_ROLE, CALLER_PLACEHOLDER],
-        argTypes: ['Address', 'Symbol', 'Address'],
+        args: [CALLER_PLACEHOLDER, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
@@ -293,24 +294,26 @@ describe('Access Control Service (T020)', () => {
         explicitCaller
       );
 
+      // v0.5.x signature: grant_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'grant_role',
-        args: [TEST_ACCOUNT, TEST_ROLE, explicitCaller],
-        argTypes: ['Address', 'Symbol', 'Address'],
+        args: [explicitCaller, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
     });
 
-    it('should assemble revoke_role action with correct parameters including caller', () => {
+    it('should assemble revoke_role action with correct parameters including caller (v0.5.x signature)', () => {
       const txData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
+      // v0.5.x signature: revoke_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'revoke_role',
-        args: [TEST_ACCOUNT, TEST_ROLE, CALLER_PLACEHOLDER],
-        argTypes: ['Address', 'Symbol', 'Address'],
+        args: [CALLER_PLACEHOLDER, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
@@ -325,11 +328,12 @@ describe('Access Control Service (T020)', () => {
         explicitCaller
       );
 
+      // v0.5.x signature: revoke_role(caller, account, role)
       expect(txData).toEqual({
         contractAddress: TEST_CONTRACT,
         functionName: 'revoke_role',
-        args: [TEST_ACCOUNT, TEST_ROLE, explicitCaller],
-        argTypes: ['Address', 'Symbol', 'Address'],
+        args: [explicitCaller, TEST_ACCOUNT, TEST_ROLE],
+        argTypes: ['Address', 'Address', 'Symbol'],
         argSchema: undefined,
         transactionOptions: {},
       });
@@ -475,41 +479,41 @@ describe('Access Control Service (T020)', () => {
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
       // Verify all required fields are present
-      // OpenZeppelin Stellar AccessControl requires: account, role, caller
+      // OpenZeppelin Stellar AccessControl v0.5.x requires: caller, account, role
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
       expect(txData.functionName).toBe('grant_role');
       expect(txData.args).toHaveLength(3);
       expect(txData.argTypes).toHaveLength(3);
-      expect(txData.argTypes[0]).toBe('Address');
-      expect(txData.argTypes[1]).toBe('Symbol');
-      expect(txData.argTypes[2]).toBe('Address');
+      expect(txData.argTypes[0]).toBe('Address'); // caller
+      expect(txData.argTypes[1]).toBe('Address'); // account
+      expect(txData.argTypes[2]).toBe('Symbol'); // role
     });
 
     it('should validate revoke_role transaction structure', () => {
       const txData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
       // Verify all required fields are present
-      // OpenZeppelin Stellar AccessControl requires: account, role, caller
+      // OpenZeppelin Stellar AccessControl v0.5.x requires: caller, account, role
       expect(txData.contractAddress).toBe(TEST_CONTRACT);
       expect(txData.functionName).toBe('revoke_role');
       expect(txData.args).toHaveLength(3);
       expect(txData.argTypes).toHaveLength(3);
-      expect(txData.argTypes[0]).toBe('Address');
-      expect(txData.argTypes[1]).toBe('Symbol');
-      expect(txData.argTypes[2]).toBe('Address');
+      expect(txData.argTypes[0]).toBe('Address'); // caller
+      expect(txData.argTypes[1]).toBe('Address'); // account
+      expect(txData.argTypes[2]).toBe('Symbol'); // role
     });
 
-    it('should preserve argument order (account, role, caller)', () => {
+    it('should preserve argument order (caller, account, role) - v0.5.x signature', () => {
       const grantTxData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
       const revokeTxData = assembleRevokeRoleAction(TEST_CONTRACT, TEST_ROLE, TEST_ACCOUNT);
 
-      // Both functions should have consistent arg order: account, role, caller
-      expect(grantTxData.args[0]).toBe(TEST_ACCOUNT);
-      expect(grantTxData.args[1]).toBe(TEST_ROLE);
-      expect(grantTxData.args[2]).toBe(CALLER_PLACEHOLDER);
-      expect(revokeTxData.args[0]).toBe(TEST_ACCOUNT);
-      expect(revokeTxData.args[1]).toBe(TEST_ROLE);
-      expect(revokeTxData.args[2]).toBe(CALLER_PLACEHOLDER);
+      // Both functions should have consistent arg order: caller, account, role (v0.5.x)
+      expect(grantTxData.args[0]).toBe(CALLER_PLACEHOLDER); // caller
+      expect(grantTxData.args[1]).toBe(TEST_ACCOUNT); // account
+      expect(grantTxData.args[2]).toBe(TEST_ROLE); // role
+      expect(revokeTxData.args[0]).toBe(CALLER_PLACEHOLDER); // caller
+      expect(revokeTxData.args[1]).toBe(TEST_ACCOUNT); // account
+      expect(revokeTxData.args[2]).toBe(TEST_ROLE); // role
     });
   });
 
@@ -518,14 +522,16 @@ describe('Access Control Service (T020)', () => {
       const specialRole = 'admin_role';
       const txData = assembleGrantRoleAction(TEST_CONTRACT, specialRole, TEST_ACCOUNT);
 
-      expect(txData.args[1]).toBe(specialRole);
+      // v0.5.x: args = [caller, account, role] - role is at index 2
+      expect(txData.args[2]).toBe(specialRole);
     });
 
     it('should handle long Stellar addresses', () => {
       const longAddress = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
       const txData = assembleGrantRoleAction(TEST_CONTRACT, TEST_ROLE, longAddress);
 
-      expect(txData.args[0]).toBe(longAddress);
+      // v0.5.x: args = [caller, account, role] - account is at index 1
+      expect(txData.args[1]).toBe(longAddress);
     });
 
     it('should handle contract addresses correctly', () => {
@@ -1923,10 +1929,11 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
     });
 
     /**
-     * T016: getOwnership() returning pending state with pending owner and expiration
+     * T016: getOwnership() returning pending state with pending owner and expiration (fast path - no on-chain verification)
      * Verifies that when a pending transfer exists and not expired, state is 'pending'
+     * This tests the default behavior without on-chain verification for faster responses.
      */
-    it('T016: should return pending state with pending owner and expiration when transfer is pending', async () => {
+    it('T016: should return pending state with pending owner and expiration when transfer is pending (fast path)', async () => {
       const currentLedger = 12340000;
       const expirationLedger = 12350000; // Future ledger - not expired
 
@@ -1935,7 +1942,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         owner: TEST_OWNER,
       });
 
-      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      // Mock: Indexer returns pending transfer (includes liveUntilLedger)
       mockIndexerClient.checkAvailability.mockResolvedValue(true);
       mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
         pendingOwner: PENDING_OWNER,
@@ -1943,20 +1950,14 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         txHash: 'a'.repeat(64),
         timestamp: '2025-01-15T10:00:00Z',
         ledger: currentLedger - 100,
-      });
-
-      // Mock: On-chain readPendingOwner returns expiration (liveUntilLedger comes from on-chain)
-      const { readPendingOwner, getCurrentLedger } = await import(
-        '../../src/access-control/onchain-reader'
-      );
-      vi.mocked(readPendingOwner).mockResolvedValue({
-        pendingOwner: PENDING_OWNER,
         liveUntilLedger: expirationLedger,
       });
 
       // Mock: getCurrentLedger returns a ledger before expiration
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
       vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
 
+      // Default: no on-chain verification (fast path)
       const ownership = await service.getOwnership(TEST_CONTRACT);
 
       expect(ownership.owner).toBe(TEST_OWNER);
@@ -1968,10 +1969,126 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
     });
 
     /**
-     * T017: getOwnership() returning expired state when currentLedger > expirationLedger
+     * T016b: getOwnership() with on-chain verification enabled
+     * Verifies that verifyOnChain option checks on-chain state
+     */
+    it('T016b: should verify pending transfer on-chain when verifyOnChain is true', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = 12350000;
+
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: currentLedger - 100,
+        liveUntilLedger: expirationLedger,
+      });
+
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      vi.mocked(readPendingOwner).mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        liveUntilLedger: expirationLedger,
+      });
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // With on-chain verification
+      const ownership = await service.getOwnership(TEST_CONTRACT, { verifyOnChain: true });
+
+      expect(ownership.state).toBe('pending');
+      // Verify readPendingOwner was called
+      expect(readPendingOwner).toHaveBeenCalledWith(TEST_CONTRACT, mockNetworkConfig);
+    });
+
+    /**
+     * T016c: getOwnership() with on-chain verification - transfer no longer exists on-chain
+     * Verifies that when indexer has stale data, on-chain verification catches it
+     */
+    it('T016c: should return owned state when on-chain verification shows no pending transfer (stale indexer)', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = 12350000;
+
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Indexer thinks there's a pending transfer (stale data)
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: currentLedger - 100,
+        liveUntilLedger: expirationLedger,
+      });
+
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      // On-chain shows no pending transfer (it was completed or expired)
+      vi.mocked(readPendingOwner).mockResolvedValue(null);
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // With on-chain verification - should detect stale data
+      const ownership = await service.getOwnership(TEST_CONTRACT, { verifyOnChain: true });
+
+      expect(ownership.state).toBe('owned');
+      expect(ownership.pendingTransfer).toBeUndefined();
+    });
+
+    /**
+     * T016d: getOwnership() with on-chain verification - verification fails with error
+     * Verifies that when on-chain verification throws, we continue with indexer data
+     */
+    it('T016d: should continue with indexer data when on-chain verification fails with error', async () => {
+      const currentLedger = 12340000;
+      const expirationLedger = 12350000;
+
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: TEST_OWNER,
+      });
+
+      // Indexer returns valid pending transfer
+      mockIndexerClient.checkAvailability.mockResolvedValue(true);
+      mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
+        pendingOwner: PENDING_OWNER,
+        previousOwner: TEST_OWNER,
+        txHash: 'a'.repeat(64),
+        timestamp: '2025-01-15T10:00:00Z',
+        ledger: currentLedger - 100,
+        liveUntilLedger: expirationLedger,
+      });
+
+      const { readPendingOwner, getCurrentLedger } = await import(
+        '../../src/access-control/onchain-reader'
+      );
+      // On-chain verification throws an error (network issue, RPC unavailable, etc.)
+      vi.mocked(readPendingOwner).mockRejectedValue(new Error('RPC connection failed'));
+      vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
+
+      // With on-chain verification - should fall back to indexer data
+      const ownership = await service.getOwnership(TEST_CONTRACT, { verifyOnChain: true });
+
+      // Should return pending state from indexer data, not 'owned'
+      expect(ownership.state).toBe('pending');
+      expect(ownership.pendingTransfer).toBeDefined();
+      expect(ownership.pendingTransfer?.pendingOwner).toBe(PENDING_OWNER);
+      expect(ownership.pendingTransfer?.expirationBlock).toBe(expirationLedger);
+    });
+
+    /**
+     * T017: getOwnership() returning expired state when currentLedger > expirationLedger (fast path)
      * Verifies that when pending transfer has expired, state is 'expired'
      */
-    it('T017: should return expired state when pending transfer has expired', async () => {
+    it('T017: should return expired state when pending transfer has expired (fast path)', async () => {
       const expirationLedger = 12340000;
       const currentLedger = 12350000; // Current ledger is past expiration
 
@@ -1980,7 +2097,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         owner: TEST_OWNER,
       });
 
-      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      // Mock: Indexer returns pending transfer (includes liveUntilLedger)
       mockIndexerClient.checkAvailability.mockResolvedValue(true);
       mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
         pendingOwner: PENDING_OWNER,
@@ -1988,20 +2105,14 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         txHash: 'a'.repeat(64),
         timestamp: '2025-01-15T10:00:00Z',
         ledger: expirationLedger - 1000,
-      });
-
-      // Mock: On-chain readPendingOwner returns expiration (liveUntilLedger comes from on-chain)
-      const { readPendingOwner, getCurrentLedger } = await import(
-        '../../src/access-control/onchain-reader'
-      );
-      vi.mocked(readPendingOwner).mockResolvedValue({
-        pendingOwner: PENDING_OWNER,
         liveUntilLedger: expirationLedger,
       });
 
       // Mock: getCurrentLedger returns a ledger after expiration
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
       vi.mocked(getCurrentLedger).mockResolvedValue(currentLedger);
 
+      // Default: no on-chain verification (fast path)
       const ownership = await service.getOwnership(TEST_CONTRACT);
 
       expect(ownership.owner).toBe(TEST_OWNER);
@@ -2055,7 +2166,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
     });
 
     /**
-     * Additional test: Edge case - expiration at boundary
+     * Additional test: Edge case - expiration at boundary (fast path)
      */
     it('should handle boundary case where currentLedger equals expirationLedger (expired)', async () => {
       const ledger = 12340000;
@@ -2065,7 +2176,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         owner: TEST_OWNER,
       });
 
-      // Mock: Indexer returns pending transfer (without liveUntilLedger - not stored in indexer)
+      // Mock: Indexer returns pending transfer (includes liveUntilLedger)
       mockIndexerClient.checkAvailability.mockResolvedValue(true);
       mockIndexerClient.queryPendingOwnershipTransfer.mockResolvedValue({
         pendingOwner: PENDING_OWNER,
@@ -2073,20 +2184,14 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         txHash: 'a'.repeat(64),
         timestamp: '2025-01-15T10:00:00Z',
         ledger: ledger - 100,
-      });
-
-      // Mock: On-chain readPendingOwner returns expiration at boundary
-      const { readPendingOwner, getCurrentLedger } = await import(
-        '../../src/access-control/onchain-reader'
-      );
-      vi.mocked(readPendingOwner).mockResolvedValue({
-        pendingOwner: PENDING_OWNER,
         liveUntilLedger: ledger,
       });
 
       // Mock: Current ledger equals expiration ledger
+      const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
       vi.mocked(getCurrentLedger).mockResolvedValue(ledger);
 
+      // Default: no on-chain verification (fast path)
       const ownership = await service.getOwnership(TEST_CONTRACT);
 
       // At boundary, should be considered expired per FR-020
@@ -2111,6 +2216,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
         txHash: 'a'.repeat(64),
         timestamp: '2025-01-15T10:00:00Z',
         ledger: 12340000,
+        liveUntilLedger: 12350000,
       });
 
       const ownership = await service.getOwnership(TEST_CONTRACT);

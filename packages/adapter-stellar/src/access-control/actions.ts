@@ -16,13 +16,14 @@ import type { StellarTransactionData } from '../transaction/formatter';
  * transaction sender (connected wallet).
  *
  * @see EoaExecutionStrategy - replaces this placeholder before building the transaction
+ * @see RelayerExecutionStrategy - also replaces this placeholder before building the transaction
  */
 export const CALLER_PLACEHOLDER = '__CALLER__';
 
 /**
  * Assembles transaction data for granting a role to an account
  *
- * Note: OpenZeppelin Stellar AccessControl requires a `caller` parameter for authorization.
+ * Note: OpenZeppelin Stellar AccessControl (v0.5.x) requires a `caller` parameter for authorization.
  * The caller is the address authorizing the role grant (must have admin privileges).
  * Use CALLER_PLACEHOLDER to use the connected wallet address as the caller.
  *
@@ -43,14 +44,14 @@ export function assembleGrantRoleAction(
     `Assembling grant_role action for ${roleId} to ${account} (caller: ${caller})`
   );
 
-  // Arguments for grant_role(account: Address, role: Symbol, caller: Address)
+  // Arguments for grant_role(caller: Address, account: Address, role: Symbol) - v0.5.x signature
   // Note: args are raw values that will be converted to ScVal by the transaction execution flow
   // The caller parameter is required by OpenZeppelin Stellar AccessControl for authorization
   return {
     contractAddress,
     functionName: 'grant_role',
-    args: [account, roleId, caller],
-    argTypes: ['Address', 'Symbol', 'Address'],
+    args: [caller, account, roleId],
+    argTypes: ['Address', 'Address', 'Symbol'],
     argSchema: undefined,
     transactionOptions: {},
   };
@@ -59,7 +60,7 @@ export function assembleGrantRoleAction(
 /**
  * Assembles transaction data for revoking a role from an account
  *
- * Note: OpenZeppelin Stellar AccessControl requires a `caller` parameter for authorization.
+ * Note: OpenZeppelin Stellar AccessControl (v0.5.x) requires a `caller` parameter for authorization.
  * The caller is the address authorizing the role revocation (must have admin privileges).
  * Use CALLER_PLACEHOLDER to use the connected wallet address as the caller.
  *
@@ -80,14 +81,14 @@ export function assembleRevokeRoleAction(
     `Assembling revoke_role action for ${roleId} from ${account} (caller: ${caller})`
   );
 
-  // Arguments for revoke_role(account: Address, role: Symbol, caller: Address)
+  // Arguments for revoke_role(caller: Address, account: Address, role: Symbol) - v0.5.x signature
   // Note: args are raw values that will be converted to ScVal by the transaction execution flow
   // The caller parameter is required by OpenZeppelin Stellar AccessControl for authorization
   return {
     contractAddress,
     functionName: 'revoke_role',
-    args: [account, roleId, caller],
-    argTypes: ['Address', 'Symbol', 'Address'],
+    args: [caller, account, roleId],
+    argTypes: ['Address', 'Address', 'Symbol'],
     argSchema: undefined,
     transactionOptions: {},
   };

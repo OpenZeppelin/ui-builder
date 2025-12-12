@@ -225,6 +225,24 @@ export interface OperationResult {
 }
 
 /**
+ * Options for getOwnership() method
+ */
+export interface GetOwnershipOptions {
+  /**
+   * Whether to verify pending transfer state on-chain.
+   *
+   * When `true`: Makes an additional on-chain RPC call to verify the pending transfer
+   * still exists. This guards against stale indexer data but adds ~100-300ms latency.
+   *
+   * When `false` (default): Trusts the indexer data for pending transfers, providing
+   * faster responses. The indexer is typically only seconds behind the chain.
+   *
+   * @default false
+   */
+  verifyOnChain?: boolean;
+}
+
+/**
  * Service interface for access control operations
  */
 export interface AccessControlService {
@@ -238,9 +256,10 @@ export interface AccessControlService {
   /**
    * Get the current owner of the contract
    * @param contractAddress The contract address
+   * @param options Optional configuration for the query
    * @returns Promise resolving to ownership information
    */
-  getOwnership(contractAddress: string): Promise<OwnershipInfo>;
+  getOwnership(contractAddress: string, options?: GetOwnershipOptions): Promise<OwnershipInfo>;
 
   /**
    * Get current role assignments
