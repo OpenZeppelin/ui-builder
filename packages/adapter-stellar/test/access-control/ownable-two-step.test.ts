@@ -148,7 +148,8 @@ describe('Two-Step Ownable Support', () => {
                     admin: 'GOLDOWNER123456789ABCDEFGHIJK', // admin = previous owner
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000', // Note: liveUntilLedger is NOT stored in indexer
+                    ledger: '12340000',
+                    liveUntilLedger: 12350000, // Required for expiration checking
                   },
                 ],
                 pageInfo: { hasNextPage: false },

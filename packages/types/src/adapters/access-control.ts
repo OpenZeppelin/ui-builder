@@ -344,6 +344,30 @@ export interface AccessControlService {
   ): Promise<OperationResult>;
 
   /**
+   * Accept a pending ownership transfer (two-step transfer)
+   *
+   * Must be called by the pending owner (the address specified in transferOwnership)
+   * before the expiration block/ledger. Only applicable for contracts that support
+   * two-step ownership transfer (check `hasTwoStepOwnable` capability).
+   *
+   * The on-chain contract validates:
+   * 1. Caller is the pending owner
+   * 2. Transfer has not expired
+   *
+   * @param contractAddress The contract address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   */
+  acceptOwnership?(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
+
+  /**
    * Export a snapshot of current access control state
    * @param contractAddress The contract address
    * @returns Promise resolving to access snapshot
