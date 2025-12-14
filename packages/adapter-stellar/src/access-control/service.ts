@@ -488,21 +488,21 @@ export class StellarAccessControlService implements AccessControlService {
       return this.convertToEnrichedWithoutTimestamps(currentRoles);
     }
 
-    // Enrich each role with grant timestamps from the indexer
-    const enrichedAssignments: EnrichedRoleAssignment[] = [];
-
-    for (const roleAssignment of currentRoles) {
+    // Enrich all roles in parallel for improved performance
+    const enrichmentPromises = currentRoles.map(async (roleAssignment) => {
       const enrichedMembers = await this.enrichMembersWithGrantInfo(
         contractAddress,
         roleAssignment.role.id,
         roleAssignment.members
       );
 
-      enrichedAssignments.push({
+      return {
         role: roleAssignment.role,
         members: enrichedMembers,
-      });
-    }
+      };
+    });
+
+    const enrichedAssignments = await Promise.all(enrichmentPromises);
 
     logger.debug(
       'StellarAccessControlService.getCurrentRolesEnriched',

@@ -1,7 +1,6 @@
 import { xdr } from '@stellar/stellar-sdk';
+import stellarXdrJsonPackage from '@stellar/stellar-xdr-json/package.json' with { type: 'json' };
 import { parse, stringify } from 'lossless-json';
-
-import stellarXdrJsonPackage from '@stellar/stellar-xdr-json/package.json' assert { type: 'json' };
 
 import { logger } from '@openzeppelin/ui-builder-utils';
 
