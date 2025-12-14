@@ -229,6 +229,9 @@ export class SolanaAdapter implements ContractAdapter {
     return null;
   }
 
+  /**
+   * @inheritdoc
+   */
   async getCurrentBlock(): Promise<number> {
     return getSolanaCurrentBlock(this.networkConfig);
   }

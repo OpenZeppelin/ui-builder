@@ -62,6 +62,12 @@ export async function getSolanaCurrentBlock(networkConfig: SolanaNetworkConfig):
       throw new Error(data.error.message || 'RPC error');
     }
 
+    if (data.result === undefined || data.result === null) {
+      throw new Error('RPC response missing result field');
+    }
+    if (typeof data.result !== 'number') {
+      throw new Error(`Invalid slot number type: expected number, got ${typeof data.result}`);
+    }
     return data.result;
   } catch (error) {
     logger.error('getSolanaCurrentBlock', 'Failed to get current slot:', error);

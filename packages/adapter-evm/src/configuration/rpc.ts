@@ -240,7 +240,14 @@ export async function getEvmCurrentBlock(networkConfig: EvmNetworkConfig): Promi
     }
 
     // eth_blockNumber returns a hex string
-    return parseInt(data.result, 16);
+    if (data.result === undefined || data.result === null) {
+      throw new Error('RPC response missing result field');
+    }
+    const blockNumber = parseInt(data.result, 16);
+    if (isNaN(blockNumber)) {
+      throw new Error(`Invalid block number returned: ${data.result}`);
+    }
+    return blockNumber;
   } catch (error) {
     logger.error('getEvmCurrentBlock', 'Failed to get current block:', error);
     throw new Error(
