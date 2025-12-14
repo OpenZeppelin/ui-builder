@@ -32,6 +32,7 @@ import {
   testMidnightNetworkServiceConnection,
   validateMidnightNetworkServiceConfig,
 } from './configuration/network-services';
+import { getMidnightCurrentBlock } from './configuration/rpc';
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
 import { generateMidnightDefaultField } from './mapping/field-generator';
 import {
@@ -442,6 +443,13 @@ export class MidnightAdapter implements ContractAdapter {
    */
   public getExplorerTxUrl(_txHash: string): string | null {
     return null; // No official explorer yet
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async getCurrentBlock(): Promise<number> {
+    return getMidnightCurrentBlock();
   }
 
   /**

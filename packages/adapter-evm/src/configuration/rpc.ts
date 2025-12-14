@@ -207,3 +207,51 @@ export async function testEvmRpcConnection(
     clearTimeout(timeoutId);
   }
 }
+
+/**
+ * Gets the current block number from an EVM network.
+ *
+ * @param networkConfig - The EVM network configuration
+ * @returns Promise resolving to the current block number
+ * @throws Error if the RPC call fails
+ */
+export async function getEvmCurrentBlock(networkConfig: EvmNetworkConfig): Promise<number> {
+  const rpcUrl = resolveRpcUrl(networkConfig);
+
+  try {
+    const response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_blockNumber',
+        params: [],
+        id: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`RPC request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error.message || 'RPC error');
+    }
+
+    // eth_blockNumber returns a hex string
+    if (data.result === undefined || data.result === null) {
+      throw new Error('RPC response missing result field');
+    }
+    const blockNumber = parseInt(data.result, 16);
+    if (isNaN(blockNumber)) {
+      throw new Error(`Invalid block number returned: ${data.result}`);
+    }
+    return blockNumber;
+  } catch (error) {
+    logger.error('getEvmCurrentBlock', 'Failed to get current block:', error);
+    throw new Error(
+      `Failed to get current block: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}

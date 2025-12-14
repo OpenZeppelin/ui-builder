@@ -47,6 +47,7 @@ import { resolveFullUiKitConfiguration } from './wallet/services/configResolutio
 
 import { loadEvmContract } from './abi';
 import {
+  getEvmCurrentBlock,
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   getEvmSupportedExecutionMethods,
@@ -487,6 +488,13 @@ export class EvmAdapter implements ContractAdapter {
       return getEvmExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async getCurrentBlock(): Promise<number> {
+    return getEvmCurrentBlock(this.networkConfig);
   }
 
   /**

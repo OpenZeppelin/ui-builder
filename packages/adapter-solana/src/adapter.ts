@@ -27,6 +27,7 @@ import {
 } from './configuration/network-services';
 
 import {
+  getSolanaCurrentBlock,
   getSolanaExplorerAddressUrl,
   getSolanaExplorerTxUrl,
   getSolanaSupportedExecutionMethods,
@@ -226,6 +227,13 @@ export class SolanaAdapter implements ContractAdapter {
       return getSolanaExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async getCurrentBlock(): Promise<number> {
+    return getSolanaCurrentBlock(this.networkConfig);
   }
 
   async waitForTransactionConfirmation?(txHash: string): Promise<{
