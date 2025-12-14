@@ -15,7 +15,11 @@ import type {
   StellarNetworkConfig,
 } from '@openzeppelin/ui-builder-types';
 import { OperationFailed } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import {
+  DEFAULT_CONCURRENCY_LIMIT,
+  logger,
+  promiseAllWithLimit,
+} from '@openzeppelin/ui-builder-utils';
 
 import { queryStellarViewFunction } from '../query/handler';
 
@@ -319,6 +323,9 @@ export async function getRoleMember(
 /**
  * Enumerates all members of a specific role
  *
+ * Fetches all members in parallel with controlled concurrency for improved
+ * performance while avoiding overwhelming RPC endpoints.
+ *
  * @param contractAddress The contract address
  * @param roleId The role identifier (Symbol)
  * @param networkConfig The network configuration
@@ -331,21 +338,29 @@ export async function enumerateRoleMembers(
 ): Promise<string[]> {
   logger.info('enumerateRoleMembers', `Enumerating members for role ${roleId}`);
 
-  const members: string[] = [];
-
   try {
     // Get the count of members
     const count = await getRoleMemberCount(contractAddress, roleId, networkConfig);
 
     logger.debug('enumerateRoleMembers', `Role ${roleId} has ${count} members`);
 
-    // Fetch each member
-    for (let i = 0; i < count; i++) {
-      const member = await getRoleMember(contractAddress, roleId, i, networkConfig);
-      if (member) {
-        members.push(member);
-      }
+    if (count === 0) {
+      return [];
     }
+
+    // Create task functions for controlled concurrent execution
+    const memberTasks = Array.from(
+      { length: count },
+      (_, i) => () => getRoleMember(contractAddress, roleId, i, networkConfig)
+    );
+
+    // Fetch members with concurrency limit to avoid overwhelming RPC endpoints
+    const results = await promiseAllWithLimit(memberTasks, DEFAULT_CONCURRENCY_LIMIT);
+
+    // Filter out null results and return valid members
+    const members = results.filter((m): m is string => m !== null);
+
+    logger.debug('enumerateRoleMembers', `Retrieved ${members.length} members for role ${roleId}`);
 
     return members;
   } catch (error) {
@@ -362,6 +377,8 @@ export async function enumerateRoleMembers(
 /**
  * Reads all current role assignments for a contract
  *
+ * Fetches all roles in parallel for improved performance.
+ *
  * @param contractAddress The contract address
  * @param roleIds Array of role identifiers to query
  * @param networkConfig The network configuration
@@ -372,11 +389,17 @@ export async function readCurrentRoles(
   roleIds: string[],
   networkConfig: StellarNetworkConfig
 ): Promise<RoleAssignment[]> {
-  logger.info('readCurrentRoles', `Reading roles for contract ${contractAddress}`);
+  logger.info(
+    'readCurrentRoles',
+    `Reading ${roleIds.length} roles for contract ${contractAddress}`
+  );
 
-  const assignments: RoleAssignment[] = [];
+  if (roleIds.length === 0) {
+    return [];
+  }
 
-  for (const roleId of roleIds) {
+  // Process all roles in parallel for improved performance
+  const assignmentPromises = roleIds.map(async (roleId) => {
     const role: RoleIdentifier = {
       id: roleId,
       label: roleId.replace(/_/g, ' ').toLowerCase(),
@@ -385,21 +408,28 @@ export async function readCurrentRoles(
     try {
       const members = await enumerateRoleMembers(contractAddress, roleId, networkConfig);
 
-      assignments.push({
+      logger.debug('readCurrentRoles', `Role ${roleId} has ${members.length} members`);
+
+      return {
         role,
         members,
-      });
-
-      logger.debug('readCurrentRoles', `Role ${roleId} has ${members.length} members`);
+      };
     } catch (error) {
       logger.warn('readCurrentRoles', `Failed to read role ${roleId}:`, error);
-      // Add role with empty members array to maintain array length consistency
-      assignments.push({
+      // Return role with empty members array to maintain array length consistency
+      return {
         role,
         members: [],
-      });
+      };
     }
-  }
+  });
+
+  const assignments = await Promise.all(assignmentPromises);
+
+  logger.info(
+    'readCurrentRoles',
+    `Completed reading ${assignments.length} roles with ${assignments.reduce((sum, a) => sum + a.members.length, 0)} total members`
+  );
 
   return assignments;
 }

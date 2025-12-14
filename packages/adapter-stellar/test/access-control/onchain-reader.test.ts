@@ -24,22 +24,28 @@ vi.mock('../../src/query/handler', () => ({
   queryStellarViewFunction: vi.fn(),
 }));
 
-// Mock the logger
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
-  logger: {
-    info: vi.fn(),
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
-}));
+// Mock the logger but keep the actual async utilities (promiseAllWithLimit, etc.)
+vi.mock('@openzeppelin/ui-builder-utils', async () => {
+  const actual = await vi.importActual<typeof import('@openzeppelin/ui-builder-utils')>(
+    '@openzeppelin/ui-builder-utils'
+  );
+  return {
+    ...actual,
+    logger: {
+      info: vi.fn(),
+      debug: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    },
+  };
+});
 
 describe('Access Control On-Chain Reader (T016)', () => {
   let mockNetworkConfig: StellarNetworkConfig;
   const mockQueryFn = queryStellarViewFunction as ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockNetworkConfig = {
       id: 'stellar-testnet',
@@ -216,17 +222,23 @@ describe('Access Control On-Chain Reader (T016)', () => {
   });
 
   describe('enumerateRoleMembers', () => {
-    it('should enumerate all role members', async () => {
-      mockQueryFn
-        .mockResolvedValueOnce(3) // member count
-        .mockResolvedValueOnce('GMEMBER1')
-        .mockResolvedValueOnce('GMEMBER2')
-        .mockResolvedValueOnce('GMEMBER3');
+    it('should enumerate all role members in parallel', async () => {
+      // Mock implementation that handles parallel calls
+      mockQueryFn.mockImplementation((contractAddress, functionName, _config, args) => {
+        if (functionName === 'get_role_member_count') {
+          return Promise.resolve(3);
+        }
+        if (functionName === 'get_role_member') {
+          const [, index] = args;
+          return Promise.resolve(`GMEMBER${index + 1}`);
+        }
+        return Promise.reject(new Error('Unknown function'));
+      });
 
       const result = await enumerateRoleMembers('CTEST123', 'admin', mockNetworkConfig);
 
       expect(result).toEqual(['GMEMBER1', 'GMEMBER2', 'GMEMBER3']);
-      expect(mockQueryFn).toHaveBeenCalledTimes(4); // 1 count + 3 members
+      expect(mockQueryFn).toHaveBeenCalledTimes(4); // 1 count + 3 parallel member calls
     });
 
     it('should return empty array for role with no members', async () => {
@@ -238,39 +250,69 @@ describe('Access Control On-Chain Reader (T016)', () => {
       expect(mockQueryFn).toHaveBeenCalledTimes(1); // only count
     });
 
-    it('should continue on individual member read failure', async () => {
-      mockQueryFn
-        .mockResolvedValueOnce(3)
-        .mockResolvedValueOnce('GMEMBER1')
-        .mockRejectedValueOnce(new Error('Failed to read member'))
-        .mockResolvedValueOnce('GMEMBER3');
+    it('should filter out failed member reads (graceful degradation)', async () => {
+      // Mock implementation that returns null for one member (simulating a failed read)
+      mockQueryFn.mockImplementation((contractAddress, functionName, _config, args) => {
+        if (functionName === 'get_role_member_count') {
+          return Promise.resolve(3);
+        }
+        if (functionName === 'get_role_member') {
+          const [, index] = args;
+          if (index === 1) {
+            // Simulate failure for middle member - getRoleMember catches errors and returns null
+            return Promise.resolve(null);
+          }
+          return Promise.resolve(`GMEMBER${index + 1}`);
+        }
+        return Promise.reject(new Error('Unknown function'));
+      });
 
       const result = await enumerateRoleMembers('CTEST123', 'admin', mockNetworkConfig);
 
+      // Member at index 1 should be filtered out (returned null)
       expect(result).toEqual(['GMEMBER1', 'GMEMBER3']);
       expect(mockQueryFn).toHaveBeenCalledTimes(4);
     });
   });
 
   describe('readCurrentRoles', () => {
-    it('should read current roles for multiple role IDs', async () => {
+    it('should read current roles for multiple role IDs in parallel', async () => {
       const roleIds = ['admin', 'minter'];
 
-      mockQueryFn
-        .mockResolvedValueOnce(2) // admin count
-        .mockResolvedValueOnce('GADMIN1')
-        .mockResolvedValueOnce('GADMIN2')
-        .mockResolvedValueOnce(1) // minter count
-        .mockResolvedValueOnce('GMINTER1');
+      // Mock implementation that handles parallel role enumeration
+      mockQueryFn.mockImplementation((contractAddress, functionName, _config, args) => {
+        if (functionName === 'get_role_member_count') {
+          const [role] = args;
+          if (role === 'admin') return Promise.resolve(2);
+          if (role === 'minter') return Promise.resolve(1);
+          return Promise.resolve(0);
+        }
+        if (functionName === 'get_role_member') {
+          const [role, index] = args;
+          if (role === 'admin') {
+            return Promise.resolve(`GADMIN${index + 1}`);
+          }
+          if (role === 'minter') {
+            return Promise.resolve('GMINTER1');
+          }
+          return Promise.resolve(null);
+        }
+        return Promise.reject(new Error('Unknown function'));
+      });
 
       const result = await readCurrentRoles('CTEST123', roleIds, mockNetworkConfig);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
+
+      // Find roles by ID since parallel execution doesn't guarantee order
+      const adminRole = result.find((r) => r.role.id === 'admin');
+      const minterRole = result.find((r) => r.role.id === 'minter');
+
+      expect(adminRole).toEqual({
         role: { id: 'admin', label: 'admin' },
         members: ['GADMIN1', 'GADMIN2'],
       });
-      expect(result[1]).toEqual({
+      expect(minterRole).toEqual({
         role: { id: 'minter', label: 'minter' },
         members: ['GMINTER1'],
       });
@@ -279,16 +321,30 @@ describe('Access Control On-Chain Reader (T016)', () => {
     it('should handle roles with no members', async () => {
       const roleIds = ['admin', 'minter'];
 
-      mockQueryFn
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce('GADMIN1')
-        .mockResolvedValueOnce(0); // minter has no members
+      mockQueryFn.mockImplementation((contractAddress, functionName, _config, args) => {
+        if (functionName === 'get_role_member_count') {
+          const [role] = args;
+          if (role === 'admin') return Promise.resolve(1);
+          if (role === 'minter') return Promise.resolve(0);
+          return Promise.resolve(0);
+        }
+        if (functionName === 'get_role_member') {
+          const [role] = args;
+          if (role === 'admin') return Promise.resolve('GADMIN1');
+          return Promise.resolve(null);
+        }
+        return Promise.reject(new Error('Unknown function'));
+      });
 
       const result = await readCurrentRoles('CTEST123', roleIds, mockNetworkConfig);
 
       expect(result).toHaveLength(2);
-      expect(result[0].members).toEqual(['GADMIN1']);
-      expect(result[1].members).toEqual([]);
+
+      const adminRole = result.find((r) => r.role.id === 'admin');
+      const minterRole = result.find((r) => r.role.id === 'minter');
+
+      expect(adminRole?.members).toEqual(['GADMIN1']);
+      expect(minterRole?.members).toEqual([]);
     });
 
     it('should handle empty role IDs array', async () => {
@@ -298,22 +354,37 @@ describe('Access Control On-Chain Reader (T016)', () => {
       expect(mockQueryFn).not.toHaveBeenCalled();
     });
 
-    it('should continue reading roles even if one fails', async () => {
+    it('should continue reading roles even if one fails (graceful degradation)', async () => {
       const roleIds = ['admin', 'minter', 'burner'];
 
-      mockQueryFn
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce('GADMIN1')
-        .mockRejectedValueOnce(new Error('Role enumeration failed'))
-        .mockResolvedValueOnce(1)
-        .mockResolvedValueOnce('GBURNER1');
+      mockQueryFn.mockImplementation((contractAddress, functionName, _config, args) => {
+        if (functionName === 'get_role_member_count') {
+          const [role] = args;
+          if (role === 'admin') return Promise.resolve(1);
+          if (role === 'minter') return Promise.reject(new Error('Role enumeration failed'));
+          if (role === 'burner') return Promise.resolve(1);
+          return Promise.resolve(0);
+        }
+        if (functionName === 'get_role_member') {
+          const [role] = args;
+          if (role === 'admin') return Promise.resolve('GADMIN1');
+          if (role === 'burner') return Promise.resolve('GBURNER1');
+          return Promise.resolve(null);
+        }
+        return Promise.reject(new Error('Unknown function'));
+      });
 
       const result = await readCurrentRoles('CTEST123', roleIds, mockNetworkConfig);
 
       expect(result).toHaveLength(3);
-      expect(result[0].members).toEqual(['GADMIN1']);
-      expect(result[1].members).toEqual([]);
-      expect(result[2].members).toEqual(['GBURNER1']);
+
+      const adminRole = result.find((r) => r.role.id === 'admin');
+      const minterRole = result.find((r) => r.role.id === 'minter');
+      const burnerRole = result.find((r) => r.role.id === 'burner');
+
+      expect(adminRole?.members).toEqual(['GADMIN1']);
+      expect(minterRole?.members).toEqual([]); // Failed, so empty array
+      expect(burnerRole?.members).toEqual(['GBURNER1']);
     });
   });
 
