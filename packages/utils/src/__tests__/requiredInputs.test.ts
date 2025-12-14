@@ -51,6 +51,7 @@ function makeAdapter(
     queryViewFunction: async () => ({}),
     formatFunctionResult: () => '',
     getExplorerUrl: () => null,
+    getCurrentBlock: async () => 12345,
     getAvailableUiKits: async () => [],
     getRelayers: async () => [],
     getRelayer: async () => ({}) as unknown as RelayerDetailsRich,

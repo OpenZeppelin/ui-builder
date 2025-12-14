@@ -1,4 +1,4 @@
-import type { UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
+import type { SolanaNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 /**
@@ -26,4 +26,47 @@ export async function testSolanaRpcConnection(_rpcConfig: UserRpcProviderConfig)
   // Could use getVersion or getHealth RPC method
   logger.info('testSolanaRpcConnection', 'TODO: Implement RPC connection testing');
   return { success: true };
+}
+
+/**
+ * Gets the current slot (block) number from a Solana network.
+ *
+ * @param networkConfig - The Solana network configuration
+ * @returns Promise resolving to the current slot number
+ * @throws Error if the RPC call fails
+ */
+export async function getSolanaCurrentBlock(networkConfig: SolanaNetworkConfig): Promise<number> {
+  const rpcEndpoint = networkConfig.rpcEndpoint;
+  if (!rpcEndpoint) {
+    throw new Error('RPC endpoint not configured for this network');
+  }
+
+  try {
+    const response = await fetch(rpcEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'getSlot',
+        params: [],
+        id: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`RPC request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error.message || 'RPC error');
+    }
+
+    return data.result;
+  } catch (error) {
+    logger.error('getSolanaCurrentBlock', 'Failed to get current slot:', error);
+    throw new Error(
+      `Failed to get current block (slot): ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }

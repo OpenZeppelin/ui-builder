@@ -359,6 +359,26 @@ export interface ContractAdapter {
   getExplorerTxUrl?(txHash: string): string | null;
 
   /**
+   * Gets the current block/ledger number from the blockchain.
+   *
+   * This is used for:
+   * - Calculating appropriate expiration blocks for time-sensitive operations
+   * - Validating expiration parameters before submitting transactions
+   * - Determining if pending operations have expired
+   *
+   * @returns A promise resolving to the current block/ledger number
+   * @throws Error if the RPC call fails
+   *
+   * @example
+   * ```typescript
+   * const currentBlock = await adapter.getCurrentBlock();
+   * // Set expiration to ~1 hour from now
+   * const expirationBlock = currentBlock + 300; // ~300 blocks at 12s/block for EVM
+   * ```
+   */
+  getCurrentBlock(): Promise<number>;
+
+  /**
    * (Optional) Waits for a transaction to be confirmed on the blockchain.
    *
    * @param txHash - The hash of the transaction to wait for.

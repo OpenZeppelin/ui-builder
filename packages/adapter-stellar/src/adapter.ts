@@ -29,6 +29,7 @@ import type {
 import { isStellarNetworkConfig } from '@openzeppelin/ui-builder-types';
 import { logger } from '@openzeppelin/ui-builder-utils';
 
+import { getCurrentLedger } from './access-control/onchain-reader';
 import { createStellarAccessControlService } from './access-control/service';
 import {
   getStellarNetworkServiceForms,
@@ -422,6 +423,13 @@ export class StellarAdapter implements ContractAdapter {
       return getStellarExplorerTxUrl(txHash, this.networkConfig);
     }
     return null;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async getCurrentBlock(): Promise<number> {
+    return getCurrentLedger(this.networkConfig);
   }
 
   /**

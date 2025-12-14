@@ -26,3 +26,17 @@ export async function testMidnightRpcConnection(_rpcConfig: UserRpcProviderConfi
   logger.info('testMidnightRpcConnection', 'TODO: Implement RPC connection testing');
   return { success: true };
 }
+
+/**
+ * Gets the current block number from a Midnight network.
+ *
+ * @returns Promise that rejects - not yet implemented for Midnight
+ * @throws Error always - Midnight indexer does not currently expose block number API
+ */
+export async function getMidnightCurrentBlock(): Promise<number> {
+  // TODO: Implement when Midnight indexer/RPC provides block number API
+  throw new Error(
+    'getCurrentBlock is not yet implemented for Midnight. ' +
+      'The Midnight indexer does not currently expose a block number endpoint.'
+  );
+}

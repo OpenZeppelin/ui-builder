@@ -63,6 +63,7 @@ module.exports = {
       'onWalletConnectionChange',
       'getExplorerUrl',
       'getExplorerTxUrl',
+      'getCurrentBlock',
       'waitForTransactionConfirmation',
       'configureUiKit',
       'getEcosystemReactUiContextProvider',
