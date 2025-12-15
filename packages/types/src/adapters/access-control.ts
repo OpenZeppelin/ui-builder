@@ -225,6 +225,7 @@ export interface AccessSnapshot {
  * - OWNERSHIP_TRANSFER_COMPLETED: Two-step ownership transfer accepted
  * - ADMIN_TRANSFER_INITIATED: Two-step admin transfer initiated
  * - ADMIN_TRANSFER_COMPLETED: Two-step admin transfer accepted
+ * - UNKNOWN: Unrecognized event type from indexer (indicates schema mismatch)
  */
 export type HistoryChangeType =
   | 'GRANTED'
@@ -232,7 +233,8 @@ export type HistoryChangeType =
   | 'OWNERSHIP_TRANSFER_STARTED'
   | 'OWNERSHIP_TRANSFER_COMPLETED'
   | 'ADMIN_TRANSFER_INITIATED'
-  | 'ADMIN_TRANSFER_COMPLETED';
+  | 'ADMIN_TRANSFER_COMPLETED'
+  | 'UNKNOWN';
 
 /**
  * History entry for role changes (adapter-specific, when history is supported)

@@ -1267,9 +1267,12 @@ export class StellarIndexerClient {
           changeType = 'ADMIN_TRANSFER_COMPLETED';
           break;
         default:
-          // Default to GRANTED for unknown types (shouldn't happen)
-          logger.warn(LOG_SYSTEM, `Unknown event type: ${entry.type}, defaulting to GRANTED`);
-          changeType = 'GRANTED';
+          // Use UNKNOWN for unrecognized types to make indexer schema issues visible
+          logger.warn(
+            LOG_SYSTEM,
+            `Unknown event type: ${entry.type}, assigning changeType to UNKNOWN`
+          );
+          changeType = 'UNKNOWN';
       }
 
       return {

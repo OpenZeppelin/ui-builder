@@ -169,6 +169,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
         'OWNERSHIP_TRANSFER_COMPLETED',
         'ADMIN_TRANSFER_INITIATED',
         'ADMIN_TRANSFER_COMPLETED',
+        'UNKNOWN',
       ]).toContain(firstEntry.changeType);
 
       // Validate Stellar address format (starts with G or C)
@@ -839,6 +840,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
           'ADMIN_TRANSFER_COMPLETED',
           'OWNERSHIP_TRANSFER_STARTED',
           'OWNERSHIP_TRANSFER_COMPLETED',
+          'UNKNOWN',
         ]).toContain(firstEvent.changeType);
       } else {
         console.log('  ⏭️  No events indexed yet for this contract');
