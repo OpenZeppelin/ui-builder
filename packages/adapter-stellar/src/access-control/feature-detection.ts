@@ -62,6 +62,9 @@ export function detectAccessControlCapabilities(
     functionNames.has(fnName)
   );
 
+  // Detect two-step admin transfer (has accept_admin_transfer function)
+  const hasTwoStepAdmin = hasAccessControl && functionNames.has('accept_admin_transfer');
+
   // Detect enumerable roles
   const hasEnumerableRoles = ENUMERATION_FUNCTIONS.every((fnName) => functionNames.has(fnName));
 
@@ -73,7 +76,8 @@ export function detectAccessControlCapabilities(
     functionNames,
     hasOwnable,
     hasAccessControl,
-    hasTwoStepOwnable
+    hasTwoStepOwnable,
+    hasTwoStepAdmin
   );
 
   // Collect notes about detected capabilities
@@ -88,7 +92,13 @@ export function detectAccessControlCapabilities(
   }
 
   if (hasAccessControl) {
-    notes.push('OpenZeppelin AccessControl interface detected');
+    if (hasTwoStepAdmin) {
+      notes.push(
+        'OpenZeppelin two-step AccessControl interface detected (with accept_admin_transfer)'
+      );
+    } else {
+      notes.push('OpenZeppelin AccessControl interface detected');
+    }
   }
 
   if (hasEnumerableRoles) {
@@ -109,6 +119,7 @@ export function detectAccessControlCapabilities(
     hasOwnable,
     hasTwoStepOwnable,
     hasAccessControl,
+    hasTwoStepAdmin,
     hasEnumerableRoles,
     supportsHistory,
     verifiedAgainstOZInterfaces,
@@ -123,13 +134,15 @@ export function detectAccessControlCapabilities(
  * @param hasOwnable Whether Ownable was detected
  * @param hasAccessControl Whether AccessControl was detected
  * @param hasTwoStepOwnable Whether two-step Ownable was detected
+ * @param hasTwoStepAdmin Whether two-step admin was detected
  * @returns True if verified against OZ interfaces
  */
 function verifyOZInterface(
   functionNames: Set<string>,
   hasOwnable: boolean,
   hasAccessControl: boolean,
-  hasTwoStepOwnable = false
+  hasTwoStepOwnable = false,
+  hasTwoStepAdmin = false
 ): boolean {
   // If no OZ patterns detected, not applicable
   if (!hasOwnable && !hasAccessControl) {
@@ -158,14 +171,25 @@ function verifyOZInterface(
     }
   }
 
-  // Verify AccessControl optional functions (at least 4 of 7 should be present)
+  // Verify AccessControl optional functions
+  // For two-step admin, require at least 5 of 7 optional functions
+  // For basic AccessControl, at least 4 of 7 should be present
   if (hasAccessControl) {
     const accessControlOptionalCount = ACCESS_CONTROL_FUNCTIONS.optional.filter((fnName) =>
       functionNames.has(fnName)
     ).length;
 
-    if (accessControlOptionalCount < 4) {
-      return false;
+    if (hasTwoStepAdmin) {
+      // Two-step admin should have at least 5 of 7 optional functions
+      // (transfer_admin_role, accept_admin_transfer guaranteed, plus others)
+      if (accessControlOptionalCount < 5) {
+        return false;
+      }
+    } else {
+      // Basic AccessControl should have at least 4 of 7 optional functions
+      if (accessControlOptionalCount < 4) {
+        return false;
+      }
     }
   }
 

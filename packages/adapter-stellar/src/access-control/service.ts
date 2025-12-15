@@ -9,11 +9,11 @@ import type {
   AccessControlCapabilities,
   AccessControlService,
   AccessSnapshot,
+  AdminInfo,
   ContractSchema,
   EnrichedRoleAssignment,
   EnrichedRoleMember,
   ExecutionConfig,
-  GetOwnershipOptions,
   HistoryQueryOptions,
   OperationResult,
   OwnershipInfo,
@@ -28,20 +28,16 @@ import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import {
+  assembleAcceptAdminTransferAction,
   assembleAcceptOwnershipAction,
   assembleGrantRoleAction,
   assembleRevokeRoleAction,
+  assembleTransferAdminRoleAction,
   assembleTransferOwnershipAction,
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, StellarIndexerClient } from './indexer-client';
-import {
-  getAdmin,
-  getCurrentLedger,
-  readCurrentRoles,
-  readOwnership,
-  readPendingOwner,
-} from './onchain-reader';
+import { getAdmin, getCurrentLedger, readCurrentRoles, readOwnership } from './onchain-reader';
 import {
   validateAccountAddress,
   validateAddress,
@@ -214,18 +210,12 @@ export class StellarAccessControlService implements AccessControlService {
    * info with 'owned' state and logging a warning.
    *
    * @param contractAddress The contract address
-   * @param options Optional configuration for the query
-   * @param options.verifyOnChain When true, verifies pending transfer exists on-chain (adds ~100-300ms latency). Defaults to false for better performance.
    * @returns Promise resolving to ownership information with state
    * @throws ConfigurationInvalid if the contract address is invalid
    *
    * @example
    * ```typescript
-   * // Fast query (default) - trusts indexer data
    * const ownership = await service.getOwnership(contractAddress);
-   *
-   * // Verified query - confirms pending transfer on-chain
-   * const verifiedOwnership = await service.getOwnership(contractAddress, { verifyOnChain: true });
    *
    * console.log('Owner:', ownership.owner);
    * console.log('State:', ownership.state); // 'owned' | 'pending' | 'expired' | 'renounced'
@@ -236,19 +226,14 @@ export class StellarAccessControlService implements AccessControlService {
    * }
    * ```
    */
-  async getOwnership(
-    contractAddress: string,
-    options?: GetOwnershipOptions
-  ): Promise<OwnershipInfo> {
+  async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
     // Validate contract address
     validateContractAddress(contractAddress);
-
-    const verifyOnChain = options?.verifyOnChain ?? false;
 
     // T025: INFO logging for ownership queries per NFR-004
     logger.info(
       'StellarAccessControlService.getOwnership',
-      `Reading ownership status for ${contractAddress}${verifyOnChain ? ' (with on-chain verification)' : ''}`
+      `Reading ownership status for ${contractAddress}`
     );
 
     // T020: Call get_owner() for current owner
@@ -308,36 +293,6 @@ export class StellarAccessControlService implements AccessControlService {
         owner: basicOwnership.owner,
         state: 'owned',
       };
-    }
-
-    // Optionally verify on-chain that the pending transfer still exists
-    // This guards against stale indexer data but adds latency
-    if (verifyOnChain) {
-      let onChainPending;
-      let verificationFailed = false;
-      try {
-        onChainPending = await readPendingOwner(contractAddress, this.networkConfig);
-      } catch (error) {
-        // If on-chain query fails, log warning and continue with indexer data
-        verificationFailed = true;
-        logger.warn(
-          'StellarAccessControlService.getOwnership',
-          `Failed to verify on-chain pending owner: ${error instanceof Error ? error.message : String(error)}. Using indexer data.`
-        );
-      }
-
-      // If verification succeeded but no on-chain pending owner, the transfer may have been completed or expired
-      // Skip this check if verification failed - we'll continue with indexer data instead
-      if (!verificationFailed && !onChainPending) {
-        logger.debug(
-          'StellarAccessControlService.getOwnership',
-          `Contract ${contractAddress} has no on-chain pending owner (transfer may have completed or expired)`
-        );
-        return {
-          owner: basicOwnership.owner,
-          state: 'owned',
-        };
-      }
     }
 
     // T022: Get current ledger to check expiration
@@ -832,6 +787,318 @@ export class StellarAccessControlService implements AccessControlService {
     logger.info(
       'StellarAccessControlService.acceptOwnership',
       `Ownership transfer accepted. TxHash: ${result.txHash}`
+    );
+
+    return { id: result.txHash };
+  }
+
+  /**
+   * Gets the current admin and admin transfer state of an AccessControl contract
+   *
+   * Retrieves the current admin via on-chain query, then checks for pending
+   * two-step admin transfers via indexer to determine the admin state:
+   * - 'active': Has admin, no pending transfer
+   * - 'pending': Has admin, pending transfer not yet expired
+   * - 'expired': Has admin, pending transfer has expired
+   * - 'renounced': No admin (null)
+   *
+   * Gracefully degrades when indexer is unavailable, returning basic admin
+   * info with 'active' state and logging a warning.
+   *
+   * @param contractAddress The contract address
+   * @returns Promise resolving to admin information with state
+   * @throws ConfigurationInvalid if the contract address is invalid
+   *
+   * @example
+   * ```typescript
+   * const adminInfo = await service.getAdminInfo(contractAddress);
+   * console.log('Admin:', adminInfo.admin);
+   * console.log('State:', adminInfo.state); // 'active' | 'pending' | 'expired' | 'renounced'
+   *
+   * if (adminInfo.state === 'pending' && adminInfo.pendingTransfer) {
+   *   console.log('Pending admin:', adminInfo.pendingTransfer.pendingAdmin);
+   *   console.log('Expires at ledger:', adminInfo.pendingTransfer.expirationBlock);
+   * }
+   * ```
+   */
+  async getAdminInfo(contractAddress: string): Promise<AdminInfo> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    logger.info(
+      'StellarAccessControlService.getAdminInfo',
+      `Reading admin status for ${contractAddress}`
+    );
+
+    // Call get_admin() for current admin
+    const currentAdmin = await getAdmin(contractAddress, this.networkConfig);
+
+    // Renounced state - admin is null
+    if (currentAdmin === null) {
+      logger.debug(
+        'StellarAccessControlService.getAdminInfo',
+        `Contract ${contractAddress} has renounced admin`
+      );
+      return {
+        admin: null,
+        state: 'renounced',
+      };
+    }
+
+    // Check indexer availability for pending transfer detection
+    const indexerAvailable = await this.indexerClient.checkAvailability();
+
+    if (!indexerAvailable) {
+      logger.warn(
+        'StellarAccessControlService.getAdminInfo',
+        `Indexer unavailable for ${this.networkConfig.id}: pending admin transfer status cannot be determined`
+      );
+      // Graceful degradation - return basic admin with 'active' state
+      return {
+        admin: currentAdmin,
+        state: 'active',
+      };
+    }
+
+    // Query indexer for pending admin transfer
+    let pendingTransfer;
+    try {
+      pendingTransfer = await this.indexerClient.queryPendingAdminTransfer(contractAddress);
+    } catch (error) {
+      // Graceful degradation on indexer query error
+      logger.warn(
+        'StellarAccessControlService.getAdminInfo',
+        `Failed to query pending admin transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return {
+        admin: currentAdmin,
+        state: 'active',
+      };
+    }
+
+    // No pending transfer in indexer - state is 'active'
+    if (!pendingTransfer) {
+      logger.debug(
+        'StellarAccessControlService.getAdminInfo',
+        `Contract ${contractAddress} has admin with no pending transfer`
+      );
+      return {
+        admin: currentAdmin,
+        state: 'active',
+      };
+    }
+
+    // Get current ledger to check expiration
+    let currentLedger: number;
+    try {
+      currentLedger = await getCurrentLedger(this.networkConfig);
+    } catch (error) {
+      // Graceful degradation if ledger query fails
+      logger.warn(
+        'StellarAccessControlService.getAdminInfo',
+        `Failed to get current ledger: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Return active state since we can't determine expiration
+      return {
+        admin: currentAdmin,
+        state: 'active',
+      };
+    }
+
+    // Use indexer's liveUntilLedger for expiration check
+    const liveUntilLedger = pendingTransfer.liveUntilLedger;
+
+    // Determine state based on expiration
+    // expirationLedger must be > currentLedger, so >= means expired
+    const isExpired = currentLedger >= liveUntilLedger;
+
+    // Build pending transfer info for the response
+    const pendingTransferInfo = {
+      pendingAdmin: pendingTransfer.pendingAdmin,
+      expirationBlock: liveUntilLedger,
+      initiatedAt: pendingTransfer.timestamp,
+      initiatedTxId: pendingTransfer.txHash,
+      initiatedBlock: pendingTransfer.ledger,
+    };
+
+    if (isExpired) {
+      // Expired state
+      logger.debug(
+        'StellarAccessControlService.getAdminInfo',
+        `Contract ${contractAddress} has expired pending admin transfer (current: ${currentLedger}, expiration: ${liveUntilLedger})`
+      );
+      return {
+        admin: currentAdmin,
+        state: 'expired',
+        pendingTransfer: pendingTransferInfo,
+      };
+    }
+
+    // Pending state
+    logger.debug(
+      'StellarAccessControlService.getAdminInfo',
+      `Contract ${contractAddress} has pending admin transfer to ${pendingTransfer.pendingAdmin} (expires at ledger ${liveUntilLedger})`
+    );
+    return {
+      admin: currentAdmin,
+      state: 'pending',
+      pendingTransfer: pendingTransferInfo,
+    };
+  }
+
+  /**
+   * Initiates an admin role transfer using two-step transfer
+   *
+   * Initiates a two-step admin transfer with an expiration ledger.
+   * The pending admin must call acceptAdminTransfer() before the expiration
+   * ledger to complete the transfer.
+   *
+   * @param contractAddress The contract address
+   * @param newAdmin The new admin address (pending admin)
+   * @param expirationLedger The ledger sequence by which the transfer must be accepted
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   * @throws ConfigurationInvalid if addresses are invalid or expiration is invalid
+   *
+   * @example
+   * ```typescript
+   * // Calculate expiration ~12 hours from now (Stellar ledgers advance ~5s each)
+   * const currentLedger = await getCurrentLedger(networkConfig);
+   * const expirationLedger = currentLedger + 8640; // 12 * 60 * 60 / 5
+   *
+   * const result = await service.transferAdminRole(
+   *   contractAddress,
+   *   newAdminAddress,
+   *   expirationLedger,
+   *   executionConfig
+   * );
+   * console.log('Admin transfer initiated, txHash:', result.id);
+   * ```
+   */
+  async transferAdminRole(
+    contractAddress: string,
+    newAdmin: string,
+    expirationLedger: number,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    // Validate addresses
+    // newAdmin can be either an account address (G...) or contract address (C...)
+    validateContractAddress(contractAddress);
+    validateAddress(newAdmin, 'newAdmin');
+
+    logger.info(
+      'StellarAccessControlService.transferAdminRole',
+      `Initiating two-step admin transfer to ${newAdmin} on ${contractAddress} with expiration at ledger ${expirationLedger}`
+    );
+
+    // Client-side expiration validation (must be > current ledger)
+    const currentLedger = await getCurrentLedger(this.networkConfig);
+    const validationResult = validateExpirationLedger(expirationLedger, currentLedger);
+
+    if (!validationResult.valid) {
+      throw new ConfigurationInvalid(
+        validationResult.error ||
+          `Expiration ledger ${expirationLedger} must be strictly greater than current ledger ${currentLedger}.`,
+        String(expirationLedger),
+        'expirationLedger'
+      );
+    }
+
+    // Assemble the transaction data with live_until_ledger parameter
+    const txData = assembleTransferAdminRoleAction(contractAddress, newAdmin, expirationLedger);
+
+    logger.debug('StellarAccessControlService.transferAdminRole', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+      argTypes: txData.argTypes,
+      expirationLedger,
+      currentLedger,
+    });
+
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
+
+    logger.info(
+      'StellarAccessControlService.transferAdminRole',
+      `Admin transfer initiated. TxHash: ${result.txHash}, pending admin: ${newAdmin}, expires at ledger: ${expirationLedger}`
+    );
+
+    return { id: result.txHash };
+  }
+
+  /**
+   * Accepts a pending admin transfer (two-step transfer)
+   *
+   * Must be called by the pending admin (the address specified in transferAdminRole)
+   * before the expiration ledger. The on-chain contract validates:
+   * 1. Caller is the pending admin
+   * 2. Transfer has not expired
+   *
+   * @param contractAddress The contract address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   * @throws ConfigurationInvalid if contract address is invalid
+   * @throws OperationFailed if on-chain rejection (expired or unauthorized)
+   *
+   * @example
+   * ```typescript
+   * // Check admin state before accepting
+   * const adminInfo = await service.getAdminInfo(contractAddress);
+   * if (adminInfo.state === 'pending') {
+   *   const result = await service.acceptAdminTransfer(contractAddress, executionConfig);
+   *   console.log('Admin transfer accepted, txHash:', result.id);
+   * }
+   * ```
+   */
+  async acceptAdminTransfer(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    // Validate contract address
+    validateContractAddress(contractAddress);
+
+    logger.info(
+      'StellarAccessControlService.acceptAdminTransfer',
+      `Accepting pending admin transfer for ${contractAddress}`
+    );
+
+    // Expiration is enforced on-chain
+    // No pre-check required - the contract will reject if expired or caller is not pending admin
+
+    // Assemble the accept_admin_transfer transaction data
+    const txData = assembleAcceptAdminTransferAction(contractAddress);
+
+    logger.debug('StellarAccessControlService.acceptAdminTransfer', 'Transaction data prepared:', {
+      contractAddress: txData.contractAddress,
+      functionName: txData.functionName,
+    });
+
+    // Execute the transaction
+    const result = await signAndBroadcastStellarTransaction(
+      txData,
+      executionConfig,
+      this.networkConfig,
+      onStatusChange,
+      runtimeApiKey
+    );
+
+    logger.info(
+      'StellarAccessControlService.acceptAdminTransfer',
+      `Admin transfer accepted. TxHash: ${result.txHash}`
     );
 
     return { id: result.txHash };

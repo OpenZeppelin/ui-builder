@@ -506,7 +506,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].role.id).toBe('OWNER'); // Should map null role to 'OWNER'
-      expect(result.items[0].changeType).toBe('TRANSFERRED'); // Ownership transfer maps to TRANSFERRED
+      expect(result.items[0].changeType).toBe('OWNERSHIP_TRANSFER_COMPLETED'); // Ownership transfer completion
     });
   });
 

@@ -18,6 +18,8 @@ export interface AccessControlCapabilities {
   hasTwoStepOwnable: boolean;
   /** Whether the contract implements AccessControl */
   hasAccessControl: boolean;
+  /** Whether the contract supports two-step admin transfer with expiration (e.g. Stellar AccessControl) */
+  hasTwoStepAdmin: boolean;
   /** Whether roles can be enumerated directly (vs requiring event reconstruction) */
   hasEnumerableRoles: boolean;
   /** Whether historical data is available (via indexer or similar) */
@@ -94,6 +96,71 @@ export interface OwnershipInfo {
 }
 
 /**
+ * Admin state enumeration for two-step AccessControl admin transfer
+ *
+ * - 'active': Contract has an active admin with no pending transfer
+ * - 'pending': Admin transfer initiated, awaiting acceptance
+ * - 'expired': Previous transfer attempt expired without completion
+ * - 'renounced': Contract has no admin (admin role was renounced)
+ */
+export type AdminState = 'active' | 'pending' | 'expired' | 'renounced';
+
+/**
+ * Pending admin transfer details for two-step AccessControl contracts
+ *
+ * Contains information about an initiated but not yet accepted admin transfer.
+ */
+export interface PendingAdminTransfer {
+  /** Address designated to receive admin role */
+  pendingAdmin: string;
+  /** Block/ledger number by which transfer must be accepted */
+  expirationBlock: number;
+  /** ISO8601 timestamp of transfer initiation (from indexer) */
+  initiatedAt?: string;
+  /** Transaction ID of the initiation (from indexer) */
+  initiatedTxId?: string;
+  /** Block/ledger number at which transfer was initiated (from indexer) */
+  initiatedBlock?: number;
+}
+
+/**
+ * Admin information for AccessControl contracts
+ *
+ * Extended to support two-step admin transfer with pending transfer state.
+ *
+ * @example Active state (basic)
+ * ```typescript
+ * { admin: 'GABC...123', state: 'active' }
+ * ```
+ *
+ * @example Pending state
+ * ```typescript
+ * {
+ *   admin: 'GABC...123',
+ *   state: 'pending',
+ *   pendingTransfer: {
+ *     pendingAdmin: 'GDEF...456',
+ *     expirationBlock: 12345678,
+ *     initiatedAt: '2025-12-10T10:30:00Z',
+ *   }
+ * }
+ * ```
+ *
+ * @example Renounced state
+ * ```typescript
+ * { admin: null, state: 'renounced' }
+ * ```
+ */
+export interface AdminInfo {
+  /** The current admin address, or null if no admin */
+  admin: string | null;
+  /** Current admin state (optional for backward compatibility) */
+  state?: AdminState;
+  /** Pending transfer details (present when state is 'pending') */
+  pendingTransfer?: PendingAdminTransfer;
+}
+
+/**
  * Role identifier
  */
 export interface RoleIdentifier {
@@ -150,9 +217,22 @@ export interface AccessSnapshot {
 }
 
 /**
- * Change type for history events (grant, revoke, or ownership transfer)
+ * Change type for history events
+ *
+ * - GRANTED: Role was granted to an account
+ * - REVOKED: Role was revoked from an account
+ * - OWNERSHIP_TRANSFER_STARTED: Two-step ownership transfer initiated
+ * - OWNERSHIP_TRANSFER_COMPLETED: Two-step ownership transfer accepted
+ * - ADMIN_TRANSFER_INITIATED: Two-step admin transfer initiated
+ * - ADMIN_TRANSFER_COMPLETED: Two-step admin transfer accepted
  */
-export type HistoryChangeType = 'GRANTED' | 'REVOKED' | 'TRANSFERRED';
+export type HistoryChangeType =
+  | 'GRANTED'
+  | 'REVOKED'
+  | 'OWNERSHIP_TRANSFER_STARTED'
+  | 'OWNERSHIP_TRANSFER_COMPLETED'
+  | 'ADMIN_TRANSFER_INITIATED'
+  | 'ADMIN_TRANSFER_COMPLETED';
 
 /**
  * History entry for role changes (adapter-specific, when history is supported)
@@ -225,24 +305,6 @@ export interface OperationResult {
 }
 
 /**
- * Options for getOwnership() method
- */
-export interface GetOwnershipOptions {
-  /**
-   * Whether to verify pending transfer state on-chain.
-   *
-   * When `true`: Makes an additional on-chain RPC call to verify the pending transfer
-   * still exists. This guards against stale indexer data but adds ~100-300ms latency.
-   *
-   * When `false` (default): Trusts the indexer data for pending transfers, providing
-   * faster responses. The indexer is typically only seconds behind the chain.
-   *
-   * @default false
-   */
-  verifyOnChain?: boolean;
-}
-
-/**
  * Service interface for access control operations
  */
 export interface AccessControlService {
@@ -256,10 +318,9 @@ export interface AccessControlService {
   /**
    * Get the current owner of the contract
    * @param contractAddress The contract address
-   * @param options Optional configuration for the query
    * @returns Promise resolving to ownership information
    */
-  getOwnership(contractAddress: string, options?: GetOwnershipOptions): Promise<OwnershipInfo>;
+  getOwnership(contractAddress: string): Promise<OwnershipInfo>;
 
   /**
    * Get current role assignments
@@ -361,6 +422,66 @@ export interface AccessControlService {
    * @returns Promise resolving to operation result with transaction ID
    */
   acceptOwnership?(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
+
+  /**
+   * Get the current admin and admin transfer state of an AccessControl contract
+   *
+   * Retrieves the current admin and checks for pending two-step admin transfers.
+   * Only applicable for contracts that support two-step admin transfer
+   * (check `hasTwoStepAdmin` capability).
+   *
+   * @param contractAddress The contract address
+   * @returns Promise resolving to admin information with state
+   */
+  getAdminInfo?(contractAddress: string): Promise<AdminInfo>;
+
+  /**
+   * Initiate an admin role transfer (two-step transfer)
+   *
+   * For two-step AccessControl contracts, this initiates a transfer that must be
+   * accepted by the pending admin before the expiration ledger. Only applicable
+   * for contracts that support two-step admin transfer (check `hasTwoStepAdmin` capability).
+   *
+   * @param contractAddress The contract address
+   * @param newAdmin The new admin address
+   * @param expirationBlock The block/ledger number by which the transfer must be accepted
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   */
+  transferAdminRole?(
+    contractAddress: string,
+    newAdmin: string,
+    expirationBlock: number,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult>;
+
+  /**
+   * Accept a pending admin transfer (two-step transfer)
+   *
+   * Must be called by the pending admin (the address specified in transferAdminRole)
+   * before the expiration block/ledger. Only applicable for contracts that support
+   * two-step admin transfer (check `hasTwoStepAdmin` capability).
+   *
+   * The on-chain contract validates:
+   * 1. Caller is the pending admin
+   * 2. Transfer has not expired
+   *
+   * @param contractAddress The contract address
+   * @param executionConfig Execution configuration specifying method (eoa, relayer, etc.)
+   * @param onStatusChange Optional callback for status updates
+   * @param runtimeApiKey Optional session-only API key for methods like Relayer
+   * @returns Promise resolving to operation result with transaction ID
+   */
+  acceptAdminTransfer?(
     contractAddress: string,
     executionConfig: ExecutionConfig,
     onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,

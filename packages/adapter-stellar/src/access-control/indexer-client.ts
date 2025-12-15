@@ -29,19 +29,21 @@ const LOG_SYSTEM = 'StellarIndexerClient';
  */
 interface IndexerHistoryEntry {
   id: string;
-  role?: string; // Nullable for Ownership events
+  role?: string; // Nullable for Ownership/Admin events
   account: string;
   type:
     | 'ROLE_GRANTED'
     | 'ROLE_REVOKED'
     | 'OWNERSHIP_TRANSFER_COMPLETED'
-    | 'OWNERSHIP_TRANSFER_STARTED';
+    | 'OWNERSHIP_TRANSFER_STARTED'
+    | 'ADMIN_TRANSFER_INITIATED'
+    | 'ADMIN_TRANSFER_COMPLETED';
   txHash: string;
   timestamp: string;
   blockHeight: string;
   /** Ledger sequence of the event */
   ledger?: string;
-  /** Admin/owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED) */
+  /** Admin/owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
   admin?: string;
   /** Expiration ledger for pending transfers (OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
   liveUntilLedger?: number;
@@ -59,6 +61,28 @@ export interface OwnershipTransferStartedEvent {
   previousOwner: string;
   /** Pending owner address (account) - the new owner */
   pendingOwner: string;
+  /** Transaction hash of the initiation */
+  txHash: string;
+  /** ISO8601 timestamp of the event */
+  timestamp: string;
+  /** Ledger sequence of the event */
+  ledger: number;
+  /** Expiration ledger - transfer must be accepted before this ledger */
+  liveUntilLedger: number;
+}
+
+/**
+ * Admin Transfer Initiated Event
+ *
+ * Contains details about a pending two-step admin transfer from the indexer.
+ * Includes the expiration ledger (`liveUntilLedger`) for determining if the
+ * transfer has expired without requiring an additional on-chain query.
+ */
+export interface AdminTransferInitiatedEvent {
+  /** Previous admin who initiated the transfer */
+  previousAdmin: string;
+  /** Pending admin address (account) - the new admin */
+  pendingAdmin: string;
   /** Transaction hash of the initiation */
   txHash: string;
   /** ISO8601 timestamp of the event */
@@ -661,6 +685,183 @@ export class StellarIndexerClient {
   }
 
   /**
+   * Query the latest pending admin transfer for a contract
+   *
+   * Queries the indexer for `ADMIN_TRANSFER_INITIATED` events and checks if
+   * a corresponding `ADMIN_TRANSFER_COMPLETED` event exists after the initiation.
+   * If no completion event exists, returns the pending transfer details.
+   *
+   * @param contractAddress The contract address to query
+   * @returns Promise resolving to pending transfer info, or null if no pending transfer
+   * @throws IndexerUnavailable if indexer is not available
+   * @throws OperationFailed if query fails
+   *
+   * @example
+   * ```typescript
+   * const pending = await client.queryPendingAdminTransfer('CABC...XYZ');
+   * if (pending) {
+   *   console.log(`Pending admin: ${pending.pendingAdmin}`);
+   *   console.log(`Transfer started at ledger: ${pending.ledger}`);
+   * }
+   * ```
+   */
+  async queryPendingAdminTransfer(
+    contractAddress: string
+  ): Promise<AdminTransferInitiatedEvent | null> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new IndexerUnavailable(
+        'Indexer not available for this network',
+        contractAddress,
+        this.networkConfig.id
+      );
+    }
+
+    const endpoints = this.resolveIndexerEndpoints();
+    if (!endpoints.http) {
+      throw new ConfigurationInvalid(
+        'No indexer HTTP endpoint configured',
+        contractAddress,
+        'indexer.http'
+      );
+    }
+
+    logger.info(LOG_SYSTEM, `Querying pending admin transfer for ${contractAddress}`);
+
+    // Step 1: Query latest ADMIN_TRANSFER_INITIATED event
+    const initiationQuery = this.buildAdminTransferInitiatedQuery();
+    const initiationVariables = { contract: contractAddress };
+
+    try {
+      const initiationResponse = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: initiationQuery, variables: initiationVariables }),
+      });
+
+      if (!initiationResponse.ok) {
+        throw new OperationFailed(
+          `Indexer query failed with status ${initiationResponse.status}`,
+          contractAddress,
+          'queryPendingAdminTransfer'
+        );
+      }
+
+      const initiationResult =
+        (await initiationResponse.json()) as IndexerOwnershipTransferResponse;
+
+      if (initiationResult.errors && initiationResult.errors.length > 0) {
+        const errorMessages = initiationResult.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer query errors: ${errorMessages}`,
+          contractAddress,
+          'queryPendingAdminTransfer'
+        );
+      }
+
+      const initiatedNodes = initiationResult.data?.accessControlEvents?.nodes;
+      if (!initiatedNodes || initiatedNodes.length === 0) {
+        logger.debug(LOG_SYSTEM, `No admin transfer initiated for ${contractAddress}`);
+        return null;
+      }
+
+      const latestInitiation = initiatedNodes[0];
+
+      // Step 2: Check if a completion event exists after the initiation
+      const completionQuery = this.buildAdminTransferCompletedQuery();
+      const completionVariables = {
+        contract: contractAddress,
+        afterTimestamp: latestInitiation.timestamp,
+      };
+
+      const completionResponse = await fetch(endpoints.http, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: completionQuery, variables: completionVariables }),
+      });
+
+      if (!completionResponse.ok) {
+        throw new OperationFailed(
+          `Indexer completion query failed with status ${completionResponse.status}`,
+          contractAddress,
+          'queryPendingAdminTransfer'
+        );
+      }
+
+      const completionResult =
+        (await completionResponse.json()) as IndexerOwnershipTransferResponse;
+
+      // Check for GraphQL errors in completion query
+      if (completionResult.errors && completionResult.errors.length > 0) {
+        const errorMessages = completionResult.errors.map((e) => e.message).join('; ');
+        throw new OperationFailed(
+          `Indexer completion query errors: ${errorMessages}`,
+          contractAddress,
+          'queryPendingAdminTransfer'
+        );
+      }
+
+      const completedNodes = completionResult.data?.accessControlEvents?.nodes;
+      if (completedNodes && completedNodes.length > 0) {
+        // Transfer was completed after initiation - no pending transfer
+        logger.debug(LOG_SYSTEM, `Admin transfer was completed for ${contractAddress}`);
+        return null;
+      }
+
+      // No completion - validate required fields before returning pending transfer info
+      // The admin field is required for ADMIN_TRANSFER_INITIATED events
+      if (!latestInitiation.admin) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without admin field for ${contractAddress}. ` +
+            `This indicates incomplete indexer data. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
+      // Validate liveUntilLedger is present (required for expiration checking)
+      if (
+        latestInitiation.liveUntilLedger === undefined ||
+        latestInitiation.liveUntilLedger === null
+      ) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without liveUntilLedger for ${contractAddress}. ` +
+            `This may indicate an older indexer version. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
+      logger.info(
+        LOG_SYSTEM,
+        `Found pending admin transfer for ${contractAddress}: pending admin=${latestInitiation.account}, expires at ledger ${latestInitiation.liveUntilLedger}`
+      );
+
+      return {
+        previousAdmin: latestInitiation.admin,
+        pendingAdmin: latestInitiation.account,
+        txHash: latestInitiation.txHash,
+        timestamp: latestInitiation.timestamp,
+        ledger: parseInt(latestInitiation.ledger || latestInitiation.blockHeight, 10),
+        liveUntilLedger: latestInitiation.liveUntilLedger,
+      };
+    } catch (error) {
+      if (error instanceof IndexerUnavailable || error instanceof OperationFailed) {
+        throw error;
+      }
+      logger.error(
+        LOG_SYSTEM,
+        `Failed to query pending admin transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw new OperationFailed(
+        `Failed to query pending admin transfer: ${(error as Error).message}`,
+        contractAddress,
+        'queryPendingAdminTransfer'
+      );
+    }
+  }
+
+  /**
    * Build GraphQL query for OWNERSHIP_TRANSFER_STARTED events
    *
    * Note: The OpenZeppelin Stellar contract emits `ownership_transfer` event
@@ -708,6 +909,69 @@ export class StellarIndexerClient {
           filter: {
             contract: { equalTo: $contract }
             type: { equalTo: OWNERSHIP_TRANSFER_COMPLETED }
+            timestamp: { greaterThan: $afterTimestamp }
+          }
+          orderBy: TIMESTAMP_DESC
+          first: 1
+        ) {
+          nodes {
+            id
+            txHash
+            timestamp
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Build GraphQL query for ADMIN_TRANSFER_INITIATED events
+   *
+   * Note: The OpenZeppelin Stellar contract emits `admin_transfer_initiated` event
+   * which is indexed as `ADMIN_TRANSFER_INITIATED`.
+   *
+   * Schema mapping:
+   * - `account`: pending new admin
+   * - `admin`: current admin who initiated the transfer
+   * - `ledger`: block height of the event
+   * - `liveUntilLedger`: expiration ledger for the pending transfer
+   */
+  private buildAdminTransferInitiatedQuery(): string {
+    return `
+      query GetAdminTransferInitiated($contract: String!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            type: { equalTo: ADMIN_TRANSFER_INITIATED }
+          }
+          orderBy: TIMESTAMP_DESC
+          first: 1
+        ) {
+          nodes {
+            id
+            account
+            admin
+            txHash
+            timestamp
+            ledger
+            blockHeight
+            liveUntilLedger
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Build GraphQL query for ADMIN_TRANSFER_COMPLETED events after a given timestamp
+   */
+  private buildAdminTransferCompletedQuery(): string {
+    return `
+      query GetAdminTransferCompleted($contract: String!, $afterTimestamp: Datetime!) {
+        accessControlEvents(
+          filter: {
+            contract: { equalTo: $contract }
+            type: { equalTo: ADMIN_TRANSFER_COMPLETED }
             timestamp: { greaterThan: $afterTimestamp }
           }
           orderBy: TIMESTAMP_DESC
@@ -800,13 +1064,17 @@ export class StellarIndexerClient {
 
   /**
    * Maps internal changeType to GraphQL EventType enum
-   * GraphQL enum values: ROLE_GRANTED, ROLE_REVOKED, OWNERSHIP_TRANSFER_COMPLETED
+   * GraphQL enum values: ROLE_GRANTED, ROLE_REVOKED, OWNERSHIP_TRANSFER_STARTED,
+   * OWNERSHIP_TRANSFER_COMPLETED, ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED
    */
   private mapChangeTypeToGraphQLEnum(changeType: HistoryChangeType): string {
     const mapping: Record<HistoryChangeType, string> = {
       GRANTED: 'ROLE_GRANTED',
       REVOKED: 'ROLE_REVOKED',
-      TRANSFERRED: 'OWNERSHIP_TRANSFER_COMPLETED',
+      OWNERSHIP_TRANSFER_STARTED: 'OWNERSHIP_TRANSFER_STARTED',
+      OWNERSHIP_TRANSFER_COMPLETED: 'OWNERSHIP_TRANSFER_COMPLETED',
+      ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
+      ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
     };
     return mapping[changeType];
   }
@@ -979,15 +1247,29 @@ export class StellarIndexerClient {
 
       // Map SubQuery event types to internal types
       let changeType: HistoryChangeType;
-      if (entry.type === 'ROLE_GRANTED') {
-        changeType = 'GRANTED';
-      } else if (entry.type === 'ROLE_REVOKED') {
-        changeType = 'REVOKED';
-      } else if (entry.type === 'OWNERSHIP_TRANSFER_COMPLETED') {
-        changeType = 'TRANSFERRED';
-      } else {
-        // Default to GRANTED for unknown types (shouldn't happen)
-        changeType = 'GRANTED';
+      switch (entry.type) {
+        case 'ROLE_GRANTED':
+          changeType = 'GRANTED';
+          break;
+        case 'ROLE_REVOKED':
+          changeType = 'REVOKED';
+          break;
+        case 'OWNERSHIP_TRANSFER_STARTED':
+          changeType = 'OWNERSHIP_TRANSFER_STARTED';
+          break;
+        case 'OWNERSHIP_TRANSFER_COMPLETED':
+          changeType = 'OWNERSHIP_TRANSFER_COMPLETED';
+          break;
+        case 'ADMIN_TRANSFER_INITIATED':
+          changeType = 'ADMIN_TRANSFER_INITIATED';
+          break;
+        case 'ADMIN_TRANSFER_COMPLETED':
+          changeType = 'ADMIN_TRANSFER_COMPLETED';
+          break;
+        default:
+          // Default to GRANTED for unknown types (shouldn't happen)
+          logger.warn(LOG_SYSTEM, `Unknown event type: ${entry.type}, defaulting to GRANTED`);
+          changeType = 'GRANTED';
       }
 
       return {
