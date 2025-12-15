@@ -152,3 +152,63 @@ export function assembleAcceptOwnershipAction(contractAddress: string): StellarT
     transactionOptions: {},
   };
 }
+
+/**
+ * Assembles transaction data for initiating an admin role transfer
+ *
+ * For two-step AccessControl contracts, this initiates an admin transfer that must
+ * be accepted by the pending admin before the expiration ledger.
+ *
+ * @param contractAddress The contract address
+ * @param newAdmin The new admin address
+ * @param liveUntilLedger The ledger sequence by which the transfer must be accepted
+ * @returns Transaction data ready for execution
+ */
+export function assembleTransferAdminRoleAction(
+  contractAddress: string,
+  newAdmin: string,
+  liveUntilLedger: number
+): StellarTransactionData {
+  logger.info(
+    'assembleTransferAdminRoleAction',
+    `Assembling transfer_admin_role action to ${newAdmin} with expiration at ledger ${liveUntilLedger}`
+  );
+
+  // Arguments for transfer_admin_role(new_admin: Address, live_until_ledger: u32)
+  // Note: args are raw values that will be converted to ScVal by the transaction execution flow
+  return {
+    contractAddress,
+    functionName: 'transfer_admin_role',
+    args: [newAdmin, liveUntilLedger],
+    argTypes: ['Address', 'u32'],
+    argSchema: undefined,
+    transactionOptions: {},
+  };
+}
+
+/**
+ * Assembles transaction data for accepting a pending admin transfer
+ *
+ * For two-step AccessControl contracts, this completes a pending admin transfer
+ * initiated by the current admin. Must be called by the pending admin before the
+ * expiration ledger.
+ *
+ * @param contractAddress The contract address
+ * @returns Transaction data ready for execution
+ */
+export function assembleAcceptAdminTransferAction(contractAddress: string): StellarTransactionData {
+  logger.info(
+    'assembleAcceptAdminTransferAction',
+    `Assembling accept_admin_transfer action for ${contractAddress}`
+  );
+
+  // accept_admin_transfer() has no arguments - caller must be the pending admin
+  return {
+    contractAddress,
+    functionName: 'accept_admin_transfer',
+    args: [],
+    argTypes: [],
+    argSchema: undefined,
+    transactionOptions: {},
+  };
+}
