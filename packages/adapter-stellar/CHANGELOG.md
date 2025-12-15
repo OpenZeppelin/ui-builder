@@ -1,5 +1,122 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.0.0
+
+### Minor Changes
+
+- [#276](https://github.com/OpenZeppelin/ui-builder/pull/276) [`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e) Thanks [@pasevin](https://github.com/pasevin)! - feat(adapters): add `getCurrentBlock()` method to ContractAdapter interface
+
+  Adds a new mandatory `getCurrentBlock()` method to the `ContractAdapter` interface that returns the current block/ledger number from the blockchain.
+
+  **Use Cases:**
+  - Calculating appropriate expiration blocks for time-sensitive operations
+  - Validating expiration parameters before submitting transactions
+  - Determining if pending operations have expired
+
+  **Implementation Details:**
+  - **EVM**: Uses `eth_blockNumber` JSON-RPC call via `getEvmCurrentBlock()` helper
+  - **Stellar**: Delegates to existing `getCurrentLedger()` from onchain-reader module
+  - **Solana**: Uses `getSlot` JSON-RPC call via `getSolanaCurrentBlock()` helper
+  - **Midnight**: Placeholder that throws (indexer does not yet expose block number API)
+
+- [#243](https://github.com/OpenZeppelin/ui-builder/pull/243) [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48) Thanks [@pasevin](https://github.com/pasevin)! - Add Access Control and Ownable support for Stellar (Soroban) contracts
+
+  ### @openzeppelin/ui-builder-adapter-stellar
+  - Add `AccessControlService` implementation with full support for OpenZeppelin Access Control and Ownable patterns
+  - Add capability detection to identify contracts implementing AccessControl, Ownable, or both
+  - Support role management: query current roles, grant/revoke roles, check permissions
+  - Support ownership management: transfer ownership, query current owner
+  - Add historical queries via SubQuery indexer integration for complete role change and ownership transfer history
+  - Implement server-side filtering by contract, role, account, and limit
+  - Add graceful degradation when indexer is unavailable (on-chain queries continue to work)
+  - Add comprehensive address validation using shared utilities at all service entry points
+  - Export access control service via `getAccessControlService()` method on `StellarAdapter`
+  - Add snapshot export functionality for current access control state
+  - Support both account addresses (G...) and contract addresses (C...) for ownership transfers
+
+  ### @openzeppelin/ui-builder-types
+  - Add `AccessControlService` interface and related types (`AccessControlCapabilities`, `OwnershipInfo`, `RoleAssignment`, `AccessSnapshot`, `HistoryEntry`, `OperationResult`)
+  - Add `getAccessControlService?()` optional method to `ContractAdapter` interface
+  - Extend `BaseNetworkConfig` with optional `indexerUri` and `indexerWsUri` fields for GraphQL endpoint configuration
+
+  ### @openzeppelin/ui-builder-utils
+  - Add access control snapshot utilities (`validateSnapshot`, `serializeSnapshot`, `deserializeSnapshot`, `createEmptySnapshot`, `findRoleAssignment`, `compareSnapshots`)
+  - Add access control error utilities (`isAccessControlError`, error message extraction helpers)
+  - Export address normalization utilities (`normalizeAddress`, `addressesEqual`) for chain-agnostic address comparison
+
+- [#277](https://github.com/OpenZeppelin/ui-builder/pull/277) [`98a9e5d`](https://github.com/OpenZeppelin/ui-builder/commit/98a9e5d670b4fc3032617705c69656213154bd1e) Thanks [@pasevin](https://github.com/pasevin)! - feat(adapter-stellar): add two-step admin transfer support with ledger-based expiration
+
+  Implements OpenZeppelin Stellar AccessControl two-step admin transfer pattern:
+
+  **New Features:**
+  - `getAdminInfo()` returns admin state (active/pending/expired/renounced) with pending transfer details
+  - `transferAdminRole()` initiates two-step admin transfer with expiration ledger parameter
+  - `acceptAdminTransfer()` allows pending admins to complete admin transfer
+  - `hasTwoStepAdmin` capability flag in feature detection
+
+  **Type Extensions:**
+  - Added `AdminState` type for admin states ('active' | 'pending' | 'expired' | 'renounced')
+  - Added `PendingAdminTransfer` interface for pending admin transfer details
+  - Added `AdminInfo` interface for admin information with state and pending transfer
+  - Extended `AccessControlCapabilities` with `hasTwoStepAdmin` flag
+  - Added optional `getAdminInfo`, `transferAdminRole`, `acceptAdminTransfer` methods to `AccessControlService` interface
+
+  **Indexer Integration:**
+  - Added `ADMIN_TRANSFER_INITIATED` event type support
+  - Added `ADMIN_TRANSFER_COMPLETED` event type support
+  - Added `AdminTransferInitiatedEvent` interface for pending admin transfers
+  - Added `queryPendingAdminTransfer()` method to indexer client
+  - Graceful degradation when indexer is unavailable
+
+  **Action Assembly:**
+  - Added `assembleTransferAdminRoleAction()` for transfer_admin_role transactions
+  - Added `assembleAcceptAdminTransferAction()` for accept_admin_transfer transactions
+
+  **Breaking Changes:**
+  - Removed `GetOwnershipOptions` interface and `verifyOnChain` option from `getOwnership()` and `getAdminInfo()`
+  - Removed `readPendingOwner()` function from onchain-reader (it called non-existent `get_pending_owner()` function)
+  - Signature change: `getOwnership(contractAddress, options?)` -> `getOwnership(contractAddress)`
+  - Signature change: `getAdminInfo(contractAddress, options?)` -> `getAdminInfo(contractAddress)`
+  - Removed `TRANSFERRED` from `HistoryChangeType` - use `OWNERSHIP_TRANSFER_COMPLETED` instead
+
+  The `verifyOnChain` option was removed because standard OpenZeppelin Stellar contracts do not expose `get_pending_owner()` or `get_pending_admin()` methods. Pending transfer state is only accessible via the indexer, not on-chain.
+
+  The `TRANSFERRED` event type was removed to simplify the API. Use the more specific `OWNERSHIP_TRANSFER_STARTED` and `OWNERSHIP_TRANSFER_COMPLETED` types instead.
+
+- [#271](https://github.com/OpenZeppelin/ui-builder/pull/271) [`94bc4b4`](https://github.com/OpenZeppelin/ui-builder/commit/94bc4b4deedb2a3755fa5e17d161a65d37944df7) Thanks [@pasevin](https://github.com/pasevin)! - feat(adapter-stellar): add two-step Ownable support with ledger-based expiration
+
+  Implements OpenZeppelin Stellar Ownable two-step ownership transfer pattern:
+
+  **New Features:**
+  - `getOwnership()` now returns ownership state (owned/pending/expired/renounced) with pending transfer details
+  - `transferOwnership()` supports expiration ledger parameter for two-step transfers
+  - `acceptOwnership()` allows pending owners to complete ownership transfer
+  - `getCurrentLedger()` helper to get current ledger sequence for expiration calculation
+  - `validateExpirationLedger()` validation helper for client-side expiration checks
+  - `hasTwoStepOwnable` capability flag in feature detection
+
+  **Type Extensions:**
+  - Added `OwnershipState` type for ownership states
+  - Added `PendingOwnershipTransfer` interface for pending transfer details
+  - Extended `OwnershipInfo` with `state` and `pendingTransfer` fields
+  - Extended `AccessControlCapabilities` with `hasTwoStepOwnable` flag
+
+  **Indexer Integration:**
+  - Added `OWNERSHIP_TRANSFER_STARTED` event type support
+  - Added `queryPendingOwnershipTransfer()` method to indexer client
+  - Graceful degradation when indexer is unavailable
+
+  **Non-Functional:**
+  - Performance: Ownership queries < 3s, indexer queries < 1s, ledger queries < 500ms
+  - Logging: INFO for ownership operations, WARN for indexer unavailability
+
+### Patch Changes
+
+- Updated dependencies [[`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e), [`7561580`](https://github.com/OpenZeppelin/ui-builder/commit/75615803c8c4e9848ffd469a19e5e684a92579fb), [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48), [`f911a9e`](https://github.com/OpenZeppelin/ui-builder/commit/f911a9ef64ad60d6b8381006f41ff398a7765e96), [`c0cb6d1`](https://github.com/OpenZeppelin/ui-builder/commit/c0cb6d1ab87c1e60e6d3c4532107cd525aaaea19), [`d74dafc`](https://github.com/OpenZeppelin/ui-builder/commit/d74dafcb83d3bc87b89aed19abc7362a5c34c02a), [`fbc8ecd`](https://github.com/OpenZeppelin/ui-builder/commit/fbc8ecd527dd879b209b02878db210eadf49208c), [`f9cf1c7`](https://github.com/OpenZeppelin/ui-builder/commit/f9cf1c7018d5baffeda8da6b747710bad941ce3e), [`98a9e5d`](https://github.com/OpenZeppelin/ui-builder/commit/98a9e5d670b4fc3032617705c69656213154bd1e), [`94bc4b4`](https://github.com/OpenZeppelin/ui-builder/commit/94bc4b4deedb2a3755fa5e17d161a65d37944df7)]:
+  - @openzeppelin/ui-builder-types@1.0.0
+  - @openzeppelin/ui-builder-ui@1.0.0
+  - @openzeppelin/ui-builder-utils@1.0.0
+
 ## 0.17.0
 
 ### Minor Changes

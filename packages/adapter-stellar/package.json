@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-adapter-stellar",
-  "version": "0.16.0",
+  "version": "1.0.0",
   "description": "Stellar Adapter for UI Builder",
   "keywords": [
     "openzeppelin",
