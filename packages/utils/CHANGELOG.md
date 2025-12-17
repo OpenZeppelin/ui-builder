@@ -1,5 +1,39 @@
 # @openzeppelin/transaction-form-utils
 
+## 1.0.0
+
+### Minor Changes
+
+- [#243](https://github.com/OpenZeppelin/ui-builder/pull/243) [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48) Thanks [@pasevin](https://github.com/pasevin)! - Add Access Control and Ownable support for Stellar (Soroban) contracts
+
+  ### @openzeppelin/ui-builder-adapter-stellar
+  - Add `AccessControlService` implementation with full support for OpenZeppelin Access Control and Ownable patterns
+  - Add capability detection to identify contracts implementing AccessControl, Ownable, or both
+  - Support role management: query current roles, grant/revoke roles, check permissions
+  - Support ownership management: transfer ownership, query current owner
+  - Add historical queries via SubQuery indexer integration for complete role change and ownership transfer history
+  - Implement server-side filtering by contract, role, account, and limit
+  - Add graceful degradation when indexer is unavailable (on-chain queries continue to work)
+  - Add comprehensive address validation using shared utilities at all service entry points
+  - Export access control service via `getAccessControlService()` method on `StellarAdapter`
+  - Add snapshot export functionality for current access control state
+  - Support both account addresses (G...) and contract addresses (C...) for ownership transfers
+
+  ### @openzeppelin/ui-builder-types
+  - Add `AccessControlService` interface and related types (`AccessControlCapabilities`, `OwnershipInfo`, `RoleAssignment`, `AccessSnapshot`, `HistoryEntry`, `OperationResult`)
+  - Add `getAccessControlService?()` optional method to `ContractAdapter` interface
+  - Extend `BaseNetworkConfig` with optional `indexerUri` and `indexerWsUri` fields for GraphQL endpoint configuration
+
+  ### @openzeppelin/ui-builder-utils
+  - Add access control snapshot utilities (`validateSnapshot`, `serializeSnapshot`, `deserializeSnapshot`, `createEmptySnapshot`, `findRoleAssignment`, `compareSnapshots`)
+  - Add access control error utilities (`isAccessControlError`, error message extraction helpers)
+  - Export address normalization utilities (`normalizeAddress`, `addressesEqual`) for chain-agnostic address comparison
+
+### Patch Changes
+
+- Updated dependencies [[`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e), [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48), [`f9cf1c7`](https://github.com/OpenZeppelin/ui-builder/commit/f9cf1c7018d5baffeda8da6b747710bad941ce3e), [`98a9e5d`](https://github.com/OpenZeppelin/ui-builder/commit/98a9e5d670b4fc3032617705c69656213154bd1e), [`94bc4b4`](https://github.com/OpenZeppelin/ui-builder/commit/94bc4b4deedb2a3755fa5e17d161a65d37944df7)]:
+  - @openzeppelin/ui-builder-types@1.0.0
+
 ## 0.16.0
 
 ### Minor Changes
