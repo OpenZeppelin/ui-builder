@@ -1,5 +1,32 @@
 # Midnight Adapter Changelog
 
+## 1.0.0
+
+### Minor Changes
+
+- [#276](https://github.com/OpenZeppelin/ui-builder/pull/276) [`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e) Thanks [@pasevin](https://github.com/pasevin)! - feat(adapters): add `getCurrentBlock()` method to ContractAdapter interface
+
+  Adds a new mandatory `getCurrentBlock()` method to the `ContractAdapter` interface that returns the current block/ledger number from the blockchain.
+
+  **Use Cases:**
+  - Calculating appropriate expiration blocks for time-sensitive operations
+  - Validating expiration parameters before submitting transactions
+  - Determining if pending operations have expired
+
+  **Implementation Details:**
+  - **EVM**: Uses `eth_blockNumber` JSON-RPC call via `getEvmCurrentBlock()` helper
+  - **Stellar**: Delegates to existing `getCurrentLedger()` from onchain-reader module
+  - **Solana**: Uses `getSlot` JSON-RPC call via `getSolanaCurrentBlock()` helper
+  - **Midnight**: Placeholder that throws (indexer does not yet expose block number API)
+
+### Patch Changes
+
+- Updated dependencies [[`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e), [`7561580`](https://github.com/OpenZeppelin/ui-builder/commit/75615803c8c4e9848ffd469a19e5e684a92579fb), [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48), [`f911a9e`](https://github.com/OpenZeppelin/ui-builder/commit/f911a9ef64ad60d6b8381006f41ff398a7765e96), [`c0cb6d1`](https://github.com/OpenZeppelin/ui-builder/commit/c0cb6d1ab87c1e60e6d3c4532107cd525aaaea19), [`d74dafc`](https://github.com/OpenZeppelin/ui-builder/commit/d74dafcb83d3bc87b89aed19abc7362a5c34c02a), [`56eb3fc`](https://github.com/OpenZeppelin/ui-builder/commit/56eb3fc4970bd85a75d6ed0cb643c096668bdc69), [`fbc8ecd`](https://github.com/OpenZeppelin/ui-builder/commit/fbc8ecd527dd879b209b02878db210eadf49208c), [`f9cf1c7`](https://github.com/OpenZeppelin/ui-builder/commit/f9cf1c7018d5baffeda8da6b747710bad941ce3e), [`98a9e5d`](https://github.com/OpenZeppelin/ui-builder/commit/98a9e5d670b4fc3032617705c69656213154bd1e), [`94bc4b4`](https://github.com/OpenZeppelin/ui-builder/commit/94bc4b4deedb2a3755fa5e17d161a65d37944df7)]:
+  - @openzeppelin/ui-builder-types@1.0.0
+  - @openzeppelin/ui-builder-ui@1.0.0
+  - @openzeppelin/ui-builder-utils@1.0.0
+  - @openzeppelin/ui-builder-react-core@1.0.0
+
 ## 0.16.0
 
 ### Minor Changes

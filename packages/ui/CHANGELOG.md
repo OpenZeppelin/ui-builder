@@ -1,5 +1,28 @@
 # @openzeppelin/transaction-form-ui
 
+## 1.0.0
+
+### Minor Changes
+
+- [#249](https://github.com/OpenZeppelin/ui-builder/pull/249) [`7561580`](https://github.com/OpenZeppelin/ui-builder/commit/75615803c8c4e9848ffd469a19e5e684a92579fb) Thanks [@pasevin](https://github.com/pasevin)! - Add `subHeader` prop to `SidebarLayout` to allow rendering content between the header and the scrollable area.
+
+- [#256](https://github.com/OpenZeppelin/ui-builder/pull/256) [`f911a9e`](https://github.com/OpenZeppelin/ui-builder/commit/f911a9ef64ad60d6b8381006f41ff398a7765e96) Thanks [@pasevin](https://github.com/pasevin)! - Add `NetworkIcon` and `NetworkSelector` components to the UI package for reuse across applications.
+  - `NetworkIcon`: Reusable component for rendering network icons based on ecosystem and iconComponent
+  - `NetworkSelector`: Generic dropdown selector component with search, ecosystem grouping, and network type badges
+  - Refactor `NetworkStatusBadge` and `NetworkRow` to use `NetworkIcon` for consistency
+
+- [#250](https://github.com/OpenZeppelin/ui-builder/pull/250) [`d74dafc`](https://github.com/OpenZeppelin/ui-builder/commit/d74dafcb83d3bc87b89aed19abc7362a5c34c02a) Thanks [@pasevin](https://github.com/pasevin)! - Move Header component to UI package
+
+- [#246](https://github.com/OpenZeppelin/ui-builder/pull/246) [`fbc8ecd`](https://github.com/OpenZeppelin/ui-builder/commit/fbc8ecd527dd879b209b02878db210eadf49208c) Thanks [@pasevin](https://github.com/pasevin)! - Add reusable sidebar components (SidebarButton, SidebarLayout, SidebarSection) to enable sidebar reuse across projects
+
+### Patch Changes
+
+- [#254](https://github.com/OpenZeppelin/ui-builder/pull/254) [`c0cb6d1`](https://github.com/OpenZeppelin/ui-builder/commit/c0cb6d1ab87c1e60e6d3c4532107cd525aaaea19) Thanks [@pasevin](https://github.com/pasevin)! - Fix `AddressDisplay` hover behavior: no reserved space when the copy button is hidden. The copy control now expands on hover/focus, removing the gray gap and right-side imbalance. Also adds a 2-second copy confirmation that swaps the copy icon for a green check.
+
+- Updated dependencies [[`940de65`](https://github.com/OpenZeppelin/ui-builder/commit/940de6518eb1e0e94559818e870179bf1375973e), [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48), [`f9cf1c7`](https://github.com/OpenZeppelin/ui-builder/commit/f9cf1c7018d5baffeda8da6b747710bad941ce3e), [`98a9e5d`](https://github.com/OpenZeppelin/ui-builder/commit/98a9e5d670b4fc3032617705c69656213154bd1e), [`94bc4b4`](https://github.com/OpenZeppelin/ui-builder/commit/94bc4b4deedb2a3755fa5e17d161a65d37944df7)]:
+  - @openzeppelin/ui-builder-types@1.0.0
+  - @openzeppelin/ui-builder-utils@1.0.0
+
 ## 0.16.0
 
 ### Minor Changes

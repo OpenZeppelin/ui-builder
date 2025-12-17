@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-utils",
-  "version": "0.16.0",
+  "version": "1.0.0",
   "private": false,
   "description": "Shared, framework-agnostic utility functions for the OpenZeppelin UI Builder.",
   "type": "module",
