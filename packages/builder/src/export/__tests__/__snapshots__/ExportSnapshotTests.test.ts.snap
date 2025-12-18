@@ -302,11 +302,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.0.0",
-    "@openzeppelin/ui-builder-renderer": "^1.0.0",
+    "@openzeppelin/ui-builder-react-core": "^1.1.0",
+    "@openzeppelin/ui-builder-renderer": "^1.1.0",
     "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.0.0",
-    "@openzeppelin/ui-builder-utils": "^1.0.0",
+    "@openzeppelin/ui-builder-ui": "^1.1.0",
+    "@openzeppelin/ui-builder-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -349,11 +349,11 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.0.0",
-    "@openzeppelin/ui-builder-renderer": "^1.0.0",
+    "@openzeppelin/ui-builder-react-core": "^1.1.0",
+    "@openzeppelin/ui-builder-renderer": "^1.1.0",
     "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.0.0",
-    "@openzeppelin/ui-builder-utils": "^1.0.0",
+    "@openzeppelin/ui-builder-ui": "^1.1.0",
+    "@openzeppelin/ui-builder-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
