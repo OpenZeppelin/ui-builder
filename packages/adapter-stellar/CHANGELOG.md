@@ -1,5 +1,19 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.1.1
+
+### Patch Changes
+
+- [#283](https://github.com/OpenZeppelin/ui-builder/pull/283) [`5527175`](https://github.com/OpenZeppelin/ui-builder/commit/5527175640f864407f371c4a0a031d21c6410877) Thanks [@pasevin](https://github.com/pasevin)! - Fix: Read user-configured indexer endpoints from localStorage
+
+  The StellarIndexerClient now correctly reads user-configured indexer endpoints from UserNetworkServiceConfigService (localStorage). Previously, user settings saved via the NetworkSettingsDialog were ignored.
+
+  Changes:
+  - Add user-configured indexer as highest priority in endpoint resolution
+  - Add URL validation for user-configured endpoints
+  - Subscribe to config changes to reset cache when user updates settings
+  - Add dispose() method for cleanup
+
 ## 1.1.0
 
 ### Patch Changes
