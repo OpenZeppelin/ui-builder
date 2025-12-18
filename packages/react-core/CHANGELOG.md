@@ -1,5 +1,18 @@
 # @openzeppelin/transaction-form-react-core
 
+## 1.1.0
+
+### Minor Changes
+
+- [#279](https://github.com/OpenZeppelin/ui-builder/pull/279) [`6b4707a`](https://github.com/OpenZeppelin/ui-builder/commit/6b4707ab6f370e662942f3f00164e40fda6fda51) Thanks [@pasevin](https://github.com/pasevin)! - Add AnalyticsProvider, AnalyticsContext, and useAnalytics hook for React analytics integration
+
+### Patch Changes
+
+- Updated dependencies [[`6b4707a`](https://github.com/OpenZeppelin/ui-builder/commit/6b4707ab6f370e662942f3f00164e40fda6fda51)]:
+  - @openzeppelin/ui-builder-utils@1.1.0
+  - @openzeppelin/ui-builder-renderer@1.1.0
+  - @openzeppelin/ui-builder-ui@1.1.0
+
 ## 1.0.0
 
 ### Minor Changes
