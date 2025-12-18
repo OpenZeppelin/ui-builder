@@ -4,7 +4,7 @@ import type { ContractSchema, NetworkConfig } from '@openzeppelin/ui-builder-typ
 import { logger } from '@openzeppelin/ui-builder-utils';
 
 import type { BuilderFormConfig } from '../../../core/types/FormTypes';
-import { useAnalytics } from '../../../hooks/useAnalytics';
+import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
 import { downloadBlob } from '../StepComplete/utils';
 import { uiBuilderStore } from './uiBuilderStore';
 
@@ -17,7 +17,7 @@ const AppExportSystemPromise = import('../../../export').then((module) => module
  */
 export function useCompleteStepState() {
   const [loading, setLoading] = useState(false);
-  const { trackExportAction } = useAnalytics();
+  const { trackExportAction } = useBuilderAnalytics();
 
   const exportApp = useCallback(
     async (

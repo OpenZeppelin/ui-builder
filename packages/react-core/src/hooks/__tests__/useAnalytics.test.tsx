@@ -2,27 +2,36 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
-import { AnalyticsService } from '../../services/AnalyticsService';
+import { AnalyticsService } from '@openzeppelin/ui-builder-utils';
+
 import { AnalyticsProvider } from '../AnalyticsProvider';
-// Import after mocks
 import { useAnalytics } from '../useAnalytics';
 
 // Mock the AnalyticsService
-vi.mock('../../services/AnalyticsService', () => ({
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   AnalyticsService: {
     initialize: vi.fn(),
     isEnabled: vi.fn(),
-    trackEcosystemSelection: vi.fn(),
+    trackEvent: vi.fn(),
+    trackPageView: vi.fn(),
     trackNetworkSelection: vi.fn(),
-    trackExportAction: vi.fn(),
-    trackWizardStep: vi.fn(),
-    trackSidebarInteraction: vi.fn(),
+  },
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
 // Get mocked functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockAnalyticsService = AnalyticsService as any;
+const mockAnalyticsService = AnalyticsService as unknown as {
+  initialize: ReturnType<typeof vi.fn>;
+  isEnabled: ReturnType<typeof vi.fn>;
+  trackEvent: ReturnType<typeof vi.fn>;
+  trackPageView: ReturnType<typeof vi.fn>;
+  trackNetworkSelection: ReturnType<typeof vi.fn>;
+};
 
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode; tagId?: string; autoInit?: boolean }> = ({
@@ -52,11 +61,9 @@ describe('useAnalytics', () => {
       });
 
       expect(result.current).toHaveProperty('isEnabled');
-      expect(result.current).toHaveProperty('trackEcosystemSelection');
+      expect(result.current).toHaveProperty('trackEvent');
+      expect(result.current).toHaveProperty('trackPageView');
       expect(result.current).toHaveProperty('trackNetworkSelection');
-      expect(result.current).toHaveProperty('trackExportAction');
-      expect(result.current).toHaveProperty('trackWizardStep');
-      expect(result.current).toHaveProperty('trackSidebarInteraction');
       expect(result.current).toHaveProperty('initialize');
     });
 
@@ -67,7 +74,7 @@ describe('useAnalytics', () => {
         wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
       });
 
-      expect(result.current.isEnabled).toBe(true);
+      expect(result.current.isEnabled()).toBe(true);
       expect(mockAnalyticsService.isEnabled).toHaveBeenCalled();
     });
 
@@ -78,7 +85,24 @@ describe('useAnalytics', () => {
         wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
       });
 
-      expect(result.current.isEnabled).toBe(false);
+      expect(result.current.isEnabled()).toBe(false);
+    });
+
+    it('should reflect dynamic feature flag changes', () => {
+      // Start with enabled
+      mockAnalyticsService.isEnabled.mockReturnValue(true);
+
+      const { result } = renderHook(() => useAnalytics(), {
+        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
+      });
+
+      expect(result.current.isEnabled()).toBe(true);
+
+      // Simulate feature flag change
+      mockAnalyticsService.isEnabled.mockReturnValue(false);
+
+      // isEnabled() should return fresh state without re-render
+      expect(result.current.isEnabled()).toBe(false);
     });
   });
 
@@ -113,16 +137,30 @@ describe('useAnalytics', () => {
   });
 
   describe('event tracking methods', () => {
-    it('should call AnalyticsService.trackEcosystemSelection', () => {
+    it('should call AnalyticsService.trackEvent', () => {
       const { result } = renderHook(() => useAnalytics(), {
         wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
       });
 
       act(() => {
-        result.current.trackEcosystemSelection('evm');
+        result.current.trackEvent('custom_event', { key: 'value' });
       });
 
-      expect(mockAnalyticsService.trackEcosystemSelection).toHaveBeenCalledWith('evm');
+      expect(mockAnalyticsService.trackEvent).toHaveBeenCalledWith('custom_event', {
+        key: 'value',
+      });
+    });
+
+    it('should call AnalyticsService.trackPageView', () => {
+      const { result } = renderHook(() => useAnalytics(), {
+        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
+      });
+
+      act(() => {
+        result.current.trackPageView('Dashboard', '/dashboard');
+      });
+
+      expect(mockAnalyticsService.trackPageView).toHaveBeenCalledWith('Dashboard', '/dashboard');
     });
 
     it('should call AnalyticsService.trackNetworkSelection', () => {
@@ -139,47 +177,11 @@ describe('useAnalytics', () => {
         'evm'
       );
     });
-
-    it('should call AnalyticsService.trackExportAction', () => {
-      const { result } = renderHook(() => useAnalytics(), {
-        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
-      });
-
-      act(() => {
-        result.current.trackExportAction('react-vite');
-      });
-
-      expect(mockAnalyticsService.trackExportAction).toHaveBeenCalledWith('react-vite');
-    });
-
-    it('should call AnalyticsService.trackWizardStep', () => {
-      const { result } = renderHook(() => useAnalytics(), {
-        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
-      });
-
-      act(() => {
-        result.current.trackWizardStep(2, 'contract-input');
-      });
-
-      expect(mockAnalyticsService.trackWizardStep).toHaveBeenCalledWith(2, 'contract-input');
-    });
-
-    it('should call AnalyticsService.trackSidebarInteraction', () => {
-      const { result } = renderHook(() => useAnalytics(), {
-        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
-      });
-
-      act(() => {
-        result.current.trackSidebarInteraction('import');
-      });
-
-      expect(mockAnalyticsService.trackSidebarInteraction).toHaveBeenCalledWith('import');
-    });
   });
 
   describe('error handling', () => {
     it('should handle errors in tracking methods gracefully', () => {
-      mockAnalyticsService.trackEcosystemSelection.mockImplementation(() => {
+      mockAnalyticsService.trackEvent.mockImplementation(() => {
         throw new Error('Tracking error');
       });
 
@@ -189,7 +191,7 @@ describe('useAnalytics', () => {
 
       expect(() => {
         act(() => {
-          result.current.trackEcosystemSelection('evm');
+          result.current.trackEvent('test_event', { key: 'value' });
         });
       }).not.toThrow();
     });

@@ -18,10 +18,17 @@ vi.mock('react-hook-form', () => ({
   }),
 }));
 
-vi.mock('../../../../hooks/useAnalytics', () => ({
-  useAnalytics: () => ({
+vi.mock('../../../../hooks/useBuilderAnalytics', () => ({
+  useBuilderAnalytics: () => ({
     trackEcosystemSelection,
     trackNetworkSelection,
+    trackExportAction: vi.fn(),
+    trackWizardStep: vi.fn(),
+    trackSidebarInteraction: vi.fn(),
+    trackEvent: vi.fn(),
+    trackPageView: vi.fn(),
+    isEnabled: () => true,
+    initialize: vi.fn(),
   }),
 }));
 

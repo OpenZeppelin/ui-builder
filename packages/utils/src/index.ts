@@ -19,6 +19,7 @@ export * from './bytesValidation';
 export * from './bytesConversion';
 export * from './environment';
 export * from './RouterService';
+export * from './AnalyticsService';
 export * from './deepLink';
 export * from './sanitize';
 export * from './access/snapshot';

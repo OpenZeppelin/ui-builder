@@ -8,7 +8,7 @@ import { logger, parseDeepLink, routerService } from '@openzeppelin/ui-builder-u
 import { extractDeepLinkParams, resolveNetworkIdFromDeepLink } from '@/core/deeplink';
 import { getNetworkById } from '@/core/ecosystemManager';
 import { BuilderFormConfig } from '@/core/types/FormTypes';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { useBuilderAnalytics } from '@/hooks/useBuilderAnalytics';
 
 import { contractUIStorage } from '../../../../storage';
 import { uiBuilderStore } from '../uiBuilderStore';
@@ -26,7 +26,7 @@ export function useBuilderLifecycle(
   autoSave: { pause: () => void; resume: () => void; isPaused: boolean }
 ) {
   const { setActiveNetworkId } = useWalletState();
-  const { trackEcosystemSelection, trackNetworkSelection } = useAnalytics();
+  const { trackEcosystemSelection, trackNetworkSelection } = useBuilderAnalytics();
 
   const handleLoadContractUI = useCallback(
     async (id: string) => {
