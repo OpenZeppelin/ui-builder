@@ -20,9 +20,51 @@ import {
   IndexerUnavailable,
   OperationFailed,
 } from '@openzeppelin/ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
+import {
+  appConfigService,
+  logger,
+  userNetworkServiceConfigService,
+} from '@openzeppelin/ui-builder-utils';
 
 const LOG_SYSTEM = 'StellarIndexerClient';
+
+/**
+ * Extracts the user-configured indexer endpoints from UserNetworkServiceConfigService.
+ *
+ * @param networkId - The network ID to get the indexer config for
+ * @returns The indexer endpoint config if configured, undefined otherwise
+ */
+function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | undefined {
+  const svcCfg = userNetworkServiceConfigService.get(networkId, 'indexer');
+  if (!svcCfg || typeof svcCfg !== 'object') {
+    return undefined;
+  }
+
+  const endpoints: IndexerEndpointConfig = {};
+
+  // Check for indexerUri field (HTTP endpoint)
+  if ('indexerUri' in svcCfg && svcCfg.indexerUri) {
+    const httpUrl = String(svcCfg.indexerUri);
+    if (httpUrl.trim()) {
+      endpoints.http = httpUrl;
+    }
+  }
+
+  // Check for indexerWsUri field (WebSocket endpoint)
+  if ('indexerWsUri' in svcCfg && svcCfg.indexerWsUri) {
+    const wsUrl = String(svcCfg.indexerWsUri);
+    if (wsUrl.trim()) {
+      endpoints.ws = wsUrl;
+    }
+  }
+
+  // Return undefined if no endpoints were found
+  if (!endpoints.http && !endpoints.ws) {
+    return undefined;
+  }
+
+  return endpoints;
+}
 
 /**
  * GraphQL query response types for indexer
@@ -162,9 +204,41 @@ export class StellarIndexerClient {
   private resolvedEndpoints: IndexerEndpointConfig | null = null;
   private availabilityChecked = false;
   private isAvailable = false;
+  private readonly unsubscribeFromConfigChanges: () => void;
 
   constructor(networkConfig: StellarNetworkConfig) {
     this.networkConfig = networkConfig;
+
+    // Subscribe to indexer config changes to reset cache when user updates settings
+    this.unsubscribeFromConfigChanges = userNetworkServiceConfigService.subscribe(
+      networkConfig.id,
+      'indexer',
+      () => {
+        logger.info(
+          LOG_SYSTEM,
+          `User indexer config changed for ${networkConfig.id}, resetting cache`
+        );
+        this.resetCache();
+      }
+    );
+  }
+
+  /**
+   * Resets the resolved endpoints and availability cache.
+   * Called when user configuration changes to force re-resolution.
+   */
+  private resetCache(): void {
+    this.resolvedEndpoints = null;
+    this.availabilityChecked = false;
+    this.isAvailable = false;
+  }
+
+  /**
+   * Cleans up subscriptions when the client is no longer needed.
+   * Call this method when disposing of the client to prevent memory leaks.
+   */
+  public dispose(): void {
+    this.unsubscribeFromConfigChanges();
   }
 
   /**
@@ -990,10 +1064,11 @@ export class StellarIndexerClient {
   /**
    * Resolve indexer endpoints with config precedence
    * Priority:
-   * 1. Runtime override from AppConfigService
-   * 2. Network config defaults (indexerUri/indexerWsUri)
-   * 3. Derived from RPC (if safe pattern exists)
-   * 4. None (returns empty object)
+   * 1. User-configured indexer from UserNetworkServiceConfigService (localStorage)
+   * 2. Runtime override from AppConfigService (environment/JSON config)
+   * 3. Network config defaults (indexerUri/indexerWsUri)
+   * 4. Derived from RPC (if safe pattern exists)
+   * 5. None (returns empty object)
    *
    * @returns Resolved indexer endpoints
    */
@@ -1005,7 +1080,26 @@ export class StellarIndexerClient {
     const networkId = this.networkConfig.id;
     const endpoints: IndexerEndpointConfig = {};
 
-    // Priority 1: Check AppConfigService for runtime override
+    // Priority 1: Check user-configured indexer from localStorage
+    const userIndexerConfig = getUserIndexerEndpoints(networkId);
+    if (userIndexerConfig) {
+      if (userIndexerConfig.http) {
+        endpoints.http = userIndexerConfig.http;
+      }
+      if (userIndexerConfig.ws) {
+        endpoints.ws = userIndexerConfig.ws;
+      }
+      if (endpoints.http || endpoints.ws) {
+        logger.info(
+          LOG_SYSTEM,
+          `Using user-configured indexer for ${networkId}: http=${endpoints.http}, ws=${endpoints.ws}`
+        );
+        this.resolvedEndpoints = endpoints;
+        return endpoints;
+      }
+    }
+
+    // Priority 2: Check AppConfigService for runtime override
     const indexerOverride = appConfigService.getIndexerEndpointOverride(networkId);
     if (indexerOverride) {
       if (typeof indexerOverride === 'string') {
@@ -1030,7 +1124,7 @@ export class StellarIndexerClient {
       return endpoints;
     }
 
-    // Priority 2: Network config defaults
+    // Priority 3: Network config defaults
     if (this.networkConfig.indexerUri) {
       endpoints.http = this.networkConfig.indexerUri;
       logger.info(
@@ -1051,7 +1145,7 @@ export class StellarIndexerClient {
       return endpoints;
     }
 
-    // Priority 3: Derive from RPC (only if safe, known pattern exists)
+    // Priority 4: Derive from RPC (only if safe, known pattern exists)
     // Currently DISABLED - no safe derivation pattern implemented
     // This would be enabled in the future when indexer/RPC relationship is well-defined
     logger.debug(LOG_SYSTEM, `No indexer derivation pattern available for ${networkId}`);
@@ -1075,6 +1169,7 @@ export class StellarIndexerClient {
       OWNERSHIP_TRANSFER_COMPLETED: 'OWNERSHIP_TRANSFER_COMPLETED',
       ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
       ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
+      UNKNOWN: 'UNKNOWN',
     };
     return mapping[changeType];
   }
