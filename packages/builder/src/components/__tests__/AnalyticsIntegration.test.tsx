@@ -28,6 +28,8 @@ vi.mock('../../../contexts/useContractUIStorage', () => ({
   useContractUIStorage: vi.fn(),
 }));
 
+// Using async importActual to get real AnalyticsProvider while mocking other exports
+// This is necessary for integration tests that need the actual provider behavior
 vi.mock('@openzeppelin/ui-builder-react-core', async () => {
   const actual = await vi.importActual('@openzeppelin/ui-builder-react-core');
   return {

@@ -44,13 +44,6 @@ vi.mock('@openzeppelin/ui-builder-react-core', () => ({
   useWalletState: () => ({
     setActiveNetworkId: setActiveNetworkIdMock,
   }),
-  useAnalytics: () => ({
-    trackEvent: vi.fn(),
-    trackPageView: vi.fn(),
-    trackNetworkSelection: trackNetworkSelectionMock,
-    isEnabled: () => true,
-    initialize: vi.fn(),
-  }),
 }));
 
 vi.mock('@/hooks/useBuilderAnalytics', () => ({

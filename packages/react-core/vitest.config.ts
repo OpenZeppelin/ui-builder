@@ -9,7 +9,7 @@ export default defineConfig(
     plugins: [react()],
     resolve: {
       alias: {
-        '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/dist/index.js'),
+        '@openzeppelin/ui-builder-utils': path.resolve(__dirname, '../utils/src/index.ts'),
       },
     },
     test: {
