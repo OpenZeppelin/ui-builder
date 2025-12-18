@@ -22,6 +22,7 @@ import {
 } from '@openzeppelin/ui-builder-types';
 import {
   appConfigService,
+  isValidUrl,
   logger,
   userNetworkServiceConfigService,
 } from '@openzeppelin/ui-builder-utils';
@@ -30,9 +31,10 @@ const LOG_SYSTEM = 'StellarIndexerClient';
 
 /**
  * Extracts the user-configured indexer endpoints from UserNetworkServiceConfigService.
+ * Validates URLs before returning them to prevent invalid URLs from causing runtime errors.
  *
  * @param networkId - The network ID to get the indexer config for
- * @returns The indexer endpoint config if configured, undefined otherwise
+ * @returns The indexer endpoint config if configured and valid, undefined otherwise
  */
 function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | undefined {
   const svcCfg = userNetworkServiceConfigService.get(networkId, 'indexer');
@@ -42,23 +44,33 @@ function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | und
 
   const endpoints: IndexerEndpointConfig = {};
 
-  // Check for indexerUri field (HTTP endpoint)
+  // Check for indexerUri field (HTTP endpoint) and validate
   if ('indexerUri' in svcCfg && svcCfg.indexerUri) {
-    const httpUrl = String(svcCfg.indexerUri);
-    if (httpUrl.trim()) {
+    const httpUrl = String(svcCfg.indexerUri).trim();
+    if (httpUrl && isValidUrl(httpUrl)) {
       endpoints.http = httpUrl;
+    } else if (httpUrl) {
+      logger.warn(
+        LOG_SYSTEM,
+        `User-configured indexer HTTP URL for ${networkId} is invalid: ${httpUrl}. Ignoring.`
+      );
     }
   }
 
-  // Check for indexerWsUri field (WebSocket endpoint)
+  // Check for indexerWsUri field (WebSocket endpoint) and validate
   if ('indexerWsUri' in svcCfg && svcCfg.indexerWsUri) {
-    const wsUrl = String(svcCfg.indexerWsUri);
-    if (wsUrl.trim()) {
+    const wsUrl = String(svcCfg.indexerWsUri).trim();
+    if (wsUrl && isValidUrl(wsUrl)) {
       endpoints.ws = wsUrl;
+    } else if (wsUrl) {
+      logger.warn(
+        LOG_SYSTEM,
+        `User-configured indexer WebSocket URL for ${networkId} is invalid: ${wsUrl}. Ignoring.`
+      );
     }
   }
 
-  // Return undefined if no endpoints were found
+  // Return undefined if no valid endpoints were found
   if (!endpoints.http && !endpoints.ws) {
     return undefined;
   }

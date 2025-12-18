@@ -9,7 +9,26 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractSchema, StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type {
+  ContractFunction,
+  ContractSchema,
+  StellarNetworkConfig,
+} from '@openzeppelin/ui-builder-types';
+
+/**
+ * Helper to create a minimal mock ContractFunction with required properties
+ */
+function mockFn(name: string): ContractFunction {
+  return {
+    id: name,
+    name,
+    displayName: name,
+    type: 'function',
+    modifiesState: false,
+    inputs: [],
+    outputs: [],
+  };
+}
 
 // Mock the Stellar SDK
 vi.mock('@stellar/stellar-sdk', () => ({
@@ -22,7 +41,7 @@ vi.mock('@stellar/stellar-sdk', () => ({
   },
 }));
 
-// Mock the logger
+// Mock the logger and config services
 vi.mock('@openzeppelin/ui-builder-utils', () => ({
   logger: {
     info: vi.fn(),
@@ -32,6 +51,18 @@ vi.mock('@openzeppelin/ui-builder-utils', () => ({
   },
   appConfigService: {
     getIndexerEndpointOverride: vi.fn().mockReturnValue(null),
+  },
+  userNetworkServiceConfigService: {
+    get: vi.fn().mockReturnValue(null),
+    subscribe: vi.fn().mockReturnValue(() => {}),
+  },
+  isValidUrl: (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   },
   validateSnapshot: vi.fn().mockReturnValue(true),
 }));
@@ -63,18 +94,19 @@ describe('Two-Step Admin Transfer Support', () => {
       );
 
       const contractSchema: ContractSchema = {
+        ecosystem: 'stellar',
         functions: [
           // Required AccessControl functions
-          { name: 'has_role', inputs: [], outputs: [] },
-          { name: 'grant_role', inputs: [], outputs: [] },
-          { name: 'revoke_role', inputs: [], outputs: [] },
+          mockFn('has_role'),
+          mockFn('grant_role'),
+          mockFn('revoke_role'),
           // Optional AccessControl functions including two-step admin
-          { name: 'get_admin', inputs: [], outputs: [] },
-          { name: 'get_role_admin', inputs: [], outputs: [] },
-          { name: 'set_role_admin', inputs: [], outputs: [] },
-          { name: 'transfer_admin_role', inputs: [], outputs: [] },
-          { name: 'accept_admin_transfer', inputs: [], outputs: [] },
-          { name: 'renounce_admin', inputs: [], outputs: [] },
+          mockFn('get_admin'),
+          mockFn('get_role_admin'),
+          mockFn('set_role_admin'),
+          mockFn('transfer_admin_role'),
+          mockFn('accept_admin_transfer'),
+          mockFn('renounce_admin'),
         ],
       };
 
@@ -94,16 +126,17 @@ describe('Two-Step Admin Transfer Support', () => {
       );
 
       const contractSchema: ContractSchema = {
+        ecosystem: 'stellar',
         functions: [
           // Required AccessControl functions
-          { name: 'has_role', inputs: [], outputs: [] },
-          { name: 'grant_role', inputs: [], outputs: [] },
-          { name: 'revoke_role', inputs: [], outputs: [] },
+          mockFn('has_role'),
+          mockFn('grant_role'),
+          mockFn('revoke_role'),
           // Optional AccessControl functions WITHOUT two-step admin
-          { name: 'get_admin', inputs: [], outputs: [] },
-          { name: 'get_role_admin', inputs: [], outputs: [] },
-          { name: 'set_role_admin', inputs: [], outputs: [] },
-          { name: 'renounce_admin', inputs: [], outputs: [] },
+          mockFn('get_admin'),
+          mockFn('get_role_admin'),
+          mockFn('set_role_admin'),
+          mockFn('renounce_admin'),
         ],
       };
 
@@ -119,11 +152,12 @@ describe('Two-Step Admin Transfer Support', () => {
       );
 
       const contractSchema: ContractSchema = {
+        ecosystem: 'stellar',
         functions: [
           // Only Ownable functions
-          { name: 'get_owner', inputs: [], outputs: [] },
-          { name: 'transfer_ownership', inputs: [], outputs: [] },
-          { name: 'accept_ownership', inputs: [], outputs: [] },
+          mockFn('get_owner'),
+          mockFn('transfer_ownership'),
+          mockFn('accept_ownership'),
         ],
       };
 

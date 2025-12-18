@@ -37,6 +37,18 @@ vi.mock('@openzeppelin/ui-builder-utils', () => ({
   appConfigService: {
     getIndexerEndpointOverride: vi.fn().mockReturnValue(null),
   },
+  userNetworkServiceConfigService: {
+    get: vi.fn().mockReturnValue(null),
+    subscribe: vi.fn().mockReturnValue(() => {}),
+  },
+  isValidUrl: (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
 }));
 
 describe('Two-Step Ownable Support', () => {

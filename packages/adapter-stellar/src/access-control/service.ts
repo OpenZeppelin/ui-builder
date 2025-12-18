@@ -1318,6 +1318,22 @@ export class StellarAccessControlService implements AccessControlService {
       return [];
     }
   }
+
+  /**
+   * Disposes of the service and cleans up resources.
+   *
+   * Cleans up the indexer client's subscriptions to prevent memory leaks.
+   * Call this method when the service is no longer needed.
+   *
+   * Note: In typical usage where the service is application-scoped and lives
+   * for the duration of the application, calling dispose is not strictly necessary.
+   * However, it should be called if the service is created/destroyed dynamically
+   * (e.g., in tests or when switching networks).
+   */
+  dispose(): void {
+    this.indexerClient.dispose();
+    logger.debug('StellarAccessControlService.dispose', 'Service disposed');
+  }
 }
 
 /**
