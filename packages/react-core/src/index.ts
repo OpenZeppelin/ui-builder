@@ -8,6 +8,11 @@ export { AdapterProvider, type AdapterProviderProps } from './hooks/AdapterProvi
 export { WalletStateContext, type WalletStateContextValue } from './hooks/WalletStateContext';
 export { WalletStateProvider, type WalletStateProviderProps } from './hooks/WalletStateProvider';
 
+// Analytics
+export { AnalyticsContext, type AnalyticsContextValue } from './hooks/AnalyticsContext';
+export { AnalyticsProvider, type AnalyticsProviderProps } from './hooks/AnalyticsProvider';
+export { useAnalytics } from './hooks/useAnalytics';
+
 // Consumer Hooks
 export { useAdapterContext } from './hooks/useAdapterContext';
 export { useWalletState } from './hooks/WalletStateContext';

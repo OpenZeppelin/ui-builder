@@ -1,18 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService } from '@openzeppelin/ui-builder-utils';
-
-// Import after mocks are set up
 import { AnalyticsService } from '../AnalyticsService';
+import { appConfigService } from '../AppConfigService';
 
 // Mock gtag functions
 const mockGtag = vi.fn();
 
 // Mock the app config service and logger
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('../AppConfigService', () => ({
   appConfigService: {
     isFeatureEnabled: vi.fn(),
   },
+}));
+
+vi.mock('../logger', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -48,8 +49,7 @@ describe('AnalyticsService', () => {
     window.dataLayer = [];
 
     // Reset AnalyticsService static state
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (AnalyticsService as any).reset();
+    AnalyticsService.reset();
 
     // Default: analytics is disabled
     mockIsFeatureEnabled.mockReturnValue(false);
@@ -120,26 +120,41 @@ describe('AnalyticsService', () => {
       AnalyticsService.initialize('G-TEST123');
     });
 
-    describe('trackEcosystemSelection', () => {
-      it('should track ecosystem selection when enabled', () => {
-        AnalyticsService.trackEcosystemSelection('evm');
+    describe('trackEvent (generic)', () => {
+      it('should track generic event when enabled', () => {
+        AnalyticsService.trackEvent('custom_event', { key: 'value', count: 42 });
 
-        expect(mockGtag).toHaveBeenCalledWith('event', 'ecosystem_selected', {
-          ecosystem: 'evm',
+        expect(mockGtag).toHaveBeenCalledWith('event', 'custom_event', {
+          key: 'value',
+          count: 42,
         });
       });
 
       it('should not track when analytics is disabled', () => {
         mockIsFeatureEnabled.mockReturnValue(false);
 
-        AnalyticsService.trackEcosystemSelection('evm');
+        AnalyticsService.trackEvent('custom_event', { key: 'value' });
 
-        // Only the initialization calls should be present
-        expect(mockGtag).not.toHaveBeenCalledWith(
-          'event',
-          'ecosystem_selected',
-          expect.any(Object)
-        );
+        expect(mockGtag).not.toHaveBeenCalledWith('event', 'custom_event', expect.any(Object));
+      });
+    });
+
+    describe('trackPageView', () => {
+      it('should track page view when enabled', () => {
+        AnalyticsService.trackPageView('Dashboard', '/dashboard');
+
+        expect(mockGtag).toHaveBeenCalledWith('event', 'page_view', {
+          page_title: 'Dashboard',
+          page_path: '/dashboard',
+        });
+      });
+
+      it('should not track when analytics is disabled', () => {
+        mockIsFeatureEnabled.mockReturnValue(false);
+
+        AnalyticsService.trackPageView('Dashboard', '/dashboard');
+
+        expect(mockGtag).not.toHaveBeenCalledWith('event', 'page_view', expect.any(Object));
       });
     });
 
@@ -159,65 +174,6 @@ describe('AnalyticsService', () => {
         AnalyticsService.trackNetworkSelection('ethereum-mainnet', 'evm');
 
         expect(mockGtag).not.toHaveBeenCalledWith('event', 'network_selected', expect.any(Object));
-      });
-    });
-
-    describe('trackExportAction', () => {
-      it('should track export action when enabled', () => {
-        AnalyticsService.trackExportAction('react-vite');
-
-        expect(mockGtag).toHaveBeenCalledWith('event', 'export_clicked', {
-          export_type: 'react-vite',
-        });
-      });
-
-      it('should not track when analytics is disabled', () => {
-        mockIsFeatureEnabled.mockReturnValue(false);
-
-        AnalyticsService.trackExportAction('react-vite');
-
-        expect(mockGtag).not.toHaveBeenCalledWith('event', 'export_clicked', expect.any(Object));
-      });
-    });
-
-    describe('trackWizardStep', () => {
-      it('should track wizard step when enabled', () => {
-        AnalyticsService.trackWizardStep(2, 'contract-input');
-
-        expect(mockGtag).toHaveBeenCalledWith('event', 'wizard_step', {
-          step_number: 2,
-          step_name: 'contract-input',
-        });
-      });
-
-      it('should not track when analytics is disabled', () => {
-        mockIsFeatureEnabled.mockReturnValue(false);
-
-        AnalyticsService.trackWizardStep(2, 'contract-input');
-
-        expect(mockGtag).not.toHaveBeenCalledWith('event', 'wizard_step', expect.any(Object));
-      });
-    });
-
-    describe('trackSidebarInteraction', () => {
-      it('should track sidebar interaction when enabled', () => {
-        AnalyticsService.trackSidebarInteraction('import');
-
-        expect(mockGtag).toHaveBeenCalledWith('event', 'sidebar_interaction', {
-          action: 'import',
-        });
-      });
-
-      it('should not track when analytics is disabled', () => {
-        mockIsFeatureEnabled.mockReturnValue(false);
-
-        AnalyticsService.trackSidebarInteraction('import');
-
-        expect(mockGtag).not.toHaveBeenCalledWith(
-          'event',
-          'sidebar_interaction',
-          expect.any(Object)
-        );
       });
     });
   });
@@ -243,7 +199,7 @@ describe('AnalyticsService', () => {
       });
 
       expect(() => {
-        AnalyticsService.trackEcosystemSelection('evm');
+        AnalyticsService.trackEvent('test_event', { key: 'value' });
       }).not.toThrow();
     });
   });
@@ -266,7 +222,7 @@ describe('AnalyticsService', () => {
       (window as any).gtag = undefined;
 
       expect(() => {
-        AnalyticsService.trackEcosystemSelection('evm');
+        AnalyticsService.trackEvent('test_event', { key: 'value' });
       }).not.toThrow();
     });
   });

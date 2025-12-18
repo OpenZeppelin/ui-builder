@@ -13,7 +13,7 @@ import {
   getEcosystemNetworkIconName,
 } from '../../../../core/ecosystems/registry';
 import { networkService } from '../../../../core/networks/service';
-import { useAnalytics } from '../../../../hooks/useAnalytics';
+import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import {
   getEcosystemFeatureConfig,
   getVisibleEcosystems,
@@ -33,7 +33,7 @@ export function ChainSelector({
   selectedNetworkId = null,
 }: ChainSelectorProps) {
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
-  const { trackEcosystemSelection, trackNetworkSelection } = useAnalytics();
+  const { trackEcosystemSelection, trackNetworkSelection } = useBuilderAnalytics();
 
   // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({

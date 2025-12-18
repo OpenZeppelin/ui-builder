@@ -1,29 +1,25 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AnalyticsProvider } from '../../hooks/AnalyticsProvider';
-import { AnalyticsService } from '../../services/AnalyticsService';
+import { AnalyticsProvider } from '@openzeppelin/ui-builder-react-core';
+import { AnalyticsService } from '@openzeppelin/ui-builder-utils';
 
-// Mock the AnalyticsService
-vi.mock('../../services/AnalyticsService', () => ({
+// Mock the AnalyticsService from shared utils
+vi.mock('@openzeppelin/ui-builder-utils', () => ({
   AnalyticsService: {
     initialize: vi.fn(),
     isEnabled: vi.fn(),
-    trackEcosystemSelection: vi.fn(),
+    trackEvent: vi.fn(),
+    trackPageView: vi.fn(),
     trackNetworkSelection: vi.fn(),
-    trackExportAction: vi.fn(),
-    trackWizardStep: vi.fn(),
-    trackSidebarInteraction: vi.fn(),
   },
-}));
-
-// Mock other dependencies
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
   appConfigService: {
     isFeatureEnabled: vi.fn(),
   },
   logger: {
     info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
   cn: vi.fn(),
 }));
@@ -32,9 +28,13 @@ vi.mock('../../../contexts/useContractUIStorage', () => ({
   useContractUIStorage: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/ui-builder-react-core', () => ({
-  useAdapterContext: vi.fn(),
-}));
+vi.mock('@openzeppelin/ui-builder-react-core', async () => {
+  const actual = await vi.importActual('@openzeppelin/ui-builder-react-core');
+  return {
+    ...actual,
+    useAdapterContext: vi.fn(),
+  };
+});
 
 vi.mock('../../core/networks/service', () => ({
   networkService: {
@@ -56,8 +56,13 @@ vi.mock('../../core/ecosystems/registry', () => ({
 }));
 
 // Get mocked functions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockAnalyticsService = AnalyticsService as any;
+const mockAnalyticsService = AnalyticsService as unknown as {
+  initialize: ReturnType<typeof vi.fn>;
+  isEnabled: ReturnType<typeof vi.fn>;
+  trackEvent: ReturnType<typeof vi.fn>;
+  trackPageView: ReturnType<typeof vi.fn>;
+  trackNetworkSelection: ReturnType<typeof vi.fn>;
+};
 
 describe('Analytics Integration Tests', () => {
   beforeEach(() => {

@@ -10,7 +10,7 @@ import { SidebarButton } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
-import { useAnalytics } from '../../../hooks/useAnalytics';
+import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
 import { recordHasMeaningfulContent } from '../../UIBuilder/utils/meaningfulContent';
 
 interface MainActionsProps {
@@ -28,7 +28,7 @@ export default function MainActions({
   isInNewUIMode = false,
 }: MainActionsProps) {
   const { exportContractUIs, contractUIs } = useContractUIStorage();
-  const { trackSidebarInteraction } = useAnalytics();
+  const { trackSidebarInteraction } = useBuilderAnalytics();
 
   const handleExport = async () => {
     // Track sidebar export interaction

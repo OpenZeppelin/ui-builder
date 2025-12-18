@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react';
 import { Button } from '@openzeppelin/ui-builder-ui';
 import { cn } from '@openzeppelin/ui-builder-utils';
 
-import { useAnalytics } from '../../hooks/useAnalytics';
+import { useBuilderAnalytics } from '../../hooks/useBuilderAnalytics';
 
 export interface WizardStep {
   id: string;
@@ -32,7 +32,7 @@ export function WizardLayout({
 }: WizardLayoutProps) {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
-  const { trackWizardStep } = useAnalytics();
+  const { trackWizardStep } = useBuilderAnalytics();
 
   const handleNext = () => {
     if (isLastStep) {

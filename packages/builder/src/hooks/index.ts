@@ -1,4 +1,10 @@
-export { useAnalytics } from './useAnalytics';
-export { AnalyticsProvider } from './AnalyticsProvider';
-export { useAnalyticsContext } from './AnalyticsContext';
-export type { AnalyticsProviderProps, AnalyticsContextValue } from './AnalyticsProvider';
+// Re-export shared analytics from react-core for convenience
+export {
+  useAnalytics,
+  AnalyticsProvider,
+  type AnalyticsProviderProps,
+  type AnalyticsContextValue,
+} from '@openzeppelin/ui-builder-react-core';
+
+// Builder-specific analytics hook
+export { useBuilderAnalytics } from './useBuilderAnalytics';

@@ -1,6 +1,10 @@
 import { useCallback, useState } from 'react';
 
-import { AdapterProvider, WalletStateProvider } from '@openzeppelin/ui-builder-react-core';
+import {
+  AdapterProvider,
+  AnalyticsProvider,
+  WalletStateProvider,
+} from '@openzeppelin/ui-builder-react-core';
 import type { NativeConfigLoader } from '@openzeppelin/ui-builder-types';
 import { Footer, NetworkErrorNotificationProvider, Toaster } from '@openzeppelin/ui-builder-ui';
 
@@ -12,7 +16,6 @@ import { useUIBuilderState } from './components/UIBuilder/hooks';
 import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
-import { AnalyticsProvider } from './hooks/AnalyticsProvider';
 
 // Use Vite's import.meta.glob to find all potential kit config files.
 // Expecting them to be .ts files as per convention.
