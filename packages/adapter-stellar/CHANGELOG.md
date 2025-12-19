@@ -1,5 +1,13 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.1.2
+
+### Patch Changes
+
+- [#286](https://github.com/OpenZeppelin/ui-builder/pull/286) [`82be765`](https://github.com/OpenZeppelin/ui-builder/commit/82be765d9ac6a1fbf0bb95596db21e0f5f3731c8) Thanks [@pasevin](https://github.com/pasevin)! - Add default indexer URL for Stellar testnet
+
+  Configure the SubQuery GraphQL indexer endpoint as the default indexerUri for Stellar testnet network configuration. This enables access control history features out-of-the-box for testnet users.
+
 ## 1.1.1
 
 ### Patch Changes
