@@ -1976,12 +1976,12 @@ describe('StellarIndexerClient - Admin Transfer Integration Tests', () => {
       // Try both contracts to find admin transfer events
       const contracts = [TEST_CONTRACT, TEST_CONTRACT_2];
       let targetContract: string | null = null;
-      let adminInitiatedEvents: typeof history.items = [];
-      let adminCompletedEvents: typeof history.items = [];
       let history: Awaited<ReturnType<typeof client.queryHistory>> = {
         items: [],
         pageInfo: { hasNextPage: false },
       };
+      let adminInitiatedEvents: typeof history.items = [];
+      let adminCompletedEvents: typeof history.items = [];
 
       for (const contract of contracts) {
         history = await client.queryHistory(contract);
@@ -2067,12 +2067,12 @@ describe('StellarIndexerClient - Admin Transfer Integration Tests', () => {
       // Try both contracts to find ownership transfer events
       const contracts = [TEST_CONTRACT, TEST_CONTRACT_2];
       let targetContract: string | null = null;
-      let ownershipStartedEvents: typeof history.items = [];
-      let ownershipCompletedEvents: typeof history.items = [];
       let history: Awaited<ReturnType<typeof client.queryHistory>> = {
         items: [],
         pageInfo: { hasNextPage: false },
       };
+      let ownershipStartedEvents: typeof history.items = [];
+      let ownershipCompletedEvents: typeof history.items = [];
 
       for (const contract of contracts) {
         history = await client.queryHistory(contract);
