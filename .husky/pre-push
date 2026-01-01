@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 echo "🔍 Running linting and formatting before push..."
 
@@ -8,8 +9,8 @@ if [ -s "$HOME/.nvm/nvm.sh" ]; then
   export NVM_DIR="$HOME/.nvm"
   \. "$NVM_DIR/nvm.sh" # This loads nvm
   
-  # Use Node.js 20+
-  nvm use 20 >/dev/null 2>&1
+  # Use Node.js 20+ (|| true because nvm use failing is non-fatal; version check below is the gate)
+  nvm use 20 >/dev/null 2>&1 || true
   
   echo "✅ Using Node.js $(node -v) from NVM"
 fi
