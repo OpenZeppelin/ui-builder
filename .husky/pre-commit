@@ -39,4 +39,6 @@ echo "🎨 Running formatting and linting (this may take a moment)..."
 pnpm fix-all
 
 # Re-stage files that were originally staged (to include any formatting fixes)
-echo "$staged_files" | xargs -I {} git add {} 
+while IFS= read -r file; do
+  [ -n "$file" ] && git add "$file"
+done <<< "$staged_files" 
