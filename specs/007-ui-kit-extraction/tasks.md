@@ -21,19 +21,19 @@
 
 **Purpose**: Create the new `openzeppelin-ui` repository with basic structure
 
-- [ ] T001 Create GitHub repository `OpenZeppelin/openzeppelin-ui` with AGPL-3.0 license
-- [ ] T002 Clone and initialize pnpm project at `openzeppelin-ui/package.json`
-- [ ] T003 [P] Create workspace config at `openzeppelin-ui/pnpm-workspace.yaml`
-- [ ] T004 [P] Create TypeScript base config at `openzeppelin-ui/tsconfig.base.json`
-- [ ] T005 [P] Copy and adapt ESLint config to `openzeppelin-ui/eslint.config.cjs`
-- [ ] T006 [P] Copy and adapt Prettier config to `openzeppelin-ui/.prettierrc.cjs`
-- [ ] T007 [P] Copy commitlint config to `openzeppelin-ui/commitlint.config.js`
-- [ ] T008 [P] Setup Husky hooks at `openzeppelin-ui/.husky/`
-- [ ] T009 Create packages directory structure at `openzeppelin-ui/packages/`
-- [ ] T010 Create examples directory structure at `openzeppelin-ui/examples/`
-- [ ] T010a [P] Copy AGPL-3.0 LICENSE file to `openzeppelin-ui/LICENSE`
-- [ ] T010b [P] Copy CONTRIBUTING.md to `openzeppelin-ui/CONTRIBUTING.md`
-- [ ] T010c [P] Copy CODE_OF_CONDUCT.md to `openzeppelin-ui/CODE_OF_CONDUCT.md`
+- [x] T001 Create GitHub repository `OpenZeppelin/openzeppelin-ui` with AGPL-3.0 license
+- [x] T002 Clone and initialize pnpm project at `openzeppelin-ui/package.json`
+- [x] T003 [P] Create workspace config at `openzeppelin-ui/pnpm-workspace.yaml`
+- [x] T004 [P] Create TypeScript base config at `openzeppelin-ui/tsconfig.base.json`
+- [x] T005 [P] Copy and adapt ESLint config to `openzeppelin-ui/eslint.config.cjs`
+- [x] T006 [P] Copy and adapt Prettier config to `openzeppelin-ui/.prettierrc.cjs`
+- [x] T007 [P] Copy commitlint config to `openzeppelin-ui/commitlint.config.js`
+- [x] T008 [P] Setup Husky hooks at `openzeppelin-ui/.husky/`
+- [x] T009 Create packages directory structure at `openzeppelin-ui/packages/`
+- [x] T010 Create examples directory structure at `openzeppelin-ui/examples/`
+- [x] T010a [P] Copy AGPL-3.0 LICENSE file to `openzeppelin-ui/LICENSE`
+- [x] T010b [P] Copy CONTRIBUTING.md to `openzeppelin-ui/CONTRIBUTING.md`
+- [x] T010c [P] Copy CODE_OF_CONDUCT.md to `openzeppelin-ui/CODE_OF_CONDUCT.md`
 
 ---
 
