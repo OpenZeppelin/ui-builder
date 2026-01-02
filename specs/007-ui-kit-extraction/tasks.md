@@ -122,16 +122,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T053 [P] [US1] Create README at `openzeppelin-ui/packages/types/README.md` with installation and usage examples
-- [ ] T054 [P] [US1] Create README at `openzeppelin-ui/packages/utils/README.md` with installation and usage examples
-- [ ] T055 [P] [US1] Create README at `openzeppelin-ui/packages/styles/README.md` with installation and usage examples
-- [ ] T056 [P] [US1] Create README at `openzeppelin-ui/packages/components/README.md` with installation and usage examples
-- [ ] T057 [P] [US1] Create README at `openzeppelin-ui/packages/renderer/README.md` with installation and usage examples
-- [ ] T058 [P] [US1] Create README at `openzeppelin-ui/packages/react/README.md` with installation and usage examples
-- [ ] T059 [P] [US1] Create README at `openzeppelin-ui/packages/storage/README.md` with installation and usage examples
-- [ ] T060 [US1] Remove all "UI Builder" references from JSDoc comments across all packages in `openzeppelin-ui/packages/*/src/**/*`
-- [ ] T061 [US1] Update package descriptions in all `openzeppelin-ui/packages/*/package.json` to remove "UI Builder" references
-- [ ] T062 [US1] Create root README at `openzeppelin-ui/README.md` with package overview and installation instructions
+- [x] T053 [P] [US1] Create README at `openzeppelin-ui/packages/types/README.md` with installation and usage examples
+- [x] T054 [P] [US1] Create README at `openzeppelin-ui/packages/utils/README.md` with installation and usage examples
+- [x] T055 [P] [US1] Create README at `openzeppelin-ui/packages/styles/README.md` with installation and usage examples
+- [x] T056 [P] [US1] Create README at `openzeppelin-ui/packages/components/README.md` with installation and usage examples
+- [x] T057 [P] [US1] Create README at `openzeppelin-ui/packages/renderer/README.md` with installation and usage examples
+- [x] T058 [P] [US1] Create README at `openzeppelin-ui/packages/react/README.md` with installation and usage examples
+- [x] T059 [P] [US1] Create README at `openzeppelin-ui/packages/storage/README.md` with installation and usage examples
+- [x] T060 [US1] Remove all "UI Builder" references from JSDoc comments across all packages in `openzeppelin-ui/packages/*/src/**/*`
+- [x] T061 [US1] Update package descriptions in all `openzeppelin-ui/packages/*/package.json` to remove "UI Builder" references
+- [x] T062 [US1] Create root README at `openzeppelin-ui/README.md` with package overview and installation instructions
 
 **Checkpoint**: US1 complete - packages ready for npm publish with proper documentation
 
