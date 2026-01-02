@@ -145,15 +145,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T063 [US2] Configure GitHub App secrets (GH_APP_ID, GH_APP_PRIVATE_KEY) in `openzeppelin-ui` repository settings
-- [ ] T064 [US2] Configure NPM_TOKEN secret in `openzeppelin-ui` repository settings
-- [ ] T065 [US2] Create initial changeset for 1.0.0 release at `openzeppelin-ui/.changeset/initial-release.md` with major bump for all packages
-- [ ] T066 [US2] Run `pnpm changeset version` to bump all packages to 1.0.0
+- [x] T063 [US2] Configure GitHub App secrets (GH_APP_ID, GH_APP_PRIVATE_KEY) in `openzeppelin-ui` repository settings (documented in `openzeppelin-ui/docs/DEVOPS_SETUP.md`)
+- [x] T064 [US2] Configure NPM_TOKEN secret in `openzeppelin-ui` repository settings (documented in `openzeppelin-ui/docs/DEVOPS_SETUP.md`)
+- [x] T065 [US2] Create initial changeset for 1.0.0 release at `openzeppelin-ui/.changeset/initial-release.md` with major bump for all packages (packages already at 1.0.0)
+- [x] T066 [US2] Run `pnpm changeset version` to bump all packages to 1.0.0 (packages already at 1.0.0)
 - [ ] T067 [US2] Commit version bump and push to trigger publish workflow
 - [ ] T068 [US2] Verify publish workflow creates release PR correctly
 - [ ] T069 [US2] Merge release PR and verify all 7 packages publish to npm with SLSA provenance
 - [ ] T070 [US2] Verify packages are installable via `npm info @openzeppelin/ui-types`
-- [ ] T070a [US2] Document rollback procedure in `openzeppelin-ui/docs/RUNBOOK.md` per FR-025 (npm deprecate + patch release)
+- [x] T070a [US2] Document rollback procedure in `openzeppelin-ui/docs/RUNBOOK.md` per FR-025 (npm deprecate + patch release)
 
 **Checkpoint**: US2 complete - all packages published to npm at 1.0.0 with provenance
 
@@ -244,6 +244,8 @@
 - [ ] T106 [US6] Document dependency update commands in migration guide
 - [ ] T107 [US6] Add troubleshooting section for common migration issues in migration guide
 - [ ] T108 [US6] Link migration guide from root `openzeppelin-ui/README.md`
+- [x] T108a [US6] Create local development setup script at `openzeppelin-ui/scripts/setup-local-dev.mjs` for consuming projects
+- [x] T108b [US6] Document setup script usage in `openzeppelin-ui/README.md`
 
 **Checkpoint**: US6 complete - migration guide provides clear path for existing consumers
 
@@ -263,6 +265,7 @@
 - [ ] T116 Update `contracts-ui-builder/pnpm-workspace.yaml` to reflect removed packages
 - [ ] T117 Run final verification: `pnpm install && pnpm build && pnpm test` in `contracts-ui-builder/`
 - [ ] T118 Create changeset for UI Builder migration update
+- [ ] T118a Remove `legacyInternalPackages` Set and associated handling from `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` (transition scaffolding no longer needed once all consumers use `@openzeppelin/ui-*` namespace)
 
 **Checkpoint**: UI Builder repo cleaned up, all migrated packages removed
 
@@ -386,11 +389,11 @@ T017: Copy storage/ to openzeppelin-ui/packages/storage/
 | US3 (P1)     | T071-T084          | UI Builder migration              |
 | US4 (P1)     | T085-T092          | Export pipeline updates           |
 | US5 (P2)     | T093-T102          | Example app                       |
-| US6 (P2)     | T103-T108          | Migration guide                   |
-| Cleanup      | T109-T118          | Remove old packages               |
+| US6 (P2)     | T103-T108b         | Migration guide + setup script    |
+| Cleanup      | T109-T118a         | Remove old packages + legacy code |
 | Polish       | T119-T122          | Final touches                     |
 
-**Total Tasks**: 127 (125 + 4 new - 3 moved = 126, plus T046a = 127)  
+**Total Tasks**: 130 (includes T108a-b setup script, T118a legacy cleanup)  
 **Parallel Opportunities**: 55 tasks marked [P]  
 **MVP Scope**: Phases 1-4 (T001-T070a) = 74 tasks  
 **Format Validation**: All tasks follow `- [ ] TXXX [P?] [US?] Description with file path`
