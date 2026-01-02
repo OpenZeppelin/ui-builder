@@ -149,10 +149,10 @@
 - [x] T064 [US2] Configure NPM_TOKEN secret in `openzeppelin-ui` repository settings (documented in `openzeppelin-ui/docs/DEVOPS_SETUP.md`)
 - [x] T065 [US2] Create initial changeset for 1.0.0 release at `openzeppelin-ui/.changeset/initial-release.md` with major bump for all packages (packages already at 1.0.0)
 - [x] T066 [US2] Run `pnpm changeset version` to bump all packages to 1.0.0 (packages already at 1.0.0)
-- [ ] T067 [US2] Commit version bump and push to trigger publish workflow
-- [ ] T068 [US2] Verify publish workflow creates release PR correctly
-- [ ] T069 [US2] Merge release PR and verify all 7 packages publish to npm with SLSA provenance
-- [ ] T070 [US2] Verify packages are installable via `npm info @openzeppelin/ui-types`
+- [x] T067 [US2] Commit version bump and push to trigger publish workflow
+- [x] T068 [US2] Verify publish workflow creates release PR correctly
+- [x] T069 [US2] Merge release PR and verify all 7 packages publish to npm with SLSA provenance
+- [x] T070 [US2] Verify packages are installable via `npm info @openzeppelin/ui-types`
 - [x] T070a [US2] Document rollback procedure in `openzeppelin-ui/docs/RUNBOOK.md` per FR-025 (npm deprecate + patch release)
 
 **Checkpoint**: US2 complete - all packages published to npm at 1.0.0 with provenance
