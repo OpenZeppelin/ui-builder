@@ -76,7 +76,7 @@ describe('Form Component Tests', () => {
       // Check for TransactionForm import - handle multi-line imports
       expect(formComponentCode).toContain('TransactionForm');
       expect(formComponentCode).toContain('from');
-      expect(formComponentCode).toMatch(/@openzeppelin\/ui-builder-renderer/);
+      expect(formComponentCode).toMatch(/@openzeppelin\/ui-renderer/);
 
       // Check for component definition
       expect(formComponentCode).toMatch(/export default function GeneratedForm/);

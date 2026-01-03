@@ -1,39 +1,39 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export/versions.ts');
 
-// List of internal packages to update
-const packagesToUpdate = [
+// Local workspace packages (adapters in this monorepo)
+const localPackages = [
   '@openzeppelin/ui-builder-adapter-evm',
   '@openzeppelin/ui-builder-adapter-midnight',
   '@openzeppelin/ui-builder-adapter-solana',
   '@openzeppelin/ui-builder-adapter-stellar',
+];
+
+// External packages from @openzeppelin/ui-* (published to npm from openzeppelin-ui repo)
+const externalPackages = [
   '@openzeppelin/ui-react',
   '@openzeppelin/ui-renderer',
   '@openzeppelin/ui-storage',
   '@openzeppelin/ui-types',
   '@openzeppelin/ui-components',
   '@openzeppelin/ui-utils',
+  '@openzeppelin/ui-styles',
 ];
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-builder-adapter-evm').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/ui-types' -> 'types'
     // e.g., '@openzeppelin/ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
-    let packageDirName = nameWithoutScope.replace('ui-builder-', '');
-
-    // Handle special case for renderer
-    if (packageName === '@openzeppelin/ui-renderer') {
-      packageDirName = 'renderer';
-    }
+    const packageDirName = nameWithoutScope.replace('ui-builder-', '');
 
     const packageJsonPath = path.resolve(__dirname, '../packages', packageDirName, 'package.json');
 
@@ -53,24 +53,52 @@ const getWorkspaceVersion = (packageName) => {
   }
 };
 
+/**
+ * Gets the latest version of a package from npm registry.
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-types').
+ * @returns {string | null} The version string or null if not found.
+ */
+const getNpmVersion = (packageName) => {
+  try {
+    const version = execSync(`npm view ${packageName} version`, {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    console.log(`✅ Found npm version for ${packageName}: ${version}`);
+    return version;
+  } catch (error) {
+    console.error(`❌ Failed to fetch npm version for ${packageName}. Is it published?`);
+    return null;
+  }
+};
+
 const updateVersionsFile = () => {
-  console.log('🚀 Synchronizing versions.ts with local workspace package versions...');
+  console.log('🚀 Synchronizing versions.ts with package versions...\n');
 
   let fileContent = fs.readFileSync(versionsFilePath, 'utf8');
   let versionsUpdated = false;
 
-  for (const pkg of packagesToUpdate) {
-    const workspaceVersion = getWorkspaceVersion(pkg);
-    if (workspaceVersion) {
-      // Regex to find the package line and update its version
-      const regex = new RegExp(`('${pkg}':\\s*')([^']+)(')`);
-      const currentVersionMatch = fileContent.match(regex);
+  // Update local workspace packages
+  console.log('📦 Checking local workspace packages...');
+  for (const pkg of localPackages) {
+    const version = getWorkspaceVersion(pkg);
+    if (version) {
+      versionsUpdated =
+        updatePackageVersion(fileContent, pkg, version, (newContent) => {
+          fileContent = newContent;
+        }) || versionsUpdated;
+    }
+  }
 
-      if (currentVersionMatch && currentVersionMatch[2] !== workspaceVersion) {
-        fileContent = fileContent.replace(regex, `$1${workspaceVersion}$3`);
-        console.log(`   Updating ${pkg} to ${workspaceVersion}`);
-        versionsUpdated = true;
-      }
+  // Update external npm packages
+  console.log('\n🌐 Checking external npm packages...');
+  for (const pkg of externalPackages) {
+    const version = getNpmVersion(pkg);
+    if (version) {
+      versionsUpdated =
+        updatePackageVersion(fileContent, pkg, version, (newContent) => {
+          fileContent = newContent;
+        }) || versionsUpdated;
     }
   }
 
@@ -86,6 +114,26 @@ const updateVersionsFile = () => {
     console.log('\n✅ All versions in versions.ts are already up to date.');
     console.log('   Skipping snapshot update (no version changes detected).');
   }
+};
+
+/**
+ * Updates a package version in the file content if it differs from current.
+ * @param {string} fileContent - Current file content
+ * @param {string} pkg - Package name
+ * @param {string} newVersion - New version to set
+ * @param {function} setContent - Callback to update content
+ * @returns {boolean} Whether the version was updated
+ */
+const updatePackageVersion = (fileContent, pkg, newVersion, setContent) => {
+  const regex = new RegExp(`('${pkg}':\\s*')([^']+)(')`);
+  const currentVersionMatch = fileContent.match(regex);
+
+  if (currentVersionMatch && currentVersionMatch[2] !== newVersion) {
+    setContent(fileContent.replace(regex, `$1${newVersion}$3`));
+    console.log(`   📝 Updating ${pkg}: ${currentVersionMatch[2]} → ${newVersion}`);
+    return true;
+  }
+  return false;
 };
 
 const updateSnapshots = () => {

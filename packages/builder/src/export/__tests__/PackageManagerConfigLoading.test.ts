@@ -163,7 +163,9 @@ describe('PackageManager configuration loading', () => {
         { env: 'local' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/ui-types']).toBe('workspace:*');
+      // UI packages from openzeppelin-ui use file: protocol for local development
+      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
+      // Adapter packages still use workspace:* (they're in contracts-ui-builder monorepo)
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
     });
 
@@ -179,8 +181,9 @@ describe('PackageManager configuration loading', () => {
         { env: 'staging' }
       );
       const result = JSON.parse(updated);
-      // Should use RC versions for staging (either 'rc' dist-tag or timestamped RC)
-      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(rcVersionOrTag);
+      // UI packages from openzeppelin-ui use stable versions (no RC pipeline)
+      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
+      // Adapter packages use RC versions for staging
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
 
       // External dependencies should remain unchanged
@@ -206,10 +209,19 @@ describe('PackageManager configuration loading', () => {
 
       const [localResult, stagingResult, prodResult] = results.map((r) => JSON.parse(r));
 
-      // Check each environment has correct versioning strategy
-      expect(localResult.dependencies['@openzeppelin/ui-types']).toBe('workspace:*');
-      expect(stagingResult.dependencies['@openzeppelin/ui-types']).toMatch(rcVersionOrTag);
+      // UI packages from openzeppelin-ui: file: for local, ^version for staging/production
+      expect(localResult.dependencies['@openzeppelin/ui-types']).toMatch(
+        /^file:.*\/packages\/types$/
+      );
+      expect(stagingResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
       expect(prodResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
+
+      // Adapter packages: workspace:* for local, rc for staging, ^version for production
+      expect(localResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
+      expect(stagingResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(
+        rcVersionOrTag
+      );
+      expect(prodResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(/^\^/);
 
       // All should have same external dependencies
       expect(localResult.dependencies['react']).toBe('^19.0.0');

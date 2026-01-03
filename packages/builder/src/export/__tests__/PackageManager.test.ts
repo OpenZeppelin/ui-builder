@@ -281,8 +281,12 @@ describe('PackageManager', () => {
         { env: 'local' }
       );
       const result = JSON.parse(updated);
-      expect(result.dependencies['@openzeppelin/ui-renderer']).toBe('workspace:*');
-      expect(result.dependencies['@openzeppelin/ui-types']).toBe('workspace:*');
+      // UI packages from openzeppelin-ui use file: protocol for local development
+      expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(
+        /^file:.*\/packages\/renderer$/
+      );
+      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
+      // Adapter packages still use workspace:* (they're in contracts-ui-builder monorepo)
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
     });
 
@@ -312,10 +316,12 @@ describe('PackageManager', () => {
       );
       const result = JSON.parse(updated);
 
-      // Should use RC versions for staging: accept 'rc' tag or timestamped RC like 0.0.0-rc-YYYYMMDDHHMMSS
+      // UI packages from openzeppelin-ui use stable versions (no RC pipeline)
+      expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
+
+      // Adapter packages use RC versions for staging: accept 'rc' tag or timestamped RC
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(rcVersionOrTag);
-      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(rcVersionOrTag);
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
 
       // Verify external deps don't get -rc treatment
@@ -338,10 +344,12 @@ describe('PackageManager', () => {
       );
       const result = JSON.parse(updated);
 
-      // All internal packages should resolve to RC format (either dist-tag 'rc' or timestamped RC)
+      // UI packages from openzeppelin-ui use stable versions (no RC pipeline)
+      expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
+
+      // Adapter packages resolve to RC format (either dist-tag 'rc' or timestamped RC)
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(result.dependencies['@openzeppelin/ui-renderer']).toMatch(rcVersionOrTag);
-      expect(result.dependencies['@openzeppelin/ui-types']).toMatch(rcVersionOrTag);
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
     });
 
@@ -350,7 +358,7 @@ describe('PackageManager', () => {
       // by testing the behavior when we know the implementation details
       const formConfig = createMinimalFormConfig();
 
-      // Test that non-RC versions get -rc appended in staging
+      // Test staging environment
       const stagingUpdated = await packageManager.updatePackageJson(
         basePackageJson,
         formConfig,
@@ -360,9 +368,14 @@ describe('PackageManager', () => {
       );
       const stagingResult = JSON.parse(stagingUpdated);
 
-      // All internal packages should have -rc suffix added (version-agnostic)
+      // UI packages use stable versions in staging (no RC pipeline for openzeppelin-ui)
+      expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
+
+      // Adapter packages use RC versions in staging
       const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
-      expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(rcVersionOrTag);
+      expect(stagingResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(
+        rcVersionOrTag
+      );
 
       // Test that production doesn't get -rc
       const prodUpdated = await packageManager.updatePackageJson(
@@ -374,7 +387,7 @@ describe('PackageManager', () => {
       );
       const prodResult = JSON.parse(prodUpdated);
 
-      // Production should have ^ prefix, not -rc suffix (version-agnostic)
+      // Production should have ^ prefix, not -rc suffix
       expect(prodResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^\d+\.\d+\.\d+$/);
       expect(prodResult.dependencies['@openzeppelin/ui-renderer']).not.toMatch(/-rc/);
     });
@@ -408,7 +421,12 @@ describe('PackageManager', () => {
         { env: 'local' }
       );
       const localResult = JSON.parse(localUpdated);
-      expect(localResult.dependencies['@openzeppelin/ui-renderer']).toBe('workspace:*');
+      // UI packages use file: protocol for local development
+      expect(localResult.dependencies['@openzeppelin/ui-renderer']).toMatch(
+        /^file:.*\/packages\/renderer$/
+      );
+      // Adapter packages use workspace:*
+      expect(localResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
 
       // Test staging environment
       const stagingUpdated = await packageManager.updatePackageJson(
@@ -419,7 +437,10 @@ describe('PackageManager', () => {
         { env: 'staging' }
       );
       const stagingResult = JSON.parse(stagingUpdated);
-      expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(
+      // UI packages use stable versions (no RC pipeline)
+      expect(stagingResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
+      // Adapter packages use RC versions
+      expect(stagingResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(
         /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/
       );
 
@@ -433,6 +454,9 @@ describe('PackageManager', () => {
       );
       const prodResult = JSON.parse(prodUpdated);
       expect(prodResult.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^\d+\.\d+\.\d+$/);
+      expect(prodResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(
+        /^\^\d+\.\d+\.\d+$/
+      );
     });
 
     it('should preserve external dependencies regardless of environment', async () => {

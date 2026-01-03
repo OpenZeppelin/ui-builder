@@ -194,14 +194,14 @@
 
 ### Implementation for User Story 4
 
-- [ ] T085 [US4] Update `internalPackages` Set in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` with new package names
-- [ ] T086 [US4] Update version mappings in `contracts-ui-builder/packages/builder/src/export/versions.ts` with new package names at `^1.0.0`
-- [ ] T087 [US4] Update `applyVersioningStrategy` in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` for new version formats (local=file:, staging=rc, production=^x.y.z)
-- [ ] T088 [US4] Update export code templates in `contracts-ui-builder/packages/builder/src/export/templates/` to use new import paths
-- [ ] T089 [US4] Update `update-renderer` script template in `contracts-ui-builder/packages/builder/src/export/` to reference new package names
-- [ ] T090 [US4] Run `pnpm test:export` in `contracts-ui-builder/` to verify exported apps build correctly
-- [ ] T091 [US4] Manually export a test form and verify generated `package.json` has correct dependencies
-- [ ] T092 [US4] Verify exported app runs correctly with `npm install && npm run dev`
+- [x] T085 [US4] Update `internalPackages` Set in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` with new package names
+- [x] T086 [US4] Update version mappings in `contracts-ui-builder/packages/builder/src/export/versions.ts` with new package names at `^1.0.0`
+- [x] T087 [US4] Update `applyVersioningStrategy` in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` for new version formats (local=file:, staging=rc, production=^x.y.z)
+- [x] T088 [US4] Update export code templates in `contracts-ui-builder/packages/builder/src/export/templates/` to use new import paths
+- [x] T089 [US4] Update `update-renderer` script template in `contracts-ui-builder/packages/builder/src/export/` to reference new package names
+- [x] T090 [US4] Run `pnpm test:export` in `contracts-ui-builder/` to verify exported apps build correctly
+- [x] T091 [US4] Manually export a test form and verify generated `package.json` has correct dependencies
+- [x] T092 [US4] Verify exported app runs correctly with `npm install && npm run dev`
 
 **Checkpoint**: US4 complete - exported apps use new packages and build successfully
 
