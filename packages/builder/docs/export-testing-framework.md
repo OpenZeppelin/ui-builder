@@ -238,14 +238,14 @@ it('should export a custom form with specific fields', async () => {
 To test different dependency configurations:
 
 ```typescript
-it('should export with workspace dependencies for local development', async () => {
+it('should export with file: dependencies for local development', async () => {
   const formConfig = createMinimalFormConfig('transfer', 'evm');
   const options = { env: 'local' as const };
 
   const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
 
   const packageJson = JSON.parse(files['package.json']);
-  expect(packageJson.dependencies['@openzeppelin/ui-builder-renderer']).toBe('workspace:*');
+  expect(packageJson.dependencies['@openzeppelin/ui-renderer']).toMatch(/^file:/);
 });
 
 it('should export with published dependencies for production', async () => {
@@ -255,7 +255,7 @@ it('should export with published dependencies for production', async () => {
   const { files } = await testExportStructure(formConfig, 'evm', 'transfer', options);
 
   const packageJson = JSON.parse(files['package.json']);
-  expect(packageJson.dependencies['@openzeppelin/ui-builder-renderer']).toBe('latest');
+  expect(packageJson.dependencies['@openzeppelin/ui-renderer']).toMatch(/^\^/);
 });
 ```
 
