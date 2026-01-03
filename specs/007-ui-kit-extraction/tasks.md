@@ -215,16 +215,16 @@
 
 ### Implementation for User Story 5
 
-- [ ] T093 [P] [US5] Create Vite + React project at `openzeppelin-ui/examples/basic-react-app/`
-- [ ] T094 [US5] Configure example app `openzeppelin-ui/examples/basic-react-app/package.json` with workspace deps
-- [ ] T095 [US5] Create example Button usage in `openzeppelin-ui/examples/basic-react-app/src/components/ButtonDemo.tsx`
-- [ ] T096 [US5] Create example Input usage in `openzeppelin-ui/examples/basic-react-app/src/components/InputDemo.tsx`
-- [ ] T097 [US5] Create example Select usage in `openzeppelin-ui/examples/basic-react-app/src/components/SelectDemo.tsx`
-- [ ] T098 [US5] Create example Form usage in `openzeppelin-ui/examples/basic-react-app/src/components/FormDemo.tsx`
-- [ ] T099 [US5] Create example FormRenderer usage in `openzeppelin-ui/examples/basic-react-app/src/components/RendererDemo.tsx`
-- [ ] T100 [US5] Create main App component at `openzeppelin-ui/examples/basic-react-app/src/App.tsx` showcasing all demos
-- [ ] T101 [US5] Add example app to workspace and verify it builds with `pnpm build`
-- [ ] T102 [US5] Verify example app runs with `pnpm dev` and displays all 5 component demos
+- [x] T093 [P] [US5] Create Vite + React project at `openzeppelin-ui/examples/basic-react-app/`
+- [x] T094 [US5] Configure example app `openzeppelin-ui/examples/basic-react-app/package.json` with workspace deps
+- [x] T095 [US5] Create example Button usage in `openzeppelin-ui/examples/basic-react-app/src/components/ButtonDemo.tsx`
+- [x] T096 [US5] Create example Input usage in `openzeppelin-ui/examples/basic-react-app/src/components/InputDemo.tsx`
+- [x] T097 [US5] Create example Select usage in `openzeppelin-ui/examples/basic-react-app/src/components/SelectDemo.tsx`
+- [x] T098 [US5] Create example Form usage in `openzeppelin-ui/examples/basic-react-app/src/components/FormDemo.tsx`
+- [x] T099 [US5] Create example FormRenderer usage in `openzeppelin-ui/examples/basic-react-app/src/components/RendererDemo.tsx`
+- [x] T100 [US5] Create main App component at `openzeppelin-ui/examples/basic-react-app/src/App.tsx` showcasing all demos
+- [x] T101 [US5] Add example app to workspace and verify it builds with `pnpm build`
+- [x] T102 [US5] Verify example app runs with `pnpm dev` and displays all 5 component demos
 
 **Checkpoint**: US5 complete - example app demonstrates Button, Input, Select, Form, FormRenderer
 
