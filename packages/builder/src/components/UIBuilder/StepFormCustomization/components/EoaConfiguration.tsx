@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AddressField, RadioField } from '@openzeppelin/ui-builder-ui';
+import { AddressField, RadioField } from '@openzeppelin/ui-components';
 
 import type { EoaConfigurationProps } from '../types';
 

@@ -1,7 +1,7 @@
 import { Control } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-builder-ui';
+import { BooleanField, TextAreaField, TextField } from '@openzeppelin/ui-components';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 import { shouldShowFieldTypeSelector } from './utils/fieldTypeUtils';
 

@@ -2,9 +2,9 @@ import { toast } from 'sonner';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { useWalletState } from '@openzeppelin/ui-react';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import { useStorageOperations } from '../../../../hooks/useStorageOperations';

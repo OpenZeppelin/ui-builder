@@ -4,7 +4,7 @@
 import type { AbiFunction } from 'viem';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 
 import type { AbiItem } from '../../types';
 // Adjust path as necessary

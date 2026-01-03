@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  EvmNetworkConfig,
-  NetworkConfig,
-  SolanaNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+import type { EvmNetworkConfig, NetworkConfig, SolanaNetworkConfig } from '@openzeppelin/ui-types';
 
 import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -100,7 +96,7 @@ describe('Export Structure Tests', () => {
       expect(dependencies).toHaveProperty('react');
       expect(dependencies).toHaveProperty('react-dom');
       // Check for the renderer package as well
-      expect(dependencies).toHaveProperty('@openzeppelin/ui-builder-renderer');
+      expect(dependencies).toHaveProperty('@openzeppelin/ui-renderer');
     });
 
     // REMOVED TESTS for includeAdapters true/false as the src/adapters dir is gone
@@ -124,7 +120,7 @@ describe('Export Structure Tests', () => {
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
     });
 
@@ -133,7 +129,7 @@ describe('Export Structure Tests', () => {
 
       // Verify package.json has correct adapter dependencies
       const packageJson = JSON.parse(files['package.json']);
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
     });
 

@@ -1,13 +1,10 @@
 import { Loader2, Wallet } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import {
-  useDerivedAccountStatus,
-  useDerivedConnectStatus,
-} from '@openzeppelin/ui-builder-react-core';
-import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { Button } from '@openzeppelin/ui-components';
+import { useDerivedAccountStatus, useDerivedConnectStatus } from '@openzeppelin/ui-react';
+import type { BaseComponentProps } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 import { ConnectorDialog } from './ConnectorDialog';

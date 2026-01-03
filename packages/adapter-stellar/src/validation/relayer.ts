@@ -1,4 +1,4 @@
-import { RelayerExecutionConfig } from '@openzeppelin/ui-builder-types';
+import { RelayerExecutionConfig } from '@openzeppelin/ui-types';
 
 export async function validateRelayerConfig(
   config: RelayerExecutionConfig

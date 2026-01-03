@@ -1,5 +1,5 @@
-import { SidebarButton, SidebarSection } from '@openzeppelin/ui-builder-ui';
-import { appConfigService } from '@openzeppelin/ui-builder-utils';
+import { SidebarButton, SidebarSection } from '@openzeppelin/ui-components';
+import { appConfigService } from '@openzeppelin/ui-utils';
 
 import ContractsWizardIconSvg from '../../../assets/icons/contracts-wizard-icon.svg';
 import { DevToolsDropdown } from '../../Common/DevToolsDropdown';

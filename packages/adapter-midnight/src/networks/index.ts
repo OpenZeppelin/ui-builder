@@ -1,4 +1,4 @@
-import { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { MidnightNetworkConfig } from '@openzeppelin/ui-types';
 
 import { midnightTestnet } from './testnet';
 

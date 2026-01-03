@@ -1,6 +1,6 @@
-import { EntityStorage } from '@openzeppelin/ui-builder-storage';
-import type { ContractDefinitionMetadata } from '@openzeppelin/ui-builder-types';
-import { generateId, logger } from '@openzeppelin/ui-builder-utils';
+import { EntityStorage } from '@openzeppelin/ui-storage';
+import type { ContractDefinitionMetadata } from '@openzeppelin/ui-types';
+import { generateId, logger } from '@openzeppelin/ui-utils';
 
 import { db } from './database';
 import type { ContractUIExportData, ContractUIRecord } from './types';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 import { ExecutionMethodFormData } from '../../../types';
 

@@ -252,11 +252,11 @@ function exportAppSimple(options) {
           '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
           '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
           '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
-          '@openzeppelin/ui-builder-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
-          '@openzeppelin/ui-builder-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
-          '@openzeppelin/ui-builder-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
-          '@openzeppelin/ui-builder-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
+          '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
+          '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
+          '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
+          '@openzeppelin/ui-components': `file:${path.join(monorepoRoot, 'packages/ui')}`,
+          '@openzeppelin/ui-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
         };
         packageJson.pnpm = {
           ...(packageJson.pnpm || {}),

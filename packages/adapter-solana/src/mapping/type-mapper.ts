@@ -1,5 +1,5 @@
-import type { FieldType } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { FieldType } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { SOLANA_TYPE_TO_FIELD_TYPE } from './constants';
 

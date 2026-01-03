@@ -1,13 +1,10 @@
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  NetworkSwitchManager,
-  useWalletReconnectionHandler,
-} from '@openzeppelin/ui-builder-react-core';
-import { ContractStateWidget } from '@openzeppelin/ui-builder-renderer';
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { NetworkSwitchManager, useWalletReconnectionHandler } from '@openzeppelin/ui-react';
+import { ContractStateWidget } from '@openzeppelin/ui-renderer';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { STEP_INDICES } from './constants/stepIndices';
 import { isTrimmedOnlyArtifacts, uiBuilderStore } from './hooks/uiBuilderStore';

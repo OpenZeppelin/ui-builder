@@ -16,9 +16,9 @@ import type {
   UiKitConfiguration,
   UserRpcProviderConfig,
   WalletConnectionStatus,
-} from '@openzeppelin/ui-builder-types';
-import { isSolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { isSolanaNetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import {
   getSolanaNetworkServiceForms,

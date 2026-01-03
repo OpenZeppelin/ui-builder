@@ -1,6 +1,6 @@
 import { MidnightBech32m } from '@midnight-ntwrk/wallet-sdk-address-format';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Address validation utilities for Midnight Network

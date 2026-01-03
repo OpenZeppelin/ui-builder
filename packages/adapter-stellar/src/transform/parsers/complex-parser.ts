@@ -1,6 +1,6 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { detectBytesEncoding, stringToBytes } from '@openzeppelin/ui-builder-utils';
+import { detectBytesEncoding, stringToBytes } from '@openzeppelin/ui-utils';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import {

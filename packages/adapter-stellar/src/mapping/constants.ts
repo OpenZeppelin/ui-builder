@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-types';
 
 /**
  * Stellar/Soroban-specific type mapping to default form field types.

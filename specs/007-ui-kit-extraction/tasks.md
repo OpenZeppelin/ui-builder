@@ -167,20 +167,20 @@
 
 ### Implementation for User Story 3
 
-- [ ] T071 [US3] Update `contracts-ui-builder/packages/builder/package.json` to replace workspace deps with npm versions `^1.0.0`
-- [ ] T072 [US3] Update `contracts-ui-builder/packages/adapter-evm/package.json` to replace workspace deps with npm versions
-- [ ] T073 [US3] Update `contracts-ui-builder/packages/adapter-stellar/package.json` to replace workspace deps with npm versions
-- [ ] T074 [US3] Update `contracts-ui-builder/packages/adapter-midnight/package.json` to replace workspace deps with npm versions
-- [ ] T075 [US3] Update `contracts-ui-builder/packages/adapter-solana/package.json` to replace workspace deps with npm versions
-- [ ] T076 [US3] Update imports in `contracts-ui-builder/packages/builder/src/**/*.{ts,tsx}` to use new package names
-- [ ] T077 [US3] Update imports in `contracts-ui-builder/packages/adapter-evm/src/**/*.{ts,tsx}` to use new package names
-- [ ] T078 [US3] Update imports in `contracts-ui-builder/packages/adapter-stellar/src/**/*.{ts,tsx}` to use new package names
-- [ ] T079 [US3] Update imports in `contracts-ui-builder/packages/adapter-midnight/src/**/*.{ts,tsx}` to use new package names
-- [ ] T080 [US3] Update imports in `contracts-ui-builder/packages/adapter-solana/src/**/*.{ts,tsx}` to use new package names
-- [ ] T081 [US3] Update `contracts-ui-builder/.changeset/config.json` to remove migrated packages from linked array
-- [ ] T082 [US3] Run `pnpm install` in `contracts-ui-builder/` and verify dependency resolution
-- [ ] T083 [US3] Run `pnpm build` in `contracts-ui-builder/` and verify all packages build
-- [ ] T084 [US3] Run `pnpm test` in `contracts-ui-builder/` and verify all tests pass
+- [x] T071 [US3] Update `contracts-ui-builder/packages/builder/package.json` to replace workspace deps with npm versions `^1.0.0`
+- [x] T072 [US3] Update `contracts-ui-builder/packages/adapter-evm/package.json` to replace workspace deps with npm versions
+- [x] T073 [US3] Update `contracts-ui-builder/packages/adapter-stellar/package.json` to replace workspace deps with npm versions
+- [x] T074 [US3] Update `contracts-ui-builder/packages/adapter-midnight/package.json` to replace workspace deps with npm versions
+- [x] T075 [US3] Update `contracts-ui-builder/packages/adapter-solana/package.json` to replace workspace deps with npm versions
+- [x] T076 [US3] Update imports in `contracts-ui-builder/packages/builder/src/**/*.{ts,tsx}` to use new package names
+- [x] T077 [US3] Update imports in `contracts-ui-builder/packages/adapter-evm/src/**/*.{ts,tsx}` to use new package names
+- [x] T078 [US3] Update imports in `contracts-ui-builder/packages/adapter-stellar/src/**/*.{ts,tsx}` to use new package names
+- [x] T079 [US3] Update imports in `contracts-ui-builder/packages/adapter-midnight/src/**/*.{ts,tsx}` to use new package names
+- [x] T080 [US3] Update imports in `contracts-ui-builder/packages/adapter-solana/src/**/*.{ts,tsx}` to use new package names
+- [x] T081 [US3] Update `contracts-ui-builder/.changeset/config.json` to remove migrated packages from linked array
+- [x] T082 [US3] Run `pnpm install` in `contracts-ui-builder/` and verify dependency resolution
+- [x] T083 [US3] Run `pnpm build` in `contracts-ui-builder/` and verify all packages build
+- [x] T084 [US3] Run `pnpm test` in `contracts-ui-builder/` and verify all tests pass
 
 **Checkpoint**: US3 complete - UI Builder works with npm packages, all tests pass
 

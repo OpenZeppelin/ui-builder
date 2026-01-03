@@ -1,4 +1,4 @@
-import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 /**
  * Generates the content for a `stellar-wallets-kit.config.ts` file for an exported project.

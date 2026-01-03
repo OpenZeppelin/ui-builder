@@ -1,6 +1,5 @@
 import { Settings, Wrench } from 'lucide-react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   useNetworkErrors,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
+import { useWalletState } from '@openzeppelin/ui-react';
 
 /**
  * Developer tools dropdown component for testing and debugging features.

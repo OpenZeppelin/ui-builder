@@ -2,7 +2,7 @@ import type {
   ExecutionConfig,
   MidnightNetworkConfig,
   TransactionStatusUpdate,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 import type { WriteContractParameters } from '../types';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';

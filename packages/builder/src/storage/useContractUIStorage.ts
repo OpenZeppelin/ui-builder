@@ -1,8 +1,8 @@
 import type { Table } from 'dexie';
 import { toast } from 'sonner';
 
-import { createRepositoryHook } from '@openzeppelin/ui-builder-storage';
-import type { ContractDefinitionMetadata } from '@openzeppelin/ui-builder-types';
+import { createRepositoryHook } from '@openzeppelin/ui-storage';
+import type { ContractDefinitionMetadata } from '@openzeppelin/ui-types';
 
 import { contractUIStorage } from './ContractUIStorage';
 import { db } from './database';

@@ -8,7 +8,7 @@ vi.mock('../../configuration/explorer', () => ({
   resolveExplorerConfig: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),

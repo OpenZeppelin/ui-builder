@@ -6,8 +6,8 @@ import type {
   ContractSchema,
   FunctionParameter,
   StellarNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { getStellarExplorerAddressUrl } from '../configuration/explorer';
 import { extractStructFields, isStructType } from '../mapping/struct-fields';

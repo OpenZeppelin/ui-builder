@@ -3,19 +3,19 @@ import type { Chain } from 'viem';
 import React from 'react';
 
 import {
-  useDerivedAccountStatus,
-  useDerivedChainInfo,
-  useDerivedSwitchChainStatus,
-} from '@openzeppelin/ui-builder-react-core';
-import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-components';
+import {
+  useDerivedAccountStatus,
+  useDerivedChainInfo,
+  useDerivedSwitchChainStatus,
+} from '@openzeppelin/ui-react';
+import type { BaseComponentProps } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';
 

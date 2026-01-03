@@ -1,6 +1,6 @@
 import { xdr } from '@stellar/stellar-sdk';
 
-import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
+import type { FunctionParameter } from '@openzeppelin/ui-types';
 
 import { extractTupleTypes } from '../utils/safe-type-parser';
 import { extractStructFields, isStructType } from './struct-fields';

@@ -1,8 +1,4 @@
-import {
-  ExecutionConfig,
-  RenderFormSchema,
-  UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
+import { ExecutionConfig, RenderFormSchema, UiKitConfiguration } from '@openzeppelin/ui-types';
 
 /**
  * Type definition for the saved configuration data structure

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import type { ContractAdapter, ContractFunction } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractAdapter, ContractFunction } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Custom hook to fetch function decoration notes from the adapter.

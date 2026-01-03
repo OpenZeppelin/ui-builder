@@ -1,6 +1,6 @@
 import type { DAppConnectorWalletAPI } from '@midnight-ntwrk/dapp-connector-api';
 
-import type { WalletConnectionStatus } from '@openzeppelin/ui-builder-types';
+import type { WalletConnectionStatus } from '@openzeppelin/ui-types';
 
 /**
  * TODO: The official DAppConnectorWalletAPI type from @midnight-ntwrk/dapp-connector-api

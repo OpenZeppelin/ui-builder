@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 export const DEFAULT_SPEC = {
   repo: 'stellar/stellar-asset-contract-spec',

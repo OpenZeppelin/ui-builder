@@ -22,9 +22,9 @@ import type {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/ui-builder-types';
-import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-builder-types';
-import { logger, validateSnapshot } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-types';
+import { logger, validateSnapshot } from '@openzeppelin/ui-utils';
 
 import { signAndBroadcastStellarTransaction } from '../transaction/sender';
 import {

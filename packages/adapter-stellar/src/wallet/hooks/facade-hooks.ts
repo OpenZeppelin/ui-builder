@@ -1,4 +1,4 @@
-import type { EcosystemSpecificReactHooks } from '@openzeppelin/ui-builder-types';
+import type { EcosystemSpecificReactHooks } from '@openzeppelin/ui-types';
 
 import { useStellarAccount } from './useStellarAccount';
 import { useStellarConnect } from './useStellarConnect';

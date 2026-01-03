@@ -1,4 +1,4 @@
-import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-builder-types';
+import type { ExecutionConfig, ExecutionMethodDetail } from '@openzeppelin/ui-types';
 
 // Placeholders
 export async function getSolanaSupportedExecutionMethods(): Promise<ExecutionMethodDetail[]> {

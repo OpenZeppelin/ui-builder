@@ -1,7 +1,7 @@
 import { xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 
-import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
+import type { FunctionParameter } from '@openzeppelin/ui-types';
 
 import { valueToScVal } from '../../src/transform/input-parser';
 

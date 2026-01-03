@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-types';
 
 // Placeholder
 export const SOLANA_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {

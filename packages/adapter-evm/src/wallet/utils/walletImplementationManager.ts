@@ -1,5 +1,5 @@
-import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
+import type { UiKitConfiguration } from '@openzeppelin/ui-types';
+import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
 import { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
 

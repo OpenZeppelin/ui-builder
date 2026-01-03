@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useAnalytics } from '@openzeppelin/ui-builder-react-core';
+import { useAnalytics } from '@openzeppelin/ui-react';
 
 /**
  * UI Builder-specific analytics hook.

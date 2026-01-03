@@ -1,7 +1,7 @@
 import { xdr } from '@stellar/stellar-sdk';
 
-import type { FunctionParameter } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { FunctionParameter } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 // Import the type extraction utility from the shared utils module
 import { extractSorobanTypeFromScSpec } from '../utils/type-detection';

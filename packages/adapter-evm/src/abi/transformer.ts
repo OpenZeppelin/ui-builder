@@ -1,11 +1,7 @@
 import type { AbiFunction, AbiParameter, AbiStateMutability } from 'viem';
 
-import type {
-  ContractFunction,
-  ContractSchema,
-  FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractFunction, ContractSchema, FunctionParameter } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { AbiItem } from '../types';
 import { formatInputName, formatMethodName } from '../utils';

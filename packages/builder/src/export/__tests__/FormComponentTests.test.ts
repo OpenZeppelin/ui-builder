@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { EvmNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import type { EvmNetworkConfig } from '@openzeppelin/ui-types';
+import { Ecosystem } from '@openzeppelin/ui-types';
 
 import { AppExportSystem } from '../AppExportSystem';
 import {

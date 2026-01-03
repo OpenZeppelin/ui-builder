@@ -5,14 +5,14 @@
  * Common form types are imported directly from the renderer package
  * when needed, rather than being re-exported here.
  * If you see that the types must be used in multiple packages, please consider
- * adding them to the @openzeppelin/ui-builder-types package instead.
+ * adding them to the @openzeppelin/ui-types package instead.
  */
 // Import using the package name from dependencies
 import type {
   CommonFormProperties,
   ExecutionConfig,
   UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 /**
  * Configuration input used during form creation and editing in the builder

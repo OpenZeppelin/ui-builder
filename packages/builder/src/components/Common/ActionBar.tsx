@@ -1,9 +1,9 @@
 import { ArrowUpFromLine, Eye, Pencil } from 'lucide-react';
 import React from 'react';
 
-import { ContractActionBar } from '@openzeppelin/ui-builder-renderer';
-import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { Button, LoadingButton } from '@openzeppelin/ui-builder-ui';
+import { Button, LoadingButton } from '@openzeppelin/ui-components';
+import { ContractActionBar } from '@openzeppelin/ui-renderer';
+import type { NetworkConfig } from '@openzeppelin/ui-types';
 
 interface ActionBarProps {
   network: NetworkConfig | null;

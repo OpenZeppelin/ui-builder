@@ -11,7 +11,7 @@ import type {
   ContractSchema,
   EoaExecutionConfig,
   StellarNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 import {
   assembleGrantRoleAction,
@@ -23,8 +23,8 @@ import { readCurrentRoles, readOwnership } from '../../src/access-control/onchai
 import { StellarAccessControlService } from '../../src/access-control/service';
 
 // Mock the logger but keep validateSnapshot real
-vi.mock('@openzeppelin/ui-builder-utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@openzeppelin/ui-builder-utils')>();
+vi.mock('@openzeppelin/ui-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openzeppelin/ui-utils')>();
   return {
     ...actual,
     logger: {
@@ -2340,7 +2340,7 @@ describe('Access Control Service - Two-Step Ownership Transfer (US2)', () => {
     it('T037: should log transfer initiation at INFO level', async () => {
       const currentLedger = 12340000;
       const expirationLedger = currentLedger + 720;
-      const { logger } = await import('@openzeppelin/ui-builder-utils');
+      const { logger } = await import('@openzeppelin/ui-utils');
 
       // Mock: getCurrentLedger
       const { getCurrentLedger } = await import('../../src/access-control/onchain-reader');
@@ -2547,7 +2547,7 @@ describe('Access Control Service - Accept Ownership Transfer (US3)', () => {
      * T047: INFO logging for acceptance operations per NFR-004
      */
     it('T047: should log acceptance operation at INFO level', async () => {
-      const { logger } = await import('@openzeppelin/ui-builder-utils');
+      const { logger } = await import('@openzeppelin/ui-utils');
 
       // Action: Accept ownership
       await service.acceptOwnership(TEST_CONTRACT, mockExecutionConfig);

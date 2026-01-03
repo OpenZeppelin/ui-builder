@@ -1,7 +1,7 @@
 import { Contract } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 
-import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
 
 import { generateStellarDefaultField } from '../../src/mapping/field-generator';
 import { formatStellarTransactionData } from '../../src/transaction/formatter';

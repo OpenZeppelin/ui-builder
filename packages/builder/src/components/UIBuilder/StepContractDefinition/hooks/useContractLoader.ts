@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
   simpleHash,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { loadContractDefinitionWithMetadata } from '../../../../services/ContractLoader';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';

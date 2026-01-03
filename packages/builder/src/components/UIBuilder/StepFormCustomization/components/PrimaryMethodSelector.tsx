@@ -2,7 +2,7 @@ import { Shield, User, Users } from 'lucide-react';
 import React from 'react';
 import { useController } from 'react-hook-form';
 
-import { EmptyState } from '@openzeppelin/ui-builder-ui';
+import { EmptyState } from '@openzeppelin/ui-components';
 
 import { type SelectableOption } from '../../../Common/OptionSelector';
 import { TitledSection } from '../../../Common/TitledSection';

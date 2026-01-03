@@ -1,6 +1,6 @@
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import { enhanceMidnightError, formatEnhancedError } from './error-enhancer';

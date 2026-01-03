@@ -50,13 +50,16 @@ function readPackage(pkg, context) {
     return pkg;
   }
 
+  // Use process.cwd() as fallback if context.dir is undefined
+  const baseDir = context.dir || process.cwd();
+
   // Replace @openzeppelin/ui-* dependencies with local file: references
   for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
     if (!pkg[depType]) continue;
 
     for (const [npmName, localPath] of Object.entries(UI_PACKAGE_MAP)) {
       if (pkg[depType][npmName]) {
-        const absolutePath = path.resolve(context.dir, LOCAL_UI_PATH, localPath);
+        const absolutePath = path.resolve(baseDir, LOCAL_UI_PATH, localPath);
         pkg[depType][npmName] = `file:${absolutePath}`;
         context.log(`[local-dev] ${npmName} → ${absolutePath}`);
       }

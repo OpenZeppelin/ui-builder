@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-builder-utils';
+import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 import { loadEvmContract } from '../abi/loader';
 import type { TypedEvmNetworkConfig } from '../types';

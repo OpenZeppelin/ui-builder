@@ -21,9 +21,9 @@ import {
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
-} from '@openzeppelin/ui-builder-react-core';
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { Footer } from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-react';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
+import { Footer } from '@openzeppelin/ui-components';
 
 import GeneratedForm from './components/GeneratedForm';
 
@@ -94,15 +94,15 @@ import {
   ContractActionBar,
   ContractStateWidget,
   TransactionForm,
-} from '@openzeppelin/ui-builder-renderer';
+} from '@openzeppelin/ui-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/ui-builder-types';
-import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { Card, CardContent } from '@openzeppelin/ui-components';
+import { cn } from '@openzeppelin/ui-utils';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -302,11 +302,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.1.0",
-    "@openzeppelin/ui-builder-renderer": "^1.1.0",
-    "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.1.0",
-    "@openzeppelin/ui-builder-utils": "^1.1.0",
+    "@openzeppelin/ui-react": "^1.1.0",
+    "@openzeppelin/ui-renderer": "^1.1.0",
+    "@openzeppelin/ui-types": "^1.0.0",
+    "@openzeppelin/ui-components": "^1.1.0",
+    "@openzeppelin/ui-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -336,7 +336,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-renderer",
   },
 }
 `;
@@ -349,11 +349,11 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.1.0",
-    "@openzeppelin/ui-builder-renderer": "^1.1.0",
-    "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.1.0",
-    "@openzeppelin/ui-builder-utils": "^1.1.0",
+    "@openzeppelin/ui-react": "^1.1.0",
+    "@openzeppelin/ui-renderer": "^1.1.0",
+    "@openzeppelin/ui-types": "^1.0.0",
+    "@openzeppelin/ui-components": "^1.1.0",
+    "@openzeppelin/ui-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -383,7 +383,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-renderer",
   },
 }
 `;

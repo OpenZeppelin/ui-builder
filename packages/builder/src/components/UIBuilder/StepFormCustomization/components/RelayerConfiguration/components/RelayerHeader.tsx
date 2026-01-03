@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ExternalLink } from '@openzeppelin/ui-builder-ui';
+import { ExternalLink } from '@openzeppelin/ui-components';
 
 export function RelayerHeader(): React.ReactElement {
   return (

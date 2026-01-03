@@ -5,10 +5,10 @@ import { defineConfig } from 'vitest/config';
 export const sharedVitestConfig = defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['@openzeppelin/ui-builder-renderer', '@openzeppelin/ui-builder-types'],
+    include: ['@openzeppelin/ui-renderer', '@openzeppelin/ui-types'],
   },
   ssr: {
-    noExternal: ['@openzeppelin/ui-builder-renderer', '@openzeppelin/ui-builder-types'],
+    noExternal: ['@openzeppelin/ui-renderer', '@openzeppelin/ui-types'],
   },
   test: {
     globals: true,

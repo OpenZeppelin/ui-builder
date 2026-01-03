@@ -5,8 +5,8 @@ import type {
   FieldValidation,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
-import { getDefaultValueForType, logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { getDefaultValueForType, logger } from '@openzeppelin/ui-utils';
 
 import { mapSolanaParamTypeToFieldType } from './type-mapper';
 

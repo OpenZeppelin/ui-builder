@@ -1,5 +1,5 @@
-import type { AdapterExportBootstrap, AdapterExportContext } from '@openzeppelin/ui-builder-types';
-import { base64ToBytes, logger } from '@openzeppelin/ui-builder-utils';
+import type { AdapterExportBootstrap, AdapterExportContext } from '@openzeppelin/ui-types';
+import { base64ToBytes, logger } from '@openzeppelin/ui-utils';
 
 import { stripZipForFunction } from '../utils/zip-slimmer';
 

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import { useWalletState } from '@openzeppelin/ui-react';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { hasMeaningfulContent } from '../../utils/meaningfulContent';

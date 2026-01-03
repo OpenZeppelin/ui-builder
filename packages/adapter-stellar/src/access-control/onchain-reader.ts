@@ -13,13 +13,9 @@ import type {
   RoleAssignment,
   RoleIdentifier,
   StellarNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
-import { OperationFailed } from '@openzeppelin/ui-builder-types';
-import {
-  DEFAULT_CONCURRENCY_LIMIT,
-  logger,
-  promiseAllWithLimit,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { OperationFailed } from '@openzeppelin/ui-types';
+import { DEFAULT_CONCURRENCY_LIMIT, logger, promiseAllWithLimit } from '@openzeppelin/ui-utils';
 
 import { queryStellarViewFunction } from '../query/handler';
 

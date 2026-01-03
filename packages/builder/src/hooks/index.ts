@@ -4,7 +4,7 @@ export {
   AnalyticsProvider,
   type AnalyticsProviderProps,
   type AnalyticsContextValue,
-} from '@openzeppelin/ui-builder-react-core';
+} from '@openzeppelin/ui-react';
 
 // Builder-specific analytics hook
 export { useBuilderAnalytics } from './useBuilderAnalytics';

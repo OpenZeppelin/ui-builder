@@ -1,4 +1,4 @@
-import { createDexieDatabase } from '@openzeppelin/ui-builder-storage';
+import { createDexieDatabase } from '@openzeppelin/ui-storage';
 
 // Single database instance shared across all storage services
 export const db = createDexieDatabase('UIBuilder', [

@@ -6,8 +6,8 @@
  * are critical infrastructure for ABI fetching. See comments below for detailed explanation.
  */
 
-import { NetworkConfig } from '@openzeppelin/ui-builder-types';
-import type { UserExplorerConfig } from '@openzeppelin/ui-builder-types';
+import { NetworkConfig } from '@openzeppelin/ui-types';
+import type { UserExplorerConfig } from '@openzeppelin/ui-types';
 
 import { isValidContractAddress } from '../validation';
 

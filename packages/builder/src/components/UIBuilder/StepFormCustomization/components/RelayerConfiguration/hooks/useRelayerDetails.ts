@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import type { ContractAdapter, RelayerDetailsRich } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractAdapter, RelayerDetailsRich } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 interface UseRelayerDetailsParams {
   adapter: ContractAdapter | null;

@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   Input,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
 
 const meta = {
   title: 'Builder/UI/Dialog',

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import type { ExecutionConfig } from '@openzeppelin/ui-builder-types';
+import type { ExecutionConfig } from '@openzeppelin/ui-types';
 
 /**
  * Custom hook to manage combined validation state for execution config and form fields.

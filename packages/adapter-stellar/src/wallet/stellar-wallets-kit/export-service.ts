@@ -1,4 +1,4 @@
-import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 import { generateStellarWalletsKitConfigFile } from './config-generator';
 

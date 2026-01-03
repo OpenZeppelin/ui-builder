@@ -5,8 +5,8 @@ import type {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-utils';
 
 import { EoaExecutionStrategy } from './eoa';
 import { ExecutionStrategy } from './execution-strategy';

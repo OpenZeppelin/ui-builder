@@ -1,5 +1,5 @@
-import type { SolanaNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { SolanaNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Validates an RPC endpoint configuration for Solana networks.

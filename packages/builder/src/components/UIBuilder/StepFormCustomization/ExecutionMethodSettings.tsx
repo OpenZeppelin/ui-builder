@@ -4,7 +4,7 @@ import type {
   ContractAdapter,
   ExecutionConfig,
   ExecutionMethodDetail,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 import { PrimaryMethodSelector } from './components/PrimaryMethodSelector';
 import { useExecutionMethodState } from './hooks/useExecutionMethodState';

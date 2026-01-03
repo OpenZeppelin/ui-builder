@@ -1,10 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import type {
-  ContractAdapter,
-  ContractSchema,
-  EvmNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, ContractSchema, EvmNetworkConfig } from '@openzeppelin/ui-types';
 
 import { TEST_FIXTURES } from './fixtures/evm-test-fixtures';
 

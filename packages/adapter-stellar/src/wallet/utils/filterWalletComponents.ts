@@ -1,6 +1,6 @@
-import type { EcosystemWalletComponents, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { ECOSYSTEM_WALLET_COMPONENT_KEYS } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { EcosystemWalletComponents, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { ECOSYSTEM_WALLET_COMPONENT_KEYS } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Filters a set of wallet components based on an exclusion list.

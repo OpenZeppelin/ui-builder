@@ -7,13 +7,9 @@
 import { toast } from 'sonner';
 import { useCallback, useEffect, useState } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import {
-  ContractDefinitionMetadata,
-  ContractSchema,
-  FormValues,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { useWalletState } from '@openzeppelin/ui-react';
+import { ContractDefinitionMetadata, ContractSchema, FormValues } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { contractDefinitionService } from '../services/ContractDefinitionService';
 import { ContractLoadResult } from '../services/ContractLoader';

@@ -6,12 +6,12 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 import {
   enhanceNumericValidation,
   getDefaultValueForType,
   type NumericBoundsMap,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 

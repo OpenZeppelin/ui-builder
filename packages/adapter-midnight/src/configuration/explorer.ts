@@ -1,6 +1,6 @@
-import { NetworkConfig } from '@openzeppelin/ui-builder-types';
-import type { UserExplorerConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { NetworkConfig } from '@openzeppelin/ui-types';
+import type { UserExplorerConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Gets a blockchain explorer URL for an address on Midnight.

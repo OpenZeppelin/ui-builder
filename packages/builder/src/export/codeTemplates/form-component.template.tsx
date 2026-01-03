@@ -8,19 +8,15 @@
 /*------------TEMPLATE COMMENT END------------*/
 import { useMemo, useState } from 'react';
 
-import {
-  ContractActionBar,
-  ContractStateWidget,
-  TransactionForm,
-} from '@openzeppelin/ui-builder-renderer';
+import { Card, CardContent } from '@openzeppelin/ui-components';
+import { ContractActionBar, ContractStateWidget, TransactionForm } from '@openzeppelin/ui-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/ui-builder-types';
-import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {

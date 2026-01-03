@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Input,
   Label,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
 
 interface RenameDialogProps {
   open: boolean;

@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ConfigurationInvalid } from '@openzeppelin/ui-builder-types';
+import { ConfigurationInvalid } from '@openzeppelin/ui-types';
 
 import {
   normalizeStellarAddress,

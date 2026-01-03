@@ -6,12 +6,12 @@ import type {
   WalletProvider,
 } from '@midnight-ntwrk/midnight-js-types';
 
-import type { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { MidnightNetworkConfig } from '@openzeppelin/ui-types';
 import {
   logger,
   userNetworkServiceConfigService,
   userRpcConfigService,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { getWalletConfigIfAvailable } from '../configuration/provider';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';

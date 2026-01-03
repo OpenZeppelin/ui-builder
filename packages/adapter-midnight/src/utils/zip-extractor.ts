@@ -4,7 +4,7 @@
  */
 import JSZip from 'jszip';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 const SYSTEM_LOG_TAG = 'ZipExtractor';
 

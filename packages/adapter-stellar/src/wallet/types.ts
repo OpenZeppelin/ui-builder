@@ -1,4 +1,4 @@
-import type { WalletConnectionStatus } from '@openzeppelin/ui-builder-types';
+import type { WalletConnectionStatus } from '@openzeppelin/ui-types';
 
 /**
  * Stellar-specific wallet connection status extending the base interface.

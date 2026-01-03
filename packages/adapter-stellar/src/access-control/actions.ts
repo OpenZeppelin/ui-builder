@@ -6,7 +6,7 @@
  * via the standard Stellar transaction execution flow.
  */
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { StellarTransactionData } from '../transaction/formatter';
 

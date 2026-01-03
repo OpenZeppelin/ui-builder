@@ -1,6 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/ui-builder-ui';
+import { Alert, AlertDescription, AlertTitle } from '@openzeppelin/ui-components';
 
 interface ContractLoadingErrorsProps {
   validationError: string | null;

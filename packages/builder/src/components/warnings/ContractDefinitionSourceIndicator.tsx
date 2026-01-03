@@ -1,7 +1,7 @@
 import { Clock, Download, Edit, ExternalLink } from 'lucide-react';
 import React from 'react';
 
-import { cn, formatTimestamp } from '@openzeppelin/ui-builder-utils';
+import { cn, formatTimestamp } from '@openzeppelin/ui-utils';
 
 export interface ContractDefinitionSourceIndicatorProps {
   source: 'fetched' | 'manual';

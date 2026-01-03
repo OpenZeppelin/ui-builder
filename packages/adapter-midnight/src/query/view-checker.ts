@@ -1,4 +1,4 @@
-import type { ContractFunction } from '@openzeppelin/ui-builder-types';
+import type { ContractFunction } from '@openzeppelin/ui-types';
 
 import { isPureCircuit } from '../utils/circuit-type-utils';
 

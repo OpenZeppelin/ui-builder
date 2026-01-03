@@ -5,7 +5,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 import {
   enumerateRoleMembers,
@@ -25,10 +25,9 @@ vi.mock('../../src/query/handler', () => ({
 }));
 
 // Mock the logger but keep the actual async utilities (promiseAllWithLimit, etc.)
-vi.mock('@openzeppelin/ui-builder-utils', async () => {
-  const actual = await vi.importActual<typeof import('@openzeppelin/ui-builder-utils')>(
-    '@openzeppelin/ui-builder-utils'
-  );
+vi.mock('@openzeppelin/ui-utils', async () => {
+  const actual =
+    await vi.importActual<typeof import('@openzeppelin/ui-utils')>('@openzeppelin/ui-utils');
   return {
     ...actual,
     logger: {

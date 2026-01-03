@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { SidebarLayout } from '@openzeppelin/ui-builder-ui';
+import { SidebarLayout } from '@openzeppelin/ui-components';
 
 import ContractUIImportDialog from '../ContractUIs/ContractUIImportDialog';
 import SidebarContent from './SidebarContent';
@@ -22,7 +22,7 @@ interface AppSidebarProps {
 
 /**
  * Main application sidebar component with logo, actions, and saved Contract UIs.
- * Uses the generic SidebarLayout from @openzeppelin/ui-builder-ui.
+ * Uses the generic SidebarLayout from @openzeppelin/ui-components.
  */
 export default function AppSidebar({
   className,

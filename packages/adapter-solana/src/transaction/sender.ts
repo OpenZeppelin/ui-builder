@@ -1,5 +1,5 @@
-import type { ExecutionConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ExecutionConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 const SYSTEM_LOG_TAG = 'adapter-solana';
 // Placeholder

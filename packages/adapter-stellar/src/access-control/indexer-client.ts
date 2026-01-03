@@ -14,18 +14,14 @@ import type {
   PaginatedHistoryResult,
   RoleIdentifier,
   StellarNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
-import {
-  ConfigurationInvalid,
-  IndexerUnavailable,
-  OperationFailed,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
+import { ConfigurationInvalid, IndexerUnavailable, OperationFailed } from '@openzeppelin/ui-types';
 import {
   appConfigService,
   isValidUrl,
   logger,
   userNetworkServiceConfigService,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 const LOG_SYSTEM = 'StellarIndexerClient';
 

@@ -1,6 +1,6 @@
 import { Info } from 'lucide-react';
 
-import { Banner } from '@openzeppelin/ui-builder-ui';
+import { Banner } from '@openzeppelin/ui-components';
 
 interface FunctionNoteSectionProps {
   note: { title?: string; body: string } | undefined;

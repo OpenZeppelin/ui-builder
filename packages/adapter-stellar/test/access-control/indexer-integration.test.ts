@@ -20,7 +20,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 import { StellarIndexerClient } from '../../src/access-control/indexer-client';
 

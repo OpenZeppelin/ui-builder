@@ -1,9 +1,9 @@
 import { Loader2, Wallet } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { Button } from '@openzeppelin/ui-components';
+import type { BaseComponentProps } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { useStellarAccount } from '../../hooks';
 import { ConnectorDialog } from './ConnectorDialog';

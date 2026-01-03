@@ -1,4 +1,4 @@
-import type { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { MidnightNetworkConfig } from '@openzeppelin/ui-types';
 
 export const midnightTestnet: MidnightNetworkConfig = {
   id: 'midnight-testnet',

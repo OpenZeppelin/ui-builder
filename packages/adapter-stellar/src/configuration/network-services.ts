@@ -1,5 +1,5 @@
-import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
-import { isValidUrl } from '@openzeppelin/ui-builder-utils';
+import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import { isValidUrl } from '@openzeppelin/ui-utils';
 
 import { testStellarRpcConnection, validateStellarRpcEndpoint } from './rpc';
 

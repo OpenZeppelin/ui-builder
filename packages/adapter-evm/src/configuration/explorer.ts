@@ -1,9 +1,5 @@
-import { NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-builder-types';
-import {
-  appConfigService,
-  logger,
-  userNetworkServiceConfigService,
-} from '@openzeppelin/ui-builder-utils';
+import { NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-types';
+import { appConfigService, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
 import { TypedEvmNetworkConfig } from '../types';

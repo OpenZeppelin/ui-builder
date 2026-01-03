@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Modifies the content paths within tailwind.config.cjs content string.
@@ -33,8 +33,8 @@ export function modifyTailwindConfigContentForExport(originalContent: string): s
     // Ensure node_modules is scanned broadly enough if renderer components are there
     // This path assumes renderer might be a direct dependency or symlinked in a way that needs explicit scanning.
     // Adjust if renderer styles are expected to be found elsewhere or if its components are self-contained regarding styles.
-    './node_modules/@openzeppelin/ui-builder-renderer/dist/**/*.{js,ts,jsx,tsx}', // More specific path to renderer components
-    './node_modules/@openzeppelin/ui-builder-renderer/src/**/*.{js,ts,jsx,tsx}', // If src is also published or linked
+    './node_modules/@openzeppelin/ui-renderer/dist/**/*.{js,ts,jsx,tsx}', // More specific path to renderer components
+    './node_modules/@openzeppelin/ui-renderer/src/**/*.{js,ts,jsx,tsx}', // If src is also published or linked
   ]
     .map((p) => `      '${p}'`) // Indent for formatting
     .join(',\n');

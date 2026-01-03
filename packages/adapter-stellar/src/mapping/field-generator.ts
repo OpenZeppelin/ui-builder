@@ -8,13 +8,13 @@ import type {
   FieldValue,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 import {
   enhanceNumericValidation,
   getDefaultValueForType,
   logger,
   type NumericBoundsMap,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { extractMapTypes, extractVecElementType } from '../utils/safe-type-parser';
 import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';

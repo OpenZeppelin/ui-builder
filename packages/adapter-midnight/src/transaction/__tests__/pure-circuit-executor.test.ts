@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/ui-types';
 
 import type { MidnightContractArtifacts, WriteContractParameters } from '../../types';
 import * as circuitTypeUtils from '../../utils/circuit-type-utils';
@@ -14,7 +14,7 @@ vi.mock('@midnight-ntwrk/compact-runtime', () => ({
   default: { versionString: '1.0.0' },
   versionString: '1.0.0',
 }));
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),

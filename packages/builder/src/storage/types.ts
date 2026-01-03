@@ -1,10 +1,10 @@
-import type { BaseRecord } from '@openzeppelin/ui-builder-storage';
+import type { BaseRecord } from '@openzeppelin/ui-storage';
 import type {
   ContractDefinitionMetadata,
   ExecutionConfig,
   RenderFormSchema,
   UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 export interface ContractUIRecord extends BaseRecord {
   title: string;

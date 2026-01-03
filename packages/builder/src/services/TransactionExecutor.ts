@@ -4,8 +4,8 @@
  * Handles execution of transactions on different blockchain platforms.
  * Uses the appropriate adapter based on the chain type.
  */
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * Interface for transaction parameters

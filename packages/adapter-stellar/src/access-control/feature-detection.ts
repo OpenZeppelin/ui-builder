@@ -6,8 +6,8 @@
  * from OpenZeppelin Stellar Contracts.
  */
 
-import type { AccessControlCapabilities, ContractSchema } from '@openzeppelin/ui-builder-types';
-import { UnsupportedContractFeatures } from '@openzeppelin/ui-builder-types';
+import type { AccessControlCapabilities, ContractSchema } from '@openzeppelin/ui-types';
+import { UnsupportedContractFeatures } from '@openzeppelin/ui-types';
 
 /**
  * Known OpenZeppelin Ownable function signatures

@@ -2,8 +2,8 @@ import type {
   EoaExecutionConfig,
   ExecutionConfig,
   ExecutionMethodDetail,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { isValidAddress } from '../validation';
 

@@ -1,7 +1,7 @@
 import { xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 
-import type { ContractSchema, FunctionParameter } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema, FunctionParameter } from '@openzeppelin/ui-types';
 
 import { generateStellarDefaultField } from '../../src/mapping/field-generator';
 import {

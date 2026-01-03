@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ContractFunction } from '@openzeppelin/ui-builder-types';
+import type { ContractFunction } from '@openzeppelin/ui-types';
 
 import { formatMidnightFunctionResult } from '../output-formatter';
 

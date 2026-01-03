@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import type { ContractAdapter, FunctionDecorationsMap } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractAdapter, FunctionDecorationsMap } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { WritableFunctionsSectionProps } from './types';
 import { WritableFunctionRow } from './WritableFunctionRow';

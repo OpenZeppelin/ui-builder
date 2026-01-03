@@ -1,5 +1,5 @@
-import { FormFieldType, isEnumValue } from '@openzeppelin/ui-builder-types';
-import { getDefaultValueForType } from '@openzeppelin/ui-builder-utils';
+import { FormFieldType, isEnumValue } from '@openzeppelin/ui-types';
+import { getDefaultValueForType } from '@openzeppelin/ui-utils';
 
 import { FieldEditorFormValues } from '../types';
 

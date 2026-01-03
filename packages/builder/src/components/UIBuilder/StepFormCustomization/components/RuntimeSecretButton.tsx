@@ -1,5 +1,5 @@
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
+import { Button } from '@openzeppelin/ui-components';
+import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import { buildInitialMetadata, type ExtendedRuntimeBinding } from '../utils/runtime-secret-helpers';

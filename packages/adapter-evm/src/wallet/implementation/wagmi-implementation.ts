@@ -20,8 +20,8 @@ import {
 } from '@wagmi/core';
 import { http, PublicClient, WalletClient, type Chain } from 'viem';
 
-import type { Connector, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
+import type { Connector, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
 import { getUserRpcUrl } from '../../configuration/rpc';
 import { evmNetworks } from '../../networks';
@@ -133,7 +133,7 @@ export class WagmiWalletImplementation {
    */
   private setupRpcConfigListener(): void {
     // Import dynamically to avoid circular dependencies
-    import('@openzeppelin/ui-builder-utils')
+    import('@openzeppelin/ui-utils')
       .then(({ userRpcConfigService }) => {
         // Subscribe to all RPC config changes
         this.rpcConfigUnsubscribe = userRpcConfigService.subscribe('*', (event) => {

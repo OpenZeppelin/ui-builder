@@ -1,4 +1,4 @@
-import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 
 /**
  * Determines if a function is a view/pure function (read-only) for Stellar contracts.

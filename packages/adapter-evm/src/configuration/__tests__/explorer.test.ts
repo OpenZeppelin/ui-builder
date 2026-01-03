@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EvmNetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-builder-types';
+import { EvmNetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-types';
 
 import { testEvmExplorerConnection, validateEvmExplorerConfig } from '../../configuration/explorer';
 

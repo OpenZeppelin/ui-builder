@@ -1,7 +1,6 @@
 import { CheckCircle, Zap } from 'lucide-react';
 import React from 'react';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Card,
@@ -9,7 +8,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 interface RelayerGasConfigurationCardProps {
   isActive: boolean;

@@ -4,13 +4,8 @@
  * Handles loading contract definitions across different blockchain platforms.
  * Uses the appropriate adapter based on the selected chain type.
  */
-import {
-  ContractAdapter,
-  ContractSchema,
-  FormValues,
-  ProxyInfo,
-} from '@openzeppelin/ui-builder-types';
-import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-builder-utils';
+import { ContractAdapter, ContractSchema, FormValues, ProxyInfo } from '@openzeppelin/ui-types';
+import { getMissingRequiredContractInputs, logger } from '@openzeppelin/ui-utils';
 
 /**
  * Loads a contract definition using the provided chain adapter.

@@ -5,7 +5,7 @@
  * and providing them for export without requiring filesystem operations.
  * It implements in-memory project generation to allow browser-based exports.
  */
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { TemplateOptions } from '../core/types/ExportTypes';
 

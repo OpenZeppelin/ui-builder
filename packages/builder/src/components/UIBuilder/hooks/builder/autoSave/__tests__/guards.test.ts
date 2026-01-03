@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { AutoSaveGuards } from '@/components/UIBuilder/hooks/builder/autoSave/guards';
 import { uiBuilderStore } from '@/components/UIBuilder/hooks/uiBuilderStore';
 
 // Mock the logger to prevent console output during tests
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     warn: vi.fn(),
     info: vi.fn(),

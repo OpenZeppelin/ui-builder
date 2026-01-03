@@ -6,12 +6,12 @@ import type {
   ContractSchema,
   MidnightNetworkConfig,
   NetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 import {
   logger,
   userNetworkServiceConfigService,
   userRpcConfigService,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { getWalletConfigIfAvailable } from '../configuration';
 import {

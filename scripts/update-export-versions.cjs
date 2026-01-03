@@ -9,29 +9,29 @@ const packagesToUpdate = [
   '@openzeppelin/ui-builder-adapter-midnight',
   '@openzeppelin/ui-builder-adapter-solana',
   '@openzeppelin/ui-builder-adapter-stellar',
-  '@openzeppelin/ui-builder-react-core',
-  '@openzeppelin/ui-builder-renderer',
-  '@openzeppelin/ui-builder-storage',
-  '@openzeppelin/ui-builder-types',
-  '@openzeppelin/ui-builder-ui',
-  '@openzeppelin/ui-builder-utils',
+  '@openzeppelin/ui-react',
+  '@openzeppelin/ui-renderer',
+  '@openzeppelin/ui-storage',
+  '@openzeppelin/ui-types',
+  '@openzeppelin/ui-components',
+  '@openzeppelin/ui-utils',
 ];
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-builder-types').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-types').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/ui-builder-types' -> 'types'
+    // e.g., '@openzeppelin/ui-types' -> 'types'
     // e.g., '@openzeppelin/ui-builder-adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
     let packageDirName = nameWithoutScope.replace('ui-builder-', '');
 
     // Handle special case for renderer
-    if (packageName === '@openzeppelin/ui-builder-renderer') {
+    if (packageName === '@openzeppelin/ui-renderer') {
       packageDirName = 'renderer';
     }
 

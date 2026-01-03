@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getBytesSize } from '@openzeppelin/ui-builder-utils';
+import { getBytesSize } from '@openzeppelin/ui-utils';
 
 import {
   isArrayType,

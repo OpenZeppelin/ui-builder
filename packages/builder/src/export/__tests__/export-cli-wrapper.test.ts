@@ -9,8 +9,8 @@ import path from 'path';
 import JSZip from 'jszip';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 // Import ecosystemManager utils
 import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';

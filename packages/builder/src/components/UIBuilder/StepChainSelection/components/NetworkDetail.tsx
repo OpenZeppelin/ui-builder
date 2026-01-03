@@ -1,4 +1,4 @@
-import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { NetworkConfig } from '@openzeppelin/ui-types';
 
 interface NetworkDetailProps {
   network: NetworkConfig;

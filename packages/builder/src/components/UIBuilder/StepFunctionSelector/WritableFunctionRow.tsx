@@ -1,9 +1,9 @@
 import { AlertCircle } from 'lucide-react';
 
-import type { FunctionDecoration } from '@openzeppelin/ui-builder-types';
-import { FunctionBadge, FunctionParameter } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { Button } from '@openzeppelin/ui-components';
+import type { FunctionDecoration } from '@openzeppelin/ui-types';
+import { FunctionBadge, FunctionParameter } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { WritableFunctionRowProps } from './types';
 

@@ -8,13 +8,13 @@
 /*------------TEMPLATE COMMENT END------------*/
 import { useEffect, useState } from 'react';
 
+import { Footer } from '@openzeppelin/ui-components';
 import {
   useDerivedAccountStatus,
   useWalletState,
   WalletConnectionWithSettings,
-} from '@openzeppelin/ui-builder-react-core';
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { Footer } from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-react';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 // @ts-expect-error - This import will be processed during code generation
 import GeneratedForm from './components/GeneratedForm';

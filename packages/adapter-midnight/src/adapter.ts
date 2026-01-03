@@ -22,9 +22,9 @@ import type {
   RuntimeSecretPropertyInput,
   TransactionStatusUpdate,
   UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
-import { isMidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { isMidnightNetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { FunctionDecorationsService } from './analysis/function-decorations-service';
 import {

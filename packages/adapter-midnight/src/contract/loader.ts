@@ -1,5 +1,5 @@
-import type { ContractSchema, MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger, simpleHash } from '@openzeppelin/ui-builder-utils';
+import type { ContractSchema, MidnightNetworkConfig } from '@openzeppelin/ui-types';
+import { logger, simpleHash } from '@openzeppelin/ui-utils';
 
 import type { MidnightContractArtifacts } from '../types/artifacts';
 import { parseMidnightContractInterface } from '../utils/schema-parser';

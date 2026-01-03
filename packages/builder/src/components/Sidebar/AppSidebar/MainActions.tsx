@@ -6,8 +6,8 @@ import {
   SquarePen,
 } from 'lucide-react';
 
-import { SidebarButton } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { SidebarButton } from '@openzeppelin/ui-components';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';

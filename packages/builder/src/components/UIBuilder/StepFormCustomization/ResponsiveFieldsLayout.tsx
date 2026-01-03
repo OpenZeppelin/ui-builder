@@ -1,4 +1,4 @@
-import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, FormFieldType } from '@openzeppelin/ui-types';
 
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { FieldEditor } from './FieldEditor';

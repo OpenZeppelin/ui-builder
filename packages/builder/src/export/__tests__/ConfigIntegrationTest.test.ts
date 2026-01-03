@@ -22,8 +22,8 @@ describe('PackageManager Integration Tests', () => {
       'core-lib': '^1.0.0', // Mock external core dep
       react: '^19.0.0',
       // Add renderer and types packages here as they are expected by PackageManager
-      '@openzeppelin/ui-builder-renderer': '^1.0.0', // Use a placeholder caret version
-      '@openzeppelin/ui-builder-types': '^0.1.0', // Use a placeholder caret version
+      '@openzeppelin/ui-renderer': '^1.0.0', // Use a placeholder caret version
+      '@openzeppelin/ui-types': '^0.1.0', // Use a placeholder caret version
     },
     fieldDependencies: {
       text: {
@@ -88,8 +88,8 @@ describe('PackageManager Integration Tests', () => {
       const evmDeps = await packageManager.getDependencies(formConfig, 'evm');
       expect(evmDeps).toHaveProperty('core-lib', '^1.0.0'); // From mock renderer config
       expect(evmDeps).toHaveProperty('react', '^19.0.0'); // From mock renderer config
-      expect(evmDeps).toHaveProperty('@openzeppelin/ui-builder-renderer', 'workspace:*'); // Added by PM
-      expect(evmDeps).toHaveProperty('@openzeppelin/ui-builder-types', 'workspace:*'); // Added by PM
+      expect(evmDeps).toHaveProperty('@openzeppelin/ui-renderer', 'workspace:*'); // Added by PM
+      expect(evmDeps).toHaveProperty('@openzeppelin/ui-types', 'workspace:*'); // Added by PM
       expect(evmDeps).toHaveProperty('@openzeppelin/ui-builder-adapter-evm', 'workspace:*'); // Added by PM
       expect(evmDeps).not.toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
 
@@ -97,8 +97,8 @@ describe('PackageManager Integration Tests', () => {
       const solanaDeps = await packageManager.getDependencies(formConfig, 'solana');
       expect(solanaDeps).toHaveProperty('core-lib', '^1.0.0');
       expect(solanaDeps).toHaveProperty('react', '^19.0.0');
-      expect(solanaDeps).toHaveProperty('@openzeppelin/ui-builder-renderer', 'workspace:*'); // Added by PM
-      expect(solanaDeps).toHaveProperty('@openzeppelin/ui-builder-types', 'workspace:*'); // Added by PM
+      expect(solanaDeps).toHaveProperty('@openzeppelin/ui-renderer', 'workspace:*'); // Added by PM
+      expect(solanaDeps).toHaveProperty('@openzeppelin/ui-types', 'workspace:*'); // Added by PM
       expect(solanaDeps).toHaveProperty('@openzeppelin/ui-builder-adapter-solana', 'workspace:*'); // Added by PM
       expect(solanaDeps).not.toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
     });
@@ -128,7 +128,7 @@ describe('PackageManager Integration Tests', () => {
 
       // Core/Adapter checks remain - Check for PRESENCE and workspace:*
       expect(advancedDeps).toHaveProperty('@openzeppelin/ui-builder-adapter-evm', 'workspace:*');
-      expect(mixedDeps).toHaveProperty('@openzeppelin/ui-builder-types', 'workspace:*');
+      expect(mixedDeps).toHaveProperty('@openzeppelin/ui-types', 'workspace:*');
     });
 
     it('should use workspace protocol for internal packages', async () => {
@@ -136,8 +136,8 @@ describe('PackageManager Integration Tests', () => {
       const formConfig = createFormConfig(['text']);
       const deps = await packageManager.getDependencies(formConfig, 'evm');
 
-      expect(deps['@openzeppelin/ui-builder-renderer']).toBe('workspace:*'); // Added by PM
-      expect(deps['@openzeppelin/ui-builder-types']).toBe('workspace:*'); // Added by PM
+      expect(deps['@openzeppelin/ui-renderer']).toBe('workspace:*'); // Added by PM
+      expect(deps['@openzeppelin/ui-types']).toBe('workspace:*'); // Added by PM
       expect(deps['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*'); // Added by PM
     });
   });
@@ -182,11 +182,11 @@ describe('PackageManager Integration Tests', () => {
         expect.stringMatching(/^\^/)
       );
       expect(result.dependencies).toHaveProperty(
-        '@openzeppelin/ui-builder-types',
+        '@openzeppelin/ui-types',
         expect.stringMatching(/^\^/)
       );
       expect(result.dependencies).toHaveProperty(
-        '@openzeppelin/ui-builder-renderer',
+        '@openzeppelin/ui-renderer',
         expect.stringMatching(/^\^/)
       );
 

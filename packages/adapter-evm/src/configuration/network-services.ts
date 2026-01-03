@@ -1,6 +1,6 @@
-import type { NetworkServiceForm } from '@openzeppelin/ui-builder-types';
-import { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
-import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-builder-utils';
+import type { NetworkServiceForm } from '@openzeppelin/ui-types';
+import { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 import { TypedEvmNetworkConfig } from '../types';
 import { EvmProviderKeys, isEvmProviderKey } from '../types/providers';

@@ -1,6 +1,6 @@
 import { NetworkSolana } from '@web3icons/react';
 
-import { SolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { SolanaNetworkConfig } from '@openzeppelin/ui-types';
 
 // Placeholder for Solana Devnet
 export const solanaDevnet: SolanaNetworkConfig = {

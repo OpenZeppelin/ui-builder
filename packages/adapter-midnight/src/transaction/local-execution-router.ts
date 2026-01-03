@@ -1,5 +1,5 @@
-import type { ContractSchema, TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractSchema, TransactionStatusUpdate } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { MidnightContractArtifacts, WriteContractParameters } from '../types';
 import { isPureCircuit } from '../utils/circuit-type-utils';
