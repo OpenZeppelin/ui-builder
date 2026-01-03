@@ -238,12 +238,12 @@
 
 ### Implementation for User Story 6
 
-- [ ] T103 [US6] Create migration guide at `openzeppelin-ui/docs/MIGRATION.md` with step-by-step instructions
-- [ ] T104 [US6] Document package name mapping in migration guide (old → new names)
-- [ ] T105 [US6] Document find-and-replace commands for import updates in migration guide
-- [ ] T106 [US6] Document dependency update commands in migration guide
-- [ ] T107 [US6] Add troubleshooting section for common migration issues in migration guide
-- [ ] T108 [US6] Link migration guide from root `openzeppelin-ui/README.md`
+- [x] T103 [US6] Create migration guide at `openzeppelin-ui/docs/MIGRATION.md` with step-by-step instructions
+- [x] T104 [US6] Document package name mapping in migration guide (old → new names)
+- [x] T105 [US6] Document find-and-replace commands for import updates in migration guide
+- [x] T106 [US6] Document dependency update commands in migration guide
+- [x] T107 [US6] Add troubleshooting section for common migration issues in migration guide
+- [x] T108 [US6] Link migration guide from root `openzeppelin-ui/README.md`
 - [x] T108a [US6] Create local development setup script at `openzeppelin-ui/scripts/setup-local-dev.mjs` for consuming projects
 - [x] T108b [US6] Document setup script usage in `openzeppelin-ui/README.md`
 
