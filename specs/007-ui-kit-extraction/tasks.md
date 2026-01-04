@@ -255,17 +255,17 @@
 
 **Purpose**: Remove migrated packages and finalize UI Builder repo
 
-- [ ] T109 Remove `contracts-ui-builder/packages/types/` directory
-- [ ] T110 Remove `contracts-ui-builder/packages/utils/` directory
-- [ ] T111 Remove `contracts-ui-builder/packages/styles/` directory
-- [ ] T112 Remove `contracts-ui-builder/packages/ui/` directory
-- [ ] T113 Remove `contracts-ui-builder/packages/renderer/` directory
-- [ ] T114 Remove `contracts-ui-builder/packages/react-core/` directory
-- [ ] T115 Remove `contracts-ui-builder/packages/storage/` directory
-- [ ] T116 Update `contracts-ui-builder/pnpm-workspace.yaml` to reflect removed packages
-- [ ] T117 Run final verification: `pnpm install && pnpm build && pnpm test` in `contracts-ui-builder/`
-- [ ] T118 Create changeset for UI Builder migration update
-- [ ] T118a Remove `legacyInternalPackages` Set and associated handling from `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` (transition scaffolding no longer needed once all consumers use `@openzeppelin/ui-*` namespace)
+- [x] T109 Remove `contracts-ui-builder/packages/types/` directory
+- [x] T110 Remove `contracts-ui-builder/packages/utils/` directory
+- [x] T111 Remove `contracts-ui-builder/packages/styles/` directory
+- [x] T112 Remove `contracts-ui-builder/packages/ui/` directory
+- [x] T113 Remove `contracts-ui-builder/packages/renderer/` directory
+- [x] T114 Remove `contracts-ui-builder/packages/react-core/` directory
+- [x] T115 Remove `contracts-ui-builder/packages/storage/` directory
+- [x] T116 Update `contracts-ui-builder/pnpm-workspace.yaml` to reflect removed packages
+- [x] T117 Run final verification: `pnpm install && pnpm build && pnpm test` in `contracts-ui-builder/`
+- [x] T118 ~~Create changeset for UI Builder migration update~~ (N/A - builder app is private, not published)
+- [x] T118a Remove `legacyInternalPackages` Set and associated handling from `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` (transition scaffolding no longer needed once all consumers use `@openzeppelin/ui-*` namespace)
 
 **Checkpoint**: UI Builder repo cleaned up, all migrated packages removed
 
