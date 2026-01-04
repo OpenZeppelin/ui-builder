@@ -26,16 +26,13 @@
  * Without this declaration, TypeScript would report an error about the module not being found,
  * even though Vite can resolve it at runtime through the plugin.
  *
- * THE UNDERLYING ISSUE:
- * In development mode, import.meta.glob cannot reliably resolve paths that cross package
- * boundaries in a monorepo. The virtual module is a workaround for this limitation.
- *
  * USED BY:
  * This module is imported by packages/builder/src/export/PackageManager.ts to access
  * the renderer configuration for dependency management during form export.
  */
 declare module 'virtual:renderer-config' {
-  export { rendererConfig } from '@openzeppelin/ui-renderer/config';
+  import type { RendererConfig } from '@openzeppelin/ui-renderer';
+  export const rendererConfig: RendererConfig;
 }
 
 /**

@@ -45,8 +45,8 @@ const virtualFiles: Record<string, string> = {
   'tailwind-config-content': 'tailwind.config.cjs',
   'postcss-config-content': 'postcss.config.cjs',
   'components-json-content': 'components.json',
-  // CSS files
-  'global-css-content': 'packages/styles/global.css',
+  // CSS files - now from npm package after migration
+  'global-css-content': 'node_modules/@openzeppelin/ui-styles/global.css',
   // Template-specific CSS (add template name if multiple templates have different styles.css)
   'template-vite-styles-css-content':
     'packages/builder/src/export/templates/typescript-react-vite/src/styles.css',

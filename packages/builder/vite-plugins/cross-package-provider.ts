@@ -1,48 +1,26 @@
 import type { Plugin } from 'vite';
 
 /**
- * Configuration for cross-package virtual modules (which require alias resolution)
- */
-const crossPackageModules: Record<string, string> = {
-  'virtual:renderer-config': '../renderer/src/config.ts',
-  // Add more alias-based virtual modules here if needed
-};
-
-/**
- * Plugin to provide cross-package module imports via aliases.
+ * Plugin to provide virtual module imports for renderer config.
  *
- * This plugin intercepts imports for specified virtual modules
- * (like 'virtual:renderer-config') and returns a small module
- * that imports the actual target file using a Vite alias (like
- * '@cross-package/renderer-config').
- *
- * This is necessary because direct cross-package imports can be unreliable
- * in Vite's dev server.
- *
- * Requires corresponding aliases to be defined in the main vite config's
- * `resolve.alias` section (e.g., '@cross-package/renderer-config': path.resolve(...)).
+ * This plugin intercepts imports for 'virtual:renderer-config' and
+ * re-exports the rendererConfig from the @openzeppelin/ui-renderer npm package.
  */
 export function crossPackageModulesProviderPlugin(): Plugin {
   return {
     name: 'cross-package-modules-provider',
     resolveId(id: string) {
-      if (id in crossPackageModules) {
+      if (id === 'virtual:renderer-config') {
         return `\0${id}`; // Mark as resolved virtual module
       }
       return null;
     },
     load(id: string) {
       const originalId = id.startsWith('\0') ? id.slice(1) : id;
-      if (originalId in crossPackageModules) {
-        const moduleKey = originalId.replace('virtual:', '');
-        const aliasKey = `@cross-package/${moduleKey}`;
-        // Generate module that re-exports from the alias
-        // IMPORTANT: Add specific named exports as needed!
+      if (originalId === 'virtual:renderer-config') {
+        // Re-export rendererConfig from the npm package
         return `
-          import * as _module from '${aliasKey}';
-          // Re-export known named exports
-          export const rendererConfig = _module.rendererConfig;
-          // Add other exports here if the target module has more...
+          export { rendererConfig } from '@openzeppelin/ui-renderer';
         `;
       }
       return null;
