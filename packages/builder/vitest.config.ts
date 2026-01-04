@@ -142,7 +142,6 @@ export default defineConfig(
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@styles': path.resolve(__dirname, '../styles'),
         // Adapter packages - required for export tests that use ecosystemManager
         '@openzeppelin/ui-builder-adapter-evm': path.resolve(
           __dirname,

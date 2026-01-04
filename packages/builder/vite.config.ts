@@ -234,8 +234,6 @@ export default defineConfig(async (): Promise<UserConfig> => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@styles': path.resolve(__dirname, '../styles'),
-        '@cross-package/renderer-config': path.resolve(__dirname, '../renderer/src/config.ts'),
         // Node built-ins polyfills for browser using absolute paths
         buffer: bufferPolyfillPath,
         'buffer/': bufferPolyfillPath,

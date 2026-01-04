@@ -3,17 +3,27 @@
 
 /* 
   Import Tailwind directives.
-  The `source()` function is a Tailwind v4 feature that sets the base path for
-  automatic content detection. By setting it to the monorepo root, Tailwind
-  can discover all necessary files in all packages, including `ui` and `renderer`.
+  Tailwind v4 uses automatic content detection for the local project.
+  For npm packages that contain Tailwind classes, we use the @source directive.
 */
-@import 'tailwindcss' source('../../');
+@import 'tailwindcss';
 
 /*
-  Import global theme variables and base styles from the styles package.
-  The path alias is configured in vite.config.ts.
+  Tell Tailwind to scan @openzeppelin npm packages for class names.
+  These packages are installed in node_modules and contain compiled JS files
+  with Tailwind classes that need to be included in the final CSS.
+  
+  Path from packages/builder/src/index.css:
+  - ../ = packages/builder/
+  - ../../ = packages/
+  - ../../../ = monorepo root (where node_modules lives)
 */
-@import '@styles/global.css';
+@source "../../../node_modules/@openzeppelin";
+
+/*
+  Import global theme variables and base styles from the @openzeppelin/ui-styles package.
+*/
+@import '@openzeppelin/ui-styles/global.css';
 
 /* Core-specific styles or overrides can be added here, preferably in layers */
 @layer components {
