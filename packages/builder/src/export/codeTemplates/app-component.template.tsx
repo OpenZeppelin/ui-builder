@@ -9,11 +9,8 @@
 import { useEffect, useState } from 'react';
 
 import { Footer } from '@openzeppelin/ui-components';
-import {
-  useDerivedAccountStatus,
-  useWalletState,
-  WalletConnectionWithSettings,
-} from '@openzeppelin/ui-react';
+import { useDerivedAccountStatus, useWalletState } from '@openzeppelin/ui-react';
+import { WalletConnectionWithSettings } from '@openzeppelin/ui-renderer';
 import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 // @ts-expect-error - This import will be processed during code generation
