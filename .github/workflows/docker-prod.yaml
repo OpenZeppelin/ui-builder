@@ -129,6 +129,8 @@ jobs:
       ECS_CLUSTER: 'contracts-ui-builder-prod-cluster'
       ECS_SERVICE: 'contracts-ui-builder-prod-service'
       AWS_REGION: 'us-east-1'
+      REGISTRY: '${{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com'
+      CONTAINER_NAME: 'contracts-ui-builder-prod'
     permissions:
       contents: read
       id-token: write
@@ -147,6 +149,61 @@ jobs:
           role-for-oidc: ${{ env.ROLE_FOR_OIDC }}
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
 
-      - name: AWS ECS force new deployment
+      - name: Update task definition and deploy
         run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment --region $AWS_REGION
+          set -e
+          
+          NEW_IMAGE="${REGISTRY}/contracts-ui-builder-prod:${{ github.sha }}"
+          echo "Target image: $NEW_IMAGE"
+          
+          # Get the current task definition ARN from the service
+          echo "Getting current task definition..."
+          TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE \
+            --region $AWS_REGION \
+            --query 'services[0].taskDefinition' \
+            --output text)
+          echo "Current task definition: $TASK_DEF_ARN"
+          
+          # Get the full task definition
+          aws ecs describe-task-definition \
+            --task-definition $TASK_DEF_ARN \
+            --region $AWS_REGION \
+            --query 'taskDefinition' > task-definition.json
+          
+          # Verify container name exists
+          CONTAINER_EXISTS=$(jq --arg CONTAINER "$CONTAINER_NAME" '.containerDefinitions | map(select(.name == $CONTAINER)) | length' task-definition.json)
+          if [ "$CONTAINER_EXISTS" -eq "0" ]; then
+            echo "ERROR: Container '$CONTAINER_NAME' not found in task definition"
+            echo "Available containers:"
+            jq '.containerDefinitions[].name' task-definition.json
+            exit 1
+          fi
+          
+          # Update the image and remove read-only fields
+          echo "Updating task definition with new image..."
+          jq --arg IMAGE "$NEW_IMAGE" --arg CONTAINER "$CONTAINER_NAME" '
+            .containerDefinitions |= map(if .name == $CONTAINER then .image = $IMAGE else . end) |
+            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
+          ' task-definition.json > new-task-definition.json
+          
+          # Register the new task definition
+          echo "Registering new task definition..."
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-task-definition.json \
+            --region $AWS_REGION \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "Registered new task definition: $NEW_TASK_DEF_ARN"
+          
+          # Deploy the new task definition
+          echo "Deploying to ECS..."
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --task-definition $NEW_TASK_DEF_ARN \
+            --force-new-deployment \
+            --region $AWS_REGION
+          
+          echo "Deployment initiated successfully!"
