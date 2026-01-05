@@ -278,7 +278,7 @@
 - [x] T119 [P] Configure Renovate/Dependabot for `openzeppelin-ui/` repo
 - [x] T120 Verify no "UI Builder" references remain in new repo (README, JSDoc, errors, package.json)
 - [x] T121 Run `openzeppelin-ui/` quickstart.md verification checklist
-- [ ] T122 Create PR for UI Builder migration changes with comprehensive description
+- [x] T122 Create PR for UI Builder migration changes with comprehensive description
 
 ---
 
