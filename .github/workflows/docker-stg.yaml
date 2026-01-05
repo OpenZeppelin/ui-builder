@@ -275,17 +275,35 @@ jobs:
             --region $AWS_REGION \
             --query 'services[0].taskDefinition' \
             --output text)
+
+          # Validate TASK_DEF_ARN
+          if [ -z "$TASK_DEF_ARN" ] || [ "$TASK_DEF_ARN" = "None" ] || [ "$TASK_DEF_ARN" = "null" ]; then
+            echo "ERROR: Failed to retrieve task definition ARN from service '$ECS_SERVICE'"
+            echo "Verify the ECS cluster and service names are correct"
+            exit 1
+          fi
           echo "Current task definition: $TASK_DEF_ARN"
 
           # Get the full task definition
-          aws ecs describe-task-definition \
-            --task-definition $TASK_DEF_ARN \
+          echo "Fetching task definition details..."
+          if ! aws ecs describe-task-definition \
+            --task-definition "$TASK_DEF_ARN" \
             --region $AWS_REGION \
-            --query 'taskDefinition' > task-definition.json
+            --query 'taskDefinition' > task-definition.json; then
+            echo "ERROR: Failed to describe task definition '$TASK_DEF_ARN'"
+            exit 1
+          fi
+
+          # Validate task definition JSON
+          if ! jq empty task-definition.json 2>/dev/null; then
+            echo "ERROR: Invalid JSON in task definition"
+            cat task-definition.json
+            exit 1
+          fi
 
           # Verify container name exists
           CONTAINER_EXISTS=$(jq --arg CONTAINER "$CONTAINER_NAME" '.containerDefinitions | map(select(.name == $CONTAINER)) | length' task-definition.json)
-          if [ "$CONTAINER_EXISTS" -eq "0" ]; then
+          if [ "$CONTAINER_EXISTS" -eq 0 ]; then
             echo "ERROR: Container '$CONTAINER_NAME' not found in task definition"
             echo "Available containers:"
             jq '.containerDefinitions[].name' task-definition.json
@@ -306,6 +324,12 @@ jobs:
             --region $AWS_REGION \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
+
+          # Validate NEW_TASK_DEF_ARN
+          if [ -z "$NEW_TASK_DEF_ARN" ] || [ "$NEW_TASK_DEF_ARN" = "None" ] || [ "$NEW_TASK_DEF_ARN" = "null" ]; then
+            echo "ERROR: Failed to register new task definition"
+            exit 1
+          fi
           echo "Registered new task definition: $NEW_TASK_DEF_ARN"
 
           # Deploy the new task definition
@@ -313,7 +337,7 @@ jobs:
           aws ecs update-service \
             --cluster $ECS_CLUSTER \
             --service $ECS_SERVICE \
-            --task-definition $NEW_TASK_DEF_ARN \
+            --task-definition "$NEW_TASK_DEF_ARN" \
             --force-new-deployment \
             --region $AWS_REGION
 
