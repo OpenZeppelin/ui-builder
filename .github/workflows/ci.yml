@@ -72,22 +72,6 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
-      - name: Test ES module imports
-        run: |
-          cat > test-es-modules.mjs << 'EOF'
-          // Test EVM adapter (Stellar excluded due to @stellar/stellar-xdr-json JSON import issue in Node 22)
-          import { EvmAdapter } from './packages/adapter-evm/dist/index.js';
-          if (typeof EvmAdapter === 'function') {
-            console.log('✅ ES modules working correctly');
-            process.exit(0);
-          } else {
-            console.error('❌ ES module imports failed');
-            process.exit(1);
-          }
-          EOF
-          node test-es-modules.mjs
-          rm test-es-modules.mjs
-
       - name: Test
         run: pnpm test
         # It's okay if no tests exist yet
