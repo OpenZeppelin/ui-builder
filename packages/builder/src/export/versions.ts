@@ -11,7 +11,7 @@ export const packageVersions = {
   '@openzeppelin/ui-builder-adapter-solana': '1.0.0',
   '@openzeppelin/ui-builder-adapter-stellar': '1.1.3',
   '@openzeppelin/ui-react': '1.0.0',
-  '@openzeppelin/ui-renderer': '1.0.1',
+  '@openzeppelin/ui-renderer': '1.0.2',
   '@openzeppelin/ui-storage': '1.0.0',
   '@openzeppelin/ui-types': '1.0.0',
   '@openzeppelin/ui-components': '1.0.1',
