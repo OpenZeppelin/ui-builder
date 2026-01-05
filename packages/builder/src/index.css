@@ -14,13 +14,13 @@
   These packages are installed in node_modules and contain compiled JS files
   with Tailwind classes that need to be included in the final CSS.
   
-  Note: node_modules is ignored by default (gitignore patterns), so we must
-  explicitly register it with @source. We scan the top-level @openzeppelin
-  directory which contains symlinks that Vite/esbuild resolves during build.
+  pnpm hoisting behavior differs between local dev (shamefully-hoist=true in .npmrc)
+  and Docker builds (.npmrc excluded). We scan both possible locations:
+  - Root node_modules: where packages are hoisted locally
+  - Builder's node_modules: where pnpm installs them in Docker
 */
-@source "../../../node_modules/@openzeppelin/ui-components";
-@source "../../../node_modules/@openzeppelin/ui-renderer";
-@source "../../../node_modules/@openzeppelin/ui-react";
+@source "../../../node_modules/@openzeppelin";
+@source "../node_modules/@openzeppelin";
 
 /*
   Import global theme variables and base styles from the @openzeppelin/ui-styles package.
