@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 // Local copy of minimal provider config used by wallet serviceUriConfig()
 export interface ProviderConfig {

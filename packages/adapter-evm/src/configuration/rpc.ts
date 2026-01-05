@@ -1,10 +1,10 @@
-import type { EvmNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
+import type { EvmNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
 import {
   appConfigService,
   isValidUrl,
   logger,
   userNetworkServiceConfigService,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 /**
  * Builds a complete RPC URL from a user RPC provider configuration.

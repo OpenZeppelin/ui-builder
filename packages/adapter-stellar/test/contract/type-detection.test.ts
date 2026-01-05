@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 // T004: Unit test for contract type detection (SAC vs Wasm)
 
@@ -42,7 +42,7 @@ vi.mock('@stellar/stellar-sdk', () => ({
   },
 }));
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     error: vi.fn(),
   },

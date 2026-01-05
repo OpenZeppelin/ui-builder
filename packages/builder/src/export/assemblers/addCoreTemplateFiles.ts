@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import { AdapterConfigLoader } from '../AdapterConfigLoader';

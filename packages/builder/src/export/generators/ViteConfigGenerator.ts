@@ -5,7 +5,7 @@
  * configuration. Uses the adapter's config to conditionally include special build requirements.
  */
 
-import type { AdapterConfig, Ecosystem } from '@openzeppelin/ui-builder-types';
+import type { AdapterConfig, Ecosystem } from '@openzeppelin/ui-types';
 
 export interface ViteConfigGeneratorOptions {
   ecosystem: Ecosystem;

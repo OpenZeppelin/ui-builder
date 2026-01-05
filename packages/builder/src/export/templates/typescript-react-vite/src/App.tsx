@@ -37,7 +37,7 @@
 // We need a valid import path here just to make the *base* template structure work,
 // even though this App.tsx content is entirely replaced during export.
 // We import the dummy export from the placeholder GeneratedForm.tsx
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { GeneratedForm } from './components/GeneratedForm';
 

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractSchema } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStoreVanilla } from '../../hooks/uiBuilderStore';

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Label } from '@openzeppelin/ui-builder-ui';
+import { Label } from '@openzeppelin/ui-components';
 
 interface TitledSectionProps {
   /**

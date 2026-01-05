@@ -9,7 +9,7 @@
  *
  * The final generated file will be a React component that:
  * - Accepts `adapter` and `onSubmit` props.
- * - Uses the `@openzeppelin/ui-builder-renderer` package.
+ * - Uses the `@openzeppelin/ui-renderer` package.
  * - Defines the specific `RenderFormSchema` based on the user's configuration.
  * - Handles contract state loading via the adapter.
  * - Renders the `TransactionForm` component.
@@ -20,8 +20,8 @@
  * ```tsx
  * import { useEffect, useState } from 'react';
  * import { EvmAdapter } from '@openzeppelin/ui-builder-adapter-evm'; // Example
- * import { TransactionForm, ... } from '@openzeppelin/ui-builder-renderer';
- * import type { RenderFormSchema, TransactionFormProps } from '@openzeppelin/ui-builder-types';
+ * import { TransactionForm, ... } from '@openzeppelin/ui-renderer';
+ * import type { RenderFormSchema, TransactionFormProps } from '@openzeppelin/ui-types';
  *
  * // Props will likely extend TransactionFormProps
  * interface GeneratedFormProps { ... }

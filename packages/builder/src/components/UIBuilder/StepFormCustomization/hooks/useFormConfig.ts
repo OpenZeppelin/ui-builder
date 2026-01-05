@@ -1,12 +1,8 @@
 import { deepEqual } from 'fast-equals';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type {
-  ContractAdapter,
-  ContractSchema,
-  FormFieldType,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractAdapter, ContractSchema, FormFieldType } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { BuilderFormConfig } from '../../../../core/types/FormTypes';
 import {

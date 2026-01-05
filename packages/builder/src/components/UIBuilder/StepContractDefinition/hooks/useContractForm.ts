@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
 
 import { useDebounce } from '../../hooks';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';

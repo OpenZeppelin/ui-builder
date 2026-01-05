@@ -1,7 +1,7 @@
 import type { xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 // T006: Integration test for loader returning SAC schema
 

@@ -1,7 +1,7 @@
 import { capitalize } from 'lodash';
 
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { FieldType } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
+import { FieldType } from '@openzeppelin/ui-types';
 
 /**
  * Field type option with display label

@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
-import { logger, withTimeout } from '@openzeppelin/ui-builder-utils';
+import type { ContractSchema } from '@openzeppelin/ui-types';
+import { logger, withTimeout } from '@openzeppelin/ui-utils';
 
 import { validateContractAddress } from '../validation/address';
 

@@ -17,13 +17,10 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
 "import { useEffect, useState } from 'react';
 
-import {
-  useDerivedAccountStatus,
-  useWalletState,
-  WalletConnectionWithSettings,
-} from '@openzeppelin/ui-builder-react-core';
-import type { ContractAdapter } from '@openzeppelin/ui-builder-types';
-import { Footer } from '@openzeppelin/ui-builder-ui';
+import { Footer } from '@openzeppelin/ui-components';
+import { useDerivedAccountStatus, useWalletState } from '@openzeppelin/ui-react';
+import { WalletConnectionWithSettings } from '@openzeppelin/ui-renderer';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 
 import GeneratedForm from './components/GeneratedForm';
 
@@ -90,19 +87,15 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
 "import { useMemo, useState } from 'react';
 
-import {
-  ContractActionBar,
-  ContractStateWidget,
-  TransactionForm,
-} from '@openzeppelin/ui-builder-renderer';
+import { Card, CardContent } from '@openzeppelin/ui-components';
+import { ContractActionBar, ContractStateWidget, TransactionForm } from '@openzeppelin/ui-renderer';
 import type {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   RenderFormSchema,
-} from '@openzeppelin/ui-builder-types';
-import { Card, CardContent } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 // Props for GeneratedForm
 interface GeneratedFormProps {
@@ -302,11 +295,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.1.0",
-    "@openzeppelin/ui-builder-renderer": "^1.1.0",
-    "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.1.0",
-    "@openzeppelin/ui-builder-utils": "^1.1.0",
+    "@openzeppelin/ui-components": "^1.0.1",
+    "@openzeppelin/ui-react": "^1.0.0",
+    "@openzeppelin/ui-renderer": "^1.0.2",
+    "@openzeppelin/ui-types": "^1.0.0",
+    "@openzeppelin/ui-utils": "^1.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -336,7 +329,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-renderer",
   },
 }
 `;
@@ -349,11 +342,11 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.0.0",
-    "@openzeppelin/ui-builder-react-core": "^1.1.0",
-    "@openzeppelin/ui-builder-renderer": "^1.1.0",
-    "@openzeppelin/ui-builder-types": "^1.0.0",
-    "@openzeppelin/ui-builder-ui": "^1.1.0",
-    "@openzeppelin/ui-builder-utils": "^1.1.0",
+    "@openzeppelin/ui-components": "^1.0.1",
+    "@openzeppelin/ui-react": "^1.0.0",
+    "@openzeppelin/ui-renderer": "^1.0.2",
+    "@openzeppelin/ui-types": "^1.0.0",
+    "@openzeppelin/ui-utils": "^1.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -383,7 +376,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "dev": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "update-renderer": "npm update @openzeppelin/ui-builder-renderer",
+    "update-renderer": "npm update @openzeppelin/ui-renderer",
   },
 }
 `;

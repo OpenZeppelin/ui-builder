@@ -11,7 +11,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 import { validateExpirationLedger } from '../../src/access-control/validation';
 
@@ -27,7 +27,7 @@ vi.mock('@stellar/stellar-sdk', () => ({
 }));
 
 // Mock the logger
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),

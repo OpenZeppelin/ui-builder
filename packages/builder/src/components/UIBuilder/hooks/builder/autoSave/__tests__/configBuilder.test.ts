@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { FormFieldType } from '@openzeppelin/ui-builder-types';
+import type { FormFieldType } from '@openzeppelin/ui-types';
 
 import { buildConfigurationObject } from '../configBuilder';
 

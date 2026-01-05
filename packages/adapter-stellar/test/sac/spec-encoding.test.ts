@@ -14,7 +14,7 @@ vi.mock('../../src/sac/spec-source', async () => {
   };
 });
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     error: loggerErrorMock,
     warn: vi.fn(),

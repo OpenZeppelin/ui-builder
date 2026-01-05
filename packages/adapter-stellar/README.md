@@ -4,7 +4,7 @@ This package provides the `ContractAdapter` implementation for the Stellar (Soro
 
 It is responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-builder-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-types`.
 - Defining and exporting Stellar network configurations (Public Network and Testnet) as `StellarNetworkConfig` objects in `src/networks/` (Horizon URL, Soroban RPC URL, network passphrase, explorer URL, icon, etc.).
 - Loading Stellar contract definitions and metadata and transforming them into the builder’s chain‑agnostic `ContractSchema`.
 - Mapping Soroban value types to builder form fields and validating user input.

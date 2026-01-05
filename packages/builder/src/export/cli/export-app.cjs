@@ -252,11 +252,11 @@ function exportAppSimple(options) {
           '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
           '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
           '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/ui-builder-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
-          '@openzeppelin/ui-builder-react-core': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
-          '@openzeppelin/ui-builder-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
-          '@openzeppelin/ui-builder-ui': `file:${path.join(monorepoRoot, 'packages/ui')}`,
-          '@openzeppelin/ui-builder-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
+          '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
+          '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
+          '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
+          '@openzeppelin/ui-components': `file:${path.join(monorepoRoot, 'packages/ui')}`,
+          '@openzeppelin/ui-utils': `file:${path.join(monorepoRoot, 'packages/utils')}`,
         };
         packageJson.pnpm = {
           ...(packageJson.pnpm || {}),
@@ -331,6 +331,45 @@ function buildExportedApp(options) {
   }
 }
 
+/**
+ * Configures Tailwind CSS @source directive for local monorepo testing.
+ * When running within the monorepo, pnpm hoists packages to the root node_modules.
+ * The template's @source "../node_modules/@openzeppelin" won't find them.
+ * This function updates the path to point to the monorepo root.
+ */
+function configureTailwindForLocalServe(targetDir) {
+  const stylesPath = path.join(targetDir, 'src', 'styles.css');
+  if (!fs.existsSync(stylesPath)) {
+    debug(`No styles.css found at ${stylesPath}, skipping Tailwind configuration`);
+    return;
+  }
+
+  let content = fs.readFileSync(stylesPath, 'utf8');
+
+  // Check if this is a pnpm workspace (packages are hoisted to root)
+  const localNodeModulesOz = path.join(targetDir, 'node_modules', '@openzeppelin');
+  const rootNodeModulesOz = path.join(monorepoRoot, 'node_modules', '@openzeppelin');
+
+  // If @openzeppelin packages exist at root but not locally, update the path
+  if (!fs.existsSync(localNodeModulesOz) && fs.existsSync(rootNodeModulesOz)) {
+    console.log(
+      `${colors.blue}Configuring Tailwind CSS for local monorepo testing...${colors.reset}`
+    );
+
+    // Replace the relative @source path with absolute path to monorepo root
+    const originalPattern = /@source\s+["']\.\.\/node_modules\/@openzeppelin["'];?/g;
+    const newSource = `@source "${rootNodeModulesOz}";`;
+
+    if (originalPattern.test(content)) {
+      content = content.replace(originalPattern, newSource);
+      fs.writeFileSync(stylesPath, content, 'utf8');
+      console.log(
+        `  ${colors.green}✓${colors.reset} Updated @source directive to use monorepo root`
+      );
+    }
+  }
+}
+
 function serveExportedApp(options) {
   const targetDir = resolveTargetDir(options.targetDir || '.', monorepoRoot);
   if (!fs.existsSync(targetDir)) {
@@ -341,6 +380,10 @@ function serveExportedApp(options) {
     console.log(`\n${colors.bold}${colors.cyan}Serving UI Builder App${colors.reset}\n`);
     console.log(`${colors.blue}Running 'pnpm install' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm install', targetDir);
+
+    // Configure Tailwind for local testing (after install, before dev)
+    configureTailwindForLocalServe(targetDir);
+
     console.log(`${colors.blue}Running 'pnpm dev' in ${targetDir}...${colors.reset}`);
     execInDir('pnpm dev', targetDir);
   } catch (error) {

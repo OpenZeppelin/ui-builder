@@ -9,7 +9,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 import {
   createIndexerClient,
@@ -18,8 +18,8 @@ import {
 } from '../../src/access-control/indexer-client';
 
 // Mock the logger
-vi.mock('@openzeppelin/ui-builder-utils', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@openzeppelin/ui-builder-utils')>();
+vi.mock('@openzeppelin/ui-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@openzeppelin/ui-utils')>();
   return {
     ...actual,
     logger: {
@@ -626,7 +626,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
 
   describe('Endpoint Resolution Precedence', () => {
     it('should use runtime override from AppConfigService', async () => {
-      const { appConfigService } = await import('@openzeppelin/ui-builder-utils');
+      const { appConfigService } = await import('@openzeppelin/ui-utils');
       const runtimeOverride = 'https://runtime-override.example.com/graphql';
 
       vi.mocked(appConfigService.getIndexerEndpointOverride).mockReturnValue(runtimeOverride);
@@ -649,7 +649,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     });
 
     it('should use runtime override object with http and ws', async () => {
-      const { appConfigService } = await import('@openzeppelin/ui-builder-utils');
+      const { appConfigService } = await import('@openzeppelin/ui-utils');
       const runtimeOverride = {
         http: 'https://runtime-http.example.com/graphql',
         ws: 'wss://runtime-ws.example.com/graphql',
@@ -675,7 +675,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     });
 
     it('should fall back to network config when no runtime override', async () => {
-      const { appConfigService } = await import('@openzeppelin/ui-builder-utils');
+      const { appConfigService } = await import('@openzeppelin/ui-utils');
       vi.mocked(appConfigService.getIndexerEndpointOverride).mockReturnValue(undefined);
 
       fetchSpy.mockResolvedValueOnce({
@@ -693,7 +693,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     });
 
     it('should cache resolved endpoints', async () => {
-      const { appConfigService } = await import('@openzeppelin/ui-builder-utils');
+      const { appConfigService } = await import('@openzeppelin/ui-utils');
       vi.mocked(appConfigService.getIndexerEndpointOverride).mockReturnValue(undefined);
 
       fetchSpy.mockResolvedValue({

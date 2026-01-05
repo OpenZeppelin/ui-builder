@@ -1,5 +1,5 @@
-import type { StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { appConfigService, logger } from '@openzeppelin/ui-builder-utils';
+import type { StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
 import { WalletsKitImplementation } from '../implementation/wallets-kit-implementation';
 

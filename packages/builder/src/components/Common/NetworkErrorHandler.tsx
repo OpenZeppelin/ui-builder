@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useAdapterContext } from '@openzeppelin/ui-builder-react-core';
-import { NetworkSettingsDialog } from '@openzeppelin/ui-builder-renderer';
-import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { useNetworkErrors } from '@openzeppelin/ui-builder-ui';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { useNetworkErrors } from '@openzeppelin/ui-components';
+import { useAdapterContext } from '@openzeppelin/ui-react';
+import { NetworkSettingsDialog } from '@openzeppelin/ui-renderer';
+import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { networkService } from '../../core/networks/service';
 

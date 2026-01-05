@@ -1,4 +1,4 @@
-import type { RuntimeSecretPropertyInput } from '@openzeppelin/ui-builder-types';
+import type { RuntimeSecretPropertyInput } from '@openzeppelin/ui-types';
 
 /**
  * Extended binding info with optional property name input config.

@@ -10,7 +10,7 @@ const mockTrackNetworkSelection = vi.fn();
 const mockIsEnabled = vi.fn(() => true);
 const mockInitialize = vi.fn();
 
-vi.mock('@openzeppelin/ui-builder-react-core', () => ({
+vi.mock('@openzeppelin/ui-react', () => ({
   useAnalytics: () => ({
     trackEvent: mockTrackEvent,
     trackPageView: mockTrackPageView,

@@ -1,9 +1,9 @@
 import { ArrowRight, Network, RotateCcw } from 'lucide-react';
 import React from 'react';
 
-import type { ProxyInfo } from '@openzeppelin/ui-builder-types';
-import { AddressDisplay, Button } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { AddressDisplay, Button } from '@openzeppelin/ui-components';
+import type { ProxyInfo } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 export interface ProxyStatusIndicatorProps {
   /** Chain-agnostic proxy information */

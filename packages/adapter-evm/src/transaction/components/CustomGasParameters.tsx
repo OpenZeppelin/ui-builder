@@ -9,8 +9,8 @@ import {
   AccordionTrigger,
   BooleanField,
   NumberField,
-} from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-components';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { EvmRelayerFormData } from './useEvmRelayerOptions';
 

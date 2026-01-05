@@ -1,5 +1,5 @@
-import type { FormFieldType } from '@openzeppelin/ui-builder-types';
-import { TooltipProvider } from '@openzeppelin/ui-builder-ui';
+import { TooltipProvider } from '@openzeppelin/ui-components';
+import type { FormFieldType } from '@openzeppelin/ui-types';
 
 import { FieldHeader, ParameterFieldDisplay, RuntimeSecretFieldDisplay } from './components';
 

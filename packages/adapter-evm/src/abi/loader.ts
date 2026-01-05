@@ -5,14 +5,14 @@ import type {
   ContractSchema,
   EvmNetworkConfig,
   ProxyInfo,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 import {
   appConfigService,
   logger,
   simpleHash,
   userNetworkServiceConfigService,
   withTimeout,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { getEvmExplorerAddressUrl } from '../configuration/explorer';
 import { detectProxyFromAbi, getAdminAddress, getImplementationAddress } from '../proxy/detection';

@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 // Placeholder validation utility for Solana
 export function isValidSolanaAddress(address: string): boolean {

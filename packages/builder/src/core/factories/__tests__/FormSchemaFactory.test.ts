@@ -1,7 +1,7 @@
 // Import types from renderer
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
+import { Ecosystem } from '@openzeppelin/ui-types';
 import type {
   ContractAdapter,
   ContractSchema,
@@ -10,8 +10,8 @@ import type {
   FormFieldType,
   FunctionParameter,
   RelayerDetailsRich,
-} from '@openzeppelin/ui-builder-types';
-import { generateId } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { generateId } from '@openzeppelin/ui-utils';
 
 import type { BuilderFormConfig } from '../../types/FormTypes';
 import { FormSchemaFactory } from '../FormSchemaFactory';

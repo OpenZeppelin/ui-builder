@@ -3,11 +3,11 @@
  *
  * Centralizes address validation for access control operations.
  * Uses Stellar-specific validation from the validation module and
- * shared normalization utilities from @openzeppelin/ui-builder-utils.
+ * shared normalization utilities from @openzeppelin/ui-utils.
  */
 
-import { ConfigurationInvalid } from '@openzeppelin/ui-builder-types';
-import { normalizeAddress } from '@openzeppelin/ui-builder-utils';
+import { ConfigurationInvalid } from '@openzeppelin/ui-types';
+import { normalizeAddress } from '@openzeppelin/ui-utils';
 
 import { isValidAccountAddress, isValidContractAddress } from '../validation/address';
 

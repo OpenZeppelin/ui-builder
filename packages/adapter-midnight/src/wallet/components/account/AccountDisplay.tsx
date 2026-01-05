@@ -1,9 +1,9 @@
 import { LogOut } from 'lucide-react';
 import React from 'react';
 
-import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
-import { cn, truncateMiddle } from '@openzeppelin/ui-builder-utils';
+import { Button } from '@openzeppelin/ui-components';
+import type { BaseComponentProps } from '@openzeppelin/ui-types';
+import { cn, truncateMiddle } from '@openzeppelin/ui-utils';
 
 import { useAccount, useDisconnect } from '../../hooks/facade-hooks';
 import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 // Adjust path as needed
-import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-builder-types';
+import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-types';
 
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 

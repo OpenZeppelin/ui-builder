@@ -1,9 +1,9 @@
 import { shallow } from 'zustand/shallow';
 import { useCallback, useEffect } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { useWalletState } from '@openzeppelin/ui-react';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';

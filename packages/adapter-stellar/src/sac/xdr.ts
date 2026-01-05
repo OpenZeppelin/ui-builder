@@ -2,7 +2,7 @@ import { xdr } from '@stellar/stellar-sdk';
 import stellarXdrJsonPackage from '@stellar/stellar-xdr-json/package.json' with { type: 'json' };
 import { parse, stringify } from 'lossless-json';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 /**
  * CDN URL for the stellar-xdr-json WASM module.

@@ -1,11 +1,7 @@
 import type { Control, UseFormReturn } from 'react-hook-form';
 
-import type {
-  ContractAdapter,
-  ExecutionMethodType,
-  RelayerDetails,
-} from '@openzeppelin/ui-builder-types';
-import { FormFieldType, FormValues } from '@openzeppelin/ui-builder-types';
+import type { ContractAdapter, ExecutionMethodType, RelayerDetails } from '@openzeppelin/ui-types';
+import { FormFieldType, FormValues } from '@openzeppelin/ui-types';
 
 /**
  * Form values interface for the field editor form

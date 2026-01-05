@@ -1,4 +1,4 @@
-import type { MidnightNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { MidnightNetworkConfig } from '@openzeppelin/ui-types';
 
 /**
  * Returns the numeric network ID from MidnightNetworkConfig.networkId map

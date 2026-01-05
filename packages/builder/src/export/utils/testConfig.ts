@@ -1,8 +1,8 @@
 import { capitalize } from 'lodash';
 
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import type { ContractSchema, FieldType } from '@openzeppelin/ui-builder-types';
-import { generateId } from '@openzeppelin/ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import type { ContractSchema, FieldType } from '@openzeppelin/ui-types';
+import { generateId } from '@openzeppelin/ui-utils';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 

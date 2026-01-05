@@ -24,8 +24,8 @@ import type {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { CALLER_PLACEHOLDER } from '../access-control/actions';
 import { valueToScVal } from '../transform/input-parser';

@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  useDerivedAccountStatus,
-  useDerivedConnectStatus,
-} from '@openzeppelin/ui-builder-react-core';
-import type { Connector } from '@openzeppelin/ui-builder-types';
-import {
   Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
+import { useDerivedAccountStatus, useDerivedConnectStatus } from '@openzeppelin/ui-react';
+import type { Connector } from '@openzeppelin/ui-types';
 
 import { isConfigEnabled, useUiKitConfig } from '../../hooks/useUiKitConfig';
 import { SafeWagmiComponent } from '../../utils/SafeWagmiComponent';

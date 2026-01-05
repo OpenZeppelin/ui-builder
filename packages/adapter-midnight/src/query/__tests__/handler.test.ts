@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/ui-types';
 
 const validContractAddress = '0200326c95873182775840764ae28e8750f73a68f236800171ebd92520e96a9fffb6';
 

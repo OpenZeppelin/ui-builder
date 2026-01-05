@@ -6,7 +6,7 @@ This package provides the `ContractAdapter` implementation for the Solana blockc
 
 It is intended to be responsible for:
 
-- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-builder-types`.
+- Implementing the `ContractAdapter` interface from `@openzeppelin/ui-types`.
 - Defining and exporting specific Solana network configurations (e.g., Mainnet Beta, Devnet, Testnet) as `SolanaNetworkConfig` objects. These are located in `src/networks/` and include details like RPC endpoints, cluster information, explorer URLs, and commitment levels.
 - Loading Solana program IDLs (Instruction Description Language).
 - Mapping Solana-specific data types to the form field types.
@@ -22,7 +22,7 @@ Once fully implemented, the `SolanaAdapter` class will be instantiated with a sp
 ```typescript
 // Example: import { solanaMainnetBeta } from '@openzeppelin/ui-builder-adapter-solana';
 import { SolanaAdapter } from '@openzeppelin/ui-builder-adapter-solana';
-import { SolanaNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { SolanaNetworkConfig } from '@openzeppelin/ui-types';
 
 // For type access if needed
 

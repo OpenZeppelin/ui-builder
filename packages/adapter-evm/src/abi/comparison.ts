@@ -5,7 +5,7 @@
 
 import type { Abi } from 'viem';
 
-import { logger, simpleHash } from '@openzeppelin/ui-builder-utils';
+import { logger, simpleHash } from '@openzeppelin/ui-utils';
 
 import type { AbiComparisonResult, AbiDifference, AbiValidationResult } from './types';
 import { isValidAbiArray } from './types';

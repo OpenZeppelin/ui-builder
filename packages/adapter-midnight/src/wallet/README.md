@@ -74,4 +74,4 @@ wallet/
 
 ## Usage in Application
 
-`MidnightWalletUiRoot` is returned by the adapter and used by the Builder's `WalletStateProvider`. Use `useWalletState()` and facade hooks from `@openzeppelin/ui-builder-react-core` to render the wallet UI components from `getEcosystemWalletComponents()`.
+`MidnightWalletUiRoot` is returned by the adapter and used by the Builder's `WalletStateProvider`. Use `useWalletState()` and facade hooks from `@openzeppelin/ui-react` to render the wallet UI components from `getEcosystemWalletComponents()`.

@@ -1,13 +1,13 @@
 import { Braces, FormInput, Lock, Tag, X } from 'lucide-react';
 
-import type { FormFieldType } from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
+import type { FormFieldType } from '@openzeppelin/ui-types';
 
 /**
  * Renders the header section of a field selector item

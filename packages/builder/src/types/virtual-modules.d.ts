@@ -26,16 +26,13 @@
  * Without this declaration, TypeScript would report an error about the module not being found,
  * even though Vite can resolve it at runtime through the plugin.
  *
- * THE UNDERLYING ISSUE:
- * In development mode, import.meta.glob cannot reliably resolve paths that cross package
- * boundaries in a monorepo. The virtual module is a workaround for this limitation.
- *
  * USED BY:
  * This module is imported by packages/builder/src/export/PackageManager.ts to access
  * the renderer configuration for dependency management during form export.
  */
 declare module 'virtual:renderer-config' {
-  export { rendererConfig } from '@openzeppelin/ui-builder-renderer/config';
+  import type { RendererConfig } from '@openzeppelin/ui-renderer';
+  export const rendererConfig: RendererConfig;
 }
 
 /**
@@ -67,13 +64,13 @@ declare module 'virtual:renderer-config' {
  * Declaration merging for RendererConfig types
  *
  * This declaration allows importing types like RendererConfig using the
- * deep import path `@openzeppelin/ui-builder-renderer/types/RendererConfig`.
+ * deep import path `@openzeppelin/ui-renderer/types/RendererConfig`.
  * It re-exports the types from the main
- * `@openzeppelin/ui-builder-renderer/types` module, ensuring type compatibility.
+ * `@openzeppelin/ui-renderer/types` module, ensuring type compatibility.
  */
-declare module '@openzeppelin/ui-builder-renderer/types/RendererConfig' {
+declare module '@openzeppelin/ui-renderer/types/RendererConfig' {
   // Re-export necessary types from the actual implementation
-  export * from '@openzeppelin/ui-builder-renderer/types';
+  export * from '@openzeppelin/ui-renderer/types';
 }
 
 // Add declarations for the raw config content virtual modules

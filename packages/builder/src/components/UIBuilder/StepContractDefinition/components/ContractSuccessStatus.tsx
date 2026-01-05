@@ -1,14 +1,14 @@
 import { AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-components';
 import type {
   ContractAdapter,
   ContractDefinitionComparisonResult,
   ContractSchema,
   ProxyInfo,
-} from '@openzeppelin/ui-builder-types';
-import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../../contexts/useContractUIStorage';
 import {

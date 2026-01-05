@@ -1,5 +1,5 @@
-import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import type { ContractSchema, FormValues } from '@openzeppelin/ui-builder-types';
+import { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
+import type { ContractSchema, FormValues } from '@openzeppelin/ui-types';
 
 import type { ContractDefinitionComparisonResult } from '../../warnings';
 

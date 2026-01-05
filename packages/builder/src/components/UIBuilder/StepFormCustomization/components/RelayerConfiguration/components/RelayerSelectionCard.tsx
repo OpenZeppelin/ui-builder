@@ -2,11 +2,6 @@ import { CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Control } from 'react-hook-form';
 
-import type {
-  ContractAdapter,
-  RelayerDetails,
-  RelayerDetailsRich,
-} from '@openzeppelin/ui-builder-types';
 import {
   Button,
   Card,
@@ -15,8 +10,9 @@ import {
   CardTitle,
   RelayerDetailsCard,
   SelectField,
-} from '@openzeppelin/ui-builder-ui';
-import { truncateMiddle } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-components';
+import type { ContractAdapter, RelayerDetails, RelayerDetailsRich } from '@openzeppelin/ui-types';
+import { truncateMiddle } from '@openzeppelin/ui-utils';
 
 import type { ExecutionMethodFormData } from '../../../types';
 

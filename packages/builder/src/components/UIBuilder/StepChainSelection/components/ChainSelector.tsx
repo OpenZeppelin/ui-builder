@@ -3,9 +3,9 @@ import { Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { EmptyState, MidnightIcon } from '@openzeppelin/ui-builder-ui';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { EmptyState, MidnightIcon } from '@openzeppelin/ui-components';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import {
   getEcosystemDescription,

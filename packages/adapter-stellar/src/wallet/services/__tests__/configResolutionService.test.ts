@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { UiKitConfiguration, UiKitName } from '@openzeppelin/ui-builder-types';
+import type { UiKitConfiguration, UiKitName } from '@openzeppelin/ui-types';
 
 import { resolveFullUiKitConfiguration } from '../configResolutionService';
 

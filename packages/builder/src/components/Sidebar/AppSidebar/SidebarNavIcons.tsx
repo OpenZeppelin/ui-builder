@@ -1,6 +1,6 @@
 import { SiGithub, SiX } from '@icons-pack/react-simple-icons';
 
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { cn } from '@openzeppelin/ui-utils';
 
 interface SidebarNavIconsProps {
   className?: string;

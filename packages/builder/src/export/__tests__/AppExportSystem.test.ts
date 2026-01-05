@@ -1,11 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type {
-  Ecosystem,
-  EvmNetworkConfig,
-  SolanaNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { Ecosystem, EvmNetworkConfig, SolanaNetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { ExportOptions } from '../../core/types/ExportTypes';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
@@ -102,8 +98,8 @@ describe('AppExportSystem', () => {
           // Simulate dependency logic: return base + adapter with correct versions
           const baseDeps = {
             react: '^19.0.0', // Correct version for assertion
-            '@openzeppelin/ui-builder-renderer': 'workspace:*', // Use consistent placeholder version
-            '@openzeppelin/ui-builder-types': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/ui-renderer': 'workspace:*', // Use consistent placeholder version
+            '@openzeppelin/ui-types': 'workspace:*', // Use consistent placeholder version
           };
           const adapterDep = `@openzeppelin/ui-builder-adapter-${ecosystem}`;
           return Promise.resolve({ ...baseDeps, [adapterDep]: 'workspace:*' });
@@ -204,8 +200,8 @@ describe('AppExportSystem', () => {
 
       // Verify dependencies contain types, renderer, and EVM adapter packages
       // Check PRESENCE only, as applyVersioningStrategy might change value
-      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-renderer');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-renderer');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-types');
       expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
       // Check a base dependency from the mock config is still present
       expect(result.dependencies).toHaveProperty('react', '^19.0.0');

@@ -1,5 +1,5 @@
-import { WalletConnectionHeader } from '@openzeppelin/ui-builder-react-core';
-import { Header as UIHeader } from '@openzeppelin/ui-builder-ui';
+import { Header as UIHeader } from '@openzeppelin/ui-components';
+import { WalletConnectionHeader } from '@openzeppelin/ui-react';
 
 interface HeaderProps {
   title?: string;

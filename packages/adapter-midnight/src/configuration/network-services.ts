@@ -1,4 +1,4 @@
-import type { NetworkServiceForm } from '@openzeppelin/ui-builder-types';
+import type { NetworkServiceForm } from '@openzeppelin/ui-types';
 
 /**
  * Returns the network service forms for Midnight networks.

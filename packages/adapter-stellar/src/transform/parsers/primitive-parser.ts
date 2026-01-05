@@ -1,6 +1,6 @@
 import { Address } from '@stellar/stellar-sdk';
 
-import { detectBytesEncoding, logger, stringToBytes } from '@openzeppelin/ui-builder-utils';
+import { detectBytesEncoding, logger, stringToBytes } from '@openzeppelin/ui-utils';
 
 const SYSTEM_LOG_TAG = 'PrimitiveParser';
 

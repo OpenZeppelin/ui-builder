@@ -1,15 +1,15 @@
 import { FormInput } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
+import { EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/ui-components';
+import { useWalletState } from '@openzeppelin/ui-react';
 import {
   ContractAdapter,
   ContractSchema,
   ExecutionConfig,
   NetworkConfig,
   UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
-import { EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-types';
 
 import { ensureCompleteConfig } from './utils/executionUtils';
 

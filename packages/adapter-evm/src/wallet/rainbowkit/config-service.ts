@@ -1,8 +1,8 @@
 import { Config, http } from '@wagmi/core';
 import { type Chain } from 'viem';
 
-import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { UiKitConfiguration } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { type WagmiConfigChains } from '../types';
 

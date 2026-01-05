@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     error: vi.fn(),
     info: vi.fn(),

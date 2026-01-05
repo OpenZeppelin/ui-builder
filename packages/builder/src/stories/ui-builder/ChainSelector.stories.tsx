@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { ChainSelector } from '../../components/UIBuilder/StepChainSelection/index';
 

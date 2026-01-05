@@ -1,7 +1,7 @@
 import { scValToNative, xdr } from '@stellar/stellar-sdk';
 
-import type { ContractFunction } from '@openzeppelin/ui-builder-types';
-import { bytesToHex, logger } from '@openzeppelin/ui-builder-utils';
+import type { ContractFunction } from '@openzeppelin/ui-types';
+import { bytesToHex, logger } from '@openzeppelin/ui-utils';
 
 import { isSerializableObject, stringifyWithBigInt } from '../utils';
 

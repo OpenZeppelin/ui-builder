@@ -1,4 +1,4 @@
-import type { Connector } from '@openzeppelin/ui-builder-types';
+import type { Connector } from '@openzeppelin/ui-types';
 
 import type { SolanaWalletConnectionStatus } from './types';
 

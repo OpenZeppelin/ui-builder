@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import type { ContractAdapter, FormValues } from '@openzeppelin/ui-builder-types';
+import { useWalletState } from '@openzeppelin/ui-react';
+import type { ContractAdapter, FormValues } from '@openzeppelin/ui-types';
 import {
   buildRequiredInputSnapshot,
   hasMissingRequiredContractInputs,
-} from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-utils';
 
 import { useContractDefinition } from '../../../hooks/useContractDefinition';
 import { useContractDefinitionComparison } from '../../../hooks/useContractDefinitionComparison';

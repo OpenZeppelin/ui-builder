@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-builder-types';
-import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-builder-utils';
+import type { ContractAdapter, ContractSchema, FormValues } from '@openzeppelin/ui-types';
+import { hasMissingRequiredContractInputs } from '@openzeppelin/ui-utils';
 
 import { contractDefinitionService } from '../../../../services/ContractDefinitionService';
 import { uiBuilderStore } from '../../hooks/uiBuilderStore';

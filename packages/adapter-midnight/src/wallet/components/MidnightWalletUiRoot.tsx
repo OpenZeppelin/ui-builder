@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { EcosystemReactUiProviderProps } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { EcosystemReactUiProviderProps } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { onMidnightWalletConnectionChange } from '../connection';
 import { MidnightWalletContext } from '../context/MidnightWalletContext';

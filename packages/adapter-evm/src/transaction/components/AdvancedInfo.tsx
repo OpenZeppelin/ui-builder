@@ -1,7 +1,7 @@
 import { Info } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@openzeppelin/ui-builder-ui';
+import { Button } from '@openzeppelin/ui-components';
 
 interface AdvancedInfoProps {
   showAdvancedInfo: boolean;

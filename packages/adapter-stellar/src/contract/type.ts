@@ -1,7 +1,7 @@
 import { Contract, rpc as StellarRpc, xdr } from '@stellar/stellar-sdk';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger, userRpcConfigService } from '@openzeppelin/ui-builder-utils';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
+import { logger, userRpcConfigService } from '@openzeppelin/ui-utils';
 
 /**
  * Returns a Soroban RPC server instance honoring user overrides.

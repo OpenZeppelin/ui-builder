@@ -1,4 +1,4 @@
-import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
+import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-types';
 
 import { testSolanaRpcConnection, validateSolanaRpcEndpoint } from './rpc';
 

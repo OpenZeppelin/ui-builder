@@ -1,5 +1,5 @@
-import type { FunctionDecorationsMap } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { FunctionDecorationsMap } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { evaluateContractModule } from '../transaction/contract-evaluator';
 import { evaluateWitnessCode } from '../transaction/witness-evaluator';

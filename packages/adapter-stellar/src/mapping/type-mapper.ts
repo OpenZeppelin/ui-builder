@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/ui-builder-types';
+import type { FieldType } from '@openzeppelin/ui-types';
 
 import { isBytesNType, isLikelyEnumType } from '../utils/type-detection';
 import { STELLAR_TYPE_TO_FIELD_TYPE } from './constants';

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useWatch } from 'react-hook-form';
 
-import type { RelayerDetails } from '@openzeppelin/ui-builder-types';
+import type { RelayerDetails } from '@openzeppelin/ui-types';
 
 import type { RelayerConfigurationProps } from '../../types';
 import {

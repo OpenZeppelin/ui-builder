@@ -11,12 +11,8 @@ import {
   WalletNetwork,
 } from '@creit.tech/stellar-wallets-kit';
 
-import type {
-  Connector,
-  StellarNetworkConfig,
-  UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { Connector, StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { StellarConnectionStatusListener, StellarWalletConnectionStatus } from '../types';
 

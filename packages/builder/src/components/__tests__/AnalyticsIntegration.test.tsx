@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AnalyticsProvider } from '@openzeppelin/ui-builder-react-core';
-import { AnalyticsService } from '@openzeppelin/ui-builder-utils';
+import { AnalyticsProvider } from '@openzeppelin/ui-react';
+import { AnalyticsService } from '@openzeppelin/ui-utils';
 
 // Mock the AnalyticsService from shared utils
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   AnalyticsService: {
     initialize: vi.fn(),
     isEnabled: vi.fn(),
@@ -30,8 +30,8 @@ vi.mock('../../../contexts/useContractUIStorage', () => ({
 
 // Using async importActual to get real AnalyticsProvider while mocking other exports
 // This is necessary for integration tests that need the actual provider behavior
-vi.mock('@openzeppelin/ui-builder-react-core', async () => {
-  const actual = await vi.importActual('@openzeppelin/ui-builder-react-core');
+vi.mock('@openzeppelin/ui-react', async () => {
+  const actual = await vi.importActual('@openzeppelin/ui-react');
   return {
     ...actual,
     useAdapterContext: vi.fn(),

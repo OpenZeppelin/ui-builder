@@ -16,8 +16,8 @@ import {
   RelayerExecutionConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { TypedEvmNetworkConfig, WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';

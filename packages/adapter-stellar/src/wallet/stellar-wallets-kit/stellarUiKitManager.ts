@@ -1,7 +1,7 @@
 import { allowAllModules, StellarWalletsKit, WalletNetwork } from '@creit.tech/stellar-wallets-kit';
 
-import type { StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { StellarNetworkConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { getStellarWalletImplementation } from '../utils/stellarWalletImplementationManager';
 

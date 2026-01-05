@@ -8,7 +8,7 @@ import {
   FormValues,
   ProxyInfo,
   UiKitConfiguration,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 import { BuilderFormConfig } from '../../../core/types/FormTypes';
 import { contractDefinitionService } from '../../../services/ContractDefinitionService';

@@ -1,8 +1,8 @@
 import { Settings } from 'lucide-react';
 
-import type { NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { Button, NetworkIcon } from '@openzeppelin/ui-builder-ui';
-import { cn } from '@openzeppelin/ui-builder-utils';
+import { Button, NetworkIcon } from '@openzeppelin/ui-components';
+import type { NetworkConfig } from '@openzeppelin/ui-types';
+import { cn } from '@openzeppelin/ui-utils';
 
 import { ICON_SIZE } from '../utils/utils';
 import { NetworkDetail } from './NetworkDetail';

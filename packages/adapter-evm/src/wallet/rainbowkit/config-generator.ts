@@ -1,4 +1,4 @@
-import { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 /**
  * Generates the content for a `rainbowkit.config.ts` file for an exported project.

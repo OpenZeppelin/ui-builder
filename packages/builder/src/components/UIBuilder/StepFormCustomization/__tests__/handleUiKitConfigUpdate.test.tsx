@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { UiKitConfiguration } from '@openzeppelin/ui-builder-types';
+import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 describe('handleUiKitConfigUpdate', () => {
   it('should only trigger runtime UI update when kitName or kitConfig changes', () => {

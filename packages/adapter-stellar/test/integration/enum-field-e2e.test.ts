@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  ContractSchema,
-  FormFieldType,
-  FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
+import type { ContractSchema, FormFieldType, FunctionParameter } from '@openzeppelin/ui-types';
 
 import { generateStellarDefaultField } from '../../src/mapping/field-generator';
 import { mapStellarParameterTypeToFieldType } from '../../src/mapping/type-mapper';

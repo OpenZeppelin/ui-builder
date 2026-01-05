@@ -1,4 +1,4 @@
-import { getBytesSize, isPlainObject, logger } from '@openzeppelin/ui-builder-utils';
+import { getBytesSize, isPlainObject, logger } from '@openzeppelin/ui-utils';
 
 import {
   isArrayType,

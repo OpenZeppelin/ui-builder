@@ -1,10 +1,5 @@
-import type { StellarNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-builder-types';
-import {
-  appConfigService,
-  isValidUrl,
-  logger,
-  userRpcConfigService,
-} from '@openzeppelin/ui-builder-utils';
+import type { StellarNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import { appConfigService, isValidUrl, logger, userRpcConfigService } from '@openzeppelin/ui-utils';
 
 /**
  * Builds a complete RPC URL from a user RPC provider configuration.

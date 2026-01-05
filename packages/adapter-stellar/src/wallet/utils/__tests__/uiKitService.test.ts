@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { UiKitConfiguration, UiKitName } from '@openzeppelin/ui-builder-types';
+import type { UiKitConfiguration, UiKitName } from '@openzeppelin/ui-types';
 
 import { CustomAccountDisplay, CustomConnectButton } from '../../components';
 import { getResolvedWalletComponents } from '../uiKitService';

@@ -1,7 +1,7 @@
 import type { xdr } from '@stellar/stellar-sdk';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/ui-types';
 
 // T007: Integration test for SAC query flow
 
@@ -42,7 +42,7 @@ vi.mock('@stellar/stellar-sdk', () => ({
   },
 }));
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),

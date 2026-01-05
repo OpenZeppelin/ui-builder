@@ -8,7 +8,7 @@ import * as estreePlugin from 'prettier/plugins/estree';
 import * as typescriptPlugin from 'prettier/plugins/typescript';
 import * as prettierStandalone from 'prettier/standalone';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 export class TemplateProcessor {
   private templates: Record<string, string> | null = null;

@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@openzeppelin/ui-builder-ui';
+} from '@openzeppelin/ui-components';
 
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { OptionSelector, type SelectableOption } from '../../Common/OptionSelector';

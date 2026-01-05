@@ -1,4 +1,4 @@
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { stripZipForFunction } from './zip-slimmer';
 

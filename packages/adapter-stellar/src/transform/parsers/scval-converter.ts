@@ -1,6 +1,6 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-types';
+import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-types';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { convertEnumToScVal } from '../../utils/input-parsing';
@@ -12,7 +12,7 @@ import { parsePrimitive } from './primitive-parser';
 import { convertStructToScVal, isStructType } from './struct-parser';
 import type { SorobanEnumValue } from './types';
 
-// FunctionParameter already includes enumMetadata in its type definition (from @openzeppelin/ui-builder-types)
+// FunctionParameter already includes enumMetadata in its type definition (from @openzeppelin/ui-types)
 // No need for a separate type wrapper
 type EnumAwareFunctionParameter = FunctionParameter;
 

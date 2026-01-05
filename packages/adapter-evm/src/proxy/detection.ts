@@ -6,7 +6,7 @@
  */
 import { createPublicClient, http, keccak256, parseAbi, toHex } from 'viem';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { resolveRpcUrl } from '../configuration';
 import { AbiItem, TypedEvmNetworkConfig } from '../types';

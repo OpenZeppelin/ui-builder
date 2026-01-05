@@ -1,9 +1,9 @@
 import { Loader2 } from 'lucide-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import type { BaseComponentProps } from '@openzeppelin/ui-builder-types';
-import { Button } from '@openzeppelin/ui-builder-ui';
-import { cn, logger } from '@openzeppelin/ui-builder-utils';
+import { Button } from '@openzeppelin/ui-components';
+import type { BaseComponentProps } from '@openzeppelin/ui-types';
+import { cn, logger } from '@openzeppelin/ui-utils';
 
 import { CustomConnectButton } from '../components';
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';

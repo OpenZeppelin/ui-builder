@@ -1,7 +1,7 @@
 import { nativeToScVal, xdr } from '@stellar/stellar-sdk';
 
-import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-builder-types';
-import { isPlainObject, logger } from '@openzeppelin/ui-builder-utils';
+import { isEnumValue, type FunctionParameter } from '@openzeppelin/ui-types';
+import { isPlainObject, logger } from '@openzeppelin/ui-utils';
 
 import { convertStellarTypeToScValType } from '../../utils/formatting';
 import { isLikelyEnumType } from '../../utils/type-detection';

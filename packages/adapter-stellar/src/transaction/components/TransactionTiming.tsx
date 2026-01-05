@@ -1,7 +1,7 @@
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
 
-import { Button, DateTimeField } from '@openzeppelin/ui-builder-ui';
+import { Button, DateTimeField } from '@openzeppelin/ui-components';
 
 import type { StellarRelayerFormData } from './useStellarRelayerOptions';
 

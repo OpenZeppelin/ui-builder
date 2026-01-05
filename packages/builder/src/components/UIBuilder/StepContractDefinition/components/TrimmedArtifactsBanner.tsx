@@ -1,6 +1,6 @@
 import { AlertCircle, ArrowRight } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-builder-ui';
+import { Alert, AlertDescription, AlertTitle, Button } from '@openzeppelin/ui-components';
 
 interface TrimmedArtifactsBannerProps {
   /** The name of the adapter (e.g., "Midnight") */

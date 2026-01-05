@@ -16,7 +16,7 @@ const {
   trackNetworkSelectionMock: vi.fn(),
 }));
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock('../../../../../storage', () => ({
   },
 }));
 
-vi.mock('@openzeppelin/ui-builder-react-core', () => ({
+vi.mock('@openzeppelin/ui-react', () => ({
   useWalletState: () => ({
     setActiveNetworkId: setActiveNetworkIdMock,
   }),

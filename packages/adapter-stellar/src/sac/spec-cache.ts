@@ -1,6 +1,6 @@
 import type { xdr } from '@stellar/stellar-sdk';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { SacSpecSourceConfig } from './spec-source';
 import { fetchSacSpecJson, getSacSpecUrl } from './spec-source';

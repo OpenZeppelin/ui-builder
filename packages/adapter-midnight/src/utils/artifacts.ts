@@ -1,7 +1,7 @@
 /**
  * Utility functions for Midnight contract artifacts validation and conversion
  */
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { globalZkConfigProvider } from '../transaction/providers';
 import type { MidnightContractArtifacts } from '../types/artifacts';

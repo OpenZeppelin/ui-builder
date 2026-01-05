@@ -1,6 +1,6 @@
 import type React from 'react';
 
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { logger } from '@openzeppelin/ui-utils';
 
 export interface RainbowKitAssets {
   ProviderComponent: React.ComponentType<React.PropsWithChildren<unknown>> | null;

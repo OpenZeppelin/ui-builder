@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentProps } from 'react';
 
-import type { Ecosystem } from '@openzeppelin/ui-builder-types';
+import type { Ecosystem } from '@openzeppelin/ui-types';
 
 import { ChainSelector } from '../components/ChainSelector';
 
@@ -58,12 +58,12 @@ vi.mock('../components/NetworkSelectionPanel', () => ({
   NetworkSelectionPanel: () => <div data-testid="network-panel" />,
 }));
 
-vi.mock('@openzeppelin/ui-builder-ui', () => ({
+vi.mock('@openzeppelin/ui-components', () => ({
   EmptyState: ({ title }: { title: string }) => <div>{title}</div>,
   MidnightIcon: () => <span>Midnight</span>,
 }));
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),

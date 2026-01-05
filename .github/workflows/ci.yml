@@ -70,23 +70,7 @@ jobs:
       - name: Build all packages
         run: pnpm -r build
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
-
-      - name: Test ES module imports
-        run: |
-          cat > test-es-modules.mjs << 'EOF'
-          import { logger } from './packages/utils/dist/index.js';
-          import { isEvmNetworkConfig } from './packages/types/dist/index.js';
-          if (typeof logger === 'object' && typeof isEvmNetworkConfig === 'function') {
-            console.log('✅ ES modules working correctly');
-            process.exit(0);
-          } else {
-            console.error('❌ ES module imports failed');
-            process.exit(1);
-          }
-          EOF
-          node test-es-modules.mjs
-          rm test-es-modules.mjs
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Test
         run: pnpm test

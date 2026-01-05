@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type {
-  EvmNetworkConfig,
-  NetworkConfig,
-  SolanaNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+import type { EvmNetworkConfig, NetworkConfig, SolanaNetworkConfig } from '@openzeppelin/ui-types';
 
 import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
@@ -72,7 +68,7 @@ describe('Adapter Integration Tests', () => {
       const { packageJson } = await getExportedPackageJson(mockEvmNetworkConfig);
 
       // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
 
       // Optional: Check if specific SDKs (like ethers) are NOT directly listed if they are peer/sub-dependencies
@@ -83,7 +79,7 @@ describe('Adapter Integration Tests', () => {
       const { packageJson } = await getExportedPackageJson(mockSolanaNetworkConfig);
 
       // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-types');
+      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
       expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
 
       // Optional: Check specific SDKs are NOT directly listed

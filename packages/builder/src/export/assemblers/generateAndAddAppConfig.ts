@@ -1,5 +1,5 @@
-import type { GlobalServiceConfigs, NetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { GlobalServiceConfigs, NetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import type { TemplateProcessor } from '../generators/TemplateProcessor';

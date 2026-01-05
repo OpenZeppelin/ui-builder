@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/ui-builder-types';
-import type {
-  EvmNetworkConfig,
-  FormFieldType,
-  RenderFormSchema,
-} from '@openzeppelin/ui-builder-types';
+import { Ecosystem } from '@openzeppelin/ui-types';
+import type { EvmNetworkConfig, FormFieldType, RenderFormSchema } from '@openzeppelin/ui-types';
 
 import { formSchemaFactory } from '../../../core/factories/FormSchemaFactory';
 import type { ExportOptions } from '../../../core/types/ExportTypes';
@@ -47,8 +43,8 @@ vi.mock('../../PackageManager', () => {
           // Simulate adding dependencies based on ecosystem
           packageJson.dependencies = {
             ...(packageJson.dependencies || {}),
-            '@openzeppelin/ui-builder-renderer': '^1.0.0',
-            '@openzeppelin/ui-builder-types': '^0.1.0',
+            '@openzeppelin/ui-renderer': '^1.0.0',
+            '@openzeppelin/ui-types': '^0.1.0',
             [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
@@ -58,8 +54,8 @@ vi.mock('../../PackageManager', () => {
       .fn()
       .mockImplementation(async (_formConfig: BuilderFormConfig, ecosystem: Ecosystem) => {
         return {
-          '@openzeppelin/ui-builder-renderer': '^1.0.0',
-          '@openzeppelin/ui-builder-types': '^0.1.0',
+          '@openzeppelin/ui-renderer': '^1.0.0',
+          '@openzeppelin/ui-types': '^0.1.0',
           [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
@@ -107,8 +103,8 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
               packageJson.name = options?.projectName || 'default-test-name';
               packageJson.dependencies = {
                 ...(packageJson.dependencies || {}),
-                '@openzeppelin/ui-builder-renderer': '^1.0.0',
-                '@openzeppelin/ui-builder-types': '^0.1.0',
+                '@openzeppelin/ui-renderer': '^1.0.0',
+                '@openzeppelin/ui-types': '^0.1.0',
                 [`@openzeppelin/ui-builder-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);

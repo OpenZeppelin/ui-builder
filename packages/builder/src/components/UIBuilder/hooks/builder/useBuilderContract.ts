@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
-import { useWalletState } from '@openzeppelin/ui-builder-react-core';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { useWalletState } from '@openzeppelin/ui-react';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { STEP_INDICES } from '../../constants/stepIndices';
 import { uiBuilderStore } from '../uiBuilderStore';

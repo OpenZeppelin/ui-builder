@@ -25,9 +25,9 @@ import type {
   UiKitConfiguration,
   UserRpcProviderConfig,
   WalletConnectionStatus,
-} from '@openzeppelin/ui-builder-types';
-import { isStellarNetworkConfig } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { isStellarNetworkConfig } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { getCurrentLedger } from './access-control/onchain-reader';
 import { createStellarAccessControlService } from './access-control/service';

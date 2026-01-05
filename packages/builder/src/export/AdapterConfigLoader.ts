@@ -1,5 +1,5 @@
-import { AdapterConfig, Ecosystem } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import { AdapterConfig, Ecosystem } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { getAdapterConfigExportName, getAdapterConfigLoader } from '../core/ecosystemManager';
 

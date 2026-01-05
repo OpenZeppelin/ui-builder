@@ -35,9 +35,9 @@
  */
 import { rendererConfig } from 'virtual:renderer-config';
 
-import type { RendererConfig } from '@openzeppelin/ui-builder-renderer';
-import { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-builder-types';
-import { logger } from '@openzeppelin/ui-builder-utils';
+import type { RendererConfig } from '@openzeppelin/ui-renderer';
+import { Ecosystem, UiKitConfiguration } from '@openzeppelin/ui-types';
+import { logger } from '@openzeppelin/ui-utils';
 
 import { adapterPackageMap } from '../core/ecosystemManager';
 import type { ExportOptions } from '../core/types/ExportTypes';
@@ -240,11 +240,11 @@ export class PackageManager {
     // Add the adapter package itself if available
     if (adapterPackageName) {
       combined[adapterPackageName] = 'workspace:*'; // Use workspace protocol for now
-      combined['@openzeppelin/ui-builder-types'] = 'workspace:*';
-      combined['@openzeppelin/ui-builder-ui'] = 'workspace:*';
-      combined['@openzeppelin/ui-builder-utils'] = 'workspace:*';
-      combined['@openzeppelin/ui-builder-renderer'] = 'workspace:*';
-      combined['@openzeppelin/ui-builder-react-core'] = 'workspace:*';
+      combined['@openzeppelin/ui-types'] = 'workspace:*';
+      combined['@openzeppelin/ui-components'] = 'workspace:*';
+      combined['@openzeppelin/ui-utils'] = 'workspace:*';
+      combined['@openzeppelin/ui-renderer'] = 'workspace:*';
+      combined['@openzeppelin/ui-react'] = 'workspace:*';
     }
 
     return combined;
@@ -421,9 +421,14 @@ export class PackageManager {
   /**
    * Applies the versioning strategy based on the environment.
    *
-   * - 'local': Uses workspace:* for local development
+   * For @openzeppelin/ui-* packages (openzeppelin-ui repo):
+   * - 'local': Uses file: protocol pointing to local openzeppelin-ui checkout
+   * - 'staging'/'production': Uses stable published versions (^x.y.z) - no RC pipeline
+   *
+   * For adapter packages (contracts-ui-builder repo):
+   * - 'local': Uses workspace:* for monorepo development
    * - 'staging': Uses RC versions for QA testing latest features
-   * - 'production': Uses stable published versions
+   * - 'production': Uses stable published versions (^x.y.z)
    *
    * @param dependencies Original dependencies object
    * @param env The target environment ('local' | 'staging' | 'production')
@@ -434,18 +439,56 @@ export class PackageManager {
     env: 'local' | 'staging' | 'production' | undefined = 'production' // Default to 'production'
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
-    const internalPackages = new Set([
-      '@openzeppelin/ui-builder-renderer',
-      '@openzeppelin/ui-builder-storage',
-      '@openzeppelin/ui-builder-types',
-      '@openzeppelin/ui-builder-utils',
-      '@openzeppelin/ui-builder-ui',
-      '@openzeppelin/ui-builder-react-core',
-      ...Object.values(adapterPackageMap),
+
+    // Adapter packages (contracts-ui-builder repo)
+    const adapterPackages = new Set(Object.values(adapterPackageMap));
+
+    // UI packages (openzeppelin-ui repo)
+    const uiPackages = new Set([
+      '@openzeppelin/ui-types',
+      '@openzeppelin/ui-utils',
+      '@openzeppelin/ui-styles',
+      '@openzeppelin/ui-components',
+      '@openzeppelin/ui-renderer',
+      '@openzeppelin/ui-react',
+      '@openzeppelin/ui-storage',
     ]);
 
+    // Map UI package names to their directory in openzeppelin-ui
+    const uiPackageDirectories: Record<string, string> = {
+      '@openzeppelin/ui-types': 'packages/types',
+      '@openzeppelin/ui-utils': 'packages/utils',
+      '@openzeppelin/ui-styles': 'packages/styles',
+      '@openzeppelin/ui-components': 'packages/components',
+      '@openzeppelin/ui-renderer': 'packages/renderer',
+      '@openzeppelin/ui-react': 'packages/react',
+      '@openzeppelin/ui-storage': 'packages/storage',
+    };
+
+    // Get the local UI path from environment or use default sibling directory
+    const localUiPath = process.env.LOCAL_UI_PATH || '../openzeppelin-ui';
+
     for (const [pkgName, version] of Object.entries(dependencies)) {
-      if (internalPackages.has(pkgName)) {
+      // Handle UI packages (from openzeppelin-ui repo)
+      // These use standard semver - no RC flow, staging uses stable versions
+      if (uiPackages.has(pkgName)) {
+        if (env === 'local') {
+          // Local development: Use file: protocol pointing to openzeppelin-ui
+          const pkgDir = uiPackageDirectories[pkgName];
+          updatedDependencies[pkgName] = `file:${localUiPath}/${pkgDir}`;
+        } else {
+          // Staging + Production: Use stable published versions (no RC pipeline in openzeppelin-ui)
+          const managedVersion =
+            packageVersions[pkgName as keyof typeof packageVersions] || version;
+          if (managedVersion.startsWith('^')) {
+            updatedDependencies[pkgName] = managedVersion;
+          } else {
+            updatedDependencies[pkgName] = `^${managedVersion}`;
+          }
+        }
+      }
+      // Handle adapter packages (contracts-ui-builder repo)
+      else if (adapterPackages.has(pkgName)) {
         const managedVersion = packageVersions[pkgName as keyof typeof packageVersions] || version;
 
         if (env === 'local') {
@@ -487,7 +530,7 @@ export class PackageManager {
 
     // Add a script to update the renderer package
     (packageJson.scripts as Record<string, string>)['update-renderer'] =
-      'npm update @openzeppelin/ui-builder-renderer';
+      'npm update @openzeppelin/ui-renderer';
 
     // Add a script to check for outdated dependencies
     (packageJson.scripts as Record<string, string>)['check-deps'] = 'npm outdated';

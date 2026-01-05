@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { ContractSchema } from '@openzeppelin/ui-builder-types';
+import type { ContractSchema } from '@openzeppelin/ui-types';
 
 import {
   detectAccessControlCapabilities,

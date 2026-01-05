@@ -1,4 +1,4 @@
-import { SidebarSection } from '@openzeppelin/ui-builder-ui';
+import { SidebarSection } from '@openzeppelin/ui-components';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import ContractUIsList from '../ContractUIs/ContractUIsList';

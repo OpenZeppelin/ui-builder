@@ -13,7 +13,7 @@ import type {
   ContractFunction,
   ContractSchema,
   StellarNetworkConfig,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 /**
  * Helper to create a minimal mock ContractFunction with required properties
@@ -42,7 +42,7 @@ vi.mock('@stellar/stellar-sdk', () => ({
 }));
 
 // Mock the logger and config services
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),

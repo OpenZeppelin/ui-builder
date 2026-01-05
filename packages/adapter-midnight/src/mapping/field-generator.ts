@@ -6,8 +6,8 @@ import type {
   FieldValidation,
   FormFieldType,
   FunctionParameter,
-} from '@openzeppelin/ui-builder-types';
-import { enhanceNumericValidation, type NumericBoundsMap } from '@openzeppelin/ui-builder-utils';
+} from '@openzeppelin/ui-types';
+import { enhanceNumericValidation, type NumericBoundsMap } from '@openzeppelin/ui-utils';
 
 import { isUintType, isVectorType } from '../utils/type-helpers';
 import { mapMidnightParameterTypeToFieldType } from './type-mapper';

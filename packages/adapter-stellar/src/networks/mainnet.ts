@@ -1,6 +1,6 @@
 import { NetworkStellar } from '@web3icons/react';
 
-import { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 // Stellar Public Network (Mainnet)
 export const stellarPublic: StellarNetworkConfig = {

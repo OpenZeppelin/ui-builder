@@ -1,5 +1,5 @@
-import type { TransactionStatusUpdate } from '@openzeppelin/ui-builder-types';
-import { hexToBytes, logger } from '@openzeppelin/ui-builder-utils';
+import type { TransactionStatusUpdate } from '@openzeppelin/ui-types';
+import { hexToBytes, logger } from '@openzeppelin/ui-utils';
 
 import type { WriteContractParameters } from '../types';
 import { resolveSecretPropertyName } from '../utils/secret-property-helpers';

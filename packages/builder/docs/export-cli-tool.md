@@ -283,18 +283,18 @@ pnpm test src/export/__tests__/export-cli-wrapper.test.ts
 
 Direct test runs will clean up files, while the CLI preserves them.
 
-**Workspace Dependencies Not Resolving**
+**Local Dependencies Not Resolving**
 
-If you're getting errors about missing workspace dependencies:
+If you're getting errors about missing local dependencies:
 
 ```
-ERROR: No matching version found for @openzeppelin/ui-builder-renderer@workspace:*
+ERROR: No matching version found for @openzeppelin/ui-renderer@file:../openzeppelin-ui/...
 ```
 
 Make sure you're:
 
 1. Using pnpm (not npm or yarn)
-2. Running the command from within the monorepo
+2. Have the `openzeppelin-ui` repo cloned as a sibling directory
 3. Using the `serve` command for local development exports
 
 ### Debugging Exports

@@ -1,6 +1,6 @@
 import type { Abi, Chain } from 'viem';
 
-import type { EvmNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { EvmNetworkConfig } from '@openzeppelin/ui-types';
 
 /**
  * EVM-specific type definitions

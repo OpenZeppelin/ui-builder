@@ -1,8 +1,8 @@
 import { Loader2 } from 'lucide-react';
 import { Control } from 'react-hook-form';
 
-import { DynamicFormField } from '@openzeppelin/ui-builder-renderer';
-import type { ContractAdapter, FormFieldType, FormValues } from '@openzeppelin/ui-builder-types';
+import { DynamicFormField } from '@openzeppelin/ui-renderer';
+import type { ContractAdapter, FormFieldType, FormValues } from '@openzeppelin/ui-types';
 
 interface ContractFormFieldsProps {
   contractDefinitionInputs: FormFieldType[];

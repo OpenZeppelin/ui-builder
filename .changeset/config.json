@@ -10,13 +10,6 @@
   "fixed": [],
   "linked": [
     [
-      "@openzeppelin/ui-builder-types",
-      "@openzeppelin/ui-builder-utils",
-      "@openzeppelin/ui-builder-storage",
-      "@openzeppelin/ui-builder-ui",
-      "@openzeppelin/ui-builder-renderer",
-      "@openzeppelin/ui-builder-react-core",
-      "@openzeppelin/ui-builder-styles",
       "@openzeppelin/ui-builder-adapter-evm",
       "@openzeppelin/ui-builder-adapter-midnight",
       "@openzeppelin/ui-builder-adapter-solana",

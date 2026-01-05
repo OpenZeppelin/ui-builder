@@ -5,7 +5,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StellarNetworkConfig } from '@openzeppelin/ui-builder-types';
+import type { StellarNetworkConfig } from '@openzeppelin/ui-types';
 
 import { createIndexerClient } from '../../src/access-control/indexer-client';
 
@@ -14,7 +14,7 @@ const mockUserConfigGet = vi.fn();
 const mockUserConfigSubscribe = vi.fn().mockReturnValue(() => {});
 const mockAppConfigGetIndexer = vi.fn();
 
-vi.mock('@openzeppelin/ui-builder-utils', () => ({
+vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {
     info: vi.fn(),
     debug: vi.fn(),

@@ -12,7 +12,7 @@ import type {
   ExecutionConfig,
   TransactionStatusUpdate,
   TxStatus,
-} from '@openzeppelin/ui-builder-types';
+} from '@openzeppelin/ui-types';
 
 // ============================================================================
 // Ownership State Types
