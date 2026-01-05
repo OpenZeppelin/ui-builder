@@ -15,9 +15,12 @@
   with Tailwind classes that need to be included in the final CSS.
   
   Note: node_modules is ignored by default (gitignore patterns), so we must
-  explicitly register it with @source. Path is relative to the stylesheet.
+  explicitly register it with @source. We scan the top-level @openzeppelin
+  directory which contains symlinks that Vite/esbuild resolves during build.
 */
-@source "../../../node_modules/@openzeppelin";
+@source "../../../node_modules/@openzeppelin/ui-components";
+@source "../../../node_modules/@openzeppelin/ui-renderer";
+@source "../../../node_modules/@openzeppelin/ui-react";
 
 /*
   Import global theme variables and base styles from the @openzeppelin/ui-styles package.
