@@ -1,0 +1,92 @@
+# Deprecate old package names workflow
+# ====================================
+# One-time workflow to deprecate @openzeppelin/ui-builder-* packages
+# and direct users to the new @openzeppelin/ui-* namespace.
+
+name: Deprecate Old Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (show commands without executing)"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      deprecation_message:
+        description: "Deprecation message"
+        required: true
+        default: "This package has been renamed. Please use the new package from @openzeppelin/ui-* namespace. See https://github.com/OpenZeppelin/openzeppelin-ui for migration guide."
+
+permissions:
+  contents: read
+
+jobs:
+  deprecate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Deprecate packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          MESSAGE: ${{ inputs.deprecation_message }}
+        run: |
+          set -euo pipefail
+
+          # Package mapping: old name -> new name
+          declare -A PACKAGES=(
+            ["@openzeppelin/ui-builder-types"]="@openzeppelin/ui-types"
+            ["@openzeppelin/ui-builder-utils"]="@openzeppelin/ui-utils"
+            ["@openzeppelin/ui-builder-styles"]="@openzeppelin/ui-styles"
+            ["@openzeppelin/ui-builder-ui"]="@openzeppelin/ui-components"
+            ["@openzeppelin/ui-builder-renderer"]="@openzeppelin/ui-renderer"
+            ["@openzeppelin/ui-builder-react-core"]="@openzeppelin/ui-react"
+            ["@openzeppelin/ui-builder-storage"]="@openzeppelin/ui-storage"
+          )
+
+          echo "=== Deprecation Configuration ==="
+          echo "Dry run: $DRY_RUN"
+          echo "Message: $MESSAGE"
+          echo ""
+
+          for old_pkg in "${!PACKAGES[@]}"; do
+            new_pkg="${PACKAGES[$old_pkg]}"
+            full_message="$MESSAGE Migrate to $new_pkg"
+
+            echo "----------------------------------------"
+            echo "Package: $old_pkg"
+            echo "New package: $new_pkg"
+            echo "Deprecation message: $full_message"
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would execute: npm deprecate \"$old_pkg\" \"$full_message\""
+            else
+              echo "Executing: npm deprecate \"$old_pkg\" \"$full_message\""
+              npm deprecate "$old_pkg" "$full_message" || {
+                echo "Warning: Failed to deprecate $old_pkg (may not exist or already deprecated)"
+              }
+            fi
+            echo ""
+          done
+
+          echo "=== Deprecation Complete ==="
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "This was a dry run. No packages were actually deprecated."
+            echo "Run again with dry_run=false to deprecate packages."
+          else
+            echo "All packages have been deprecated."
+          fi
