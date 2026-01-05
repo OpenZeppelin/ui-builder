@@ -24,9 +24,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch to build from"
+        description: 'Branch to build from'
         required: true
-        default: "main"
+        default: 'main'
         type: string
 
 # Prevent concurrent staging deployments and avoid conflicts with release workflow
@@ -78,7 +78,7 @@ jobs:
       - name: Build all packages
         run: pnpm -r build
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Check for pending changesets
         id: changeset-check
@@ -106,7 +106,7 @@ jobs:
         if: steps.changeset-check.outputs.has_changesets == 'true'
         run: pnpm -r build
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Type check all packages
         if: steps.changeset-check.outputs.has_changesets == 'true'
@@ -151,8 +151,8 @@ jobs:
       security-events: write
     env:
       REGISTRY: ${{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-      ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
-      ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
+      ROLE_FOR_OIDC: 'arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role'
+      ROLE_TO_ASSUME: 'arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole'
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
@@ -165,7 +165,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
         with:
-          platforms: "arm64"
+          platforms: 'arm64'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
@@ -235,13 +235,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     env:
-      ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
-      ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
-      ECS_CLUSTER: "contracts-ui-builder-stg-cluster"
-      ECS_SERVICE: "contracts-ui-builder-stg-service"
-      AWS_REGION: "us-east-1"
-      REGISTRY: "${{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com"
-      CONTAINER_NAME: "contracts-ui-builder-stg"
+      ROLE_FOR_OIDC: 'arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role'
+      ROLE_TO_ASSUME: 'arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole'
+      ECS_CLUSTER: 'contracts-ui-builder-stg-cluster'
+      ECS_SERVICE: 'contracts-ui-builder-stg-service'
+      AWS_REGION: 'us-east-1'
     permissions:
       contents: read
       id-token: write
@@ -260,85 +258,6 @@ jobs:
           role-for-oidc: ${{ env.ROLE_FOR_OIDC }}
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
 
-      - name: Update task definition and deploy
+      - name: AWS ECS force new deployment
         run: |
-          set -e
-
-          NEW_IMAGE="${REGISTRY}/contracts-ui-builder-stg:${{ github.sha }}"
-          echo "Target image: $NEW_IMAGE"
-
-          # Get the current task definition ARN from the service
-          echo "Getting current task definition..."
-          TASK_DEF_ARN=$(aws ecs describe-services \
-            --cluster $ECS_CLUSTER \
-            --services $ECS_SERVICE \
-            --region $AWS_REGION \
-            --query 'services[0].taskDefinition' \
-            --output text)
-
-          # Validate TASK_DEF_ARN
-          if [ -z "$TASK_DEF_ARN" ] || [ "$TASK_DEF_ARN" = "None" ] || [ "$TASK_DEF_ARN" = "null" ]; then
-            echo "ERROR: Failed to retrieve task definition ARN from service '$ECS_SERVICE'"
-            echo "Verify the ECS cluster and service names are correct"
-            exit 1
-          fi
-          echo "Current task definition: $TASK_DEF_ARN"
-
-          # Get the full task definition
-          echo "Fetching task definition details..."
-          if ! aws ecs describe-task-definition \
-            --task-definition "$TASK_DEF_ARN" \
-            --region $AWS_REGION \
-            --query 'taskDefinition' > task-definition.json; then
-            echo "ERROR: Failed to describe task definition '$TASK_DEF_ARN'"
-            exit 1
-          fi
-
-          # Validate task definition JSON
-          if ! jq empty task-definition.json 2>/dev/null; then
-            echo "ERROR: Invalid JSON in task definition"
-            cat task-definition.json
-            exit 1
-          fi
-
-          # Verify container name exists
-          CONTAINER_EXISTS=$(jq --arg CONTAINER "$CONTAINER_NAME" '.containerDefinitions | map(select(.name == $CONTAINER)) | length' task-definition.json)
-          if [ "$CONTAINER_EXISTS" -eq 0 ]; then
-            echo "ERROR: Container '$CONTAINER_NAME' not found in task definition"
-            echo "Available containers:"
-            jq '.containerDefinitions[].name' task-definition.json
-            exit 1
-          fi
-
-          # Update the image and remove read-only fields
-          echo "Updating task definition with new image..."
-          jq --arg IMAGE "$NEW_IMAGE" --arg CONTAINER "$CONTAINER_NAME" '
-            .containerDefinitions |= map(if .name == $CONTAINER then .image = $IMAGE else . end) |
-            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
-          ' task-definition.json > new-task-definition.json
-
-          # Register the new task definition
-          echo "Registering new task definition..."
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://new-task-definition.json \
-            --region $AWS_REGION \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-
-          # Validate NEW_TASK_DEF_ARN
-          if [ -z "$NEW_TASK_DEF_ARN" ] || [ "$NEW_TASK_DEF_ARN" = "None" ] || [ "$NEW_TASK_DEF_ARN" = "null" ]; then
-            echo "ERROR: Failed to register new task definition"
-            exit 1
-          fi
-          echo "Registered new task definition: $NEW_TASK_DEF_ARN"
-
-          # Deploy the new task definition
-          echo "Deploying to ECS..."
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --task-definition "$NEW_TASK_DEF_ARN" \
-            --force-new-deployment \
-            --region $AWS_REGION
-
-          echo "Deployment initiated successfully!"
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment --region $AWS_REGION
