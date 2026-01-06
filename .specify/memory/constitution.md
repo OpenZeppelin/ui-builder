@@ -1,9 +1,15 @@
 <!--
 Sync Impact Report
-Version: 1.2.1 → 1.2.2
-Modified Principles: none
-Added sections: none
-Removed sections: none
+Version: 1.2.2 → 1.3.0
+Modified Principles: Updated for UI Kit extraction to openzeppelin-ui monorepo
+- Section I: Core packages now external (@openzeppelin/ui-*), adapters remain internal
+- Section II: Updated package references to new namespace
+- Section III: Changesets now only for builder app and adapters
+- Section IV: Updated styles package reference
+- Section V: Exported apps use @openzeppelin/ui-* packages
+- Section VII: Updated utility package references
+- Additional Constraints: Updated package references
+- Development Workflow: Added pnpmfile-based local dev workflow
 Templates:
 - ✅ .specify/templates/plan-template.md
 Follow-up TODOs: none
@@ -15,17 +21,20 @@ Follow-up TODOs: none
 
 ### I. Chain-Agnostic Core, Adapter-Led Architecture (NON-NEGOTIABLE)
 
-- The builder app (`packages/builder`), renderer (`packages/renderer`), UI components
-  (`packages/ui`), utils (`packages/utils`), react-core (`packages/react-core`),
-  storage (`packages/storage`), styles (`packages/styles`), and shared types
-  (`packages/types`) MUST remain chain-agnostic.
+- Core UI packages (`@openzeppelin/ui-types`, `@openzeppelin/ui-utils`,
+  `@openzeppelin/ui-styles`, `@openzeppelin/ui-components`, `@openzeppelin/ui-renderer`,
+  `@openzeppelin/ui-react`, `@openzeppelin/ui-storage`) are maintained in the
+  separate `openzeppelin-ui` monorepo and consumed via npm.
+- The builder app (`packages/builder`) and adapter packages (`packages/adapter-*`)
+  remain in this repository.
 - All chain-specific logic, dependencies, and polyfills live exclusively in adapter
   packages (`packages/adapter-*`).
-- Adapters MUST implement `ContractAdapter` from
-  `packages/types/src/adapters/base.ts` and be instantiated with a `NetworkConfig`.
+- Adapters MUST implement `ContractAdapter` from `@openzeppelin/ui-types` and be
+  instantiated with a `NetworkConfig`.
 - The builder MUST resolve adapters through dynamic ecosystem registration via the
   ecosystem manager (`packages/builder/src/core/...`).
-- Chain-agnostic packages MUST NOT declare chain-specific dependencies.
+- Adapter packages MUST NOT declare chain-specific dependencies in chain-agnostic
+  imports; they own their network concerns.
 - Validation rules originate in the adapter interface; `isValidAddress(address:
 string, addressType?: string)` supports chain-specific behavior.
 - The EVM adapter is the reference implementation; all new adapters MUST mirror
@@ -38,7 +47,7 @@ string, addressType?: string)` supports chain-specific behavior.
 - TypeScript strictness, shared linting, and formatting rules apply across the
   monorepo.
 - `console` usage in source code is prohibited; use `logger` from
-  `@openzeppelin/ui-builder-utils` instead (exceptions only in tests, stories, or
+  `@openzeppelin/ui-utils` instead (exceptions only in tests, stories, or
   scripts).
 - Logging is disabled by default outside development; enable explicitly via
   `logger.configure({ enabled: true, level })`.
@@ -53,8 +62,9 @@ string, addressType?: string)` supports chain-specific behavior.
 - `pnpm` is the sole package manager; use `pnpm -r` for workspace commands.
 - Build outputs use `tsup` for bundling and `tsc --emitDeclarationOnly` for types,
   shipping both ESM and CJS where applicable.
-- Versioning relies on Changesets; CI publishes releases on merge to `main` after
-  tests, linting, and type checks pass.
+- Versioning relies on Changesets for the builder app and adapter packages; core
+  UI packages are versioned independently in the `openzeppelin-ui` repository.
+- CI publishes releases on merge to `main` after tests, linting, and type checks pass.
 - Shared configs (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`)
   are consumed via lightweight proxies.
 - Rationale: Maintains reproducible builds, consistent release automation, and
@@ -64,9 +74,8 @@ string, addressType?: string)` supports chain-specific behavior.
 
 - A single design system governs the builder, renderer, and exported apps.
 - Styling leverages Tailwind CSS v4 with shadcn/ui primitives via
-  `@openzeppelin/ui-builder-styles` and root configs.
-- Use the `cn` utility from `@openzeppelin/ui-builder-utils` for class
-  composition.
+  `@openzeppelin/ui-styles` and root configs.
+- Use the `cn` utility from `@openzeppelin/ui-utils` for class composition.
 - Prefer `lucide-react` icons; avoid emojis or inline raw SVG when reusable
   assets exist.
 - Apply standard Tailwind sizing tokens; use arbitrary values only with
@@ -85,8 +94,9 @@ string, addressType?: string)` supports chain-specific behavior.
 - Exported apps MUST build as standalone React + Vite bundles with runtime
   configuration supplied via `AppConfigService` (`public/app.config.json` for
   exports).
-- Local exports reference `workspace:*`; production exports consume published
-  `latest` versions.
+- Exported apps use `@openzeppelin/ui-*` packages (not `ui-builder-*`); version
+  strategy varies by environment: local uses `file:` for tarballs, staging uses
+  RC versions, production uses stable npm versions.
 - Feature flags gate functionality according to ecosystem readiness.
 - Rationale: Ensures reliable distribution channels and prevents regressions in
   consumer-facing exports.
@@ -111,10 +121,11 @@ string, addressType?: string)` supports chain-specific behavior.
   identify reusable modules (e.g., adapters, `AppConfigService`, transformers).
 - Introduce new modules only when reuse is impossible; document rationale and
   alternatives.
-- Extending `packages/types/src/adapters/base.ts` requires updating associated
-  lint rules (e.g., `no-extra-adapter-methods`).
-- Shared logic across adapters belongs in `packages/utils` or `packages/types`;
-  avoid duplication of chain-agnostic behavior.
+- Extending adapter interfaces in `@openzeppelin/ui-types` requires coordinating
+  with the `openzeppelin-ui` repository maintainers and updating associated lint
+  rules (e.g., `no-extra-adapter-methods`).
+- Shared logic across adapters belongs in `@openzeppelin/ui-utils` or
+  `@openzeppelin/ui-types`; avoid duplication of chain-agnostic behavior.
 - Document reuse decisions in specs and plans; reviewers enforce compliance with
   this principle.
 - Rationale: Minimizes redundancy, keeps abstractions aligned, and streamlines
@@ -122,11 +133,11 @@ string, addressType?: string)` supports chain-specific behavior.
 
 ## Additional Constraints
 
-- Do not add chain-specific code or polyfills to chain-agnostic packages;
+- Do not add chain-specific code or polyfills to chain-agnostic imports;
   adapters own network concerns.
 - Data schemas and shared types have a single source of truth in
-  `packages/types`.
-- Prefer shared utilities from `@openzeppelin/ui-builder-utils` (e.g., `logger`,
+  `@openzeppelin/ui-types`.
+- Prefer shared utilities from `@openzeppelin/ui-utils` (e.g., `logger`,
   `AppConfigService`, `cn`, ID generation); use lodash `debounce` when
   debouncing is required.
 - Avoid noisy logging; rely on structured, level-based logs only when
@@ -139,10 +150,17 @@ string, addressType?: string)` supports chain-specific behavior.
 
 - Use `pnpm` for all tasks (`pnpm dev`, `pnpm build`, `pnpm test`,
   `pnpm -r format:check`, `pnpm fix-all`).
+- **Local UI development**: Run `pnpm dev:local` to resolve `@openzeppelin/ui-*`
+  packages to local paths in `../openzeppelin-ui` via `.pnpmfile.cjs`. Run
+  `pnpm dev:npm` to switch back to npm packages. This keeps `package.json`
+  unchanged while enabling seamless local development.
+- **Docker testing**: Run `pnpm docker:dev` to build and run the Docker container
+  locally.
 - Commit messages follow Conventional Commits and pass commitlint; Commitizen
   (`pnpm commit`) is available.
 - Before opening a PR, ensure tests, type checks, and linting pass
-  workspace-wide; include a Changeset for public package changes.
+  workspace-wide; include a Changeset for public package changes (builder app
+  and adapters only).
 - Adapter contributions MUST follow the Adapter Architecture Guide:
   network-aware constructor, exports, ecosystem registration, strict interface
   compliance.
@@ -163,4 +181,4 @@ string, addressType?: string)` supports chain-specific behavior.
 - CI enforces compliance; PRs violating constitutional rules MUST be corrected
   before merge.
 
-**Version**: 1.2.2 | **Ratified**: 2025-09-17 | **Last Amended**: 2025-10-09
+**Version**: 1.3.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2026-01-06
