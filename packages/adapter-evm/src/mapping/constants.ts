@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/ui-types';
+import type { FieldType, TypeMappingInfo } from '@openzeppelin/ui-types';
 
 /**
  * EVM-specific type mapping to default form field types.
@@ -30,3 +30,28 @@ export const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   bytes: 'textarea',
   bytes32: 'text',
 };
+
+/**
+ * EVM dynamic type patterns handled through pattern matching.
+ */
+const EVM_DYNAMIC_PATTERNS: TypeMappingInfo['dynamicPatterns'] = [
+  { name: 'array', syntax: 'T[]', mapsTo: 'array', description: 'Dynamic array of primitives' },
+  { name: 'fixed-array', syntax: 'T[N]', mapsTo: 'array', description: 'Fixed-size array' },
+  {
+    name: 'tuple-array',
+    syntax: 'tuple[]',
+    mapsTo: 'array-object',
+    description: 'Array of structs',
+  },
+  { name: 'tuple', syntax: 'tuple', mapsTo: 'object', description: 'Struct/tuple type' },
+];
+
+/**
+ * Returns complete type mapping information for EVM.
+ */
+export function getEvmTypeMappingInfo(): TypeMappingInfo {
+  return {
+    primitives: { ...EVM_TYPE_TO_FIELD_TYPE },
+    dynamicPatterns: EVM_DYNAMIC_PATTERNS,
+  };
+}

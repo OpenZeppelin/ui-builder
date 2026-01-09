@@ -6,6 +6,7 @@ import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-types
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 
 import { EvmAdapter } from '../adapter';
+import { EVM_TYPE_TO_FIELD_TYPE } from '../mapping';
 import { parseEvmInput as parseEvmInputFunction } from '../transform';
 
 // Mock FunctionParameter type helper
@@ -463,4 +464,69 @@ describe('EvmAdapter Output Formatting', () => {
   });
 
   // Potential TODO: Add test for error during stringifyWithBigInt if possible (e.g., circular refs, though unlikely here)
+});
+
+// --- getTypeMappingInfo Tests ---
+describe('EvmAdapter getTypeMappingInfo', () => {
+  let adapter: EvmAdapter;
+
+  beforeEach(() => {
+    adapter = new EvmAdapter(mockEvmNetworkConfig);
+  });
+
+  it('should return TypeMappingInfo with primitives and dynamicPatterns', () => {
+    const info = adapter.getTypeMappingInfo();
+    expect(info).toHaveProperty('primitives');
+    expect(info).toHaveProperty('dynamicPatterns');
+    expect(typeof info.primitives).toBe('object');
+    expect(Array.isArray(info.dynamicPatterns)).toBe(true);
+  });
+
+  it('should return primitives matching EVM_TYPE_TO_FIELD_TYPE constant', () => {
+    const info = adapter.getTypeMappingInfo();
+    const expectedTypes = Object.keys(EVM_TYPE_TO_FIELD_TYPE);
+    expect(Object.keys(info.primitives)).toEqual(expectedTypes);
+  });
+
+  it('should include expected EVM primitive types in primitives', () => {
+    const { primitives } = adapter.getTypeMappingInfo();
+    // Core EVM primitive types
+    expect(primitives).toHaveProperty('address');
+    expect(primitives).toHaveProperty('bool');
+    expect(primitives).toHaveProperty('string');
+    expect(primitives).toHaveProperty('bytes');
+    expect(primitives).toHaveProperty('bytes32');
+    // Integer types
+    expect(primitives).toHaveProperty('uint256');
+    expect(primitives).toHaveProperty('int256');
+  });
+
+  it('should NOT include dynamic types in primitives', () => {
+    const { primitives } = adapter.getTypeMappingInfo();
+    Object.keys(primitives).forEach((type) => {
+      expect(type).not.toMatch(/\[\]$/); // No array types
+      expect(type).not.toMatch(/^tuple/); // No tuple types
+    });
+  });
+
+  it('should include dynamic patterns for arrays and tuples', () => {
+    const { dynamicPatterns } = adapter.getTypeMappingInfo();
+    const patternNames = dynamicPatterns.map((p) => p.name);
+    expect(patternNames).toContain('array');
+    expect(patternNames).toContain('tuple');
+    expect(patternNames).toContain('tuple-array');
+  });
+
+  it('should have properly structured dynamic patterns', () => {
+    const { dynamicPatterns } = adapter.getTypeMappingInfo();
+    dynamicPatterns.forEach((pattern) => {
+      expect(pattern).toHaveProperty('name');
+      expect(pattern).toHaveProperty('syntax');
+      expect(pattern).toHaveProperty('mapsTo');
+      expect(pattern).toHaveProperty('description');
+      expect(typeof pattern.name).toBe('string');
+      expect(typeof pattern.syntax).toBe('string');
+      expect(typeof pattern.description).toBe('string');
+    });
+  });
 });

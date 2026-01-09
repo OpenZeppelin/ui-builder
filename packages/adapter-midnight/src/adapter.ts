@@ -21,6 +21,7 @@ import type {
   RelayerDetailsRich,
   RuntimeSecretPropertyInput,
   TransactionStatusUpdate,
+  TypeMappingInfo,
   UiKitConfiguration,
 } from '@openzeppelin/ui-types';
 import { isMidnightNetworkConfig } from '@openzeppelin/ui-types';
@@ -34,6 +35,7 @@ import {
 } from './configuration/network-services';
 import { getMidnightCurrentBlock } from './configuration/rpc';
 import { getMidnightExportBootstrapFiles } from './export/bootstrap';
+import { getMidnightTypeMappingInfo } from './mapping/constants';
 import { generateMidnightDefaultField } from './mapping/field-generator';
 import {
   getMidnightCompatibleFieldTypes,
@@ -557,6 +559,13 @@ export class MidnightAdapter implements ContractAdapter {
     bootstrapSource?: Record<string, unknown>;
   }> {
     return prepareArtifacts(args.functionId, args.currentArtifacts);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getTypeMappingInfo(): TypeMappingInfo {
+    return getMidnightTypeMappingInfo();
   }
 }
 

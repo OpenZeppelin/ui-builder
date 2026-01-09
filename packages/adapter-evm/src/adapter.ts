@@ -23,6 +23,7 @@ import type {
   RelayerDetailsRich,
   TransactionStatusUpdate,
   TxStatus,
+  TypeMappingInfo,
   UiKitConfiguration,
   UserExplorerConfig,
   UserRpcProviderConfig,
@@ -60,6 +61,7 @@ import {
 import {
   generateEvmDefaultField,
   getEvmCompatibleFieldTypes,
+  getEvmTypeMappingInfo,
   mapEvmParamTypeToFieldType,
 } from './mapping';
 import { isEvmViewFunction, queryEvmViewFunction } from './query';
@@ -782,6 +784,13 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
    */
   public hashContractDefinition(definition: string): string {
     return abiComparisonService.hashAbi(definition);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getTypeMappingInfo(): TypeMappingInfo {
+    return getEvmTypeMappingInfo();
   }
 }
 

@@ -1,9 +1,9 @@
-import type { EvmNetworkConfig } from '@openzeppelin/ui-types';
+import type { TypedEvmNetworkConfig } from '../../types';
 
 /**
  * Mock EVM Network Configuration for testing purposes.
  */
-export const mockEvmNetworkConfig: EvmNetworkConfig = {
+export const mockEvmNetworkConfig: TypedEvmNetworkConfig = {
   id: 'test-evm-mocknet',
   exportConstName: 'mockEvmNetworkConfig',
   name: 'Test EVM Mocknet',
@@ -15,6 +15,7 @@ export const mockEvmNetworkConfig: EvmNetworkConfig = {
   rpcUrl: 'http://localhost:8545', // Mock RPC URL
   nativeCurrency: { name: 'TestETH', symbol: 'TETH', decimals: 18 },
   apiUrl: 'https://api.etherscan.io/api', // Mock API URL
+  viemChain: undefined, // Optional viem Chain object
 };
 
 // Add mocks for other ecosystems here if needed later

@@ -13,6 +13,7 @@ import type {
   RelayerDetails,
   RelayerDetailsRich,
   SolanaNetworkConfig,
+  TypeMappingInfo,
   UiKitConfiguration,
   UserRpcProviderConfig,
   WalletConnectionStatus,
@@ -38,6 +39,7 @@ import {
 import {
   generateSolanaDefaultField,
   getSolanaCompatibleFieldTypes,
+  getSolanaTypeMappingInfo,
   mapSolanaParamTypeToFieldType,
 } from './mapping';
 import { isSolanaViewFunction, querySolanaViewFunction } from './query';
@@ -306,6 +308,13 @@ export class SolanaAdapter implements ContractAdapter {
   }> {
     // TODO: Implement Solana-specific RPC validation when needed
     return testSolanaRpcConnection(rpcConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getTypeMappingInfo(): TypeMappingInfo {
+    return getSolanaTypeMappingInfo();
   }
 }
 
