@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { STELLAR_TYPE_TO_FIELD_TYPE } from '../../src/mapping/constants';
 import {
   getStellarCompatibleFieldTypes,
   mapStellarParameterTypeToFieldType,
@@ -208,6 +209,64 @@ describe('getStellarCompatibleFieldTypes', () => {
     it('should default to text for unknown types', () => {
       const result = getStellarCompatibleFieldTypes('UnknownType');
       expect(result).toEqual(['text']);
+    });
+  });
+});
+
+describe('STELLAR_TYPE_TO_FIELD_TYPE constant', () => {
+  it('should contain expected Stellar primitive types', () => {
+    const primitiveTypes = Object.keys(STELLAR_TYPE_TO_FIELD_TYPE);
+
+    // Core Stellar/Soroban primitive types
+    expect(primitiveTypes).toContain('Address');
+    expect(primitiveTypes).toContain('Bool');
+    expect(primitiveTypes).toContain('ScString');
+    expect(primitiveTypes).toContain('ScSymbol');
+    expect(primitiveTypes).toContain('Bytes');
+
+    // Unsigned integers
+    expect(primitiveTypes).toContain('U32');
+    expect(primitiveTypes).toContain('U64');
+    expect(primitiveTypes).toContain('U128');
+    expect(primitiveTypes).toContain('U256');
+
+    // Signed integers
+    expect(primitiveTypes).toContain('I32');
+    expect(primitiveTypes).toContain('I64');
+    expect(primitiveTypes).toContain('I128');
+    expect(primitiveTypes).toContain('I256');
+  });
+
+  it('should NOT include dynamic types like Vec or Map', () => {
+    const primitiveTypes = Object.keys(STELLAR_TYPE_TO_FIELD_TYPE);
+
+    primitiveTypes.forEach((type) => {
+      // Should not include generic type wrappers
+      expect(type).not.toMatch(/^Vec</);
+      expect(type).not.toMatch(/^Map</);
+      expect(type).not.toMatch(/^Option</);
+    });
+  });
+
+  it('should map all types to valid FieldType values', () => {
+    const validFieldTypes = [
+      'text',
+      'textarea',
+      'number',
+      'bigint',
+      'checkbox',
+      'select',
+      'radio',
+      'blockchain-address',
+      'bytes',
+      'array',
+      'array-object',
+      'object',
+      'map',
+    ];
+
+    Object.values(STELLAR_TYPE_TO_FIELD_TYPE).forEach((fieldType) => {
+      expect(validFieldTypes).toContain(fieldType);
     });
   });
 });

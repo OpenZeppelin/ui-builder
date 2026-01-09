@@ -90,6 +90,7 @@ module.exports = {
       'getArtifactPersistencePolicy',
       'prepareArtifactsForFunction',
       'getAccessControlService',
+      'getTypeMappingInfo',
     ];
 
     // Common standard methods and properties that are allowed

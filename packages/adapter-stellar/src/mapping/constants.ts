@@ -1,4 +1,4 @@
-import type { FieldType } from '@openzeppelin/ui-types';
+import type { FieldType, TypeMappingInfo } from '@openzeppelin/ui-types';
 
 /**
  * Stellar/Soroban-specific type mapping to default form field types.
@@ -49,3 +49,41 @@ export const STELLAR_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   // Instance types (for compatibility)
   Instance: 'object',
 };
+
+/**
+ * Stellar dynamic type patterns handled through pattern matching.
+ */
+const STELLAR_DYNAMIC_PATTERNS: TypeMappingInfo['dynamicPatterns'] = [
+  { name: 'vec', syntax: 'Vec<T>', mapsTo: null, description: 'Array (maps based on inner type)' },
+  { name: 'map', syntax: 'Map<K,V>', mapsTo: 'map', description: 'Key-value map' },
+  {
+    name: 'option',
+    syntax: 'Option<T>',
+    mapsTo: 'unwrap',
+    description: 'Optional, resolves to inner type',
+  },
+  {
+    name: 'result',
+    syntax: 'Result<T>',
+    mapsTo: 'unwrap',
+    description: 'Result, resolves to inner type',
+  },
+  { name: 'bytes-n', syntax: 'BytesN<N>', mapsTo: 'bytes', description: 'Fixed-size byte array' },
+  {
+    name: 'struct',
+    syntax: 'StructName',
+    mapsTo: 'object',
+    description: 'Custom struct (PascalCase)',
+  },
+  { name: 'enum', syntax: 'EnumName', mapsTo: 'select', description: 'Enum type' },
+];
+
+/**
+ * Returns complete type mapping information for Stellar.
+ */
+export function getStellarTypeMappingInfo(): TypeMappingInfo {
+  return {
+    primitives: { ...STELLAR_TYPE_TO_FIELD_TYPE },
+    dynamicPatterns: STELLAR_DYNAMIC_PATTERNS,
+  };
+}

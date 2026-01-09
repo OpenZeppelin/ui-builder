@@ -88,6 +88,18 @@ const mockAdapterInstance: ContractAdapter = {
   getRelayers: vi.fn().mockResolvedValue([]),
   getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
   getNetworkServiceForms: vi.fn(() => []),
+  getCurrentBlock: vi.fn().mockResolvedValue(12345),
+  getTypeMappingInfo: vi.fn(() => ({
+    primitives: {
+      address: 'blockchain-address',
+      uint256: 'bigint',
+      bool: 'checkbox',
+      string: 'text',
+    },
+    dynamicPatterns: [
+      { name: 'array', syntax: 'T[]', mapsTo: 'array', description: 'Dynamic array' },
+    ],
+  })),
 };
 
 describe('FormSchemaFactory', () => {

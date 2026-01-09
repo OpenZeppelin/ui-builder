@@ -22,6 +22,7 @@ import type {
   StellarNetworkConfig,
   TransactionStatusUpdate,
   TxStatus,
+  TypeMappingInfo,
   UiKitConfiguration,
   UserRpcProviderConfig,
   WalletConnectionStatus,
@@ -52,6 +53,7 @@ import {
 import {
   generateStellarDefaultField,
   getStellarCompatibleFieldTypes,
+  getStellarTypeMappingInfo,
   mapStellarParameterTypeToFieldType,
 } from './mapping';
 import {
@@ -635,6 +637,13 @@ export class StellarAdapter implements ContractAdapter {
    */
   public getAccessControlService(): AccessControlService {
     return this.accessControlService;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getTypeMappingInfo(): TypeMappingInfo {
+    return getStellarTypeMappingInfo();
   }
 }
 
