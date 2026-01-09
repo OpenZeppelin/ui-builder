@@ -16,9 +16,9 @@
 // Mock declarations must come before imports
 import { describe, expect, it, vi } from 'vitest';
 
+import type { RendererConfig } from '@openzeppelin/ui-renderer';
 import { Ecosystem } from '@openzeppelin/ui-types';
 
-import type { RendererConfig } from '../../../../renderer/dist';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 

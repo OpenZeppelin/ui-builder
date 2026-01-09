@@ -91,13 +91,18 @@ const mockAdapterInstance: ContractAdapter = {
   getCurrentBlock: vi.fn().mockResolvedValue(12345),
   getTypeMappingInfo: vi.fn(() => ({
     primitives: {
-      address: 'blockchain-address',
-      uint256: 'bigint',
-      bool: 'checkbox',
-      string: 'text',
+      address: 'blockchain-address' as FieldType,
+      uint256: 'bigint' as FieldType,
+      bool: 'checkbox' as FieldType,
+      string: 'text' as FieldType,
     },
     dynamicPatterns: [
-      { name: 'array', syntax: 'T[]', mapsTo: 'array', description: 'Dynamic array' },
+      {
+        name: 'array',
+        syntax: 'T[]',
+        mapsTo: 'array' as FieldType,
+        description: 'Dynamic array',
+      },
     ],
   })),
 };
