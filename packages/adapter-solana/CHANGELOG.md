@@ -1,5 +1,17 @@
 # @openzeppelin/transaction-form-adapter-solana
 
+## 1.2.0
+
+### Minor Changes
+
+- [#300](https://github.com/OpenZeppelin/ui-builder/pull/300) [`b10bfe0`](https://github.com/OpenZeppelin/ui-builder/commit/b10bfe0c3367898282eba2c66417ac26a507746b) Thanks [@pasevin](https://github.com/pasevin)! - Implement `getTypeMappingInfo()` method across all adapters
+
+  Each adapter now returns complete type mapping information including:
+  - Primitive types with their default field type mappings
+  - Dynamic type patterns (arrays, generics, tuples, etc.) with descriptions
+
+  This enables consuming applications to programmatically discover all adapter type capabilities at runtime.
+
 ## 1.0.0
 
 ### Minor Changes

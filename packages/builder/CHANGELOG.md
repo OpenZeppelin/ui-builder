@@ -1,5 +1,15 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.12.9
+
+### Patch Changes
+
+- Updated dependencies [[`b10bfe0`](https://github.com/OpenZeppelin/ui-builder/commit/b10bfe0c3367898282eba2c66417ac26a507746b)]:
+  - @openzeppelin/ui-builder-adapter-evm@1.2.0
+  - @openzeppelin/ui-builder-adapter-stellar@1.2.0
+  - @openzeppelin/ui-builder-adapter-solana@1.2.0
+  - @openzeppelin/ui-builder-adapter-midnight@1.2.0
+
 ## 0.12.8
 
 ### Patch Changes
