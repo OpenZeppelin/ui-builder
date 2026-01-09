@@ -100,7 +100,7 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
       "use-sync-external-store": "^1.2.0",
