@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@openzeppelin/relayer-sdk": "1.4.0",
-    "@openzeppelin/ui-components": "^1.0.3",
+    "@openzeppelin/ui-components": "^1.0.4",
     "@openzeppelin/ui-react": "^1.0.0",
     "@openzeppelin/ui-types": "^1.1.0",
     "@openzeppelin/ui-utils": "^1.0.0",
