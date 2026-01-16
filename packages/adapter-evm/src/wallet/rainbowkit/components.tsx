@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@openzeppelin/ui-components';
 import type { BaseComponentProps } from '@openzeppelin/ui-types';
-import { cn, logger } from '@openzeppelin/ui-utils';
+import { cn, getWalletButtonSizeProps, logger } from '@openzeppelin/ui-utils';
 
 import { CustomConnectButton } from '../components';
 import { WagmiProviderInitializedContext } from '../context/wagmi-context';
@@ -79,14 +79,16 @@ export const RainbowKitConnectButton: React.FC<BaseComponentProps> = (props) => 
     };
   }, []); // Effect for dynamic import runs once
 
+  const sizeProps = getWalletButtonSizeProps(props.size);
+
   const renderLoadingPlaceholder = (message: string) => (
     <Button
       disabled={true}
-      variant="outline"
-      size="sm"
-      className={cn('h-8 px-2 text-xs', props.className)}
+      variant={props.variant || 'outline'}
+      size={sizeProps.size}
+      className={cn(sizeProps.className, props.fullWidth && 'w-full', props.className)}
     >
-      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+      <Loader2 className={cn(sizeProps.iconSize, 'animate-spin mr-1.5')} />
       {message}
     </Button>
   );
