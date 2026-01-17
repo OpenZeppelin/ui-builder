@@ -2,8 +2,8 @@ import { Loader2, Wallet } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@openzeppelin/ui-components';
-import type { BaseComponentProps } from '@openzeppelin/ui-types';
-import { cn } from '@openzeppelin/ui-utils';
+import type { BaseComponentProps, WalletComponentSize } from '@openzeppelin/ui-types';
+import { cn, getWalletButtonSizeProps } from '@openzeppelin/ui-utils';
 
 import { useAccount, useConnect } from '../../hooks/facade-hooks';
 import { SafeMidnightComponent } from '../../utils/SafeMidnightComponent';
@@ -18,12 +18,22 @@ export interface ConnectButtonProps extends BaseComponentProps {
 
 export const ConnectButton: React.FC<ConnectButtonProps> = ({
   className,
+  size,
+  variant,
+  fullWidth,
   hideWhenConnected = true,
 }) => {
+  const sizeProps = getWalletButtonSizeProps(size);
+
   const unavailableButton = (
-    <div className={cn('flex items-center', className)}>
-      <Button disabled={true} variant="outline" size="sm" className="h-8 px-2 text-xs">
-        <Wallet className="size-3.5 mr-1" />
+    <div className={cn('flex items-center', fullWidth && 'w-full', className)}>
+      <Button
+        disabled={true}
+        variant={variant || 'outline'}
+        size={sizeProps.size}
+        className={cn(sizeProps.className, fullWidth && 'w-full')}
+      >
+        <Wallet className={cn(sizeProps.iconSize, 'mr-1')} />
         Wallet Unavailable
       </Button>
     </div>
@@ -31,7 +41,13 @@ export const ConnectButton: React.FC<ConnectButtonProps> = ({
 
   return (
     <SafeMidnightComponent fallback={unavailableButton}>
-      <ConnectButtonContent className={className} hideWhenConnected={hideWhenConnected} />
+      <ConnectButtonContent
+        className={className}
+        size={size}
+        variant={variant}
+        fullWidth={fullWidth}
+        hideWhenConnected={hideWhenConnected}
+      />
     </SafeMidnightComponent>
   );
 };
@@ -41,10 +57,15 @@ export const ConnectButton: React.FC<ConnectButtonProps> = ({
  */
 const ConnectButtonContent: React.FC<{
   className?: string;
+  size?: WalletComponentSize;
+  variant?: BaseComponentProps['variant'];
+  fullWidth?: boolean;
   hideWhenConnected: boolean;
-}> = ({ className, hideWhenConnected }) => {
+}> = ({ className, size, variant, fullWidth, hideWhenConnected }) => {
   const { isConnected } = useAccount();
   const { connect, isConnecting, connectors, error: connectError } = useConnect();
+
+  const sizeProps = getWalletButtonSizeProps(size);
 
   const handleConnectClick = () => {
     if (connect && !isConnected) {
@@ -70,19 +91,19 @@ const ConnectButtonContent: React.FC<{
   }
 
   return (
-    <div className={cn('flex flex-col items-start gap-1', className)}>
-      <div className="flex items-center">
+    <div className={cn('flex flex-col items-start gap-1', fullWidth && 'w-full', className)}>
+      <div className={cn('flex items-center', fullWidth && 'w-full')}>
         <Button
           onClick={handleConnectClick}
           disabled={showButtonLoading || isConnected || !hasWallet}
-          variant="outline"
-          size="sm"
-          className="h-8 px-2 text-xs"
+          variant={variant || 'outline'}
+          size={sizeProps.size}
+          className={cn(sizeProps.className, fullWidth && 'w-full')}
         >
           {showButtonLoading ? (
-            <Loader2 className="size-3.5 animate-spin mr-1" />
+            <Loader2 className={cn(sizeProps.iconSize, 'animate-spin mr-1')} />
           ) : (
-            <Wallet className="size-3.5 mr-1" />
+            <Wallet className={cn(sizeProps.iconSize, 'mr-1')} />
           )}
           {buttonText}
         </Button>

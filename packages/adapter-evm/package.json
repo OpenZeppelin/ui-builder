@@ -49,9 +49,9 @@
   "dependencies": {
     "@openzeppelin/relayer-sdk": "1.4.0",
     "@openzeppelin/ui-components": "^1.0.4",
-    "@openzeppelin/ui-react": "^1.0.0",
-    "@openzeppelin/ui-types": "^1.1.0",
-    "@openzeppelin/ui-utils": "^1.0.0",
+    "@openzeppelin/ui-react": "^1.1.0",
+    "@openzeppelin/ui-types": "^1.2.0",
+    "@openzeppelin/ui-utils": "^1.1.0",
     "@wagmi/connectors": "5.7.13",
     "@wagmi/core": "^2.20.3",
     "@web3icons/react": "^4.0.19",
