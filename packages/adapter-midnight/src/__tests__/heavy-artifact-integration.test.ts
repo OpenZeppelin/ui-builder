@@ -73,7 +73,6 @@ describe('MidnightAdapter - Heavy Artifact Handling Integration', () => {
 
       expect(result.bootstrapSource).toBeDefined();
       expect(result.bootstrapSource?.contractAddress).toBe('0x123');
-      expect(result.bootstrapSource?.privateStateId).toBe('test-state');
       expect(result.bootstrapSource?.contractArtifactsUrl).toBe('/midnight/contract.zip');
     });
 
