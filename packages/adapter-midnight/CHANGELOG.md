@@ -1,5 +1,19 @@
 # Midnight Adapter Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- [#304](https://github.com/OpenZeppelin/ui-builder/pull/304) [`daacd99`](https://github.com/OpenZeppelin/ui-builder/commit/daacd9982493816495b6d3363a4a649dc56a1447) Thanks [@pasevin](https://github.com/pasevin)! - Implement wallet component customization props
+
+  All adapters now support the following `BaseComponentProps` on wallet components (`ConnectButton`, `AccountDisplay`, `NetworkSwitcher`):
+  - `size`: Control component size (`'sm' | 'default' | 'lg' | 'xl'`)
+  - `variant`: Control visual style (`'default' | 'outline' | 'ghost' | 'secondary'`)
+  - `fullWidth`: Expand component to fill container width
+  - `className`: Additional CSS classes for custom styling
+
+  This enables developers to customize wallet UI components to match their application design.
+
 ## 1.2.0
 
 ### Minor Changes
