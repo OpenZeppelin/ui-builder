@@ -76,7 +76,7 @@ jobs:
         id: check-changes
         run: |
           # Check if either versions.ts or snapshot files have changed
-          if git diff --exit-code packages/builder/src/export/versions.ts packages/builder/src/export/__tests__/__snapshots__/; then
+          if git diff --exit-code apps/builder/src/export/versions.ts apps/builder/src/export/__tests__/__snapshots__/; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -94,6 +94,6 @@ jobs:
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           git checkout "$BRANCH_NAME"
           # Add both versions.ts and any updated snapshot files
-          git add packages/builder/src/export/versions.ts packages/builder/src/export/__tests__/__snapshots__/
+          git add apps/builder/src/export/versions.ts apps/builder/src/export/__tests__/__snapshots__/
           git commit -m "chore: update export versions and test snapshots"
           git push origin "$BRANCH_NAME"

@@ -358,7 +358,7 @@ graph LR
 
 ```bash
 # Check current versions
-cat packages/builder/src/export/versions.ts
+cat apps/builder/src/export/versions.ts
 
 # Test local export
 pnpm export-app export --env local
