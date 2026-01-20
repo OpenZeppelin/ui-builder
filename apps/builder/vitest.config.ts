@@ -10,18 +10,21 @@ import { sharedVitestConfig } from '../../vitest.shared.config';
  * This is needed because Vite 7.2+ has stricter resolution for dynamic imports.
  */
 const adapterPackagePaths: Record<string, string> = {
-  '@openzeppelin/ui-builder-adapter-evm': path.resolve(__dirname, '../adapter-evm/dist/index.js'),
+  '@openzeppelin/ui-builder-adapter-evm': path.resolve(
+    __dirname,
+    '../../packages/adapter-evm/dist/index.js'
+  ),
   '@openzeppelin/ui-builder-adapter-solana': path.resolve(
     __dirname,
-    '../adapter-solana/dist/index.js'
+    '../../packages/adapter-solana/dist/index.js'
   ),
   '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
     __dirname,
-    '../adapter-stellar/dist/index.js'
+    '../../packages/adapter-stellar/dist/index.js'
   ),
   '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
     __dirname,
-    '../adapter-midnight/dist/index.js'
+    '../../packages/adapter-midnight/dist/index.js'
   ),
 };
 
@@ -145,19 +148,19 @@ export default defineConfig(
         // Adapter packages - required for export tests that use ecosystemManager
         '@openzeppelin/ui-builder-adapter-evm': path.resolve(
           __dirname,
-          '../adapter-evm/dist/index.js'
+          '../../packages/adapter-evm/dist/index.js'
         ),
         '@openzeppelin/ui-builder-adapter-solana': path.resolve(
           __dirname,
-          '../adapter-solana/dist/index.js'
+          '../../packages/adapter-solana/dist/index.js'
         ),
         '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
           __dirname,
-          '../adapter-stellar/dist/index.js'
+          '../../packages/adapter-stellar/dist/index.js'
         ),
         '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
           __dirname,
-          '../adapter-midnight/dist/index.js'
+          '../../packages/adapter-midnight/dist/index.js'
         ),
       },
       dedupe: [
