@@ -6,7 +6,7 @@
  * created at runtime by Vite plugins.
  *
  * For detailed documentation on this approach, see:
- * packages/builder/src/docs/cross-package-imports.md
+ * apps/builder/src/docs/cross-package-imports.md
  *
  * HOW TO ADD A NEW VIRTUAL MODULE:
  *
@@ -27,7 +27,7 @@
  * even though Vite can resolve it at runtime through the plugin.
  *
  * USED BY:
- * This module is imported by packages/builder/src/export/PackageManager.ts to access
+ * This module is imported by apps/builder/src/export/PackageManager.ts to access
  * the renderer configuration for dependency management during form export.
  */
 declare module 'virtual:renderer-config' {

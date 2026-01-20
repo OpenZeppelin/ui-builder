@@ -24,7 +24,7 @@ import {
  * Auto-save hook with debouncing and duplicate operation prevention.
  * See documentation for complete usage patterns and architecture details.
  *
- * @see {@link packages/builder/docs/state-management.md | Auto-save Documentation}
+ * @see {@link apps/builder/docs/state-management.md | Auto-save Documentation}
  */
 /**
  * Handle auto-save errors with consistent logging and user feedback

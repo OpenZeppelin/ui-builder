@@ -32,7 +32,7 @@ logger.warn = (msg, options) => {
  * configuration from another package.
  *
  * For detailed documentation on this approach, see:
- * packages/builder/src/docs/cross-package-imports.md
+ * apps/builder/src/docs/cross-package-imports.md
  */
 
 /**

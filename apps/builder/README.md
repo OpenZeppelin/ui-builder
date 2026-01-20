@@ -48,7 +48,7 @@ This package uses the centralized styling system from the `packages/styles` pack
 - **Component Library**: Built on shadcn/ui with consistent, accessible components
 - **Dark Mode**: Built-in dark mode support
 
-For more details on the styling system, see the [Styles README](../styles/README.md).
+For more details on the styling system, see the [Styles README](../../packages/styles/README.md).
 
 ## Type System
 

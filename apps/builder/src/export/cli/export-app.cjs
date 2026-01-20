@@ -42,8 +42,8 @@ function findMonorepoRoot(startDir) {
 function resolveTargetDir(targetDirInput, rootDir) {
   const inputPath = targetDirInput || '.';
   debug(`Initial target directory: ${inputPath}`);
-  if (inputPath.startsWith('./packages/builder') && process.cwd().includes('/packages/builder')) {
-    const adjusted = inputPath.replace('./packages/builder', '.');
+  if (inputPath.startsWith('./apps/builder') && process.cwd().includes('/apps/builder')) {
+    const adjusted = inputPath.replace('./apps/builder', '.');
     debug(`Adjusted path from: ${inputPath} to: ${adjusted}`);
     return path.resolve(process.cwd(), adjusted);
   }
@@ -193,7 +193,7 @@ function exportAppSimple(options) {
     };
 
     console.log(`${colors.blue}Generating export...${colors.reset}\n`);
-    const builderPackageDir = path.join(monorepoRoot, 'packages/builder');
+    const builderPackageDir = path.join(monorepoRoot, 'apps/builder');
     const testPath = path.join(
       builderPackageDir,
       'src/export/__tests__/export-cli-wrapper.test.ts'

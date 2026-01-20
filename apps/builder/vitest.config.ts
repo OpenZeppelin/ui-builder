@@ -35,7 +35,7 @@ const adapterPackagePaths: Record<string, string> = {
  * This should mirror the virtual modules defined in vite.config.ts
  *
  * For detailed documentation on this approach, see:
- * packages/builder/src/docs/cross-package-imports.md
+ * apps/builder/src/docs/cross-package-imports.md
  */
 const virtualModuleMocks: Record<string, string> = {
   // Module ID -> mock implementation

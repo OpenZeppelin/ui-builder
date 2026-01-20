@@ -49,7 +49,7 @@ const virtualFiles: Record<string, string> = {
   'global-css-content': 'node_modules/@openzeppelin/ui-styles/global.css',
   // Template-specific CSS (add template name if multiple templates have different styles.css)
   'template-vite-styles-css-content':
-    'packages/builder/src/export/templates/typescript-react-vite/src/styles.css',
+    'apps/builder/src/export/templates/typescript-react-vite/src/styles.css',
   // Core Type Files (added)
   'contract-schema-content': 'packages/types/src/contracts/schema.ts',
 };
@@ -59,7 +59,7 @@ const virtualFiles: Record<string, string> = {
  */
 export function virtualContentLoaderPlugin(): Plugin {
   // Resolve the monorepo root directory relative to this plugin file
-  // Assumes this file is in packages/builder/vite-plugins/
+  // Assumes this file is in apps/builder/vite-plugins/
   const monorepoRoot = path.resolve(__dirname, '../../..');
 
   return {

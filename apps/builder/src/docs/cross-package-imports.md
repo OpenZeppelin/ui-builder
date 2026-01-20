@@ -4,7 +4,7 @@ This guide explains how to import files across package boundaries in our monorep
 
 ## The Problem
 
-When using `import.meta.glob` to dynamically import files across package boundaries (e.g., from `packages/builder` to `packages/renderer`), Vite's development server has limitations that prevent it from correctly resolving these imports. This results in errors like:
+When using `import.meta.glob` to dynamically import files across package boundaries (e.g., from `apps/builder` to `packages/renderer`), Vite's development server has limitations that prevent it from correctly resolving these imports. This results in errors like:
 
 ```
 Export failed: No renderer configuration file found
@@ -61,7 +61,7 @@ resolve: {
 
 ### 2. Add Type Declarations
 
-Add a type declaration for your virtual module in `packages/builder/src/types/virtual-modules.d.ts`:
+Add a type declaration for your virtual module in `apps/builder/src/types/virtual-modules.d.ts`:
 
 ```typescript
 declare module 'virtual:my-new-module' {
@@ -77,7 +77,7 @@ declare module 'virtual:my-new-module' {
 
 ### 3. Add Test Support
 
-Add a mock implementation for tests in `packages/builder/vitest.config.ts`:
+Add a mock implementation for tests in `apps/builder/vitest.config.ts`:
 
 ```typescript
 const virtualModuleMocks: Record<string, string> = {

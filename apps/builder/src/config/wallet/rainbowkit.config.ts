@@ -1,4 +1,4 @@
-// packages/builder/src/config/wallet/rainbowkit.config.ts
+// apps/builder/src/config/wallet/rainbowkit.config.ts
 import { type RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 // Import the custom configuration types from the EVM adapter

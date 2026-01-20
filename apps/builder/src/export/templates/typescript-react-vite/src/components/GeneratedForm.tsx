@@ -4,7 +4,7 @@
  * ==========================================================================
  * This file serves as a structural placeholder in the base template.
  * Its entire content will be **generated and overwritten** during the export process
- * based on the `packages/builder/src/export/codeTemplates/form-component.template.tsx` template
+ * based on the `apps/builder/src/export/codeTemplates/form-component.template.tsx` template
  * and the user's form configuration.
  *
  * The final generated file will be a React component that:

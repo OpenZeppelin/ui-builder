@@ -217,7 +217,7 @@ Planned improvements:
 
 ## Virtual Module Loading
 
-To reliably load files outside the `packages/builder` scope (like root configs or shared styles)
+To reliably load files outside the `apps/builder` scope (like root configs or shared styles)
 across different execution environments (Vite dev, Vite build, Vitest), we use custom Vite plugins:
 
 - **`vite-plugins/virtual-content-loader.ts`**: Loads the raw text content of specified files

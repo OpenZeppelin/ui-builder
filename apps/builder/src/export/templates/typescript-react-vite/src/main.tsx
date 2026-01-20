@@ -4,7 +4,7 @@
  * ==========================================================================
  * This file serves as a structural placeholder in the base template.
  * Its entire content will be **generated and overwritten** during the export process
- * based on the `packages/builder/src/export/codeTemplates/main.template.tsx` template
+ * based on the `apps/builder/src/export/codeTemplates/main.template.tsx` template
  * and the selected export options.
  *
  * The final generated file will:
