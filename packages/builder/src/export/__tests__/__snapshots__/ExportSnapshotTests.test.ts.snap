@@ -295,7 +295,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.3.0",
-    "@openzeppelin/ui-components": "^1.0.4",
+    "@openzeppelin/ui-components": "^1.1.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.0.2",
     "@openzeppelin/ui-types": "^1.2.0",
@@ -342,7 +342,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.3.0",
-    "@openzeppelin/ui-components": "^1.0.4",
+    "@openzeppelin/ui-components": "^1.1.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.0.2",
     "@openzeppelin/ui-types": "^1.2.0",
