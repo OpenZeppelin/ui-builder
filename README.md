@@ -139,16 +139,7 @@ Adapter implementation for Midnight. For more details, see the [Midnight Adapter
 
 The following packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository:
 
-| Package | Description |
-|---------|-------------|
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-react.svg)](https://www.npmjs.com/package/@openzeppelin/ui-react) **react** | Core React providers and hooks for wallet/adapter state management |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/ui-renderer) **renderer** | React components for transaction forms, contract state queries, and execution status |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-components.svg)](https://www.npmjs.com/package/@openzeppelin/ui-components) **components** | Shared UI primitives and form field components |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-storage.svg)](https://www.npmjs.com/package/@openzeppelin/ui-storage) **storage** | IndexedDB-based local storage services |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-types) **types** | Shared TypeScript type definitions |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-styles.svg)](https://www.npmjs.com/package/@openzeppelin/ui-styles) **styles** | Centralized styling system with CSS variables |
-| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-utils.svg)](https://www.npmjs.com/package/@openzeppelin/ui-utils) **utils** | Framework-agnostic utility functions |
-
+See the **Shared Packages (External)** section above for the list of shared packages and their descriptions.
 ## Features
 
 - Chain-agnostic architecture supporting multiple blockchain ecosystems
