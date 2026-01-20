@@ -1,0 +1,69 @@
+@import 'tailwindcss';
+
+/*
+  Tell Tailwind to scan @openzeppelin npm packages for class names.
+  These packages contain compiled JS files with Tailwind classes that
+  need to be included in the final CSS output.
+*/
+@source "../node_modules/@openzeppelin";
+
+@import './styles/global.css';
+
+/* 
+  Base styles for the exported form application
+  This file will be included in the final export
+  TODO: review this file. Some of the styles should be taken from the global.css file
+*/
+
+/* Template-specific components */
+@layer components {
+  .app {
+    @apply flex min-h-screen flex-col;
+  }
+
+  .header {
+    @apply bg-background text-foreground;
+  }
+
+  .main {
+    @apply flex-1 py-8;
+  }
+
+  .container {
+    @apply mx-auto max-w-2xl px-4;
+  }
+
+  .footer {
+    @apply text-muted-foreground border-t px-4 py-6 text-center text-sm;
+  }
+
+  /* Form styles */
+  .form-placeholder,
+  .form-example {
+    @apply bg-muted/30 mb-4 rounded-lg p-6;
+  }
+
+  .form-field {
+    @apply mb-4;
+  }
+
+  .form-field label {
+    @apply mb-2 block font-medium;
+  }
+
+  .form-field input {
+    @apply w-full rounded-md border px-3 py-2 text-base;
+  }
+
+  .form-example {
+    @apply mt-6 border;
+  }
+
+  ul {
+    @apply my-4 pl-6;
+  }
+
+  li {
+    @apply mb-2;
+  }
+}

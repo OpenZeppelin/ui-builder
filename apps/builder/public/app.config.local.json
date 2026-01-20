@@ -1,0 +1,23 @@
+{
+  "globalServiceConfigs": {
+    "walletui": {
+      "stellar": {
+        "kitName": "custom",
+        "kitConfig": {}
+      },
+      "evm": {
+        "kitName": "custom",
+        "kitConfig": {
+          "showInjectedConnector": false,
+          "components": {
+            "exclude": ["NetworkSwitcher"]
+          }
+        }
+      },
+      "default": {
+        "kitName": "custom",
+        "kitConfig": {}
+      }
+    }
+  }
+}
