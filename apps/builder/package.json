@@ -123,6 +123,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/OpenZeppelin/ui-builder",
-    "directory": "packages/builder"
+    "directory": "apps/builder"
   }
 }
