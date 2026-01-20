@@ -8,11 +8,8 @@ This project is currently in development.
 
 [![CI](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/ci.yml)
 [![Coverage](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/coverage.yml)
-[![codecov](https://codecov.io/gh/OpenZeppelin/ui-builder/branch/main/graph/badge.svg)](https://codecov.io/gh/OpenZeppelin/ui-builder)
-[![Publish](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
+[![Release](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/publish.yml)
 [![Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependencies.yml)
-[![Dependency Review](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/dependency-review.yml)
-[![Update Dependencies](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml/badge.svg)](https://github.com/OpenZeppelin/ui-builder/actions/workflows/update-dependencies.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder/badge)](https://api.securityscorecards.dev/projects/github.com/OpenZeppelin/ui-builder)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
@@ -25,24 +22,14 @@ This project is currently in development.
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/OpenZeppelin/ui-builder/maintainability)
 
 ## Table of Contents
 
 - [Monorepo Structure](#monorepo-structure)
 - [Packages](#packages)
   - [Builder Package](#builder-package)
-  - [React Core Package](#react-core-package)
-  - [Renderer Package](#renderer-package)
-  - [UI Package](#ui-package)
-  - [Utils Package](#utils-package)
-  - [Types Package](#types-package)
-  - [Styles Package](#styles-package)
-  - [Storage Package](#storage-package)
-  - [EVM Adapter](#evm-adapter)
-  - [Solana Adapter](#solana-adapter)
-  - [Stellar Adapter](#stellar-adapter)
-  - [Midnight Adapter](#midnight-adapter)
+  - [Adapter Packages](#adapter-packages)
+  - [Shared Packages (External)](#shared-packages-external)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
@@ -89,17 +76,22 @@ This project is currently in development.
 This project is organized as a monorepo with the following packages:
 
 - **packages/builder**: The main application with the builder app UI and core logic.
-- **packages/react-core**: Contains core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions. Used by `@builder` and exported apps.
-- **packages/renderer**: The shared app rendering library (published to npm), responsible for dynamically rendering forms and other components based on schemas and an active adapter.
-- **packages/ui**: Contains shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components. Used by `builder` and `renderer` to ensure a consistent look and feel.
-- **packages/storage**: Local storage services built on IndexedDB for persisting contract UI configurations, providing history, auto-save, and import/export capabilities.
-- **packages/types**: Shared TypeScript type definitions for all packages (published to npm).
-- **packages/styles**: Centralized styling system with shared CSS variables and configurations.
-- **packages/utils**: Shared, framework-agnostic utility functions (e.g., logger, app configuration service).
 - **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
 - **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
 - **packages/adapter-stellar**: Adapter implementation for the Stellar network.
 - **packages/adapter-midnight**: Adapter implementation for the Midnight blockchain.
+
+### Shared Packages (External)
+
+Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) monorepo:
+
+- **react**: Core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions.
+- **renderer**: React components for rendering blockchain transaction forms, contract state displays, execution configuration, and transaction status tracking.
+- **components**: Shared React UI components, including basic primitives (buttons, inputs, cards) and specialized form field components.
+- **storage**: Local storage services built on IndexedDB for persisting contract UI configurations, providing history, auto-save, and import/export capabilities.
+- **types**: Shared TypeScript type definitions for all packages.
+- **styles**: Centralized styling system with shared CSS variables and configurations.
+- **utils**: Shared, framework-agnostic utility functions (e.g., logger, app configuration service).
 
 ## Packages
 
@@ -109,133 +101,53 @@ The main application with the builder UI, export system, and core logic.
 
 For more details, see the [Builder README](./packages/builder/README.md).
 
-### React Core Package
+### Adapter Packages
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-react-core.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-react-core)
-
-Core React providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing adapter and wallet state.
-
-For more details, see the [React Core README](./packages/react-core/README.md).
-
-### Renderer Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-renderer)
-
-The `renderer` package provides a reusable library for rendering transaction forms and other components. It's published to npm and can be used independently of the main application.
-
-Features:
-
-- Lightweight app rendering components
-- Framework-agnostic design
-- TypeScript support with full type definitions
-- Support for both ESM and CommonJS environments
-- Customizable styling options
-
-For more details, see the [Renderer README](./packages/renderer/README.md).
-
-### Types Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-types)
-
-The `types` package contains shared TypeScript type definitions for all packages in the ecosystem. It serves as the single source of truth for types used across the UI Builder.
-
-Features:
-
-- Centralized type definitions
-- Organized namespaces for contracts, adapters, and forms
-- Clear separation of concerns
-- TypeScript project references for proper type checking
-
-For more details, see the [Types README](./packages/types/README.md).
-
-### Styles Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-styles.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-styles)
-
-The `styles` package contains the centralized styling system used across all packages. It provides consistent theming, spacing, and component styles throughout the application.
-
-Features:
-
-- Shared CSS variables with direct OKLCH color values
-- Consistent form component spacing
-- Dark mode support
-- Tailwind CSS v4 integration
-
-For more details, see the [Styles README](./packages/styles/README.md).
-
-### Storage Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-storage.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-storage)
-
-The `storage` package provides local storage services built on IndexedDB using Dexie.js for persisting contract UI configurations. It enables a complete history and auto-save system for the builder application.
-
-Features:
-
-- Generic storage base class for extensible type-safe storage services
-- Reactive updates with automatic UI synchronization across browser tabs
-- Complete CRUD operations with performance optimization for 1000+ records
-- Built-in auto-save functionality with debouncing and duplicate operation prevention
-- Import/export capabilities for sharing configurations as JSON files
-- Full TypeScript support with proper type definitions
-- Integration with React hooks for seamless UI state management
-
-For more details, see the [Storage README](./packages/storage/README.md).
-
-### UI Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-ui.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-ui)
-
-Shared UI primitives and form field components for a consistent UX across builder and renderer.
-
-For more details, see the [UI README](./packages/ui/README.md).
-
-### Utils Package
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-utils.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-utils)
-
-Framework-agnostic utilities like logging, runtime configuration, validation, and helpers.
-
-For more details, see the [Utils README](./packages/utils/README.md).
-
-### EVM Adapter
+#### EVM Adapter
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-evm)
 
 _Status: Fully implemented._
 
-Adapter implementation for EVM-compatible chains.
+Adapter implementation for EVM-compatible chains. For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md).
 
-For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md).
-
-### Solana Adapter
+#### Solana Adapter
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-solana)
 
 _Status: Scaffolding._
 
-Adapter implementation for Solana.
+Adapter implementation for Solana. For more details, see the [Solana Adapter README](./packages/adapter-solana/README.md).
 
-For more details, see the [Solana Adapter README](./packages/adapter-solana/README.md).
-
-### Stellar Adapter
+#### Stellar Adapter
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-stellar)
 
 _Status: Fully Implemented._
 
-Adapter implementation for Stellar (Soroban).
+Adapter implementation for Stellar (Soroban). For more details, see the [Stellar Adapter README](./packages/adapter-stellar/README.md).
 
-For more details, see the [Stellar Adapter README](./packages/adapter-stellar/README.md).
-
-### Midnight Adapter
+#### Midnight Adapter
 
 [![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-midnight)
 
 _Status: In progress._
 
-Adapter implementation for Midnight.
+Adapter implementation for Midnight. For more details, see the [Midnight Adapter README](./packages/adapter-midnight/README.md).
 
-For more details, see the [Midnight Adapter README](./packages/adapter-midnight/README.md).
+### Shared Packages (External)
+
+The following packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository:
+
+| Package | Description |
+|---------|-------------|
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-react.svg)](https://www.npmjs.com/package/@openzeppelin/ui-react) **react** | Core React providers and hooks for wallet/adapter state management |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-renderer.svg)](https://www.npmjs.com/package/@openzeppelin/ui-renderer) **renderer** | React components for transaction forms, contract state queries, and execution status |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-components.svg)](https://www.npmjs.com/package/@openzeppelin/ui-components) **components** | Shared UI primitives and form field components |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-storage.svg)](https://www.npmjs.com/package/@openzeppelin/ui-storage) **storage** | IndexedDB-based local storage services |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-types.svg)](https://www.npmjs.com/package/@openzeppelin/ui-types) **types** | Shared TypeScript type definitions |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-styles.svg)](https://www.npmjs.com/package/@openzeppelin/ui-styles) **styles** | Centralized styling system with CSS variables |
+| [![npm](https://img.shields.io/npm/v/@openzeppelin/ui-utils.svg)](https://www.npmjs.com/package/@openzeppelin/ui-utils) **utils** | Framework-agnostic utility functions |
 
 ## Features
 
@@ -352,25 +264,19 @@ For a consistent and reliable development environment, it is highly recommended 
 
 ## Project Structure
 
-This monorepo is organized into several specialized packages, each with a specific purpose:
+This monorepo contains the builder application and blockchain adapters:
 
-### Core Packages
+### Local Packages
 
 - **[packages/builder/](./packages/builder/README.md)** - Main application with builder UI, export system, and core logic
-- **[packages/renderer/](./packages/renderer/README.md)** - Shared library for rendering transaction forms and components (published to npm)
-- **[packages/react-core/](./packages/react-core/README.md)** - Core React providers and hooks for wallet/adapter state management
-- **[packages/ui/](./packages/ui/README.md)** - Shared UI components and form field components
-- **[packages/storage/](./packages/storage/README.md)** - Local storage services with IndexedDB for configuration persistence
-- **[packages/types/](./packages/types/README.md)** - Shared TypeScript type definitions (published to npm)
-- **[packages/styles/](./packages/styles/README.md)** - Centralized styling system with CSS variables and configurations
-- **[packages/utils/](./packages/utils/README.md)** - Framework-agnostic utility functions
-
-### Adapter Packages
-
 - **[packages/adapter-evm/](./packages/adapter-evm/README.md)** - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
 - **[packages/adapter-solana/](./packages/adapter-solana/README.md)** - Solana blockchain implementation
 - **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
 - **[packages/adapter-midnight/](./packages/adapter-midnight/README.md)** - Midnight blockchain implementation
+
+### External Packages
+
+Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository (renderer, react, components, storage, types, styles, utils).
 
 ### Configuration Structure
 
@@ -461,7 +367,7 @@ To maintain the integrity of the adapter pattern, this project includes:
 
 These enforcement mechanisms ensure that the adapter interface remains the single source of truth for adapter implementations, preventing interface drift and maintaining architectural consistency.
 
-For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the documentation within the [`packages/types/src/adapters/base.ts`](./packages/types/src/adapters/base.ts) file where the `ContractAdapter` interface is defined.
+For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the documentation within the [`packages/types/src/adapters/base.ts`](https://github.com/OpenZeppelin/openzeppelin-ui/blob/main/packages/types/src/adapters/base.ts) file where the `ContractAdapter` interface is defined.
 
 ## Component Architecture
 
@@ -469,9 +375,15 @@ The project follows a structured component architecture centered around app rend
 
 ### Renderer Components
 
-The renderer package provides the core `TransactionForm` component for rendering transaction forms. It dynamically selects and renders appropriate field components using its `DynamicFormField` component. The actual UI primitives and field component implementations (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/ui-builder-ui` package.
+The [`@openzeppelin/ui-renderer`](https://github.com/OpenZeppelin/openzeppelin-ui/tree/main/packages/renderer) package (maintained in the external openzeppelin-ui repo) provides:
 
-These field components are designed to work exclusively with React Hook Form and are orchestrated by `DynamicFormField`.
+- **TransactionForm**: Core component for rendering blockchain transaction forms with dynamic field generation
+- **ContractStateWidget**: Widget for querying and displaying contract state through view functions
+- **ExecutionConfigDisplay**: Configuration UI for transaction execution methods (EOA/Relayer)
+- **TransactionStatusDisplay**: Shows transaction progress, hash display with explorer links
+- **DynamicFormField**: Renders form fields dynamically based on field type configuration
+
+The actual UI primitives (like `TextField`, `AddressField`, `Button`, `Input`) are sourced from the `@openzeppelin/ui-components` package and work exclusively with React Hook Form.
 
 ### Storybook Integration
 
@@ -480,9 +392,6 @@ The project uses Storybook 8 for component documentation and development:
 ```bash
 # Start Storybook at the root level
 pnpm storybook
-
-# Or start Storybook for a specific package
-pnpm --filter=@openzeppelin/ui-builder-renderer storybook
 ```
 
 Storybook stories are organized to:
@@ -492,7 +401,7 @@ Storybook stories are organized to:
 - Provide interactive examples for development
 - Serve as visual regression tests
 
-Stories are located in the `stories` directory of each package, with renderer components having the most comprehensive documentation.
+Stories are located in the `stories` directory of each package.
 
 ## Code Style
 
@@ -652,7 +561,7 @@ Please read [SECURITY.md](./SECURITY.md) for details on our security policy and 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](./LICENSE) file for details.
 
 ## CI/CD Pipeline
 
@@ -661,10 +570,8 @@ This project uses GitHub Actions for continuous integration and delivery:
 - **CI Workflow**: Runs tests, linting, and type checking for all packages
 - **Coverage Workflow**: Generates and uploads test coverage reports
 - **Release Workflow**: Manages versioning and releases using Changesets
-- **Renderer Publish Workflow**: Builds and tests the renderer package automatically when changes are merged to main
 - **Security Workflow**: Checks for security vulnerabilities
 - **Dependencies Workflow**: Checks for outdated dependencies
-- **Update Dependencies Workflow**: Automatically updates dependencies
 
 ### Package Publishing
 
