@@ -41,14 +41,12 @@ This package relies on:
 
 ## Styling
 
-This package uses the centralized styling system from the `packages/styles` package:
+This package uses the centralized styling system from the `@openzeppelin/ui-styles` package (published from [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)):
 
 - **CSS Variables**: Direct OKLCH color values define the theme colors
 - **Tailwind CSS 4.0**: Modern utility-first CSS with the latest features
 - **Component Library**: Built on shadcn/ui with consistent, accessible components
 - **Dark Mode**: Built-in dark mode support
-
-For more details on the styling system, see the [Styles README](../../packages/styles/README.md).
 
 ## Type System
 
