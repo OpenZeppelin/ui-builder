@@ -265,7 +265,7 @@ This monorepo contains the builder application and blockchain adapters:
 - **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
 - **[packages/adapter-midnight/](./packages/adapter-midnight/README.md)** - Midnight blockchain implementation
 
-### External Packages
+### Shared Packages (External)
 
 Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository (renderer, react, components, storage, types, styles, utils).
 
