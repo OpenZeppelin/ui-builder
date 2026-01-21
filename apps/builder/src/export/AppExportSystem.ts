@@ -19,6 +19,7 @@ import type { BuilderFormConfig } from '../core/types/FormTypes';
 import {
   addCoreTemplateFiles,
   addStyleAndRootConfigFiles,
+  copyAdapterPatchFiles,
   generateAdapterBootstrapFiles,
   generateAdapterSpecificFiles,
   generateAndAddAppConfig,
@@ -259,6 +260,10 @@ export class AppExportSystem {
       functionId,
       exportOptions
     );
+
+    // Copy adapter-specific patch files (e.g., Midnight SDK patches)
+    await copyAdapterPatchFiles(projectFiles, networkConfig.ecosystem);
+
     await this.formatJsonFiles(projectFiles);
 
     // Inject bootstrap code into main.tsx if provided
