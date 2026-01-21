@@ -10,6 +10,10 @@ const LOG_SYSTEM = 'File Assembly (copyAdapterPatchFiles)';
  * This is required because Vite needs static analysis of imports at build time.
  *
  * The glob pattern matches all .patch files in any adapter package's patches directory.
+ *
+ * NOTE: During local development, patches must be synced to adapter packages before
+ * testing export functionality. Run `pnpm sync-patches` (or `pnpm build` which includes it)
+ * to ensure patch files are available in `packages/adapter-*/patches/` directories.
  */
 const patchModules = import.meta.glob<string>('../../../../packages/adapter-*/patches/*.patch', {
   query: '?raw',
