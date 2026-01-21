@@ -75,7 +75,7 @@ This project is currently in development.
 
 This project is organized as a monorepo with the following packages:
 
-- **packages/builder**: The main application with the builder app UI and core logic.
+- **apps/builder**: The main application with the builder app UI and core logic.
 - **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
 - **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
 - **packages/adapter-stellar**: Adapter implementation for the Stellar network.
@@ -99,7 +99,7 @@ Core UI packages are maintained in the [openzeppelin-ui](https://github.com/Open
 
 The main application with the builder UI, export system, and core logic.
 
-For more details, see the [Builder README](./packages/builder/README.md).
+For more details, see the [Builder README](./apps/builder/README.md).
 
 ### Adapter Packages
 
@@ -259,7 +259,7 @@ This monorepo contains the builder application and blockchain adapters:
 
 ### Local Packages
 
-- **[packages/builder/](./packages/builder/README.md)** - Main application with builder UI, export system, and core logic
+- **[apps/builder/](./apps/builder/README.md)** - Main application with builder UI, export system, and core logic
 - **[packages/adapter-evm/](./packages/adapter-evm/README.md)** - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
 - **[packages/adapter-solana/](./packages/adapter-solana/README.md)** - Solana blockchain implementation
 - **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
@@ -457,7 +457,7 @@ This project uses several tools to manage dependencies effectively:
 
 ### Exported Package Versions
 
-The versions of internal `@openzeppelin/` packages used in exported forms are centrally managed in the `packages/builder/src/export/versions.ts` file. This ensures that all exported projects use stable, tested, and reproducible dependency versions.
+The versions of internal `@openzeppelin/` packages used in exported forms are centrally managed in the `apps/builder/src/export/versions.ts` file. This ensures that all exported projects use stable, tested, and reproducible dependency versions.
 
 To update these versions to the latest published releases, run the following command from the root of the monorepo:
 
@@ -518,7 +518,7 @@ To add support for a new blockchain ecosystem:
    - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
 6. **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
 7. **Register Ecosystem in Builder**:
-   - Open `packages/builder/src/core/ecosystemManager.ts`.
+   - Open `apps/builder/src/core/ecosystemManager.ts`.
    - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/ui-builder-adapter-sui';`).
    - Add a new entry to the `ecosystemRegistry` object. This entry defines:
      - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.

@@ -7,11 +7,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/builder/src/export/**'
+      - "apps/builder/src/export/**"
   pull_request:
     branches: [main]
     paths:
-      - 'packages/builder/src/export/**'
+      - "apps/builder/src/export/**"
 
 permissions:
   contents: read
@@ -76,7 +76,7 @@ jobs:
       - name: Build all packages
         run: pnpm -r build
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       # Run only export-related tests
       - name: Run export tests
@@ -84,7 +84,7 @@ jobs:
 
       # Create test-results directory
       - name: Create test results directory
-        run: mkdir -p packages/builder/test-results
+        run: mkdir -p apps/builder/test-results
 
       # Generate test report for better CI visibility
       - name: Generate test report
@@ -97,5 +97,5 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: export-test-results
-          path: packages/builder/test-results
+          path: apps/builder/test-results
           retention-days: 5

@@ -65,7 +65,7 @@ jobs:
       - name: Build all packages
         run: pnpm -r build
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Run tests with coverage
         run: pnpm test:coverage
@@ -74,5 +74,5 @@ jobs:
         uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./packages/*/coverage/lcov.info
+          files: ./packages/*/coverage/lcov.info,./apps/*/coverage/lcov.info
           fail_ci_if_error: false

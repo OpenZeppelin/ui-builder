@@ -67,7 +67,7 @@ WORKDIR /builder
 RUN npm install -g serve
 
 # Copy the built application from the builder stage
-COPY --from=builder /builder/packages/builder/dist ./dist
+COPY --from=builder /builder/apps/builder/dist ./dist
 
 # Expose the port the app will run on
 EXPOSE 3000

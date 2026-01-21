@@ -25,14 +25,14 @@ Follow-up TODOs: none
   `@openzeppelin/ui-styles`, `@openzeppelin/ui-components`, `@openzeppelin/ui-renderer`,
   `@openzeppelin/ui-react`, `@openzeppelin/ui-storage`) are maintained in the
   separate `openzeppelin-ui` monorepo and consumed via npm.
-- The builder app (`packages/builder`) and adapter packages (`packages/adapter-*`)
+- The builder app (`apps/builder`) and adapter packages (`packages/adapter-*`)
   remain in this repository.
 - All chain-specific logic, dependencies, and polyfills live exclusively in adapter
   packages (`packages/adapter-*`).
 - Adapters MUST implement `ContractAdapter` from `@openzeppelin/ui-types` and be
   instantiated with a `NetworkConfig`.
 - The builder MUST resolve adapters through dynamic ecosystem registration via the
-  ecosystem manager (`packages/builder/src/core/...`).
+  ecosystem manager (`apps/builder/src/core/...`).
 - Adapter packages MUST NOT declare chain-specific dependencies in chain-agnostic
   imports; they own their network concerns.
 - Validation rules originate in the adapter interface; `isValidAddress(address:

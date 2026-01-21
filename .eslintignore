@@ -12,5 +12,5 @@ coverage/
 .vercel/
 .netlify/
 exports/
-packages/builder/test-results/
+apps/builder/test-results/
 

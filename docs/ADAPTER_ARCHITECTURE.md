@@ -322,7 +322,7 @@ The storage system integrates seamlessly with the adapter pattern:
 - **Adapter-Aware Restoration**: When loading saved configurations, the appropriate adapter is automatically selected based on the stored ecosystem information
 - **Network Configuration Persistence**: Both the selected network and adapter-specific configurations are preserved and restored
 
-For detailed information about the state management architecture, see the [State Management Documentation](../packages/builder/docs/state-management.md).
+For detailed information about the state management architecture, see the [State Management Documentation](../apps/builder/docs/state-management.md).
 
 ## 9. Enforcement & Contribution
 
@@ -399,7 +399,7 @@ This approach was adopted to solve a critical issue: when adapters with complex 
 
 **Prior Approach (Deprecated):**
 
-Previously, all build configuration lived in `packages/builder/vite.config.ts`. This caused issues:
+Previously, all build configuration lived in `apps/builder/vite.config.ts`. This caused issues:
 
 - Global plugin application could break other adapters
 - Hard to isolate which adapter needed which config
@@ -455,7 +455,7 @@ Each adapter package must:
 
 #### 11.2.3. Builder Integration
 
-The builder app (`packages/builder/vite.config.ts`) dynamically loads and merges all adapter configs:
+The builder app (`apps/builder/vite.config.ts`) dynamically loads and merges all adapter configs:
 
 ```typescript
 async function loadAdapterViteConfigs() {
@@ -594,7 +594,7 @@ Before committing build configuration changes:
 2. **Test dev mode**: `pnpm dev` - ensure hot reload works
 3. **Test build**: `pnpm build` - ensure production builds succeed
 4. **Test the adapter**: Execute a transaction using the adapter in dev mode
-5. **Clear cache**: `rm -rf packages/builder/node_modules/.vite` between tests
+5. **Clear cache**: `rm -rf apps/builder/node_modules/.vite` between tests
 
 ### 11.7. Including Adapter Artifacts in Exported Apps
 
@@ -783,7 +783,7 @@ These artifacts enable:
 
 When users export applications built with the UI Builder, build configuration requirements follow them:
 
-- The export template (`packages/builder/src/export/templates/`) includes its own `vite.config.ts`
+- The export template (`apps/builder/src/export/templates/`) includes its own `vite.config.ts`
 - Adapter-specific configuration is conditionally included in exported configs based on which adapter is used
 - **Update (2025)**: Adapter artifact bundling is now implemented via `getExportBootstrapFiles()` (see § 11.7)
 

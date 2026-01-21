@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const versionsFilePath = path.resolve(__dirname, '../packages/builder/src/export/versions.ts');
+const versionsFilePath = path.resolve(__dirname, '../apps/builder/src/export/versions.ts');
 
 // Local workspace packages (adapters in this monorepo)
 const localPackages = [
