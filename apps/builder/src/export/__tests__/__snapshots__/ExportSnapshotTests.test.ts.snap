@@ -14,7 +14,9 @@ exports[`Export Snapshot Tests > Conditional File Modifications > should modify 
 /* Base styles... */"
 `;
 
-exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for App component > app-component-evm 1`] = `
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
+
+exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > app-component-evm 1`] = `
 "import { useEffect, useState } from 'react';
 
 import { Footer } from '@openzeppelin/ui-components';
@@ -81,8 +83,6 @@ export function App() {
 }
 "
 `;
-
-exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for EVM adapter > evm-adapter 1`] = `""`;
 
 exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot for Form component > form-component-evm 1`] = `
 "import { useMemo, useState } from 'react';
@@ -298,7 +298,7 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
     "@openzeppelin/ui-components": "^1.1.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.0.2",
-    "@openzeppelin/ui-types": "^1.2.0",
+    "@openzeppelin/ui-types": "^1.3.0",
     "@openzeppelin/ui-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
@@ -345,7 +345,7 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
     "@openzeppelin/ui-components": "^1.1.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.0.2",
-    "@openzeppelin/ui-types": "^1.2.0",
+    "@openzeppelin/ui-types": "^1.3.0",
     "@openzeppelin/ui-utils": "^1.1.0",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
