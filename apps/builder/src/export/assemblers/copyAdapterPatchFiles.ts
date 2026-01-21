@@ -13,7 +13,7 @@ const LOG_SYSTEM = 'File Assembly (copyAdapterPatchFiles)';
  *
  * NOTE: During local development, patches must be synced to adapter packages before
  * testing export functionality. Run `pnpm sync-patches` (or `pnpm build` which includes it)
- * to ensure patch files are available in `packages/adapter-*/patches/` directories.
+ * to ensure patch files are available in adapter package `patches/` directories.
  */
 const patchModules = import.meta.glob<string>('../../../../packages/adapter-*/patches/*.patch', {
   query: '?raw',
