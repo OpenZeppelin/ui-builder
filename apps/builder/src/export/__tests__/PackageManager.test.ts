@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/ui-types';
+import type { AdapterConfig, Ecosystem } from '@openzeppelin/ui-types';
 
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
@@ -23,6 +23,84 @@ vi.mock('../versions', async () => {
     },
   };
 });
+
+// Mock AdapterConfig for Midnight with patchedDependencies
+const mockMidnightAdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      '@midnight-ntwrk/compact-runtime': '^0.9.0',
+      '@midnight-ntwrk/midnight-js-contracts': '^2.0.2',
+    },
+    dev: {},
+    build: {},
+  },
+  overrides: {
+    '@midnight-ntwrk/compact-runtime': '0.9.0',
+    '@midnight-ntwrk/midnight-js-contracts': '2.0.2',
+  },
+  patchedDependencies: {
+    '@midnight-ntwrk/compact-runtime@0.9.0': '@midnight-ntwrk__compact-runtime@0.9.0.patch',
+    '@midnight-ntwrk/midnight-js-contracts@2.0.2':
+      '@midnight-ntwrk__midnight-js-contracts@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-types@2.0.2': '@midnight-ntwrk__midnight-js-types@2.0.2.patch',
+  },
+};
+
+// Mock EVM config (realistic - no patchedDependencies)
+const mockEvmAdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      viem: '^2.0.0',
+      wagmi: '^2.0.0',
+      '@rainbow-me/rainbowkit': '^2.0.0',
+    },
+    dev: {},
+    build: {},
+  },
+  overrides: {},
+};
+
+// Mock Solana config (no patchedDependencies)
+const mockSolanaAdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      '@solana/web3.js': '^1.87.0',
+    },
+    dev: {},
+  },
+  overrides: {},
+};
+
+// Mock Stellar config (no patchedDependencies)
+const mockStellarAdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      '@stellar/stellar-sdk': '^11.0.0',
+    },
+    dev: {},
+  },
+  overrides: {},
+};
+
+// Mock AdapterConfigLoader to return test configs
+vi.mock('../AdapterConfigLoader', () => ({
+  AdapterConfigLoader: vi.fn().mockImplementation(() => ({
+    loadConfig: vi.fn().mockImplementation(async (ecosystem: Ecosystem) => {
+      switch (ecosystem) {
+        case 'midnight':
+          return mockMidnightAdapterConfig;
+        case 'evm':
+          return mockEvmAdapterConfig;
+        case 'solana':
+          return mockSolanaAdapterConfig;
+        case 'stellar':
+          return mockStellarAdapterConfig;
+        default:
+          return null;
+      }
+    }),
+  })),
+}));
 
 // Mock RendererConfig since we can't import it directly
 interface MockRendererConfig {
@@ -547,6 +625,88 @@ describe('PackageManager', () => {
       // Should add helper scripts
       expect(result.scripts).toHaveProperty('update-renderer');
       expect(result.scripts).toHaveProperty('check-deps');
+    });
+
+    it('should include pnpm.patchedDependencies for ecosystems with patches', async () => {
+      const formConfig = createMinimalFormConfig();
+
+      // Midnight has patches
+      const midnightUpdated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'midnight',
+        'testFunction'
+      );
+      const midnightResult = JSON.parse(midnightUpdated);
+
+      // Should have pnpm.patchedDependencies
+      expect(midnightResult.pnpm).toBeDefined();
+      expect(midnightResult.pnpm.patchedDependencies).toBeDefined();
+      expect(Object.keys(midnightResult.pnpm.patchedDependencies).length).toBeGreaterThan(0);
+
+      // Patch paths should be prefixed with patches/
+      const patchPaths = Object.values(midnightResult.pnpm.patchedDependencies) as string[];
+      patchPaths.forEach((path) => {
+        expect(path).toMatch(/^patches\//);
+        expect(path).toMatch(/\.patch$/);
+      });
+    });
+
+    it('should not include pnpm.patchedDependencies for ecosystems without patches', async () => {
+      const formConfig = createMinimalFormConfig();
+
+      // EVM doesn't have patches
+      const evmUpdated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'testFunction'
+      );
+      const evmResult = JSON.parse(evmUpdated);
+
+      // Should not have pnpm.patchedDependencies (or pnpm section should be absent/empty)
+      expect(evmResult.pnpm?.patchedDependencies).toBeUndefined();
+    });
+  });
+
+  describe('getPatchedDependencies', () => {
+    let packageManager: PackageManager;
+
+    beforeEach(() => {
+      packageManager = new PackageManager(mockRendererConfig as MockRendererConfig);
+    });
+
+    it('should return patched dependencies for Midnight ecosystem', async () => {
+      const patches = await packageManager.getPatchedDependencies('midnight');
+
+      // Should have patches
+      expect(Object.keys(patches).length).toBeGreaterThan(0);
+
+      // Should include known Midnight SDK patches
+      expect(patches).toHaveProperty('@midnight-ntwrk/compact-runtime@0.9.0');
+      expect(patches).toHaveProperty('@midnight-ntwrk/midnight-js-contracts@2.0.2');
+
+      // Paths should be prefixed with patches/
+      Object.values(patches).forEach((path) => {
+        expect(path).toMatch(/^patches\//);
+        expect(path).toMatch(/\.patch$/);
+      });
+    });
+
+    it('should return empty object for ecosystems without patches', async () => {
+      const evmPatches = await packageManager.getPatchedDependencies('evm');
+      expect(evmPatches).toEqual({});
+
+      const stellarPatches = await packageManager.getPatchedDependencies('stellar');
+      expect(stellarPatches).toEqual({});
+
+      const solanaPatches = await packageManager.getPatchedDependencies('solana');
+      expect(solanaPatches).toEqual({});
+    });
+
+    it('should return empty object for unknown ecosystem', async () => {
+      const patches = await packageManager.getPatchedDependencies('unknown' as Ecosystem);
+      expect(patches).toEqual({});
     });
   });
 });

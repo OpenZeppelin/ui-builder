@@ -104,6 +104,28 @@ export const midnightAdapterConfig: AdapterConfig = {
   },
 
   /**
+   * Patched dependencies for browser compatibility fixes.
+   * These patches fix ESM/CJS module issues and browser polyfill requirements
+   * in the Midnight SDK packages.
+   *
+   * The export system will copy these patches to exported projects and configure
+   * pnpm.patchedDependencies in the exported package.json.
+   */
+  patchedDependencies: {
+    '@midnight-ntwrk/compact-runtime@0.9.0': '@midnight-ntwrk__compact-runtime@0.9.0.patch',
+    '@midnight-ntwrk/midnight-js-contracts@2.0.2':
+      '@midnight-ntwrk__midnight-js-contracts@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-http-client-proof-provider@2.0.2':
+      '@midnight-ntwrk__midnight-js-http-client-proof-provider@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-indexer-public-data-provider@2.0.2':
+      '@midnight-ntwrk__midnight-js-indexer-public-data-provider@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-network-id@2.0.2':
+      '@midnight-ntwrk__midnight-js-network-id@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-types@2.0.2': '@midnight-ntwrk__midnight-js-types@2.0.2.patch',
+    '@midnight-ntwrk/midnight-js-utils@2.0.2': '@midnight-ntwrk__midnight-js-utils@2.0.2.patch',
+  },
+
+  /**
    * Vite configuration for exported applications
    * Provides the necessary build configuration for Midnight SDK's WASM modules
    */
@@ -122,14 +144,4 @@ export const midnightAdapterConfig: AdapterConfig = {
       exclude: 'exclude: [...(midnightConfig.optimizeDeps?.exclude || [])],',
     },
   },
-
-  /**
-   * Note: Midnight SDK patches are bundled with this adapter package.
-   * When this adapter is installed via npm/pnpm, the patches are automatically
-   * applied thanks to the pnpm.patchedDependencies configuration in this package's
-   * package.json. No additional configuration is needed in consuming applications.
-   *
-   * See packages/adapter-midnight/patches/ for the patch files.
-   * See packages/adapter-midnight/package.json "pnpm.patchedDependencies" for the configuration.
-   */
 };

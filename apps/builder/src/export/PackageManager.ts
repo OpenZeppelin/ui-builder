@@ -323,6 +323,27 @@ export class PackageManager {
   }
 
   /**
+   * Get patched dependencies from the adapter config.
+   * Returns a mapping of package@version to patch file path for pnpm.patchedDependencies.
+   *
+   * @param ecosystem The ecosystem
+   * @returns Record of patched package identifiers to patch file paths
+   */
+  async getPatchedDependencies(ecosystem: Ecosystem): Promise<Record<string, string>> {
+    const adapterConfig = await this.adapterConfigLoader.loadConfig(ecosystem);
+    if (!adapterConfig?.patchedDependencies) {
+      return {};
+    }
+
+    // Transform the patch file names to include the patches/ directory prefix
+    const patchedDeps: Record<string, string> = {};
+    for (const [packageId, patchFileName] of Object.entries(adapterConfig.patchedDependencies)) {
+      patchedDeps[packageId] = `patches/${patchFileName}`;
+    }
+    return patchedDeps;
+  }
+
+  /**
    * Updates the package.json content with correct dependencies, metadata, and scripts.
    *
    * @param originalContent Original package.json content string
@@ -346,10 +367,11 @@ export class PackageManager {
       packageJson.dependencies = packageJson.dependencies || {};
       packageJson.devDependencies = packageJson.devDependencies || {};
 
-      // Get all dependencies
+      // Get all dependencies and configuration
       const dependencies = await this.getDependencies(formConfig, ecosystem);
       const devDependencies = await this.getDevDependencies(formConfig, ecosystem);
       const overrides = await this.getOverrides(formConfig, ecosystem);
+      const patchedDependencies = await this.getPatchedDependencies(ecosystem);
 
       // Merge dependencies
       const finalDependencies = {
@@ -401,10 +423,14 @@ export class PackageManager {
         packageJson.overrides = overrides;
       }
 
-      // Note: Adapter patches (e.g., Midnight SDK patches) are automatically applied
-      // by pnpm when the adapter package is installed, as they are bundled with the
-      // adapter package and listed in the adapter's pnpm.patchedDependencies.
-      // No additional configuration needed in the exported app's package.json.
+      // Add pnpm.patchedDependencies if any patches are required
+      // This enables adapters (like Midnight) to specify patches for browser compatibility
+      if (Object.keys(patchedDependencies).length > 0) {
+        packageJson.pnpm = {
+          ...(packageJson.pnpm || {}),
+          patchedDependencies,
+        };
+      }
 
       // Add upgrade instructions if workspace dependencies are present
       this.addUpgradeInstructions(packageJson);

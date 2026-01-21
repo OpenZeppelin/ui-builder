@@ -10,12 +10,11 @@ cd ~/dev
 git clone git@github.com:OpenZeppelin/contracts-ui-builder.git
 git clone git@github.com:OpenZeppelin/openzeppelin-ui.git
 
-# 2. Build openzeppelin-ui
+# 2. Install dependencies in openzeppelin-ui
 cd openzeppelin-ui
 pnpm install
-pnpm build
 
-# 3. Enable local packages in contracts-ui-builder
+# 3. Enable local packages in contracts-ui-builder (auto-builds openzeppelin-ui)
 cd ../contracts-ui-builder
 pnpm dev:local
 
@@ -51,7 +50,21 @@ The local development setup uses pnpm's `.pnpmfile.cjs` hook to dynamically reso
 pnpm dev:local
 ```
 
-This runs `LOCAL_UI=true pnpm install` which resolves all `@openzeppelin/ui-*` dependencies to the local `../openzeppelin-ui` directory.
+This command automatically:
+1. Builds all packages in the local openzeppelin-ui directory (defaults to `../openzeppelin-ui`)
+2. Runs `LOCAL_UI=true pnpm install` to resolve all `@openzeppelin/ui-*` dependencies to local paths
+
+This ensures you always have up-to-date compiled types when working with local packages.
+
+### Custom Path
+
+If your openzeppelin-ui checkout is in a different location, use the `LOCAL_UI_PATH` environment variable:
+
+```bash
+LOCAL_UI_PATH=/path/to/openzeppelin-ui pnpm dev:local
+```
+
+This will build and link packages from the specified directory.
 
 ### Switch Back to npm Packages
 
@@ -61,21 +74,15 @@ pnpm dev:npm
 
 This runs a regular `pnpm install` which uses the published npm versions.
 
-### Custom Path
-
-If your openzeppelin-ui checkout is in a different location:
-
-```bash
-LOCAL_UI_PATH=/path/to/openzeppelin-ui LOCAL_UI=true pnpm install
-```
-
 ## Development Workflow
 
 ### Making Changes to UI Packages
 
 1. Make changes in `openzeppelin-ui/packages/*`
-2. Rebuild the changed package: `cd openzeppelin-ui && pnpm build`
-3. Changes are immediately available in contracts-ui-builder (no reinstall needed)
+2. Rebuild the changed package(s):
+   - Quick rebuild: `cd ../openzeppelin-ui && pnpm build`
+   - Or re-run: `pnpm dev:local` (rebuilds and reinstalls)
+3. Restart the contracts-ui-builder dev server if needed
 
 ### Hot Reload
 
@@ -118,7 +125,13 @@ This allows testing exported apps against local package changes before publishin
 
 ### "Module not found" Errors
 
-Ensure openzeppelin-ui is built:
+Re-run `pnpm dev:local` to rebuild and reinstall local packages:
+
+```bash
+pnpm dev:local
+```
+
+Or manually ensure openzeppelin-ui is built:
 
 ```bash
 cd ../openzeppelin-ui
@@ -128,14 +141,12 @@ pnpm build
 
 ### Changes Not Reflected
 
-After changing openzeppelin-ui code, rebuild:
+After changing openzeppelin-ui code, rebuild and restart:
 
 ```bash
-cd ../openzeppelin-ui
-pnpm build
+pnpm dev:local  # Rebuilds openzeppelin-ui automatically
+pnpm dev        # Restart dev server
 ```
-
-Then restart the contracts-ui-builder dev server.
 
 ### Switching Between Modes
 
@@ -150,16 +161,15 @@ pnpm install  # or pnpm dev:local
 
 ### Verifying Local Mode is Active
 
-Check that packages resolve to local paths:
-
-```bash
-LOCAL_UI=true pnpm install 2>&1 | grep "\[local-dev\]"
-```
-
-You should see log lines like:
+When running `pnpm dev:local`, you should see:
 
 ```
+🔨 Building local openzeppelin-ui packages...
+...
 [local-dev] @openzeppelin/ui-types → /path/to/openzeppelin-ui/packages/types
+[local-dev] @openzeppelin/ui-utils → /path/to/openzeppelin-ui/packages/utils
+...
+✅ Using local @openzeppelin/ui-* packages from ../openzeppelin-ui
 ```
 
 ## Best Practices
