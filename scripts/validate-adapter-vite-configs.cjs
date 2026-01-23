@@ -68,9 +68,12 @@ function validateAdapter(adapter) {
 
   // Check 2: vite-config.ts exports the correct function
   const viteConfigContent = fs.readFileSync(viteConfigPath, 'utf8');
+  // Convert hyphenated adapter name to PascalCase (e.g., "evm-core" -> "EvmCore")
   const adapterName = name
     .replace('@openzeppelin/ui-builder-adapter-', '')
-    .replace(/^./, (c) => c.toUpperCase());
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
   const expectedFunctionName = `get${adapterName}ViteConfig`;
   const hasExport =
     viteConfigContent.includes(`export function ${expectedFunctionName}`) ||
