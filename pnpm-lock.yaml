@@ -24,8 +24,6 @@ overrides:
   '@midnight-ntwrk/midnight-js-types': 2.0.2
   '@midnight-ntwrk/midnight-js-utils': 2.0.2
 
-pnpmfileChecksum: sha256-DdIHOFqWrg8WY/ztjhHq7ds+Qcs1I5IAqGB+IhL8PRs=
-
 patchedDependencies:
   '@midnight-ntwrk/compact-runtime@0.9.0':
     hash: 81923a3ecf0dd679e5a35d9871f5a19512de29914adc6cbdbd0d0e249a6eb401
@@ -281,7 +279,7 @@ importers:
         version: 3.10.1
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       lucide-react:
         specifier: ^0.510.0
         version: 0.510.0(react@19.2.3)
@@ -459,7 +457,7 @@ importers:
         version: 4.1.10(react@19.2.3)(typescript@5.9.3)
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       lucide-react:
         specifier: ^0.510.0
         version: 0.510.0(react@19.2.3)
@@ -565,7 +563,7 @@ importers:
         version: 3.10.1
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       lucide-react:
         specifier: ^0.510.0
         version: 0.510.0(react@19.2.3)
@@ -623,7 +621,7 @@ importers:
         version: 5.0.0
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       react:
         specifier: ^19.0.0
         version: 19.2.3
@@ -666,7 +664,7 @@ importers:
         version: 4.1.10(react@19.2.3)(typescript@5.9.3)
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       lossless-json:
         specifier: ^4.0.2
         version: 4.3.0
@@ -7429,6 +7427,9 @@ packages:
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
     engines: {node: '>=10'}
@@ -11709,7 +11710,7 @@ snapshots:
       '@types/debug': 4.1.12
       '@types/lodash': 4.17.21
       debug: 4.4.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       pony-cause: 2.1.11
       semver: 7.7.3
       uuid: 9.0.1
@@ -11790,7 +11791,7 @@ snapshots:
       '@midnight-ntwrk/midnight-js-types': 2.0.2(patch_hash=1e0e654d7206de84b3a83a3e123282af7890bbe7e8531cafc524829611d8e274)
       cross-fetch: 4.1.0
       fetch-retry: 6.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
     transitivePeerDependencies:
       - encoding
 
@@ -11827,7 +11828,7 @@ snapshots:
       fp-ts: 2.16.11
       io-ts: 2.2.22(fp-ts@2.16.11)
       level: 10.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       superjson: 2.2.6
 
   '@midnight-ntwrk/midnight-js-network-id@2.0.2(patch_hash=61111d1b40fdfaa90b85d534fc7d227a7e0ec16621b4e8470b1c271ce75f8c13)': {}
@@ -12124,7 +12125,7 @@ snapshots:
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       date-fns: 4.1.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       lucide-react: 0.510.0(react@19.2.3)
       next-themes: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react: 19.2.3
@@ -15110,7 +15111,7 @@ snapshots:
       chalk: 3.0.0
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       redent: 3.0.0
 
   '@testing-library/jest-dom@6.9.1':
@@ -20772,6 +20773,8 @@ snapshots:
   lodash.upperfirst@4.3.1: {}
 
   lodash@4.17.21: {}
+
+  lodash@4.17.23: {}
 
   log-symbols@4.1.0:
     dependencies:
