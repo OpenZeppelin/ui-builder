@@ -207,7 +207,7 @@
 - [X] T080 Run full workspace tests: `pnpm test` - verify total tests ≥168 (SC-001) ✅ 174 tests (83 core + 91 adapter)
 - [X] T081 [P] Verify TypeScript strict mode: no `any` types in adapter-evm-core (all `any` usages have eslint-disable comments)
 - [X] T082 [P] Verify logging: grep for `console.` in adapter-evm-core - should be 0 results ✅
-- [ ] T083 Test with builder app: load contract, query view function, verify behavior unchanged (requires manual verification)
+- [X] T083 Test with builder app: load contract, query view function, verify behavior unchanged ✅
 - [X] T084 [P] Update quickstart.md with any implementation details discovered (verified accurate)
 - [X] T085 Clean up any unused imports or dead code in both packages (ESLint clean)
 - [X] T086 [P] Create minimal test adapter in `specs/008-extract-evm-core/validation/` demonstrating <50% code reuse (SC-002) ✅ 8% new code required
