@@ -25,14 +25,14 @@
 
 **Purpose**: Create adapter-evm-core package with all configuration files
 
-- [ ] T001 Create directory `packages/adapter-evm-core/` with empty `src/index.ts`
-- [ ] T002 Create `packages/adapter-evm-core/package.json` with `"private": true`, dependencies per research.md
-- [ ] T003 [P] Create `packages/adapter-evm-core/tsconfig.json` with `"strict": true` extending workspace base
-- [ ] T004 [P] Create `packages/adapter-evm-core/tsup.config.ts` with ESM+CJS output, entry: [index.ts, vite-config.ts]
-- [ ] T005 [P] Create `packages/adapter-evm-core/vitest.config.ts` with workspace-compatible config
-- [ ] T006 [P] Create `packages/adapter-evm-core/src/vite-config.ts` with `getEvmCoreViteConfig()` returning minimal config
+- [X] T001 Create directory `packages/adapter-evm-core/` with empty `src/index.ts`
+- [X] T002 Create `packages/adapter-evm-core/package.json` with `"private": true`, dependencies per research.md
+- [X] T003 [P] Create `packages/adapter-evm-core/tsconfig.json` with `"strict": true` extending workspace base
+- [X] T004 [P] Create `packages/adapter-evm-core/tsup.config.ts` with ESM+CJS output, entry: [index.ts, vite-config.ts]
+- [X] T005 [P] Create `packages/adapter-evm-core/vitest.config.ts` with workspace-compatible config
+- [X] T006 [P] Create `packages/adapter-evm-core/src/vite-config.ts` with `getEvmCoreViteConfig()` returning minimal config
 
-**Checkpoint**: Package compiles with `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core build`
+**Checkpoint**: ✅ Package compiles with `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core build`
 
 ---
 
@@ -42,19 +42,19 @@
 
 **⚠️ CRITICAL**: All user story work depends on this structure existing
 
-- [ ] T007 Create `packages/adapter-evm-core/src/abi/index.ts` with placeholder exports
-- [ ] T008 [P] Create `packages/adapter-evm-core/src/mapping/index.ts` with placeholder exports
-- [ ] T009 [P] Create `packages/adapter-evm-core/src/transform/index.ts` with placeholder exports
-- [ ] T010 [P] Create `packages/adapter-evm-core/src/query/index.ts` with placeholder exports
-- [ ] T011 [P] Create `packages/adapter-evm-core/src/transaction/index.ts` with placeholder exports
-- [ ] T012 [P] Create `packages/adapter-evm-core/src/configuration/index.ts` with placeholder exports
-- [ ] T013 [P] Create `packages/adapter-evm-core/src/proxy/index.ts` with placeholder export
-- [ ] T014 [P] Create `packages/adapter-evm-core/src/validation/index.ts` with placeholder exports
-- [ ] T015 [P] Create `packages/adapter-evm-core/src/utils/index.ts` with placeholder exports
-- [ ] T016 [P] Create `packages/adapter-evm-core/src/types/index.ts` with placeholder exports
-- [ ] T017 Update `packages/adapter-evm-core/src/index.ts` to re-export all modules per contracts/module-exports.ts
+- [X] T007 Create `packages/adapter-evm-core/src/abi/index.ts` with placeholder exports
+- [X] T008 [P] Create `packages/adapter-evm-core/src/mapping/index.ts` with placeholder exports
+- [X] T009 [P] Create `packages/adapter-evm-core/src/transform/index.ts` with placeholder exports
+- [X] T010 [P] Create `packages/adapter-evm-core/src/query/index.ts` with placeholder exports
+- [X] T011 [P] Create `packages/adapter-evm-core/src/transaction/index.ts` with placeholder exports
+- [X] T012 [P] Create `packages/adapter-evm-core/src/configuration/index.ts` with placeholder exports
+- [X] T013 [P] Create `packages/adapter-evm-core/src/proxy/index.ts` with placeholder export
+- [X] T014 [P] Create `packages/adapter-evm-core/src/validation/index.ts` with placeholder exports
+- [X] T015 [P] Create `packages/adapter-evm-core/src/utils/index.ts` with placeholder exports
+- [X] T016 [P] Create `packages/adapter-evm-core/src/types/index.ts` with placeholder exports
+- [X] T017 Update `packages/adapter-evm-core/src/index.ts` to re-export all modules per contracts/module-exports.ts
 
-**Checkpoint**: Build succeeds, all exports compile (may be `undefined` placeholders)
+**Checkpoint**: ✅ Build succeeds, all exports compile (placeholder values)
 
 ---
 
