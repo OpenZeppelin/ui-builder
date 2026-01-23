@@ -1,7 +1,10 @@
 // Barrel file for transaction module
-export * from './execution-strategy';
+// Re-export core transaction functionality
+export { formatEvmTransactionData } from '@openzeppelin/ui-builder-adapter-evm-core';
+
+// Adapter-specific exports (use wallet implementation, UI components)
+export { type AdapterExecutionStrategy } from './execution-strategy';
+export * from './eoa';
 export * from './relayer';
 export * from './sender';
-export * from './formatter';
-export * from './eoa';
 export { EvmRelayerOptions } from './components/EvmRelayerOptions';

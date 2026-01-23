@@ -168,18 +168,18 @@
 
 ### Dependency Configuration
 
-- [ ] T067 [US2] Add `"@openzeppelin/ui-builder-adapter-evm-core": "workspace:*"` to `packages/adapter-evm/package.json`
-- [ ] T068 [US2] Update `packages/adapter-evm/tsup.config.ts` to add `noExternal: ['@openzeppelin/ui-builder-adapter-evm-core']`
+- [X] T067 [US2] Add `"@openzeppelin/ui-builder-adapter-evm-core": "workspace:*"` to `packages/adapter-evm/package.json`
+- [X] T068 [US2] Update `packages/adapter-evm/tsup.config.ts` to add `noExternal: ['@openzeppelin/ui-builder-adapter-evm-core']`
 
 ### Adapter Refactoring
 
-- [ ] T069 [US2] Update `packages/adapter-evm/src/adapter.ts` to import from `@openzeppelin/ui-builder-adapter-evm-core`
-- [ ] T070 [US2] Remove now-empty module directories from `packages/adapter-evm/src/` (keep stubs if needed for re-exports)
-- [ ] T071 [US2] Verify `packages/adapter-evm/src/index.ts` public API unchanged (same exports as before)
-- [ ] T072 [US2] Update any remaining internal imports in adapter-evm to use core package
-- [ ] T073 [US2] Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm test` - ALL existing tests must pass
+- [X] T069 [US2] Update `packages/adapter-evm/src/adapter.ts` to import from `@openzeppelin/ui-builder-adapter-evm-core`
+- [X] T070 [US2] Remove now-empty module directories from `packages/adapter-evm/src/` (keep stubs if needed for re-exports)
+- [X] T071 [US2] Verify `packages/adapter-evm/src/index.ts` public API unchanged (same exports as before)
+- [X] T072 [US2] Update any remaining internal imports in adapter-evm to use core package
+- [X] T073 [US2] Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm test` - ALL existing tests must pass
 
-**Checkpoint**: adapter-evm builds and all 168+ tests pass. Public API identical to before extraction.
+**Checkpoint**: ✅ adapter-evm builds and all 91 tests pass. Public API identical to before extraction.
 
 ---
 

@@ -1,11 +1,16 @@
+// Import from core package via barrel files
+import {
+  EvmProviderKeys,
+  isEvmProviderKey,
+  testEvmExplorerConnection,
+  testEvmRpcConnection,
+  validateEvmExplorerConfig,
+  validateEvmRpcEndpoint,
+  type TypedEvmNetworkConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { NetworkServiceForm } from '@openzeppelin/ui-types';
 import { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
-
-import { TypedEvmNetworkConfig } from '../types';
-import { EvmProviderKeys, isEvmProviderKey } from '../types/providers';
-import { testEvmExplorerConnection, validateEvmExplorerConfig } from './explorer';
-import { testEvmRpcConnection, validateEvmRpcEndpoint } from './rpc';
 
 /**
  * Returns the network service forms for EVM networks.

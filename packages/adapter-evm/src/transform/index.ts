@@ -1,3 +1,3 @@
 // Barrel file for transform module
-export * from './input-parser';
-export * from './output-formatter';
+// Re-export all transform functionality from core package
+export { parseEvmInput, formatEvmFunctionResult } from '@openzeppelin/ui-builder-adapter-evm-core';

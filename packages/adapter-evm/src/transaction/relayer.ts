@@ -10,6 +10,10 @@ import {
   type EvmTransactionResponse,
 } from '@openzeppelin/relayer-sdk';
 import {
+  type TypedEvmNetworkConfig,
+  type WriteContractParameters,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+import {
   ExecutionConfig,
   RelayerDetails,
   RelayerDetailsRich,
@@ -19,9 +23,8 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { TypedEvmNetworkConfig, WriteContractParameters } from '../types';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-import { ExecutionStrategy } from './execution-strategy';
+import type { AdapterExecutionStrategy } from './execution-strategy';
 
 /**
  * EVM-specific transaction options for the OpenZeppelin Relayer.
@@ -47,7 +50,7 @@ export interface EvmRelayerTransactionOptions {
  * gas payment, signing, and broadcasting. It includes a polling mechanism to wait
  * for the transaction to be mined and return the final hash.
  */
-export class RelayerExecutionStrategy implements ExecutionStrategy {
+export class RelayerExecutionStrategy implements AdapterExecutionStrategy {
   public async execute(
     transactionData: WriteContractParameters,
     executionConfig: ExecutionConfig,
