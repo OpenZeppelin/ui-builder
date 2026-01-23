@@ -1,16 +1,10 @@
 /**
  * Transform Module
  *
- * Handles input parsing and output formatting for EVM contract interactions.
- * Converts between user-friendly strings and blockchain-compatible values.
+ * Input parsing and output formatting for EVM contract interactions.
  *
  * @module transform
  */
 
-// Placeholder exports - will be populated when modules are moved
-
-// Input transformation
-export const parseEvmInput = undefined as unknown;
-
-// Output transformation
-export const formatEvmFunctionResult = undefined as unknown;
+export { parseEvmInput } from './input-parser';
+export { formatEvmFunctionResult } from './output-formatter';

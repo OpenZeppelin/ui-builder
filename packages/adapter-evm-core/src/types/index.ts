@@ -7,10 +7,25 @@
  * @module types
  */
 
-// Placeholder exports - will be populated when modules are moved
+// Contract artifacts types
+export { type EvmContractArtifacts, isEvmContractArtifacts } from './artifacts';
 
-// Contract artifacts type
-export type EvmContractArtifacts = Record<string, unknown>;
+// Provider types
+export {
+  EvmProviderKeys,
+  type EvmContractDefinitionProviderKey,
+  EVM_PROVIDER_ORDER_DEFAULT,
+  isEvmProviderKey,
+} from './providers';
+
+// ABI and EVM-specific types
+export {
+  type TypedEvmNetworkConfig,
+  type AbiItem,
+  EVMParameterType,
+  EVMChainType,
+  type WriteContractParameters,
+} from './abi';
 
 // ABI load result type
 export type EvmAbiLoadResult = {

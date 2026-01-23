@@ -1,17 +1,13 @@
 /**
  * Validation Module
  *
- * Handles validation of EVM addresses and execution configurations.
- * Provides validators for EOA and Relayer execution modes.
+ * Execution configuration validation for EVM transactions.
  *
  * @module validation
  */
 
-// Placeholder exports - will be populated when modules are moved
+export { validateEoaConfig, validateEvmEoaConfig, type EvmWalletStatus } from './eoa';
+export { validateRelayerConfig, validateEvmRelayerConfig } from './relayer';
 
-// Address validation
-export const isValidEvmAddress = undefined as unknown;
-
-// Execution config validation
-export const validateEvmEoaConfig = undefined as unknown;
-export const validateEvmRelayerConfig = undefined as unknown;
+// Re-export address validation from utils for convenience
+export { isValidEvmAddress } from '../utils/validation';

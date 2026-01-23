@@ -1,20 +1,15 @@
 /**
  * Utils Module
  *
- * General utility functions for EVM operations.
- * Includes JSON handling with BigInt support, gas formatting, and artifacts.
+ * Utility functions for EVM operations including JSON handling,
+ * formatting, gas calculations, validation, and artifacts processing.
  *
  * @module utils
  */
 
-// Placeholder exports - will be populated when modules are moved
-
-// JSON utilities
-export const stringifyWithBigInt = undefined as unknown;
-export const parseJsonWithBigInt = undefined as unknown;
-
-// Gas formatting
-export const formatGasEstimate = undefined as unknown;
-
-// Value formatting
-export const formatWeiToEther = undefined as unknown;
+// Barrel file for utils module
+export * from './artifacts';
+export * from './json';
+export * from './formatting';
+export * from './validation';
+export * from './gas';

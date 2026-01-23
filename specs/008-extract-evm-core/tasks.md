@@ -66,95 +66,95 @@
 
 ### ABI Module Extraction
 
-- [ ] T018 [US1] Move `packages/adapter-evm/src/abi/loader.ts` → `packages/adapter-evm-core/src/abi/loader.ts`
-- [ ] T019 [P] [US1] Move `packages/adapter-evm/src/abi/transformer.ts` → `packages/adapter-evm-core/src/abi/transformer.ts`
-- [ ] T020 [P] [US1] Move `packages/adapter-evm/src/abi/etherscan.ts` → `packages/adapter-evm-core/src/abi/etherscan.ts`
-- [ ] T021 [P] [US1] Move `packages/adapter-evm/src/abi/etherscan-v2.ts` → `packages/adapter-evm-core/src/abi/etherscan-v2.ts`
-- [ ] T022 [P] [US1] Move `packages/adapter-evm/src/abi/sourcify.ts` → `packages/adapter-evm-core/src/abi/sourcify.ts`
-- [ ] T023 [P] [US1] Move `packages/adapter-evm/src/abi/comparison.ts` → `packages/adapter-evm-core/src/abi/comparison.ts`
-- [ ] T024 [P] [US1] Move `packages/adapter-evm/src/abi/types.ts` → `packages/adapter-evm-core/src/abi/types.ts`
-- [ ] T025 [US1] Update `packages/adapter-evm-core/src/abi/index.ts` with real exports from moved files
-- [ ] T026 [US1] Move `packages/adapter-evm/src/abi/__tests__/` → `packages/adapter-evm-core/src/abi/__tests__/`
-- [ ] T027 [US1] Update imports in all moved abi files to use relative paths, logger from ui-utils
+- [X] T018 [US1] Move `packages/adapter-evm/src/abi/loader.ts` → `packages/adapter-evm-core/src/abi/loader.ts`
+- [X] T019 [P] [US1] Move `packages/adapter-evm/src/abi/transformer.ts` → `packages/adapter-evm-core/src/abi/transformer.ts`
+- [X] T020 [P] [US1] Move `packages/adapter-evm/src/abi/etherscan.ts` → `packages/adapter-evm-core/src/abi/etherscan.ts`
+- [X] T021 [P] [US1] Move `packages/adapter-evm/src/abi/etherscan-v2.ts` → `packages/adapter-evm-core/src/abi/etherscan-v2.ts`
+- [X] T022 [P] [US1] Move `packages/adapter-evm/src/abi/sourcify.ts` → `packages/adapter-evm-core/src/abi/sourcify.ts`
+- [X] T023 [P] [US1] Move `packages/adapter-evm/src/abi/comparison.ts` → `packages/adapter-evm-core/src/abi/comparison.ts`
+- [X] T024 [P] [US1] Move `packages/adapter-evm/src/abi/types.ts` → `packages/adapter-evm-core/src/abi/types.ts`
+- [X] T025 [US1] Update `packages/adapter-evm-core/src/abi/index.ts` with real exports from moved files
+- [X] T026 [US1] Move `packages/adapter-evm/src/abi/__tests__/` → `packages/adapter-evm-core/src/abi/__tests__/`
+- [X] T027 [US1] Update imports in all moved abi files to use relative paths, logger from ui-utils
 
 ### Mapping Module Extraction
 
-- [ ] T028 [P] [US1] Move `packages/adapter-evm/src/mapping/type-mapper.ts` → `packages/adapter-evm-core/src/mapping/type-mapper.ts`
-- [ ] T029 [P] [US1] Move `packages/adapter-evm/src/mapping/field-generator.ts` → `packages/adapter-evm-core/src/mapping/field-generator.ts`
-- [ ] T030 [P] [US1] Move `packages/adapter-evm/src/mapping/constants.ts` → `packages/adapter-evm-core/src/mapping/constants.ts`
-- [ ] T031 [US1] Update `packages/adapter-evm-core/src/mapping/index.ts` with real exports
-- [ ] T032 [US1] Move `packages/adapter-evm/src/mapping/__tests__/` → `packages/adapter-evm-core/src/mapping/__tests__/`
+- [X] T028 [P] [US1] Move `packages/adapter-evm/src/mapping/type-mapper.ts` → `packages/adapter-evm-core/src/mapping/type-mapper.ts`
+- [X] T029 [P] [US1] Move `packages/adapter-evm/src/mapping/field-generator.ts` → `packages/adapter-evm-core/src/mapping/field-generator.ts`
+- [X] T030 [P] [US1] Move `packages/adapter-evm/src/mapping/constants.ts` → `packages/adapter-evm-core/src/mapping/constants.ts`
+- [X] T031 [US1] Update `packages/adapter-evm-core/src/mapping/index.ts` with real exports
+- [X] T032 [US1] Move `packages/adapter-evm/src/mapping/__tests__/` → `packages/adapter-evm-core/src/mapping/__tests__/`
 
 ### Transform Module Extraction
 
 > **Note**: Transform module has no unit tests in adapter-evm (tested via integration tests in adapter-evm/__tests__/)
 
-- [ ] T033 [P] [US1] Move `packages/adapter-evm/src/transform/input-parser.ts` → `packages/adapter-evm-core/src/transform/input-parser.ts`
-- [ ] T034 [P] [US1] Move `packages/adapter-evm/src/transform/output-formatter.ts` → `packages/adapter-evm-core/src/transform/output-formatter.ts`
-- [ ] T035 [US1] Update `packages/adapter-evm-core/src/transform/index.ts` with real exports
+- [X] T033 [P] [US1] Move `packages/adapter-evm/src/transform/input-parser.ts` → `packages/adapter-evm-core/src/transform/input-parser.ts`
+- [X] T034 [P] [US1] Move `packages/adapter-evm/src/transform/output-formatter.ts` → `packages/adapter-evm-core/src/transform/output-formatter.ts`
+- [X] T035 [US1] Update `packages/adapter-evm-core/src/transform/index.ts` with real exports
 
 ### Query Module Extraction
 
 > **Note**: Query module has no unit tests in adapter-evm (tested via integration tests in adapter-evm/__tests__/)
 
-- [ ] T036 [P] [US1] Move `packages/adapter-evm/src/query/handler.ts` → `packages/adapter-evm-core/src/query/handler.ts`
-- [ ] T037 [P] [US1] Move `packages/adapter-evm/src/query/view-checker.ts` → `packages/adapter-evm-core/src/query/view-checker.ts`
-- [ ] T038 [US1] Update `packages/adapter-evm-core/src/query/index.ts` with real exports
+- [X] T036 [P] [US1] Move `packages/adapter-evm/src/query/handler.ts` → `packages/adapter-evm-core/src/query/handler.ts`
+- [X] T037 [P] [US1] Move `packages/adapter-evm/src/query/view-checker.ts` → `packages/adapter-evm-core/src/query/view-checker.ts`
+- [X] T038 [US1] Update `packages/adapter-evm-core/src/query/index.ts` with real exports
 
 ### Transaction Module Extraction (Interface Only)
 
 > **Note**: Transaction formatter has no unit tests (UI components tested separately in adapter-evm)
 
-- [ ] T039 [P] [US1] Move `packages/adapter-evm/src/transaction/formatter.ts` → `packages/adapter-evm-core/src/transaction/formatter.ts`
-- [ ] T040 [P] [US1] Create `packages/adapter-evm-core/src/transaction/execution-strategy.ts` with ExecutionStrategy interface (extracted from adapter-evm)
-- [ ] T041 [US1] Update `packages/adapter-evm-core/src/transaction/index.ts` with real exports
+- [X] T039 [P] [US1] Move `packages/adapter-evm/src/transaction/formatter.ts` → `packages/adapter-evm-core/src/transaction/formatter.ts`
+- [X] T040 [P] [US1] Create `packages/adapter-evm-core/src/transaction/execution-strategy.ts` with ExecutionStrategy interface (extracted from adapter-evm)
+- [X] T041 [US1] Update `packages/adapter-evm-core/src/transaction/index.ts` with real exports
 
 ### Configuration Module Extraction
 
-- [ ] T042 [P] [US1] Move `packages/adapter-evm/src/configuration/rpc.ts` → `packages/adapter-evm-core/src/configuration/rpc.ts`
-- [ ] T043 [P] [US1] Move `packages/adapter-evm/src/configuration/explorer.ts` → `packages/adapter-evm-core/src/configuration/explorer.ts`
-- [ ] T044 [US1] Update `packages/adapter-evm-core/src/configuration/index.ts` with real exports
-- [ ] T045 [US1] Move `packages/adapter-evm/src/configuration/__tests__/` → `packages/adapter-evm-core/src/configuration/__tests__/`
+- [X] T042 [P] [US1] Move `packages/adapter-evm/src/configuration/rpc.ts` → `packages/adapter-evm-core/src/configuration/rpc.ts`
+- [X] T043 [P] [US1] Move `packages/adapter-evm/src/configuration/explorer.ts` → `packages/adapter-evm-core/src/configuration/explorer.ts`
+- [X] T044 [US1] Update `packages/adapter-evm-core/src/configuration/index.ts` with real exports
+- [X] T045 [US1] Move `packages/adapter-evm/src/configuration/__tests__/` → `packages/adapter-evm-core/src/configuration/__tests__/`
 
 ### Proxy Module Extraction
 
 > **Note**: Proxy detection has no unit tests (async RPC-dependent, tested via integration)
 
-- [ ] T046 [US1] Move `packages/adapter-evm/src/proxy/detection.ts` → `packages/adapter-evm-core/src/proxy/detection.ts`
-- [ ] T047 [US1] Update `packages/adapter-evm-core/src/proxy/index.ts` with real export
+- [X] T046 [US1] Move `packages/adapter-evm/src/proxy/detection.ts` → `packages/adapter-evm-core/src/proxy/detection.ts`
+- [X] T047 [US1] Update `packages/adapter-evm-core/src/proxy/index.ts` with real export
 
 ### Validation Module Extraction
 
 > **Note**: Validation functions tested via configuration/__tests__/ (address validation is part of config tests)
 
-- [ ] T048 [P] [US1] Move `packages/adapter-evm/src/validation/eoa.ts` → `packages/adapter-evm-core/src/validation/eoa.ts`
-- [ ] T049 [P] [US1] Move `packages/adapter-evm/src/validation/relayer.ts` → `packages/adapter-evm-core/src/validation/relayer.ts`
-- [ ] T050 [US1] Update `packages/adapter-evm-core/src/validation/index.ts` with real exports (including isValidEvmAddress)
+- [X] T048 [P] [US1] Move `packages/adapter-evm/src/validation/eoa.ts` → `packages/adapter-evm-core/src/validation/eoa.ts`
+- [X] T049 [P] [US1] Move `packages/adapter-evm/src/validation/relayer.ts` → `packages/adapter-evm-core/src/validation/relayer.ts`
+- [X] T050 [US1] Update `packages/adapter-evm-core/src/validation/index.ts` with real exports (including isValidEvmAddress)
 
 ### Utils Module Extraction
 
-- [ ] T051 [P] [US1] Move `packages/adapter-evm/src/utils/json.ts` → `packages/adapter-evm-core/src/utils/json.ts`
-- [ ] T052 [P] [US1] Move `packages/adapter-evm/src/utils/formatting.ts` → `packages/adapter-evm-core/src/utils/formatting.ts`
-- [ ] T053 [P] [US1] Move `packages/adapter-evm/src/utils/gas.ts` → `packages/adapter-evm-core/src/utils/gas.ts`
-- [ ] T054 [P] [US1] Move `packages/adapter-evm/src/utils/validation.ts` → `packages/adapter-evm-core/src/utils/validation.ts`
-- [ ] T055 [P] [US1] Move `packages/adapter-evm/src/utils/artifacts.ts` → `packages/adapter-evm-core/src/utils/artifacts.ts`
-- [ ] T056 [US1] Update `packages/adapter-evm-core/src/utils/index.ts` with real exports
-- [ ] T057 [US1] Move `packages/adapter-evm/src/utils/__tests__/` → `packages/adapter-evm-core/src/utils/__tests__/`
+- [X] T051 [P] [US1] Move `packages/adapter-evm/src/utils/json.ts` → `packages/adapter-evm-core/src/utils/json.ts`
+- [X] T052 [P] [US1] Move `packages/adapter-evm/src/utils/formatting.ts` → `packages/adapter-evm-core/src/utils/formatting.ts`
+- [X] T053 [P] [US1] Move `packages/adapter-evm/src/utils/gas.ts` → `packages/adapter-evm-core/src/utils/gas.ts`
+- [X] T054 [P] [US1] Move `packages/adapter-evm/src/utils/validation.ts` → `packages/adapter-evm-core/src/utils/validation.ts`
+- [X] T055 [P] [US1] Move `packages/adapter-evm/src/utils/artifacts.ts` → `packages/adapter-evm-core/src/utils/artifacts.ts`
+- [X] T056 [US1] Update `packages/adapter-evm-core/src/utils/index.ts` with real exports
+- [X] T057 [US1] Move `packages/adapter-evm/src/utils/__tests__/` → `packages/adapter-evm-core/src/utils/__tests__/`
 
 ### Types Module Extraction
 
-- [ ] T058 [P] [US1] Move `packages/adapter-evm/src/types/artifacts.ts` → `packages/adapter-evm-core/src/types/artifacts.ts`
-- [ ] T059 [P] [US1] Move `packages/adapter-evm/src/types/providers.ts` → `packages/adapter-evm-core/src/types/providers.ts`
-- [ ] T060 [US1] Update `packages/adapter-evm-core/src/types/index.ts` with real exports
-- [ ] T061 [US1] Move `packages/adapter-evm/src/types/__tests__/` → `packages/adapter-evm-core/src/types/__tests__/`
+- [X] T058 [P] [US1] Move `packages/adapter-evm/src/types/artifacts.ts` → `packages/adapter-evm-core/src/types/artifacts.ts`
+- [X] T059 [P] [US1] Move `packages/adapter-evm/src/types/providers.ts` → `packages/adapter-evm-core/src/types/providers.ts`
+- [X] T060 [US1] Update `packages/adapter-evm-core/src/types/index.ts` with real exports
+- [X] T061 [US1] Move `packages/adapter-evm/src/types/__tests__/` → `packages/adapter-evm-core/src/types/__tests__/`
 
 ### Core Package Finalization
 
-- [ ] T062 [US1] Update `packages/adapter-evm-core/src/index.ts` to export all modules per contracts/module-exports.ts
-- [ ] T063 [US1] Replace any `console` usage with `logger` from `@openzeppelin/ui-utils` in all core files
-- [ ] T064 [US1] Verify all core modules accept configuration as parameters (no global state)
-- [ ] T065 [US1] Verify all core modules propagate errors with descriptive messages per FR-012 (no swallowing errors)
-- [ ] T066 [US1] Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test` - all migrated tests must pass
+- [X] T062 [US1] Update `packages/adapter-evm-core/src/index.ts` to export all modules per contracts/module-exports.ts
+- [X] T063 [US1] Replace any `console` usage with `logger` from `@openzeppelin/ui-utils` in all core files
+- [X] T064 [US1] Verify all core modules accept configuration as parameters (no global state)
+- [X] T065 [US1] Verify all core modules propagate errors with descriptive messages per FR-012 (no swallowing errors)
+- [X] T066 [US1] Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test` - all migrated tests must pass
 
 **Checkpoint**: adapter-evm-core builds and all migrated tests pass. Core modules are usable by new adapters.
 

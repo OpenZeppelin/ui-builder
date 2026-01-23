@@ -1,22 +1,21 @@
 /**
  * ABI Module
  *
- * Handles ABI loading, transformation, and comparison for EVM contracts.
- * Supports Etherscan (v1/v2) and Sourcify as ABI providers.
+ * Functions for loading, transforming, and comparing EVM contract ABIs.
  *
  * @module abi
  */
 
-// Placeholder exports - will be populated when modules are moved
-
-// ABI loading functions
-export const loadEvmContract = undefined as unknown;
-export const loadAbiFromEtherscan = undefined as unknown;
-export const loadAbiFromEtherscanV2 = undefined as unknown;
-export const loadAbiFromSourcify = undefined as unknown;
-
-// ABI transformation
-export const transformAbiToSchema = undefined as unknown;
-
-// ABI comparison
-export const compareEvmContracts = undefined as unknown;
+// Barrel file for abi module
+export * from './transformer';
+export { loadAbiFromEtherscan, loadAbiFromEtherscanV1, type EtherscanAbiResult } from './etherscan';
+export {
+  loadAbiFromEtherscanV2,
+  shouldUseV2Api,
+  testEtherscanV2Connection,
+  type EtherscanAbiResult as EtherscanV2AbiResult,
+} from './etherscan-v2';
+export { loadAbiFromSourcify, getSourcifyContractAppUrl, type SourcifyAbiResult } from './sourcify';
+export { loadEvmContract, type EvmContractLoadResult, type ContractLoadOptions } from './loader';
+export * from './types';
+export { AbiComparisonService, abiComparisonService } from './comparison';
