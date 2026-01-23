@@ -1,6 +1,7 @@
 import { EvmNetworkConfig, NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-types';
 import { appConfigService, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
+import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
 import { TypedEvmNetworkConfig } from '../types/abi';
 import { isValidEvmAddress } from '../utils';
 
@@ -152,7 +153,7 @@ export function validateEvmExplorerConfig(explorerConfig: UserExplorerConfig): b
 /**
  * Tests the connection to an EVM explorer API.
  * Makes a test API call to verify the API key works.
- * For V2 API networks, use testEtherscanV2Connection from the abi module.
+ * Automatically uses V2 API testing for networks that support it.
  */
 export async function testEvmExplorerConnection(
   explorerConfig: UserExplorerConfig,
@@ -162,6 +163,18 @@ export async function testEvmExplorerConnection(
   latency?: number;
   error?: string;
 }> {
+  // Check if this network supports V2 API and should use it
+  const typedNetworkConfig = networkConfig as TypedEvmNetworkConfig | undefined;
+  if (typedNetworkConfig && shouldUseV2Api(typedNetworkConfig)) {
+    // Use the V2-specific connection test
+    logger.info(
+      'testEvmExplorerConnection',
+      `Using V2 API connection test for ${typedNetworkConfig.name}`
+    );
+    return testEtherscanV2Connection(typedNetworkConfig, explorerConfig.apiKey);
+  }
+
+  // V1 API testing path
   // Check if API key is required for this network
   const requiresApiKey =
     networkConfig && 'requiresExplorerApiKey' in networkConfig
