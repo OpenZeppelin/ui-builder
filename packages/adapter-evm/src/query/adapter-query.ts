@@ -28,9 +28,9 @@ import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-i
  * @param functionId The function ID to call
  * @param networkConfig The network configuration
  * @param params The parameters for the function call
- * @param contractSchema Optional contract schema (if not provided, will error)
+ * @param contractSchema Optional contract schema (if not provided, will use loadContractCallback)
  * @param _walletImplementation Optional wallet implementation (reserved for future use)
- * @param _loadContractCallback Optional callback to load contract schema for proxies (reserved for future use)
+ * @param loadContractCallback Optional callback to load contract schema when not provided
  * @returns The result of the view function call
  */
 export async function queryEvmViewFunction(
@@ -40,10 +40,20 @@ export async function queryEvmViewFunction(
   params: unknown[] = [],
   contractSchema?: ContractSchema,
   _walletImplementation?: WagmiWalletImplementation,
-  _loadContractCallback?: (address: string) => Promise<ContractSchema>
+  loadContractCallback?: (address: string) => Promise<ContractSchema>
 ): Promise<unknown> {
-  if (!contractSchema) {
-    throw new Error('Contract schema is required for view function query');
+  // Use provided schema or fall back to loading via callback
+  let schema = contractSchema;
+  if (!schema) {
+    if (loadContractCallback) {
+      logger.debug('adapter-query', `Loading contract schema for ${contractAddress} via callback`);
+      schema = await loadContractCallback(contractAddress);
+    } else {
+      throw new Error(
+        'Contract schema is required for view function query. ' +
+          'Provide either a contractSchema or a loadContractCallback.'
+      );
+    }
   }
 
   // Resolve RPC URL from network config (supports user overrides)
@@ -61,7 +71,7 @@ export async function queryEvmViewFunction(
     contractAddress,
     functionId,
     params,
-    contractSchema,
+    schema,
     rpcUrl,
     networkConfig
   );
