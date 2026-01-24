@@ -4,9 +4,7 @@ export { EvmAdapter } from './adapter';
 // Export RainbowKit customization types
 export * from './wallet/rainbowkit/types';
 
-// Optionally re-export types if they need to be accessible directly
-// export * from './types';
-
+// Export EVM networks
 export {
   evmNetworks,
   evmMainnetNetworks,
@@ -40,12 +38,16 @@ export {
 // Export adapter configuration
 export { evmAdapterConfig } from './config';
 
-export type { TypedEvmNetworkConfig, WriteContractParameters } from './types';
-export type { EvmRelayerTransactionOptions } from './transaction/relayer';
+// Re-export core types for public API compatibility
+export type {
+  TypedEvmNetworkConfig,
+  WriteContractParameters,
+  EvmContractArtifacts,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+export { isEvmContractArtifacts } from '@openzeppelin/ui-builder-adapter-evm-core';
 
-// Re-export adapter-specific types
-export type { EvmContractArtifacts } from './types/artifacts';
-export { isEvmContractArtifacts } from './types/artifacts';
+// Export adapter-specific types
+export type { EvmRelayerTransactionOptions } from './transaction/relayer';
 
 // Export abi module for comparison functionality
 export { abiComparisonService } from './abi';

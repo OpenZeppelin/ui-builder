@@ -47,6 +47,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*",
     "@openzeppelin/relayer-sdk": "1.4.0",
     "@openzeppelin/ui-components": "^1.0.4",
     "@openzeppelin/ui-react": "^1.1.0",

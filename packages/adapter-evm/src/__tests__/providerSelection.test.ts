@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
-import { loadEvmContract } from '../abi/loader';
+import { loadEvmContract } from '../abi';
 import type { TypedEvmNetworkConfig } from '../types';
 import type { EvmContractArtifacts } from '../types/artifacts';
 

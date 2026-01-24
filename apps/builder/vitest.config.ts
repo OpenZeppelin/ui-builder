@@ -209,9 +209,17 @@ export default defineConfig(
       setupFiles: [path.resolve(__dirname, './src/test/setup.ts')],
       passWithNoTests: true,
       // Increase timeouts to avoid flakes in heavy export tests under Vite 7
-      testTimeout: 20000,
-      hookTimeout: 20000,
-      teardownTimeout: 20000,
+      // EVM adapter initialization takes ~12s, needs buffer for parallel contention
+      testTimeout: 30000,
+      hookTimeout: 30000,
+      teardownTimeout: 30000,
+      // Run export tests sequentially to avoid resource contention during
+      // heavy EVM adapter dynamic imports (which take ~12s each)
+      poolOptions: {
+        threads: {
+          singleThread: false,
+        },
+      },
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html', 'json-summary'],

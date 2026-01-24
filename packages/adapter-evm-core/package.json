@@ -1,0 +1,57 @@
+{
+  "name": "@openzeppelin/ui-builder-adapter-evm-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Internal EVM core package for UI Builder adapters",
+  "keywords": [
+    "openzeppelin",
+    "evm",
+    "core",
+    "adapter",
+    "internal"
+  ],
+  "author": "OpenZeppelin <contact@openzeppelin.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@openzeppelin/ui-types": "^1.3.0",
+    "@openzeppelin/ui-utils": "^1.1.0",
+    "lodash": "^4.17.21",
+    "viem": "^2.33.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.20",
+    "eslint": "^9.32.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./vite-config": {
+      "types": "./dist/vite-config.d.ts",
+      "import": "./dist/vite-config.js",
+      "require": "./dist/vite-config.cjs"
+    }
+  }
+}

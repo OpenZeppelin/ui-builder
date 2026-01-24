@@ -1,3 +1,6 @@
 // Barrel file for query module
-export * from './view-checker';
-export * from './handler';
+// Re-export core query functionality
+export { isEvmViewFunction } from '@openzeppelin/ui-builder-adapter-evm-core';
+
+// Export adapter-specific wrapper that handles RPC resolution and wallet integration
+export { queryEvmViewFunction } from './adapter-query';

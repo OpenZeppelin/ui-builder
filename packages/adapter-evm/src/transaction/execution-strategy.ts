@@ -1,14 +1,17 @@
-import { ExecutionConfig, TransactionStatusUpdate, TxStatus } from '@openzeppelin/ui-types';
+import type { WriteContractParameters } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { ExecutionConfig, TransactionStatusUpdate, TxStatus } from '@openzeppelin/ui-types';
 
-import { WriteContractParameters } from '../types';
-import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
+import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 /**
  * Defines a common interface for different transaction execution strategies (e.g., EOA, Relayer).
  * This allows the adapter to remain a lean orchestrator that selects the appropriate strategy
  * at runtime based on the user's configuration.
+ *
+ * This adapter-specific interface extends the core ExecutionStrategy concept with wallet
+ * implementation support required for EVM adapters using Wagmi.
  */
-export interface ExecutionStrategy {
+export interface AdapterExecutionStrategy {
   /**
    * Executes a transaction according to the specific strategy.
    *

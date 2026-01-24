@@ -2,6 +2,10 @@ import { GetAccountReturnType } from '@wagmi/core';
 import { WalletClient } from 'viem';
 
 import {
+  validateEoaConfig,
+  type WriteContractParameters,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+import {
   EoaExecutionConfig,
   ExecutionConfig,
   TransactionStatusUpdate,
@@ -9,10 +13,8 @@ import {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { WriteContractParameters } from '../types';
-import { validateEoaConfig } from '../validation';
 import { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
-import { ExecutionStrategy } from './execution-strategy';
+import type { AdapterExecutionStrategy } from './execution-strategy';
 
 const SYSTEM_LOG_TAG = 'EoaExecutionStrategy';
 
@@ -21,7 +23,7 @@ const SYSTEM_LOG_TAG = 'EoaExecutionStrategy';
  * This strategy involves signing and broadcasting a transaction directly from the user's
  * connected wallet, which is the most common way of interacting with a blockchain.
  */
-export class EoaExecutionStrategy implements ExecutionStrategy {
+export class EoaExecutionStrategy implements AdapterExecutionStrategy {
   public async execute(
     transactionData: WriteContractParameters,
     executionConfig: ExecutionConfig,
@@ -36,8 +38,8 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
     // Final validation at the point of execution
     const eoaConfig = executionConfig as EoaExecutionConfig;
     const validationResult = await validateEoaConfig(eoaConfig, {
-      ...accountStatus,
-      chainId: accountStatus.chainId?.toString(),
+      isConnected: accountStatus.isConnected,
+      address: accountStatus.address,
     });
     if (validationResult !== true) {
       throw new Error(validationResult);

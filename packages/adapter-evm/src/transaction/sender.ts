@@ -1,10 +1,10 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 import type { TransactionReceipt, WalletClient } from 'viem';
 
+import type { WriteContractParameters } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { ExecutionConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { WriteContractParameters } from '../types';
 import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 const SYSTEM_LOG_TAG = 'adapter-evm-sender';

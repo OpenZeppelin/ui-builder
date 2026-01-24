@@ -1,6 +1,40 @@
 import { type TransactionReceipt } from 'viem';
 import React from 'react';
 
+// Core module imports - reusable EVM logic
+import {
+  // ABI
+  abiComparisonService,
+  // Types
+  EvmProviderKeys,
+  // Transform
+  formatEvmFunctionResult,
+  // Transaction (formatter only)
+  formatEvmTransactionData,
+  // Mapping
+  generateEvmDefaultField,
+  getEvmCompatibleFieldTypes,
+  // Configuration
+  getEvmCurrentBlock,
+  getEvmExplorerAddressUrl,
+  getEvmExplorerTxUrl,
+  getEvmTypeMappingInfo,
+  // Query
+  isEvmViewFunction,
+  // Validation
+  isValidEvmAddress,
+  loadEvmContract,
+  mapEvmParamTypeToFieldType,
+  testEvmExplorerConnection,
+  testEvmRpcConnection,
+  // Utils
+  validateAndConvertEvmArtifacts,
+  validateEvmExplorerConfig,
+  validateEvmRpcEndpoint,
+  type EvmContractDefinitionProviderKey,
+  type TypedEvmNetworkConfig,
+  type WriteContractParameters,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type {
   AvailableUiKit,
   Connector,
@@ -31,13 +65,6 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { abiComparisonService } from './abi/comparison';
-import {
-  getEvmNetworkServiceForms,
-  testEvmNetworkServiceConnection,
-  validateEvmNetworkServiceConfig,
-} from './configuration/network-services';
-import { EvmProviderKeys, type EvmContractDefinitionProviderKey } from './types/providers';
 import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
@@ -46,37 +73,23 @@ import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generat
 import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
 import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
 
-import { loadEvmContract } from './abi';
+// Adapter-specific imports - EVM adapter orchestration
 import {
-  getEvmCurrentBlock,
-  getEvmExplorerAddressUrl,
-  getEvmExplorerTxUrl,
+  getEvmNetworkServiceForms,
   getEvmSupportedExecutionMethods,
-  testEvmExplorerConnection,
-  testEvmRpcConnection,
+  testEvmNetworkServiceConnection,
   validateEvmExecutionConfig,
-  validateEvmExplorerConfig,
-  validateEvmRpcEndpoint,
+  validateEvmNetworkServiceConfig,
 } from './configuration';
-import {
-  generateEvmDefaultField,
-  getEvmCompatibleFieldTypes,
-  getEvmTypeMappingInfo,
-  mapEvmParamTypeToFieldType,
-} from './mapping';
-import { isEvmViewFunction, queryEvmViewFunction } from './query';
+// Adapter-specific query with RPC resolution
+import { queryEvmViewFunction } from './query';
 import {
   EoaExecutionStrategy,
   EvmRelayerOptions,
-  ExecutionStrategy,
-  formatEvmTransactionData,
   RelayerExecutionStrategy,
   waitForEvmTransactionConfirmation,
+  type AdapterExecutionStrategy,
 } from './transaction';
-import { formatEvmFunctionResult } from './transform';
-import { TypedEvmNetworkConfig } from './types';
-import type { WriteContractParameters } from './types';
-import { isValidEvmAddress, validateAndConvertEvmArtifacts } from './utils';
 import {
   connectAndEnsureCorrectNetwork,
   convertWagmiToEvmStatus,
@@ -257,7 +270,7 @@ export class EvmAdapter implements ContractAdapter {
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const walletImplementation = await getEvmWalletImplementation();
-    let strategy: ExecutionStrategy;
+    let strategy: AdapterExecutionStrategy;
 
     switch (executionConfig.method) {
       case 'relayer':
@@ -388,7 +401,7 @@ export class EvmAdapter implements ContractAdapter {
       params,
       contractSchema,
       walletImplementation,
-      (src) => this.loadContract({ contractAddress: src })
+      (src: string) => this.loadContract({ contractAddress: src })
     );
   }
 

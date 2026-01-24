@@ -1,6 +1,10 @@
 // Barrel file for utils module
-export * from './artifacts';
-export * from './json';
-export * from './formatting';
-export * from './validation';
-export * from './gas';
+// Re-export all utility functionality from core package
+export {
+  stringifyWithBigInt,
+  formatMethodName,
+  formatInputName,
+  weiToGwei,
+  gweiToWei,
+  validateAndConvertEvmArtifacts,
+} from '@openzeppelin/ui-builder-adapter-evm-core';

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { loadEvmContract } from '../abi/loader';
-import { getEvmExplorerAddressUrl } from '../configuration/explorer';
+import { loadEvmContract } from '../abi';
+import { getEvmExplorerAddressUrl } from '../configuration';
 import type { TypedEvmNetworkConfig } from '../types';
 import type { EvmContractArtifacts } from '../types/artifacts';
 
