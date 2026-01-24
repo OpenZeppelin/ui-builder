@@ -93,7 +93,13 @@ export const yourChainMainnet: TypedEvmNetworkConfig = {
 
 ```typescript
 // src/adapter.ts
-import type { ContractAdapter, ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
+import type {
+  ContractAdapter,
+  ContractFunction,
+  ContractSchema,
+  FunctionParameter,
+  NetworkConfig,
+} from '@openzeppelin/ui-types';
 import {
   loadEvmContract,
   mapEvmParamTypeToFieldType,
@@ -106,6 +112,7 @@ import {
   formatEvmTransactionData,
   resolveRpcUrl,
   isValidEvmAddress,
+  type EvmContractArtifacts,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { TypedEvmNetworkConfig } from './types';
 
@@ -117,8 +124,13 @@ export class YourChainAdapter implements ContractAdapter {
   }
 
   // Delegate to core modules
-  async loadContract(address: string): Promise<ContractSchema> {
-    return loadEvmContract(address, this.networkConfig);
+  async loadContract(address: string, options?: { artifacts?: unknown }): Promise<ContractSchema> {
+    const evmArtifacts: EvmContractArtifacts = {
+      contractAddress: address,
+      contractDefinition: typeof options?.artifacts === 'string' ? options.artifacts : undefined,
+    };
+    const result = await loadEvmContract(evmArtifacts, this.networkConfig, {});
+    return result.schema;
   }
 
   mapParameterTypeToFieldType(paramType: string) {
@@ -129,24 +141,34 @@ export class YourChainAdapter implements ContractAdapter {
     return getEvmCompatibleFieldTypes(paramType);
   }
 
-  generateDefaultField(param: any, functionId: string, paramIndex: number) {
-    return generateEvmDefaultField(param, functionId, paramIndex);
+  generateDefaultField(param: FunctionParameter, _functionId: string, _paramIndex: number) {
+    // Core function only needs the parameter
+    return generateEvmDefaultField(param);
   }
 
   parseInput(value: string, type: string) {
-    return parseEvmInput(value, type);
+    // Build a minimal FunctionParameter from the type string
+    const param: FunctionParameter = { name: '', type };
+    return parseEvmInput(param, value);
   }
 
-  formatFunctionResult(result: unknown, outputs: any[], functionId: string) {
-    return formatEvmFunctionResult(result, outputs, functionId);
+  formatFunctionResult(result: unknown, outputs: FunctionParameter[], functionId: string) {
+    // Build a minimal ContractFunction for the core formatter
+    const functionDetails: ContractFunction = {
+      name: functionId,
+      inputs: [],
+      outputs,
+      stateMutability: 'view',
+    };
+    return formatEvmFunctionResult(result, functionDetails);
   }
 
-  isViewFunction(func: any) {
+  isViewFunction(func: { stateMutability?: string }) {
     return isEvmViewFunction(func);
   }
 
   async queryViewFunction(address: string, functionId: string, params: unknown[], schema: ContractSchema) {
-    const rpcUrl = resolveRpcUrl(this.networkConfig.id, this.networkConfig);
+    const rpcUrl = resolveRpcUrl(this.networkConfig);
     return queryEvmViewFunction(address, functionId, params, schema, rpcUrl);
   }
 
@@ -234,13 +256,14 @@ async loadContract(address: string): Promise<ContractSchema> {
   // Custom pre-processing
   const normalizedAddress = address.toLowerCase();
   
-  // Call core module
-  const schema = await loadEvmContract(normalizedAddress, this.networkConfig);
+  // Call core module with proper artifacts structure
+  const evmArtifacts: EvmContractArtifacts = { contractAddress: normalizedAddress };
+  const result = await loadEvmContract(evmArtifacts, this.networkConfig, {});
   
   // Custom post-processing
-  schema.name = `${this.networkConfig.name}: ${schema.name}`;
+  result.schema.name = `${this.networkConfig.name}: ${result.schema.name}`;
   
-  return schema;
+  return result.schema;
 }
 ```
 

@@ -2,8 +2,7 @@
  * Adapter-specific query wrapper
  *
  * Wraps the core queryEvmViewFunction with adapter-specific functionality:
- * - Resolves RPC URL from network config
- * - Handles wallet implementation for RPC URL override
+ * - Resolves RPC URL from network config (with user override support)
  * - Supports loading contract schema for proxy implementations
  */
 import {
@@ -57,12 +56,8 @@ export async function queryEvmViewFunction(
   }
 
   // Resolve RPC URL from network config (supports user overrides)
+  // Note: resolveRpcUrl throws if no valid URL can be resolved
   const rpcUrl = resolveRpcUrl(networkConfig);
-  if (!rpcUrl) {
-    throw new Error(
-      `No RPC URL available for network ${networkConfig.name}. Configure an RPC endpoint.`
-    );
-  }
 
   logger.debug('adapter-query', `Using RPC URL for query: ${rpcUrl}`);
 

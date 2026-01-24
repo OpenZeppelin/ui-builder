@@ -14,10 +14,12 @@
 
 import type {
   ContractAdapter,
+  ContractFunction,
   ContractSchema,
   NetworkConfig,
   FunctionParameter,
   FormField,
+  FormFieldType,
   FunctionResult,
 } from '@openzeppelin/ui-types';
 
@@ -25,7 +27,6 @@ import type {
 import {
   // ABI operations
   loadEvmContract,
-  transformAbiToSchema,
   // Type mapping
   mapEvmParamTypeToFieldType,
   getEvmCompatibleFieldTypes,
@@ -45,7 +46,8 @@ import {
   isValidEvmAddress,
   // Types
   type TypedEvmNetworkConfig,
-  type EvmTransactionData,
+  type EvmContractArtifacts,
+  type WriteContractParameters,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 
 /**
@@ -97,9 +99,13 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
     address: string,
     options?: { artifacts?: unknown }
   ): Promise<ContractSchema> {
-    return loadEvmContract(address, this.networkConfig, {
-      contractArtifacts: options?.artifacts,
-    });
+    const evmArtifacts: EvmContractArtifacts = {
+      contractAddress: address,
+      contractDefinition:
+        typeof options?.artifacts === 'string' ? options.artifacts : undefined,
+    };
+    const result = await loadEvmContract(evmArtifacts, this.networkConfig, {});
+    return result.schema;
   }
 
   // ============================================================================
@@ -116,10 +122,11 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
 
   generateDefaultField(
     param: FunctionParameter,
-    functionId: string,
-    paramIndex: number
+    _functionId: string,
+    _paramIndex: number
   ): FormField {
-    return generateEvmDefaultField(param, functionId, paramIndex);
+    // Core function only needs the parameter; functionId/paramIndex unused
+    return generateEvmDefaultField(param);
   }
 
   getTypeMappingInfo() {
@@ -131,7 +138,9 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
   // ============================================================================
 
   parseInput(value: string, type: string): unknown {
-    return parseEvmInput(value, type);
+    // Build a minimal FunctionParameter from the type string
+    const param: FunctionParameter = { name: '', type };
+    return parseEvmInput(param, value);
   }
 
   formatFunctionResult(
@@ -139,7 +148,20 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
     outputs: FunctionParameter[],
     functionId: string
   ): FunctionResult {
-    return formatEvmFunctionResult(result, outputs, functionId);
+    // Build a minimal ContractFunction for the core formatter
+    const functionDetails: ContractFunction = {
+      name: functionId,
+      inputs: [],
+      outputs,
+      stateMutability: 'view',
+    };
+    const formatted = formatEvmFunctionResult(result, functionDetails);
+    // Return as FunctionResult structure
+    return {
+      functionId,
+      result: formatted,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   // ============================================================================
@@ -156,7 +178,7 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
     params: unknown[],
     schema: ContractSchema
   ): Promise<unknown> {
-    const rpcUrl = resolveRpcUrl(this.networkConfig.id, this.networkConfig);
+    const rpcUrl = resolveRpcUrl(this.networkConfig);
     return queryEvmViewFunction(address, functionId, params, schema, rpcUrl);
   }
 
@@ -164,13 +186,25 @@ export class MinimalL2Adapter implements Partial<ContractAdapter> {
   // Transaction Operations - delegated to core
   // ============================================================================
 
+  /**
+   * Format transaction data for contract execution.
+   *
+   * Note: The core `formatEvmTransactionData` expects:
+   * - contractSchema: ContractSchema
+   * - functionId: string
+   * - submittedInputs: Record<string, unknown> (form field values by name)
+   * - fields: FormFieldType[] (form field configurations)
+   *
+   * This is designed for form-based UIs. For simpler use cases, adapters
+   * may need to build the form field structure from raw params.
+   */
   formatTransactionData(
-    address: string,
+    schema: ContractSchema,
     functionId: string,
-    params: unknown[],
-    schema: ContractSchema
-  ): EvmTransactionData {
-    return formatEvmTransactionData(address, functionId, params, schema);
+    submittedInputs: Record<string, unknown>,
+    fields: FormFieldType[]
+  ): WriteContractParameters {
+    return formatEvmTransactionData(schema, functionId, submittedInputs, fields);
   }
 
   // ============================================================================
