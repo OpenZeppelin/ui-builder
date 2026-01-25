@@ -24,12 +24,12 @@
 
 **Purpose**: Create the adapter-polkadot package structure and configuration
 
-- [ ] T001 Create package directory structure per plan.md at `packages/adapter-polkadot/`
-- [ ] T002 Create `packages/adapter-polkadot/package.json` with dependencies (`adapter-evm-core`, `ui-types`, `ui-utils`, `viem`, `wagmi@2`)
-- [ ] T003 [P] Create `packages/adapter-polkadot/tsconfig.json` extending base config
-- [ ] T004 [P] Create `packages/adapter-polkadot/tsup.config.ts` with `noExternal: ['adapter-evm-core']`
-- [ ] T005 [P] Create `packages/adapter-polkadot/vite-config.ts` with minimal config (no WASM)
-- [ ] T006 Run `pnpm install` from monorepo root to link workspace dependencies
+- [x] T001 Create package directory structure per plan.md at `packages/adapter-polkadot/`
+- [x] T002 Create `packages/adapter-polkadot/package.json` with dependencies (`adapter-evm-core`, `ui-types`, `ui-utils`, `viem`, `wagmi@2`)
+- [x] T003 [P] Create `packages/adapter-polkadot/tsconfig.json` extending base config
+- [x] T004 [P] Create `packages/adapter-polkadot/tsup.config.ts` with `noExternal: ['adapter-evm-core']`
+- [x] T005 [P] Create `packages/adapter-polkadot/vite-config.ts` with minimal config (no WASM)
+- [x] T006 Run `pnpm install` from monorepo root to link workspace dependencies
 
 ---
 
