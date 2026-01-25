@@ -11,20 +11,7 @@ import { createConfig, http, WagmiProvider } from 'wagmi';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 
-import { moonbaseAlpha, moonbeam, moonriver } from '../networks';
-import { kusamaHub, polkadotHub, polkadotHubTestNet } from '../networks/chains';
-
-/**
- * All Polkadot ecosystem chains for wagmi configuration.
- */
-const polkadotChains: readonly [Chain, ...Chain[]] = [
-  polkadotHub,
-  kusamaHub,
-  polkadotHubTestNet,
-  moonbeam,
-  moonriver,
-  moonbaseAlpha,
-];
+import { polkadotChains } from './chains';
 
 /**
  * Props for the PolkadotWalletUiRoot component.
@@ -102,9 +89,3 @@ export const PolkadotWalletUiRoot: React.FC<PolkadotWalletUiRootProps> = ({
     </WagmiProvider>
   );
 };
-
-/**
- * Pre-configured Polkadot ecosystem chains.
- * Export for consumers who want to customize the chain list.
- */
-export { polkadotChains };

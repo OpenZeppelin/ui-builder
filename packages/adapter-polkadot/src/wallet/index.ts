@@ -11,11 +11,13 @@
  */
 
 // ============================================================================
+// CHAIN CONSTANTS
+// ============================================================================
+
+export { polkadotChains } from './chains';
+
+// ============================================================================
 // POLKADOT-SPECIFIC COMPONENTS
 // ============================================================================
 
-export {
-  PolkadotWalletUiRoot,
-  polkadotChains,
-  type PolkadotWalletUiRootProps,
-} from './PolkadotWalletUiRoot';
+export { PolkadotWalletUiRoot, type PolkadotWalletUiRootProps } from './PolkadotWalletUiRoot';
