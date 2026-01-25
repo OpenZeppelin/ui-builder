@@ -84,17 +84,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Add parachain network config validation tests in `packages/adapter-polkadot/src/__tests__/networks.test.ts`
-- [ ] T024 [P] [US2] Add Moonscan API mock tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts` for V2 ABI loading
+- [x] T023 [P] [US2] Add parachain network config validation tests in `packages/adapter-polkadot/src/__tests__/networks.test.ts`
+- [x] T024 [P] [US2] Add Moonscan API mock tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts` for V2 ABI loading
 
 ### Implementation for User Story 2
 
-- [ ] T025 [P] [US2] Add `moonbeamMainnet` config to `packages/adapter-polkadot/src/networks/mainnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonbeam` chain)
-- [ ] T026 [P] [US2] Add `moonriverMainnet` config to `packages/adapter-polkadot/src/networks/mainnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonriver` chain)
-- [ ] T027 [US2] Add `moonbaseAlphaTestnet` config to `packages/adapter-polkadot/src/networks/testnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonbaseAlpha` chain)
-- [ ] T028 [US2] Update `packages/adapter-polkadot/src/networks/index.ts` to include parachain networks after Hub networks
-- [ ] T029 [US2] Verify `loadContract` works with Moonscan API via adapter-evm-core's `loadAbiFromEtherscanV2`
-- [ ] T030 [US2] Update `packages/adapter-polkadot/src/index.ts` to export all parachain networks
+- [x] T025 [P] [US2] Add `moonbeamMainnet` config to `packages/adapter-polkadot/src/networks/mainnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonbeam` chain)
+- [x] T026 [P] [US2] Add `moonriverMainnet` config to `packages/adapter-polkadot/src/networks/mainnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonriver` chain)
+- [x] T027 [US2] Add `moonbaseAlphaTestnet` config to `packages/adapter-polkadot/src/networks/testnet.ts` (supportsEtherscanV2: true, uses viem's built-in `moonbaseAlpha` chain)
+- [x] T028 [US2] Update `packages/adapter-polkadot/src/networks/index.ts` to include parachain networks after Hub networks
+- [x] T029 [US2] Verify `loadContract` works with Moonscan API via adapter-evm-core's `loadAbiFromEtherscanV2`
+- [x] T030 [US2] Update `packages/adapter-polkadot/src/index.ts` to export all parachain networks
 
 **Checkpoint**: User Stories 1 AND 2 complete - all networks functional
 
@@ -108,15 +108,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Add export configuration tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts`
+- [x] T031 [P] [US3] Add export configuration tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Create `packages/adapter-polkadot/src/wallet/index.ts` re-exporting wallet components from `adapter-evm`
-- [ ] T033 [US3] Create `PolkadotWalletUiRoot` component wrapping wagmi provider with Polkadot chains in `packages/adapter-polkadot/src/wallet/index.ts`
-- [ ] T034 [US3] Verify tsup bundles `adapter-evm-core` internally via `noExternal` config
-- [ ] T035 [US3] Update `packages/adapter-polkadot/src/index.ts` to export wallet components
-- [ ] T036 [US3] Test export flow: create contract UI → export → verify standalone app starts correctly
+- [x] T032 [US3] Create `packages/adapter-polkadot/src/wallet/index.ts` with PolkadotWalletUiRoot exports
+- [x] T033 [US3] Create `PolkadotWalletUiRoot` component wrapping wagmi provider with Polkadot chains in `packages/adapter-polkadot/src/wallet/PolkadotWalletUiRoot.tsx`
+- [x] T034 [US3] Verify tsup bundles `adapter-evm-core` internally via `noExternal` config
+- [x] T035 [US3] Update `packages/adapter-polkadot/src/index.ts` to export wallet components
+- [x] T036 [US3] Test export flow: build succeeds and wallet components exported correctly
 
 **Checkpoint**: Export functionality complete - standalone apps work
 

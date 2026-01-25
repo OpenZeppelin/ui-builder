@@ -628,6 +628,9 @@ importers:
 
   packages/adapter-polkadot:
     dependencies:
+      '@openzeppelin/ui-builder-adapter-evm':
+        specifier: workspace:*
+        version: link:../adapter-evm
       '@openzeppelin/ui-builder-adapter-evm-core':
         specifier: workspace:*
         version: link:../adapter-evm-core

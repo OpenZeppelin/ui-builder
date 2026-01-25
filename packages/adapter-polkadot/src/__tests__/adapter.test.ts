@@ -6,6 +6,8 @@ import { PolkadotAdapter } from '../adapter';
 // Import after mock setup
 import * as evmHandler from '../handlers/evm-handler';
 import type { TypedPolkadotNetworkConfig } from '../types';
+// Import wallet exports to verify they're available
+import { polkadotChains, PolkadotWalletUiRoot } from '../wallet';
 
 // Mock the EVM handler module
 vi.mock('../handlers/evm-handler', () => ({
@@ -197,6 +199,46 @@ describe('PolkadotAdapter', () => {
       expect(() => adapter.mapParameterTypeToFieldType('uint256')).toThrow(
         'Operation not supported for execution type: substrate'
       );
+    });
+  });
+});
+
+describe('Module Exports', () => {
+  describe('PolkadotAdapter export', () => {
+    it('should export PolkadotAdapter class', () => {
+      expect(PolkadotAdapter).toBeDefined();
+      expect(typeof PolkadotAdapter).toBe('function');
+    });
+
+    it('should be instantiable with valid config', () => {
+      const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
+      expect(adapter).toBeInstanceOf(PolkadotAdapter);
+    });
+  });
+
+  describe('Wallet component exports', () => {
+    it('should export PolkadotWalletUiRoot component', () => {
+      expect(PolkadotWalletUiRoot).toBeDefined();
+      expect(typeof PolkadotWalletUiRoot).toBe('function');
+    });
+
+    it('should export polkadotChains array', () => {
+      expect(polkadotChains).toBeDefined();
+      expect(Array.isArray(polkadotChains)).toBe(true);
+      expect(polkadotChains.length).toBeGreaterThan(0);
+    });
+
+    it('should include all Polkadot ecosystem chains', () => {
+      // Verify Hub chains are present
+      const chainIds = polkadotChains.map((c) => c.id);
+      expect(chainIds).toContain(420420419); // polkadotHub
+      expect(chainIds).toContain(420420418); // kusamaHub
+      expect(chainIds).toContain(420420417); // polkadotHubTestNet
+
+      // Verify Parachain chains are present
+      expect(chainIds).toContain(1284); // moonbeam
+      expect(chainIds).toContain(1285); // moonriver
+      expect(chainIds).toContain(1287); // moonbaseAlpha
     });
   });
 });

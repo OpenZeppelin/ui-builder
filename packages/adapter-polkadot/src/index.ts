@@ -55,8 +55,7 @@ export { moonbeam, moonriver, moonbaseAlpha } from './networks';
 // WALLET COMPONENTS
 // ============================================================================
 
-// Wallet exports will be added in Phase 5 (User Story 3)
-// export { PolkadotWalletUiRoot, ConnectButton, AccountDisplay, NetworkSwitcher } from './wallet';
+export { PolkadotWalletUiRoot, polkadotChains, type PolkadotWalletUiRootProps } from './wallet';
 
 // ============================================================================
 // ECOSYSTEM REGISTRATION

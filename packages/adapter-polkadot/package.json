@@ -45,6 +45,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@openzeppelin/ui-builder-adapter-evm": "workspace:*",
     "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*",
     "@openzeppelin/ui-types": "^1.3.0",
     "@openzeppelin/ui-utils": "^1.1.0",
