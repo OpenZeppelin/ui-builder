@@ -228,7 +228,7 @@ The adapter architecture should be designed to accommodate future non-EVM parach
 - **SC-002**: Users can load and interact with contracts on Moonbeam/Moonriver using Moonscan (Etherscan V2) for ABI loading
 - **SC-003**: Polkadot appears as a distinct ecosystem in the UI Builder with Hub networks listed before parachain networks
 - **SC-004**: Exported applications for Polkadot EVM contracts function correctly as standalone apps
-- **SC-005**: The adapter package size remains reasonable (comparable to EVM adapter, accounting for bundled core)
+- **SC-005**: The adapter package bundle size MUST be within 25% of `adapter-evm` size (accounting for bundled core); verify with `du -sh dist/` after build
 - **SC-006**: All EVM adapter test patterns pass when adapted for Polkadot networks (address validation, type mapping, transaction formatting)
 - **SC-007**: Adding a new EVM network requires only adding a network configuration file (no adapter code changes)
 

@@ -63,8 +63,10 @@ packages/adapter-polkadot/
 │   ├── index.ts                     # Main exports
 │   ├── adapter.ts                   # PolkadotAdapter class
 │   ├── types.ts                     # TypedPolkadotNetworkConfig
+│   ├── utils.ts                     # Network utility functions
 │   ├── networks/
 │   │   ├── index.ts                 # Aggregate exports
+│   │   ├── chains.ts                # Custom viem chain definitions (Polkadot Hub, Kusama Hub)
 │   │   ├── mainnet.ts               # Polkadot Hub, Kusama Hub, Moonbeam, Moonriver
 │   │   └── testnet.ts               # Polkadot Hub TestNet, Moonbase Alpha
 │   ├── handlers/
@@ -74,7 +76,8 @@ packages/adapter-polkadot/
 │   └── __tests__/
 │       ├── adapter.test.ts
 │       ├── networks.test.ts
-│       └── types.test.ts
+│       ├── types.test.ts
+│       └── utils.test.ts
 ```
 
 **Structure Decision**: Single package following the established adapter pattern (mirrors `adapter-evm` structure). The `handlers/` directory is added to support future non-EVM execution types.
