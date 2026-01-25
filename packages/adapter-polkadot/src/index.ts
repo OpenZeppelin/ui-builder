@@ -28,17 +28,21 @@ export type {
 // NETWORK CONFIGURATIONS
 // ============================================================================
 
-// Network exports will be added in Phase 3 (User Story 1) and Phase 4 (User Story 2)
-// export { polkadotHubMainnet, kusamaHubMainnet, ... } from './networks';
-// export { polkadotHubTestnet, moonbaseAlphaTestnet, ... } from './networks';
-// export { mainnetNetworks, testnetNetworks, networks } from './networks';
+// Hub networks (P1 - MVP)
+export {
+  polkadotHubMainnet,
+  kusamaHubMainnet,
+  polkadotHubTestnet,
+  mainnetNetworks,
+  testnetNetworks,
+  networks,
+} from './networks';
 
 // ============================================================================
 // VIEM CHAIN DEFINITIONS
 // ============================================================================
 
-// Chain exports will be added in Phase 3 (User Story 1)
-// export { polkadotHub, kusamaHub, polkadotHubTestNet } from './networks/chains';
+export { polkadotHub, kusamaHub, polkadotHubTestNet } from './networks/chains';
 
 // ============================================================================
 // WALLET COMPONENTS

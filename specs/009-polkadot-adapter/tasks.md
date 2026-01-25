@@ -58,19 +58,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Create `packages/adapter-polkadot/src/__tests__/networks.test.ts` with Hub network config validation tests
-- [ ] T014 [P] [US1] Add Blockscout API mock tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts` for V1 ABI loading
+- [x] T013 [P] [US1] Create `packages/adapter-polkadot/src/__tests__/networks.test.ts` with Hub network config validation tests
+- [x] T014 [P] [US1] Add Blockscout API mock tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts` for V1 ABI loading
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create custom viem chain definition `polkadotHub` (chain ID 420420419) in `packages/adapter-polkadot/src/networks/chains.ts`
-- [ ] T016 [P] [US1] Create custom viem chain definition `kusamaHub` (chain ID 420420418) in `packages/adapter-polkadot/src/networks/chains.ts`
-- [ ] T017 [P] [US1] Create custom viem chain definition `polkadotHubTestNet` (chain ID 420420417) in `packages/adapter-polkadot/src/networks/chains.ts`
-- [ ] T018 [US1] Create `packages/adapter-polkadot/src/networks/mainnet.ts` with `polkadotHubMainnet` and `kusamaHubMainnet` configs (supportsEtherscanV2: false)
-- [ ] T019 [US1] Create `packages/adapter-polkadot/src/networks/testnet.ts` with `polkadotHubTestnet` config (supportsEtherscanV2: false)
-- [ ] T020 [US1] Create `packages/adapter-polkadot/src/networks/index.ts` aggregating network exports with Hub networks first
-- [ ] T021 [US1] Verify `loadContract` works with Blockscout API URL via adapter-evm-core's `loadAbiFromEtherscanV1`
-- [ ] T022 [US1] Update `packages/adapter-polkadot/src/index.ts` to export Hub networks and viem chains
+- [x] T015 [P] [US1] Create custom viem chain definition `polkadotHub` (chain ID 420420419) in `packages/adapter-polkadot/src/networks/chains.ts`
+- [x] T016 [P] [US1] Create custom viem chain definition `kusamaHub` (chain ID 420420418) in `packages/adapter-polkadot/src/networks/chains.ts`
+- [x] T017 [P] [US1] Create custom viem chain definition `polkadotHubTestNet` (chain ID 420420417) in `packages/adapter-polkadot/src/networks/chains.ts`
+- [x] T018 [US1] Create `packages/adapter-polkadot/src/networks/mainnet.ts` with `polkadotHubMainnet` and `kusamaHubMainnet` configs (supportsEtherscanV2: false)
+- [x] T019 [US1] Create `packages/adapter-polkadot/src/networks/testnet.ts` with `polkadotHubTestnet` config (supportsEtherscanV2: false)
+- [x] T020 [US1] Create `packages/adapter-polkadot/src/networks/index.ts` aggregating network exports with Hub networks first
+- [x] T021 [US1] Verify `loadContract` works with Blockscout API URL via adapter-evm-core's `loadAbiFromEtherscanV1`
+- [x] T022 [US1] Update `packages/adapter-polkadot/src/index.ts` to export Hub networks and viem chains
 
 **Checkpoint**: User Story 1 complete - Hub contract interaction works independently
 

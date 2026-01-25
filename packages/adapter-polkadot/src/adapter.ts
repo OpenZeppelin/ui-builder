@@ -131,16 +131,6 @@ export class PolkadotAdapter implements ContractAdapter {
   }
 
   /**
-   * Parse user input to blockchain-compatible value.
-   * Delegates to adapter-evm-core.
-   * @internal
-   */
-  private parseInput(value: string, type: string): unknown {
-    this.assertEvmExecution();
-    return evmHandler.parseInput(value, type);
-  }
-
-  /**
    * Format blockchain result for display.
    * Delegates to adapter-evm-core.
    */
@@ -204,14 +194,6 @@ export class PolkadotAdapter implements ContractAdapter {
       { key: 'sourcify', label: 'Sourcify' },
       { key: 'manual', label: 'Manual' },
     ];
-  }
-
-  /**
-   * Get the current typed network configuration.
-   * @internal
-   */
-  private getTypedNetworkConfig(): TypedPolkadotNetworkConfig {
-    return this._typedNetworkConfig;
   }
 
   /**
