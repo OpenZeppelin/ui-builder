@@ -2,6 +2,8 @@
  * @fileoverview Testnet network configurations for Polkadot adapter.
  */
 
+import { moonbaseAlpha } from 'viem/chains';
+
 import type { TypedPolkadotNetworkConfig } from '../types';
 import { polkadotHubTestNet } from './chains';
 
@@ -33,8 +35,40 @@ export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   relayChain: 'polkadot',
 };
 
+// ============================================================================
+// PARACHAIN TESTNETS (P2)
+// ============================================================================
+
+/**
+ * Moonbase Alpha testnet configuration.
+ * Chain ID: 1287, Currency: DEV, Explorer: Moonscan
+ */
+export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
+  id: 'polkadot-moonbase-alpha-testnet',
+  name: 'Moonbase Alpha',
+  exportConstName: 'moonbaseAlphaTestnet',
+  ecosystem: 'polkadot',
+  network: 'moonbase-alpha',
+  type: 'testnet',
+  isTestnet: true,
+  chainId: 1287,
+  rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+  explorerUrl: 'https://moonbase.moonscan.io',
+  apiUrl: 'https://api-moonbase.moonscan.io/api',
+  supportsEtherscanV2: true,
+  nativeCurrency: {
+    name: 'DEV',
+    symbol: 'DEV',
+    decimals: 18,
+  },
+  viemChain: moonbaseAlpha,
+  executionType: 'evm',
+  networkCategory: 'parachain',
+  relayChain: undefined, // Testnet, no relay chain
+};
+
 /**
  * All testnet network configurations in priority order.
- * Hub networks first (P1), then parachains (P2) will be added later.
+ * Hub networks first (P1), then parachains (P2).
  */
-export const testnetNetworks = [polkadotHubTestnet] as const;
+export const testnetNetworks = [polkadotHubTestnet, moonbaseAlphaTestnet] as const;

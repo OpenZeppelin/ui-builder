@@ -2,6 +2,8 @@
  * @fileoverview Mainnet network configurations for Polkadot adapter.
  */
 
+import { moonbeam, moonriver } from 'viem/chains';
+
 import type { TypedPolkadotNetworkConfig } from '../types';
 import { kusamaHub, polkadotHub } from './chains';
 
@@ -61,8 +63,73 @@ export const kusamaHubMainnet: TypedPolkadotNetworkConfig = {
   relayChain: 'kusama',
 };
 
+// ============================================================================
+// PARACHAIN NETWORKS (P2)
+// ============================================================================
+
+/**
+ * Moonbeam mainnet configuration.
+ * Chain ID: 1284, Currency: GLMR, Explorer: Moonscan
+ */
+export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
+  id: 'polkadot-moonbeam-mainnet',
+  name: 'Moonbeam',
+  exportConstName: 'moonbeamMainnet',
+  ecosystem: 'polkadot',
+  network: 'moonbeam',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 1284,
+  rpcUrl: 'https://rpc.api.moonbeam.network',
+  explorerUrl: 'https://moonbeam.moonscan.io',
+  apiUrl: 'https://api-moonbeam.moonscan.io/api',
+  supportsEtherscanV2: true,
+  nativeCurrency: {
+    name: 'Glimmer',
+    symbol: 'GLMR',
+    decimals: 18,
+  },
+  viemChain: moonbeam,
+  executionType: 'evm',
+  networkCategory: 'parachain',
+  relayChain: 'polkadot',
+};
+
+/**
+ * Moonriver mainnet configuration.
+ * Chain ID: 1285, Currency: MOVR, Explorer: Moonscan
+ */
+export const moonriverMainnet: TypedPolkadotNetworkConfig = {
+  id: 'polkadot-moonriver-mainnet',
+  name: 'Moonriver',
+  exportConstName: 'moonriverMainnet',
+  ecosystem: 'polkadot',
+  network: 'moonriver',
+  type: 'mainnet',
+  isTestnet: false,
+  chainId: 1285,
+  rpcUrl: 'https://rpc.api.moonriver.moonbeam.network',
+  explorerUrl: 'https://moonriver.moonscan.io',
+  apiUrl: 'https://api-moonriver.moonscan.io/api',
+  supportsEtherscanV2: true,
+  nativeCurrency: {
+    name: 'Moonriver',
+    symbol: 'MOVR',
+    decimals: 18,
+  },
+  viemChain: moonriver,
+  executionType: 'evm',
+  networkCategory: 'parachain',
+  relayChain: 'kusama',
+};
+
 /**
  * All mainnet network configurations in priority order.
- * Hub networks first (P1), then parachains (P2) will be added later.
+ * Hub networks first (P1), then parachains (P2).
  */
-export const mainnetNetworks = [polkadotHubMainnet, kusamaHubMainnet] as const;
+export const mainnetNetworks = [
+  polkadotHubMainnet,
+  kusamaHubMainnet,
+  moonbeamMainnet,
+  moonriverMainnet,
+] as const;

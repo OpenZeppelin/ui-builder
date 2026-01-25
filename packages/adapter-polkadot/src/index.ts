@@ -38,11 +38,18 @@ export {
   networks,
 } from './networks';
 
+// Parachain networks (P2)
+export { moonbeamMainnet, moonriverMainnet, moonbaseAlphaTestnet } from './networks';
+
 // ============================================================================
 // VIEM CHAIN DEFINITIONS
 // ============================================================================
 
+// Custom Hub chain definitions
 export { polkadotHub, kusamaHub, polkadotHubTestNet } from './networks/chains';
+
+// Parachain viem chains (re-exported from viem/chains)
+export { moonbeam, moonriver, moonbaseAlpha } from './networks';
 
 // ============================================================================
 // WALLET COMPONENTS

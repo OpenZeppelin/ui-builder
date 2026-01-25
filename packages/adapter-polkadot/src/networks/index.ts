@@ -8,14 +8,23 @@ import { testnetNetworks } from './testnet';
  * @fileoverview Network configuration exports for Polkadot adapter.
  */
 
-// Viem chain definitions
+// Viem chain definitions (custom Hub chains)
 export { polkadotHub, kusamaHub, polkadotHubTestNet } from './chains';
 
-// Mainnet networks
-export { polkadotHubMainnet, kusamaHubMainnet, mainnetNetworks } from './mainnet';
+// Viem chain definitions (from viem/chains)
+export { moonbeam, moonriver, moonbaseAlpha } from 'viem/chains';
 
-// Testnet networks
-export { polkadotHubTestnet, testnetNetworks } from './testnet';
+// Mainnet networks - Hub networks first, then parachains
+export {
+  polkadotHubMainnet,
+  kusamaHubMainnet,
+  moonbeamMainnet,
+  moonriverMainnet,
+  mainnetNetworks,
+} from './mainnet';
+
+// Testnet networks - Hub networks first, then parachains
+export { polkadotHubTestnet, moonbaseAlphaTestnet, testnetNetworks } from './testnet';
 
 // Re-export types
 export type { TypedPolkadotNetworkConfig } from '../types';
