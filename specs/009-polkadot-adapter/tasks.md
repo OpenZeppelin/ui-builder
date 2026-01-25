@@ -130,14 +130,14 @@
 
 ### Tests for User Story 4
 
-- [ ] T037 [P] [US4] Add ecosystem registration tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts`
+- [x] T037 [P] [US4] Add ecosystem registration tests in `packages/adapter-polkadot/src/__tests__/adapter.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] Create `registerPolkadotEcosystem()` function in `packages/adapter-polkadot/src/index.ts`
-- [ ] T039 [US4] Register Polkadot ecosystem in `apps/builder/src/core/ecosystems/registry.ts` with lazy import
-- [ ] T040 [US4] Add Polkadot icon/branding to ecosystem selector (use `lucide-react` icon or coordinate with design system for custom SVG; placeholder acceptable initially)
-- [ ] T041 [US4] Verify network ordering: Hub networks (P1) appear before parachain networks (P2) in selector
+- [x] T038 [US4] Create `polkadotAdapterConfig` and `polkadotNetworks` exports in `packages/adapter-polkadot/src/index.ts`
+- [x] T039 [US4] Register Polkadot ecosystem in `apps/builder/src/core/ecosystems/registry.ts` and `ecosystemManager.ts`
+- [x] T040 [US4] Add Polkadot icon/branding to ecosystem selector (uses `networkIconName: 'polkadot'` for @web3icons/react)
+- [x] T041 [US4] Verify network ordering: Hub networks (P1) appear before parachain networks (P2) in selector
 
 **Checkpoint**: UI integration complete - Polkadot ecosystem visible in builder
 

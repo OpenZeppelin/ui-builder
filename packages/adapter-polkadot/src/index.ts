@@ -36,6 +36,7 @@ export {
   mainnetNetworks,
   testnetNetworks,
   networks,
+  polkadotNetworks,
 } from './networks';
 
 // Parachain networks (P2)
@@ -58,11 +59,10 @@ export { moonbeam, moonriver, moonbaseAlpha } from './networks';
 export { PolkadotWalletUiRoot, polkadotChains, type PolkadotWalletUiRootProps } from './wallet';
 
 // ============================================================================
-// ECOSYSTEM REGISTRATION
+// ADAPTER CONFIGURATION
 // ============================================================================
 
-// Ecosystem registration will be added in Phase 6 (User Story 4)
-// export { registerPolkadotEcosystem } from './ecosystem';
+export { polkadotAdapterConfig } from './config';
 
 // ============================================================================
 // UTILITIES

@@ -33,3 +33,10 @@ export const networks = {
   ...Object.fromEntries(mainnetNetworks.map((n) => [n.id, n])),
   ...Object.fromEntries(testnetNetworks.map((n) => [n.id, n])),
 } as const;
+
+/**
+ * All Polkadot ecosystem networks as an array.
+ * Used by the ecosystem manager for network discovery.
+ * Hub networks appear first (P1), followed by parachain networks (P2).
+ */
+export const polkadotNetworks = [...mainnetNetworks, ...testnetNetworks];

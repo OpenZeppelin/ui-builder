@@ -4,7 +4,13 @@ import type { Ecosystem, EcosystemFeatureConfig, EcosystemInfo } from '@openzepp
  * Ordered list of ecosystems for consistent display across the application
  * This defines the order in which ecosystems appear in the UI
  */
-export const ECOSYSTEM_ORDER: Ecosystem[] = ['evm', 'stellar', 'midnight', 'solana'] as const;
+export const ECOSYSTEM_ORDER: Ecosystem[] = [
+  'evm',
+  'polkadot',
+  'stellar',
+  'midnight',
+  'solana',
+] as const;
 
 /**
  * Central registry of blockchain ecosystem information
@@ -62,6 +68,20 @@ export const ECOSYSTEM_REGISTRY: Record<Ecosystem, EcosystemInfo> = {
       enabled: false,
       showInUI: false,
       disabledLabel: 'Coming Soon',
+    },
+  },
+  polkadot: {
+    name: 'Polkadot',
+    description:
+      'Polkadot is a heterogeneous multi-chain protocol enabling cross-chain communication and shared security. It supports EVM-compatible smart contracts through Hub networks and parachains like Moonbeam.',
+    explorerGuidance: 'Blockscout or Moonscan verified contracts',
+    addressExample: '0x...',
+    networkIconName: 'polkadot',
+    bgColorClass: 'bg-pink-100',
+    textColorClass: 'text-pink-900',
+    defaultFeatureConfig: {
+      enabled: true,
+      showInUI: true,
     },
   },
 };

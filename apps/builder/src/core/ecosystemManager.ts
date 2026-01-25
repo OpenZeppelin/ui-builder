@@ -5,6 +5,7 @@ import type {
   Ecosystem,
   MidnightNetworkConfig,
   NetworkConfig,
+  PolkadotNetworkConfig,
   SolanaNetworkConfig,
   StellarNetworkConfig,
 } from '@openzeppelin/ui-types';
@@ -15,13 +16,15 @@ type EvmAdapterConstructor = new (networkConfig: TypedEvmNetworkConfig) => Contr
 type SolanaAdapterConstructor = new (networkConfig: SolanaNetworkConfig) => ContractAdapter;
 type StellarAdapterConstructor = new (networkConfig: StellarNetworkConfig) => ContractAdapter;
 type MidnightAdapterConstructor = new (networkConfig: MidnightNetworkConfig) => ContractAdapter;
+type PolkadotAdapterConstructor = new (networkConfig: PolkadotNetworkConfig) => ContractAdapter;
 
 // Union of all possible adapter constructor types
 type AnySpecificAdapterConstructor =
   | EvmAdapterConstructor
   | SolanaAdapterConstructor
   | StellarAdapterConstructor
-  | MidnightAdapterConstructor;
+  | MidnightAdapterConstructor
+  | PolkadotAdapterConstructor;
 
 // Define the structure for each ecosystem's metadata
 interface EcosystemMetadata {
@@ -66,6 +69,14 @@ const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
     adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-midnight',
     adapterConfigExportName: 'midnightAdapterConfig',
   },
+  polkadot: {
+    networksExportName: 'polkadotNetworks',
+    getAdapterClass: async () =>
+      (await import('@openzeppelin/ui-builder-adapter-polkadot'))
+        .PolkadotAdapter as PolkadotAdapterConstructor,
+    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-polkadot',
+    adapterConfigExportName: 'polkadotAdapterConfig',
+  },
 };
 
 // --- Network Discovery Logic (adapted from networks/registry.ts) ---
@@ -82,6 +93,8 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
       return import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
       return import('@openzeppelin/ui-builder-adapter-midnight');
+    case 'polkadot':
+      return import('@openzeppelin/ui-builder-adapter-polkadot');
     default: {
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
@@ -250,6 +263,8 @@ export function getAdapterConfigLoader(
       return () => import('@openzeppelin/ui-builder-adapter-stellar');
     case 'midnight':
       return () => import('@openzeppelin/ui-builder-adapter-midnight');
+    case 'polkadot':
+      return () => import('@openzeppelin/ui-builder-adapter-polkadot');
     default: {
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
@@ -302,6 +317,10 @@ export async function getAdapter(networkConfigInput: NetworkConfig): Promise<Con
       return new (AdapterClass as MidnightAdapterConstructor)(
         networkConfigInput as MidnightNetworkConfig
       );
+    case 'polkadot':
+      return new (AdapterClass as PolkadotAdapterConstructor)(
+        networkConfigInput as PolkadotNetworkConfig
+      );
     default:
       const unhandledEcosystem = (networkConfigInput as NetworkConfig).ecosystem;
       throw new Error(`No adapter constructor logic for ${String(unhandledEcosystem)}`);
@@ -314,4 +333,5 @@ export const adapterPackageMap: Record<Ecosystem, string> = {
   solana: '@openzeppelin/ui-builder-adapter-solana',
   stellar: '@openzeppelin/ui-builder-adapter-stellar',
   midnight: '@openzeppelin/ui-builder-adapter-midnight',
+  polkadot: '@openzeppelin/ui-builder-adapter-polkadot',
 };
