@@ -39,12 +39,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Create `packages/adapter-polkadot/src/types.ts` with `PolkadotExecutionType`, `PolkadotNetworkCategory`, `PolkadotRelayChain`, and `TypedPolkadotNetworkConfig` per data-model.md
-- [ ] T008 [P] Create `packages/adapter-polkadot/src/__tests__/types.test.ts` with type validation tests
-- [ ] T009 Create `packages/adapter-polkadot/src/handlers/evm-handler.ts` delegating to `adapter-evm-core` modules (includes execution strategies: EOA, Relayer via core)
-- [ ] T010 Create `packages/adapter-polkadot/src/adapter.ts` with `PolkadotAdapter` class implementing `ContractAdapter` interface
-- [ ] T011 [P] Create `packages/adapter-polkadot/src/__tests__/adapter.test.ts` with adapter method tests
-- [ ] T012 Create `packages/adapter-polkadot/src/index.ts` aggregating all exports per contracts/module-exports.ts
+- [x] T007 Create `packages/adapter-polkadot/src/types.ts` with `PolkadotExecutionType`, `PolkadotNetworkCategory`, `PolkadotRelayChain`, and `TypedPolkadotNetworkConfig` per data-model.md
+- [x] T008 [P] Create `packages/adapter-polkadot/src/__tests__/types.test.ts` with type validation tests
+- [x] T009 Create `packages/adapter-polkadot/src/handlers/evm-handler.ts` delegating to `adapter-evm-core` modules (includes execution strategies: EOA, Relayer via core)
+- [x] T010 Create `packages/adapter-polkadot/src/adapter.ts` with `PolkadotAdapter` class implementing `ContractAdapter` interface
+- [x] T011 [P] Create `packages/adapter-polkadot/src/__tests__/adapter.test.ts` with adapter method tests
+- [x] T012 Create `packages/adapter-polkadot/src/index.ts` aggregating all exports per contracts/module-exports.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
