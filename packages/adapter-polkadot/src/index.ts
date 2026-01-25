@@ -68,5 +68,13 @@ export { polkadotAdapterConfig } from './config';
 // UTILITIES
 // ============================================================================
 
-// Utility exports will be added in Phase 8 (Utilities & Polish)
-// export { getNetworksByCategory, getNetworksByRelayChain, isHubNetwork, isParachainNetwork } from './utils';
+export {
+  getNetworksByCategory,
+  getNetworksByRelayChain,
+  isHubNetwork,
+  isParachainNetwork,
+  getMainnetNetworks,
+  getTestnetNetworks,
+  getNetworkByChainId,
+  getNetworkById,
+} from './utils';

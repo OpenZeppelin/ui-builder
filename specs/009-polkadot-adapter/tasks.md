@@ -151,9 +151,9 @@
 
 ### Implementation for User Story 5
 
-- [ ] T042 [US5] Add JSDoc comments in `packages/adapter-polkadot/src/handlers/evm-handler.ts` documenting handler pattern for future Substrate handler
-- [ ] T043 [US5] Ensure `executionType` routing is implemented in `PolkadotAdapter` (currently only 'evm', but extensible)
-- [ ] T044 [US5] Document handler extension pattern in `packages/adapter-polkadot/README.md`
+- [x] T042 [US5] Add JSDoc comments in `packages/adapter-polkadot/src/handlers/evm-handler.ts` documenting handler pattern for future Substrate handler
+- [x] T043 [US5] Ensure `executionType` routing is implemented in `PolkadotAdapter` (currently only 'evm', but extensible)
+- [x] T044 [US5] Document handler extension pattern in `packages/adapter-polkadot/README.md`
 
 **Checkpoint**: Architecture documented and extensible for future non-EVM support
 
@@ -163,16 +163,16 @@
 
 **Purpose**: Network utilities and cross-cutting improvements
 
-- [ ] T045 [P] Create `getNetworksByCategory()` utility in `packages/adapter-polkadot/src/utils.ts`
-- [ ] T046 [P] Create `getNetworksByRelayChain()` utility in `packages/adapter-polkadot/src/utils.ts`
-- [ ] T047 [P] Create `isHubNetwork()` and `isParachainNetwork()` type guards in `packages/adapter-polkadot/src/utils.ts`
-- [ ] T048 Add utility function tests in `packages/adapter-polkadot/src/__tests__/utils.test.ts`
-- [ ] T049 [P] Create `packages/adapter-polkadot/README.md` with usage documentation
-- [ ] T050 Update `packages/adapter-polkadot/src/index.ts` to export all utilities
-- [ ] T051 Run full test suite: `pnpm --filter adapter-polkadot test`
-- [ ] T052 Run quickstart.md validation scenarios manually
-- [ ] T053 Verify build: `pnpm --filter adapter-polkadot build`
-- [ ] T054 Verify package bundle size is within 25% of adapter-evm: `du -sh packages/adapter-polkadot/dist/ packages/adapter-evm/dist/`
+- [x] T045 [P] Create `getNetworksByCategory()` utility in `packages/adapter-polkadot/src/utils.ts`
+- [x] T046 [P] Create `getNetworksByRelayChain()` utility in `packages/adapter-polkadot/src/utils.ts`
+- [x] T047 [P] Create `isHubNetwork()` and `isParachainNetwork()` type guards in `packages/adapter-polkadot/src/utils.ts`
+- [x] T048 Add utility function tests in `packages/adapter-polkadot/src/__tests__/utils.test.ts`
+- [x] T049 [P] Create `packages/adapter-polkadot/README.md` with usage documentation
+- [x] T050 Update `packages/adapter-polkadot/src/index.ts` to export all utilities
+- [x] T051 Run full test suite: `pnpm --filter adapter-polkadot test` (77 tests passing)
+- [x] T052 Run quickstart.md validation scenarios manually
+- [x] T053 Verify build: `pnpm --filter adapter-polkadot build` (82.15 KB ESM)
+- [x] T054 Verify package bundle size is within 25% of adapter-evm: 664K vs 1.4M (47%)
 
 ---
 
