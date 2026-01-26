@@ -65,12 +65,11 @@ declare module 'virtual:renderer-config' {
  *
  * This declaration allows importing types like RendererConfig using the
  * deep import path `@openzeppelin/ui-renderer/types/RendererConfig`.
- * It re-exports the types from the main
- * `@openzeppelin/ui-renderer/types` module, ensuring type compatibility.
+ * Types are re-exported from the main package entry point.
  */
 declare module '@openzeppelin/ui-renderer/types/RendererConfig' {
-  // Re-export necessary types from the actual implementation
-  export * from '@openzeppelin/ui-renderer/types';
+  // Re-export types from the main package (not /types sub-path which doesn't exist)
+  export type { RendererConfig } from '@openzeppelin/ui-renderer';
 }
 
 // Add declarations for the raw config content virtual modules
