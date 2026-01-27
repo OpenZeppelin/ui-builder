@@ -47,20 +47,22 @@ Fixes #123
 - **api**: API-related code
 - **auth**: Authentication and authorization
 - **builder**: Builder functionality
+- **export**: Export functionality
 - **deps**: Dependencies
 - **config**: Configuration files
-- **renderer**: Renderer functionality
-- **react-core**: React core functionality
-- **types**: Types
-- **transaction**: Transaction-related code
+- **ci**: CI/CD configuration
 - **utils**: Utility functions
 - **docs**: Documentation
 - **tests**: Test-related changes
+- **release**: Release automation
+- **adapter**: Generic adapter changes
 - **adapter-evm**: EVM adapter functionality
+- **adapter-evm-core**: EVM core package
+- **adapter-polkadot**: Polkadot adapter functionality
 - **adapter-solana**: Solana adapter functionality
 - **adapter-stellar**: Stellar adapter functionality
 - **adapter-midnight**: Midnight adapter functionality
-- **styles**: Styles package functionality
+- **common**: Common/shared code
 
 ## Breaking Changes
 
