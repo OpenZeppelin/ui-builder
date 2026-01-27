@@ -15,8 +15,10 @@ Extracted modules:
 - Type mapping and form field generation  
 - Input parsing and output formatting
 - View function querying
-- Transaction formatting
+- Transaction formatting and execution strategies (EOA, Relayer)
 - RPC and Explorer configuration resolution
 - Address validation utilities
+- Wallet infrastructure (WagmiWalletImplementation, UI kit management)
+- RainbowKit configuration utilities
 
 The core package is bundled into adapter-evm at build time (not published separately).
