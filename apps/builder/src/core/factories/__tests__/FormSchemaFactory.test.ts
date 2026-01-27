@@ -1,10 +1,10 @@
 // Import types from renderer
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Ecosystem } from '@openzeppelin/ui-types';
 import type {
   ContractAdapter,
   ContractSchema,
+  Ecosystem,
   EvmNetworkConfig,
   FieldType,
   FormFieldType,
