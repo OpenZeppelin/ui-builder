@@ -19,19 +19,26 @@
 | `utils/` | JSON, formatting, gas, validation | ✅ Yes | Generic utilities |
 | `types.ts`, `types/` | Internal TypeScript types | ✅ Yes | Shared type definitions |
 | `configuration/` | RPC/explorer resolution | ✅ Partial | Extract RPC resolution; keep network-services |
-| `transaction/` | Formatter, strategies | ✅ Partial | Extract formatter + strategy interface; keep UI components |
+| `transaction/` | Formatter, strategies, execution | ✅ Yes | Extract formatter + execution strategies (EOA, Relayer) |
 | `validation/` | EOA/Relayer validation | ✅ Yes | Pure validation logic |
+| `wallet/implementation/` | WagmiWalletImplementation | ✅ Yes | Configurable wagmi wrapper, accepts chains as param |
+| `wallet/utils/` | Wallet manager, connection utils | ✅ Partial | Extract walletImplementationManager; keep UI-specific utils |
 | `adapter.ts` | Main adapter class | ❌ No | Orchestrator, consumes core modules |
 | `networks/` | Network definitions | ❌ No | Ecosystem-specific configurations |
-| `wallet/` | Wallet UI, wagmi, RainbowKit | ❌ No | UI components, ecosystem branding |
+| `wallet/components/` | React UI (EvmWalletUiRoot, etc.) | ❌ No | React UI components, ecosystem-specific |
+| `wallet/rainbowkit/` | RainbowKit integration | ❌ No | UI library integration |
 | `config.ts` | Adapter config | ❌ No | Adapter-specific |
 | `vite-config.ts` | Build config | ❌ No | Adapter-specific |
 
-**Rationale**: Core modules must be pure functions/classes that:
-1. Don't import from `wallet/` or `networks/`
-2. Accept configuration via parameters (dependency injection)
-3. Use viem types but not wagmi React hooks
-4. Have no ecosystem-specific branding
+**Rationale**: Core modules must be:
+1. Pure functions/classes OR configurable classes that accept dependencies as parameters
+2. Not React components (React UI stays in adapters)
+3. Reusable across EVM-compatible adapters (EVM, Polkadot, future L2s)
+4. Free of ecosystem-specific branding
+
+**2026-01-25 Update**: Revised to include wallet infrastructure (non-UI) for reuse by Polkadot adapter.
+The wallet execution logic (signing, broadcasting) is EVM-generic and should be shared.
+React components and RainbowKit remain in individual adapters for customization.
 
 ### Decision: tsup bundling strategy for internal packages
 

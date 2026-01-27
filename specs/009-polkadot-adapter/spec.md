@@ -278,18 +278,40 @@ packages/adapter-polkadot/
 ├── vite-config.ts                 # Minimal config (no WASM for EVM mode)
 ├── src/
 │   ├── index.ts                   # Main exports
-│   ├── adapter.ts                 # PolkadotAdapter class
+│   ├── adapter.ts                 # PolkadotAdapter class (orchestrator)
 │   ├── types.ts                   # TypedPolkadotNetworkConfig
+│   ├── config.ts                  # Adapter configuration
 │   ├── networks/
 │   │   ├── index.ts               # Aggregate exports
 │   │   ├── mainnet.ts             # Polkadot Hub, Kusama Hub, Moonbeam, Moonriver
 │   │   └── testnet.ts             # Polkadot Hub TestNet, Moonbase Alpha
-│   ├── handlers/
-│   │   └── evm-handler.ts         # Delegates to adapter-evm-core
+│   ├── evm/                       # EVM module - mirrors adapter-evm structure
+│   │   ├── index.ts               # Module exports
+│   │   ├── abi/                   # ABI loading (delegates to core)
+│   │   ├── configuration/         # RPC/Explorer config
+│   │   ├── mapping/               # Type mapping
+│   │   ├── query/                 # View function queries
+│   │   ├── transaction/           # EOA, Relayer, sign-and-broadcast
+│   │   ├── transform/             # Input/output formatting
+│   │   ├── ui/                    # Network service forms
+│   │   ├── utils/                 # Utilities
+│   │   └── validation/            # Config validation
+│   ├── wallet/
+│   │   ├── implementation.ts      # PolkadotWalletImplementation
+│   │   ├── hooks/                 # Wagmi hook facades
+│   │   ├── utils/                 # Wallet utilities
+│   │   └── rainbowkit/            # RainbowKit integration
 │   └── __tests__/
 │       ├── adapter.test.ts
 │       └── networks.test.ts
 ```
+
+**Architecture Note**: The `evm/` module mirrors the `adapter-evm/src/` structure.
+This ensures 1:1 parity and makes it easy to maintain both adapters.
+The adapter.ts orchestrates calls using `import * as evm from './evm'` namespace.
+
+**Substrate Extension**: When adding Substrate support, create a parallel `substrate/`
+module with the same pattern. The adapter will route based on `executionType`.
 
 #### Key Type Definitions
 

@@ -41,7 +41,7 @@
 
 - [x] T007 Create `packages/adapter-polkadot/src/types.ts` with `PolkadotExecutionType`, `PolkadotNetworkCategory`, `PolkadotRelayChain`, and `TypedPolkadotNetworkConfig` per data-model.md
 - [x] T008 [P] Create `packages/adapter-polkadot/src/__tests__/types.test.ts` with type validation tests
-- [x] T009 Create `packages/adapter-polkadot/src/handlers/evm-handler.ts` delegating to `adapter-evm-core` modules (includes execution strategies: EOA, Relayer via core)
+- [x] T009 Create `packages/adapter-polkadot/src/evm/` module structure mirroring `adapter-evm/src/` (abi, configuration, mapping, query, transaction, transform, ui, utils, validation) - delegates to `adapter-evm-core`
 - [x] T010 Create `packages/adapter-polkadot/src/adapter.ts` with `PolkadotAdapter` class implementing `ContractAdapter` interface
 - [x] T011 [P] Create `packages/adapter-polkadot/src/__tests__/adapter.test.ts` with adapter method tests
 - [x] T012 Create `packages/adapter-polkadot/src/index.ts` aggregating all exports per contracts/module-exports.ts
@@ -159,20 +159,23 @@
 
 ---
 
-## Phase 8: Utilities & Polish
+## Phase 8: Polish
 
-**Purpose**: Network utilities and cross-cutting improvements
+**Purpose**: Documentation and final verification
 
-- [x] T045 [P] Create `getNetworksByCategory()` utility in `packages/adapter-polkadot/src/utils.ts`
-- [x] T046 [P] Create `getNetworksByRelayChain()` utility in `packages/adapter-polkadot/src/utils.ts`
-- [x] T047 [P] Create `isHubNetwork()` and `isParachainNetwork()` type guards in `packages/adapter-polkadot/src/utils.ts`
-- [x] T048 Add utility function tests in `packages/adapter-polkadot/src/__tests__/utils.test.ts`
+**Note**: Utility functions (T045-T048, T050) were removed to follow the same pattern as adapter-evm.
+Users can filter the exported network arrays directly (e.g., `polkadotNetworks.filter(n => n.networkCategory === 'hub')`).
+
+- [x] ~~T045 [P] Create `getNetworksByCategory()` utility~~ (REMOVED - follow EVM pattern)
+- [x] ~~T046 [P] Create `getNetworksByRelayChain()` utility~~ (REMOVED - follow EVM pattern)
+- [x] ~~T047 [P] Create `isHubNetwork()` and `isParachainNetwork()` type guards~~ (REMOVED - follow EVM pattern)
+- [x] ~~T048 Add utility function tests~~ (REMOVED - follow EVM pattern)
 - [x] T049 [P] Create `packages/adapter-polkadot/README.md` with usage documentation
-- [x] T050 Update `packages/adapter-polkadot/src/index.ts` to export all utilities
-- [x] T051 Run full test suite: `pnpm --filter adapter-polkadot test` (77 tests passing)
+- [x] ~~T050 Update index.ts to export utilities~~ (REMOVED - follow EVM pattern)
+- [x] T051 Run full test suite: `pnpm --filter adapter-polkadot test`
 - [x] T052 Run quickstart.md validation scenarios manually
-- [x] T053 Verify build: `pnpm --filter adapter-polkadot build` (82.15 KB ESM)
-- [x] T054 Verify package bundle size is within 25% of adapter-evm: 664K vs 1.4M (47%)
+- [x] T053 Verify build: `pnpm --filter adapter-polkadot build`
+- [x] T054 Verify package bundle size is within 25% of adapter-evm
 
 ---
 
@@ -279,3 +282,10 @@ With multiple developers:
 - adapter-evm-core dependency: Ensure spec 008 is complete before starting
 - Wagmi v2: Use same version as adapter-evm for RainbowKit compatibility
 - Blockscout uses Etherscan V1 API format - no new loaders needed
+
+## Integration Tests (Post-Refactoring)
+
+These tests require manual wallet connection with testnet funds and should be performed before production release:
+
+- [ ] T110 [INTEGRATION] Test signAndBroadcast in builder app with EVM network
+- [ ] T111 [INTEGRATION] Test signAndBroadcast in builder app with Polkadot network (Moonbeam)

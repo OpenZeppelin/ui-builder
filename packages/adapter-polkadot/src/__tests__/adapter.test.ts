@@ -3,23 +3,51 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NetworkConfig } from '@openzeppelin/ui-types';
 
 import { PolkadotAdapter } from '../adapter';
-// Import after mock setup
-import * as evmHandler from '../handlers/evm-handler';
+// Import evm module for mocking
+import * as evmModule from '../evm';
 import type { TypedPolkadotNetworkConfig } from '../types';
 // Import wallet exports to verify they're available
 import { polkadotChains, PolkadotWalletUiRoot } from '../wallet';
 
-// Mock the EVM handler module
-vi.mock('../handlers/evm-handler', () => ({
+// Mock the EVM module
+vi.mock('../evm', () => ({
   loadContract: vi.fn(),
-  mapParameterTypeToFieldType: vi.fn(),
-  getCompatibleFieldTypes: vi.fn(),
-  generateDefaultField: vi.fn(),
-  parseInput: vi.fn(),
-  formatFunctionResult: vi.fn(),
+  loadContractWithMetadata: vi.fn(),
+  compareContractDefinitions: vi.fn(),
+  validateContractDefinition: vi.fn(),
+  hashContractDefinition: vi.fn(),
+  getSupportedExecutionMethods: vi.fn(),
+  validateExecutionConfig: vi.fn(),
+  getNetworkServiceForms: vi.fn(),
+  validateNetworkServiceConfig: vi.fn(),
+  testNetworkServiceConnection: vi.fn(),
+  getEvmCurrentBlock: vi.fn(),
+  getEvmExplorerAddressUrl: vi.fn(),
+  getEvmExplorerTxUrl: vi.fn(),
+  mapEvmParamTypeToFieldType: vi.fn(),
+  getEvmCompatibleFieldTypes: vi.fn(),
+  generateEvmDefaultField: vi.fn(),
+  getEvmTypeMappingInfo: vi.fn(),
   isViewFunction: vi.fn(),
   queryViewFunction: vi.fn(),
-  isValidAddress: vi.fn(),
+  formatEvmTransactionData: vi.fn(),
+  signAndBroadcast: vi.fn(),
+  waitForTransactionConfirmation: vi.fn(),
+  getRelayers: vi.fn(),
+  getRelayer: vi.fn(),
+  formatEvmFunctionResult: vi.fn(),
+  getAvailableUiKits: vi.fn(),
+  getContractDefinitionInputs: vi.fn(),
+  getUiLabels: vi.fn(),
+  getWritableFunctions: vi.fn(),
+  filterAutoQueryableFunctions: vi.fn(),
+  supportsWalletConnection: vi.fn(),
+  getRelayerOptionsComponent: vi.fn(),
+  isValidEvmAddress: vi.fn(),
+  validateRpcEndpoint: vi.fn(),
+  testRpcConnection: vi.fn(),
+  validateExplorerConfig: vi.fn(),
+  testExplorerConnection: vi.fn(),
 }));
 
 const mockPolkadotHubConfig: TypedPolkadotNetworkConfig = {
@@ -116,15 +144,15 @@ describe('PolkadotAdapter', () => {
     });
   });
 
-  describe('EVM handler delegation', () => {
-    it('should delegate loadContract to EVM handler', async () => {
+  describe('EVM module delegation', () => {
+    it('should delegate loadContract to EVM module', async () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
       const mockSchema = { name: 'TestContract', functions: [] };
-      vi.mocked(evmHandler.loadContract).mockResolvedValue(mockSchema as never);
+      vi.mocked(evmModule.loadContract).mockResolvedValue(mockSchema as never);
 
       const result = await adapter.loadContract('0x1234567890123456789012345678901234567890');
 
-      expect(evmHandler.loadContract).toHaveBeenCalledWith(
+      expect(evmModule.loadContract).toHaveBeenCalledWith(
         '0x1234567890123456789012345678901234567890',
         mockPolkadotHubConfig,
         undefined
@@ -132,46 +160,46 @@ describe('PolkadotAdapter', () => {
       expect(result).toEqual(mockSchema);
     });
 
-    it('should delegate mapParameterTypeToFieldType to EVM handler', () => {
+    it('should delegate mapParameterTypeToFieldType to EVM module', () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
-      vi.mocked(evmHandler.mapParameterTypeToFieldType).mockReturnValue('number');
+      vi.mocked(evmModule.mapEvmParamTypeToFieldType).mockReturnValue('number');
 
       const result = adapter.mapParameterTypeToFieldType('uint256');
 
-      expect(evmHandler.mapParameterTypeToFieldType).toHaveBeenCalledWith('uint256');
+      expect(evmModule.mapEvmParamTypeToFieldType).toHaveBeenCalledWith('uint256');
       expect(result).toBe('number');
     });
 
-    it('should delegate getCompatibleFieldTypes to EVM handler', () => {
+    it('should delegate getCompatibleFieldTypes to EVM module', () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
-      vi.mocked(evmHandler.getCompatibleFieldTypes).mockReturnValue(['number', 'text']);
+      vi.mocked(evmModule.getEvmCompatibleFieldTypes).mockReturnValue(['number', 'text']);
 
       const result = adapter.getCompatibleFieldTypes('uint256');
 
-      expect(evmHandler.getCompatibleFieldTypes).toHaveBeenCalledWith('uint256');
+      expect(evmModule.getEvmCompatibleFieldTypes).toHaveBeenCalledWith('uint256');
       expect(result).toEqual(['number', 'text']);
     });
 
-    it('should delegate isValidAddress to EVM handler', () => {
+    it('should delegate isValidAddress to EVM module', () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
-      vi.mocked(evmHandler.isValidAddress).mockReturnValue(true);
+      vi.mocked(evmModule.isValidEvmAddress).mockReturnValue(true);
 
       const result = adapter.isValidAddress('0x1234567890123456789012345678901234567890');
 
-      expect(evmHandler.isValidAddress).toHaveBeenCalledWith(
+      expect(evmModule.isValidEvmAddress).toHaveBeenCalledWith(
         '0x1234567890123456789012345678901234567890'
       );
       expect(result).toBe(true);
     });
 
-    it('should delegate isViewFunction to EVM handler', () => {
+    it('should delegate isViewFunction to EVM module', () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
-      vi.mocked(evmHandler.isViewFunction).mockReturnValue(true);
+      vi.mocked(evmModule.isViewFunction).mockReturnValue(true);
 
       const mockFunction = { stateMutability: 'view' };
       const result = adapter.isViewFunction(mockFunction as never);
 
-      expect(evmHandler.isViewFunction).toHaveBeenCalledWith(mockFunction);
+      expect(evmModule.isViewFunction).toHaveBeenCalledWith(mockFunction);
       expect(result).toBe(true);
     });
   });

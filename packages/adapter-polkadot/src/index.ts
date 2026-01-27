@@ -28,18 +28,13 @@ export type {
 // NETWORK CONFIGURATIONS
 // ============================================================================
 
-// Hub networks (P1 - MVP)
-export {
-  polkadotHubMainnet,
-  kusamaHubMainnet,
-  polkadotHubTestnet,
-  mainnetNetworks,
-  testnetNetworks,
-  networks,
-  polkadotNetworks,
-} from './networks';
+// Network arrays (following EVM adapter pattern)
+export { polkadotNetworks, polkadotMainnetNetworks, polkadotTestnetNetworks } from './networks';
 
-// Parachain networks (P2)
+// Individual Hub networks (P1 - MVP)
+export { polkadotHubMainnet, kusamaHubMainnet, polkadotHubTestnet } from './networks';
+
+// Individual Parachain networks (P2)
 export { moonbeamMainnet, moonriverMainnet, moonbaseAlphaTestnet } from './networks';
 
 // ============================================================================
@@ -63,18 +58,3 @@ export { PolkadotWalletUiRoot, polkadotChains, type PolkadotWalletUiRootProps } 
 // ============================================================================
 
 export { polkadotAdapterConfig } from './config';
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
-
-export {
-  getNetworksByCategory,
-  getNetworksByRelayChain,
-  isHubNetwork,
-  isParachainNetwork,
-  getMainnetNetworks,
-  getTestnetNetworks,
-  getNetworkByChainId,
-  getNetworkById,
-} from './utils';

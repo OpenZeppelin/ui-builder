@@ -8,17 +8,18 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Chain } from 'viem';
 import { createConfig, http, WagmiProvider } from 'wagmi';
-import type { ReactNode } from 'react';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { WagmiProviderInitializedContext } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { EcosystemReactUiProviderProps } from '@openzeppelin/ui-types';
 
 import { polkadotChains } from './chains';
+import { initializePolkadotWallet } from './implementation';
 
 /**
  * Props for the PolkadotWalletUiRoot component.
  */
-export interface PolkadotWalletUiRootProps {
-  /** Child components to render within the wallet context */
-  children: ReactNode;
+export interface PolkadotWalletUiRootProps extends EcosystemReactUiProviderProps {
   /** Optional override for chains to configure (defaults to all Polkadot ecosystem chains) */
   chains?: readonly [Chain, ...Chain[]];
 }
@@ -73,6 +74,8 @@ export const PolkadotWalletUiRoot: React.FC<PolkadotWalletUiRootProps> = ({
   children,
   chains = polkadotChains,
 }) => {
+  const [isProviderInitialized, setIsProviderInitialized] = useState(false);
+
   // Create wagmi config with Polkadot ecosystem chains
   const wagmiConfig = useMemo(() => {
     const transports = Object.fromEntries(chains.map((chain) => [chain.id, http()]));
@@ -83,9 +86,20 @@ export const PolkadotWalletUiRoot: React.FC<PolkadotWalletUiRootProps> = ({
     });
   }, [chains]);
 
+  // Initialize the wallet implementation singleton with the config
+  useEffect(() => {
+    initializePolkadotWallet(wagmiConfig);
+    // Mark provider as initialized after the wallet implementation is set up
+    setIsProviderInitialized(true);
+  }, [wagmiConfig]);
+
   return (
     <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <WagmiProviderInitializedContext.Provider value={isProviderInitialized}>
+          {children}
+        </WagmiProviderInitializedContext.Provider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 };

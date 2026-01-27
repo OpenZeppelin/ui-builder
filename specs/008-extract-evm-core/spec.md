@@ -12,7 +12,7 @@
 - Q: Should viem be a direct dependency, peer dependency, or abstracted away in adapter-evm-core? → A: Direct dependency - adapter-evm-core includes viem in its dependencies; bundled into consuming adapters.
 - Q: How should testing be organized for the core package? → A: Migrate existing tests - move relevant unit tests from adapter-evm to adapter-evm-core alongside the extracted modules.
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Adapter Developer Creates EVM-Compatible Adapter (Priority: P1)
 
@@ -70,16 +70,16 @@ The `adapter-evm-core` package is an internal implementation detail. It should n
 - How does the system handle version mismatches if multiple adapters use different core versions? (Answer: Not applicable since core is bundled, not a shared runtime dependency)
 - What happens if a core module requires adapter-specific configuration? (Answer: Core modules should accept configuration as parameters, not rely on global state)
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
 - **FR-001**: The system MUST create a new internal package `packages/adapter-evm-core` that is not publishable to npm
-- **FR-002**: The core package MUST export reusable modules for: ABI loading/transformation, type mapping, input parsing, output formatting, view function querying, transaction formatting, and address validation
+- **FR-002**: The core package MUST export reusable modules for: ABI loading/transformation, type mapping, input parsing, output formatting, view function querying, transaction formatting, transaction execution (EOA/Relayer strategies), wallet implementation, and address validation
 - **FR-003**: The EVM adapter MUST be refactored to import and use modules from `adapter-evm-core` instead of its internal implementations
 - **FR-004**: Core modules MUST accept network configuration and dependencies as parameters (dependency injection pattern)
-- **FR-005**: The core package MUST NOT contain any ecosystem-specific branding, wallet UI components, or network definitions
-- **FR-006**: Core modules MUST be pure functions or classes that don't rely on global state or singletons
+- **FR-005**: The core package MUST NOT contain any ecosystem-specific branding, React UI components, or network definitions
+- **FR-006**: Core modules MUST be pure functions or configurable classes that accept dependencies as parameters (singletons are acceptable if they accept configuration via registration)
 - **FR-007**: The build system MUST bundle `adapter-evm-core` modules into consuming adapters (not as external dependencies)
 - **FR-008**: The existing EVM adapter public API MUST remain unchanged after the extraction
 - **FR-009**: The core package MUST include `viem` as a direct dependency (bundled into consuming adapters at build time)
@@ -88,6 +88,10 @@ The `adapter-evm-core` package is an internal implementation detail. It should n
 - **FR-012**: Core modules MUST propagate errors with descriptive messages; callers handle user-facing error presentation
 - **FR-013**: The core package MUST use TypeScript strict mode (`"strict": true` in tsconfig.json)
 - **FR-014**: The core package MUST export a `getEvmCoreViteConfig()` function via `vite-config.ts` (per Architecture §11), returning minimal config (empty arrays) since core has no WASM/special requirements
+- **FR-015**: The core package MUST export execution strategies (EOA, Relayer) in the `transaction/` module that can sign and broadcast transactions using wagmi/viem
+- **FR-016**: The core package MUST export an `EvmWalletImplementation` interface that defines the minimal wallet API required by execution strategies; adapters implement this interface (e.g., `WagmiWalletImplementation` in adapter-evm, `PolkadotWalletImplementation` in adapter-polkadot)
+- **FR-017**: The core package MUST include `wagmi` and `@wagmi/core` as peer dependencies (actual wallet implementations live in individual adapters)
+- **FR-018**: The core package `wallet/` module MUST contain ONLY RainbowKit config generation utilities; execution-related code MUST live in `transaction/`
 
 ### Key Entities
 
@@ -95,7 +99,7 @@ The `adapter-evm-core` package is an internal implementation detail. It should n
 - **Core Modules**: Reusable functions/classes extracted from the EVM adapter (e.g., `loadAbiFromEtherscan`, `transformAbiToSchema`, `parseEvmInput`, `queryEvmViewFunction`)
 - **Consuming Adapter**: Any adapter package that imports and uses `adapter-evm-core` modules (e.g., `adapter-evm`, a future `adapter-polkadot-evm`)
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
@@ -110,4 +114,17 @@ The `adapter-evm-core` package is an internal implementation detail. It should n
 - The extraction follows the existing adapter architecture patterns documented in `docs/ADAPTER_ARCHITECTURE.md`
 - Core modules will use the shared `@openzeppelin/ui-types` for type definitions
 - The existing monorepo tooling (pnpm, tsup, TypeScript) supports internal non-published packages
-- Wallet connection and UI components remain in the main EVM adapter (not extracted to core)
+- React UI components (EvmWalletUiRoot, RainbowKit components, etc.) remain in the main EVM adapter (not extracted to core)
+- Wallet execution infrastructure (signing, broadcasting, wagmi wrapper) IS extracted to core for reuse by other EVM-compatible adapters
+
+**2026-01-25 Revision**: Updated to include wallet infrastructure (non-UI) in core package.
+This enables the Polkadot adapter (and future EVM-compatible adapters) to reuse transaction
+execution logic without duplicating the wagmi/viem integration.
+
+**2026-01-25 Revision (Module Structure)**: Reorganized module structure to mirror `adapter-evm`:
+
+- Execution strategies (EOA, Relayer), sender functions, and `EvmWalletImplementation` interface
+  are in `src/transaction/` (not `src/wallet/`)
+- `src/wallet/` now contains ONLY RainbowKit config generation utilities
+- Removed deprecated `ExecutionStrategy` type alias (use `AdapterExecutionStrategy`)
+- Removed unnecessary re-export wrapper files from adapters (direct imports from core)

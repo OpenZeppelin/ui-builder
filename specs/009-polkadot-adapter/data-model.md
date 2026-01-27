@@ -80,7 +80,8 @@ import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm
  * Extended network configuration for Polkadot ecosystem.
  * Inherits all EVM fields for EVM-compatible networks.
  */
-export interface TypedPolkadotNetworkConfig extends TypedEvmNetworkConfig {
+export interface TypedPolkadotNetworkConfig extends Omit<TypedEvmNetworkConfig, 'ecosystem'> {
+  ecosystem: 'polkadot';
   /**
    * Execution type determines which handler processes requests.
    * Currently only 'evm' is implemented; 'substrate' reserved for future.
@@ -189,7 +190,7 @@ export const kusamaHubMainnet: TypedPolkadotNetworkConfig = {
 
 ```typescript
 export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
-  id: 'moonbeam',
+  id: 'polkadot-moonbeam-mainnet',
   name: 'Moonbeam',
   ecosystem: 'polkadot',
   network: 'moonbeam',
@@ -198,7 +199,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
   chainId: 1284,
   rpcUrl: 'https://rpc.api.moonbeam.network',
   explorerUrl: 'https://moonbeam.moonscan.io',
-  apiUrl: 'https://api.etherscan.io/v2/api',
+  apiUrl: 'https://api-moonbeam.moonscan.io/api',
   supportsEtherscanV2: true,
   nativeCurrency: {
     name: 'Glimmer',
@@ -215,7 +216,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
 
 ```typescript
 export const moonriverMainnet: TypedPolkadotNetworkConfig = {
-  id: 'moonriver',
+  id: 'polkadot-moonriver-mainnet',
   name: 'Moonriver',
   ecosystem: 'polkadot',
   network: 'moonriver',
@@ -224,7 +225,7 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
   chainId: 1285,
   rpcUrl: 'https://rpc.api.moonriver.moonbeam.network',
   explorerUrl: 'https://moonriver.moonscan.io',
-  apiUrl: 'https://api.etherscan.io/v2/api',
+  apiUrl: 'https://api-moonriver.moonscan.io/api',
   supportsEtherscanV2: true,
   nativeCurrency: {
     name: 'Moonriver',
@@ -271,7 +272,7 @@ export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
 
 ```typescript
 export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
-  id: 'moonbase-alpha',
+  id: 'polkadot-moonbase-alpha-testnet',
   name: 'Moonbase Alpha',
   ecosystem: 'polkadot',
   network: 'moonbase-alpha',
@@ -280,7 +281,7 @@ export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
   chainId: 1287,
   rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
   explorerUrl: 'https://moonbase.moonscan.io',
-  apiUrl: 'https://api.etherscan.io/v2/api',
+  apiUrl: 'https://api-moonbase.moonscan.io/api',
   supportsEtherscanV2: true,
   nativeCurrency: {
     name: 'Dev',

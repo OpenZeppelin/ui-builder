@@ -4,16 +4,16 @@ import { describe, expect, it } from 'vitest';
 import {
   kusamaHub,
   kusamaHubMainnet,
-  mainnetNetworks,
   moonbaseAlphaTestnet,
   moonbeamMainnet,
   moonriverMainnet,
-  networks,
   polkadotHub,
   polkadotHubMainnet,
   polkadotHubTestnet,
   polkadotHubTestNet,
-  testnetNetworks,
+  polkadotMainnetNetworks,
+  polkadotNetworks,
+  polkadotTestnetNetworks,
 } from '../networks';
 
 describe('Polkadot Hub Network Configurations', () => {
@@ -208,101 +208,93 @@ describe('Viem Chain Definitions', () => {
 });
 
 describe('Network Collections', () => {
-  describe('mainnetNetworks', () => {
+  describe('polkadotMainnetNetworks', () => {
     it('should contain Hub networks before parachains (priority order)', () => {
-      expect(mainnetNetworks).toHaveLength(4);
+      expect(polkadotMainnetNetworks).toHaveLength(4);
       // Hub networks first (P1)
-      expect(mainnetNetworks[0].id).toBe('polkadot-hub');
-      expect(mainnetNetworks[0].networkCategory).toBe('hub');
-      expect(mainnetNetworks[1].id).toBe('kusama-hub');
-      expect(mainnetNetworks[1].networkCategory).toBe('hub');
+      expect(polkadotMainnetNetworks[0].id).toBe('polkadot-hub');
+      expect(polkadotMainnetNetworks[0].networkCategory).toBe('hub');
+      expect(polkadotMainnetNetworks[1].id).toBe('kusama-hub');
+      expect(polkadotMainnetNetworks[1].networkCategory).toBe('hub');
       // Parachains after (P2)
-      expect(mainnetNetworks[2].id).toBe('polkadot-moonbeam-mainnet');
-      expect(mainnetNetworks[2].networkCategory).toBe('parachain');
-      expect(mainnetNetworks[3].id).toBe('polkadot-moonriver-mainnet');
-      expect(mainnetNetworks[3].networkCategory).toBe('parachain');
+      expect(polkadotMainnetNetworks[2].id).toBe('polkadot-moonbeam-mainnet');
+      expect(polkadotMainnetNetworks[2].networkCategory).toBe('parachain');
+      expect(polkadotMainnetNetworks[3].id).toBe('polkadot-moonriver-mainnet');
+      expect(polkadotMainnetNetworks[3].networkCategory).toBe('parachain');
     });
 
     it('should only contain mainnet networks', () => {
-      mainnetNetworks.forEach((network) => {
+      polkadotMainnetNetworks.forEach((network) => {
         expect(network.isTestnet).toBe(false);
         expect(network.type).toBe('mainnet');
       });
     });
   });
 
-  describe('testnetNetworks', () => {
+  describe('polkadotTestnetNetworks', () => {
     it('should contain Hub testnet before parachain testnets (priority order)', () => {
-      expect(testnetNetworks).toHaveLength(2);
+      expect(polkadotTestnetNetworks).toHaveLength(2);
       // Hub testnets first (P1)
-      expect(testnetNetworks[0].id).toBe('polkadot-hub-testnet');
-      expect(testnetNetworks[0].networkCategory).toBe('hub');
+      expect(polkadotTestnetNetworks[0].id).toBe('polkadot-hub-testnet');
+      expect(polkadotTestnetNetworks[0].networkCategory).toBe('hub');
       // Parachain testnets after (P2)
-      expect(testnetNetworks[1].id).toBe('polkadot-moonbase-alpha-testnet');
-      expect(testnetNetworks[1].networkCategory).toBe('parachain');
+      expect(polkadotTestnetNetworks[1].id).toBe('polkadot-moonbase-alpha-testnet');
+      expect(polkadotTestnetNetworks[1].networkCategory).toBe('parachain');
     });
 
     it('should only contain testnet networks', () => {
-      testnetNetworks.forEach((network) => {
+      polkadotTestnetNetworks.forEach((network) => {
         expect(network.isTestnet).toBe(true);
         expect(network.type).toBe('testnet');
       });
     });
   });
 
-  describe('networks', () => {
-    it('should contain all networks indexed by ID', () => {
-      // Hub networks
-      expect(networks['polkadot-hub']).toBe(polkadotHubMainnet);
-      expect(networks['kusama-hub']).toBe(kusamaHubMainnet);
-      expect(networks['polkadot-hub-testnet']).toBe(polkadotHubTestnet);
-      // Parachain networks
-      expect(networks['polkadot-moonbeam-mainnet']).toBe(moonbeamMainnet);
-      expect(networks['polkadot-moonriver-mainnet']).toBe(moonriverMainnet);
-      expect(networks['polkadot-moonbase-alpha-testnet']).toBe(moonbaseAlphaTestnet);
+  describe('polkadotNetworks', () => {
+    it('should contain all networks', () => {
+      expect(polkadotNetworks).toHaveLength(6);
     });
 
-    it('should have correct number of networks', () => {
-      expect(Object.keys(networks)).toHaveLength(6);
+    it('should contain all mainnet and testnet networks', () => {
+      const ids = polkadotNetworks.map((n) => n.id);
+      expect(ids).toContain('polkadot-hub');
+      expect(ids).toContain('kusama-hub');
+      expect(ids).toContain('polkadot-hub-testnet');
+      expect(ids).toContain('polkadot-moonbeam-mainnet');
+      expect(ids).toContain('polkadot-moonriver-mainnet');
+      expect(ids).toContain('polkadot-moonbase-alpha-testnet');
     });
   });
 });
 
 describe('Network Validation', () => {
   it('all networks should have unique IDs', () => {
-    const allNetworks = [...mainnetNetworks, ...testnetNetworks];
-    const ids = allNetworks.map((n) => n.id);
+    const ids = polkadotNetworks.map((n) => n.id);
     const uniqueIds = new Set(ids);
     expect(uniqueIds.size).toBe(ids.length);
   });
 
   it('all networks should have unique chain IDs', () => {
-    const allNetworks = [...mainnetNetworks, ...testnetNetworks];
-    const chainIds = allNetworks.map((n) => n.chainId);
+    const chainIds = polkadotNetworks.map((n) => n.chainId);
     const uniqueChainIds = new Set(chainIds);
     expect(uniqueChainIds.size).toBe(chainIds.length);
   });
 
   it('all networks should have valid networkCategory', () => {
-    const allNetworks = [...mainnetNetworks, ...testnetNetworks];
-    allNetworks.forEach((network) => {
+    polkadotNetworks.forEach((network) => {
       expect(['hub', 'parachain']).toContain(network.networkCategory);
     });
   });
 
   it('Hub networks should use Blockscout (V1 API)', () => {
-    const hubNetworks = [...mainnetNetworks, ...testnetNetworks].filter(
-      (n) => n.networkCategory === 'hub'
-    );
+    const hubNetworks = polkadotNetworks.filter((n) => n.networkCategory === 'hub');
     hubNetworks.forEach((network) => {
       expect(network.supportsEtherscanV2).toBe(false);
     });
   });
 
   it('Moonbeam parachain networks should use Moonscan (V2 API)', () => {
-    const parachainNetworks = [...mainnetNetworks, ...testnetNetworks].filter(
-      (n) => n.networkCategory === 'parachain'
-    );
+    const parachainNetworks = polkadotNetworks.filter((n) => n.networkCategory === 'parachain');
     parachainNetworks.forEach((network) => {
       expect(network.supportsEtherscanV2).toBe(true);
       expect(network.apiUrl).toContain('moonscan.io');

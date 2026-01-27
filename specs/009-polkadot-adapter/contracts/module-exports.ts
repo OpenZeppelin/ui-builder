@@ -7,15 +7,9 @@
  * This serves as the contract for consumers of the Polkadot adapter.
  */
 
-import type {
-  ContractAdapter,
-  ContractSchema,
-  ContractFunction,
-  FunctionParameter,
-  NetworkConfig,
-  FieldType,
-  FormFieldType,
-} from '@openzeppelin/ui-types';
+import type React from 'react';
+
+import type { ContractAdapter, FunctionParameter, NetworkConfig } from '@openzeppelin/ui-types';
 
 // =============================================================================
 // TYPES
@@ -134,20 +128,10 @@ export declare class PolkadotAdapter implements ContractAdapter {
   ): FormFieldType;
 
   /**
-   * Parse user input to blockchain-compatible value.
-   * Delegates to adapter-evm-core.
-   */
-  parseInput(value: string, type: string): unknown;
-
-  /**
    * Format blockchain result for display.
    * Delegates to adapter-evm-core.
    */
-  formatFunctionResult(
-    result: unknown,
-    outputs: FunctionParameter[],
-    functionId: string
-  ): string;
+  formatFunctionResult(result: unknown, outputs: FunctionParameter[], functionId: string): string;
 
   /**
    * Check if a function is view/pure (doesn't require transaction).
@@ -176,18 +160,12 @@ export declare class PolkadotAdapter implements ContractAdapter {
    * Get supported contract definition providers.
    * Returns Etherscan (for Blockscout/Moonscan) and Sourcify.
    */
-  getContractDefinitionProviders(): Array<{ key: string; label: string }>;
+  getSupportedContractDefinitionProviders(): Array<{ key: string; label: string }>;
 
   /**
-   * Get execution configuration UI for transactions.
-   * Supports EOA and Relayer strategies.
+   * Sign and broadcast a transaction.
    */
-  getExecutionConfigUI(): unknown;
-
-  /**
-   * Execute a transaction using the configured strategy.
-   */
-  executeTransaction(
+  signAndBroadcast(
     address: string,
     functionId: string,
     params: unknown[],
@@ -196,9 +174,9 @@ export declare class PolkadotAdapter implements ContractAdapter {
   ): Promise<unknown>;
 
   /**
-   * Get the current network configuration.
+   * The current network configuration.
    */
-  getNetworkConfig(): TypedPolkadotNetworkConfig;
+  readonly networkConfig: TypedPolkadotNetworkConfig;
 }
 
 // =============================================================================
@@ -207,56 +185,58 @@ export declare class PolkadotAdapter implements ContractAdapter {
 
 /**
  * Polkadot Hub mainnet configuration.
- * Chain ID: 420420419, Currency: DOT, Explorer: Blockscout
+ * ID: 'polkadot-hub', Chain ID: 420420419, Currency: DOT, Explorer: Blockscout
  */
 export declare const polkadotHubMainnet: TypedPolkadotNetworkConfig;
 
 /**
  * Kusama Hub mainnet configuration.
- * Chain ID: 420420418, Currency: KSM, Explorer: Blockscout
+ * ID: 'kusama-hub', Chain ID: 420420418, Currency: KSM, Explorer: Blockscout
  */
 export declare const kusamaHubMainnet: TypedPolkadotNetworkConfig;
 
 /**
  * Moonbeam mainnet configuration.
- * Chain ID: 1284, Currency: GLMR, Explorer: Moonscan
+ * ID: 'polkadot-moonbeam-mainnet', Chain ID: 1284, Currency: GLMR, Explorer: Moonscan
  */
 export declare const moonbeamMainnet: TypedPolkadotNetworkConfig;
 
 /**
  * Moonriver mainnet configuration.
- * Chain ID: 1285, Currency: MOVR, Explorer: Moonscan
+ * ID: 'polkadot-moonriver-mainnet', Chain ID: 1285, Currency: MOVR, Explorer: Moonscan
  */
 export declare const moonriverMainnet: TypedPolkadotNetworkConfig;
 
 /**
  * Polkadot Hub testnet configuration.
- * Chain ID: 420420417, Currency: PAS, Explorer: Blockscout
+ * ID: 'polkadot-hub-testnet', Chain ID: 420420417, Currency: PAS, Explorer: Blockscout
  */
 export declare const polkadotHubTestnet: TypedPolkadotNetworkConfig;
 
 /**
  * Moonbase Alpha testnet configuration.
- * Chain ID: 1287, Currency: DEV, Explorer: Moonscan
+ * ID: 'polkadot-moonbase-alpha-testnet', Chain ID: 1287, Currency: DEV, Explorer: Moonscan
  */
 export declare const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig;
 
 /**
- * All mainnet network configurations in priority order.
- * Hub networks first, then parachains.
+ * All Polkadot mainnet network configurations in priority order.
+ * Hub networks first (P1), then parachains (P2).
  */
-export declare const mainnetNetworks: readonly TypedPolkadotNetworkConfig[];
+export declare const polkadotMainnetNetworks: readonly TypedPolkadotNetworkConfig[];
 
 /**
- * All testnet network configurations in priority order.
- * Hub networks first, then parachains.
+ * All Polkadot testnet network configurations in priority order.
+ * Hub networks first (P1), then parachains (P2).
  */
-export declare const testnetNetworks: readonly TypedPolkadotNetworkConfig[];
+export declare const polkadotTestnetNetworks: readonly TypedPolkadotNetworkConfig[];
 
 /**
- * All network configurations indexed by ID.
+ * All Polkadot network configurations as an array.
+ * Used by ecosystem manager for registration.
+ * Hub networks appear first (P1), followed by parachain networks (P2).
  */
-export declare const networks: Record<string, TypedPolkadotNetworkConfig>;
+export declare const polkadotNetworks: TypedPolkadotNetworkConfig[];
 
 // =============================================================================
 // VIEM CHAIN DEFINITIONS
@@ -324,7 +304,7 @@ export declare const polkadotHubTestNet: {
 };
 
 // =============================================================================
-// WALLET COMPONENTS (Re-exported from adapter-evm)
+// WALLET COMPONENTS
 // =============================================================================
 
 /**
@@ -333,69 +313,30 @@ export declare const polkadotHubTestNet: {
  */
 export declare const PolkadotWalletUiRoot: React.ComponentType<{
   children: React.ReactNode;
-  networkConfig: TypedPolkadotNetworkConfig;
+  chains?: unknown[];
 }>;
 
 /**
- * Connect wallet button component.
- * Re-exported from adapter-evm wallet components.
+ * Polkadot viem chains array for wallet configuration.
+ * Contains all supported Polkadot ecosystem chains (Hub, Moonbeam, etc.).
  */
-export declare const ConnectButton: React.ComponentType;
+export declare const polkadotChains: readonly unknown[];
 
 /**
- * Account display component showing connected wallet.
- * Re-exported from adapter-evm wallet components.
+ * Polkadot adapter configuration for ecosystem registration.
+ * Used by the builder app's ecosystem manager.
  */
-export declare const AccountDisplay: React.ComponentType;
-
-/**
- * Network switcher component.
- * Re-exported from adapter-evm wallet components.
- */
-export declare const NetworkSwitcher: React.ComponentType;
+export declare const polkadotAdapterConfig: {
+  ecosystem: 'polkadot';
+  name: string;
+  networks: TypedPolkadotNetworkConfig[];
+  createAdapter: (config: NetworkConfig) => PolkadotAdapter;
+};
 
 // =============================================================================
-// ECOSYSTEM REGISTRATION
+// NOTE: No utility functions exported
 // =============================================================================
-
-/**
- * Register the Polkadot ecosystem with the ecosystem manager.
- * Called automatically when the adapter is imported.
- */
-export declare function registerPolkadotEcosystem(): void;
-
-// =============================================================================
-// UTILITIES
-// =============================================================================
-
-/**
- * Get networks filtered by category.
- * @param category - The network category to filter by
- * @returns Array of networks matching the category
- */
-export declare function getNetworksByCategory(
-  category: PolkadotNetworkCategory
-): TypedPolkadotNetworkConfig[];
-
-/**
- * Get networks filtered by relay chain.
- * @param relayChain - The relay chain to filter by
- * @returns Array of networks connected to the relay chain
- */
-export declare function getNetworksByRelayChain(
-  relayChain: PolkadotRelayChain
-): TypedPolkadotNetworkConfig[];
-
-/**
- * Check if a network configuration is for a Hub network.
- */
-export declare function isHubNetwork(
-  config: TypedPolkadotNetworkConfig
-): boolean;
-
-/**
- * Check if a network configuration is for a parachain.
- */
-export declare function isParachainNetwork(
-  config: TypedPolkadotNetworkConfig
-): boolean;
+// Following the same pattern as adapter-evm, users can filter networks directly:
+//   polkadotNetworks.filter(n => n.networkCategory === 'hub')
+//   polkadotNetworks.filter(n => n.relayChain === 'kusama')
+//   polkadotNetworks.find(n => n.chainId === 1284)
