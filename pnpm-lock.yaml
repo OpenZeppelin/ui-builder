@@ -662,9 +662,6 @@ importers:
       '@openzeppelin/relayer-sdk':
         specifier: 1.4.0
         version: 1.4.0(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      '@openzeppelin/ui-builder-adapter-evm':
-        specifier: workspace:*
-        version: link:../adapter-evm
       '@openzeppelin/ui-builder-adapter-evm-core':
         specifier: workspace:*
         version: link:../adapter-evm-core
