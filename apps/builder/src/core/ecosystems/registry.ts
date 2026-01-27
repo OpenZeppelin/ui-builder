@@ -6,8 +6,8 @@ import type { Ecosystem, EcosystemFeatureConfig, EcosystemInfo } from '@openzepp
  */
 export const ECOSYSTEM_ORDER: Ecosystem[] = [
   'evm',
-  'polkadot',
   'stellar',
+  'polkadot',
   'midnight',
   'solana',
 ] as const;

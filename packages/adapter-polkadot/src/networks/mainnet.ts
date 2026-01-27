@@ -2,6 +2,7 @@
  * @fileoverview Mainnet network configurations for Polkadot adapter.
  */
 
+import { NetworkMoonbeam, NetworkPolkadot } from '@web3icons/react';
 import { moonbeam, moonriver } from 'viem/chains';
 
 import type { TypedPolkadotNetworkConfig } from '../types';
@@ -24,6 +25,7 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://blockscout.polkadot.io',
   apiUrl: 'https://blockscout.polkadot.io/api',
   supportsEtherscanV2: false,
+  iconComponent: NetworkPolkadot,
   nativeCurrency: {
     name: 'Polkadot',
     symbol: 'DOT',
@@ -52,6 +54,7 @@ export const kusamaHubMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io',
   apiUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io/api',
   supportsEtherscanV2: false,
+  iconComponent: NetworkPolkadot, // Kusama uses Polkadot icon as fallback (canary network)
   nativeCurrency: {
     name: 'Kusama',
     symbol: 'KSM',
@@ -84,6 +87,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonbeam.moonscan.io',
   apiUrl: 'https://api-moonbeam.moonscan.io/api',
   supportsEtherscanV2: true,
+  iconComponent: NetworkMoonbeam,
   nativeCurrency: {
     name: 'Glimmer',
     symbol: 'GLMR',
@@ -112,6 +116,7 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonriver.moonscan.io',
   apiUrl: 'https://api-moonriver.moonscan.io/api',
   supportsEtherscanV2: true,
+  iconComponent: NetworkMoonbeam, // Moonriver uses Moonbeam icon (same ecosystem)
   nativeCurrency: {
     name: 'Moonriver',
     symbol: 'MOVR',

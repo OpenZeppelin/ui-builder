@@ -2,6 +2,7 @@
  * @fileoverview Testnet network configurations for Polkadot adapter.
  */
 
+import { NetworkMoonbeam, NetworkPolkadot } from '@web3icons/react';
 import { moonbaseAlpha } from 'viem/chains';
 
 import type { TypedPolkadotNetworkConfig } from '../types';
@@ -24,6 +25,7 @@ export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://polkadot.testnet.routescan.io',
   apiUrl: 'https://polkadot.testnet.routescan.io/api',
   supportsEtherscanV2: false,
+  iconComponent: NetworkPolkadot,
   nativeCurrency: {
     name: 'Paseo',
     symbol: 'PAS',
@@ -56,6 +58,7 @@ export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonbase.moonscan.io',
   apiUrl: 'https://api-moonbase.moonscan.io/api',
   supportsEtherscanV2: true,
+  iconComponent: NetworkMoonbeam,
   nativeCurrency: {
     name: 'DEV',
     symbol: 'DEV',
