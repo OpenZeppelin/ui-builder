@@ -52,23 +52,16 @@ This adapter generally follows the standard module structure outlined in the mai
 ```text
 adapter-evm/
 ├── src/
-│   ├── abi/                     # ABI fetching and parsing utilities
-│   ├── config/                  # Adapter-specific configuration
-│   ├── mapping/                 # Type mapping utilities
-│   ├── networks/                # EVM network configurations
-│   ├── query/                   # View function execution
-│   ├── transaction/             # Transaction execution system
-│   │   ├── components/                # React components for configuration
-│   │   ├── strategies/                # Execution strategy implementations
-│   ├── validation/              # Validation utilities
+│   ├── configuration/           # Adapter-specific configuration wrappers
+│   ├── networks/                # EVM network configurations (mainnet, testnet)
+│   ├── query/                   # View function query wrappers
+│   ├── transaction/             # Transaction UI components
+│   │   └── components/          # React components (EvmRelayerOptions)
 │   ├── wallet/                  # Wallet integration (see wallet/README.md)
-│   │   ├── providers/                 # Wallet context providers
-│   │   ├── hooks/                     # Wallet interaction hooks
-│   │   ├── components/                # Wallet UI components
-│   │   ├── implementation/            # Wagmi implementation details
-│   │   ├── types/                     # Wallet-specific types
-│   │   ├── utils/                     # Wallet utilities
-│   │   ├── README.md                  # Detailed wallet documentation
+│   │   ├── hooks/               # Wagmi hook facades
+│   │   ├── implementation/      # Wagmi wallet implementation
+│   │   ├── rainbowkit/          # RainbowKit component factories
+│   │   └── utils/               # Wallet utilities
 │   ├── adapter.ts               # Main EvmAdapter class implementation
 │   └── index.ts                 # Public package exports
 ├── package.json
@@ -77,6 +70,25 @@ adapter-evm/
 ├── vitest.config.ts
 └── README.md
 ```
+
+## Relationship with adapter-evm-core
+
+Core EVM functionality has been extracted to `@openzeppelin/ui-builder-adapter-evm-core`. This adapter imports and delegates to core modules for:
+
+- **ABI loading**: `loadEvmContract`, `loadAbiFromEtherscan`, `loadAbiFromSourcify`
+- **Type mapping**: `mapEvmParamTypeToFieldType`, `generateEvmDefaultField`
+- **Transaction execution**: `EoaExecutionStrategy`, `RelayerExecutionStrategy`
+- **Query handling**: `queryEvmViewFunction`, `isEvmViewFunction`
+- **Input/output transformation**: `parseEvmInput`, `formatEvmFunctionResult`
+- **Wallet infrastructure**: `WagmiWalletImplementation`, UI kit management
+
+The core package is bundled internally (not a runtime dependency) via `tsup` with `noExternal: ['@openzeppelin/ui-builder-adapter-evm-core']`.
+
+**What remains in this adapter:**
+- Ethereum/EVM network configurations (mainnet, Sepolia, Polygon, etc.)
+- Adapter-specific wrapper functions
+- React UI components for transaction options
+- RainbowKit integration and configuration
 
 ---
 

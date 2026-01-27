@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Speed } from '@openzeppelin/relayer-sdk';
-
-import { gweiToWei, weiToGwei } from '../../utils';
-import type { EvmRelayerTransactionOptions } from '../relayer';
+import {
+  gweiToWei,
+  weiToGwei,
+  type EvmRelayerTransactionOptions,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 
 export interface EvmRelayerFormData {
   transactionOptions: EvmRelayerTransactionOptions & {

@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-// Adjust path as needed
+import {
+  EVM_TYPE_TO_FIELD_TYPE,
+  parseEvmInput as parseEvmInputFunction,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-types';
 
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 
 import { EvmAdapter } from '../adapter';
-import { EVM_TYPE_TO_FIELD_TYPE } from '../mapping';
-import { parseEvmInput as parseEvmInputFunction } from '../transform';
 
 // Mock FunctionParameter type helper
 const createParam = (

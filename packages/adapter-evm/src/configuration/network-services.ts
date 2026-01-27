@@ -1,15 +1,9 @@
 // Import from core package via barrel files
 import {
   EvmProviderKeys,
-  isEvmProviderKey,
-  testEvmExplorerConnection,
-  testEvmRpcConnection,
-  validateEvmExplorerConfig,
-  validateEvmRpcEndpoint,
   type TypedEvmNetworkConfig,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { NetworkServiceForm } from '@openzeppelin/ui-types';
-import { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 /**
@@ -212,58 +206,4 @@ export function getEvmNetworkServiceForms(
       ],
     },
   ];
-}
-
-/**
- * Validates a network service configuration for EVM networks.
- */
-export async function validateEvmNetworkServiceConfig(
-  serviceId: string,
-  values: Record<string, unknown>
-): Promise<boolean> {
-  if (serviceId === 'rpc') {
-    const cfg = { url: String(values.rpcUrl || ''), isCustom: true } as UserRpcProviderConfig;
-    return validateEvmRpcEndpoint(cfg);
-  }
-  if (serviceId === 'explorer') {
-    const cfg = {
-      explorerUrl: values.explorerUrl ? String(values.explorerUrl) : undefined,
-      apiUrl: values.apiUrl ? String(values.apiUrl) : undefined,
-      apiKey: values.apiKey ? String(values.apiKey) : undefined,
-      isCustom: true,
-      applyToAllNetworks: Boolean(values.applyToAllNetworks),
-    } as UserExplorerConfig;
-    return validateEvmExplorerConfig(cfg);
-  }
-  if (serviceId === 'contract-definitions') {
-    const raw = values.defaultProvider;
-    if (raw === undefined || raw === null || raw === '') return true;
-    return isEvmProviderKey(raw);
-  }
-  return true;
-}
-
-/**
- * Tests a network service connection for EVM networks.
- */
-export async function testEvmNetworkServiceConnection(
-  serviceId: string,
-  values: Record<string, unknown>,
-  networkConfig: TypedEvmNetworkConfig
-): Promise<{ success: boolean; latency?: number; error?: string }> {
-  if (serviceId === 'rpc') {
-    const cfg = { url: String(values.rpcUrl || ''), isCustom: true } as UserRpcProviderConfig;
-    return testEvmRpcConnection(cfg);
-  }
-  if (serviceId === 'explorer') {
-    const cfg = {
-      explorerUrl: values.explorerUrl ? String(values.explorerUrl) : undefined,
-      apiUrl: values.apiUrl ? String(values.apiUrl) : undefined,
-      apiKey: values.apiKey ? String(values.apiKey) : undefined,
-      isCustom: true,
-      applyToAllNetworks: Boolean(values.applyToAllNetworks),
-    } as UserExplorerConfig;
-    return testEvmExplorerConnection(cfg, networkConfig);
-  }
-  return { success: true };
 }

@@ -3,34 +3,36 @@ import React from 'react';
 
 // Core module imports - reusable EVM logic
 import {
-  // ABI
-  abiComparisonService,
-  // Types
+  compareContractDefinitions as coreCompareContractDefinitions,
+  hashContractDefinition as coreHashContractDefinition,
+  validateContractDefinition as coreValidateContractDefinition,
   EvmProviderKeys,
-  // Transform
+  executeEvmTransaction,
   formatEvmFunctionResult,
-  // Transaction (formatter only)
   formatEvmTransactionData,
-  // Mapping
   generateEvmDefaultField,
+  generateRainbowKitConfigFile,
+  generateRainbowKitExportables,
   getEvmCompatibleFieldTypes,
-  // Configuration
   getEvmCurrentBlock,
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   getEvmTypeMappingInfo,
-  // Query
   isEvmViewFunction,
-  // Validation
   isValidEvmAddress,
-  loadEvmContract,
+  loadContractSchema,
+  loadContractWithFullMetadata,
   mapEvmParamTypeToFieldType,
+  RelayerExecutionStrategy,
+  resolveFullUiKitConfiguration,
   testEvmExplorerConnection,
+  testEvmNetworkServiceConnection,
   testEvmRpcConnection,
-  // Utils
-  validateAndConvertEvmArtifacts,
+  validateEvmExecutionConfig,
   validateEvmExplorerConfig,
+  validateEvmNetworkServiceConfig,
   validateEvmRpcEndpoint,
+  waitForEvmTransactionConfirmation,
   type EvmContractDefinitionProviderKey,
   type TypedEvmNetworkConfig,
   type WriteContractParameters,
@@ -69,27 +71,12 @@ import { EvmWalletUiRoot } from './wallet/components/EvmWalletUiRoot';
 import { evmUiKitManager } from './wallet/evmUiKitManager';
 import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
-import { generateRainbowKitConfigFile } from './wallet/rainbowkit/config-generator';
-import { generateRainbowKitExportables } from './wallet/rainbowkit/export-service';
-import { resolveFullUiKitConfiguration } from './wallet/services/configResolutionService';
 
 // Adapter-specific imports - EVM adapter orchestration
-import {
-  getEvmNetworkServiceForms,
-  getEvmSupportedExecutionMethods,
-  testEvmNetworkServiceConnection,
-  validateEvmExecutionConfig,
-  validateEvmNetworkServiceConfig,
-} from './configuration';
+import { getEvmNetworkServiceForms, getEvmSupportedExecutionMethods } from './configuration';
 // Adapter-specific query with RPC resolution
 import { queryEvmViewFunction } from './query';
-import {
-  EoaExecutionStrategy,
-  EvmRelayerOptions,
-  RelayerExecutionStrategy,
-  waitForEvmTransactionConfirmation,
-  type AdapterExecutionStrategy,
-} from './transaction';
+import { EvmRelayerOptions } from './transaction';
 import {
   connectAndEnsureCorrectNetwork,
   convertWagmiToEvmStatus,
@@ -177,10 +164,7 @@ export class EvmAdapter implements ContractAdapter {
    * @inheritdoc
    */
   public async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {
-    // Convert generic input to EVM-specific artifacts
-    const artifacts = validateAndConvertEvmArtifacts(source);
-    const result = await loadEvmContract(artifacts, this.networkConfig);
-    return result.schema;
+    return loadContractSchema(source, this.networkConfig);
   }
 
   /**
@@ -199,30 +183,9 @@ export class EvmAdapter implements ContractAdapter {
     };
     proxyInfo?: ProxyInfo;
   }> {
-    try {
-      // Convert generic input to EVM-specific artifacts
-      const artifacts = validateAndConvertEvmArtifacts(source);
-      const result = await loadEvmContract(artifacts, this.networkConfig);
-
-      return {
-        schema: result.schema,
-        source: result.source,
-        contractDefinitionOriginal: result.contractDefinitionOriginal,
-        metadata: result.metadata,
-        proxyInfo: result.proxyInfo,
-      };
-    } catch (error) {
-      // Check if this is an unverified contract error
-      const errorMessage = (error as Error).message || '';
-      if (errorMessage.includes('not verified on the block explorer')) {
-        // For unverified contracts, we still need to throw but include metadata
-        // The UI will handle this error and can extract verification status from the message
-        throw error;
-      }
-
-      // Re-throw other errors
-      throw error;
-    }
+    // Delegate to core convenience function
+    // Errors (including unverified contract errors) are handled by the core function
+    return loadContractWithFullMetadata(source, this.networkConfig);
   }
 
   /**
@@ -270,19 +233,7 @@ export class EvmAdapter implements ContractAdapter {
     runtimeApiKey?: string
   ): Promise<{ txHash: string }> {
     const walletImplementation = await getEvmWalletImplementation();
-    let strategy: AdapterExecutionStrategy;
-
-    switch (executionConfig.method) {
-      case 'relayer':
-        strategy = new RelayerExecutionStrategy();
-        break;
-      case 'eoa':
-      default:
-        strategy = new EoaExecutionStrategy();
-        break;
-    }
-
-    return strategy.execute(
+    return executeEvmTransaction(
       transactionData as WriteContractParameters,
       executionConfig,
       walletImplementation,
@@ -754,26 +705,8 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
     severity: 'none' | 'minor' | 'major' | 'breaking';
     summary: string;
   }> {
-    try {
-      const result = abiComparisonService.compareAbis(storedSchema, freshSchema);
-      return {
-        identical: result.identical,
-        differences: result.differences.map((diff) => ({
-          type: diff.type,
-          section: diff.section,
-          name: diff.name,
-          details: diff.details,
-          impact: diff.impact,
-          oldSignature: diff.oldSignature,
-          newSignature: diff.newSignature,
-        })),
-        severity: result.severity,
-        summary: result.summary,
-      };
-    } catch (error) {
-      logger.error('EVM contract definition comparison failed:', (error as Error).message);
-      throw new Error(`Contract definition comparison failed: ${(error as Error).message}`);
-    }
+    // Delegate to core convenience function
+    return coreCompareContractDefinitions(storedSchema, freshSchema);
   }
 
   /**
@@ -784,19 +717,16 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
     errors: string[];
     warnings: string[];
   } {
-    const result = abiComparisonService.validateAbi(definition);
-    return {
-      valid: result.valid,
-      errors: result.errors,
-      warnings: result.warnings,
-    };
+    // Delegate to core convenience function
+    return coreValidateContractDefinition(definition);
   }
 
   /**
    * @inheritdoc
    */
   public hashContractDefinition(definition: string): string {
-    return abiComparisonService.hashAbi(definition);
+    // Delegate to core convenience function
+    return coreHashContractDefinition(definition);
   }
 
   /**

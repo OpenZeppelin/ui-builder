@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { generateRainbowKitExportables } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
-
-import { generateRainbowKitExportables } from '../export-service';
 
 describe('RainbowKit Export Service', () => {
   describe('generateRainbowKitExportables', () => {

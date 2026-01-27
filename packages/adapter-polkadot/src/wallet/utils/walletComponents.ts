@@ -1,3 +1,9 @@
+/**
+ * Wallet Components Utilities for Polkadot Adapter
+ *
+ * Provides utilities for getting resolved wallet UI components based on UI kit configuration.
+ */
+
 import {
   CustomAccountDisplay,
   CustomConnectButton,
@@ -10,7 +16,7 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import { createRainbowKitComponents, validateRainbowKitConfig } from '../rainbowkit';
 
-/** Service for resolving UI kit specific components and providers for the EVM adapter. */
+/** Service for resolving UI kit specific components and providers for the Polkadot adapter. */
 
 /**
  * Determines the final set of wallet components to be provided by the adapter
@@ -23,7 +29,7 @@ export function getResolvedWalletComponents(
   uiKitConfiguration: UiKitConfiguration
 ): EcosystemWalletComponents | undefined {
   logger.debug(
-    'uiKitService:getResolvedWalletComponents',
+    'PolkadotWalletComponents:getResolvedWalletComponents',
     'Received uiKitConfiguration:',
     JSON.stringify(uiKitConfiguration)
   );
@@ -32,7 +38,7 @@ export function getResolvedWalletComponents(
 
   if (currentKitName === 'none') {
     logger.info(
-      'uiKitService',
+      'PolkadotWalletComponents',
       'UI Kit set to "none" for getResolvedWalletComponents, not providing wallet components.'
     );
     return undefined;
@@ -40,14 +46,11 @@ export function getResolvedWalletComponents(
 
   const exclusions = getComponentExclusionsFromConfig(uiKitConfiguration.kitConfig);
   logger.debug(
-    'uiKitService',
+    'PolkadotWalletComponents',
     `Extracted component exclusions for ${currentKitName}: ${exclusions.join(', ') || 'none'}.`
   );
 
-  // TODO: If many more UI kits are added, this conditional logic could be refactored
-  // using a map or strategy pattern to resolve components based on kitName.
-  // For example: const componentFactory = this.kitComponentFactories[currentKitName];
-  // if (componentFactory) { return filterWalletComponents(componentFactory(), exclusions, currentKitName); }
+  // Handle custom kit
   if (currentKitName === 'custom') {
     const allCustomComponents: EcosystemWalletComponents = {
       ConnectButton: CustomConnectButton,
@@ -57,12 +60,13 @@ export function getResolvedWalletComponents(
     return filterWalletComponents(allCustomComponents, exclusions, currentKitName);
   }
 
+  // Handle RainbowKit
   if (currentKitName === 'rainbowkit') {
     const validation = validateRainbowKitConfig(uiKitConfiguration.kitConfig);
 
     if (!validation.isValid) {
       logger.warn(
-        'uiKitService',
+        'PolkadotWalletComponents',
         `Invalid RainbowKit configuration for components: ${validation.error}. No components provided.`
       );
       return undefined; // Fail fast for components if config is invalid for RainbowKit
@@ -70,13 +74,12 @@ export function getResolvedWalletComponents(
 
     // Get RainbowKit components and apply any exclusions
     const rainbowKitComponents = createRainbowKitComponents();
-    logger.info('uiKitService', 'Providing RainbowKit components.');
+    logger.info('PolkadotWalletComponents', 'Providing RainbowKit components.');
     return filterWalletComponents(rainbowKitComponents, exclusions, currentKitName);
   }
-  // if (currentKitName === 'connectkit') { /* return ConnectKit components */ }
-  // if (currentKitName === 'appkit') { /* return AppKit components */ }
+
   logger.warn(
-    'uiKitService',
+    'PolkadotWalletComponents',
     `UI Kit "${currentKitName}" for getResolvedWalletComponents not explicitly supported. No components provided.`
   );
   return undefined;

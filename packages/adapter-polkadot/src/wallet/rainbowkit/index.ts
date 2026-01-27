@@ -14,11 +14,8 @@ export {
   getRawUserNativeConfig,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 
-// EVM-specific components
+// Polkadot-specific components
 export { RainbowKitConnectButton } from './components';
 
-// EVM-specific factory functions
+// Polkadot-specific factory functions
 export { createRainbowKitComponents } from './componentFactory';
-
-// EVM-specific config service (creates RainbowKit wagmi config)
-export { createRainbowKitWagmiConfig, getWagmiConfigForRainbowKit } from './config-service';

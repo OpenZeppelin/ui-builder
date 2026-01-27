@@ -1,5 +1,10 @@
 import type { GetAccountReturnType } from '@wagmi/core';
 
+import {
+  connectAndEnsureCorrectNetworkCore,
+  DEFAULT_DISCONNECTED_STATUS,
+  type EvmWalletConnectionResult,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { Connector } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
@@ -41,52 +46,14 @@ export async function getEvmAvailableConnectors(): Promise<Connector[]> {
 export async function connectAndEnsureCorrectNetwork(
   connectorId: string,
   targetChainId: number
-): Promise<{ connected: boolean; address?: string; chainId?: number; error?: string }> {
+): Promise<EvmWalletConnectionResult> {
   const impl = await getEvmWalletImplementation();
   if (!impl) {
     logger.error(LOG_SYSTEM, 'connectAndEnsureCorrectNetwork: Wallet implementation not ready.');
     return { connected: false, error: 'Wallet system not initialized.' };
   }
 
-  const connectionResult = await impl.connect(connectorId);
-  if (!connectionResult.connected || !connectionResult.address || !connectionResult.chainId) {
-    return { connected: false, error: connectionResult.error || 'Connection failed' };
-  }
-
-  if (connectionResult.chainId !== targetChainId) {
-    logger.info(
-      LOG_SYSTEM,
-      `Connected to chain ${connectionResult.chainId}, but target is ${targetChainId}. Attempting switch.`
-    );
-    try {
-      await impl.switchNetwork(targetChainId);
-      const postSwitchStatus = impl.getWalletConnectionStatus();
-      if (postSwitchStatus.chainId !== targetChainId) {
-        const switchError = `Failed to switch to target network ${targetChainId}. Current: ${postSwitchStatus.chainId}`;
-        logger.error(LOG_SYSTEM, switchError);
-        // Attempt to disconnect to leave a clean state if switch fails
-        try {
-          await impl.disconnect();
-        } catch (e) {
-          logger.warn(LOG_SYSTEM, 'Failed to disconnect after network switch failure.', e);
-        }
-        return { connected: false, error: switchError };
-      }
-      logger.info(LOG_SYSTEM, `Successfully switched to target chain ${targetChainId}.`);
-      return { ...connectionResult, chainId: postSwitchStatus.chainId }; // Return updated chainId
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(LOG_SYSTEM, 'Network switch failed:', errorMessage);
-      // Attempt to disconnect to leave a clean state if switch fails
-      try {
-        await impl.disconnect();
-      } catch (e) {
-        logger.warn(LOG_SYSTEM, 'Failed to disconnect after network switch failure.', e);
-      }
-      return { connected: false, error: `Network switch failed: ${errorMessage}` };
-    }
-  }
-  return connectionResult;
+  return connectAndEnsureCorrectNetworkCore(impl, connectorId, targetChainId, LOG_SYSTEM);
 }
 
 /**
@@ -117,18 +84,7 @@ export function getEvmWalletConnectionStatus(): GetAccountReturnType {
       LOG_SYSTEM,
       'getEvmWalletConnectionStatus: Wallet implementation not ready. Returning default disconnected state.'
     );
-    return {
-      isConnected: false,
-      isConnecting: false,
-      isDisconnected: true,
-      isReconnecting: false,
-      status: 'disconnected',
-      address: undefined,
-      addresses: undefined,
-      chainId: undefined,
-      chain: undefined,
-      connector: undefined,
-    };
+    return DEFAULT_DISCONNECTED_STATUS;
   }
   return impl.getWalletConnectionStatus();
 }
