@@ -356,8 +356,11 @@ export default defineConfig(async (): Promise<UserConfig> => {
         // Workspace adapter packages should NOT be pre-bundled (treat as source)
         '@openzeppelin/ui-builder-adapter-evm',
         '@openzeppelin/ui-builder-adapter-midnight',
+        '@openzeppelin/ui-builder-adapter-polkadot',
         '@openzeppelin/ui-builder-adapter-solana',
         '@openzeppelin/ui-builder-adapter-stellar',
+        // Internal packages bundled into adapters at build time - excluding prevents duplicate instances
+        '@openzeppelin/ui-builder-adapter-evm-core',
         // Adapter-specific exclusions
         ...(adapterConfigs.optimizeDeps?.exclude || []),
       ],

@@ -21,6 +21,7 @@
 
 /* Adapter packages (workspace packages with Tailwind classes) */
 @source "../../../packages/adapter-evm/src";
+@source "../../../packages/adapter-evm-core/src";
 @source "../../../packages/adapter-midnight/src";
 @source "../../../packages/adapter-solana/src";
 @source "../../../packages/adapter-stellar/src";
