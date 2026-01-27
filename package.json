@@ -104,6 +104,7 @@
   "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
+      "@openzeppelin/ui-types": "file:../openzeppelin-ui/packages/types",
       "use-sync-external-store": "^1.2.0",
       "valtio": "^1.13.2",
       "@paulmillr/qr": "npm:qr@^0.5.0",

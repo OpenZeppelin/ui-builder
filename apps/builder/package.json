@@ -34,6 +34,7 @@
     "@icons-pack/react-simple-icons": "^12.9.0",
     "@openzeppelin/ui-builder-adapter-evm": "workspace:*",
     "@openzeppelin/ui-builder-adapter-midnight": "workspace:*",
+    "@openzeppelin/ui-builder-adapter-polkadot": "workspace:*",
     "@openzeppelin/ui-builder-adapter-solana": "workspace:*",
     "@openzeppelin/ui-builder-adapter-stellar": "workspace:*",
     "@openzeppelin/ui-components": "^1.0.4",
