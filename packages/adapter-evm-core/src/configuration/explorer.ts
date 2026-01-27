@@ -1,3 +1,5 @@
+import { trimEnd } from 'lodash';
+
 import { UserExplorerConfig } from '@openzeppelin/ui-types';
 import { appConfigService, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
@@ -102,7 +104,7 @@ export function getEvmExplorerAddressUrl(
   }
 
   // Construct the URL using the explorerUrl from the config
-  const baseUrl = explorerConfig.explorerUrl.replace(/\/+$/, '');
+  const baseUrl = trimEnd(explorerConfig.explorerUrl, '/');
   return `${baseUrl}/address/${address}`;
 }
 
@@ -127,7 +129,7 @@ export function getEvmExplorerTxUrl(
   }
 
   // Construct the URL using the explorerUrl from the config
-  const baseUrl = explorerConfig.explorerUrl.replace(/\/+$/, '');
+  const baseUrl = trimEnd(explorerConfig.explorerUrl, '/');
   return `${baseUrl}/tx/${txHash}`;
 }
 
