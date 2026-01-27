@@ -24,3 +24,9 @@ export {
   validateEvmExplorerConfig,
   testEvmExplorerConnection,
 } from './explorer';
+
+// Network service configuration
+export {
+  validateEvmNetworkServiceConfig,
+  testEvmNetworkServiceConnection,
+} from './network-services';

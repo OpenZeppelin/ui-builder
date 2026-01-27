@@ -16,6 +16,18 @@ export {
   type EtherscanAbiResult as EtherscanV2AbiResult,
 } from './etherscan-v2';
 export { loadAbiFromSourcify, getSourcifyContractAppUrl, type SourcifyAbiResult } from './sourcify';
-export { loadEvmContract, type EvmContractLoadResult, type ContractLoadOptions } from './loader';
+export {
+  loadEvmContract,
+  loadContractSchema,
+  loadContractWithFullMetadata,
+  type EvmContractLoadResult,
+  type ContractLoadOptions,
+} from './loader';
 export * from './types';
-export { AbiComparisonService, abiComparisonService } from './comparison';
+export {
+  AbiComparisonService,
+  abiComparisonService,
+  compareContractDefinitions,
+  validateContractDefinition,
+  hashContractDefinition,
+} from './comparison';

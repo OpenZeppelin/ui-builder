@@ -1,7 +1,8 @@
 import type { ContractSchema } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import type { AbiItem, TypedEvmNetworkConfig } from '../types/abi';
+import type { AbiItem } from '../types/abi';
+import type { EvmCompatibleNetworkConfig } from '../types/network';
 import { transformAbiToSchema } from './transformer';
 
 export interface SourcifyAbiResult {
@@ -35,9 +36,16 @@ function buildSourcifyApiUrl(chainId: number, address: string): string {
   return url.toString();
 }
 
+/**
+ * Fetches and parses an ABI from Sourcify using a contract address and network config.
+ *
+ * @param address - Contract address to fetch ABI for
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @param timeoutMs - Timeout in milliseconds (default: 4000ms)
+ */
 export async function loadAbiFromSourcify(
   address: string,
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   timeoutMs = 4000
 ): Promise<SourcifyAbiResult> {
   const controller = new AbortController();

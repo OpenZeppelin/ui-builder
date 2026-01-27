@@ -2,7 +2,8 @@ import type { ContractSchema } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { resolveExplorerConfig } from '../configuration/explorer';
-import type { AbiItem, TypedEvmNetworkConfig } from '../types/abi';
+import type { AbiItem } from '../types/abi';
+import type { EvmCompatibleNetworkConfig } from '../types/network';
 import { transformAbiToSchema } from './transformer';
 
 /**
@@ -44,8 +45,10 @@ function buildV2ApiUrl(
 
 /**
  * Checks if the network supports V2 API
+ *
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
-export function shouldUseV2Api(networkConfig: TypedEvmNetworkConfig): boolean {
+export function shouldUseV2Api(networkConfig: EvmCompatibleNetworkConfig): boolean {
   if (!networkConfig.supportsEtherscanV2) {
     return false;
   }
@@ -55,10 +58,13 @@ export function shouldUseV2Api(networkConfig: TypedEvmNetworkConfig): boolean {
 
 /**
  * Fetches and parses an ABI from Etherscan V2 API using a contract address and network config.
+ *
+ * @param address - Contract address to fetch ABI for
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
 export async function loadAbiFromEtherscanV2(
   address: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<EtherscanAbiResult> {
   const explorerConfig = resolveExplorerConfig(networkConfig);
 
@@ -166,9 +172,12 @@ export async function loadAbiFromEtherscanV2(
 
 /**
  * Test connection to Etherscan V2 API
+ *
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @param apiKey - Optional API key for authentication
  */
 export async function testEtherscanV2Connection(
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   apiKey?: string
 ): Promise<{
   success: boolean;

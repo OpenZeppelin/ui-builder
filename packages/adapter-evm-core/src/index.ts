@@ -23,6 +23,12 @@ export {
   getSourcifyContractAppUrl,
   shouldUseV2Api,
   testEtherscanV2Connection,
+  // Convenience wrappers
+  loadContractSchema,
+  loadContractWithFullMetadata,
+  compareContractDefinitions,
+  validateContractDefinition,
+  hashContractDefinition,
   // Comparison
   AbiComparisonService,
   abiComparisonService,
@@ -62,9 +68,87 @@ export { parseEvmInput, formatEvmFunctionResult } from './transform';
 export { queryEvmViewFunction, isEvmViewFunction } from './query';
 
 // ============================================================================
-// Transaction Module - Transaction formatting and execution strategy interface
+// Transaction Module - Transaction formatting, execution strategies, and sending
 // ============================================================================
-export { formatEvmTransactionData, type ExecutionStrategy } from './transaction';
+export {
+  // Formatting
+  formatEvmTransactionData,
+  // Execution strategy interface
+  type AdapterExecutionStrategy,
+  // Execution strategies
+  EoaExecutionStrategy,
+  RelayerExecutionStrategy,
+  type EvmRelayerTransactionOptions,
+  // Transaction functions
+  executeEvmTransaction,
+  signAndBroadcastEvmTransaction,
+  waitForEvmTransactionConfirmation,
+  // Types
+  type EvmWalletImplementation,
+  type EvmWalletConnectionStatus,
+  type EvmWalletConnectionResult,
+  type EvmWalletDisconnectResult,
+} from './transaction';
+
+// ============================================================================
+// Wallet Module - Wallet implementation and UI configuration utilities
+// ============================================================================
+export {
+  // Wagmi provider context
+  WagmiProviderInitializedContext,
+  // Wagmi hooks
+  useIsWagmiProviderInitialized,
+  // Wagmi components
+  SafeWagmiComponent,
+  // Wallet UI components
+  CustomConnectButton,
+  ConnectorDialog,
+  CustomAccountDisplay,
+  CustomNetworkSwitcher,
+  type ConnectButtonProps,
+  // Core connection utilities
+  connectAndEnsureCorrectNetworkCore,
+  DEFAULT_DISCONNECTED_STATUS,
+  // Wallet implementation
+  WagmiWalletImplementation,
+  type GetWagmiConfigForRainbowKitFn,
+  // Wallet types
+  type WagmiWalletConfig,
+  type WagmiConfigChains,
+  type WalletNetworkConfig,
+  // RainbowKit utilities
+  generateRainbowKitConfigFile,
+  generateRainbowKitExportables,
+  type RainbowKitConfigOptions,
+  // RainbowKit types
+  type AppInfo,
+  type RainbowKitConnectButtonProps,
+  type RainbowKitProviderProps,
+  type RainbowKitKitConfig,
+  type RainbowKitCustomizations,
+  isRainbowKitCustomizations,
+  extractRainbowKitCustomizations,
+  // RainbowKit utility functions
+  validateRainbowKitConfig,
+  getRawUserNativeConfig,
+  // RainbowKit component factories
+  createRainbowKitConnectButton,
+  createRainbowKitComponents,
+  // UI Kit Manager factory
+  createUiKitManager,
+  type UiKitManagerState,
+  type UiKitManagerDependencies,
+  type UiKitManager,
+  type RainbowKitAssetsResult,
+  // RainbowKit Asset Manager
+  ensureRainbowKitAssetsLoaded,
+  // Configuration Resolution
+  resolveAndInitializeKitConfig,
+  resolveFullUiKitConfiguration,
+  // Wallet component filtering utilities
+  filterWalletComponents,
+  getComponentExclusionsFromConfig,
+} from './wallet';
 
 // ============================================================================
 // Configuration Module - RPC and Explorer configuration
@@ -83,6 +167,9 @@ export {
   getEvmExplorerTxUrl,
   validateEvmExplorerConfig,
   testEvmExplorerConnection,
+  // Network service configuration
+  validateEvmNetworkServiceConfig,
+  testEvmNetworkServiceConnection,
 } from './configuration';
 
 // ============================================================================
@@ -103,6 +190,7 @@ export {
   validateEvmEoaConfig,
   validateRelayerConfig,
   validateEvmRelayerConfig,
+  validateEvmExecutionConfig,
   isValidEvmAddress,
   type EvmWalletStatus,
 } from './validation';
@@ -135,11 +223,10 @@ export {
   type EvmContractDefinitionProviderKey,
   EVM_PROVIDER_ORDER_DEFAULT,
   isEvmProviderKey,
-  // ABI types
+  // Network and ABI types
+  type EvmCompatibleNetworkConfig,
   type TypedEvmNetworkConfig,
   type AbiItem,
-  EVMParameterType,
-  EVMChainType,
   type WriteContractParameters,
   // Result types
   type EvmAbiLoadResult,

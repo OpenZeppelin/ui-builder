@@ -1,10 +1,12 @@
-import type { EvmNetworkConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import type { UserRpcProviderConfig } from '@openzeppelin/ui-types';
 import {
   appConfigService,
   isValidUrl,
   logger,
   userNetworkServiceConfigService,
 } from '@openzeppelin/ui-utils';
+
+import type { EvmCompatibleNetworkConfig } from '../types/network';
 
 /**
  * Builds a complete RPC URL from a user RPC provider configuration.
@@ -39,11 +41,11 @@ export function getUserRpcUrl(networkId: string): string | undefined {
  * 2. RPC URL override from AppConfigService
  * 3. Default rpcUrl from the network configuration
  *
- * @param networkConfig - The EVM network configuration.
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem).
  * @returns The resolved RPC URL string.
  * @throws If no RPC URL can be resolved (neither user config, override, nor default is present and valid).
  */
-export function resolveRpcUrl(networkConfig: EvmNetworkConfig): string {
+export function resolveRpcUrl(networkConfig: EvmCompatibleNetworkConfig): string {
   const logSystem = 'RpcResolver';
   const networkId = networkConfig.id;
 
@@ -211,11 +213,13 @@ export async function testEvmRpcConnection(
 /**
  * Gets the current block number from an EVM network.
  *
- * @param networkConfig - The EVM network configuration
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  * @returns Promise resolving to the current block number
  * @throws Error if the RPC call fails
  */
-export async function getEvmCurrentBlock(networkConfig: EvmNetworkConfig): Promise<number> {
+export async function getEvmCurrentBlock(
+  networkConfig: EvmCompatibleNetworkConfig
+): Promise<number> {
   const rpcUrl = resolveRpcUrl(networkConfig);
 
   try {

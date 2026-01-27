@@ -9,7 +9,8 @@ import { createPublicClient, http, keccak256, parseAbi, toHex } from 'viem';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { resolveRpcUrl } from '../configuration/rpc';
-import { AbiItem, TypedEvmNetworkConfig } from '../types/abi';
+import { AbiItem } from '../types/abi';
+import { EvmCompatibleNetworkConfig } from '../types/network';
 
 export interface ProxyDetectionResult {
   isProxy: boolean;
@@ -143,10 +144,14 @@ export function detectProxyFromAbi(abi: AbiItem[]): ProxyDetectionResult {
 
 /**
  * Attempts to resolve the implementation address for a proxy contract
+ *
+ * @param proxyAddress - Address of the proxy contract
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @param proxyType - Type of proxy (uups, transparent, beacon, diamond, minimal, unknown)
  */
 export async function getImplementationAddress(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   proxyType: string
 ): Promise<string | null> {
   logger.info(
@@ -194,10 +199,13 @@ export async function getImplementationAddress(
 /**
  * Attempts to resolve the admin address for a proxy contract
  * Tries EIP-1967 admin slot first, then legacy OZ slot
+ *
+ * @param proxyAddress - Address of the proxy contract
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
 export async function getAdminAddress(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     const eip1967Admin = await getEIP1967Admin(proxyAddress, networkConfig);
@@ -218,7 +226,7 @@ export async function getAdminAddress(
  */
 async function getEIP1967Implementation(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   // EIP-1967 implementation storage slot
   const implementationSlot = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
@@ -232,7 +240,7 @@ async function getEIP1967Implementation(
  */
 async function getEIP1967Admin(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   const adminSlot = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103';
   return await readStorageSlot(proxyAddress, adminSlot, networkConfig);
@@ -244,7 +252,7 @@ async function getEIP1967Admin(
  */
 async function getLegacyOZAdmin(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     const slot = keccak256(toHex('org.zeppelinos.proxy.admin'));
@@ -262,7 +270,7 @@ async function getLegacyOZAdmin(
  */
 async function getLegacyOZImplementation(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     // Compute slot deterministically at runtime to avoid hardcoding
@@ -280,7 +288,7 @@ async function getLegacyOZImplementation(
  */
 async function getBeaconImplementation(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   // EIP-1967 beacon storage slot
   const beaconSlot = '0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50';
@@ -299,7 +307,7 @@ async function getBeaconImplementation(
  */
 async function getMinimalProxyImplementation(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     // Get the contract bytecode
@@ -332,7 +340,7 @@ async function getMinimalProxyImplementation(
  */
 async function tryCommonImplementationMethods(
   proxyAddress: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   const commonMethods = [
     'implementation()',
@@ -364,7 +372,7 @@ async function tryCommonImplementationMethods(
 /**
  * Creates a viem public client for the given network configuration
  */
-function createViemClient(networkConfig: TypedEvmNetworkConfig) {
+function createViemClient(networkConfig: EvmCompatibleNetworkConfig) {
   // Honor user/app RPC overrides
   const rpcUrl = resolveRpcUrl(networkConfig);
   return createPublicClient({
@@ -378,7 +386,7 @@ function createViemClient(networkConfig: TypedEvmNetworkConfig) {
 async function readStorageSlot(
   address: string,
   slot: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     const client = createViemClient(networkConfig);
@@ -413,7 +421,7 @@ async function callContractFunction(
   address: string,
   signature: string,
   params: unknown[],
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     const client = createViemClient(networkConfig);
@@ -448,7 +456,7 @@ async function callContractFunction(
  */
 async function getContractBytecode(
   address: string,
-  networkConfig: TypedEvmNetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): Promise<string | null> {
   try {
     const client = createViemClient(networkConfig);

@@ -1,23 +1,8 @@
-import type { Abi, Chain } from 'viem';
-
-import type { EvmNetworkConfig } from '@openzeppelin/ui-types';
+import type { Abi } from 'viem';
 
 /**
- * EVM-specific type definitions
+ * EVM-specific ABI type definitions
  */
-
-/**
- * EVM-specific network configuration with properly typed viem chain
- * This extends the base EvmNetworkConfig with the correct Chain type from viem
- */
-export interface TypedEvmNetworkConfig extends EvmNetworkConfig {
-  /**
-   * Viem Chain object for this EVM network.
-   * If provided, this will be used directly by Viem clients.
-   * If not provided, a fallback chain object will be created.
-   */
-  viemChain?: Chain;
-}
 
 /**
  * Represents an item in an Ethereum ABI
@@ -52,31 +37,6 @@ export type AbiItem = {
 };
 
 /**
- * EVM-specific parameter types
- */
-export enum EVMParameterType {
-  ADDRESS = 'address',
-  UINT256 = 'uint256',
-  UINT8 = 'uint8',
-  BOOL = 'bool',
-  BYTES = 'bytes',
-  BYTES32 = 'bytes32',
-  STRING = 'string',
-}
-
-/**
- * EVM-specific chain types
- */
-export enum EVMChainType {
-  ETHEREUM = 'ethereum',
-  POLYGON = 'polygon',
-  ARBITRUM = 'arbitrum',
-  OPTIMISM = 'optimism',
-  BSC = 'bsc',
-  AVALANCHE = 'avalanche',
-}
-
-/**
  * Defines the structure for parameters required to execute a contract write operation via viem.
  */
 export interface WriteContractParameters {
@@ -85,5 +45,4 @@ export interface WriteContractParameters {
   functionName: string;
   args: unknown[];
   value?: bigint;
-  // Add other potential viem parameters if needed (e.g., gas)
 }

@@ -1,11 +1,6 @@
 import { isAddress } from 'viem';
 
-import type {
-  ContractDefinitionMetadata,
-  ContractSchema,
-  EvmNetworkConfig,
-  ProxyInfo,
-} from '@openzeppelin/ui-types';
+import type { ContractDefinitionMetadata, ContractSchema, ProxyInfo } from '@openzeppelin/ui-types';
 import {
   appConfigService,
   logger,
@@ -16,8 +11,9 @@ import {
 
 import { getEvmExplorerAddressUrl } from '../configuration/explorer';
 import { detectProxyFromAbi, getAdminAddress, getImplementationAddress } from '../proxy/detection';
-import type { AbiItem, TypedEvmNetworkConfig } from '../types/abi';
+import type { AbiItem } from '../types/abi';
 import type { EvmContractArtifacts } from '../types/artifacts';
+import type { EvmCompatibleNetworkConfig } from '../types/network';
 import {
   EvmProviderKeys,
   isEvmProviderKey,
@@ -74,10 +70,14 @@ const OVERALL_BUDGET_MS = 10000;
 /**
  * Loads contract schema from artifacts provided by the UI, prioritizing manual ABI input.
  * Returns enhanced result with schema source information and automatic proxy detection.
+ *
+ * @param artifacts - Contract artifacts containing address and optional ABI
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @param options - Optional loading options
  */
 export async function loadEvmContract(
   artifacts: EvmContractArtifacts,
-  networkConfig: EvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   options: ContractLoadOptions = {}
 ): Promise<EvmContractLoadResult> {
   const { contractAddress, contractDefinition, __proxyDetectionOptions } = artifacts;
@@ -142,7 +142,7 @@ export async function loadEvmContract(
 
   return await loadContractWithProxyDetection(
     contractAddress,
-    networkConfig as TypedEvmNetworkConfig,
+    networkConfig,
     options,
     forcedProvider
   );
@@ -154,7 +154,7 @@ export async function loadEvmContract(
 function buildContractResult(
   contractAddress: string,
   abiResult: { schema: ContractSchema; originalAbi: string },
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   sourceProvider: EvmContractDefinitionProviderKey | null,
   proxyInfo?: ProxyInfo
 ): EvmContractLoadResult {
@@ -190,7 +190,7 @@ function buildContractResult(
 async function loadImplementationAbi(
   _contractAddress: string,
   implementationAddress: string,
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   _proxyType: string
 ): Promise<{ schema: ContractSchema; originalAbi: string } | null> {
   try {
@@ -217,7 +217,7 @@ async function loadImplementationAbi(
 async function handleProxyDetection(
   contractAddress: string,
   initialResult: { schema: ContractSchema; originalAbi: string },
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   initialProvider: EvmContractDefinitionProviderKey | null
 ): Promise<EvmContractLoadResult | null> {
   // Parse the ABI to check for proxy patterns
@@ -301,7 +301,7 @@ async function handleProxyDetection(
  */
 async function loadContractWithProxyDetection(
   contractAddress: string,
-  networkConfig: TypedEvmNetworkConfig,
+  networkConfig: EvmCompatibleNetworkConfig,
   options: ContractLoadOptions = {},
   forcedProvider: EvmContractDefinitionProviderKey | null = null
 ): Promise<EvmContractLoadResult> {
@@ -412,4 +412,66 @@ async function loadContractWithProxyDetection(
     // Otherwise, rethrow the last error from provider attempts
     throw error;
   }
+}
+
+// ============================================================================
+// Convenience Wrapper Functions
+// ============================================================================
+
+/**
+ * Convenience wrapper that loads a contract and returns just the schema.
+ * Handles artifact validation, ABI fetching, and proxy detection.
+ *
+ * @param source - Contract address string or artifacts object
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @param options - Optional loading options
+ * @returns The contract schema
+ *
+ * @example
+ * ```typescript
+ * // Load by address (fetches ABI from explorer)
+ * const schema = await loadContractSchema('0x1234...', networkConfig);
+ *
+ * // Load with manual ABI
+ * const schema = await loadContractSchema(
+ *   { contractAddress: '0x1234...', contractDefinition: '[...]' },
+ *   networkConfig
+ * );
+ * ```
+ */
+export async function loadContractSchema(
+  source: string | Record<string, unknown>,
+  networkConfig: EvmCompatibleNetworkConfig,
+  options?: ContractLoadOptions
+): Promise<ContractSchema> {
+  const { validateAndConvertEvmArtifacts } = await import('../utils');
+  const artifacts = validateAndConvertEvmArtifacts(source);
+  const result = await loadEvmContract(artifacts, networkConfig, options);
+  return result.schema;
+}
+
+/**
+ * Convenience wrapper that loads a contract with full metadata.
+ * Returns schema, source information, original ABI, metadata, and proxy info.
+ *
+ * @param source - Contract address string or artifacts object
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
+ * @returns Full contract load result with metadata
+ *
+ * @example
+ * ```typescript
+ * const result = await loadContractWithFullMetadata('0x1234...', networkConfig);
+ * console.log(result.schema.name);          // Contract name
+ * console.log(result.source);               // 'fetched' | 'manual'
+ * console.log(result.metadata?.fetchedFrom); // Explorer URL
+ * console.log(result.proxyInfo?.isProxy);   // Proxy detection result
+ * ```
+ */
+export async function loadContractWithFullMetadata(
+  source: string | Record<string, unknown>,
+  networkConfig: EvmCompatibleNetworkConfig
+): Promise<EvmContractLoadResult> {
+  const { validateAndConvertEvmArtifacts } = await import('../utils');
+  const artifacts = validateAndConvertEvmArtifacts(source);
+  return loadEvmContract(artifacts, networkConfig);
 }

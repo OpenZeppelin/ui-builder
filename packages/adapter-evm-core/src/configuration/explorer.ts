@@ -1,8 +1,8 @@
-import { EvmNetworkConfig, NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-types';
+import { UserExplorerConfig } from '@openzeppelin/ui-types';
 import { appConfigService, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
-import { TypedEvmNetworkConfig } from '../types/abi';
+import { EvmCompatibleNetworkConfig } from '../types/network';
 import { isValidEvmAddress } from '../utils';
 
 /**
@@ -13,10 +13,12 @@ import { isValidEvmAddress } from '../utils';
  * 3. App-configured explorer API key (from AppConfigService network service configs)
  * 4. Default network explorer (from NetworkConfig)
  *
- * @param networkConfig - The EVM network configuration.
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem).
  * @returns The resolved explorer configuration.
  */
-export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): UserExplorerConfig {
+export function resolveExplorerConfig(
+  networkConfig: EvmCompatibleNetworkConfig
+): UserExplorerConfig {
   // Precompute app-level keys and defaults for merging
   const isV2 =
     networkConfig.supportsEtherscanV2 &&
@@ -82,16 +84,19 @@ export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): Use
 /**
  * Gets a blockchain explorer URL for an EVM address.
  * Uses the resolved explorer configuration.
+ *
+ * @param address - Contract or wallet address
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
 export function getEvmExplorerAddressUrl(
   address: string,
-  networkConfig: NetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): string | null {
   if (!isValidEvmAddress(address)) {
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
@@ -104,13 +109,19 @@ export function getEvmExplorerAddressUrl(
 /**
  * Gets a blockchain explorer URL for an EVM transaction.
  * Uses the resolved explorer configuration.
+ *
+ * @param txHash - Transaction hash
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
-export function getEvmExplorerTxUrl(txHash: string, networkConfig: NetworkConfig): string | null {
+export function getEvmExplorerTxUrl(
+  txHash: string,
+  networkConfig: EvmCompatibleNetworkConfig
+): string | null {
   if (!txHash) {
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
@@ -154,24 +165,26 @@ export function validateEvmExplorerConfig(explorerConfig: UserExplorerConfig): b
  * Tests the connection to an EVM explorer API.
  * Makes a test API call to verify the API key works.
  * Automatically uses V2 API testing for networks that support it.
+ *
+ * @param explorerConfig - Explorer configuration to test
+ * @param networkConfig - Optional EVM-compatible network configuration (works with any ecosystem)
  */
 export async function testEvmExplorerConnection(
   explorerConfig: UserExplorerConfig,
-  networkConfig?: EvmNetworkConfig
+  networkConfig?: EvmCompatibleNetworkConfig
 ): Promise<{
   success: boolean;
   latency?: number;
   error?: string;
 }> {
   // Check if this network supports V2 API and should use it
-  const typedNetworkConfig = networkConfig as TypedEvmNetworkConfig | undefined;
-  if (typedNetworkConfig && shouldUseV2Api(typedNetworkConfig)) {
+  if (networkConfig && shouldUseV2Api(networkConfig)) {
     // Use the V2-specific connection test
     logger.info(
       'testEvmExplorerConnection',
-      `Using V2 API connection test for ${typedNetworkConfig.name}`
+      `Using V2 API connection test for ${networkConfig.name}`
     );
-    return testEtherscanV2Connection(typedNetworkConfig, explorerConfig.apiKey);
+    return testEtherscanV2Connection(networkConfig, explorerConfig.apiKey);
   }
 
   // V1 API testing path
