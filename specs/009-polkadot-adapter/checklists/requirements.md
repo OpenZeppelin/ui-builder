@@ -1,8 +1,8 @@
 # Specification Quality Checklist: Polkadot Adapter
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
-**Created**: 2026-01-24  
-**Updated**: 2026-01-08  
+**Created**: 2026-01-08  
+**Updated**: 2026-01-24  
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality

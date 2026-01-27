@@ -11,12 +11,8 @@ import type { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui
 
 import { isEvmProviderKey } from '../types';
 import type { EvmCompatibleNetworkConfig } from '../types';
-import {
-  testEvmExplorerConnection,
-  testEvmRpcConnection,
-  validateEvmExplorerConfig,
-  validateEvmRpcEndpoint,
-} from './index';
+import { testEvmExplorerConnection, validateEvmExplorerConfig } from './explorer';
+import { testEvmRpcConnection, validateEvmRpcEndpoint } from './rpc';
 
 /**
  * Validates a network service configuration for EVM-compatible networks.
