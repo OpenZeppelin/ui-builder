@@ -1,4 +1,4 @@
-import type { TypedEvmNetworkConfig } from '../../types';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
 
 /**
  * Mock EVM Network Configuration for testing purposes.
