@@ -72,6 +72,9 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
+      - name: Type check all packages
+        run: pnpm typecheck
+
       - name: Test
         run: pnpm test
         # It's okay if no tests exist yet
