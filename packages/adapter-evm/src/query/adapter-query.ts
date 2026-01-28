@@ -9,11 +9,10 @@ import {
   queryEvmViewFunction as coreQueryEvmViewFunction,
   resolveRpcUrl,
   type TypedEvmNetworkConfig,
+  type WagmiWalletImplementation,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { ContractSchema } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
-
-import type { WagmiWalletImplementation } from '../wallet/implementation/wagmi-implementation';
 
 /**
  * Query a view function on an EVM contract.

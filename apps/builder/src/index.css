@@ -4,10 +4,28 @@
 /* 
   Import Tailwind directives.
   Tailwind v4 uses automatic content detection for the local project.
-  The source() function sets the base path for scanning - we use the monorepo root.
-  This ensures consistent path resolution in both local dev and Docker builds.
+  
+  FIX: Restrict scanning to only source files - NOT the entire monorepo.
+  The original source('../../../') was scanning ALL of node_modules (~4 min delay).
+  Now we explicitly list only the directories that contain Tailwind classes.
 */
-@import 'tailwindcss' source('../../../');
+@import 'tailwindcss' source(none);
+
+/*
+  Explicitly define which directories Tailwind should scan for class names.
+  This is MUCH faster than scanning the entire monorepo.
+*/
+/* Builder app source files */
+@source "./";
+@source "../";
+
+/* Adapter packages (workspace packages with Tailwind classes) */
+@source "../../../packages/adapter-evm/src";
+@source "../../../packages/adapter-evm-core/src";
+@source "../../../packages/adapter-midnight/src";
+@source "../../../packages/adapter-solana/src";
+@source "../../../packages/adapter-stellar/src";
+@source "../../../packages/adapter-polkadot/src";
 
 /*
   Tell Tailwind to scan @openzeppelin npm packages for class names.
@@ -19,8 +37,16 @@
   - Root node_modules: where packages are hoisted locally
   - Builder's node_modules: where pnpm installs them in Docker
 */
-@source "../../../node_modules/@openzeppelin";
-@source "../node_modules/@openzeppelin";
+@source "../../../node_modules/@openzeppelin/ui-components";
+@source "../../../node_modules/@openzeppelin/ui-react";
+@source "../../../node_modules/@openzeppelin/ui-renderer";
+@source "../../../node_modules/@openzeppelin/ui-styles";
+@source "../../../node_modules/@openzeppelin/ui-utils";
+@source "../node_modules/@openzeppelin/ui-components";
+@source "../node_modules/@openzeppelin/ui-react";
+@source "../node_modules/@openzeppelin/ui-renderer";
+@source "../node_modules/@openzeppelin/ui-styles";
+@source "../node_modules/@openzeppelin/ui-utils";
 
 /*
   Import global theme variables and base styles from the @openzeppelin/ui-styles package.

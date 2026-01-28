@@ -387,3 +387,70 @@ export class AbiComparisonService {
 
 // Export singleton instance
 export const abiComparisonService = new AbiComparisonService();
+
+// ============================================================================
+// Convenience Wrapper Functions
+// ============================================================================
+
+/**
+ * Compare two contract definitions (ABI strings).
+ * Convenience wrapper around abiComparisonService.compareAbis().
+ *
+ * @param storedSchema - The stored/original ABI JSON string
+ * @param freshSchema - The new/fresh ABI JSON string to compare against
+ * @returns Comparison result with differences and severity
+ *
+ * @example
+ * ```typescript
+ * const result = await compareContractDefinitions(oldAbi, newAbi);
+ * if (!result.identical) {
+ *   console.log(`Changes detected: ${result.summary}`);
+ *   console.log(`Severity: ${result.severity}`);
+ * }
+ * ```
+ */
+export async function compareContractDefinitions(
+  storedSchema: string,
+  freshSchema: string
+): Promise<AbiComparisonResult> {
+  return abiComparisonService.compareAbis(storedSchema, freshSchema);
+}
+
+/**
+ * Validate a contract definition (ABI string).
+ * Convenience wrapper around abiComparisonService.validateAbi().
+ *
+ * @param definition - The ABI JSON string to validate
+ * @returns Validation result with errors and warnings
+ *
+ * @example
+ * ```typescript
+ * const result = validateContractDefinition(abiJson);
+ * if (!result.valid) {
+ *   console.log('Validation errors:', result.errors);
+ * }
+ * ```
+ */
+export function validateContractDefinition(definition: string): AbiValidationResult {
+  return abiComparisonService.validateAbi(definition);
+}
+
+/**
+ * Hash a contract definition (ABI string) for comparison.
+ * Convenience wrapper around abiComparisonService.hashAbi().
+ *
+ * @param definition - The ABI JSON string to hash
+ * @returns Deterministic hash of the normalized ABI
+ *
+ * @example
+ * ```typescript
+ * const hash1 = hashContractDefinition(abi1);
+ * const hash2 = hashContractDefinition(abi2);
+ * if (hash1 === hash2) {
+ *   console.log('ABIs are identical');
+ * }
+ * ```
+ */
+export function hashContractDefinition(definition: string): string {
+  return abiComparisonService.hashAbi(definition);
+}

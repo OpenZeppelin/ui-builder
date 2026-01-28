@@ -1,4 +1,5 @@
-import { TypedEvmNetworkConfig } from '../types';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+
 import {
   arbitrumMainnet,
   avalancheMainnet,

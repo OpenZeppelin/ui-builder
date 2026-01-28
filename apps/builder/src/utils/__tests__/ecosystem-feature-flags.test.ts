@@ -70,6 +70,10 @@ describe('ecosystem-feature-flags', () => {
       expect(isEcosystemEnabled('evm')).toBe(true);
     });
 
+    it('should return true for Polkadot by default', () => {
+      expect(isEcosystemEnabled('polkadot')).toBe(true);
+    });
+
     it('should return true for Stellar by default', () => {
       expect(isEcosystemEnabled('stellar')).toBe(true);
     });
@@ -91,6 +95,7 @@ describe('ecosystem-feature-flags', () => {
   describe('shouldShowEcosystemInUI', () => {
     it('should return true for visible ecosystems by default', () => {
       expect(shouldShowEcosystemInUI('evm')).toBe(true);
+      expect(shouldShowEcosystemInUI('polkadot')).toBe(true);
       expect(shouldShowEcosystemInUI('solana')).toBe(false);
       expect(shouldShowEcosystemInUI('stellar')).toBe(true);
       expect(shouldShowEcosystemInUI('midnight')).toBe(true);
@@ -109,7 +114,7 @@ describe('ecosystem-feature-flags', () => {
   describe('getVisibleEcosystems', () => {
     it('should return visible ecosystems by default', () => {
       const visible = getVisibleEcosystems();
-      expect(visible).toEqual(['evm', 'stellar', 'midnight']);
+      expect(visible).toEqual(['evm', 'stellar', 'polkadot', 'midnight']);
     });
 
     it('should filter out hidden ecosystems', () => {
@@ -120,14 +125,14 @@ describe('ecosystem-feature-flags', () => {
       });
 
       const visible = getVisibleEcosystems();
-      expect(visible).toEqual(['evm', 'midnight']);
+      expect(visible).toEqual(['evm', 'polkadot', 'midnight']);
     });
   });
 
   describe('getEnabledEcosystems', () => {
-    it('should return EVM, Stellar, Midnight by default', () => {
+    it('should return EVM, Stellar, Polkadot, Midnight by default', () => {
       const enabled = getEnabledEcosystems();
-      expect(enabled).toEqual(['evm', 'stellar', 'midnight']);
+      expect(enabled).toEqual(['evm', 'stellar', 'polkadot', 'midnight']);
     });
 
     it('should include ecosystems enabled by feature flags', () => {
@@ -138,7 +143,7 @@ describe('ecosystem-feature-flags', () => {
       });
 
       const enabled = getEnabledEcosystems();
-      expect(enabled).toEqual(['evm', 'stellar', 'midnight', 'solana']);
+      expect(enabled).toEqual(['evm', 'stellar', 'polkadot', 'midnight', 'solana']);
     });
   });
 });

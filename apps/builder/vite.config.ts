@@ -216,7 +216,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
   // Load adapter-specific Vite configurations
   const adapterConfigs = await loadAdapterViteConfigs();
 
-  return {
+  const config: UserConfig = {
     customLogger: logger,
     plugins: [
       // Adapter-specific plugins (e.g., WASM for Midnight)
@@ -254,16 +254,116 @@ export default defineConfig(async (): Promise<UserConfig> => {
     // ==============================================================================
     // DEPENDENCY PRE-BUNDLING & OPTIMIZATION
     // ==============================================================================
+    // Pre-bundle dependencies upfront to prevent Vite from pausing requests while re-optimizing
     optimizeDeps: {
+      // Comprehensive include list - all dependencies are pre-bundled upfront
+
       esbuildOptions: {
         define: {
           global: 'globalThis',
         },
       },
 
-      // Adapter-specific pre-bundling configuration
-      include: adapterConfigs.optimizeDeps?.include || [],
-      exclude: adapterConfigs.optimizeDeps?.exclude || [],
+      // App-level dependencies + adapter-specific pre-bundling configuration.
+      // If optimizeDeps.noDiscovery is enabled, ALL deps must be listed here.
+      include: [
+        // React core - explicit inclusion prevents runtime discovery
+        'react',
+        'react-dom',
+        'react-dom/client',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+
+        // OpenZeppelin UI packages - MUST be pre-bundled to avoid runtime discovery blocking
+        '@openzeppelin/ui-components',
+        '@openzeppelin/ui-react',
+        '@openzeppelin/ui-renderer',
+        '@openzeppelin/ui-storage',
+        '@openzeppelin/ui-types',
+        '@openzeppelin/ui-utils',
+        '@openzeppelin/relayer-sdk',
+
+        // Large icon libraries - pre-bundle to avoid slow discovery
+        'lucide-react',
+        '@web3icons/react',
+        '@icons-pack/react-simple-icons',
+
+        // Form & state management
+        'react-hook-form',
+        'zod',
+        'zustand',
+        'zustand/shallow',
+        'zustand/traditional',
+        'zustand/vanilla',
+
+        // UI libraries
+        'sonner',
+        'clsx',
+        'tailwind-merge',
+        'class-variance-authority',
+
+        // Radix UI components
+        '@radix-ui/react-accordion',
+        '@radix-ui/react-checkbox',
+        '@radix-ui/react-dialog',
+        '@radix-ui/react-dropdown-menu',
+        '@radix-ui/react-label',
+        '@radix-ui/react-popover',
+        '@radix-ui/react-select',
+        '@radix-ui/react-slot',
+        '@radix-ui/react-tabs',
+        '@radix-ui/react-toast',
+        '@radix-ui/react-tooltip',
+
+        // Query & data fetching
+        '@tanstack/react-query',
+
+        // Deep compare utilities
+        'fast-equals',
+        'use-deep-compare-effect',
+
+        // Code editor
+        '@uiw/react-textarea-code-editor',
+
+        // Wallet libraries - EVM
+        'viem',
+        'viem/chains',
+        'viem/accounts',
+        'wagmi',
+        '@wagmi/core',
+        '@wagmi/connectors',
+        '@rainbow-me/rainbowkit',
+
+        // Wallet libraries - Solana
+        '@solana/web3.js',
+
+        // Wallet libraries - Stellar
+        '@stellar/stellar-sdk',
+        '@stellar/stellar-xdr-json',
+        '@creit.tech/stellar-wallets-kit',
+        'lossless-json',
+
+        // Utility libraries
+        'lodash',
+
+        // JSZip for exports
+        'jszip',
+
+        // Adapter-specific dependencies
+        ...(adapterConfigs.optimizeDeps?.include || []),
+      ],
+      exclude: [
+        // Workspace adapter packages should NOT be pre-bundled (treat as source)
+        '@openzeppelin/ui-builder-adapter-evm',
+        '@openzeppelin/ui-builder-adapter-midnight',
+        '@openzeppelin/ui-builder-adapter-polkadot',
+        '@openzeppelin/ui-builder-adapter-solana',
+        '@openzeppelin/ui-builder-adapter-stellar',
+        // Internal packages bundled into adapters at build time - excluding prevents duplicate instances
+        '@openzeppelin/ui-builder-adapter-evm-core',
+        // Adapter-specific exclusions
+        ...(adapterConfigs.optimizeDeps?.exclude || []),
+      ],
     },
     build: {
       outDir: 'dist',
@@ -297,4 +397,5 @@ export default defineConfig(async (): Promise<UserConfig> => {
       minify: 'esbuild',
     },
   };
+  return config;
 });

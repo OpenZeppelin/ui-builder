@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  loadEvmContract,
+  type EvmContractArtifacts,
+  type TypedEvmNetworkConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
-
-import { loadEvmContract } from '../abi';
-import type { TypedEvmNetworkConfig } from '../types';
-import type { EvmContractArtifacts } from '../types/artifacts';
 
 describe('EVM provider selection (etherscan → sourcify, forced/app/ui precedence)', () => {
   const mockFetch = vi.fn();

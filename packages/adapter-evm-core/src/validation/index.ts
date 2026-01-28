@@ -8,6 +8,7 @@
 
 export { validateEoaConfig, validateEvmEoaConfig, type EvmWalletStatus } from './eoa';
 export { validateRelayerConfig, validateEvmRelayerConfig } from './relayer';
+export { validateEvmExecutionConfig } from './execution';
 
 // Re-export address validation from utils for convenience
 export { isValidEvmAddress } from '../utils/validation';

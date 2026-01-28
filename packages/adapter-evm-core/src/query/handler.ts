@@ -5,13 +5,13 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import { createAbiFunctionItem } from '../abi/transformer';
 import { parseEvmInput } from '../transform/input-parser';
-import type { TypedEvmNetworkConfig } from '../types/abi';
+import type { EvmCompatibleNetworkConfig } from '../types/network';
 import { isEvmViewFunction } from './view-checker';
 
 /**
  * Helper to create a public client with a specific RPC URL
  */
-function createPublicClientWithRpc(networkConfig: TypedEvmNetworkConfig, rpcUrl: string) {
+function createPublicClientWithRpc(networkConfig: EvmCompatibleNetworkConfig, rpcUrl: string) {
   let chainForViem: Chain;
   if (networkConfig.viemChain) {
     chainForViem = networkConfig.viemChain;
@@ -61,12 +61,12 @@ function createPublicClientWithRpc(networkConfig: TypedEvmNetworkConfig, rpcUrl:
  * Core logic for querying an EVM view function.
  * This is a stateless version that accepts an RPC URL directly.
  *
- * @param contractAddress Address of the contract.
- * @param functionId ID of the function to query.
- * @param params Raw parameters for the function call.
- * @param schema Contract schema with function definitions.
- * @param rpcUrl RPC URL to use for the query.
- * @param networkConfig Optional network configuration for chain metadata.
+ * @param contractAddress - Address of the contract.
+ * @param functionId - ID of the function to query.
+ * @param params - Raw parameters for the function call.
+ * @param schema - Contract schema with function definitions.
+ * @param rpcUrl - RPC URL to use for the query.
+ * @param networkConfig - Optional EVM-compatible network configuration for chain metadata (works with any ecosystem).
  * @returns The decoded result of the view function call.
  */
 export async function queryEvmViewFunction(
@@ -75,7 +75,7 @@ export async function queryEvmViewFunction(
   params: unknown[],
   schema: ContractSchema,
   rpcUrl: string,
-  networkConfig?: TypedEvmNetworkConfig
+  networkConfig?: EvmCompatibleNetworkConfig
 ): Promise<unknown> {
   logger.info(
     'queryEvmViewFunction',
@@ -122,7 +122,7 @@ export async function queryEvmViewFunction(
 
     // --- Create Public Client --- //
     // Create a minimal network config if not provided
-    const minimalConfig: TypedEvmNetworkConfig = networkConfig || {
+    const minimalConfig: EvmCompatibleNetworkConfig = networkConfig || {
       id: 'query-network',
       name: 'Query Network',
       ecosystem: 'evm',

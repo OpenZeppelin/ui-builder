@@ -1,10 +1,14 @@
+import {
+  CustomAccountDisplay,
+  CustomConnectButton,
+  CustomNetworkSwitcher,
+  filterWalletComponents,
+  getComponentExclusionsFromConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { EcosystemWalletComponents, UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../components';
 import { createRainbowKitComponents, validateRainbowKitConfig } from '../rainbowkit';
-// Assuming this is the default custom provider
-import { filterWalletComponents, getComponentExclusionsFromConfig } from './filterWalletComponents';
 
 /** Service for resolving UI kit specific components and providers for the EVM adapter. */
 

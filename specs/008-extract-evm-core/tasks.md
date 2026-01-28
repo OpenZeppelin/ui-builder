@@ -106,7 +106,7 @@
 > **Note**: Transaction formatter has no unit tests (UI components tested separately in adapter-evm)
 
 - [X] T039 [P] [US1] Move `packages/adapter-evm/src/transaction/formatter.ts` → `packages/adapter-evm-core/src/transaction/formatter.ts`
-- [X] T040 [P] [US1] Create `packages/adapter-evm-core/src/transaction/execution-strategy.ts` with ExecutionStrategy interface (extracted from adapter-evm)
+- [X] T040 [P] [US1] Create `packages/adapter-evm-core/src/transaction/execution-strategy.ts` with AdapterExecutionStrategy interface (extracted from adapter-evm)
 - [X] T041 [US1] Update `packages/adapter-evm-core/src/transaction/index.ts` with real exports
 
 ### Configuration Module Extraction
@@ -211,6 +211,69 @@
 - [X] T084 [P] Update quickstart.md with any implementation details discovered (verified accurate)
 - [X] T085 Clean up any unused imports or dead code in both packages (ESLint clean)
 - [X] T086 [P] Create minimal test adapter in `specs/008-extract-evm-core/validation/` demonstrating <50% code reuse (SC-002) ✅ 8% new code required
+
+---
+
+## Phase 7: Wallet Infrastructure Extraction (2026-01-25 Addition)
+
+**Purpose**: Extract wallet execution infrastructure to enable reuse by Polkadot adapter and future EVM-compatible adapters
+
+**Rationale**: The wallet execution logic (signing, broadcasting via wagmi/viem) is EVM-generic and should be shared. React UI components remain in individual adapters.
+
+### Execution Strategies Extraction
+
+**Note (2026-01-25 Reorganization)**: Execution strategies are in `src/transaction/` (not `src/wallet/`)
+to mirror `adapter-evm` structure. The `src/wallet/` module now contains ONLY RainbowKit config utilities.
+
+- [X] T087 [US1] Create `packages/adapter-evm-core/src/transaction/eoa.ts` with EoaExecutionStrategy ✅
+- [X] T088 [P] [US1] Create `packages/adapter-evm-core/src/transaction/relayer.ts` with RelayerExecutionStrategy ✅
+- [X] T089 [P] [US1] Create `packages/adapter-evm-core/src/transaction/sender.ts` with signAndBroadcastEvmTransaction ✅
+- [X] T090 [US1] Update `packages/adapter-evm-core/src/transaction/index.ts` to export execution strategies ✅
+
+### Wallet Implementation Interface
+
+Note: WagmiWalletImplementation remains in adapter-evm (too coupled with RainbowKit/ecosystem-specific config).
+Instead, we created an `EvmWalletImplementation` interface that adapters can implement.
+
+- [X] T091 [US1] Create `EvmWalletImplementation` interface in `packages/adapter-evm-core/src/transaction/types.ts` ✅
+- [X] T092 [US1] Make `WagmiWalletImplementation` (adapter-evm) implement `EvmWalletImplementation` interface ✅
+- [X] T093 [US1] Make `PolkadotWalletImplementation` (adapter-polkadot) implement `EvmWalletImplementation` interface ✅
+
+### RainbowKit Config Utilities (Wallet Module)
+
+- [X] T094 [US1] Create `packages/adapter-evm-core/src/wallet/rainbowkit/config-generator.ts` ✅
+- [X] T095 [US1] Create `packages/adapter-evm-core/src/wallet/index.ts` to export RainbowKit utilities ✅
+- [X] T096 [US1] Update `packages/adapter-evm-core/src/index.ts` to export wallet module ✅
+
+### Adapter Cleanup (Re-export removal)
+
+**Note (2026-01-25)**: Removed unnecessary re-export wrapper files. Adapters now import directly from core.
+
+- [X] T097 [US2] Delete `packages/adapter-evm/src/transaction/eoa.ts` re-export file ✅
+- [X] T098 [US2] Delete `packages/adapter-evm/src/transaction/relayer.ts` re-export file ✅
+- [X] T099 [US2] Delete `packages/adapter-evm/src/transaction/sender.ts` re-export file ✅
+- [X] T100 [US2] Delete `packages/adapter-evm/src/transaction/execution-strategy.ts` re-export file ✅
+- [X] T101 [US2] Update `packages/adapter-evm/src/transaction/index.ts` to import directly from core ✅
+- [X] T102 [US2] Delete `packages/adapter-polkadot/src/evm/transaction/eoa.ts` re-export file ✅
+- [X] T103 [US2] Delete `packages/adapter-polkadot/src/evm/transaction/sender.ts` re-export file ✅
+- [X] T104 [US2] Update `packages/adapter-polkadot/src/evm/transaction/index.ts` to import directly from core ✅
+
+### Polkadot Adapter Integration
+
+- [X] T105 [US1] Create `packages/adapter-polkadot/src/wallet/implementation.ts` implementing `EvmWalletImplementation` ✅
+- [X] T106 [US1] Update `packages/adapter-polkadot/src/adapter.ts` signAndBroadcast to use core execution strategies ✅
+
+### Validation
+
+- [X] T107 Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test` - all tests pass ✅ (83 tests)
+- [X] T108 Run `pnpm --filter @openzeppelin/ui-builder-adapter-evm test` - all tests pass ✅ (91 tests)
+- [X] T109 Run `pnpm --filter @openzeppelin/ui-builder-adapter-polkadot test` - all tests pass ✅ (66 tests)
+- [ ] T110 [INTEGRATION] Test signAndBroadcast in builder app with EVM network (manual E2E test)
+- [ ] T111 [INTEGRATION] Test signAndBroadcast in builder app with Polkadot network/Moonbeam (manual E2E test)
+
+**Note**: T110/T111 are manual integration tests requiring wallet connection and testnet funds. They should be performed before production release but are not blocking for the refactoring PR.
+
+**Checkpoint**: Both EVM and Polkadot adapters can sign and broadcast transactions using shared core infrastructure.
 
 ---
 

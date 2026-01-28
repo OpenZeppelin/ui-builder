@@ -1,0 +1,21 @@
+// Re-export types from core
+export type {
+  AppInfo,
+  RainbowKitConnectButtonProps,
+  RainbowKitProviderProps,
+  RainbowKitKitConfig,
+  RainbowKitCustomizations,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+
+export {
+  isRainbowKitCustomizations,
+  extractRainbowKitCustomizations,
+  validateRainbowKitConfig,
+  getRawUserNativeConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+
+// Polkadot-specific components
+export { RainbowKitConnectButton } from './components';
+
+// Polkadot-specific factory functions
+export { createRainbowKitComponents } from './componentFactory';

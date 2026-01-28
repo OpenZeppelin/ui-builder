@@ -140,6 +140,7 @@ Adapter implementation for Midnight. For more details, see the [Midnight Adapter
 The following packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository:
 
 See the **Shared Packages (External)** section above for the list of shared packages and their descriptions.
+
 ## Features
 
 - Chain-agnostic architecture supporting multiple blockchain ecosystems
@@ -620,7 +621,9 @@ During development of the builder application, configurations are typically prov
 
 Key configurable items include:
 
-- **Explorer API Keys:** For services like Etherscan, PolygonScan, etc., used by adapters to fetch ABIs. Example: `VITE_APP_CFG_API_KEY_ETHERSCAN_MAINNET="your_key"`.
+- **Explorer API Keys:** For services like Etherscan, PolygonScan, Routescan, etc., used by adapters to fetch ABIs. Two patterns are supported:
+  - Per-network keys: `VITE_APP_CFG_API_KEY_<IDENTIFIER>="your_key"` (e.g., `VITE_APP_CFG_API_KEY_ETHERSCAN_MAINNET`)
+  - Global service keys: `VITE_APP_CFG_SERVICE_<SERVICE>_API_KEY="your_key"` (e.g., `VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY` for unified Etherscan V2, or `VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY` for Routescan)
 - **WalletConnect Project ID:** For EVM adapter's WalletConnect functionality. Example: `VITE_APP_CFG_SERVICE_WALLETCONNECT_PROJECT_ID="your_id"`.
 - **RPC URL Overrides:** To use custom RPC endpoints instead of public defaults for specific networks. Example: `VITE_APP_CFG_RPC_ENDPOINT_ETHEREUM_MAINNET="https://your_custom_rpc.com"`.
 - **Indexer Endpoint Overrides:** To configure GraphQL indexer endpoints for historical blockchain data queries (e.g., access control events). Example: `VITE_APP_CFG_INDEXER_ENDPOINT_STELLAR_TESTNET="https://your_indexer.com/graphql"`.
@@ -631,8 +634,8 @@ Exported forms include a `public/app.config.json` file. Users of the exported fo
 
 The structure of this JSON file includes sections for:
 
-- `networkServiceConfigs`: For explorer API keys, keyed by a service identifier (e.g., `"etherscan-mainnet"`).
-- `globalServiceConfigs`: For global service parameters (e.g., `walletconnect.projectId`).
+- `networkServiceConfigs`: For per-network explorer API keys, keyed by a service identifier (e.g., `"etherscan-mainnet"`).
+- `globalServiceConfigs`: For global service parameters (e.g., `walletconnect.projectId`) and unified explorer API keys (e.g., `etherscanv2.apiKey` for Etherscan V2, `routescan.apiKey` for Routescan).
 - `rpcEndpoints`: For RPC URL overrides, keyed by the network ID (e.g., `"ethereum-mainnet"`).
 - `indexerEndpoints`: For indexer endpoint overrides, keyed by the network ID (e.g., `"stellar-testnet"`). Values can be strings (HTTP URL) or objects with `http` and `ws` properties.
 

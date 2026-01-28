@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { loadEvmContract } from '../abi';
-import { getEvmExplorerAddressUrl } from '../configuration';
-import type { TypedEvmNetworkConfig } from '../types';
-import type { EvmContractArtifacts } from '../types/artifacts';
+import {
+  getEvmExplorerAddressUrl,
+  loadEvmContract,
+  type EvmContractArtifacts,
+  type TypedEvmNetworkConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 
 describe('EVM provenance links', () => {
   it('builds address URL from explorer config', () => {

@@ -1,8 +1,10 @@
-import { EvmNetworkConfig, NetworkConfig, UserExplorerConfig } from '@openzeppelin/ui-types';
+import { trimEnd } from 'lodash';
+
+import { UserExplorerConfig } from '@openzeppelin/ui-types';
 import { appConfigService, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 import { shouldUseV2Api, testEtherscanV2Connection } from '../abi/etherscan-v2';
-import { TypedEvmNetworkConfig } from '../types/abi';
+import { EvmCompatibleNetworkConfig } from '../types/network';
 import { isValidEvmAddress } from '../utils';
 
 /**
@@ -13,10 +15,12 @@ import { isValidEvmAddress } from '../utils';
  * 3. App-configured explorer API key (from AppConfigService network service configs)
  * 4. Default network explorer (from NetworkConfig)
  *
- * @param networkConfig - The EVM network configuration.
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem).
  * @returns The resolved explorer configuration.
  */
-export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): UserExplorerConfig {
+export function resolveExplorerConfig(
+  networkConfig: EvmCompatibleNetworkConfig
+): UserExplorerConfig {
   // Precompute app-level keys and defaults for merging
   const isV2 =
     networkConfig.supportsEtherscanV2 &&
@@ -24,9 +28,18 @@ export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): Use
   const globalV2ApiKey = isV2
     ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
     : undefined;
-  const appApiKey = networkConfig.primaryExplorerApiIdentifier
-    ? appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier)
-    : undefined;
+
+  // For non-V2 networks, check globalServiceConfigs first (e.g., routescan), then fall back to explorer API keys
+  let appApiKey: string | undefined;
+  if (networkConfig.primaryExplorerApiIdentifier) {
+    // First check globalServiceConfigs (supports routescan, blockscout, etc.)
+    const globalServiceConfig = appConfigService.getGlobalServiceConfig(
+      networkConfig.primaryExplorerApiIdentifier
+    );
+    appApiKey =
+      (globalServiceConfig?.apiKey as string | undefined) ??
+      appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier);
+  }
 
   // 1. Check for user-configured explorer via new generic service
   const rawCfg = userNetworkServiceConfigService.get(networkConfig.id, 'explorer');
@@ -82,41 +95,50 @@ export function resolveExplorerConfig(networkConfig: TypedEvmNetworkConfig): Use
 /**
  * Gets a blockchain explorer URL for an EVM address.
  * Uses the resolved explorer configuration.
+ *
+ * @param address - Contract or wallet address
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
 export function getEvmExplorerAddressUrl(
   address: string,
-  networkConfig: NetworkConfig
+  networkConfig: EvmCompatibleNetworkConfig
 ): string | null {
   if (!isValidEvmAddress(address)) {
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
 
   // Construct the URL using the explorerUrl from the config
-  const baseUrl = explorerConfig.explorerUrl.replace(/\/+$/, '');
+  const baseUrl = trimEnd(explorerConfig.explorerUrl, '/');
   return `${baseUrl}/address/${address}`;
 }
 
 /**
  * Gets a blockchain explorer URL for an EVM transaction.
  * Uses the resolved explorer configuration.
+ *
+ * @param txHash - Transaction hash
+ * @param networkConfig - EVM-compatible network configuration (works with any ecosystem)
  */
-export function getEvmExplorerTxUrl(txHash: string, networkConfig: NetworkConfig): string | null {
+export function getEvmExplorerTxUrl(
+  txHash: string,
+  networkConfig: EvmCompatibleNetworkConfig
+): string | null {
   if (!txHash) {
     return null;
   }
 
-  const explorerConfig = resolveExplorerConfig(networkConfig as TypedEvmNetworkConfig);
+  const explorerConfig = resolveExplorerConfig(networkConfig);
   if (!explorerConfig.explorerUrl) {
     return null;
   }
 
   // Construct the URL using the explorerUrl from the config
-  const baseUrl = explorerConfig.explorerUrl.replace(/\/+$/, '');
+  const baseUrl = trimEnd(explorerConfig.explorerUrl, '/');
   return `${baseUrl}/tx/${txHash}`;
 }
 
@@ -154,24 +176,26 @@ export function validateEvmExplorerConfig(explorerConfig: UserExplorerConfig): b
  * Tests the connection to an EVM explorer API.
  * Makes a test API call to verify the API key works.
  * Automatically uses V2 API testing for networks that support it.
+ *
+ * @param explorerConfig - Explorer configuration to test
+ * @param networkConfig - Optional EVM-compatible network configuration (works with any ecosystem)
  */
 export async function testEvmExplorerConnection(
   explorerConfig: UserExplorerConfig,
-  networkConfig?: EvmNetworkConfig
+  networkConfig?: EvmCompatibleNetworkConfig
 ): Promise<{
   success: boolean;
   latency?: number;
   error?: string;
 }> {
   // Check if this network supports V2 API and should use it
-  const typedNetworkConfig = networkConfig as TypedEvmNetworkConfig | undefined;
-  if (typedNetworkConfig && shouldUseV2Api(typedNetworkConfig)) {
+  if (networkConfig && shouldUseV2Api(networkConfig)) {
     // Use the V2-specific connection test
     logger.info(
       'testEvmExplorerConnection',
-      `Using V2 API connection test for ${typedNetworkConfig.name}`
+      `Using V2 API connection test for ${networkConfig.name}`
     );
-    return testEtherscanV2Connection(typedNetworkConfig, explorerConfig.apiKey);
+    return testEtherscanV2Connection(networkConfig, explorerConfig.apiKey);
   }
 
   // V1 API testing path

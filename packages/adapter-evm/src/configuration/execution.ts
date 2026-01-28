@@ -1,16 +1,5 @@
-import type {
-  EoaExecutionConfig,
-  ExecutionConfig,
-  ExecutionMethodDetail,
-  MultisigExecutionConfig,
-  RelayerExecutionConfig,
-} from '@openzeppelin/ui-types';
+import type { ExecutionMethodDetail } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
-
-import { validateEoaConfig, validateRelayerConfig } from '../validation';
-import { EvmWalletConnectionStatus } from '../wallet/types';
-
-const SYSTEM_LOG_TAG = 'adapter-evm-execution-config';
 
 /**
  * Returns details for execution methods supported by the EVM adapter.
@@ -40,44 +29,4 @@ export async function getEvmSupportedExecutionMethods(): Promise<ExecutionMethod
       disabled: true,
     },
   ]);
-}
-
-/**
- * Validates Multisig execution configuration (placeholder).
- */
-async function _validateMultisigConfig(
-  _config: MultisigExecutionConfig,
-  _walletStatus: EvmWalletConnectionStatus
-): Promise<true | string> {
-  logger.info(SYSTEM_LOG_TAG, 'Multisig execution config validation: Not yet fully implemented.');
-  // TODO: Add validation for Safe address, required signers, etc.
-  return true; // Placeholder
-}
-
-/**
- * Validates the complete execution configuration object against the
- * requirements and capabilities of the EVM adapter.
- */
-export async function validateEvmExecutionConfig(
-  config: ExecutionConfig,
-  walletStatus: EvmWalletConnectionStatus
-): Promise<true | string> {
-  logger.info(SYSTEM_LOG_TAG, 'Validating EVM execution config:', { config, walletStatus });
-
-  switch (config.method) {
-    case 'eoa':
-      return validateEoaConfig(config as EoaExecutionConfig, walletStatus);
-    case 'relayer':
-      return validateRelayerConfig(config as RelayerExecutionConfig);
-    case 'multisig':
-      return _validateMultisigConfig(config as MultisigExecutionConfig, walletStatus);
-    default: {
-      const unknownMethod = (config as ExecutionConfig).method;
-      logger.warn(
-        SYSTEM_LOG_TAG,
-        `Unsupported execution method type encountered: ${unknownMethod}`
-      );
-      return `Unsupported execution method type: ${unknownMethod}`;
-    }
-  }
 }

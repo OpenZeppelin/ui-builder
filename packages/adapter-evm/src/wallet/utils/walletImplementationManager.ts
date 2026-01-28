@@ -1,7 +1,8 @@
+import type { WagmiWalletImplementation } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 import { appConfigService, logger } from '@openzeppelin/ui-utils';
 
-import { WagmiWalletImplementation } from '../implementation/wagmi-implementation';
+import { createEvmWalletImplementation } from '../implementation/wagmi-implementation';
 
 let walletImplementationInstance: WagmiWalletImplementation | undefined;
 let walletImplementationPromise: Promise<WagmiWalletImplementation> | undefined;
@@ -37,14 +38,14 @@ export async function getEvmWalletImplementation(): Promise<WagmiWalletImplement
         | string
         | undefined;
 
-      // Pass initialUiKitConfig to the constructor
-      const instance = new WagmiWalletImplementation(wcProjectId, initialUiKitConfig);
+      // Use factory function for proper EVM configuration
+      const instance = createEvmWalletImplementation(wcProjectId, initialUiKitConfig);
       logger.info(LOG_SYSTEM, 'WagmiWalletImplementation singleton created (async).');
       walletImplementationInstance = instance;
       return instance;
     } catch (error) {
       logger.error(LOG_SYSTEM, 'Failed to initialize WagmiWalletImplementation (async):', error);
-      const fallbackInstance = new WagmiWalletImplementation();
+      const fallbackInstance = createEvmWalletImplementation();
       walletImplementationInstance = fallbackInstance;
       return fallbackInstance;
     }

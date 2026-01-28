@@ -1,4 +1,4 @@
-import { NetworkEthereum, NetworkSolana, NetworkStellar } from '@web3icons/react';
+import { NetworkEthereum, NetworkPolkadot, NetworkSolana, NetworkStellar } from '@web3icons/react';
 import { Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -186,6 +186,12 @@ export function ChainSelector({
                         />
                       ) : option.network === 'solana' ? (
                         <NetworkSolana
+                          size={24}
+                          variant="branded"
+                          className={isDisabled ? 'opacity-50' : ''}
+                        />
+                      ) : option.network === 'polkadot' ? (
+                        <NetworkPolkadot
                           size={24}
                           variant="branded"
                           className={isDisabled ? 'opacity-50' : ''}

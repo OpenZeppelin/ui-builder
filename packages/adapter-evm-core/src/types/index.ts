@@ -18,14 +18,11 @@ export {
   isEvmProviderKey,
 } from './providers';
 
-// ABI and EVM-specific types
-export {
-  type TypedEvmNetworkConfig,
-  type AbiItem,
-  EVMParameterType,
-  EVMChainType,
-  type WriteContractParameters,
-} from './abi';
+// Network configuration types
+export { type EvmCompatibleNetworkConfig, type TypedEvmNetworkConfig } from './network';
+
+// ABI types
+export { type AbiItem, type WriteContractParameters } from './abi';
 
 // ABI load result type
 export type EvmAbiLoadResult = {

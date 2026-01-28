@@ -5,19 +5,40 @@
  * All exports listed here MUST be available from '@openzeppelin/ui-builder-adapter-evm-core'.
  *
  * This serves as the contract between adapter-evm-core and consuming adapters.
+ *
+ * ## Module Structure (as of 2026-01-25)
+ *
+ * - **abi/**: ABI loading, transformation, and comparison
+ * - **mapping/**: Type mapping and form field generation
+ * - **transform/**: Input parsing and output formatting
+ * - **query/**: View function querying
+ * - **transaction/**: Transaction formatting, execution strategies (EOA/Relayer), sender functions
+ * - **wallet/**: RainbowKit config generation utilities ONLY (no execution logic)
+ * - **configuration/**: RPC and Explorer configuration
+ * - **proxy/**: Proxy detection and implementation resolution
+ * - **validation/**: Execution configuration validation
+ * - **utils/**: Utility functions
+ * - **types/**: TypeScript type definitions
  */
 
-import type { Abi, AbiFunction, AbiParameter, Address } from 'viem';
+import type { AbiFunction, AbiParameter, Address } from 'viem';
+import type React from 'react';
+
 import type {
-  ContractSchema,
   ContractFunction,
+  ContractSchema,
   EvmNetworkConfig,
-  NetworkConfig,
+  ExecutionConfig,
   FieldType,
   FormFieldType,
   FunctionParameter,
-  UserRpcProviderConfig,
+  RelayerDetails,
+  RelayerDetailsRich,
+  TransactionStatusUpdate,
+  TxStatus,
+  UiKitConfiguration,
   UserExplorerConfig,
+  UserRpcProviderConfig,
 } from '@openzeppelin/ui-types';
 
 // =============================================================================
@@ -141,18 +162,13 @@ export declare function transformAbiToSchema(
 /**
  * Create ABI function item from ContractFunction
  */
-export declare function createAbiFunctionItem(
-  functionDetails: ContractFunction
-): AbiFunction;
+export declare function createAbiFunctionItem(functionDetails: ContractFunction): AbiFunction;
 
 /**
  * ABI comparison service for comparing contract definitions
  */
 export declare class AbiComparisonService {
-  compare(
-    abiA: readonly AbiItem[],
-    abiB: readonly AbiItem[]
-  ): AbiComparisonResult;
+  compare(abiA: readonly AbiItem[], abiB: readonly AbiItem[]): AbiComparisonResult;
 }
 
 export interface AbiComparisonResult {
@@ -185,9 +201,7 @@ export declare function getEvmCompatibleFieldTypes(paramType: string): FieldType
  * @param parameter - The function parameter definition
  * @returns FormFieldType configuration
  */
-export declare function generateEvmDefaultField(
-  parameter: FunctionParameter
-): FormFieldType;
+export declare function generateEvmDefaultField(parameter: FunctionParameter): FormFieldType;
 
 /**
  * Get type mapping metadata
@@ -248,13 +262,13 @@ export declare function queryEvmViewFunction(
 /**
  * Check if function is view/pure
  */
-export declare function isEvmViewFunction(
-  func: { stateMutability?: string }
-): boolean;
+export declare function isEvmViewFunction(func: { stateMutability?: string }): boolean;
 
 // =============================================================================
 // TRANSACTION MODULE
 // =============================================================================
+// Contains: formatting, execution strategies (EOA/Relayer), sender functions,
+// and the EvmWalletImplementation interface that adapters must implement.
 
 /**
  * EVM transaction data structure
@@ -276,11 +290,328 @@ export declare function formatEvmTransactionData(
 ): EvmTransactionData;
 
 /**
- * Execution strategy interface (implementations in adapter-evm)
+ * Wallet connection status type for EVM wallets.
  */
-export interface ExecutionStrategy {
-  execute(): Promise<unknown>;
+export type EvmWalletConnectionStatus =
+  | 'connected'
+  | 'disconnected'
+  | 'connecting'
+  | 'reconnecting';
+
+/**
+ * Interface that adapters must implement to provide wallet functionality.
+ * This is an INTERFACE (not a class) - each adapter creates its own implementation.
+ *
+ * Examples:
+ * - adapter-evm: WagmiWalletImplementation in src/wallet/implementation/
+ * - adapter-polkadot: PolkadotWalletImplementation in src/wallet/implementation.ts
+ */
+export interface EvmWalletImplementation {
+  /** Get a wallet client for signing transactions */
+  getWalletClient(): Promise<unknown>;
+
+  /** Get the current connected address */
+  getConnectedAddress(): string | null;
+
+  /** Get the current chain ID */
+  getCurrentChainId(): number | null;
+
+  /** Get wallet connection status */
+  getConnectionStatus(): EvmWalletConnectionStatus;
+
+  /** Switch to a specific chain */
+  switchChain(chainId: number): Promise<void>;
 }
+
+/**
+ * Execution strategy interface for transaction execution.
+ * Implementations use EvmWalletImplementation for signing.
+ */
+export interface AdapterExecutionStrategy {
+  execute(
+    transactionData: WriteContractParameters,
+    executionConfig: ExecutionConfig,
+    walletImplementation: EvmWalletImplementation,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<{ txHash: string }>;
+}
+
+/**
+ * EOA (Externally Owned Account) execution strategy.
+ * Signs and broadcasts transactions directly from the connected wallet.
+ */
+export declare class EoaExecutionStrategy implements AdapterExecutionStrategy {
+  execute(
+    transactionData: WriteContractParameters,
+    executionConfig: ExecutionConfig,
+    walletImplementation: EvmWalletImplementation,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<{ txHash: string }>;
+}
+
+/**
+ * Relayer transaction options (gas settings, speed, etc.)
+ */
+export interface EvmRelayerTransactionOptions {
+  speed?: 'slow' | 'normal' | 'fast';
+  gasLimit?: number;
+  gasPrice?: number;
+  maxFeePerGas?: number;
+  maxPriorityFeePerGas?: number;
+}
+
+/**
+ * Relayer execution strategy.
+ * Submits transactions through a relayer service for gas sponsorship.
+ */
+export declare class RelayerExecutionStrategy implements AdapterExecutionStrategy {
+  execute(
+    transactionData: WriteContractParameters,
+    executionConfig: ExecutionConfig,
+    walletImplementation: EvmWalletImplementation,
+    onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<{ txHash: string }>;
+
+  getEvmRelayers(
+    serviceUrl: string,
+    accessToken: string,
+    networkConfig: TypedEvmNetworkConfig
+  ): Promise<RelayerDetails[]>;
+
+  getEvmRelayer(
+    serviceUrl: string,
+    accessToken: string,
+    relayerId: string,
+    networkConfig: TypedEvmNetworkConfig
+  ): Promise<RelayerDetailsRich>;
+}
+
+/**
+ * Sign and broadcast an EVM transaction using the provided wallet implementation.
+ */
+export declare function signAndBroadcastEvmTransaction(
+  transactionData: WriteContractParameters,
+  walletImplementation: EvmWalletImplementation,
+  targetChainId: number,
+  executionConfig?: ExecutionConfig
+): Promise<{ txHash: string }>;
+
+/**
+ * Wait for transaction confirmation.
+ */
+export declare function waitForEvmTransactionConfirmation(
+  txHash: string,
+  walletImplementation: EvmWalletImplementation,
+  chainId: number,
+  onStatusChange: (status: TxStatus, details: TransactionStatusUpdate) => void
+): Promise<void>;
+
+// =============================================================================
+// WALLET MODULE
+// =============================================================================
+// Contains wallet infrastructure for EVM-compatible adapters:
+// - WagmiWalletImplementation class
+// - RainbowKit configuration utilities
+// - UI kit management factories
+// - Wallet UI components and hooks
+
+/**
+ * Wagmi provider context for initialization state.
+ */
+export declare const WagmiProviderInitializedContext: React.Context<boolean>;
+
+/**
+ * Hook to check if Wagmi provider is initialized.
+ */
+export declare function useIsWagmiProviderInitialized(): boolean;
+
+/**
+ * Safe wrapper component for Wagmi-dependent components.
+ */
+export declare const SafeWagmiComponent: React.ComponentType<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}>;
+
+/**
+ * Custom wallet UI components (for adapter customization).
+ */
+export declare const CustomConnectButton: React.ComponentType<ConnectButtonProps>;
+export declare const ConnectorDialog: React.ComponentType<unknown>;
+export declare const CustomAccountDisplay: React.ComponentType<unknown>;
+export declare const CustomNetworkSwitcher: React.ComponentType<unknown>;
+
+export interface ConnectButtonProps {
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+/**
+ * Core connection utility for ensuring correct network.
+ */
+export declare function connectAndEnsureCorrectNetworkCore(
+  targetChainId: number,
+  walletImplementation: EvmWalletImplementation
+): Promise<void>;
+
+export declare const DEFAULT_DISCONNECTED_STATUS: EvmWalletConnectionStatus;
+
+/**
+ * Wagmi wallet implementation class.
+ * Provides a ready-to-use implementation of EvmWalletImplementation.
+ */
+export declare class WagmiWalletImplementation implements EvmWalletImplementation {
+  constructor(config: WagmiWalletConfig);
+  getWalletClient(): Promise<unknown>;
+  getConnectedAddress(): string | null;
+  getCurrentChainId(): number | null;
+  getConnectionStatus(): EvmWalletConnectionStatus;
+  switchChain(chainId: number): Promise<void>;
+}
+
+export type GetWagmiConfigForRainbowKitFn = () => unknown;
+
+export interface WagmiWalletConfig {
+  chains: WagmiConfigChains;
+  projectId?: string;
+}
+
+export type WagmiConfigChains = readonly unknown[];
+
+export interface WalletNetworkConfig {
+  chainId: number;
+  rpcUrl: string;
+}
+
+/**
+ * Options for generating RainbowKit config files.
+ */
+export interface RainbowKitConfigOptions {
+  defaultAppName?: string;
+  headerComment?: string;
+}
+
+/**
+ * Generate RainbowKit configuration file content.
+ */
+export declare function generateRainbowKitConfigFile(
+  userConfig: UiKitConfiguration['kitConfig'],
+  options?: RainbowKitConfigOptions
+): string;
+
+/**
+ * Generate exportable RainbowKit files for standalone apps.
+ */
+export declare function generateRainbowKitExportables(
+  uiKitConfig: UiKitConfiguration,
+  options?: RainbowKitConfigOptions
+): Record<string, string>;
+
+/**
+ * RainbowKit types for configuration.
+ */
+export interface AppInfo {
+  appName?: string;
+  learnMoreUrl?: string;
+}
+
+export interface RainbowKitConnectButtonProps {
+  showBalance?: boolean;
+  chainStatus?: 'full' | 'icon' | 'name' | 'none';
+  accountStatus?: 'full' | 'avatar' | 'address';
+}
+
+export interface RainbowKitProviderProps {
+  children: React.ReactNode;
+  theme?: unknown;
+  locale?: string;
+}
+
+export interface RainbowKitKitConfig {
+  appInfo?: AppInfo;
+  showRecentTransactions?: boolean;
+  coolMode?: boolean;
+}
+
+export interface RainbowKitCustomizations {
+  theme?: unknown;
+  locale?: string;
+}
+
+export declare function isRainbowKitCustomizations(obj: unknown): obj is RainbowKitCustomizations;
+export declare function extractRainbowKitCustomizations(
+  config: unknown
+): RainbowKitCustomizations | undefined;
+
+/**
+ * RainbowKit utility functions.
+ */
+export declare function validateRainbowKitConfig(config: unknown): boolean;
+export declare function getRawUserNativeConfig(config: unknown): unknown;
+
+/**
+ * RainbowKit component factories.
+ */
+export declare function createRainbowKitConnectButton(
+  props?: RainbowKitConnectButtonProps
+): React.ComponentType;
+export declare function createRainbowKitComponents(config: unknown): {
+  ConnectButton: React.ComponentType;
+  AccountDisplay: React.ComponentType;
+  NetworkSwitcher: React.ComponentType;
+};
+
+/**
+ * UI Kit Manager factory and types.
+ */
+export declare function createUiKitManager(dependencies: UiKitManagerDependencies): UiKitManager;
+
+export interface UiKitManagerState {
+  isInitialized: boolean;
+  currentKit: string | null;
+}
+
+export interface UiKitManagerDependencies {
+  walletImplementation: EvmWalletImplementation;
+  getWagmiConfig: GetWagmiConfigForRainbowKitFn;
+}
+
+export interface UiKitManager {
+  initialize(kitId: string, config: unknown): Promise<void>;
+  getState(): UiKitManagerState;
+  getComponents(): unknown;
+}
+
+export interface RainbowKitAssetsResult {
+  loaded: boolean;
+  error?: string;
+}
+
+/**
+ * RainbowKit asset management.
+ */
+export declare function ensureRainbowKitAssetsLoaded(): Promise<RainbowKitAssetsResult>;
+
+/**
+ * Configuration resolution utilities.
+ */
+export declare function resolveAndInitializeKitConfig(
+  kitId: string,
+  userConfig: unknown
+): Promise<unknown>;
+export declare function resolveFullUiKitConfiguration(kitId: string, config: unknown): unknown;
+
+/**
+ * Wallet component filtering utilities.
+ */
+export declare function filterWalletComponents(
+  components: unknown[],
+  exclusions: string[]
+): unknown[];
+export declare function getComponentExclusionsFromConfig(config: unknown): string[];
 
 // =============================================================================
 // CONFIGURATION MODULE
@@ -332,9 +663,7 @@ export declare function getEvmExplorerTxUrl(
 /**
  * Validate RPC endpoint configuration
  */
-export declare function validateEvmRpcEndpoint(
-  rpcConfig: UserRpcProviderConfig
-): boolean;
+export declare function validateEvmRpcEndpoint(rpcConfig: UserRpcProviderConfig): boolean;
 
 /**
  * Test RPC connection
@@ -354,16 +683,12 @@ export declare function testEvmRpcConnection(
 /**
  * Get current block number from network
  */
-export declare function getEvmCurrentBlock(
-  networkConfig: EvmNetworkConfig
-): Promise<number>;
+export declare function getEvmCurrentBlock(networkConfig: EvmNetworkConfig): Promise<number>;
 
 /**
  * Validate explorer configuration
  */
-export declare function validateEvmExplorerConfig(
-  config: UserExplorerConfig
-): boolean;
+export declare function validateEvmExplorerConfig(config: UserExplorerConfig): boolean;
 
 /**
  * Test explorer connection
@@ -459,10 +784,7 @@ export interface EvmWalletStatus {
 /**
  * JSON stringify with BigInt support
  */
-export declare function stringifyWithBigInt(
-  value: unknown,
-  space?: number
-): string;
+export declare function stringifyWithBigInt(value: unknown, space?: number): string;
 
 /**
  * Format method name for display
@@ -487,9 +809,7 @@ export declare function gweiToWei(gwei: string | number): bigint;
 /**
  * Validate and convert artifacts to EvmContractArtifacts
  */
-export declare function validateAndConvertEvmArtifacts(
-  artifacts: unknown
-): EvmContractArtifacts;
+export declare function validateAndConvertEvmArtifacts(artifacts: unknown): EvmContractArtifacts;
 
 // =============================================================================
 // TYPES
@@ -551,16 +871,12 @@ export declare const EVM_PROVIDER_ORDER_DEFAULT: EvmContractDefinitionProviderKe
 /**
  * Type guard for provider keys
  */
-export declare function isEvmProviderKey(
-  value: unknown
-): value is EvmContractDefinitionProviderKey;
+export declare function isEvmProviderKey(value: unknown): value is EvmContractDefinitionProviderKey;
 
 /**
  * Type guard for contract artifacts
  */
-export declare function isEvmContractArtifacts(
-  obj: unknown
-): obj is EvmContractArtifacts;
+export declare function isEvmContractArtifacts(obj: unknown): obj is EvmContractArtifacts;
 
 /**
  * ABI validation utilities

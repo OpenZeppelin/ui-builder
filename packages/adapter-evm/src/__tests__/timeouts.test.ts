@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { loadEvmContract } from '../abi';
-import type { TypedEvmNetworkConfig } from '../types';
-import type { EvmContractArtifacts } from '../types/artifacts';
+import {
+  loadEvmContract,
+  type EvmContractArtifacts,
+  type TypedEvmNetworkConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 
 describe('EVM provider timeouts', () => {
   it('moves to next provider when the first provider exceeds per-provider timeout', async () => {

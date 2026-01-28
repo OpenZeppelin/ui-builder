@@ -1,0 +1,1 @@
+export { useIsWagmiProviderInitialized } from './useIsWagmiProviderInitialized';

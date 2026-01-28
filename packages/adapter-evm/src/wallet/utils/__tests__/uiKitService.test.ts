@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  CustomAccountDisplay,
+  CustomConnectButton,
+  CustomNetworkSwitcher,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { ComponentExclusionConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { CustomAccountDisplay, CustomConnectButton, CustomNetworkSwitcher } from '../../components';
 import { getResolvedWalletComponents } from '../uiKitService';
 
 // Mock the logger

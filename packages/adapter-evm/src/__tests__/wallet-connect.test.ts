@@ -8,7 +8,7 @@ import { mockEvmNetworkConfig } from './mocks/mock-network-configs';
 
 import { EvmAdapter } from '../adapter';
 
-// Mock the WagmiWalletImplementation to isolate EvmAdapter logic
+// Mock the createEvmWalletImplementation factory to isolate EvmAdapter logic
 vi.mock('../wallet/implementation/wagmi-implementation', () => {
   // --- Mock implementations for WagmiWalletImplementation methods ---
   const mockGetAvailableConnectors = vi.fn().mockResolvedValue([
@@ -50,7 +50,7 @@ vi.mock('../wallet/implementation/wagmi-implementation', () => {
   // --- End Mock Implementations ---
 
   return {
-    WagmiWalletImplementation: vi.fn().mockImplementation(() => ({
+    createEvmWalletImplementation: vi.fn().mockImplementation(() => ({
       // Expose mocks
       getAvailableConnectors: mockGetAvailableConnectors,
       connect: mockConnect,
