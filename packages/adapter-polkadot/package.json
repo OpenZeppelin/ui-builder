@@ -49,8 +49,12 @@
     "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*",
     "@openzeppelin/ui-types": "^1.4.0",
     "@openzeppelin/ui-utils": "^1.1.0",
+    "@wagmi/connectors": "5.7.13",
+    "@wagmi/core": "^2.20.3",
     "@web3icons/react": "^4.0.19",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "viem": "^2.33.3",
+    "wagmi": "^2.16.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
@@ -59,9 +63,7 @@
     "eslint": "^9.32.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.2",
-    "viem": "^2.33.3",
-    "vitest": "^3.2.4",
-    "wagmi": "^2.16.1"
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
