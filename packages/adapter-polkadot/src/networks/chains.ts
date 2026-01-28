@@ -23,7 +23,7 @@ export const polkadotHub = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['https://services.polkadothub-rpc.com'],
+      http: ['https://services.polkadothub-rpc.com/mainnet'],
     },
   },
   blockExplorers: {

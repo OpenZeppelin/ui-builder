@@ -21,7 +21,7 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   type: 'mainnet',
   isTestnet: false,
   chainId: 420420419,
-  rpcUrl: 'https://services.polkadothub-rpc.com',
+  rpcUrl: 'https://services.polkadothub-rpc.com/mainnet',
   explorerUrl: 'https://blockscout.polkadot.io',
   apiUrl: 'https://blockscout.polkadot.io/api',
   supportsEtherscanV2: false,
