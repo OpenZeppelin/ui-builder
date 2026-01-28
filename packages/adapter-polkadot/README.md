@@ -141,12 +141,24 @@ The `PolkadotAdapter` routes operations based on `executionType`:
 - `'evm'` → EVM module (current implementation)
 - `'substrate'` → Substrate module (future)
 
+## Network Configurations
+
+Each network configuration (`TypedPolkadotNetworkConfig`) includes:
+
+- `id`: Unique string identifier (e.g., "polkadot-hub-testnet")
+- `chainId`: EVM chain ID
+- `primaryExplorerApiIdentifier`: Key for API key resolution (e.g., "etherscan-v2", "routescan")
+- `supportsEtherscanV2`: Whether the network uses unified Etherscan V2 API
+- Default `rpcUrl`, `apiUrl`, `explorerUrl`, and native currency info
+
+For details on how explorer API keys and RPC URLs are resolved, see the [adapter-evm-core Configuration Module](../adapter-evm-core/README.md#configuration-module).
+
 ## Explorer APIs
 
-| Network Type        | Explorer   | API Version             |
-| ------------------- | ---------- | ----------------------- |
-| Hub networks        | Blockscout | Etherscan V1 compatible |
-| Moonbeam parachains | Moonscan   | Etherscan V2 compatible |
+| Network Type        | Explorer  | API Version             | `primaryExplorerApiIdentifier` |
+| ------------------- | --------- | ----------------------- | ------------------------------ |
+| Hub networks        | Routescan | Etherscan V1 compatible | `routescan`                    |
+| Moonbeam parachains | Moonscan  | Etherscan V2 compatible | `etherscan-v2`                 |
 
 ## License
 

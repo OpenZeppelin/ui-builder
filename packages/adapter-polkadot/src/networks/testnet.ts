@@ -11,6 +11,9 @@ import { polkadotHubTestNet } from './chains';
 /**
  * Polkadot Hub testnet configuration.
  * Chain ID: 420420417, Currency: PAS (Paseo), Explorer: Routescan
+ *
+ * Note: Uses Routescan's Etherscan-compatible V1 API (not Etherscan V2).
+ * API key format: rs_* (Routescan-specific)
  */
 export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   id: 'polkadot-hub-testnet',
@@ -23,8 +26,9 @@ export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   chainId: 420420417,
   rpcUrl: 'https://services.polkadothub-rpc.com/testnet',
   explorerUrl: 'https://polkadot.testnet.routescan.io',
-  apiUrl: 'https://polkadot.testnet.routescan.io/api',
-  supportsEtherscanV2: false,
+  apiUrl: 'https://api.routescan.io/v2/network/testnet/evm/420420417/etherscan/api',
+  supportsEtherscanV2: false, // Uses Routescan API directly, not unified Etherscan V2
+  primaryExplorerApiIdentifier: 'routescan',
   iconComponent: NetworkPolkadot,
   nativeCurrency: {
     name: 'Paseo',

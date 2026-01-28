@@ -85,6 +85,7 @@ Core EVM functionality has been extracted to `@openzeppelin/ui-builder-adapter-e
 The core package is bundled internally (not a runtime dependency) via `tsup` with `noExternal: ['@openzeppelin/ui-builder-adapter-evm-core']`.
 
 **What remains in this adapter:**
+
 - Ethereum/EVM network configurations (mainnet, Sepolia, Polygon, etc.)
 - Adapter-specific wrapper functions
 - React UI components for transaction options
@@ -142,5 +143,7 @@ The `src/wallet/implementation/wagmi-implementation.ts` file configures Wagmi wi
 Network configurations for various EVM chains (mainnets and testnets) are exported from `src/networks/index.ts` within this package (e.g., `ethereumMainnet`, `polygonMainnet`, `ethereumSepolia`, `polygonAmoy`). Each `EvmNetworkConfig` includes:
 
 - `id`: A unique string identifier for the network (e.g., "ethereum-mainnet").
-- `primaryExplorerApiIdentifier`: A string key (e.g., "etherscan-mainnet") used by `AppConfigService` to fetch a specific API key for this network's explorer from `networkServiceConfigs`.
-- It also includes a default public `rpcUrl`, Chain ID, `apiUrl` for explorers, `explorerUrl`, and native currency information.
+- `primaryExplorerApiIdentifier`: A string key (e.g., "etherscan-v2", "routescan") used to resolve explorer API keys.
+- Default `rpcUrl`, Chain ID, `apiUrl` for explorers, `explorerUrl`, and native currency information.
+
+For details on how explorer API keys and RPC URLs are resolved, see the [adapter-evm-core Configuration Module](../adapter-evm-core/README.md#configuration-module).

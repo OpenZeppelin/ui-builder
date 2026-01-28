@@ -43,11 +43,11 @@ Load and transform contract ABIs from various sources:
 
 ```typescript
 import {
-  loadEvmContract,
+  abiComparisonService,
   loadAbiFromEtherscan,
   loadAbiFromSourcify,
+  loadEvmContract,
   transformAbiToSchema,
-  abiComparisonService,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 ```
 
@@ -58,9 +58,9 @@ Execute transactions with different strategies:
 ```typescript
 import {
   EoaExecutionStrategy,
-  RelayerExecutionStrategy,
   executeEvmTransaction,
   formatEvmTransactionData,
+  RelayerExecutionStrategy,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 ```
 
@@ -70,25 +70,61 @@ Wallet implementation interface and RainbowKit utilities:
 
 ```typescript
 import {
-  WagmiWalletImplementation,
+  connectAndEnsureCorrectNetworkCore,
   createUiKitManager,
   generateRainbowKitConfigFile,
-  connectAndEnsureCorrectNetworkCore,
+  WagmiWalletImplementation,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 ```
 
 ### Configuration Module
 
-RPC and explorer configuration:
+RPC and explorer configuration resolution:
 
 ```typescript
 import {
-  resolveRpcUrl,
   resolveExplorerConfig,
-  validateEvmRpcEndpoint,
+  resolveRpcUrl,
   testEvmRpcConnection,
+  validateEvmRpcEndpoint,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 ```
+
+#### Explorer API Key Resolution
+
+The `resolveExplorerConfig` function resolves explorer API keys based on network configuration. It checks multiple sources in this priority order:
+
+1. **User-configured settings** (via UI, stored in localStorage)
+2. **Etherscan V2 global key** (for networks with `supportsEtherscanV2: true`)
+3. **Global service configs** (e.g., `VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY`)
+4. **Network service configs** (e.g., `VITE_APP_CFG_API_KEY_ETHERSCAN_MAINNET`)
+5. **Network defaults** (from network configuration)
+
+Network configurations specify a `primaryExplorerApiIdentifier` (e.g., `"etherscan-v2"`, `"routescan"`) that determines which API key to use. For example:
+
+```typescript
+// Network config with Etherscan V2 support
+{
+  supportsEtherscanV2: true,
+  primaryExplorerApiIdentifier: 'etherscan-v2',
+  // API key resolved from VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY
+}
+
+// Network config with Routescan (V1-compatible)
+{
+  supportsEtherscanV2: false,
+  primaryExplorerApiIdentifier: 'routescan',
+  // API key resolved from VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY
+}
+```
+
+#### RPC URL Resolution
+
+The `resolveRpcUrl` function resolves RPC URLs with this priority:
+
+1. **User-configured settings** (via UI)
+2. **App config overrides** (via environment variables or `app.config.json`)
+3. **Network defaults** (from network configuration)
 
 ## Usage in Adapters
 

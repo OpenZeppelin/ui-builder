@@ -28,9 +28,18 @@ export function resolveExplorerConfig(
   const globalV2ApiKey = isV2
     ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
     : undefined;
-  const appApiKey = networkConfig.primaryExplorerApiIdentifier
-    ? appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier)
-    : undefined;
+
+  // For non-V2 networks, check globalServiceConfigs first (e.g., routescan), then fall back to explorer API keys
+  let appApiKey: string | undefined;
+  if (networkConfig.primaryExplorerApiIdentifier) {
+    // First check globalServiceConfigs (supports routescan, blockscout, etc.)
+    const globalServiceConfig = appConfigService.getGlobalServiceConfig(
+      networkConfig.primaryExplorerApiIdentifier
+    );
+    appApiKey =
+      (globalServiceConfig?.apiKey as string | undefined) ??
+      appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier);
+  }
 
   // 1. Check for user-configured explorer via new generic service
   const rawCfg = userNetworkServiceConfigService.get(networkConfig.id, 'explorer');
