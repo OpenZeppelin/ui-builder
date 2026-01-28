@@ -2,8 +2,7 @@ import { moonbaseAlpha, moonbeam, moonriver } from 'viem/chains';
 import { describe, expect, it } from 'vitest';
 
 import {
-  kusamaHub,
-  kusamaHubMainnet,
+  // NOTE: kusamaHub and kusamaHubMainnet temporarily disabled - RPC DNS not resolving
   moonbaseAlphaTestnet,
   moonbeamMainnet,
   moonriverMainnet,
@@ -43,25 +42,27 @@ describe('Polkadot Hub Network Configurations', () => {
     });
   });
 
-  describe('kusamaHubMainnet', () => {
-    it('should have correct chain configuration', () => {
-      expect(kusamaHubMainnet.id).toBe('kusama-hub');
-      expect(kusamaHubMainnet.chainId).toBe(420420418);
-      expect(kusamaHubMainnet.ecosystem).toBe('polkadot');
-      expect(kusamaHubMainnet.executionType).toBe('evm');
-      expect(kusamaHubMainnet.networkCategory).toBe('hub');
-      expect(kusamaHubMainnet.relayChain).toBe('kusama');
-    });
-
-    it('should have correct native currency', () => {
-      expect(kusamaHubMainnet.nativeCurrency.symbol).toBe('KSM');
-      expect(kusamaHubMainnet.nativeCurrency.decimals).toBe(18);
-    });
-
-    it('should use Blockscout (Etherscan V1 API)', () => {
-      expect(kusamaHubMainnet.supportsEtherscanV2).toBe(false);
-    });
-  });
+  // NOTE: kusamaHubMainnet tests temporarily disabled - RPC DNS not resolving
+  // Re-enable once the Kusama Hub EVM RPC service is publicly available.
+  // describe('kusamaHubMainnet', () => {
+  //   it('should have correct chain configuration', () => {
+  //     expect(kusamaHubMainnet.id).toBe('kusama-hub');
+  //     expect(kusamaHubMainnet.chainId).toBe(420420418);
+  //     expect(kusamaHubMainnet.ecosystem).toBe('polkadot');
+  //     expect(kusamaHubMainnet.executionType).toBe('evm');
+  //     expect(kusamaHubMainnet.networkCategory).toBe('hub');
+  //     expect(kusamaHubMainnet.relayChain).toBe('kusama');
+  //   });
+  //
+  //   it('should have correct native currency', () => {
+  //     expect(kusamaHubMainnet.nativeCurrency.symbol).toBe('KSM');
+  //     expect(kusamaHubMainnet.nativeCurrency.decimals).toBe(18);
+  //   });
+  //
+  //   it('should use Blockscout (Etherscan V1 API)', () => {
+  //     expect(kusamaHubMainnet.supportsEtherscanV2).toBe(false);
+  //   });
+  // });
 
   describe('polkadotHubTestnet', () => {
     it('should have correct chain configuration', () => {
@@ -186,15 +187,17 @@ describe('Viem Chain Definitions', () => {
     });
   });
 
-  describe('kusamaHub', () => {
-    it('should have correct chain ID', () => {
-      expect(kusamaHub.id).toBe(420420418);
-    });
-
-    it('should have correct native currency', () => {
-      expect(kusamaHub.nativeCurrency.symbol).toBe('KSM');
-    });
-  });
+  // NOTE: kusamaHub tests temporarily disabled - RPC DNS not resolving
+  // Re-enable once the Kusama Hub EVM RPC service is publicly available.
+  // describe('kusamaHub', () => {
+  //   it('should have correct chain ID', () => {
+  //     expect(kusamaHub.id).toBe(420420418);
+  //   });
+  //
+  //   it('should have correct native currency', () => {
+  //     expect(kusamaHub.nativeCurrency.symbol).toBe('KSM');
+  //   });
+  // });
 
   describe('polkadotHubTestNet', () => {
     it('should have correct chain ID', () => {
@@ -209,18 +212,17 @@ describe('Viem Chain Definitions', () => {
 
 describe('Network Collections', () => {
   describe('polkadotMainnetNetworks', () => {
+    // NOTE: kusamaHubMainnet temporarily excluded - RPC DNS not resolving
     it('should contain Hub networks before parachains (priority order)', () => {
-      expect(polkadotMainnetNetworks).toHaveLength(4);
+      expect(polkadotMainnetNetworks).toHaveLength(3); // Was 4, now 3 without Kusama Hub
       // Hub networks first (P1)
       expect(polkadotMainnetNetworks[0].id).toBe('polkadot-hub');
       expect(polkadotMainnetNetworks[0].networkCategory).toBe('hub');
-      expect(polkadotMainnetNetworks[1].id).toBe('kusama-hub');
-      expect(polkadotMainnetNetworks[1].networkCategory).toBe('hub');
-      // Parachains after (P2)
-      expect(polkadotMainnetNetworks[2].id).toBe('polkadot-moonbeam-mainnet');
+      // Parachains after (P2) - now at index 1 and 2
+      expect(polkadotMainnetNetworks[1].id).toBe('polkadot-moonbeam-mainnet');
+      expect(polkadotMainnetNetworks[1].networkCategory).toBe('parachain');
+      expect(polkadotMainnetNetworks[2].id).toBe('polkadot-moonriver-mainnet');
       expect(polkadotMainnetNetworks[2].networkCategory).toBe('parachain');
-      expect(polkadotMainnetNetworks[3].id).toBe('polkadot-moonriver-mainnet');
-      expect(polkadotMainnetNetworks[3].networkCategory).toBe('parachain');
     });
 
     it('should only contain mainnet networks', () => {
@@ -251,14 +253,15 @@ describe('Network Collections', () => {
   });
 
   describe('polkadotNetworks', () => {
+    // NOTE: kusamaHubMainnet temporarily excluded - RPC DNS not resolving
     it('should contain all networks', () => {
-      expect(polkadotNetworks).toHaveLength(6);
+      expect(polkadotNetworks).toHaveLength(5); // Was 6, now 5 without Kusama Hub
     });
 
     it('should contain all mainnet and testnet networks', () => {
       const ids = polkadotNetworks.map((n) => n.id);
       expect(ids).toContain('polkadot-hub');
-      expect(ids).toContain('kusama-hub');
+      // expect(ids).toContain('kusama-hub'); // Temporarily disabled
       expect(ids).toContain('polkadot-hub-testnet');
       expect(ids).toContain('polkadot-moonbeam-mainnet');
       expect(ids).toContain('polkadot-moonriver-mainnet');

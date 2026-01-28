@@ -6,7 +6,7 @@ import { NetworkMoonbeam, NetworkPolkadot } from '@web3icons/react';
 import { moonbeam, moonriver } from 'viem/chains';
 
 import type { TypedPolkadotNetworkConfig } from '../types';
-import { kusamaHub, polkadotHub } from './chains';
+import { polkadotHub } from './chains';
 
 /**
  * Polkadot Hub mainnet configuration.
@@ -40,31 +40,36 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
 /**
  * Kusama Hub mainnet configuration.
  * Chain ID: 420420418, Currency: KSM, Explorer: Blockscout
+ *
+ * NOTE: Temporarily disabled - The official RPC endpoint DNS
+ * (kusama-asset-hub-eth-rpc.polkadot.io) does not resolve as of Jan 2026.
+ * Re-enable once the Kusama Hub EVM RPC service is publicly available.
+ * @see https://kusama.network/smart-contracts for updates
  */
-export const kusamaHubMainnet: TypedPolkadotNetworkConfig = {
-  id: 'kusama-hub',
-  name: 'Kusama Hub',
-  exportConstName: 'kusamaHubMainnet',
-  ecosystem: 'polkadot',
-  network: 'kusama-hub',
-  type: 'mainnet',
-  isTestnet: false,
-  chainId: 420420418,
-  rpcUrl: 'https://kusama-asset-hub-eth-rpc.polkadot.io',
-  explorerUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io',
-  apiUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io/api',
-  supportsEtherscanV2: false,
-  iconComponent: NetworkPolkadot, // Kusama uses Polkadot icon as fallback (canary network)
-  nativeCurrency: {
-    name: 'Kusama',
-    symbol: 'KSM',
-    decimals: 18,
-  },
-  viemChain: kusamaHub,
-  executionType: 'evm',
-  networkCategory: 'hub',
-  relayChain: 'kusama',
-};
+// export const kusamaHubMainnet: TypedPolkadotNetworkConfig = {
+//   id: 'kusama-hub',
+//   name: 'Kusama Hub',
+//   exportConstName: 'kusamaHubMainnet',
+//   ecosystem: 'polkadot',
+//   network: 'kusama-hub',
+//   type: 'mainnet',
+//   isTestnet: false,
+//   chainId: 420420418,
+//   rpcUrl: 'https://kusama-asset-hub-eth-rpc.polkadot.io',
+//   explorerUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io',
+//   apiUrl: 'https://blockscout-kusama-asset-hub.parity-chains-scw.parity.io/api',
+//   supportsEtherscanV2: false,
+//   iconComponent: NetworkPolkadot, // Kusama uses Polkadot icon as fallback (canary network)
+//   nativeCurrency: {
+//     name: 'Kusama',
+//     symbol: 'KSM',
+//     decimals: 18,
+//   },
+//   viemChain: kusamaHub,
+//   executionType: 'evm',
+//   networkCategory: 'hub',
+//   relayChain: 'kusama',
+// };
 
 // ============================================================================
 // PARACHAIN NETWORKS (P2)
@@ -133,10 +138,12 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
 /**
  * All mainnet network configurations in priority order.
  * Hub networks first (P1), then parachains (P2).
+ *
+ * NOTE: kusamaHubMainnet temporarily excluded - RPC not available yet.
  */
 export const mainnetNetworks = [
   polkadotHubMainnet,
-  kusamaHubMainnet,
+  // kusamaHubMainnet, // Temporarily disabled - RPC DNS not resolving
   moonbeamMainnet,
   moonriverMainnet,
 ] as const;
