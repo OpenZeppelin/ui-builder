@@ -1,5 +1,30 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 1.4.0
+
+### Patch Changes
+
+- [#309](https://github.com/OpenZeppelin/ui-builder/pull/309) [`0ef987e`](https://github.com/OpenZeppelin/ui-builder/commit/0ef987ec0c31a34add65d32feb8423daeb54028a) Thanks [@pasevin](https://github.com/pasevin)! - Refactor: Extract reusable EVM core modules into internal adapter-evm-core package
+
+  This internal refactoring extracts stateless, reusable EVM functionality into a new
+  internal package (`adapter-evm-core`) to enable creating EVM-compatible adapters
+  for other chains (L2s, Polkadot parachains) without code duplication.
+
+  **No breaking changes** - The public API of adapter-evm remains identical.
+
+  Extracted modules:
+  - ABI loading, transformation, and comparison
+  - Type mapping and form field generation
+  - Input parsing and output formatting
+  - View function querying
+  - Transaction formatting and execution strategies (EOA, Relayer)
+  - RPC and Explorer configuration resolution
+  - Address validation utilities
+  - Wallet infrastructure (WagmiWalletImplementation, UI kit management)
+  - RainbowKit configuration utilities
+
+  The core package is bundled into adapter-evm at build time (not published separately).
+
 ## 1.3.0
 
 ### Minor Changes
