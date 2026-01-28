@@ -12,6 +12,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  // Bundle adapter-evm-core into the output - it's an internal workspace package
   noExternal: ['@openzeppelin/ui-builder-adapter-evm-core'],
-  external: ['react', 'react-dom', '@rainbow-me/rainbowkit'],
 });
