@@ -87,6 +87,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonbeam.moonscan.io',
   apiUrl: 'https://api-moonbeam.moonscan.io/api',
   supportsEtherscanV2: true,
+  primaryExplorerApiIdentifier: 'etherscan-v2',
   iconComponent: NetworkMoonbeam,
   nativeCurrency: {
     name: 'Glimmer',
@@ -116,6 +117,7 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonriver.moonscan.io',
   apiUrl: 'https://api-moonriver.moonscan.io/api',
   supportsEtherscanV2: true,
+  primaryExplorerApiIdentifier: 'etherscan-v2',
   iconComponent: NetworkMoonbeam, // Moonriver uses Moonbeam icon (same ecosystem)
   nativeCurrency: {
     name: 'Moonriver',

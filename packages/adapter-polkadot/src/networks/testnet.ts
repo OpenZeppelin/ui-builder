@@ -58,6 +58,7 @@ export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
   explorerUrl: 'https://moonbase.moonscan.io',
   apiUrl: 'https://api-moonbase.moonscan.io/api',
   supportsEtherscanV2: true,
+  primaryExplorerApiIdentifier: 'etherscan-v2',
   iconComponent: NetworkMoonbeam,
   nativeCurrency: {
     name: 'DEV',
