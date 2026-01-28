@@ -264,8 +264,8 @@ export default defineConfig(async (): Promise<UserConfig> => {
         },
       },
 
-      // App-level dependencies + Adapter-specific pre-bundling configuration
-      // With noDiscovery: true, ALL deps must be listed here
+      // App-level dependencies + adapter-specific pre-bundling configuration.
+      // If optimizeDeps.noDiscovery is enabled, ALL deps must be listed here.
       include: [
         // React core - explicit inclusion prevents runtime discovery
         'react',
