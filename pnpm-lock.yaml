@@ -25,7 +25,7 @@ overrides:
   '@midnight-ntwrk/midnight-js-types': 2.0.2
   '@midnight-ntwrk/midnight-js-utils': 2.0.2
 
-pnpmfileChecksum: sha256-DdIHOFqWrg8WY/ztjhHq7ds+Qcs1I5IAqGB+IhL8PRs=
+pnpmfileChecksum: sha256-sA6sc8Vq58dYIMzZekIB2QXkwFrJTTrh0k2dolCNU/I=
 
 patchedDependencies:
   '@midnight-ntwrk/compact-runtime@0.9.0':
