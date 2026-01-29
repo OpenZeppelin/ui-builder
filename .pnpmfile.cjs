@@ -54,7 +54,9 @@ function readPackage(pkg, context) {
   const baseDir = context.dir || process.cwd();
 
   // Replace @openzeppelin/ui-* dependencies with local file: references
-  for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
+  // Note: peerDependencies are excluded because pnpm requires them to be
+  // semver ranges, workspace: specs, or catalog: specs (not file: paths)
+  for (const depType of ['dependencies', 'devDependencies']) {
     if (!pkg[depType]) continue;
 
     for (const [npmName, localPath] of Object.entries(UI_PACKAGE_MAP)) {
