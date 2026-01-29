@@ -374,12 +374,13 @@ export default defineConfig(async (): Promise<UserConfig> => {
         // We use output.manualChunks to ensure wagmi deps are bundled separately
         output: {
           // Split chunks to reduce memory usage during build
+          // NOTE: Do NOT add wagmi/@wagmi/core to manualChunks - they use Top-Level Await
+          // which breaks when split into separate chunks due to minification reordering issues.
+          // Let Rollup decide how to chunk wagmi for proper TLA initialization order.
           manualChunks: {
             vendor: ['react', 'react-dom'],
             ui: ['@radix-ui/react-accordion', '@radix-ui/react-checkbox', '@radix-ui/react-dialog'],
             web3: ['viem', '@tanstack/react-query'],
-            // Wagmi dependencies - required by EVM adapter for dynamic imports
-            wagmi: ['wagmi', '@wagmi/core'],
           },
           // Suppress sourcemap warnings for dependencies
           sourcemapIgnoreList: (relativeSourcePath: string) => {
@@ -393,8 +394,19 @@ export default defineConfig(async (): Promise<UserConfig> => {
       chunkSizeWarningLimit: 2000,
       // Reduce source map generation to save memory
       sourcemap: false,
+      // Use esnext target to preserve Top-Level Await syntax natively
+      // This is required because wagmi connectors use TLA which breaks with lower targets
+      target: 'esnext',
       // Remove console and debugger in staging/production builds
-      minify: 'esbuild',
+      // NOTE: Use terser instead of esbuild to preserve TLA code order
+      // esbuild's minification can reorder statements in a way that breaks TLA
+      minify: 'terser',
+      terserOptions: {
+        // Keep variable names more intact to preserve initialization order
+        mangle: {
+          toplevel: false,
+        },
+      },
     },
   };
   return config;
