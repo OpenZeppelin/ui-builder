@@ -1,7 +1,7 @@
 # Implementation Plan: Rename to 'UI Builder'
 
-**Branch**: `002-rename-to-ui-builder` | **Date**: 2025-09-22 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/spec.md
-**Input**: Feature specification from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/spec.md`
+**Branch**: `002-rename-to-ui-builder` | **Date**: 2025-09-22 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/spec.md
+**Input**: Feature specification from `/Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/spec.md`
 
 ## Execution Flow (/plan command scope)
 
@@ -82,7 +82,7 @@ specs/002-rename-to-ui-builder/
    - Repository name/slug and first‑party URLs will be updated.
    - Brand qualifier "OpenZeppelin UI Builder" used only where prior usage was "OpenZeppelin Contracts UI Builder".
    - No backwards compatibility required.
-   - Naming policy: remove "contracts" from names/slugs (e.g., `contracts-ui-builder-types` → `ui-builder-types`).
+   - Naming policy: remove "contracts" from names/slugs (e.g., `ui-builder-types` → `ui-builder-types`).
 2. Risks & mitigations consolidated in `research.md`.
 
 Output: `research.md` with decisions, risks, alternatives.

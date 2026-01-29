@@ -451,7 +451,7 @@ export class PackageManager {
    * - 'local': Uses file: protocol pointing to local openzeppelin-ui checkout
    * - 'staging'/'production': Uses stable published versions (^x.y.z) - no RC pipeline
    *
-   * For adapter packages (contracts-ui-builder repo):
+   * For adapter packages (ui-builder repo):
    * - 'local': Uses workspace:* for monorepo development
    * - 'staging': Uses RC versions for QA testing latest features
    * - 'production': Uses stable published versions (^x.y.z)
@@ -466,7 +466,7 @@ export class PackageManager {
   ): Record<string, string> {
     const updatedDependencies: Record<string, string> = {};
 
-    // Adapter packages (contracts-ui-builder repo)
+    // Adapter packages (ui-builder repo)
     const adapterPackages = new Set(Object.values(adapterPackageMap));
 
     // UI packages (openzeppelin-ui repo)
@@ -513,7 +513,7 @@ export class PackageManager {
           }
         }
       }
-      // Handle adapter packages (contracts-ui-builder repo)
+      // Handle adapter packages (ui-builder repo)
       else if (adapterPackages.has(pkgName)) {
         const managedVersion = packageVersions[pkgName as keyof typeof packageVersions] || version;
 

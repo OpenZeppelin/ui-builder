@@ -14,7 +14,7 @@
  *
  * Expected directory structure:
  *   ~/dev/
- *   ├── contracts-ui-builder/    # This repo
+ *   ├── ui-builder/    # This repo
  *   └── openzeppelin-ui/         # UI Kit repo (sibling directory)
  *
  * Custom path:

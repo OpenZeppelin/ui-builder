@@ -95,10 +95,10 @@ openzeppelin-ui/
 └── README.md
 ```
 
-### Source Code - UI Builder Updates (contracts-ui-builder)
+### Source Code - UI Builder Updates (ui-builder)
 
 ```text
-contracts-ui-builder/
+ui-builder/
 ├── packages/
 │   ├── builder/         # Updated to consume @openzeppelin/ui-* from npm
 │   │   └── src/

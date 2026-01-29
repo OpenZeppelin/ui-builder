@@ -11,7 +11,7 @@
 - Packages/imports: will be renamed; legacy packages deprecated on npm with migration notes linking to new packages and a brief rationale.
 - Brand qualifier: use "OpenZeppelin UI Builder" only where prior usage was "OpenZeppelin Contracts UI Builder"; otherwise use "UI Builder".
 - Backwards compatibility: not required.
-- Naming policy: remove the keyword "contracts" from package names and slugs (e.g., `contracts-ui-builder-types` → `ui-builder-types`).
+- Naming policy: remove the keyword "contracts" from package names and slugs (e.g., `ui-builder-types` → `ui-builder-types`).
 - Component and identifier renames: UI component names, file/directory names, and code identifiers (classes/functions) that include the legacy brand will be renamed (e.g., `ContractsUIBuilder` → `UIBuilder`).
 
 ## Risks & Mitigations

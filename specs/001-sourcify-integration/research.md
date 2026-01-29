@@ -5,7 +5,7 @@
 - Decision: Use React Router v7+ (Data Router APIs)
 - Rationale: Most widely adopted, robust docs, stable navigation/data APIs, ecosystem tooling; aligns with Vite + React 19.
 - Alternatives: TanStack Router (modern, strong features) — rejected for now due to lower adoption; internal URL utils only — rejected (reinventing the wheel).
-- Future‑proofing: Wrap with RouterService abstraction in `@openzeppelin/contracts-ui-builder-utils` to allow swapping without app rewrites.
+- Future‑proofing: Wrap with RouterService abstraction in `@openzeppelin/ui-builder-utils` to allow swapping without app rewrites.
 
 ## Provider Precedence
 

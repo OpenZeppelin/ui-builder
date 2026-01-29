@@ -2,7 +2,7 @@
 
 Parent issue: #165
 
-**Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/`
+**Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
 ## Phase 3.1: Setup
@@ -14,7 +14,7 @@ Parent issue: #165
 ## Phase 3.2: Tests First (TDD) – Validation Scans
 
 - [x] T004 [P] Create grep script `/scripts/rename/scan-user-facing.sh` to find "Contracts UI Builder" and "OpenZeppelin Contracts UI Builder" in user-facing paths (builder UI, docs, exports)
-- [x] T005 [P] Create grep script `/scripts/rename/scan-internal.sh` to find legacy terms and `contracts-ui-builder` in comments/docs
+- [x] T005 [P] Create grep script `/scripts/rename/scan-internal.sh` to find legacy terms and `ui-builder` in comments/docs
 - [x] T006 [P] Create CI check step draft `/scripts/rename/ci-assert-no-legacy.sh` that fails on matches (to be integrated in PRs)
 
 ## PR A: User-Facing Rename Sweep
@@ -53,7 +53,7 @@ Tracking: Issue #171
 - [x] T023 Finalize mapping in `/specs/002-rename-to-ui-builder/data-model.md` `PackageMapping` table
 - [x] T024 Update package names in package manifests across workspace (e.g., `packages/types/package.json`, `packages/utils/package.json`, `packages/ui/package.json`, others per mapping)
 - [x] T025 Update internal workspace dependencies to new names
-- [x] T026 Update import paths in source files referencing `@openzeppelin/contracts-ui-builder-*` (grep list from analysis) [P]
+- [x] T026 Update import paths in source files referencing `@openzeppelin/ui-builder-*` (grep list from analysis) [P]
 - [x] T027 Update CI publish workflows and Changesets to publish new names and deprecate legacy packages
 - [x] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
 - [x] T029 Full typecheck/build/test: `pnpm -r build && pnpm -r test`

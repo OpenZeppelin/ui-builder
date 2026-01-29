@@ -6,7 +6,7 @@ A production-ready SubQuery indexer for OpenZeppelin Stellar Access Control and 
 
 ## Repository
 
-**Location:** `stellar-access-control-indexer` (sibling repository to `contracts-ui-builder`)
+**Location:** `stellar-access-control-indexer` (sibling repository to `ui-builder`)
 
 **Technology Stack:**
 

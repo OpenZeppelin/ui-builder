@@ -165,7 +165,7 @@ describe('PackageManager configuration loading', () => {
       const result = JSON.parse(updated);
       // UI packages from openzeppelin-ui use file: protocol for local development
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
-      // Adapter packages still use workspace:* (they're in contracts-ui-builder monorepo)
+      // Adapter packages still use workspace:* (they're in ui-builder monorepo)
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
     });
 
