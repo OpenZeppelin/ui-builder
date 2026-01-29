@@ -13,7 +13,7 @@
     "clean": "pnpm -r clean",
     "install-deps": "pnpm install --frozen-lockfile --ignore-scripts --prefer-offline",
     "dev": "pnpm --filter=@openzeppelin/ui-builder-app dev",
-    "dev:local": "LOCAL_UI_PATH=${LOCAL_UI_PATH:-../openzeppelin-ui} && echo '🔨 Building local openzeppelin-ui packages...' && (cd \"$LOCAL_UI_PATH\" && pnpm build) && LOCAL_UI=true pnpm install --force && echo \"✅ Using local @openzeppelin/ui-* packages from $LOCAL_UI_PATH\"",
+    "dev:local": "LOCAL_UI_PATH=${LOCAL_UI_PATH:-../openzeppelin-ui} && echo '🔨 Building local openzeppelin-ui packages...' && (cd \"$LOCAL_UI_PATH\" && pnpm --filter='./packages/*' build) && LOCAL_UI=true pnpm install --force && echo \"✅ Using local @openzeppelin/ui-* packages from $LOCAL_UI_PATH\"",
     "dev:npm": "pnpm install --force && echo '✅ Using npm @openzeppelin/ui-* packages'",
     "docker:dev": "docker-compose up --build",
     "docs": "oz-docs -c docs",
