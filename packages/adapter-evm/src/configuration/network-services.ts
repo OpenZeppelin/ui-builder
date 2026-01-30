@@ -24,13 +24,42 @@ export function getEvmDefaultServiceConfig(
         return { rpcUrl: networkConfig.rpcUrl };
       }
       break;
-    case 'explorer':
-      // Explorer service requires API key which is not in network config defaults
-      // We can only provide the base URL - actual testing requires user configuration
-      if (networkConfig.explorerUrl) {
-        return { explorerUrl: networkConfig.explorerUrl };
+    case 'explorer': {
+      // For explorer service, we need to include the API key if available
+      // Priority: global V2 API key -> network-specific app config API key
+      const typedConfig = networkConfig as TypedEvmNetworkConfig;
+      const isV2 =
+        typedConfig.supportsEtherscanV2 &&
+        typedConfig.primaryExplorerApiIdentifier === 'etherscan-v2';
+
+      // Get global V2 API key if this is a V2-compatible network
+      const globalV2ApiKey = isV2
+        ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
+        : undefined;
+
+      // For non-V2 networks, check globalServiceConfigs first, then fall back to explorer API keys
+      let appApiKey: string | undefined;
+      if (!globalV2ApiKey && typedConfig.primaryExplorerApiIdentifier) {
+        const globalServiceConfig = appConfigService.getGlobalServiceConfig(
+          typedConfig.primaryExplorerApiIdentifier
+        );
+        appApiKey =
+          (globalServiceConfig?.apiKey as string | undefined) ??
+          appConfigService.getExplorerApiKey(typedConfig.primaryExplorerApiIdentifier);
+      }
+
+      const apiKey = globalV2ApiKey ?? appApiKey;
+
+      // Return config if we have at least an explorer URL or an API key
+      if (networkConfig.explorerUrl || apiKey) {
+        return {
+          explorerUrl: networkConfig.explorerUrl,
+          apiUrl: networkConfig.apiUrl,
+          ...(apiKey ? { apiKey } : {}),
+        };
       }
       break;
+    }
     case 'contract-definitions':
       // No connection test for contract definitions service
       return null;
