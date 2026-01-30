@@ -98,7 +98,7 @@ As a stakeholder and end user, I want the product to be consistently named "UI B
 - **FR-009**: Code comments and inline documentation SHOULD refer to "UI Builder" consistently (non-user-facing but part of internal consistency scope).
 - **FR-010**: CI/CD and release automation MUST be updated to publish under new package names and to apply deprecation to legacy packages.
 - **FR-011**: Migration guidance MUST be visible on legacy npm package pages with links to the new packages; no backwards compatibility is required.
-- **FR-012**: A naming policy MUST be applied to remove "contracts" from names and slugs (e.g., `ui-builder-types` → `ui-builder-types`).
+- **FR-012**: A naming policy MUST be applied to remove "contracts" from names and slugs (e.g., `contracts-ui-builder-types` → `ui-builder-types`).
 - **FR-013**: Before release, a quality check MUST confirm no unintended "Contracts UI Builder" strings remain in current user-facing content.
 - **FR-014**: Code identifiers (component names, classes, functions) and file/directory names that embed the legacy brand MUST be renamed to the new naming (e.g., `ContractsUIBuilder` → `UIBuilder`), and all imports/references MUST be updated consistently across the codebase.
 
@@ -106,7 +106,7 @@ As a stakeholder and end user, I want the product to be consistently named "UI B
 
 - **Product Name (New)**: "UI Builder" — canonical brand string for all current content.
 - **Product Name (Legacy)**: "Contracts UI Builder" — legacy term to be deprecated in current content.
-- **Naming Policy**: Remove the term "contracts" from names and slugs across repository, packages, and internal references (e.g., `ui-builder-types` → `ui-builder-types`).
+- **Naming Policy**: Remove the term "contracts" from names and slugs across repository, packages, and internal references (e.g., `contracts-ui-builder-types` → `ui-builder-types`).
 - **Package Migration**: Legacy packages deprecated on npm with migration notes linking to new packages; new packages published under updated names; no backwards compatibility.
 - **Repository and URLs**: Repository name/slug and first-party URLs updated to reflect the new naming; references updated accordingly.
 - **Brand Qualifier Policy**: Use "OpenZeppelin UI Builder" only where the previous usage was "OpenZeppelin Contracts UI Builder"; otherwise use "UI Builder".

@@ -21,6 +21,6 @@
 
 ## Migration Notes (Consumers)
 
-- Upgrade path: replace imports from `@openzeppelin/ui-builder-*` to `@openzeppelin/ui-builder-*`.
+- Upgrade path: replace imports from `@openzeppelin/contracts-ui-builder-*` to `@openzeppelin/ui-builder-*`.
 - No breaking runtime changes; brand and package names only.
 - Rationale: simplify naming, broaden scope beyond contracts.

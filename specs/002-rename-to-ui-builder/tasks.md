@@ -14,7 +14,7 @@ Parent issue: #165
 ## Phase 3.2: Tests First (TDD) – Validation Scans
 
 - [x] T004 [P] Create grep script `/scripts/rename/scan-user-facing.sh` to find "Contracts UI Builder" and "OpenZeppelin Contracts UI Builder" in user-facing paths (builder UI, docs, exports)
-- [x] T005 [P] Create grep script `/scripts/rename/scan-internal.sh` to find legacy terms and `ui-builder` in comments/docs
+- [x] T005 [P] Create grep script `/scripts/rename/scan-internal.sh` to find legacy terms and `contracts-ui-builder` in comments/docs
 - [x] T006 [P] Create CI check step draft `/scripts/rename/ci-assert-no-legacy.sh` that fails on matches (to be integrated in PRs)
 
 ## PR A: User-Facing Rename Sweep
