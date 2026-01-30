@@ -73,7 +73,11 @@ import { evmFacadeHooks } from './wallet/hooks/facade-hooks';
 import { loadInitialConfigFromAppService } from './wallet/hooks/useUiKitConfig';
 
 // Adapter-specific imports - EVM adapter orchestration
-import { getEvmNetworkServiceForms, getEvmSupportedExecutionMethods } from './configuration';
+import {
+  getEvmDefaultServiceConfig,
+  getEvmNetworkServiceForms,
+  getEvmSupportedExecutionMethods,
+} from './configuration';
 // Adapter-specific query with RPC resolution
 import { queryEvmViewFunction } from './query';
 import { EvmRelayerOptions } from './transaction';
@@ -158,6 +162,13 @@ export class EvmAdapter implements ContractAdapter {
     values: Record<string, unknown>
   ): Promise<{ success: boolean; latency?: number; error?: string }> {
     return testEvmNetworkServiceConnection(serviceId, values, this.networkConfig);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null {
+    return getEvmDefaultServiceConfig(this.networkConfig, serviceId);
   }
 
   /**

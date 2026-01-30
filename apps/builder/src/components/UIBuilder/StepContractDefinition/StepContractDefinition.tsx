@@ -2,6 +2,8 @@ import { useStore } from 'zustand/react';
 import { useShallow } from 'zustand/react/shallow';
 import { useCallback, useMemo, useState } from 'react';
 
+import { NetworkServiceErrorBanner } from '@openzeppelin/ui-components';
+
 import { ActionBar } from '../../Common/ActionBar';
 import { STEP_INDICES } from '../constants/stepIndices';
 import {
@@ -15,7 +17,13 @@ import {
   ContractSuccessStatus,
   TrimmedArtifactsBanner,
 } from './components';
-import { useAutoContractLoad, useContractForm, useContractLoader, useFormSync } from './hooks';
+import {
+  useAutoContractLoad,
+  useContractForm,
+  useContractLoader,
+  useFormSync,
+  useNetworkServiceHealthCheck,
+} from './hooks';
 import { StepContractDefinitionProps } from './types';
 
 export function StepContractDefinition({
@@ -89,6 +97,12 @@ export function StepContractDefinition({
       ignoreProxy,
     });
 
+  // Proactive network service health check
+  const { hasUnhealthyServices, unhealthyServices } = useNetworkServiceHealthCheck(
+    adapter,
+    networkConfig
+  );
+
   // Form-store synchronization
   useFormSync({
     debouncedManualDefinition,
@@ -148,6 +162,18 @@ export function StepContractDefinition({
         isWidgetExpanded={isWidgetExpanded}
       />
 
+      {/* Show banners for unhealthy network services */}
+      {hasUnhealthyServices &&
+        unhealthyServices.map((service) => (
+          <NetworkServiceErrorBanner
+            key={service.serviceId}
+            networkConfig={networkConfig}
+            serviceType={service.serviceId}
+            errorMessage={service.error}
+            title={`${service.serviceLabel} Unavailable`}
+          />
+        ))}
+
       {/* Show banner if artifacts have been trimmed */}
       {artifactsAreTrimmed && loadedConfigurationId && (
         <TrimmedArtifactsBanner
@@ -168,6 +194,7 @@ export function StepContractDefinition({
         contractDefinitionError={contractDefinitionError}
         circuitBreakerActive={circuitBreakerActive}
         loadedConfigurationId={loadedConfigurationId}
+        networkConfig={networkConfig}
       />
 
       {hasContract && (

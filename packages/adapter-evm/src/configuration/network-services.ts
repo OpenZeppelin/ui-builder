@@ -3,8 +3,40 @@ import {
   EvmProviderKeys,
   type TypedEvmNetworkConfig,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
-import type { NetworkServiceForm } from '@openzeppelin/ui-types';
+import type { EvmNetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
+
+/**
+ * Returns the default service configuration values for a given service ID.
+ * Used for proactive health checks when no user overrides are configured.
+ *
+ * @param networkConfig The network configuration
+ * @param serviceId The service identifier (e.g., 'rpc', 'explorer', 'contract-definitions')
+ * @returns The default configuration values, or null if not available
+ */
+export function getEvmDefaultServiceConfig(
+  networkConfig: EvmNetworkConfig,
+  serviceId: string
+): Record<string, unknown> | null {
+  switch (serviceId) {
+    case 'rpc':
+      if (networkConfig.rpcUrl) {
+        return { rpcUrl: networkConfig.rpcUrl };
+      }
+      break;
+    case 'explorer':
+      // Explorer service requires API key which is not in network config defaults
+      // We can only provide the base URL - actual testing requires user configuration
+      if (networkConfig.explorerUrl) {
+        return { explorerUrl: networkConfig.explorerUrl };
+      }
+      break;
+    case 'contract-definitions':
+      // No connection test for contract definitions service
+      return null;
+  }
+  return null;
+}
 
 /**
  * Returns the network service forms for EVM networks.

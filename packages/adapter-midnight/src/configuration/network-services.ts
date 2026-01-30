@@ -1,4 +1,27 @@
-import type { NetworkServiceForm } from '@openzeppelin/ui-types';
+import type { MidnightNetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
+
+/**
+ * Returns the default service configuration values for a given service ID.
+ * Used for proactive health checks when no user overrides are configured.
+ *
+ * @param networkConfig The network configuration
+ * @param serviceId The service identifier (e.g., 'indexer')
+ * @returns The default configuration values, or null if not available
+ */
+export function getMidnightDefaultServiceConfig(
+  networkConfig: MidnightNetworkConfig,
+  serviceId: string
+): Record<string, unknown> | null {
+  if (serviceId === 'indexer') {
+    if (networkConfig.indexerUri && networkConfig.indexerWsUri) {
+      return {
+        httpUrl: networkConfig.indexerUri,
+        wsUrl: networkConfig.indexerWsUri,
+      };
+    }
+  }
+  return null;
+}
 
 /**
  * Returns the network service forms for Midnight networks.

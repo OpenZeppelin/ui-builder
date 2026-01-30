@@ -33,6 +33,7 @@ import { logger } from '@openzeppelin/ui-utils';
 import { getCurrentLedger } from './access-control/onchain-reader';
 import { createStellarAccessControlService } from './access-control/service';
 import {
+  getStellarDefaultServiceConfig,
   getStellarNetworkServiceForms,
   testStellarNetworkServiceConnection,
   validateStellarNetworkServiceConfig,
@@ -155,6 +156,13 @@ export class StellarAdapter implements ContractAdapter {
     values: Record<string, unknown>
   ): Promise<{ success: boolean; latency?: number; error?: string }> {
     return testStellarNetworkServiceConnection(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null {
+    return getStellarDefaultServiceConfig(this.networkConfig, serviceId);
   }
 
   /**

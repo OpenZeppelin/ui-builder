@@ -1,6 +1,28 @@
-import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import type {
+  NetworkServiceForm,
+  SolanaNetworkConfig,
+  UserRpcProviderConfig,
+} from '@openzeppelin/ui-types';
 
 import { testSolanaRpcConnection, validateSolanaRpcEndpoint } from './rpc';
+
+/**
+ * Returns the default service configuration values for a given service ID.
+ * Used for proactive health checks when no user overrides are configured.
+ *
+ * @param networkConfig The network configuration
+ * @param serviceId The service identifier (e.g., 'rpc')
+ * @returns The default configuration values, or null if not available
+ */
+export function getSolanaDefaultServiceConfig(
+  networkConfig: SolanaNetworkConfig,
+  serviceId: string
+): Record<string, unknown> | null {
+  if (serviceId === 'rpc' && networkConfig.rpcEndpoint) {
+    return { rpcEndpoint: networkConfig.rpcEndpoint };
+  }
+  return null;
+}
 
 /**
  * Returns the network service forms for Solana networks.

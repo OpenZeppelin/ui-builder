@@ -62,6 +62,7 @@ export {
   getSupportedExecutionMethods,
   validateExecutionConfig,
   getNetworkServiceForms,
+  getPolkadotDefaultServiceConfig,
 } from './configuration';
 
 // ============================================================================
