@@ -386,6 +386,14 @@ export class PolkadotAdapter implements ContractAdapter {
   }
 
   /**
+   * @inheritdoc
+   */
+  public getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null {
+    this.assertEvmExecution();
+    return evm.getPolkadotDefaultServiceConfig(this._typedNetworkConfig, serviceId);
+  }
+
+  /**
    * Validate an RPC endpoint configuration.
    */
   async validateRpcEndpoint(rpcConfig: UserRpcProviderConfig): Promise<boolean> {

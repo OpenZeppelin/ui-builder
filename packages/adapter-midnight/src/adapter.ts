@@ -29,6 +29,7 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import { FunctionDecorationsService } from './analysis/function-decorations-service';
 import {
+  getMidnightDefaultServiceConfig,
   getMidnightNetworkServiceForms,
   testMidnightNetworkServiceConnection,
   validateMidnightNetworkServiceConfig,
@@ -520,6 +521,13 @@ export class MidnightAdapter implements ContractAdapter {
     values: Record<string, unknown>
   ): Promise<{ success: boolean; latency?: number; error?: string }> {
     return testMidnightNetworkServiceConnection(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null {
+    return getMidnightDefaultServiceConfig(this.networkConfig, serviceId);
   }
 
   /**

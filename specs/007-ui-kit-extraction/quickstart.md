@@ -34,7 +34,7 @@ EOF
 
 ### Step 1.2: Copy Configuration Files
 
-From `contracts-ui-builder/`:
+From `ui-builder/`:
 
 - `.prettierrc.cjs` → root
 - `eslint.config.cjs` → root (update paths)
@@ -45,7 +45,7 @@ From `contracts-ui-builder/`:
 ### Step 1.3: Copy Packages
 
 ```bash
-# From contracts-ui-builder root
+# From ui-builder root
 DEST="../openzeppelin-ui"
 
 # Copy each package (preserving git history optional)
@@ -109,7 +109,7 @@ EOF
 
 ### Step 1.7: Setup CI Workflows
 
-Copy and adapt from `contracts-ui-builder/.github/`:
+Copy and adapt from `ui-builder/.github/`:
 
 - `actions/prepare/action.yml`
 - `workflows/ci.yml`
@@ -163,7 +163,7 @@ git push origin main
 
 ### Step 3.1: Update Dependencies
 
-In `contracts-ui-builder/`:
+In `ui-builder/`:
 
 ```bash
 # Remove workspace packages from dependencies

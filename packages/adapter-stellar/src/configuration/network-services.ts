@@ -1,7 +1,42 @@
-import type { NetworkServiceForm, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import type {
+  NetworkServiceForm,
+  StellarNetworkConfig,
+  UserRpcProviderConfig,
+} from '@openzeppelin/ui-types';
 import { isValidUrl } from '@openzeppelin/ui-utils';
 
 import { testStellarRpcConnection, validateStellarRpcEndpoint } from './rpc';
+
+/**
+ * Returns the default service configuration values for a given service ID.
+ * Used for proactive health checks when no user overrides are configured.
+ *
+ * @param networkConfig The network configuration
+ * @param serviceId The service identifier (e.g., 'rpc', 'indexer')
+ * @returns The default configuration values, or null if not available
+ */
+export function getStellarDefaultServiceConfig(
+  networkConfig: StellarNetworkConfig,
+  serviceId: string
+): Record<string, unknown> | null {
+  switch (serviceId) {
+    case 'rpc':
+      if (networkConfig.sorobanRpcUrl) {
+        return { sorobanRpcUrl: networkConfig.sorobanRpcUrl };
+      }
+      break;
+    case 'indexer':
+      // Indexer is optional for Stellar - only return if both URLs are configured
+      if (networkConfig.indexerUri && networkConfig.indexerWsUri) {
+        return {
+          indexerUri: networkConfig.indexerUri,
+          indexerWsUri: networkConfig.indexerWsUri,
+        };
+      }
+      break;
+  }
+  return null;
+}
 
 /**
  * Returns the network service forms for Stellar networks.

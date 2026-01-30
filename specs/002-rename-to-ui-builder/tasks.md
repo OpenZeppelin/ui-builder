@@ -2,7 +2,7 @@
 
 Parent issue: #165
 
-**Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/`
+**Input**: Design documents from `/Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
 ## Phase 3.1: Setup
@@ -53,7 +53,7 @@ Tracking: Issue #171
 - [x] T023 Finalize mapping in `/specs/002-rename-to-ui-builder/data-model.md` `PackageMapping` table
 - [x] T024 Update package names in package manifests across workspace (e.g., `packages/types/package.json`, `packages/utils/package.json`, `packages/ui/package.json`, others per mapping)
 - [x] T025 Update internal workspace dependencies to new names
-- [x] T026 Update import paths in source files referencing `@openzeppelin/contracts-ui-builder-*` (grep list from analysis) [P]
+- [x] T026 Update import paths in source files referencing `@openzeppelin/ui-builder-*` (grep list from analysis) [P]
 - [x] T027 Update CI publish workflows and Changesets to publish new names and deprecate legacy packages
 - [x] T028 Author deprecation messages per `/specs/002-rename-to-ui-builder/contracts/package-migration-contracts.md` and link new packages
 - [x] T029 Full typecheck/build/test: `pnpm -r build && pnpm -r test`

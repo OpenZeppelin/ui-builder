@@ -91,6 +91,7 @@ module.exports = {
       'prepareArtifactsForFunction',
       'getAccessControlService',
       'getTypeMappingInfo',
+      'getDefaultServiceConfig',
     ];
 
     // Common standard methods and properties that are allowed

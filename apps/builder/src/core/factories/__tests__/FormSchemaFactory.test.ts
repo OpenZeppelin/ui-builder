@@ -88,6 +88,7 @@ const mockAdapterInstance: ContractAdapter = {
   getRelayers: vi.fn().mockResolvedValue([]),
   getRelayer: vi.fn().mockResolvedValue({} as RelayerDetailsRich),
   getNetworkServiceForms: vi.fn(() => []),
+  getDefaultServiceConfig: vi.fn(() => null),
   getCurrentBlock: vi.fn().mockResolvedValue(12345),
   getTypeMappingInfo: vi.fn(() => ({
     primitives: {

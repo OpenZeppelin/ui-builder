@@ -7,15 +7,15 @@ This guide explains how to develop with local versions of `@openzeppelin/ui-*` p
 ```bash
 # 1. Clone both repos as siblings
 cd ~/dev
-git clone git@github.com:OpenZeppelin/contracts-ui-builder.git
+git clone git@github.com:OpenZeppelin/ui-builder.git
 git clone git@github.com:OpenZeppelin/openzeppelin-ui.git
 
 # 2. Install dependencies in openzeppelin-ui
 cd openzeppelin-ui
 pnpm install
 
-# 3. Enable local packages in contracts-ui-builder (auto-builds openzeppelin-ui)
-cd ../contracts-ui-builder
+# 3. Enable local packages in ui-builder (auto-builds openzeppelin-ui)
+cd ../ui-builder
 pnpm dev:local
 
 # 4. Start development
@@ -30,7 +30,7 @@ The local development setup uses pnpm's `.pnpmfile.cjs` hook to dynamically reso
 
 ```
 ~/dev/
-├── contracts-ui-builder/    # UI Builder app
+├── ui-builder/    # UI Builder app
 └── openzeppelin-ui/         # UI Kit packages (sibling directory)
     └── packages/
         ├── types/           # @openzeppelin/ui-types
@@ -51,6 +51,7 @@ pnpm dev:local
 ```
 
 This command automatically:
+
 1. Builds all packages in the local openzeppelin-ui directory (defaults to `../openzeppelin-ui`)
 2. Runs `LOCAL_UI=true pnpm install` to resolve all `@openzeppelin/ui-*` dependencies to local paths
 
@@ -82,7 +83,7 @@ This runs a regular `pnpm install` which uses the published npm versions.
 2. Rebuild the changed package(s):
    - Quick rebuild: `cd ../openzeppelin-ui && pnpm build`
    - Or re-run: `pnpm dev:local` (rebuilds and reinstalls)
-3. Restart the contracts-ui-builder dev server if needed
+3. Restart the ui-builder dev server if needed
 
 ### Hot Reload
 
@@ -93,8 +94,8 @@ For faster iteration, run the openzeppelin-ui build in watch mode:
 cd openzeppelin-ui
 pnpm build --watch  # If supported, or rebuild manually
 
-# Terminal 2: Run contracts-ui-builder
-cd contracts-ui-builder
+# Terminal 2: Run ui-builder
+cd ui-builder
 pnpm dev
 ```
 

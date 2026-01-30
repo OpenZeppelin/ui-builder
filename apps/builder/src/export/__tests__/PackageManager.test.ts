@@ -364,7 +364,7 @@ describe('PackageManager', () => {
         /^file:.*\/packages\/renderer$/
       );
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
-      // Adapter packages still use workspace:* (they're in contracts-ui-builder monorepo)
+      // Adapter packages still use workspace:* (they're in ui-builder monorepo)
       expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
     });
 

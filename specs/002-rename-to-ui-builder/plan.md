@@ -1,7 +1,7 @@
 # Implementation Plan: Rename to 'UI Builder'
 
-**Branch**: `002-rename-to-ui-builder` | **Date**: 2025-09-22 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/spec.md
-**Input**: Feature specification from `/Users/ghost/dev/repos/OpenZeppelin/contracts-ui-builder/specs/002-rename-to-ui-builder/spec.md`
+**Branch**: `002-rename-to-ui-builder` | **Date**: 2025-09-22 | **Spec**: /Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/spec.md
+**Input**: Feature specification from `/Users/ghost/dev/repos/OpenZeppelin/ui-builder/specs/002-rename-to-ui-builder/spec.md`
 
 ## Execution Flow (/plan command scope)
 

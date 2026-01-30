@@ -13,7 +13,7 @@
 ## Path Conventions
 
 - **New repo**: `openzeppelin-ui/` (to be created)
-- **Existing repo**: `contracts-ui-builder/` (current workspace)
+- **Existing repo**: `ui-builder/` (current workspace)
 
 ---
 
@@ -167,20 +167,20 @@
 
 ### Implementation for User Story 3
 
-- [x] T071 [US3] Update `contracts-ui-builder/packages/builder/package.json` to replace workspace deps with npm versions `^1.0.0`
-- [x] T072 [US3] Update `contracts-ui-builder/packages/adapter-evm/package.json` to replace workspace deps with npm versions
-- [x] T073 [US3] Update `contracts-ui-builder/packages/adapter-stellar/package.json` to replace workspace deps with npm versions
-- [x] T074 [US3] Update `contracts-ui-builder/packages/adapter-midnight/package.json` to replace workspace deps with npm versions
-- [x] T075 [US3] Update `contracts-ui-builder/packages/adapter-solana/package.json` to replace workspace deps with npm versions
-- [x] T076 [US3] Update imports in `contracts-ui-builder/packages/builder/src/**/*.{ts,tsx}` to use new package names
-- [x] T077 [US3] Update imports in `contracts-ui-builder/packages/adapter-evm/src/**/*.{ts,tsx}` to use new package names
-- [x] T078 [US3] Update imports in `contracts-ui-builder/packages/adapter-stellar/src/**/*.{ts,tsx}` to use new package names
-- [x] T079 [US3] Update imports in `contracts-ui-builder/packages/adapter-midnight/src/**/*.{ts,tsx}` to use new package names
-- [x] T080 [US3] Update imports in `contracts-ui-builder/packages/adapter-solana/src/**/*.{ts,tsx}` to use new package names
-- [x] T081 [US3] Update `contracts-ui-builder/.changeset/config.json` to remove migrated packages from linked array
-- [x] T082 [US3] Run `pnpm install` in `contracts-ui-builder/` and verify dependency resolution
-- [x] T083 [US3] Run `pnpm build` in `contracts-ui-builder/` and verify all packages build
-- [x] T084 [US3] Run `pnpm test` in `contracts-ui-builder/` and verify all tests pass
+- [x] T071 [US3] Update `ui-builder/packages/builder/package.json` to replace workspace deps with npm versions `^1.0.0`
+- [x] T072 [US3] Update `ui-builder/packages/adapter-evm/package.json` to replace workspace deps with npm versions
+- [x] T073 [US3] Update `ui-builder/packages/adapter-stellar/package.json` to replace workspace deps with npm versions
+- [x] T074 [US3] Update `ui-builder/packages/adapter-midnight/package.json` to replace workspace deps with npm versions
+- [x] T075 [US3] Update `ui-builder/packages/adapter-solana/package.json` to replace workspace deps with npm versions
+- [x] T076 [US3] Update imports in `ui-builder/packages/builder/src/**/*.{ts,tsx}` to use new package names
+- [x] T077 [US3] Update imports in `ui-builder/packages/adapter-evm/src/**/*.{ts,tsx}` to use new package names
+- [x] T078 [US3] Update imports in `ui-builder/packages/adapter-stellar/src/**/*.{ts,tsx}` to use new package names
+- [x] T079 [US3] Update imports in `ui-builder/packages/adapter-midnight/src/**/*.{ts,tsx}` to use new package names
+- [x] T080 [US3] Update imports in `ui-builder/packages/adapter-solana/src/**/*.{ts,tsx}` to use new package names
+- [x] T081 [US3] Update `ui-builder/.changeset/config.json` to remove migrated packages from linked array
+- [x] T082 [US3] Run `pnpm install` in `ui-builder/` and verify dependency resolution
+- [x] T083 [US3] Run `pnpm build` in `ui-builder/` and verify all packages build
+- [x] T084 [US3] Run `pnpm test` in `ui-builder/` and verify all tests pass
 
 **Checkpoint**: US3 complete - UI Builder works with npm packages, all tests pass
 
@@ -194,12 +194,12 @@
 
 ### Implementation for User Story 4
 
-- [x] T085 [US4] Update `internalPackages` Set in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` with new package names
-- [x] T086 [US4] Update version mappings in `contracts-ui-builder/packages/builder/src/export/versions.ts` with new package names at `^1.0.0`
-- [x] T087 [US4] Update `applyVersioningStrategy` in `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` for new version formats (local=file:, staging=rc, production=^x.y.z)
-- [x] T088 [US4] Update export code templates in `contracts-ui-builder/packages/builder/src/export/templates/` to use new import paths
-- [x] T089 [US4] Update `update-renderer` script template in `contracts-ui-builder/packages/builder/src/export/` to reference new package names
-- [x] T090 [US4] Run `pnpm test:export` in `contracts-ui-builder/` to verify exported apps build correctly
+- [x] T085 [US4] Update `internalPackages` Set in `ui-builder/packages/builder/src/export/PackageManager.ts` with new package names
+- [x] T086 [US4] Update version mappings in `ui-builder/packages/builder/src/export/versions.ts` with new package names at `^1.0.0`
+- [x] T087 [US4] Update `applyVersioningStrategy` in `ui-builder/packages/builder/src/export/PackageManager.ts` for new version formats (local=file:, staging=rc, production=^x.y.z)
+- [x] T088 [US4] Update export code templates in `ui-builder/packages/builder/src/export/templates/` to use new import paths
+- [x] T089 [US4] Update `update-renderer` script template in `ui-builder/packages/builder/src/export/` to reference new package names
+- [x] T090 [US4] Run `pnpm test:export` in `ui-builder/` to verify exported apps build correctly
 - [x] T091 [US4] Manually export a test form and verify generated `package.json` has correct dependencies
 - [x] T092 [US4] Verify exported app runs correctly with `npm install && npm run dev`
 
@@ -255,17 +255,17 @@
 
 **Purpose**: Remove migrated packages and finalize UI Builder repo
 
-- [x] T109 Remove `contracts-ui-builder/packages/types/` directory
-- [x] T110 Remove `contracts-ui-builder/packages/utils/` directory
-- [x] T111 Remove `contracts-ui-builder/packages/styles/` directory
-- [x] T112 Remove `contracts-ui-builder/packages/ui/` directory
-- [x] T113 Remove `contracts-ui-builder/packages/renderer/` directory
-- [x] T114 Remove `contracts-ui-builder/packages/react-core/` directory
-- [x] T115 Remove `contracts-ui-builder/packages/storage/` directory
-- [x] T116 Update `contracts-ui-builder/pnpm-workspace.yaml` to reflect removed packages
-- [x] T117 Run final verification: `pnpm install && pnpm build && pnpm test` in `contracts-ui-builder/`
+- [x] T109 Remove `ui-builder/packages/types/` directory
+- [x] T110 Remove `ui-builder/packages/utils/` directory
+- [x] T111 Remove `ui-builder/packages/styles/` directory
+- [x] T112 Remove `ui-builder/packages/ui/` directory
+- [x] T113 Remove `ui-builder/packages/renderer/` directory
+- [x] T114 Remove `ui-builder/packages/react-core/` directory
+- [x] T115 Remove `ui-builder/packages/storage/` directory
+- [x] T116 Update `ui-builder/pnpm-workspace.yaml` to reflect removed packages
+- [x] T117 Run final verification: `pnpm install && pnpm build && pnpm test` in `ui-builder/`
 - [x] T118 ~~Create changeset for UI Builder migration update~~ (N/A - builder app is private, not published)
-- [x] T118a Remove `legacyInternalPackages` Set and associated handling from `contracts-ui-builder/packages/builder/src/export/PackageManager.ts` (transition scaffolding no longer needed once all consumers use `@openzeppelin/ui-*` namespace)
+- [x] T118a Remove `legacyInternalPackages` Set and associated handling from `ui-builder/packages/builder/src/export/PackageManager.ts` (transition scaffolding no longer needed once all consumers use `@openzeppelin/ui-*` namespace)
 
 **Checkpoint**: UI Builder repo cleaned up, all migrated packages removed
 

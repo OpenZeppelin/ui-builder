@@ -22,6 +22,7 @@ import { isSolanaNetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import {
+  getSolanaDefaultServiceConfig,
   getSolanaNetworkServiceForms,
   testSolanaNetworkServiceConnection,
   validateSolanaNetworkServiceConfig,
@@ -96,6 +97,13 @@ export class SolanaAdapter implements ContractAdapter {
     values: Record<string, unknown>
   ): Promise<{ success: boolean; latency?: number; error?: string }> {
     return testSolanaNetworkServiceConnection(serviceId, values);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null {
+    return getSolanaDefaultServiceConfig(this.networkConfig, serviceId);
   }
 
   async loadContract(source: string | Record<string, unknown>): Promise<ContractSchema> {

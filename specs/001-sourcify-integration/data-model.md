@@ -46,7 +46,7 @@ Note: Each adapter defines its own schema and validation using existing adapter 
 - getParam(name): string | null
 - navigate(path): void
 
-Note: Implemented via a lightweight RouterService wrapper in `@openzeppelin/contracts-ui-builder-utils`. No routing logic in adapters.
+Note: Implemented via a lightweight RouterService wrapper in `@openzeppelin/ui-builder-utils`. No routing logic in adapters.
 
 ## Relationships
 
