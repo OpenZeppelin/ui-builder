@@ -19,6 +19,7 @@ export {
 // Explorer configuration
 export {
   resolveExplorerConfig,
+  resolveExplorerApiKeyFromAppConfig,
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   validateEvmExplorerConfig,

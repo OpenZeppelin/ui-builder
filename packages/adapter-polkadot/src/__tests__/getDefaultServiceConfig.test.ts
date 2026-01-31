@@ -151,6 +151,27 @@ describe('getPolkadotDefaultServiceConfig', () => {
 
       expect(result).toBeNull();
     });
+
+    it('should return config with API key when explorerUrl is missing but API key is available', () => {
+      vi.spyOn(appConfigService, 'getGlobalServiceConfig').mockReturnValue({
+        apiKey: 'test-api-key-only',
+      });
+
+      const networkConfig = createMockNetworkConfig({
+        explorerUrl: undefined,
+        apiUrl: undefined,
+        supportsEtherscanV2: true,
+        primaryExplorerApiIdentifier: 'etherscan-v2',
+      });
+
+      const result = getPolkadotDefaultServiceConfig(networkConfig, 'explorer');
+
+      expect(result).toEqual({
+        explorerUrl: undefined,
+        apiUrl: undefined,
+        apiKey: 'test-api-key-only',
+      });
+    });
   });
 
   describe('contract-definitions service', () => {

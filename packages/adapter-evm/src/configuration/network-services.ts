@@ -1,6 +1,7 @@
 // Import from core package via barrel files
 import {
   EvmProviderKeys,
+  resolveExplorerApiKeyFromAppConfig,
   type TypedEvmNetworkConfig,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { EvmNetworkConfig, NetworkServiceForm } from '@openzeppelin/ui-types';
@@ -26,29 +27,9 @@ export function getEvmDefaultServiceConfig(
       break;
     case 'explorer': {
       // For explorer service, we need to include the API key if available
-      // Priority: global V2 API key -> network-specific app config API key
+      // Use the shared helper from adapter-evm-core to resolve the API key
       const typedConfig = networkConfig as TypedEvmNetworkConfig;
-      const isV2 =
-        typedConfig.supportsEtherscanV2 &&
-        typedConfig.primaryExplorerApiIdentifier === 'etherscan-v2';
-
-      // Get global V2 API key if this is a V2-compatible network
-      const globalV2ApiKey = isV2
-        ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
-        : undefined;
-
-      // For non-V2 networks, check globalServiceConfigs first, then fall back to explorer API keys
-      let appApiKey: string | undefined;
-      if (!globalV2ApiKey && typedConfig.primaryExplorerApiIdentifier) {
-        const globalServiceConfig = appConfigService.getGlobalServiceConfig(
-          typedConfig.primaryExplorerApiIdentifier
-        );
-        appApiKey =
-          (globalServiceConfig?.apiKey as string | undefined) ??
-          appConfigService.getExplorerApiKey(typedConfig.primaryExplorerApiIdentifier);
-      }
-
-      const apiKey = globalV2ApiKey ?? appApiKey;
+      const apiKey = resolveExplorerApiKeyFromAppConfig(typedConfig);
 
       // Return config if we have at least an explorer URL or an API key
       if (networkConfig.explorerUrl || apiKey) {

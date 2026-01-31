@@ -8,7 +8,10 @@
  * This file only contains the UI form definitions specific to Polkadot networks.
  */
 
-import { EvmProviderKeys } from '@openzeppelin/ui-builder-adapter-evm-core';
+import {
+  EvmProviderKeys,
+  resolveExplorerApiKeyFromAppConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { NetworkServiceForm } from '@openzeppelin/ui-types';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
@@ -34,28 +37,8 @@ export function getPolkadotDefaultServiceConfig(
       break;
     case 'explorer': {
       // For explorer service, we need to include the API key if available
-      // Priority: global V2 API key -> network-specific app config API key
-      const isV2 =
-        networkConfig.supportsEtherscanV2 &&
-        networkConfig.primaryExplorerApiIdentifier === 'etherscan-v2';
-
-      // Get global V2 API key if this is a V2-compatible network
-      const globalV2ApiKey = isV2
-        ? (appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as string | undefined)
-        : undefined;
-
-      // For non-V2 networks (like Polkadot Hub which uses Routescan), check globalServiceConfigs
-      let appApiKey: string | undefined;
-      if (!globalV2ApiKey && networkConfig.primaryExplorerApiIdentifier) {
-        const globalServiceConfig = appConfigService.getGlobalServiceConfig(
-          networkConfig.primaryExplorerApiIdentifier
-        );
-        appApiKey =
-          (globalServiceConfig?.apiKey as string | undefined) ??
-          appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier);
-      }
-
-      const apiKey = globalV2ApiKey ?? appApiKey;
+      // Use the shared helper from adapter-evm-core to resolve the API key
+      const apiKey = resolveExplorerApiKeyFromAppConfig(networkConfig);
 
       // Return config if we have at least an explorer URL or an API key
       if (networkConfig.explorerUrl || apiKey) {

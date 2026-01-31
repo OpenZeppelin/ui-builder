@@ -8,6 +8,51 @@ import { EvmCompatibleNetworkConfig } from '../types/network';
 import { isValidEvmAddress } from '../utils';
 
 /**
+ * Resolves the explorer API key from app configuration (without user overrides).
+ * This is used by getDefaultServiceConfig to provide defaults for health checks.
+ *
+ * Priority order:
+ * 1. For V2 API networks: Global Etherscan V2 API key
+ * 2. Network-specific global service config API key
+ * 3. Fallback to explorer API key by identifier
+ *
+ * @param networkConfig - EVM-compatible network configuration
+ * @returns The resolved API key, or undefined if not configured
+ */
+export function resolveExplorerApiKeyFromAppConfig(
+  networkConfig: EvmCompatibleNetworkConfig
+): string | undefined {
+  const isV2 =
+    networkConfig.supportsEtherscanV2 &&
+    networkConfig.primaryExplorerApiIdentifier === 'etherscan-v2';
+
+  // For V2-compatible networks, check global Etherscan V2 API key first
+  if (isV2) {
+    const globalV2ApiKey = appConfigService.getGlobalServiceConfig('etherscanv2')?.apiKey as
+      | string
+      | undefined;
+    if (globalV2ApiKey) {
+      return globalV2ApiKey;
+    }
+  }
+
+  // For non-V2 networks or when no V2 key is available, check network-specific configs
+  if (networkConfig.primaryExplorerApiIdentifier) {
+    const globalServiceConfig = appConfigService.getGlobalServiceConfig(
+      networkConfig.primaryExplorerApiIdentifier
+    );
+    const apiKey =
+      (globalServiceConfig?.apiKey as string | undefined) ??
+      appConfigService.getExplorerApiKey(networkConfig.primaryExplorerApiIdentifier);
+    if (apiKey) {
+      return apiKey;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Resolves the explorer configuration for a given EVM network.
  * Priority order:
  * 1. User-configured explorer (from UserExplorerConfigService)
