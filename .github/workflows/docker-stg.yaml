@@ -198,6 +198,7 @@ jobs:
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
             etherscan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY }}
+            routescan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY }}
 
       - name: Scan Docker image
         uses: anchore/scan-action@df395807f4554463d4455b8047cf58e37b6acaae # v6.5.0
@@ -230,6 +231,7 @@ jobs:
           secrets: |
             npm_token=${{ secrets.NPM_TOKEN }}
             etherscan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY }}
+            routescan_api_key=${{ secrets.VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY }}
 
   deploy:
     runs-on: ubuntu-latest
