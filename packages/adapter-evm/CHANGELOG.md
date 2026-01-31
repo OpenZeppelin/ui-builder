@@ -1,5 +1,47 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 1.4.0
+
+### Minor Changes
+
+- [#322](https://github.com/OpenZeppelin/ui-builder/pull/322) [`1b5496e`](https://github.com/OpenZeppelin/ui-builder/commit/1b5496e4d2ed2ba9ae8c7e206d65ee87be9eb3ec) Thanks [@pasevin](https://github.com/pasevin)! - Add `getDefaultServiceConfig` method to all adapters for proactive network service health checks
+
+  This new required method enables the UI to proactively test network service connectivity (RPC, indexers, explorers) when a network is selected, displaying user-friendly error banners before users attempt operations that would fail.
+
+  **New method: `getDefaultServiceConfig(serviceId: string): Record<string, unknown> | null`**
+
+  Returns the default configuration values for a network service, extracted from the network config. This allows health check functionality without requiring user configuration.
+
+  Implementation per adapter:
+  - **EVM**: Returns `rpcUrl` for 'rpc' service, `explorerUrl` for 'explorer' service
+  - **Stellar**: Returns `sorobanRpcUrl` for 'rpc' service, `indexerUri`/`indexerWsUri` for 'indexer' service
+  - **Solana**: Returns `rpcEndpoint` for 'rpc' service
+  - **Polkadot**: Returns `rpcUrl` for 'rpc' service, `explorerUrl` for 'explorer' service
+  - **Midnight**: Returns `httpUrl`/`wsUrl` (from `indexerUri`/`indexerWsUri`) for 'indexer' service
+
+### Patch Changes
+
+- [#309](https://github.com/OpenZeppelin/ui-builder/pull/309) [`0ef987e`](https://github.com/OpenZeppelin/ui-builder/commit/0ef987ec0c31a34add65d32feb8423daeb54028a) Thanks [@pasevin](https://github.com/pasevin)! - Refactor: Extract reusable EVM core modules into internal adapter-evm-core package
+
+  This internal refactoring extracts stateless, reusable EVM functionality into a new
+  internal package (`adapter-evm-core`) to enable creating EVM-compatible adapters
+  for other chains (L2s, Polkadot parachains) without code duplication.
+
+  **No breaking changes** - The public API of adapter-evm remains identical.
+
+  Extracted modules:
+  - ABI loading, transformation, and comparison
+  - Type mapping and form field generation
+  - Input parsing and output formatting
+  - View function querying
+  - Transaction formatting and execution strategies (EOA, Relayer)
+  - RPC and Explorer configuration resolution
+  - Address validation utilities
+  - Wallet infrastructure (WagmiWalletImplementation, UI kit management)
+  - RainbowKit configuration utilities
+
+  The core package is bundled into adapter-evm at build time (not published separately).
+
 ## 1.3.0
 
 ### Minor Changes
