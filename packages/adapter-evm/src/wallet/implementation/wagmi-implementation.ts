@@ -11,7 +11,9 @@ import {
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 import { evmNetworks } from '../../networks';
-import { getWagmiConfigForRainbowKit } from '../rainbowkit';
+// Import directly from config-service to avoid circular dependency through the barrel file
+// (components.tsx → evmUiKitManager → wagmi-implementation → rainbowkit/index.ts → components.tsx)
+import { getWagmiConfigForRainbowKit } from '../rainbowkit/config-service';
 import { type WagmiConfigChains } from '../types';
 
 /**
