@@ -44,16 +44,22 @@ COPY . .
 RUN pnpm install --frozen-lockfile || (echo "Install failed, clearing caches and retrying..." && rm -rf /root/.cache/node-gyp /root/.npm /root/.node-gyp && pnpm install --frozen-lockfile)
 
 # Build all packages in the correct order
-# This step now uses Docker BuildKit secrets to securely pass the Etherscan API key
-# The secret is only available during this RUN command and won't be stored in the image
+# This step now uses Docker BuildKit secrets to securely pass API keys
+# The secrets are only available during this RUN command and won't be stored in the image
 RUN --mount=type=secret,id=etherscan_api_key \
-    sh -c 'if [ -f /run/secrets/etherscan_api_key ]; then \
-        export VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=$(cat /run/secrets/etherscan_api_key) && \
-        pnpm build; \
-    else \
-        echo "Warning: Building without Etherscan API key" && \
-        pnpm build; \
-    fi'
+    --mount=type=secret,id=routescan_api_key \
+    sh -c '\
+        if [ -f /run/secrets/etherscan_api_key ]; then \
+            export VITE_APP_CFG_SERVICE_ETHERSCANV2_API_KEY=$(cat /run/secrets/etherscan_api_key); \
+        else \
+            echo "Warning: Building without Etherscan API key"; \
+        fi && \
+        if [ -f /run/secrets/routescan_api_key ]; then \
+            export VITE_APP_CFG_SERVICE_ROUTESCAN_API_KEY=$(cat /run/secrets/routescan_api_key); \
+        else \
+            echo "Warning: Building without Routescan API key"; \
+        fi && \
+        pnpm build'
 
 # Runtime stage - using a slim image for a smaller footprint
 FROM node:22-slim@sha256:752ea8a2f758c34002a0461bd9f1cee4f9a3c36d48494586f60ffce1fc708e0e AS runner
