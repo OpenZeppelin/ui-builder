@@ -8,7 +8,10 @@
  * This file only contains the UI form definitions specific to Polkadot networks.
  */
 
-import { EvmProviderKeys } from '@openzeppelin/ui-builder-adapter-evm-core';
+import {
+  EvmProviderKeys,
+  resolveExplorerApiKeyFromAppConfig,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { NetworkServiceForm } from '@openzeppelin/ui-types';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
@@ -32,13 +35,21 @@ export function getPolkadotDefaultServiceConfig(
         return { rpcUrl: networkConfig.rpcUrl };
       }
       break;
-    case 'explorer':
-      // Explorer service requires API key which is not in network config defaults
-      // We can only provide the base URL - actual testing requires user configuration
-      if (networkConfig.explorerUrl) {
-        return { explorerUrl: networkConfig.explorerUrl };
+    case 'explorer': {
+      // For explorer service, we need to include the API key if available
+      // Use the shared helper from adapter-evm-core to resolve the API key
+      const apiKey = resolveExplorerApiKeyFromAppConfig(networkConfig);
+
+      // Return config if we have at least an explorer URL or an API key
+      if (networkConfig.explorerUrl || apiKey) {
+        return {
+          explorerUrl: networkConfig.explorerUrl,
+          apiUrl: networkConfig.apiUrl,
+          ...(apiKey ? { apiKey } : {}),
+        };
       }
       break;
+    }
     case 'contract-definitions':
       // No connection test for contract definitions service
       return null;

@@ -163,6 +163,7 @@ export {
   getEvmCurrentBlock,
   // Explorer
   resolveExplorerConfig,
+  resolveExplorerApiKeyFromAppConfig,
   getEvmExplorerAddressUrl,
   getEvmExplorerTxUrl,
   validateEvmExplorerConfig,
