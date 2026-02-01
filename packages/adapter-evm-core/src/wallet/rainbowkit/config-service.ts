@@ -1,10 +1,18 @@
+/**
+ * RainbowKit Config Service
+ *
+ * Creates Wagmi configuration for RainbowKit. This is shared between
+ * EVM and Polkadot adapters to avoid code duplication.
+ */
 import { Config, http } from '@wagmi/core';
 import { type Chain } from 'viem';
 
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { type WagmiConfigChains } from '../types';
+import type { WagmiConfigChains } from '../types';
+
+const LOG_PREFIX = 'rainbowkit/config-service';
 
 /**
  * Creates a Wagmi configuration for RainbowKit using getDefaultConfig
@@ -27,10 +35,7 @@ export async function createRainbowKitWagmiConfig(
   try {
     const { getDefaultConfig } = await import('@rainbow-me/rainbowkit');
     if (!getDefaultConfig) {
-      logger.error(
-        'rainbowkit/config-service',
-        'Failed to import getDefaultConfig from RainbowKit'
-      );
+      logger.error(LOG_PREFIX, 'Failed to import getDefaultConfig from RainbowKit');
       return null;
     }
 
@@ -39,7 +44,7 @@ export async function createRainbowKitWagmiConfig(
 
     if (!wagmiParams) {
       logger.warn(
-        'rainbowkit/config-service',
+        LOG_PREFIX,
         'Resolved kitConfig does not contain a `wagmiParams` object. Cannot create RainbowKit Wagmi config.'
       );
       return null;
@@ -47,17 +52,11 @@ export async function createRainbowKitWagmiConfig(
 
     // Ensure essential appName and projectId are present in user's wagmiParams
     if (typeof wagmiParams.appName !== 'string' || !wagmiParams.appName) {
-      logger.warn(
-        'rainbowkit/config-service',
-        'kitConfig.wagmiParams is missing or has invalid `appName`.'
-      );
+      logger.warn(LOG_PREFIX, 'kitConfig.wagmiParams is missing or has invalid `appName`.');
       return null;
     }
     if (typeof wagmiParams.projectId !== 'string' || !wagmiParams.projectId) {
-      logger.warn(
-        'rainbowkit/config-service',
-        'kitConfig.wagmiParams is missing or has invalid `projectId`.'
-      );
+      logger.warn(LOG_PREFIX, 'kitConfig.wagmiParams is missing or has invalid `projectId`.');
       return null;
     }
 
@@ -88,7 +87,7 @@ export async function createRainbowKitWagmiConfig(
 
           if (httpRpcOverride) {
             logger.info(
-              'rainbowkit/config-service',
+              LOG_PREFIX,
               `Using overridden RPC for chain ${chainDefinition.name}: ${httpRpcOverride}`
             );
             rpcUrlToUse = httpRpcOverride;
@@ -117,14 +116,10 @@ export async function createRainbowKitWagmiConfig(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config = getDefaultConfig(finalConfigOptions as any);
 
-    logger.info(
-      'rainbowkit/config-service',
-      'Successfully created RainbowKit Wagmi config object.',
-      config
-    );
+    logger.info(LOG_PREFIX, 'Successfully created RainbowKit Wagmi config object.', config);
     return config;
   } catch (error) {
-    logger.error('rainbowkit/config-service', 'Error creating RainbowKit Wagmi config:', error);
+    logger.error(LOG_PREFIX, 'Error creating RainbowKit Wagmi config:', error);
     return null;
   }
 }
@@ -133,7 +128,7 @@ export async function createRainbowKitWagmiConfig(
  * Gets the Wagmi configuration for RainbowKit based on the global UI kit settings.
  * This function is intended to be called by WagmiWalletImplementation.
  *
- * @param uiKitConfiguration The UI kit configuration object from EvmUiKitManager (contains the resolved kitConfig).
+ * @param uiKitConfiguration The UI kit configuration object from UiKitManager (contains the resolved kitConfig).
  * @param chains Array of viem Chain objects to use with RainbowKit
  * @param chainIdToNetworkIdMap Mapping of chain IDs to network IDs for RPC override lookups
  * @param getRpcEndpointOverride Function to get RPC endpoint overrides
@@ -151,7 +146,7 @@ export async function getWagmiConfigForRainbowKit(
     !uiKitConfiguration.kitConfig // kitConfig is the fully resolved config here
   ) {
     logger.debug(
-      'rainbowkit/config-service',
+      LOG_PREFIX,
       'Not configured for RainbowKit or kitConfig (resolved native + programmatic) is missing.'
     );
     return null;

@@ -6,15 +6,13 @@
  */
 import {
   WagmiWalletImplementation as CoreWagmiWalletImplementation,
+  getWagmiConfigForRainbowKit,
+  type WagmiConfigChains,
   type WagmiWalletConfig,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 import { evmNetworks } from '../../networks';
-// Import directly from config-service to avoid circular dependency through the barrel file
-// (components.tsx → evmUiKitManager → wagmi-implementation → rainbowkit/index.ts → components.tsx)
-import { getWagmiConfigForRainbowKit } from '../rainbowkit/config-service';
-import { type WagmiConfigChains } from '../types';
 
 /**
  * Generates the supported chains from EVM network configurations.

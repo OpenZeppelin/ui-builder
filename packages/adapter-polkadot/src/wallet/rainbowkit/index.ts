@@ -19,3 +19,9 @@ export { RainbowKitConnectButton } from './components';
 
 // Polkadot-specific factory functions
 export { createRainbowKitComponents } from './componentFactory';
+
+// Re-export config service from core for convenience
+export {
+  createRainbowKitWagmiConfig,
+  getWagmiConfigForRainbowKit,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
