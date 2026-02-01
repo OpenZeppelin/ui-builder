@@ -26,3 +26,6 @@ export { validateRainbowKitConfig, getRawUserNativeConfig } from './utils';
 // RainbowKit component factory
 export { createRainbowKitConnectButton } from './components';
 export { createRainbowKitComponents } from './componentFactory';
+
+// RainbowKit config service (creates RainbowKit wagmi config)
+export { createRainbowKitWagmiConfig, getWagmiConfigForRainbowKit } from './config-service';

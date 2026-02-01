@@ -60,6 +60,9 @@ export {
   // RainbowKit component factories
   createRainbowKitConnectButton,
   createRainbowKitComponents,
+  // RainbowKit config service
+  createRainbowKitWagmiConfig,
+  getWagmiConfigForRainbowKit,
 } from './rainbowkit';
 
 // UI Kit Manager factory

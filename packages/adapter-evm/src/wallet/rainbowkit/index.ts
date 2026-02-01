@@ -20,5 +20,8 @@ export { RainbowKitConnectButton } from './components';
 // EVM-specific factory functions
 export { createRainbowKitComponents } from './componentFactory';
 
-// EVM-specific config service (creates RainbowKit wagmi config)
-export { createRainbowKitWagmiConfig, getWagmiConfigForRainbowKit } from './config-service';
+// Re-export config service from core for convenience
+export {
+  createRainbowKitWagmiConfig,
+  getWagmiConfigForRainbowKit,
+} from '@openzeppelin/ui-builder-adapter-evm-core';

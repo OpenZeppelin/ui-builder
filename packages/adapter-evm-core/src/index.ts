@@ -134,6 +134,9 @@ export {
   // RainbowKit component factories
   createRainbowKitConnectButton,
   createRainbowKitComponents,
+  // RainbowKit config service
+  createRainbowKitWagmiConfig,
+  getWagmiConfigForRainbowKit,
   // UI Kit Manager factory
   createUiKitManager,
   type UiKitManagerState,

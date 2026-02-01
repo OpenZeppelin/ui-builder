@@ -15,7 +15,8 @@
 import type { Config } from '@wagmi/core';
 
 import {
-  WagmiWalletImplementation as CoreWagmiWalletImplementation,
+  getWagmiConfigForRainbowKit,
+  WagmiWalletImplementation,
   type WagmiConfigChains,
   type WagmiWalletConfig,
   type WalletNetworkConfig,
@@ -59,7 +60,7 @@ function toWalletNetworkConfigs(): WalletNetworkConfig[] {
  * The config should be created by the PolkadotWalletUiRoot component
  * or passed directly by the consuming application.
  */
-export class PolkadotWalletImplementation extends CoreWagmiWalletImplementation {
+export class PolkadotWalletImplementation extends WagmiWalletImplementation {
   /**
    * Creates a new PolkadotWalletImplementation instance.
    *
@@ -74,6 +75,18 @@ export class PolkadotWalletImplementation extends CoreWagmiWalletImplementation 
     };
 
     super(config);
+
+    // Inject the RainbowKit config function for creating RainbowKit-specific wagmi configs
+    this.setRainbowKitConfigFn(
+      async (uiKitConfiguration, chains, chainIdToNetworkIdMap, getRpcOverride) => {
+        return getWagmiConfigForRainbowKit(
+          uiKitConfiguration,
+          chains as WagmiConfigChains,
+          chainIdToNetworkIdMap,
+          getRpcOverride
+        );
+      }
+    );
 
     logger.info(
       LOG_SYSTEM,
