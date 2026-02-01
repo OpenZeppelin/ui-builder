@@ -6,10 +6,10 @@
  */
 
 export const packageVersions = {
-  '@openzeppelin/ui-builder-adapter-evm': '1.3.0',
-  '@openzeppelin/ui-builder-adapter-midnight': '1.3.0',
-  '@openzeppelin/ui-builder-adapter-solana': '1.2.0',
-  '@openzeppelin/ui-builder-adapter-stellar': '1.3.0',
+  '@openzeppelin/ui-builder-adapter-evm': '1.4.0',
+  '@openzeppelin/ui-builder-adapter-midnight': '1.4.0',
+  '@openzeppelin/ui-builder-adapter-solana': '1.4.0',
+  '@openzeppelin/ui-builder-adapter-stellar': '1.4.0',
   '@openzeppelin/ui-react': '1.1.0',
   '@openzeppelin/ui-renderer': '1.0.2',
   '@openzeppelin/ui-storage': '1.0.0',
