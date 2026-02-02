@@ -133,5 +133,52 @@ describe('EVM Field Generator', () => {
       expect(field.placeholder).toContain('value');
       expect(field.width).toBe('full');
     });
+
+    it('should set metadata.exactBytes for bytes32 type', () => {
+      const param = createParam('bytes32', 'hash');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('bytes');
+      expect(field.metadata).toBeDefined();
+      expect((field.metadata as Record<string, unknown>).exactBytes).toBe(32);
+    });
+
+    it('should set metadata.exactBytes for bytes4 type', () => {
+      const param = createParam('bytes4', 'selector');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('bytes');
+      expect(field.metadata).toBeDefined();
+      expect((field.metadata as Record<string, unknown>).exactBytes).toBe(4);
+    });
+
+    it('should NOT set metadata.exactBytes for dynamic bytes type', () => {
+      const param = createParam('bytes', 'data');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('bytes');
+      expect(field.metadata).toBeUndefined();
+    });
+
+    it('should set metadata.exactBytes in elementFieldConfig for bytes32[] array', () => {
+      const param = createParam('bytes32[]', 'tags');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('array');
+      expect(field.elementFieldConfig).toBeDefined();
+      expect(field.elementFieldConfig?.type).toBe('bytes');
+      expect(field.elementFieldConfig?.metadata).toBeDefined();
+      expect((field.elementFieldConfig?.metadata as Record<string, unknown>).exactBytes).toBe(32);
+    });
+
+    it('should NOT set metadata in elementFieldConfig for dynamic bytes[] array', () => {
+      const param = createParam('bytes[]', 'dataArray');
+      const field = generateEvmDefaultField(param);
+
+      expect(field.type).toBe('array');
+      expect(field.elementFieldConfig).toBeDefined();
+      expect(field.elementFieldConfig?.type).toBe('bytes');
+      expect(field.elementFieldConfig?.metadata).toBeUndefined();
+    });
   });
 });

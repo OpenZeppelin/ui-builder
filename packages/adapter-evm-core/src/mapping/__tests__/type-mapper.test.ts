@@ -37,9 +37,14 @@ describe('EVM Type Mapper', () => {
       expect(mapEvmParamTypeToFieldType('string')).toBe('text');
     });
 
-    it('should map bytes types to text/textarea fields', () => {
-      expect(mapEvmParamTypeToFieldType('bytes')).toBe('textarea');
-      expect(mapEvmParamTypeToFieldType('bytes32')).toBe('text');
+    it('should map bytes types to bytes field for proper hex validation', () => {
+      expect(mapEvmParamTypeToFieldType('bytes')).toBe('bytes');
+      expect(mapEvmParamTypeToFieldType('bytes32')).toBe('bytes');
+      // All bytesN types (bytes1-bytes32) should map to 'bytes'
+      expect(mapEvmParamTypeToFieldType('bytes1')).toBe('bytes');
+      expect(mapEvmParamTypeToFieldType('bytes4')).toBe('bytes');
+      expect(mapEvmParamTypeToFieldType('bytes16')).toBe('bytes');
+      expect(mapEvmParamTypeToFieldType('bytes20')).toBe('bytes');
     });
 
     it('should map array types correctly', () => {
@@ -134,6 +139,29 @@ describe('EVM Type Mapper', () => {
       expect(compatibleTypes[0]).toBe('array'); // First (recommended) type
       expect(compatibleTypes).toContain('textarea');
       expect(compatibleTypes).toContain('text');
+    });
+
+    it('should return bytes as first compatible type for bytes types', () => {
+      // Dynamic bytes
+      const compatibleBytesTypes = getEvmCompatibleFieldTypes('bytes');
+      expect(compatibleBytesTypes[0]).toBe('bytes'); // First (recommended) type
+      expect(compatibleBytesTypes).toContain('textarea');
+      expect(compatibleBytesTypes).toContain('text');
+
+      // Fixed bytes32
+      const compatibleBytes32Types = getEvmCompatibleFieldTypes('bytes32');
+      expect(compatibleBytes32Types[0]).toBe('bytes'); // First (recommended) type
+      expect(compatibleBytes32Types).toContain('textarea');
+      expect(compatibleBytes32Types).toContain('text');
+
+      // Other bytesN types (bytes4, bytes20, etc.)
+      const compatibleBytes4Types = getEvmCompatibleFieldTypes('bytes4');
+      expect(compatibleBytes4Types[0]).toBe('bytes'); // First (recommended) type
+      expect(compatibleBytes4Types).toContain('textarea');
+      expect(compatibleBytes4Types).toContain('text');
+
+      const compatibleBytes20Types = getEvmCompatibleFieldTypes('bytes20');
+      expect(compatibleBytes20Types[0]).toBe('bytes'); // First (recommended) type
     });
   });
 });

@@ -27,8 +27,8 @@ export const EVM_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
   int128: 'bigint',
   int256: 'bigint',
   bool: 'checkbox',
-  bytes: 'textarea',
-  bytes32: 'text',
+  bytes: 'bytes',
+  bytes32: 'bytes',
 };
 
 /**
