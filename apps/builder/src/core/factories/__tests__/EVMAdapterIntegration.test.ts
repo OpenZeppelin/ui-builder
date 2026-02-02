@@ -396,8 +396,8 @@ describe('EVM Adapter Integration Tests', () => {
 
       expect(bytesSchema.fields).toHaveLength(1);
       const bytesField = bytesSchema.fields[0];
-      // Dynamic bytes should be handled as textarea for better multi-line input
-      expect(bytesField.type).toBe('textarea');
+      // Dynamic bytes should use BytesField for proper hex validation
+      expect(bytesField.type).toBe('bytes');
 
       // Test bytes32 field
       const bytes32Function = byteFixture.functions.find((f) => f.id === 'function-bytes32');
@@ -406,8 +406,10 @@ describe('EVM Adapter Integration Tests', () => {
 
       expect(bytes32Schema.fields).toHaveLength(1);
       const bytes32Field = bytes32Schema.fields[0];
-      // bytes32 should be handled as text with hex validation
-      expect(bytes32Field.type).toBe('text');
+      // bytes32 should use BytesField with exactBytes metadata for proper hex validation
+      expect(bytes32Field.type).toBe('bytes');
+      // Should have exactBytes metadata for fixed-size validation
+      expect((bytes32Field.metadata as Record<string, unknown>)?.exactBytes).toBe(32);
     });
   });
 
