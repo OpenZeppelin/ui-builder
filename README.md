@@ -77,6 +77,8 @@ This project is organized as a monorepo with the following packages:
 
 - **apps/builder**: The main application with the builder app UI and core logic.
 - **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
+- **packages/adapter-evm-core**: Shared EVM core functionality (internal, not published).
+- **packages/adapter-polkadot**: Adapter implementation for Polkadot ecosystem with EVM support.
 - **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
 - **packages/adapter-stellar**: Adapter implementation for the Stellar network.
 - **packages/adapter-midnight**: Adapter implementation for the Midnight blockchain.
@@ -134,6 +136,20 @@ Adapter implementation for Stellar (Soroban). For more details, see the [Stellar
 _Status: In progress._
 
 Adapter implementation for Midnight. For more details, see the [Midnight Adapter README](./packages/adapter-midnight/README.md).
+
+#### Polkadot Adapter
+
+[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-polkadot.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-polkadot)
+
+_Status: In progress._
+
+Adapter implementation for Polkadot ecosystem chains with EVM support (Moonbeam, Polkadot Hub). For more details, see the [Polkadot Adapter README](./packages/adapter-polkadot/README.md).
+
+#### EVM Core (Internal)
+
+_Status: Stable._
+
+Internal shared package providing core EVM functionality used by `adapter-evm` and `adapter-polkadot`. This package is not published to npm. For more details, see the [EVM Core README](./packages/adapter-evm-core/README.md).
 
 ### Shared Packages (External)
 
@@ -262,6 +278,8 @@ This monorepo contains the builder application and blockchain adapters:
 
 - **[apps/builder/](./apps/builder/README.md)** - Main application with builder UI, export system, and core logic
 - **[packages/adapter-evm/](./packages/adapter-evm/README.md)** - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
+- **[packages/adapter-evm-core/](./packages/adapter-evm-core/README.md)** - Shared EVM core (internal, not published)
+- **[packages/adapter-polkadot/](./packages/adapter-polkadot/README.md)** - Polkadot ecosystem with EVM support (Moonbeam, Polkadot Hub)
 - **[packages/adapter-solana/](./packages/adapter-solana/README.md)** - Solana blockchain implementation
 - **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
 - **[packages/adapter-midnight/](./packages/adapter-midnight/README.md)** - Midnight blockchain implementation
