@@ -10,22 +10,81 @@ Each adapter lives in its own package (e.g., `packages/adapter-evm`, `packages/a
 
 The main `adapter.ts` file within each package acts as an orchestrator, delegating specific tasks to functions or classes exported from dedicated modules within its `src/` directory.
 
+### 1.1. Package Dependency Structure
+
+EVM-compatible adapters share a common internal core to avoid code duplication:
+
+```mermaid
+flowchart TB
+    subgraph adapters["EVM-Compatible Adapters"]
+        EVM["adapter-evm<br/>Ethereum, L2s"]
+        POLKADOT["adapter-polkadot<br/>Moonbeam, Polkadot Hub"]
+        FUTURE["Future EVM adapters"]
+    end
+
+    subgraph core["adapter-evm-core"]
+        ABI["ABI Module"] ~~~ PROXY["Proxy Module"] ~~~ TX["Transaction Module"]
+        WALLET["Wallet Module"] ~~~ CONFIG["Configuration Module"] ~~~ VALID["Validation Module"]
+        QUERY["Query Module"] ~~~ MAP["Mapping Module"] ~~~ TRANSFORM["Transform Module"]
+    end
+
+    subgraph standalone["Standalone Adapters"]
+        STELLAR["adapter-stellar"]
+        SOLANA["adapter-solana"]
+        MIDNIGHT["adapter-midnight"]
+    end
+
+    EVM --> core
+    POLKADOT --> core
+    FUTURE -.-> core
+```
+
+**Core modules provided by `adapter-evm-core`:**
+
+| Module        | Functionality                                                 |
+| ------------- | ------------------------------------------------------------- |
+| ABI           | Etherscan V1/V2, Sourcify loading, transformation, comparison |
+| Proxy         | Proxy detection, implementation address resolution            |
+| Transaction   | EOA & Relayer execution strategies, sign/broadcast/confirm    |
+| Wallet        | wagmi/viem integration, RainbowKit components                 |
+| Configuration | RPC & Explorer URL resolution, network service config         |
+| Validation    | Address validation, execution config checks                   |
+| Query         | View function calls                                           |
+| Mapping       | Blockchain type → field type mapping, field generation        |
+| Transform     | Input parsing, output formatting                              |
+
+| Package            | Published     | Depends on Core    | Description                                          |
+| ------------------ | ------------- | ------------------ | ---------------------------------------------------- |
+| `adapter-evm-core` | No (internal) | —                  | Shared EVM functionality (see modules above)         |
+| `adapter-evm`      | Yes           | `adapter-evm-core` | Ethereum and EVM L2 chains                           |
+| `adapter-polkadot` | Yes           | `adapter-evm-core` | Polkadot ecosystem with EVM (Moonbeam, Polkadot Hub) |
+| `adapter-stellar`  | Yes           | —                  | Stellar/Soroban (standalone)                         |
+| `adapter-solana`   | Yes           | —                  | Solana (standalone)                                  |
+| `adapter-midnight` | Yes           | —                  | Midnight (standalone)                                |
+
+For details on the EVM core package, see [adapter-evm-core/README.md](../packages/adapter-evm-core/README.md).
+
 ## 2. Core `ContractAdapter` Interface
 
-All adapters **must** implement the `ContractAdapter` interface found in `packages/types/src/adapters/base.ts`. This interface defines the required methods for:
+All adapters **must** implement the `ContractAdapter` interface from `@openzeppelin/ui-types` (defined in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository at `packages/types/src/adapters/base.ts`). This interface defines the required methods for:
 
-- Loading contract definitions (e.g., `loadContract`)
-- Mapping blockchain types to form field types (e.g., `mapParameterTypeToFieldType`, `getCompatibleFieldTypes`)
+- Loading contract definitions (e.g., `loadContract`, `loadContractWithMetadata?`)
+- Mapping blockchain types to form field types (e.g., `mapParameterTypeToFieldType`, `getCompatibleFieldTypes`, `getTypeMappingInfo`)
 - Generating default form fields (e.g., `generateDefaultField`)
 - Parsing user input and formatting transaction data (e.g., `formatTransactionData`)
 - Signing and broadcasting transactions (e.g., `signAndBroadcast`, `waitForTransactionConfirmation?`)
-- Querying view functions (e.g., `isViewFunction`, `queryViewFunction`)
+- Querying view functions (e.g., `isViewFunction`, `queryViewFunction`, `getWritableFunctions`)
 - Formatting query results (e.g., `formatFunctionResult`)
-- Handling wallet connections (e.g., `supportsWalletConnection`, `connectWallet`, `disconnectWallet`, `getWalletConnectionStatus`, etc.)
-- Providing configuration and metadata (e.g., `getSupportedExecutionMethods`, `validateExecutionConfig`, `getExplorerUrl`, `getExplorerTxUrl?`)
-- Basic validation (e.g., `isValidAddress`)
+- Handling wallet connections (e.g., `supportsWalletConnection`, `connectWallet`, `disconnectWallet`, `getWalletConnectionStatus`, `getAvailableConnectors`, etc.)
+- UI kit management (e.g., `getAvailableUiKits`, `configureUiKit?`, `getEcosystemReactUiContextProvider?`, `getEcosystemWalletComponents?`)
+- Providing configuration and metadata (e.g., `getSupportedExecutionMethods`, `validateExecutionConfig`, `getExplorerUrl`, `getExplorerTxUrl?`, `getDefaultServiceConfig`)
+- Network service configuration (e.g., `getNetworkServiceForms`, `validateNetworkServiceConfig?`, `testNetworkServiceConnection?`)
+- Basic validation (e.g., `isValidAddress`, `validateRpcEndpoint?`, `testRpcConnection?`)
+- Contract definition management (e.g., `compareContractDefinitions?`, `validateContractDefinition?`, `hashContractDefinition?`)
+- Export support (e.g., `getExportBootstrapFiles?`, `getExportableWalletConfigFiles?`)
+- Access control (e.g., `getAccessControlService?`)
 
-**Note:** Methods requiring network context (like `queryViewFunction`, `getExplorerUrl`, `loadContract` when fetching from network) rely on the `networkConfig` provided during adapter instantiation, rather than receiving it as a parameter.
+**Note:** Methods marked with `?` are optional. Methods requiring network context (like `queryViewFunction`, `getExplorerUrl`, `loadContract` when fetching from network) rely on the `networkConfig` provided during adapter instantiation, rather than receiving it as a parameter. For the complete interface definition, see the source in `@openzeppelin/ui-types`.
 
 ## 3. Standardized Module Structure
 
@@ -130,8 +189,8 @@ adapter-<chain>/
 - **`utils/`:**
   - **Purpose:** Contains general utility functions specific to the needs of this adapter (e.g., formatting helpers, JSON helpers).
 
-- **`types.ts`:**
-  - **Purpose:** Defines any internal TypeScript types used only within this specific adapter package.
+- **`types.ts` or `types/`:**
+  - **Purpose:** Defines any internal TypeScript types used only within this specific adapter package. May be a single file or a directory with multiple type files (e.g., `types/artifacts.ts`, `types/providers.ts`).
 
 ## 5. Data Flow Example (EVM View Query)
 
@@ -167,28 +226,30 @@ Instead of creating a monolithic `signAndBroadcast` function with complex condit
 
 ### 6.2. Core Components
 
-1.  **`ExecutionStrategy` Interface**: A common interface (e.g., defined in `src/transaction/execution-strategy.ts`) that all concrete strategy classes must implement. It defines a single, primary method:
+1.  **`AdapterExecutionStrategy` Interface**: A common interface (defined in `src/transaction/execution-strategy.ts`) that all concrete strategy classes must implement. It defines a single, primary method:
     ```typescript
-    interface ExecutionStrategy {
+    interface AdapterExecutionStrategy {
       execute(): Promise<TransactionResult>;
       // ...required params: functionId, params, contractAddress, etc.
     }
     ```
-2.  **Concrete Strategy Classes**: Separate classes for each execution method, each implementing the `ExecutionStrategy` interface.
+2.  **Concrete Strategy Classes**: Separate classes for each execution method, each implementing the `AdapterExecutionStrategy` interface.
     - `EoaExecutionStrategy`: Handles the standard flow of signing and broadcasting a transaction using the user's connected wallet.
     - `RelayerExecutionStrategy`: Implements the logic for sending a transaction to the OpenZeppelin Relayer service, including polling for the final transaction hash.
-3.  **Strategy Factory**: A function within the adapter (or its `transaction` module) that takes the user-provided `ExecutionConfig` and returns an instance of the corresponding strategy class.
+3.  **Strategy Selection**: Strategy instantiation happens within the main execution function (e.g., `executeEvmTransaction` in `adapter-evm-core`). The function selects the appropriate strategy based on the `ExecutionConfig`:
     ```typescript
-    function createExecutionStrategy(config: ExecutionConfig): ExecutionStrategy {
-      switch (config.method) {
-        case 'eoa':
-          return new EoaExecutionStrategy(...);
-        case 'relayer':
-          return new RelayerExecutionStrategy(...);
-        default:
-          throw new Error('Unsupported execution method');
-      }
+    // Inside executeEvmTransaction (src/transaction/sender.ts)
+    switch (config.method) {
+      case 'eoa':
+        strategy = new EoaExecutionStrategy(/* params */);
+        break;
+      case 'relayer':
+        strategy = new RelayerExecutionStrategy(/* params */);
+        break;
+      default:
+        throw new Error('Unsupported execution method');
     }
+    const result = await strategy.execute();
     ```
 
 ### 6.3. Flow in `Adapter.signAndBroadcast`
@@ -196,9 +257,9 @@ Instead of creating a monolithic `signAndBroadcast` function with complex condit
 The main `signAndBroadcast` method in `adapter.ts` becomes a lean orchestrator:
 
 1.  It receives the `ExecutionConfig` along with other transaction details.
-2.  It calls the `createExecutionStrategy` factory to get the appropriate strategy instance.
-3.  It calls the `execute()` method on the returned strategy instance.
-4.  It returns the result from the strategy's `execute()` method.
+2.  It delegates to the core execution function (e.g., `executeEvmTransaction` in `adapter-evm-core`).
+3.  The core function selects and instantiates the appropriate strategy based on the config.
+4.  It calls the `execute()` method on the strategy instance and returns the result.
 
 This design keeps the main adapter class clean and delegates the complex, method-specific logic to the individual strategy classes, adhering to the single-responsibility principle.
 
