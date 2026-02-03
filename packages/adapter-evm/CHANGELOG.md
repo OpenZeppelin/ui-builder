@@ -1,5 +1,13 @@
 # @openzeppelin/transaction-form-adapter-evm
 
+## 1.4.2
+
+### Patch Changes
+
+- [#331](https://github.com/OpenZeppelin/ui-builder/pull/331) [`2016925`](https://github.com/OpenZeppelin/ui-builder/commit/2016925667b8c52b1912c45101685c878d90a025) Thanks [@pasevin](https://github.com/pasevin)! - Fix EVM bytes type mapping to use BytesField with proper validation. bytes32 and other fixed-size bytes types now use the 'bytes' field type with exactBytes metadata for proper hex validation.
+
+  This fix is in the internal adapter-evm-core package which is bundled into adapter-evm and adapter-polkadot.
+
 ## 1.4.1
 
 ### Patch Changes
