@@ -26,6 +26,11 @@ export function mapEvmParamTypeToFieldType(parameterType: string): FieldType {
     return 'object';
   }
 
+  // Handle all bytesN types (bytes1-bytes32) - map to 'bytes' field for proper hex validation
+  if (baseType.match(/^bytes\d+$/)) {
+    return 'bytes';
+  }
+
   // Map common EVM types to appropriate field types
   return EVM_TYPE_TO_FIELD_TYPE[baseType] || 'text'; // Default to 'text'
 }
@@ -72,9 +77,14 @@ export function getEvmCompatibleFieldTypes(parameterType: string): FieldType[] {
     int256: ['bigint', 'number', 'text'],
     bool: ['checkbox', 'select', 'radio', 'text'],
     string: ['text', 'textarea', 'email', 'password'],
-    bytes: ['textarea', 'text'],
-    bytes32: ['text', 'textarea'],
+    bytes: ['bytes', 'textarea', 'text'],
+    bytes32: ['bytes', 'textarea', 'text'],
   };
+
+  // Handle all bytesN types (bytes1-bytes32) - allow 'bytes' field for proper hex validation
+  if (baseType.match(/^bytes\d+$/)) {
+    return ['bytes', 'textarea', 'text'];
+  }
 
   return compatibilityMap[baseType] || ['text']; // Default to 'text'
 }

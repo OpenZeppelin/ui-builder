@@ -16,6 +16,19 @@ import {
 import { mapEvmParamTypeToFieldType } from './type-mapper';
 
 /**
+ * Extracts the byte size from a fixed-size bytes type (e.g., bytes32 -> 32)
+ * @param parameterType - The parameter type (e.g., 'bytes32', 'bytes4', 'bytes')
+ * @returns The byte size if fixed-size, undefined if dynamic
+ */
+function extractBytesSize(parameterType: string): number | undefined {
+  const match = parameterType.match(/^bytes(\d+)$/);
+  if (match) {
+    return Number.parseInt(match[1], 10);
+  }
+  return undefined;
+}
+
+/**
  * Extracts the inner type from an EVM array type.
  * @param parameterType - The parameter type (e.g., 'uint32[]', 'address[]')
  * @returns The inner type (e.g., 'uint32', 'address') or null if not an array type
@@ -78,11 +91,23 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
     width: 'full',
   };
 
+  // Add exactBytes metadata for fixed-size bytes types (bytes1, bytes4, bytes32, etc.)
+  const bytesSize = extractBytesSize(parameter.type);
+  if (bytesSize !== undefined) {
+    baseField.metadata = {
+      ...(baseField.metadata ?? {}),
+      exactBytes: bytesSize,
+    };
+  }
+
   // For array types, provide element type information
   if (fieldType === 'array') {
     const elementType = extractArrayElementType(parameter.type);
     if (elementType) {
       const elementFieldType = mapEvmParamTypeToFieldType(elementType);
+
+      // Check if element type is a fixed-size bytes type
+      const elementBytesSize = extractBytesSize(elementType);
 
       // Add array-specific properties
       const arrayField = {
@@ -96,6 +121,10 @@ export function generateEvmDefaultField<T extends FieldType = FieldType>(
             EVM_NUMERIC_BOUNDS
           ),
           placeholder: `Enter ${elementType}`,
+          // Include exactBytes metadata for fixed-size bytes array elements (e.g., bytes32[])
+          ...(elementBytesSize !== undefined && {
+            metadata: { exactBytes: elementBytesSize },
+          }),
         },
       };
       return arrayField;
