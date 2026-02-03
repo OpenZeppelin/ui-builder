@@ -295,11 +295,11 @@ exports[`Export Snapshot Tests > EVM Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.4.1",
-    "@openzeppelin/ui-components": "^1.2.0",
+    "@openzeppelin/ui-components": "^1.2.1",
     "@openzeppelin/ui-react": "^1.1.0",
-    "@openzeppelin/ui-renderer": "^1.0.2",
+    "@openzeppelin/ui-renderer": "^1.0.3",
     "@openzeppelin/ui-types": "^1.5.0",
-    "@openzeppelin/ui-utils": "^1.2.0",
+    "@openzeppelin/ui-utils": "^1.2.1",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
@@ -342,11 +342,11 @@ exports[`Export Snapshot Tests > Solana Export Snapshots > should match snapshot
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.4.1",
-    "@openzeppelin/ui-components": "^1.2.0",
+    "@openzeppelin/ui-components": "^1.2.1",
     "@openzeppelin/ui-react": "^1.1.0",
-    "@openzeppelin/ui-renderer": "^1.0.2",
+    "@openzeppelin/ui-renderer": "^1.0.3",
     "@openzeppelin/ui-types": "^1.5.0",
-    "@openzeppelin/ui-utils": "^1.2.0",
+    "@openzeppelin/ui-utils": "^1.2.1",
     "@tanstack/react-query": "^5.0.0",
     "@wagmi/core": "^2.20.3",
     "react": "^19.2.1",
