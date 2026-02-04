@@ -169,19 +169,19 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'a'.repeat(64),
                   timestamp: '2024-01-01T00:00:00Z',
-                  blockHeight: '1000',
+                  blockNumber: '1000',
                 },
                 {
                   id: 'event-2',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_REVOKED',
+                  eventType: 'ROLE_REVOKED',
                   txHash: 'b'.repeat(64),
                   timestamp: '2024-01-02T00:00:00Z',
-                  blockHeight: '2000',
+                  blockNumber: '2000',
                 },
               ],
               pageInfo: {
@@ -229,10 +229,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'minter',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'c'.repeat(64),
                   timestamp: '2024-01-03T00:00:00Z',
-                  blockHeight: '3000',
+                  blockNumber: '3000',
                 },
               ],
               pageInfo: {
@@ -279,10 +279,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'admin',
                   account: testAccount,
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'd'.repeat(64),
                   timestamp: '2024-01-04T00:00:00Z',
-                  blockHeight: '4000',
+                  blockNumber: '4000',
                 },
               ],
               pageInfo: {
@@ -327,10 +327,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'e'.repeat(64),
                   timestamp: '2024-01-05T00:00:00Z',
-                  blockHeight: '5000',
+                  blockNumber: '5000',
                 },
               ],
               pageInfo: {
@@ -379,10 +379,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'burner',
                   account: testAccount,
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'f'.repeat(64),
                   timestamp: '2024-01-06T00:00:00Z',
-                  blockHeight: '6000',
+                  blockNumber: '6000',
                 },
               ],
               pageInfo: {
@@ -431,10 +431,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-2',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'g'.repeat(64),
                   timestamp: '2024-01-07T00:00:00Z',
-                  blockHeight: '7000',
+                  blockNumber: '7000',
                 },
               ],
               pageInfo: {
@@ -486,10 +486,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-ownership',
                   role: null, // Ownership events don't have a role
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'OWNERSHIP_TRANSFER_COMPLETED',
+                  eventType: 'OWNERSHIP_TRANSFER_COMPLETED',
                   txHash: 'g'.repeat(64),
                   timestamp: '2024-01-07T00:00:00Z',
-                  blockHeight: '7000',
+                  blockNumber: '7000',
                 },
               ],
               pageInfo: {
@@ -759,10 +759,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
       expect(body.query).toContain('id');
       expect(body.query).toContain('role');
       expect(body.query).toContain('account');
-      expect(body.query).toContain('type');
+      expect(body.query).toContain('eventType');
       expect(body.query).toContain('txHash');
       expect(body.query).toContain('timestamp');
-      expect(body.query).toContain('blockHeight');
+      expect(body.query).toContain('blockNumber');
 
       // Validate variables
       expect(body.variables).toMatchObject({
@@ -827,10 +827,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'test-event-123',
                   role: 'pauser',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'a1b2c3d4e5f6',
                   timestamp: '2024-11-24T12:00:00.000Z',
-                  blockHeight: '12345',
+                  blockNumber: '12345',
                 },
               ],
               pageInfo: {
@@ -884,10 +884,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'revoke-event',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_REVOKED',
+                  eventType: 'ROLE_REVOKED',
                   txHash: 'revoke-tx',
                   timestamp: '2024-11-24T13:00:00.000Z',
-                  blockHeight: '12346',
+                  blockNumber: '12346',
                 },
               ],
               pageInfo: {
@@ -921,10 +921,10 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   id: 'event-1',
                   role: 'admin',
                   account: 'GBDGBGAQPXDVJLMFGB7VBXVRMM5KLUVAKQYBZ6ON7D5YSBBWPFGBHFK5',
-                  type: 'ROLE_GRANTED',
+                  eventType: 'ROLE_GRANTED',
                   txHash: 'tx-1',
                   timestamp: '2024-11-24T14:00:00.000Z',
-                  blockHeight: '999999',
+                  blockNumber: '999999',
                 },
               ],
               pageInfo: {
@@ -977,13 +977,13 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   account: TEST_ACCOUNT_1,
                   txHash: 'a'.repeat(64),
                   timestamp: '2024-01-15T10:00:00Z',
-                  blockHeight: '5000',
+                  blockNumber: '5000',
                 },
                 {
                   account: TEST_ACCOUNT_2,
                   txHash: 'b'.repeat(64),
                   timestamp: '2024-01-10T08:00:00Z',
-                  blockHeight: '4000',
+                  blockNumber: '4000',
                 },
               ],
             },
@@ -1033,13 +1033,13 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   account: TEST_ACCOUNT_1,
                   txHash: 'latest-tx',
                   timestamp: '2024-01-20T12:00:00Z', // Latest
-                  blockHeight: '6000',
+                  blockNumber: '6000',
                 },
                 {
                   account: TEST_ACCOUNT_1,
                   txHash: 'older-tx',
                   timestamp: '2024-01-10T08:00:00Z', // Older
-                  blockHeight: '4000',
+                  blockNumber: '4000',
                 },
               ],
             },
@@ -1083,7 +1083,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
       expect(body.query).toContain('$contract: String!');
       expect(body.query).toContain('$role: String!');
       expect(body.query).toContain('$accounts: [String!]!');
-      expect(body.query).toContain('type: { equalTo: ROLE_GRANTED }');
+      expect(body.query).toContain('eventType: { equalTo: ROLE_GRANTED }');
       expect(body.query).toContain('account: { in: $accounts }');
       expect(body.query).toContain('orderBy: TIMESTAMP_DESC');
 
@@ -1190,7 +1190,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
                   account: TEST_ACCOUNT_1,
                   txHash: 'only-tx',
                   timestamp: '2024-01-15T10:00:00Z',
-                  blockHeight: '5000',
+                  blockNumber: '5000',
                 },
               ],
             },

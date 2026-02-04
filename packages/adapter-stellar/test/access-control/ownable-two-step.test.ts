@@ -155,12 +155,12 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'test-event-1',
-                    type: 'OWNERSHIP_TRANSFER_STARTED',
+                    eventType: 'OWNERSHIP_TRANSFER_STARTED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
                     admin: 'GOLDOWNER123456789ABCDEFGHIJK', // admin = previous owner
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000',
+                    blockNumber: '12340000',
                     liveUntilLedger: 12350000, // Required for expiration checking
                   },
                 ],
@@ -254,12 +254,12 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'incomplete-event',
-                    type: 'OWNERSHIP_TRANSFER_STARTED',
+                    eventType: 'OWNERSHIP_TRANSFER_STARTED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
                     // admin field is missing!
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000',
+                    blockNumber: '12340000',
                   },
                 ],
                 pageInfo: { hasNextPage: false },
@@ -312,12 +312,12 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'test-event',
-                    type: 'OWNERSHIP_TRANSFER_STARTED',
+                    eventType: 'OWNERSHIP_TRANSFER_STARTED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
                     admin: 'GOLDOWNER123456789ABCDEFGHIJK',
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000',
+                    blockNumber: '12340000',
                   },
                 ],
                 pageInfo: { hasNextPage: false },
@@ -366,13 +366,13 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'initiation-event',
-                    type: 'OWNERSHIP_TRANSFER_INITIATED',
+                    eventType: 'OWNERSHIP_TRANSFER_INITIATED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
                     previousOwner: 'GOLDOWNER123456789ABCDEFGHIJK',
                     liveUntilLedger: 12350000,
                     txHash: 'initiation-tx',
                     timestamp: '2025-01-15T10:00:00Z',
-                    blockHeight: '12340000',
+                    blockNumber: '12340000',
                   },
                 ],
                 pageInfo: { hasNextPage: false },
@@ -389,11 +389,11 @@ describe('Two-Step Ownable Support', () => {
                 nodes: [
                   {
                     id: 'completion-event',
-                    type: 'OWNERSHIP_TRANSFER_COMPLETED',
+                    eventType: 'OWNERSHIP_TRANSFER_COMPLETED',
                     account: 'GNEWOWNER123456789ABCDEFGHIJK',
                     txHash: 'completion-tx',
                     timestamp: '2025-01-15T11:00:00Z',
-                    blockHeight: '12345000',
+                    blockNumber: '12345000',
                   },
                 ],
                 pageInfo: { hasNextPage: false },
