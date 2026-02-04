@@ -80,7 +80,7 @@ function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | und
 interface IndexerHistoryEntry {
   id: string;
   role?: string; // Nullable for Ownership/Admin events
-  /** Account address - required for role events, optional for ownership/admin events */
+  /** Account address - required for role events */
   account?: string;
   /** Event type */
   eventType:
@@ -97,15 +97,13 @@ interface IndexerHistoryEntry {
   timestamp: string;
   /** Block/ledger number */
   blockNumber: string;
-  /** Admin/owner who initiated the transfer (for backward compatibility) */
-  admin?: string;
-  /** Previous owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED) */
+  /** Previous owner (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED) */
   previousOwner?: string;
-  /** New owner (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED) */
+  /** New owner (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED, OWNERSHIP_RENOUNCED) */
   newOwner?: string;
-  /** Previous admin who initiated the transfer (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED) */
+  /** Previous admin (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED) */
   previousAdmin?: string;
-  /** New admin (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED) */
+  /** New admin (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED, ADMIN_RENOUNCED) */
   newAdmin?: string;
   /** Expiration ledger for pending transfers (OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
   liveUntilLedger?: number;
@@ -728,23 +726,19 @@ export class StellarIndexerClient {
       }
 
       // No completion - validate required fields before returning pending transfer info
-      // Multi-chain schema uses previousOwner, falling back to legacy admin field
-      const previousOwner = latestInitiation.previousOwner || latestInitiation.admin;
-      if (!previousOwner) {
+      if (!latestInitiation.previousOwner) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without previousOwner/admin field for ${contractAddress}. ` +
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without previousOwner field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
       }
 
-      // Multi-chain schema uses newOwner, falling back to legacy account field
-      const pendingOwner = latestInitiation.newOwner || latestInitiation.account;
-      if (!pendingOwner) {
+      if (!latestInitiation.newOwner) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without newOwner/account field for ${contractAddress}. ` +
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without newOwner field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
@@ -765,12 +759,12 @@ export class StellarIndexerClient {
 
       logger.info(
         LOG_SYSTEM,
-        `Found pending ownership transfer for ${contractAddress}: pending owner=${pendingOwner}, expires at ledger ${latestInitiation.liveUntilLedger}`
+        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.newOwner}, expires at ledger ${latestInitiation.liveUntilLedger}`
       );
 
       return {
-        previousOwner,
-        pendingOwner,
+        previousOwner: latestInitiation.previousOwner,
+        pendingOwner: latestInitiation.newOwner,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
         ledger: parseInt(latestInitiation.blockNumber, 10),
@@ -917,23 +911,19 @@ export class StellarIndexerClient {
       }
 
       // No completion - validate required fields before returning pending transfer info
-      // Multi-chain schema uses previousAdmin, falling back to legacy admin field
-      const previousAdmin = latestInitiation.previousAdmin || latestInitiation.admin;
-      if (!previousAdmin) {
+      if (!latestInitiation.previousAdmin) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned ADMIN_TRANSFER_INITIATED event without previousAdmin/admin field for ${contractAddress}. ` +
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without previousAdmin field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
       }
 
-      // Multi-chain schema uses newAdmin, falling back to legacy account field
-      const pendingAdmin = latestInitiation.newAdmin || latestInitiation.account;
-      if (!pendingAdmin) {
+      if (!latestInitiation.newAdmin) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned ADMIN_TRANSFER_INITIATED event without newAdmin/account field for ${contractAddress}. ` +
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without newAdmin field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
@@ -954,12 +944,12 @@ export class StellarIndexerClient {
 
       logger.info(
         LOG_SYSTEM,
-        `Found pending admin transfer for ${contractAddress}: pending admin=${pendingAdmin}, expires at ledger ${latestInitiation.liveUntilLedger}`
+        `Found pending admin transfer for ${contractAddress}: pending admin=${latestInitiation.newAdmin}, expires at ledger ${latestInitiation.liveUntilLedger}`
       );
 
       return {
-        previousAdmin,
-        pendingAdmin,
+        previousAdmin: latestInitiation.previousAdmin,
+        pendingAdmin: latestInitiation.newAdmin,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
         ledger: parseInt(latestInitiation.blockNumber, 10),
@@ -1376,29 +1366,33 @@ export class StellarIndexerClient {
    * - Role events: `account` field
    * - Ownership events: `newOwner` field (pending/new owner)
    * - Admin events: `newAdmin` field (pending/new admin)
-   *
-   * Falls back to legacy `account` field for backward compatibility.
    */
   private normalizeAccount(entry: IndexerHistoryEntry): string {
     // For role events, use account directly
-    if (entry.eventType === 'ROLE_GRANTED' || entry.eventType === 'ROLE_REVOKED') {
+    if (
+      entry.eventType === 'ROLE_GRANTED' ||
+      entry.eventType === 'ROLE_REVOKED' ||
+      entry.eventType === 'ROLE_ADMIN_CHANGED'
+    ) {
       return entry.account || '';
     }
 
-    // For ownership events, prefer newOwner
+    // For ownership events, use newOwner
     if (
       entry.eventType === 'OWNERSHIP_TRANSFER_STARTED' ||
-      entry.eventType === 'OWNERSHIP_TRANSFER_COMPLETED'
+      entry.eventType === 'OWNERSHIP_TRANSFER_COMPLETED' ||
+      entry.eventType === 'OWNERSHIP_RENOUNCED'
     ) {
-      return entry.newOwner || entry.account || '';
+      return entry.newOwner || '';
     }
 
-    // For admin events, prefer newAdmin
+    // For admin events, use newAdmin
     if (
       entry.eventType === 'ADMIN_TRANSFER_INITIATED' ||
-      entry.eventType === 'ADMIN_TRANSFER_COMPLETED'
+      entry.eventType === 'ADMIN_TRANSFER_COMPLETED' ||
+      entry.eventType === 'ADMIN_RENOUNCED'
     ) {
-      return entry.newAdmin || entry.account || '';
+      return entry.newAdmin || '';
     }
 
     // Fallback for unknown event types
