@@ -80,21 +80,31 @@ function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | und
 interface IndexerHistoryEntry {
   id: string;
   role?: string; // Nullable for Ownership/Admin events
-  account: string;
-  type:
+  /** Account address - required for role events */
+  account?: string;
+  /** Event type */
+  eventType:
     | 'ROLE_GRANTED'
     | 'ROLE_REVOKED'
+    | 'ROLE_ADMIN_CHANGED'
     | 'OWNERSHIP_TRANSFER_COMPLETED'
     | 'OWNERSHIP_TRANSFER_STARTED'
+    | 'OWNERSHIP_RENOUNCED'
     | 'ADMIN_TRANSFER_INITIATED'
-    | 'ADMIN_TRANSFER_COMPLETED';
+    | 'ADMIN_TRANSFER_COMPLETED'
+    | 'ADMIN_RENOUNCED';
   txHash: string;
   timestamp: string;
-  blockHeight: string;
-  /** Ledger sequence of the event */
-  ledger?: string;
-  /** Admin/owner who initiated the transfer (for OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
-  admin?: string;
+  /** Block/ledger number */
+  blockNumber: string;
+  /** Previous owner (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED) */
+  previousOwner?: string;
+  /** New owner (for OWNERSHIP_TRANSFER_STARTED, OWNERSHIP_TRANSFER_COMPLETED, OWNERSHIP_RENOUNCED) */
+  newOwner?: string;
+  /** Previous admin (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED) */
+  previousAdmin?: string;
+  /** New admin (for ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED, ADMIN_RENOUNCED) */
+  newAdmin?: string;
   /** Expiration ledger for pending transfers (OWNERSHIP_TRANSFER_STARTED, ADMIN_TRANSFER_INITIATED) */
   liveUntilLedger?: number;
 }
@@ -565,11 +575,13 @@ export class StellarIndexerClient {
       // Since we order by TIMESTAMP_DESC, we take the first occurrence per account
       const grantMap = new Map<string, GrantInfo>();
       for (const entry of result.data.accessControlEvents.nodes) {
-        if (!grantMap.has(entry.account)) {
-          grantMap.set(entry.account, {
+        // For role grants, account is always present
+        const account = entry.account || '';
+        if (account && !grantMap.has(account)) {
+          grantMap.set(account, {
             timestamp: entry.timestamp,
             txId: entry.txHash,
-            ledger: parseInt(entry.blockHeight, 10),
+            ledger: parseInt(entry.blockNumber, 10),
           });
         }
       }
@@ -714,11 +726,19 @@ export class StellarIndexerClient {
       }
 
       // No completion - validate required fields before returning pending transfer info
-      // The admin field is required for OWNERSHIP_TRANSFER_STARTED events
-      if (!latestInitiation.admin) {
+      if (!latestInitiation.previousOwner) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without admin field for ${contractAddress}. ` +
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without previousOwner field for ${contractAddress}. ` +
+            `This indicates incomplete indexer data. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
+      if (!latestInitiation.newOwner) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned OWNERSHIP_TRANSFER_STARTED event without newOwner field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
@@ -739,15 +759,15 @@ export class StellarIndexerClient {
 
       logger.info(
         LOG_SYSTEM,
-        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.account}, expires at ledger ${latestInitiation.liveUntilLedger}`
+        `Found pending ownership transfer for ${contractAddress}: pending owner=${latestInitiation.newOwner}, expires at ledger ${latestInitiation.liveUntilLedger}`
       );
 
       return {
-        previousOwner: latestInitiation.admin,
-        pendingOwner: latestInitiation.account,
+        previousOwner: latestInitiation.previousOwner,
+        pendingOwner: latestInitiation.newOwner,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
-        ledger: parseInt(latestInitiation.ledger || latestInitiation.blockHeight, 10),
+        ledger: parseInt(latestInitiation.blockNumber, 10),
         liveUntilLedger: latestInitiation.liveUntilLedger,
       };
     } catch (error) {
@@ -891,11 +911,19 @@ export class StellarIndexerClient {
       }
 
       // No completion - validate required fields before returning pending transfer info
-      // The admin field is required for ADMIN_TRANSFER_INITIATED events
-      if (!latestInitiation.admin) {
+      if (!latestInitiation.previousAdmin) {
         logger.warn(
           LOG_SYSTEM,
-          `Indexer returned ADMIN_TRANSFER_INITIATED event without admin field for ${contractAddress}. ` +
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without previousAdmin field for ${contractAddress}. ` +
+            `This indicates incomplete indexer data. Treating as no valid pending transfer.`
+        );
+        return null;
+      }
+
+      if (!latestInitiation.newAdmin) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer returned ADMIN_TRANSFER_INITIATED event without newAdmin field for ${contractAddress}. ` +
             `This indicates incomplete indexer data. Treating as no valid pending transfer.`
         );
         return null;
@@ -916,15 +944,15 @@ export class StellarIndexerClient {
 
       logger.info(
         LOG_SYSTEM,
-        `Found pending admin transfer for ${contractAddress}: pending admin=${latestInitiation.account}, expires at ledger ${latestInitiation.liveUntilLedger}`
+        `Found pending admin transfer for ${contractAddress}: pending admin=${latestInitiation.newAdmin}, expires at ledger ${latestInitiation.liveUntilLedger}`
       );
 
       return {
-        previousAdmin: latestInitiation.admin,
-        pendingAdmin: latestInitiation.account,
+        previousAdmin: latestInitiation.previousAdmin,
+        pendingAdmin: latestInitiation.newAdmin,
         txHash: latestInitiation.txHash,
         timestamp: latestInitiation.timestamp,
-        ledger: parseInt(latestInitiation.ledger || latestInitiation.blockHeight, 10),
+        ledger: parseInt(latestInitiation.blockNumber, 10),
         liveUntilLedger: latestInitiation.liveUntilLedger,
       };
     } catch (error) {
@@ -949,11 +977,6 @@ export class StellarIndexerClient {
    * Note: The OpenZeppelin Stellar contract emits `ownership_transfer` event
    * which is indexed as `OWNERSHIP_TRANSFER_STARTED`.
    *
-   * Schema mapping:
-   * - `account`: pending new owner
-   * - `admin`: current owner who initiated the transfer
-   * - `ledger`: block height of the event
-   * - `liveUntilLedger`: expiration ledger for the pending transfer
    */
   private buildOwnershipTransferStartedQuery(): string {
     return `
@@ -961,19 +984,18 @@ export class StellarIndexerClient {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { equalTo: OWNERSHIP_TRANSFER_STARTED }
+            eventType: { equalTo: OWNERSHIP_TRANSFER_STARTED }
           }
           orderBy: TIMESTAMP_DESC
           first: 1
         ) {
           nodes {
             id
-            account
-            admin
+            previousOwner
+            newOwner
             txHash
             timestamp
-            ledger
-            blockHeight
+            blockNumber
             liveUntilLedger
           }
         }
@@ -990,7 +1012,7 @@ export class StellarIndexerClient {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { equalTo: OWNERSHIP_TRANSFER_COMPLETED }
+            eventType: { equalTo: OWNERSHIP_TRANSFER_COMPLETED }
             timestamp: { greaterThan: $afterTimestamp }
           }
           orderBy: TIMESTAMP_DESC
@@ -1011,12 +1033,6 @@ export class StellarIndexerClient {
    *
    * Note: The OpenZeppelin Stellar contract emits `admin_transfer_initiated` event
    * which is indexed as `ADMIN_TRANSFER_INITIATED`.
-   *
-   * Schema mapping:
-   * - `account`: pending new admin
-   * - `admin`: current admin who initiated the transfer
-   * - `ledger`: block height of the event
-   * - `liveUntilLedger`: expiration ledger for the pending transfer
    */
   private buildAdminTransferInitiatedQuery(): string {
     return `
@@ -1024,19 +1040,18 @@ export class StellarIndexerClient {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { equalTo: ADMIN_TRANSFER_INITIATED }
+            eventType: { equalTo: ADMIN_TRANSFER_INITIATED }
           }
           orderBy: TIMESTAMP_DESC
           first: 1
         ) {
           nodes {
             id
-            account
-            admin
+            previousAdmin
+            newAdmin
             txHash
             timestamp
-            ledger
-            blockHeight
+            blockNumber
             liveUntilLedger
           }
         }
@@ -1053,7 +1068,7 @@ export class StellarIndexerClient {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { equalTo: ADMIN_TRANSFER_COMPLETED }
+            eventType: { equalTo: ADMIN_TRANSFER_COMPLETED }
             timestamp: { greaterThan: $afterTimestamp }
           }
           orderBy: TIMESTAMP_DESC
@@ -1166,17 +1181,18 @@ export class StellarIndexerClient {
 
   /**
    * Maps internal changeType to GraphQL EventType enum
-   * GraphQL enum values: ROLE_GRANTED, ROLE_REVOKED, OWNERSHIP_TRANSFER_STARTED,
-   * OWNERSHIP_TRANSFER_COMPLETED, ADMIN_TRANSFER_INITIATED, ADMIN_TRANSFER_COMPLETED
    */
   private mapChangeTypeToGraphQLEnum(changeType: HistoryChangeType): string {
     const mapping: Record<HistoryChangeType, string> = {
       GRANTED: 'ROLE_GRANTED',
       REVOKED: 'ROLE_REVOKED',
+      ROLE_ADMIN_CHANGED: 'ROLE_ADMIN_CHANGED',
       OWNERSHIP_TRANSFER_STARTED: 'OWNERSHIP_TRANSFER_STARTED',
       OWNERSHIP_TRANSFER_COMPLETED: 'OWNERSHIP_TRANSFER_COMPLETED',
+      OWNERSHIP_RENOUNCED: 'OWNERSHIP_RENOUNCED',
       ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
       ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
+      ADMIN_RENOUNCED: 'ADMIN_RENOUNCED',
       UNKNOWN: 'UNKNOWN',
     };
     return mapping[changeType];
@@ -1190,7 +1206,7 @@ export class StellarIndexerClient {
     const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
     // Type filter uses inline enum value (consistent with buildLatestGrantsQuery pattern)
     const typeFilter = options?.changeType
-      ? `, type: { equalTo: ${this.mapChangeTypeToGraphQLEnum(options.changeType)} }`
+      ? `, eventType: { equalTo: ${this.mapChangeTypeToGraphQLEnum(options.changeType)} }`
       : '';
     const txFilter = options?.txId ? ', txHash: { equalTo: $txHash }' : '';
     // Build combined timestamp filter to avoid duplicate keys
@@ -1203,12 +1219,12 @@ export class StellarIndexerClient {
     }
     const timestampFilter =
       timestampConditions.length > 0 ? `, timestamp: { ${timestampConditions.join(', ')} }` : '';
-    const ledgerFilter = options?.ledger ? ', blockHeight: { equalTo: $blockHeight }' : '';
+    const ledgerFilter = options?.ledger ? ', blockNumber: { equalTo: $blockNumber }' : '';
     const limitClause = options?.limit ? ', first: $limit' : '';
     const cursorClause = options?.cursor ? ', after: $cursor' : '';
 
     // Build variable declarations
-    // Note: SubQuery uses Datetime for timestamp filters and BigFloat for blockHeight filtering
+    // Note: SubQuery uses Datetime for timestamp filters and BigFloat for blockNumber filtering
     const varDeclarations = [
       '$contract: String!',
       options?.roleId ? '$role: String' : '',
@@ -1216,7 +1232,7 @@ export class StellarIndexerClient {
       options?.txId ? '$txHash: String' : '',
       options?.timestampFrom ? '$timestampFrom: Datetime' : '',
       options?.timestampTo ? '$timestampTo: Datetime' : '',
-      options?.ledger ? '$blockHeight: BigFloat' : '',
+      options?.ledger ? '$blockNumber: BigFloat' : '',
       options?.limit ? '$limit: Int' : '',
       options?.cursor ? '$cursor: Cursor' : '',
     ]
@@ -1235,10 +1251,14 @@ export class StellarIndexerClient {
             id
             role
             account
-            type
+            eventType
             txHash
             timestamp
-            blockHeight
+            blockNumber
+            previousOwner
+            newOwner
+            previousAdmin
+            newAdmin
           }
           pageInfo {
             hasNextPage
@@ -1276,8 +1296,8 @@ export class StellarIndexerClient {
       variables.timestampTo = options.timestampTo;
     }
     if (options?.ledger) {
-      // GraphQL expects blockHeight as string
-      variables.blockHeight = String(options.ledger);
+      // GraphQL expects blockNumber as string
+      variables.blockNumber = String(options.ledger);
     }
     if (options?.limit) {
       variables.limit = options.limit;
@@ -1300,7 +1320,7 @@ export class StellarIndexerClient {
         accessControlEvents(
           filter: {
             contract: { equalTo: $contract }
-            type: { in: [ROLE_GRANTED, ROLE_REVOKED] }
+            eventType: { in: [ROLE_GRANTED, ROLE_REVOKED] }
           }
         ) {
           nodes {
@@ -1324,7 +1344,7 @@ export class StellarIndexerClient {
             contract: { equalTo: $contract }
             role: { equalTo: $role }
             account: { in: $accounts }
-            type: { equalTo: ROLE_GRANTED }
+            eventType: { equalTo: ROLE_GRANTED }
           }
           orderBy: TIMESTAMP_DESC
         ) {
@@ -1332,11 +1352,51 @@ export class StellarIndexerClient {
             account
             txHash
             timestamp
-            blockHeight
+            blockNumber
           }
         }
       }
     `;
+  }
+
+  /**
+   * Normalize account from indexer entry
+   *
+   * Multi-chain schema uses different fields for different event types:
+   * - Role events: `account` field
+   * - Ownership events: `newOwner` field (pending/new owner)
+   * - Admin events: `newAdmin` field (pending/new admin)
+   */
+  private normalizeAccount(entry: IndexerHistoryEntry): string {
+    // For role events, use account directly
+    if (
+      entry.eventType === 'ROLE_GRANTED' ||
+      entry.eventType === 'ROLE_REVOKED' ||
+      entry.eventType === 'ROLE_ADMIN_CHANGED'
+    ) {
+      return entry.account || '';
+    }
+
+    // For ownership events, use newOwner
+    if (
+      entry.eventType === 'OWNERSHIP_TRANSFER_STARTED' ||
+      entry.eventType === 'OWNERSHIP_TRANSFER_COMPLETED' ||
+      entry.eventType === 'OWNERSHIP_RENOUNCED'
+    ) {
+      return entry.newOwner || '';
+    }
+
+    // For admin events, use newAdmin
+    if (
+      entry.eventType === 'ADMIN_TRANSFER_INITIATED' ||
+      entry.eventType === 'ADMIN_TRANSFER_COMPLETED' ||
+      entry.eventType === 'ADMIN_RENOUNCED'
+    ) {
+      return entry.newAdmin || '';
+    }
+
+    // Fallback for unknown event types
+    return entry.account || '';
   }
 
   /**
@@ -1350,12 +1410,15 @@ export class StellarIndexerClient {
 
       // Map SubQuery event types to internal types
       let changeType: HistoryChangeType;
-      switch (entry.type) {
+      switch (entry.eventType) {
         case 'ROLE_GRANTED':
           changeType = 'GRANTED';
           break;
         case 'ROLE_REVOKED':
           changeType = 'REVOKED';
+          break;
+        case 'ROLE_ADMIN_CHANGED':
+          changeType = 'ROLE_ADMIN_CHANGED';
           break;
         case 'OWNERSHIP_TRANSFER_STARTED':
           changeType = 'OWNERSHIP_TRANSFER_STARTED';
@@ -1363,28 +1426,34 @@ export class StellarIndexerClient {
         case 'OWNERSHIP_TRANSFER_COMPLETED':
           changeType = 'OWNERSHIP_TRANSFER_COMPLETED';
           break;
+        case 'OWNERSHIP_RENOUNCED':
+          changeType = 'OWNERSHIP_RENOUNCED';
+          break;
         case 'ADMIN_TRANSFER_INITIATED':
           changeType = 'ADMIN_TRANSFER_INITIATED';
           break;
         case 'ADMIN_TRANSFER_COMPLETED':
           changeType = 'ADMIN_TRANSFER_COMPLETED';
           break;
+        case 'ADMIN_RENOUNCED':
+          changeType = 'ADMIN_RENOUNCED';
+          break;
         default:
           // Use UNKNOWN for unrecognized types to make indexer schema issues visible
           logger.warn(
             LOG_SYSTEM,
-            `Unknown event type: ${entry.type}, assigning changeType to UNKNOWN`
+            `Unknown event type: ${entry.eventType}, assigning changeType to UNKNOWN`
           );
           changeType = 'UNKNOWN';
       }
 
       return {
         role,
-        account: entry.account,
+        account: this.normalizeAccount(entry),
         changeType,
         txId: entry.txHash,
         timestamp: entry.timestamp,
-        ledger: parseInt(entry.blockHeight, 10),
+        ledger: parseInt(entry.blockNumber, 10),
       };
     });
   }

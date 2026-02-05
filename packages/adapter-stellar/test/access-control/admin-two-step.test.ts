@@ -238,12 +238,12 @@ describe('Two-Step Admin Transfer Support', () => {
                 nodes: [
                   {
                     id: 'test-event-1',
-                    type: 'ADMIN_TRANSFER_INITIATED',
-                    account: 'GNEWADMIN123456789ABCDEFGHIJK',
-                    admin: 'GOLDADMIN123456789ABCDEFGHIJK',
+                    eventType: 'ADMIN_TRANSFER_INITIATED',
+                    newAdmin: 'GNEWADMIN123456789ABCDEFGHIJK',
+                    previousAdmin: 'GOLDADMIN123456789ABCDEFGHIJK',
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000',
+                    blockNumber: '12340000',
                     liveUntilLedger: 12350000,
                   },
                 ],
@@ -337,12 +337,12 @@ describe('Two-Step Admin Transfer Support', () => {
                 nodes: [
                   {
                     id: 'test-event-1',
-                    type: 'ADMIN_TRANSFER_INITIATED',
-                    account: 'GNEWADMIN123456789ABCDEFGHIJK',
-                    admin: 'GOLDADMIN123456789ABCDEFGHIJK',
+                    eventType: 'ADMIN_TRANSFER_INITIATED',
+                    newAdmin: 'GNEWADMIN123456789ABCDEFGHIJK',
+                    previousAdmin: 'GOLDADMIN123456789ABCDEFGHIJK',
                     txHash: 'a'.repeat(64),
                     timestamp: '2025-01-15T10:00:00Z',
-                    ledger: '12340000',
+                    blockNumber: '12340000',
                     liveUntilLedger: 12350000,
                   },
                 ],
@@ -360,7 +360,7 @@ describe('Two-Step Admin Transfer Support', () => {
                 nodes: [
                   {
                     id: 'test-event-2',
-                    type: 'ADMIN_TRANSFER_COMPLETED',
+                    eventType: 'ADMIN_TRANSFER_COMPLETED',
                     txHash: 'b'.repeat(64),
                     timestamp: '2025-01-15T11:00:00Z',
                   },
