@@ -15,30 +15,34 @@ jobs:
   update-deps:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
 
-      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
-        id: gh-app-token
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Resolve authentication token
+        id: auth
+        uses: ./.github/actions/auth-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Checkout Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
       - name: Prepare pre-requisites
         uses: ./.github/actions/prepare
         with:
-          token: ${{ steps.gh-app-token.outputs.token }}
+          token: ${{ steps.auth.outputs.token }}
 
       - name: Configure npm authentication for npm registry
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install
@@ -46,14 +50,14 @@ jobs:
       - name: Check for outdated dependencies
         id: outdated
         run: |
-          echo "OUTDATED_DEPS=$(pnpm outdated --format json)" >> $GITHUB_ENV
+          echo "OUTDATED_DEPS=$(pnpm outdated --format json)" >> "$GITHUB_ENV"
         continue-on-error: true
 
       - name: Create PR for dependency updates
         if: success()
         uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5 # v5.0.3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.auth.outputs.token }}
           commit-message: 'chore(deps): update dependencies'
           title: 'chore(deps): update dependencies'
           body: |
