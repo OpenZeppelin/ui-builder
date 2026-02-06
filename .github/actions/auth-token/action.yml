@@ -1,0 +1,62 @@
+---
+name: Resolve Authentication Token
+description: |
+  Selects between a GitHub App token and the default GITHUB_TOKEN.
+  Uses the app token when credentials are available and the workflow
+  is not triggered from a fork.
+
+inputs:
+  app-id:
+    description: GitHub App ID
+    required: false
+    default: ''
+  private-key:
+    description: GitHub App private key
+    required: false
+    default: ''
+  is-fork:
+    description: Whether the PR is from a fork
+    required: false
+    default: 'false'
+
+outputs:
+  token:
+    description: The resolved authentication token
+    value: ${{ steps.select.outputs.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check if app creds exist
+      id: has-app
+      shell: bash
+      env:
+        IS_FORK: ${{ inputs.is-fork }}
+        APP_ID: ${{ inputs.app-id }}
+        PRIVATE_KEY: ${{ inputs.private-key }}
+      run: |
+        present=true
+        if [ "$IS_FORK" = "true" ]; then present=false; fi
+        if [ -z "$APP_ID" ] || [ -z "$PRIVATE_KEY" ]; then present=false; fi
+        echo "present=$present" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
+      id: gh-app-token
+      if: steps.has-app.outputs.present == 'true'
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+
+    - name: Select token
+      id: select
+      shell: bash
+      env:
+        HAS_APP: ${{ steps.has-app.outputs.present }}
+        APP_TOKEN: ${{ steps.gh-app-token.outputs.token }}
+        FALLBACK_TOKEN: ${{ github.token }}
+      run: |
+        if [ "$HAS_APP" = "true" ]; then
+          echo "token=$APP_TOKEN" >> "$GITHUB_OUTPUT"
+        else
+          echo "token=$FALLBACK_TOKEN" >> "$GITHUB_OUTPUT"
+        fi
