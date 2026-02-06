@@ -1,5 +1,21 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.5.0
+
+### Minor Changes
+
+- [#334](https://github.com/OpenZeppelin/ui-builder/pull/334) [`fb8f511`](https://github.com/OpenZeppelin/ui-builder/commit/fb8f511760d71a705c272f29ba6ff33abdff73ce) Thanks [@pasevin](https://github.com/pasevin)! - Update indexer client to support multi-chain indexer schema
+  - Use `eventType` instead of `type` in GraphQL queries
+  - Use `blockNumber` instead of `blockHeight`
+  - Add support for `previousOwner`/`newOwner` and `previousAdmin`/`newAdmin` fields
+  - Add `normalizeAccount()` helper for backward-compatible data extraction
+  - Add support for `ROLE_ADMIN_CHANGED`, `OWNERSHIP_RENOUNCED`, and `ADMIN_RENOUNCED` event types
+  - Maintain full backward compatibility with existing public interfaces
+
+### Patch Changes
+
+- [#336](https://github.com/OpenZeppelin/ui-builder/pull/336) [`4641bba`](https://github.com/OpenZeppelin/ui-builder/commit/4641bba5c57fd2e5db7fc8ccfe2afd79f80382e5) Thanks [@LuisUrrutia](https://github.com/LuisUrrutia)! - Bump `@openzeppelin/relayer-sdk` from 1.4.0 to 1.9.0, resolving two high-severity transitive vulnerabilities (bigint-buffer buffer overflow, h3 request smuggling).
+
 ## 1.4.0
 
 ### Minor Changes
