@@ -12,15 +12,13 @@ import { mainnetNetworks } from './mainnet';
 import { testnetNetworks } from './testnet';
 
 // Viem chain definitions (custom Hub chains)
-// NOTE: kusamaHub temporarily disabled - RPC DNS not resolving
-export { polkadotHub, polkadotHubTestNet } from './chains';
+export { kusamaHub, polkadotHub, polkadotHubTestNet } from './chains';
 
 // Viem chain definitions (from viem/chains)
 export { moonbeam, moonriver, moonbaseAlpha } from 'viem/chains';
 
 // Individual mainnet networks - Hub networks first, then parachains
-// NOTE: kusamaHubMainnet temporarily disabled - RPC DNS not resolving
-export { polkadotHubMainnet, moonbeamMainnet, moonriverMainnet } from './mainnet';
+export { kusamaHubMainnet, polkadotHubMainnet, moonbeamMainnet, moonriverMainnet } from './mainnet';
 
 // Individual testnet networks - Hub networks first, then parachains
 export { polkadotHubTestnet, moonbaseAlphaTestnet } from './testnet';
