@@ -27,7 +27,7 @@ export const stellarAdapterConfig: AdapterConfig = {
       '@creit.tech/stellar-wallets-kit': '^1.9.5',
 
       // OpenZeppelin Relayer integration (optional, for gasless transactions)
-      '@openzeppelin/relayer-sdk': '1.1.0',
+      '@openzeppelin/relayer-sdk': '1.9.0',
 
       // React integration for wallet components
       react: '^19.0.0',

@@ -30,7 +30,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@openzeppelin/relayer-sdk": "1.4.0",
+    "@openzeppelin/relayer-sdk": "1.9.0",
     "@openzeppelin/ui-types": "1.5.0",
     "@openzeppelin/ui-utils": "^1.2.0",
     "@wagmi/connectors": "5.7.13",
