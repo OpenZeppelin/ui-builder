@@ -1,5 +1,11 @@
 # @openzeppelin/ui-builder-adapter-polkadot
 
+## 1.5.0
+
+### Patch Changes
+
+- [#336](https://github.com/OpenZeppelin/ui-builder/pull/336) [`4641bba`](https://github.com/OpenZeppelin/ui-builder/commit/4641bba5c57fd2e5db7fc8ccfe2afd79f80382e5) Thanks [@LuisUrrutia](https://github.com/LuisUrrutia)! - Bump `@openzeppelin/relayer-sdk` from 1.4.0 to 1.9.0, resolving two high-severity transitive vulnerabilities (bigint-buffer buffer overflow, h3 request smuggling).
+
 ## 1.4.2
 
 ### Patch Changes
