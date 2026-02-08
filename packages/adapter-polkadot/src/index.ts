@@ -32,8 +32,7 @@ export type {
 export { polkadotNetworks, polkadotMainnetNetworks, polkadotTestnetNetworks } from './networks';
 
 // Individual Hub networks (P1 - MVP)
-// NOTE: kusamaHubMainnet temporarily disabled - RPC DNS not resolving
-export { polkadotHubMainnet, polkadotHubTestnet } from './networks';
+export { kusamaHubMainnet, polkadotHubMainnet, polkadotHubTestnet } from './networks';
 
 // Individual Parachain networks (P2)
 export { moonbeamMainnet, moonriverMainnet, moonbaseAlphaTestnet } from './networks';
@@ -43,8 +42,7 @@ export { moonbeamMainnet, moonriverMainnet, moonbaseAlphaTestnet } from './netwo
 // ============================================================================
 
 // Custom Hub chain definitions
-// NOTE: kusamaHub temporarily disabled - RPC DNS not resolving
-export { polkadotHub, polkadotHubTestNet } from './networks/chains';
+export { kusamaHub, polkadotHub, polkadotHubTestNet } from './networks/chains';
 
 // Parachain viem chains (re-exported from viem/chains)
 export { moonbeam, moonriver, moonbaseAlpha } from './networks';
