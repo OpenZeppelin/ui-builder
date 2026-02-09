@@ -236,13 +236,13 @@
 
 ### Tests (TDD)
 
-- [ ] T042 [P] [US9] Write indexer client discovery tests in `packages/adapter-evm-core/test/access-control/indexer-client.test.ts` (add discovery suite). Cover: `discoverRoleIds` returns unique role IDs from events, empty result when no events. Reference: contracts/indexer-queries.graphql §DiscoverRoles.
-- [ ] T043 [P] [US9] Write service discovery tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add discovery suite). Cover: `discoverKnownRoleIds()` returns discovered roles, caches results, returns empty when indexer unavailable, returns knownRoleIds when explicitly provided (precedence), single-attempt flag prevents retries. Reference: spec.md §US9 scenarios 1–2.
+- [x] T042 [P] [US9] Write indexer client discovery tests in `packages/adapter-evm-core/test/access-control/indexer-client.test.ts` (add discovery suite). Cover: `discoverRoleIds` returns unique role IDs from events, empty result when no events. Reference: contracts/indexer-queries.graphql §DiscoverRoles.
+- [x] T043 [P] [US9] Write service discovery tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add discovery suite). Cover: `discoverKnownRoleIds()` returns discovered roles, caches results, returns empty when indexer unavailable, returns knownRoleIds when explicitly provided (precedence), single-attempt flag prevents retries. Reference: spec.md §US9 scenarios 1–2.
 
 ### Implementation
 
-- [ ] T044 [US9] Implement `discoverRoleIds(contractAddress)` in `packages/adapter-evm-core/src/access-control/indexer-client.ts`. Query unique role IDs from historical events. Reference: contracts/indexer-queries.graphql §DiscoverRoles.
-- [ ] T045 [US9] Implement `discoverKnownRoleIds()` and `dispose()` in `packages/adapter-evm-core/src/access-control/service.ts`. Cache discovered roles, respect knownRoleIds precedence, mark roleDiscoveryAttempted to prevent retries. `dispose()` clears context Map and indexer resources. Reference: contracts/access-control-service.ts §Role Discovery + §Lifecycle.
+- [x] T044 [US9] Implement `discoverRoleIds(contractAddress)` in `packages/adapter-evm-core/src/access-control/indexer-client.ts`. Query unique role IDs from historical events. Reference: contracts/indexer-queries.graphql §DiscoverRoles.
+- [x] T045 [US9] Implement `discoverKnownRoleIds()` and `dispose()` in `packages/adapter-evm-core/src/access-control/service.ts`. Cache discovered roles, respect knownRoleIds precedence, mark roleDiscoveryAttempted to prevent retries. `dispose()` clears context Map and indexer resources. Reference: contracts/access-control-service.ts §Role Discovery + §Lifecycle.
 
 **Checkpoint**: All 9 user stories complete. Full service implementation done. All tests pass.
 

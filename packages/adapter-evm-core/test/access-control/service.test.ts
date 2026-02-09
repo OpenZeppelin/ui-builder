@@ -10,6 +10,7 @@
  * - Phase 8 (US6): Role management — grantRole, revokeRole, renounceRole write operations
  * - Phase 9 (US7): History queries — getHistory with filtering, pagination, graceful degradation
  * - Phase 10 (US8): Snapshot export — exportSnapshot with roles + optional ownership, validation
+ * - Phase 11 (US9): Role discovery — discoverKnownRoleIds with caching, precedence, graceful degradation
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
  * @see spec.md §US2 — acceptance scenarios 1–6
@@ -64,6 +65,7 @@ const mockQueryPendingOwnershipTransfer = vi.fn();
 const mockQueryPendingAdminTransfer = vi.fn();
 const mockQueryLatestGrants = vi.fn();
 const mockQueryHistory = vi.fn();
+const mockDiscoverRoleIds = vi.fn();
 
 vi.mock('../../src/access-control/indexer-client', () => ({
   createIndexerClient: () => ({
@@ -73,6 +75,7 @@ vi.mock('../../src/access-control/indexer-client', () => ({
     queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
     queryLatestGrants: (...args: unknown[]) => mockQueryLatestGrants(...args),
     queryHistory: (...args: unknown[]) => mockQueryHistory(...args),
+    discoverRoleIds: (...args: unknown[]) => mockDiscoverRoleIds(...args),
   }),
 }));
 
@@ -2480,6 +2483,182 @@ describe('EvmAccessControlService', () => {
 
     it('should throw ConfigurationInvalid for invalid address', async () => {
       await expect(service.exportSnapshot(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── discoverKnownRoleIds (Phase 11 — US9) ───────────────────────────
+
+  describe('discoverKnownRoleIds', () => {
+    const MINTER_ROLE = VALID_ROLE_ID;
+    const PAUSER_ROLE = VALID_ROLE_ID_2;
+    const DISCOVERED_ROLE = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockEnumerateRoleMembers.mockReset();
+      mockHasRole.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+      mockQueryHistory.mockReset();
+      mockDiscoverRoleIds.mockReset();
+    });
+
+    it('should return discovered role IDs from the indexer (US9 scenario 1)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([MINTER_ROLE, PAUSER_ROLE, DISCOVERED_ROLE]);
+
+      const result = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      expect(result).toContain(MINTER_ROLE);
+      expect(result).toContain(PAUSER_ROLE);
+      expect(result).toContain(DISCOVERED_ROLE);
+      expect(result).toHaveLength(3);
+    });
+
+    it('should cache discovered roles and not re-query on subsequent calls', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([MINTER_ROLE, PAUSER_ROLE]);
+
+      const result1 = await service.discoverKnownRoleIds(VALID_ADDRESS);
+      const result2 = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      // Same result returned both times
+      expect(result1).toEqual(result2);
+      // discoverRoleIds only called once — cached after first attempt
+      expect(mockDiscoverRoleIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when indexer is unavailable (US9 scenario 2)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(false);
+
+      const result = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      expect(result).toEqual([]);
+      expect(mockDiscoverRoleIds).not.toHaveBeenCalled();
+    });
+
+    it('should not retry discovery after a failed attempt (single-attempt flag)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce(null); // Simulate indexer query failure
+
+      const result1 = await service.discoverKnownRoleIds(VALID_ADDRESS);
+      expect(result1).toEqual([]);
+
+      const result2 = await service.discoverKnownRoleIds(VALID_ADDRESS);
+      expect(result2).toEqual([]);
+
+      // discoverRoleIds should only be called once — flagged as attempted
+      expect(mockDiscoverRoleIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return knownRoleIds when explicitly provided (precedence)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE, PAUSER_ROLE]);
+
+      // Even if indexer would discover more roles, the known ones take precedence
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([DISCOVERED_ROLE]);
+
+      const result = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      // Should include both known and discovered (merged)
+      expect(result).toContain(MINTER_ROLE);
+      expect(result).toContain(PAUSER_ROLE);
+      expect(result).toContain(DISCOVERED_ROLE);
+    });
+
+    it('should handle indexer discovery returning empty array', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([]);
+
+      const result = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle indexer error gracefully and return empty array', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockRejectedValueOnce(new Error('Indexer error'));
+
+      const result = await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.discoverKnownRoleIds(unregisteredAddress)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+      await expect(service.discoverKnownRoleIds(unregisteredAddress)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(service.discoverKnownRoleIds(INVALID_ADDRESS)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+    });
+
+    it('should use normalized (lowercase) contract address for indexer query', async () => {
+      const checksummedAddress = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      service.registerContract(checksummedAddress, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([MINTER_ROLE]);
+
+      await service.discoverKnownRoleIds(checksummedAddress);
+
+      // Verify the indexer was called with the lowercase address
+      expect(mockDiscoverRoleIds).toHaveBeenCalledWith(checksummedAddress.toLowerCase());
+    });
+  });
+
+  // ── dispose (Phase 11 — updated) ────────────────────────────────────
+
+  describe('dispose (updated)', () => {
+    it('should clear all registered contracts and discovered roles', async () => {
+      // Register and discover
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValue(true);
+      mockDiscoverRoleIds.mockResolvedValueOnce([VALID_ROLE_ID]);
+
+      await service.discoverKnownRoleIds(VALID_ADDRESS);
+
+      // Dispose
+      service.dispose();
+
+      // After dispose, the contract should no longer be registered
+      await expect(service.getCapabilities(VALID_ADDRESS)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should allow re-registration after dispose', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+      service.dispose();
+
+      // Should be able to re-register
+      expect(() => {
+        service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+      }).not.toThrow();
     });
   });
 });

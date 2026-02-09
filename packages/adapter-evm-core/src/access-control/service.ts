@@ -1237,10 +1237,84 @@ export class EvmAccessControlService implements AccessControlService {
     return snapshot;
   }
 
-  // ── Role Discovery (stub — implemented in Phase 11) ───────────────────
+  // ── Role Discovery (Phase 11 — US9) ────────────────────────────────────
 
-  async discoverKnownRoleIds(_contractAddress: string): Promise<string[]> {
-    throw new Error('Not implemented — will be added in Phase 11 (US9)');
+  /**
+   * Discover role IDs from the indexer's historical events.
+   *
+   * Queries the indexer for all unique role IDs that have appeared in events
+   * for the given contract. Results are cached in the contract context — subsequent
+   * calls return the cached value without re-querying (`roleDiscoveryAttempted` flag).
+   *
+   * When `knownRoleIds` were explicitly provided at registration, they are preserved
+   * and merged with any newly discovered roles.
+   *
+   * **Graceful degradation (FR-017)**: Returns an empty array when:
+   * - The indexer is unavailable
+   * - The indexer query returns null
+   * - The indexer query throws an error
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Array of known + discovered role IDs (deduplicated)
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async discoverKnownRoleIds(contractAddress: string): Promise<string[]> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.discoverKnownRoleIds',
+      `Discovering role IDs for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // If discovery was already attempted, return the merged known + discovered set
+    if (context.roleDiscoveryAttempted) {
+      logger.debug(
+        'EvmAccessControlService.discoverKnownRoleIds',
+        `Returning cached discovery result for ${context.contractAddress}`
+      );
+      return this.getMergedRoleIds(context);
+    }
+
+    // Mark as attempted immediately to prevent retries on failure
+    context.roleDiscoveryAttempted = true;
+
+    // Check indexer availability
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (!indexerAvailable) {
+      logger.warn(
+        'EvmAccessControlService.discoverKnownRoleIds',
+        `Indexer unavailable for ${this.networkConfig.id}: role discovery skipped`
+      );
+      return this.getMergedRoleIds(context);
+    }
+
+    // Query indexer for role discovery
+    try {
+      const discoveredRoles = await this.indexerClient.discoverRoleIds(context.contractAddress);
+
+      if (discoveredRoles && discoveredRoles.length > 0) {
+        context.discoveredRoleIds = discoveredRoles;
+        logger.info(
+          'EvmAccessControlService.discoverKnownRoleIds',
+          `Discovered ${discoveredRoles.length} role(s) for ${context.contractAddress}`
+        );
+      } else {
+        logger.debug(
+          'EvmAccessControlService.discoverKnownRoleIds',
+          `No roles discovered for ${context.contractAddress}`
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        'EvmAccessControlService.discoverKnownRoleIds',
+        `Failed to discover roles: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Graceful degradation — continue with whatever we have
+    }
+
+    return this.getMergedRoleIds(context);
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -1322,23 +1396,45 @@ export class EvmAccessControlService implements AccessControlService {
   /**
    * Attempt to discover role IDs via the indexer.
    *
-   * This is a lightweight wrapper that delegates to `discoverKnownRoleIds()`
-   * when it's implemented (Phase 11). For now, returns the discovered role IDs
-   * from the context if any, or an empty array.
+   * Delegates to the indexer client's `discoverRoleIds()`. Results are cached
+   * in the context's `discoveredRoleIds` and the `roleDiscoveryAttempted` flag
+   * prevents retries on failure.
    *
    * @internal
    */
   private async attemptRoleDiscovery(context: EvmAccessControlContext): Promise<string[]> {
     // If discovery was already attempted, return what we have
     if (context.roleDiscoveryAttempted) {
-      return context.discoveredRoleIds;
+      return this.getMergedRoleIds(context);
     }
 
-    // For now, mark as attempted and return empty
-    // Full discovery will be implemented in Phase 11 (US9)
+    // Mark as attempted to prevent retries
     context.roleDiscoveryAttempted = true;
 
-    return context.discoveredRoleIds;
+    // Check indexer availability
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (!indexerAvailable) {
+      return this.getMergedRoleIds(context);
+    }
+
+    try {
+      const discoveredRoles = await this.indexerClient.discoverRoleIds(context.contractAddress);
+
+      if (discoveredRoles && discoveredRoles.length > 0) {
+        context.discoveredRoleIds = discoveredRoles;
+        logger.info(
+          'EvmAccessControlService.attemptRoleDiscovery',
+          `Auto-discovered ${discoveredRoles.length} role(s) for ${context.contractAddress}`
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        'EvmAccessControlService.attemptRoleDiscovery',
+        `Role discovery failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    return this.getMergedRoleIds(context);
   }
 
   /**

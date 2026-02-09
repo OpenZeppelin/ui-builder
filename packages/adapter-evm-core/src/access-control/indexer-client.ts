@@ -115,6 +115,15 @@ interface IndexerEventsResponse {
   errors?: Array<{ message: string }>;
 }
 
+interface IndexerDiscoverRolesResponse {
+  data?: {
+    accessControlEvents?: {
+      nodes: Array<{ role?: string | null }>;
+    };
+  };
+  errors?: Array<{ message: string }>;
+}
+
 interface IndexerRoleMembershipsResponse {
   data?: {
     roleMemberships?: {
@@ -169,6 +178,23 @@ const ROLE_MEMBERSHIPS_QUERY = `
         grantedAt
         grantedBy
         txHash
+      }
+    }
+  }
+`;
+
+const DISCOVER_ROLES_QUERY = `
+  query DiscoverRoles($network: String!, $contract: String!) {
+    accessControlEvents(
+      filter: {
+        network: { equalTo: $network }
+        contract: { equalTo: $contract }
+      }
+      first: 1000
+      orderBy: TIMESTAMP_DESC
+    ) {
+      nodes {
+        role
       }
     }
   }
@@ -591,6 +617,83 @@ export class EvmIndexerClient {
       logger.warn(
         LOG_SYSTEM,
         `Failed to query latest grants: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
+    }
+  }
+
+  // ── Role Discovery (Phase 11 — US9) ────────────────────────────────────
+
+  /**
+   * Discover all unique role identifiers for a contract by querying historical events.
+   *
+   * Queries all `accessControlEvents` for the contract and extracts unique, non-empty
+   * `role` values. This enables role enumeration even when `knownRoleIds` are not
+   * provided at registration.
+   *
+   * Graceful degradation: returns null if the indexer is unavailable or the query fails.
+   *
+   * @param contractAddress - The contract address to discover roles for
+   * @returns Array of unique role identifiers, or null on failure
+   */
+  async discoverRoleIds(contractAddress: string): Promise<string[] | null> {
+    const isUp = await this.isAvailable();
+    if (!isUp || !this.endpoint) {
+      return null;
+    }
+
+    logger.info(LOG_SYSTEM, `Discovering role IDs for ${contractAddress}`);
+
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: DISCOVER_ROLES_QUERY,
+          variables: {
+            network: this.networkConfig.id,
+            contract: contractAddress,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer query failed with status ${response.status} for role discovery`
+        );
+        return null;
+      }
+
+      const result = (await response.json()) as IndexerDiscoverRolesResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer query errors: ${result.errors.map((e) => e.message).join('; ')}`
+        );
+        return null;
+      }
+
+      const nodes = result.data?.accessControlEvents?.nodes;
+      if (!nodes || nodes.length === 0) {
+        logger.debug(LOG_SYSTEM, `No events found for role discovery on ${contractAddress}`);
+        return [];
+      }
+
+      // Extract unique, non-empty role values
+      const uniqueRoles = [...new Set(nodes.map((n) => n.role).filter((r): r is string => !!r))];
+
+      logger.debug(
+        LOG_SYSTEM,
+        `Discovered ${uniqueRoles.length} unique role(s) for ${contractAddress}`
+      );
+
+      return uniqueRoles;
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Failed to discover role IDs: ${error instanceof Error ? error.message : String(error)}`
       );
       return null;
     }

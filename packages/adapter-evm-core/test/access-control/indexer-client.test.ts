@@ -5,9 +5,10 @@
  * - Phase 4: Constructor, endpoint resolution, availability, pending transfer queries
  * - Phase 5: Role membership queries (queryLatestGrants)
  * - Phase 9 (US7): History queries with filtering, pagination, and event type mapping
+ * - Phase 11 (US9): Role discovery via indexer (discoverRoleIds)
  *
  * @see quickstart.md §Step 4
- * @see contracts/indexer-queries.graphql §GetPendingOwnershipTransfer + §GetPendingAdminTransfer + §QueryAccessControlEvents
+ * @see contracts/indexer-queries.graphql §GetPendingOwnershipTransfer + §GetPendingAdminTransfer + §QueryAccessControlEvents + §DiscoverRoles
  * @see research.md §R6 — EVM event type mapping
  */
 
@@ -1046,6 +1047,162 @@ describe('EvmIndexerClient', () => {
       expect(result).not.toBeNull();
       expect(result!.pageInfo.hasNextPage).toBe(true);
       expect(result!.pageInfo.endCursor).toBe('cursor-abc123');
+    });
+  });
+
+  // ── discoverRoleIds (Phase 11 — US9) ────────────────────────────────
+
+  describe('discoverRoleIds', () => {
+    it('should return unique role IDs from historical events', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            { role: '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6' },
+            { role: '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a' },
+            { role: '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6' },
+            { role: '0x0000000000000000000000000000000000000000000000000000000000000000' },
+          ],
+        },
+      });
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).not.toBeNull();
+      expect(result!).toHaveLength(3);
+      expect(result!).toContain(
+        '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6'
+      );
+      expect(result!).toContain(
+        '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a'
+      );
+      expect(result!).toContain(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      );
+    });
+
+    it('should return empty array when no events exist', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [],
+        },
+      });
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).not.toBeNull();
+      expect(result!).toHaveLength(0);
+    });
+
+    it('should return null when indexer is unavailable', async () => {
+      mockFetchError(500);
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when no indexer endpoint is configured', async () => {
+      const noIndexerClient = new EvmIndexerClient(createNetworkConfigNoIndexer());
+
+      const result = await noIndexerClient.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when fetch throws a network error', async () => {
+      mockFetchHealthy();
+      mockFetchNetworkError();
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when GraphQL errors are returned', async () => {
+      mockFetchHealthy();
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          errors: [{ message: 'some GraphQL error' }],
+        }),
+      });
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).toBeNull();
+    });
+
+    it('should filter out null/undefined/empty role values', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            { role: '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6' },
+            { role: null },
+            { role: undefined },
+            { role: '' },
+            { role: '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a' },
+          ],
+        },
+      });
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).not.toBeNull();
+      expect(result!).toHaveLength(2);
+      expect(result!).toContain(
+        '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6'
+      );
+      expect(result!).toContain(
+        '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a'
+      );
+    });
+
+    it('should use networkConfig.id as the network filter value (FR-027)', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: { nodes: [] },
+      });
+
+      await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      // The second fetch call (after health check) should include the network ID in variables
+      const secondCallBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+      expect(secondCallBody.variables.network).toBe('ethereum-mainnet');
+      expect(secondCallBody.variables.contract).toBe(CONTRACT_ADDRESS);
+    });
+
+    it('should deduplicate role IDs across multiple events', async () => {
+      mockFetchHealthy();
+
+      const sameRole = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [{ role: sameRole }, { role: sameRole }, { role: sameRole }],
+        },
+      });
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).not.toBeNull();
+      expect(result!).toHaveLength(1);
+      expect(result![0]).toBe(sameRole);
+    });
+
+    it('should handle non-OK response gracefully', async () => {
+      mockFetchHealthy();
+      mockFetchError(502);
+
+      const result = await client.discoverRoleIds(CONTRACT_ADDRESS);
+
+      expect(result).toBeNull();
     });
   });
 
