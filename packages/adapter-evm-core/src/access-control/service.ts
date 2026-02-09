@@ -37,8 +37,8 @@ import type {
   TransactionStatusUpdate,
   TxStatus,
 } from '@openzeppelin/ui-types';
-import { ConfigurationInvalid } from '@openzeppelin/ui-types';
-import { logger } from '@openzeppelin/ui-utils';
+import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-types';
+import { logger, validateSnapshot } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig, WriteContractParameters } from '../types';
 import {
@@ -1165,8 +1165,76 @@ export class EvmAccessControlService implements AccessControlService {
     }
   }
 
-  async exportSnapshot(_contractAddress: string): Promise<AccessSnapshot> {
-    throw new Error('Not implemented — will be added in Phase 10 (US8)');
+  /**
+   * Export a point-in-time snapshot of the contract's access control state.
+   *
+   * Combines `getCurrentRoles()` + `getOwnership()` into a unified `AccessSnapshot`.
+   * Ownership is omitted if the contract does not support Ownable (try/catch).
+   * Roles default to an empty array if the read fails.
+   *
+   * **Known limitation**: The unified `AccessSnapshot` type does not include `adminInfo`.
+   * Admin information is accessible separately via `getAdminInfo()`. If a future
+   * `@openzeppelin/ui-types` update adds `adminInfo` to `AccessSnapshot`, this method
+   * should be updated to populate it.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Access control snapshot with roles and optional ownership
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   * @throws OperationFailed if the snapshot structure fails validation
+   */
+  async exportSnapshot(contractAddress: string): Promise<AccessSnapshot> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.exportSnapshot',
+      `Exporting snapshot for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // Read ownership (if supported — omit if contract is not Ownable)
+    let ownership: OwnershipInfo | undefined;
+    try {
+      ownership = await this.getOwnership(context.contractAddress);
+    } catch (error) {
+      logger.debug(
+        'EvmAccessControlService.exportSnapshot',
+        `Ownership not available: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Contract may not be Ownable — continue without ownership
+    }
+
+    // Read roles (fallback to empty array on failure)
+    let roles: RoleAssignment[] = [];
+    try {
+      roles = await this.getCurrentRoles(context.contractAddress);
+    } catch (error) {
+      logger.debug(
+        'EvmAccessControlService.exportSnapshot',
+        `Roles not available: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Continue with empty roles array
+    }
+
+    const snapshot: AccessSnapshot = {
+      roles,
+      ownership,
+    };
+
+    // Validate snapshot structure
+    if (!validateSnapshot(snapshot)) {
+      const errorMsg = `Invalid snapshot structure for contract ${context.contractAddress}`;
+      logger.error('EvmAccessControlService.exportSnapshot', errorMsg);
+      throw new OperationFailed(errorMsg, context.contractAddress, 'exportSnapshot');
+    }
+
+    logger.debug('EvmAccessControlService.exportSnapshot', 'Snapshot created and validated:', {
+      hasOwnership: !!ownership?.owner,
+      roleCount: roles.length,
+      totalMembers: roles.reduce((sum, r) => sum + r.members.length, 0),
+    });
+
+    return snapshot;
   }
 
   // ── Role Discovery (stub — implemented in Phase 11) ───────────────────

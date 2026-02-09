@@ -9,6 +9,7 @@
  * - Phase 7 (US5): Admin transfer, accept, cancel, delay change, delay rollback — write operations
  * - Phase 8 (US6): Role management — grantRole, revokeRole, renounceRole write operations
  * - Phase 9 (US7): History queries — getHistory with filtering, pagination, graceful degradation
+ * - Phase 10 (US8): Snapshot export — exportSnapshot with roles + optional ownership, validation
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
  * @see spec.md §US2 — acceptance scenarios 1–6
@@ -16,12 +17,14 @@
  * @see spec.md §US5 — acceptance scenarios 1–6
  * @see spec.md §US6 — acceptance scenarios 1–5
  * @see spec.md §US7 — acceptance scenarios 1–3
- * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin + §Roles + §History
+ * @see spec.md §US8 — acceptance scenarios 1–3
+ * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin + §Roles + §History & Snapshots
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type {
+  AccessSnapshot,
   AdminInfo,
   ContractFunction,
   ContractSchema,
@@ -2143,6 +2146,340 @@ describe('EvmAccessControlService', () => {
       expect(result.pageInfo.hasNextPage).toBe(false);
 
       serviceNoIndexer.dispose();
+    });
+  });
+
+  // ── exportSnapshot (Phase 10 — US8) ─────────────────────────────────
+
+  describe('exportSnapshot', () => {
+    const OWNER = '0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa';
+    const MINTER_ROLE = VALID_ROLE_ID;
+    const PAUSER_ROLE = VALID_ROLE_ID_2;
+    const MEMBER_1 = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+    const MEMBER_2 = '0xFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFf';
+
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockEnumerateRoleMembers.mockReset();
+      mockHasRole.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+      mockQueryHistory.mockReset();
+    });
+
+    // ── US8 Scenario 1: Complete snapshot with roles + ownership ─────
+
+    it('should return a complete snapshot with roles and ownership (US8 scenario 1)', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE, PAUSER_ROLE]);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: undefined,
+      });
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+        {
+          role: { id: PAUSER_ROLE },
+          members: [MEMBER_1, MEMBER_2],
+        },
+      ]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Verify roles
+      expect(snapshot.roles).toHaveLength(2);
+      expect(snapshot.roles[0].role.id).toBe(MINTER_ROLE);
+      expect(snapshot.roles[0].members).toContain(MEMBER_1);
+      expect(snapshot.roles[1].role.id).toBe(PAUSER_ROLE);
+      expect(snapshot.roles[1].members).toHaveLength(2);
+
+      // Verify ownership
+      expect(snapshot.ownership).toBeDefined();
+      expect(snapshot.ownership!.owner).toBe(OWNER);
+      expect(snapshot.ownership!.state).toBe('owned');
+    });
+
+    // ── US8 Scenario 2: Snapshot validates against AccessSnapshot schema ─
+
+    it('should produce a valid AccessSnapshot structure (US8 scenario 2)', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE]);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: undefined,
+      });
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Verify structure conforms to AccessSnapshot
+      expect(snapshot).toHaveProperty('roles');
+      expect(snapshot).toHaveProperty('ownership');
+      expect(Array.isArray(snapshot.roles)).toBe(true);
+
+      // Each role has the correct shape
+      for (const roleAssignment of snapshot.roles) {
+        expect(roleAssignment).toHaveProperty('role');
+        expect(roleAssignment.role).toHaveProperty('id');
+        expect(Array.isArray(roleAssignment.members)).toBe(true);
+      }
+
+      // Ownership has the correct shape
+      expect(snapshot.ownership).toHaveProperty('owner');
+      expect(snapshot.ownership).toHaveProperty('state');
+    });
+
+    // ── US8 Scenario 3: Non-Ownable contract → ownership omitted ─────
+
+    it('should omit ownership when contract does not support Ownable (US8 scenario 3)', async () => {
+      // Register with AccessControl-only schema (no Ownable functions)
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      // getOwnership will fail because readOwnership throws for non-Ownable contracts
+      mockReadOwnership.mockRejectedValueOnce(new Error('Contract does not support Ownable'));
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Roles should be present
+      expect(snapshot.roles).toHaveLength(1);
+      expect(snapshot.roles[0].role.id).toBe(MINTER_ROLE);
+
+      // Ownership should be omitted
+      expect(snapshot.ownership).toBeUndefined();
+    });
+
+    // ── No adminInfo in AccessSnapshot (known limitation) ────────────
+
+    it('should not include adminInfo in the snapshot (known limitation)', async () => {
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA, [MINTER_ROLE]);
+
+      mockReadOwnership.mockRejectedValueOnce(new Error('Not Ownable'));
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // The unified AccessSnapshot type does not include adminInfo
+      expect(snapshot).not.toHaveProperty('adminInfo');
+    });
+
+    // ── Snapshot parity tests ────────────────────────────────────────
+
+    it('should produce a snapshot that matches current ownership state', async () => {
+      service.registerContract(VALID_ADDRESS, OWNABLE_TWO_STEP_SCHEMA);
+
+      mockReadOwnership.mockResolvedValue({
+        owner: OWNER,
+        pendingOwner: undefined,
+      });
+
+      // Get fresh ownership
+      const ownership: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      // Get snapshot
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Verify parity
+      expect(snapshot.ownership).toEqual(ownership);
+    });
+
+    it('should produce a snapshot that matches current role assignments', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [
+        MINTER_ROLE,
+        PAUSER_ROLE,
+      ]);
+
+      const mockRoles: RoleAssignment[] = [
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+        {
+          role: { id: PAUSER_ROLE },
+          members: [MEMBER_1, MEMBER_2],
+        },
+      ];
+
+      // Mock readOwnership to fail (non-Ownable) for both getCurrentRoles and exportSnapshot calls
+      mockReadOwnership.mockRejectedValue(new Error('Not Ownable'));
+      mockReadCurrentRoles.mockResolvedValue(mockRoles);
+
+      // Get fresh roles
+      const roles: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      // Get snapshot
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Verify parity
+      expect(snapshot.roles).toEqual(roles);
+    });
+
+    // ── Edge cases ───────────────────────────────────────────────────
+
+    it('should handle ownership read failure gracefully', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE]);
+
+      mockReadOwnership.mockRejectedValueOnce(new Error('RPC unavailable'));
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      // Should not throw
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Roles present, ownership absent
+      expect(snapshot.roles).toHaveLength(1);
+      expect(snapshot.ownership).toBeUndefined();
+    });
+
+    it('should handle roles read failure gracefully', async () => {
+      service.registerContract(VALID_ADDRESS, OWNABLE_SCHEMA);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: undefined,
+      });
+
+      mockReadCurrentRoles.mockRejectedValueOnce(new Error('Roles enumeration failed'));
+
+      // Should not throw
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Ownership present, roles empty
+      expect(snapshot.ownership).toBeDefined();
+      expect(snapshot.ownership!.owner).toBe(OWNER);
+      expect(snapshot.roles).toEqual([]);
+    });
+
+    it('should handle both reads failing gracefully', async () => {
+      service.registerContract(VALID_ADDRESS, EMPTY_SCHEMA);
+
+      mockReadOwnership.mockRejectedValueOnce(new Error('Not Ownable'));
+      mockReadCurrentRoles.mockRejectedValueOnce(new Error('No roles'));
+
+      // Should not throw
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      // Empty snapshot
+      expect(snapshot.roles).toEqual([]);
+      expect(snapshot.ownership).toBeUndefined();
+    });
+
+    it('should handle roles with empty member lists', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadOwnership.mockRejectedValueOnce(new Error('Not Ownable'));
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [],
+        },
+      ]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      expect(snapshot.roles).toHaveLength(1);
+      expect(snapshot.roles[0].members).toEqual([]);
+    });
+
+    it('should include pending ownership state in snapshot', async () => {
+      const PENDING_OWNER = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+
+      service.registerContract(VALID_ADDRESS, OWNABLE_TWO_STEP_SCHEMA);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      expect(snapshot.ownership).toBeDefined();
+      expect(snapshot.ownership!.state).toBe('pending');
+      expect(snapshot.ownership!.pendingTransfer).toBeDefined();
+      expect(snapshot.ownership!.pendingTransfer!.pendingOwner).toBe(PENDING_OWNER);
+    });
+
+    it('should include renounced ownership state in snapshot', async () => {
+      service.registerContract(VALID_ADDRESS, OWNABLE_SCHEMA);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: null,
+        pendingOwner: undefined,
+      });
+
+      mockReadCurrentRoles.mockResolvedValueOnce([]);
+
+      const snapshot: AccessSnapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      expect(snapshot.ownership).toBeDefined();
+      expect(snapshot.ownership!.owner).toBeNull();
+      expect(snapshot.ownership!.state).toBe('renounced');
+    });
+
+    it('should produce consistent snapshots across multiple calls', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE]);
+
+      const mockOwnershipData = { owner: OWNER, pendingOwner: undefined };
+      const mockRolesData: RoleAssignment[] = [{ role: { id: MINTER_ROLE }, members: [MEMBER_1] }];
+
+      mockReadOwnership.mockResolvedValue(mockOwnershipData);
+      mockReadCurrentRoles.mockResolvedValue(mockRolesData);
+
+      const snapshot1 = await service.exportSnapshot(VALID_ADDRESS);
+      const snapshot2 = await service.exportSnapshot(VALID_ADDRESS);
+
+      expect(snapshot1).toEqual(snapshot2);
+    });
+
+    // ── Validation ───────────────────────────────────────────────────
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.exportSnapshot(unregisteredAddress)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+      await expect(service.exportSnapshot(unregisteredAddress)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(service.exportSnapshot(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
     });
   });
 });

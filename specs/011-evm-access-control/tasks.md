@@ -218,11 +218,11 @@
 
 ### Tests (TDD)
 
-- [ ] T040 [P] [US8] Write service snapshot tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add snapshot suite). Cover: `exportSnapshot()` returns roles + optional ownership, omits ownership when contract not Ownable, snapshot validation, no adminInfo in AccessSnapshot (known limitation). Reference: spec.md §US8 scenarios 1–3, data-model.md §8.
+- [x] T040 [P] [US8] Write service snapshot tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add snapshot suite). Cover: `exportSnapshot()` returns roles + optional ownership, omits ownership when contract not Ownable, snapshot validation, no adminInfo in AccessSnapshot (known limitation). Reference: spec.md §US8 scenarios 1–3, data-model.md §8.
 
 ### Implementation
 
-- [ ] T041 [US8] Implement `exportSnapshot()` in `packages/adapter-evm-core/src/access-control/service.ts`. Combine `getCurrentRoles()` + `getOwnership()` (try/catch — omit if not Ownable). Validate snapshot structure. Reference: contracts/access-control-service.ts §History & Snapshots.
+- [x] T041 [US8] Implement `exportSnapshot()` in `packages/adapter-evm-core/src/access-control/service.ts`. Combine `getCurrentRoles()` + `getOwnership()` (try/catch — omit if not Ownable). Validate snapshot structure. Reference: contracts/access-control-service.ts §History & Snapshots.
 
 **Checkpoint**: US8 complete. Snapshot export works with validation. Tests pass.
 
