@@ -47,7 +47,10 @@ import {
   assembleBeginAdminTransferAction,
   assembleCancelAdminTransferAction,
   assembleChangeAdminDelayAction,
+  assembleGrantRoleAction,
   assembleRenounceOwnershipAction,
+  assembleRenounceRoleAction,
+  assembleRevokeRoleAction,
   assembleRollbackAdminDelayAction,
   assembleTransferOwnershipAction,
 } from './actions';
@@ -55,7 +58,7 @@ import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, EvmIndexerClient } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
-import { validateAddress, validateRoleIds } from './validation';
+import { validateAddress, validateRoleId, validateRoleIds } from './validation';
 
 // ---------------------------------------------------------------------------
 // Service Implementation
@@ -950,26 +953,140 @@ export class EvmAccessControlService implements AccessControlService {
     }
   }
 
+  /**
+   * Grant a role to an account.
+   *
+   * Assembles `grantRole(bytes32 role, address account)` and delegates execution.
+   * Must be called by an account with the role's admin role (typically DEFAULT_ADMIN_ROLE).
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param roleId - The bytes32 role identifier to grant
+   * @param account - The account to grant the role to
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, addresses invalid, or role ID invalid
+   */
   async grantRole(
-    _contractAddress: string,
-    _roleId: string,
-    _account: string,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    contractAddress: string,
+    roleId: string,
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 8 (US6)');
+    validateAddress(contractAddress, 'contractAddress');
+    validateRoleId(roleId, 'roleId');
+    validateAddress(account, 'account');
+
+    logger.info(
+      'EvmAccessControlService.grantRole',
+      `Granting role ${roleId} to ${account} on ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleGrantRoleAction(context.contractAddress, roleId, account);
+
+    logger.debug(
+      'EvmAccessControlService.grantRole',
+      `Assembled grantRole tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
+  /**
+   * Revoke a role from an account.
+   *
+   * Assembles `revokeRole(bytes32 role, address account)` and delegates execution.
+   * Must be called by an account with the role's admin role.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param roleId - The bytes32 role identifier to revoke
+   * @param account - The account to revoke the role from
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, addresses invalid, or role ID invalid
+   */
   async revokeRole(
-    _contractAddress: string,
-    _roleId: string,
-    _account: string,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    contractAddress: string,
+    roleId: string,
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 8 (US6)');
+    validateAddress(contractAddress, 'contractAddress');
+    validateRoleId(roleId, 'roleId');
+    validateAddress(account, 'account');
+
+    logger.info(
+      'EvmAccessControlService.revokeRole',
+      `Revoking role ${roleId} from ${account} on ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleRevokeRoleAction(context.contractAddress, roleId, account);
+
+    logger.debug(
+      'EvmAccessControlService.revokeRole',
+      `Assembled revokeRole tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  /**
+   * Renounce own role.
+   *
+   * Assembles `renounceRole(bytes32 role, address callerConfirmation)` and delegates execution.
+   * The `account` parameter acts as a caller confirmation — on-chain, the contract verifies
+   * it matches `msg.sender` to prevent accidental renouncement.
+   *
+   * **EVM-specific extension** — Stellar uses `revokeRole` for self-revocation instead
+   * of a separate `renounceRole` function.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param roleId - The bytes32 role identifier to renounce
+   * @param account - The caller's address for confirmation (must match msg.sender on-chain)
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, addresses invalid, or role ID invalid
+   */
+  async renounceRole(
+    contractAddress: string,
+    roleId: string,
+    account: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    validateAddress(contractAddress, 'contractAddress');
+    validateRoleId(roleId, 'roleId');
+    validateAddress(account, 'account');
+
+    logger.info(
+      'EvmAccessControlService.renounceRole',
+      `Renouncing role ${roleId} for ${account} on ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleRenounceRoleAction(context.contractAddress, roleId, account);
+
+    logger.debug(
+      'EvmAccessControlService.renounceRole',
+      `Assembled renounceRole tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
   // ── History & Snapshots (stub — implemented in Phase 9/10) ────────────

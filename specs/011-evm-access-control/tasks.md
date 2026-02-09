@@ -178,13 +178,13 @@
 
 ### Tests (TDD)
 
-- [ ] T032 [P] [US6] Write actions role tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (add role suite). Cover: `assembleGrantRoleAction`, `assembleRevokeRoleAction`, `assembleRenounceRoleAction`. Verify bytes32 role and address args. Reference: quickstart.md §Step 5.
-- [ ] T033 [P] [US6] Write service role management tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add role management suite). Cover: `grantRole()`, `revokeRole()`, `renounceRole()` (EVM-specific). Validation: invalid role ID rejected, invalid address rejected, unregistered contract rejected. Reference: spec.md §US6 scenarios 1–5.
+- [x] T032 [P] [US6] Write actions role tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (add role suite). Cover: `assembleGrantRoleAction`, `assembleRevokeRoleAction`, `assembleRenounceRoleAction`. Verify bytes32 role and address args. Reference: quickstart.md §Step 5.
+- [x] T033 [P] [US6] Write service role management tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add role management suite). Cover: `grantRole()`, `revokeRole()`, `renounceRole()` (EVM-specific). Validation: invalid role ID rejected, invalid address rejected, unregistered contract rejected. Reference: spec.md §US6 scenarios 1–5.
 
 ### Implementation
 
-- [ ] T034 [P] [US6] Implement `assembleGrantRoleAction`, `assembleRevokeRoleAction`, `assembleRenounceRoleAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Reference: quickstart.md §Step 5.
-- [ ] T035 [US6] Implement `grantRole()`, `revokeRole()`, `renounceRole()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate addresses and role IDs. Delegate to `executeTransaction`. Reference: contracts/access-control-service.ts §Roles.
+- [x] T034 [P] [US6] Implement `assembleGrantRoleAction`, `assembleRevokeRoleAction`, `assembleRenounceRoleAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Reference: quickstart.md §Step 5.
+- [x] T035 [US6] Implement `grantRole()`, `revokeRole()`, `renounceRole()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate addresses and role IDs. Delegate to `executeTransaction`. Reference: contracts/access-control-service.ts §Roles.
 
 **Checkpoint**: US4+US5+US6 complete — all P2 write operations functional. Tests pass.
 

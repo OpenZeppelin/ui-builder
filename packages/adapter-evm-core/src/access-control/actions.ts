@@ -23,7 +23,10 @@ import {
   BEGIN_DEFAULT_ADMIN_TRANSFER_ABI,
   CANCEL_DEFAULT_ADMIN_TRANSFER_ABI,
   CHANGE_DEFAULT_ADMIN_DELAY_ABI,
+  GRANT_ROLE_ABI,
   RENOUNCE_OWNERSHIP_ABI,
+  RENOUNCE_ROLE_ABI,
+  REVOKE_ROLE_ABI,
   ROLLBACK_DEFAULT_ADMIN_DELAY_ABI,
   TRANSFER_OWNERSHIP_ABI,
 } from './abis';
@@ -195,5 +198,85 @@ export function assembleRollbackAdminDelayAction(contractAddress: string): Write
     abi: ROLLBACK_DEFAULT_ADMIN_DELAY_ABI,
     functionName: 'rollbackDefaultAdminDelay',
     args: [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Role Actions (Phase 8 — US6)
+// ---------------------------------------------------------------------------
+
+/**
+ * Assembles a `grantRole(bytes32 role, address account)` transaction.
+ *
+ * Grants a role to an account. Must be called by an account with the role's
+ * admin role (typically DEFAULT_ADMIN_ROLE for newly created roles).
+ *
+ * @param contractAddress - The target contract address (0x-prefixed)
+ * @param roleId - The bytes32 role identifier
+ * @param account - The account to grant the role to (0x-prefixed)
+ * @returns WriteContractParameters ready for execution
+ */
+export function assembleGrantRoleAction(
+  contractAddress: string,
+  roleId: string,
+  account: string
+): WriteContractParameters {
+  return {
+    address: contractAddress as `0x${string}`,
+    abi: GRANT_ROLE_ABI,
+    functionName: 'grantRole',
+    args: [roleId, account],
+  };
+}
+
+/**
+ * Assembles a `revokeRole(bytes32 role, address account)` transaction.
+ *
+ * Revokes a role from an account. Must be called by an account with the
+ * role's admin role.
+ *
+ * @param contractAddress - The target contract address (0x-prefixed)
+ * @param roleId - The bytes32 role identifier
+ * @param account - The account to revoke the role from (0x-prefixed)
+ * @returns WriteContractParameters ready for execution
+ */
+export function assembleRevokeRoleAction(
+  contractAddress: string,
+  roleId: string,
+  account: string
+): WriteContractParameters {
+  return {
+    address: contractAddress as `0x${string}`,
+    abi: REVOKE_ROLE_ABI,
+    functionName: 'revokeRole',
+    args: [roleId, account],
+  };
+}
+
+/**
+ * Assembles a `renounceRole(bytes32 role, address callerConfirmation)` transaction.
+ *
+ * Renounces a role from the caller's own account. The `callerConfirmation` parameter
+ * must match the caller's address — this is an on-chain safety check to prevent
+ * accidental renouncement.
+ *
+ * **EVM-specific extension** — Stellar uses `revokeRole` for self-revocation instead
+ * of a separate `renounceRole` function.
+ *
+ * @param contractAddress - The target contract address (0x-prefixed)
+ * @param roleId - The bytes32 role identifier
+ * @param account - The caller's address for confirmation (0x-prefixed)
+ * @returns WriteContractParameters ready for execution
+ */
+export function assembleRenounceRoleAction(
+  contractAddress: string,
+  roleId: string,
+  account: string
+): WriteContractParameters {
+  return {
+    address: contractAddress as `0x${string}`,
+    abi: RENOUNCE_ROLE_ABI,
+    functionName: 'renounceRole',
+    args: [roleId, account],
   };
 }

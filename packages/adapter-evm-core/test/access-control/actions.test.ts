@@ -16,6 +16,11 @@
  * - assembleChangeAdminDelayAction
  * - assembleRollbackAdminDelayAction
  *
+ * Phase 8 (US6): Role management actions
+ * - assembleGrantRoleAction
+ * - assembleRevokeRoleAction
+ * - assembleRenounceRoleAction
+ *
  * @see quickstart.md §Step 5
  * @see research.md §R2 — Transaction Assembly Strategy
  */
@@ -28,7 +33,10 @@ import {
   BEGIN_DEFAULT_ADMIN_TRANSFER_ABI,
   CANCEL_DEFAULT_ADMIN_TRANSFER_ABI,
   CHANGE_DEFAULT_ADMIN_DELAY_ABI,
+  GRANT_ROLE_ABI,
   RENOUNCE_OWNERSHIP_ABI,
+  RENOUNCE_ROLE_ABI,
+  REVOKE_ROLE_ABI,
   ROLLBACK_DEFAULT_ADMIN_DELAY_ABI,
   TRANSFER_OWNERSHIP_ABI,
 } from '../../src/access-control/abis';
@@ -38,7 +46,10 @@ import {
   assembleBeginAdminTransferAction,
   assembleCancelAdminTransferAction,
   assembleChangeAdminDelayAction,
+  assembleGrantRoleAction,
   assembleRenounceOwnershipAction,
+  assembleRenounceRoleAction,
+  assembleRevokeRoleAction,
   assembleRollbackAdminDelayAction,
   assembleTransferOwnershipAction,
 } from '../../src/access-control/actions';
@@ -50,6 +61,9 @@ import {
 const CONTRACT_ADDRESS = '0x1234567890123456789012345678901234567890';
 const NEW_OWNER = '0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa';
 const NEW_ADMIN = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC';
+const ACCOUNT = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+const MINTER_ROLE = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -320,6 +334,164 @@ describe('Access Control Actions', () => {
       const result = assembleRollbackAdminDelayAction(CONTRACT_ADDRESS);
 
       expect(result.args).toHaveLength(0);
+    });
+  });
+
+  // ── Role Actions (Phase 8 — US6) ────────────────────────────────────
+
+  describe('assembleGrantRoleAction', () => {
+    it('should return correct WriteContractParameters for grantRole', () => {
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
+      expect(result.abi).toEqual(GRANT_ROLE_ABI);
+      expect(result.functionName).toBe('grantRole');
+      expect(result.args).toEqual([MINTER_ROLE, ACCOUNT]);
+    });
+
+    it('should use the exact ABI fragment for grantRole', () => {
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.abi).toHaveLength(1);
+      expect(result.abi[0]).toMatchObject({
+        type: 'function',
+        name: 'grantRole',
+        inputs: [
+          { name: 'role', type: 'bytes32' },
+          { name: 'account', type: 'address' },
+        ],
+        outputs: [],
+        stateMutability: 'nonpayable',
+      });
+    });
+
+    it('should preserve the exact role ID (bytes32)', () => {
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(MINTER_ROLE);
+    });
+
+    it('should preserve the exact account address', () => {
+      const checksummedAccount = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, checksummedAccount);
+
+      expect(result.args[1]).toBe(checksummedAccount);
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', () => {
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, DEFAULT_ADMIN_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(DEFAULT_ADMIN_ROLE);
+    });
+
+    it('should set address as the contract address', () => {
+      const result = assembleGrantRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
+    });
+  });
+
+  describe('assembleRevokeRoleAction', () => {
+    it('should return correct WriteContractParameters for revokeRole', () => {
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
+      expect(result.abi).toEqual(REVOKE_ROLE_ABI);
+      expect(result.functionName).toBe('revokeRole');
+      expect(result.args).toEqual([MINTER_ROLE, ACCOUNT]);
+    });
+
+    it('should use the exact ABI fragment for revokeRole', () => {
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.abi).toHaveLength(1);
+      expect(result.abi[0]).toMatchObject({
+        type: 'function',
+        name: 'revokeRole',
+        inputs: [
+          { name: 'role', type: 'bytes32' },
+          { name: 'account', type: 'address' },
+        ],
+        outputs: [],
+        stateMutability: 'nonpayable',
+      });
+    });
+
+    it('should preserve the exact role ID (bytes32)', () => {
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(MINTER_ROLE);
+    });
+
+    it('should preserve the exact account address', () => {
+      const checksummedAccount = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, checksummedAccount);
+
+      expect(result.args[1]).toBe(checksummedAccount);
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', () => {
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, DEFAULT_ADMIN_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(DEFAULT_ADMIN_ROLE);
+    });
+
+    it('should set address as the contract address', () => {
+      const result = assembleRevokeRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
+    });
+  });
+
+  describe('assembleRenounceRoleAction', () => {
+    it('should return correct WriteContractParameters for renounceRole', () => {
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
+      expect(result.abi).toEqual(RENOUNCE_ROLE_ABI);
+      expect(result.functionName).toBe('renounceRole');
+      expect(result.args).toEqual([MINTER_ROLE, ACCOUNT]);
+    });
+
+    it('should use the exact ABI fragment for renounceRole', () => {
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.abi).toHaveLength(1);
+      expect(result.abi[0]).toMatchObject({
+        type: 'function',
+        name: 'renounceRole',
+        inputs: [
+          { name: 'role', type: 'bytes32' },
+          { name: 'callerConfirmation', type: 'address' },
+        ],
+        outputs: [],
+        stateMutability: 'nonpayable',
+      });
+    });
+
+    it('should preserve the exact role ID (bytes32)', () => {
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(MINTER_ROLE);
+    });
+
+    it('should preserve the exact callerConfirmation address', () => {
+      const checksummedAccount = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed';
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, checksummedAccount);
+
+      expect(result.args[1]).toBe(checksummedAccount);
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', () => {
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, DEFAULT_ADMIN_ROLE, ACCOUNT);
+
+      expect(result.args[0]).toBe(DEFAULT_ADMIN_ROLE);
+    });
+
+    it('should set address as the contract address', () => {
+      const result = assembleRenounceRoleAction(CONTRACT_ADDRESS, MINTER_ROLE, ACCOUNT);
+
+      expect(result.address).toBe(CONTRACT_ADDRESS);
     });
   });
 });

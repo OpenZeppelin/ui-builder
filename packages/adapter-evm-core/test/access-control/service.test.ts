@@ -7,12 +7,14 @@
  * - Phase 5 (US3): Role queries, enriched role assignments, graceful degradation
  * - Phase 6 (US4): Ownership transfer, accept, renounce — write operations
  * - Phase 7 (US5): Admin transfer, accept, cancel, delay change, delay rollback — write operations
+ * - Phase 8 (US6): Role management — grantRole, revokeRole, renounceRole write operations
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
  * @see spec.md §US2 — acceptance scenarios 1–6
  * @see spec.md §US4 — acceptance scenarios 1–5
  * @see spec.md §US5 — acceptance scenarios 1–6
- * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin
+ * @see spec.md §US6 — acceptance scenarios 1–5
+ * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin + §Roles
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -1629,6 +1631,331 @@ describe('EvmAccessControlService', () => {
       const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
       expect(callArgs[2]).toBe(onStatusChange);
       expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── grantRole (Phase 8 — US6) ────────────────────────────────────────
+
+  describe('grantRole', () => {
+    const ROLE_ACCOUNT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.grantRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('grantRole');
+      expect(txData.args).toEqual([VALID_ROLE_ID, ROLE_ACCOUNT]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should pass executionConfig to callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.grantRole(VALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[1]).toBe(MOCK_EXECUTION_CONFIG);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.grantRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'test-api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('test-api-key');
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.grantRole(
+        VALID_ADDRESS,
+        DEFAULT_ADMIN_ROLE,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.args).toEqual([DEFAULT_ADMIN_ROLE, ROLE_ACCOUNT]);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.grantRole(unregisteredAddress, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+      await expect(
+        service.grantRole(unregisteredAddress, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow('Contract not registered');
+    });
+
+    it('should throw ConfigurationInvalid for invalid contract address', async () => {
+      await expect(
+        service.grantRole(INVALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid role ID', async () => {
+      await expect(
+        service.grantRole(VALID_ADDRESS, INVALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid account address', async () => {
+      await expect(
+        service.grantRole(VALID_ADDRESS, VALID_ROLE_ID, 'not-an-address', MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── revokeRole (Phase 8 — US6) ───────────────────────────────────────
+
+  describe('revokeRole', () => {
+    const ROLE_ACCOUNT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.revokeRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('revokeRole');
+      expect(txData.args).toEqual([VALID_ROLE_ID, ROLE_ACCOUNT]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should pass executionConfig to callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.revokeRole(VALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[1]).toBe(MOCK_EXECUTION_CONFIG);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.revokeRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'test-api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('test-api-key');
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.revokeRole(
+        VALID_ADDRESS,
+        DEFAULT_ADMIN_ROLE,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.args).toEqual([DEFAULT_ADMIN_ROLE, ROLE_ACCOUNT]);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.revokeRole(unregisteredAddress, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+      await expect(
+        service.revokeRole(unregisteredAddress, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow('Contract not registered');
+    });
+
+    it('should throw ConfigurationInvalid for invalid contract address', async () => {
+      await expect(
+        service.revokeRole(INVALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid role ID', async () => {
+      await expect(
+        service.revokeRole(VALID_ADDRESS, INVALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid account address', async () => {
+      await expect(
+        service.revokeRole(VALID_ADDRESS, VALID_ROLE_ID, 'not-an-address', MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── renounceRole (Phase 8 — US6, EVM-specific) ───────────────────────
+
+  describe('renounceRole', () => {
+    const ROLE_ACCOUNT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.renounceRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('renounceRole');
+      expect(txData.args).toEqual([VALID_ROLE_ID, ROLE_ACCOUNT]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should pass executionConfig to callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.renounceRole(VALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[1]).toBe(MOCK_EXECUTION_CONFIG);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.renounceRole(
+        VALID_ADDRESS,
+        VALID_ROLE_ID,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'test-api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('test-api-key');
+    });
+
+    it('should work with DEFAULT_ADMIN_ROLE (bytes32 zero)', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.renounceRole(
+        VALID_ADDRESS,
+        DEFAULT_ADMIN_ROLE,
+        ROLE_ACCOUNT,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.args).toEqual([DEFAULT_ADMIN_ROLE, ROLE_ACCOUNT]);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.renounceRole(
+          unregisteredAddress,
+          VALID_ROLE_ID,
+          ROLE_ACCOUNT,
+          MOCK_EXECUTION_CONFIG
+        )
+      ).rejects.toThrow(ConfigurationInvalid);
+      await expect(
+        service.renounceRole(
+          unregisteredAddress,
+          VALID_ROLE_ID,
+          ROLE_ACCOUNT,
+          MOCK_EXECUTION_CONFIG
+        )
+      ).rejects.toThrow('Contract not registered');
+    });
+
+    it('should throw ConfigurationInvalid for invalid contract address', async () => {
+      await expect(
+        service.renounceRole(INVALID_ADDRESS, VALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid role ID', async () => {
+      await expect(
+        service.renounceRole(VALID_ADDRESS, INVALID_ROLE_ID, ROLE_ACCOUNT, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid account address', async () => {
+      await expect(
+        service.renounceRole(VALID_ADDRESS, VALID_ROLE_ID, 'not-an-address', MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
     });
   });
 });
