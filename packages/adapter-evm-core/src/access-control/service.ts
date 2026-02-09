@@ -61,6 +61,16 @@ import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 import { validateAddress, validateRoleId, validateRoleIds } from './validation';
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** Empty history result used for graceful degradation (FR-017) */
+const EMPTY_HISTORY_RESULT: PaginatedHistoryResult = {
+  items: [],
+  pageInfo: { hasNextPage: false },
+};
+
+// ---------------------------------------------------------------------------
 // Service Implementation
 // ---------------------------------------------------------------------------
 
@@ -1089,13 +1099,70 @@ export class EvmAccessControlService implements AccessControlService {
     return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
-  // ── History & Snapshots (stub — implemented in Phase 9/10) ────────────
+  // ── History (Phase 9 — US7) ────────────────────────────────────────────
 
+  /**
+   * Query historical access control events from the indexer.
+   *
+   * Delegates to the indexer client's `queryHistory()` with filter/pagination options.
+   * Supports filtering by: role, account, event type, time range, and pagination.
+   *
+   * **Graceful degradation (FR-017)**: Returns an empty `PaginatedHistoryResult`
+   * (`{ items: [], pageInfo: { hasNextPage: false } }`) when:
+   * - The indexer is unavailable
+   * - The indexer query returns null
+   * - The indexer query throws an error
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param options - Optional filtering and pagination options
+   * @returns Paginated history result
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
   async getHistory(
-    _contractAddress: string,
-    _options?: HistoryQueryOptions
+    contractAddress: string,
+    options?: HistoryQueryOptions
   ): Promise<PaginatedHistoryResult> {
-    throw new Error('Not implemented — will be added in Phase 9 (US7)');
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info('EvmAccessControlService.getHistory', `Querying history for ${contractAddress}`);
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // Check indexer availability
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (!indexerAvailable) {
+      logger.warn(
+        'EvmAccessControlService.getHistory',
+        `Indexer unavailable for ${this.networkConfig.id}: returning empty history`
+      );
+      return EMPTY_HISTORY_RESULT;
+    }
+
+    // Delegate to indexer client
+    try {
+      const result = await this.indexerClient.queryHistory(context.contractAddress, options);
+
+      if (!result) {
+        logger.warn(
+          'EvmAccessControlService.getHistory',
+          `Indexer returned null for history query on ${context.contractAddress}`
+        );
+        return EMPTY_HISTORY_RESULT;
+      }
+
+      logger.debug(
+        'EvmAccessControlService.getHistory',
+        `Retrieved ${result.items.length} history event(s) for ${context.contractAddress}`
+      );
+
+      return result;
+    } catch (error) {
+      logger.warn(
+        'EvmAccessControlService.getHistory',
+        `Failed to query history: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return EMPTY_HISTORY_RESULT;
+    }
   }
 
   async exportSnapshot(_contractAddress: string): Promise<AccessSnapshot> {

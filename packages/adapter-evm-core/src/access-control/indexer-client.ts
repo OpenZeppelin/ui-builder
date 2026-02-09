@@ -19,6 +19,14 @@
  * @see research.md §R3 — GraphQL Indexer Client
  */
 
+import type {
+  HistoryChangeType,
+  HistoryEntry,
+  HistoryQueryOptions,
+  PageInfo,
+  PaginatedHistoryResult,
+  RoleIdentifier,
+} from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig } from '../types';
@@ -100,6 +108,7 @@ interface IndexerEventsResponse {
       pageInfo?: {
         hasNextPage: boolean;
         hasPreviousPage?: boolean;
+        endCursor?: string;
       };
     };
   };
@@ -188,6 +197,57 @@ const PENDING_ADMIN_TRANSFER_QUERY = `
     }
   }
 `;
+
+// ---------------------------------------------------------------------------
+// EVM Event Type → HistoryChangeType Mapping (research.md §R6)
+// ---------------------------------------------------------------------------
+
+/**
+ * Maps all 13 EVM indexer event types to unified HistoryChangeType values.
+ *
+ * 10 types map directly. 3 EVM-specific types (DEFAULT_ADMIN_TRANSFER_CANCELED,
+ * DEFAULT_ADMIN_DELAY_CHANGE_SCHEDULED, DEFAULT_ADMIN_DELAY_CHANGE_CANCELED)
+ * map to their PR-2 variants (ADMIN_TRANSFER_CANCELED, ADMIN_DELAY_CHANGE_SCHEDULED,
+ * ADMIN_DELAY_CHANGE_CANCELED) which are now available in @openzeppelin/ui-types@1.7.0.
+ *
+ * DEFAULT_ADMIN_TRANSFER_SCHEDULED is an EVM-specific alias for ADMIN_TRANSFER_INITIATED.
+ */
+const EVM_EVENT_TYPE_TO_CHANGE_TYPE: Record<string, HistoryChangeType> = {
+  ROLE_GRANTED: 'GRANTED',
+  ROLE_REVOKED: 'REVOKED',
+  ROLE_ADMIN_CHANGED: 'ROLE_ADMIN_CHANGED',
+  OWNERSHIP_TRANSFER_STARTED: 'OWNERSHIP_TRANSFER_STARTED',
+  OWNERSHIP_TRANSFER_COMPLETED: 'OWNERSHIP_TRANSFER_COMPLETED',
+  OWNERSHIP_RENOUNCED: 'OWNERSHIP_RENOUNCED',
+  ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
+  ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
+  ADMIN_RENOUNCED: 'ADMIN_RENOUNCED',
+  // EVM-specific aliases
+  DEFAULT_ADMIN_TRANSFER_SCHEDULED: 'ADMIN_TRANSFER_INITIATED',
+  DEFAULT_ADMIN_TRANSFER_CANCELED: 'ADMIN_TRANSFER_CANCELED',
+  DEFAULT_ADMIN_DELAY_CHANGE_SCHEDULED: 'ADMIN_DELAY_CHANGE_SCHEDULED',
+  DEFAULT_ADMIN_DELAY_CHANGE_CANCELED: 'ADMIN_DELAY_CHANGE_CANCELED',
+};
+
+/**
+ * Reverse mapping: HistoryChangeType → EVM indexer GraphQL enum value.
+ * Used to filter by event type in history queries.
+ */
+const CHANGE_TYPE_TO_EVENT_TYPE: Record<HistoryChangeType, string> = {
+  GRANTED: 'ROLE_GRANTED',
+  REVOKED: 'ROLE_REVOKED',
+  ROLE_ADMIN_CHANGED: 'ROLE_ADMIN_CHANGED',
+  OWNERSHIP_TRANSFER_STARTED: 'OWNERSHIP_TRANSFER_STARTED',
+  OWNERSHIP_TRANSFER_COMPLETED: 'OWNERSHIP_TRANSFER_COMPLETED',
+  OWNERSHIP_RENOUNCED: 'OWNERSHIP_RENOUNCED',
+  ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
+  ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
+  ADMIN_TRANSFER_CANCELED: 'DEFAULT_ADMIN_TRANSFER_CANCELED',
+  ADMIN_RENOUNCED: 'ADMIN_RENOUNCED',
+  ADMIN_DELAY_CHANGE_SCHEDULED: 'DEFAULT_ADMIN_DELAY_CHANGE_SCHEDULED',
+  ADMIN_DELAY_CHANGE_CANCELED: 'DEFAULT_ADMIN_DELAY_CHANGE_CANCELED',
+  UNKNOWN: 'UNKNOWN',
+};
 
 // ---------------------------------------------------------------------------
 // Client Implementation
@@ -533,6 +593,260 @@ export class EvmIndexerClient {
         `Failed to query latest grants: ${error instanceof Error ? error.message : String(error)}`
       );
       return null;
+    }
+  }
+
+  // ── History Queries (Phase 9 — US7) ────────────────────────────────────
+
+  /**
+   * Query historical access control events with filtering and pagination.
+   *
+   * Queries `accessControlEvents` with the specified filters. All 13 EVM event types
+   * are mapped to `HistoryChangeType` values per research.md §R6.
+   *
+   * Graceful degradation: returns null if the indexer is unavailable or the query fails.
+   *
+   * @param contractAddress - The contract address to query
+   * @param options - Optional filtering and pagination options
+   * @returns Paginated history result, or null on failure
+   */
+  async queryHistory(
+    contractAddress: string,
+    options?: HistoryQueryOptions
+  ): Promise<PaginatedHistoryResult | null> {
+    const isUp = await this.isAvailable();
+    if (!isUp || !this.endpoint) {
+      return null;
+    }
+
+    logger.info(LOG_SYSTEM, `Querying history for ${contractAddress}`);
+
+    const query = this.buildHistoryQuery(options);
+    const variables = this.buildHistoryVariables(contractAddress, options);
+
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+
+      if (!response.ok) {
+        logger.warn(LOG_SYSTEM, `Indexer query failed with status ${response.status} for history`);
+        return null;
+      }
+
+      const result = (await response.json()) as IndexerEventsResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer query errors: ${result.errors.map((e) => e.message).join('; ')}`
+        );
+        return null;
+      }
+
+      const nodes = result.data?.accessControlEvents?.nodes;
+      if (!nodes || nodes.length === 0) {
+        logger.debug(LOG_SYSTEM, `No history events found for ${contractAddress}`);
+        return {
+          items: [],
+          pageInfo: { hasNextPage: false },
+        };
+      }
+
+      const items = this.transformToHistoryEntries(nodes);
+      const pageInfo: PageInfo = {
+        hasNextPage: result.data?.accessControlEvents?.pageInfo?.hasNextPage ?? false,
+        endCursor: result.data?.accessControlEvents?.pageInfo?.endCursor,
+      };
+
+      logger.debug(LOG_SYSTEM, `Retrieved ${items.length} history event(s) for ${contractAddress}`);
+
+      return { items, pageInfo };
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Failed to query history: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
+    }
+  }
+
+  // ── Private Helpers ────────────────────────────────────────────────────
+
+  /**
+   * Builds the dynamic GraphQL history query with conditional filter clauses.
+   *
+   * Filter conditions are added only when the corresponding option is present.
+   * EventType filter uses inline GraphQL enum values (not quoted strings).
+   */
+  private buildHistoryQuery(options?: HistoryQueryOptions): string {
+    const roleFilter = options?.roleId ? ', role: { equalTo: $role }' : '';
+    const accountFilter = options?.account ? ', account: { equalTo: $account }' : '';
+    const typeFilter = options?.changeType
+      ? `, eventType: { equalTo: ${CHANGE_TYPE_TO_EVENT_TYPE[options.changeType]} }`
+      : '';
+    const txFilter = options?.txId ? ', txHash: { equalTo: $txHash }' : '';
+
+    // Build combined timestamp filter
+    const timestampConditions: string[] = [];
+    if (options?.timestampFrom) {
+      timestampConditions.push('greaterThanOrEqualTo: $timestampFrom');
+    }
+    if (options?.timestampTo) {
+      timestampConditions.push('lessThanOrEqualTo: $timestampTo');
+    }
+    const timestampFilter =
+      timestampConditions.length > 0 ? `, timestamp: { ${timestampConditions.join(', ')} }` : '';
+
+    const ledgerFilter = options?.ledger ? ', blockNumber: { equalTo: $blockNumber }' : '';
+    const limitClause = options?.limit ? ', first: $limit' : '';
+    const cursorClause = options?.cursor ? ', after: $cursor' : '';
+
+    // Build variable declarations
+    const varDeclarations = [
+      '$network: String!',
+      '$contract: String!',
+      options?.roleId ? '$role: String' : '',
+      options?.account ? '$account: String' : '',
+      options?.txId ? '$txHash: String' : '',
+      options?.timestampFrom ? '$timestampFrom: Datetime' : '',
+      options?.timestampTo ? '$timestampTo: Datetime' : '',
+      options?.ledger ? '$blockNumber: BigFloat' : '',
+      options?.limit ? '$limit: Int' : '',
+      options?.cursor ? '$cursor: Cursor' : '',
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    return `
+      query GetHistory(${varDeclarations}) {
+        accessControlEvents(
+          filter: {
+            network: { equalTo: $network }
+            contract: { equalTo: $contract }${roleFilter}${accountFilter}${typeFilter}${txFilter}${timestampFilter}${ledgerFilter}
+          }
+          orderBy: TIMESTAMP_DESC${limitClause}${cursorClause}
+        ) {
+          nodes {
+            id
+            eventType
+            blockNumber
+            timestamp
+            txHash
+            role
+            account
+            newOwner
+            newAdmin
+            acceptSchedule
+          }
+          totalCount
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    `;
+  }
+
+  /**
+   * Builds query variables for history queries, mapping options to GraphQL variables.
+   */
+  private buildHistoryVariables(
+    contractAddress: string,
+    options?: HistoryQueryOptions
+  ): Record<string, unknown> {
+    const variables: Record<string, unknown> = {
+      network: this.networkConfig.id,
+      contract: contractAddress,
+    };
+
+    if (options?.roleId) variables.role = options.roleId;
+    if (options?.account) variables.account = options.account;
+    if (options?.txId) variables.txHash = options.txId;
+    if (options?.timestampFrom) variables.timestampFrom = options.timestampFrom;
+    if (options?.timestampTo) variables.timestampTo = options.timestampTo;
+    if (options?.ledger) variables.blockNumber = String(options.ledger);
+    if (options?.limit) variables.limit = options.limit;
+    if (options?.cursor) variables.cursor = options.cursor;
+
+    return variables;
+  }
+
+  /**
+   * Transforms indexer event nodes to unified HistoryEntry format.
+   *
+   * Maps EVM event types to HistoryChangeType, normalizes account field
+   * based on event type (role → account, ownership → newOwner, admin → newAdmin).
+   */
+  private transformToHistoryEntries(nodes: IndexerEventNode[]): HistoryEntry[] {
+    return nodes.map((node) => {
+      const role: RoleIdentifier = {
+        id: node.role || 'OWNER',
+      };
+
+      const changeType = this.mapEventTypeToChangeType(node.eventType);
+      const account = this.normalizeAccountFromEvent(node);
+
+      return {
+        role,
+        account,
+        changeType,
+        txId: node.txHash,
+        timestamp: node.timestamp,
+        ledger: parseInt(node.blockNumber, 10),
+      };
+    });
+  }
+
+  /**
+   * Maps an EVM indexer event type string to the unified HistoryChangeType.
+   * Returns 'UNKNOWN' for unrecognized event types.
+   */
+  private mapEventTypeToChangeType(eventType: string): HistoryChangeType {
+    const mapped = EVM_EVENT_TYPE_TO_CHANGE_TYPE[eventType];
+    if (mapped) {
+      return mapped;
+    }
+
+    logger.warn(LOG_SYSTEM, `Unknown event type: ${eventType}, assigning changeType to UNKNOWN`);
+    return 'UNKNOWN';
+  }
+
+  /**
+   * Normalizes the account field from an indexer event node.
+   *
+   * Different event types store the relevant account in different fields:
+   * - Role events (ROLE_GRANTED, ROLE_REVOKED, ROLE_ADMIN_CHANGED): `account`
+   * - Ownership events: `newOwner`
+   * - Admin events: `newAdmin`
+   * - Fallback: `account` or empty string
+   */
+  private normalizeAccountFromEvent(node: IndexerEventNode): string {
+    switch (node.eventType) {
+      case 'ROLE_GRANTED':
+      case 'ROLE_REVOKED':
+      case 'ROLE_ADMIN_CHANGED':
+        return node.account || '';
+
+      case 'OWNERSHIP_TRANSFER_STARTED':
+      case 'OWNERSHIP_TRANSFER_COMPLETED':
+      case 'OWNERSHIP_RENOUNCED':
+        return node.newOwner || '';
+
+      case 'ADMIN_TRANSFER_INITIATED':
+      case 'ADMIN_TRANSFER_COMPLETED':
+      case 'ADMIN_RENOUNCED':
+      case 'DEFAULT_ADMIN_TRANSFER_SCHEDULED':
+      case 'DEFAULT_ADMIN_TRANSFER_CANCELED':
+      case 'DEFAULT_ADMIN_DELAY_CHANGE_SCHEDULED':
+      case 'DEFAULT_ADMIN_DELAY_CHANGE_CANCELED':
+        return node.newAdmin || '';
+
+      default:
+        return node.account || '';
     }
   }
 }

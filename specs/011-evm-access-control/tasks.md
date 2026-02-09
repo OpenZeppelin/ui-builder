@@ -198,13 +198,13 @@
 
 ### Tests (TDD)
 
-- [ ] T036 [P] [US7] Write indexer client history tests in `packages/adapter-evm-core/test/access-control/indexer-client.test.ts` (add history suite). Cover: `queryHistory` with filter by role/account/eventType/time range, pagination (first/offset), reverse chronological order, event type mapping (13 EVM events → HistoryChangeType per research.md §R6). Reference: contracts/indexer-queries.graphql §QueryAccessControlEvents.
-- [ ] T037 [P] [US7] Write service history tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add history suite). Cover: `getHistory()` delegates to indexer, empty result when indexer unavailable (FR-017), filter validation. Reference: spec.md §US7 scenarios 1–3.
+- [x] T036 [P] [US7] Write indexer client history tests in `packages/adapter-evm-core/test/access-control/indexer-client.test.ts` (add history suite). Cover: `queryHistory` with filter by role/account/eventType/time range, pagination (first/offset), reverse chronological order, event type mapping (13 EVM events → HistoryChangeType per research.md §R6). Reference: contracts/indexer-queries.graphql §QueryAccessControlEvents.
+- [x] T037 [P] [US7] Write service history tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add history suite). Cover: `getHistory()` delegates to indexer, empty result when indexer unavailable (FR-017), filter validation. Reference: spec.md §US7 scenarios 1–3.
 
 ### Implementation
 
-- [ ] T038 [US7] Implement `queryHistory(contractAddress, options)` with event type mapping in `packages/adapter-evm-core/src/access-control/indexer-client.ts`. Map all 13 EVM event types to HistoryChangeType (use UNKNOWN for 3 types until PR-2). Support filters: role, account, eventType, time range, pagination. Reference: contracts/indexer-queries.graphql §QueryAccessControlEvents, research.md §R6 mapping table.
-- [ ] T039 [US7] Implement `getHistory()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate inputs, check indexer availability, delegate to indexer client. Return empty PaginatedHistoryResult when indexer unavailable. Reference: contracts/access-control-service.ts §History.
+- [x] T038 [US7] Implement `queryHistory(contractAddress, options)` with event type mapping in `packages/adapter-evm-core/src/access-control/indexer-client.ts`. Map all 13 EVM event types to HistoryChangeType (use UNKNOWN for 3 types until PR-2). Support filters: role, account, eventType, time range, pagination. Reference: contracts/indexer-queries.graphql §QueryAccessControlEvents, research.md §R6 mapping table.
+- [x] T039 [US7] Implement `getHistory()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate inputs, check indexer availability, delegate to indexer client. Return empty PaginatedHistoryResult when indexer unavailable. Reference: contracts/access-control-service.ts §History.
 
 **Checkpoint**: US7 complete. Historical event queries with filtering and pagination work. Tests pass.
 

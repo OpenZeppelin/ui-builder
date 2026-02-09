@@ -8,13 +8,15 @@
  * - Phase 6 (US4): Ownership transfer, accept, renounce — write operations
  * - Phase 7 (US5): Admin transfer, accept, cancel, delay change, delay rollback — write operations
  * - Phase 8 (US6): Role management — grantRole, revokeRole, renounceRole write operations
+ * - Phase 9 (US7): History queries — getHistory with filtering, pagination, graceful degradation
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
  * @see spec.md §US2 — acceptance scenarios 1–6
  * @see spec.md §US4 — acceptance scenarios 1–5
  * @see spec.md §US5 — acceptance scenarios 1–6
  * @see spec.md §US6 — acceptance scenarios 1–5
- * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin + §Roles
+ * @see spec.md §US7 — acceptance scenarios 1–3
+ * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin + §Roles + §History
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,6 +28,7 @@ import type {
   EnrichedRoleAssignment,
   OperationResult,
   OwnershipInfo,
+  PaginatedHistoryResult,
   RoleAssignment,
 } from '@openzeppelin/ui-types';
 import { ConfigurationInvalid } from '@openzeppelin/ui-types';
@@ -57,6 +60,7 @@ const mockIndexerIsAvailable = vi.fn();
 const mockQueryPendingOwnershipTransfer = vi.fn();
 const mockQueryPendingAdminTransfer = vi.fn();
 const mockQueryLatestGrants = vi.fn();
+const mockQueryHistory = vi.fn();
 
 vi.mock('../../src/access-control/indexer-client', () => ({
   createIndexerClient: () => ({
@@ -65,6 +69,7 @@ vi.mock('../../src/access-control/indexer-client', () => ({
       mockQueryPendingOwnershipTransfer(...args),
     queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
     queryLatestGrants: (...args: unknown[]) => mockQueryLatestGrants(...args),
+    queryHistory: (...args: unknown[]) => mockQueryHistory(...args),
   }),
 }));
 
@@ -1956,6 +1961,188 @@ describe('EvmAccessControlService', () => {
       await expect(
         service.renounceRole(VALID_ADDRESS, VALID_ROLE_ID, 'not-an-address', MOCK_EXECUTION_CONFIG)
       ).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── getHistory (Phase 9 — US7) ───────────────────────────────────────
+
+  describe('getHistory', () => {
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+      mockQueryHistory.mockReset();
+
+      // Register a contract for history tests
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [VALID_ROLE_ID]);
+    });
+
+    it('should return paginated history events from indexer', async () => {
+      const mockResult: PaginatedHistoryResult = {
+        items: [
+          {
+            role: { id: VALID_ROLE_ID },
+            account: '0xAccount1000000000000000000000000000000001',
+            changeType: 'GRANTED',
+            txId: '0xhash1',
+            timestamp: '2026-01-20T12:00:00Z',
+            ledger: 300,
+          },
+          {
+            role: { id: 'OWNER' },
+            account: '0xNewOwner000000000000000000000000000000aa',
+            changeType: 'OWNERSHIP_TRANSFER_STARTED',
+            txId: '0xhash2',
+            timestamp: '2026-01-15T08:00:00Z',
+            ledger: 200,
+          },
+        ],
+        pageInfo: { hasNextPage: false },
+      };
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce(mockResult);
+
+      const result: PaginatedHistoryResult = await service.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0].changeType).toBe('GRANTED');
+      expect(result.items[1].changeType).toBe('OWNERSHIP_TRANSFER_STARTED');
+      expect(result.pageInfo.hasNextPage).toBe(false);
+    });
+
+    it('should delegate to indexer client with correct parameters', async () => {
+      const mockResult: PaginatedHistoryResult = {
+        items: [],
+        pageInfo: { hasNextPage: false },
+      };
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce(mockResult);
+
+      const options = {
+        roleId: VALID_ROLE_ID,
+        account: '0xAccount1000000000000000000000000000000001',
+        changeType: 'GRANTED' as const,
+        limit: 10,
+      };
+
+      await service.getHistory(VALID_ADDRESS, options);
+
+      // Verify the indexer client was called with the correct contract address and options
+      expect(mockQueryHistory).toHaveBeenCalledTimes(1);
+      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), options);
+    });
+
+    it('should return empty PaginatedHistoryResult when indexer is unavailable (FR-017)', async () => {
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: PaginatedHistoryResult = await service.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
+      expect(mockQueryHistory).not.toHaveBeenCalled();
+    });
+
+    it('should return empty PaginatedHistoryResult when indexer returns null', async () => {
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce(null);
+
+      const result: PaginatedHistoryResult = await service.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
+    });
+
+    it('should gracefully handle indexer errors and return empty result', async () => {
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockRejectedValueOnce(new Error('Indexer query failed'));
+
+      const result: PaginatedHistoryResult = await service.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
+    });
+
+    it('should pass filter options through to indexer client', async () => {
+      const mockResult: PaginatedHistoryResult = {
+        items: [],
+        pageInfo: { hasNextPage: false },
+      };
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce(mockResult);
+
+      const filterOptions = {
+        roleId: VALID_ROLE_ID,
+        account: '0xAccount1000000000000000000000000000000001',
+        changeType: 'REVOKED' as const,
+        timestampFrom: '2026-01-01T00:00:00',
+        timestampTo: '2026-02-01T00:00:00',
+        limit: 25,
+        cursor: 'page-cursor-abc',
+      };
+
+      await service.getHistory(VALID_ADDRESS, filterOptions);
+
+      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), filterOptions);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.getHistory(unregisteredAddress)).rejects.toThrow(ConfigurationInvalid);
+      await expect(service.getHistory(unregisteredAddress)).rejects.toThrow(
+        'Contract not registered'
+      );
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(service.getHistory(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should work with no options (query all history)', async () => {
+      const mockResult: PaginatedHistoryResult = {
+        items: [
+          {
+            role: { id: VALID_ROLE_ID },
+            account: '0xAcc1',
+            changeType: 'GRANTED',
+            txId: '0xhash1',
+            timestamp: '2026-01-20T12:00:00Z',
+            ledger: 300,
+          },
+        ],
+        pageInfo: { hasNextPage: false },
+      };
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce(mockResult);
+
+      const result = await service.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(1);
+      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), undefined);
+    });
+
+    it('should work with service created without indexer URL', async () => {
+      const serviceNoIndexer = new EvmAccessControlService(
+        mockNetworkConfigNoIndexer,
+        mockExecuteTransaction
+      );
+      serviceNoIndexer.registerContract(VALID_ADDRESS, COMBINED_SCHEMA);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result = await serviceNoIndexer.getHistory(VALID_ADDRESS);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.pageInfo.hasNextPage).toBe(false);
+
+      serviceNoIndexer.dispose();
     });
   });
 });
