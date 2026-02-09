@@ -70,18 +70,27 @@ export type HistoryChangeType =
 
 Update the JSDoc comment block to document each new variant.
 
-#### Step 0c: Add `accessControlIndexerUrl` to `EvmNetworkConfig` (PR-3)
+#### Step 0c: Add `accessControlIndexerUrl` to `BaseNetworkConfig` (PR-3)
 
 **File**: `packages/types/src/networks/config.ts`
 
 ```typescript
-// Add to EvmNetworkConfig interface:
+// Add to BaseNetworkConfig interface (shared across all ecosystems):
 /**
  * Optional GraphQL endpoint for the access control indexer.
  * Used by the access control module for historical queries and role discovery.
+ * Feature-specific field — distinct from the general-purpose `indexerUri` which
+ * may serve different purposes per ecosystem (e.g., Midnight chain indexer).
  */
 accessControlIndexerUrl?: string;
 ```
+
+**Stellar adapter migration (PR-3a)**: Update Stellar network configs to use `accessControlIndexerUrl` instead of `indexerUri`:
+- `packages/adapter-stellar/src/networks/mainnet.ts`: Replace `indexerUri` with `accessControlIndexerUrl`
+- `packages/adapter-stellar/src/networks/testnet.ts`: Replace `indexerUri` with `accessControlIndexerUrl`
+- `packages/adapter-stellar/src/access-control/indexer-client.ts`: Update resolution to `networkConfig.accessControlIndexerUrl ?? networkConfig.indexerUri`
+- `apps/builder/src/export/assemblers/generateAndAddAppConfig.ts`: Update to check `accessControlIndexerUrl ?? indexerUri`
+- Add temporary type augmentation files (`src/types/access-control-indexer-url.d.ts`) in Stellar adapter and builder app until the new types are published
 
 #### Step 0d: Update Role Manager mapping (required by PR-2)
 
@@ -101,7 +110,7 @@ This MUST be done before or simultaneously with bumping `@openzeppelin/ui-types`
 - Publish a new `@openzeppelin/ui-types` version with all three changes
 - Update `@openzeppelin/ui-types` dependency in `ui-builder` repo's `package.json`
 - Update `@openzeppelin/ui-types` dependency in `role-manager` repo's `package.json` and apply Step 0d
-- Remove any temporary workarounds (sentinel values, UNKNOWN mappings, local type extensions)
+- Remove any temporary workarounds (sentinel values, UNKNOWN mappings, local type extensions, `access-control-indexer-url.d.ts` augmentation files in Stellar adapter, builder app, and EVM adapter)
 
 ### Phase 1: Foundation (P1 — Read Operations)
 
@@ -255,9 +264,9 @@ Export all public API from each submodule. Mirror the Stellar module's export st
 #### Step 8: Network Config Extension
 
 ```
-packages/adapter-evm-core/src/types/network.ts  (add accessControlIndexerUrl)
-packages/adapter-evm/src/networks/mainnet.ts     (add indexer URLs per network)
-packages/adapter-evm/src/networks/testnet.ts     (add indexer URLs per network)
+packages/adapter-evm-core/src/types/access-control-indexer-url.d.ts  (temporary type augmentation for accessControlIndexerUrl on BaseNetworkConfig — remove after types are published)
+packages/adapter-evm/src/networks/mainnet.ts     (add accessControlIndexerUrl per network)
+packages/adapter-evm/src/networks/testnet.ts     (add accessControlIndexerUrl per network)
 ```
 
 #### Step 9: Adapter Integration
@@ -305,4 +314,4 @@ pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test -- src/access-contr
 ## Post-Implementation Cleanup
 
 1. **Changeset**: Create changesets for `adapter-evm-core` and `adapter-evm` packages
-2. **Remove workarounds**: Once the updated `@openzeppelin/ui-types` is consumed, remove any sentinel values (`expirationBlock: 0`), `UNKNOWN` fallbacks for mapped events, and local type extensions for `accessControlIndexerUrl`
+2. **Remove workarounds**: Once the updated `@openzeppelin/ui-types` is consumed, remove any sentinel values (`expirationBlock: 0`), `UNKNOWN` fallbacks for mapped events, and temporary `access-control-indexer-url.d.ts` type augmentation files (in Stellar adapter, builder app, and EVM adapter core)

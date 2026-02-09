@@ -151,7 +151,7 @@ Extended in `adapter-evm-core/src/types/network.ts`:
 | Field | Type | Description |
 |-------|------|-------------|
 | *(existing fields)* | | All existing EvmCompatibleNetworkConfig fields preserved |
-| accessControlIndexerUrl | `string \| undefined` | NEW: GraphQL endpoint for the access control indexer (added via PR-3 in openzeppelin-ui; local extension in adapter-evm-core until types are updated) |
+| accessControlIndexerUrl | `string \| undefined` | NEW: GraphQL endpoint for the access control indexer. Added to `BaseNetworkConfig` via PR-3 in openzeppelin-ui (shared across all ecosystems). Temporary type augmentation in adapter packages until types are published. |
 
 ## Constants
 

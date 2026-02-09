@@ -218,7 +218,7 @@ A user registers a contract without knowing all the role identifiers. The system
   - `getHistory()`: returns empty `PaginatedHistoryResult` (`{ items: [], pageInfo: { hasNextPage: false } }`).
   - `discoverKnownRoleIds()`: returns empty array, marks discovery as attempted to prevent retries.
 - **FR-018**: System MUST be exposed via the `EvmAdapter.getAccessControlService()` method, following the same pattern as the Stellar adapter. The access control module implementation MUST reside in the EVM core package; the adapter-evm package delegates to it.
-- **FR-019**: System MUST support the same indexer client configuration precedence as Stellar: user configuration (service constructor override) > runtime override > network default endpoint (`networkConfig.accessControlIndexerUrl`). All existing EVM networks MUST have indexer endpoints configured — the indexer implementation is identical across networks, so only network config entries need updating.
+- **FR-019**: System MUST support the same indexer client configuration precedence as Stellar: user configuration (service constructor override) > runtime override > network default endpoint (`networkConfig.accessControlIndexerUrl`, falling back to `networkConfig.indexerUri` for backward compatibility). All existing EVM networks MUST have indexer endpoints configured — the indexer implementation is identical across networks, so only network config entries need updating. Both EVM and Stellar adapters use the shared `accessControlIndexerUrl` field on `BaseNetworkConfig`.
 - **FR-020**: System MUST handle the EVM-specific `DEFAULT_ADMIN_ROLE` (bytes32 zero value) correctly in all role queries and operations.
 - **FR-021**: System MUST provide a `dispose()` method to clean up resources (indexer connections, caches).
 - **FR-022**: System MUST map EVM-specific concepts to the unified types — block numbers instead of ledger sequences, accept schedule timestamps instead of expiration ledgers, bytes32 roles instead of symbol roles.
@@ -280,18 +280,20 @@ Update the JSDoc comment block to document each new variant.
 
 **Impact on Role Manager**: The Role Manager uses `Record<HistoryChangeType, RoleChangeAction>` for event type mapping. Adding new union members **will break TypeScript compilation** in the Role Manager until its mapping is updated to include the new variants. This must be coordinated: either the Role Manager mapping is updated in the same PR cycle, or the Role Manager must add a catch-all/default pattern before the types are bumped. Update the `CHANGE_TYPE_TO_ACTION` mapping in `apps/role-manager/src/types/role-changes.ts`.
 
-### PR-3: Add `accessControlIndexerUrl` to `EvmNetworkConfig`
+### PR-3: Add `accessControlIndexerUrl` to `BaseNetworkConfig`
 
 **File**: `packages/types/src/networks/config.ts`
 
-The EVM access control module needs an indexer endpoint per network. Adding it to the canonical `EvmNetworkConfig` keeps the type system consistent and avoids local type extensions in the builder repo.
+All adapters that use the access control indexer need a feature-specific endpoint per network. Adding `accessControlIndexerUrl` to `BaseNetworkConfig` (rather than individual ecosystem configs) provides a uniform field across all ecosystems.
 
-Add to `EvmNetworkConfig`:
-- `accessControlIndexerUrl?: string` — Optional GraphQL endpoint for the access control indexer
+Add to `BaseNetworkConfig`:
+- `accessControlIndexerUrl?: string` — Optional GraphQL endpoint for the access control indexer. Feature-specific field — distinct from the general-purpose `indexerUri` which may serve different purposes per ecosystem (e.g., Midnight chain indexer).
 
 This is additive and non-breaking (optional field).
 
-**Naming note**: The Stellar adapter uses the generic `indexerUri` field from `BaseNetworkConfig` (shared across all features). For EVM, a feature-specific field (`accessControlIndexerUrl`) is used because EVM networks may have multiple independent indexers for different features in the future. This is an intentional divergence from the Stellar naming pattern.
+**Rationale**: The generic `indexerUri` field serves different purposes per ecosystem — Stellar uses it for the access control indexer, while Midnight uses it for its chain indexer. By introducing a feature-specific field on `BaseNetworkConfig`, each adapter explicitly declares its access control indexer URL, avoiding semantic ambiguity. Both EVM and Stellar adapters use `accessControlIndexerUrl` for their access control modules. The Stellar adapter's `indexer-client.ts` prefers `accessControlIndexerUrl` over `indexerUri` (with graceful fallback to `indexerUri` for backward compatibility).
+
+**Stellar adapter migration (PR-3a)**: As part of this change, the Stellar adapter's network configs (`mainnet.ts`, `testnet.ts`) were updated to use `accessControlIndexerUrl` instead of `indexerUri`, and the `indexer-client.ts` resolution logic was updated to prefer `accessControlIndexerUrl ?? indexerUri`. A temporary type augmentation file (`src/types/access-control-indexer-url.d.ts`) bridges the gap until the new types are published. The user config system (`network-services.ts`) continues to use `indexerUri` as its form field name, which is unchanged.
 
 ## Assumptions
 
