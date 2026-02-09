@@ -41,6 +41,16 @@ import { ConfigurationInvalid } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig, WriteContractParameters } from '../types';
+import {
+  assembleAcceptAdminTransferAction,
+  assembleAcceptOwnershipAction,
+  assembleBeginAdminTransferAction,
+  assembleCancelAdminTransferAction,
+  assembleChangeAdminDelayAction,
+  assembleRenounceOwnershipAction,
+  assembleRollbackAdminDelayAction,
+  assembleTransferOwnershipAction,
+} from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, EvmIndexerClient } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
@@ -312,24 +322,129 @@ export class EvmAccessControlService implements AccessControlService {
     };
   }
 
+  /**
+   * Initiate ownership transfer.
+   *
+   * - Ownable: single-step `transferOwnership(newOwner)` — ownership changes immediately
+   * - Ownable2Step: `transferOwnership(newOwner)` — sets `pendingOwner`, requires `acceptOwnership()`
+   *
+   * The `expirationBlock` parameter is **ignored for EVM** — EVM Ownable2Step has no
+   * expiration mechanism (FR-023). The parameter exists for API parity with Stellar.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param newOwner - The new owner address
+   * @param _expirationBlock - Ignored for EVM (no expiration). Exists for Stellar API parity.
+   * @param executionConfig - Execution strategy configuration (EOA, Relayer, etc.)
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered or addresses invalid
+   */
   async transferOwnership(
-    _contractAddress: string,
-    _newOwner: string,
+    contractAddress: string,
+    newOwner: string,
     _expirationBlock: number | undefined,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 6 (US4)');
+    validateAddress(contractAddress, 'contractAddress');
+    validateAddress(newOwner, 'newOwner');
+
+    logger.info(
+      'EvmAccessControlService.transferOwnership',
+      `Initiating ownership transfer for ${contractAddress} to ${newOwner}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleTransferOwnershipAction(context.contractAddress, newOwner);
+
+    logger.debug(
+      'EvmAccessControlService.transferOwnership',
+      `Assembled transferOwnership tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
+  /**
+   * Accept a pending ownership transfer (Ownable2Step only).
+   *
+   * Must be called by the pending owner. No arguments — the caller is
+   * implicitly validated on-chain.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
   async acceptOwnership(
-    _contractAddress: string,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 6 (US4)');
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.acceptOwnership',
+      `Accepting ownership for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleAcceptOwnershipAction(context.contractAddress);
+
+    logger.debug(
+      'EvmAccessControlService.acceptOwnership',
+      `Assembled acceptOwnership tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  /**
+   * Renounce ownership (Ownable).
+   *
+   * Permanently renounces ownership — after execution, `owner()` returns the zero address
+   * and ownership queries return state `'renounced'`.
+   *
+   * **EVM-specific extension** — not part of the unified AccessControlService interface
+   * or the Stellar adapter. Stellar has no equivalent.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async renounceOwnership(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.renounceOwnership',
+      `Renouncing ownership for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    const txData = assembleRenounceOwnershipAction(context.contractAddress);
+
+    logger.debug(
+      'EvmAccessControlService.renounceOwnership',
+      `Assembled renounceOwnership tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
   // ── Admin ──────────────────────────────────────────────────────────────
@@ -443,24 +558,232 @@ export class EvmAccessControlService implements AccessControlService {
     };
   }
 
+  /**
+   * Initiate default admin transfer (AccessControlDefaultAdminRules).
+   *
+   * Assembles `beginDefaultAdminTransfer(newAdmin)` and delegates execution.
+   * The contract's built-in delay determines when the transfer can be accepted.
+   *
+   * The `expirationBlock` parameter is **ignored for EVM** — the delay is
+   * determined by the contract's `defaultAdminDelay()`. The parameter exists
+   * for API parity with Stellar.
+   *
+   * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
+   * have the `hasTwoStepAdmin` capability.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param newAdmin - The new admin address
+   * @param _expirationBlock - Ignored for EVM. Exists for Stellar API parity.
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, address invalid, or lacks hasTwoStepAdmin
+   */
   async transferAdminRole(
-    _contractAddress: string,
-    _newAdmin: string,
+    contractAddress: string,
+    newAdmin: string,
     _expirationBlock: number | undefined,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 7 (US5)');
+    validateAddress(contractAddress, 'contractAddress');
+    validateAddress(newAdmin, 'newAdmin');
+
+    logger.info(
+      'EvmAccessControlService.transferAdminRole',
+      `Initiating admin transfer for ${contractAddress} to ${newAdmin}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+    await this.ensureHasTwoStepAdmin(contractAddress);
+
+    const txData = assembleBeginAdminTransferAction(context.contractAddress, newAdmin);
+
+    logger.debug(
+      'EvmAccessControlService.transferAdminRole',
+      `Assembled beginDefaultAdminTransfer tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
+  /**
+   * Accept a pending default admin transfer (AccessControlDefaultAdminRules).
+   *
+   * Must be called by the pending admin after the accept schedule timestamp.
+   * No arguments — the caller is implicitly validated on-chain.
+   *
+   * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
+   * have the `hasTwoStepAdmin` capability.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, address invalid, or lacks hasTwoStepAdmin
+   */
   async acceptAdminTransfer(
-    _contractAddress: string,
-    _executionConfig: ExecutionConfig,
-    _onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
-    _runtimeApiKey?: string
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
   ): Promise<OperationResult> {
-    throw new Error('Not implemented — will be added in Phase 7 (US5)');
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.acceptAdminTransfer',
+      `Accepting admin transfer for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+    await this.ensureHasTwoStepAdmin(contractAddress);
+
+    const txData = assembleAcceptAdminTransferAction(context.contractAddress);
+
+    logger.debug(
+      'EvmAccessControlService.acceptAdminTransfer',
+      `Assembled acceptDefaultAdminTransfer tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  /**
+   * Cancel a pending default admin transfer (AccessControlDefaultAdminRules).
+   *
+   * Must be called by the current default admin. Cancels any pending transfer
+   * and resets the pending admin state.
+   *
+   * **EVM-specific extension** — not part of the unified AccessControlService interface
+   * or the Stellar adapter.
+   *
+   * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
+   * have the `hasTwoStepAdmin` capability.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, address invalid, or lacks hasTwoStepAdmin
+   */
+  async cancelAdminTransfer(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.cancelAdminTransfer',
+      `Canceling admin transfer for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+    await this.ensureHasTwoStepAdmin(contractAddress);
+
+    const txData = assembleCancelAdminTransferAction(context.contractAddress);
+
+    logger.debug(
+      'EvmAccessControlService.cancelAdminTransfer',
+      `Assembled cancelDefaultAdminTransfer tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  /**
+   * Change the default admin transfer delay (AccessControlDefaultAdminRules).
+   *
+   * Schedules a change to the delay period. The change itself has a delay
+   * before it takes effect (determined by the current delay).
+   *
+   * **EVM-specific extension** — not part of the unified AccessControlService interface.
+   *
+   * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
+   * have the `hasTwoStepAdmin` capability.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param newDelay - The new delay in seconds (uint48)
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, address invalid, or lacks hasTwoStepAdmin
+   */
+  async changeAdminDelay(
+    contractAddress: string,
+    newDelay: number,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.changeAdminDelay',
+      `Changing admin delay for ${contractAddress} to ${newDelay}s`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+    await this.ensureHasTwoStepAdmin(contractAddress);
+
+    const txData = assembleChangeAdminDelayAction(context.contractAddress, newDelay);
+
+    logger.debug(
+      'EvmAccessControlService.changeAdminDelay',
+      `Assembled changeDefaultAdminDelay tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  /**
+   * Rollback a pending admin delay change (AccessControlDefaultAdminRules).
+   *
+   * Cancels a scheduled delay change. Must be called by the current default admin
+   * before the delay change takes effect.
+   *
+   * **EVM-specific extension** — not part of the unified AccessControlService interface.
+   *
+   * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
+   * have the `hasTwoStepAdmin` capability.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param executionConfig - Execution strategy configuration
+   * @param onStatusChange - Optional callback for transaction status updates
+   * @param runtimeApiKey - Optional API key for relayer execution
+   * @returns Operation result with transaction hash
+   * @throws ConfigurationInvalid if contract not registered, address invalid, or lacks hasTwoStepAdmin
+   */
+  async rollbackAdminDelay(
+    contractAddress: string,
+    executionConfig: ExecutionConfig,
+    onStatusChange?: (status: TxStatus, details: TransactionStatusUpdate) => void,
+    runtimeApiKey?: string
+  ): Promise<OperationResult> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.rollbackAdminDelay',
+      `Rolling back admin delay change for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+    await this.ensureHasTwoStepAdmin(contractAddress);
+
+    const txData = assembleRollbackAdminDelayAction(context.contractAddress);
+
+    logger.debug(
+      'EvmAccessControlService.rollbackAdminDelay',
+      `Assembled rollbackDefaultAdminDelay tx for ${context.contractAddress}`
+    );
+
+    return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
   }
 
   // ── Roles ──────────────────────────────────────────────────────────────
@@ -712,6 +1035,28 @@ export class EvmAccessControlService implements AccessControlService {
    */
   private hasIndexerEndpoint(): boolean {
     return !!this.networkConfig.accessControlIndexerUrl;
+  }
+
+  /**
+   * Guards admin operations — ensures the contract has `hasTwoStepAdmin` capability.
+   *
+   * Throws `ConfigurationInvalid` if the contract does not support
+   * AccessControlDefaultAdminRules (FR-024). This prevents any on-chain
+   * interaction with incompatible contracts.
+   *
+   * @param contractAddress - The contract address to check
+   * @throws ConfigurationInvalid if the contract lacks hasTwoStepAdmin capability
+   */
+  private async ensureHasTwoStepAdmin(contractAddress: string): Promise<void> {
+    const capabilities = await this.getCapabilities(contractAddress);
+    if (!capabilities.hasTwoStepAdmin) {
+      throw new ConfigurationInvalid(
+        'Contract does not support AccessControlDefaultAdminRules (hasTwoStepAdmin is false). ' +
+          'Admin operations require a contract with the DefaultAdminRules pattern.',
+        contractAddress,
+        'contractAddress'
+      );
+    }
   }
 
   /**

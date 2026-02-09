@@ -4,9 +4,14 @@
  * Tests the EvmAccessControlService class for:
  * - Phase 3 (US1): Contract registration, input validation, role ID management, capability detection
  * - Phase 4 (US2): Ownership queries, admin info queries, indexer enrichment, graceful degradation
+ * - Phase 5 (US3): Role queries, enriched role assignments, graceful degradation
+ * - Phase 6 (US4): Ownership transfer, accept, renounce — write operations
+ * - Phase 7 (US5): Admin transfer, accept, cancel, delay change, delay rollback — write operations
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
  * @see spec.md §US2 — acceptance scenarios 1–6
+ * @see spec.md §US4 — acceptance scenarios 1–5
+ * @see spec.md §US5 — acceptance scenarios 1–6
  * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin
  */
 
@@ -995,6 +1000,635 @@ describe('EvmAccessControlService', () => {
       await expect(service.getCurrentRolesEnriched(INVALID_ADDRESS)).rejects.toThrow(
         ConfigurationInvalid
       );
+    });
+  });
+
+  // ── transferOwnership (Phase 6 — US4) ────────────────────────────────
+
+  describe('transferOwnership', () => {
+    const NEW_OWNER = '0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa';
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, OWNABLE_TWO_STEP_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.transferOwnership(
+        VALID_ADDRESS,
+        NEW_OWNER,
+        undefined,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('transferOwnership');
+      expect(txData.args).toEqual([NEW_OWNER]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should ignore expirationBlock for EVM (FR-023)', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      // Pass a non-undefined expirationBlock — should be ignored
+      await service.transferOwnership(VALID_ADDRESS, NEW_OWNER, 999999, MOCK_EXECUTION_CONFIG);
+
+      // Verify the assembled transaction doesn't include expirationBlock in args
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('transferOwnership');
+      expect(txData.args).toEqual([NEW_OWNER]);
+      // Only one arg: newOwner
+      expect(txData.args).toHaveLength(1);
+    });
+
+    it('should pass executionConfig to callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.transferOwnership(VALID_ADDRESS, NEW_OWNER, undefined, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[1]).toBe(MOCK_EXECUTION_CONFIG);
+    });
+
+    it('should pass onStatusChange callback when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.transferOwnership(
+        VALID_ADDRESS,
+        NEW_OWNER,
+        undefined,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+    });
+
+    it('should pass runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.transferOwnership(
+        VALID_ADDRESS,
+        NEW_OWNER,
+        undefined,
+        MOCK_EXECUTION_CONFIG,
+        undefined,
+        'test-api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[3]).toBe('test-api-key');
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.transferOwnership(unregisteredAddress, NEW_OWNER, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+      await expect(
+        service.transferOwnership(unregisteredAddress, NEW_OWNER, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow('Contract not registered');
+    });
+
+    it('should throw ConfigurationInvalid for invalid contract address', async () => {
+      await expect(
+        service.transferOwnership(INVALID_ADDRESS, NEW_OWNER, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid new owner address', async () => {
+      await expect(
+        service.transferOwnership(VALID_ADDRESS, 'not-an-address', undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── acceptOwnership (Phase 6 — US4) ─────────────────────────────────
+
+  describe('acceptOwnership', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, OWNABLE_TWO_STEP_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.acceptOwnership(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('acceptOwnership');
+      expect(txData.args).toEqual([]);
+    });
+
+    it('should use the normalized contract address', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.acceptOwnership(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.acceptOwnership(unregisteredAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(service.acceptOwnership(INVALID_ADDRESS, MOCK_EXECUTION_CONFIG)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.acceptOwnership(
+        VALID_ADDRESS,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── renounceOwnership (Phase 6 — US4, EVM-specific) ─────────────────
+
+  describe('renounceOwnership', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, OWNABLE_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.renounceOwnership(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('renounceOwnership');
+      expect(txData.args).toEqual([]);
+    });
+
+    it('should use the normalized contract address', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.renounceOwnership(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.renounceOwnership(unregisteredAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(
+        service.renounceOwnership(INVALID_ADDRESS, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.renounceOwnership(
+        VALID_ADDRESS,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── transferAdminRole (Phase 7 — US5) ────────────────────────────────
+
+  describe('transferAdminRole', () => {
+    const NEW_ADMIN = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC';
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.transferAdminRole(
+        VALID_ADDRESS,
+        NEW_ADMIN,
+        undefined,
+        MOCK_EXECUTION_CONFIG
+      );
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      // Verify the assembled WriteContractParameters
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('beginDefaultAdminTransfer');
+      expect(txData.args).toEqual([NEW_ADMIN]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should ignore expirationBlock for EVM', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.transferAdminRole(VALID_ADDRESS, NEW_ADMIN, 999999, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('beginDefaultAdminTransfer');
+      expect(txData.args).toEqual([NEW_ADMIN]);
+      expect(txData.args).toHaveLength(1);
+    });
+
+    it('should pass executionConfig to callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.transferAdminRole(VALID_ADDRESS, NEW_ADMIN, undefined, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[1]).toBe(MOCK_EXECUTION_CONFIG);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.transferAdminRole(
+        VALID_ADDRESS,
+        NEW_ADMIN,
+        undefined,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'test-api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('test-api-key');
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.transferAdminRole(unregisteredAddress, NEW_ADMIN, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+      await expect(
+        service.transferAdminRole(unregisteredAddress, NEW_ADMIN, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow('Contract not registered');
+    });
+
+    it('should throw ConfigurationInvalid for invalid contract address', async () => {
+      await expect(
+        service.transferAdminRole(INVALID_ADDRESS, NEW_ADMIN, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid newAdmin address', async () => {
+      await expect(
+        service.transferAdminRole(VALID_ADDRESS, 'not-an-address', undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid when contract lacks hasTwoStepAdmin capability (FR-024)', async () => {
+      // Register with Ownable-only schema (no DefaultAdminRules)
+      const ownableOnlyAddress = '0x2222222222222222222222222222222222222222';
+      service.registerContract(ownableOnlyAddress, OWNABLE_SCHEMA);
+
+      await expect(
+        service.transferAdminRole(ownableOnlyAddress, NEW_ADMIN, undefined, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── acceptAdminTransfer (Phase 7 — US5) ──────────────────────────────
+
+  describe('acceptAdminTransfer', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.acceptAdminTransfer(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('acceptDefaultAdminTransfer');
+      expect(txData.args).toEqual([]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.acceptAdminTransfer(unregisteredAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(
+        service.acceptAdminTransfer(INVALID_ADDRESS, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid when contract lacks hasTwoStepAdmin capability (FR-024)', async () => {
+      const ownableOnlyAddress = '0x2222222222222222222222222222222222222222';
+      service.registerContract(ownableOnlyAddress, OWNABLE_SCHEMA);
+
+      await expect(
+        service.acceptAdminTransfer(ownableOnlyAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.acceptAdminTransfer(
+        VALID_ADDRESS,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── cancelAdminTransfer (Phase 7 — US5) ──────────────────────────────
+
+  describe('cancelAdminTransfer', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.cancelAdminTransfer(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('cancelDefaultAdminTransfer');
+      expect(txData.args).toEqual([]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.cancelAdminTransfer(unregisteredAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(
+        service.cancelAdminTransfer(INVALID_ADDRESS, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid when contract lacks hasTwoStepAdmin capability (FR-024)', async () => {
+      const accessControlOnlyAddress = '0x3333333333333333333333333333333333333333';
+      service.registerContract(accessControlOnlyAddress, ACCESS_CONTROL_SCHEMA);
+
+      await expect(
+        service.cancelAdminTransfer(accessControlOnlyAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.cancelAdminTransfer(
+        VALID_ADDRESS,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── changeAdminDelay (Phase 7 — US5) ─────────────────────────────────
+
+  describe('changeAdminDelay', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const newDelay = 172800; // 2 days in seconds
+      const result = await service.changeAdminDelay(VALID_ADDRESS, newDelay, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('changeDefaultAdminDelay');
+      expect(txData.args).toEqual([newDelay]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should accept zero delay', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      await service.changeAdminDelay(VALID_ADDRESS, 0, MOCK_EXECUTION_CONFIG);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.args).toEqual([0]);
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.changeAdminDelay(unregisteredAddress, 86400, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(
+        service.changeAdminDelay(INVALID_ADDRESS, 86400, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid when contract lacks hasTwoStepAdmin capability (FR-024)', async () => {
+      const ownableOnlyAddress = '0x2222222222222222222222222222222222222222';
+      service.registerContract(ownableOnlyAddress, OWNABLE_SCHEMA);
+
+      await expect(
+        service.changeAdminDelay(ownableOnlyAddress, 86400, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.changeAdminDelay(
+        VALID_ADDRESS,
+        86400,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
+    });
+  });
+
+  // ── rollbackAdminDelay (Phase 7 — US5) ───────────────────────────────
+
+  describe('rollbackAdminDelay', () => {
+    const MOCK_EXECUTION_CONFIG = {
+      type: 'EOA',
+    } as unknown as import('@openzeppelin/ui-types').ExecutionConfig;
+
+    beforeEach(() => {
+      vi.mocked(mockExecuteTransaction).mockClear();
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should assemble and delegate to executeTransaction callback', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+
+      const result = await service.rollbackAdminDelay(VALID_ADDRESS, MOCK_EXECUTION_CONFIG);
+
+      expect(result.id).toBe('0xtxhash');
+      expect(mockExecuteTransaction).toHaveBeenCalledTimes(1);
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      const txData = callArgs[0];
+      expect(txData.functionName).toBe('rollbackDefaultAdminDelay');
+      expect(txData.args).toEqual([]);
+      expect(txData.address).toBe(VALID_ADDRESS.toLowerCase());
+    });
+
+    it('should throw ConfigurationInvalid for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(
+        service.rollbackAdminDelay(unregisteredAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid for invalid address', async () => {
+      await expect(
+        service.rollbackAdminDelay(INVALID_ADDRESS, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw ConfigurationInvalid when contract lacks hasTwoStepAdmin capability (FR-024)', async () => {
+      const ownableOnlyAddress = '0x2222222222222222222222222222222222222222';
+      service.registerContract(ownableOnlyAddress, OWNABLE_SCHEMA);
+
+      await expect(
+        service.rollbackAdminDelay(ownableOnlyAddress, MOCK_EXECUTION_CONFIG)
+      ).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should pass onStatusChange and runtimeApiKey when provided', async () => {
+      vi.mocked(mockExecuteTransaction).mockResolvedValueOnce({ id: '0xtxhash' });
+      const onStatusChange = vi.fn();
+
+      await service.rollbackAdminDelay(
+        VALID_ADDRESS,
+        MOCK_EXECUTION_CONFIG,
+        onStatusChange,
+        'api-key'
+      );
+
+      const callArgs = vi.mocked(mockExecuteTransaction).mock.calls[0];
+      expect(callArgs[2]).toBe(onStatusChange);
+      expect(callArgs[3]).toBe('api-key');
     });
   });
 });

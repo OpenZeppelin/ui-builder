@@ -138,13 +138,13 @@
 
 ### Tests (TDD)
 
-- [ ] T024 [P] [US4] Write actions ownership tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (initial file — ownership suite). Cover: `assembleTransferOwnershipAction` returns correct `WriteContractParameters`, `assembleAcceptOwnershipAction`, `assembleRenounceOwnershipAction` (EVM-specific). Verify address, abi, functionName, args for each. Reference: quickstart.md §Step 5.
-- [ ] T025 [P] [US4] Write service ownership transfer tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add ownership transfer suite). Cover: `transferOwnership()` assembles and delegates to executeTransaction callback, `acceptOwnership()`, `renounceOwnership()` (EVM-specific). Verify expirationBlock is ignored for EVM. Guard: unregistered contract throws ConfigurationInvalid. Reference: spec.md §US4 scenarios 1–5.
+- [x] T024 [P] [US4] Write actions ownership tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (initial file — ownership suite). Cover: `assembleTransferOwnershipAction` returns correct `WriteContractParameters`, `assembleAcceptOwnershipAction`, `assembleRenounceOwnershipAction` (EVM-specific). Verify address, abi, functionName, args for each. Reference: quickstart.md §Step 5.
+- [x] T025 [P] [US4] Write service ownership transfer tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add ownership transfer suite). Cover: `transferOwnership()` assembles and delegates to executeTransaction callback, `acceptOwnership()`, `renounceOwnership()` (EVM-specific). Verify expirationBlock is ignored for EVM. Guard: unregistered contract throws ConfigurationInvalid. Reference: spec.md §US4 scenarios 1–5.
 
 ### Implementation
 
-- [ ] T026 [P] [US4] Implement `assembleTransferOwnershipAction`, `assembleAcceptOwnershipAction`, `assembleRenounceOwnershipAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Each returns `{ address, abi: [singleFunctionAbi], functionName, args }` as `WriteContractParameters`. Reference: quickstart.md §Step 5, research.md §R2.
-- [ ] T027 [US4] Implement `transferOwnership()`, `acceptOwnership()`, `renounceOwnership()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate inputs, assemble via actions module, delegate to `executeTransaction` callback. `expirationBlock` param is ignored for EVM. Add INFO/DEBUG logging per NFR-001 (verify via mock logger in T025 service tests). Reference: contracts/access-control-service.ts §Ownership.
+- [x] T026 [P] [US4] Implement `assembleTransferOwnershipAction`, `assembleAcceptOwnershipAction`, `assembleRenounceOwnershipAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Each returns `{ address, abi: [singleFunctionAbi], functionName, args }` as `WriteContractParameters`. Reference: quickstart.md §Step 5, research.md §R2.
+- [x] T027 [US4] Implement `transferOwnership()`, `acceptOwnership()`, `renounceOwnership()` in `packages/adapter-evm-core/src/access-control/service.ts`. Validate inputs, assemble via actions module, delegate to `executeTransaction` callback. `expirationBlock` param is ignored for EVM. Add INFO/DEBUG logging per NFR-001 (verify via mock logger in T025 service tests). Reference: contracts/access-control-service.ts §Ownership.
 
 **Checkpoint**: US4 complete. Ownership transfer, accept, and renounce work end-to-end. Tests pass.
 
@@ -158,13 +158,13 @@
 
 ### Tests (TDD)
 
-- [ ] T028 [P] [US5] Write actions admin tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (add admin suite). Cover: `assembleBeginAdminTransferAction`, `assembleAcceptAdminTransferAction`, `assembleCancelAdminTransferAction`, `assembleChangeAdminDelayAction` (uint48 parameter), `assembleRollbackAdminDelayAction`. Reference: quickstart.md §Step 5.
-- [ ] T029 [P] [US5] Write service admin transfer tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add admin transfer suite). Cover: `transferAdminRole()`, `acceptAdminTransfer()`, `cancelAdminTransfer()`, `changeAdminDelay()`, `rollbackAdminDelay()`. Guard: calling without `hasTwoStepAdmin` throws ConfigurationInvalid (FR-024). Reference: spec.md §US5 scenarios 1–6.
+- [x] T028 [P] [US5] Write actions admin tests in `packages/adapter-evm-core/test/access-control/actions.test.ts` (add admin suite). Cover: `assembleBeginAdminTransferAction`, `assembleAcceptAdminTransferAction`, `assembleCancelAdminTransferAction`, `assembleChangeAdminDelayAction` (uint48 parameter), `assembleRollbackAdminDelayAction`. Reference: quickstart.md §Step 5.
+- [x] T029 [P] [US5] Write service admin transfer tests in `packages/adapter-evm-core/test/access-control/service.test.ts` (add admin transfer suite). Cover: `transferAdminRole()`, `acceptAdminTransfer()`, `cancelAdminTransfer()`, `changeAdminDelay()`, `rollbackAdminDelay()`. Guard: calling without `hasTwoStepAdmin` throws ConfigurationInvalid (FR-024). Reference: spec.md §US5 scenarios 1–6.
 
 ### Implementation
 
-- [ ] T030 [P] [US5] Implement `assembleBeginAdminTransferAction`, `assembleAcceptAdminTransferAction`, `assembleCancelAdminTransferAction`, `assembleChangeAdminDelayAction`, `assembleRollbackAdminDelayAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Reference: quickstart.md §Step 5.
-- [ ] T031 [US5] Implement `transferAdminRole()`, `acceptAdminTransfer()`, `cancelAdminTransfer()`, `changeAdminDelay()`, `rollbackAdminDelay()` in `packages/adapter-evm-core/src/access-control/service.ts`. Guard capability checks (throw ConfigurationInvalid if `!hasTwoStepAdmin`). Delegate to `executeTransaction`. Reference: contracts/access-control-service.ts §Admin.
+- [x] T030 [P] [US5] Implement `assembleBeginAdminTransferAction`, `assembleAcceptAdminTransferAction`, `assembleCancelAdminTransferAction`, `assembleChangeAdminDelayAction`, `assembleRollbackAdminDelayAction` in `packages/adapter-evm-core/src/access-control/actions.ts`. Reference: quickstart.md §Step 5.
+- [x] T031 [US5] Implement `transferAdminRole()`, `acceptAdminTransfer()`, `cancelAdminTransfer()`, `changeAdminDelay()`, `rollbackAdminDelay()` in `packages/adapter-evm-core/src/access-control/service.ts`. Guard capability checks (throw ConfigurationInvalid if `!hasTwoStepAdmin`). Delegate to `executeTransaction`. Reference: contracts/access-control-service.ts §Admin.
 
 **Checkpoint**: US5 complete. All admin transfer and delay operations work. Capability guards tested. Tests pass.
 
