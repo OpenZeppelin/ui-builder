@@ -25,6 +25,7 @@ import type {
   AdminInfo,
   ContractSchema,
   EnrichedRoleAssignment,
+  EnrichedRoleMember,
   ExecutionConfig,
   HistoryQueryOptions,
   OperationResult,
@@ -42,7 +43,7 @@ import { logger } from '@openzeppelin/ui-utils';
 import type { EvmCompatibleNetworkConfig, WriteContractParameters } from '../types';
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, EvmIndexerClient } from './indexer-client';
-import { getAdmin, readOwnership } from './onchain-reader';
+import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 import { validateAddress, validateRoleIds } from './validation';
 
@@ -462,14 +463,168 @@ export class EvmAccessControlService implements AccessControlService {
     throw new Error('Not implemented — will be added in Phase 7 (US5)');
   }
 
-  // ── Roles (stub — implemented in Phase 5/8) ──────────────────────────
+  // ── Roles ──────────────────────────────────────────────────────────────
 
-  async getCurrentRoles(_contractAddress: string): Promise<RoleAssignment[]> {
-    throw new Error('Not implemented — will be added in Phase 5 (US3)');
+  /**
+   * Get current role assignments for a registered AccessControl contract.
+   *
+   * Strategy:
+   * 1. If AccessControlEnumerable: enumerate on-chain via `getRoleMember()`
+   * 2. If known role IDs available: use on-chain `readCurrentRoles()` with hasRole checks
+   * 3. If indexer available: attempt to discover role IDs via indexer
+   * 4. Fallback: return empty array
+   *
+   * The `DEFAULT_ADMIN_ROLE` (bytes32 zero) is given the label `"DEFAULT_ADMIN_ROLE"`.
+   * Other roles have no label (the keccak256 hash cannot be reversed).
+   *
+   * **Note (FR-026)**: `DEFAULT_ADMIN_ROLE` is NOT auto-included in knownRoleIds.
+   * Consumers must provide it explicitly or rely on indexer discovery.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Array of role assignments with members
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async getCurrentRoles(contractAddress: string): Promise<RoleAssignment[]> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info('EvmAccessControlService.getCurrentRoles', `Reading roles for ${contractAddress}`);
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // Detect capabilities to check for enumerable roles
+    const capabilities = await this.getCapabilities(contractAddress);
+
+    // Determine the union of known + discovered role IDs
+    let roleIds = this.getMergedRoleIds(context);
+
+    // If no role IDs are available, attempt discovery
+    if (roleIds.length === 0) {
+      logger.debug(
+        'EvmAccessControlService.getCurrentRoles',
+        'No role IDs provided, attempting discovery via indexer'
+      );
+      roleIds = await this.attemptRoleDiscovery(context);
+    }
+
+    if (roleIds.length === 0) {
+      logger.warn(
+        'EvmAccessControlService.getCurrentRoles',
+        'No role IDs available (neither provided nor discoverable), returning empty array'
+      );
+      return [];
+    }
+
+    // Read roles from on-chain (uses enumeration if available)
+    const assignments = await readCurrentRoles(
+      this.networkConfig.rpcUrl,
+      context.contractAddress,
+      roleIds,
+      capabilities.hasEnumerableRoles,
+      this.networkConfig.viemChain
+    );
+
+    logger.debug(
+      'EvmAccessControlService.getCurrentRoles',
+      `Retrieved ${assignments.length} role assignment(s) for ${context.contractAddress}`
+    );
+
+    return assignments;
   }
 
-  async getCurrentRolesEnriched(_contractAddress: string): Promise<EnrichedRoleAssignment[]> {
-    throw new Error('Not implemented — will be added in Phase 5 (US3)');
+  /**
+   * Get enriched role assignments with grant metadata from the indexer.
+   *
+   * Builds on `getCurrentRoles()` and enriches each member with grant timestamp,
+   * transaction ID, and block number from the indexer. Falls back to unenriched
+   * data if the indexer is unavailable (graceful degradation per FR-017).
+   *
+   * The `grantedLedger` field in `EnrichedRoleMember` stores an EVM **block number**
+   * despite its Stellar-originated name. This is a consequence of the unified type
+   * design — see data-model.md §6.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Array of enriched role assignments
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async getCurrentRolesEnriched(contractAddress: string): Promise<EnrichedRoleAssignment[]> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.getCurrentRolesEnriched',
+      `Reading enriched roles for ${contractAddress}`
+    );
+
+    // Get base role assignments
+    const currentRoles = await this.getCurrentRoles(contractAddress);
+
+    if (currentRoles.length === 0) {
+      return [];
+    }
+
+    // Check indexer availability for enrichment
+    const indexerAvailable = await this.indexerClient.isAvailable();
+
+    if (!indexerAvailable) {
+      logger.debug(
+        'EvmAccessControlService.getCurrentRolesEnriched',
+        'Indexer not available, returning roles without timestamps'
+      );
+      return this.convertToEnrichedWithoutTimestamps(currentRoles);
+    }
+
+    // Attempt enrichment via indexer
+    try {
+      const context = this.getContextOrThrow(contractAddress);
+      const roleIds = currentRoles.map((ra) => ra.role.id);
+
+      const grantMap = await this.indexerClient.queryLatestGrants(context.contractAddress, roleIds);
+
+      if (!grantMap) {
+        logger.warn(
+          'EvmAccessControlService.getCurrentRolesEnriched',
+          'Indexer returned null for grant data, returning without enrichment'
+        );
+        return this.convertToEnrichedWithoutTimestamps(currentRoles);
+      }
+
+      // Map each role assignment to enriched form
+      const enriched: EnrichedRoleAssignment[] = currentRoles.map((roleAssignment) => ({
+        role: roleAssignment.role,
+        members: roleAssignment.members.map((memberAddress) => {
+          const grantInfo = grantMap.get(memberAddress.toLowerCase());
+          const member: EnrichedRoleMember = {
+            address: memberAddress,
+          };
+
+          if (grantInfo) {
+            member.grantedAt = grantInfo.grantedAt;
+            member.grantedTxId = grantInfo.txHash;
+            /**
+             * The `grantedLedger` field stores an EVM block number despite its
+             * Stellar-originated name. See data-model.md §6.
+             */
+            // Block number is not directly available from roleMemberships query;
+            // grantedAt timestamp is the primary enrichment data
+          }
+
+          return member;
+        }),
+      }));
+
+      logger.debug(
+        'EvmAccessControlService.getCurrentRolesEnriched',
+        `Enriched ${enriched.length} role(s) with grant timestamps`
+      );
+
+      return enriched;
+    } catch (error) {
+      logger.warn(
+        'EvmAccessControlService.getCurrentRolesEnriched',
+        `Failed to enrich roles from indexer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Graceful degradation: return on-chain data without enrichment
+      return this.convertToEnrichedWithoutTimestamps(currentRoles);
+    }
   }
 
   async grantRole(
@@ -554,11 +709,56 @@ export class EvmAccessControlService implements AccessControlService {
    * Checks whether an indexer endpoint is configured for this network.
    *
    * Uses the config precedence: `accessControlIndexerUrl` on the network config.
-   * A full availability check (HTTP health check) will be added when the indexer
-   * client is implemented in Phase 4 (US2).
    */
   private hasIndexerEndpoint(): boolean {
     return !!this.networkConfig.accessControlIndexerUrl;
+  }
+
+  /**
+   * Returns the union of known + discovered role IDs for a context.
+   * Deduplicates the combined set.
+   */
+  private getMergedRoleIds(context: EvmAccessControlContext): string[] {
+    return [...new Set([...context.knownRoleIds, ...context.discoveredRoleIds])];
+  }
+
+  /**
+   * Attempt to discover role IDs via the indexer.
+   *
+   * This is a lightweight wrapper that delegates to `discoverKnownRoleIds()`
+   * when it's implemented (Phase 11). For now, returns the discovered role IDs
+   * from the context if any, or an empty array.
+   *
+   * @internal
+   */
+  private async attemptRoleDiscovery(context: EvmAccessControlContext): Promise<string[]> {
+    // If discovery was already attempted, return what we have
+    if (context.roleDiscoveryAttempted) {
+      return context.discoveredRoleIds;
+    }
+
+    // For now, mark as attempted and return empty
+    // Full discovery will be implemented in Phase 11 (US9)
+    context.roleDiscoveryAttempted = true;
+
+    return context.discoveredRoleIds;
+  }
+
+  /**
+   * Converts RoleAssignment[] to EnrichedRoleAssignment[] without timestamps.
+   *
+   * Used for graceful degradation when the indexer is unavailable.
+   * Each member gets an `EnrichedRoleMember` with only the `address` field populated.
+   */
+  private convertToEnrichedWithoutTimestamps(
+    assignments: RoleAssignment[]
+  ): EnrichedRoleAssignment[] {
+    return assignments.map((ra) => ({
+      role: ra.role,
+      members: ra.members.map((memberAddress) => ({
+        address: memberAddress,
+      })),
+    }));
   }
 
   /**

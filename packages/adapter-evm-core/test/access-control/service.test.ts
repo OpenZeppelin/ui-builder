@@ -16,8 +16,10 @@ import type {
   AdminInfo,
   ContractFunction,
   ContractSchema,
+  EnrichedRoleAssignment,
   OperationResult,
   OwnershipInfo,
+  RoleAssignment,
 } from '@openzeppelin/ui-types';
 import { ConfigurationInvalid } from '@openzeppelin/ui-types';
 
@@ -32,15 +34,22 @@ import type { EvmCompatibleNetworkConfig } from '../../src/types';
 
 const mockReadOwnership = vi.fn();
 const mockGetAdmin = vi.fn();
+const mockReadCurrentRoles = vi.fn();
+const mockEnumerateRoleMembers = vi.fn();
+const mockHasRole = vi.fn();
 
 vi.mock('../../src/access-control/onchain-reader', () => ({
   readOwnership: (...args: unknown[]) => mockReadOwnership(...args),
   getAdmin: (...args: unknown[]) => mockGetAdmin(...args),
+  readCurrentRoles: (...args: unknown[]) => mockReadCurrentRoles(...args),
+  enumerateRoleMembers: (...args: unknown[]) => mockEnumerateRoleMembers(...args),
+  hasRole: (...args: unknown[]) => mockHasRole(...args),
 }));
 
 const mockIndexerIsAvailable = vi.fn();
 const mockQueryPendingOwnershipTransfer = vi.fn();
 const mockQueryPendingAdminTransfer = vi.fn();
+const mockQueryLatestGrants = vi.fn();
 
 vi.mock('../../src/access-control/indexer-client', () => ({
   createIndexerClient: () => ({
@@ -48,6 +57,7 @@ vi.mock('../../src/access-control/indexer-client', () => ({
     queryPendingOwnershipTransfer: (...args: unknown[]) =>
       mockQueryPendingOwnershipTransfer(...args),
     queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
+    queryLatestGrants: (...args: unknown[]) => mockQueryLatestGrants(...args),
   }),
 }));
 
@@ -736,6 +746,255 @@ describe('EvmAccessControlService', () => {
 
     it('should throw for invalid address', async () => {
       await expect(service.getAdminInfo(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── getCurrentRoles (Phase 5 — US3) ──────────────────────────────────
+
+  describe('getCurrentRoles', () => {
+    const MINTER_ROLE = VALID_ROLE_ID;
+    const PAUSER_ROLE = VALID_ROLE_ID_2;
+    const MEMBER_1 = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+    const MEMBER_2 = '0xFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFf';
+
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockEnumerateRoleMembers.mockReset();
+      mockHasRole.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+    });
+
+    it('should return role assignments via enumeration (hasEnumerableRoles)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [
+        MINTER_ROLE,
+        PAUSER_ROLE,
+      ]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+        {
+          role: { id: PAUSER_ROLE },
+          members: [MEMBER_1, MEMBER_2],
+        },
+      ]);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].role.id).toBe(MINTER_ROLE);
+      expect(result[0].members).toContain(MEMBER_1);
+      expect(result[1].role.id).toBe(PAUSER_ROLE);
+      expect(result[1].members).toHaveLength(2);
+    });
+
+    it('should return role assignments via known role IDs + hasRole when not enumerable', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(MINTER_ROLE);
+    });
+
+    it('should return empty array when no roles/indexer/enumeration available', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([]);
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should map DEFAULT_ADMIN_ROLE label correctly', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [
+        DEFAULT_ADMIN_ROLE,
+      ]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: DEFAULT_ADMIN_ROLE, label: 'DEFAULT_ADMIN_ROLE' },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result[0].role.label).toBe('DEFAULT_ADMIN_ROLE');
+    });
+
+    it('should NOT auto-include DEFAULT_ADMIN_ROLE in knownRoleIds on registration (FR-026)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      // Verify DEFAULT_ADMIN_ROLE is not automatically added
+      const roleIds = service.addKnownRoleIds(VALID_ADDRESS, []);
+      expect(roleIds).not.toContain(DEFAULT_ADMIN_ROLE);
+    });
+
+    it('should throw for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.getCurrentRoles(unregisteredAddress)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+    });
+
+    it('should throw for invalid address', async () => {
+      await expect(service.getCurrentRoles(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── getCurrentRolesEnriched (Phase 5 — US3) ──────────────────────────
+
+  describe('getCurrentRolesEnriched', () => {
+    const MINTER_ROLE = VALID_ROLE_ID;
+    const MEMBER_1 = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+    const MEMBER_2 = '0xFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFf';
+
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockEnumerateRoleMembers.mockReset();
+      mockHasRole.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+    });
+
+    it('should return enriched role assignments with grant metadata', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1, MEMBER_2],
+        },
+      ]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockResolvedValueOnce(
+        new Map([
+          [
+            MEMBER_1.toLowerCase(),
+            {
+              account: MEMBER_1,
+              role: MINTER_ROLE,
+              grantedAt: '2026-01-10T08:00:00Z',
+              txHash: '0xgrant1',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+            },
+          ],
+          [
+            MEMBER_2.toLowerCase(),
+            {
+              account: MEMBER_2,
+              role: MINTER_ROLE,
+              grantedAt: '2026-01-12T12:00:00Z',
+              txHash: '0xgrant2',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+            },
+          ],
+        ])
+      );
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(MINTER_ROLE);
+      expect(result[0].members).toHaveLength(2);
+      expect(result[0].members[0].address).toBe(MEMBER_1);
+      expect(result[0].members[0].grantedAt).toBe('2026-01-10T08:00:00Z');
+      expect(result[0].members[0].grantedTxId).toBe('0xgrant1');
+      /**
+       * The `grantedLedger` field in `EnrichedRoleMember` stores an EVM block number
+       * despite its Stellar-originated name. The `roleMemberships` query does not
+       * return block numbers directly, so this field remains undefined when
+       * enriching via the roleMemberships endpoint. See data-model.md §6.
+       */
+      expect(result[0].members[0].grantedLedger).toBeUndefined();
+    });
+
+    it('should return enriched structure without timestamps when indexer unavailable (graceful degradation)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members[0].address).toBe(MEMBER_1);
+      expect(result[0].members[0].grantedAt).toBeUndefined();
+      expect(result[0].members[0].grantedTxId).toBeUndefined();
+      expect(result[0].members[0].grantedLedger).toBeUndefined();
+    });
+
+    it('should return on-chain data with warning when enrichment fails partially', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockRejectedValueOnce(new Error('Indexer enrichment failed'));
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      // Should still return the role structure without enrichment
+      expect(result).toHaveLength(1);
+      expect(result[0].members[0].address).toBe(MEMBER_1);
+      expect(result[0].members[0].grantedAt).toBeUndefined();
+    });
+
+    it('should return empty array when no roles exist', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([]);
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should throw for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.getCurrentRolesEnriched(unregisteredAddress)).rejects.toThrow(
+        ConfigurationInvalid
+      );
+    });
+
+    it('should throw for invalid address', async () => {
+      await expect(service.getCurrentRolesEnriched(INVALID_ADDRESS)).rejects.toThrow(
+        ConfigurationInvalid
+      );
     });
   });
 });

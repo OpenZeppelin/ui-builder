@@ -326,6 +326,146 @@ describe('EvmIndexerClient', () => {
     });
   });
 
+  // ── queryLatestGrants (Phase 5 — US3) ───────────────────────────────
+
+  describe('queryLatestGrants', () => {
+    const ROLE_ID_MINTER = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+    const ROLE_ID_PAUSER = '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a';
+
+    it('should return grant data for role members', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        roleMemberships: {
+          nodes: [
+            {
+              role: ROLE_ID_MINTER,
+              account: '0xMember1000000000000000000000000000000001',
+              grantedAt: '2026-01-10T08:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrant1',
+            },
+            {
+              role: ROLE_ID_MINTER,
+              account: '0xMember2000000000000000000000000000000002',
+              grantedAt: '2026-01-12T12:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrant2',
+            },
+          ],
+        },
+      });
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      expect(result).not.toBeNull();
+      expect(result!.size).toBe(2);
+    });
+
+    it('should return empty map when no grant data exists', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        roleMemberships: {
+          nodes: [],
+        },
+      });
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      expect(result).not.toBeNull();
+      expect(result!.size).toBe(0);
+    });
+
+    it('should return null when indexer is unavailable', async () => {
+      mockFetchError(500);
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle multiple role IDs', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        roleMemberships: {
+          nodes: [
+            {
+              role: ROLE_ID_MINTER,
+              account: '0xMember1000000000000000000000000000000001',
+              grantedAt: '2026-01-10T08:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrant1',
+            },
+            {
+              role: ROLE_ID_PAUSER,
+              account: '0xMember3000000000000000000000000000000003',
+              grantedAt: '2026-01-11T09:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrant3',
+            },
+          ],
+        },
+      });
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [
+        ROLE_ID_MINTER,
+        ROLE_ID_PAUSER,
+      ]);
+
+      expect(result).not.toBeNull();
+      expect(result!.size).toBe(2);
+    });
+
+    it('should use networkConfig.id as the network filter value (FR-027)', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        roleMemberships: { nodes: [] },
+      });
+
+      await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      // The second fetch call (after health check) should include the network ID
+      const secondCallBody = JSON.parse(mockFetch.mock.calls[1][1].body);
+      expect(secondCallBody.variables.network).toBe('ethereum-mainnet');
+      expect(secondCallBody.variables.contract).toBe(CONTRACT_ADDRESS);
+    });
+
+    it('should gracefully handle fetch errors', async () => {
+      mockFetchHealthy();
+      mockFetchNetworkError();
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle GraphQL errors gracefully', async () => {
+      mockFetchHealthy();
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          errors: [{ message: 'some GraphQL error' }],
+        }),
+      });
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [ROLE_ID_MINTER]);
+
+      expect(result).toBeNull();
+    });
+
+    it('should return empty map for empty roleIds array', async () => {
+      // No fetch should be made for empty roleIds
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, []);
+
+      expect(result).not.toBeNull();
+      expect(result!.size).toBe(0);
+    });
+  });
+
   // ── Graceful degradation ──────────────────────────────────────────────
 
   describe('graceful degradation', () => {

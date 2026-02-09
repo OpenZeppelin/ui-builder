@@ -9,7 +9,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ZERO_ADDRESS } from '../../src/access-control/constants';
+import { DEFAULT_ADMIN_ROLE, ZERO_ADDRESS } from '../../src/access-control/constants';
 // Import after mocking
 import { getAdmin, readOwnership } from '../../src/access-control/onchain-reader';
 
@@ -43,6 +43,12 @@ const PENDING_OWNER_ADDRESS = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
 const ADMIN_ADDRESS = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC';
 const PENDING_ADMIN_ADDRESS = '0xDdDdDdDdDDddDDddDDddDDDDdDdDDdDDdDDDDDDd';
 
+// Role-related constants (Phase 5 — US3)
+const DEFAULT_ADMIN_ROLE_CONSTANT = DEFAULT_ADMIN_ROLE;
+const ROLE_ID_MINTER = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+const MEMBER_ADDRESS_1 = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+const MEMBER_ADDRESS_2 = '0xFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFfFf';
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -54,6 +60,226 @@ describe('onchain-reader', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  // ── Role Functions (Phase 5 — US3) ────────────────────────────────────
+
+  describe('hasRole', () => {
+    it('should return true when account has the role', async () => {
+      mockReadContract.mockResolvedValueOnce(true);
+
+      const { hasRole } = await import('../../src/access-control/onchain-reader');
+      const result = await hasRole(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        ROLE_ID_MINTER,
+        MEMBER_ADDRESS_1
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when account does not have the role', async () => {
+      mockReadContract.mockResolvedValueOnce(false);
+
+      const { hasRole } = await import('../../src/access-control/onchain-reader');
+      const result = await hasRole(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        ROLE_ID_MINTER,
+        MEMBER_ADDRESS_2
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when readContract throws (graceful degradation)', async () => {
+      mockReadContract.mockRejectedValueOnce(new Error('execution reverted'));
+
+      const { hasRole } = await import('../../src/access-control/onchain-reader');
+      const result = await hasRole(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        ROLE_ID_MINTER,
+        MEMBER_ADDRESS_1
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should accept an optional viemChain parameter', async () => {
+      mockReadContract.mockResolvedValueOnce(true);
+
+      const { hasRole } = await import('../../src/access-control/onchain-reader');
+      const mockChain = { id: 1, name: 'Ethereum' } as unknown as import('viem').Chain;
+      const result = await hasRole(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        ROLE_ID_MINTER,
+        MEMBER_ADDRESS_1,
+        mockChain
+      );
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('enumerateRoleMembers', () => {
+    it('should enumerate all members of a role', async () => {
+      // getRoleMemberCount returns 2
+      mockReadContract.mockResolvedValueOnce(2n);
+      // getRoleMember(role, 0) and getRoleMember(role, 1)
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_1);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_2);
+
+      const { enumerateRoleMembers } = await import('../../src/access-control/onchain-reader');
+      const result = await enumerateRoleMembers(TEST_RPC_URL, CONTRACT_ADDRESS, ROLE_ID_MINTER);
+
+      expect(result).toHaveLength(2);
+      expect(result).toContain(MEMBER_ADDRESS_1);
+      expect(result).toContain(MEMBER_ADDRESS_2);
+    });
+
+    it('should return empty array when role has no members', async () => {
+      mockReadContract.mockResolvedValueOnce(0n); // count = 0
+
+      const { enumerateRoleMembers } = await import('../../src/access-control/onchain-reader');
+      const result = await enumerateRoleMembers(TEST_RPC_URL, CONTRACT_ADDRESS, ROLE_ID_MINTER);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should throw when getRoleMemberCount fails', async () => {
+      mockReadContract.mockRejectedValueOnce(new Error('execution reverted'));
+
+      const { enumerateRoleMembers } = await import('../../src/access-control/onchain-reader');
+      await expect(
+        enumerateRoleMembers(TEST_RPC_URL, CONTRACT_ADDRESS, ROLE_ID_MINTER)
+      ).rejects.toThrow();
+    });
+
+    it('should accept an optional viemChain parameter', async () => {
+      mockReadContract.mockResolvedValueOnce(1n);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_1);
+
+      const { enumerateRoleMembers } = await import('../../src/access-control/onchain-reader');
+      const mockChain = { id: 1, name: 'Ethereum' } as unknown as import('viem').Chain;
+      const result = await enumerateRoleMembers(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        ROLE_ID_MINTER,
+        mockChain
+      );
+
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  describe('readCurrentRoles', () => {
+    it('should read role assignments for a single role with enumeration', async () => {
+      // Single role: count=2, members
+      mockReadContract.mockResolvedValueOnce(2n);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_1);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_2);
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [ROLE_ID_MINTER],
+        true // hasEnumerableRoles
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(ROLE_ID_MINTER);
+      expect(result[0].members).toHaveLength(2);
+      expect(result[0].members).toContain(MEMBER_ADDRESS_1);
+      expect(result[0].members).toContain(MEMBER_ADDRESS_2);
+    });
+
+    it('should return empty array when given empty role IDs', async () => {
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(TEST_RPC_URL, CONTRACT_ADDRESS, [], true);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should label DEFAULT_ADMIN_ROLE correctly', async () => {
+      mockReadContract.mockResolvedValueOnce(1n);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_1);
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [DEFAULT_ADMIN_ROLE_CONSTANT],
+        true
+      );
+
+      expect(result[0].role.label).toBe('DEFAULT_ADMIN_ROLE');
+    });
+
+    it('should return role with empty members when not enumerable', async () => {
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [ROLE_ID_MINTER],
+        false // not enumerable
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(ROLE_ID_MINTER);
+      expect(result[0].members).toHaveLength(0);
+    });
+
+    it('should return role with empty members when enumeration fails', async () => {
+      mockReadContract.mockRejectedValueOnce(new Error('execution reverted'));
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(TEST_RPC_URL, CONTRACT_ADDRESS, [ROLE_ID_MINTER], true);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(0);
+    });
+  });
+
+  describe('getRoleAdmin', () => {
+    it('should return the admin role ID for a given role', async () => {
+      mockReadContract.mockResolvedValueOnce(DEFAULT_ADMIN_ROLE_CONSTANT);
+
+      const { getRoleAdmin } = await import('../../src/access-control/onchain-reader');
+      const result = await getRoleAdmin(TEST_RPC_URL, CONTRACT_ADDRESS, ROLE_ID_MINTER);
+
+      expect(result).toBe(DEFAULT_ADMIN_ROLE_CONSTANT);
+    });
+
+    it('should return null when the call fails', async () => {
+      mockReadContract.mockRejectedValueOnce(new Error('execution reverted'));
+
+      const { getRoleAdmin } = await import('../../src/access-control/onchain-reader');
+      const result = await getRoleAdmin(TEST_RPC_URL, CONTRACT_ADDRESS, ROLE_ID_MINTER);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getCurrentBlock', () => {
+    it('should return the current block number', async () => {
+      mockGetBlockNumber.mockResolvedValueOnce(12345678n);
+
+      const { getCurrentBlock } = await import('../../src/access-control/onchain-reader');
+      const result = await getCurrentBlock(TEST_RPC_URL);
+
+      expect(result).toBe(12345678);
+    });
+
+    it('should throw when the call fails', async () => {
+      mockGetBlockNumber.mockRejectedValueOnce(new Error('RPC error'));
+
+      const { getCurrentBlock } = await import('../../src/access-control/onchain-reader');
+      await expect(getCurrentBlock(TEST_RPC_URL)).rejects.toThrow();
+    });
   });
 
   // ── readOwnership ─────────────────────────────────────────────────────

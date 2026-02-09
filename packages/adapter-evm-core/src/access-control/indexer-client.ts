@@ -55,6 +55,20 @@ export interface PendingAdminTransferData {
   initiatedBlock: number;
 }
 
+/** Grant info data returned from queryLatestGrants */
+export interface GrantInfo {
+  /** The account address */
+  account: string;
+  /** The role ID */
+  role: string;
+  /** ISO8601 timestamp of the grant event */
+  grantedAt: string;
+  /** Transaction hash of the grant event */
+  txHash: string;
+  /** Who granted the role */
+  grantedBy?: string;
+}
+
 /** Internal GraphQL response shape for access control events */
 interface IndexerEventNode {
   id: string;
@@ -69,6 +83,15 @@ interface IndexerEventNode {
   account?: string;
 }
 
+/** Internal GraphQL response shape for role membership nodes */
+interface RoleMembershipNode {
+  role: string;
+  account: string;
+  grantedAt: string;
+  grantedBy?: string;
+  txHash: string;
+}
+
 interface IndexerEventsResponse {
   data?: {
     accessControlEvents?: {
@@ -78,6 +101,15 @@ interface IndexerEventsResponse {
         hasNextPage: boolean;
         hasPreviousPage?: boolean;
       };
+    };
+  };
+  errors?: Array<{ message: string }>;
+}
+
+interface IndexerRoleMembershipsResponse {
+  data?: {
+    roleMemberships?: {
+      nodes: RoleMembershipNode[];
     };
   };
   errors?: Array<{ message: string }>;
@@ -107,6 +139,27 @@ const PENDING_OWNERSHIP_TRANSFER_QUERY = `
         timestamp
         txHash
         newOwner
+      }
+    }
+  }
+`;
+
+const ROLE_MEMBERSHIPS_QUERY = `
+  query GetRoleMembers($network: String!, $contract: String!, $roles: [String!]) {
+    roleMemberships(
+      filter: {
+        network: { equalTo: $network }
+        contract: { equalTo: $contract }
+        role: { in: $roles }
+      }
+      orderBy: GRANTED_AT_DESC
+    ) {
+      nodes {
+        role
+        account
+        grantedAt
+        grantedBy
+        txHash
       }
     }
   }
@@ -376,6 +429,108 @@ export class EvmIndexerClient {
       logger.warn(
         LOG_SYSTEM,
         `Failed to query pending admin transfer: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
+    }
+  }
+
+  // ── Role Membership Queries (Phase 5 — US3) ────────────────────────────
+
+  /**
+   * Query the indexer for current role membership grant data.
+   *
+   * Queries `roleMemberships` for the specified roles, returning a map of
+   * `account → GrantInfo` for enrichment of role assignments.
+   *
+   * Returns an empty Map if roleIds is empty. Returns null if the indexer
+   * is unavailable or the query fails (graceful degradation).
+   *
+   * @param contractAddress - The contract address to query
+   * @param roleIds - Array of bytes32 role IDs to query
+   * @returns Map of lowercased account address to GrantInfo, or null on failure
+   */
+  async queryLatestGrants(
+    contractAddress: string,
+    roleIds: string[]
+  ): Promise<Map<string, GrantInfo> | null> {
+    if (roleIds.length === 0) {
+      return new Map();
+    }
+
+    const isUp = await this.isAvailable();
+    if (!isUp || !this.endpoint) {
+      return null;
+    }
+
+    logger.info(
+      LOG_SYSTEM,
+      `Querying latest grants for ${roleIds.length} role(s) on ${contractAddress}`
+    );
+
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: ROLE_MEMBERSHIPS_QUERY,
+          variables: {
+            network: this.networkConfig.id,
+            contract: contractAddress,
+            roles: roleIds,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer query failed with status ${response.status} for role memberships`
+        );
+        return null;
+      }
+
+      const result = (await response.json()) as IndexerRoleMembershipsResponse;
+
+      if (result.errors && result.errors.length > 0) {
+        logger.warn(
+          LOG_SYSTEM,
+          `Indexer query errors: ${result.errors.map((e) => e.message).join('; ')}`
+        );
+        return null;
+      }
+
+      const nodes = result.data?.roleMemberships?.nodes;
+      if (!nodes || nodes.length === 0) {
+        logger.debug(LOG_SYSTEM, `No role membership data found for ${contractAddress}`);
+        return new Map();
+      }
+
+      // Build map of lowercased account → GrantInfo
+      const grantMap = new Map<string, GrantInfo>();
+      for (const node of nodes) {
+        const key = node.account.toLowerCase();
+        // Keep only the first (most recent) grant per account since ordered by GRANTED_AT_DESC
+        if (!grantMap.has(key)) {
+          grantMap.set(key, {
+            account: node.account,
+            role: node.role,
+            grantedAt: node.grantedAt,
+            txHash: node.txHash,
+            grantedBy: node.grantedBy,
+          });
+        }
+      }
+
+      logger.debug(
+        LOG_SYSTEM,
+        `Found grant info for ${grantMap.size} member(s) across ${roleIds.length} role(s)`
+      );
+
+      return grantMap;
+    } catch (error) {
+      logger.warn(
+        LOG_SYSTEM,
+        `Failed to query latest grants: ${error instanceof Error ? error.message : String(error)}`
       );
       return null;
     }
