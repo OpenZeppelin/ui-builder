@@ -1,0 +1,174 @@
+# EVM Access Control Indexer — GraphQL Query Contracts
+#
+# These are the GraphQL queries the EvmIndexerClient will use against the
+# access-control-indexers unified schema.
+
+# ---------------------------------------------------------------------------
+# History: Paginated access control events
+# ---------------------------------------------------------------------------
+query QueryAccessControlEvents($filter: AccessControlEventFilter, $first: Int, $offset: Int) {
+  accessControlEvents(filter: $filter, first: $first, offset: $offset, orderBy: TIMESTAMP_DESC) {
+    nodes {
+      id
+      network
+      contract
+      eventType
+      blockNumber
+      timestamp
+      txHash
+      # Role event fields
+      role
+      account
+      sender
+      previousAdminRole
+      newAdminRole
+      # Ownership fields
+      previousOwner
+      newOwner
+      # Admin fields (EVM AccessControlDefaultAdminRules)
+      acceptSchedule
+      newDelay
+      effectSchedule
+    }
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Role Members: Current role memberships for a contract
+# ---------------------------------------------------------------------------
+query GetRoleMembers($filter: RoleMembershipFilter) {
+  roleMemberships(filter: $filter, orderBy: GRANTED_AT_DESC) {
+    nodes {
+      id
+      network
+      contract
+      role
+      account
+      grantedAt
+      grantedBy
+      txHash
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Contract Ownership: Current ownership state
+# ---------------------------------------------------------------------------
+query GetContractOwnership($id: String!) {
+  contractOwnership(id: $id) {
+    id
+    network
+    contract
+    owner
+    previousOwner
+    pendingOwner
+    transferredAt
+    txHash
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Pending Ownership Transfer: Check for OwnershipTransferStarted events
+# ---------------------------------------------------------------------------
+query GetPendingOwnershipTransfer($filter: AccessControlEventFilter) {
+  accessControlEvents(filter: $filter, first: 1, orderBy: TIMESTAMP_DESC) {
+    nodes {
+      id
+      eventType
+      blockNumber
+      timestamp
+      txHash
+      newOwner
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Pending Admin Transfer: Check for DefaultAdminTransferScheduled events
+# ---------------------------------------------------------------------------
+query GetPendingAdminTransfer($filter: AccessControlEventFilter) {
+  accessControlEvents(filter: $filter, first: 1, orderBy: TIMESTAMP_DESC) {
+    nodes {
+      id
+      eventType
+      blockNumber
+      timestamp
+      txHash
+      newAdmin
+      acceptSchedule
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Role Discovery: Unique roles from historical events
+# ---------------------------------------------------------------------------
+query DiscoverRoles($filter: AccessControlEventFilter) {
+  accessControlEvents(filter: $filter, first: 1000, orderBy: TIMESTAMP_DESC) {
+    nodes {
+      role
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Latest Grants: Grant timestamps for enrichment
+# ---------------------------------------------------------------------------
+query GetLatestGrants($filter: RoleMembershipFilter) {
+  roleMemberships(filter: $filter, orderBy: GRANTED_AT_DESC) {
+    nodes {
+      role
+      account
+      grantedAt
+      grantedBy
+      txHash
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Contract Metadata: Check if contract exists in indexer
+# ---------------------------------------------------------------------------
+query GetContract($id: String!) {
+  contract(id: $id) {
+    id
+    network
+    address
+    type
+    firstSeenAt
+    lastActivityAt
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Filter Patterns (for reference)
+# ---------------------------------------------------------------------------
+#
+# History by contract:
+#   filter: { network: { equalTo: "ethereum-mainnet" }, contract: { equalTo: "0x..." } }
+#
+# History by role:
+#   filter: { ..., role: { equalTo: "0x..." } }
+#
+# History by account:
+#   filter: { ..., account: { equalTo: "0x..." } }
+#
+# History by event type:
+#   filter: { ..., eventType: { equalTo: "ROLE_GRANTED" } }
+#
+# History by time range:
+#   filter: { ..., timestamp: { greaterThanOrEqualTo: "2026-01-01", lessThanOrEqualTo: "2026-02-01" } }
+#
+# Role members for a contract:
+#   filter: { network: { equalTo: "ethereum-mainnet" }, contract: { equalTo: "0x..." } }
+#
+# Role members for a specific role:
+#   filter: { ..., role: { equalTo: "0x..." } }
+#
+# Contract ownership ID format: "network-contract" (e.g., "ethereum-mainnet-0x...")
+# Contract ID format: "network-contract"
