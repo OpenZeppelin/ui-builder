@@ -268,12 +268,12 @@
 
 **Purpose**: Final cleanup, documentation, changesets, and validation
 
-- [ ] T052 [P] Run full test suite: `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test` and verify all access-control tests pass.
-- [ ] T053 [P] Create changeset for `packages/adapter-evm-core` (minor — new feature: access control module).
-- [ ] T054 [P] Create changeset for `packages/adapter-evm` (minor — new feature: getAccessControlService integration + network indexer URLs).
-- [ ] T055 Run quickstart.md validation — verify the implementation matches the step-by-step guide and all referenced files exist. **Also validate performance criteria**: SC-002 (capability detection <3s) and SC-004 (indexer queries <2s for 50 events) as manual smoke tests or lightweight benchmarks.
-- [ ] T056 Code review: verify all TODO comments for PR-1/PR-2/PR-3 workarounds are present and clearly describe what to change once types are updated.
-- [ ] T057 API parity verification (SC-001): Compare the EVM service's exported public API against the Stellar adapter's `packages/adapter-stellar/src/access-control/index.ts` exports. Verify all 13 unified `AccessControlService` methods are implemented with equivalent behavior. Document any intentional EVM-specific extensions not present in Stellar. Reference: spec.md §FR-001, §FR-025.
+- [x] T052 [P] Run full test suite: `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test` and verify all access-control tests pass.
+- [x] T053 [P] Create changeset for `packages/adapter-evm-core` (minor — new feature: access control module).
+- [x] T054 [P] Create changeset for `packages/adapter-evm` (minor — new feature: getAccessControlService integration + network indexer URLs).
+- [x] T055 Run quickstart.md validation — verify the implementation matches the step-by-step guide and all referenced files exist. **Also validate performance criteria**: SC-002 (capability detection <3s) and SC-004 (indexer queries <2s for 50 events) as manual smoke tests or lightweight benchmarks.
+- [x] T056 Code review: verify all TODO comments for PR-1/PR-2/PR-3 workarounds are present and clearly describe what to change once types are updated.
+- [x] T057 API parity verification (SC-001): Compare the EVM service's exported public API against the Stellar adapter's `packages/adapter-stellar/src/access-control/index.ts` exports. Verify all 13 unified `AccessControlService` methods are implemented with equivalent behavior. Document any intentional EVM-specific extensions not present in Stellar. Reference: spec.md §FR-001, §FR-025.
 
 ---
 
