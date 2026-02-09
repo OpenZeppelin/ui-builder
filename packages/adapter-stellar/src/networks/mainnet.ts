@@ -16,5 +16,5 @@ export const stellarPublic: StellarNetworkConfig = {
   networkPassphrase: 'Public Global Stellar Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/public',
   iconComponent: NetworkStellar,
-  indexerUri: 'https://openzeppelin-stellar-mainnet.graphql.subquery.network/',
+  accessControlIndexerUrl: 'https://openzeppelin-stellar-mainnet.graphql.subquery.network/',
 };

@@ -1885,7 +1885,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
       sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
       networkPassphrase: 'Test SDF Network ; September 2015',
       explorerUrl: 'https://stellar.expert/explorer/testnet',
-      indexerUri: 'http://localhost:3000/graphql',
+      accessControlIndexerUrl: 'http://localhost:3000/graphql',
     };
 
     // Setup mock indexer client

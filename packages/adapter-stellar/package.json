@@ -51,7 +51,7 @@
     "@creit.tech/stellar-wallets-kit": "^1.8.0",
     "@openzeppelin/relayer-sdk": "1.9.0",
     "@openzeppelin/ui-components": "^1.2.0",
-    "@openzeppelin/ui-types": "^1.6.0",
+    "@openzeppelin/ui-types": "^1.7.0",
     "@openzeppelin/ui-utils": "^1.2.0",
     "@stellar/stellar-sdk": "^14.1.1",
     "@stellar/stellar-xdr-json": "^23.0.0",

@@ -53,7 +53,7 @@ const testNetworkConfig: StellarNetworkConfig = {
   sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
   horizonUrl: 'https://horizon-testnet.stellar.org',
   networkPassphrase: 'Test SDF Network ; September 2015',
-  indexerUri: DEPLOYED_INDEXER_URL,
+  accessControlIndexerUrl: DEPLOYED_INDEXER_URL,
 };
 
 describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
@@ -131,7 +131,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
     it('should handle unavailable indexer gracefully', async () => {
       const invalidConfig: StellarNetworkConfig = {
         ...testNetworkConfig,
-        indexerUri: 'https://invalid-endpoint.example.com/graphql',
+        accessControlIndexerUrl: 'https://invalid-endpoint.example.com/graphql',
       };
       const invalidClient = new StellarIndexerClient(invalidConfig);
       const isAvailable = await invalidClient.checkAvailability();
@@ -969,7 +969,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
     it('should throw error when indexer is unavailable', async () => {
       const invalidConfig: StellarNetworkConfig = {
         ...testNetworkConfig,
-        indexerUri: undefined,
+        accessControlIndexerUrl: undefined,
       };
       const noIndexerClient = new StellarIndexerClient(invalidConfig);
 
@@ -1123,7 +1123,7 @@ describe('StellarIndexerClient - Integration Test with Real Indexer', () => {
     it('should throw error when indexer is unavailable', async () => {
       const invalidConfig: StellarNetworkConfig = {
         ...testNetworkConfig,
-        indexerUri: undefined,
+        accessControlIndexerUrl: undefined,
       };
       const noIndexerClient = new StellarIndexerClient(invalidConfig);
 

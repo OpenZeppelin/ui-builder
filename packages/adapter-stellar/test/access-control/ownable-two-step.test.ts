@@ -109,7 +109,7 @@ describe('Two-Step Ownable Support', () => {
       // Verify the class can be instantiated
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       expect(client).toBeDefined();
@@ -121,7 +121,7 @@ describe('Two-Step Ownable Support', () => {
     it('should return null when indexer is unavailable', async () => {
       const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
 
-      const client = new StellarIndexerClient(mockNetworkConfig); // No indexerUri configured
+      const client = new StellarIndexerClient(mockNetworkConfig); // No accessControlIndexerUrl configured
 
       await expect(
         client.queryPendingOwnershipTransfer(
@@ -135,7 +135,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch for the indexer queries
@@ -198,7 +198,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch returning empty results
@@ -234,7 +234,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch returning event WITHOUT admin field (incomplete data)
@@ -293,7 +293,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       global.fetch = vi
@@ -347,7 +347,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       global.fetch = vi
@@ -755,7 +755,7 @@ describe('Two-Step Ownable Support', () => {
 
         const client = new StellarIndexerClient({
           ...mockNetworkConfig,
-          indexerUri: 'http://localhost:3000/graphql',
+          accessControlIndexerUrl: 'http://localhost:3000/graphql',
         });
 
         // Mock fetch returning GraphQL error
@@ -785,7 +785,7 @@ describe('Two-Step Ownable Support', () => {
 
         const client = new StellarIndexerClient({
           ...mockNetworkConfig,
-          indexerUri: 'http://localhost:3000/graphql',
+          accessControlIndexerUrl: 'http://localhost:3000/graphql',
         });
 
         // Mock fetch throwing network error
@@ -835,7 +835,7 @@ describe('Two-Step Ownable Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fast indexer responses

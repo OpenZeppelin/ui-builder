@@ -56,7 +56,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
       sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
       horizonUrl: 'https://horizon-testnet.stellar.org',
       networkPassphrase: 'Test SDF Network ; September 2015',
-      indexerUri: TEST_INDEXER_HTTP,
+      accessControlIndexerUrl: TEST_INDEXER_HTTP,
       indexerWsUri: TEST_INDEXER_WS,
     };
 
@@ -100,7 +100,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     it('should return false when no indexer configured', async () => {
       const noIndexerConfig: StellarNetworkConfig = {
         ...mockNetworkConfig,
-        indexerUri: undefined,
+        accessControlIndexerUrl: undefined,
         indexerWsUri: undefined,
       };
 
@@ -514,7 +514,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     it('should throw when querying with unavailable indexer', async () => {
       const noIndexerConfig: StellarNetworkConfig = {
         ...mockNetworkConfig,
-        indexerUri: undefined,
+        accessControlIndexerUrl: undefined,
       };
 
       const client = new StellarIndexerClient(noIndexerConfig);
@@ -1120,7 +1120,7 @@ describe('StellarIndexerClient (T031, T033)', () => {
     it('should throw when indexer is unavailable', async () => {
       const noIndexerConfig: StellarNetworkConfig = {
         ...mockNetworkConfig,
-        indexerUri: undefined,
+        accessControlIndexerUrl: undefined,
       };
 
       const client = new StellarIndexerClient(noIndexerConfig);

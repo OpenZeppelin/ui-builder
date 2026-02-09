@@ -118,7 +118,7 @@ describe('StellarIndexerClient - User Configuration', () => {
 
       const configWithIndexer: StellarNetworkConfig = {
         ...mockNetworkConfig,
-        indexerUri: 'https://network-default-indexer.example.com/graphql',
+        accessControlIndexerUrl: 'https://network-default-indexer.example.com/graphql',
       };
 
       const client = createIndexerClient(configWithIndexer);
