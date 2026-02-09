@@ -1,22 +1,55 @@
 /**
- * Service Tests for EVM Access Control (Initial — Registration + Capabilities Suite)
+ * Service Tests for EVM Access Control
  *
- * Tests the EvmAccessControlService class for contract registration, input validation,
- * role ID management, and capability detection.
+ * Tests the EvmAccessControlService class for:
+ * - Phase 3 (US1): Contract registration, input validation, role ID management, capability detection
+ * - Phase 4 (US2): Ownership queries, admin info queries, indexer enrichment, graceful degradation
  *
  * @see spec.md §US1 — acceptance scenarios 1–5
- * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection
+ * @see spec.md §US2 — acceptance scenarios 1–6
+ * @see contracts/access-control-service.ts §Contract Registration + §Capability Detection + §Ownership + §Admin
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ContractFunction, ContractSchema, OperationResult } from '@openzeppelin/ui-types';
+import type {
+  AdminInfo,
+  ContractFunction,
+  ContractSchema,
+  OperationResult,
+  OwnershipInfo,
+} from '@openzeppelin/ui-types';
 import { ConfigurationInvalid } from '@openzeppelin/ui-types';
 
 import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
 import { EvmAccessControlService } from '../../src/access-control/service';
 import type { EvmTransactionExecutor } from '../../src/access-control/types';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
+
+// ---------------------------------------------------------------------------
+// Mock on-chain reader and indexer client for Phase 4 (US2) tests
+// ---------------------------------------------------------------------------
+
+const mockReadOwnership = vi.fn();
+const mockGetAdmin = vi.fn();
+
+vi.mock('../../src/access-control/onchain-reader', () => ({
+  readOwnership: (...args: unknown[]) => mockReadOwnership(...args),
+  getAdmin: (...args: unknown[]) => mockGetAdmin(...args),
+}));
+
+const mockIndexerIsAvailable = vi.fn();
+const mockQueryPendingOwnershipTransfer = vi.fn();
+const mockQueryPendingAdminTransfer = vi.fn();
+
+vi.mock('../../src/access-control/indexer-client', () => ({
+  createIndexerClient: () => ({
+    isAvailable: () => mockIndexerIsAvailable(),
+    queryPendingOwnershipTransfer: (...args: unknown[]) =>
+      mockQueryPendingOwnershipTransfer(...args),
+    queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
+  }),
+}));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -415,6 +448,294 @@ describe('EvmAccessControlService', () => {
     it('should be safe to call multiple times', () => {
       service.dispose();
       expect(() => service.dispose()).not.toThrow();
+    });
+  });
+
+  // ── getOwnership (Phase 4 — US2) ─────────────────────────────────────
+
+  describe('getOwnership', () => {
+    const OWNER = '0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa';
+    const PENDING_OWNER = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+
+    beforeEach(() => {
+      // Reset Phase 4 mocks to prevent leaking between tests
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+
+      // Register a contract for ownership tests
+      service.registerContract(VALID_ADDRESS, OWNABLE_TWO_STEP_SCHEMA);
+    });
+
+    it('should return "owned" state when contract has an owner with no pending transfer', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: undefined,
+      });
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      expect(result.owner).toBe(OWNER);
+      expect(result.state).toBe('owned');
+      expect(result.pendingTransfer).toBeUndefined();
+    });
+
+    it('should return "pending" state when there is a pending owner', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingOwnershipTransfer.mockResolvedValueOnce({
+        pendingOwner: PENDING_OWNER,
+        initiatedAt: '2026-01-15T10:00:00Z',
+        initiatedTxId: '0xabc123',
+        initiatedBlock: 12345,
+      });
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      expect(result.owner).toBe(OWNER);
+      expect(result.state).toBe('pending');
+      expect(result.pendingTransfer).toBeDefined();
+      expect(result.pendingTransfer!.pendingOwner).toBe(PENDING_OWNER);
+      // EVM Ownable2Step has no expiration — expirationBlock should be undefined
+      expect(result.pendingTransfer!.expirationBlock).toBeUndefined();
+    });
+
+    it('should return "renounced" state when owner is zero address', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: null,
+        pendingOwner: undefined,
+      });
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      expect(result.owner).toBeNull();
+      expect(result.state).toBe('renounced');
+      expect(result.pendingTransfer).toBeUndefined();
+    });
+
+    it('should never return "expired" state for EVM (FR-023)', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingOwnershipTransfer.mockResolvedValueOnce({
+        pendingOwner: PENDING_OWNER,
+        initiatedAt: '2026-01-01T00:00:00Z',
+        initiatedTxId: '0xold',
+        initiatedBlock: 1,
+      });
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      // Should be 'pending', never 'expired' for EVM
+      expect(result.state).not.toBe('expired');
+    });
+
+    it('should enrich pending transfer with indexer data when available', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingOwnershipTransfer.mockResolvedValueOnce({
+        pendingOwner: PENDING_OWNER,
+        initiatedAt: '2026-01-15T10:00:00Z',
+        initiatedTxId: '0xabc123',
+        initiatedBlock: 12345,
+      });
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      expect(result.pendingTransfer!.initiatedAt).toBe('2026-01-15T10:00:00Z');
+      expect(result.pendingTransfer!.initiatedTxId).toBe('0xabc123');
+      expect(result.pendingTransfer!.initiatedBlock).toBe(12345);
+    });
+
+    it('should gracefully degrade without indexer (FR-017)', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      // Should still return pending state based on on-chain pendingOwner
+      expect(result.owner).toBe(OWNER);
+      expect(result.state).toBe('pending');
+      expect(result.pendingTransfer!.pendingOwner).toBe(PENDING_OWNER);
+      // No indexer enrichment
+      expect(result.pendingTransfer!.initiatedAt).toBeUndefined();
+    });
+
+    it('should gracefully handle indexer query errors', async () => {
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: OWNER,
+        pendingOwner: PENDING_OWNER,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingOwnershipTransfer.mockRejectedValueOnce(new Error('Indexer error'));
+
+      const result: OwnershipInfo = await service.getOwnership(VALID_ADDRESS);
+
+      // Should still return valid ownership data without enrichment
+      expect(result.owner).toBe(OWNER);
+      expect(result.state).toBe('pending');
+    });
+
+    it('should throw for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.getOwnership(unregisteredAddress)).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw for invalid address', async () => {
+      await expect(service.getOwnership(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
+    });
+  });
+
+  // ── getAdminInfo (Phase 4 — US2) ─────────────────────────────────────
+
+  describe('getAdminInfo', () => {
+    const ADMIN = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC';
+    const PENDING_ADMIN = '0xDdDdDdDdDDddDDddDDddDDDDdDdDDdDDdDDDDDDd';
+    const ACCEPT_SCHEDULE = 1700000000;
+
+    beforeEach(() => {
+      // Reset Phase 4 mocks to prevent leaking between tests
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+
+      // Register with DefaultAdminRules schema
+      service.registerContract(VALID_ADDRESS, DEFAULT_ADMIN_RULES_SCHEMA);
+    });
+
+    it('should return "active" state when admin is set with no pending transfer', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: undefined,
+        acceptSchedule: undefined,
+        defaultAdminDelay: 86400,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.admin).toBe(ADMIN);
+      expect(result.state).toBe('active');
+      expect(result.pendingTransfer).toBeUndefined();
+    });
+
+    it('should return "pending" state when admin transfer is scheduled', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        defaultAdminDelay: 86400,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingAdminTransfer.mockResolvedValueOnce({
+        pendingAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        initiatedAt: '2026-01-20T14:00:00Z',
+        initiatedTxId: '0xdef456',
+        initiatedBlock: 67890,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.admin).toBe(ADMIN);
+      expect(result.state).toBe('pending');
+      expect(result.pendingTransfer).toBeDefined();
+      expect(result.pendingTransfer!.pendingAdmin).toBe(PENDING_ADMIN);
+      // acceptSchedule maps to expirationBlock (UNIX timestamp, per R5)
+      expect(result.pendingTransfer!.expirationBlock).toBe(ACCEPT_SCHEDULE);
+    });
+
+    it('should return "renounced" state when admin is zero address', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: null,
+        pendingDefaultAdmin: undefined,
+        acceptSchedule: undefined,
+        defaultAdminDelay: 0,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.admin).toBeNull();
+      expect(result.state).toBe('renounced');
+    });
+
+    it('should never return "expired" state for EVM (FR-023)', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        defaultAdminDelay: 86400,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.state).not.toBe('expired');
+    });
+
+    it('should enrich pending admin transfer with indexer data', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        defaultAdminDelay: 86400,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryPendingAdminTransfer.mockResolvedValueOnce({
+        pendingAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        initiatedAt: '2026-01-20T14:00:00Z',
+        initiatedTxId: '0xdef456',
+        initiatedBlock: 67890,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.pendingTransfer!.initiatedAt).toBe('2026-01-20T14:00:00Z');
+      expect(result.pendingTransfer!.initiatedTxId).toBe('0xdef456');
+      expect(result.pendingTransfer!.initiatedBlock).toBe(67890);
+    });
+
+    it('should gracefully degrade without indexer', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: PENDING_ADMIN,
+        acceptSchedule: ACCEPT_SCHEDULE,
+        defaultAdminDelay: 86400,
+      });
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.admin).toBe(ADMIN);
+      expect(result.state).toBe('pending');
+      expect(result.pendingTransfer!.pendingAdmin).toBe(PENDING_ADMIN);
+      expect(result.pendingTransfer!.expirationBlock).toBe(ACCEPT_SCHEDULE);
+      // No indexer enrichment
+      expect(result.pendingTransfer!.initiatedAt).toBeUndefined();
+    });
+
+    it('should throw for unregistered contract', async () => {
+      const unregisteredAddress = '0x9999999999999999999999999999999999999999';
+      await expect(service.getAdminInfo(unregisteredAddress)).rejects.toThrow(ConfigurationInvalid);
+    });
+
+    it('should throw for invalid address', async () => {
+      await expect(service.getAdminInfo(INVALID_ADDRESS)).rejects.toThrow(ConfigurationInvalid);
     });
   });
 });

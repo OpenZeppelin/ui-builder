@@ -30,6 +30,8 @@ import type {
   OperationResult,
   OwnershipInfo,
   PaginatedHistoryResult,
+  PendingAdminTransfer,
+  PendingOwnershipTransfer,
   RoleAssignment,
   TransactionStatusUpdate,
   TxStatus,
@@ -39,6 +41,8 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig, WriteContractParameters } from '../types';
 import { detectAccessControlCapabilities } from './feature-detection';
+import { createIndexerClient, EvmIndexerClient } from './indexer-client';
+import { getAdmin, readOwnership } from './onchain-reader';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 import { validateAddress, validateRoleIds } from './validation';
 
@@ -65,6 +69,7 @@ export class EvmAccessControlService implements AccessControlService {
   private readonly contractContexts = new Map<string, EvmAccessControlContext>();
   private readonly networkConfig: EvmCompatibleNetworkConfig;
   private readonly executeTransaction: EvmTransactionExecutor;
+  private readonly indexerClient: EvmIndexerClient;
 
   constructor(
     networkConfig: EvmCompatibleNetworkConfig,
@@ -72,6 +77,7 @@ export class EvmAccessControlService implements AccessControlService {
   ) {
     this.networkConfig = networkConfig;
     this.executeTransaction = executeTransaction;
+    this.indexerClient = createIndexerClient(networkConfig);
   }
 
   // ── Contract Registration ──────────────────────────────────────────────
@@ -199,10 +205,110 @@ export class EvmAccessControlService implements AccessControlService {
     return capabilities;
   }
 
-  // ── Ownership (stub — implemented in Phase 4) ─────────────────────────
+  // ── Ownership ──────────────────────────────────────────────────────────
 
-  async getOwnership(_contractAddress: string): Promise<OwnershipInfo> {
-    throw new Error('Not implemented — will be added in Phase 4 (US2)');
+  /**
+   * Get current ownership state.
+   *
+   * On-chain reads: `owner()`, `pendingOwner()` (if Ownable2Step)
+   * Indexer enrichment: pending transfer initiation timestamp/tx
+   *
+   * State mapping:
+   * - owner !== zeroAddress && no pendingOwner → 'owned'
+   * - pendingOwner set → 'pending' (expirationBlock = undefined — no expiration for EVM)
+   * - owner === zeroAddress → 'renounced'
+   * - Never returns 'expired' for EVM (FR-023)
+   *
+   * Graceful degradation (FR-017): Returns on-chain data without enrichment
+   * when the indexer is unavailable.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Ownership information with state classification
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async getOwnership(contractAddress: string): Promise<OwnershipInfo> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.getOwnership',
+      `Reading ownership status for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // Read on-chain ownership data
+    const onChainData = await readOwnership(
+      this.networkConfig.rpcUrl,
+      context.contractAddress,
+      this.networkConfig.viemChain
+    );
+
+    // ── Renounced state — owner is null ─────────────────────────────
+    if (onChainData.owner === null) {
+      logger.debug(
+        'EvmAccessControlService.getOwnership',
+        `Contract ${context.contractAddress} has renounced ownership`
+      );
+      return {
+        owner: null,
+        state: 'renounced',
+      };
+    }
+
+    // ── No pending owner — owned state ──────────────────────────────
+    if (!onChainData.pendingOwner) {
+      logger.debug(
+        'EvmAccessControlService.getOwnership',
+        `Contract ${context.contractAddress} has owner with no pending transfer`
+      );
+      return {
+        owner: onChainData.owner,
+        state: 'owned',
+      };
+    }
+
+    // ── Pending owner exists — enrich from indexer if available ──────
+    const pendingTransfer: PendingOwnershipTransfer = {
+      pendingOwner: onChainData.pendingOwner,
+      // EVM Ownable2Step has no expiration — expirationBlock is undefined (see research.md §R5)
+      expirationBlock: undefined,
+    };
+
+    // Attempt indexer enrichment
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (indexerAvailable) {
+      try {
+        const enrichment = await this.indexerClient.queryPendingOwnershipTransfer(
+          context.contractAddress
+        );
+        if (enrichment) {
+          pendingTransfer.initiatedAt = enrichment.initiatedAt;
+          pendingTransfer.initiatedTxId = enrichment.initiatedTxId;
+          pendingTransfer.initiatedBlock = enrichment.initiatedBlock;
+        }
+      } catch (error) {
+        logger.warn(
+          'EvmAccessControlService.getOwnership',
+          `Failed to enrich ownership from indexer: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    } else {
+      logger.warn(
+        'EvmAccessControlService.getOwnership',
+        `Indexer unavailable for ${this.networkConfig.id}: pending transfer enrichment skipped`
+      );
+    }
+
+    logger.debug(
+      'EvmAccessControlService.getOwnership',
+      `Contract ${context.contractAddress} has pending transfer to ${onChainData.pendingOwner}`
+    );
+
+    return {
+      owner: onChainData.owner,
+      state: 'pending',
+      pendingTransfer,
+    };
   }
 
   async transferOwnership(
@@ -225,10 +331,115 @@ export class EvmAccessControlService implements AccessControlService {
     throw new Error('Not implemented — will be added in Phase 6 (US4)');
   }
 
-  // ── Admin (stub — implemented in Phase 4/7) ───────────────────────────
+  // ── Admin ──────────────────────────────────────────────────────────────
 
-  async getAdminInfo(_contractAddress: string): Promise<AdminInfo> {
-    throw new Error('Not implemented — will be added in Phase 4 (US2)');
+  /**
+   * Get current default admin state (AccessControlDefaultAdminRules).
+   *
+   * On-chain reads: `defaultAdmin()`, `pendingDefaultAdmin()`, `defaultAdminDelay()`
+   * Indexer enrichment: pending transfer initiation timestamp/tx
+   *
+   * State mapping:
+   * - defaultAdmin !== zeroAddress && no pending → 'active'
+   * - pendingDefaultAdmin set → 'pending'
+   * - defaultAdmin === zeroAddress → 'renounced'
+   * - Never returns 'expired' for EVM (FR-023)
+   *
+   * For pending transfers, `acceptSchedule` maps to `expirationBlock` — this is a
+   * **UNIX timestamp in seconds** (NOT a block number). See research.md §R5 for the
+   * semantic divergence between Stellar and EVM.
+   *
+   * @param contractAddress - Previously registered contract address
+   * @returns Admin information with state classification
+   * @throws ConfigurationInvalid if contract not registered or address invalid
+   */
+  async getAdminInfo(contractAddress: string): Promise<AdminInfo> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    logger.info(
+      'EvmAccessControlService.getAdminInfo',
+      `Reading admin status for ${contractAddress}`
+    );
+
+    const context = this.getContextOrThrow(contractAddress);
+
+    // Read on-chain admin data
+    const onChainData = await getAdmin(
+      this.networkConfig.rpcUrl,
+      context.contractAddress,
+      this.networkConfig.viemChain
+    );
+
+    // ── Renounced state — admin is null ─────────────────────────────
+    if (onChainData.defaultAdmin === null) {
+      logger.debug(
+        'EvmAccessControlService.getAdminInfo',
+        `Contract ${context.contractAddress} has renounced admin`
+      );
+      return {
+        admin: null,
+        state: 'renounced',
+      };
+    }
+
+    // ── No pending admin — active state ─────────────────────────────
+    if (!onChainData.pendingDefaultAdmin) {
+      logger.debug(
+        'EvmAccessControlService.getAdminInfo',
+        `Contract ${context.contractAddress} has admin with no pending transfer`
+      );
+      return {
+        admin: onChainData.defaultAdmin,
+        state: 'active',
+      };
+    }
+
+    // ── Pending admin exists — enrich from indexer if available ──────
+    /**
+     * The `expirationBlock` field stores the `acceptSchedule` value from
+     * `pendingDefaultAdmin()` — this is a UNIX timestamp (seconds since epoch),
+     * NOT a block number. See research.md §R5 for semantic divergence.
+     */
+    const pendingTransfer: PendingAdminTransfer = {
+      pendingAdmin: onChainData.pendingDefaultAdmin,
+      expirationBlock: onChainData.acceptSchedule,
+    };
+
+    // Attempt indexer enrichment
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (indexerAvailable) {
+      try {
+        const enrichment = await this.indexerClient.queryPendingAdminTransfer(
+          context.contractAddress
+        );
+        if (enrichment) {
+          pendingTransfer.initiatedAt = enrichment.initiatedAt;
+          pendingTransfer.initiatedTxId = enrichment.initiatedTxId;
+          pendingTransfer.initiatedBlock = enrichment.initiatedBlock;
+        }
+      } catch (error) {
+        logger.warn(
+          'EvmAccessControlService.getAdminInfo',
+          `Failed to enrich admin info from indexer: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    } else {
+      logger.warn(
+        'EvmAccessControlService.getAdminInfo',
+        `Indexer unavailable for ${this.networkConfig.id}: pending admin enrichment skipped`
+      );
+    }
+
+    logger.debug(
+      'EvmAccessControlService.getAdminInfo',
+      `Contract ${context.contractAddress} has pending admin transfer to ${onChainData.pendingDefaultAdmin}`
+    );
+
+    return {
+      admin: onChainData.defaultAdmin,
+      state: 'pending',
+      pendingTransfer,
+    };
   }
 
   async transferAdminRole(
@@ -311,6 +522,7 @@ export class EvmAccessControlService implements AccessControlService {
    */
   dispose(): void {
     this.contractContexts.clear();
+    // Indexer client is stateless (no subscriptions to unsubscribe) — no cleanup needed
     logger.debug('EvmAccessControlService.dispose', 'Service disposed');
   }
 
