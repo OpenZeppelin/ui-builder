@@ -56,11 +56,11 @@
 
 ### Tests (TDD — write first, verify they fail)
 
-- [ ] T006 [P] Write validation tests in `packages/adapter-evm-core/test/access-control/validation.test.ts`. Cover: valid/invalid EVM addresses (checksummed, non-checksummed, wrong length, missing 0x), valid/invalid bytes32 role IDs, DEFAULT_ADMIN_ROLE, array validation, error messages. Reference: research.md §R8, Stellar `packages/adapter-stellar/src/access-control/validation.ts`.
+- [x] T006 [P] Write validation tests in `packages/adapter-evm-core/test/access-control/validation.test.ts`. Cover: valid/invalid EVM addresses (checksummed, non-checksummed, wrong length, missing 0x), valid/invalid bytes32 role IDs, DEFAULT_ADMIN_ROLE, array validation, error messages, custom paramName for contextual errors. Reference: research.md §R8.
 
 ### Implementation
 
-- [ ] T007 Implement `validateContractAddress`, `validateAccountAddress`, `validateAddress`, `validateRoleId`, `validateRoleIds` in `packages/adapter-evm-core/src/access-control/validation.ts`. Use viem `isAddress()` for addresses, regex `/^0x[0-9a-fA-F]{64}$/` for role IDs. Throw `ConfigurationInvalid` from `@openzeppelin/ui-types` on failure. Reference: quickstart.md §Step 1.
+- [x] T007 Implement `validateAddress`, `validateRoleId`, `validateRoleIds` in `packages/adapter-evm-core/src/access-control/validation.ts`. Reuses existing `isValidEvmAddress()` from `../utils/validation.ts` for address checks (single function — EVM has no contract/account address distinction). Regex `/^0x[0-9a-fA-F]{64}$/` for role IDs. Throws `ConfigurationInvalid` from `@openzeppelin/ui-types` on failure. Callers pass contextual `paramName` (e.g. `'contractAddress'`, `'account'`, `'newOwner'`) for descriptive errors. Reference: quickstart.md §Step 1.
 
 **Checkpoint**: Validation module complete. All input validation tests pass. User story implementation can begin.
 
