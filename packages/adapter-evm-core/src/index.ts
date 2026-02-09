@@ -216,6 +216,49 @@ export {
 } from './utils';
 
 // ============================================================================
+// Access Control Module - Access control detection, reads, writes, and history
+// ============================================================================
+export {
+  // Service
+  createEvmAccessControlService,
+  EvmAccessControlService,
+  // Actions
+  assembleAcceptAdminTransferAction,
+  assembleAcceptOwnershipAction,
+  assembleBeginAdminTransferAction,
+  assembleCancelAdminTransferAction,
+  assembleChangeAdminDelayAction,
+  assembleGrantRoleAction,
+  assembleRenounceOwnershipAction,
+  assembleRenounceRoleAction,
+  assembleRevokeRoleAction,
+  assembleRollbackAdminDelayAction,
+  assembleTransferOwnershipAction,
+  // Feature Detection
+  detectAccessControlCapabilities,
+  validateAccessControlSupport,
+  // Indexer Client
+  createIndexerClient,
+  EvmIndexerClient,
+  // On-Chain Reader
+  getAdmin,
+  getCurrentBlock,
+  readCurrentRoles,
+  readOwnership,
+  // Validation
+  validateAddress,
+  validateRoleId,
+  validateRoleIds,
+  // Constants
+  DEFAULT_ADMIN_ROLE,
+  DEFAULT_ADMIN_ROLE_LABEL,
+  ZERO_ADDRESS,
+  // Types
+  type EvmAccessControlContext,
+  type EvmTransactionExecutor,
+} from './access-control';
+
+// ============================================================================
 // Types Module - TypeScript type definitions
 // ============================================================================
 export {

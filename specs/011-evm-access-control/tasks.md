@@ -252,13 +252,13 @@
 
 **Purpose**: Wire the module into the adapter packages and configure network endpoints.
 
-- [ ] T046 [P] Create module exports in `packages/adapter-evm-core/src/access-control/index.ts`. Export: `createEvmAccessControlService`, `EvmAccessControlService`, `EvmTransactionExecutor`, validation functions, feature-detection functions, constants. Mirror Stellar module's export structure.
-- [ ] T047 [P] Update `packages/adapter-evm-core/src/index.ts` to re-export the `access-control` module.
-- [ ] T048 [P] Add indexer URLs for all EVM mainnet networks in `packages/adapter-evm/src/networks/mainnet.ts`. Add `accessControlIndexerUrl` to each network config object. **URL source**: Obtain endpoints from the `access-control-indexers` repo's deployment configuration or infrastructure documentation. Follow the URL pattern established by existing deployed indexers. Reference: plan.md §Project Structure, research.md §R7.
-- [ ] T049 [P] Add indexer URLs for all EVM testnet networks in `packages/adapter-evm/src/networks/testnet.ts`. Same pattern and URL source as T048.
-- [ ] T050 Implement `getAccessControlService()` with lazy initialization in `packages/adapter-evm/src/adapter.ts`. Add private `accessControlService: EvmAccessControlService | null` field. Create service on first call with `executeTransaction` callback wrapping `signAndBroadcast`. Reference: quickstart.md §Step 9, research.md §R9, NFR-004.
-- [ ] T051a Write integration test in `packages/adapter-evm/test/access-control-integration.test.ts` (or co-located with adapter tests). Test the full flow: `EvmAdapter.getAccessControlService()` → `registerContract()` → `getCapabilities()` → `getOwnership()` → `transferOwnership()` with mocked RPC and indexer. Verify lazy initialization (NFR-004): first call creates service, second call returns same instance. Reference: SC-008 (comprehensive test coverage).
-- [ ] T051b Verify build: run `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core build` and `pnpm --filter @openzeppelin/ui-builder-adapter-evm build` to ensure no type errors or build failures.
+- [x] T046 [P] Create module exports in `packages/adapter-evm-core/src/access-control/index.ts`. Export: `createEvmAccessControlService`, `EvmAccessControlService`, `EvmTransactionExecutor`, validation functions, feature-detection functions, constants. Mirror Stellar module's export structure.
+- [x] T047 [P] Update `packages/adapter-evm-core/src/index.ts` to re-export the `access-control` module.
+- [x] T048 [P] Add indexer URLs for all EVM mainnet networks in `packages/adapter-evm/src/networks/mainnet.ts`. Add `accessControlIndexerUrl` to each network config object. **URL source**: Obtain endpoints from the `access-control-indexers` repo's deployment configuration or infrastructure documentation. Follow the URL pattern established by existing deployed indexers. Reference: plan.md §Project Structure, research.md §R7.
+- [x] T049 [P] Add indexer URLs for all EVM testnet networks in `packages/adapter-evm/src/networks/testnet.ts`. Same pattern and URL source as T048.
+- [x] T050 Implement `getAccessControlService()` with lazy initialization in `packages/adapter-evm/src/adapter.ts`. Add private `accessControlService: EvmAccessControlService | null` field. Create service on first call with `executeTransaction` callback wrapping `signAndBroadcast`. Reference: quickstart.md §Step 9, research.md §R9, NFR-004.
+- [x] T051a Write integration test in `packages/adapter-evm/test/access-control-integration.test.ts` (or co-located with adapter tests). Test the full flow: `EvmAdapter.getAccessControlService()` → `registerContract()` → `getCapabilities()` → `getOwnership()` → `transferOwnership()` with mocked RPC and indexer. Verify lazy initialization (NFR-004): first call creates service, second call returns same instance. Reference: SC-008 (comprehensive test coverage).
+- [x] T051b Verify build: run `pnpm --filter @openzeppelin/ui-builder-adapter-evm-core build` and `pnpm --filter @openzeppelin/ui-builder-adapter-evm build` to ensure no type errors or build failures.
 
 **Checkpoint**: Module fully integrated into adapter packages. Builds pass.
 
@@ -274,6 +274,28 @@
 - [ ] T055 Run quickstart.md validation — verify the implementation matches the step-by-step guide and all referenced files exist. **Also validate performance criteria**: SC-002 (capability detection <3s) and SC-004 (indexer queries <2s for 50 events) as manual smoke tests or lightweight benchmarks.
 - [ ] T056 Code review: verify all TODO comments for PR-1/PR-2/PR-3 workarounds are present and clearly describe what to change once types are updated.
 - [ ] T057 API parity verification (SC-001): Compare the EVM service's exported public API against the Stellar adapter's `packages/adapter-stellar/src/access-control/index.ts` exports. Verify all 13 unified `AccessControlService` methods are implemented with equivalent behavior. Document any intentional EVM-specific extensions not present in Stellar. Reference: spec.md §FR-001, §FR-025.
+
+---
+
+## Phase 14: Live Indexer Integration Tests
+
+**Purpose**: Validate the EVM indexer client against real deployed SubQuery indexers, mirroring the Stellar adapter's `indexer-integration.test.ts`. These tests are env-var-gated and skip gracefully when infrastructure is unavailable.
+
+- [ ] T058 Write live indexer integration test in `packages/adapter-evm-core/test/access-control/indexer-integration.test.ts`. Use `INDEXER_URL` env var (skip all tests if unset). Create `EvmIndexerClient` with a real network config pointing to a deployed EVM indexer. Test suites:
+  - **Connectivity**: `isAvailable()` returns true, invalid endpoint returns false.
+  - **History Query — Basic**: query all history for a known EVM contract with access control events, verify structure (role, account, changeType, txId, timestamp, blockHeight), validate EVM address format (`0x` hex), validate `HistoryChangeType` enum values.
+  - **History Query — Pagination**: paginate with small page size (5), verify no duplicates across pages, verify descending timestamp order, test `limit` + `cursor` continuity, test consistent results with different page sizes.
+  - **History Query — Filtering**: filter by account, roleId, changeType (`GRANTED`, `REVOKED`), combined filters (changeType + roleId, changeType + account), timestamp range (`timestampFrom`/`timestampTo`).
+  - **Role Discovery**: `discoverRoleIds()` returns unique bytes32 role IDs, empty array for non-existent contract, discovered roles consistent with history query.
+  - **Latest Grants**: `queryLatestGrants()` for known members, empty map for non-existent accounts, multiple accounts in single query, latest grant when granted multiple times.
+  - **Pending Transfers**: `queryPendingOwnershipTransfer()` and `queryPendingAdminTransfer()` — return null for contracts with no pending transfer, verify structure when pending transfer exists.
+  - **Data Integrity**: valid tx hashes (64-char hex with `0x` prefix), valid block heights (positive numbers), valid bytes32 role IDs.
+  - **Error Handling**: empty result for contract with no events, graceful handling when indexer URL is not configured.
+  Reference: Stellar adapter's `packages/adapter-stellar/test/access-control/indexer-integration.test.ts` as structural template. Use EVM-specific test contracts deployed on Sepolia or another testnet with known access control events.
+- [ ] T059 [P] Document test contract addresses and setup instructions in a comment block at the top of the test file. Include: contract addresses, network, deployed access control patterns (Ownable2Step, AccessControl, etc.), and how to deploy new test contracts if needed.
+- [ ] T060 [P] Add `INDEXER_URL` environment variable documentation to the test file header, following the same pattern as the Stellar integration test (SubQuery gateway URL with API key).
+
+**Checkpoint**: Live indexer integration tests pass when `INDEXER_URL` is set. Tests skip gracefully when unset. Parity with Stellar adapter's integration test coverage.
 
 ---
 
@@ -295,6 +317,7 @@
 - **US9 (Phase 11)**: Depends on US3 (indexer client discoverRoleIds)
 - **Integration (Phase 12)**: Depends on ALL user stories (Phase 3–11) + Phase 0 for workaround removal
 - **Polish (Phase 13)**: Depends on Integration (Phase 12)
+- **Live Integration Tests (Phase 14)**: Depends on Integration (Phase 12) — requires deployed indexers and test contracts
 
 ### User Story Dependencies
 
@@ -349,6 +372,9 @@ Phase 12 (Integration):
 
 Phase 13 (Polish):
   T052 ∥ T053 ∥ T054  →  T055  →  T056  →  T057
+
+Phase 14 (Live Integration Tests):
+  T058  →  T059 ∥ T060  (T059/T060 are doc tasks, parallelizable)
 ```
 
 ---
