@@ -40,11 +40,11 @@
 
 **Purpose**: Create directory structure, constants, and type extensions needed by all stories
 
-- [ ] T001 Create directory structure: `packages/adapter-evm-core/src/access-control/` and `packages/adapter-evm-core/test/access-control/`. Mirror the Stellar adapter's `packages/adapter-stellar/src/access-control/` layout.
-- [ ] T002 [P] Define EVM access control constants (DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL, ZERO_ADDRESS) in `packages/adapter-evm-core/src/access-control/constants.ts`. Reference: data-model.md §Constants.
-- [ ] T003 [P] Define `EvmAccessControlContext` interface and `EvmTransactionExecutor` callback type in `packages/adapter-evm-core/src/access-control/types.ts`. Reference: data-model.md §1, contracts/access-control-service.ts §Factory.
-- [ ] T004 [P] Add temporary type augmentation for `accessControlIndexerUrl` on `BaseNetworkConfig` in `packages/adapter-evm-core/src/types/access-control-indexer-url.d.ts` (same pattern as Stellar adapter's `src/types/access-control-indexer-url.d.ts`). Add `// TODO(011-evm-access-control): remove after @openzeppelin/ui-types is bumped to include accessControlIndexerUrl on BaseNetworkConfig` comment. Reference: data-model.md §9, spec.md §PR-3.
-- [ ] T005 [P] Define ABI fragment constants for all access control functions (Ownable, Ownable2Step, AccessControl, AccessControlEnumerable, AccessControlDefaultAdminRules, admin delay operations) in `packages/adapter-evm-core/src/access-control/abis.ts`. Reference: contracts/feature-detection.ts for the full signature matrix.
+- [x] T001 Create directory structure: `packages/adapter-evm-core/src/access-control/` and `packages/adapter-evm-core/test/access-control/`. Mirror the Stellar adapter's `packages/adapter-stellar/src/access-control/` layout.
+- [x] T002 [P] Define EVM access control constants (DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL, ZERO_ADDRESS) in `packages/adapter-evm-core/src/access-control/constants.ts`. Reference: data-model.md §Constants.
+- [x] T003 [P] Define `EvmAccessControlContext` interface and `EvmTransactionExecutor` callback type in `packages/adapter-evm-core/src/access-control/types.ts`. Reference: data-model.md §1, contracts/access-control-service.ts §Factory.
+- [x] T004 [P] ~~Add temporary type augmentation for `accessControlIndexerUrl`~~ — SKIPPED: `accessControlIndexerUrl` already exists on `BaseNetworkConfig` in `@openzeppelin/ui-types@1.7.0` (published as part of T000e). No type augmentation needed.
+- [x] T005 [P] Define ABI fragment constants for all access control functions (Ownable, Ownable2Step, AccessControl, AccessControlEnumerable, AccessControlDefaultAdminRules, admin delay operations) in `packages/adapter-evm-core/src/access-control/abis.ts`. Reference: contracts/feature-detection.ts for the full signature matrix.
 
 ---
 
