@@ -281,7 +281,7 @@
 
 **Purpose**: Validate the EVM indexer client against real deployed SubQuery indexers, mirroring the Stellar adapter's `indexer-integration.test.ts`. These tests are env-var-gated and skip gracefully when infrastructure is unavailable.
 
-- [ ] T058 Write live indexer integration test in `packages/adapter-evm-core/test/access-control/indexer-integration.test.ts`. Use `INDEXER_URL` env var (skip all tests if unset). Create `EvmIndexerClient` with a real network config pointing to a deployed EVM indexer. Test suites:
+- [x] T058 Write live indexer integration test in `packages/adapter-evm-core/test/access-control/indexer-integration.test.ts`. Use `INDEXER_URL` env var (skip all tests if unset). Create `EvmIndexerClient` with a real network config pointing to a deployed EVM indexer. Test suites:
   - **Connectivity**: `isAvailable()` returns true, invalid endpoint returns false.
   - **History Query — Basic**: query all history for a known EVM contract with access control events, verify structure (role, account, changeType, txId, timestamp, blockHeight), validate EVM address format (`0x` hex), validate `HistoryChangeType` enum values.
   - **History Query — Pagination**: paginate with small page size (5), verify no duplicates across pages, verify descending timestamp order, test `limit` + `cursor` continuity, test consistent results with different page sizes.
@@ -292,8 +292,8 @@
   - **Data Integrity**: valid tx hashes (64-char hex with `0x` prefix), valid block heights (positive numbers), valid bytes32 role IDs.
   - **Error Handling**: empty result for contract with no events, graceful handling when indexer URL is not configured.
   Reference: Stellar adapter's `packages/adapter-stellar/test/access-control/indexer-integration.test.ts` as structural template. Use EVM-specific test contracts deployed on Sepolia or another testnet with known access control events.
-- [ ] T059 [P] Document test contract addresses and setup instructions in a comment block at the top of the test file. Include: contract addresses, network, deployed access control patterns (Ownable2Step, AccessControl, etc.), and how to deploy new test contracts if needed.
-- [ ] T060 [P] Add `INDEXER_URL` environment variable documentation to the test file header, following the same pattern as the Stellar integration test (SubQuery gateway URL with API key).
+- [x] T059 [P] Document test contract addresses and setup instructions in a comment block at the top of the test file. Include: contract addresses, network, deployed access control patterns (Ownable2Step, AccessControl, etc.), and how to deploy new test contracts if needed.
+- [x] T060 [P] Add `INDEXER_URL` environment variable documentation to the test file header, following the same pattern as the Stellar integration test (SubQuery gateway URL with API key).
 
 **Checkpoint**: Live indexer integration tests pass when `INDEXER_URL` is set. Tests skip gracefully when unset. Parity with Stellar adapter's integration test coverage.
 
