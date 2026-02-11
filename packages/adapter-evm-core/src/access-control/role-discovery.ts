@@ -8,10 +8,12 @@
  * @module access-control/role-discovery
  */
 
-import { createPublicClient, http, type Abi, type Chain } from 'viem';
+import type { Abi, Chain } from 'viem';
 
 import type { ContractFunction, ContractSchema } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
+
+import { createEvmPublicClient } from '../utils/public-client';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -74,19 +76,7 @@ export async function discoverRoleLabelsFromAbi(
     return new Map();
   }
 
-  const chain = viemChain ?? {
-    id: 1,
-    name: 'Unknown',
-    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-    rpcUrls: {
-      default: { http: [rpcUrl] },
-    },
-  };
-
-  const client = createPublicClient({
-    chain,
-    transport: http(rpcUrl),
-  });
+  const client = createEvmPublicClient(rpcUrl, viemChain);
 
   const address = contractAddress as `0x${string}`;
   const result = new Map<string, string>();

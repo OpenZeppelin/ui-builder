@@ -1,4 +1,4 @@
-import { createPublicClient, http, isAddress, type Chain } from 'viem';
+import { isAddress } from 'viem';
 
 import type { ContractSchema, FunctionParameter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
@@ -6,56 +6,8 @@ import { logger } from '@openzeppelin/ui-utils';
 import { createAbiFunctionItem } from '../abi/transformer';
 import { parseEvmInput } from '../transform/input-parser';
 import type { EvmCompatibleNetworkConfig } from '../types/network';
+import { createEvmPublicClient } from '../utils/public-client';
 import { isEvmViewFunction } from './view-checker';
-
-/**
- * Helper to create a public client with a specific RPC URL
- */
-function createPublicClientWithRpc(networkConfig: EvmCompatibleNetworkConfig, rpcUrl: string) {
-  let chainForViem: Chain;
-  if (networkConfig.viemChain) {
-    chainForViem = networkConfig.viemChain;
-  } else {
-    logger.warn(
-      'createPublicClientWithRpc',
-      `Viem chain object (viemChain) not provided in EvmNetworkConfig for ${networkConfig.name} (query). Creating a minimal one.`
-    );
-    if (!networkConfig.rpcUrl) {
-      throw new Error(
-        `RPC URL is missing in networkConfig for ${networkConfig.name} and viemChain is not set for query client.`
-      );
-    }
-    chainForViem = {
-      id: networkConfig.chainId,
-      name: networkConfig.name,
-      nativeCurrency: networkConfig.nativeCurrency,
-      rpcUrls: {
-        default: { http: [networkConfig.rpcUrl] },
-        public: { http: [networkConfig.rpcUrl] },
-      },
-      blockExplorers: networkConfig.explorerUrl
-        ? { default: { name: `${networkConfig.name} Explorer`, url: networkConfig.explorerUrl } }
-        : undefined,
-    };
-  }
-
-  try {
-    const publicClient = createPublicClient({
-      chain: chainForViem,
-      transport: http(rpcUrl),
-    });
-    return publicClient;
-  } catch (error) {
-    logger.error(
-      'createPublicClientWithRpc',
-      'Failed to create network-specific public client for query:',
-      error
-    );
-    throw new Error(
-      `Failed to create network-specific public client for query: ${(error as Error).message}`
-    );
-  }
-}
 
 /**
  * Core logic for querying an EVM view function.
@@ -121,21 +73,7 @@ export async function queryEvmViewFunction(
     logger.debug('queryEvmViewFunction', 'Parsed Args for readContract:', args);
 
     // --- Create Public Client --- //
-    // Create a minimal network config if not provided
-    const minimalConfig: EvmCompatibleNetworkConfig = networkConfig || {
-      id: 'query-network',
-      name: 'Query Network',
-      ecosystem: 'evm',
-      network: 'unknown',
-      type: 'mainnet',
-      isTestnet: false,
-      chainId: 1, // Default to mainnet chain ID
-      rpcUrl: rpcUrl,
-      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-      exportConstName: 'queryNetwork',
-    };
-
-    const publicClient = createPublicClientWithRpc(minimalConfig, rpcUrl);
+    const publicClient = createEvmPublicClient(rpcUrl, networkConfig?.viemChain);
 
     // --- Construct ABI Item --- //
     const functionAbiItem = createAbiFunctionItem(functionDetails);

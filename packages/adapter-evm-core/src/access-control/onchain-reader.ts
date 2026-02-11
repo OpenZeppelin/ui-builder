@@ -18,12 +18,13 @@
  * @see research.md §R1 — On-Chain Read Strategy
  */
 
-import { createPublicClient, http, type Chain } from 'viem';
+import type { Chain } from 'viem';
 
 import type { RoleAssignment, RoleIdentifier } from '@openzeppelin/ui-types';
 import { OperationFailed } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { createEvmPublicClient } from '../utils/public-client';
 import {
   DEFAULT_ADMIN_ABI,
   DEFAULT_ADMIN_DELAY_ABI,
@@ -74,24 +75,9 @@ export interface AdminReadResult {
 
 const LOG_SYSTEM = 'EvmOnChainReader';
 
-/**
- * Creates a viem public client for a given RPC URL and optional chain.
- * If viemChain is not provided, creates a minimal chain config.
- */
+/** Alias for readability within this module */
 function createClient(rpcUrl: string, viemChain?: Chain) {
-  const chain = viemChain ?? {
-    id: 1,
-    name: 'Unknown',
-    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-    rpcUrls: {
-      default: { http: [rpcUrl] },
-    },
-  };
-
-  return createPublicClient({
-    chain,
-    transport: http(rpcUrl),
-  });
+  return createEvmPublicClient(rpcUrl, viemChain);
 }
 
 // ---------------------------------------------------------------------------
