@@ -55,11 +55,15 @@ export function validateAddress(address: string, paramName = 'address'): void {
  *
  * The `DEFAULT_ADMIN_ROLE` (bytes32 zero: `0x0000...0000`) is a valid role ID.
  *
+ * Returns the trimmed role ID so callers can use the sanitized value
+ * in downstream operations (e.g. transaction assembly).
+ *
  * @param roleId - The role identifier to validate
  * @param paramName - Optional parameter name for error messages (defaults to 'roleId')
+ * @returns The trimmed, validated role ID
  * @throws ConfigurationInvalid if the role ID is invalid
  */
-export function validateRoleId(roleId: string, paramName = 'roleId'): void {
+export function validateRoleId(roleId: string, paramName = 'roleId'): string {
   assertNonEmptyString(roleId, paramName);
 
   const trimmed = roleId.trim();
@@ -71,6 +75,8 @@ export function validateRoleId(roleId: string, paramName = 'roleId'): void {
       paramName
     );
   }
+
+  return trimmed;
 }
 
 /**

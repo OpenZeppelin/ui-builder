@@ -131,27 +131,32 @@ describe('validateAddress', () => {
 // ---------------------------------------------------------------------------
 
 describe('validateRoleId', () => {
-  it('should accept a valid bytes32 role ID', () => {
-    expect(() => validateRoleId(VALID_ROLE_ID)).not.toThrow();
+  it('should accept a valid bytes32 role ID and return it', () => {
+    expect(validateRoleId(VALID_ROLE_ID)).toBe(VALID_ROLE_ID);
   });
 
-  it('should accept another valid bytes32 role ID', () => {
-    expect(() => validateRoleId(VALID_ROLE_ID_2)).not.toThrow();
+  it('should accept another valid bytes32 role ID and return it', () => {
+    expect(validateRoleId(VALID_ROLE_ID_2)).toBe(VALID_ROLE_ID_2);
   });
 
   it('should accept DEFAULT_ADMIN_ROLE (bytes32 zero)', () => {
-    expect(() => validateRoleId(DEFAULT_ADMIN_ROLE)).not.toThrow();
-    expect(() => validateRoleId(ADMIN_ROLE)).not.toThrow();
+    expect(validateRoleId(DEFAULT_ADMIN_ROLE)).toBe(DEFAULT_ADMIN_ROLE);
+    expect(validateRoleId(ADMIN_ROLE)).toBe(ADMIN_ROLE);
   });
 
   it('should accept role IDs with uppercase hex', () => {
     const upperHex = '0x9F2DF0FED2C77648DE5860A4CC508CD0818C85B8B8A1AB4CEEEF8D981C8956A6';
-    expect(() => validateRoleId(upperHex)).not.toThrow();
+    expect(validateRoleId(upperHex)).toBe(upperHex);
   });
 
   it('should accept role IDs with mixed-case hex', () => {
     const mixedHex = '0x9f2Df0Fed2c77648dE5860a4Cc508Cd0818c85b8B8A1aB4CeEeF8d981C8956A6';
-    expect(() => validateRoleId(mixedHex)).not.toThrow();
+    expect(validateRoleId(mixedHex)).toBe(mixedHex);
+  });
+
+  it('should trim whitespace and return the trimmed value', () => {
+    const padded = `  ${VALID_ROLE_ID}  `;
+    expect(validateRoleId(padded)).toBe(VALID_ROLE_ID);
   });
 
   it('should reject an empty string', () => {
