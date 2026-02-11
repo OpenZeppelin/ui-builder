@@ -55,12 +55,14 @@ export function validateAddress(address: string, paramName = 'address'): void {
  *
  * The `DEFAULT_ADMIN_ROLE` (bytes32 zero: `0x0000...0000`) is a valid role ID.
  *
- * Returns the trimmed role ID so callers can use the sanitized value
- * in downstream operations (e.g. transaction assembly).
+ * Returns the trimmed, lowercase-normalized role ID so callers can use the
+ * sanitized value in downstream operations (e.g. transaction assembly, Set
+ * deduplication, Map lookups). Normalizing to lowercase at the validation
+ * boundary ensures case-insensitive deduplication across all consumers.
  *
  * @param roleId - The role identifier to validate
  * @param paramName - Optional parameter name for error messages (defaults to 'roleId')
- * @returns The trimmed, validated role ID
+ * @returns The trimmed, lowercase-normalized, validated role ID
  * @throws ConfigurationInvalid if the role ID is invalid
  */
 export function validateRoleId(roleId: string, paramName = 'roleId'): string {
@@ -76,7 +78,7 @@ export function validateRoleId(roleId: string, paramName = 'roleId'): string {
     );
   }
 
-  return trimmed;
+  return trimmed.toLowerCase();
 }
 
 /**
@@ -95,11 +97,9 @@ export function validateRoleIds(roleIds: string[], paramName = 'roleIds'): strin
     throw new ConfigurationInvalid(`${paramName} must be an array`, String(roleIds), paramName);
   }
 
-  for (let i = 0; i < roleIds.length; i++) {
-    validateRoleId(roleIds[i], `${paramName}[${i}]`);
-  }
+  const validated = roleIds.map((r, i) => validateRoleId(r, `${paramName}[${i}]`));
 
-  return [...new Set(roleIds.map((r) => r.trim()))];
+  return [...new Set(validated)];
 }
 
 // ---------------------------------------------------------------------------

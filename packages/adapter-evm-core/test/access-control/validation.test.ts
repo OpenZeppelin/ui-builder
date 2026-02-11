@@ -144,14 +144,14 @@ describe('validateRoleId', () => {
     expect(validateRoleId(ADMIN_ROLE)).toBe(ADMIN_ROLE);
   });
 
-  it('should accept role IDs with uppercase hex', () => {
+  it('should accept role IDs with uppercase hex and normalize to lowercase', () => {
     const upperHex = '0x9F2DF0FED2C77648DE5860A4CC508CD0818C85B8B8A1AB4CEEEF8D981C8956A6';
-    expect(validateRoleId(upperHex)).toBe(upperHex);
+    expect(validateRoleId(upperHex)).toBe(upperHex.toLowerCase());
   });
 
-  it('should accept role IDs with mixed-case hex', () => {
+  it('should accept role IDs with mixed-case hex and normalize to lowercase', () => {
     const mixedHex = '0x9f2Df0Fed2c77648dE5860a4Cc508Cd0818c85b8B8A1aB4CeEeF8d981C8956A6';
-    expect(validateRoleId(mixedHex)).toBe(mixedHex);
+    expect(validateRoleId(mixedHex)).toBe(mixedHex.toLowerCase());
   });
 
   it('should trim whitespace and return the trimmed value', () => {
@@ -242,6 +242,13 @@ describe('validateRoleIds', () => {
     expect(validateRoleIds([VALID_ROLE_ID, VALID_ROLE_ID, VALID_ROLE_ID_2, VALID_ROLE_ID])).toEqual(
       [VALID_ROLE_ID, VALID_ROLE_ID_2]
     );
+  });
+
+  it('should deduplicate role IDs case-insensitively', () => {
+    const upper = '0x9F2DF0FED2C77648DE5860A4CC508CD0818C85B8B8A1AB4CEEEF8D981C8956A6';
+    const lower = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+    const mixed = '0x9f2Df0Fed2c77648dE5860a4Cc508Cd0818c85b8B8A1aB4CeEeF8d981C8956A6';
+    expect(validateRoleIds([upper, lower, mixed])).toEqual([lower]);
   });
 
   it('should reject non-array input', () => {
