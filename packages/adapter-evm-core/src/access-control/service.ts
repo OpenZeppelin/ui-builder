@@ -211,7 +211,10 @@ export class EvmAccessControlService implements AccessControlService {
         this.networkConfig.viemChain
       );
       for (const [hash, label] of discovered) {
-        context.roleLabelMap.set(hash, label);
+        // Only set if not already present — external labels from addKnownRoleIds() take precedence
+        if (!context.roleLabelMap.has(hash)) {
+          context.roleLabelMap.set(hash, label);
+        }
       }
     } finally {
       context.abiRoleDiscoveryDone = true;

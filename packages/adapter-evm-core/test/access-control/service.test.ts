@@ -390,6 +390,32 @@ describe('EvmAccessControlService', () => {
       expect(result).toContain(VALID_ROLE_ID);
       expect(result).toContain(VALID_ROLE_ID_2);
     });
+
+    it('should preserve external label when ABI discovery returns conflicting label for same hash', async () => {
+      const { discoverRoleLabelsFromAbi: mockDiscover } = await import(
+        '../../src/access-control/role-discovery'
+      );
+
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [VALID_ROLE_ID]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: VALID_ROLE_ID, label: 'MY_CUSTOM_ROLE' }]);
+
+      // ABI discovery returns a conflicting label for the same hash
+      (mockDiscover as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+        new Map([[VALID_ROLE_ID, 'MINTER_ROLE']])
+      );
+
+      mockReadCurrentRoles.mockReset();
+      mockReadCurrentRoles.mockResolvedValue([
+        { role: { id: VALID_ROLE_ID, label: 'MY_CUSTOM_ROLE' }, members: [] },
+      ]);
+
+      await service.getCurrentRoles(VALID_ADDRESS);
+
+      // Verify the roleLabelMap passed to readCurrentRoles keeps the external label
+      const call = mockReadCurrentRoles.mock.calls[0];
+      const roleLabelMap = call[5] as Map<string, string>;
+      expect(roleLabelMap.get(VALID_ROLE_ID)).toBe('MY_CUSTOM_ROLE');
+    });
   });
 
   // ── getCapabilities ───────────────────────────────────────────────────

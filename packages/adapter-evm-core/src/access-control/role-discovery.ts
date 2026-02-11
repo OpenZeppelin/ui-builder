@@ -91,18 +91,19 @@ export async function discoverRoleLabelsFromAbi(
   const address = contractAddress as `0x${string}`;
   const result = new Map<string, string>();
 
-  for (const fn of candidates) {
-    const abi: Abi = [
-      {
-        type: 'function',
-        name: fn.name,
-        inputs: [],
-        outputs: [{ name: '', type: 'bytes32' }],
-        stateMutability: (fn.stateMutability as 'view' | 'pure') || 'view',
-      },
-    ];
+  // Batch all RPC calls in parallel for reduced latency
+  const callResults = await Promise.allSettled(
+    candidates.map(async (fn) => {
+      const abi: Abi = [
+        {
+          type: 'function',
+          name: fn.name,
+          inputs: [],
+          outputs: [{ name: '', type: 'bytes32' }],
+          stateMutability: (fn.stateMutability as 'view' | 'pure') || 'view',
+        },
+      ];
 
-    try {
       const value = await client.readContract({
         address,
         abi,
@@ -110,23 +111,33 @@ export async function discoverRoleLabelsFromAbi(
         args: [],
       });
 
-      // Normalize to 0x + 64 hex chars for consistent map keys
-      const hash =
-        typeof value === 'string'
-          ? value.toLowerCase().startsWith('0x')
-            ? value.toLowerCase()
-            : `0x${value}`
-          : `0x${(value as bigint).toString(16).padStart(64, '0')}`;
-      const normalizedHash = hash.length === 66 ? hash : `0x${hash.slice(2).padStart(64, '0')}`;
+      return { name: fn.name, value };
+    })
+  );
 
-      result.set(normalizedHash, fn.name);
-      logger.debug(LOG_SYSTEM, `Resolved role constant ${fn.name} -> ${normalizedHash}`);
-    } catch (error) {
+  for (const settled of callResults) {
+    if (settled.status === 'rejected') {
       logger.debug(
         LOG_SYSTEM,
-        `Skipping role constant ${fn.name} on ${contractAddress}: ${(error as Error).message}`
+        `Skipping role constant on ${contractAddress}: ${(settled.reason as Error).message}`
       );
+      continue;
     }
+
+    const { name, value } = settled.value;
+
+    // Normalize to 0x + 64 lowercase hex chars for consistent map keys.
+    // viem returns bytes32 as a hex string, but we handle bigint defensively.
+    const raw =
+      typeof value === 'string'
+        ? value.toLowerCase()
+        : `0x${(value as bigint).toString(16).padStart(64, '0')}`;
+    const normalizedHash = raw.startsWith('0x')
+      ? `0x${raw.slice(2).padStart(64, '0')}`
+      : `0x${raw.padStart(64, '0')}`;
+
+    result.set(normalizedHash, name);
+    logger.debug(LOG_SYSTEM, `Resolved role constant ${name} -> ${normalizedHash}`);
   }
 
   logger.info(
