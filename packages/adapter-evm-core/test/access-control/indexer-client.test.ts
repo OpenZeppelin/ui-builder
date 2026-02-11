@@ -889,6 +889,96 @@ describe('EvmIndexerClient', () => {
       expect(result!.items[0].role.label).toBe('DEFAULT_ADMIN_ROLE');
     });
 
+    it('should resolve role label from roleLabelMap for ROLE_GRANTED events', async () => {
+      const minterRoleHash = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            {
+              id: 'evt-1',
+              eventType: 'ROLE_GRANTED',
+              blockNumber: '100',
+              timestamp: '2026-01-10T06:00:00Z',
+              txHash: '0xhash1',
+              role: minterRoleHash,
+              account: '0xAcc1',
+            },
+          ],
+          totalCount: 1,
+          pageInfo: { hasNextPage: false },
+        },
+      });
+
+      const labelMap = new Map<string, string>([[minterRoleHash, 'MY_CUSTOM_MINTER']]);
+      const result = await client.queryHistory(CONTRACT_ADDRESS, undefined, labelMap);
+
+      expect(result!.items[0].role.id).toBe(minterRoleHash);
+      expect(result!.items[0].role.label).toBe('MY_CUSTOM_MINTER');
+    });
+
+    it('should fall back to well-known label when roleLabelMap has no entry', async () => {
+      const minterRoleHash = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            {
+              id: 'evt-1',
+              eventType: 'ROLE_GRANTED',
+              blockNumber: '100',
+              timestamp: '2026-01-10T06:00:00Z',
+              txHash: '0xhash1',
+              role: minterRoleHash,
+              account: '0xAcc1',
+            },
+          ],
+          totalCount: 1,
+          pageInfo: { hasNextPage: false },
+        },
+      });
+
+      // Pass empty roleLabelMap — should fall back to well-known dictionary
+      const result = await client.queryHistory(
+        CONTRACT_ADDRESS,
+        undefined,
+        new Map<string, string>()
+      );
+
+      expect(result!.items[0].role.id).toBe(minterRoleHash);
+      expect(result!.items[0].role.label).toBe('MINTER_ROLE');
+    });
+
+    it('should return undefined label for unknown role hash without roleLabelMap entry', async () => {
+      const unknownRole = '0x1111111111111111111111111111111111111111111111111111111111111111';
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            {
+              id: 'evt-1',
+              eventType: 'ROLE_GRANTED',
+              blockNumber: '100',
+              timestamp: '2026-01-10T06:00:00Z',
+              txHash: '0xhash1',
+              role: unknownRole,
+              account: '0xAcc1',
+            },
+          ],
+          totalCount: 1,
+          pageInfo: { hasNextPage: false },
+        },
+      });
+
+      const result = await client.queryHistory(CONTRACT_ADDRESS, undefined, new Map());
+
+      expect(result!.items[0].role.id).toBe(unknownRole);
+      expect(result!.items[0].role.label).toBeUndefined();
+    });
+
     it('should support pagination with first/offset', async () => {
       mockFetchHealthy();
 

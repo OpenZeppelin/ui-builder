@@ -242,6 +242,87 @@ describe('onchain-reader', () => {
       expect(result).toHaveLength(1);
       expect(result[0].members).toHaveLength(0);
     });
+
+    it('should resolve label from roleLabelMap when provided', async () => {
+      mockReadContract.mockResolvedValueOnce(1n);
+      mockReadContract.mockResolvedValueOnce(MEMBER_ADDRESS_1);
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const labelMap = new Map<string, string>([[ROLE_ID_MINTER, 'Custom Minter Label']]);
+
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [ROLE_ID_MINTER],
+        true,
+        undefined,
+        labelMap
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(ROLE_ID_MINTER);
+      expect(result[0].role.label).toBe('Custom Minter Label');
+    });
+
+    it('should resolve well-known label when roleLabelMap has no entry', async () => {
+      // ROLE_ID_MINTER is the well-known MINTER_ROLE hash
+      mockReadContract.mockResolvedValueOnce(0n); // count = 0
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const emptyMap = new Map<string, string>();
+
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [ROLE_ID_MINTER],
+        true,
+        undefined,
+        emptyMap
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(ROLE_ID_MINTER);
+      expect(result[0].role.label).toBe('MINTER_ROLE');
+    });
+
+    it('should prefer roleLabelMap over well-known dictionary', async () => {
+      mockReadContract.mockResolvedValueOnce(0n); // count = 0
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const labelMap = new Map<string, string>([[DEFAULT_ADMIN_ROLE_CONSTANT, 'Override Admin']]);
+
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [DEFAULT_ADMIN_ROLE_CONSTANT],
+        true,
+        undefined,
+        labelMap
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(DEFAULT_ADMIN_ROLE_CONSTANT);
+      expect(result[0].role.label).toBe('Override Admin');
+    });
+
+    it('should return undefined label for unknown role when no roleLabelMap entry', async () => {
+      const unknownRole = '0x1111111111111111111111111111111111111111111111111111111111111111';
+      mockReadContract.mockResolvedValueOnce(0n);
+
+      const { readCurrentRoles } = await import('../../src/access-control/onchain-reader');
+      const result = await readCurrentRoles(
+        TEST_RPC_URL,
+        CONTRACT_ADDRESS,
+        [unknownRole],
+        true,
+        undefined,
+        new Map()
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.id).toBe(unknownRole);
+      expect(result[0].role.label).toBeUndefined();
+    });
   });
 
   describe('getRoleAdmin', () => {

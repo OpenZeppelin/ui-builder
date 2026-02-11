@@ -2772,6 +2772,139 @@ describe('EvmAccessControlService', () => {
     });
   });
 
+  // ── Role Label Propagation ───────────────────────────────────────────
+
+  describe('Role Label Propagation', () => {
+    const MINTER_ROLE = VALID_ROLE_ID; // well-known MINTER_ROLE hash
+    const PAUSER_ROLE = VALID_ROLE_ID_2; // well-known PAUSER_ROLE hash
+    const CUSTOM_ROLE = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const MEMBER_1 = '0xEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEeEe';
+
+    beforeEach(() => {
+      mockReadOwnership.mockReset();
+      mockGetAdmin.mockReset();
+      mockReadCurrentRoles.mockReset();
+      mockEnumerateRoleMembers.mockReset();
+      mockHasRole.mockReset();
+      mockIndexerIsAvailable.mockReset();
+      mockQueryPendingOwnershipTransfer.mockReset();
+      mockQueryPendingAdminTransfer.mockReset();
+      mockQueryLatestGrants.mockReset();
+      mockQueryHistory.mockReset();
+    });
+
+    it('should pass well-known role labels through getCurrentRoles via roleLabelMap', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: MINTER_ROLE, label: 'MINTER_ROLE' }, members: [MEMBER_1] },
+      ]);
+
+      const result = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.label).toBe('MINTER_ROLE');
+
+      // Verify roleLabelMap was passed to readCurrentRoles
+      const call = mockReadCurrentRoles.mock.calls[0];
+      const roleLabelMap = call[5] as Map<string, string> | undefined;
+      expect(roleLabelMap).toBeDefined();
+    });
+
+    it('should pass external label through getCurrentRolesEnriched', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [CUSTOM_ROLE]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: CUSTOM_ROLE, label: 'MY_SPECIAL_ROLE' }]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: CUSTOM_ROLE, label: 'MY_SPECIAL_ROLE' }, members: [MEMBER_1] },
+      ]);
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role.label).toBe('MY_SPECIAL_ROLE');
+
+      // Verify roleLabelMap was passed
+      const call = mockReadCurrentRoles.mock.calls[0];
+      const roleLabelMap = call[5] as Map<string, string>;
+      expect(roleLabelMap.get(CUSTOM_ROLE)).toBe('MY_SPECIAL_ROLE');
+    });
+
+    it('should pass roleLabelMap to getHistory indexer query', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: MINTER_ROLE, label: 'Custom Minter' }]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryHistory.mockResolvedValueOnce({
+        items: [
+          {
+            role: { id: MINTER_ROLE, label: 'Custom Minter' },
+            account: MEMBER_1,
+            changeType: 'GRANTED',
+            txId: '0xhash1',
+            timestamp: '2026-01-20T12:00:00Z',
+            ledger: 300,
+          },
+        ],
+        pageInfo: { hasNextPage: false },
+      });
+
+      await service.getHistory(VALID_ADDRESS);
+
+      // Verify roleLabelMap was passed as 3rd argument to queryHistory
+      expect(mockQueryHistory).toHaveBeenCalledTimes(1);
+      const queryCall = mockQueryHistory.mock.calls[0];
+      const roleLabelMap = queryCall[2] as Map<string, string>;
+      expect(roleLabelMap).toBeInstanceOf(Map);
+      expect(roleLabelMap.get(MINTER_ROLE)).toBe('Custom Minter');
+    });
+
+    it('should include labels in exportSnapshot role output', async () => {
+      service.registerContract(VALID_ADDRESS, COMBINED_SCHEMA, [MINTER_ROLE, PAUSER_ROLE]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: MINTER_ROLE, label: 'Snapshot Minter' }]);
+
+      mockReadOwnership.mockResolvedValueOnce({
+        owner: MEMBER_1,
+        pendingOwner: undefined,
+      });
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: MINTER_ROLE, label: 'Snapshot Minter' }, members: [MEMBER_1] },
+        { role: { id: PAUSER_ROLE, label: 'PAUSER_ROLE' }, members: [] },
+      ]);
+
+      const snapshot = await service.exportSnapshot(VALID_ADDRESS);
+
+      expect(snapshot.roles).toHaveLength(2);
+      expect(snapshot.roles[0].role.label).toBe('Snapshot Minter');
+      expect(snapshot.roles[1].role.label).toBe('PAUSER_ROLE');
+    });
+
+    it('should thread roleLabelMap with multiple label sources (external + well-known)', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [
+        DEFAULT_ADMIN_ROLE,
+        MINTER_ROLE,
+        CUSTOM_ROLE,
+      ]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: CUSTOM_ROLE, label: 'MY_CUSTOM' }]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: DEFAULT_ADMIN_ROLE, label: 'DEFAULT_ADMIN_ROLE' }, members: [] },
+        { role: { id: MINTER_ROLE, label: 'MINTER_ROLE' }, members: [] },
+        { role: { id: CUSTOM_ROLE, label: 'MY_CUSTOM' }, members: [] },
+      ]);
+
+      await service.getCurrentRoles(VALID_ADDRESS);
+
+      const call = mockReadCurrentRoles.mock.calls[0];
+      const roleLabelMap = call[5] as Map<string, string>;
+      expect(roleLabelMap).toBeDefined();
+      // External label
+      expect(roleLabelMap.get(CUSTOM_ROLE)).toBe('MY_CUSTOM');
+    });
+  });
+
   // ── dispose (Phase 11 — updated) ────────────────────────────────────
 
   describe('dispose (updated)', () => {

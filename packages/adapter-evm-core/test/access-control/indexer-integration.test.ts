@@ -62,7 +62,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
+import { DEFAULT_ADMIN_ROLE, WELL_KNOWN_ROLES } from '../../src/access-control/constants';
 import { EvmIndexerClient } from '../../src/access-control/indexer-client';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
 
@@ -829,10 +829,23 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
       const result = await client.queryHistory(TEST_CONTRACT_PRIMARY);
       expect(result).not.toBeNull();
 
+      // Sentinel change types used for ownership/admin events (not actual AccessControl roles)
+      const SENTINEL_CHANGE_TYPES = new Set([
+        'OWNERSHIP_TRANSFER_STARTED',
+        'OWNERSHIP_TRANSFER_COMPLETED',
+        'OWNERSHIP_RENOUNCED',
+        'ADMIN_TRANSFER_INITIATED',
+        'ADMIN_TRANSFER_COMPLETED',
+        'ADMIN_TRANSFER_CANCELED',
+        'ADMIN_RENOUNCED',
+        'ADMIN_DELAY_CHANGE_SCHEDULED',
+        'ADMIN_DELAY_CHANGE_CANCELED',
+      ]);
+
       const historyRoles = new Set<string>();
       for (const entry of result!.items) {
         // Only collect actual role IDs from role events (not ownership/admin sentinels)
-        if (entry.role && entry.role.id && !entry.role.label) {
+        if (entry.role && entry.role.id && !SENTINEL_CHANGE_TYPES.has(entry.changeType)) {
           historyRoles.add(entry.role.id);
         }
       }
@@ -1344,20 +1357,154 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
       // Should have multiple members granted across roles
       expect(grantMap!.size).toBeGreaterThanOrEqual(3);
 
-      // Verify the deployer is among the granted accounts
+      // Verify the deployer is among the granted accounts (keys are composite role:account)
       const DEPLOYER = '0xf0a9ed2663311ce436347bb6f240181ff103ca16';
-      const deployerGrant = grantMap!.get(DEPLOYER);
-      expect(deployerGrant).toBeDefined();
-      expect(deployerGrant!.grantedAt).toBeDefined();
-      expect(deployerGrant!.txHash).toBeDefined();
+      const deployerEntries = [...grantMap!.entries()].filter(([key]) =>
+        key.endsWith(`:${DEPLOYER}`)
+      );
+      expect(deployerEntries.length).toBeGreaterThanOrEqual(1);
+
+      const [, deployerGrant] = deployerEntries[0];
+      expect(deployerGrant.grantedAt).toBeDefined();
+      expect(deployerGrant.txHash).toBeDefined();
 
       console.log(`  ✓ Found ${grantMap!.size} members with grants on AccessControlMock`);
 
-      for (const [account, grant] of grantMap!) {
+      for (const [compositeKey, grant] of grantMap!) {
         console.log(
-          `    ${account.slice(0, 10)}... role=${grant.role.slice(0, 10)}... at ${grant.grantedAt}`
+          `    ${compositeKey.slice(0, 20)}... role=${grant.role.slice(0, 10)}... at ${grant.grantedAt}`
         );
       }
     }, 20000);
+  });
+
+  // ── Role Label Resolution ──────────────────────────────────────────────
+
+  describe('Role Label Resolution', () => {
+    it('should resolve well-known labels for ROLE_GRANTED events when roleLabelMap is provided', async () => {
+      if (!indexerAvailable) return;
+
+      // Build a roleLabelMap from the well-known dictionary
+      const roleLabelMap = new Map<string, string>(Object.entries(WELL_KNOWN_ROLES));
+
+      const result = await client.queryHistory(
+        TEST_CONTRACT_PRIMARY,
+        { changeType: 'GRANTED', limit: 20 },
+        roleLabelMap
+      );
+
+      expect(result).not.toBeNull();
+      expect(result!.items.length).toBeGreaterThan(0);
+
+      const labeledItems = result!.items.filter((e) => e.role.label !== undefined);
+      expect(labeledItems.length).toBeGreaterThan(0);
+
+      // All GRANTED events should have a label since AccessControlMock uses well-known roles
+      for (const entry of labeledItems) {
+        expect(typeof entry.role.label).toBe('string');
+        expect(entry.role.label!.length).toBeGreaterThan(0);
+        console.log(`  ✓ Role ${entry.role.id.slice(0, 10)}... labeled as "${entry.role.label}"`);
+      }
+    }, 15000);
+
+    it('should resolve DEFAULT_ADMIN_ROLE label for admin role events', async () => {
+      if (!indexerAvailable) return;
+
+      const roleLabelMap = new Map<string, string>(Object.entries(WELL_KNOWN_ROLES));
+
+      const result = await client.queryHistory(
+        TEST_CONTRACT_PRIMARY,
+        { roleId: DEFAULT_ADMIN_ROLE, changeType: 'GRANTED', limit: 5 },
+        roleLabelMap
+      );
+
+      expect(result).not.toBeNull();
+
+      if (result!.items.length > 0) {
+        for (const entry of result!.items) {
+          expect(entry.role.id).toBe(DEFAULT_ADMIN_ROLE);
+          expect(entry.role.label).toBe('DEFAULT_ADMIN_ROLE');
+        }
+        console.log(
+          `  ✓ DEFAULT_ADMIN_ROLE labeled correctly for ${result!.items.length} event(s)`
+        );
+      }
+    }, 15000);
+
+    it('should resolve custom label from roleLabelMap over well-known dictionary', async () => {
+      if (!indexerAvailable) return;
+
+      // Override DEFAULT_ADMIN_ROLE with a custom label
+      const customLabelMap = new Map<string, string>([[DEFAULT_ADMIN_ROLE, 'Super Custom Admin']]);
+
+      const result = await client.queryHistory(
+        TEST_CONTRACT_PRIMARY,
+        { roleId: DEFAULT_ADMIN_ROLE, changeType: 'GRANTED', limit: 3 },
+        customLabelMap
+      );
+
+      expect(result).not.toBeNull();
+
+      if (result!.items.length > 0) {
+        for (const entry of result!.items) {
+          expect(entry.role.label).toBe('Super Custom Admin');
+        }
+        console.log(
+          `  ✓ Custom label "Super Custom Admin" resolved for ${result!.items.length} event(s)`
+        );
+      }
+    }, 15000);
+
+    it('should label ownership events as "OWNER" regardless of roleLabelMap', async () => {
+      if (!indexerAvailable) return;
+
+      const roleLabelMap = new Map<string, string>(Object.entries(WELL_KNOWN_ROLES));
+
+      // Query ownership events from OwnableMock
+      const result = await client.queryHistory(TEST_CONTRACT_OWNERSHIP, undefined, roleLabelMap);
+
+      expect(result).not.toBeNull();
+
+      const ownershipEvents = result!.items.filter(
+        (e) => e.changeType === 'OWNERSHIP_TRANSFER_COMPLETED'
+      );
+
+      if (ownershipEvents.length > 0) {
+        for (const entry of ownershipEvents) {
+          // Ownership events use DEFAULT_ADMIN_ROLE as sentinel with label "OWNER"
+          expect(entry.role.id).toBe(DEFAULT_ADMIN_ROLE);
+          expect(entry.role.label).toBe('OWNER');
+        }
+        console.log(
+          `  ✓ Ownership events labeled as "OWNER" for ${ownershipEvents.length} event(s)`
+        );
+      }
+    }, 15000);
+
+    it('should discover and label all well-known roles on AccessControlMock', async () => {
+      if (!indexerAvailable) return;
+
+      // Discover roles
+      const roleIds = await client.discoverRoleIds(TEST_CONTRACT_PRIMARY);
+      expect(roleIds).not.toBeNull();
+      expect(roleIds!.length).toBeGreaterThanOrEqual(5);
+
+      // Check how many discovered roles are well-known
+      const labeledCount = roleIds!.filter((id) => WELL_KNOWN_ROLES[id] !== undefined).length;
+
+      console.log(
+        `  📊 Discovered ${roleIds!.length} roles, ${labeledCount} have well-known labels`
+      );
+
+      // AccessControlMock should have at least DEFAULT_ADMIN + MINTER + PAUSER + BURNER + UPGRADER
+      expect(labeledCount).toBeGreaterThanOrEqual(5);
+
+      for (const roleId of roleIds!) {
+        const label = WELL_KNOWN_ROLES[roleId];
+        if (label) {
+          console.log(`  ✓ ${roleId.slice(0, 10)}... → ${label}`);
+        }
+      }
+    }, 15000);
   });
 });
