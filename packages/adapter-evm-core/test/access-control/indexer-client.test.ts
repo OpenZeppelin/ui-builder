@@ -16,7 +16,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
 // Import after mocking
-import { createIndexerClient, EvmIndexerClient } from '../../src/access-control/indexer-client';
+import {
+  createIndexerClient,
+  EvmIndexerClient,
+  grantMapKey,
+} from '../../src/access-control/indexer-client';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
 
 // ---------------------------------------------------------------------------
@@ -365,6 +369,12 @@ describe('EvmIndexerClient', () => {
 
       expect(result).not.toBeNull();
       expect(result!.size).toBe(2);
+
+      // Verify composite key lookup works
+      const key1 = grantMapKey(ROLE_ID_MINTER, '0xMember1000000000000000000000000000000001');
+      const key2 = grantMapKey(ROLE_ID_MINTER, '0xMember2000000000000000000000000000000002');
+      expect(result!.get(key1)?.txHash).toBe('0xgrant1');
+      expect(result!.get(key2)?.txHash).toBe('0xgrant2');
     });
 
     it('should return empty map when no grant data exists', async () => {
@@ -421,6 +431,65 @@ describe('EvmIndexerClient', () => {
 
       expect(result).not.toBeNull();
       expect(result!.size).toBe(2);
+
+      // Verify composite key distinguishes different roles for different accounts
+      const minterKey = grantMapKey(ROLE_ID_MINTER, '0xMember1000000000000000000000000000000001');
+      const pauserKey = grantMapKey(ROLE_ID_PAUSER, '0xMember3000000000000000000000000000000003');
+      expect(result!.get(minterKey)?.txHash).toBe('0xgrant1');
+      expect(result!.get(pauserKey)?.txHash).toBe('0xgrant3');
+    });
+
+    it('should keep distinct grant metadata when same account holds multiple roles', async () => {
+      mockFetchHealthy();
+
+      // Same account granted MINTER at one time and PAUSER at another
+      mockFetchSuccess({
+        roleMemberships: {
+          nodes: [
+            {
+              role: ROLE_ID_MINTER,
+              account: '0xMember1000000000000000000000000000000001',
+              grantedAt: '2026-01-10T08:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrantMinter',
+            },
+            {
+              role: ROLE_ID_PAUSER,
+              account: '0xMember1000000000000000000000000000000001',
+              grantedAt: '2026-01-15T12:00:00Z',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+              txHash: '0xgrantPauser',
+            },
+          ],
+        },
+      });
+
+      const result = await client.queryLatestGrants(CONTRACT_ADDRESS, [
+        ROLE_ID_MINTER,
+        ROLE_ID_PAUSER,
+      ]);
+
+      expect(result).not.toBeNull();
+      // Two entries: one per role+account combination
+      expect(result!.size).toBe(2);
+
+      const minterKey = grantMapKey(ROLE_ID_MINTER, '0xMember1000000000000000000000000000000001');
+      const pauserKey = grantMapKey(ROLE_ID_PAUSER, '0xMember1000000000000000000000000000000001');
+
+      const minterGrant = result!.get(minterKey);
+      const pauserGrant = result!.get(pauserKey);
+
+      expect(minterGrant).toBeDefined();
+      expect(pauserGrant).toBeDefined();
+
+      // Each role retains its own grant timestamp and tx hash
+      expect(minterGrant!.grantedAt).toBe('2026-01-10T08:00:00Z');
+      expect(minterGrant!.txHash).toBe('0xgrantMinter');
+      expect(minterGrant!.role).toBe(ROLE_ID_MINTER);
+
+      expect(pauserGrant!.grantedAt).toBe('2026-01-15T12:00:00Z');
+      expect(pauserGrant!.txHash).toBe('0xgrantPauser');
+      expect(pauserGrant!.role).toBe(ROLE_ID_PAUSER);
     });
 
     it('should use networkConfig.id as the network filter value (FR-027)', async () => {

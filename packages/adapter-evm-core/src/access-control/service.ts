@@ -55,7 +55,7 @@ import {
   assembleTransferOwnershipAction,
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
-import { createIndexerClient, EvmIndexerClient } from './indexer-client';
+import { createIndexerClient, EvmIndexerClient, grantMapKey } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 import { validateAddress, validateRoleId, validateRoleIds } from './validation';
@@ -927,7 +927,7 @@ export class EvmAccessControlService implements AccessControlService {
       const enriched: EnrichedRoleAssignment[] = currentRoles.map((roleAssignment) => ({
         role: roleAssignment.role,
         members: roleAssignment.members.map((memberAddress) => {
-          const grantInfo = grantMap.get(memberAddress.toLowerCase());
+          const grantInfo = grantMap.get(grantMapKey(roleAssignment.role.id, memberAddress));
           const member: EnrichedRoleMember = {
             address: memberAddress,
           };
@@ -987,17 +987,17 @@ export class EvmAccessControlService implements AccessControlService {
     runtimeApiKey?: string
   ): Promise<OperationResult> {
     validateAddress(contractAddress, 'contractAddress');
-    validateRoleId(roleId, 'roleId');
+    const validatedRoleId = validateRoleId(roleId, 'roleId');
     validateAddress(account, 'account');
 
     logger.info(
       'EvmAccessControlService.grantRole',
-      `Granting role ${roleId} to ${account} on ${contractAddress}`
+      `Granting role ${validatedRoleId} to ${account} on ${contractAddress}`
     );
 
     const context = this.getContextOrThrow(contractAddress);
 
-    const txData = assembleGrantRoleAction(context.contractAddress, roleId, account);
+    const txData = assembleGrantRoleAction(context.contractAddress, validatedRoleId, account);
 
     logger.debug(
       'EvmAccessControlService.grantRole',
@@ -1031,17 +1031,17 @@ export class EvmAccessControlService implements AccessControlService {
     runtimeApiKey?: string
   ): Promise<OperationResult> {
     validateAddress(contractAddress, 'contractAddress');
-    validateRoleId(roleId, 'roleId');
+    const validatedRoleId = validateRoleId(roleId, 'roleId');
     validateAddress(account, 'account');
 
     logger.info(
       'EvmAccessControlService.revokeRole',
-      `Revoking role ${roleId} from ${account} on ${contractAddress}`
+      `Revoking role ${validatedRoleId} from ${account} on ${contractAddress}`
     );
 
     const context = this.getContextOrThrow(contractAddress);
 
-    const txData = assembleRevokeRoleAction(context.contractAddress, roleId, account);
+    const txData = assembleRevokeRoleAction(context.contractAddress, validatedRoleId, account);
 
     logger.debug(
       'EvmAccessControlService.revokeRole',
@@ -1079,17 +1079,17 @@ export class EvmAccessControlService implements AccessControlService {
     runtimeApiKey?: string
   ): Promise<OperationResult> {
     validateAddress(contractAddress, 'contractAddress');
-    validateRoleId(roleId, 'roleId');
+    const validatedRoleId = validateRoleId(roleId, 'roleId');
     validateAddress(account, 'account');
 
     logger.info(
       'EvmAccessControlService.renounceRole',
-      `Renouncing role ${roleId} for ${account} on ${contractAddress}`
+      `Renouncing role ${validatedRoleId} for ${account} on ${contractAddress}`
     );
 
     const context = this.getContextOrThrow(contractAddress);
 
-    const txData = assembleRenounceRoleAction(context.contractAddress, roleId, account);
+    const txData = assembleRenounceRoleAction(context.contractAddress, validatedRoleId, account);
 
     logger.debug(
       'EvmAccessControlService.renounceRole',

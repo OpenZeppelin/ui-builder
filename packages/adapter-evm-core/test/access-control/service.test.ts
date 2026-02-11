@@ -38,6 +38,7 @@ import type {
 import { ConfigurationInvalid } from '@openzeppelin/ui-types';
 
 import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
+import { grantMapKey } from '../../src/access-control/indexer-client';
 import { EvmAccessControlService } from '../../src/access-control/service';
 import type { EvmTransactionExecutor } from '../../src/access-control/types';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
@@ -67,17 +68,21 @@ const mockQueryLatestGrants = vi.fn();
 const mockQueryHistory = vi.fn();
 const mockDiscoverRoleIds = vi.fn();
 
-vi.mock('../../src/access-control/indexer-client', () => ({
-  createIndexerClient: () => ({
-    isAvailable: () => mockIndexerIsAvailable(),
-    queryPendingOwnershipTransfer: (...args: unknown[]) =>
-      mockQueryPendingOwnershipTransfer(...args),
-    queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
-    queryLatestGrants: (...args: unknown[]) => mockQueryLatestGrants(...args),
-    queryHistory: (...args: unknown[]) => mockQueryHistory(...args),
-    discoverRoleIds: (...args: unknown[]) => mockDiscoverRoleIds(...args),
-  }),
-}));
+vi.mock('../../src/access-control/indexer-client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/access-control/indexer-client')>();
+  return {
+    ...actual,
+    createIndexerClient: () => ({
+      isAvailable: () => mockIndexerIsAvailable(),
+      queryPendingOwnershipTransfer: (...args: unknown[]) =>
+        mockQueryPendingOwnershipTransfer(...args),
+      queryPendingAdminTransfer: (...args: unknown[]) => mockQueryPendingAdminTransfer(...args),
+      queryLatestGrants: (...args: unknown[]) => mockQueryLatestGrants(...args),
+      queryHistory: (...args: unknown[]) => mockQueryHistory(...args),
+      discoverRoleIds: (...args: unknown[]) => mockDiscoverRoleIds(...args),
+    }),
+  };
+});
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -910,7 +915,7 @@ describe('EvmAccessControlService', () => {
       mockQueryLatestGrants.mockResolvedValueOnce(
         new Map([
           [
-            MEMBER_1.toLowerCase(),
+            grantMapKey(MINTER_ROLE, MEMBER_1),
             {
               account: MEMBER_1,
               role: MINTER_ROLE,
@@ -920,7 +925,7 @@ describe('EvmAccessControlService', () => {
             },
           ],
           [
-            MEMBER_2.toLowerCase(),
+            grantMapKey(MINTER_ROLE, MEMBER_2),
             {
               account: MEMBER_2,
               role: MINTER_ROLE,
@@ -1013,6 +1018,71 @@ describe('EvmAccessControlService', () => {
       await expect(service.getCurrentRolesEnriched(INVALID_ADDRESS)).rejects.toThrow(
         ConfigurationInvalid
       );
+    });
+
+    it('should enrich same account with distinct grant metadata per role', async () => {
+      const PAUSER_ROLE = VALID_ROLE_ID_2;
+
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [
+        MINTER_ROLE,
+        PAUSER_ROLE,
+      ]);
+
+      // Same account (MEMBER_1) holds both MINTER and PAUSER roles
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        {
+          role: { id: MINTER_ROLE },
+          members: [MEMBER_1],
+        },
+        {
+          role: { id: PAUSER_ROLE },
+          members: [MEMBER_1],
+        },
+      ]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockResolvedValueOnce(
+        new Map([
+          [
+            grantMapKey(MINTER_ROLE, MEMBER_1),
+            {
+              account: MEMBER_1,
+              role: MINTER_ROLE,
+              grantedAt: '2026-01-10T08:00:00Z',
+              txHash: '0xgrantMinter',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+            },
+          ],
+          [
+            grantMapKey(PAUSER_ROLE, MEMBER_1),
+            {
+              account: MEMBER_1,
+              role: PAUSER_ROLE,
+              grantedAt: '2026-01-15T12:00:00Z',
+              txHash: '0xgrantPauser',
+              grantedBy: '0xGranter0000000000000000000000000000000001',
+            },
+          ],
+        ])
+      );
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(2);
+
+      // MINTER role enrichment
+      const minterRole = result.find((r) => r.role.id === MINTER_ROLE)!;
+      expect(minterRole.members).toHaveLength(1);
+      expect(minterRole.members[0].address).toBe(MEMBER_1);
+      expect(minterRole.members[0].grantedAt).toBe('2026-01-10T08:00:00Z');
+      expect(minterRole.members[0].grantedTxId).toBe('0xgrantMinter');
+
+      // PAUSER role enrichment — must NOT inherit MINTER's metadata
+      const pauserRole = result.find((r) => r.role.id === PAUSER_ROLE)!;
+      expect(pauserRole.members).toHaveLength(1);
+      expect(pauserRole.members[0].address).toBe(MEMBER_1);
+      expect(pauserRole.members[0].grantedAt).toBe('2026-01-15T12:00:00Z');
+      expect(pauserRole.members[0].grantedTxId).toBe('0xgrantPauser');
     });
   });
 

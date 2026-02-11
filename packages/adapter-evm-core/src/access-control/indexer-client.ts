@@ -78,6 +78,21 @@ export interface GrantInfo {
   grantedBy?: string;
 }
 
+/**
+ * Build the composite key used for grant map lookups.
+ *
+ * Keys on `role:account` (both lowercased) so that an account holding
+ * multiple roles gets a distinct entry per role, avoiding stale grant
+ * metadata cross-contamination.
+ *
+ * @param roleId - The bytes32 role identifier
+ * @param account - The account address
+ * @returns A composite key in the form `roleId:account` (lowercased)
+ */
+export function grantMapKey(roleId: string, account: string): string {
+  return `${roleId.toLowerCase()}:${account.toLowerCase()}`;
+}
+
 /** Internal GraphQL response shape for access control events */
 interface IndexerEventNode {
   id: string;
@@ -527,14 +542,16 @@ export class EvmIndexerClient {
    * Query the indexer for current role membership grant data.
    *
    * Queries `roleMemberships` for the specified roles, returning a map of
-   * `account → GrantInfo` for enrichment of role assignments.
+   * `role:account → GrantInfo` for enrichment of role assignments. The composite
+   * key ensures that an account holding multiple roles retains distinct grant
+   * metadata per role. Use {@link grantMapKey} to build lookup keys.
    *
    * Returns an empty Map if roleIds is empty. Returns null if the indexer
    * is unavailable or the query fails (graceful degradation).
    *
    * @param contractAddress - The contract address to query
    * @param roleIds - Array of bytes32 role IDs to query
-   * @returns Map of lowercased account address to GrantInfo, or null on failure
+   * @returns Map of `role:account` composite key to GrantInfo, or null on failure
    */
   async queryLatestGrants(
     contractAddress: string,
@@ -592,11 +609,12 @@ export class EvmIndexerClient {
         return new Map();
       }
 
-      // Build map of lowercased account → GrantInfo
+      // Build map of role:account → GrantInfo (composite key prevents
+      // cross-role contamination when an account holds multiple roles)
       const grantMap = new Map<string, GrantInfo>();
       for (const node of nodes) {
-        const key = node.account.toLowerCase();
-        // Keep only the first (most recent) grant per account since ordered by GRANTED_AT_DESC
+        const key = grantMapKey(node.role, node.account);
+        // Keep only the first (most recent) grant per role+account since ordered by GRANTED_AT_DESC
         if (!grantMap.has(key)) {
           grantMap.set(key, {
             account: node.account,

@@ -864,11 +864,13 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
       if (grantMap!.size > 0) {
         console.log(`  ✓ Found grants for ${grantMap!.size} member(s)`);
 
-        // Verify structure of first grant
+        // Verify structure of first grant (map keys are now composite role:account strings)
         const firstEntry = grantMap!.entries().next().value;
         if (firstEntry) {
-          const [account, grantInfo] = firstEntry;
-          expect(typeof account).toBe('string');
+          const [compositeKey, grantInfo] = firstEntry;
+          expect(typeof compositeKey).toBe('string');
+          // Composite key should contain a colon separator (role:account)
+          expect(compositeKey).toContain(':');
           expect(typeof grantInfo.grantedAt).toBe('string');
           expect(typeof grantInfo.txHash).toBe('string');
           expect(typeof grantInfo.role).toBe('string');
