@@ -1,5 +1,5 @@
 ---
-"@openzeppelin/ui-builder-adapter-evm-core": minor
+'@openzeppelin/ui-builder-adapter-evm-core': minor
 ---
 
 Add human-readable role labels for EVM access control
