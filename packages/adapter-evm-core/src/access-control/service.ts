@@ -40,6 +40,7 @@ import type {
 import { ConfigurationInvalid, OperationFailed } from '@openzeppelin/ui-types';
 import { logger, validateSnapshot } from '@openzeppelin/ui-utils';
 
+import { resolveRpcUrl } from '../configuration/rpc';
 import type { EvmCompatibleNetworkConfig, WriteContractParameters } from '../types';
 import {
   assembleAcceptAdminTransferAction,
@@ -205,7 +206,7 @@ export class EvmAccessControlService implements AccessControlService {
 
     try {
       const discovered = await discoverRoleLabelsFromAbi(
-        this.networkConfig.rpcUrl,
+        resolveRpcUrl(this.networkConfig),
         context.contractAddress,
         context.contractSchema,
         this.networkConfig.viemChain
@@ -305,7 +306,7 @@ export class EvmAccessControlService implements AccessControlService {
 
     // Read on-chain ownership data
     const onChainData = await readOwnership(
-      this.networkConfig.rpcUrl,
+      resolveRpcUrl(this.networkConfig),
       context.contractAddress,
       this.networkConfig.viemChain
     );
@@ -537,7 +538,7 @@ export class EvmAccessControlService implements AccessControlService {
 
     // Read on-chain admin data
     const onChainData = await getAdmin(
-      this.networkConfig.rpcUrl,
+      resolveRpcUrl(this.networkConfig),
       context.contractAddress,
       this.networkConfig.viemChain
     );
@@ -897,7 +898,7 @@ export class EvmAccessControlService implements AccessControlService {
 
     // Read roles from on-chain (uses enumeration if available)
     const assignments = await readCurrentRoles(
-      this.networkConfig.rpcUrl,
+      resolveRpcUrl(this.networkConfig),
       context.contractAddress,
       roleIds,
       capabilities.hasEnumerableRoles,
