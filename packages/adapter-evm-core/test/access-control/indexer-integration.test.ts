@@ -62,6 +62,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
 import { EvmIndexerClient } from '../../src/access-control/indexer-client';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
 
@@ -532,7 +533,9 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
       const allResult = await client.queryHistory(TEST_CONTRACT_PRIMARY);
       expect(allResult).not.toBeNull();
 
-      const roleEntry = allResult!.items.find((e) => e.role && e.role.id && e.role.id !== 'OWNER');
+      const roleEntry = allResult!.items.find(
+        (e) => e.role && e.role.id && e.role.id !== DEFAULT_ADMIN_ROLE
+      );
 
       if (!roleEntry) {
         console.log('  ⏭️ No role entries found (ownership-only contract)');
@@ -600,7 +603,7 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
       expect(allResult).not.toBeNull();
 
       const grantedEntry = allResult!.items.find(
-        (e) => e.changeType === 'GRANTED' && e.role && e.role.id !== 'OWNER'
+        (e) => e.changeType === 'GRANTED' && e.role && e.role.id !== DEFAULT_ADMIN_ROLE
       );
 
       if (!grantedEntry) {
@@ -828,7 +831,8 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
 
       const historyRoles = new Set<string>();
       for (const entry of result!.items) {
-        if (entry.role && entry.role.id && entry.role.id !== 'OWNER') {
+        // Only collect actual role IDs from role events (not ownership/admin sentinels)
+        if (entry.role && entry.role.id && !entry.role.label) {
           historyRoles.add(entry.role.id);
         }
       }
@@ -1069,10 +1073,9 @@ describe('EvmIndexerClient - Integration Test with Real Indexer', () => {
         expect(typeof entry.role.id).toBe('string');
         expect(entry.role.id.length).toBeGreaterThan(0);
 
-        // EVM role IDs are bytes32 or the synthetic 'OWNER' value
-        if (entry.role.id !== 'OWNER') {
-          expect(isValidBytes32(entry.role.id)).toBe(true);
-        }
+        // All EVM role IDs should now be valid bytes32 hex strings
+        // (ownership/admin events use DEFAULT_ADMIN_ROLE as sentinel)
+        expect(isValidBytes32(entry.role.id)).toBe(true);
       }
     }, 15000);
 

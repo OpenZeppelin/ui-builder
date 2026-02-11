@@ -14,6 +14,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_ADMIN_ROLE } from '../../src/access-control/constants';
 // Import after mocking
 import { createIndexerClient, EvmIndexerClient } from '../../src/access-control/indexer-client';
 import type { EvmCompatibleNetworkConfig } from '../../src/types';
@@ -767,7 +768,7 @@ describe('EvmIndexerClient', () => {
       expect(result!.items[0].ledger).toBe(54321);
     });
 
-    it('should use "OWNER" as role id for ownership events without a role field', async () => {
+    it('should use DEFAULT_ADMIN_ROLE with label "OWNER" for ownership events without a role field', async () => {
       mockFetchHealthy();
 
       mockFetchSuccess({
@@ -789,7 +790,34 @@ describe('EvmIndexerClient', () => {
 
       const result = await client.queryHistory(CONTRACT_ADDRESS);
 
-      expect(result!.items[0].role.id).toBe('OWNER');
+      expect(result!.items[0].role.id).toBe(DEFAULT_ADMIN_ROLE);
+      expect(result!.items[0].role.label).toBe('OWNER');
+    });
+
+    it('should use DEFAULT_ADMIN_ROLE with label "DEFAULT_ADMIN_ROLE" for admin events', async () => {
+      mockFetchHealthy();
+
+      mockFetchSuccess({
+        accessControlEvents: {
+          nodes: [
+            {
+              id: 'evt-1',
+              eventType: 'ADMIN_TRANSFER_INITIATED',
+              blockNumber: '100',
+              timestamp: '2026-01-10T06:00:00Z',
+              txHash: '0xhash1',
+              newAdmin: '0xNewAdmin000000000000000000000000000000cc',
+            },
+          ],
+          totalCount: 1,
+          pageInfo: { hasNextPage: false },
+        },
+      });
+
+      const result = await client.queryHistory(CONTRACT_ADDRESS);
+
+      expect(result!.items[0].role.id).toBe(DEFAULT_ADMIN_ROLE);
+      expect(result!.items[0].role.label).toBe('DEFAULT_ADMIN_ROLE');
     });
 
     it('should support pagination with first/offset', async () => {

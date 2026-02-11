@@ -1999,7 +1999,7 @@ describe('EvmAccessControlService', () => {
             ledger: 300,
           },
           {
-            role: { id: 'OWNER' },
+            role: { id: DEFAULT_ADMIN_ROLE, label: 'OWNER' },
             account: '0xNewOwner000000000000000000000000000000aa',
             changeType: 'OWNERSHIP_TRANSFER_STARTED',
             txId: '0xhash2',

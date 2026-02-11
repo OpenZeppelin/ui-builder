@@ -30,6 +30,7 @@ import type {
 import { logger } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig } from '../types';
+import { DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL } from './constants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -882,14 +883,13 @@ export class EvmIndexerClient {
    * Transforms indexer event nodes to unified HistoryEntry format.
    *
    * Maps EVM event types to HistoryChangeType, normalizes account field
-   * based on event type (role → account, ownership → newOwner, admin → newAdmin).
+   * based on event type (role → account, ownership → newOwner, admin → newAdmin),
+   * and resolves the role identifier using event-type-aware logic so that
+   * `role.id` is always a valid bytes32 hex string in the EVM context.
    */
   private transformToHistoryEntries(nodes: IndexerEventNode[]): HistoryEntry[] {
     return nodes.map((node) => {
-      const role: RoleIdentifier = {
-        id: node.role || 'OWNER',
-      };
-
+      const role = this.resolveRoleFromEvent(node);
       const changeType = this.mapEventTypeToChangeType(node.eventType);
       const account = this.normalizeAccountFromEvent(node);
 
@@ -902,6 +902,63 @@ export class EvmIndexerClient {
         ledger: parseInt(node.blockNumber, 10),
       };
     });
+  }
+
+  /**
+   * Resolves the RoleIdentifier from an indexer event node based on event type.
+   *
+   * - **Role events** (ROLE_GRANTED, ROLE_REVOKED, ROLE_ADMIN_CHANGED): Use the
+   *   actual `node.role` bytes32 value from the indexed event.
+   * - **Ownership events** (OWNERSHIP_*): The Ownable pattern has no AccessControl
+   *   role, so we use `DEFAULT_ADMIN_ROLE` (bytes32 zero) as a canonical sentinel
+   *   with `label: 'OWNER'` for display context.
+   * - **Admin events** (ADMIN_*, DEFAULT_ADMIN_*): These events concern the default
+   *   admin role, so we use `DEFAULT_ADMIN_ROLE` with its standard label.
+   *
+   * This ensures `role.id` is always a valid bytes32 hex string, maintaining
+   * consistency with EVM's address/role format conventions. Consumers can use
+   * `role.label` to distinguish ownership vs. admin events.
+   */
+  private resolveRoleFromEvent(node: IndexerEventNode): RoleIdentifier {
+    switch (node.eventType) {
+      // Role events — use the actual bytes32 role from the indexed event
+      case 'ROLE_GRANTED':
+      case 'ROLE_REVOKED':
+      case 'ROLE_ADMIN_CHANGED':
+        return {
+          id: node.role || DEFAULT_ADMIN_ROLE,
+          label:
+            node.role === DEFAULT_ADMIN_ROLE || !node.role ? DEFAULT_ADMIN_ROLE_LABEL : undefined,
+        };
+
+      // Ownership events — no AccessControl role; use bytes32 zero as sentinel
+      case 'OWNERSHIP_TRANSFER_STARTED':
+      case 'OWNERSHIP_TRANSFER_COMPLETED':
+      case 'OWNERSHIP_RENOUNCED':
+        return {
+          id: DEFAULT_ADMIN_ROLE,
+          label: 'OWNER',
+        };
+
+      // Admin events — semantically about the default admin role
+      case 'ADMIN_TRANSFER_INITIATED':
+      case 'ADMIN_TRANSFER_COMPLETED':
+      case 'ADMIN_RENOUNCED':
+      case 'DEFAULT_ADMIN_TRANSFER_SCHEDULED':
+      case 'DEFAULT_ADMIN_TRANSFER_CANCELED':
+      case 'DEFAULT_ADMIN_DELAY_CHANGE_SCHEDULED':
+      case 'DEFAULT_ADMIN_DELAY_CHANGE_CANCELED':
+        return {
+          id: DEFAULT_ADMIN_ROLE,
+          label: DEFAULT_ADMIN_ROLE_LABEL,
+        };
+
+      // Fallback for unknown event types — preserve node.role if available
+      default:
+        return {
+          id: node.role || DEFAULT_ADMIN_ROLE,
+        };
+    }
   }
 
   /**
