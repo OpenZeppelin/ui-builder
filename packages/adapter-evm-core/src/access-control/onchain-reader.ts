@@ -35,7 +35,7 @@ import {
   PENDING_DEFAULT_ADMIN_ABI,
   PENDING_OWNER_ABI,
 } from './abis';
-import { DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL, ZERO_ADDRESS } from './constants';
+import { resolveRoleLabel, ZERO_ADDRESS } from './constants';
 
 // ---------------------------------------------------------------------------
 // Internal Types
@@ -382,14 +382,15 @@ export async function enumerateRoleMembers(
  * returns the role with an empty members array (caller must check membership
  * via `hasRole` or indexer).
  *
- * The `DEFAULT_ADMIN_ROLE` (bytes32 zero) is given the label `"DEFAULT_ADMIN_ROLE"`.
- * Other roles have no label (hash cannot be reversed).
+ * Labels are resolved from the optional roleLabelMap (external + ABI-extracted),
+ * then the well-known dictionary (DEFAULT_ADMIN_ROLE, MINTER_ROLE, etc.).
  *
  * @param rpcUrl - RPC endpoint URL
  * @param contractAddress - The EVM contract address
  * @param roleIds - Array of bytes32 role identifiers
  * @param hasEnumerableRoles - Whether the contract supports AccessControlEnumerable
  * @param viemChain - Optional viem Chain object
+ * @param roleLabelMap - Optional per-contract map of hash -> label for human-readable display
  * @returns Array of role assignments
  */
 export async function readCurrentRoles(
@@ -397,7 +398,8 @@ export async function readCurrentRoles(
   contractAddress: string,
   roleIds: string[],
   hasEnumerableRoles: boolean,
-  viemChain?: Chain
+  viemChain?: Chain,
+  roleLabelMap?: Map<string, string>
 ): Promise<RoleAssignment[]> {
   logger.info(
     LOG_SYSTEM,
@@ -412,7 +414,7 @@ export async function readCurrentRoles(
     roleIds.map(async (roleId) => {
       const role: RoleIdentifier = {
         id: roleId,
-        label: roleId === DEFAULT_ADMIN_ROLE ? DEFAULT_ADMIN_ROLE_LABEL : undefined,
+        label: resolveRoleLabel(roleId, roleLabelMap),
       };
 
       if (!hasEnumerableRoles) {

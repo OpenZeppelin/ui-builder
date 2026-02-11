@@ -45,6 +45,12 @@ export interface EvmAccessControlContext {
 
   /** Cached capabilities (populated on first `getCapabilities()` call) */
   capabilities: AccessControlCapabilities | null;
+
+  /** Merged role label map: hash -> human-readable name (populated by dictionary, ABI scan, and external labels) */
+  roleLabelMap: Map<string, string>;
+
+  /** Flag to prevent repeated ABI role-constant discovery on first getCurrentRoles/getHistory */
+  abiRoleDiscoveryDone: boolean;
 }
 
 /**

@@ -57,6 +57,7 @@ import {
 import { detectAccessControlCapabilities } from './feature-detection';
 import { createIndexerClient, EvmIndexerClient, grantMapKey } from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
+import { discoverRoleLabelsFromAbi } from './role-discovery';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 import { validateAddress, validateRoleId, validateRoleIds } from './validation';
 
@@ -135,6 +136,8 @@ export class EvmAccessControlService implements AccessControlService {
       discoveredRoleIds: [],
       roleDiscoveryAttempted: false,
       capabilities: null,
+      roleLabelMap: new Map(),
+      abiRoleDiscoveryDone: false,
     });
 
     logger.debug('EvmAccessControlService.registerContract', `Registered ${normalizedAddress}`, {
@@ -146,19 +149,34 @@ export class EvmAccessControlService implements AccessControlService {
    * Add additional known role IDs to a registered contract.
    *
    * Merges with existing role IDs using union with deduplication.
+   * Accepts plain role IDs (string) or label pairs ({ id, label }) for human-readable display.
+   * External labels are stored in context.roleLabelMap and take precedence over ABI/dictionary.
    *
    * @param contractAddress - Previously registered contract address
-   * @param roleIds - Additional bytes32 role identifiers
+   * @param roleIds - Additional bytes32 role identifiers, or { id, label } pairs
    * @returns Merged array of all known role IDs
    * @throws ConfigurationInvalid if contract not registered or role IDs invalid
    */
-  addKnownRoleIds(contractAddress: string, roleIds: string[]): string[] {
+  addKnownRoleIds(
+    contractAddress: string,
+    roleIds: Array<string | { id: string; label: string }>
+  ): string[] {
     validateAddress(contractAddress, 'contractAddress');
 
     const context = this.getContextOrThrow(contractAddress);
-    const validatedNewRoleIds = validateRoleIds(roleIds);
 
-    if (validatedNewRoleIds.length === 0) {
+    const validatedIds: string[] = [];
+    for (let i = 0; i < roleIds.length; i++) {
+      const item = roleIds[i];
+      if (typeof item === 'string') {
+        validatedIds.push(validateRoleId(item, `roleIds[${i}]`));
+      } else {
+        validatedIds.push(validateRoleId(item.id, `roleIds[${i}].id`));
+        context.roleLabelMap.set(validatedIds[validatedIds.length - 1], item.label);
+      }
+    }
+
+    if (validatedIds.length === 0) {
       logger.debug(
         'EvmAccessControlService.addKnownRoleIds',
         `No valid role IDs to add for ${context.contractAddress}`
@@ -166,16 +184,38 @@ export class EvmAccessControlService implements AccessControlService {
       return [...context.knownRoleIds];
     }
 
-    const mergedRoleIds = [...new Set([...context.knownRoleIds, ...validatedNewRoleIds])];
+    const mergedRoleIds = [...new Set([...context.knownRoleIds, ...validatedIds])];
     context.knownRoleIds = mergedRoleIds;
 
     logger.info(
       'EvmAccessControlService.addKnownRoleIds',
-      `Added ${validatedNewRoleIds.length} role ID(s) for ${context.contractAddress}`,
-      { added: validatedNewRoleIds, total: mergedRoleIds.length }
+      `Added ${validatedIds.length} role ID(s) for ${context.contractAddress}`,
+      { added: validatedIds, total: mergedRoleIds.length }
     );
 
     return mergedRoleIds;
+  }
+
+  /**
+   * Ensures ABI role constant discovery has been run once for this contract.
+   * Merges discovered hash -> label into context.roleLabelMap and sets abiRoleDiscoveryDone.
+   */
+  private async ensureAbiRoleLabels(context: EvmAccessControlContext): Promise<void> {
+    if (context.abiRoleDiscoveryDone) return;
+
+    try {
+      const discovered = await discoverRoleLabelsFromAbi(
+        this.networkConfig.rpcUrl,
+        context.contractAddress,
+        context.contractSchema,
+        this.networkConfig.viemChain
+      );
+      for (const [hash, label] of discovered) {
+        context.roleLabelMap.set(hash, label);
+      }
+    } finally {
+      context.abiRoleDiscoveryDone = true;
+    }
   }
 
   // ── Capability Detection ───────────────────────────────────────────────
@@ -827,6 +867,8 @@ export class EvmAccessControlService implements AccessControlService {
 
     const context = this.getContextOrThrow(contractAddress);
 
+    await this.ensureAbiRoleLabels(context);
+
     // Detect capabilities to check for enumerable roles
     const capabilities = await this.getCapabilities(contractAddress);
 
@@ -856,7 +898,8 @@ export class EvmAccessControlService implements AccessControlService {
       context.contractAddress,
       roleIds,
       capabilities.hasEnumerableRoles,
-      this.networkConfig.viemChain
+      this.networkConfig.viemChain,
+      context.roleLabelMap
     );
 
     logger.debug(
@@ -1128,6 +1171,8 @@ export class EvmAccessControlService implements AccessControlService {
 
     const context = this.getContextOrThrow(contractAddress);
 
+    await this.ensureAbiRoleLabels(context);
+
     // Check indexer availability
     const indexerAvailable = await this.indexerClient.isAvailable();
     if (!indexerAvailable) {
@@ -1140,7 +1185,11 @@ export class EvmAccessControlService implements AccessControlService {
 
     // Delegate to indexer client
     try {
-      const result = await this.indexerClient.queryHistory(context.contractAddress, options);
+      const result = await this.indexerClient.queryHistory(
+        context.contractAddress,
+        options,
+        context.roleLabelMap
+      );
 
       if (!result) {
         logger.warn(

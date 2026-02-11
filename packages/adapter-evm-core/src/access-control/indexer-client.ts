@@ -30,7 +30,7 @@ import type {
 import { logger } from '@openzeppelin/ui-utils';
 
 import type { EvmCompatibleNetworkConfig } from '../types';
-import { DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL } from './constants';
+import { DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL, resolveRoleLabel } from './constants';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -734,7 +734,8 @@ export class EvmIndexerClient {
    */
   async queryHistory(
     contractAddress: string,
-    options?: HistoryQueryOptions
+    options?: HistoryQueryOptions,
+    roleLabelMap?: Map<string, string>
   ): Promise<PaginatedHistoryResult | null> {
     const isUp = await this.isAvailable();
     if (!isUp || !this.endpoint) {
@@ -777,7 +778,7 @@ export class EvmIndexerClient {
         };
       }
 
-      const items = this.transformToHistoryEntries(nodes);
+      const items = this.transformToHistoryEntries(nodes, roleLabelMap);
       const pageInfo: PageInfo = {
         hasNextPage: result.data?.accessControlEvents?.pageInfo?.hasNextPage ?? false,
         endCursor: result.data?.accessControlEvents?.pageInfo?.endCursor,
@@ -905,9 +906,12 @@ export class EvmIndexerClient {
    * and resolves the role identifier using event-type-aware logic so that
    * `role.id` is always a valid bytes32 hex string in the EVM context.
    */
-  private transformToHistoryEntries(nodes: IndexerEventNode[]): HistoryEntry[] {
+  private transformToHistoryEntries(
+    nodes: IndexerEventNode[],
+    roleLabelMap?: Map<string, string>
+  ): HistoryEntry[] {
     return nodes.map((node) => {
-      const role = this.resolveRoleFromEvent(node);
+      const role = this.resolveRoleFromEvent(node, roleLabelMap);
       const changeType = this.mapEventTypeToChangeType(node.eventType);
       const account = this.normalizeAccountFromEvent(node);
 
@@ -926,7 +930,8 @@ export class EvmIndexerClient {
    * Resolves the RoleIdentifier from an indexer event node based on event type.
    *
    * - **Role events** (ROLE_GRANTED, ROLE_REVOKED, ROLE_ADMIN_CHANGED): Use the
-   *   actual `node.role` bytes32 value from the indexed event.
+   *   actual `node.role` bytes32 value from the indexed event; label from
+   *   roleLabelMap or well-known dictionary.
    * - **Ownership events** (OWNERSHIP_*): The Ownable pattern has no AccessControl
    *   role, so we use `DEFAULT_ADMIN_ROLE` (bytes32 zero) as a canonical sentinel
    *   with `label: 'OWNER'` for display context.
@@ -937,16 +942,19 @@ export class EvmIndexerClient {
    * consistency with EVM's address/role format conventions. Consumers can use
    * `role.label` to distinguish ownership vs. admin events.
    */
-  private resolveRoleFromEvent(node: IndexerEventNode): RoleIdentifier {
+  private resolveRoleFromEvent(
+    node: IndexerEventNode,
+    roleLabelMap?: Map<string, string>
+  ): RoleIdentifier {
+    const roleId = node.role || DEFAULT_ADMIN_ROLE;
     switch (node.eventType) {
       // Role events — use the actual bytes32 role from the indexed event
       case 'ROLE_GRANTED':
       case 'ROLE_REVOKED':
       case 'ROLE_ADMIN_CHANGED':
         return {
-          id: node.role || DEFAULT_ADMIN_ROLE,
-          label:
-            node.role === DEFAULT_ADMIN_ROLE || !node.role ? DEFAULT_ADMIN_ROLE_LABEL : undefined,
+          id: roleId,
+          label: resolveRoleLabel(roleId, roleLabelMap),
         };
 
       // Ownership events — no AccessControl role; use bytes32 zero as sentinel
@@ -974,7 +982,8 @@ export class EvmIndexerClient {
       // Fallback for unknown event types — preserve node.role if available
       default:
         return {
-          id: node.role || DEFAULT_ADMIN_ROLE,
+          id: roleId,
+          label: resolveRoleLabel(roleId, roleLabelMap),
         };
     }
   }

@@ -84,6 +84,10 @@ vi.mock('../../src/access-control/indexer-client', async (importOriginal) => {
   };
 });
 
+vi.mock('../../src/access-control/role-discovery', () => ({
+  discoverRoleLabelsFromAbi: vi.fn().mockResolvedValue(new Map()),
+}));
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -355,6 +359,36 @@ describe('EvmAccessControlService', () => {
       expect(() => {
         service.addKnownRoleIds(VALID_ADDRESS, [INVALID_ROLE_ID]);
       }).toThrow(ConfigurationInvalid);
+    });
+
+    it('should accept label pairs and pass roleLabelMap to readCurrentRoles on getCurrentRoles', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [VALID_ROLE_ID]);
+      service.addKnownRoleIds(VALID_ADDRESS, [{ id: VALID_ROLE_ID, label: 'Custom Minter' }]);
+
+      mockReadCurrentRoles.mockReset();
+      mockReadCurrentRoles.mockResolvedValue([
+        { role: { id: VALID_ROLE_ID, label: 'Custom Minter' }, members: [] },
+      ]);
+
+      await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(mockReadCurrentRoles).toHaveBeenCalled();
+      const call = mockReadCurrentRoles.mock.calls[0];
+      const roleLabelMap = call[5] as Map<string, string> | undefined;
+      expect(roleLabelMap).toBeDefined();
+      expect(roleLabelMap!.get(VALID_ROLE_ID)).toBe('Custom Minter');
+    });
+
+    it('should accept mixed string and label pair array', () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA);
+      const result = service.addKnownRoleIds(VALID_ADDRESS, [
+        VALID_ROLE_ID,
+        { id: VALID_ROLE_ID_2, label: 'Pauser' },
+      ]);
+
+      expect(result).toHaveLength(2);
+      expect(result).toContain(VALID_ROLE_ID);
+      expect(result).toContain(VALID_ROLE_ID_2);
     });
   });
 
@@ -2109,9 +2143,13 @@ describe('EvmAccessControlService', () => {
 
       await service.getHistory(VALID_ADDRESS, options);
 
-      // Verify the indexer client was called with the correct contract address and options
+      // Verify the indexer client was called with the correct contract address, options, and roleLabelMap
       expect(mockQueryHistory).toHaveBeenCalledTimes(1);
-      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), options);
+      expect(mockQueryHistory).toHaveBeenCalledWith(
+        VALID_ADDRESS.toLowerCase(),
+        options,
+        expect.any(Map)
+      );
     });
 
     it('should return empty PaginatedHistoryResult when indexer is unavailable (FR-017)', async () => {
@@ -2165,7 +2203,11 @@ describe('EvmAccessControlService', () => {
 
       await service.getHistory(VALID_ADDRESS, filterOptions);
 
-      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), filterOptions);
+      expect(mockQueryHistory).toHaveBeenCalledWith(
+        VALID_ADDRESS.toLowerCase(),
+        filterOptions,
+        expect.any(Map)
+      );
     });
 
     it('should throw ConfigurationInvalid for unregistered contract', async () => {
@@ -2201,7 +2243,11 @@ describe('EvmAccessControlService', () => {
       const result = await service.getHistory(VALID_ADDRESS);
 
       expect(result.items).toHaveLength(1);
-      expect(mockQueryHistory).toHaveBeenCalledWith(VALID_ADDRESS.toLowerCase(), undefined);
+      expect(mockQueryHistory).toHaveBeenCalledWith(
+        VALID_ADDRESS.toLowerCase(),
+        undefined,
+        expect.any(Map)
+      );
     });
 
     it('should work with service created without indexer URL', async () => {

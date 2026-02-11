@@ -57,6 +57,7 @@ export * from './constants';
 export * from './feature-detection';
 export * from './indexer-client';
 export * from './onchain-reader';
+export * from './role-discovery';
 export * from './service';
 export type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
 export * from './validation';
