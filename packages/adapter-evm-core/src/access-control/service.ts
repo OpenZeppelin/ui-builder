@@ -309,6 +309,17 @@ export class EvmAccessControlService implements AccessControlService {
 
     const context = this.getContextOrThrow(contractAddress);
 
+    // Defense-in-depth: check capabilities before calling owner()
+    // Prevents confusing revert errors when called on AccessControl-only contracts
+    const capabilities = context.capabilities ?? (await this.getCapabilities(contractAddress));
+    if (!capabilities.hasOwnable) {
+      throw new OperationFailed(
+        'Contract does not implement the Ownable interface — no owner() function available',
+        contractAddress,
+        'getOwnership'
+      );
+    }
+
     // Read on-chain ownership data
     const onChainData = await readOwnership(
       resolveRpcUrl(this.networkConfig),
@@ -540,6 +551,17 @@ export class EvmAccessControlService implements AccessControlService {
     );
 
     const context = this.getContextOrThrow(contractAddress);
+
+    // Defense-in-depth: check capabilities before calling defaultAdmin()
+    // Prevents confusing revert errors when called on contracts without AccessControlDefaultAdminRules
+    const capabilities = context.capabilities ?? (await this.getCapabilities(contractAddress));
+    if (!capabilities.hasTwoStepAdmin) {
+      throw new OperationFailed(
+        'Contract does not implement the AccessControlDefaultAdminRules interface — no defaultAdmin() function available',
+        contractAddress,
+        'getAdminInfo'
+      );
+    }
 
     // Read on-chain admin data
     const onChainData = await getAdmin(
