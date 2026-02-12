@@ -56,7 +56,12 @@ import {
   assembleTransferOwnershipAction,
 } from './actions';
 import { detectAccessControlCapabilities } from './feature-detection';
-import { createIndexerClient, EvmIndexerClient, grantMapKey } from './indexer-client';
+import {
+  createIndexerClient,
+  EvmIndexerClient,
+  grantMapKey,
+  type GrantInfo,
+} from './indexer-client';
 import { getAdmin, readCurrentRoles, readOwnership } from './onchain-reader';
 import { discoverRoleLabelsFromAbi } from './role-discovery';
 import type { EvmAccessControlContext, EvmTransactionExecutor } from './types';
@@ -906,9 +911,18 @@ export class EvmAccessControlService implements AccessControlService {
       context.roleLabelMap
     );
 
+    // For non-enumerable contracts, on-chain reads return empty members.
+    // Use the indexer to populate members from historical grant data.
+    if (!capabilities.hasEnumerableRoles) {
+      const hasEmptyMembers = assignments.some((a) => a.members.length === 0);
+      if (hasEmptyMembers) {
+        await this.populateMembersFromIndexer(context, assignments);
+      }
+    }
+
     logger.debug(
       'EvmAccessControlService.getCurrentRoles',
-      `Retrieved ${assignments.length} role assignment(s) for ${context.contractAddress}`
+      `Retrieved ${assignments.length} role assignment(s) with ${assignments.reduce((sum, a) => sum + a.members.length, 0)} total member(s) for ${context.contractAddress}`
     );
 
     return assignments;
@@ -970,33 +984,58 @@ export class EvmAccessControlService implements AccessControlService {
         return this.convertToEnrichedWithoutTimestamps(currentRoles);
       }
 
+      // Build a reverse index: roleId → GrantInfo[] for populating non-enumerable roles
+      const grantsByRole = new Map<string, GrantInfo[]>();
+      for (const grant of grantMap.values()) {
+        const key = grant.role.toLowerCase();
+        const existing = grantsByRole.get(key) ?? [];
+        existing.push(grant);
+        grantsByRole.set(key, existing);
+      }
+
       // Map each role assignment to enriched form
-      const enriched: EnrichedRoleAssignment[] = currentRoles.map((roleAssignment) => ({
-        role: roleAssignment.role,
-        members: roleAssignment.members.map((memberAddress) => {
-          const grantInfo = grantMap.get(grantMapKey(roleAssignment.role.id, memberAddress));
-          const member: EnrichedRoleMember = {
-            address: memberAddress,
+      const enriched: EnrichedRoleAssignment[] = currentRoles.map((roleAssignment) => {
+        const roleIdLower = roleAssignment.role.id.toLowerCase();
+
+        // For non-enumerable contracts, on-chain members will be empty.
+        // Populate members from indexer grant data instead.
+        if (roleAssignment.members.length === 0) {
+          const indexerGrants = grantsByRole.get(roleIdLower) ?? [];
+          return {
+            role: roleAssignment.role,
+            members: indexerGrants.map(
+              (grant): EnrichedRoleMember => ({
+                address: grant.account,
+                grantedAt: grant.grantedAt,
+                grantedTxId: grant.txHash,
+              })
+            ),
           };
+        }
 
-          if (grantInfo) {
-            member.grantedAt = grantInfo.grantedAt;
-            member.grantedTxId = grantInfo.txHash;
-            /**
-             * The `grantedLedger` field stores an EVM block number despite its
-             * Stellar-originated name. See data-model.md §6.
-             */
-            // Block number is not directly available from roleMemberships query;
-            // grantedAt timestamp is the primary enrichment data
-          }
+        // For enumerable contracts, enrich on-chain members with indexer metadata
+        return {
+          role: roleAssignment.role,
+          members: roleAssignment.members.map((memberAddress): EnrichedRoleMember => {
+            const grantInfo = grantMap.get(grantMapKey(roleAssignment.role.id, memberAddress));
+            const member: EnrichedRoleMember = {
+              address: memberAddress,
+            };
 
-          return member;
-        }),
-      }));
+            if (grantInfo) {
+              member.grantedAt = grantInfo.grantedAt;
+              member.grantedTxId = grantInfo.txHash;
+            }
 
+            return member;
+          }),
+        };
+      });
+
+      const totalMembers = enriched.reduce((sum, a) => sum + a.members.length, 0);
       logger.debug(
         'EvmAccessControlService.getCurrentRolesEnriched',
-        `Enriched ${enriched.length} role(s) with grant timestamps`
+        `Enriched ${enriched.length} role(s) with ${totalMembers} total member(s)`
       );
 
       return enriched;
@@ -1488,6 +1527,67 @@ export class EvmAccessControlService implements AccessControlService {
     }
 
     return this.getMergedRoleIds(context);
+  }
+
+  /**
+   * Populate empty member arrays from indexer grant data (non-enumerable contracts).
+   *
+   * For contracts without `AccessControlEnumerable`, on-chain reads cannot enumerate
+   * members. This method queries the indexer's `roleMemberships` to discover who holds
+   * each role, mutating the `assignments` array in place.
+   *
+   * Graceful degradation: if the indexer is unavailable or the query fails,
+   * members stay empty — no error is thrown.
+   *
+   * @internal
+   */
+  private async populateMembersFromIndexer(
+    context: EvmAccessControlContext,
+    assignments: RoleAssignment[]
+  ): Promise<void> {
+    const indexerAvailable = await this.indexerClient.isAvailable();
+    if (!indexerAvailable) {
+      return;
+    }
+
+    try {
+      const roleIds = assignments.map((a) => a.role.id);
+      const grantMap = await this.indexerClient.queryLatestGrants(context.contractAddress, roleIds);
+
+      if (!grantMap || grantMap.size === 0) {
+        return;
+      }
+
+      // Build reverse index: roleId (lowercased) → account addresses
+      const membersByRole = new Map<string, string[]>();
+      for (const grant of grantMap.values()) {
+        const key = grant.role.toLowerCase();
+        const existing = membersByRole.get(key) ?? [];
+        existing.push(grant.account);
+        membersByRole.set(key, existing);
+      }
+
+      // Fill empty member arrays from indexer data
+      for (const assignment of assignments) {
+        if (assignment.members.length === 0) {
+          const indexerMembers = membersByRole.get(assignment.role.id.toLowerCase());
+          if (indexerMembers && indexerMembers.length > 0) {
+            assignment.members = indexerMembers;
+          }
+        }
+      }
+
+      const totalPopulated = assignments.reduce((sum, a) => sum + a.members.length, 0);
+      logger.info(
+        'EvmAccessControlService.populateMembersFromIndexer',
+        `Populated ${totalPopulated} member(s) from indexer for ${context.contractAddress}`
+      );
+    } catch (error) {
+      logger.warn(
+        'EvmAccessControlService.populateMembersFromIndexer',
+        `Failed to populate members from indexer: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   /**
