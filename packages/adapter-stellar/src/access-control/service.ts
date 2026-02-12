@@ -236,6 +236,20 @@ export class StellarAccessControlService implements AccessControlService {
       `Reading ownership status for ${contractAddress}`
     );
 
+    // Defense-in-depth: check capabilities before calling get_owner()
+    // Only applies when contract is registered (context available for schema-based detection)
+    const context = this.contractContexts.get(contractAddress);
+    if (context) {
+      const capabilities = detectAccessControlCapabilities(context.contractSchema);
+      if (!capabilities.hasOwnable) {
+        throw new OperationFailed(
+          'Contract does not implement the Ownable interface — no get_owner() function available',
+          contractAddress,
+          'getOwnership'
+        );
+      }
+    }
+
     // T020: Call get_owner() for current owner
     const basicOwnership = await readOwnership(contractAddress, this.networkConfig);
 
@@ -830,6 +844,20 @@ export class StellarAccessControlService implements AccessControlService {
       `Reading admin status for ${contractAddress}`
     );
 
+    // Defense-in-depth: check capabilities before calling get_admin()
+    // Only applies when contract is registered (context available for schema-based detection)
+    const context = this.contractContexts.get(contractAddress);
+    if (context) {
+      const capabilities = detectAccessControlCapabilities(context.contractSchema);
+      if (!capabilities.hasTwoStepAdmin) {
+        throw new OperationFailed(
+          'Contract does not implement the two-step admin interface — no get_admin() / accept_admin_transfer() functions available',
+          contractAddress,
+          'getAdminInfo'
+        );
+      }
+    }
+
     // Call get_admin() for current admin
     const currentAdmin = await getAdmin(contractAddress, this.networkConfig);
 
@@ -1219,6 +1247,20 @@ export class StellarAccessControlService implements AccessControlService {
       'StellarAccessControlService.getAdminAccount',
       `Reading admin for ${contractAddress}`
     );
+
+    // Defense-in-depth: check capabilities before calling get_admin()
+    // Only applies when contract is registered (context available for schema-based detection)
+    const context = this.contractContexts.get(contractAddress);
+    if (context) {
+      const capabilities = detectAccessControlCapabilities(context.contractSchema);
+      if (!capabilities.hasTwoStepAdmin) {
+        throw new OperationFailed(
+          'Contract does not implement the two-step admin interface — no get_admin() function available',
+          contractAddress,
+          'getAdminAccount'
+        );
+      }
+    }
 
     return getAdmin(contractAddress, this.networkConfig);
   }
