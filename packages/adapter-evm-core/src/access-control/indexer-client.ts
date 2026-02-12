@@ -5,7 +5,8 @@
  * Uses `fetch()` for GraphQL POST requests (available in both browser and Node.js).
  *
  * Endpoint resolution precedence:
- * 1. `networkConfig.accessControlIndexerUrl`
+ * 1. User-configured indexer URL (from UserNetworkServiceConfigService)
+ * 2. `networkConfig.accessControlIndexerUrl`
  *
  * Graceful degradation: catches network errors, returns null/empty results
  * with appropriate logging. The service layer handles unavailability transparently.
@@ -29,6 +30,7 @@ import type {
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { resolveAccessControlIndexerUrl } from '../configuration';
 import type { EvmCompatibleNetworkConfig } from '../types';
 import { DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE_LABEL, resolveRoleLabel } from './constants';
 
@@ -310,7 +312,7 @@ export class EvmIndexerClient {
 
   constructor(networkConfig: EvmCompatibleNetworkConfig) {
     this.networkConfig = networkConfig;
-    this.endpoint = networkConfig.accessControlIndexerUrl;
+    this.endpoint = resolveAccessControlIndexerUrl(networkConfig);
   }
 
   // ── Availability ──────────────────────────────────────────────────────

@@ -154,7 +154,7 @@ export {
 } from './wallet';
 
 // ============================================================================
-// Configuration Module - RPC and Explorer configuration
+// Configuration Module - RPC, Explorer, and Access Control Indexer configuration
 // ============================================================================
 export {
   // RPC
@@ -171,6 +171,9 @@ export {
   getEvmExplorerTxUrl,
   validateEvmExplorerConfig,
   testEvmExplorerConnection,
+  // Access control indexer
+  getUserAccessControlIndexerUrl,
+  resolveAccessControlIndexerUrl,
   // Network service configuration
   validateEvmNetworkServiceConfig,
   testEvmNetworkServiceConnection,

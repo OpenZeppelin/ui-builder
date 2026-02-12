@@ -178,7 +178,7 @@ describe('getEvmDefaultServiceConfig', () => {
     it('should return null for unknown service IDs', () => {
       const networkConfig = createMockNetworkConfig();
 
-      expect(getEvmDefaultServiceConfig(networkConfig, 'indexer')).toBeNull();
+      expect(getEvmDefaultServiceConfig(networkConfig, 'access-control-indexer')).toBeNull();
       expect(getEvmDefaultServiceConfig(networkConfig, 'unknown')).toBeNull();
     });
   });

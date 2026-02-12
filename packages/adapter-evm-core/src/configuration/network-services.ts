@@ -8,6 +8,7 @@
  */
 
 import type { UserExplorerConfig, UserRpcProviderConfig } from '@openzeppelin/ui-types';
+import { isValidUrl } from '@openzeppelin/ui-utils';
 
 import { isEvmProviderKey } from '../types';
 import type { EvmCompatibleNetworkConfig } from '../types';
@@ -38,6 +39,17 @@ export async function validateEvmNetworkServiceConfig(
       applyToAllNetworks: Boolean(values.applyToAllNetworks),
     } as UserExplorerConfig;
     return validateEvmExplorerConfig(cfg);
+  }
+  if (serviceId === 'access-control-indexer') {
+    // Access control indexer URL is optional — validate format only if provided
+    if (
+      values.accessControlIndexerUrl !== undefined &&
+      values.accessControlIndexerUrl !== null &&
+      values.accessControlIndexerUrl !== ''
+    ) {
+      return isValidUrl(String(values.accessControlIndexerUrl));
+    }
+    return true;
   }
   if (serviceId === 'contract-definitions') {
     const raw = values.defaultProvider;
@@ -73,6 +85,58 @@ export async function testEvmNetworkServiceConnection(
       applyToAllNetworks: Boolean(values.applyToAllNetworks),
     } as UserExplorerConfig;
     return testEvmExplorerConnection(cfg, networkConfig);
+  }
+  if (serviceId === 'access-control-indexer') {
+    const accessControlIndexerUrl = values.accessControlIndexerUrl;
+
+    // If no indexer URL is provided, indexer is optional — return success
+    if (
+      !accessControlIndexerUrl ||
+      typeof accessControlIndexerUrl !== 'string' ||
+      accessControlIndexerUrl.trim() === ''
+    ) {
+      return { success: true };
+    }
+
+    if (!isValidUrl(accessControlIndexerUrl)) {
+      return { success: false, error: 'Invalid access control indexer URL format' };
+    }
+
+    try {
+      const startTime = Date.now();
+      // Perform a lightweight GraphQL health check
+      const response = await fetch(accessControlIndexerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: '{ __typename }' }),
+      });
+
+      const latency = Date.now() - startTime;
+
+      if (!response.ok) {
+        return {
+          success: false,
+          latency,
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+      if (data.errors) {
+        return {
+          success: false,
+          latency,
+          error: `GraphQL errors: ${JSON.stringify(data.errors)}`,
+        };
+      }
+
+      return { success: true, latency };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
   return { success: true };
 }

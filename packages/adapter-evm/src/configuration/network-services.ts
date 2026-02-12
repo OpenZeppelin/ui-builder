@@ -12,7 +12,7 @@ import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin
  * Used for proactive health checks when no user overrides are configured.
  *
  * @param networkConfig The network configuration
- * @param serviceId The service identifier (e.g., 'rpc', 'explorer', 'contract-definitions')
+ * @param serviceId The service identifier (e.g., 'rpc', 'explorer', 'contract-definitions', 'access-control-indexer')
  * @returns The default configuration values, or null if not available
  */
 export function getEvmDefaultServiceConfig(
@@ -40,6 +40,14 @@ export function getEvmDefaultServiceConfig(
         };
       }
       break;
+    }
+    case 'access-control-indexer': {
+      // Access control indexer is optional — return default URL from network config if available
+      const typedNetworkConfig = networkConfig as TypedEvmNetworkConfig;
+      if (typedNetworkConfig.accessControlIndexerUrl) {
+        return { accessControlIndexerUrl: typedNetworkConfig.accessControlIndexerUrl };
+      }
+      return null;
     }
     case 'contract-definitions':
       // No connection test for contract definitions service
@@ -180,6 +188,26 @@ export function getEvmNetworkServiceForms(
             'API endpoint for fetching contract data. If not provided, defaults from the network will be used.',
           width: 'full',
           metadata: { section: 'custom-endpoints' },
+        },
+      ],
+    },
+    {
+      id: 'access-control-indexer',
+      label: 'Access Control Indexer',
+      description:
+        'Optional GraphQL indexer endpoint for historical access control data. Overrides the default indexer URL for this network.',
+      supportsConnectionTest: true,
+      fields: [
+        {
+          id: 'evm-access-control-indexer-url',
+          name: 'accessControlIndexerUrl',
+          type: 'text',
+          label: 'Access Control Indexer GraphQL Endpoint',
+          placeholder: 'https://gateway.subquery.network/query/...',
+          validation: { required: false, pattern: '^https?://.+' },
+          width: 'full',
+          helperText:
+            'Optional. Used for querying historical access control events and role discovery on non-enumerable contracts.',
         },
       ],
     },
