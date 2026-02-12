@@ -930,6 +930,90 @@ describe('EvmAccessControlService', () => {
       expect(roleIds).not.toContain(DEFAULT_ADMIN_ROLE);
     });
 
+    // ── Non-enumerable: indexer-based member population ──────────────────
+
+    it('should populate members from indexer for non-enumerable contracts', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE, PAUSER_ROLE]);
+
+      // On-chain returns roles with empty members (non-enumerable)
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: MINTER_ROLE }, members: [] },
+        { role: { id: PAUSER_ROLE }, members: [] },
+      ]);
+
+      // Indexer is available and has grant data
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockResolvedValueOnce(
+        new Map([
+          [
+            grantMapKey(MINTER_ROLE, MEMBER_1),
+            {
+              account: MEMBER_1,
+              role: MINTER_ROLE,
+              grantedAt: '2026-01-10T08:00:00Z',
+              txHash: '0xgrant1',
+            },
+          ],
+          [
+            grantMapKey(PAUSER_ROLE, MEMBER_2),
+            {
+              account: MEMBER_2,
+              role: PAUSER_ROLE,
+              grantedAt: '2026-01-12T12:00:00Z',
+              txHash: '0xgrant2',
+            },
+          ],
+        ])
+      );
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].members).toContain(MEMBER_1);
+      expect(result[1].members).toContain(MEMBER_2);
+    });
+
+    it('should leave members empty for non-enumerable contracts when indexer unavailable', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([{ role: { id: MINTER_ROLE }, members: [] }]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(false);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(0);
+    });
+
+    it('should leave members empty for non-enumerable contracts when indexer query fails', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([{ role: { id: MINTER_ROLE }, members: [] }]);
+
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockRejectedValueOnce(new Error('Indexer query failed'));
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(0);
+    });
+
+    it('should not re-query indexer for enumerable contracts with existing members', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_ENUMERABLE_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([
+        { role: { id: MINTER_ROLE }, members: [MEMBER_1] },
+      ]);
+
+      const result: RoleAssignment[] = await service.getCurrentRoles(VALID_ADDRESS);
+
+      expect(result[0].members).toContain(MEMBER_1);
+      // Indexer should NOT be called for member population on enumerable contracts
+      expect(mockQueryLatestGrants).not.toHaveBeenCalled();
+    });
+
     it('should throw for unregistered contract', async () => {
       const unregisteredAddress = '0x9999999999999999999999999999999999999999';
       await expect(service.getCurrentRoles(unregisteredAddress)).rejects.toThrow(
@@ -1065,6 +1149,92 @@ describe('EvmAccessControlService', () => {
       const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
 
       expect(result).toHaveLength(0);
+    });
+
+    // ── Non-enumerable: indexer-based member population for enriched ─────
+
+    it('should populate enriched members from indexer for non-enumerable contracts', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      const grantMap = new Map([
+        [
+          grantMapKey(MINTER_ROLE, MEMBER_1),
+          {
+            account: MEMBER_1,
+            role: MINTER_ROLE,
+            grantedAt: '2026-02-01T10:00:00Z',
+            txHash: '0xgrant_nonenumerable_1',
+            grantedBy: '0xGranter0000000000000000000000000000000001',
+          },
+        ],
+        [
+          grantMapKey(MINTER_ROLE, MEMBER_2),
+          {
+            account: MEMBER_2,
+            role: MINTER_ROLE,
+            grantedAt: '2026-02-02T12:00:00Z',
+            txHash: '0xgrant_nonenumerable_2',
+            grantedBy: '0xGranter0000000000000000000000000000000001',
+          },
+        ],
+      ]);
+
+      // On-chain returns role with empty members (non-enumerable)
+      mockReadCurrentRoles.mockResolvedValueOnce([{ role: { id: MINTER_ROLE }, members: [] }]);
+
+      // getCurrentRolesEnriched calls getCurrentRoles → populateMembersFromIndexer → isAvailable + queryLatestGrants
+      // Then it calls isAvailable + queryLatestGrants again for enrichment
+      mockIndexerIsAvailable.mockResolvedValueOnce(true); // for populateMembersFromIndexer
+      mockQueryLatestGrants.mockResolvedValueOnce(grantMap); // for populateMembersFromIndexer
+      mockIndexerIsAvailable.mockResolvedValueOnce(true); // for getCurrentRolesEnriched
+      mockQueryLatestGrants.mockResolvedValueOnce(grantMap); // for getCurrentRolesEnriched
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(2);
+      // Members should be populated from indexer with grant metadata
+      const addresses = result[0].members.map((m) => m.address);
+      expect(addresses).toContain(MEMBER_1);
+      expect(addresses).toContain(MEMBER_2);
+      // Grant metadata should be present from enrichment
+      const member1 = result[0].members.find((m) => m.address === MEMBER_1);
+      expect(member1?.grantedAt).toBe('2026-02-01T10:00:00Z');
+      expect(member1?.grantedTxId).toBe('0xgrant_nonenumerable_1');
+    });
+
+    it('should return enriched structure with empty members for non-enumerable contracts when indexer unavailable', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([{ role: { id: MINTER_ROLE }, members: [] }]);
+
+      // Both calls to isAvailable return false
+      mockIndexerIsAvailable.mockResolvedValueOnce(false); // for populateMembersFromIndexer
+      mockIndexerIsAvailable.mockResolvedValueOnce(false); // for getCurrentRolesEnriched
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(0);
+    });
+
+    it('should return enriched structure with empty members for non-enumerable contracts when indexer query fails', async () => {
+      service.registerContract(VALID_ADDRESS, ACCESS_CONTROL_SCHEMA, [MINTER_ROLE]);
+
+      mockReadCurrentRoles.mockResolvedValueOnce([{ role: { id: MINTER_ROLE }, members: [] }]);
+
+      // populateMembersFromIndexer: available but query fails → caught, members stay empty
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockRejectedValueOnce(new Error('Indexer query failed'));
+      // getCurrentRolesEnriched: available but query fails → caught, fallback to no enrichment
+      mockIndexerIsAvailable.mockResolvedValueOnce(true);
+      mockQueryLatestGrants.mockRejectedValueOnce(new Error('Indexer enrichment failed'));
+
+      const result: EnrichedRoleAssignment[] = await service.getCurrentRolesEnriched(VALID_ADDRESS);
+
+      // Should still return the role structure without members
+      expect(result).toHaveLength(1);
+      expect(result[0].members).toHaveLength(0);
     });
 
     it('should throw for unregistered contract', async () => {
