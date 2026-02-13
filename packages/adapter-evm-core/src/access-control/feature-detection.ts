@@ -20,6 +20,7 @@ import type { AccessControlCapabilities, ContractSchema } from '@openzeppelin/ui
 
 import {
   ACCESS_CONTROL_SIGNATURES,
+  ADMIN_DELAY_CHANGE_SIGNATURES,
   DEFAULT_ADMIN_RULES_SIGNATURES,
   ENUMERABLE_SIGNATURES,
   OWNABLE_SIGNATURES,
@@ -122,6 +123,27 @@ export function detectAccessControlCapabilities(
   const hasTwoStepAdmin =
     hasAccessControl && hasAllFunctions(lookup, DEFAULT_ADMIN_RULES_SIGNATURES);
 
+  // ── Renounce Ownership Detection ─────────────────────────────────
+  // renounceOwnership() is available on all Ownable contracts
+  const hasRenounceOwnership =
+    hasOwnable && hasFunction(lookup, { name: 'renounceOwnership', inputs: [] });
+
+  // ── Renounce Role Detection ──────────────────────────────────────
+  // renounceRole(bytes32, address) is available on all AccessControl contracts
+  const hasRenounceRole =
+    hasAccessControl &&
+    hasFunction(lookup, { name: 'renounceRole', inputs: ['bytes32', 'address'] });
+
+  // ── Cancel Admin Transfer Detection ──────────────────────────────
+  // cancelDefaultAdminTransfer() is part of AccessControlDefaultAdminRules
+  const hasCancelAdminTransfer =
+    hasTwoStepAdmin && hasFunction(lookup, { name: 'cancelDefaultAdminTransfer', inputs: [] });
+
+  // ── Admin Delay Management Detection ─────────────────────────────
+  // changeDefaultAdminDelay(uint48) + rollbackDefaultAdminDelay() from AccessControlDefaultAdminRules
+  const hasAdminDelayManagement =
+    hasTwoStepAdmin && hasAllFunctions(lookup, ADMIN_DELAY_CHANGE_SIGNATURES);
+
   // ── History Support ───────────────────────────────────────────────
   const supportsHistory = indexerAvailable;
 
@@ -176,6 +198,10 @@ export function detectAccessControlCapabilities(
     supportsHistory,
     verifiedAgainstOZInterfaces,
     notes: notes.length > 0 ? notes : undefined,
+    hasRenounceOwnership,
+    hasRenounceRole,
+    hasCancelAdminTransfer,
+    hasAdminDelayManagement,
   };
 }
 

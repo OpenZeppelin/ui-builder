@@ -14,6 +14,7 @@ import type {
   EnrichedRoleAssignment,
   EnrichedRoleMember,
   ExecutionConfig,
+  ExpirationMetadata,
   HistoryQueryOptions,
   OperationResult,
   OwnershipInfo,
@@ -643,6 +644,31 @@ export class StellarAccessControlService implements AccessControlService {
     logger.info('StellarAccessControlService.revokeRole', `Role revoked. TxHash: ${result.txHash}`);
 
     return { id: result.txHash };
+  }
+
+  // ── Expiration Metadata ────────────────────────────────────────────────
+
+  /**
+   * Get expiration metadata for a transfer type.
+   *
+   * Stellar semantics: Both ownership and admin transfers require a user-provided
+   * expiration ledger number.
+   *
+   * @param contractAddress - Contract address (validated but not used for Stellar)
+   * @param _transferType - 'ownership' or 'admin' (same semantics for both on Stellar)
+   * @returns Expiration metadata indicating required ledger number input
+   */
+  async getExpirationMetadata(
+    contractAddress: string,
+    _transferType: 'ownership' | 'admin'
+  ): Promise<ExpirationMetadata> {
+    validateContractAddress(contractAddress);
+
+    return {
+      mode: 'required',
+      label: 'Expiration Ledger',
+      unit: 'ledger number',
+    };
   }
 
   /**

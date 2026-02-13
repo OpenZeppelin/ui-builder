@@ -27,6 +27,7 @@ import type {
   EnrichedRoleAssignment,
   EnrichedRoleMember,
   ExecutionConfig,
+  ExpirationMetadata,
   HistoryQueryOptions,
   OperationResult,
   OwnershipInfo,
@@ -485,8 +486,8 @@ export class EvmAccessControlService implements AccessControlService {
    * Permanently renounces ownership — after execution, `owner()` returns the zero address
    * and ownership queries return state `'renounced'`.
    *
-   * **EVM-specific extension** — not part of the unified AccessControlService interface
-   * or the Stellar adapter. Stellar has no equivalent.
+   * Part of the unified `AccessControlService` interface — gated by
+   * `hasRenounceOwnership` capability flag.
    *
    * @param contractAddress - Previously registered contract address
    * @param executionConfig - Execution strategy configuration
@@ -518,6 +519,39 @@ export class EvmAccessControlService implements AccessControlService {
     );
 
     return this.executeAction(txData, executionConfig, onStatusChange, runtimeApiKey);
+  }
+
+  // ── Expiration Metadata ────────────────────────────────────────────────
+
+  /**
+   * Get expiration metadata for a transfer type.
+   *
+   * EVM semantics:
+   * - Ownership transfers (Ownable2Step): No expiration → mode 'none'
+   * - Admin transfers (AccessControlDefaultAdminRules): Contract-managed accept schedule
+   *   → mode 'contract-managed' with the accept schedule as current value
+   *
+   * @param contractAddress - Previously registered contract address
+   * @param transferType - 'ownership' or 'admin'
+   * @returns Expiration metadata for the UI
+   */
+  async getExpirationMetadata(
+    contractAddress: string,
+    transferType: 'ownership' | 'admin'
+  ): Promise<ExpirationMetadata> {
+    validateAddress(contractAddress, 'contractAddress');
+
+    if (transferType === 'ownership') {
+      // EVM Ownable2Step has no expiration mechanism
+      return { mode: 'none' };
+    }
+
+    // Admin transfers: contract-managed accept schedule
+    return {
+      mode: 'contract-managed',
+      label: 'Accept Schedule',
+      unit: 'UNIX timestamp',
+    };
   }
 
   // ── Admin ──────────────────────────────────────────────────────────────
@@ -570,6 +604,12 @@ export class EvmAccessControlService implements AccessControlService {
       this.networkConfig.viemChain
     );
 
+    // ── Build delayInfo from on-chain data ─────────────────────────
+    const delayInfo =
+      onChainData.defaultAdminDelay != null
+        ? { currentDelay: onChainData.defaultAdminDelay }
+        : undefined;
+
     // ── Renounced state — admin is null ─────────────────────────────
     if (onChainData.defaultAdmin === null) {
       logger.debug(
@@ -579,6 +619,7 @@ export class EvmAccessControlService implements AccessControlService {
       return {
         admin: null,
         state: 'renounced',
+        delayInfo,
       };
     }
 
@@ -591,6 +632,7 @@ export class EvmAccessControlService implements AccessControlService {
       return {
         admin: onChainData.defaultAdmin,
         state: 'active',
+        delayInfo,
       };
     }
 
@@ -639,6 +681,7 @@ export class EvmAccessControlService implements AccessControlService {
       admin: onChainData.defaultAdmin,
       state: 'pending',
       pendingTransfer,
+      delayInfo,
     };
   }
 
@@ -741,8 +784,8 @@ export class EvmAccessControlService implements AccessControlService {
    * Must be called by the current default admin. Cancels any pending transfer
    * and resets the pending admin state.
    *
-   * **EVM-specific extension** — not part of the unified AccessControlService interface
-   * or the Stellar adapter.
+   * Part of the unified `AccessControlService` interface — gated by
+   * `hasCancelAdminTransfer` capability flag.
    *
    * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
    * have the `hasTwoStepAdmin` capability.
@@ -786,7 +829,8 @@ export class EvmAccessControlService implements AccessControlService {
    * Schedules a change to the delay period. The change itself has a delay
    * before it takes effect (determined by the current delay).
    *
-   * **EVM-specific extension** — not part of the unified AccessControlService interface.
+   * Part of the unified `AccessControlService` interface — gated by
+   * `hasAdminDelayManagement` capability flag.
    *
    * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
    * have the `hasTwoStepAdmin` capability.
@@ -832,7 +876,8 @@ export class EvmAccessControlService implements AccessControlService {
    * Cancels a scheduled delay change. Must be called by the current default admin
    * before the delay change takes effect.
    *
-   * **EVM-specific extension** — not part of the unified AccessControlService interface.
+   * Part of the unified `AccessControlService` interface — gated by
+   * `hasAdminDelayManagement` capability flag.
    *
    * **Guard (FR-024)**: Throws `ConfigurationInvalid` if the contract does not
    * have the `hasTwoStepAdmin` capability.
@@ -1166,8 +1211,8 @@ export class EvmAccessControlService implements AccessControlService {
    * The `account` parameter acts as a caller confirmation — on-chain, the contract verifies
    * it matches `msg.sender` to prevent accidental renouncement.
    *
-   * **EVM-specific extension** — Stellar uses `revokeRole` for self-revocation instead
-   * of a separate `renounceRole` function.
+   * Part of the unified `AccessControlService` interface — gated by
+   * `hasRenounceRole` capability flag.
    *
    * @param contractAddress - Previously registered contract address
    * @param roleId - The bytes32 role identifier to renounce
