@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@openzeppelin/relayer-sdk": "1.9.0",
-    "@openzeppelin/ui-types": "^1.7.0",
-    "@openzeppelin/ui-utils": "^1.2.0",
+    "@openzeppelin/ui-types": "^1.8.0",
+    "@openzeppelin/ui-utils": "^1.2.1",
     "@wagmi/connectors": "5.7.13",
     "@wagmi/core": "^2.20.3",
     "lodash": "^4.17.21",
