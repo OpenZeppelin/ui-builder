@@ -446,13 +446,16 @@ describe('onchain-reader', () => {
       mockReadContract
         .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
         .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin() — no pending
-        .mockResolvedValueOnce(86400n); // defaultAdminDelay()
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay()
+        .mockResolvedValueOnce([0n, 0n]); // pendingDefaultAdminDelay() — no pending
 
       const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
 
       expect(result.defaultAdmin).toBe(ADMIN_ADDRESS);
       expect(result.pendingDefaultAdmin).toBeUndefined();
       expect(result.defaultAdminDelay).toBe(86400);
+      expect(result.pendingDefaultAdminDelay).toBeUndefined();
+      expect(result.pendingDefaultAdminDelaySchedule).toBeUndefined();
     });
 
     it('should return pendingDefaultAdmin with acceptSchedule when transfer is scheduled', async () => {
@@ -461,7 +464,8 @@ describe('onchain-reader', () => {
       mockReadContract
         .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
         .mockResolvedValueOnce([PENDING_ADMIN_ADDRESS, acceptSchedule]) // pendingDefaultAdmin()
-        .mockResolvedValueOnce(86400n); // defaultAdminDelay()
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay()
+        .mockResolvedValueOnce([0n, 0n]); // pendingDefaultAdminDelay()
 
       const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
 
@@ -475,7 +479,8 @@ describe('onchain-reader', () => {
       mockReadContract
         .mockResolvedValueOnce(ZERO_ADDRESS) // defaultAdmin() returns zero
         .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin()
-        .mockResolvedValueOnce(0n); // defaultAdminDelay()
+        .mockResolvedValueOnce(0n) // defaultAdminDelay()
+        .mockResolvedValueOnce([0n, 0n]); // pendingDefaultAdminDelay()
 
       const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
 
@@ -487,7 +492,8 @@ describe('onchain-reader', () => {
       mockReadContract
         .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
         .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin() — zero means no pending
-        .mockResolvedValueOnce(86400n); // defaultAdminDelay()
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay()
+        .mockResolvedValueOnce([0n, 0n]); // pendingDefaultAdminDelay()
 
       const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
 
@@ -505,12 +511,57 @@ describe('onchain-reader', () => {
       mockReadContract
         .mockResolvedValueOnce(ADMIN_ADDRESS)
         .mockResolvedValueOnce([ZERO_ADDRESS, 0n])
-        .mockResolvedValueOnce(86400n);
+        .mockResolvedValueOnce(86400n)
+        .mockResolvedValueOnce([0n, 0n]);
 
       const mockChain = { id: 1, name: 'Ethereum' } as unknown as import('viem').Chain;
       const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS, mockChain);
 
       expect(result.defaultAdmin).toBe(ADMIN_ADDRESS);
+    });
+
+    it('should return pendingDefaultAdminDelay when a delay change is scheduled', async () => {
+      const effectSchedule = 1700100000n; // UNIX timestamp
+
+      mockReadContract
+        .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
+        .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin() — no pending transfer
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay() — current delay
+        .mockResolvedValueOnce([172800n, effectSchedule]); // pendingDefaultAdminDelay()
+
+      const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
+
+      expect(result.defaultAdminDelay).toBe(86400);
+      expect(result.pendingDefaultAdminDelay).toBe(172800);
+      expect(result.pendingDefaultAdminDelaySchedule).toBe(Number(effectSchedule));
+    });
+
+    it('should treat (0, 0) pendingDefaultAdminDelay as no pending delay change', async () => {
+      mockReadContract
+        .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
+        .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin()
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay()
+        .mockResolvedValueOnce([0n, 0n]); // pendingDefaultAdminDelay() — no change
+
+      const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
+
+      expect(result.pendingDefaultAdminDelay).toBeUndefined();
+      expect(result.pendingDefaultAdminDelaySchedule).toBeUndefined();
+    });
+
+    it('should gracefully handle pendingDefaultAdminDelay() failure', async () => {
+      mockReadContract
+        .mockResolvedValueOnce(ADMIN_ADDRESS) // defaultAdmin()
+        .mockResolvedValueOnce([ZERO_ADDRESS, 0n]) // pendingDefaultAdmin()
+        .mockResolvedValueOnce(86400n) // defaultAdminDelay()
+        .mockRejectedValueOnce(new Error('not supported')); // pendingDefaultAdminDelay() fails
+
+      const result = await getAdmin(TEST_RPC_URL, CONTRACT_ADDRESS);
+
+      expect(result.defaultAdmin).toBe(ADMIN_ADDRESS);
+      expect(result.defaultAdminDelay).toBe(86400);
+      expect(result.pendingDefaultAdminDelay).toBeUndefined();
+      expect(result.pendingDefaultAdminDelaySchedule).toBeUndefined();
     });
   });
 });

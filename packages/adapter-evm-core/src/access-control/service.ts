@@ -607,7 +607,18 @@ export class EvmAccessControlService implements AccessControlService {
     // ── Build delayInfo from on-chain data ─────────────────────────
     const delayInfo =
       onChainData.defaultAdminDelay != null
-        ? { currentDelay: onChainData.defaultAdminDelay }
+        ? {
+            currentDelay: onChainData.defaultAdminDelay,
+            ...(onChainData.pendingDefaultAdminDelay != null &&
+            onChainData.pendingDefaultAdminDelaySchedule != null
+              ? {
+                  pendingDelay: {
+                    newDelay: onChainData.pendingDefaultAdminDelay,
+                    effectAt: onChainData.pendingDefaultAdminDelaySchedule,
+                  },
+                }
+              : {}),
+          }
         : undefined;
 
     // ── Renounced state — admin is null ─────────────────────────────

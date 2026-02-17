@@ -220,6 +220,26 @@ export const DEFAULT_ADMIN_DELAY_ABI: Abi = [
   },
 ] as const;
 
+/**
+ * ABI for `pendingDefaultAdminDelay() → (uint48 newDelay, uint48 schedule)`
+ *
+ * Returns a tuple of the pending new admin delay (in seconds) and the UNIX
+ * timestamp at which the delay change takes effect.  Returns (0, 0) when no
+ * delay change is scheduled.
+ */
+export const PENDING_DEFAULT_ADMIN_DELAY_ABI: Abi = [
+  {
+    type: 'function',
+    name: 'pendingDefaultAdminDelay',
+    inputs: [],
+    outputs: [
+      { name: 'newDelay', type: 'uint48' },
+      { name: 'schedule', type: 'uint48' },
+    ],
+    stateMutability: 'view',
+  },
+] as const;
+
 /** ABI for `beginDefaultAdminTransfer(address newAdmin)` */
 export const BEGIN_DEFAULT_ADMIN_TRANSFER_ABI: Abi = [
   {

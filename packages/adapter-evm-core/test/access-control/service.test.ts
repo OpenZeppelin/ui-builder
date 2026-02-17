@@ -724,6 +724,44 @@ describe('EvmAccessControlService', () => {
       expect(result.admin).toBe(ADMIN);
       expect(result.state).toBe('active');
       expect(result.pendingTransfer).toBeUndefined();
+      expect(result.delayInfo).toEqual({ currentDelay: 86400 });
+    });
+
+    it('should include pendingDelay in delayInfo when delay change is scheduled', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: undefined,
+        acceptSchedule: undefined,
+        defaultAdminDelay: 86400,
+        pendingDefaultAdminDelay: 172800,
+        pendingDefaultAdminDelaySchedule: 1700100000,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.delayInfo).toEqual({
+        currentDelay: 86400,
+        pendingDelay: {
+          newDelay: 172800,
+          effectAt: 1700100000,
+        },
+      });
+    });
+
+    it('should omit pendingDelay from delayInfo when no delay change is pending', async () => {
+      mockGetAdmin.mockResolvedValueOnce({
+        defaultAdmin: ADMIN,
+        pendingDefaultAdmin: undefined,
+        acceptSchedule: undefined,
+        defaultAdminDelay: 86400,
+        pendingDefaultAdminDelay: undefined,
+        pendingDefaultAdminDelaySchedule: undefined,
+      });
+
+      const result: AdminInfo = await service.getAdminInfo(VALID_ADDRESS);
+
+      expect(result.delayInfo).toEqual({ currentDelay: 86400 });
+      expect(result.delayInfo!.pendingDelay).toBeUndefined();
     });
 
     it('should return "pending" state when admin transfer is scheduled', async () => {

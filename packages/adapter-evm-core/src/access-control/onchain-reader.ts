@@ -34,6 +34,7 @@ import {
   HAS_ROLE_ABI,
   OWNER_ABI,
   PENDING_DEFAULT_ADMIN_ABI,
+  PENDING_DEFAULT_ADMIN_DELAY_ABI,
   PENDING_OWNER_ABI,
 } from './abis';
 import { resolveRoleLabel, ZERO_ADDRESS } from './constants';
@@ -67,6 +68,10 @@ export interface AdminReadResult {
   acceptSchedule?: number;
   /** Current admin delay in seconds */
   defaultAdminDelay?: number;
+  /** Pending new admin delay in seconds (from `pendingDefaultAdminDelay()`) */
+  pendingDefaultAdminDelay?: number;
+  /** UNIX timestamp when the pending delay takes effect (from `pendingDefaultAdminDelay()`) */
+  pendingDefaultAdminDelaySchedule?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,7 +162,8 @@ export async function readOwnership(
 /**
  * Read the current default admin state from an AccessControlDefaultAdminRules contract.
  *
- * Calls `defaultAdmin()`, `pendingDefaultAdmin()`, and `defaultAdminDelay()`.
+ * Calls `defaultAdmin()`, `pendingDefaultAdmin()`, `defaultAdminDelay()`, and
+ * `pendingDefaultAdminDelay()`.
  * If `defaultAdmin()` returns the zero address, `defaultAdmin` is returned as `null` (renounced).
  * If `pendingDefaultAdmin()` returns the zero address as the new admin, no pending transfer
  * is indicated.
@@ -235,14 +241,48 @@ export async function getAdmin(
     logger.warn(LOG_SYSTEM, `Failed to read defaultAdminDelay() for ${contractAddress}:`, error);
   }
 
+  // ── pendingDefaultAdminDelay() → (uint48 newDelay, uint48 schedule)
+  let pendingDefaultAdminDelay: number | undefined;
+  let pendingDefaultAdminDelaySchedule: number | undefined;
+  try {
+    const result = (await client.readContract({
+      address,
+      abi: PENDING_DEFAULT_ADMIN_DELAY_ABI,
+      functionName: 'pendingDefaultAdminDelay',
+    })) as [bigint, bigint];
+
+    const [newDelay, schedule] = result;
+
+    // (0, 0) means no pending delay change
+    if (Number(schedule) !== 0) {
+      pendingDefaultAdminDelay = Number(newDelay);
+      pendingDefaultAdminDelaySchedule = Number(schedule);
+    }
+  } catch (error) {
+    logger.warn(
+      LOG_SYSTEM,
+      `Failed to read pendingDefaultAdminDelay() for ${contractAddress}:`,
+      error
+    );
+  }
+
   logger.debug(LOG_SYSTEM, `Admin info for ${contractAddress}:`, {
     defaultAdmin,
     pendingDefaultAdmin: pendingDefaultAdmin ?? 'none',
     acceptSchedule,
     defaultAdminDelay,
+    pendingDefaultAdminDelay: pendingDefaultAdminDelay ?? 'none',
+    pendingDefaultAdminDelaySchedule,
   });
 
-  return { defaultAdmin, pendingDefaultAdmin, acceptSchedule, defaultAdminDelay };
+  return {
+    defaultAdmin,
+    pendingDefaultAdmin,
+    acceptSchedule,
+    defaultAdminDelay,
+    pendingDefaultAdminDelay,
+    pendingDefaultAdminDelaySchedule,
+  };
 }
 
 // ---------------------------------------------------------------------------
