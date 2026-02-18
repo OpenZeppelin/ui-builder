@@ -35,6 +35,7 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'hub',
   relayChain: 'polkadot',
+  // TODO: Add accessControlIndexerUrl when indexer is deployed for Polkadot Hub
 };
 
 /**
@@ -103,6 +104,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'parachain',
   relayChain: 'polkadot',
+  // TODO: Add accessControlIndexerUrl when indexer is deployed for Moonbeam
 };
 
 /**
@@ -133,6 +135,7 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'parachain',
   relayChain: 'kusama',
+  // TODO: Add accessControlIndexerUrl when indexer is deployed for Moonriver
 };
 
 /**
