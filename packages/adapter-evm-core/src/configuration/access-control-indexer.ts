@@ -5,7 +5,7 @@
  * 1. User-configured URL from UserNetworkServiceConfigService
  * 2. Default URL from network configuration
  *
- * @module configuration/indexer
+ * @module configuration/access-control-indexer
  */
 
 import { isValidUrl, logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
