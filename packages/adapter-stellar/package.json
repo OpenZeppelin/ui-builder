@@ -50,9 +50,9 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.8.0",
     "@openzeppelin/relayer-sdk": "1.9.0",
-    "@openzeppelin/ui-components": "^1.2.1",
-    "@openzeppelin/ui-types": "^1.8.0",
-    "@openzeppelin/ui-utils": "^1.2.1",
+    "@openzeppelin/ui-components": "^1.3.0",
+    "@openzeppelin/ui-types": "^1.9.0",
+    "@openzeppelin/ui-utils": "^1.2.2",
     "@stellar/stellar-sdk": "^14.1.1",
     "@stellar/stellar-xdr-json": "^23.0.0",
     "@web3icons/react": "^4.0.19",
