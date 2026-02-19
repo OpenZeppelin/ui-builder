@@ -55,5 +55,6 @@ export function resolveRoleLabel(
   roleId: string,
   roleLabelMap?: Map<string, string>
 ): string | undefined {
-  return roleLabelMap?.get(roleId) ?? WELL_KNOWN_ROLES[roleId];
+  const normalized = roleId.toLowerCase();
+  return roleLabelMap?.get(normalized) ?? WELL_KNOWN_ROLES[normalized];
 }
