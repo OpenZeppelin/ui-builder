@@ -1,5 +1,5 @@
 ---
-"@openzeppelin/ui-builder-adapter-polkadot": minor
+'@openzeppelin/ui-builder-adapter-polkadot': minor
 ---
 
 Add access control service integration to Polkadot adapter
