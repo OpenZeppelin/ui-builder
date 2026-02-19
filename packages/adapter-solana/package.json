@@ -67,6 +67,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./metadata": {
+      "types": "./dist/metadata.d.ts",
+      "import": "./dist/metadata.js",
+      "require": "./dist/metadata.cjs"
+    },
     "./dist/config.js": {
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",

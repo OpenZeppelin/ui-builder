@@ -7,16 +7,23 @@
  * @packageDocumentation
  */
 
-// ============================================================================
-// ADAPTER CLASS
-// ============================================================================
+import type { EcosystemExport } from '@openzeppelin/ui-types';
 
-export { PolkadotAdapter } from './adapter';
+import { PolkadotAdapter } from './adapter';
+import { polkadotAdapterConfig } from './config';
+import { ecosystemMetadata } from './metadata';
+import { polkadotNetworks } from './networks';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+export { ecosystemMetadata } from './metadata';
 
+export const ecosystemDefinition: EcosystemExport = {
+  ...ecosystemMetadata,
+  networks: polkadotNetworks,
+  createAdapter: (config) => new PolkadotAdapter(config),
+  adapterConfig: polkadotAdapterConfig,
+};
+
+// Types
 export type {
   PolkadotExecutionType,
   PolkadotNetworkCategory,
@@ -24,39 +31,17 @@ export type {
   TypedPolkadotNetworkConfig,
 } from './types';
 
-// ============================================================================
-// NETWORK CONFIGURATIONS
-// ============================================================================
-
-// Network arrays (following EVM adapter pattern)
-export { polkadotNetworks, polkadotMainnetNetworks, polkadotTestnetNetworks } from './networks';
-
 // Individual Hub networks (P1 - MVP)
-// NOTE: kusamaHubMainnet temporarily disabled - RPC DNS not resolving
 export { polkadotHubMainnet, polkadotHubTestnet } from './networks';
 
 // Individual Parachain networks (P2)
 export { moonbeamMainnet, moonriverMainnet, moonbaseAlphaTestnet } from './networks';
 
-// ============================================================================
-// VIEM CHAIN DEFINITIONS
-// ============================================================================
-
 // Custom Hub chain definitions
-// NOTE: kusamaHub temporarily disabled - RPC DNS not resolving
 export { polkadotHub, polkadotHubTestNet } from './networks/chains';
 
 // Parachain viem chains (re-exported from viem/chains)
 export { moonbeam, moonriver, moonbaseAlpha } from './networks';
 
-// ============================================================================
-// WALLET COMPONENTS
-// ============================================================================
-
+// Wallet components
 export { PolkadotWalletUiRoot, polkadotChains, type PolkadotWalletUiRootProps } from './wallet';
-
-// ============================================================================
-// ADAPTER CONFIGURATION
-// ============================================================================
-
-export { polkadotAdapterConfig } from './config';

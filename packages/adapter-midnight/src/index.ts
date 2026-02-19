@@ -10,20 +10,28 @@
 // Initialize browser environment (Buffer + CommonJS polyfills) as soon as adapter is imported
 import './browser-init';
 
-export * from './adapter';
-export { default } from './adapter'; // Default export for convenience
+import type { EcosystemExport, MidnightNetworkConfig } from '@openzeppelin/ui-types';
 
-// Re-export adapter-specific types
+import { MidnightAdapter } from './adapter';
+import { midnightAdapterConfig } from './config';
+import { ecosystemMetadata } from './metadata';
+import { midnightNetworks } from './networks';
+
+export { ecosystemMetadata } from './metadata';
+
+export const ecosystemDefinition: EcosystemExport = {
+  ...ecosystemMetadata,
+  networks: midnightNetworks,
+  createAdapter: (config) => new MidnightAdapter(config as MidnightNetworkConfig),
+  adapterConfig: midnightAdapterConfig,
+};
+
+export * from './adapter';
+export { default } from './adapter';
+
+// Adapter-specific types
 export type { MidnightContractArtifacts } from './types';
 export { isMidnightContractArtifacts } from './types';
 
-export { MidnightAdapter } from './adapter';
-export {
-  midnightNetworks,
-  midnightTestnetNetworks,
-  // Individual networks
-  midnightTestnet,
-} from './networks';
-
-// Export adapter configuration
-export { midnightAdapterConfig } from './config';
+// Individual network exports
+export { midnightTestnet } from './networks';

@@ -1,7 +1,21 @@
-// Re-export the main adapter class
-export { EvmAdapter } from './adapter';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { EcosystemExport } from '@openzeppelin/ui-types';
 
-// Export RainbowKit customization types (re-exported from core via rainbowkit/index.ts)
+import { EvmAdapter } from './adapter';
+import { evmAdapterConfig } from './config';
+import { ecosystemMetadata } from './metadata';
+import { evmNetworks } from './networks';
+
+export { ecosystemMetadata } from './metadata';
+
+export const ecosystemDefinition: EcosystemExport = {
+  ...ecosystemMetadata,
+  networks: evmNetworks,
+  createAdapter: (config) => new EvmAdapter(config as TypedEvmNetworkConfig),
+  adapterConfig: evmAdapterConfig,
+};
+
+// RainbowKit customization types (re-exported from core via rainbowkit/index.ts)
 export type {
   AppInfo,
   RainbowKitConnectButtonProps,
@@ -11,12 +25,8 @@ export type {
 } from './wallet/rainbowkit';
 export { isRainbowKitCustomizations, extractRainbowKitCustomizations } from './wallet/rainbowkit';
 
-// Export EVM networks
+// Individual network exports (useful for specific references)
 export {
-  evmNetworks,
-  evmMainnetNetworks,
-  evmTestnetNetworks,
-  // Individual networks
   ethereumMainnet,
   arbitrumMainnet,
   polygonMainnet,
@@ -39,13 +49,9 @@ export {
   lineaSepolia,
   scrollSepolia,
   zksyncSepoliaTestnet,
-  // ... other individual network exports
 } from './networks';
 
-// Export adapter configuration
-export { evmAdapterConfig } from './config';
-
-// Re-export core types for public API compatibility
+// Core types for public API compatibility
 export type {
   TypedEvmNetworkConfig,
   WriteContractParameters,
@@ -56,5 +62,4 @@ export {
   abiComparisonService,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 
-// Export adapter-specific types
 export type { EvmRelayerTransactionOptions } from '@openzeppelin/ui-builder-adapter-evm-core';
