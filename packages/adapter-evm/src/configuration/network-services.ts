@@ -197,6 +197,7 @@ export function getEvmNetworkServiceForms(
       description:
         'Optional GraphQL indexer endpoint for historical access control data. Overrides the default indexer URL for this network.',
       supportsConnectionTest: true,
+      requiredFeature: 'access_control_indexer',
       fields: [
         {
           id: 'evm-access-control-indexer-url',

@@ -219,6 +219,7 @@ export function getNetworkServiceForms(
       description:
         'Optional GraphQL indexer endpoint for historical access control data. Overrides the default indexer URL for this network.',
       supportsConnectionTest: true,
+      requiredFeature: 'access_control_indexer',
       fields: [
         {
           id: 'polkadot-access-control-indexer-url',
