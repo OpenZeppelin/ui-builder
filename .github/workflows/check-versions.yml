@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   check-versions:
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
