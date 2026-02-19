@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { ContractAdapter, NetworkConfig } from '@openzeppelin/ui-types';
-import { logger, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
+import {
+  filterEnabledServiceForms,
+  logger,
+  userNetworkServiceConfigService,
+} from '@openzeppelin/ui-utils';
 
 export interface ServiceHealthStatus {
   serviceId: string;
@@ -44,7 +48,7 @@ export function useNetworkServiceHealthCheck(
     }
 
     // Get the network service forms to know which services exist
-    const serviceForms = adapter.getNetworkServiceForms();
+    const serviceForms = filterEnabledServiceForms(adapter.getNetworkServiceForms());
     if (!serviceForms || serviceForms.length === 0) {
       // No services to check (e.g., some ecosystems might not have configurable services)
       setServiceStatuses([]);

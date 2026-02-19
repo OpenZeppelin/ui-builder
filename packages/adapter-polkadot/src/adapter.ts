@@ -65,10 +65,13 @@ import React from 'react';
 // - Substrate-specific UI kit manager
 // =============================================================================
 import {
+  createEvmAccessControlService,
   generateRainbowKitExportables,
   resolveFullUiKitConfiguration,
+  type EvmAccessControlService,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type {
+  AccessControlService,
   AvailableUiKit,
   Connector,
   ContractAdapter,
@@ -159,6 +162,13 @@ export class PolkadotAdapter implements ContractAdapter {
   readonly networkConfig: NetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
   private readonly _typedNetworkConfig: TypedPolkadotNetworkConfig;
+
+  /**
+   * Lazily initialized access control service.
+   * Created on the first call to `getAccessControlService()` to avoid
+   * unnecessary initialization overhead when access control is not used.
+   */
+  private accessControlService: EvmAccessControlService | null = null;
 
   /**
    * Create a new PolkadotAdapter instance.
@@ -645,6 +655,47 @@ export class PolkadotAdapter implements ContractAdapter {
     | undefined {
     this.assertEvmExecution();
     return evm.getRelayerOptionsComponent();
+  }
+
+  // ============================================================================
+  // Access Control
+  // ============================================================================
+
+  /**
+   * @inheritdoc
+   *
+   * Returns a lazily initialized `EvmAccessControlService` instance.
+   * The service is created on first call with an `executeTransaction` callback
+   * that wraps `signAndBroadcast`, decoupling the access control module from
+   * wallet/signing infrastructure.
+   *
+   * @returns The AccessControlService for this adapter's network
+   */
+  public getAccessControlService(): AccessControlService {
+    this.assertEvmExecution();
+
+    if (!this.accessControlService) {
+      logger.info(
+        'PolkadotAdapter:getAccessControlService',
+        'Initializing EvmAccessControlService (lazy, first call)'
+      );
+
+      this.accessControlService = createEvmAccessControlService(
+        this._typedNetworkConfig,
+        async (txData, executionConfig, onStatusChange, runtimeApiKey) => {
+          const defaultStatusHandler = onStatusChange ?? (() => {});
+          const result = await this.signAndBroadcast(
+            txData,
+            executionConfig,
+            defaultStatusHandler,
+            runtimeApiKey
+          );
+          return { id: result.txHash };
+        }
+      );
+    }
+
+    return this.accessControlService;
   }
 
   // ============================================================================

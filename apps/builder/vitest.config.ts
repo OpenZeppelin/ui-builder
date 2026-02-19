@@ -14,17 +14,41 @@ const adapterPackagePaths: Record<string, string> = {
     __dirname,
     '../../packages/adapter-evm/dist/index.js'
   ),
+  '@openzeppelin/ui-builder-adapter-evm/metadata': path.resolve(
+    __dirname,
+    '../../packages/adapter-evm/dist/metadata.js'
+  ),
   '@openzeppelin/ui-builder-adapter-solana': path.resolve(
     __dirname,
     '../../packages/adapter-solana/dist/index.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-solana/metadata': path.resolve(
+    __dirname,
+    '../../packages/adapter-solana/dist/metadata.js'
   ),
   '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
     __dirname,
     '../../packages/adapter-stellar/dist/index.js'
   ),
+  '@openzeppelin/ui-builder-adapter-stellar/metadata': path.resolve(
+    __dirname,
+    '../../packages/adapter-stellar/dist/metadata.js'
+  ),
   '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
     __dirname,
     '../../packages/adapter-midnight/dist/index.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-midnight/metadata': path.resolve(
+    __dirname,
+    '../../packages/adapter-midnight/dist/metadata.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-polkadot': path.resolve(
+    __dirname,
+    '../../packages/adapter-polkadot/dist/index.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-polkadot/metadata': path.resolve(
+    __dirname,
+    '../../packages/adapter-polkadot/dist/metadata.js'
   ),
 };
 
@@ -145,22 +169,48 @@ export default defineConfig(
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        // Adapter packages - required for export tests that use ecosystemManager
+        // Adapter packages - required for export tests that use ecosystemManager.
+        // Subpath exports (e.g. /metadata) must be listed BEFORE the bare specifier
+        // so Vite matches the more specific path first.
+        '@openzeppelin/ui-builder-adapter-evm/metadata': path.resolve(
+          __dirname,
+          '../../packages/adapter-evm/dist/metadata.js'
+        ),
         '@openzeppelin/ui-builder-adapter-evm': path.resolve(
           __dirname,
           '../../packages/adapter-evm/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-solana/metadata': path.resolve(
+          __dirname,
+          '../../packages/adapter-solana/dist/metadata.js'
         ),
         '@openzeppelin/ui-builder-adapter-solana': path.resolve(
           __dirname,
           '../../packages/adapter-solana/dist/index.js'
         ),
+        '@openzeppelin/ui-builder-adapter-stellar/metadata': path.resolve(
+          __dirname,
+          '../../packages/adapter-stellar/dist/metadata.js'
+        ),
         '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
           __dirname,
           '../../packages/adapter-stellar/dist/index.js'
         ),
+        '@openzeppelin/ui-builder-adapter-midnight/metadata': path.resolve(
+          __dirname,
+          '../../packages/adapter-midnight/dist/metadata.js'
+        ),
         '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
           __dirname,
           '../../packages/adapter-midnight/dist/index.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-polkadot/metadata': path.resolve(
+          __dirname,
+          '../../packages/adapter-polkadot/dist/metadata.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-polkadot': path.resolve(
+          __dirname,
+          '../../packages/adapter-polkadot/dist/index.js'
         ),
       },
       dedupe: [
@@ -172,6 +222,7 @@ export default defineConfig(
         '@openzeppelin/ui-builder-adapter-solana',
         '@openzeppelin/ui-builder-adapter-stellar',
         '@openzeppelin/ui-builder-adapter-midnight',
+        '@openzeppelin/ui-builder-adapter-polkadot',
         'react',
         'react-dom',
       ],
@@ -187,9 +238,9 @@ export default defineConfig(
         '@openzeppelin/ui-builder-adapter-solana',
         '@openzeppelin/ui-builder-adapter-stellar',
         '@openzeppelin/ui-builder-adapter-midnight',
+        '@openzeppelin/ui-builder-adapter-polkadot',
       ],
     },
-    // Add ssr.noExternal to ensure these are not treated as external during test SSR phase
     ssr: {
       noExternal: [
         '@openzeppelin/ui-renderer',
@@ -200,6 +251,7 @@ export default defineConfig(
         '@openzeppelin/ui-builder-adapter-solana',
         '@openzeppelin/ui-builder-adapter-stellar',
         '@openzeppelin/ui-builder-adapter-midnight',
+        '@openzeppelin/ui-builder-adapter-polkadot',
       ],
     },
     test: {

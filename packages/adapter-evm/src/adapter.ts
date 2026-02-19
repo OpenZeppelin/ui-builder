@@ -6,6 +6,7 @@ import {
   compareContractDefinitions as coreCompareContractDefinitions,
   hashContractDefinition as coreHashContractDefinition,
   validateContractDefinition as coreValidateContractDefinition,
+  createEvmAccessControlService,
   EvmProviderKeys,
   executeEvmTransaction,
   formatEvmFunctionResult,
@@ -33,11 +34,13 @@ import {
   validateEvmNetworkServiceConfig,
   validateEvmRpcEndpoint,
   waitForEvmTransactionConfirmation,
+  type EvmAccessControlService,
   type EvmContractDefinitionProviderKey,
   type TypedEvmNetworkConfig,
   type WriteContractParameters,
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 import type {
+  AccessControlService,
   AvailableUiKit,
   Connector,
   ContractAdapter,
@@ -108,6 +111,13 @@ const isTypedEvmNetworkConfig = (config: NetworkConfig): config is TypedEvmNetwo
 export class EvmAdapter implements ContractAdapter {
   readonly networkConfig: TypedEvmNetworkConfig;
   readonly initialAppServiceKitName: UiKitConfiguration['kitName'];
+
+  /**
+   * Lazily initialized access control service (NFR-004).
+   * Created on the first call to `getAccessControlService()` to avoid
+   * unnecessary initialization overhead when access control is not used.
+   */
+  private accessControlService: EvmAccessControlService | null = null;
 
   constructor(networkConfig: TypedEvmNetworkConfig) {
     if (!isTypedEvmNetworkConfig(networkConfig)) {
@@ -738,6 +748,42 @@ Get your WalletConnect projectId from <a href="https://cloud.walletconnect.com" 
   public hashContractDefinition(definition: string): string {
     // Delegate to core convenience function
     return coreHashContractDefinition(definition);
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * Returns a lazily initialized `EvmAccessControlService` instance.
+   * The service is created on first call with an `executeTransaction` callback
+   * that wraps `signAndBroadcast`, decoupling the access control module from
+   * wallet/signing infrastructure.
+   *
+   * @returns The AccessControlService for this adapter's network
+   * @see research.md §R9 — Service Lifecycle and Transaction Execution
+   */
+  public getAccessControlService(): AccessControlService {
+    if (!this.accessControlService) {
+      logger.info(
+        'EvmAdapter:getAccessControlService',
+        'Initializing EvmAccessControlService (lazy, first call)'
+      );
+
+      this.accessControlService = createEvmAccessControlService(
+        this.networkConfig,
+        async (txData, executionConfig, onStatusChange, runtimeApiKey) => {
+          const defaultStatusHandler = onStatusChange ?? (() => {});
+          const result = await this.signAndBroadcast(
+            txData,
+            executionConfig,
+            defaultStatusHandler,
+            runtimeApiKey
+          );
+          return { id: result.txHash };
+        }
+      );
+    }
+
+    return this.accessControlService;
   }
 
   /**

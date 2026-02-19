@@ -1,7 +1,7 @@
 /**
  * Configuration Module
  *
- * RPC and Explorer configuration resolution for EVM networks.
+ * RPC, Explorer, and Access Control Indexer configuration resolution for EVM networks.
  *
  * @module configuration
  */
@@ -25,6 +25,12 @@ export {
   validateEvmExplorerConfig,
   testEvmExplorerConnection,
 } from './explorer';
+
+// Access control indexer configuration
+export {
+  getUserAccessControlIndexerUrl,
+  resolveAccessControlIndexerUrl,
+} from './access-control-indexer';
 
 // Network service configuration
 export {

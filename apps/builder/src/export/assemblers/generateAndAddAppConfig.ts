@@ -62,15 +62,17 @@ function _generateIndexerEndpointsConfigSection(
   const indexerNetworkIdKey = networkConfig.id;
 
   // Only add indexer config if the network has default indexer endpoints (indicating support)
-  if (networkConfig.indexerUri || networkConfig.indexerWsUri) {
+  // Prefer accessControlIndexerUrl (feature-specific) over indexerUri (generic)
+  const indexerHttpUrl = networkConfig.accessControlIndexerUrl ?? networkConfig.indexerUri;
+  if (indexerHttpUrl || networkConfig.indexerWsUri) {
     const config: { http?: string; ws?: string; _comment?: string } = {
       _comment:
         'Optional. Used for querying historical blockchain data (e.g., access control events). Remove if not needed.',
     };
 
-    // Only set http if indexerUri is actually provided
-    if (networkConfig.indexerUri) {
-      config.http = networkConfig.indexerUri;
+    // Only set http if an indexer URL is actually provided
+    if (indexerHttpUrl) {
+      config.http = indexerHttpUrl;
     }
 
     // Only set ws if indexerWsUri is actually provided

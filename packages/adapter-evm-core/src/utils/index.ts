@@ -11,5 +11,6 @@
 export * from './artifacts';
 export * from './json';
 export * from './formatting';
+export * from './public-client';
 export * from './validation';
 export * from './gas';

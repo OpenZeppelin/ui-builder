@@ -47,6 +47,7 @@ export const ethereumMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemMainnet,
+  accessControlIndexerUrl: 'https://openzeppelin-ethereum-mainnet.graphql.subquery.network/',
 };
 
 export const arbitrumMainnet: TypedEvmNetworkConfig = {
@@ -70,6 +71,7 @@ export const arbitrumMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemArbitrum,
+  accessControlIndexerUrl: 'https://openzeppelin-arbitrum-mainnet.graphql.subquery.network/',
 };
 
 export const polygonMainnet: TypedEvmNetworkConfig = {
@@ -93,6 +95,7 @@ export const polygonMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemPolygon,
+  accessControlIndexerUrl: 'https://openzeppelin-polygon-mainnet.graphql.subquery.network/',
 };
 
 export const polygonZkEvmMainnet: TypedEvmNetworkConfig = {
@@ -116,6 +119,7 @@ export const polygonZkEvmMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemPolygonZkEvm,
+  accessControlIndexerUrl: 'https://openzeppelin-polygon-zkevm-mainnet.graphql.subquery.network/',
 };
 
 export const baseMainnet: TypedEvmNetworkConfig = {
@@ -139,6 +143,7 @@ export const baseMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBase,
+  accessControlIndexerUrl: 'https://openzeppelin-base-mainnet.graphql.subquery.network/',
 };
 
 export const bscMainnet: TypedEvmNetworkConfig = {
@@ -162,6 +167,7 @@ export const bscMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemBsc,
+  accessControlIndexerUrl: 'https://openzeppelin-bsc-mainnet.graphql.subquery.network/',
 };
 
 export const optimismMainnet: TypedEvmNetworkConfig = {
@@ -185,6 +191,7 @@ export const optimismMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemOptimism,
+  accessControlIndexerUrl: 'https://openzeppelin-optimism-mainnet.graphql.subquery.network/',
 };
 
 export const avalancheMainnet: TypedEvmNetworkConfig = {
@@ -208,6 +215,7 @@ export const avalancheMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemAvalanche,
+  accessControlIndexerUrl: 'https://openzeppelin-avalanche-mainnet.graphql.subquery.network/',
 };
 
 // TODO: test and setup the api and explorer config
@@ -232,6 +240,7 @@ export const zkSyncEraMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemZkSync,
+  accessControlIndexerUrl: 'https://openzeppelin-zksync-era-mainnet.graphql.subquery.network/',
 };
 
 export const scrollMainnet: TypedEvmNetworkConfig = {
@@ -255,6 +264,7 @@ export const scrollMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemScroll,
+  accessControlIndexerUrl: 'https://openzeppelin-scroll-mainnet.graphql.subquery.network/',
 };
 
 export const lineaMainnet: TypedEvmNetworkConfig = {
@@ -278,6 +288,7 @@ export const lineaMainnet: TypedEvmNetworkConfig = {
     decimals: 18,
   },
   viemChain: viemLinea,
+  accessControlIndexerUrl: 'https://openzeppelin-linea-mainnet.graphql.subquery.network/',
 };
 
 // TODO: Add other EVM mainnet networks with their public RPCs and viemChain objects

@@ -1,7 +1,7 @@
 /**
  * Network Service Configuration for Polkadot EVM Adapter
  *
- * Defines UI configuration for RPC, Explorer, and Contract Definitions services.
+ * Defines UI configuration for RPC, Explorer, Access Control Indexer, and Contract Definitions services.
  *
  * @remarks
  * Validation and connection testing are handled by adapter-evm-core.
@@ -49,6 +49,12 @@ export function getPolkadotDefaultServiceConfig(
         };
       }
       break;
+    }
+    case 'access-control-indexer': {
+      if (networkConfig.accessControlIndexerUrl) {
+        return { accessControlIndexerUrl: networkConfig.accessControlIndexerUrl };
+      }
+      return null;
     }
     case 'contract-definitions':
       // No connection test for contract definitions service
@@ -204,6 +210,27 @@ export function getNetworkServiceForms(
             'API endpoint for fetching contract data. If not provided, defaults from the network will be used.',
           width: 'full',
           metadata: { section: 'custom-endpoints' },
+        },
+      ],
+    },
+    {
+      id: 'access-control-indexer',
+      label: 'Access Control Indexer',
+      description:
+        'Optional GraphQL indexer endpoint for historical access control data. Overrides the default indexer URL for this network.',
+      supportsConnectionTest: true,
+      requiredFeature: 'access_control_indexer',
+      fields: [
+        {
+          id: 'polkadot-access-control-indexer-url',
+          name: 'accessControlIndexerUrl',
+          type: 'text',
+          label: 'Access Control Indexer GraphQL Endpoint',
+          placeholder: 'https://gateway.subquery.network/query/...',
+          validation: { required: false, pattern: '^https?://.+' },
+          width: 'full',
+          helperText:
+            'Optional. Used for querying historical access control events and role discovery on non-enumerable contracts.',
         },
       ],
     },

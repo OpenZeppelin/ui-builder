@@ -51,10 +51,8 @@ vi.mock('../../utils/ecosystem-feature-flags', () => ({
   isEcosystemEnabled: vi.fn(),
 }));
 
-vi.mock('../../core/ecosystems/registry', () => ({
-  getEcosystemName: vi.fn(),
-  getEcosystemDescription: vi.fn(),
-  getEcosystemNetworkIconName: vi.fn(),
+vi.mock('../../core/ecosystemManager', () => ({
+  getEcosystemMetadata: () => undefined,
 }));
 
 // Get mocked functions

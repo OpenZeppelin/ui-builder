@@ -206,7 +206,7 @@ describe('Two-Step Admin Transfer Support', () => {
     it('should throw when indexer is unavailable', async () => {
       const { StellarIndexerClient } = await import('../../src/access-control/indexer-client');
 
-      const client = new StellarIndexerClient(mockNetworkConfig); // No indexerUri configured
+      const client = new StellarIndexerClient(mockNetworkConfig); // No accessControlIndexerUrl configured
 
       await expect(
         client.queryPendingAdminTransfer('CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM')
@@ -218,7 +218,7 @@ describe('Two-Step Admin Transfer Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch for the indexer queries
@@ -281,7 +281,7 @@ describe('Two-Step Admin Transfer Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch returning empty results
@@ -317,7 +317,7 @@ describe('Two-Step Admin Transfer Support', () => {
 
       const client = new StellarIndexerClient({
         ...mockNetworkConfig,
-        indexerUri: 'http://localhost:3000/graphql',
+        accessControlIndexerUrl: 'http://localhost:3000/graphql',
       });
 
       // Mock fetch with initiation followed by completion

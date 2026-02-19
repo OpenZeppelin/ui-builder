@@ -1885,7 +1885,7 @@ describe('Access Control Service - Two-Step Ownership State (US1)', () => {
       sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
       networkPassphrase: 'Test SDF Network ; September 2015',
       explorerUrl: 'https://stellar.expert/explorer/testnet',
-      indexerUri: 'http://localhost:3000/graphql',
+      accessControlIndexerUrl: 'http://localhost:3000/graphql',
     };
 
     // Setup mock indexer client
@@ -2557,6 +2557,268 @@ describe('Access Control Service - Accept Ownership Transfer (US3)', () => {
         expect.stringContaining('acceptOwnership'),
         expect.stringContaining(TEST_CONTRACT)
       );
+    });
+  });
+});
+
+describe('Access Control Service - Defense-in-Depth Capability Checks', () => {
+  let service: StellarAccessControlService;
+  let mockNetworkConfig: StellarNetworkConfig;
+  let mockIndexerClient: {
+    checkAvailability: ReturnType<typeof vi.fn>;
+    queryPendingOwnershipTransfer: ReturnType<typeof vi.fn>;
+    queryPendingAdminTransfer: ReturnType<typeof vi.fn>;
+    queryHistory: ReturnType<typeof vi.fn>;
+    discoverRoleIds: ReturnType<typeof vi.fn>;
+  };
+
+  const TEST_CONTRACT = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockNetworkConfig = {
+      id: 'stellar-testnet',
+      name: 'Stellar Testnet',
+      ecosystem: 'stellar',
+      network: 'stellar',
+      type: 'testnet',
+      isTestnet: true,
+      exportConstName: 'stellarTestnet',
+      horizonUrl: 'https://horizon-testnet.stellar.org',
+      sorobanRpcUrl: 'https://soroban-testnet.stellar.org',
+      networkPassphrase: 'Test SDF Network ; September 2015',
+      explorerUrl: 'https://stellar.expert/explorer/testnet',
+    };
+
+    mockIndexerClient = {
+      checkAvailability: vi.fn().mockResolvedValue(false),
+      queryPendingOwnershipTransfer: vi.fn().mockResolvedValue(null),
+      queryPendingAdminTransfer: vi.fn().mockResolvedValue(null),
+      queryHistory: vi.fn(),
+      discoverRoleIds: vi.fn(),
+    };
+
+    const { createIndexerClient } = await import('../../src/access-control/indexer-client');
+    vi.mocked(createIndexerClient).mockReturnValue(
+      mockIndexerClient as unknown as ReturnType<typeof createIndexerClient>
+    );
+
+    service = new StellarAccessControlService(mockNetworkConfig);
+  });
+
+  describe('getOwnership() capability guard', () => {
+    it('should throw OperationFailed when registered contract lacks Ownable interface', async () => {
+      // Register contract with AccessControl-only schema (no get_owner)
+      const accessControlOnlySchema: ContractSchema = {
+        ecosystem: 'stellar',
+        address: TEST_CONTRACT,
+        functions: [
+          {
+            id: 'has_role',
+            name: 'has_role',
+            displayName: 'has_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [{ name: 'result', type: 'u32' }],
+            modifiesState: false,
+            stateMutability: 'view',
+          },
+          {
+            id: 'grant_role',
+            name: 'grant_role',
+            displayName: 'grant_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+          {
+            id: 'revoke_role',
+            name: 'revoke_role',
+            displayName: 'revoke_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+        ],
+      };
+
+      service.registerContract(TEST_CONTRACT, accessControlOnlySchema);
+
+      await expect(service.getOwnership(TEST_CONTRACT)).rejects.toThrow(
+        'Contract does not implement the Ownable interface'
+      );
+    });
+
+    it('should NOT throw when contract is not registered (soft check)', async () => {
+      // Mock readOwnership to succeed
+      vi.mocked(readOwnership).mockResolvedValue({
+        owner: 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI',
+      });
+
+      // Call without registering — defense-in-depth check is skipped
+      const ownership = await service.getOwnership(TEST_CONTRACT);
+      expect(ownership.owner).toBe('GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI');
+    });
+  });
+
+  describe('getAdminInfo() capability guard', () => {
+    it('should throw OperationFailed when registered contract lacks two-step admin interface', async () => {
+      // Register contract with Ownable-only schema (no AccessControl admin functions)
+      const ownableOnlySchema: ContractSchema = {
+        ecosystem: 'stellar',
+        address: TEST_CONTRACT,
+        functions: [
+          {
+            id: 'get_owner',
+            name: 'get_owner',
+            displayName: 'get_owner',
+            type: 'function',
+            inputs: [],
+            outputs: [{ name: 'owner', type: 'Address' }],
+            modifiesState: false,
+            stateMutability: 'view',
+          },
+          {
+            id: 'transfer_ownership',
+            name: 'transfer_ownership',
+            displayName: 'transfer_ownership',
+            type: 'function',
+            inputs: [{ name: 'new_owner', type: 'Address' }],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+          {
+            id: 'accept_ownership',
+            name: 'accept_ownership',
+            displayName: 'accept_ownership',
+            type: 'function',
+            inputs: [],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+          {
+            id: 'renounce_ownership',
+            name: 'renounce_ownership',
+            displayName: 'renounce_ownership',
+            type: 'function',
+            inputs: [],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+        ],
+      };
+
+      service.registerContract(TEST_CONTRACT, ownableOnlySchema);
+
+      await expect(service.getAdminInfo(TEST_CONTRACT)).rejects.toThrow(
+        'Contract does not implement the two-step admin interface'
+      );
+    });
+  });
+
+  describe('getAdminAccount() capability guard', () => {
+    it('should throw OperationFailed when registered contract lacks two-step admin interface', async () => {
+      // Register contract with Ownable-only schema (no AccessControl admin functions)
+      const ownableOnlySchema: ContractSchema = {
+        ecosystem: 'stellar',
+        address: TEST_CONTRACT,
+        functions: [
+          {
+            id: 'get_owner',
+            name: 'get_owner',
+            displayName: 'get_owner',
+            type: 'function',
+            inputs: [],
+            outputs: [{ name: 'owner', type: 'Address' }],
+            modifiesState: false,
+            stateMutability: 'view',
+          },
+        ],
+      };
+
+      service.registerContract(TEST_CONTRACT, ownableOnlySchema);
+
+      await expect(service.getAdminAccount(TEST_CONTRACT)).rejects.toThrow(
+        'Contract does not implement the two-step admin interface'
+      );
+    });
+  });
+
+  describe('exportSnapshot() graceful degradation', () => {
+    it('should handle capability guard gracefully in exportSnapshot for non-Ownable contract', async () => {
+      // Register contract with AccessControl-only schema
+      const accessControlOnlySchema: ContractSchema = {
+        ecosystem: 'stellar',
+        address: TEST_CONTRACT,
+        functions: [
+          {
+            id: 'has_role',
+            name: 'has_role',
+            displayName: 'has_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [{ name: 'result', type: 'u32' }],
+            modifiesState: false,
+            stateMutability: 'view',
+          },
+          {
+            id: 'grant_role',
+            name: 'grant_role',
+            displayName: 'grant_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+          {
+            id: 'revoke_role',
+            name: 'revoke_role',
+            displayName: 'revoke_role',
+            type: 'function',
+            inputs: [
+              { name: 'account', type: 'Address' },
+              { name: 'role', type: 'Symbol' },
+            ],
+            outputs: [],
+            modifiesState: true,
+            stateMutability: 'nonpayable',
+          },
+        ],
+      };
+
+      service.registerContract(TEST_CONTRACT, accessControlOnlySchema);
+
+      // Mock roles to return empty
+      vi.mocked(readCurrentRoles).mockResolvedValue([]);
+
+      // exportSnapshot should succeed — getOwnership throws but is caught
+      const snapshot = await service.exportSnapshot(TEST_CONTRACT);
+      expect(snapshot.ownership).toBeUndefined();
+      expect(snapshot.roles).toEqual([]);
     });
   });
 });

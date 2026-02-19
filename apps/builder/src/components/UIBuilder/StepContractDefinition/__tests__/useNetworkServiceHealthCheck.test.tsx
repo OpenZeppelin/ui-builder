@@ -23,6 +23,7 @@ vi.mock('@openzeppelin/ui-utils', () => ({
   userNetworkServiceConfigService: {
     get: vi.fn().mockReturnValue(null),
   },
+  filterEnabledServiceForms: (forms: NetworkServiceForm[]) => forms,
 }));
 
 // Helper to create mock network config

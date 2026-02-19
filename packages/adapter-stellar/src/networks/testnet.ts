@@ -16,5 +16,5 @@ export const stellarTestnet: StellarNetworkConfig = {
   networkPassphrase: 'Test SDF Network ; September 2015',
   explorerUrl: 'https://stellar.expert/explorer/testnet',
   iconComponent: NetworkStellar,
-  indexerUri: 'https://openzepplin-stellar-testnet.graphql.subquery.network',
+  accessControlIndexerUrl: 'https://openzepplin-stellar-testnet.graphql.subquery.network',
 };

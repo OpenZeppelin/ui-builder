@@ -133,6 +133,14 @@ export {
 } from '@openzeppelin/ui-builder-adapter-evm-core';
 
 // ============================================================================
+// Access Control Module - from core
+// ============================================================================
+export {
+  createEvmAccessControlService,
+  type EvmAccessControlService,
+} from '@openzeppelin/ui-builder-adapter-evm-core';
+
+// ============================================================================
 // Core Types (re-exported for convenience)
 // ============================================================================
 export type {

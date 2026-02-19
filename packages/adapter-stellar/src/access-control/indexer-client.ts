@@ -1147,9 +1147,11 @@ export class StellarIndexerClient {
       return endpoints;
     }
 
-    // Priority 3: Network config defaults
-    if (this.networkConfig.indexerUri) {
-      endpoints.http = this.networkConfig.indexerUri;
+    // Priority 3: Network config defaults (prefer accessControlIndexerUrl, fall back to indexerUri)
+    const defaultHttpUrl =
+      this.networkConfig.accessControlIndexerUrl ?? this.networkConfig.indexerUri;
+    if (defaultHttpUrl) {
+      endpoints.http = defaultHttpUrl;
       logger.info(
         LOG_SYSTEM,
         `Using network config indexer URI for ${networkId}: ${endpoints.http}`
@@ -1192,7 +1194,10 @@ export class StellarIndexerClient {
       OWNERSHIP_RENOUNCED: 'OWNERSHIP_RENOUNCED',
       ADMIN_TRANSFER_INITIATED: 'ADMIN_TRANSFER_INITIATED',
       ADMIN_TRANSFER_COMPLETED: 'ADMIN_TRANSFER_COMPLETED',
+      ADMIN_TRANSFER_CANCELED: 'UNKNOWN', // EVM-only event, not applicable to Stellar
       ADMIN_RENOUNCED: 'ADMIN_RENOUNCED',
+      ADMIN_DELAY_CHANGE_SCHEDULED: 'UNKNOWN', // EVM-only event, not applicable to Stellar
+      ADMIN_DELAY_CHANGE_CANCELED: 'UNKNOWN', // EVM-only event, not applicable to Stellar
       UNKNOWN: 'UNKNOWN',
     };
     return mapping[changeType];

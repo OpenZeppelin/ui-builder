@@ -115,6 +115,14 @@ export function detectAccessControlCapabilities(
     notes.push('No OpenZeppelin access control interfaces detected');
   }
 
+  // ── Stellar-specific capability flags ──────────────────────────────
+  // Stellar contracts have renounce_ownership but NOT renounce_role (uses revoke_role for self)
+  // Stellar has no cancel-admin-transfer or admin-delay-management concepts
+  const hasRenounceOwnership = hasOwnable && functionNames.has('renounce_ownership');
+  const hasRenounceRole = false; // Stellar uses revokeRole for self-revocation
+  const hasCancelAdminTransfer = false; // Not supported on Stellar
+  const hasAdminDelayManagement = false; // Not supported on Stellar
+
   return {
     hasOwnable,
     hasTwoStepOwnable,
@@ -124,6 +132,10 @@ export function detectAccessControlCapabilities(
     supportsHistory,
     verifiedAgainstOZInterfaces,
     notes: notes.length > 0 ? notes : undefined,
+    hasRenounceOwnership,
+    hasRenounceRole,
+    hasCancelAdminTransfer,
+    hasAdminDelayManagement,
   };
 }
 

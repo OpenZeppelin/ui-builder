@@ -154,7 +154,7 @@ export {
 } from './wallet';
 
 // ============================================================================
-// Configuration Module - RPC and Explorer configuration
+// Configuration Module - RPC, Explorer, and Access Control Indexer configuration
 // ============================================================================
 export {
   // RPC
@@ -171,6 +171,9 @@ export {
   getEvmExplorerTxUrl,
   validateEvmExplorerConfig,
   testEvmExplorerConnection,
+  // Access control indexer
+  getUserAccessControlIndexerUrl,
+  resolveAccessControlIndexerUrl,
   // Network service configuration
   validateEvmNetworkServiceConfig,
   testEvmNetworkServiceConnection,
@@ -214,6 +217,49 @@ export {
   // Artifacts
   validateAndConvertEvmArtifacts,
 } from './utils';
+
+// ============================================================================
+// Access Control Module - Access control detection, reads, writes, and history
+// ============================================================================
+export {
+  // Service
+  createEvmAccessControlService,
+  EvmAccessControlService,
+  // Actions
+  assembleAcceptAdminTransferAction,
+  assembleAcceptOwnershipAction,
+  assembleBeginAdminTransferAction,
+  assembleCancelAdminTransferAction,
+  assembleChangeAdminDelayAction,
+  assembleGrantRoleAction,
+  assembleRenounceOwnershipAction,
+  assembleRenounceRoleAction,
+  assembleRevokeRoleAction,
+  assembleRollbackAdminDelayAction,
+  assembleTransferOwnershipAction,
+  // Feature Detection
+  detectAccessControlCapabilities,
+  validateAccessControlSupport,
+  // Indexer Client
+  createIndexerClient,
+  EvmIndexerClient,
+  // On-Chain Reader
+  getAdmin,
+  getCurrentBlock,
+  readCurrentRoles,
+  readOwnership,
+  // Validation
+  validateAddress,
+  validateRoleId,
+  validateRoleIds,
+  // Constants
+  DEFAULT_ADMIN_ROLE,
+  DEFAULT_ADMIN_ROLE_LABEL,
+  ZERO_ADDRESS,
+  // Types
+  type EvmAccessControlContext,
+  type EvmTransactionExecutor,
+} from './access-control';
 
 // ============================================================================
 // Types Module - TypeScript type definitions

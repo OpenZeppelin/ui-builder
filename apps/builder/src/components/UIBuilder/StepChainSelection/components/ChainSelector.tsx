@@ -1,17 +1,12 @@
-import { NetworkEthereum, NetworkPolkadot, NetworkSolana, NetworkStellar } from '@web3icons/react';
 import { Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { EmptyState, MidnightIcon } from '@openzeppelin/ui-components';
+import { EcosystemIcon, EmptyState } from '@openzeppelin/ui-components';
 import { Ecosystem } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import {
-  getEcosystemDescription,
-  getEcosystemName,
-  getEcosystemNetworkIconName,
-} from '../../../../core/ecosystems/registry';
+import { getEcosystemMetadata } from '../../../../core/ecosystemManager';
 import { networkService } from '../../../../core/networks/service';
 import { useBuilderAnalytics } from '../../../../hooks/useBuilderAnalytics';
 import {
@@ -35,32 +30,27 @@ export function ChainSelector({
   const [selectedEcosystem, setSelectedEcosystem] = useState<Ecosystem | null>(null);
   const { trackEcosystemSelection, trackNetworkSelection } = useBuilderAnalytics();
 
-  // Set up react-hook-form (keeping this for consistency with the existing implementation)
   const { setValue } = useForm({
     defaultValues: {
       ecosystem: initialEcosystem,
     },
   });
 
-  // Define ecosystem options based on visible ecosystems
   const ecosystemOptions = getVisibleEcosystems().map((ecosystem) => {
     const config = getEcosystemFeatureConfig(ecosystem);
+    const meta = getEcosystemMetadata(ecosystem);
 
     return {
       value: ecosystem,
-      label: getEcosystemName(ecosystem),
-      network: getEcosystemNetworkIconName(ecosystem) || null,
-      customIcon: ecosystem === 'midnight',
+      label: meta?.name ?? ecosystem,
       enabled: config.enabled,
       disabledLabel: config.disabledLabel,
       disabledDescription: config.disabledDescription,
     };
   });
 
-  // Handle selection of a blockchain ecosystem
   const handleSelectEcosystem = useCallback(
     async (ecosystem: Ecosystem) => {
-      // Check if ecosystem is enabled
       if (!isEcosystemEnabled(ecosystem)) {
         logger.info('ChainSelector', `Ecosystem ${ecosystem} is disabled, ignoring selection`);
         return;
@@ -68,30 +58,21 @@ export function ChainSelector({
 
       setSelectedEcosystem(ecosystem);
       setValue('ecosystem', ecosystem);
-
-      // Track ecosystem selection
       trackEcosystemSelection(ecosystem);
-
-      // Remove auto-selection logic - let users manually choose their network
-      // This improves UX by not forcing a default network selection
     },
     [setValue, trackEcosystemSelection]
   );
 
-  // Handle network selection
   const handleNetworkSelected = useCallback(
     (networkId: string) => {
       if (selectedEcosystem) {
-        // Track network selection
         trackNetworkSelection(networkId, selectedEcosystem);
-
         onNetworkSelect(selectedEcosystem, networkId);
       }
     },
     [onNetworkSelect, selectedEcosystem, trackNetworkSelection]
   );
 
-  // Keep the selector in sync with the ecosystem provided by the store/UI state
   useEffect(() => {
     const visibleEcosystems = getVisibleEcosystems();
 
@@ -101,7 +82,6 @@ export function ChainSelector({
       return;
     }
 
-    // Fallback: pick the first enabled ecosystem if the provided one is hidden
     const enabledFallback = visibleEcosystems.find(isEcosystemEnabled) || null;
     setSelectedEcosystem(enabledFallback ?? null);
     if (enabledFallback) {
@@ -109,25 +89,21 @@ export function ChainSelector({
     }
   }, [initialEcosystem, setValue]);
 
-  // If we have a selectedNetworkId and no ecosystem, we need to fetch the network to determine its ecosystem
   useEffect(() => {
     if (selectedNetworkId && !selectedEcosystem) {
       async function fetchNetworkAndSetEcosystem() {
         try {
-          // We know selectedNetworkId is not null here because of the condition above
           const network = await networkService.getNetworkById(selectedNetworkId!);
           if (network) {
             setSelectedEcosystem(network.ecosystem);
             setValue('ecosystem', network.ecosystem);
           } else {
-            // Fall back to initialEcosystem if network not found
             logger.warn('ChainSelector', `Network with ID ${selectedNetworkId} not found`);
             setSelectedEcosystem(initialEcosystem);
             setValue('ecosystem', initialEcosystem);
           }
         } catch (error) {
           logger.error('ChainSelector', 'Failed to fetch network details:', error);
-          // Fall back to initialEcosystem if we can't determine the ecosystem
           setSelectedEcosystem(initialEcosystem);
           setValue('ecosystem', initialEcosystem);
         }
@@ -136,6 +112,8 @@ export function ChainSelector({
       void fetchNetworkAndSetEcosystem();
     }
   }, [selectedNetworkId, selectedEcosystem, initialEcosystem, setValue]);
+
+  const selectedDef = selectedEcosystem ? getEcosystemMetadata(selectedEcosystem) : undefined;
 
   return (
     <div className="flex flex-col space-y-6">
@@ -146,6 +124,7 @@ export function ChainSelector({
             {ecosystemOptions.map((option) => {
               const isSelected = selectedEcosystem === option.value;
               const isDisabled = !option.enabled;
+              const def = getEcosystemMetadata(option.value);
 
               return (
                 <button
@@ -169,42 +148,12 @@ export function ChainSelector({
                   aria-selected={isSelected}
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full">
-                    {option.value === 'midnight' ? (
-                      <MidnightIcon size={20} className={isDisabled ? 'opacity-50' : ''} />
-                    ) : option.network ? (
-                      option.network === 'ethereum' ? (
-                        <NetworkEthereum
-                          size={24}
-                          variant="branded"
-                          className={isDisabled ? 'opacity-50' : ''}
-                        />
-                      ) : option.network === 'stellar' ? (
-                        <NetworkStellar
-                          size={24}
-                          variant="branded"
-                          className={isDisabled ? 'opacity-50' : ''}
-                        />
-                      ) : option.network === 'solana' ? (
-                        <NetworkSolana
-                          size={24}
-                          variant="branded"
-                          className={isDisabled ? 'opacity-50' : ''}
-                        />
-                      ) : option.network === 'polkadot' ? (
-                        <NetworkPolkadot
-                          size={24}
-                          variant="branded"
-                          className={isDisabled ? 'opacity-50' : ''}
-                        />
-                      ) : (
-                        <div
-                          className={`h-6 w-6 rounded-full bg-muted flex items-center justify-center ${isDisabled ? 'opacity-50' : ''}`}
-                        >
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {option.label.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )
+                    {def ? (
+                      <EcosystemIcon
+                        ecosystem={{ id: option.value, iconComponent: def.iconComponent }}
+                        size={24}
+                        className={isDisabled ? 'opacity-50' : ''}
+                      />
                     ) : (
                       <div
                         className={`h-6 w-6 rounded-full bg-muted flex items-center justify-center ${isDisabled ? 'opacity-50' : ''}`}
@@ -242,14 +191,10 @@ export function ChainSelector({
           </div>
 
           {/* Ecosystem Description */}
-          {selectedEcosystem && (
+          {selectedDef && (
             <div className="bg-muted rounded-md p-3">
-              <h4 className="mb-2 font-medium text-sm">
-                About {getEcosystemName(selectedEcosystem)}
-              </h4>
-              <p className="text-muted-foreground text-sm">
-                {getEcosystemDescription(selectedEcosystem)}
-              </p>
+              <h4 className="mb-2 font-medium text-sm">About {selectedDef.name}</h4>
+              <p className="text-muted-foreground text-sm">{selectedDef.description}</p>
             </div>
           )}
         </div>
@@ -269,12 +214,12 @@ export function ChainSelector({
               icon={<Clock className="h-6 w-6 text-muted-foreground" />}
               title={
                 selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
-                  ? `${getEcosystemName(selectedEcosystem)} Support Coming Soon`
+                  ? `${selectedDef?.name ?? selectedEcosystem} Support Coming Soon`
                   : 'Select Blockchain Ecosystem'
               }
               description={
                 selectedEcosystem && !isEcosystemEnabled(selectedEcosystem)
-                  ? `We're working hard to bring ${getEcosystemName(selectedEcosystem)} support to the platform. Stay tuned for updates!`
+                  ? `We're working hard to bring ${selectedDef?.name ?? selectedEcosystem} support to the platform. Stay tuned for updates!`
                   : 'Select a blockchain ecosystem above to view available networks and continue building your contract interface.'
               }
               size="default"
