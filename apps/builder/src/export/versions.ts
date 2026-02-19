@@ -13,8 +13,8 @@ export const packageVersions = {
   '@openzeppelin/ui-react': '1.1.0',
   '@openzeppelin/ui-renderer': '1.0.3',
   '@openzeppelin/ui-storage': '1.0.0',
-  '@openzeppelin/ui-types': '1.8.0',
-  '@openzeppelin/ui-components': '1.2.1',
+  '@openzeppelin/ui-types': '1.9.0',
+  '@openzeppelin/ui-components': '1.3.0',
   '@openzeppelin/ui-utils': '1.2.2',
   '@openzeppelin/ui-styles': '1.0.0',
 };
