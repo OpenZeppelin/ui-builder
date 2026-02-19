@@ -1,100 +1,65 @@
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm';
+// Static metadata imports — these are tiny (~500 B each, just display strings
+// + an SVG icon reference). Importing them statically means ecosystem pickers
+// render with proper names and icons on the very first frame, with zero
+// loading state. The heavy adapter runtime is still lazy-loaded below.
+import { ecosystemMetadata as evmMetadata } from '@openzeppelin/ui-builder-adapter-evm/metadata';
+import { ecosystemMetadata as midnightMetadata } from '@openzeppelin/ui-builder-adapter-midnight/metadata';
+import { ecosystemMetadata as polkadotMetadata } from '@openzeppelin/ui-builder-adapter-polkadot/metadata';
+import { ecosystemMetadata as solanaMetadata } from '@openzeppelin/ui-builder-adapter-solana/metadata';
+import { ecosystemMetadata as stellarMetadata } from '@openzeppelin/ui-builder-adapter-stellar/metadata';
 import type {
   AdapterConfig,
   ContractAdapter,
   Ecosystem,
-  MidnightNetworkConfig,
+  EcosystemExport,
+  EcosystemMetadata,
   NetworkConfig,
-  PolkadotNetworkConfig,
-  SolanaNetworkConfig,
-  StellarNetworkConfig,
 } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-// Define specific constructor types for each adapter
-type EvmAdapterConstructor = new (networkConfig: TypedEvmNetworkConfig) => ContractAdapter;
-type SolanaAdapterConstructor = new (networkConfig: SolanaNetworkConfig) => ContractAdapter;
-type StellarAdapterConstructor = new (networkConfig: StellarNetworkConfig) => ContractAdapter;
-type MidnightAdapterConstructor = new (networkConfig: MidnightNetworkConfig) => ContractAdapter;
-type PolkadotAdapterConstructor = new (networkConfig: PolkadotNetworkConfig) => ContractAdapter;
+// =============================================================================
+// Metadata Registry (synchronous — available from first render)
+// =============================================================================
 
-// Union of all possible adapter constructor types
-type AnySpecificAdapterConstructor =
-  | EvmAdapterConstructor
-  | SolanaAdapterConstructor
-  | StellarAdapterConstructor
-  | MidnightAdapterConstructor
-  | PolkadotAdapterConstructor;
-
-// Define the structure for each ecosystem's metadata
-interface EcosystemMetadata {
-  networksExportName: string; // e.g., 'evmNetworks'
-  // Store a function that returns a promise of the Class constructor.
-  // The constructor itself will be cast to 'any' before use in getAdapter due to varying specific NetworkConfig types.
-  getAdapterClass: () => Promise<AnySpecificAdapterConstructor>;
-  adapterConfigPackagePath?: string;
-  adapterConfigExportName?: string;
-}
-
-// Centralized configuration for each ecosystem
-const ecosystemRegistry: Record<Ecosystem, EcosystemMetadata> = {
-  evm: {
-    networksExportName: 'evmNetworks',
-    getAdapterClass: async () =>
-      (await import('@openzeppelin/ui-builder-adapter-evm')).EvmAdapter as EvmAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-evm',
-    adapterConfigExportName: 'evmAdapterConfig',
-  },
-  solana: {
-    networksExportName: 'solanaNetworks',
-    getAdapterClass: async () =>
-      (await import('@openzeppelin/ui-builder-adapter-solana'))
-        .SolanaAdapter as SolanaAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-solana',
-    adapterConfigExportName: 'solanaAdapterConfig',
-  },
-  stellar: {
-    networksExportName: 'stellarNetworks',
-    getAdapterClass: async () =>
-      (await import('@openzeppelin/ui-builder-adapter-stellar'))
-        .StellarAdapter as StellarAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-stellar',
-    adapterConfigExportName: 'stellarAdapterConfig',
-  },
-  midnight: {
-    networksExportName: 'midnightNetworks',
-    getAdapterClass: async () =>
-      (await import('@openzeppelin/ui-builder-adapter-midnight'))
-        .MidnightAdapter as MidnightAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-midnight',
-    adapterConfigExportName: 'midnightAdapterConfig',
-  },
-  polkadot: {
-    networksExportName: 'polkadotNetworks',
-    getAdapterClass: async () =>
-      (await import('@openzeppelin/ui-builder-adapter-polkadot'))
-        .PolkadotAdapter as PolkadotAdapterConstructor,
-    adapterConfigPackagePath: '@openzeppelin/ui-builder-adapter-polkadot',
-    adapterConfigExportName: 'polkadotAdapterConfig',
-  },
+const ecosystemMetadataRegistry: Record<Ecosystem, EcosystemMetadata> = {
+  evm: evmMetadata,
+  stellar: stellarMetadata,
+  polkadot: polkadotMetadata,
+  midnight: midnightMetadata,
+  solana: solanaMetadata,
 };
 
-// --- Network Discovery Logic (adapted from networks/registry.ts) ---
-const networksByEcosystemCache: Partial<Record<Ecosystem, NetworkConfig[]>> = {};
+// =============================================================================
+// Full Adapter Module Loading (lazy — static switch required by Vite)
+// =============================================================================
 
-async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<string, unknown>> {
-  // This robust switch is good for Vite compatibility
+const ecosystemCache: Partial<Record<Ecosystem, EcosystemExport>> = {};
+
+/**
+ * Loads the full adapter module (networks, createAdapter, adapterConfig).
+ * This is the "heavy" import — only called when the adapter is actually needed.
+ */
+async function loadAdapterModule(ecosystem: Ecosystem): Promise<EcosystemExport> {
+  const cached = ecosystemCache[ecosystem];
+  if (cached) return cached;
+
+  let mod: { ecosystemDefinition: EcosystemExport };
   switch (ecosystem) {
     case 'evm':
-      return import('@openzeppelin/ui-builder-adapter-evm');
+      mod = await import('@openzeppelin/ui-builder-adapter-evm');
+      break;
     case 'solana':
-      return import('@openzeppelin/ui-builder-adapter-solana');
+      mod = await import('@openzeppelin/ui-builder-adapter-solana');
+      break;
     case 'stellar':
-      return import('@openzeppelin/ui-builder-adapter-stellar');
+      mod = await import('@openzeppelin/ui-builder-adapter-stellar');
+      break;
     case 'midnight':
-      return import('@openzeppelin/ui-builder-adapter-midnight');
+      mod = await import('@openzeppelin/ui-builder-adapter-midnight');
+      break;
     case 'polkadot':
-      return import('@openzeppelin/ui-builder-adapter-polkadot');
+      mod = await import('@openzeppelin/ui-builder-adapter-polkadot');
+      break;
     default: {
       const _exhaustiveCheck: never = ecosystem;
       throw new Error(
@@ -102,32 +67,34 @@ async function loadAdapterPackageModule(ecosystem: Ecosystem): Promise<Record<st
       );
     }
   }
+
+  const def = mod.ecosystemDefinition;
+  ecosystemCache[ecosystem] = def;
+  return def;
 }
 
+// =============================================================================
+// Network Discovery
+// =============================================================================
+
+const networksByEcosystemCache: Partial<Record<Ecosystem, NetworkConfig[]>> = {};
+
 export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
-  // Check cache first
   if (networksByEcosystemCache[ecosystem]) {
     return networksByEcosystemCache[ecosystem]!;
   }
 
-  const meta = ecosystemRegistry[ecosystem];
-  if (!meta) {
-    logger.warn('EcosystemManager', `No metadata registered for ecosystem: ${ecosystem}`);
-    return [];
-  }
-
   try {
-    const module = await loadAdapterPackageModule(ecosystem);
-    const networks = (module[meta.networksExportName] as NetworkConfig[]) || [];
+    const def = await loadAdapterModule(ecosystem);
+    const networks = def.networks;
     if (!Array.isArray(networks)) {
       logger.error(
         'EcosystemManager',
-        `Expected an array for ${meta.networksExportName} in ${ecosystem}, received: ${typeof networks}`
+        `Expected an array of networks for ${ecosystem}, received: ${typeof networks}`
       );
       networksByEcosystemCache[ecosystem] = [];
       return [];
     }
-    // Cache the networks
     networksByEcosystemCache[ecosystem] = networks;
     return networks;
   } catch (error) {
@@ -137,197 +104,99 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
   }
 }
 
-/**
- * Retrieves a specific network configuration by its unique ID.
- *
- * This function employs a two-step caching and lookup strategy to efficiently find the network
- * configuration while ensuring adapters are loaded dynamically and only when necessary:
- *
- * 1.  **Ecosystem-Specific Cache Check (`networksByEcosystemCache`):**
- *     It first iterates through `networksByEcosystemCache`. This cache stores arrays of
- *     `NetworkConfig` objects, keyed by their `Ecosystem`. This cache is populated whenever
- *     `getNetworksByEcosystem` is called for a particular ecosystem (which involves dynamically
- *     importing the corresponding adapter package if it hasn't been loaded yet).
- *     If the network ID is found in any of these already-loaded ecosystem caches, the function
- *     returns the network config immediately, avoiding redundant lookups or module loading.
- *
- * 2.  **Sequential Ecosystem Iteration and On-Demand Loading:**
- *     If the network ID is not found in any pre-populated ecosystem-specific cache, the function
- *     iterates through all registered ecosystems defined in `ecosystemRegistry`.
- *     For each ecosystem in this list:
- *     a.  It first checks `networksByEcosystemCache` again for that specific ecosystem. This handles
- *         cases where the cache might have been populated by a concurrent operation or a previous
- *         step within the same broader application flow but wasn't iterated over in step 1 (e.g., if
- *         step 1 iterated `Object.keys(networksByEcosystemCache)` before this specific ecosystem was added).
- *     b.  If the networks for the current ecosystem are not in `networksByEcosystemCache`, it calls
- *         `await getNetworksByEcosystem(ecosystem)`. This function is responsible for:
- *         - Dynamically importing the adapter package for that ecosystem (e.g., `/adapter-evm`).
- *           This is the core of the dynamic loading behavior, ensuring adapter code is fetched only when
- *           its ecosystem is being actively queried.
- *         - Extracting the network configurations from the loaded module.
- *         - Populating `networksByEcosystemCache[ecosystem]` with these networks for future lookups.
- *     c.  Once the networks for the current ecosystem are available (either from cache or newly loaded),
- *         it searches for the target network ID within that list.
- *     d.  If found, the network configuration is returned, and the process stops.
- *
- * This approach ensures that:
- * - We leverage existing cached data as much as possible.
- * - We only load adapter modules (and their associated network lists) for ecosystems that are
- *   actually relevant to the `id` being searched, or for ecosystems whose networks have been
- *   explicitly requested elsewhere via `getNetworksByEcosystem`.
- */
 export async function getNetworkById(id: string): Promise<NetworkConfig | undefined> {
   logger.info('EcosystemManager(getNetworkById)', `Attempting to get network by ID: '${id}'`);
 
-  // 1. Check all existing populated ecosystem-specific caches
-  // These caches are populated by calls to getNetworksByEcosystem
   for (const ecosystemKey of Object.keys(networksByEcosystemCache)) {
     const ecosystem = ecosystemKey as Ecosystem;
-    const cachedNetworksForEcosystem = networksByEcosystemCache[ecosystem];
-    if (cachedNetworksForEcosystem) {
-      const network = cachedNetworksForEcosystem.find((n) => n.id === id);
+    const cached = networksByEcosystemCache[ecosystem];
+    if (cached) {
+      const network = cached.find((n) => n.id === id);
       if (network) {
         logger.info(
           'EcosystemManager(getNetworkById)',
-          `Network ID '${id}' found in already populated cache for ecosystem: ${ecosystem}.`
+          `Network ID '${id}' found in cache for ecosystem: ${ecosystem}.`
         );
         return network;
       }
     }
   }
 
-  // 2. If not found in existing caches, iterate through all registered ecosystems.
-  // For each ecosystem, load its networks if not already cached via networksByEcosystemCache, then search.
-  logger.info(
-    'EcosystemManager(getNetworkById)',
-    `Network ID '${id}' not found in existing caches. Sequentially checking/loading ecosystems.`
-  );
-  const allEcosystems = Object.keys(ecosystemRegistry) as Ecosystem[];
-
+  const allEcosystems: Ecosystem[] = ['evm', 'solana', 'stellar', 'midnight', 'polkadot'];
   for (const ecosystem of allEcosystems) {
-    // Attempt to retrieve from cache first for this specific ecosystem
-    let networksForEcosystem = networksByEcosystemCache[ecosystem];
-
-    if (!networksForEcosystem) {
-      // If not in cache, load them. getNetworksByEcosystem will populate the cache.
+    let networks = networksByEcosystemCache[ecosystem];
+    if (!networks) {
       logger.info(
         'EcosystemManager(getNetworkById)',
-        `Cache miss for ${ecosystem}. Loading networks for ecosystem: ${ecosystem} to find ID '${id}'.`
+        `Loading networks for ecosystem: ${ecosystem} to find ID '${id}'.`
       );
-      networksForEcosystem = await getNetworksByEcosystem(ecosystem);
-    } else {
-      // This case means the ecosystem's networks were already in networksByEcosystemCache,
-      // but the ID wasn't found in the first loop. This can happen if the first loop iterated
-      // over Object.keys(networksByEcosystemCache) which might not yet include this `ecosystem`
-      // if it's being processed for the first time in this broader loop.
-      // No need to re-log if already loaded, the first loop would have caught it if the ID was present.
-      // However, it's crucial to use these already loaded networks for the search.
-      logger.info(
-        'EcosystemManager(getNetworkById)',
-        `Using already loaded networks for ecosystem: ${ecosystem} (from networksByEcosystemCache) to find ID '${id}'.`
-      );
+      networks = await getNetworksByEcosystem(ecosystem);
     }
-
-    const foundNetwork = networksForEcosystem?.find((n) => n.id === id);
-    if (foundNetwork) {
+    const found = networks?.find((n) => n.id === id);
+    if (found) {
       logger.info(
         'EcosystemManager(getNetworkById)',
         `Network ID '${id}' found in ecosystem: ${ecosystem}.`
       );
-      return foundNetwork;
+      return found;
     }
   }
 
   logger.warn(
     'EcosystemManager(getNetworkById)',
-    `Network with ID '${id}' not found after checking/loading all ecosystems.`
+    `Network with ID '${id}' not found after checking all ecosystems.`
   );
   return undefined;
 }
 
-// --- Adapter Config Loaders Map ---
-export function getAdapterConfigLoader(
-  ecosystem: Ecosystem
-): (() => Promise<Record<string, AdapterConfig | unknown>>) | undefined {
-  const meta = ecosystemRegistry[ecosystem];
-  if (!meta || !meta.adapterConfigPackagePath) return undefined;
+// =============================================================================
+// Adapter Config
+// =============================================================================
 
-  // The adapterConfigPackagePath in meta is for reference/documentation;
-  // the switch uses static paths for Vite compatibility.
-  switch (ecosystem) {
-    case 'evm':
-      return () => import('@openzeppelin/ui-builder-adapter-evm');
-    case 'solana':
-      return () => import('@openzeppelin/ui-builder-adapter-solana');
-    case 'stellar':
-      return () => import('@openzeppelin/ui-builder-adapter-stellar');
-    case 'midnight':
-      return () => import('@openzeppelin/ui-builder-adapter-midnight');
-    case 'polkadot':
-      return () => import('@openzeppelin/ui-builder-adapter-polkadot');
-    default: {
-      const _exhaustiveCheck: never = ecosystem;
-      throw new Error(
-        `No adapter constructor loader logic for ${ecosystem}. Please add it to the ecosystemRegistry. Exhaustive check: ${String(_exhaustiveCheck)}`
-      );
-    }
-  }
+export async function getAdapterConfig(ecosystem: Ecosystem): Promise<AdapterConfig | undefined> {
+  const def = await loadAdapterModule(ecosystem);
+  return def.adapterConfig;
 }
 
-export function getAdapterConfigExportName(ecosystem: Ecosystem): string | undefined {
-  return ecosystemRegistry[ecosystem]?.adapterConfigExportName;
-}
+// =============================================================================
+// Adapter Instantiation
+// =============================================================================
 
-// --- Adapter Instantiation Logic ---
-
-export async function getAdapter(networkConfigInput: NetworkConfig): Promise<ContractAdapter> {
+export async function getAdapter(networkConfig: NetworkConfig): Promise<ContractAdapter> {
   const logSystem = 'EcosystemManager(getAdapter)';
-  const networkId = networkConfigInput.id;
-
   logger.info(
     logSystem,
-    `Creating new adapter for network: ${networkConfigInput.name} (ID: ${networkId}) using its default RPC.`
+    `Creating adapter for network: ${networkConfig.name} (ID: ${networkConfig.id}).`
   );
 
-  const meta = ecosystemRegistry[networkConfigInput.ecosystem];
-  if (!meta) {
-    throw new Error(
-      `No adapter metadata registered for ecosystem: ${networkConfigInput.ecosystem}`
-    );
-  }
-
-  const AdapterClass = await meta.getAdapterClass();
-
-  // Instantiate with the original, static networkConfigInput
-  // The adapter's constructor or client initialization logic will handle RPC overrides.
-  switch (networkConfigInput.ecosystem) {
-    case 'evm':
-      return new (AdapterClass as EvmAdapterConstructor)(
-        networkConfigInput as TypedEvmNetworkConfig
-      );
-    case 'solana':
-      return new (AdapterClass as SolanaAdapterConstructor)(
-        networkConfigInput as SolanaNetworkConfig
-      );
-    case 'stellar':
-      return new (AdapterClass as StellarAdapterConstructor)(
-        networkConfigInput as StellarNetworkConfig
-      );
-    case 'midnight':
-      return new (AdapterClass as MidnightAdapterConstructor)(
-        networkConfigInput as MidnightNetworkConfig
-      );
-    case 'polkadot':
-      return new (AdapterClass as PolkadotAdapterConstructor)(
-        networkConfigInput as PolkadotNetworkConfig
-      );
-    default:
-      const unhandledEcosystem = (networkConfigInput as NetworkConfig).ecosystem;
-      throw new Error(`No adapter constructor logic for ${String(unhandledEcosystem)}`);
-  }
+  const def = await loadAdapterModule(networkConfig.ecosystem);
+  return def.createAdapter(networkConfig);
 }
 
-// --- Adapter Package Name Map ---
+// =============================================================================
+// Ecosystem Metadata (synchronous — no loading required)
+// =============================================================================
+
+/**
+ * Returns lightweight display metadata for an ecosystem. Always synchronous
+ * because metadata is statically imported at module load time.
+ */
+export function getEcosystemMetadata(ecosystem: Ecosystem): EcosystemMetadata {
+  return ecosystemMetadataRegistry[ecosystem];
+}
+
+/**
+ * Returns the full ecosystem definition including networks and adapter factory.
+ * Triggers full adapter module loading.
+ */
+export async function getEcosystemDefinition(ecosystem: Ecosystem): Promise<EcosystemExport> {
+  return loadAdapterModule(ecosystem);
+}
+
+// =============================================================================
+// Adapter Package Name Map (used by scaffolding/export features)
+// =============================================================================
+
 export const adapterPackageMap: Record<Ecosystem, string> = {
   evm: '@openzeppelin/ui-builder-adapter-evm',
   solana: '@openzeppelin/ui-builder-adapter-solana',

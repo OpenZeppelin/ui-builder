@@ -38,10 +38,17 @@ vi.mock('../../../../core/networks/service', () => ({
   },
 }));
 
-vi.mock('../../../../core/ecosystems/registry', () => ({
-  getEcosystemName: (ecosystem: Ecosystem) => ecosystem.toUpperCase(),
-  getEcosystemDescription: () => '',
-  getEcosystemNetworkIconName: () => null,
+vi.mock('../../../../core/ecosystemManager', () => ({
+  getEcosystemMetadata: (eco: Ecosystem) => {
+    const map: Record<string, { id: string; name: string; description: string }> = {
+      evm: { id: 'evm', name: 'EVM', description: '' },
+      stellar: { id: 'stellar', name: 'STELLAR', description: '' },
+      solana: { id: 'solana', name: 'SOLANA', description: '' },
+      midnight: { id: 'midnight', name: 'MIDNIGHT', description: '' },
+      polkadot: { id: 'polkadot', name: 'POLKADOT', description: '' },
+    };
+    return map[eco];
+  },
 }));
 
 vi.mock('../../../../utils/ecosystem-feature-flags', () => ({
@@ -60,6 +67,7 @@ vi.mock('../components/NetworkSelectionPanel', () => ({
 
 vi.mock('@openzeppelin/ui-components', () => ({
   EmptyState: ({ title }: { title: string }) => <div>{title}</div>,
+  EcosystemIcon: () => <span data-testid="ecosystem-icon" />,
   MidnightIcon: () => <span>Midnight</span>,
 }));
 

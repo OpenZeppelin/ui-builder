@@ -4,15 +4,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// Export chain utilities from centralized registry
-export {
-  getEcosystemName,
-  getEcosystemDescription,
-  getEcosystemExplorerGuidance,
-  getEcosystemAddressExample,
-  getAvailableEcosystems,
-  getEcosystemStyling,
-} from '../ecosystems/registry';
+export { getAvailableEcosystems } from '../ecosystems/registry';
 
 /**
  * Combines class names with Tailwind's merge utility

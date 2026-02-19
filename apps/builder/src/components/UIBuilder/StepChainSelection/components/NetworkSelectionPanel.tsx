@@ -7,7 +7,7 @@ import { NetworkSettingsDialog } from '@openzeppelin/ui-renderer';
 import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
-import { getEcosystemName } from '../../../../core/ecosystems/registry';
+import { getEcosystemMetadata } from '../../../../core/ecosystemManager';
 import { networkService } from '../../../../core/networks/service';
 import { NetworkRow } from './NetworkRow';
 
@@ -23,6 +23,7 @@ export function NetworkSelectionPanel({
   selectedNetworkId,
 }: NetworkSelectionPanelProps) {
   const [networks, setNetworks] = useState<NetworkConfig[]>([]);
+  const ecosystemName = getEcosystemMetadata(ecosystem).name;
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
@@ -106,7 +107,7 @@ export function NetworkSelectionPanel({
         <div className="py-8 text-center text-muted-foreground">
           {searchQuery
             ? `No networks found matching "${searchQuery}"`
-            : `No networks found for ${getEcosystemName(ecosystem)}.`}
+            : `No networks found for ${ecosystemName}.`}
         </div>
       ) : (
         <div className="space-y-4">
