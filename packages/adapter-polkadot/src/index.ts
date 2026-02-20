@@ -15,6 +15,7 @@ import { ecosystemMetadata } from './metadata';
 import { polkadotNetworks } from './networks';
 
 export { ecosystemMetadata } from './metadata';
+export { PolkadotAdapter } from './adapter';
 
 export const ecosystemDefinition: EcosystemExport = {
   ...ecosystemMetadata,

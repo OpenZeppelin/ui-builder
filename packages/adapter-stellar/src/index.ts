@@ -6,6 +6,7 @@ import { ecosystemMetadata } from './metadata';
 import { stellarNetworks } from './networks';
 
 export { ecosystemMetadata } from './metadata';
+export { StellarAdapter } from './adapter';
 
 export const ecosystemDefinition: EcosystemExport = {
   ...ecosystemMetadata,
