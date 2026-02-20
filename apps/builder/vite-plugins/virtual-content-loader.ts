@@ -1,5 +1,5 @@
-import { createRequire } from 'module';
 import fs from 'fs';
+import { createRequire } from 'node:module';
 import path from 'path';
 import type { Plugin } from 'vite';
 
@@ -102,7 +102,7 @@ export function virtualContentLoaderPlugin(): Plugin {
 
             if (fileName.endsWith('.css')) {
               const escapedContent = content
-                .replace(/\\/g, '\\')
+                .replace(/\\/g, '\\\\')
                 .replace(/`/g, '\\`')
                 .replace(/\$/g, '\\$');
               return `export default \`${escapedContent}\`;`;
