@@ -1,3 +1,4 @@
+import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
 import type { Plugin } from 'vite';
@@ -20,6 +21,8 @@ import { logger } from '@openzeppelin/ui-utils';
  * How it works:
  * 1. Define a mapping (`virtualFiles`) between a virtual module name (e.g., 'virtual:tailwind-config-content')
  *    and the real file path relative to the monorepo root.
+ *    Entries prefixed with `npm:` are resolved via Node's module resolution from the
+ *    builder package directory, so they work with any pnpm node-linker strategy.
  * 2. The `resolveId` hook intercepts imports matching the 'virtual:' prefix and marks them
  *    as resolved virtual modules using the null byte prefix ('\0').
  * 3. The `load` hook intercepts requests for these resolved virtual modules.
@@ -34,23 +37,24 @@ import { logger } from '@openzeppelin/ui-utils';
  * - Import the content in your application code: `import myConfig from 'virtual:my-config-content';`
  */
 
-// Define the virtual module IDs and their corresponding real file paths
-// Paths are relative to the monorepo root
+// Define the virtual module IDs and their corresponding real file paths.
+// Paths are relative to the monorepo root unless prefixed with `npm:`,
+// which triggers Node module resolution from the builder package directory.
 const VIRTUAL_MODULE_PREFIX = 'virtual:';
 const RESOLVED_VIRTUAL_MODULE_PREFIX = '\0virtual:'; // Null byte prefix for resolved IDs
+const NPM_RESOLVE_PREFIX = 'npm:';
 
-// Renamed map to reflect it handles more than just config
 const virtualFiles: Record<string, string> = {
-  // Config files
+  // Config files (relative to monorepo root)
   'tailwind-config-content': 'tailwind.config.cjs',
   'postcss-config-content': 'postcss.config.cjs',
   'components-json-content': 'components.json',
-  // CSS files - now from npm package after migration
-  'global-css-content': 'node_modules/@openzeppelin/ui-styles/global.css',
-  // Template-specific CSS (add template name if multiple templates have different styles.css)
+  // npm packages (resolved via Node module resolution — works with any pnpm hoisting strategy)
+  'global-css-content': 'npm:@openzeppelin/ui-styles/global.css',
+  // Template-specific CSS (relative to monorepo root)
   'template-vite-styles-css-content':
     'apps/builder/src/export/templates/typescript-react-vite/src/styles.css',
-  // Core Type Files (added)
+  // Core Type Files (relative to monorepo root)
   'contract-schema-content': 'packages/types/src/contracts/schema.ts',
 };
 
@@ -61,44 +65,48 @@ export function virtualContentLoaderPlugin(): Plugin {
   // Resolve the monorepo root directory relative to this plugin file
   // Assumes this file is in apps/builder/vite-plugins/
   const monorepoRoot = path.resolve(__dirname, '../../..');
+  const builderDir = path.join(monorepoRoot, 'apps/builder');
+  const builderRequire = createRequire(path.join(builderDir, 'package.json'));
 
   return {
-    name: 'virtual-content-loader', // Renamed plugin for clarity
+    name: 'virtual-content-loader',
 
     resolveId(id) {
       if (id.startsWith(VIRTUAL_MODULE_PREFIX)) {
         const moduleName = id.substring(VIRTUAL_MODULE_PREFIX.length);
-        // Check the renamed map
         if (virtualFiles[moduleName]) {
-          // Prepend null byte to mark as resolved virtual module
           return RESOLVED_VIRTUAL_MODULE_PREFIX + moduleName;
         }
       }
-      return null; // Let other plugins handle it
+      return null;
     },
 
     load(id) {
       if (id.startsWith(RESOLVED_VIRTUAL_MODULE_PREFIX)) {
         const moduleName = id.substring(RESOLVED_VIRTUAL_MODULE_PREFIX.length);
-        // Use the renamed map
         const fileName = virtualFiles[moduleName];
 
         if (fileName) {
           try {
-            const filePath = path.resolve(monorepoRoot, fileName);
+            let filePath: string;
+            if (fileName.startsWith(NPM_RESOLVE_PREFIX)) {
+              // Use Node module resolution from the builder package so this works
+              // with any pnpm node-linker strategy (hoisted or isolated).
+              const specifier = fileName.substring(NPM_RESOLVE_PREFIX.length);
+              filePath = builderRequire.resolve(specifier);
+            } else {
+              filePath = path.resolve(monorepoRoot, fileName);
+            }
+
             const content = fs.readFileSync(filePath, 'utf-8');
 
-            // Choose export format based on file type
             if (fileName.endsWith('.css')) {
-              // Export CSS content as a raw JS string literal using backticks
               const escapedContent = content
-                .replace(/\\/g, '\\') // Escape backslashes
-                .replace(/`/g, '\\`') // Escape backticks
-                .replace(/\$/g, '\\$'); // Escape dollars (for template literals)
+                .replace(/\\/g, '\\')
+                .replace(/`/g, '\\`')
+                .replace(/\$/g, '\\$');
               return `export default \`${escapedContent}\`;`;
             } else {
-              // For non-CSS (like .cjs, .json), try JSON.stringify
-              // This worked for postcss.config.cjs previously and might be safer for JS/JSON code
               return `export default ${JSON.stringify(content)};`;
             }
           } catch (error: unknown) {
@@ -111,7 +119,7 @@ export function virtualContentLoaderPlugin(): Plugin {
           }
         }
       }
-      return null; // Let other plugins handle it
+      return null;
     },
   };
 }
