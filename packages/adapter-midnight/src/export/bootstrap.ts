@@ -11,6 +11,9 @@ const SYSTEM_LOG_TAG = 'MidnightAdapter:ExportBootstrap';
  * Instead of embedding massive artifact files, this bundles the original ZIP file
  * as a base64 string and lets the adapter parse it using the same logic as the builder.
  *
+ * Note: privateStateId is auto-generated at transaction time from contract + wallet address,
+ * so it's not included in the exported artifacts configuration.
+ *
  * @param context - Export context with form config, schema, network, and artifacts
  * @returns Bootstrap configuration with ZIP data and initialization code
  */
@@ -24,10 +27,9 @@ export async function getMidnightExportBootstrapFiles(
 
   const contractAddress =
     context.formConfig.contractAddress || context.contractSchema.address || '';
-  const privateStateId = (artifacts['privateStateId'] as string) || '';
 
-  if (!contractAddress || !privateStateId) {
-    logger.error(SYSTEM_LOG_TAG, 'Missing contract address or private state ID.');
+  if (!contractAddress) {
+    logger.error(SYSTEM_LOG_TAG, 'Missing contract address.');
     return null;
   }
 
@@ -48,7 +50,6 @@ export async function getMidnightExportBootstrapFiles(
   const artifactsFileContent = `
 export const midnightArtifactsSource = {
   contractAddress: '${contractAddress}',
-  privateStateId: '${privateStateId}',
   contractArtifactsUrl: '/midnight/contract.zip',
 };
 `;

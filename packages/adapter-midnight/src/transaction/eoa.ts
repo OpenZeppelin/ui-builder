@@ -2,6 +2,7 @@ import type { TransactionStatusUpdate } from '@openzeppelin/ui-types';
 import { hexToBytes, logger } from '@openzeppelin/ui-utils';
 
 import type { WriteContractParameters } from '../types';
+import { generatePrivateStateId } from '../utils/private-state-id';
 import { resolveSecretPropertyName } from '../utils/secret-property-helpers';
 import type { LaceWalletImplementation } from '../wallet/implementation/lace-implementation';
 import { callCircuit } from './call-circuit';
@@ -170,10 +171,13 @@ export class EoaExecutionStrategy implements ExecutionStrategy {
       if (!contractAddress) {
         throw new Error('Invalid contract address: empty or non-string value');
       }
-      const privateStateId =
+
+      // Auto-generate privateStateId if not provided (deterministic from contract + wallet address)
+      let privateStateId =
         typeof artifacts.privateStateId === 'string' ? artifacts.privateStateId.trim() : '';
       if (!privateStateId) {
-        throw new Error('Invalid Private State ID: empty or non-string value');
+        privateStateId = generatePrivateStateId(contractAddress, walletState.address);
+        logger.info(SYSTEM_LOG_TAG, `Auto-generated privateStateId: ${privateStateId}`);
       }
 
       const witnesses = evaluateWitnessCode(artifacts.witnessCode || '');

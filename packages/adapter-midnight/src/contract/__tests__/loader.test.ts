@@ -15,7 +15,6 @@ describe('Midnight contract loader', () => {
   it('loadMidnightContract returns schema and metadata with definitionHash', async () => {
     const artifacts: MidnightContractArtifacts = {
       contractAddress: 'ct1qexampleaddress',
-      privateStateId: 'state-1',
       contractDefinition: mockInterface,
       contractModule: 'module.exports = {}',
       witnessCode: 'export const witnesses = {}',
@@ -51,7 +50,6 @@ describe('Midnight contract loader', () => {
   it('loadMidnightContractWithMetadata omits artifacts when none provided', async () => {
     const artifacts: MidnightContractArtifacts = {
       contractAddress: 'ct1qexampleaddress3',
-      privateStateId: '',
       contractDefinition: mockInterface,
       contractModule: '',
       witnessCode: '',

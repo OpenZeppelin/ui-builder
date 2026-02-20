@@ -62,7 +62,6 @@ export async function prepareArtifactsForFunction(
       },
       bootstrapSource: {
         contractAddress: currentArtifacts.contractAddress,
-        privateStateId: currentArtifacts.privateStateId,
         identitySecretKeyPropertyName: currentArtifacts.identitySecretKeyPropertyName,
         contractArtifactsUrl: '/midnight/contract.zip',
       },
