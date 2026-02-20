@@ -1,5 +1,33 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.6.0
+
+### Minor Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add self-describing ecosystem metadata to all adapters
+  - Each adapter now exports `ecosystemMetadata` with display info
+    (name, icon, description, styling classes, default feature config)
+  - New `./metadata` subpath export for lightweight static imports
+  - Adapters implement the `EcosystemExport` interface from ui-types
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add chain-agnostic capability flags and expiration metadata
+  - Report `hasRenounceOwnership` from ABI detection, set `hasRenounceRole`, `hasCancelAdminTransfer`, `hasAdminDelayManagement` to false
+  - Implement `getExpirationMetadata()` returning `mode: 'required'` with label "Expiration Ledger" and unit "ledger number"
+
+### Patch Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Bump @openzeppelin/ui-types to ^1.8.0, ui-utils to ^1.2.1, and ui-components to ^1.2.1 across all adapters
+
+- [#343](https://github.com/OpenZeppelin/ui-builder/pull/343) [`000c6ed`](https://github.com/OpenZeppelin/ui-builder/commit/000c6ed5a1ab5dd042040e4594c8c268ba81e231) Thanks [@pasevin](https://github.com/pasevin)! - Re-export adapter classes (EvmAdapter, StellarAdapter, PolkadotAdapter) from package entry points. These exports were accidentally removed during the ecosystemDefinition refactor in #338, breaking exported app builds that import adapter classes directly.
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add defense-in-depth capability checks to Stellar access control service
+  - `getOwnership()` now validates `hasOwnable` capability before calling `get_owner()` when contract is registered
+  - `getAdminInfo()` now validates `hasTwoStepAdmin` capability before calling `get_admin()` when contract is registered
+  - `getAdminAccount()` now validates `hasTwoStepAdmin` capability before calling `get_admin()` when contract is registered
+  - Checks are soft — skipped when contract is not registered to preserve backward compatibility
+  - Throws descriptive `OperationFailed` errors instead of confusing on-chain failures
+  - Mirrors the defense-in-depth pattern added to the EVM adapter
+
 ## 1.5.0
 
 ### Minor Changes
