@@ -1,5 +1,19 @@
 # Midnight Adapter Changelog
 
+## 1.6.0
+
+### Minor Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add self-describing ecosystem metadata to all adapters
+  - Each adapter now exports `ecosystemMetadata` with display info
+    (name, icon, description, styling classes, default feature config)
+  - New `./metadata` subpath export for lightweight static imports
+  - Adapters implement the `EcosystemExport` interface from ui-types
+
+### Patch Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Bump @openzeppelin/ui-types to ^1.8.0, ui-utils to ^1.2.1, and ui-components to ^1.2.1 across all adapters
+
 ## 1.4.0
 
 ### Minor Changes
