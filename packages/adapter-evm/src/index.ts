@@ -7,6 +7,7 @@ import { ecosystemMetadata } from './metadata';
 import { evmNetworks } from './networks';
 
 export { ecosystemMetadata } from './metadata';
+export { EvmAdapter } from './adapter';
 
 export const ecosystemDefinition: EcosystemExport = {
   ...ecosystemMetadata,
