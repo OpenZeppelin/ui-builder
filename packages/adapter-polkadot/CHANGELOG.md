@@ -1,5 +1,41 @@
 # @openzeppelin/ui-builder-adapter-polkadot
 
+## 1.6.0
+
+### Minor Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add access control service integration to Polkadot adapter
+  - Implement `getAccessControlService()` with lazy initialization on PolkadotAdapter
+  - Add access control indexer network service form for Polkadot EVM networks
+  - Re-export access control types from the evm module
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Add self-describing ecosystem metadata to all adapters
+  - Each adapter now exports `ecosystemMetadata` with display info
+    (name, icon, description, styling classes, default feature config)
+  - New `./metadata` subpath export for lightweight static imports
+  - Adapters implement the `EcosystemExport` interface from ui-types
+
+### Patch Changes
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Bump @openzeppelin/ui-types to ^1.8.0, ui-utils to ^1.2.1, and ui-components to ^1.2.1 across all adapters
+
+- [#344](https://github.com/OpenZeppelin/ui-builder/pull/344) [`2b74cde`](https://github.com/OpenZeppelin/ui-builder/commit/2b74cde53d603fc9c3e857140b56bc35e4cea819) Thanks [@pasevin](https://github.com/pasevin)! - fix(adapter): resolve type declarations for internal evm-core package
+
+  Add `dts.resolve` for `adapter-evm-core` in tsup configs so type declarations
+  are bundled alongside runtime JS. This fixes exported apps failing to compile
+  because `.d.ts` files referenced the unpublished `adapter-evm-core` package.
+
+  Also cleans up the type hierarchy: `TypedPolkadotNetworkConfig` now extends
+  `PolkadotNetworkConfig` from `@openzeppelin/ui-types` directly (with narrowed
+  `viemChain` typing), eliminating its type-level dependency on `adapter-evm-core`.
+  `TypedEvmNetworkConfig` similarly extends `EvmNetworkConfig` directly.
+
+- [#343](https://github.com/OpenZeppelin/ui-builder/pull/343) [`000c6ed`](https://github.com/OpenZeppelin/ui-builder/commit/000c6ed5a1ab5dd042040e4594c8c268ba81e231) Thanks [@pasevin](https://github.com/pasevin)! - Re-export adapter classes (EvmAdapter, StellarAdapter, PolkadotAdapter) from package entry points. These exports were accidentally removed during the ecosystemDefinition refactor in #338, breaking exported app builds that import adapter classes directly.
+
+- [#338](https://github.com/OpenZeppelin/ui-builder/pull/338) [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b) Thanks [@pasevin](https://github.com/pasevin)! - Gate access-control-indexer service form behind feature flag
+  - Tag access-control-indexer network service forms with `requiredFeature: 'access_control_indexer'`
+  - Apply `filterEnabledServiceForms` in health check hook to skip disabled services
+
 ## 1.5.0
 
 ### Patch Changes

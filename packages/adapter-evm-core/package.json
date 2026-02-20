@@ -1,6 +1,6 @@
 {
   "name": "@openzeppelin/ui-builder-adapter-evm-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Internal EVM core package for UI Builder adapters",
   "keywords": [

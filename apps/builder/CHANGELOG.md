@@ -1,5 +1,16 @@
 # @openzeppelin/transaction-form-builder-core
 
+## 0.12.15
+
+### Patch Changes
+
+- Updated dependencies [[`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`2b74cde`](https://github.com/OpenZeppelin/ui-builder/commit/2b74cde53d603fc9c3e857140b56bc35e4cea819), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`000c6ed`](https://github.com/OpenZeppelin/ui-builder/commit/000c6ed5a1ab5dd042040e4594c8c268ba81e231), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b), [`da33121`](https://github.com/OpenZeppelin/ui-builder/commit/da33121ba20f17d414e121b3cb28ad1b2988b28b)]:
+  - @openzeppelin/ui-builder-adapter-evm@1.6.0
+  - @openzeppelin/ui-builder-adapter-stellar@1.6.0
+  - @openzeppelin/ui-builder-adapter-polkadot@1.6.0
+  - @openzeppelin/ui-builder-adapter-solana@1.6.0
+  - @openzeppelin/ui-builder-adapter-midnight@1.6.0
+
 ## 0.12.14
 
 ### Patch Changes
