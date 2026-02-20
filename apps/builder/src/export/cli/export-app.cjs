@@ -81,10 +81,14 @@ ${colors.bold}Options:${colors.reset}
   --template, -t [name]      Template to use (default: typescript-react-vite)
   --complex, -x              Use complex app with multiple fields
   --verbose, -v              Enable verbose output
-  --env, -e [env]            Target environment: 'local' or 'production' (default: local)
+  --env, -e [env]            Target environment: 'local', 'packed', or 'production' (default: local)
+                             local      - file: links to workspace packages (fast, for dev)
+                             packed     - pnpm pack tarballs (simulates real npm install, catches .d.ts issues)
+                             production - uses published npm versions
 ${colors.bold}Examples:${colors.reset}
   export-app export
   export-app export -c solana -f stake -o stake-app
+  export-app export --env packed -c polkadot -o polkadot-test
   export-app export --env production -o prod-app
   export-app build ./exports/transfer-app
   export-app serve ./exports/transfer-app
@@ -160,6 +164,141 @@ function execInDir(command, dir, stdio = 'inherit') {
   }
 }
 
+/**
+ * Builds and packs all publishable monorepo packages into tarballs.
+ * Returns { packDir, packedMap } where packedMap maps package names to tarball paths.
+ */
+function packMonorepoPackages() {
+  const packDir = path.join(monorepoRoot, '.packed-packages');
+
+  fs.rmSync(packDir, { recursive: true, force: true });
+  fs.mkdirSync(packDir, { recursive: true });
+
+  console.log(`\n${colors.blue}Building monorepo packages...${colors.reset}`);
+  execInDir('pnpm build', monorepoRoot);
+  console.log(`${colors.green}✓ Build complete${colors.reset}\n`);
+
+  const packagesDir = path.join(monorepoRoot, 'packages');
+  const packageDirs = fs
+    .readdirSync(packagesDir)
+    .map((dir) => path.join(packagesDir, dir))
+    .filter((dir) => {
+      return (
+        fs.statSync(dir).isDirectory() &&
+        fs.existsSync(path.join(dir, 'package.json')) &&
+        fs.existsSync(path.join(dir, 'dist'))
+      );
+    });
+
+  const packedMap = {};
+
+  console.log(`${colors.blue}Packing ${packageDirs.length} packages...${colors.reset}`);
+  for (const pkgDir of packageDirs) {
+    const pkgJson = JSON.parse(fs.readFileSync(path.join(pkgDir, 'package.json'), 'utf8'));
+    const pkgName = pkgJson.name;
+
+    try {
+      const output = execInDir(`pnpm pack --pack-destination "${packDir}"`, pkgDir, 'pipe');
+      const tarball = output.toString().trim().split('\n').pop();
+      const tarballPath = path.join(packDir, path.basename(tarball));
+
+      if (fs.existsSync(tarballPath)) {
+        packedMap[pkgName] = tarballPath;
+        console.log(
+          `  ${colors.green}✓${colors.reset} ${pkgName} → ${path.basename(tarballPath)}`
+        );
+      }
+    } catch (error) {
+      console.log(`  ${colors.yellow}⚠${colors.reset} Skipping ${pkgName} (pack failed)`);
+    }
+  }
+
+  console.log(
+    `\n${colors.green}✓ Packed ${Object.keys(packedMap).length} packages${colors.reset}`
+  );
+  return { packDir, packedMap };
+}
+
+/**
+ * Configures an extracted export app to use locally packed tarballs
+ * instead of published npm versions. Also handles Midnight SDK patches.
+ */
+function configureForPackedMode(extractDir, packedMap) {
+  const packageJsonPath = path.join(extractDir, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+  console.log(`\n${colors.blue}Replacing dependencies with packed tarballs...${colors.reset}`);
+  for (const depType of ['dependencies', 'devDependencies']) {
+    if (!packageJson[depType]) continue;
+    for (const dep of Object.keys(packageJson[depType])) {
+      if (packedMap[dep]) {
+        console.log(
+          `  ${colors.green}✓${colors.reset} ${dep}: ${packageJson[depType][dep]} → file:${packedMap[dep]}`
+        );
+        packageJson[depType][dep] = `file:${packedMap[dep]}`;
+      }
+    }
+  }
+
+  if (!packageJson.pnpm) packageJson.pnpm = {};
+  if (!packageJson.pnpm.overrides) packageJson.pnpm.overrides = {};
+
+  for (const [pkgName, tarballPath] of Object.entries(packedMap)) {
+    packageJson.pnpm.overrides[pkgName] = `file:${tarballPath}`;
+  }
+
+  const allDeps = {
+    ...(packageJson.dependencies || {}),
+    ...(packageJson.devDependencies || {}),
+  };
+  const hasMidnight = Object.keys(allDeps).some((k) => k.startsWith('@midnight-ntwrk/'));
+
+  if (hasMidnight) {
+    const adapterPatchesDir = path.join(monorepoRoot, 'packages/adapter-midnight/patches');
+    if (fs.existsSync(adapterPatchesDir)) {
+      console.log(`\n${colors.blue}Configuring Midnight SDK patches...${colors.reset}`);
+      const targetPatchesDir = path.join(extractDir, 'patches');
+      fs.mkdirSync(targetPatchesDir, { recursive: true });
+
+      const patchFiles = fs.readdirSync(adapterPatchesDir).filter((f) => f.endsWith('.patch'));
+      for (const patchFile of patchFiles) {
+        fs.copyFileSync(
+          path.join(adapterPatchesDir, patchFile),
+          path.join(targetPatchesDir, patchFile)
+        );
+      }
+
+      if (!packageJson.pnpm.patchedDependencies) packageJson.pnpm.patchedDependencies = {};
+
+      for (const patchFile of patchFiles) {
+        // Format: @scope__package@version.patch → @scope/package@version
+        const match = patchFile.match(/^(@[^_]+)__(.+)@(.+)\.patch$/);
+        if (match) {
+          const patchKey = `${match[1]}/${match[2]}@${match[3]}`;
+          const pkgNameFromPatch = `${match[1]}/${match[2]}`;
+
+          if (allDeps[pkgNameFromPatch]) {
+            packageJson.pnpm.patchedDependencies[patchKey] = `patches/${patchFile}`;
+            packageJson.pnpm.overrides[pkgNameFromPatch] = match[3];
+            console.log(`  ${colors.green}✓${colors.reset} Patching ${patchKey}`);
+          }
+        }
+      }
+    }
+  } else {
+    debug('No Midnight packages detected, skipping patches');
+  }
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+  const lockfilePath = path.join(extractDir, 'pnpm-lock.yaml');
+  if (fs.existsSync(lockfilePath)) {
+    fs.unlinkSync(lockfilePath);
+  }
+
+  console.log(`${colors.green}✓ package.json configured with packed tarballs${colors.reset}`);
+}
+
 function exportAppSimple(options) {
   try {
     console.log(`\n${colors.bold}${colors.cyan}Exporting UI Builder App${colors.reset}\n`);
@@ -180,6 +319,15 @@ function exportAppSimple(options) {
     console.log(`  Output Directory: ${colors.blue}${outputDir}${colors.reset}`);
     console.log(`  Environment:      ${colors.blue}${options.env}${colors.reset}\n`);
 
+    let packedResult = null;
+    if (options.env === 'packed') {
+      packedResult = packMonorepoPackages();
+    }
+
+    // For packed mode, tell the export system to use production versions
+    // (they'll be overridden with tarball paths after extraction)
+    const exportEnv = options.env === 'packed' ? 'production' : options.env;
+
     const env = {
       EXPORT_TEST_CHAIN: options.chain,
       EXPORT_TEST_FUNCTION: options.func,
@@ -188,7 +336,7 @@ function exportAppSimple(options) {
       EXPORT_TEST_COMPLEX: options.complex.toString(),
       EXPORT_TEST_OUTPUT_DIR: outputDir,
       EXPORT_CLI_MODE: 'true',
-      EXPORT_CLI_ENV: options.env,
+      EXPORT_CLI_ENV: exportEnv,
       ...process.env,
     };
 
@@ -275,6 +423,31 @@ function exportAppSimple(options) {
           error
         );
       }
+    }
+
+    if (options.env === 'packed' && packedResult) {
+      configureForPackedMode(extractDir, packedResult.packedMap);
+
+      const tempDir = path.join(os.tmpdir(), `ui-builder-packed-test-${Date.now()}`);
+      console.log(
+        `\n${colors.blue}Moving project to isolated test directory...${colors.reset}`
+      );
+      fs.cpSync(extractDir, tempDir, { recursive: true });
+      console.log(`${colors.green}✓ Project copied to:${colors.reset} ${tempDir}`);
+
+      console.log(`\n${colors.blue}Installing dependencies...${colors.reset}`);
+      execInDir('pnpm install --no-frozen-lockfile', tempDir);
+      console.log(`${colors.green}✓ Dependencies installed${colors.reset}`);
+
+      console.log(`\n${colors.blue}Building exported app (verifying types and bundling)...${colors.reset}`);
+      execInDir('pnpm build', tempDir);
+      console.log(`\n${colors.green}${colors.bold}✓ Packed build verification passed!${colors.reset}`);
+      console.log(`  ${colors.dim}Types, bundling, and Tailwind all resolved correctly.${colors.reset}`);
+      console.log(`\n${colors.cyan}Test directory:${colors.reset} ${tempDir}`);
+      console.log(`\n${colors.cyan}To clean up:${colors.reset}`);
+      console.log(`  rm -rf ${tempDir}`);
+      console.log(`  rm -rf ${packedResult.packDir}`);
+      return extractDir;
     }
 
     if (options.env === 'local') {

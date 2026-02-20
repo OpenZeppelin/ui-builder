@@ -22,7 +22,7 @@
     "build": "pnpm clean && pnpm sync-patches && pnpm validate:vite-configs && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
     "test": "pnpm -r test",
     "test:watch": "pnpm -r test:watch",
-    "test:export": "bash scripts/test-exported-app-local.sh",
+    "test:export": "node apps/builder/src/export/cli/export-app.cjs export --env packed",
     "coverage": "pnpm -r coverage",
     "preview": "pnpm --filter=@openzeppelin/ui-builder-app preview",
     "lint": "pnpm -r lint",
