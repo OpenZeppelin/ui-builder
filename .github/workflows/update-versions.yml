@@ -28,40 +28,28 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Check if app creds exist (base repo only)
-        id: has-app
-        run: |
-          present=true
-          if [ "${{ github.event.pull_request.head.repo.fork || false }}" = "true" ]; then present=false; fi
-          if [ -z "${{ vars.GH_APP_ID }}" ] || [ -z "${{ secrets.GH_APP_PRIVATE_KEY }}" ]; then present=false; fi
-          echo "present=$present" >> "$GITHUB_OUTPUT"
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/create-github-app-token@af35edadc00be37caa72ed9f3e6d5f7801bfdf09 # v1.11.7
-        id: gh-app-token
-        if: steps.has-app.outputs.present == 'true'
+      - name: Resolve authentication token
+        id: auth
+        uses: ./.github/actions/auth-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-
-      - name: Select token
-        id: auth
-        run: |
-          if [ "${{ steps.has-app.outputs.present }}" = "true" ]; then
-            echo "token=${{ steps.gh-app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "token=${{ github.token }}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Checkout Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          token: ${{ steps.auth.outputs.token }}
-          fetch-depth: 0
+          is-fork: ${{ github.event.pull_request.head.repo.fork || false }}
 
       - name: Prepare pre-requisites
         uses: ./.github/actions/prepare
         with:
           token: ${{ steps.auth.outputs.token }}
+          fetch-depth: '0'
+
+      - name: Configure npm authentication for npm registry
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install
@@ -77,9 +65,9 @@ jobs:
         run: |
           # Check if either versions.ts or snapshot files have changed
           if git diff --exit-code apps/builder/src/export/versions.ts apps/builder/src/export/__tests__/__snapshots__/; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit and push changes
@@ -87,11 +75,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.auth.outputs.token }}
           HUSKY: 0 # Disable husky hooks for automated commits
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           # Checkout the proper branch (handle both PR and push events)
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           git checkout "$BRANCH_NAME"
           # Add both versions.ts and any updated snapshot files
           git add apps/builder/src/export/versions.ts apps/builder/src/export/__tests__/__snapshots__/
