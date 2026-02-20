@@ -46,10 +46,13 @@ export interface EvmCompatibleNetworkConfig<E extends string = string>
 }
 
 /**
- * EVM-specific network configuration with strict `ecosystem: 'evm'` constraint.
- * Use this type in EVM-only contexts where you want strict ecosystem typing.
+ * EVM-specific network configuration with strict `ecosystem: 'evm'` constraint
+ * and strongly-typed viem `Chain` (narrowed from `unknown` in `EvmNetworkConfig`).
  *
+ * Use this type in EVM-only contexts where you want strict ecosystem typing.
  * For function signatures that should accept configs from multiple adapters
  * (EVM, Polkadot, etc.), use `EvmCompatibleNetworkConfig` instead.
  */
-export type TypedEvmNetworkConfig = EvmCompatibleNetworkConfig<'evm'>;
+export interface TypedEvmNetworkConfig extends EvmNetworkConfig {
+  viemChain?: Chain;
+}

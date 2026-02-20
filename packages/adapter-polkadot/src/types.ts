@@ -1,6 +1,7 @@
 /**
  * @fileoverview Core type definitions for the Polkadot adapter.
- * These types extend the EVM core types with Polkadot-specific fields.
+ * These types extend the base types from `@openzeppelin/ui-types` with
+ * adapter-level refinements (e.g. strongly-typed viem Chain).
  *
  * ## Developer Notes: Future Substrate Extension
  *
@@ -22,57 +23,38 @@
  * 3. **Runtime Detection**: Use executionType to discriminate at runtime
  */
 
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { Chain } from 'viem';
+
+import type { PolkadotNetworkConfig } from '@openzeppelin/ui-types';
 
 /**
- * Polkadot network execution types.
- * - 'evm': Networks using EVM via PolkaVM/REVM or native EVM (Moonbeam)
- * - 'substrate': Future - Native Substrate/Wasm chains (not implemented)
+ * Re-exported from `@openzeppelin/ui-types` for convenience.
  *
- * [SUBSTRATE TODO]: When adding Substrate support, the adapter will route
- * operations based on this type. Networks with executionType: 'substrate'
- * will use polkadot-api for queries and transactions instead of viem/wagmi.
+ * - `PolkadotExecutionType`: `'evm' | 'substrate'`
+ *   [SUBSTRATE TODO]: When adding Substrate support, the adapter will route
+ *   operations based on this type. Networks with executionType: 'substrate'
+ *   will use polkadot-api for queries and transactions instead of viem/wagmi.
+ *
+ * - `PolkadotNetworkCategory`: `'hub' | 'parachain'`
+ *   'hub' = Official Polkadot/Kusama system chains (displayed first)
+ *   'parachain' = Independent parachains (displayed after hub networks)
+ *
+ * - `PolkadotRelayChain`: `'polkadot' | 'kusama'`
  */
-export type PolkadotExecutionType = 'evm' | 'substrate';
-
-/**
- * Network category for UI grouping.
- * - 'hub': Official Polkadot/Kusama system chains (displayed first)
- * - 'parachain': Independent parachains (displayed after hub networks)
- */
-export type PolkadotNetworkCategory = 'hub' | 'parachain';
-
-/**
- * The Polkadot/Kusama relay chain this network connects to.
- */
-export type PolkadotRelayChain = 'polkadot' | 'kusama';
+export type {
+  PolkadotExecutionType,
+  PolkadotNetworkCategory,
+  PolkadotRelayChain,
+} from '@openzeppelin/ui-types';
 
 /**
  * Extended network configuration for Polkadot ecosystem.
- * Inherits all EVM fields for EVM-compatible networks.
- * Overrides the ecosystem field to 'polkadot'.
+ *
+ * Extends {@link PolkadotNetworkConfig} from `@openzeppelin/ui-types`
+ * (which already defines ecosystem, executionType, networkCategory, relayChain,
+ * and all inherited EVM fields) with a strongly-typed `viemChain` field
+ * (narrowed from `unknown` to viem {@link Chain}).
  */
-export interface TypedPolkadotNetworkConfig extends Omit<TypedEvmNetworkConfig, 'ecosystem'> {
-  /**
-   * Ecosystem identifier - always 'polkadot' for this adapter.
-   */
-  ecosystem: 'polkadot';
-
-  /**
-   * Execution type determines which handler processes requests.
-   * Currently only 'evm' is implemented; 'substrate' reserved for future.
-   */
-  executionType: PolkadotExecutionType;
-
-  /**
-   * Network category for UI grouping.
-   * Hub networks appear before parachain networks in selectors.
-   */
-  networkCategory: PolkadotNetworkCategory;
-
-  /**
-   * Optional: The relay chain this network is connected to.
-   * Used for display purposes and filtering.
-   */
-  relayChain?: PolkadotRelayChain;
+export interface TypedPolkadotNetworkConfig extends PolkadotNetworkConfig {
+  viemChain?: Chain;
 }

@@ -4,6 +4,7 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/metadata.ts', 'src/vite-config.ts'],
   format: ['cjs', 'esm'],
   dts: {
+    resolve: ['@openzeppelin/ui-builder-adapter-evm-core'],
     compilerOptions: {
       composite: false,
       incremental: false,
