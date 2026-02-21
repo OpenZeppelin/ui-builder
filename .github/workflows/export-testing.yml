@@ -98,12 +98,14 @@ jobs:
 
   e2e-export:
     runs-on: ubuntu-latest
-    name: E2E Export Build Verification
+    name: E2E Export – ${{ matrix.chain }}
     permissions:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
+        chain: [evm, solana, stellar]
         node-version: [22.x]
 
     steps:
@@ -156,7 +158,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
-      - name: Run packed export e2e test
-        run: node apps/builder/src/export/cli/export-app.cjs export --env packed -o exports/ci-test
+      - name: Run packed export e2e test (${{ matrix.chain }})
+        run: node apps/builder/src/export/cli/export-app.cjs export --env packed -c ${{ matrix.chain }} -o exports/ci-test-${{ matrix.chain }}
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
