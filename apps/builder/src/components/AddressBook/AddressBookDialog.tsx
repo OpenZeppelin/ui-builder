@@ -54,9 +54,16 @@ export function AddressBookDialog({ open, onOpenChange }: AddressBookDialogProps
 
       const net = networks.find((n) => n.id === networkId);
       if (!net?.explorerUrl) return undefined;
-      const baseUrl = net.explorerUrl.replace(/\/+$/, '');
       const segment = ECOSYSTEM_ADDRESS_PATH[net.ecosystem] ?? 'address';
-      return `${baseUrl}/${segment}/${address}`;
+      try {
+        const url = new URL(net.explorerUrl);
+        const basePath = url.pathname.replace(/\/+$/, '');
+        url.pathname = `${basePath}/${segment}/${address}`;
+        return url.toString();
+      } catch {
+        const baseUrl = net.explorerUrl.replace(/\/+$/, '');
+        return `${baseUrl}/${segment}/${address}`;
+      }
     },
     [activeAdapter, networks, activeNetworkConfig]
   );
