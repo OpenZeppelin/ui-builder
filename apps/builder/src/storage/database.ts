@@ -1,4 +1,4 @@
-import { createDexieDatabase } from '@openzeppelin/ui-storage';
+import { ALIAS_SCHEMA, createDexieDatabase } from '@openzeppelin/ui-storage';
 
 // Single database instance shared across all storage services
 export const db = createDexieDatabase('UIBuilder', [
@@ -23,6 +23,15 @@ export const db = createDexieDatabase('UIBuilder', [
     upgrade: async (_trans) => {
       // Migration logic: No data modification is necessary for this version
       // The new fields are optional and will be populated as records are updated
+    },
+  },
+  // Version 3: Add alias (address book) schema
+  {
+    version: 3,
+    stores: {
+      contractUIs:
+        '++id, title, createdAt, updatedAt, ecosystem, networkId, contractAddress, functionId, contractDefinitionSource, contractDefinitionOriginal',
+      ...ALIAS_SCHEMA,
     },
   },
 ]);

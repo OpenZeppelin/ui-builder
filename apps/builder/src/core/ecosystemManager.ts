@@ -74,34 +74,78 @@ async function loadAdapterModule(ecosystem: Ecosystem): Promise<EcosystemExport>
 }
 
 // =============================================================================
-// Network Discovery
+// Lightweight Network Loading (lazy — only loads network configs, not adapters)
 // =============================================================================
 
 const networksByEcosystemCache: Partial<Record<Ecosystem, NetworkConfig[]>> = {};
 
-export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
-  if (networksByEcosystemCache[ecosystem]) {
-    return networksByEcosystemCache[ecosystem]!;
+const ALL_ECOSYSTEMS: Ecosystem[] = ['evm', 'solana', 'stellar', 'midnight', 'polkadot'];
+
+/**
+ * Loads only the network config array for an ecosystem. This is much lighter
+ * than `loadAdapterModule` because it imports from the `/networks` subpath,
+ * which only pulls in static config objects + icons — no adapter runtime,
+ * wallet libraries, or SDK code.
+ */
+async function loadNetworksModule(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
+  const cached = networksByEcosystemCache[ecosystem];
+  if (cached) return cached;
+
+  let mod: { networks: NetworkConfig[] };
+  switch (ecosystem) {
+    case 'evm':
+      mod = await import('@openzeppelin/ui-builder-adapter-evm/networks');
+      break;
+    case 'solana':
+      mod = await import('@openzeppelin/ui-builder-adapter-solana/networks');
+      break;
+    case 'stellar':
+      mod = await import('@openzeppelin/ui-builder-adapter-stellar/networks');
+      break;
+    case 'midnight':
+      mod = await import('@openzeppelin/ui-builder-adapter-midnight/networks');
+      break;
+    case 'polkadot':
+      mod = await import('@openzeppelin/ui-builder-adapter-polkadot/networks');
+      break;
+    default: {
+      const _exhaustiveCheck: never = ecosystem;
+      throw new Error(`Networks module not defined for ecosystem: ${String(_exhaustiveCheck)}`);
+    }
   }
 
+  networksByEcosystemCache[ecosystem] = mod.networks;
+  return mod.networks;
+}
+
+// =============================================================================
+// Network Discovery
+// =============================================================================
+
+export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
   try {
-    const def = await loadAdapterModule(ecosystem);
-    const networks = def.networks;
-    if (!Array.isArray(networks)) {
-      logger.error(
-        'EcosystemManager',
-        `Expected an array of networks for ${ecosystem}, received: ${typeof networks}`
-      );
-      networksByEcosystemCache[ecosystem] = [];
-      return [];
-    }
-    networksByEcosystemCache[ecosystem] = networks;
-    return networks;
+    return await loadNetworksModule(ecosystem);
   } catch (error) {
     logger.error('EcosystemManager', `Error loading networks for ${ecosystem}:`, error);
     networksByEcosystemCache[ecosystem] = [];
     return [];
   }
+}
+
+/**
+ * Loads networks from all ecosystems in parallel. Uses the lightweight
+ * `/networks` subpath so no full adapter modules are loaded.
+ */
+export async function getAllNetworks(): Promise<NetworkConfig[]> {
+  const results = await Promise.allSettled(
+    ALL_ECOSYSTEMS.map((eco) => getNetworksByEcosystem(eco))
+  );
+
+  const all: NetworkConfig[] = [];
+  for (const result of results) {
+    if (result.status === 'fulfilled') all.push(...result.value);
+  }
+  return all;
 }
 
 export async function getNetworkById(id: string): Promise<NetworkConfig | undefined> {
@@ -122,8 +166,7 @@ export async function getNetworkById(id: string): Promise<NetworkConfig | undefi
     }
   }
 
-  const allEcosystems: Ecosystem[] = ['evm', 'solana', 'stellar', 'midnight', 'polkadot'];
-  for (const ecosystem of allEcosystems) {
+  for (const ecosystem of ALL_ECOSYSTEMS) {
     let networks = networksByEcosystemCache[ecosystem];
     if (!networks) {
       logger.info(

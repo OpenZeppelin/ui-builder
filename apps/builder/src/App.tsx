@@ -9,6 +9,7 @@ import { NetworkErrorHandler } from './components/Common/NetworkErrorHandler';
 import AppSidebar from './components/Sidebar/AppSidebar';
 import { UIBuilder } from './components/UIBuilder';
 import { useUIBuilderState } from './components/UIBuilder/hooks';
+import { AliasLabelBridge } from './contexts/AliasLabelBridge';
 import { ContractUIStorageProvider } from './contexts/ContractUIStorageProvider';
 import { StorageOperationsProvider } from './contexts/StorageOperationsContext';
 import { getAdapter, getNetworkById } from './core/ecosystemManager';
@@ -95,9 +96,11 @@ function App() {
                 getNetworkConfigById={getNetworkById}
                 loadConfigModule={loadAppConfigModule}
               >
-                <AppContent />
-                {/* Global network error handler - always mounted to handle error toasts */}
-                <NetworkErrorHandler />
+                <AliasLabelBridge>
+                  <AppContent />
+                  {/* Global network error handler - always mounted to handle error toasts */}
+                  <NetworkErrorHandler />
+                </AliasLabelBridge>
               </WalletStateProvider>
             </AdapterProvider>
             <Toaster position="top-right" />

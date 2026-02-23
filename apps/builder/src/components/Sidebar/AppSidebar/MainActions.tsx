@@ -2,15 +2,18 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   BookOpenText,
+  BookUser,
   LayoutPanelTop,
   SquarePen,
 } from 'lucide-react';
+import { useState } from 'react';
 
 import { SidebarButton } from '@openzeppelin/ui-components';
 import { cn } from '@openzeppelin/ui-utils';
 
 import { useContractUIStorage } from '../../../contexts/useContractUIStorage';
 import { useBuilderAnalytics } from '../../../hooks/useBuilderAnalytics';
+import { AddressBookDialog } from '../../AddressBook/AddressBookDialog';
 import { recordHasMeaningfulContent } from '../../UIBuilder/utils/meaningfulContent';
 
 interface MainActionsProps {
@@ -49,14 +52,11 @@ export default function MainActions({
     return recordHasMeaningfulContent(record);
   });
 
+  const [showAddressBook, setShowAddressBook] = useState(false);
+
   return (
     <div className="flex flex-col w-full">
-      <div
-        className={cn(
-          // Show selection styling when in new UI mode
-          isInNewUIMode && 'bg-neutral-100 rounded-lg'
-        )}
-      >
+      <div className={cn(isInNewUIMode && 'bg-neutral-100 rounded-lg')}>
         <SidebarButton
           icon={<SquarePen className="size-4" />}
           onClick={onCreateNew}
@@ -68,6 +68,13 @@ export default function MainActions({
 
       <SidebarButton icon={<LayoutPanelTop className="size-4" />} badge="Coming Soon" disabled>
         Templates
+      </SidebarButton>
+
+      <SidebarButton
+        icon={<BookUser className="size-4" />}
+        onClick={() => setShowAddressBook(true)}
+      >
+        Address Book
       </SidebarButton>
 
       <SidebarButton icon={<ArrowDownToLine className="size-4" />} onClick={handleImport}>
@@ -83,7 +90,6 @@ export default function MainActions({
         </SidebarButton>
       )}
 
-      {/* Docs link below Import/Export */}
       <SidebarButton
         icon={<BookOpenText className="size-4" />}
         href="https://docs.openzeppelin.com/ui-builder"
@@ -92,6 +98,8 @@ export default function MainActions({
       >
         Docs
       </SidebarButton>
+
+      <AddressBookDialog open={showAddressBook} onOpenChange={setShowAddressBook} />
     </div>
   );
 }

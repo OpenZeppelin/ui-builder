@@ -6,5 +6,6 @@ export {
   type AnalyticsContextValue,
 } from '@openzeppelin/ui-react';
 
-// Builder-specific analytics hook
+// Builder-specific hooks
 export { useBuilderAnalytics } from './useBuilderAnalytics';
+export { useAllNetworks } from './useAllNetworks';
