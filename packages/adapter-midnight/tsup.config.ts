@@ -1,7 +1,13 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/metadata.ts', 'src/config.ts', 'src/vite-config.ts'],
+  entry: [
+    'src/index.ts',
+    'src/metadata.ts',
+    'src/networks.ts',
+    'src/config.ts',
+    'src/vite-config.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: {
     compilerOptions: {
