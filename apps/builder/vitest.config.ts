@@ -18,6 +18,10 @@ const adapterPackagePaths: Record<string, string> = {
     __dirname,
     '../../packages/adapter-evm/dist/metadata.js'
   ),
+  '@openzeppelin/ui-builder-adapter-evm/networks': path.resolve(
+    __dirname,
+    '../../packages/adapter-evm/dist/networks.js'
+  ),
   '@openzeppelin/ui-builder-adapter-solana': path.resolve(
     __dirname,
     '../../packages/adapter-solana/dist/index.js'
@@ -25,6 +29,10 @@ const adapterPackagePaths: Record<string, string> = {
   '@openzeppelin/ui-builder-adapter-solana/metadata': path.resolve(
     __dirname,
     '../../packages/adapter-solana/dist/metadata.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-solana/networks': path.resolve(
+    __dirname,
+    '../../packages/adapter-solana/dist/networks.js'
   ),
   '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
     __dirname,
@@ -34,6 +42,10 @@ const adapterPackagePaths: Record<string, string> = {
     __dirname,
     '../../packages/adapter-stellar/dist/metadata.js'
   ),
+  '@openzeppelin/ui-builder-adapter-stellar/networks': path.resolve(
+    __dirname,
+    '../../packages/adapter-stellar/dist/networks.js'
+  ),
   '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
     __dirname,
     '../../packages/adapter-midnight/dist/index.js'
@@ -42,6 +54,10 @@ const adapterPackagePaths: Record<string, string> = {
     __dirname,
     '../../packages/adapter-midnight/dist/metadata.js'
   ),
+  '@openzeppelin/ui-builder-adapter-midnight/networks': path.resolve(
+    __dirname,
+    '../../packages/adapter-midnight/dist/networks.js'
+  ),
   '@openzeppelin/ui-builder-adapter-polkadot': path.resolve(
     __dirname,
     '../../packages/adapter-polkadot/dist/index.js'
@@ -49,6 +65,10 @@ const adapterPackagePaths: Record<string, string> = {
   '@openzeppelin/ui-builder-adapter-polkadot/metadata': path.resolve(
     __dirname,
     '../../packages/adapter-polkadot/dist/metadata.js'
+  ),
+  '@openzeppelin/ui-builder-adapter-polkadot/networks': path.resolve(
+    __dirname,
+    '../../packages/adapter-polkadot/dist/networks.js'
   ),
 };
 
@@ -176,6 +196,10 @@ export default defineConfig(
           __dirname,
           '../../packages/adapter-evm/dist/metadata.js'
         ),
+        '@openzeppelin/ui-builder-adapter-evm/networks': path.resolve(
+          __dirname,
+          '../../packages/adapter-evm/dist/networks.js'
+        ),
         '@openzeppelin/ui-builder-adapter-evm': path.resolve(
           __dirname,
           '../../packages/adapter-evm/dist/index.js'
@@ -183,6 +207,10 @@ export default defineConfig(
         '@openzeppelin/ui-builder-adapter-solana/metadata': path.resolve(
           __dirname,
           '../../packages/adapter-solana/dist/metadata.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-solana/networks': path.resolve(
+          __dirname,
+          '../../packages/adapter-solana/dist/networks.js'
         ),
         '@openzeppelin/ui-builder-adapter-solana': path.resolve(
           __dirname,
@@ -192,6 +220,10 @@ export default defineConfig(
           __dirname,
           '../../packages/adapter-stellar/dist/metadata.js'
         ),
+        '@openzeppelin/ui-builder-adapter-stellar/networks': path.resolve(
+          __dirname,
+          '../../packages/adapter-stellar/dist/networks.js'
+        ),
         '@openzeppelin/ui-builder-adapter-stellar': path.resolve(
           __dirname,
           '../../packages/adapter-stellar/dist/index.js'
@@ -200,6 +232,10 @@ export default defineConfig(
           __dirname,
           '../../packages/adapter-midnight/dist/metadata.js'
         ),
+        '@openzeppelin/ui-builder-adapter-midnight/networks': path.resolve(
+          __dirname,
+          '../../packages/adapter-midnight/dist/networks.js'
+        ),
         '@openzeppelin/ui-builder-adapter-midnight': path.resolve(
           __dirname,
           '../../packages/adapter-midnight/dist/index.js'
@@ -207,6 +243,10 @@ export default defineConfig(
         '@openzeppelin/ui-builder-adapter-polkadot/metadata': path.resolve(
           __dirname,
           '../../packages/adapter-polkadot/dist/metadata.js'
+        ),
+        '@openzeppelin/ui-builder-adapter-polkadot/networks': path.resolve(
+          __dirname,
+          '../../packages/adapter-polkadot/dist/networks.js'
         ),
         '@openzeppelin/ui-builder-adapter-polkadot': path.resolve(
           __dirname,
