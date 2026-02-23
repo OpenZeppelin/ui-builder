@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.7.0
+
+### Minor Changes
+
+- [#349](https://github.com/OpenZeppelin/ui-builder/pull/349) [`8b423c7`](https://github.com/OpenZeppelin/ui-builder/commit/8b423c799314f3abf8677fd13906c2296c178255) Thanks [@pasevin](https://github.com/pasevin)! - Add `./networks` subpath export for lightweight network loading without pulling in full adapter runtime, wallet libraries, or SDK code. Update `@openzeppelin/ui-components` and `@openzeppelin/ui-types` dependency versions.
+
 ## 1.6.0
 
 ### Minor Changes
