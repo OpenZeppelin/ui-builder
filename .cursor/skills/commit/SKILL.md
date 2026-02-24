@@ -9,9 +9,10 @@ This skill guides committing changes following the project's Conventional Commit
 
 ## Critical Requirements
 
-1. **Always run commits outside sandbox** - Full shell permissions required for GPG signing and pre-commit hooks
-2. **Never use `--no-gpg-sign`** - All commits must be GPG-signed
-3. **Never use `--no-verify`** - Pre-commit hooks must run
+1. **Never commit directly to `main`** - Always check the current branch before committing. If on `main`, create a new branch first (see Commit Workflow below).
+2. **Always run commits outside sandbox** - Full shell permissions required for GPG signing and pre-commit hooks
+3. **Never use `--no-gpg-sign`** - All commits must be GPG-signed
+4. **Never use `--no-verify`** - Pre-commit hooks must run
 
 ## Commit Format
 
