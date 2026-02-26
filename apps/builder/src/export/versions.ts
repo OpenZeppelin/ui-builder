@@ -8,6 +8,7 @@
 export const packageVersions = {
   '@openzeppelin/ui-builder-adapter-evm': '1.7.0',
   '@openzeppelin/ui-builder-adapter-midnight': '1.7.0',
+  '@openzeppelin/ui-builder-adapter-polkadot': '1.7.0',
   '@openzeppelin/ui-builder-adapter-solana': '1.7.0',
   '@openzeppelin/ui-builder-adapter-stellar': '1.7.0',
   '@openzeppelin/ui-react': '1.1.0',

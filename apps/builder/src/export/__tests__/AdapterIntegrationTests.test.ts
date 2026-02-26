@@ -1,37 +1,24 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { EvmNetworkConfig, NetworkConfig, SolanaNetworkConfig } from '@openzeppelin/ui-types';
+import type { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 
+import { adapterPackageMap, getNetworksByEcosystem } from '../../core/ecosystemManager';
 import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
-// Define mock network configs
-const mockEvmNetworkConfig: EvmNetworkConfig = {
-  id: 'test-export-adapter-evm',
-  name: 'Test Export EVM',
-  exportConstName: 'mockEvmNetworkConfig',
-  ecosystem: 'evm',
-  network: 'ethereum',
-  type: 'testnet',
-  isTestnet: true,
-  chainId: 1337,
-  rpcUrl: 'http://localhost:8545',
-  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
-  apiUrl: '',
-};
+// Stellar and Midnight adapters have ESM/CJS compatibility issues when loaded
+// dynamically in vitest. Full e2e export tests are limited to EVM and Polkadot.
+// Versioning correctness for ALL ecosystems is verified in VersioningSafetyGuard.test.ts.
+const EXPORTABLE_ECOSYSTEMS: Ecosystem[] = ['evm', 'polkadot'];
 
-const mockSolanaNetworkConfig: SolanaNetworkConfig = {
-  id: 'test-export-adapter-solana',
-  name: 'Test Export Solana',
-  exportConstName: 'mockSolanaNetworkConfig',
-  ecosystem: 'solana',
-  network: 'solana',
-  type: 'testnet',
-  isTestnet: true,
-  rpcEndpoint: 'mock',
-  commitment: 'confirmed',
-};
+async function getFirstNetwork(ecosystem: Ecosystem): Promise<NetworkConfig> {
+  const networks = await getNetworksByEcosystem(ecosystem);
+  if (networks.length === 0) {
+    throw new Error(`No networks found for ecosystem: ${ecosystem}`);
+  }
+  return networks[0];
+}
 
 describe('Adapter Integration Tests', () => {
   let exportSystem: AppExportSystem;
@@ -40,7 +27,6 @@ describe('Adapter Integration Tests', () => {
     exportSystem = new AppExportSystem();
   });
 
-  // Helper function to get exported files and parsed package.json
   async function getExportedPackageJson(
     networkConfig: NetworkConfig,
     functionName: string = 'transfer'
@@ -64,28 +50,36 @@ describe('Adapter Integration Tests', () => {
   }
 
   describe('Package.json Adapter Dependencies', () => {
-    it('should include correct dependencies for EVM in package.json', async () => {
-      const { packageJson } = await getExportedPackageJson(mockEvmNetworkConfig);
+    it.each(EXPORTABLE_ECOSYSTEMS)(
+      'should include correct adapter dependency for %s in package.json',
+      async (ecosystem) => {
+        const networkConfig = await getFirstNetwork(ecosystem);
+        const { packageJson } = await getExportedPackageJson(networkConfig);
+        const expectedAdapter = adapterPackageMap[ecosystem];
 
-      // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+        expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
+        expect(packageJson.dependencies).toHaveProperty(expectedAdapter);
+      }
+    );
 
-      // Optional: Check if specific SDKs (like ethers) are NOT directly listed if they are peer/sub-dependencies
-      // expect(packageJson.dependencies).not.toHaveProperty('ethers');
-    });
+    it.each(EXPORTABLE_ECOSYSTEMS)(
+      'should not include adapters from other ecosystems in %s export',
+      async (ecosystem) => {
+        const networkConfig = await getFirstNetwork(ecosystem);
+        const { packageJson } = await getExportedPackageJson(networkConfig);
+        const expectedAdapter = adapterPackageMap[ecosystem];
 
-    it('should include correct dependencies for Solana in package.json', async () => {
-      const { packageJson } = await getExportedPackageJson(mockSolanaNetworkConfig);
+        for (const [otherEcosystem, otherAdapter] of Object.entries(adapterPackageMap)) {
+          if (otherEcosystem !== ecosystem) {
+            expect(
+              packageJson.dependencies,
+              `${ecosystem} export should not contain adapter for ${otherEcosystem}`
+            ).not.toHaveProperty(otherAdapter);
+          }
+        }
 
-      // Check required packages are present
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-types');
-      expect(packageJson.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-solana');
-
-      // Optional: Check specific SDKs are NOT directly listed
-      // expect(packageJson.dependencies).not.toHaveProperty('@solana/web3.js');
-    });
-
-    // Add similar tests for Stellar and Midnight if needed
+        expect(packageJson.dependencies).toHaveProperty(expectedAdapter);
+      }
+    );
   });
 });

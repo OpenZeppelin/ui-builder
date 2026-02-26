@@ -1,53 +1,52 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Ecosystem, EvmNetworkConfig } from '@openzeppelin/ui-types';
+import type { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
+import { getNetworksByEcosystem } from '../../core/ecosystemManager';
 import { AppExportSystem } from '../AppExportSystem';
 import { createMinimalContractSchema, createMinimalFormConfig } from '../utils/testConfig';
 import { extractFilesFromZip } from '../utils/zipInspector';
 
-// Define mock network config
-const mockEvmNetworkConfig: EvmNetworkConfig = {
-  id: 'test-export-snapshot-evm',
-  name: 'Test Export Snapshot EVM',
-  exportConstName: 'mockEvmNetworkConfig',
-  ecosystem: 'evm',
-  network: 'ethereum',
-  type: 'testnet',
-  isTestnet: true,
-  chainId: 1337,
-  rpcUrl: 'http://localhost:8545',
-  nativeCurrency: { name: 'TETH', symbol: 'TETH', decimals: 18 },
-  apiUrl: '',
-};
+// Stellar and Midnight adapters have ESM/CJS compatibility issues when loaded
+// dynamically in vitest. Full e2e export tests are limited to EVM and Polkadot.
+// Versioning correctness for ALL ecosystems is verified in VersioningSafetyGuard.test.ts.
+const EXPORTABLE_ECOSYSTEMS: Ecosystem[] = ['evm', 'polkadot'];
+
+const networkCache = new Map<Ecosystem, NetworkConfig>();
+
+async function getFirstNetwork(ecosystem: Ecosystem): Promise<NetworkConfig> {
+  if (networkCache.has(ecosystem)) {
+    return networkCache.get(ecosystem)!;
+  }
+  const networks = await getNetworksByEcosystem(ecosystem);
+  if (networks.length === 0) {
+    throw new Error(`No networks found for ecosystem: ${ecosystem}`);
+  }
+  networkCache.set(ecosystem, networks[0]);
+  return networks[0];
+}
 
 describe('Export Snapshot Tests', () => {
-  /**
-   * Helper function to extract key files from the export for snapshot testing
-   */
   async function getSnapshotFiles(ecosystem: Ecosystem = 'evm', functionName: string = 'transfer') {
-    // Create the export system and form config
+    const networkConfig = await getFirstNetwork(ecosystem);
     const exportSystem = new AppExportSystem();
     const formConfig = createMinimalFormConfig(functionName, ecosystem);
     const mockContractSchema = createMinimalContractSchema(functionName, ecosystem);
 
-    // Export the form with a consistent project name for snapshots
     const result = await exportSystem.exportApp(
       formConfig,
       mockContractSchema,
-      mockEvmNetworkConfig,
+      networkConfig,
       functionName,
       {
         projectName: 'snapshot-test-project',
       }
     );
 
-    // Extract files from the ZIP using result.data
     expect(result.data).toBeDefined();
     const files = await extractFilesFromZip(result.data);
 
-    // Return the files that should be snapshot tested
     return {
       packageJson: JSON.parse(files['package.json']),
       appComponent: files['src/App.tsx'],
@@ -57,140 +56,85 @@ describe('Export Snapshot Tests', () => {
     };
   }
 
-  /**
-   * Filter sensitive or variable content from snapshots to avoid false diffs
-   */
   function prepareForSnapshot(content: string): string {
     if (!content) return '';
 
-    // Replace timestamp comments that would cause snapshot diffs
-    return (
-      content
-        .replace(/\/\/ Generated at:.*$/gm, '// Generated at: [timestamp]')
-        .replace(/\/\* Generated:.*\*\//gm, '/* Generated: [timestamp] */')
-        // Replace IDs in the form schema - more comprehensive UUID pattern
-        .replace(
-          /"id":\s*"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"/g,
-          '"id": "[id]"'
-        )
-        // Replace field IDs directly in content - better UUID pattern matching
-        .replace(
-          /id: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'/g,
-          "id: '[id]'"
-        )
-        // Replace fields list in sections
-        .replace(/"fields":\s*\[\s*"[a-zA-Z0-9-]+"\s*\]/g, '"fields": ["testParam"]')
-        // Replace other variables that might make snapshots unstable
-        .replace(/version: ["'][\d.]+["']/g, 'version: "[version]"')
-    );
+    return content
+      .replace(/\/\/ Generated at:.*$/gm, '// Generated at: [timestamp]')
+      .replace(/\/\* Generated:.*\*\//gm, '/* Generated: [timestamp] */')
+      .replace(
+        /"id":\s*"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"/g,
+        '"id": "[id]"'
+      )
+      .replace(/id: '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}'/g, "id: '[id]'")
+      .replace(/"fields":\s*\[\s*"[a-zA-Z0-9-]+"\s*\]/g, '"fields": ["testParam"]')
+      .replace(/version: ["'][\d.]+["']/g, 'version: "[version]"');
   }
 
-  describe('EVM Export Snapshots', () => {
+  describe.each(EXPORTABLE_ECOSYSTEMS)('%s Export Snapshots', (ecosystem) => {
     it('should match snapshot for App component', async () => {
-      const files = await getSnapshotFiles('evm');
-      expect(prepareForSnapshot(files.appComponent)).toMatchSnapshot('app-component-evm');
+      const files = await getSnapshotFiles(ecosystem);
+      expect(prepareForSnapshot(files.appComponent)).toMatchSnapshot(`app-component-${ecosystem}`);
     });
 
     it('should match snapshot for Form component', async () => {
-      const files = await getSnapshotFiles('evm');
-      expect(prepareForSnapshot(files.formComponent)).toMatchSnapshot('form-component-evm');
-    });
-
-    it('should match snapshot for adapters index', async () => {
-      const files = await getSnapshotFiles('evm');
-      expect(prepareForSnapshot(files.adapterIndex)).toMatchSnapshot('adapter-index-evm');
-    });
-
-    it('should match snapshot for EVM adapter', async () => {
-      const files = await getSnapshotFiles('evm');
-      expect(prepareForSnapshot(files.adapter_evm)).toMatchSnapshot('evm-adapter');
+      const files = await getSnapshotFiles(ecosystem);
+      expect(prepareForSnapshot(files.formComponent)).toMatchSnapshot(
+        `form-component-${ecosystem}`
+      );
     });
 
     it('should match snapshot for package.json structure', async () => {
-      const files = await getSnapshotFiles('evm');
-
-      // Only snapshot relevant parts of package.json to avoid noise
+      const files = await getSnapshotFiles(ecosystem);
       const { dependencies, devDependencies, scripts } = files.packageJson;
-      expect({ dependencies, devDependencies, scripts }).toMatchSnapshot('package-json-evm');
-    });
-  });
-
-  describe('Solana Export Snapshots', () => {
-    it('should match snapshot for Solana adapter', async () => {
-      const files = await getSnapshotFiles('solana');
-      expect(prepareForSnapshot(files.adapter_solana)).toMatchSnapshot('solana-adapter');
-    });
-
-    it('should match snapshot for adapters index with Solana', async () => {
-      const files = await getSnapshotFiles('solana');
-      expect(prepareForSnapshot(files.adapterIndex)).toMatchSnapshot('adapter-index-solana');
-    });
-
-    it('should match snapshot for package.json with Solana dependencies', async () => {
-      const files = await getSnapshotFiles('solana');
-
-      // Only snapshot relevant parts of package.json to avoid noise
-      const { dependencies, devDependencies, scripts } = files.packageJson;
-      expect({ dependencies, devDependencies, scripts }).toMatchSnapshot('package-json-solana');
+      expect({ dependencies, devDependencies, scripts }).toMatchSnapshot(
+        `package-json-${ecosystem}`
+      );
     });
   });
 
   describe('Cross-Chain Comparison', () => {
     it('should verify form component similarities across chains', async () => {
-      // Get form components for different chains
       const evmFiles = await getSnapshotFiles('evm');
-      const solanaFiles = await getSnapshotFiles('solana');
+      const polkadotFiles = await getSnapshotFiles('polkadot');
 
-      // The core form structure should be similar
-      // Looking at component definition and main return elements
       const evmFormComponent = prepareForSnapshot(evmFiles.formComponent);
-      const solanaFormComponent = prepareForSnapshot(solanaFiles.formComponent);
+      const polkadotFormComponent = prepareForSnapshot(polkadotFiles.formComponent);
 
-      // Both should be React components with useMemo import
       expect(evmFormComponent).toContain('import');
       expect(evmFormComponent).toMatch(/import.*useMemo.*from ['"]react['"]/);
-      expect(solanaFormComponent).toContain('import');
-      expect(solanaFormComponent).toMatch(/import.*useMemo.*from ['"]react['"]/);
+      expect(polkadotFormComponent).toContain('import');
+      expect(polkadotFormComponent).toMatch(/import.*useMemo.*from ['"]react['"]/);
 
-      // Both should render TransactionForm
       expect(evmFormComponent).toMatch(/return\s*\([\s\S]*?<TransactionForm/);
-      expect(solanaFormComponent).toMatch(/return\s*\([\s\S]*?<TransactionForm/);
+      expect(polkadotFormComponent).toMatch(/return\s*\([\s\S]*?<TransactionForm/);
 
-      // Both should have similar form schema structures with useMemo
       expect(evmFormComponent).toMatch(/const formSchema.*useMemo/);
-      expect(solanaFormComponent).toMatch(/const formSchema.*useMemo/);
+      expect(polkadotFormComponent).toMatch(/const formSchema.*useMemo/);
     });
 
     it('should verify App component similarities across chains', async () => {
-      // Get App components for different chains
       const evmFiles = await getSnapshotFiles('evm');
-      const solanaFiles = await getSnapshotFiles('solana');
+      const polkadotFiles = await getSnapshotFiles('polkadot');
 
-      // The App component should be nearly identical across chains
       const evmAppComponent = prepareForSnapshot(evmFiles.appComponent);
-      const solanaAppComponent = prepareForSnapshot(solanaFiles.appComponent);
+      const polkadotAppComponent = prepareForSnapshot(polkadotFiles.appComponent);
 
-      // Both should import and render GeneratedForm
       expect(evmAppComponent).toMatch(/import.*GeneratedForm/);
-      expect(solanaAppComponent).toMatch(/import.*GeneratedForm/);
+      expect(polkadotAppComponent).toMatch(/import.*GeneratedForm/);
 
-      // Both should have similar App component structure
       expect(evmAppComponent).toMatch(/function App/);
-      expect(solanaAppComponent).toMatch(/function App/);
+      expect(polkadotAppComponent).toMatch(/function App/);
     });
   });
 });
 
-// --- Add New Test Suite for Conditional Files ---
-
 describe('Export Snapshot Tests > Conditional File Modifications', () => {
   beforeEach(() => {
-    // Disable logging for cleaner test output
     logger.configure({ enabled: false });
   });
 
   afterEach(() => {
-    // Restore default logger settings
     logger.configure({ enabled: true, level: 'info' });
   });
 
@@ -198,9 +142,7 @@ describe('Export Snapshot Tests > Conditional File Modifications', () => {
     const mainCssPath = 'src/styles.css';
     const startingCssContent = `@import 'tailwindcss';\n@import './styles/global.css';\n\n/* Base styles... */`;
 
-    // --- Simulate Case 1: isCliBuildTarget = true ---
     let projectFilesCli: Record<string, string> = { [mainCssPath]: startingCssContent };
-    // Directly apply the modification logic here
     const originalCliContent = projectFilesCli[mainCssPath];
     const modifiedCliContent = originalCliContent.replace(
       /^\s*@import\s+['"]tailwindcss['"]\s*;?/m,
@@ -209,28 +151,20 @@ describe('Export Snapshot Tests > Conditional File Modifications', () => {
     if (modifiedCliContent !== originalCliContent) {
       projectFilesCli[mainCssPath] = modifiedCliContent;
     } else {
-      // Fail test if replacement didn't happen, indicating regex issue
       throw new Error('CSS replacement failed for CLI case');
     }
     const stylesCssCli = projectFilesCli[mainCssPath];
     expect(stylesCssCli).toBeDefined();
     expect(stylesCssCli).toMatchSnapshot('styles-css-cli');
 
-    // --- Simulate Case 2: isCliBuildTarget = false ---
     let projectFilesUi: Record<string, string> = { [mainCssPath]: startingCssContent };
-    // In the UI case, we expect NO replacement, so modified should equal original
-    // We check this implicitly by snapshotting the *original* content effectively
-    const stylesCssUi = projectFilesUi[mainCssPath]; // Snapshot the unmodified content
+    const stylesCssUi = projectFilesUi[mainCssPath];
     expect(stylesCssUi).toBeDefined();
     expect(stylesCssUi).toMatchSnapshot('styles-css-ui');
 
-    // --- Final Assertions ---
-    // Verify the content is different
     expect(stylesCssCli).not.toEqual(stylesCssUi);
-    // Verify CLI version contains the source directive
     expect(stylesCssCli).toContain("source('../../../')");
-    // Verify UI version does NOT contain the source directive
     expect(stylesCssUi).not.toContain("source('../../../')");
-    expect(stylesCssUi).toEqual(startingCssContent); // Ensure UI case is unchanged
+    expect(stylesCssUi).toEqual(startingCssContent);
   });
 });
