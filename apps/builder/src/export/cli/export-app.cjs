@@ -74,7 +74,7 @@ ${colors.bold}Commands:${colors.reset}
   verify       Verify UI Builder app functionality
 ${colors.bold}Options:${colors.reset}
   --help, -h                 Show this help information
-  --chain, -c [type]         Chain type (evm, solana, stellar) (default: evm)
+  --chain, -c [type]         Chain type (evm, stellar, polkadot, midnight) (default: evm)
   --func, -f [name]          Function name (default: transfer)
   --output, -o [name]        Subdirectory name within ./exports (default: transfer-app)
   --adapters, -a [boolean]   Include blockchain adapters (default: true)
@@ -325,7 +325,7 @@ function exportAppSimple(options) {
     const exportEnv = options.env === 'packed' ? 'production' : options.env;
 
     const env = {
-      EXPORT_TEST_CHAIN: options.chain,
+      EXPORT_TEST_ECOSYSTEM: options.chain,
       EXPORT_TEST_FUNCTION: options.func,
       EXPORT_TEST_TEMPLATE: options.template,
       EXPORT_TEST_INCLUDE_ADAPTERS: options.adapters.toString(),

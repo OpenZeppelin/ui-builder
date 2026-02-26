@@ -112,6 +112,41 @@ describe('Versioning Safety Guard', () => {
     });
   });
 
+  describe('workspace:* fallback to latest', () => {
+    it('should resolve to latest when an adapter has no versions.ts entry in production', async () => {
+      const versionsModule = await import('../versions');
+      const originalVersions = { ...versionsModule.packageVersions };
+      const testAdapter = adapterPackageMap['evm'];
+
+      // Temporarily remove the EVM adapter from packageVersions to simulate a missing entry
+      delete (versionsModule.packageVersions as Record<string, string>)[testAdapter];
+
+      try {
+        const packageManager = new PackageManager(mockRendererConfig);
+        const updated = await packageManager.updatePackageJson(
+          basePackageJson,
+          minimalFormConfig,
+          'evm',
+          'testFunction',
+          { env: 'production' }
+        );
+
+        const result = JSON.parse(updated);
+        const deps = result.dependencies || {};
+
+        expect(
+          deps[testAdapter],
+          `Adapter "${testAdapter}" with no versions.ts entry should fall back to "latest" in production`
+        ).toBe('latest');
+        expect(deps[testAdapter]).not.toBe('workspace:*');
+      } finally {
+        // Restore the original version entry
+        (versionsModule.packageVersions as Record<string, string>)[testAdapter] =
+          originalVersions[testAdapter as keyof typeof originalVersions];
+      }
+    });
+  });
+
   describe('no workspace:* in production exports', () => {
     it.each(DEVELOPED_ECOSYSTEMS)(
       'should resolve %s adapter dependency to ^semver in production',
