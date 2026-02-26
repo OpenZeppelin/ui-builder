@@ -1,5 +1,11 @@
 # @openzeppelin/ui-builder-adapter-evm-core
 
+## 1.1.2
+
+### Patch Changes
+
+- [#351](https://github.com/OpenZeppelin/ui-builder/pull/351) [`2e23c29`](https://github.com/OpenZeppelin/ui-builder/commit/2e23c29126942dc84be34d606fbdb03111e41dea) Thanks [@pasevin](https://github.com/pasevin)! - Update `@openzeppelin/ui-types` and `@openzeppelin/ui-components` dependency versions.
+
 ## 1.1.1
 
 ### Patch Changes

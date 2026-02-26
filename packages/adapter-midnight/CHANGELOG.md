@@ -1,5 +1,11 @@
 # Midnight Adapter Changelog
 
+## 1.8.0
+
+### Minor Changes
+
+- [#351](https://github.com/OpenZeppelin/ui-builder/pull/351) [`2e23c29`](https://github.com/OpenZeppelin/ui-builder/commit/2e23c29126942dc84be34d606fbdb03111e41dea) Thanks [@pasevin](https://github.com/pasevin)! - Add `./networks` subpath export for lightweight network loading without pulling in full adapter runtime, wallet libraries, or SDK code. Update `@openzeppelin/ui-components` and `@openzeppelin/ui-types` dependency versions.
+
 ## 1.7.0
 
 ### Minor Changes
