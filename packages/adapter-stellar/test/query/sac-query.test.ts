@@ -16,31 +16,35 @@ const convertTypeMock = vi.fn((type) => type);
 const isViewFunctionMock = vi.fn(() => true);
 const nativeToScValMock = vi.fn((value) => value);
 
-vi.mock('@stellar/stellar-sdk', () => ({
-  BASE_FEE: '100',
-  Contract: vi.fn(() => ({
-    call: () => ({}),
-  })),
-  Address: {
-    fromString: vi.fn(() => true),
-  },
-  Account: vi.fn(() => ({})),
-  Keypair: { random: () => ({ publicKey: () => 'GABC' }) },
-  TransactionBuilder: vi.fn(() => ({
-    addOperation: transactionAddOperationMock,
-    setTimeout: transactionSetTimeoutMock,
-    build: transactionBuildMock,
-  })),
-  nativeToScVal: nativeToScValMock,
-  rpc: {
-    Server: vi.fn(() => ({
-      simulateTransaction: simulateTransactionMock,
+vi.mock('@stellar/stellar-sdk', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    BASE_FEE: '100',
+    Contract: vi.fn(() => ({
+      call: () => ({}),
     })),
-    Api: {
-      isSimulationError: () => false,
+    Address: {
+      fromString: vi.fn(() => true),
     },
-  },
-}));
+    Account: vi.fn(() => ({})),
+    Keypair: { random: () => ({ publicKey: () => 'GABC' }) },
+    TransactionBuilder: vi.fn(() => ({
+      addOperation: transactionAddOperationMock,
+      setTimeout: transactionSetTimeoutMock,
+      build: transactionBuildMock,
+    })),
+    nativeToScVal: nativeToScValMock,
+    rpc: {
+      Server: vi.fn(() => ({
+        simulateTransaction: simulateTransactionMock,
+      })),
+      Api: {
+        isSimulationError: () => false,
+      },
+    },
+  };
+});
 
 vi.mock('@openzeppelin/ui-utils', () => ({
   logger: {

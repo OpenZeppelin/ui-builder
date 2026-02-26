@@ -239,7 +239,7 @@ export async function checkStellarFunctionStateMutability(
       `[Check ${functionName}] State mutability check complete:`,
       {
         totalStateChanges: simulationResult.stateChanges?.length || 0,
-        storageChanges: storageChanges.length,
+        storageChangesCount: storageChanges.length,
         modifiesState: hasStorageChanges,
       }
     );
