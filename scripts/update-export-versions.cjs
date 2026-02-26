@@ -8,6 +8,7 @@ const versionsFilePath = path.resolve(__dirname, '../apps/builder/src/export/ver
 const localPackages = [
   '@openzeppelin/ui-builder-adapter-evm',
   '@openzeppelin/ui-builder-adapter-midnight',
+  '@openzeppelin/ui-builder-adapter-polkadot',
   '@openzeppelin/ui-builder-adapter-solana',
   '@openzeppelin/ui-builder-adapter-stellar',
 ];

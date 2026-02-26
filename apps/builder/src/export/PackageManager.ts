@@ -532,7 +532,14 @@ export class PackageManager {
           }
         } else {
           // Production: Use stable published versions
-          if (managedVersion.startsWith('^') || managedVersion === 'workspace:*') {
+          if (managedVersion === 'workspace:*') {
+            logger.warn(
+              'PackageManager',
+              `Adapter package "${pkgName}" has no managed version in versions.ts. ` +
+                `Falling back to 'latest' dist-tag for production.`
+            );
+            updatedDependencies[pkgName] = 'latest';
+          } else if (managedVersion.startsWith('^')) {
             updatedDependencies[pkgName] = managedVersion;
           } else {
             updatedDependencies[pkgName] = `^${managedVersion}`;

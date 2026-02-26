@@ -204,18 +204,14 @@ function packMonorepoPackages() {
 
       if (fs.existsSync(tarballPath)) {
         packedMap[pkgName] = tarballPath;
-        console.log(
-          `  ${colors.green}✓${colors.reset} ${pkgName} → ${path.basename(tarballPath)}`
-        );
+        console.log(`  ${colors.green}✓${colors.reset} ${pkgName} → ${path.basename(tarballPath)}`);
       }
     } catch (error) {
       console.log(`  ${colors.yellow}⚠${colors.reset} Skipping ${pkgName} (pack failed)`);
     }
   }
 
-  console.log(
-    `\n${colors.green}✓ Packed ${Object.keys(packedMap).length} packages${colors.reset}`
-  );
+  console.log(`\n${colors.green}✓ Packed ${Object.keys(packedMap).length} packages${colors.reset}`);
   return { packDir, packedMap };
 }
 
@@ -397,9 +393,10 @@ function exportAppSimple(options) {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const packageOverrides = {
           '@openzeppelin/ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
+          '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
+          '@openzeppelin/ui-builder-adapter-polkadot': `file:${path.join(monorepoRoot, 'packages/adapter-polkadot')}`,
           '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
           '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
-          '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
           '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
           '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,
@@ -429,9 +426,7 @@ function exportAppSimple(options) {
       configureForPackedMode(extractDir, packedResult.packedMap);
 
       const tempDir = path.join(os.tmpdir(), `ui-builder-packed-test-${Date.now()}`);
-      console.log(
-        `\n${colors.blue}Moving project to isolated test directory...${colors.reset}`
-      );
+      console.log(`\n${colors.blue}Moving project to isolated test directory...${colors.reset}`);
       fs.cpSync(extractDir, tempDir, { recursive: true });
       console.log(`${colors.green}✓ Project copied to:${colors.reset} ${tempDir}`);
 
@@ -439,10 +434,16 @@ function exportAppSimple(options) {
       execInDir('pnpm install --no-frozen-lockfile', tempDir);
       console.log(`${colors.green}✓ Dependencies installed${colors.reset}`);
 
-      console.log(`\n${colors.blue}Building exported app (verifying types and bundling)...${colors.reset}`);
+      console.log(
+        `\n${colors.blue}Building exported app (verifying types and bundling)...${colors.reset}`
+      );
       execInDir('pnpm build', tempDir);
-      console.log(`\n${colors.green}${colors.bold}✓ Packed build verification passed!${colors.reset}`);
-      console.log(`  ${colors.dim}Types, bundling, and Tailwind all resolved correctly.${colors.reset}`);
+      console.log(
+        `\n${colors.green}${colors.bold}✓ Packed build verification passed!${colors.reset}`
+      );
+      console.log(
+        `  ${colors.dim}Types, bundling, and Tailwind all resolved correctly.${colors.reset}`
+      );
       console.log(`\n${colors.cyan}Test directory:${colors.reset} ${tempDir}`);
       console.log(`\n${colors.cyan}To clean up:${colors.reset}`);
       console.log(`  rm -rf ${tempDir}`);

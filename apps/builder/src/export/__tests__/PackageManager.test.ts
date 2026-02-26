@@ -13,6 +13,7 @@ vi.mock('../versions', async () => {
     packageVersions: {
       '@openzeppelin/ui-builder-adapter-evm': '0.2.0',
       '@openzeppelin/ui-builder-adapter-midnight': '0.0.4',
+      '@openzeppelin/ui-builder-adapter-polkadot': '0.2.0',
       '@openzeppelin/ui-builder-adapter-solana': '0.0.3',
       '@openzeppelin/ui-builder-adapter-stellar': '0.0.3',
       '@openzeppelin/ui-react': '0.1.3',
@@ -71,6 +72,20 @@ const mockSolanaAdapterConfig: AdapterConfig = {
   overrides: {},
 };
 
+// Mock Polkadot config (no patchedDependencies, uses EVM-compatible libs)
+const mockPolkadotAdapterConfig: AdapterConfig = {
+  dependencies: {
+    runtime: {
+      viem: '^2.0.0',
+      wagmi: '^2.0.0',
+      '@rainbow-me/rainbowkit': '^2.0.0',
+    },
+    dev: {},
+    build: {},
+  },
+  overrides: {},
+};
+
 // Mock Stellar config (no patchedDependencies)
 const mockStellarAdapterConfig: AdapterConfig = {
   dependencies: {
@@ -91,6 +106,8 @@ vi.mock('../AdapterConfigLoader', () => ({
           return mockMidnightAdapterConfig;
         case 'evm':
           return mockEvmAdapterConfig;
+        case 'polkadot':
+          return mockPolkadotAdapterConfig;
         case 'solana':
           return mockSolanaAdapterConfig;
         case 'stellar':
@@ -405,6 +422,41 @@ describe('PackageManager', () => {
       // Verify external deps don't get -rc treatment
       expect(result.dependencies['react']).not.toMatch(/-rc$/);
       expect(result.dependencies['react-dom']).not.toMatch(/-rc$/);
+    });
+
+    it('should apply versioning strategy correctly for polkadot (prod env)', async () => {
+      const formConfig = createMinimalFormConfig();
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'polkadot',
+        'testFunction',
+        { env: 'production' }
+      );
+      const result = JSON.parse(updated);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-polkadot']).toMatch(/^\^/);
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-polkadot']).not.toBe(
+        'workspace:*'
+      );
+    });
+
+    it('should apply versioning strategy correctly for polkadot (staging env)', async () => {
+      const formConfig = createMinimalFormConfig();
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'polkadot',
+        'testFunction',
+        { env: 'staging' }
+      );
+      const result = JSON.parse(updated);
+      const rcVersionOrTag = /^(rc|\d+\.\d+\.\d+-rc(?:[-.]\d+)?)$/;
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-polkadot']).toMatch(
+        rcVersionOrTag
+      );
+      expect(result.dependencies['@openzeppelin/ui-builder-adapter-polkadot']).not.toBe(
+        'workspace:*'
+      );
     });
 
     it('should handle already RC versions in staging environment', async () => {
