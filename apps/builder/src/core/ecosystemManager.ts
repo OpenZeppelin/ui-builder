@@ -33,44 +33,52 @@ const ecosystemMetadataRegistry: Record<Ecosystem, EcosystemMetadata> = {
 // Full Adapter Module Loading (lazy — static switch required by Vite)
 // =============================================================================
 
-const ecosystemCache: Partial<Record<Ecosystem, EcosystemExport>> = {};
+const adapterPromiseCache: Partial<Record<Ecosystem, Promise<EcosystemExport>>> = {};
 
 /**
  * Loads the full adapter module (networks, createAdapter, adapterConfig).
  * This is the "heavy" import — only called when the adapter is actually needed.
+ * Caches the in-flight promise to deduplicate concurrent calls and clears the
+ * cache entry on failure so transient errors can be retried.
  */
 async function loadAdapterModule(ecosystem: Ecosystem): Promise<EcosystemExport> {
-  const cached = ecosystemCache[ecosystem];
+  const cached = adapterPromiseCache[ecosystem];
   if (cached) return cached;
 
-  let mod: { ecosystemDefinition: EcosystemExport };
-  switch (ecosystem) {
-    case 'evm':
-      mod = await import('@openzeppelin/ui-builder-adapter-evm');
-      break;
-    case 'solana':
-      mod = await import('@openzeppelin/ui-builder-adapter-solana');
-      break;
-    case 'stellar':
-      mod = await import('@openzeppelin/ui-builder-adapter-stellar');
-      break;
-    case 'midnight':
-      mod = await import('@openzeppelin/ui-builder-adapter-midnight');
-      break;
-    case 'polkadot':
-      mod = await import('@openzeppelin/ui-builder-adapter-polkadot');
-      break;
-    default: {
-      const _exhaustiveCheck: never = ecosystem;
-      throw new Error(
-        `Adapter package module not defined for ecosystem: ${String(_exhaustiveCheck)}`
-      );
+  const promise = (async (): Promise<EcosystemExport> => {
+    let mod: { ecosystemDefinition: EcosystemExport };
+    switch (ecosystem) {
+      case 'evm':
+        mod = await import('@openzeppelin/ui-builder-adapter-evm');
+        break;
+      case 'solana':
+        mod = await import('@openzeppelin/ui-builder-adapter-solana');
+        break;
+      case 'stellar':
+        mod = await import('@openzeppelin/ui-builder-adapter-stellar');
+        break;
+      case 'midnight':
+        mod = await import('@openzeppelin/ui-builder-adapter-midnight');
+        break;
+      case 'polkadot':
+        mod = await import('@openzeppelin/ui-builder-adapter-polkadot');
+        break;
+      default: {
+        const _exhaustiveCheck: never = ecosystem;
+        throw new Error(
+          `Adapter package module not defined for ecosystem: ${String(_exhaustiveCheck)}`
+        );
+      }
     }
-  }
+    return mod.ecosystemDefinition;
+  })();
 
-  const def = mod.ecosystemDefinition;
-  ecosystemCache[ecosystem] = def;
-  return def;
+  adapterPromiseCache[ecosystem] = promise;
+  promise.catch(() => {
+    delete adapterPromiseCache[ecosystem];
+  });
+
+  return promise;
 }
 
 // =============================================================================
@@ -78,6 +86,7 @@ async function loadAdapterModule(ecosystem: Ecosystem): Promise<EcosystemExport>
 // =============================================================================
 
 const networksByEcosystemCache: Partial<Record<Ecosystem, NetworkConfig[]>> = {};
+const networkPromiseCache: Partial<Record<Ecosystem, Promise<NetworkConfig[]>>> = {};
 
 const ALL_ECOSYSTEMS: Ecosystem[] = ['evm', 'solana', 'stellar', 'midnight', 'polkadot'];
 
@@ -86,36 +95,52 @@ const ALL_ECOSYSTEMS: Ecosystem[] = ['evm', 'solana', 'stellar', 'midnight', 'po
  * than `loadAdapterModule` because it imports from the `/networks` subpath,
  * which only pulls in static config objects + icons — no adapter runtime,
  * wallet libraries, or SDK code.
+ *
+ * Caches the in-flight promise to deduplicate concurrent calls. Resolved
+ * values are stored in `networksByEcosystemCache` for synchronous lookups.
+ * On failure the promise cache entry is cleared so the next call retries.
  */
 async function loadNetworksModule(ecosystem: Ecosystem): Promise<NetworkConfig[]> {
-  const cached = networksByEcosystemCache[ecosystem];
-  if (cached) return cached;
+  const resolvedCache = networksByEcosystemCache[ecosystem];
+  if (resolvedCache) return resolvedCache;
 
-  let mod: { networks: NetworkConfig[] };
-  switch (ecosystem) {
-    case 'evm':
-      mod = await import('@openzeppelin/ui-builder-adapter-evm/networks');
-      break;
-    case 'solana':
-      mod = await import('@openzeppelin/ui-builder-adapter-solana/networks');
-      break;
-    case 'stellar':
-      mod = await import('@openzeppelin/ui-builder-adapter-stellar/networks');
-      break;
-    case 'midnight':
-      mod = await import('@openzeppelin/ui-builder-adapter-midnight/networks');
-      break;
-    case 'polkadot':
-      mod = await import('@openzeppelin/ui-builder-adapter-polkadot/networks');
-      break;
-    default: {
-      const _exhaustiveCheck: never = ecosystem;
-      throw new Error(`Networks module not defined for ecosystem: ${String(_exhaustiveCheck)}`);
+  const inflight = networkPromiseCache[ecosystem];
+  if (inflight) return inflight;
+
+  const promise = (async (): Promise<NetworkConfig[]> => {
+    let mod: { networks: NetworkConfig[] };
+    switch (ecosystem) {
+      case 'evm':
+        mod = await import('@openzeppelin/ui-builder-adapter-evm/networks');
+        break;
+      case 'solana':
+        mod = await import('@openzeppelin/ui-builder-adapter-solana/networks');
+        break;
+      case 'stellar':
+        mod = await import('@openzeppelin/ui-builder-adapter-stellar/networks');
+        break;
+      case 'midnight':
+        mod = await import('@openzeppelin/ui-builder-adapter-midnight/networks');
+        break;
+      case 'polkadot':
+        mod = await import('@openzeppelin/ui-builder-adapter-polkadot/networks');
+        break;
+      default: {
+        const _exhaustiveCheck: never = ecosystem;
+        throw new Error(`Networks module not defined for ecosystem: ${String(_exhaustiveCheck)}`);
+      }
     }
-  }
 
-  networksByEcosystemCache[ecosystem] = mod.networks;
-  return mod.networks;
+    networksByEcosystemCache[ecosystem] = mod.networks;
+    return mod.networks;
+  })();
+
+  networkPromiseCache[ecosystem] = promise;
+  promise.catch(() => {
+    delete networkPromiseCache[ecosystem];
+  });
+
+  return promise;
 }
 
 // =============================================================================
@@ -127,7 +152,6 @@ export async function getNetworksByEcosystem(ecosystem: Ecosystem): Promise<Netw
     return await loadNetworksModule(ecosystem);
   } catch (error) {
     logger.error('EcosystemManager', `Error loading networks for ${ecosystem}:`, error);
-    networksByEcosystemCache[ecosystem] = [];
     return [];
   }
 }
@@ -151,21 +175,6 @@ export async function getAllNetworks(): Promise<NetworkConfig[]> {
 export async function getNetworkById(id: string): Promise<NetworkConfig | undefined> {
   logger.info('EcosystemManager(getNetworkById)', `Attempting to get network by ID: '${id}'`);
 
-  for (const ecosystemKey of Object.keys(networksByEcosystemCache)) {
-    const ecosystem = ecosystemKey as Ecosystem;
-    const cached = networksByEcosystemCache[ecosystem];
-    if (cached) {
-      const network = cached.find((n) => n.id === id);
-      if (network) {
-        logger.info(
-          'EcosystemManager(getNetworkById)',
-          `Network ID '${id}' found in cache for ecosystem: ${ecosystem}.`
-        );
-        return network;
-      }
-    }
-  }
-
   for (const ecosystem of ALL_ECOSYSTEMS) {
     let networks = networksByEcosystemCache[ecosystem];
     if (!networks) {
@@ -173,7 +182,11 @@ export async function getNetworkById(id: string): Promise<NetworkConfig | undefi
         'EcosystemManager(getNetworkById)',
         `Loading networks for ecosystem: ${ecosystem} to find ID '${id}'.`
       );
-      networks = await getNetworksByEcosystem(ecosystem);
+      try {
+        networks = await getNetworksByEcosystem(ecosystem);
+      } catch {
+        continue;
+      }
     }
     const found = networks?.find((n) => n.id === id);
     if (found) {
