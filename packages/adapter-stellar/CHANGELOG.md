@@ -1,5 +1,11 @@
 # @openzeppelin/transaction-form-adapter-stellar
 
+## 1.8.1
+
+### Patch Changes
+
+- [#355](https://github.com/OpenZeppelin/ui-builder/pull/355) [`897d266`](https://github.com/OpenZeppelin/ui-builder/commit/897d266916ae3b2917bf37a136907c0f9b6bb822) Thanks [@pasevin](https://github.com/pasevin)! - Fix state mutability detection for Stellar contracts falsely classifying all functions as state-modifying. Filters out infrastructure state changes (contract instance and WASM code TTL bumps) that occur on every invocation, so read-only functions like `owner()`, `paused()`, and `get_settings()` are correctly identified as view functions.
+
 ## 1.8.0
 
 ### Minor Changes
