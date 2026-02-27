@@ -6,6 +6,7 @@ import {
   nativeToScVal,
   rpc as StellarRpc,
   TransactionBuilder,
+  xdr,
 } from '@stellar/stellar-sdk';
 
 import type {
@@ -205,21 +206,45 @@ export async function checkStellarFunctionStateMutability(
       return true;
     }
 
-    // --- Check State Changes (following Laboratory approach) --- //
-    const hasStateChanges =
-      simulationResult.stateChanges && simulationResult.stateChanges.length > 0;
+    // --- Check State Changes --- //
+    // Filter out infrastructure state changes that occur for every invocation:
+    // 1. CONTRACT_CODE entries (WASM code TTL bumps)
+    // 2. CONTRACT_DATA entries with scvLedgerKeyContractInstance key (instance TTL bumps)
+    // Only remaining entries represent actual contract storage modifications.
+    const storageChanges = (simulationResult.stateChanges ?? []).filter((change) => {
+      try {
+        const keyType = change.key.switch();
+
+        if (keyType === xdr.LedgerEntryType.contractCode()) {
+          return false;
+        }
+
+        if (keyType === xdr.LedgerEntryType.contractData()) {
+          const dataKey = change.key.contractData().key();
+          if (dataKey.switch() === xdr.ScValType.scvLedgerKeyContractInstance()) {
+            return false;
+          }
+        }
+
+        return true;
+      } catch {
+        return true;
+      }
+    });
+
+    const hasStorageChanges = storageChanges.length > 0;
 
     logger.info(
       'checkStellarFunctionStateMutability',
       `[Check ${functionName}] State mutability check complete:`,
       {
-        hasStateChanges,
-        stateChangesCount: simulationResult.stateChanges?.length || 0,
-        modifiesState: Boolean(hasStateChanges),
+        totalStateChanges: simulationResult.stateChanges?.length || 0,
+        storageChangesCount: storageChanges.length,
+        modifiesState: hasStorageChanges,
       }
     );
 
-    return Boolean(hasStateChanges);
+    return hasStorageChanges;
   } catch (error) {
     logger.warn(
       'checkStellarFunctionStateMutability',
