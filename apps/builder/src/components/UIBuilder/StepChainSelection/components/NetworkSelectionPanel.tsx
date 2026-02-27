@@ -9,6 +9,7 @@ import { logger } from '@openzeppelin/ui-utils';
 
 import { getEcosystemMetadata } from '../../../../core/ecosystemManager';
 import { networkService } from '../../../../core/networks/service';
+import { useUIBuilderStore } from '../../hooks/useUIBuilderStore';
 import { NetworkRow } from './NetworkRow';
 
 interface NetworkSelectionPanelProps {
@@ -29,6 +30,7 @@ export function NetworkSelectionPanel({
   const [settingsNetwork, setSettingsNetwork] = useState<NetworkConfig | null>(null);
   const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
   const { getAdapterForNetwork } = useAdapterContext();
+  const pendingNetworkId = useUIBuilderStore((s) => s.pendingNetworkId);
 
   // Get adapter for the settings network
   useEffect(() => {
@@ -117,6 +119,7 @@ export function NetworkSelectionPanel({
               networks={mainnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              loadingNetworkId={pendingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
@@ -127,6 +130,7 @@ export function NetworkSelectionPanel({
               networks={testnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              loadingNetworkId={pendingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
@@ -137,6 +141,7 @@ export function NetworkSelectionPanel({
               networks={devnetNetworks}
               onNetworkSelected={onNetworkSelected}
               selectedNetworkId={selectedNetworkId}
+              loadingNetworkId={pendingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
@@ -159,6 +164,7 @@ interface NetworkGroupProps {
   networks: NetworkConfig[];
   onNetworkSelected: (networkConfigId: string) => void;
   selectedNetworkId?: string | null;
+  loadingNetworkId?: string | null;
   onOpenNetworkSettings: (network: NetworkConfig, event: React.MouseEvent) => void;
 }
 
@@ -167,6 +173,7 @@ function NetworkGroup({
   networks,
   onNetworkSelected,
   selectedNetworkId,
+  loadingNetworkId,
   onOpenNetworkSettings,
 }: NetworkGroupProps) {
   return (
@@ -180,6 +187,7 @@ function NetworkGroup({
             <NetworkRow
               network={network}
               isSelected={network.id === selectedNetworkId}
+              isLoading={network.id === loadingNetworkId}
               onSelect={() => onNetworkSelected(network.id)}
               onOpenSettings={(e) => onOpenNetworkSettings(network, e)}
             />
