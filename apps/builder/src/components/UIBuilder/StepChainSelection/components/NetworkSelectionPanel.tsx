@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Input } from '@openzeppelin/ui-components';
 import { useAdapterContext } from '@openzeppelin/ui-react';
@@ -31,6 +31,26 @@ export function NetworkSelectionPanel({
   const [settingsAdapter, setSettingsAdapter] = useState<ContractAdapter | null>(null);
   const { getAdapterForNetwork } = useAdapterContext();
   const pendingNetworkId = useUIBuilderStore((s) => s.pendingNetworkId);
+
+  // Local state set synchronously on click for instant feedback,
+  // cleared once the store confirms the adapter finished loading.
+  const [clickedNetworkId, setClickedNetworkId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingNetworkId && clickedNetworkId) {
+      setClickedNetworkId(null);
+    }
+  }, [pendingNetworkId, clickedNetworkId]);
+
+  const loadingNetworkId = clickedNetworkId ?? pendingNetworkId;
+
+  const handleNetworkClick = useCallback(
+    (networkId: string) => {
+      setClickedNetworkId(networkId);
+      onNetworkSelected(networkId);
+    },
+    [onNetworkSelected]
+  );
 
   // Get adapter for the settings network
   useEffect(() => {
@@ -117,9 +137,9 @@ export function NetworkSelectionPanel({
             <NetworkGroup
               title="Mainnet"
               networks={mainnetNetworks}
-              onNetworkSelected={onNetworkSelected}
+              onNetworkSelected={handleNetworkClick}
               selectedNetworkId={selectedNetworkId}
-              loadingNetworkId={pendingNetworkId}
+              loadingNetworkId={loadingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
@@ -128,9 +148,9 @@ export function NetworkSelectionPanel({
             <NetworkGroup
               title="Testnet"
               networks={testnetNetworks}
-              onNetworkSelected={onNetworkSelected}
+              onNetworkSelected={handleNetworkClick}
               selectedNetworkId={selectedNetworkId}
-              loadingNetworkId={pendingNetworkId}
+              loadingNetworkId={loadingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
@@ -139,9 +159,9 @@ export function NetworkSelectionPanel({
             <NetworkGroup
               title="Devnet"
               networks={devnetNetworks}
-              onNetworkSelected={onNetworkSelected}
+              onNetworkSelected={handleNetworkClick}
               selectedNetworkId={selectedNetworkId}
-              loadingNetworkId={pendingNetworkId}
+              loadingNetworkId={loadingNetworkId}
               onOpenNetworkSettings={handleOpenNetworkSettings}
             />
           )}
