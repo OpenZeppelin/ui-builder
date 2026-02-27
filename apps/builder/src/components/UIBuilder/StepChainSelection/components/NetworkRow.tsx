@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react';
+import { Loader2, Settings } from 'lucide-react';
 
 import { Button, NetworkIcon } from '@openzeppelin/ui-components';
 import type { NetworkConfig } from '@openzeppelin/ui-types';
@@ -10,11 +10,18 @@ import { NetworkDetail } from './NetworkDetail';
 export interface NetworkRowProps {
   network: NetworkConfig;
   isSelected: boolean;
+  isLoading?: boolean;
   onSelect: () => void;
   onOpenSettings?: (event: React.MouseEvent) => void;
 }
 
-export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: NetworkRowProps) {
+export function NetworkRow({
+  network,
+  isSelected,
+  isLoading = false,
+  onSelect,
+  onOpenSettings,
+}: NetworkRowProps) {
   const isTestnetLike = network.type === 'testnet' || network.type === 'devnet';
 
   return (
@@ -61,40 +68,47 @@ export function NetworkRow({ network, isSelected, onSelect, onOpenSettings }: Ne
 
       {/* Action buttons */}
       <div className="flex items-center gap-2">
-        {/* Select button - visible on hover */}
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect();
-          }}
-          className={cn(
-            'h-8 px-3 text-xs',
-            // Visible on mobile (sm and below), hover-only on desktop (md and up)
-            'opacity-100 sm:opacity-0 sm:group-hover:opacity-100',
-            'transition-opacity duration-200'
-          )}
-        >
-          Select
-        </Button>
+        {isLoading ? (
+          <div className="flex items-center gap-2 h-8 px-3 text-xs text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Loading…</span>
+          </div>
+        ) : (
+          <>
+            {/* Select button - visible on hover */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+              className={cn(
+                'h-8 px-3 text-xs',
+                'opacity-100 sm:opacity-0 sm:group-hover:opacity-100',
+                'transition-opacity duration-200'
+              )}
+            >
+              Select
+            </Button>
 
-        {/* Settings button - visible on mobile, hover-only on desktop */}
-        {onOpenSettings && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onOpenSettings}
-            className={cn(
-              'size-8 p-0',
-              // Visible on mobile (sm and below), hover-only on desktop (md and up)
-              'opacity-100 sm:opacity-0 sm:group-hover:opacity-100',
-              'transition-opacity duration-200'
+            {/* Settings button - visible on mobile, hover-only on desktop */}
+            {onOpenSettings && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onOpenSettings}
+                className={cn(
+                  'size-8 p-0',
+                  'opacity-100 sm:opacity-0 sm:group-hover:opacity-100',
+                  'transition-opacity duration-200'
+                )}
+                title="Configure network settings"
+              >
+                <Settings size={14} />
+              </Button>
             )}
-            title="Configure network settings"
-          >
-            <Settings size={14} />
-          </Button>
+          </>
         )}
       </div>
     </div>
