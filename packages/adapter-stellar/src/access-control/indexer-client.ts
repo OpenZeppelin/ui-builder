@@ -33,7 +33,7 @@ const LOG_SYSTEM = 'StellarIndexerClient';
  * @returns The indexer endpoint config if configured and valid, undefined otherwise
  */
 function getUserIndexerEndpoints(networkId: string): IndexerEndpointConfig | undefined {
-  const svcCfg = userNetworkServiceConfigService.get(networkId, 'indexer');
+  const svcCfg = userNetworkServiceConfigService.get(networkId, 'access-control-indexer');
   if (!svcCfg || typeof svcCfg !== 'object') {
     return undefined;
   }
@@ -230,7 +230,7 @@ export class StellarIndexerClient {
     // Subscribe to indexer config changes to reset cache when user updates settings
     this.unsubscribeFromConfigChanges = userNetworkServiceConfigService.subscribe(
       networkConfig.id,
-      'indexer',
+      'access-control-indexer',
       () => {
         logger.info(
           LOG_SYSTEM,

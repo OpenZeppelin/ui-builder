@@ -79,7 +79,7 @@ describe('StellarIndexerClient - User Configuration', () => {
       await client.checkAvailability().catch(() => {});
 
       // Verify userNetworkServiceConfigService.get was called with correct params
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
     });
 
     it('should prioritize user config over AppConfigService', async () => {
@@ -97,7 +97,7 @@ describe('StellarIndexerClient - User Configuration', () => {
       await client.checkAvailability().catch(() => {});
 
       // User config should be checked first
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
     });
 
     it('should fall back to AppConfigService when no user config', async () => {
@@ -108,7 +108,7 @@ describe('StellarIndexerClient - User Configuration', () => {
 
       await client.checkAvailability().catch(() => {});
 
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
       expect(mockAppConfigGetIndexer).toHaveBeenCalledWith('stellar-testnet');
     });
 
@@ -125,7 +125,7 @@ describe('StellarIndexerClient - User Configuration', () => {
 
       await client.checkAvailability().catch(() => {});
 
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
       expect(mockAppConfigGetIndexer).toHaveBeenCalledWith('stellar-testnet');
     });
 
@@ -140,7 +140,7 @@ describe('StellarIndexerClient - User Configuration', () => {
       await client.checkAvailability().catch(() => {});
 
       // Should have tried user config but fallen back due to invalid URL
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
       expect(mockAppConfigGetIndexer).toHaveBeenCalledWith('stellar-testnet');
     });
 
@@ -154,7 +154,7 @@ describe('StellarIndexerClient - User Configuration', () => {
 
       await client.checkAvailability().catch(() => {});
 
-      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'indexer');
+      expect(mockUserConfigGet).toHaveBeenCalledWith('stellar-testnet', 'access-control-indexer');
     });
   });
 
@@ -166,7 +166,7 @@ describe('StellarIndexerClient - User Configuration', () => {
 
       expect(mockUserConfigSubscribe).toHaveBeenCalledWith(
         'stellar-testnet',
-        'indexer',
+        'access-control-indexer',
         expect.any(Function)
       );
     });

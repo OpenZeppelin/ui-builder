@@ -12,7 +12,7 @@ import { testStellarRpcConnection, validateStellarRpcEndpoint } from './rpc';
  * Used for proactive health checks when no user overrides are configured.
  *
  * @param networkConfig The network configuration
- * @param serviceId The service identifier (e.g., 'rpc', 'indexer')
+ * @param serviceId The service identifier (e.g., 'rpc', 'access-control-indexer')
  * @returns The default configuration values, or null if not available
  */
 export function getStellarDefaultServiceConfig(
@@ -25,8 +25,8 @@ export function getStellarDefaultServiceConfig(
         return { sorobanRpcUrl: networkConfig.sorobanRpcUrl };
       }
       break;
-    case 'indexer':
-      // Indexer is optional for Stellar - only return if both URLs are configured
+    case 'access-control-indexer':
+      // Access control indexer is optional for Stellar - only return if both URLs are configured
       if (networkConfig.indexerUri && networkConfig.indexerWsUri) {
         return {
           indexerUri: networkConfig.indexerUri,
@@ -40,7 +40,7 @@ export function getStellarDefaultServiceConfig(
 
 /**
  * Returns the network service forms for Stellar networks.
- * Defines the UI configuration for the RPC and Indexer services.
+ * Defines the UI configuration for the RPC and Access Control Indexer services.
  *
  * @param exclude Optional array of service IDs to exclude from the returned forms
  * @returns Array of network service forms
@@ -63,26 +63,29 @@ export function getStellarNetworkServiceForms(exclude: string[] = []): NetworkSe
       ],
     },
     {
-      id: 'indexer',
-      label: 'Indexer',
-      description: 'Optional GraphQL indexer endpoint for historical access control data',
+      id: 'access-control-indexer',
+      label: 'Access Control Indexer',
+      description:
+        'Optional GraphQL indexer endpoint for historical access control data. Overrides the default indexer URL for this network.',
       supportsConnectionTest: true,
+      requiredFeature: 'access_control_indexer',
       fields: [
         {
-          id: 'stellar-indexer-uri',
+          id: 'stellar-access-control-indexer-uri',
           name: 'indexerUri',
           type: 'text',
-          label: 'Indexer GraphQL HTTP Endpoint',
+          label: 'Access Control Indexer GraphQL Endpoint',
           placeholder: 'https://indexer.example.com/graphql',
           validation: { required: false, pattern: '^https?://.+' },
           width: 'full',
-          helperText: 'Optional. Used for querying historical access control events.',
+          helperText:
+            'Optional. Used for querying historical access control events and role discovery.',
         },
         {
-          id: 'stellar-indexer-ws-uri',
+          id: 'stellar-access-control-indexer-ws-uri',
           name: 'indexerWsUri',
           type: 'text',
-          label: 'Indexer GraphQL WebSocket Endpoint',
+          label: 'Access Control Indexer GraphQL WebSocket Endpoint',
           placeholder: 'wss://indexer.example.com/graphql',
           validation: { required: false, pattern: '^wss?://.+' },
           width: 'full',
@@ -110,7 +113,7 @@ export async function validateStellarNetworkServiceConfig(
     return validateStellarRpcEndpoint(cfg);
   }
 
-  if (serviceId === 'indexer') {
+  if (serviceId === 'access-control-indexer') {
     // Validate indexerUri if provided
     if (values.indexerUri !== undefined && values.indexerUri !== null && values.indexerUri !== '') {
       if (!isValidUrl(String(values.indexerUri))) {
@@ -150,7 +153,7 @@ export async function testStellarNetworkServiceConnection(
     return testStellarRpcConnection(cfg);
   }
 
-  if (serviceId === 'indexer') {
+  if (serviceId === 'access-control-indexer') {
     const indexerUri = values.indexerUri;
 
     // If no indexer URI is provided, indexer is optional - return success (nothing to test)

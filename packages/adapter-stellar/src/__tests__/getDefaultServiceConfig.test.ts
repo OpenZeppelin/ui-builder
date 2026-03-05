@@ -50,14 +50,14 @@ describe('getStellarDefaultServiceConfig', () => {
     });
   });
 
-  describe('indexer service', () => {
+  describe('access-control-indexer service', () => {
     it('should return indexer config when both URLs are present', () => {
       const networkConfig = createMockNetworkConfig({
         indexerUri: 'https://indexer.stellar.example/graphql',
         indexerWsUri: 'wss://indexer.stellar.example/graphql',
       });
 
-      const result = getStellarDefaultServiceConfig(networkConfig, 'indexer');
+      const result = getStellarDefaultServiceConfig(networkConfig, 'access-control-indexer');
 
       expect(result).toEqual({
         indexerUri: 'https://indexer.stellar.example/graphql',
@@ -70,7 +70,7 @@ describe('getStellarDefaultServiceConfig', () => {
         indexerWsUri: 'wss://indexer.stellar.example/graphql',
       });
 
-      const result = getStellarDefaultServiceConfig(networkConfig, 'indexer');
+      const result = getStellarDefaultServiceConfig(networkConfig, 'access-control-indexer');
 
       expect(result).toBeNull();
     });
@@ -80,7 +80,7 @@ describe('getStellarDefaultServiceConfig', () => {
         indexerUri: 'https://indexer.stellar.example/graphql',
       });
 
-      const result = getStellarDefaultServiceConfig(networkConfig, 'indexer');
+      const result = getStellarDefaultServiceConfig(networkConfig, 'access-control-indexer');
 
       expect(result).toBeNull();
     });
@@ -88,7 +88,7 @@ describe('getStellarDefaultServiceConfig', () => {
     it('should return null when neither indexer URL is present', () => {
       const networkConfig = createMockNetworkConfig();
 
-      const result = getStellarDefaultServiceConfig(networkConfig, 'indexer');
+      const result = getStellarDefaultServiceConfig(networkConfig, 'access-control-indexer');
 
       expect(result).toBeNull();
     });
