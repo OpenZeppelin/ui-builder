@@ -35,7 +35,7 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'hub',
   relayChain: 'polkadot',
-  // TODO: Add accessControlIndexerUrl when indexer is deployed for Polkadot Hub
+  accessControlIndexerUrl: 'https://openzeppelin-polkadot-hub-mainnet.graphql.subquery.network',
 };
 
 /**
@@ -104,7 +104,7 @@ export const moonbeamMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'parachain',
   relayChain: 'polkadot',
-  // TODO: Add accessControlIndexerUrl when indexer is deployed for Moonbeam
+  accessControlIndexerUrl: 'https://openzeppelin-moonbeam-mainnet.graphql.subquery.network',
 };
 
 /**
@@ -135,7 +135,7 @@ export const moonriverMainnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'parachain',
   relayChain: 'kusama',
-  // TODO: Add accessControlIndexerUrl when indexer is deployed for Moonriver
+  accessControlIndexerUrl: 'https://openzeppelin-moonriver-mainnet.graphql.subquery.network',
 };
 
 /**

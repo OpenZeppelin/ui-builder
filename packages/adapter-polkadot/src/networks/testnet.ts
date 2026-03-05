@@ -39,7 +39,7 @@ export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'hub',
   relayChain: 'polkadot',
-  // TODO: Add accessControlIndexerUrl when indexer is deployed for Polkadot Hub TestNet
+  accessControlIndexerUrl: 'https://openzeppelin-polkadot-hub-testnet.graphql.subquery.network',
 };
 
 // ============================================================================
@@ -74,7 +74,7 @@ export const moonbaseAlphaTestnet: TypedPolkadotNetworkConfig = {
   executionType: 'evm',
   networkCategory: 'parachain',
   relayChain: undefined, // Testnet, no relay chain
-  // TODO: Add accessControlIndexerUrl when indexer is deployed for Moonbase Alpha
+  accessControlIndexerUrl: 'https://openzeppelin-moonbase-alpha-testnet.graphql.subquery.network',
 };
 
 /**
