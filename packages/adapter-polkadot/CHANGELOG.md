@@ -1,5 +1,11 @@
 # @openzeppelin/ui-builder-adapter-polkadot
 
+## 1.8.2
+
+### Patch Changes
+
+- [#358](https://github.com/OpenZeppelin/ui-builder/pull/358) [`5eb64ea`](https://github.com/OpenZeppelin/ui-builder/commit/5eb64ea5738a60f7a2720cb508159067861ea200) Thanks [@pasevin](https://github.com/pasevin)! - Use public SubQuery access control endpoints in network definitions. Normalize EVM and Stellar adapter `accessControlIndexerUrl` (no trailing slash), fix Stellar testnet typo (openzepplin → openzeppelin), and add SubQuery indexer URLs to Polkadot adapter networks (polkadot-hub, moonbeam, moonriver, moonbase-alpha).
+
 ## 1.8.0
 
 ### Minor Changes
