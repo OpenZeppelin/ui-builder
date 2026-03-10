@@ -60,7 +60,7 @@ describe('Polkadot Hub Network Configurations', () => {
   //     expect(kusamaHubMainnet.nativeCurrency.decimals).toBe(18);
   //   });
   //
-  //   it('should use Blockscout (Etherscan V1 API)', () => {
+  //   it('should use Routescan (Etherscan-compatible V1 API)', () => {
   //     expect(kusamaHubMainnet.supportsEtherscanV2).toBe(false);
   //   });
   // });

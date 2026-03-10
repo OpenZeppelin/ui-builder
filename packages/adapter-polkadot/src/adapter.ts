@@ -199,7 +199,8 @@ export class PolkadotAdapter implements ContractAdapter {
 
   /**
    * Load a contract schema from an address or artifacts.
-   * Uses Blockscout (V1 API) for Hub networks, Moonscan (V2 API) for parachains.
+   * Uses Routescan (Etherscan-compatible V1 API) for Hub networks and Moonscan (V2 API)
+   * for parachains.
    * Falls back to Sourcify if primary provider fails.
    *
    * [SUBSTRATE TODO]: ink! contracts would need different loading:
@@ -282,13 +283,13 @@ export class PolkadotAdapter implements ContractAdapter {
 
   /**
    * Get supported contract definition providers.
-   * Returns Etherscan (for Blockscout/Moonscan) and Sourcify.
+   * Returns Etherscan-compatible providers (Routescan/Moonscan) and Sourcify.
    */
   getSupportedContractDefinitionProviders(): Array<{ key: string; label: string }> {
     return [
       {
         key: 'etherscan',
-        label: this._typedNetworkConfig.networkCategory === 'hub' ? 'Blockscout' : 'Moonscan',
+        label: this._typedNetworkConfig.networkCategory === 'hub' ? 'Routescan' : 'Moonscan',
       },
       { key: 'sourcify', label: 'Sourcify' },
       { key: 'manual', label: 'Manual' },
