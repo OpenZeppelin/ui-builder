@@ -99,9 +99,10 @@ describe('Polkadot Types', () => {
         isTestnet: false,
         chainId: 420420419,
         rpcUrl: 'https://services.polkadothub-rpc.com',
-        explorerUrl: 'https://blockscout.polkadot.io',
-        apiUrl: 'https://blockscout.polkadot.io/api',
+        explorerUrl: 'https://polkadot.routescan.io',
+        apiUrl: 'https://api.routescan.io/v2/network/mainnet/evm/420420419/etherscan/api',
         supportsEtherscanV2: false,
+        primaryExplorerApiIdentifier: 'routescan',
         nativeCurrency: {
           name: 'Polkadot',
           symbol: 'DOT',
@@ -112,9 +113,12 @@ describe('Polkadot Types', () => {
         relayChain: 'polkadot',
       };
 
-      expect(config.explorerUrl).toBe('https://blockscout.polkadot.io');
-      expect(config.apiUrl).toBe('https://blockscout.polkadot.io/api');
+      expect(config.explorerUrl).toBe('https://polkadot.routescan.io');
+      expect(config.apiUrl).toBe(
+        'https://api.routescan.io/v2/network/mainnet/evm/420420419/etherscan/api'
+      );
       expect(config.supportsEtherscanV2).toBe(false);
+      expect(config.primaryExplorerApiIdentifier).toBe('routescan');
     });
   });
 });

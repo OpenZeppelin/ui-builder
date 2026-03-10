@@ -10,7 +10,7 @@ import { polkadotHub } from './chains';
 
 /**
  * Polkadot Hub mainnet configuration.
- * Chain ID: 420420419, Currency: DOT, Explorer: Blockscout
+ * Chain ID: 420420419, Currency: DOT, Explorer: Routescan
  */
 export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   id: 'polkadot-hub',
@@ -22,9 +22,10 @@ export const polkadotHubMainnet: TypedPolkadotNetworkConfig = {
   isTestnet: false,
   chainId: 420420419,
   rpcUrl: 'https://services.polkadothub-rpc.com/mainnet',
-  explorerUrl: 'https://blockscout.polkadot.io',
-  apiUrl: 'https://blockscout.polkadot.io/api',
-  supportsEtherscanV2: false,
+  explorerUrl: 'https://polkadot.routescan.io',
+  apiUrl: 'https://api.routescan.io/v2/network/mainnet/evm/420420419/etherscan/api',
+  supportsEtherscanV2: false, // Uses Routescan API directly, not unified Etherscan V2
+  primaryExplorerApiIdentifier: 'routescan',
   iconComponent: NetworkPolkadot,
   nativeCurrency: {
     name: 'Polkadot',
