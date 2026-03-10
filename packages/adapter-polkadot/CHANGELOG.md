@@ -1,5 +1,13 @@
 # @openzeppelin/ui-builder-adapter-polkadot
 
+## 1.8.3
+
+### Patch Changes
+
+- [#360](https://github.com/OpenZeppelin/ui-builder/pull/360) [`6a1dd1e`](https://github.com/OpenZeppelin/ui-builder/commit/6a1dd1ec39549cd05ea2415ca5b010b2169b913f) Thanks [@pasevin](https://github.com/pasevin)! - Rename user-facing network labels to "Polkadot" and "Polkadot Testnet" (from "Polkadot Hub" and "Polkadot Hub TestNet").
+
+- [#364](https://github.com/OpenZeppelin/ui-builder/pull/364) [`e8d6f0c`](https://github.com/OpenZeppelin/ui-builder/commit/e8d6f0c63fbccadd6512214a41010622432f76df) Thanks [@pasevin](https://github.com/pasevin)! - Rename remaining Polkadot Hub explorer UI labels and guidance from Blockscout to Routescan.
+
 ## 1.8.2
 
 ### Patch Changes
