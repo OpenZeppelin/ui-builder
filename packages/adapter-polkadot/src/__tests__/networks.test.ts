@@ -31,9 +31,10 @@ describe('Polkadot Hub Network Configurations', () => {
       expect(polkadotHubMainnet.nativeCurrency.decimals).toBe(18);
     });
 
-    it('should use Blockscout (Etherscan V1 API)', () => {
+    it('should use Routescan (Etherscan-compatible V1 API)', () => {
       expect(polkadotHubMainnet.supportsEtherscanV2).toBe(false);
-      expect(polkadotHubMainnet.apiUrl).toContain('blockscout');
+      expect(polkadotHubMainnet.apiUrl).toContain('routescan.io');
+      expect(polkadotHubMainnet.explorerUrl).toBe('https://polkadot.routescan.io');
     });
 
     it('should include viem chain definition', () => {
@@ -289,7 +290,7 @@ describe('Network Validation', () => {
     });
   });
 
-  it('Hub networks should use Blockscout (V1 API)', () => {
+  it('Hub networks should use Etherscan-compatible V1 APIs', () => {
     const hubNetworks = polkadotNetworks.filter((n) => n.networkCategory === 'hub');
     hubNetworks.forEach((network) => {
       expect(network.supportsEtherscanV2).toBe(false);
