@@ -18,7 +18,8 @@ import type { TypedPolkadotNetworkConfig } from '../../types';
 
 /**
  * Load a contract using EVM core module.
- * Uses Blockscout (V1 API) for Hub networks, Moonscan (V2 API) for parachains.
+ * Uses Routescan (Etherscan-compatible V1 API) for Hub networks and Moonscan (V2 API)
+ * for parachains.
  *
  * @remarks
  * This is a thin wrapper that handles the Polkadot-specific option format

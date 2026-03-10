@@ -7,7 +7,7 @@ export const ecosystemMetadata: EcosystemMetadata = {
   name: 'Polkadot',
   description:
     'Polkadot is a heterogeneous multi-chain protocol enabling cross-chain communication and shared security. It supports EVM-compatible smart contracts through Hub networks and parachains like Moonbeam.',
-  explorerGuidance: 'Blockscout or Moonscan verified contracts',
+  explorerGuidance: 'Routescan or Moonscan verified contracts',
   addressExample: '0x...',
   iconComponent: NetworkPolkadot,
   bgColorClass: 'bg-pink-100',

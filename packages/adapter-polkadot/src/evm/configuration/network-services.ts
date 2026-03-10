@@ -67,7 +67,7 @@ export function getPolkadotDefaultServiceConfig(
  * Get explorer label based on network category.
  */
 function getExplorerLabel(networkConfig: TypedPolkadotNetworkConfig): string {
-  return networkConfig.networkCategory === 'hub' ? 'Blockscout' : 'Moonscan';
+  return networkConfig.networkCategory === 'hub' ? 'Routescan' : 'Moonscan';
 }
 
 /**
@@ -130,7 +130,7 @@ export function getNetworkServiceForms(
               lines: [
                 `<strong>${explorerLabel}:</strong> The primary block explorer for this network.`,
                 networkConfig.networkCategory === 'hub'
-                  ? '<strong>Note:</strong> Hub networks use Blockscout API (V1 compatible).'
+                  ? '<strong>Note:</strong> Hub networks use Routescan (Etherscan-compatible V1 API).'
                   : '<strong>Note:</strong> Parachain networks use Moonscan (Etherscan V2 compatible).',
               ],
             },
@@ -150,10 +150,10 @@ export function getNetworkServiceForms(
           id: 'polkadot-explorer-use-v2',
           name: 'useV2Api',
           type: 'checkbox',
-          label: `Use ${networkConfig.networkCategory === 'hub' ? 'Blockscout' : 'Etherscan V2'} API`,
+          label: `Use ${networkConfig.networkCategory === 'hub' ? 'Routescan' : 'Etherscan V2'} API`,
           helperText:
             networkConfig.networkCategory === 'hub'
-              ? 'Hub networks use Blockscout API which is V1 compatible.'
+              ? 'Hub networks use Routescan, which exposes an Etherscan-compatible V1 API.'
               : 'Enable the V2 API for Moonscan networks.',
           validation: {},
           defaultValue: v2DefaultEnabled && networkConfig.networkCategory !== 'hub',
@@ -184,7 +184,7 @@ export function getNetworkServiceForms(
           label: 'Explorer Base URL (optional)',
           placeholder:
             networkConfig.networkCategory === 'hub'
-              ? 'https://assethub-polkadot.blockscout.com'
+              ? 'https://polkadot.routescan.io'
               : 'https://moonbeam.moonscan.io',
           validation: {},
           helperText:
@@ -203,7 +203,7 @@ export function getNetworkServiceForms(
           label: 'Explorer API URL',
           placeholder:
             networkConfig.networkCategory === 'hub'
-              ? 'https://assethub-polkadot.blockscout.com/api'
+              ? 'https://api.routescan.io/v2/network/mainnet/evm/420420419/etherscan/api'
               : 'https://api.moonscan.io/api',
           validation: {},
           helperText:
@@ -268,7 +268,7 @@ export function getNetworkServiceForms(
           validation: {},
           options: [
             {
-              label: networkConfig.networkCategory === 'hub' ? 'Blockscout' : 'Moonscan',
+              label: networkConfig.networkCategory === 'hub' ? 'Routescan' : 'Moonscan',
               value: EvmProviderKeys.Etherscan,
             },
             { label: 'Sourcify', value: EvmProviderKeys.Sourcify },

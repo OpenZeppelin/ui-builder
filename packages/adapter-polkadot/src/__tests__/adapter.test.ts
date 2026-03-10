@@ -130,10 +130,10 @@ describe('PolkadotAdapter', () => {
   });
 
   describe('getSupportedContractDefinitionProviders', () => {
-    it('should return Blockscout for Hub networks', () => {
+    it('should return Routescan for Hub networks', () => {
       const adapter = new PolkadotAdapter(mockPolkadotHubConfig as unknown as NetworkConfig);
       const providers = adapter.getSupportedContractDefinitionProviders();
-      expect(providers).toContainEqual({ key: 'etherscan', label: 'Blockscout' });
+      expect(providers).toContainEqual({ key: 'etherscan', label: 'Routescan' });
       expect(providers).toContainEqual({ key: 'sourcify', label: 'Sourcify' });
       expect(providers).toContainEqual({ key: 'manual', label: 'Manual' });
     });
