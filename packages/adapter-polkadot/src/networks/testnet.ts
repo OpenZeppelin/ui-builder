@@ -17,7 +17,7 @@ import { polkadotHubTestNet } from './chains';
  */
 export const polkadotHubTestnet: TypedPolkadotNetworkConfig = {
   id: 'polkadot-hub-testnet',
-  name: 'Polkadot Hub TestNet',
+  name: 'Polkadot Testnet',
   exportConstName: 'polkadotHubTestnet',
   ecosystem: 'polkadot',
   network: 'polkadot-hub-testnet',

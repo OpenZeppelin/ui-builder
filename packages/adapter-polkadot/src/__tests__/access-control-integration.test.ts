@@ -126,7 +126,7 @@ function createSchema(functions: ContractFunction[]): ContractSchema {
 const TEST_NETWORK_CONFIG: TypedPolkadotNetworkConfig = {
   id: 'polkadot-hub-testnet',
   exportConstName: 'polkadotHubTestnet',
-  name: 'Polkadot Hub TestNet',
+  name: 'Polkadot Testnet',
   ecosystem: 'polkadot',
   network: 'polkadot-hub-testnet',
   type: 'testnet',
