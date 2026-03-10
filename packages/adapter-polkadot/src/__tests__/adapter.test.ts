@@ -60,9 +60,10 @@ const mockPolkadotHubConfig: TypedPolkadotNetworkConfig = {
   isTestnet: false,
   chainId: 420420419,
   rpcUrl: 'https://services.polkadothub-rpc.com',
-  explorerUrl: 'https://blockscout.polkadot.io',
-  apiUrl: 'https://blockscout.polkadot.io/api',
+  explorerUrl: 'https://polkadot.routescan.io',
+  apiUrl: 'https://api.routescan.io/v2/network/mainnet/evm/420420419/etherscan/api',
   supportsEtherscanV2: false,
+  primaryExplorerApiIdentifier: 'routescan',
   nativeCurrency: {
     name: 'Polkadot',
     symbol: 'DOT',

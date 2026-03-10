@@ -28,8 +28,8 @@ export const polkadotHub = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'Blockscout',
-      url: 'https://blockscout.polkadot.io',
+      name: 'Routescan',
+      url: 'https://polkadot.routescan.io',
     },
   },
 });
