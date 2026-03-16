@@ -37,7 +37,7 @@ function AppContent() {
   );
 
   return (
-    <div className="bg-background text-foreground min-h-screen flex">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Global Sidebar */}
       <AppSidebar
         onLoadContractUI={handleLoad}
@@ -50,13 +50,15 @@ function AppContent() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
         <Header title="UI Builder" onOpenSidebar={() => setIsMobileSidebarOpen(true)} />
 
-        <main className="pb-8 flex-1">
-          <UIBuilder />
-        </main>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto pb-8">
+            <UIBuilder />
+          </main>
+        </div>
 
         {/* Footer */}
         <Footer />
