@@ -1,17 +1,17 @@
 <!--
 Sync Impact Report
-Version: 1.2.2 → 1.3.0
-Modified Principles: Updated for UI Kit extraction to openzeppelin-ui monorepo
-- Section I: Core packages now external (@openzeppelin/ui-*), adapters remain internal
-- Section II: Updated package references to new namespace
-- Section III: Changesets now only for builder app and adapters
-- Section IV: Updated styles package reference
-- Section V: Exported apps use @openzeppelin/ui-* packages
-- Section VII: Updated utility package references
-- Additional Constraints: Updated package references
-- Development Workflow: Added pnpmfile-based local dev workflow
+Version: 1.3.0 → 1.3.1
+Modified Principles: None (structural alignment with new constitution-template.md)
+- All 7 principles verified against template structure
+- Section 2 (Additional Constraints) aligns with [SECTION_2_NAME] slot
+- Section 3 (Development Workflow and Review Process) aligns with [SECTION_3_NAME] slot
+- Governance section and version footer match template format
 Templates:
-- ✅ .specify/templates/plan-template.md
+- ✅ .specify/templates/constitution-template.md (new — constitution verified against it)
+- ✅ .specify/templates/plan-template.md (Constitution Check section references principles correctly)
+- ✅ .specify/templates/spec-template.md (no constitution-specific references to update)
+- ✅ .specify/templates/tasks-template.md (no constitution-specific references to update)
+- ✅ .specify/templates/checklist-template.md (no constitution-specific references to update)
 Follow-up TODOs: none
 -->
 
@@ -181,4 +181,4 @@ string, addressType?: string)` supports chain-specific behavior.
 - CI enforces compliance; PRs violating constitutional rules MUST be corrected
   before merge.
 
-**Version**: 1.3.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2026-01-06
+**Version**: 1.3.1 | **Ratified**: 2025-09-17 | **Last Amended**: 2026-03-18

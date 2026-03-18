@@ -67,6 +67,13 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
     exit 1
 fi
 
+# Trim whitespace and validate description is not empty (e.g., user passed only whitespace)
+FEATURE_DESCRIPTION=$(echo "$FEATURE_DESCRIPTION" | xargs)
+if [ -z "$FEATURE_DESCRIPTION" ]; then
+    echo "Error: Feature description cannot be empty or contain only whitespace" >&2
+    exit 1
+fi
+
 # Function to find the repository root by searching for existing project markers
 find_repo_root() {
     local dir="$1"
@@ -80,41 +87,86 @@ find_repo_root() {
     return 1
 }
 
-# Function to check existing branches (local and remote) and return next available number
-check_existing_branches() {
-    local short_name="$1"
+# Function to get highest number from specs directory
+get_highest_from_specs() {
+    local specs_dir="$1"
+    local highest=0
     
-    # Fetch all remotes to get latest branch info (suppress errors if no remotes)
-    git fetch --all --prune 2>/dev/null || true
-    
-    # Find all branches matching the pattern using git ls-remote (more reliable)
-    local remote_branches=$(git ls-remote --heads origin 2>/dev/null | grep -E "refs/heads/[0-9]+-${short_name}$" | sed 's/.*\/\([0-9]*\)-.*/\1/' | sort -n)
-    
-    # Also check local branches
-    local local_branches=$(git branch 2>/dev/null | grep -E "^[* ]*[0-9]+-${short_name}$" | sed 's/^[* ]*//' | sed 's/-.*//' | sort -n)
-    
-    # Check specs directory as well
-    local spec_dirs=""
-    if [ -d "$SPECS_DIR" ]; then
-        spec_dirs=$(find "$SPECS_DIR" -maxdepth 1 -type d -name "[0-9]*-${short_name}" 2>/dev/null | xargs -n1 basename 2>/dev/null | sed 's/-.*//' | sort -n)
+    if [ -d "$specs_dir" ]; then
+        for dir in "$specs_dir"/*; do
+            [ -d "$dir" ] || continue
+            dirname=$(basename "$dir")
+            number=$(echo "$dirname" | grep -o '^[0-9]\+' || echo "0")
+            number=$((10#$number))
+            if [ "$number" -gt "$highest" ]; then
+                highest=$number
+            fi
+        done
     fi
     
-    # Combine all sources and get the highest number
-    local max_num=0
-    for num in $remote_branches $local_branches $spec_dirs; do
-        if [ "$num" -gt "$max_num" ]; then
-            max_num=$num
-        fi
-    done
+    echo "$highest"
+}
+
+# Function to get highest number from git branches
+get_highest_from_branches() {
+    local highest=0
     
+    # Get all branches (local and remote)
+    branches=$(git branch -a 2>/dev/null || echo "")
+    
+    if [ -n "$branches" ]; then
+        while IFS= read -r branch; do
+            # Clean branch name: remove leading markers and remote prefixes
+            clean_branch=$(echo "$branch" | sed 's/^[* ]*//; s|^remotes/[^/]*/||')
+            
+            # Extract feature number if branch matches pattern ###-*
+            if echo "$clean_branch" | grep -q '^[0-9]\{3\}-'; then
+                number=$(echo "$clean_branch" | grep -o '^[0-9]\{3\}' || echo "0")
+                number=$((10#$number))
+                if [ "$number" -gt "$highest" ]; then
+                    highest=$number
+                fi
+            fi
+        done <<< "$branches"
+    fi
+    
+    echo "$highest"
+}
+
+# Function to check existing branches (local and remote) and return next available number
+check_existing_branches() {
+    local specs_dir="$1"
+
+    # Fetch all remotes to get latest branch info (suppress errors if no remotes)
+    git fetch --all --prune >/dev/null 2>&1 || true
+
+    # Get highest number from ALL branches (not just matching short name)
+    local highest_branch=$(get_highest_from_branches)
+
+    # Get highest number from ALL specs (not just matching short name)
+    local highest_spec=$(get_highest_from_specs "$specs_dir")
+
+    # Take the maximum of both
+    local max_num=$highest_branch
+    if [ "$highest_spec" -gt "$max_num" ]; then
+        max_num=$highest_spec
+    fi
+
     # Return next number
     echo $((max_num + 1))
+}
+
+# Function to clean and format a branch name
+clean_branch_name() {
+    local name="$1"
+    echo "$name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//'
 }
 
 # Resolve repository root. Prefer git information when available, but fall back
 # to searching for repository markers so the workflow still functions in repositories that
 # were initialised with --no-git.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
 
 if git rev-parse --show-toplevel >/dev/null 2>&1; then
     REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -176,14 +228,15 @@ generate_branch_name() {
         echo "$result"
     else
         # Fallback to original logic if no meaningful words found
-        echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//' | tr '-' '\n' | grep -v '^$' | head -3 | tr '\n' '-' | sed 's/-$//'
+        local cleaned=$(clean_branch_name "$description")
+        echo "$cleaned" | tr '-' '\n' | grep -v '^$' | head -3 | tr '\n' '-' | sed 's/-$//'
     fi
 }
 
 # Generate branch name
 if [ -n "$SHORT_NAME" ]; then
     # Use provided short name, just clean it up
-    BRANCH_SUFFIX=$(echo "$SHORT_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//')
+    BRANCH_SUFFIX=$(clean_branch_name "$SHORT_NAME")
 else
     # Generate from description with smart filtering
     BRANCH_SUFFIX=$(generate_branch_name "$FEATURE_DESCRIPTION")
@@ -193,24 +246,16 @@ fi
 if [ -z "$BRANCH_NUMBER" ]; then
     if [ "$HAS_GIT" = true ]; then
         # Check existing branches on remotes
-        BRANCH_NUMBER=$(check_existing_branches "$BRANCH_SUFFIX")
+        BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR")
     else
         # Fall back to local directory check
-        HIGHEST=0
-        if [ -d "$SPECS_DIR" ]; then
-            for dir in "$SPECS_DIR"/*; do
-                [ -d "$dir" ] || continue
-                dirname=$(basename "$dir")
-                number=$(echo "$dirname" | grep -o '^[0-9]\+' || echo "0")
-                number=$((10#$number))
-                if [ "$number" -gt "$HIGHEST" ]; then HIGHEST=$number; fi
-            done
-        fi
+        HIGHEST=$(get_highest_from_specs "$SPECS_DIR")
         BRANCH_NUMBER=$((HIGHEST + 1))
     fi
 fi
 
-FEATURE_NUM=$(printf "%03d" "$BRANCH_NUMBER")
+# Force base-10 interpretation to prevent octal conversion (e.g., 010 → 8 in octal, but should be 10 in decimal)
+FEATURE_NUM=$(printf "%03d" "$((10#$BRANCH_NUMBER))")
 BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
 
 # GitHub enforces a 244-byte limit on branch names
@@ -235,7 +280,16 @@ if [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
 fi
 
 if [ "$HAS_GIT" = true ]; then
-    git checkout -b "$BRANCH_NAME"
+    if ! git checkout -b "$BRANCH_NAME" 2>/dev/null; then
+        # Check if branch already exists
+        if git branch --list "$BRANCH_NAME" | grep -q .; then
+            >&2 echo "Error: Branch '$BRANCH_NAME' already exists. Please use a different feature name or specify a different number with --number."
+            exit 1
+        else
+            >&2 echo "Error: Failed to create git branch '$BRANCH_NAME'. Please check your git configuration and try again."
+            exit 1
+        fi
+    fi
 else
     >&2 echo "[specify] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi
@@ -243,18 +297,31 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
+TEMPLATE=$(resolve_template "spec-template" "$REPO_ROOT") || true
 SPEC_FILE="$FEATURE_DIR/spec.md"
-if [ -f "$TEMPLATE" ]; then cp "$TEMPLATE" "$SPEC_FILE"; else touch "$SPEC_FILE"; fi
+if [ -n "$TEMPLATE" ] && [ -f "$TEMPLATE" ]; then
+    cp "$TEMPLATE" "$SPEC_FILE"
+else
+    echo "Warning: Spec template not found; created empty spec file" >&2
+    touch "$SPEC_FILE"
+fi
 
-# Set the SPECIFY_FEATURE environment variable for the current session
-export SPECIFY_FEATURE="$BRANCH_NAME"
+# Inform the user how to persist the feature variable in their own shell
+printf '# To persist: export SPECIFY_FEATURE=%q\n' "$BRANCH_NAME" >&2
 
 if $JSON_MODE; then
-    printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$BRANCH_NAME" "$SPEC_FILE" "$FEATURE_NUM"
+    if command -v jq >/dev/null 2>&1; then
+        jq -cn \
+            --arg branch_name "$BRANCH_NAME" \
+            --arg spec_file "$SPEC_FILE" \
+            --arg feature_num "$FEATURE_NUM" \
+            '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num}'
+    else
+        printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")"
+    fi
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
     echo "SPEC_FILE: $SPEC_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
-    echo "SPECIFY_FEATURE environment variable set to: $BRANCH_NAME"
+    printf '# To persist in your shell: export SPECIFY_FEATURE=%q\n' "$BRANCH_NAME"
 fi
