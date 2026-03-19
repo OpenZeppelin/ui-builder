@@ -1,4 +1,4 @@
-# @openzeppelin/ui-builder-adapter-evm-core
+# @openzeppelin/adapter-evm-core
 
 Core EVM blockchain functionality extracted from `adapter-evm`. This package provides reusable, stateless modules for building EVM-compatible blockchain adapters.
 
@@ -48,7 +48,7 @@ import {
   loadAbiFromSourcify,
   loadEvmContract,
   transformAbiToSchema,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 ```
 
 ### Transaction Module
@@ -61,7 +61,7 @@ import {
   executeEvmTransaction,
   formatEvmTransactionData,
   RelayerExecutionStrategy,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 ```
 
 ### Wallet Module
@@ -74,7 +74,7 @@ import {
   createUiKitManager,
   generateRainbowKitConfigFile,
   WagmiWalletImplementation,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 ```
 
 ### Configuration Module
@@ -87,7 +87,7 @@ import {
   resolveRpcUrl,
   testEvmRpcConnection,
   validateEvmRpcEndpoint,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 ```
 
 #### Explorer API Key Resolution
@@ -135,7 +135,7 @@ In your adapter's `package.json`:
 ```json
 {
   "dependencies": {
-    "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*"
+    "@openzeppelin/adapter-evm-core": "workspace:*"
   }
 }
 ```
@@ -147,7 +147,7 @@ In your adapter's `tsup.config.ts`, ensure the core package is bundled:
 ```typescript
 export default defineConfig({
   // ...
-  noExternal: ['@openzeppelin/ui-builder-adapter-evm-core'],
+  noExternal: ['@openzeppelin/adapter-evm-core'],
 });
 ```
 
@@ -156,7 +156,7 @@ export default defineConfig({
 Adapters implement the `EvmWalletImplementation` interface:
 
 ```typescript
-import { WagmiWalletImplementation } from '@openzeppelin/ui-builder-adapter-evm-core';
+import { WagmiWalletImplementation } from '@openzeppelin/adapter-evm-core';
 
 // The WagmiWalletImplementation class provides a ready-to-use implementation
 const walletImpl = new WagmiWalletImplementation(config);
@@ -202,7 +202,7 @@ const walletImpl = new WagmiWalletImplementation(config);
 Run tests with:
 
 ```bash
-pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test
+pnpm --filter @openzeppelin/adapter-evm-core test
 ```
 
 ## License

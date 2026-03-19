@@ -5,14 +5,14 @@ export type {
   RainbowKitProviderProps,
   RainbowKitKitConfig,
   RainbowKitCustomizations,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 export {
   isRainbowKitCustomizations,
   extractRainbowKitCustomizations,
   validateRainbowKitConfig,
   getRawUserNativeConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // Polkadot-specific components
 export { RainbowKitConnectButton } from './components';
@@ -24,4 +24,4 @@ export { createRainbowKitComponents } from './componentFactory';
 export {
   createRainbowKitWagmiConfig,
   getWagmiConfigForRainbowKit,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';

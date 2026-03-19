@@ -10,7 +10,7 @@ import {
   CustomNetworkSwitcher,
   filterWalletComponents,
   getComponentExclusionsFromConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { EcosystemWalletComponents, UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 

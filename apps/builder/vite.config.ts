@@ -58,7 +58,7 @@ async function loadAdapterViteConfigs(): Promise<{
 
   // Load EVM adapter config
   try {
-    const { getEvmViteConfig } = await import('@openzeppelin/ui-builder-adapter-evm/vite-config');
+    const { getEvmViteConfig } = await import('@openzeppelin/adapter-evm/vite-config');
     const evmConfig = getEvmViteConfig();
     if (evmConfig.plugins) {
       plugins.push(...(Array.isArray(evmConfig.plugins) ? evmConfig.plugins : []));
@@ -80,7 +80,7 @@ async function loadAdapterViteConfigs(): Promise<{
     logger.error(`Failed to load EVM adapter Vite config: ${error}`);
     throw new Error(
       `Failed to load EVM adapter Vite configuration. This is a build error. ` +
-        `Ensure @openzeppelin/ui-builder-adapter-evm is built and exports vite-config. ` +
+        `Ensure @openzeppelin/adapter-evm is built and exports vite-config. ` +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
     );
   }
@@ -88,7 +88,7 @@ async function loadAdapterViteConfigs(): Promise<{
   // Load Midnight adapter config
   try {
     const { getMidnightViteConfig } = await import(
-      '@openzeppelin/ui-builder-adapter-midnight/vite-config'
+      '@openzeppelin/adapter-midnight/vite-config'
     );
     const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });
     if (midnightConfig.plugins) {
@@ -117,7 +117,7 @@ async function loadAdapterViteConfigs(): Promise<{
     logger.error(`Failed to load Midnight adapter Vite config: ${error}`);
     throw new Error(
       `Failed to load Midnight adapter Vite configuration. This is a build error. ` +
-        `Ensure @openzeppelin/ui-builder-adapter-midnight is built and exports vite-config. ` +
+        `Ensure @openzeppelin/adapter-midnight is built and exports vite-config. ` +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
     );
   }
@@ -125,7 +125,7 @@ async function loadAdapterViteConfigs(): Promise<{
   // Load Solana adapter config
   try {
     const { getSolanaViteConfig } = await import(
-      '@openzeppelin/ui-builder-adapter-solana/vite-config'
+      '@openzeppelin/adapter-solana/vite-config'
     );
     const solanaConfig = getSolanaViteConfig();
     if (solanaConfig.plugins) {
@@ -154,7 +154,7 @@ async function loadAdapterViteConfigs(): Promise<{
     logger.error(`Failed to load Solana adapter Vite config: ${error}`);
     throw new Error(
       `Failed to load Solana adapter Vite configuration. This is a build error. ` +
-        `Ensure @openzeppelin/ui-builder-adapter-solana is built and exports vite-config. ` +
+        `Ensure @openzeppelin/adapter-solana is built and exports vite-config. ` +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
     );
   }
@@ -162,7 +162,7 @@ async function loadAdapterViteConfigs(): Promise<{
   // Load Stellar adapter config
   try {
     const { getStellarViteConfig } = await import(
-      '@openzeppelin/ui-builder-adapter-stellar/vite-config'
+      '@openzeppelin/adapter-stellar/vite-config'
     );
     const stellarConfig = getStellarViteConfig();
     if (stellarConfig.plugins) {
@@ -191,7 +191,7 @@ async function loadAdapterViteConfigs(): Promise<{
     logger.error(`Failed to load Stellar adapter Vite config: ${error}`);
     throw new Error(
       `Failed to load Stellar adapter Vite configuration. This is a build error. ` +
-        `Ensure @openzeppelin/ui-builder-adapter-stellar is built and exports vite-config. ` +
+        `Ensure @openzeppelin/adapter-stellar is built and exports vite-config. ` +
         `Original error: ${error instanceof Error ? error.message : String(error)}`
     );
   }
@@ -354,13 +354,13 @@ export default defineConfig(async (): Promise<UserConfig> => {
       ],
       exclude: [
         // Workspace adapter packages should NOT be pre-bundled (treat as source)
-        '@openzeppelin/ui-builder-adapter-evm',
-        '@openzeppelin/ui-builder-adapter-midnight',
-        '@openzeppelin/ui-builder-adapter-polkadot',
-        '@openzeppelin/ui-builder-adapter-solana',
-        '@openzeppelin/ui-builder-adapter-stellar',
+        '@openzeppelin/adapter-evm',
+        '@openzeppelin/adapter-midnight',
+        '@openzeppelin/adapter-polkadot',
+        '@openzeppelin/adapter-solana',
+        '@openzeppelin/adapter-stellar',
         // Internal packages bundled into adapters at build time - excluding prevents duplicate instances
-        '@openzeppelin/ui-builder-adapter-evm-core',
+        '@openzeppelin/adapter-evm-core',
         // Adapter-specific exclusions
         ...(adapterConfigs.optimizeDeps?.exclude || []),
       ],

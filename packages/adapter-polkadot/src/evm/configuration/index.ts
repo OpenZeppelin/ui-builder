@@ -3,7 +3,7 @@
  *
  * Adapter-specific configuration functions and Polkadot-style aliases.
  * Core configuration utilities (buildRpcUrl, getUserRpcUrl, etc.) are available
- * directly from @openzeppelin/ui-builder-adapter-evm-core.
+ * directly from @openzeppelin/adapter-evm-core.
  */
 
 // Polkadot-style aliases for core validation functions
@@ -14,7 +14,7 @@ export {
   testEvmRpcConnection as testRpcConnection,
   validateEvmExplorerConfig as validateExplorerConfig,
   testEvmExplorerConnection as testExplorerConnection,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // Adapter-specific exports
 export * from './execution';

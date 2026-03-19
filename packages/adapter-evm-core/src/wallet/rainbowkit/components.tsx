@@ -27,13 +27,13 @@ export type RainbowKitConnectButtonProps = BaseComponentProps;
  * @example
  * ```typescript
  * // In adapter-evm:
- * import { createRainbowKitConnectButton } from '@openzeppelin/ui-builder-adapter-evm-core';
+ * import { createRainbowKitConnectButton } from '@openzeppelin/adapter-evm-core';
  * import { evmUiKitManager } from './evmUiKitManager';
  *
  * export const RainbowKitConnectButton = createRainbowKitConnectButton(evmUiKitManager);
  *
  * // In adapter-polkadot:
- * import { createRainbowKitConnectButton } from '@openzeppelin/ui-builder-adapter-evm-core';
+ * import { createRainbowKitConnectButton } from '@openzeppelin/adapter-evm-core';
  * import { polkadotUiKitManager } from './polkadotUiKitManager';
  *
  * export const RainbowKitConnectButton = createRainbowKitConnectButton(polkadotUiKitManager);

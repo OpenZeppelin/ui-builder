@@ -4,7 +4,7 @@ import { mainnet } from 'viem/chains';
 import { WagmiProvider } from 'wagmi';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { WagmiProviderInitializedContext } from '@openzeppelin/ui-builder-adapter-evm-core';
+import { WagmiProviderInitializedContext } from '@openzeppelin/adapter-evm-core';
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 

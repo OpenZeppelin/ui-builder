@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/ui-builder-adapter-evm",
+  "name": "@openzeppelin/adapter-evm",
   "version": "1.8.2",
   "private": false,
   "description": "EVM Adapter for UI Builder",
@@ -60,7 +60,7 @@
     "react-hook-form": "^7.62.0"
   },
   "devDependencies": {
-    "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*",
+    "@openzeppelin/adapter-evm-core": "workspace:*",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.84.1",
     "@testing-library/jest-dom": "^6.6.4",

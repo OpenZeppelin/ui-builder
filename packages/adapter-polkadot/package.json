@@ -1,5 +1,5 @@
 {
-  "name": "@openzeppelin/ui-builder-adapter-polkadot",
+  "name": "@openzeppelin/adapter-polkadot",
   "version": "1.8.3",
   "private": false,
   "description": "Polkadot Adapter for UI Builder",
@@ -56,7 +56,7 @@
     "wagmi": "^2.16.1"
   },
   "devDependencies": {
-    "@openzeppelin/ui-builder-adapter-evm-core": "workspace:*",
+    "@openzeppelin/adapter-evm-core": "workspace:*",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.84.1",
     "@types/lodash": "^4.17.20",

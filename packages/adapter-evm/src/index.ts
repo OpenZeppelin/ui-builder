@@ -1,4 +1,4 @@
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/adapter-evm-core';
 import type { EcosystemExport } from '@openzeppelin/ui-types';
 
 import { EvmAdapter } from './adapter';
@@ -57,10 +57,7 @@ export type {
   TypedEvmNetworkConfig,
   WriteContractParameters,
   EvmContractArtifacts,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
-export {
-  isEvmContractArtifacts,
-  abiComparisonService,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
+export { isEvmContractArtifacts, abiComparisonService } from '@openzeppelin/adapter-evm-core';
 
-export type { EvmRelayerTransactionOptions } from '@openzeppelin/ui-builder-adapter-evm-core';
+export type { EvmRelayerTransactionOptions } from '@openzeppelin/adapter-evm-core';

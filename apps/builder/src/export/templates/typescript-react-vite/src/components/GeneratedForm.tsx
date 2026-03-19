@@ -19,7 +19,7 @@
  * Example Snippet (Generated Content - simplified structure):
  * ```tsx
  * import { useEffect, useState } from 'react';
- * import { EvmAdapter } from '@openzeppelin/ui-builder-adapter-evm'; // Example
+ * import { EvmAdapter } from '@openzeppelin/adapter-evm'; // Example
  * import { TransactionForm, ... } from '@openzeppelin/ui-renderer';
  * import type { RenderFormSchema, TransactionFormProps } from '@openzeppelin/ui-types';
  *

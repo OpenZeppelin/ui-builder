@@ -35,7 +35,11 @@ function findAdapterPackages() {
     if (fs.existsSync(packageJsonPath)) {
       try {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson.name && packageJson.name.includes('ui-builder-adapter')) {
+        if (
+          packageJson.name &&
+          (packageJson.name.includes('@openzeppelin/adapter-') ||
+            packageJson.name.includes('ui-builder-adapter'))
+        ) {
           adapters.push({
             name: packageJson.name,
             path: adapterPath,
@@ -70,7 +74,7 @@ function validateAdapter(adapter) {
   const viteConfigContent = fs.readFileSync(viteConfigPath, 'utf8');
   // Convert hyphenated adapter name to PascalCase (e.g., "evm-core" -> "EvmCore")
   const adapterName = name
-    .replace('@openzeppelin/ui-builder-adapter-', '')
+    .replace('@openzeppelin/adapter-', '')
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');

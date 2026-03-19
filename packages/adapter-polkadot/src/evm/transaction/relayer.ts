@@ -11,7 +11,7 @@
 import {
   RelayerExecutionStrategy,
   type EvmRelayerTransactionOptions,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { RelayerDetails, RelayerDetailsRich } from '@openzeppelin/ui-types';
 
 import type { TypedPolkadotNetworkConfig } from '../../types';

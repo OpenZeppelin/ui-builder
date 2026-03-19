@@ -14,7 +14,7 @@
  * - `ui/` - UI-related functions (UI kits, labels, form inputs)
  *
  * Core EVM functionality (mapping, transform, validation) is available directly
- * from @openzeppelin/ui-builder-adapter-evm-core.
+ * from @openzeppelin/adapter-evm-core.
  */
 
 // ============================================================================
@@ -29,7 +29,7 @@ export {
   compareContractDefinitions,
   validateContractDefinition,
   hashContractDefinition,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // ============================================================================
 // Configuration Module
@@ -49,7 +49,7 @@ export {
   testEvmExplorerConnection,
   validateEvmNetworkServiceConfig,
   testEvmNetworkServiceConnection,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // Polkadot-style aliases and adapter-specific exports
 export {
@@ -74,7 +74,7 @@ export {
   EVM_TYPE_TO_FIELD_TYPE,
   getEvmTypeMappingInfo,
   generateEvmDefaultField,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // ============================================================================
 // Query Module
@@ -91,7 +91,7 @@ export {
   executeEvmTransaction,
   signAndBroadcastEvmTransaction,
   waitForEvmTransactionConfirmation,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // Adapter-specific relayer exports
 export {
@@ -104,7 +104,7 @@ export {
 // ============================================================================
 // Transform Module - from core
 // ============================================================================
-export { parseEvmInput, formatEvmFunctionResult } from '@openzeppelin/ui-builder-adapter-evm-core';
+export { parseEvmInput, formatEvmFunctionResult } from '@openzeppelin/adapter-evm-core';
 
 // ============================================================================
 // UI Module
@@ -130,7 +130,7 @@ export {
   validateEvmExecutionConfig,
   isValidEvmAddress,
   type EvmWalletStatus,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // ============================================================================
 // Access Control Module - from core
@@ -138,7 +138,7 @@ export {
 export {
   createEvmAccessControlService,
   type EvmAccessControlService,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 // ============================================================================
 // Core Types (re-exported for convenience)
@@ -149,6 +149,6 @@ export type {
   WriteContractParameters,
   EvmWalletImplementation,
   ContractLoadOptions,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
-export { EvmProviderKeys, isEvmProviderKey } from '@openzeppelin/ui-builder-adapter-evm-core';
+export { EvmProviderKeys, isEvmProviderKey } from '@openzeppelin/adapter-evm-core';

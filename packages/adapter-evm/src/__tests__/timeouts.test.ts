@@ -4,7 +4,7 @@ import {
   loadEvmContract,
   type EvmContractArtifacts,
   type TypedEvmNetworkConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 describe('EVM provider timeouts', () => {
   it('moves to next provider when the first provider exceeds per-provider timeout', async () => {

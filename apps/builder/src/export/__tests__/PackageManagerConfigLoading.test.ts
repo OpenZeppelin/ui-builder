@@ -141,7 +141,7 @@ describe('PackageManager configuration loading', () => {
       );
       const result = JSON.parse(updated);
       expect(result.dependencies).toHaveProperty('react-datepicker');
-      expect(result.dependencies).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+      expect(result.dependencies).toHaveProperty('@openzeppelin/adapter-evm');
     });
 
     it('should handle dev dependencies correctly', async () => {
@@ -166,7 +166,7 @@ describe('PackageManager configuration loading', () => {
       // UI packages from openzeppelin-ui use file: protocol for local development
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
       // Adapter packages still use workspace:* (they're in ui-builder monorepo)
-      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
+      expect(result.dependencies['@openzeppelin/adapter-evm']).toBe('workspace:*');
     });
 
     it('should apply correct versioning for staging environment', async () => {
@@ -184,7 +184,7 @@ describe('PackageManager configuration loading', () => {
       // UI packages from openzeppelin-ui use stable versions (no RC pipeline)
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
       // Adapter packages use RC versions for staging
-      expect(result.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(rcVersionOrTag);
+      expect(result.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
 
       // External dependencies should remain unchanged
       expect(result.dependencies['react']).toBe('^19.0.0');
@@ -217,11 +217,9 @@ describe('PackageManager configuration loading', () => {
       expect(prodResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
 
       // Adapter packages: workspace:* for local, rc for staging, ^version for production
-      expect(localResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toBe('workspace:*');
-      expect(stagingResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(
-        rcVersionOrTag
-      );
-      expect(prodResult.dependencies['@openzeppelin/ui-builder-adapter-evm']).toMatch(/^\^/);
+      expect(localResult.dependencies['@openzeppelin/adapter-evm']).toBe('workspace:*');
+      expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
+      expect(prodResult.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^/);
 
       // All should have same external dependencies
       expect(localResult.dependencies['react']).toBe('^19.0.0');
@@ -274,14 +272,14 @@ describe('PackageManager configuration loading', () => {
       const formConfig = createMinimalFormConfig();
       const deps = await packageManager.getDependencies(formConfig, 'unknown' as Ecosystem);
       expect(deps).toHaveProperty('react');
-      expect(Object.keys(deps)).not.toContain('@openzeppelin/ui-builder-adapter-evm');
+      expect(Object.keys(deps)).not.toContain('@openzeppelin/adapter-evm');
     });
 
     it('should handle unknown field types gracefully', async () => {
       const packageManager = new PackageManager(mockRendererConfig);
       const formConfig = createMinimalFormConfig(['unknown-type']);
       const deps = await packageManager.getDependencies(formConfig, 'evm');
-      expect(deps).toHaveProperty('@openzeppelin/ui-builder-adapter-evm');
+      expect(deps).toHaveProperty('@openzeppelin/adapter-evm');
       expect(deps).not.toHaveProperty('unknown-field-dep'); // Assuming no dep for unknown type
     });
 

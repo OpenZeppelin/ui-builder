@@ -22,7 +22,7 @@ import type { UserConfig } from 'vite';
  * @example
  * ```typescript
  * // vite.config.ts
- * import { getEvmViteConfig } from '@openzeppelin/ui-builder-adapter-evm/vite-config';
+ * import { getEvmViteConfig } from '@openzeppelin/adapter-evm/vite-config';
  *
  * export default defineConfig(({ mode }) => {
  *   const evmConfig = getEvmViteConfig();

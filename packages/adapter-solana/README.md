@@ -1,4 +1,4 @@
-# Solana Adapter (`@openzeppelin/ui-builder-adapter-solana`)
+# Solana Adapter (`@openzeppelin/adapter-solana`)
 
 This package provides the `ContractAdapter` implementation for the Solana blockchain for the UI Builder.
 
@@ -20,8 +20,8 @@ It is intended to be responsible for:
 Once fully implemented, the `SolanaAdapter` class will be instantiated with a specific `SolanaNetworkConfig` object:
 
 ```typescript
-// Example: import { solanaMainnetBeta } from '@openzeppelin/ui-builder-adapter-solana';
-import { SolanaAdapter } from '@openzeppelin/ui-builder-adapter-solana';
+// Example: import { solanaMainnetBeta } from '@openzeppelin/adapter-solana';
+import { SolanaAdapter } from '@openzeppelin/adapter-solana';
 import { SolanaNetworkConfig } from '@openzeppelin/ui-types';
 
 // For type access if needed

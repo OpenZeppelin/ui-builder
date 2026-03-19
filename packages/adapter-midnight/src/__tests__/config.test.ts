@@ -170,7 +170,7 @@ describe('Midnight Adapter Config', () => {
       expect(viteConfig).toBeDefined();
       const importsStr = viteConfig!.imports.join('\n');
       expect(importsStr).toContain('getMidnightViteConfig');
-      expect(importsStr).toContain('@openzeppelin/ui-builder-adapter-midnight/vite-config');
+      expect(importsStr).toContain('@openzeppelin/adapter-midnight/vite-config');
     });
 
     it('should have configInit that calls getMidnightViteConfig', () => {

@@ -3,7 +3,7 @@
  *
  * Provides adapter-specific wrappers around core ABI functionality.
  * Core functions (abiComparisonService, validateAndConvertEvmArtifacts, etc.) are available
- * directly from @openzeppelin/ui-builder-adapter-evm-core.
+ * directly from @openzeppelin/adapter-evm-core.
  */
 
 import {
@@ -11,7 +11,7 @@ import {
   loadContractWithFullMetadata as coreLoadContractWithFullMetadata,
   type ContractLoadOptions,
   type EvmContractLoadResult,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { ContractSchema } from '@openzeppelin/ui-types';
 
 import type { TypedPolkadotNetworkConfig } from '../../types';

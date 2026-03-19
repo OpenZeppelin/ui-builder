@@ -1,4 +1,4 @@
-# @openzeppelin/ui-builder-adapter-polkadot
+# @openzeppelin/adapter-polkadot
 
 Polkadot adapter for the OpenZeppelin UI Builder. Enables building UIs for EVM-compatible smart contracts deployed on Polkadot ecosystem networks.
 
@@ -23,7 +23,7 @@ Polkadot adapter for the OpenZeppelin UI Builder. Enables building UIs for EVM-c
 ## Installation
 
 ```bash
-pnpm add @openzeppelin/ui-builder-adapter-polkadot
+pnpm add @openzeppelin/adapter-polkadot
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ pnpm add @openzeppelin/ui-builder-adapter-polkadot
 ### Basic Usage
 
 ```typescript
-import { PolkadotAdapter, polkadotHubMainnet } from '@openzeppelin/ui-builder-adapter-polkadot';
+import { PolkadotAdapter, polkadotHubMainnet } from '@openzeppelin/adapter-polkadot';
 
 // Create adapter for Polkadot Hub
 const adapter = new PolkadotAdapter(polkadotHubMainnet);
@@ -56,7 +56,7 @@ import {
   // All networks
   polkadotNetworks,
   polkadotTestnetNetworks,
-} from '@openzeppelin/ui-builder-adapter-polkadot';
+} from '@openzeppelin/adapter-polkadot';
 
 // Filter networks as needed
 const hubNetworks = polkadotNetworks.filter((n) => n.networkCategory === 'hub');
@@ -69,7 +69,7 @@ const moonbeam = polkadotNetworks.find((n) => n.chainId === 1284);
 The adapter provides a pre-configured wallet provider for React applications:
 
 ```tsx
-import { PolkadotWalletUiRoot } from '@openzeppelin/ui-builder-adapter-polkadot';
+import { PolkadotWalletUiRoot } from '@openzeppelin/adapter-polkadot';
 
 function App() {
   return <PolkadotWalletUiRoot>{/* Your app content */}</PolkadotWalletUiRoot>;
@@ -79,7 +79,7 @@ function App() {
 Or if you need to override the default chains:
 
 ```tsx
-import { polkadotChains, PolkadotWalletUiRoot } from '@openzeppelin/ui-builder-adapter-polkadot';
+import { polkadotChains, PolkadotWalletUiRoot } from '@openzeppelin/adapter-polkadot';
 
 function App() {
   return (
@@ -90,7 +90,7 @@ function App() {
 
 ## Architecture
 
-The adapter uses a modular architecture that delegates all EVM operations to `@openzeppelin/ui-builder-adapter-evm-core`:
+The adapter uses a modular architecture that delegates all EVM operations to `@openzeppelin/adapter-evm-core`:
 
 ```
 adapter-polkadot/
@@ -115,7 +115,7 @@ adapter-polkadot/
 
 ### Core Package Dependency
 
-This adapter uses `@openzeppelin/ui-builder-adapter-evm-core` for all shared EVM functionality:
+This adapter uses `@openzeppelin/adapter-evm-core` for all shared EVM functionality:
 
 - ABI loading and transformation
 - Transaction formatting and execution strategies (EOA, Relayer)

@@ -4,10 +4,7 @@
  * Handles execution method configuration and validation.
  */
 
-import {
-  validateEvmExecutionConfig,
-  type EvmWalletStatus,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+import { validateEvmExecutionConfig, type EvmWalletStatus } from '@openzeppelin/adapter-evm-core';
 import type {
   ExecutionConfig,
   ExecutionMethodDetail,

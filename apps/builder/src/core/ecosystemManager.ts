@@ -2,11 +2,11 @@
 // + an SVG icon reference). Importing them statically means ecosystem pickers
 // render with proper names and icons on the very first frame, with zero
 // loading state. The heavy adapter runtime is still lazy-loaded below.
-import { ecosystemMetadata as evmMetadata } from '@openzeppelin/ui-builder-adapter-evm/metadata';
-import { ecosystemMetadata as midnightMetadata } from '@openzeppelin/ui-builder-adapter-midnight/metadata';
-import { ecosystemMetadata as polkadotMetadata } from '@openzeppelin/ui-builder-adapter-polkadot/metadata';
-import { ecosystemMetadata as solanaMetadata } from '@openzeppelin/ui-builder-adapter-solana/metadata';
-import { ecosystemMetadata as stellarMetadata } from '@openzeppelin/ui-builder-adapter-stellar/metadata';
+import { ecosystemMetadata as evmMetadata } from '@openzeppelin/adapter-evm/metadata';
+import { ecosystemMetadata as midnightMetadata } from '@openzeppelin/adapter-midnight/metadata';
+import { ecosystemMetadata as polkadotMetadata } from '@openzeppelin/adapter-polkadot/metadata';
+import { ecosystemMetadata as solanaMetadata } from '@openzeppelin/adapter-solana/metadata';
+import { ecosystemMetadata as stellarMetadata } from '@openzeppelin/adapter-stellar/metadata';
 import type {
   AdapterConfig,
   ContractAdapter,
@@ -49,19 +49,19 @@ async function loadAdapterModule(ecosystem: Ecosystem): Promise<EcosystemExport>
     let mod: { ecosystemDefinition: EcosystemExport };
     switch (ecosystem) {
       case 'evm':
-        mod = await import('@openzeppelin/ui-builder-adapter-evm');
+        mod = await import('@openzeppelin/adapter-evm');
         break;
       case 'solana':
-        mod = await import('@openzeppelin/ui-builder-adapter-solana');
+        mod = await import('@openzeppelin/adapter-solana');
         break;
       case 'stellar':
-        mod = await import('@openzeppelin/ui-builder-adapter-stellar');
+        mod = await import('@openzeppelin/adapter-stellar');
         break;
       case 'midnight':
-        mod = await import('@openzeppelin/ui-builder-adapter-midnight');
+        mod = await import('@openzeppelin/adapter-midnight');
         break;
       case 'polkadot':
-        mod = await import('@openzeppelin/ui-builder-adapter-polkadot');
+        mod = await import('@openzeppelin/adapter-polkadot');
         break;
       default: {
         const _exhaustiveCheck: never = ecosystem;
@@ -111,19 +111,19 @@ async function loadNetworksModule(ecosystem: Ecosystem): Promise<NetworkConfig[]
     let mod: { networks: NetworkConfig[] };
     switch (ecosystem) {
       case 'evm':
-        mod = await import('@openzeppelin/ui-builder-adapter-evm/networks');
+        mod = await import('@openzeppelin/adapter-evm/networks');
         break;
       case 'solana':
-        mod = await import('@openzeppelin/ui-builder-adapter-solana/networks');
+        mod = await import('@openzeppelin/adapter-solana/networks');
         break;
       case 'stellar':
-        mod = await import('@openzeppelin/ui-builder-adapter-stellar/networks');
+        mod = await import('@openzeppelin/adapter-stellar/networks');
         break;
       case 'midnight':
-        mod = await import('@openzeppelin/ui-builder-adapter-midnight/networks');
+        mod = await import('@openzeppelin/adapter-midnight/networks');
         break;
       case 'polkadot':
-        mod = await import('@openzeppelin/ui-builder-adapter-polkadot/networks');
+        mod = await import('@openzeppelin/adapter-polkadot/networks');
         break;
       default: {
         const _exhaustiveCheck: never = ecosystem;
@@ -254,9 +254,9 @@ export async function getEcosystemDefinition(ecosystem: Ecosystem): Promise<Ecos
 // =============================================================================
 
 export const adapterPackageMap: Record<Ecosystem, string> = {
-  evm: '@openzeppelin/ui-builder-adapter-evm',
-  solana: '@openzeppelin/ui-builder-adapter-solana',
-  stellar: '@openzeppelin/ui-builder-adapter-stellar',
-  midnight: '@openzeppelin/ui-builder-adapter-midnight',
-  polkadot: '@openzeppelin/ui-builder-adapter-polkadot',
+  evm: '@openzeppelin/adapter-evm',
+  solana: '@openzeppelin/adapter-solana',
+  stellar: '@openzeppelin/adapter-stellar',
+  midnight: '@openzeppelin/adapter-midnight',
+  polkadot: '@openzeppelin/adapter-polkadot',
 };

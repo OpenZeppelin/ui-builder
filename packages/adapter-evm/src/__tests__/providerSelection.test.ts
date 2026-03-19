@@ -4,7 +4,7 @@ import {
   loadEvmContract,
   type EvmContractArtifacts,
   type TypedEvmNetworkConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import { appConfigService, userNetworkServiceConfigService } from '@openzeppelin/ui-utils';
 
 describe('EVM provider selection (etherscan → sourcify, forced/app/ui precedence)', () => {

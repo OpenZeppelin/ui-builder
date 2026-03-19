@@ -1,5 +1,5 @@
 /**
- * @openzeppelin/ui-builder-adapter-polkadot
+ * @openzeppelin/adapter-polkadot
  *
  * Polkadot adapter for the UI Builder, supporting EVM-compatible networks
  * in the Polkadot ecosystem (Polkadot Hub, Kusama Hub, Moonbeam, Moonriver).

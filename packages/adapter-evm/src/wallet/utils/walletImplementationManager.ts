@@ -1,4 +1,4 @@
-import type { WagmiWalletImplementation } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { WagmiWalletImplementation } from '@openzeppelin/adapter-evm-core';
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 import { appConfigService, logger } from '@openzeppelin/ui-utils';
 

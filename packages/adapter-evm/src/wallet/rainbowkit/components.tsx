@@ -4,7 +4,7 @@
  * This file exports only React components to support Fast Refresh.
  * Factory functions are in componentFactory.ts.
  */
-import { createRainbowKitConnectButton } from '@openzeppelin/ui-builder-adapter-evm-core';
+import { createRainbowKitConnectButton } from '@openzeppelin/adapter-evm-core';
 import type { BaseComponentProps } from '@openzeppelin/ui-types';
 
 import { evmUiKitManager } from '../evmUiKitManager';

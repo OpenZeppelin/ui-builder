@@ -8,7 +8,7 @@ import {
   createUiKitManager,
   ensureRainbowKitAssetsLoaded,
   type UiKitManagerState,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 import { getPolkadotWalletImplementation } from './implementation';
 

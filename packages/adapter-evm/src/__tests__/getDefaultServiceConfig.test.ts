@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/adapter-evm-core';
 import type { EvmNetworkConfig } from '@openzeppelin/ui-types';
 import { appConfigService } from '@openzeppelin/ui-utils';
 

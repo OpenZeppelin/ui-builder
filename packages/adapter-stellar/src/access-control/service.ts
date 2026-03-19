@@ -1416,7 +1416,7 @@ export class StellarAccessControlService implements AccessControlService {
  *
  * @example
  * ```typescript
- * import { createStellarAccessControlService } from '@openzeppelin/ui-builder-adapter-stellar';
+ * import { createStellarAccessControlService } from '@openzeppelin/adapter-stellar';
  *
  * const service = createStellarAccessControlService(networkConfig);
  * service.registerContract(contractAddress, contractSchema);

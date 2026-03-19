@@ -1,3 +1,4 @@
+# Workspace adapter folders under packages/adapter-* publish as @openzeppelin/adapter-*.
 packages:
   # Include all packages in the packages directory
   - 'packages/*'

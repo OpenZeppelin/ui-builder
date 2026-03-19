@@ -4,7 +4,7 @@ import {
   CustomAccountDisplay,
   CustomConnectButton,
   CustomNetworkSwitcher,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { ComponentExclusionConfig, UiKitConfiguration } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 

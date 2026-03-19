@@ -10,7 +10,7 @@ import {
   resolveRpcUrl,
   type TypedEvmNetworkConfig,
   type WagmiWalletImplementation,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { ContractSchema } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 

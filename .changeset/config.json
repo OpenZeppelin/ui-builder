@@ -10,11 +10,11 @@
   "fixed": [],
   "linked": [
     [
-      "@openzeppelin/ui-builder-adapter-evm",
-      "@openzeppelin/ui-builder-adapter-midnight",
-      "@openzeppelin/ui-builder-adapter-polkadot",
-      "@openzeppelin/ui-builder-adapter-solana",
-      "@openzeppelin/ui-builder-adapter-stellar"
+      "@openzeppelin/adapter-evm",
+      "@openzeppelin/adapter-midnight",
+      "@openzeppelin/adapter-polkadot",
+      "@openzeppelin/adapter-solana",
+      "@openzeppelin/adapter-stellar"
     ]
   ],
   "access": "public",

@@ -134,7 +134,7 @@ export const midnightAdapterConfig: AdapterConfig = {
       "import topLevelAwait from 'vite-plugin-top-level-await';",
       "import wasm from 'vite-plugin-wasm';",
       '',
-      "import { getMidnightViteConfig } from '@openzeppelin/ui-builder-adapter-midnight/vite-config';",
+      "import { getMidnightViteConfig } from '@openzeppelin/adapter-midnight/vite-config';",
     ],
     configInit: 'const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });',
     plugins: '...(midnightConfig.plugins || []),',

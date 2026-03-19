@@ -13,7 +13,7 @@ import {
   queryEvmViewFunction as coreQueryEvmViewFunction,
   isEvmViewFunction as isViewFunction,
   resolveRpcUrl,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { ContractSchema } from '@openzeppelin/ui-types';
 
 import type { TypedPolkadotNetworkConfig } from '../../types';

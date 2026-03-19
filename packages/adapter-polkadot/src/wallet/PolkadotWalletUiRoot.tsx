@@ -11,7 +11,7 @@ import { mainnet } from 'viem/chains';
 import { WagmiProvider } from 'wagmi';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { WagmiProviderInitializedContext } from '@openzeppelin/ui-builder-adapter-evm-core';
+import { WagmiProviderInitializedContext } from '@openzeppelin/adapter-evm-core';
 import type { EcosystemReactUiProviderProps } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
@@ -48,7 +48,7 @@ const minimalDefaultWagmiConfig = createConfig({
  *
  * @example
  * ```tsx
- * import { PolkadotWalletUiRoot } from '@openzeppelin/ui-builder-adapter-polkadot';
+ * import { PolkadotWalletUiRoot } from '@openzeppelin/adapter-polkadot';
  *
  * function App() {
  *   return (

@@ -1,4 +1,4 @@
-# EVM Adapter (`@openzeppelin/ui-builder-adapter-evm`)
+# EVM Adapter (`@openzeppelin/adapter-evm`)
 
 This package provides the `ContractAdapter` implementation for EVM-compatible blockchains (Ethereum, Polygon, BSC, etc.) for the UI Builder.
 
@@ -73,7 +73,7 @@ adapter-evm/
 
 ## Relationship with adapter-evm-core
 
-Core EVM functionality has been extracted to `@openzeppelin/ui-builder-adapter-evm-core`. This adapter imports and delegates to core modules for:
+Core EVM functionality has been extracted to `@openzeppelin/adapter-evm-core`. This adapter imports and delegates to core modules for:
 
 - **ABI loading**: `loadEvmContract`, `loadAbiFromEtherscan`, `loadAbiFromSourcify`
 - **Type mapping**: `mapEvmParamTypeToFieldType`, `generateEvmDefaultField`
@@ -82,7 +82,7 @@ Core EVM functionality has been extracted to `@openzeppelin/ui-builder-adapter-e
 - **Input/output transformation**: `parseEvmInput`, `formatEvmFunctionResult`
 - **Wallet infrastructure**: `WagmiWalletImplementation`, UI kit management
 
-The core package is bundled internally (not a runtime dependency) via `tsup` with `noExternal: ['@openzeppelin/ui-builder-adapter-evm-core']`.
+The core package is bundled internally (not a runtime dependency) via `tsup` with `noExternal: ['@openzeppelin/adapter-evm-core']`.
 
 **What remains in this adapter:**
 
@@ -98,7 +98,7 @@ The core package is bundled internally (not a runtime dependency) via `tsup` wit
 The `EvmAdapter` class is instantiated with a specific `EvmNetworkConfig` object, making it aware of the target network from its creation:
 
 ```typescript
-import { ethereumSepolia, EvmAdapter } from '@openzeppelin/ui-builder-adapter-evm';
+import { ethereumSepolia, EvmAdapter } from '@openzeppelin/adapter-evm';
 
 // Or any other exported EvmNetworkConfig
 

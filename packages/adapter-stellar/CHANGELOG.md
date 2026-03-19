@@ -172,7 +172,7 @@
 
 - [#243](https://github.com/OpenZeppelin/ui-builder/pull/243) [`bfbbf9b`](https://github.com/OpenZeppelin/ui-builder/commit/bfbbf9bf55883ae61d6672436cfea66040251d48) Thanks [@pasevin](https://github.com/pasevin)! - Add Access Control and Ownable support for Stellar (Soroban) contracts
 
-  ### @openzeppelin/ui-builder-adapter-stellar
+  ### @openzeppelin/adapter-stellar
   - Add `AccessControlService` implementation with full support for OpenZeppelin Access Control and Ownable patterns
   - Add capability detection to identify contracts implementing AccessControl, Ownable, or both
   - Support role management: query current roles, grant/revoke roles, check permissions

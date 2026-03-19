@@ -15,7 +15,7 @@ import { logger } from '@openzeppelin/ui-utils';
 // Import ecosystemManager utils
 import { getNetworkById, getNetworksByEcosystem } from '../../core/ecosystemManager';
 // Import others as needed for different ecosystem tests
-// import { solanaDevnet } from '@openzeppelin/ui-builder-adapter-solana';
+// import { solanaDevnet } from '@openzeppelin/adapter-solana';
 
 import { AppExportSystem } from '../AppExportSystem';
 import {

@@ -1,5 +1,5 @@
 /**
- * @openzeppelin/ui-builder-adapter-evm-core
+ * @openzeppelin/adapter-evm-core
  *
  * Core EVM blockchain adapter functionality extracted from adapter-evm.
  * This package provides reusable, stateless modules for EVM-compatible adapters.

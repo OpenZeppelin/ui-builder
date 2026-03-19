@@ -64,16 +64,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Rename EVM package metadata in `../openzeppelin-adapters/packages/adapter-evm/package.json` and `../openzeppelin-adapters/packages/adapter-evm-core/package.json`
-- [ ] T015 [P] [US1] Rename Midnight and Polkadot package metadata in `../openzeppelin-adapters/packages/adapter-midnight/package.json` and `../openzeppelin-adapters/packages/adapter-polkadot/package.json`
-- [ ] T016 [P] [US1] Rename Solana and Stellar package metadata in `../openzeppelin-adapters/packages/adapter-solana/package.json` and `../openzeppelin-adapters/packages/adapter-stellar/package.json`
-- [ ] T017 [US1] Preserve private-core bundling and consumer-facing subpath exports in `../openzeppelin-adapters/packages/adapter-evm/package.json`, `../openzeppelin-adapters/packages/adapter-polkadot/package.json`, and `../openzeppelin-adapters/packages/adapter-evm-core/package.json`
-- [ ] T018 [US1] Update internal adapter source imports to `@openzeppelin/adapter-*` across `../openzeppelin-adapters/packages/adapter-evm/src/`, `../openzeppelin-adapters/packages/adapter-midnight/src/`, `../openzeppelin-adapters/packages/adapter-polkadot/src/`, `../openzeppelin-adapters/packages/adapter-solana/src/`, and `../openzeppelin-adapters/packages/adapter-stellar/src/`
-- [ ] T019 [US1] Replace Builder workspace adapter dependencies in `package.json` and `pnpm-workspace.yaml`
-- [ ] T020 [US1] Update Builder runtime adapter references in `apps/builder/src/core/ecosystemManager.ts` and `apps/builder/src/config/wallet/rainbowkit.config.ts`
-- [ ] T021 [P] [US1] Migrate example-consumer dependencies and adapter imports in `../openzeppelin-ui/package.json`, `../openzeppelin-ui/.pnpmfile.cjs`, and `../openzeppelin-ui/examples/basic-react-app/src/core/ecosystemManager.ts`
-- [ ] T022 [P] [US1] Migrate Role Manager dependencies and adapter imports in `../role-manager/package.json`, `../role-manager/.pnpmfile.cjs`, and `../role-manager/apps/role-manager/src/core/ecosystems/ecosystemManager.ts`
-- [ ] T023 [P] [US1] Migrate RWA Wizard adapter dependencies and references in `../rwa-wizard/package.json`, `../rwa-wizard/.pnpmfile.cjs`, and `../rwa-wizard/apps/rwa-wizard/src/services/codegen/types.ts`
+- [x] T014 [P] [US1] Rename EVM package metadata in `../openzeppelin-adapters/packages/adapter-evm/package.json` and `../openzeppelin-adapters/packages/adapter-evm-core/package.json`
+- [x] T015 [P] [US1] Rename Midnight and Polkadot package metadata in `../openzeppelin-adapters/packages/adapter-midnight/package.json` and `../openzeppelin-adapters/packages/adapter-polkadot/package.json`
+- [x] T016 [P] [US1] Rename Solana and Stellar package metadata in `../openzeppelin-adapters/packages/adapter-solana/package.json` and `../openzeppelin-adapters/packages/adapter-stellar/package.json`
+- [x] T017 [US1] Preserve private-core bundling and consumer-facing subpath exports in `../openzeppelin-adapters/packages/adapter-evm/package.json`, `../openzeppelin-adapters/packages/adapter-polkadot/package.json`, and `../openzeppelin-adapters/packages/adapter-evm-core/package.json`
+- [x] T018 [US1] Update internal adapter source imports to `@openzeppelin/adapter-*` across `../openzeppelin-adapters/packages/adapter-evm/src/`, `../openzeppelin-adapters/packages/adapter-midnight/src/`, `../openzeppelin-adapters/packages/adapter-polkadot/src/`, `../openzeppelin-adapters/packages/adapter-solana/src/`, and `../openzeppelin-adapters/packages/adapter-stellar/src/`
+- [x] T019 [US1] Replace Builder workspace adapter dependencies in `package.json` and `pnpm-workspace.yaml`
+- [x] T020 [US1] Update Builder runtime adapter references in `apps/builder/src/core/ecosystemManager.ts` and `apps/builder/src/config/wallet/rainbowkit.config.ts`
+- [x] T021 [P] [US1] Migrate example-consumer dependencies and adapter imports in `../openzeppelin-ui/package.json`, `../openzeppelin-ui/.pnpmfile.cjs`, and `../openzeppelin-ui/examples/basic-react-app/src/core/ecosystemManager.ts`
+- [x] T022 [P] [US1] Migrate Role Manager dependencies and adapter imports in `../role-manager/package.json`, `../role-manager/.pnpmfile.cjs`, and `../role-manager/apps/role-manager/src/core/ecosystems/ecosystemManager.ts`
+- [x] T023 [P] [US1] Migrate RWA Wizard adapter dependencies and references in `../rwa-wizard/package.json`, `../rwa-wizard/.pnpmfile.cjs`, and `../rwa-wizard/apps/rwa-wizard/src/services/codegen/types.ts`
 
 **Checkpoint**: Consumer repositories can point at the extracted package namespace without legacy-package behavior regressions
 

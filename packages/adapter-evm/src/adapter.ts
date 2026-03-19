@@ -38,7 +38,7 @@ import {
   type EvmContractDefinitionProviderKey,
   type TypedEvmNetworkConfig,
   type WriteContractParameters,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type {
   AccessControlService,
   AvailableUiKit,

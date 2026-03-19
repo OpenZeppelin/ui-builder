@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   EvmAccessControlService,
   TypedEvmNetworkConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type {
   AccessControlService,
   ContractFunction,

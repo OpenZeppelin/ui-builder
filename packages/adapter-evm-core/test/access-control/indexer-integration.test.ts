@@ -75,7 +75,7 @@ import type { EvmCompatibleNetworkConfig } from '../../src/types';
  *
  * To run these tests:
  *   export INDEXER_URL="https://gateway.subquery.network/query/<CID>?apikey=<YOUR_KEY>"
- *   pnpm --filter @openzeppelin/ui-builder-adapter-evm-core test -- indexer-integration
+ *   pnpm --filter @openzeppelin/adapter-evm-core test -- indexer-integration
  *
  * Tests are SKIPPED when INDEXER_URL is not set — unit tests with mocked responses
  * provide coverage for indexer functionality in that case.

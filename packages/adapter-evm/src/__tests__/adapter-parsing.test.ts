@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   EVM_TYPE_TO_FIELD_TYPE,
   parseEvmInput as parseEvmInputFunction,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { ContractFunction, FunctionParameter } from '@openzeppelin/ui-types';
 
 import { mockEvmNetworkConfig } from './mocks/mock-network-configs';

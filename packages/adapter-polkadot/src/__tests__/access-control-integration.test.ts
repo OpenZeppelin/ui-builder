@@ -13,7 +13,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { EvmAccessControlService } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { EvmAccessControlService } from '@openzeppelin/adapter-evm-core';
 import type {
   AccessControlService,
   ContractFunction,

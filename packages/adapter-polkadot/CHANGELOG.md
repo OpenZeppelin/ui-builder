@@ -1,4 +1,4 @@
-# @openzeppelin/ui-builder-adapter-polkadot
+# @openzeppelin/adapter-polkadot
 
 ## 1.8.3
 
@@ -82,7 +82,7 @@
 
 - [#328](https://github.com/OpenZeppelin/ui-builder/pull/328) [`fe9bc16`](https://github.com/OpenZeppelin/ui-builder/commit/fe9bc16111c1a5a5c519c6dde34bd604dfafdce2) Thanks [@pasevin](https://github.com/pasevin)! - Fix broken dependency on private package adapter-evm-core
 
-  Moves `@openzeppelin/ui-builder-adapter-evm-core` from `dependencies` to `devDependencies`. Since the core package is bundled at build time via tsup's `noExternal` config, it should not appear as a runtime dependency in published packages.
+  Moves `@openzeppelin/adapter-evm-core` from `dependencies` to `devDependencies`. Since the core package is bundled at build time via tsup's `noExternal` config, it should not appear as a runtime dependency in published packages.
 
 ## 1.4.0
 

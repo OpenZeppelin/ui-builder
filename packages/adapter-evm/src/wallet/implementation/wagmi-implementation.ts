@@ -9,7 +9,7 @@ import {
   getWagmiConfigForRainbowKit,
   type WagmiConfigChains,
   type WagmiWalletConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { UiKitConfiguration } from '@openzeppelin/ui-types';
 
 import { evmNetworks } from '../../networks';

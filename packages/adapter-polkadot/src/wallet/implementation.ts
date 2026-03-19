@@ -20,7 +20,7 @@ import {
   type WagmiConfigChains,
   type WagmiWalletConfig,
   type WalletNetworkConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import { logger } from '@openzeppelin/ui-utils';
 
 import { polkadotNetworks } from '../networks';

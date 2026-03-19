@@ -6,11 +6,11 @@ const versionsFilePath = path.resolve(__dirname, '../apps/builder/src/export/ver
 
 // Local workspace packages (adapters in this monorepo)
 const localPackages = [
-  '@openzeppelin/ui-builder-adapter-evm',
-  '@openzeppelin/ui-builder-adapter-midnight',
-  '@openzeppelin/ui-builder-adapter-polkadot',
-  '@openzeppelin/ui-builder-adapter-solana',
-  '@openzeppelin/ui-builder-adapter-stellar',
+  '@openzeppelin/adapter-evm',
+  '@openzeppelin/adapter-midnight',
+  '@openzeppelin/adapter-polkadot',
+  '@openzeppelin/adapter-solana',
+  '@openzeppelin/adapter-stellar',
 ];
 
 // External packages from @openzeppelin/ui-* (published to npm from openzeppelin-ui repo)
@@ -26,13 +26,13 @@ const externalPackages = [
 
 /**
  * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-builder-adapter-evm').
+ * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/adapter-evm').
  * @returns {string | null} The version string or null if not found.
  */
 const getWorkspaceVersion = (packageName) => {
   try {
     // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/ui-builder-adapter-evm' -> 'adapter-evm'
+    // e.g., '@openzeppelin/adapter-evm' -> 'adapter-evm'
     const nameWithoutScope = packageName.split('/')[1];
     const packageDirName = nameWithoutScope.replace('ui-builder-', '');
 

@@ -22,7 +22,7 @@ import type { UserConfig } from 'vite';
  * @example
  * ```typescript
  * // vite.config.ts
- * import { getSolanaViteConfig } from '@openzeppelin/ui-builder-adapter-solana/vite-config';
+ * import { getSolanaViteConfig } from '@openzeppelin/adapter-solana/vite-config';
  *
  * export default defineConfig(({ mode }) => {
  *   const solanaConfig = getSolanaViteConfig();

@@ -26,7 +26,7 @@ import {
   zksyncSepoliaTestnet as viemZkSyncSepoliaTestnet,
 } from 'viem/chains';
 
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/adapter-evm-core';
 
 export const ethereumSepolia: TypedEvmNetworkConfig = {
   id: 'ethereum-sepolia',

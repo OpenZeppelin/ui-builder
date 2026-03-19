@@ -13,14 +13,14 @@ import type { BaseComponentProps, EcosystemWalletComponents } from '@openzeppeli
  * @example
  * ```typescript
  * // In adapter-evm:
- * import { createRainbowKitConnectButton, createRainbowKitComponents } from '@openzeppelin/ui-builder-adapter-evm-core';
+ * import { createRainbowKitConnectButton, createRainbowKitComponents } from '@openzeppelin/adapter-evm-core';
  * import { evmUiKitManager } from './evmUiKitManager';
  *
  * const RainbowKitConnectButton = createRainbowKitConnectButton(evmUiKitManager);
  * const components = createRainbowKitComponents(RainbowKitConnectButton);
  *
  * // In adapter-polkadot:
- * import { createRainbowKitConnectButton, createRainbowKitComponents } from '@openzeppelin/ui-builder-adapter-evm-core';
+ * import { createRainbowKitConnectButton, createRainbowKitComponents } from '@openzeppelin/adapter-evm-core';
  * import { polkadotUiKitManager } from './polkadotUiKitManager';
  *
  * const RainbowKitConnectButton = createRainbowKitConnectButton(polkadotUiKitManager);

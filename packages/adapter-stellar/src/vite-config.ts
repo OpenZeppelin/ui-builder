@@ -22,7 +22,7 @@ import type { UserConfig } from 'vite';
  * @example
  * ```typescript
  * // vite.config.ts
- * import { getStellarViteConfig } from '@openzeppelin/ui-builder-adapter-stellar/vite-config';
+ * import { getStellarViteConfig } from '@openzeppelin/adapter-stellar/vite-config';
  *
  * export default defineConfig(({ mode }) => {
  *   const stellarConfig = getStellarViteConfig();

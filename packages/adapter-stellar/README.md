@@ -1,4 +1,4 @@
-# Stellar Adapter (`@openzeppelin/ui-builder-adapter-stellar`)
+# Stellar Adapter (`@openzeppelin/adapter-stellar`)
 
 This package provides the `ContractAdapter` implementation for the Stellar (Soroban) ecosystem for the UI Builder.
 
@@ -178,7 +178,7 @@ adapter-stellar/
 Instantiate the adapter with a specific `StellarNetworkConfig`:
 
 ```typescript
-import { StellarAdapter, stellarTestnet } from '@openzeppelin/ui-builder-adapter-stellar';
+import { StellarAdapter, stellarTestnet } from '@openzeppelin/adapter-stellar';
 
 const networkConfig = stellarTestnet; // or stellarPublic
 const stellarAdapter = new StellarAdapter(networkConfig);

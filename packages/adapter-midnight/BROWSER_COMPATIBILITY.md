@@ -301,10 +301,10 @@ To verify the workaround is functioning:
 
 ```bash
 # Build the adapter
-pnpm --filter @openzeppelin/ui-builder-adapter-midnight build
+pnpm --filter @openzeppelin/adapter-midnight build
 
 # Run tests
-pnpm --filter @openzeppelin/ui-builder-adapter-midnight test
+pnpm --filter @openzeppelin/adapter-midnight test
 
 # Start dev server and test in browser
 pnpm --filter @openzeppelin/ui-builder dev

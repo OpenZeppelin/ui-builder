@@ -392,11 +392,11 @@ function exportAppSimple(options) {
         const packageJsonPath = path.join(extractDir, 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
         const packageOverrides = {
-          '@openzeppelin/ui-builder-adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
-          '@openzeppelin/ui-builder-adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/ui-builder-adapter-polkadot': `file:${path.join(monorepoRoot, 'packages/adapter-polkadot')}`,
-          '@openzeppelin/ui-builder-adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
-          '@openzeppelin/ui-builder-adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          '@openzeppelin/adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
+          '@openzeppelin/adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
+          '@openzeppelin/adapter-polkadot': `file:${path.join(monorepoRoot, 'packages/adapter-polkadot')}`,
+          '@openzeppelin/adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
+          '@openzeppelin/adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
           '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
           '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,

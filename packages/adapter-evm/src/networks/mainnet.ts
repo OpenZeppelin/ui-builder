@@ -24,7 +24,7 @@ import {
   zksync as viemZkSync,
 } from 'viem/chains';
 
-import type { TypedEvmNetworkConfig } from '@openzeppelin/ui-builder-adapter-evm-core';
+import type { TypedEvmNetworkConfig } from '@openzeppelin/adapter-evm-core';
 
 export const ethereumMainnet: TypedEvmNetworkConfig = {
   id: 'ethereum-mainnet',

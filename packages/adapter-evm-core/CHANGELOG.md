@@ -1,4 +1,4 @@
-# @openzeppelin/ui-builder-adapter-evm-core
+# @openzeppelin/adapter-evm-core
 
 ## 1.1.2
 

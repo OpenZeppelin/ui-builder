@@ -69,7 +69,7 @@ import {
   generateRainbowKitExportables,
   resolveFullUiKitConfiguration,
   type EvmAccessControlService,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type {
   AccessControlService,
   AvailableUiKit,
@@ -152,7 +152,7 @@ import type { TypedPolkadotNetworkConfig } from './types';
  *
  * @example
  * ```typescript
- * import { PolkadotAdapter, polkadotHubMainnet } from '@openzeppelin/ui-builder-adapter-polkadot';
+ * import { PolkadotAdapter, polkadotHubMainnet } from '@openzeppelin/adapter-polkadot';
  *
  * const adapter = new PolkadotAdapter(polkadotHubMainnet);
  * const schema = await adapter.loadContract('0x1234...');

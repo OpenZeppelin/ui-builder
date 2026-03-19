@@ -5,7 +5,7 @@ import {
   loadEvmContract,
   type EvmContractArtifacts,
   type TypedEvmNetworkConfig,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 
 describe('EVM provenance links', () => {
   it('builds address URL from explorer config', () => {

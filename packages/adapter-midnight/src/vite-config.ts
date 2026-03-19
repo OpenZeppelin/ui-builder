@@ -32,7 +32,7 @@ export interface MidnightVitePlugins {
  * @example
  * ```typescript
  * // vite.config.ts
- * import { getMidnightViteConfig } from '@openzeppelin/ui-builder-adapter-midnight/vite-config';
+ * import { getMidnightViteConfig } from '@openzeppelin/adapter-midnight/vite-config';
  * import wasm from 'vite-plugin-wasm';
  * import topLevelAwait from 'vite-plugin-top-level-await';
  *

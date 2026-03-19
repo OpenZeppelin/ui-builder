@@ -4,7 +4,7 @@
  * Factory function for creating RainbowKit components.
  * Separated from components.tsx to support React Fast Refresh.
  */
-import { createRainbowKitComponents as coreCreateRainbowKitComponents } from '@openzeppelin/ui-builder-adapter-evm-core';
+import { createRainbowKitComponents as coreCreateRainbowKitComponents } from '@openzeppelin/adapter-evm-core';
 
 import { RainbowKitConnectButton } from './components';
 

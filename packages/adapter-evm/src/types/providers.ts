@@ -7,4 +7,4 @@ export {
   type EvmContractDefinitionProviderKey,
   EVM_PROVIDER_ORDER_DEFAULT,
   isEvmProviderKey,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';

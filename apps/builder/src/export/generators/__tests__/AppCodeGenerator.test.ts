@@ -12,8 +12,8 @@ import { AppCodeGenerator } from '../AppCodeGenerator';
 // Mock adapterRegistry before other imports that might use it indirectly
 vi.mock('../../../core/adapterRegistry', () => {
   const adapterPackageMap = {
-    evm: '@openzeppelin/ui-builder-adapter-evm',
-    solana: '@openzeppelin/ui-builder-adapter-solana',
+    evm: '@openzeppelin/adapter-evm',
+    solana: '@openzeppelin/adapter-solana',
     // Add other real chains if needed by tests
   };
 
@@ -45,7 +45,7 @@ vi.mock('../../PackageManager', () => {
             ...(packageJson.dependencies || {}),
             '@openzeppelin/ui-renderer': '^1.0.0',
             '@openzeppelin/ui-types': '^0.1.0',
-            [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1', // Add caret version
+            [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1', // Add caret version
           };
           return JSON.stringify(packageJson, null, 2);
         }
@@ -56,7 +56,7 @@ vi.mock('../../PackageManager', () => {
         return {
           '@openzeppelin/ui-renderer': '^1.0.0',
           '@openzeppelin/ui-types': '^0.1.0',
-          [`@openzeppelin/ui-builder-adapter-${ecosystem}`]: '^0.0.1',
+          [`@openzeppelin/adapter-${ecosystem}`]: '^0.0.1',
         };
       }),
     getDevDependencies: vi
@@ -105,7 +105,7 @@ vi.mock('../../TemplateManager', async (importOriginal) => {
                 ...(packageJson.dependencies || {}),
                 '@openzeppelin/ui-renderer': '^1.0.0',
                 '@openzeppelin/ui-types': '^0.1.0',
-                [`@openzeppelin/ui-builder-adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
+                [`@openzeppelin/adapter-${options.ecosystem || 'evm'}`]: '^0.0.1',
               };
               result['package.json'] = JSON.stringify(packageJson, null, 2);
             }
@@ -210,7 +210,7 @@ describe('AppCodeGenerator', () => {
         'form-component',
         expect.objectContaining({
           adapterClassName: 'EvmAdapter',
-          adapterPackageName: '@openzeppelin/ui-builder-adapter-evm',
+          adapterPackageName: '@openzeppelin/adapter-evm',
           networkConfigImportName: 'mockEvmNetworkConfig', // From the mock config exportConstName
           functionId: 'testFunction',
           formConfigJSON: expect.any(String),

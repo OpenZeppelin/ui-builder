@@ -4,7 +4,7 @@ import {
   connectAndEnsureCorrectNetworkCore,
   DEFAULT_DISCONNECTED_STATUS,
   type EvmWalletConnectionResult,
-} from '@openzeppelin/ui-builder-adapter-evm-core';
+} from '@openzeppelin/adapter-evm-core';
 import type { Connector } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
