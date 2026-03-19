@@ -26,11 +26,13 @@
 
 **Purpose**: Create the new adapter repository shell and reusable top-level tooling
 
-- [ ] T001 Create the new repo scaffold in `../openzeppelin-adapters/package.json`, `../openzeppelin-adapters/pnpm-workspace.yaml`, and `../openzeppelin-adapters/README.md`
-- [ ] T002 [P] Copy root TypeScript, lint, and test config into `../openzeppelin-adapters/tsconfig.base.json`, `../openzeppelin-adapters/tsconfig.json`, `../openzeppelin-adapters/tsconfig.node.json`, `../openzeppelin-adapters/eslint.config.cjs`, and `../openzeppelin-adapters/vitest.shared.config.ts`
-- [ ] T003 [P] Copy package-manager and formatting defaults into `../openzeppelin-adapters/.npmrc`, `../openzeppelin-adapters/.nvmrc`, and `../openzeppelin-adapters/.prettierrc.cjs`
-- [ ] T004 [P] Copy the reusable prepare action into `../openzeppelin-adapters/.github/actions/prepare/action.yml`
-- [ ] T005 [P] Create release-operations docs in `../openzeppelin-adapters/docs/DEVOPS_SETUP.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
+- [x] T001 Create the new repo scaffold in `../openzeppelin-adapters/package.json`, `../openzeppelin-adapters/pnpm-workspace.yaml`, and `../openzeppelin-adapters/README.md`
+- [x] T002 [P] Copy root TypeScript, lint, and test config into `../openzeppelin-adapters/tsconfig.base.json`, `../openzeppelin-adapters/tsconfig.json`, `../openzeppelin-adapters/tsconfig.node.json`, `../openzeppelin-adapters/eslint.config.cjs`, and `../openzeppelin-adapters/vitest.shared.config.ts`
+- [x] T003 [P] Copy package-manager and formatting defaults into `../openzeppelin-adapters/.npmrc`, `../openzeppelin-adapters/.nvmrc`, and `../openzeppelin-adapters/.prettierrc.cjs`
+- [x] T004 [P] Copy the reusable prepare action into `../openzeppelin-adapters/.github/actions/prepare/action.yml`
+- [x] T005 [P] Create release-operations docs in `../openzeppelin-adapters/docs/DEVOPS_SETUP.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
+- [x] T005a [P] Add Husky pre-commit hooks and lint-staged in `../openzeppelin-adapters/`
+- [x] T005b [P] Add conventional commits support (commitlint, commitizen) in `../openzeppelin-adapters/`
 
 ---
 
@@ -204,7 +206,7 @@ Phase 1 (Setup) → Phase 2 (Foundational) → Phase 3 (US1) → Phase 4 (US2) �
 
 ### Parallel Opportunities
 
-- **Phase 1**: T002-T005 can run in parallel after T001 creates the repo shell
+- **Phase 1**: T002-T005b can run in parallel after T001 creates the repo shell
 - **Phase 2**: T008-T012 can run in parallel after T006-T007a define governance and release-group rules
 - **US1**: T014-T016 can run in parallel; T021-T023 can run in parallel across consumer repos
 - **US2**: T023a-T023b can run in parallel first; T024-T025 can run in parallel once shared workflow conventions are established
@@ -274,7 +276,7 @@ T041: Update ../rwa-wizard/.pnpmfile.cjs and ../rwa-wizard/package.json
 
 | Category     | Tasks                  | Scope                                                                                                                   |
 | ------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Setup        | T001-T005              | New repo shell, root configs, initial docs                                                                              |
+| Setup        | T001-T005b             | New repo shell, root configs, initial docs, husky, conventional commits                                                 |
 | Foundational | T006-T013, T007a       | Governance gate, `1.0.0` baseline, package migration base, `tsdown`, and CI                                             |
 | US1 (P1)     | T014-T023              | Package renames and consumer adoption                                                                                   |
 | US2 (P1)     | T023a-T032a            | Release-flow tests, RC and stable publishing, Builder version resolution, wrapper-package prevention, and rollout gates |
@@ -283,8 +285,8 @@ T041: Update ../rwa-wizard/.pnpmfile.cjs and ../rwa-wizard/package.json
 | Cleanup      | T045-T047a             | Remove legacy ownership, old package references, and add the rollout-closeout guard                                     |
 | Polish       | T048-T050, T048a-T049a | Final workflow, timing, and multi-repo verification                                                                     |
 
-**Total Tasks**: 60  
+**Total Tasks**: 62  
 **Task Count by Story**: US1 = 10, US2 = 13, US3 = 7, US4 = 7  
-**Parallel Opportunities**: 24 tasks marked `[P]`  
+**Parallel Opportunities**: 26 tasks marked `[P]`  
 **Suggested MVP Scope**: T001-T032a  
 **Format Validation**: All tasks follow `- [ ] TXXX [P?] [US?] Description with path`
