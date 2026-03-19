@@ -1,0 +1,36 @@
+---
+description: Project Development Guidelines
+globs: ['**/*']
+alwaysApply: true
+---
+
+# ui-builder Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-19
+
+## Active Technologies
+
+- TypeScript 5.x (strict mode), Node.js >= 20.19.0 + pnpm 10.x, `@changesets/cli`, tsdown, Vitest, React 19, Vite 7, GitHub Actions, npm dist-tags (012-adapter-monorepo-extraction)
+- N/A for application data; npm registry, git, and generated export metadata files are the operational persistence layer (012-adapter-monorepo-extraction)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+npm test && npm run lint
+
+## Code Style
+
+TypeScript 5.x (strict mode), Node.js >= 20.19.0: Follow standard conventions
+
+## Recent Changes
+
+- 012-adapter-monorepo-extraction: Added TypeScript 5.x (strict mode), Node.js >= 20.19.0 + pnpm 10.x, `@changesets/cli`, tsdown, Vitest, React 19, Vite 7, GitHub Actions, npm dist-tags
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

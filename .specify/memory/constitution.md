@@ -1,18 +1,28 @@
 <!--
 Sync Impact Report
-Version: 1.3.0 → 1.3.1
-Modified Principles: None (structural alignment with new constitution-template.md)
-- All 7 principles verified against template structure
-- Section 2 (Additional Constraints) aligns with [SECTION_2_NAME] slot
-- Section 3 (Development Workflow and Review Process) aligns with [SECTION_3_NAME] slot
-- Governance section and version footer match template format
+Version: 1.3.1 → 1.4.0
+Modified Principles:
+- I. Chain-Agnostic Core, Adapter-Led Architecture
+- III. Tooling, Packaging, and Releases
+- Development Workflow and Review Process
+- Governance
+Summary of Changes:
+- Ratified the adapter repository boundary so adapter packages move from `ui-builder`
+  to the dedicated `openzeppelin-adapters` monorepo while the Builder app remains
+  in this repository.
+- Updated packaging guidance to allow `tsdown` for the extracted adapter
+  monorepo instead of requiring `tsup` there.
+- Added explicit workflow guidance for cross-repo local adapter development using
+  `LOCAL_ADAPTERS_PATH`.
 Templates:
-- ✅ .specify/templates/constitution-template.md (new — constitution verified against it)
-- ✅ .specify/templates/plan-template.md (Constitution Check section references principles correctly)
-- ✅ .specify/templates/spec-template.md (no constitution-specific references to update)
-- ✅ .specify/templates/tasks-template.md (no constitution-specific references to update)
-- ✅ .specify/templates/checklist-template.md (no constitution-specific references to update)
-Follow-up TODOs: none
+- ✅ .specify/templates/constitution-template.md (structure still aligned)
+- ✅ .specify/templates/plan-template.md (Constitution Check remains compatible)
+- ✅ .specify/templates/spec-template.md (no template changes required)
+- ✅ .specify/templates/tasks-template.md (no template changes required)
+- ✅ .specify/templates/checklist-template.md (no template changes required)
+Follow-up TODOs:
+- Update planning artifacts that still describe this amendment as only a
+  precondition once the spec set is refreshed.
 -->
 
 # UI Builder Constitution
@@ -25,10 +35,12 @@ Follow-up TODOs: none
   `@openzeppelin/ui-styles`, `@openzeppelin/ui-components`, `@openzeppelin/ui-renderer`,
   `@openzeppelin/ui-react`, `@openzeppelin/ui-storage`) are maintained in the
   separate `openzeppelin-ui` monorepo and consumed via npm.
-- The builder app (`apps/builder`) and adapter packages (`packages/adapter-*`)
-  remain in this repository.
+- The builder app (`apps/builder`) remains in this repository.
+- Ecosystem adapter packages are maintained in the dedicated
+  `openzeppelin-adapters` monorepo and consumed by Builder and other products via
+  published packages or approved local-repo overrides during development.
 - All chain-specific logic, dependencies, and polyfills live exclusively in adapter
-  packages (`packages/adapter-*`).
+  packages (`packages/adapter-*` in the adapter monorepo).
 - Adapters MUST implement `ContractAdapter` from `@openzeppelin/ui-types` and be
   instantiated with a `NetworkConfig`.
 - The builder MUST resolve adapters through dynamic ecosystem registration via the
@@ -60,10 +72,15 @@ string, addressType?: string)` supports chain-specific behavior.
 ### III. Tooling, Packaging, and Releases (NON-NEGOTIABLE)
 
 - `pnpm` is the sole package manager; use `pnpm -r` for workspace commands.
-- Build outputs use `tsup` for bundling and `tsc --emitDeclarationOnly` for types,
+- Build outputs use the repository-standard bundler:
+  `ui-builder` continues using its current build stack, while the dedicated
+  adapter monorepo uses `tsdown` plus `tsc --emitDeclarationOnly` for types,
   shipping both ESM and CJS where applicable.
 - Versioning relies on Changesets for the builder app and adapter packages; core
   UI packages are versioned independently in the `openzeppelin-ui` repository.
+- Adapter package versioning and RC/stable publication are owned by the dedicated
+  adapter monorepo; `ui-builder` remains responsible for Builder staging and
+  production deployment orchestration plus generated export-version metadata.
 - CI publishes releases on merge to `main` after tests, linting, and type checks pass.
 - Shared configs (`tailwind.config.cjs`, `postcss.config.cjs`, `components.json`)
   are consumed via lightweight proxies.
@@ -154,6 +171,11 @@ string, addressType?: string)` supports chain-specific behavior.
   packages to local paths in `../openzeppelin-ui` via `.pnpmfile.cjs`. Run
   `pnpm dev:npm` to switch back to npm packages. This keeps `package.json`
   unchanged while enabling seamless local development.
+- **Local adapter development**: Use the canonical `LOCAL_ADAPTERS_PATH`
+  convention when resolving `@openzeppelin/adapter-*` packages from a sibling
+  checkout of `../openzeppelin-adapters`. Compatibility aliases may exist
+  temporarily during migration, but repository docs must converge on the
+  canonical variable.
 - **Docker testing**: Run `pnpm docker:dev` to build and run the Docker container
   locally.
 - Commit messages follow Conventional Commits and pass commitlint; Commitizen
@@ -176,9 +198,12 @@ string, addressType?: string)` supports chain-specific behavior.
   and review.
 - Amendments require a documented proposal, updates to relevant guides/READMEs,
   migration notes if applicable, and approval via PR review.
+- Repository-boundary changes affecting adapter ownership, release automation, or
+  local-development contracts MUST be ratified here before implementation PRs are
+  merged.
 - Breaking changes demand a Changeset with a major version bump and explicit
   upgrade notes; commit messages must flag breaking changes per convention.
 - CI enforces compliance; PRs violating constitutional rules MUST be corrected
   before merge.
 
-**Version**: 1.3.1 | **Ratified**: 2025-09-17 | **Last Amended**: 2026-03-18
+**Version**: 1.4.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2026-03-18
