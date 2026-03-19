@@ -42,15 +42,15 @@
 
 **CRITICAL**: No user story rollout should be completed until this phase is done
 
-- [ ] T006 Ratify the repository-boundary amendment in `.specify/memory/constitution.md`
-- [ ] T007 Configure linked Changesets releases in `../openzeppelin-adapters/.changeset/config.json`
-- [ ] T007a Set the initial `1.0.0` release baseline in `../openzeppelin-adapters/.changeset/initial-release.md` and `../openzeppelin-adapters/packages/*/package.json`
-- [ ] T008 [P] Migrate adapter support scripts into `../openzeppelin-adapters/scripts/sync-patches-to-adapters.js`, `../openzeppelin-adapters/scripts/validate-adapter-vite-configs.cjs`, and `../openzeppelin-adapters/scripts/remove-midnight-sourcemaps.js`
-- [ ] T009 [P] Migrate shared patch assets into `../openzeppelin-adapters/patches/`
-- [ ] T010 [P] Copy adapter package sources into `../openzeppelin-adapters/packages/adapter-evm/`, `../openzeppelin-adapters/packages/adapter-evm-core/`, `../openzeppelin-adapters/packages/adapter-midnight/`, `../openzeppelin-adapters/packages/adapter-polkadot/`, `../openzeppelin-adapters/packages/adapter-solana/`, and `../openzeppelin-adapters/packages/adapter-stellar/`
-- [ ] T011 [P] Replace deprecated bundling setup with `tsdown` in `../openzeppelin-adapters/package.json`
-- [ ] T012 [P] Add package-level `tsdown` configs in `../openzeppelin-adapters/packages/adapter-evm/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-midnight/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-polkadot/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-solana/tsdown.config.ts`, and `../openzeppelin-adapters/packages/adapter-stellar/tsdown.config.ts`
-- [ ] T013 Create the baseline verification workflow in `../openzeppelin-adapters/.github/workflows/ci.yml`
+- [x] T006 Ratify the repository-boundary amendment in `.specify/memory/constitution.md`
+- [x] T007 Configure linked Changesets releases in `../openzeppelin-adapters/.changeset/config.json`
+- [x] T007a Set the initial `1.0.0` release baseline in `../openzeppelin-adapters/.changeset/initial-release.md` and `../openzeppelin-adapters/packages/*/package.json`
+- [x] T008 [P] Migrate adapter support scripts into `../openzeppelin-adapters/scripts/sync-patches-to-adapters.js`, `../openzeppelin-adapters/scripts/validate-adapter-vite-configs.cjs`, `../openzeppelin-adapters/scripts/remove-midnight-sourcemaps.js`, and `../openzeppelin-adapters/lint-adapters.cjs` (root); wire `lint:adapters` in root package.json, all adapter packages, pre-push hook, and CI workflow
+- [x] T009 [P] Migrate shared patch assets into `../openzeppelin-adapters/patches/`
+- [x] T010 [P] Copy adapter package sources into `../openzeppelin-adapters/packages/adapter-evm/`, `../openzeppelin-adapters/packages/adapter-evm-core/`, `../openzeppelin-adapters/packages/adapter-midnight/`, `../openzeppelin-adapters/packages/adapter-polkadot/`, `../openzeppelin-adapters/packages/adapter-solana/`, and `../openzeppelin-adapters/packages/adapter-stellar/`
+- [x] T011 [P] Replace deprecated bundling setup with `tsdown` in `../openzeppelin-adapters/package.json`
+- [x] T012 [P] Add package-level `tsdown` configs in `../openzeppelin-adapters/packages/adapter-evm/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-midnight/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-polkadot/tsdown.config.ts`, `../openzeppelin-adapters/packages/adapter-solana/tsdown.config.ts`, and `../openzeppelin-adapters/packages/adapter-stellar/tsdown.config.ts`
+- [x] T013 Create the baseline verification workflow in `../openzeppelin-adapters/.github/workflows/ci.yml`
 
 **Checkpoint**: Foundation ready - repository bootstrap, governance gate, and build tooling are in place
 
@@ -124,6 +124,8 @@
 - [ ] T034 [US3] Regenerate canonical adapter version references in `apps/builder/src/export/versions.ts`
 - [ ] T035 [US3] Update export CLI dependency generation in `apps/builder/src/export/cli/export-app.cjs`
 - [ ] T036 [US3] Replace any remaining legacy adapter names in `apps/builder/src/export/templates/`
+- [ ] T036a [US3] Update `apps/builder/src/export/assemblers/copyAdapterPatchFiles.ts` to resolve patch files from adapter package (LOCAL_ADAPTERS_PATH sibling or resolved adapter in node_modules) instead of hardcoded `packages/adapter-*/patches`
+- [ ] T036b [US3] Update `apps/builder/src/export/cli/export-app.cjs` `configureForPackedMode` to resolve adapter patches path from LOCAL_ADAPTERS_PATH or adapter package location instead of hardcoded `packages/adapter-midnight/patches`
 - [ ] T037 [US3] Update export verification coverage in `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts`, `apps/builder/src/export/__tests__/PackageManager.test.ts`, and `apps/builder/src/export/__tests__/PackageManagerConfigLoading.test.ts`
 - [ ] T038 [US3] Refresh export snapshots and fixtures in `apps/builder/src/export/__snapshots__/` and related files under `apps/builder/src/export/`
 
@@ -162,6 +164,7 @@
 - [ ] T046 Delete the extracted adapter source directories at `packages/adapter-evm/`, `packages/adapter-evm-core/`, `packages/adapter-midnight/`, `packages/adapter-polkadot/`, `packages/adapter-solana/`, and `packages/adapter-stellar/`
 - [ ] T047 Sweep remaining `@openzeppelin/ui-builder-adapter-*` references from `package.json`, `apps/builder/src/`, `../openzeppelin-ui/`, `../role-manager/`, and `../rwa-wizard/`
 - [ ] T047a Add a rollout-closeout guard against new legacy-name usage in `../openzeppelin-adapters/docs/RUNBOOK.md` and `specs/012-adapter-monorepo-extraction/quickstart.md`
+- [ ] T047b [P] Simplify `../openzeppelin-adapters/scripts/validate-adapter-vite-configs.cjs` to only check `@openzeppelin/adapter-*` (remove legacy `ui-builder-adapter` branch) after Phase 3 rename
 
 ---
 
@@ -274,18 +277,18 @@ T041: Update ../rwa-wizard/.pnpmfile.cjs and ../rwa-wizard/package.json
 
 ## Summary
 
-| Category     | Tasks                  | Scope                                                                                                                   |
-| ------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Setup        | T001-T005b             | New repo shell, root configs, initial docs, husky, conventional commits                                                 |
-| Foundational | T006-T013, T007a       | Governance gate, `1.0.0` baseline, package migration base, `tsdown`, and CI                                             |
-| US1 (P1)     | T014-T023              | Package renames and consumer adoption                                                                                   |
-| US2 (P1)     | T023a-T032a            | Release-flow tests, RC and stable publishing, Builder version resolution, wrapper-package prevention, and rollout gates |
-| US3 (P1)     | T032b-T038             | Export tests-first work, exported-app package names, and export verification                                            |
-| US4 (P2)     | T038a-T044             | Local-dev tests-first work and convergence across sibling repos                                                         |
-| Cleanup      | T045-T047a             | Remove legacy ownership, old package references, and add the rollout-closeout guard                                     |
-| Polish       | T048-T050, T048a-T049a | Final workflow, timing, and multi-repo verification                                                                     |
+| Category     | Tasks                   | Scope                                                                                                                   |
+| ------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Setup        | T001-T005b              | New repo shell, root configs, initial docs, husky, conventional commits                                                 |
+| Foundational | T006-T013, T007a        | Governance gate, `1.0.0` baseline, package migration base, `tsdown`, and CI                                             |
+| US1 (P1)     | T014-T023               | Package renames and consumer adoption                                                                                   |
+| US2 (P1)     | T023a-T032a             | Release-flow tests, RC and stable publishing, Builder version resolution, wrapper-package prevention, and rollout gates |
+| US3 (P1)     | T032b-T038, T036a-T036b | Export tests-first work, exported-app package names, patch resolution from extracted adapters, and export verification  |
+| US4 (P2)     | T038a-T044              | Local-dev tests-first work and convergence across sibling repos                                                         |
+| Cleanup      | T045-T047b              | Remove legacy ownership, old package references, rollout-closeout guard, and simplify validate-adapter-vite-configs.cjs |
+| Polish       | T048-T050, T048a-T049a  | Final workflow, timing, and multi-repo verification                                                                     |
 
-**Total Tasks**: 62  
+**Total Tasks**: 65  
 **Task Count by Story**: US1 = 10, US2 = 13, US3 = 7, US4 = 7  
 **Parallel Opportunities**: 26 tasks marked `[P]`  
 **Suggested MVP Scope**: T001-T032a  

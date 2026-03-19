@@ -95,6 +95,7 @@ openzeppelin-adapters/
 │   ├── sync-patches-to-adapters.js
 │   ├── validate-adapter-vite-configs.cjs
 │   └── remove-midnight-sourcemaps.js
+├── lint-adapters.cjs
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── tsconfig.base.json
