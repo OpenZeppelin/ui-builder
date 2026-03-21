@@ -87,22 +87,22 @@
 
 ### Tests for User Story 2
 
-- [ ] T023a [P] [US2] Add failing coverage for published adapter metadata resolution in `scripts/__tests__/update-export-versions.test.ts`
-- [ ] T023b [P] [US2] Add failing coverage for Builder release-channel resolution in `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts` and `apps/builder/src/export/__tests__/PackageManagerConfigLoading.test.ts`
+- [x] T023a [P] [US2] Add failing coverage for published adapter metadata resolution in `scripts/__tests__/update-export-versions.test.ts`
+- [x] T023b [P] [US2] Add failing coverage for Builder release-channel resolution in `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts` and `apps/builder/src/export/__tests__/PackageManagerConfigLoading.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Create the stable release workflow in `../openzeppelin-adapters/.github/workflows/publish.yml`
-- [ ] T025 [US2] Create the RC publication workflow in `../openzeppelin-adapters/.github/workflows/publish-rc.yml`
-- [ ] T026 [US2] Document release credentials, provenance setup, and release-PR expectations in `../openzeppelin-adapters/docs/DEVOPS_SETUP.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
-- [ ] T027 [US2] Add Changesets release documentation in `../openzeppelin-adapters/.changeset/README.md`
-- [ ] T027a [US2] Verify old wrapper packages are absent from `../openzeppelin-adapters/packages/`, `../openzeppelin-adapters/pnpm-workspace.yaml`, and `../openzeppelin-adapters/.github/workflows/publish.yml`
-- [ ] T028 [US2] Resolve published adapter metadata inside `scripts/update-export-versions.cjs`
-- [ ] T029 [US2] Preserve Builder version-sync enforcement in `.github/workflows/check-versions.yml` and `.github/workflows/update-versions.yml`
-- [ ] T030 [US2] Preserve Builder environment ownership in `.github/workflows/docker-stg.yaml` and `.github/workflows/docker-prod.yaml`
-- [ ] T031 [US2] Keep export validation aligned with published adapters in `.github/workflows/export-testing.yml`
-- [ ] T032 [US2] Document Builder-owned staging redeploy and defective-release recovery in `docs/LOCAL_DEVELOPMENT.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
-- [ ] T032a [US2] Add the focused rollout gate requiring initial adapter publish validation before consumer-cutover merges in `../openzeppelin-adapters/docs/RUNBOOK.md`, `docs/LOCAL_DEVELOPMENT.md`, and `../openzeppelin-adapters/.github/workflows/publish.yml`
+- [x] T024 [US2] Create the stable release workflow in `../openzeppelin-adapters/.github/workflows/publish.yml`
+- [x] T025 [US2] Create the RC publication workflow in `../openzeppelin-adapters/.github/workflows/publish-rc.yml`
+- [x] T026 [US2] Document release credentials, provenance setup, and release-PR expectations in `../openzeppelin-adapters/docs/DEVOPS_SETUP.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
+- [x] T027 [US2] Add Changesets release documentation in `../openzeppelin-adapters/.changeset/README.md`
+- [x] T027a [US2] Verify old wrapper packages are absent from `../openzeppelin-adapters/packages/`, `../openzeppelin-adapters/pnpm-workspace.yaml`, and `../openzeppelin-adapters/.github/workflows/publish.yml`
+- [x] T028 [US2] Resolve published adapter metadata inside `scripts/update-export-versions.cjs`
+- [x] T029 [US2] Preserve Builder version-sync enforcement in `.github/workflows/check-versions.yml` and `.github/workflows/update-versions.yml`
+- [x] T030 [US2] Preserve Builder environment ownership in `.github/workflows/docker-stg.yaml` and `.github/workflows/docker-prod.yaml`
+- [x] T031 [US2] Keep export validation aligned with published adapters in `.github/workflows/export-testing.yml`
+- [x] T032 [US2] Document Builder-owned staging redeploy and defective-release recovery in `docs/LOCAL_DEVELOPMENT.md` and `../openzeppelin-adapters/docs/RUNBOOK.md`
+- [x] T032a [US2] Add the focused rollout gate requiring initial adapter publish validation before consumer-cutover merges in `../openzeppelin-adapters/docs/RUNBOOK.md`, `docs/LOCAL_DEVELOPMENT.md`, and `../openzeppelin-adapters/.github/workflows/publish.yml`
 
 **Checkpoint**: The adapter repo can publish RC/stable packages independently and Builder workflows still resolve the right release channel per environment
 

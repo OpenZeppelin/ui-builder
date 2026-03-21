@@ -2,16 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const {
+  ADAPTER_PACKAGES,
+  resolveAdapterVersion,
+  getNpmVersion,
+} = require('./lib/update-export-versions-core.cjs');
+
 const versionsFilePath = path.resolve(__dirname, '../apps/builder/src/export/versions.ts');
 
-// Local workspace packages (adapters in this monorepo)
-const localPackages = [
-  '@openzeppelin/adapter-evm',
-  '@openzeppelin/adapter-midnight',
-  '@openzeppelin/adapter-polkadot',
-  '@openzeppelin/adapter-solana',
-  '@openzeppelin/adapter-stellar',
-];
+// Adapter versions are resolved from published npm metadata (or LOCAL_ADAPTERS_PATH override).
+const localPackages = ADAPTER_PACKAGES;
 
 // External packages from @openzeppelin/ui-* (published to npm from openzeppelin-ui repo)
 const externalPackages = [
@@ -25,50 +25,24 @@ const externalPackages = [
 ];
 
 /**
- * Gets the version of a package directly from its package.json in the workspace.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/adapter-evm').
- * @returns {string | null} The version string or null if not found.
+ * Gets the stable version for an adapter: local checkout when LOCAL_ADAPTERS_PATH is set, else npm.
+ * @param {string} packageName
+ * @returns {string | null}
  */
-const getWorkspaceVersion = (packageName) => {
+const getAdapterVersionForExport = (packageName) => {
   try {
-    // Derives the directory name from the package name.
-    // e.g., '@openzeppelin/adapter-evm' -> 'adapter-evm'
-    const nameWithoutScope = packageName.split('/')[1];
-    const packageDirName = nameWithoutScope.replace('ui-builder-', '');
-
-    const packageJsonPath = path.resolve(__dirname, '../packages', packageDirName, 'package.json');
-
-    if (!fs.existsSync(packageJsonPath)) {
-      console.error(`❌ Could not find package.json for ${packageName} at: ${packageJsonPath}`);
-      return null;
+    const version = resolveAdapterVersion(packageName);
+    if (version) {
+      console.log(`✅ Resolved adapter version for ${packageName}: ${version}`);
+      return version;
     }
-
-    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
-    const packageJson = JSON.parse(packageJsonContent);
-    const version = packageJson.version;
-    console.log(`✅ Found workspace version for ${packageName}: ${version}`);
-    return version;
-  } catch (error) {
-    console.error(`❌ Failed to read workspace version for ${packageName}.`, error);
+    console.error(
+      `❌ Could not resolve published (or local override) version for ${packageName}. ` +
+        `Set LOCAL_ADAPTERS_PATH to a checkout of openzeppelin-adapters or ensure the package is on npm.`
+    );
     return null;
-  }
-};
-
-/**
- * Gets the latest version of a package from npm registry.
- * @param {string} packageName - The full name of the package (e.g., '@openzeppelin/ui-types').
- * @returns {string | null} The version string or null if not found.
- */
-const getNpmVersion = (packageName) => {
-  try {
-    const version = execSync(`npm view ${packageName} version`, {
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
-    console.log(`✅ Found npm version for ${packageName}: ${version}`);
-    return version;
   } catch (error) {
-    console.error(`❌ Failed to fetch npm version for ${packageName}. Is it published?`);
+    console.error(`❌ Failed to resolve version for ${packageName}.`, error);
     return null;
   }
 };
@@ -79,10 +53,10 @@ const updateVersionsFile = () => {
   let fileContent = fs.readFileSync(versionsFilePath, 'utf8');
   let versionsUpdated = false;
 
-  // Update local workspace packages
-  console.log('📦 Checking local workspace packages...');
+  // Update adapter packages (published npm metadata or LOCAL_ADAPTERS_PATH)
+  console.log('📦 Checking adapter packages (npm / LOCAL_ADAPTERS_PATH)...');
   for (const pkg of localPackages) {
-    const version = getWorkspaceVersion(pkg);
+    const version = getAdapterVersionForExport(pkg);
     if (version) {
       versionsUpdated =
         updatePackageVersion(fileContent, pkg, version, (newContent) => {
@@ -94,8 +68,9 @@ const updateVersionsFile = () => {
   // Update external npm packages
   console.log('\n🌐 Checking external npm packages...');
   for (const pkg of externalPackages) {
-    const version = getNpmVersion(pkg);
+    const version = getNpmVersion(pkg, execSync);
     if (version) {
+      console.log(`✅ Found npm version for ${pkg}: ${version}`);
       versionsUpdated =
         updatePackageVersion(fileContent, pkg, version, (newContent) => {
           fileContent = newContent;
@@ -139,19 +114,16 @@ const updatePackageVersion = (fileContent, pkg, newVersion, setContent) => {
 
 const updateSnapshots = () => {
   console.log('📸 Updating test snapshots due to version changes...');
-  const { execSync } = require('child_process');
+  const { execSync: exec } = require('child_process');
 
   try {
     // Update snapshots for the export tests specifically (these are the tests that use package versions)
     // Note: We use `exec vitest run -u` instead of `test -- -u` because the -u flag must come
     // before the test path for vitest to recognize it as the update snapshots flag
-    execSync(
-      'pnpm --filter @openzeppelin/ui-builder-app exec vitest run -u src/export/__tests__/',
-      {
-        cwd: path.resolve(__dirname, '..'),
-        stdio: 'inherit',
-      }
-    );
+    exec('pnpm --filter @openzeppelin/ui-builder-app exec vitest run -u src/export/__tests__/', {
+      cwd: path.resolve(__dirname, '..'),
+      stdio: 'inherit',
+    });
     console.log('✅ Snapshots updated successfully!');
   } catch (error) {
     console.error('❌ Failed to update snapshots:', error.message);

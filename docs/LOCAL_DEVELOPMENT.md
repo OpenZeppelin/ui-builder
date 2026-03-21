@@ -28,7 +28,7 @@ The local development setup uses pnpm's `.pnpmfile.cjs` hook to dynamically reso
 
 ### Directory Structure
 
-```
+```text
 ~/dev/
 ├── ui-builder/    # UI Builder app
 └── openzeppelin-ui/         # UI Kit packages (sibling directory)
@@ -122,6 +122,32 @@ This allows testing exported apps against local package changes before publishin
 | `staging`    | Stable versions (`^x.y.z`)           | RC versions or `rc` dist-tag    |
 | `production` | Stable versions (`^x.y.z`)           | Stable versions (`^x.y.z`)      |
 
+## Adapters (openzeppelin-adapters)
+
+Adapter packages are published from the [openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters) repository. `apps/builder/src/export/versions.ts` is refreshed with:
+
+```bash
+pnpm update-export-versions
+```
+
+That script reads **stable** adapter versions from the public npm registry unless `LOCAL_ADAPTERS_PATH` points at a local checkout (same idea as `LOCAL_UI_PATH` for UI packages).
+
+### Staging redeploy after an adapter RC
+
+When you only need to validate a new adapter RC in staging (no Builder code change):
+
+1. Confirm the RC is on npm: `npm view @openzeppelin/adapter-evm dist-tags.rc` (see openzeppelin-adapters `docs/RUNBOOK.md`).
+2. In ui-builder, run `pnpm update-export-versions` if you need `versions.ts` to track a new stable line; staging exports still resolve adapters via the `rc` dist-tag when `versions.ts` holds plain semver.
+3. Redeploy or rebuild the staging environment so the Builder image picks up the intended dependency lockfile or image tag.
+
+### Defective adapter release
+
+If a published adapter version must be pulled or replaced, follow **Defective Release Recovery** in `openzeppelin-adapters/docs/RUNBOOK.md` (`npm deprecate`, corrected publish, consumer communication). ui-builder does not publish adapters; it consumes them from npm.
+
+### Rollout gate (consumer cutovers)
+
+Do **not** merge package-name or lockfile cutover PRs in ui-builder, openzeppelin-ui, role-manager, or rwa-wizard until the initial `@openzeppelin/adapter-*` publish train is verified installable from the registry. See `openzeppelin-adapters/docs/RUNBOOK.md` § Rollout Gates and the notice step in `openzeppelin-adapters/.github/workflows/publish.yml`.
+
 ## Troubleshooting
 
 ### "Module not found" Errors
@@ -164,7 +190,7 @@ pnpm install  # or pnpm dev:local
 
 When running `pnpm dev:local`, you should see:
 
-```
+```text
 🔨 Building local openzeppelin-ui packages...
 ...
 [local-dev] @openzeppelin/ui-types → /path/to/openzeppelin-ui/packages/types

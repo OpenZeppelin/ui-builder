@@ -165,7 +165,7 @@ describe('PackageManager configuration loading', () => {
       const result = JSON.parse(updated);
       // UI packages from openzeppelin-ui use file: protocol for local development
       expect(result.dependencies['@openzeppelin/ui-types']).toMatch(/^file:.*\/packages\/types$/);
-      // Adapter packages still use workspace:* (they're in ui-builder monorepo)
+      // Adapter packages use workspace:* in local exports (linked workspace in ui-builder dev)
       expect(result.dependencies['@openzeppelin/adapter-evm']).toBe('workspace:*');
     });
 
@@ -188,6 +188,27 @@ describe('PackageManager configuration loading', () => {
 
       // External dependencies should remain unchanged
       expect(result.dependencies['react']).toBe('^19.0.0');
+    });
+
+    it('production adapter range should match versions.ts stable (published metadata contract)', async () => {
+      const { packageVersions } = await import('../versions');
+      const packageManager = new PackageManager(mockRendererConfig);
+      const formConfig = createMinimalFormConfig();
+      const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'func1',
+        { env: 'production' }
+      );
+      const result = JSON.parse(updated);
+      const raw = packageVersions['@openzeppelin/adapter-evm'];
+      expect(raw, 'versions.ts must carry a plain semver for the EVM adapter').toMatch(
+        /^\d+\.\d+\.\d+/
+      );
+      const expected = raw.startsWith('^') ? raw : `^${raw}`;
+      expect(result.dependencies['@openzeppelin/adapter-evm']).toBe(expected);
     });
 
     it('should handle three environments consistently', async () => {
@@ -216,7 +237,7 @@ describe('PackageManager configuration loading', () => {
       expect(stagingResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
       expect(prodResult.dependencies['@openzeppelin/ui-types']).toMatch(/^\^/);
 
-      // Adapter packages: workspace:* for local, rc for staging, ^version for production
+      // Adapters (published from openzeppelin-adapters): workspace:* local, rc staging, ^stable prod
       expect(localResult.dependencies['@openzeppelin/adapter-evm']).toBe('workspace:*');
       expect(stagingResult.dependencies['@openzeppelin/adapter-evm']).toMatch(rcVersionOrTag);
       expect(prodResult.dependencies['@openzeppelin/adapter-evm']).toMatch(/^\^/);

@@ -4,7 +4,7 @@
 # Uses public npm registry for @openzeppelin packages.
 #
 # RC PUBLISHING STRATEGY:
-# - Publishes RC snapshot versions (e.g., @openzeppelin/adapter-evm@0.2.1-rc.123)
+# - Staging resolves @openzeppelin/adapter-* via the npm `rc` dist-tag (published from openzeppelin-adapters).
 # - Exported apps from staging use RC versions for QA testing
 # - Ensures QA tests latest features before stable release
 #
@@ -24,9 +24,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to build from'
+        description: "Branch to build from"
         required: true
-        default: 'main'
+        default: "main"
         type: string
 
 # Prevent concurrent staging deployments and avoid conflicts with release workflow
@@ -78,7 +78,7 @@ jobs:
       - name: Build all packages
         run: pnpm -r build
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Check for pending changesets
         id: changeset-check
@@ -106,7 +106,7 @@ jobs:
         if: steps.changeset-check.outputs.has_changesets == 'true'
         run: pnpm -r build
         env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Type check all packages
         if: steps.changeset-check.outputs.has_changesets == 'true'
@@ -151,8 +151,8 @@ jobs:
       security-events: write
     env:
       REGISTRY: ${{ secrets.RESEARCH_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-      ROLE_FOR_OIDC: 'arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role'
-      ROLE_TO_ASSUME: 'arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole'
+      ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
+      ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
@@ -165,7 +165,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
         with:
-          platforms: 'arm64'
+          platforms: "arm64"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
@@ -237,11 +237,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     env:
-      ROLE_FOR_OIDC: 'arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role'
-      ROLE_TO_ASSUME: 'arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole'
-      ECS_CLUSTER: 'contracts-ui-builder-stg-cluster'
-      ECS_SERVICE: 'contracts-ui-builder-stg-service'
-      AWS_REGION: 'us-east-1'
+      ROLE_FOR_OIDC: "arn:aws:iam::${{ secrets.ROOT_ACCOUNT_ID }}:role/github-actions-research-account-oidc-role"
+      ROLE_TO_ASSUME: "arn:aws:iam::${{ secrets.RESEARCH_ACCOUNT_ID }}:role/GithubOIDCResearchAccountRole"
+      ECS_CLUSTER: "contracts-ui-builder-stg-cluster"
+      ECS_SERVICE: "contracts-ui-builder-stg-service"
+      AWS_REGION: "us-east-1"
     permissions:
       contents: read
       id-token: write

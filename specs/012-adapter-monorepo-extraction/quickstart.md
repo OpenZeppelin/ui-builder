@@ -106,10 +106,11 @@ Set up Changesets stable publishing in the new repo so merges to `main`:
 
 ### Step 3.2: RC Release Workflow
 
-Set up RC publication in the new repo so merges to `main` also:
+Set up RC publication in the new repo (typically `workflow_dispatch` only, matching full SLSA parity with stable `publish.yml`):
 
-1. publish the linked public adapter set to the npm `rc` channel
-2. make the latest RC set available to consumers without pushing version sync commits downstream
+1. maintainers run **Release RC** when the intended commit is on `main` (or from the selected ref)
+2. publish the linked public adapter set to the npm `rc` channel
+3. make the latest RC set available to consumers without pushing version sync commits downstream
 
 ### Step 3.3: Verify Repo Build
 

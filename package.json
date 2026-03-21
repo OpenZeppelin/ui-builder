@@ -20,7 +20,8 @@
     "docs:watch": "oz-docs watch docs",
     "sync-patches": "node scripts/sync-patches-to-adapters.js",
     "build": "pnpm clean && pnpm sync-patches && pnpm validate:vite-configs && NODE_OPTIONS='--max-old-space-size=8192' pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && pnpm test:scripts",
+    "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "test:watch": "pnpm -r test:watch",
     "test:export": "node apps/builder/src/export/cli/export-app.cjs export --env packed",
     "coverage": "pnpm -r coverage",
@@ -96,7 +97,8 @@
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "0.6.14",
     "tsup": "^8.5.1",
-    "vite": "^7.2.2"
+    "vite": "^7.2.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20.19.0"

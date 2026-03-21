@@ -190,6 +190,52 @@ describe('Versioning Safety Guard', () => {
     );
   });
 
+  describe('Builder release-channel resolution (published adapters)', () => {
+    it('uses npm rc dist-tag for staging when versions.ts holds a stable semver', async () => {
+      const versionsModule = await import('../versions');
+      const original = { ...versionsModule.packageVersions };
+      const testAdapter = adapterPackageMap['evm'];
+      (versionsModule.packageVersions as Record<string, string>)[testAdapter] = '1.2.3';
+
+      try {
+        const packageManager = new PackageManager(mockRendererConfig);
+        const updated = await packageManager.updatePackageJson(
+          basePackageJson,
+          minimalFormConfig,
+          'evm',
+          'testFunction',
+          { env: 'staging' }
+        );
+        const deps = JSON.parse(updated).dependencies || {};
+        expect(deps[testAdapter]).toBe('rc');
+      } finally {
+        Object.assign(versionsModule.packageVersions, original);
+      }
+    });
+
+    it('uses caret stable range in production when versions.ts holds a plain semver', async () => {
+      const versionsModule = await import('../versions');
+      const original = { ...versionsModule.packageVersions };
+      const testAdapter = adapterPackageMap['evm'];
+      (versionsModule.packageVersions as Record<string, string>)[testAdapter] = '1.2.3';
+
+      try {
+        const packageManager = new PackageManager(mockRendererConfig);
+        const updated = await packageManager.updatePackageJson(
+          basePackageJson,
+          minimalFormConfig,
+          'evm',
+          'testFunction',
+          { env: 'production' }
+        );
+        const deps = JSON.parse(updated).dependencies || {};
+        expect(deps[testAdapter]).toBe('^1.2.3');
+      } finally {
+        Object.assign(versionsModule.packageVersions, original);
+      }
+    });
+  });
+
   describe('no workspace:* in staging exports', () => {
     it.each(DEVELOPED_ECOSYSTEMS)(
       'should resolve %s adapter dependency to RC version in staging',
