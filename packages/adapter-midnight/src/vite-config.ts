@@ -20,7 +20,8 @@ import type { Plugin, UserConfig } from 'vite';
  */
 export interface MidnightVitePlugins {
   wasm: () => Plugin;
-  topLevelAwait: () => Plugin;
+  /** Matches vite-plugin-top-level-await (optional plugin options). */
+  topLevelAwait: (options?: import('vite-plugin-top-level-await').Options) => Plugin;
 }
 
 /**

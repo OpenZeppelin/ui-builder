@@ -3,7 +3,7 @@ import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig } from 'vite';
-import type { UserConfig } from 'vite';
+import type { PluginOption, UserConfig } from 'vite';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
 
@@ -47,11 +47,13 @@ logger.warn = (msg, options) => {
  * and prevents silent build issues.
  */
 async function loadAdapterViteConfigs(): Promise<{
-  plugins: UserConfig['plugins'];
+  plugins: PluginOption[];
   resolve: UserConfig['resolve'];
   optimizeDeps: UserConfig['optimizeDeps'];
 }> {
-  const plugins: UserConfig['plugins'] = [];
+  // Adapter packages may resolve `vite` from a different pnpm virtual-store path than this app.
+  // At runtime the plugins are identical; normalize to this project's `PluginOption` for typing.
+  const plugins: PluginOption[] = [];
   const dedupe: string[] = [];
   const optimizeDepsInclude: string[] = [];
   const optimizeDepsExclude: string[] = [];
@@ -61,7 +63,11 @@ async function loadAdapterViteConfigs(): Promise<{
     const { getEvmViteConfig } = await import('@openzeppelin/adapter-evm/vite-config');
     const evmConfig = getEvmViteConfig();
     if (evmConfig.plugins) {
-      plugins.push(...(Array.isArray(evmConfig.plugins) ? evmConfig.plugins : []));
+      plugins.push(
+        ...((Array.isArray(evmConfig.plugins)
+          ? evmConfig.plugins
+          : [evmConfig.plugins]) as PluginOption[])
+      );
     }
     if (evmConfig.resolve?.dedupe) {
       dedupe.push(...(Array.isArray(evmConfig.resolve.dedupe) ? evmConfig.resolve.dedupe : []));
@@ -87,12 +93,14 @@ async function loadAdapterViteConfigs(): Promise<{
 
   // Load Midnight adapter config
   try {
-    const { getMidnightViteConfig } = await import(
-      '@openzeppelin/adapter-midnight/vite-config'
-    );
+    const { getMidnightViteConfig } = await import('@openzeppelin/adapter-midnight/vite-config');
     const midnightConfig = getMidnightViteConfig({ wasm, topLevelAwait });
     if (midnightConfig.plugins) {
-      plugins.push(...(Array.isArray(midnightConfig.plugins) ? midnightConfig.plugins : []));
+      plugins.push(
+        ...((Array.isArray(midnightConfig.plugins)
+          ? midnightConfig.plugins
+          : [midnightConfig.plugins]) as PluginOption[])
+      );
     }
     if (midnightConfig.resolve?.dedupe) {
       dedupe.push(
@@ -124,12 +132,14 @@ async function loadAdapterViteConfigs(): Promise<{
 
   // Load Solana adapter config
   try {
-    const { getSolanaViteConfig } = await import(
-      '@openzeppelin/adapter-solana/vite-config'
-    );
+    const { getSolanaViteConfig } = await import('@openzeppelin/adapter-solana/vite-config');
     const solanaConfig = getSolanaViteConfig();
     if (solanaConfig.plugins) {
-      plugins.push(...(Array.isArray(solanaConfig.plugins) ? solanaConfig.plugins : []));
+      plugins.push(
+        ...((Array.isArray(solanaConfig.plugins)
+          ? solanaConfig.plugins
+          : [solanaConfig.plugins]) as PluginOption[])
+      );
     }
     if (solanaConfig.resolve?.dedupe) {
       dedupe.push(
@@ -161,12 +171,14 @@ async function loadAdapterViteConfigs(): Promise<{
 
   // Load Stellar adapter config
   try {
-    const { getStellarViteConfig } = await import(
-      '@openzeppelin/adapter-stellar/vite-config'
-    );
+    const { getStellarViteConfig } = await import('@openzeppelin/adapter-stellar/vite-config');
     const stellarConfig = getStellarViteConfig();
     if (stellarConfig.plugins) {
-      plugins.push(...(Array.isArray(stellarConfig.plugins) ? stellarConfig.plugins : []));
+      plugins.push(
+        ...((Array.isArray(stellarConfig.plugins)
+          ? stellarConfig.plugins
+          : [stellarConfig.plugins]) as PluginOption[])
+      );
     }
     if (stellarConfig.resolve?.dedupe) {
       dedupe.push(
@@ -230,7 +242,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
       templatePlugin(),
       virtualContentLoaderPlugin(),
       crossPackageModulesProviderPlugin(),
-    ],
+    ] as PluginOption[],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

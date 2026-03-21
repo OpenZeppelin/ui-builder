@@ -74,6 +74,8 @@
     "eslint": "^9.32.0",
     "jsdom": "^26.1.0",
     "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vite-plugin-top-level-await": "^1.6.0",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

@@ -250,7 +250,8 @@ For a consistent and reliable development environment, it is highly recommended 
 - `pnpm lint:adapters` - Validate adapter implementations against the ContractAdapter interface
 - `pnpm lint:fix` - Fix ESLint issues
 - `pnpm lint:all-fix` - Fix ESLint issues across all file types
-- `pnpm lint:config-files` - Fix linting in configuration files
+- `pnpm lint:config-files` - Lint Vite/Vitest config files (read-only; fails on issues)
+- `pnpm lint:config-files:fix` - Auto-fix lint issues in configuration files (builder app only; run via `pnpm --filter=@openzeppelin/ui-builder-app lint:config-files:fix`)
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check formatting without making changes
 - `pnpm fix-all` - Run Prettier first, then ESLint to avoid conflicts with CSS class sorting

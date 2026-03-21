@@ -10,10 +10,7 @@ import { sharedVitestConfig } from '../../vitest.shared.config';
  * This is needed because Vite 7.2+ has stricter resolution for dynamic imports.
  */
 const adapterPackagePaths: Record<string, string> = {
-  '@openzeppelin/adapter-evm': path.resolve(
-    __dirname,
-    '../../packages/adapter-evm/dist/index.js'
-  ),
+  '@openzeppelin/adapter-evm': path.resolve(__dirname, '../../packages/adapter-evm/dist/index.js'),
   '@openzeppelin/adapter-evm/metadata': path.resolve(
     __dirname,
     '../../packages/adapter-evm/dist/metadata.js'

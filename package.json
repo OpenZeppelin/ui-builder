@@ -80,7 +80,7 @@
     "@tailwindcss/postcss": "^4.1.17",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^24.10.1",
+    "@types/node": "24.10.13",
     "@types/react": "^19.2.6",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
@@ -106,12 +106,13 @@
   "packageManager": "pnpm@10.28.2",
   "pnpm": {
     "overrides": {
+      "vite": "7.3.1",
       "use-sync-external-store": "^1.2.0",
       "valtio": "^1.13.2",
       "@paulmillr/qr": "npm:qr@^0.5.0",
       "@walletconnect/modal": "2.7.0",
       "@types/react": "^19.1.8",
-      "@types/node": "^24.7.1",
+      "@types/node": "24.10.13",
       "prettier": "3.6.2",
       "prettier-plugin-tailwindcss": "0.6.14",
       "@ianvs/prettier-plugin-sort-imports": "4.5.1",
