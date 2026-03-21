@@ -141,16 +141,16 @@
 
 ### Tests for User Story 4
 
-- [ ] T038a [P] [US4] Add failing local-override coverage in `.pnpmfile.test.cjs`, `../openzeppelin-ui/.pnpmfile.test.cjs`, `../role-manager/.pnpmfile.test.cjs`, and `../rwa-wizard/.pnpmfile.test.cjs`
+- [x] T038a [P] [US4] Add failing local-override coverage in `.pnpmfile.test.cjs`, `../openzeppelin-ui/.pnpmfile.test.cjs`, `../role-manager/.pnpmfile.test.cjs`, and `../rwa-wizard/.pnpmfile.test.cjs`
 
 ### Implementation for User Story 4
 
-- [ ] T039 [P] [US4] Standardize local adapter switching in `../openzeppelin-ui/.pnpmfile.cjs` and `../openzeppelin-ui/package.json`
-- [ ] T040 [P] [US4] Standardize local adapter switching in `../role-manager/.pnpmfile.cjs` and `../role-manager/package.json`
-- [ ] T041 [P] [US4] Standardize local adapter switching in `../rwa-wizard/.pnpmfile.cjs` and `../rwa-wizard/package.json`
-- [ ] T042 [US4] Standardize Builder local adapter switching in `.pnpmfile.cjs`, `package.json`, and `docs/LOCAL_DEVELOPMENT.md`
-- [ ] T043 [US4] Document canonical `LOCAL_ADAPTERS_PATH` usage and compatibility aliases in `../openzeppelin-adapters/README.md`
-- [ ] T044 [US4] Add clear bad-path diagnostics to `.pnpmfile.cjs`, `../openzeppelin-ui/.pnpmfile.cjs`, `../role-manager/.pnpmfile.cjs`, and `../rwa-wizard/.pnpmfile.cjs`
+- [x] T039 [P] [US4] Standardize local adapter switching in `../openzeppelin-ui/.pnpmfile.cjs` and `../openzeppelin-ui/package.json`
+- [x] T040 [P] [US4] Standardize local adapter switching in `../role-manager/.pnpmfile.cjs` and `../role-manager/package.json`
+- [x] T041 [P] [US4] Standardize local adapter switching in `../rwa-wizard/.pnpmfile.cjs` and `../rwa-wizard/package.json`
+- [x] T042 [US4] Standardize Builder local adapter switching in `.pnpmfile.cjs`, `package.json`, and `docs/LOCAL_DEVELOPMENT.md`
+- [x] T043 [US4] Document canonical `LOCAL_ADAPTERS_PATH` usage and compatibility aliases in `../openzeppelin-adapters/README.md`
+- [x] T044 [US4] Add clear bad-path diagnostics to `.pnpmfile.cjs`, `../openzeppelin-ui/.pnpmfile.cjs`, `../role-manager/.pnpmfile.cjs`, and `../rwa-wizard/.pnpmfile.cjs`
 
 **Checkpoint**: Cross-repo local development works through a shared, documented override contract
 
