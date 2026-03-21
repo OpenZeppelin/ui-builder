@@ -4,6 +4,11 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const {
+  adapterPackageNames,
+  resolveLocalAdapterPackageRoot,
+  resolveAdapterPatchesDir,
+} = require('../shared/adapterPathResolver.cjs');
 
 // Enable debug mode via environment variable
 const DEBUG = process.env.DEBUG === 'true';
@@ -250,8 +255,11 @@ function configureForPackedMode(extractDir, packedMap) {
   const hasMidnight = Object.keys(allDeps).some((k) => k.startsWith('@midnight-ntwrk/'));
 
   if (hasMidnight) {
-    const adapterPatchesDir = path.join(monorepoRoot, 'packages/adapter-midnight/patches');
-    if (fs.existsSync(adapterPatchesDir)) {
+    const adapterPatchesDir = resolveAdapterPatchesDir(
+      monorepoRoot,
+      '@openzeppelin/adapter-midnight'
+    );
+    if (adapterPatchesDir) {
       console.log(`\n${colors.blue}Configuring Midnight SDK patches...${colors.reset}`);
       const targetPatchesDir = path.join(extractDir, 'patches');
       fs.mkdirSync(targetPatchesDir, { recursive: true });
@@ -391,12 +399,16 @@ function exportAppSimple(options) {
       try {
         const packageJsonPath = path.join(extractDir, 'package.json');
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        const adapterOverrides = Object.fromEntries(
+          adapterPackageNames
+            .map((packageName) => {
+              const packageRoot = resolveLocalAdapterPackageRoot(monorepoRoot, packageName);
+              return packageRoot ? [packageName, `file:${packageRoot}`] : null;
+            })
+            .filter(Boolean)
+        );
         const packageOverrides = {
-          '@openzeppelin/adapter-evm': `file:${path.join(monorepoRoot, 'packages/adapter-evm')}`,
-          '@openzeppelin/adapter-midnight': `file:${path.join(monorepoRoot, 'packages/adapter-midnight')}`,
-          '@openzeppelin/adapter-polkadot': `file:${path.join(monorepoRoot, 'packages/adapter-polkadot')}`,
-          '@openzeppelin/adapter-solana': `file:${path.join(monorepoRoot, 'packages/adapter-solana')}`,
-          '@openzeppelin/adapter-stellar': `file:${path.join(monorepoRoot, 'packages/adapter-stellar')}`,
+          ...adapterOverrides,
           '@openzeppelin/ui-renderer': `file:${path.join(monorepoRoot, 'packages/renderer')}`,
           '@openzeppelin/ui-react': `file:${path.join(monorepoRoot, 'packages/react-core')}`,
           '@openzeppelin/ui-types': `file:${path.join(monorepoRoot, 'packages/types')}`,

@@ -110,6 +110,17 @@ describe('Versioning Safety Guard', () => {
         ).toHaveProperty(adapterPkg as keyof typeof packageVersions);
       }
     });
+
+    it('should not retain any legacy ui-builder adapter package names', () => {
+      const legacyAdapterPackages = Object.keys(packageVersions).filter((packageName) =>
+        packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+      );
+
+      expect(
+        legacyAdapterPackages,
+        'versions.ts must only manage extracted @openzeppelin/adapter-* package names'
+      ).toEqual([]);
+    });
   });
 
   describe('workspace:* fallback to latest', () => {

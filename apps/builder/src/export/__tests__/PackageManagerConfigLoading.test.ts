@@ -19,6 +19,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { RendererConfig } from '@openzeppelin/ui-renderer';
 import { Ecosystem } from '@openzeppelin/ui-types';
 
+import { adapterPackageMap } from '../../core/ecosystemManager';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -246,6 +247,29 @@ describe('PackageManager configuration loading', () => {
       expect(localResult.dependencies['react']).toBe('^19.0.0');
       expect(stagingResult.dependencies['react']).toBe('^19.0.0');
       expect(prodResult.dependencies['react']).toBe('^19.0.0');
+    });
+
+    it('should keep legacy adapter package names out of generated dependencies', async () => {
+      const packageManager = new PackageManager(mockRendererConfig);
+      const formConfig = createMinimalFormConfig();
+      const basePackageJson = JSON.stringify({ name: 'test', version: '0.1.0' });
+
+      const updated = await packageManager.updatePackageJson(
+        basePackageJson,
+        formConfig,
+        'evm',
+        'func1',
+        { env: 'production' }
+      );
+
+      const dependencies = JSON.parse(updated).dependencies;
+      expect(dependencies).toHaveProperty(adapterPackageMap.evm);
+
+      const legacyAdapterPackages = Object.keys(dependencies).filter((packageName) =>
+        packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+      );
+
+      expect(legacyAdapterPackages).toEqual([]);
     });
 
     it('should include upgrade instructions in package.json', async () => {

@@ -116,18 +116,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T032b [P] [US3] Add failing export dependency coverage in `apps/builder/src/export/__tests__/PackageManager.test.ts` and `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts`
+- [x] T032b [P] [US3] Add failing export dependency coverage in `apps/builder/src/export/__tests__/PackageManager.test.ts` and `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Update exported dependency mapping in `apps/builder/src/export/PackageManager.ts`
-- [ ] T034 [US3] Regenerate canonical adapter version references in `apps/builder/src/export/versions.ts`
-- [ ] T035 [US3] Update export CLI dependency generation in `apps/builder/src/export/cli/export-app.cjs`
-- [ ] T036 [US3] Replace any remaining legacy adapter names in `apps/builder/src/export/templates/`
-- [ ] T036a [US3] Update `apps/builder/src/export/assemblers/copyAdapterPatchFiles.ts` to resolve patch files from adapter package (LOCAL_ADAPTERS_PATH sibling or resolved adapter in node_modules) instead of hardcoded `packages/adapter-*/patches`
-- [ ] T036b [US3] Update `apps/builder/src/export/cli/export-app.cjs` `configureForPackedMode` to resolve adapter patches path from LOCAL_ADAPTERS_PATH or adapter package location instead of hardcoded `packages/adapter-midnight/patches`
-- [ ] T037 [US3] Update export verification coverage in `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts`, `apps/builder/src/export/__tests__/PackageManager.test.ts`, and `apps/builder/src/export/__tests__/PackageManagerConfigLoading.test.ts`
-- [ ] T038 [US3] Refresh export snapshots and fixtures in `apps/builder/src/export/__snapshots__/` and related files under `apps/builder/src/export/`
+- [x] T033 [US3] Update exported dependency mapping in `apps/builder/src/export/PackageManager.ts`
+- [x] T034 [US3] Regenerate canonical adapter version references in `apps/builder/src/export/versions.ts`
+- [x] T035 [US3] Update export CLI dependency generation in `apps/builder/src/export/cli/export-app.cjs`
+- [x] T036 [US3] Replace any remaining legacy adapter names in `apps/builder/src/export/templates/`
+- [x] T036a [US3] Update `apps/builder/src/export/assemblers/copyAdapterPatchFiles.ts` to resolve patch files from adapter package (LOCAL_ADAPTERS_PATH sibling or resolved adapter in node_modules) instead of hardcoded `packages/adapter-*/patches`
+- [x] T036b [US3] Update `apps/builder/src/export/cli/export-app.cjs` `configureForPackedMode` to resolve adapter patches path from LOCAL_ADAPTERS_PATH or adapter package location instead of hardcoded `packages/adapter-midnight/patches`
+- [x] T037 [US3] Update export verification coverage in `apps/builder/src/export/__tests__/VersioningSafetyGuard.test.ts`, `apps/builder/src/export/__tests__/PackageManager.test.ts`, and `apps/builder/src/export/__tests__/PackageManagerConfigLoading.test.ts`
+- [x] T038 [US3] Refresh export snapshots and fixtures in `apps/builder/src/export/__snapshots__/` and related files under `apps/builder/src/export/`
 
 **Checkpoint**: Exported apps install and build with only the extracted adapter namespace
 

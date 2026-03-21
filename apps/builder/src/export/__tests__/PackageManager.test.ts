@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { AdapterConfig, Ecosystem } from '@openzeppelin/ui-types';
 
+import { adapterPackageMap } from '../../core/ecosystemManager';
 import type { BuilderFormConfig } from '../../core/types/FormTypes';
 import { PackageManager } from '../PackageManager';
 
@@ -255,6 +256,27 @@ describe('PackageManager', () => {
       expect(dependencies).not.toHaveProperty('@openzeppelin/adapter-evm'); // Adapter package not included
       expect(dependencies).not.toHaveProperty('@openzeppelin/ui-types'); // Types package not included for unknown chain
     });
+
+    it.each(['evm', 'midnight', 'polkadot', 'solana', 'stellar'] as const)(
+      'should only use extracted adapter package names for %s exports',
+      async (ecosystem) => {
+        const dependencies = await packageManager.getDependencies(
+          createMinimalFormConfig(),
+          ecosystem
+        );
+
+        expect(dependencies).toHaveProperty(adapterPackageMap[ecosystem]);
+
+        const legacyAdapterPackages = Object.keys(dependencies).filter((packageName) =>
+          packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+        );
+
+        expect(
+          legacyAdapterPackages,
+          `Export dependencies for ${ecosystem} must not reference legacy ui-builder adapter packages`
+        ).toEqual([]);
+      }
+    );
   });
 
   describe('getDevDependencies', () => {
