@@ -112,12 +112,13 @@ describe('Versioning Safety Guard', () => {
     });
 
     it('should not retain any legacy ui-builder adapter package names', () => {
-      const legacyAdapterPackages = Object.keys(packageVersions).filter((packageName) =>
-        packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+      const unexpectedAdapterPackages = Object.keys(packageVersions).filter(
+        (packageName) =>
+          packageName.includes('adapter-') && !packageName.startsWith('@openzeppelin/adapter-')
       );
 
       expect(
-        legacyAdapterPackages,
+        unexpectedAdapterPackages,
         'versions.ts must only manage extracted @openzeppelin/adapter-* package names'
       ).toEqual([]);
     });

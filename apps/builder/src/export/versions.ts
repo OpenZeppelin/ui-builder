@@ -10,7 +10,7 @@ export const packageVersions = {
   '@openzeppelin/adapter-midnight': '1.0.0',
   '@openzeppelin/adapter-polkadot': '1.0.0',
   '@openzeppelin/adapter-solana': '1.0.0',
-  '@openzeppelin/adapter-stellar': '1.8.2',
+  '@openzeppelin/adapter-stellar': '1.0.0',
   '@openzeppelin/ui-react': '1.1.0',
   '@openzeppelin/ui-renderer': '1.1.1',
   '@openzeppelin/ui-storage': '1.2.0',

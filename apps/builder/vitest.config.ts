@@ -1,8 +1,31 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 import { sharedVitestConfig } from '../../vitest.shared.config';
+
+const require = createRequire(import.meta.url);
+
+function resolveAdapterImportEntry(
+  packageName: string,
+  exportPath: '.' | './metadata' | './networks'
+) {
+  const installedEntryPath = require.resolve(packageName);
+  const packageDir = path.resolve(path.dirname(installedEntryPath), '..');
+  const packageJsonPath = path.join(packageDir, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
+    exports?: Record<string, { import?: string }>;
+  };
+
+  const entry = packageJson.exports?.[exportPath]?.import;
+  if (!entry) {
+    throw new Error(`Missing import export "${exportPath}" in ${packageName}/package.json`);
+  }
+
+  return path.resolve(packageDir, entry);
+}
 
 /**
  * Adapter package paths for test resolution.
@@ -10,64 +33,63 @@ import { sharedVitestConfig } from '../../vitest.shared.config';
  * This is needed because Vite 7.2+ has stricter resolution for dynamic imports.
  */
 const adapterPackagePaths: Record<string, string> = {
-  '@openzeppelin/adapter-evm': path.resolve(__dirname, '../../packages/adapter-evm/dist/index.js'),
-  '@openzeppelin/adapter-evm/metadata': path.resolve(
-    __dirname,
-    '../../packages/adapter-evm/dist/metadata.js'
+  '@openzeppelin/adapter-evm/metadata': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-evm',
+    './metadata'
   ),
-  '@openzeppelin/adapter-evm/networks': path.resolve(
-    __dirname,
-    '../../packages/adapter-evm/dist/networks.js'
+  '@openzeppelin/adapter-evm/networks': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-evm',
+    './networks'
   ),
-  '@openzeppelin/adapter-solana': path.resolve(
-    __dirname,
-    '../../packages/adapter-solana/dist/index.js'
+  '@openzeppelin/adapter-evm': resolveAdapterImportEntry('@openzeppelin/adapter-evm', '.'),
+  '@openzeppelin/adapter-solana/metadata': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-solana',
+    './metadata'
   ),
-  '@openzeppelin/adapter-solana/metadata': path.resolve(
-    __dirname,
-    '../../packages/adapter-solana/dist/metadata.js'
+  '@openzeppelin/adapter-solana/networks': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-solana',
+    './networks'
   ),
-  '@openzeppelin/adapter-solana/networks': path.resolve(
-    __dirname,
-    '../../packages/adapter-solana/dist/networks.js'
+  '@openzeppelin/adapter-solana': resolveAdapterImportEntry('@openzeppelin/adapter-solana', '.'),
+  '@openzeppelin/adapter-stellar/metadata': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-stellar',
+    './metadata'
   ),
-  '@openzeppelin/adapter-stellar': path.resolve(
-    __dirname,
-    '../../packages/adapter-stellar/dist/index.js'
+  '@openzeppelin/adapter-stellar/networks': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-stellar',
+    './networks'
   ),
-  '@openzeppelin/adapter-stellar/metadata': path.resolve(
-    __dirname,
-    '../../packages/adapter-stellar/dist/metadata.js'
+  '@openzeppelin/adapter-stellar': resolveAdapterImportEntry('@openzeppelin/adapter-stellar', '.'),
+  '@openzeppelin/adapter-midnight/metadata': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-midnight',
+    './metadata'
   ),
-  '@openzeppelin/adapter-stellar/networks': path.resolve(
-    __dirname,
-    '../../packages/adapter-stellar/dist/networks.js'
+  '@openzeppelin/adapter-midnight/networks': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-midnight',
+    './networks'
   ),
-  '@openzeppelin/adapter-midnight': path.resolve(
-    __dirname,
-    '../../packages/adapter-midnight/dist/index.js'
+  '@openzeppelin/adapter-midnight': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-midnight',
+    '.'
   ),
-  '@openzeppelin/adapter-midnight/metadata': path.resolve(
-    __dirname,
-    '../../packages/adapter-midnight/dist/metadata.js'
+  '@openzeppelin/adapter-polkadot/metadata': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-polkadot',
+    './metadata'
   ),
-  '@openzeppelin/adapter-midnight/networks': path.resolve(
-    __dirname,
-    '../../packages/adapter-midnight/dist/networks.js'
+  '@openzeppelin/adapter-polkadot/networks': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-polkadot',
+    './networks'
   ),
-  '@openzeppelin/adapter-polkadot': path.resolve(
-    __dirname,
-    '../../packages/adapter-polkadot/dist/index.js'
-  ),
-  '@openzeppelin/adapter-polkadot/metadata': path.resolve(
-    __dirname,
-    '../../packages/adapter-polkadot/dist/metadata.js'
-  ),
-  '@openzeppelin/adapter-polkadot/networks': path.resolve(
-    __dirname,
-    '../../packages/adapter-polkadot/dist/networks.js'
+  '@openzeppelin/adapter-polkadot': resolveAdapterImportEntry(
+    '@openzeppelin/adapter-polkadot',
+    '.'
   ),
 };
+
+const adapterAliasEntries = Object.entries(adapterPackagePaths).map(([find, replacement]) => ({
+  find,
+  replacement,
+}));
 
 /**
  * Virtual module mocks for testing
@@ -187,68 +209,9 @@ export default defineConfig(
       alias: {
         '@': path.resolve(__dirname, './src'),
         // Adapter packages - required for export tests that use ecosystemManager.
-        // Subpath exports (e.g. /metadata) must be listed BEFORE the bare specifier
-        // so Vite matches the more specific path first.
-        '@openzeppelin/adapter-evm/metadata': path.resolve(
-          __dirname,
-          '../../packages/adapter-evm/dist/metadata.js'
-        ),
-        '@openzeppelin/adapter-evm/networks': path.resolve(
-          __dirname,
-          '../../packages/adapter-evm/dist/networks.js'
-        ),
-        '@openzeppelin/adapter-evm': path.resolve(
-          __dirname,
-          '../../packages/adapter-evm/dist/index.js'
-        ),
-        '@openzeppelin/adapter-solana/metadata': path.resolve(
-          __dirname,
-          '../../packages/adapter-solana/dist/metadata.js'
-        ),
-        '@openzeppelin/adapter-solana/networks': path.resolve(
-          __dirname,
-          '../../packages/adapter-solana/dist/networks.js'
-        ),
-        '@openzeppelin/adapter-solana': path.resolve(
-          __dirname,
-          '../../packages/adapter-solana/dist/index.js'
-        ),
-        '@openzeppelin/adapter-stellar/metadata': path.resolve(
-          __dirname,
-          '../../packages/adapter-stellar/dist/metadata.js'
-        ),
-        '@openzeppelin/adapter-stellar/networks': path.resolve(
-          __dirname,
-          '../../packages/adapter-stellar/dist/networks.js'
-        ),
-        '@openzeppelin/adapter-stellar': path.resolve(
-          __dirname,
-          '../../packages/adapter-stellar/dist/index.js'
-        ),
-        '@openzeppelin/adapter-midnight/metadata': path.resolve(
-          __dirname,
-          '../../packages/adapter-midnight/dist/metadata.js'
-        ),
-        '@openzeppelin/adapter-midnight/networks': path.resolve(
-          __dirname,
-          '../../packages/adapter-midnight/dist/networks.js'
-        ),
-        '@openzeppelin/adapter-midnight': path.resolve(
-          __dirname,
-          '../../packages/adapter-midnight/dist/index.js'
-        ),
-        '@openzeppelin/adapter-polkadot/metadata': path.resolve(
-          __dirname,
-          '../../packages/adapter-polkadot/dist/metadata.js'
-        ),
-        '@openzeppelin/adapter-polkadot/networks': path.resolve(
-          __dirname,
-          '../../packages/adapter-polkadot/dist/networks.js'
-        ),
-        '@openzeppelin/adapter-polkadot': path.resolve(
-          __dirname,
-          '../../packages/adapter-polkadot/dist/index.js'
-        ),
+        // Resolve from installed package exports so tests keep working after Phase 7
+        // removes the in-repo adapter workspaces.
+        ...adapterAliasEntries,
       },
       dedupe: [
         '@openzeppelin/ui-renderer',

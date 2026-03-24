@@ -160,11 +160,11 @@
 
 **Purpose**: Remove obsolete workspace ownership and legacy package references after the cutover
 
-- [ ] T045 Remove legacy adapter workspace ownership from `pnpm-workspace.yaml` and `.changeset/config.json`
-- [ ] T046 Delete the extracted adapter source directories at `packages/adapter-evm/`, `packages/adapter-evm-core/`, `packages/adapter-midnight/`, `packages/adapter-polkadot/`, `packages/adapter-solana/`, and `packages/adapter-stellar/`
-- [ ] T047 Sweep remaining `@openzeppelin/ui-builder-adapter-*` references from `package.json`, `apps/builder/src/`, `../openzeppelin-ui/`, `../role-manager/`, and `../rwa-wizard/`
-- [ ] T047a Add a rollout-closeout guard against new legacy-name usage in `../openzeppelin-adapters/docs/RUNBOOK.md` and `specs/012-adapter-monorepo-extraction/quickstart.md`
-- [ ] T047b [P] Simplify `../openzeppelin-adapters/scripts/validate-adapter-vite-configs.cjs` to only check `@openzeppelin/adapter-*` (remove legacy `ui-builder-adapter` branch) after Phase 3 rename
+- [x] T045 Remove legacy adapter workspace ownership from `pnpm-workspace.yaml` and `.changeset/config.json`
+- [x] T046 Delete the extracted adapter source directories at `packages/adapter-evm/`, `packages/adapter-evm-core/`, `packages/adapter-midnight/`, `packages/adapter-polkadot/`, `packages/adapter-solana/`, and `packages/adapter-stellar/`
+- [x] T047 Sweep remaining `@openzeppelin/ui-builder-adapter-*` references from `package.json`, `apps/builder/src/`, `../openzeppelin-ui/`, `../role-manager/`, and `../rwa-wizard/`
+- [x] T047a Add a rollout-closeout guard against new legacy-name usage in `../openzeppelin-adapters/docs/RUNBOOK.md` and `specs/012-adapter-monorepo-extraction/quickstart.md`
+- [x] T047b [P] Simplify `../openzeppelin-adapters/scripts/validate-adapter-vite-configs.cjs` to only check `@openzeppelin/adapter-*` (remove legacy `ui-builder-adapter` branch) after Phase 3 rename
 
 ---
 

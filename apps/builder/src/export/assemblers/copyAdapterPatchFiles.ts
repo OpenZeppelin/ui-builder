@@ -24,28 +24,14 @@ const installedAdapterPatchModules = import.meta.glob<string>(
   }
 );
 
-const legacyWorkspacePatchModules = import.meta.glob<string>(
-  '../../../../../packages/adapter-*/patches/*.patch',
-  {
-    query: '?raw',
-    import: 'default',
-    eager: true,
-  }
-);
-
 /**
  * Pre-load patch files from all supported adapter-package locations.
  *
  * Resolution order matters:
  * 1. sibling `openzeppelin-adapters` checkout for local extraction work
  * 2. installed `node_modules/@openzeppelin/adapter-*` packages
- * 3. legacy in-repo adapter packages until Phase 7 removes them
  */
-const patchModuleSources = [
-  siblingAdapterPatchModules,
-  installedAdapterPatchModules,
-  legacyWorkspacePatchModules,
-] as const;
+const patchModuleSources = [siblingAdapterPatchModules, installedAdapterPatchModules] as const;
 
 /**
  * Pre-load all patch files from adapter packages using Vite's glob import.

@@ -19,13 +19,17 @@
 @source "./";
 @source "../";
 
-/* Adapter packages (workspace packages with Tailwind classes) */
-@source "../../../packages/adapter-evm/src";
-@source "../../../packages/adapter-evm-core/src";
-@source "../../../packages/adapter-midnight/src";
-@source "../../../packages/adapter-solana/src";
-@source "../../../packages/adapter-stellar/src";
-@source "../../../packages/adapter-polkadot/src";
+/* Adapter packages now resolve from npm or a local openzeppelin-adapters checkout */
+@source "../../../node_modules/@openzeppelin/adapter-evm/src";
+@source "../../../node_modules/@openzeppelin/adapter-midnight/src";
+@source "../../../node_modules/@openzeppelin/adapter-polkadot/src";
+@source "../../../node_modules/@openzeppelin/adapter-solana/src";
+@source "../../../node_modules/@openzeppelin/adapter-stellar/src";
+@source "../node_modules/@openzeppelin/adapter-evm/src";
+@source "../node_modules/@openzeppelin/adapter-midnight/src";
+@source "../node_modules/@openzeppelin/adapter-polkadot/src";
+@source "../node_modules/@openzeppelin/adapter-solana/src";
+@source "../node_modules/@openzeppelin/adapter-stellar/src";
 
 /*
   Tell Tailwind to scan @openzeppelin npm packages for class names.

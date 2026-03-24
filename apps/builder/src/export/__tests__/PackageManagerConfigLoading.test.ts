@@ -265,11 +265,12 @@ describe('PackageManager configuration loading', () => {
       const dependencies = JSON.parse(updated).dependencies;
       expect(dependencies).toHaveProperty(adapterPackageMap.evm);
 
-      const legacyAdapterPackages = Object.keys(dependencies).filter((packageName) =>
-        packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+      const unexpectedAdapterPackages = Object.keys(dependencies).filter(
+        (packageName) =>
+          packageName.includes('adapter-') && !packageName.startsWith('@openzeppelin/adapter-')
       );
 
-      expect(legacyAdapterPackages).toEqual([]);
+      expect(unexpectedAdapterPackages).toEqual([]);
     });
 
     it('should include upgrade instructions in package.json', async () => {

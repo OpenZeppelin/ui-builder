@@ -228,3 +228,4 @@ pnpm test:export
 - [ ] Staging validates adapter RCs without downstream push syncs from the adapter repo
 - [ ] Production exports and deployments resolve stable adapter versions
 - [ ] `role-manager`, `openzeppelin-ui`, and `rwa-wizard` are updated for new package names and local dev paths
+- [ ] Run `rg -n "ui-builder-adapter" . ../openzeppelin-adapters ../openzeppelin-ui ../role-manager ../rwa-wizard` and confirm any remaining matches are historical/spec references only before declaring migration complete

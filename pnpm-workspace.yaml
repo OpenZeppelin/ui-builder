@@ -2,6 +2,8 @@
 packages:
   # Include all packages in the packages directory
   - 'packages/*'
+  # Adapter packages now live in the extracted openzeppelin-adapters repo.
+  - '!packages/adapter-*'
   # Include all apps in the apps directory
   - 'apps/*'
   # Exclude any node_modules directories

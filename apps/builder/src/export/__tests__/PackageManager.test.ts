@@ -267,13 +267,14 @@ describe('PackageManager', () => {
 
         expect(dependencies).toHaveProperty(adapterPackageMap[ecosystem]);
 
-        const legacyAdapterPackages = Object.keys(dependencies).filter((packageName) =>
-          packageName.startsWith('@openzeppelin/ui-builder-adapter-')
+        const unexpectedAdapterPackages = Object.keys(dependencies).filter(
+          (packageName) =>
+            packageName.includes('adapter-') && !packageName.startsWith('@openzeppelin/adapter-')
         );
 
         expect(
-          legacyAdapterPackages,
-          `Export dependencies for ${ecosystem} must not reference legacy ui-builder adapter packages`
+          unexpectedAdapterPackages,
+          `Export dependencies for ${ecosystem} must only reference extracted adapter packages`
         ).toEqual([]);
       }
     );
