@@ -6,8 +6,12 @@ export interface MidnightContractArtifacts {
   /** The deployed contract address (required, Bech32m format) */
   contractAddress: string;
 
-  /** Unique identifier for private state instance (required) */
-  privateStateId: string;
+  /**
+   * Unique identifier for private state instance.
+   * Auto-generated deterministically from contract address + wallet address.
+   * Only required at transaction execution time, not during contract loading.
+   */
+  privateStateId?: string;
 
   /**
    * Contract-level identity secret key property name (derived from artifacts).
@@ -44,7 +48,8 @@ export function isMidnightContractArtifacts(obj: unknown): obj is MidnightContra
     typeof obj === 'object' &&
     obj !== null &&
     typeof record.contractAddress === 'string' &&
-    typeof record.privateStateId === 'string' &&
+    // privateStateId is optional - auto-generated at transaction time
+    (record.privateStateId === undefined || typeof record.privateStateId === 'string') &&
     typeof record.contractDefinition === 'string'
   );
 }
