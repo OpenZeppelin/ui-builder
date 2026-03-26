@@ -184,6 +184,16 @@ function packMonorepoPackages() {
   console.log(`${colors.green}✓ Build complete${colors.reset}\n`);
 
   const packagesDir = path.join(monorepoRoot, 'packages');
+  if (!fs.existsSync(packagesDir)) {
+    console.log(
+      `${colors.yellow}⚠${colors.reset} No local workspace packages directory found at ${packagesDir}.`
+    );
+    console.log(
+      `${colors.yellow}  Skipping tarball packing and using published package versions instead.${colors.reset}\n`
+    );
+    return { packDir, packedMap: {} };
+  }
+
   const packageDirs = fs
     .readdirSync(packagesDir)
     .map((dir) => path.join(packagesDir, dir))
