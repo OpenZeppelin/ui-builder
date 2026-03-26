@@ -291,7 +291,7 @@ exports[`Export Snapshot Tests > evm Export Snapshots > should match snapshot fo
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-evm": "^1.8.2",
-    "@openzeppelin/ui-components": "^1.4.0",
+    "@openzeppelin/ui-components": "^1.5.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.1.1",
     "@openzeppelin/ui-types": "^1.11.1",
@@ -607,7 +607,7 @@ exports[`Export Snapshot Tests > polkadot Export Snapshots > should match snapsh
 {
   "dependencies": {
     "@openzeppelin/ui-builder-adapter-polkadot": "^1.8.3",
-    "@openzeppelin/ui-components": "^1.4.0",
+    "@openzeppelin/ui-components": "^1.5.0",
     "@openzeppelin/ui-react": "^1.1.0",
     "@openzeppelin/ui-renderer": "^1.1.1",
     "@openzeppelin/ui-types": "^1.11.1",
