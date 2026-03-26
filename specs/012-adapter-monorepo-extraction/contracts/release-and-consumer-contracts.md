@@ -118,8 +118,7 @@ Consumers MUST keep a supported path for local sibling-repo adapter development.
 
 ### Compatibility Rules
 
-- Existing consumer-specific variables such as `LOCAL_UI_BUILDER_PATH` MAY remain as compatibility aliases during migration
-- Documentation MUST describe the canonical path variable and any temporary aliases
+- Documentation MUST describe `LOCAL_ADAPTERS_PATH` as the canonical adapter repo path variable
 - Consumer repositories MUST converge toward the canonical variable and package-map contract rather than preserving permanent divergent local-linking conventions
 
 ---

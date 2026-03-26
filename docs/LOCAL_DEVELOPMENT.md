@@ -29,7 +29,7 @@ pnpm dev
 
 ## How It Works
 
-The local development setup uses pnpm's `.pnpmfile.cjs` hook to dynamically resolve local `@openzeppelin/ui-*` and `@openzeppelin/adapter-*` packages when `LOCAL_UI=true` and `LOCAL_ADAPTERS=true` are set.
+The local development setup uses the published `oz-dev` CLI plus a small config-driven `.pnpmfile.cjs` hook in this repo. The CLI builds and packs local families from your checked-out source repos, while the pnpm hook rewrites dependencies to those packed tarballs when `LOCAL_UI=true` and `LOCAL_ADAPTERS=true` are enabled for install.
 
 ### Directory Structure
 
@@ -62,13 +62,7 @@ The local development setup uses pnpm's `.pnpmfile.cjs` hook to dynamically reso
 pnpm dev:local
 ```
 
-This command automatically:
-
-1. Builds all packages in the local openzeppelin-ui directory (defaults to `../openzeppelin-ui`)
-2. Builds adapter packages in the local openzeppelin-adapters directory (defaults to `../openzeppelin-adapters`)
-3. Runs `LOCAL_UI=true LOCAL_ADAPTERS=true pnpm install` to resolve both dependency families to local paths
-
-This ensures you always have up-to-date compiled types when working with local packages.
+This command delegates to the published `oz-dev` CLI. It builds the selected package families from your local `openzeppelin-ui` and `openzeppelin-adapters` checkouts, packs them into tarballs under `.packed-packages/local-dev`, and reinstalls ui-builder against those packed artifacts.
 
 ### Switch to Local UI Kit Only
 
@@ -98,7 +92,7 @@ LOCAL_UI_PATH=/path/to/openzeppelin-ui pnpm dev:uikit:local
 pnpm dev:npm
 ```
 
-This runs a regular `pnpm install` which uses the published npm/workspace versions.
+This delegates to `oz-dev use remote`, which removes local manifests and reinstalls against published npm packages.
 
 ## Development Workflow
 
@@ -163,11 +157,7 @@ That script reads **stable** adapter versions from the public npm registry unles
 pnpm dev:adapters:local
 ```
 
-This command:
-
-1. Builds adapter packages from `../openzeppelin-adapters` by default
-2. Runs `LOCAL_ADAPTERS=true pnpm install` so `@openzeppelin/adapter-*` dependencies resolve to `file:` paths
-3. Leaves the existing UI-kit local workflow (`pnpm dev:local`) unchanged
+This command uses the shared `oz-dev` CLI to build and pack the adapter family only, then reinstalls ui-builder against the packed adapter tarballs while leaving UI packages on published dependencies.
 
 If your adapter checkout is elsewhere, use the canonical path variable:
 
@@ -175,7 +165,14 @@ If your adapter checkout is elsewhere, use the canonical path variable:
 LOCAL_ADAPTERS_PATH=/path/to/openzeppelin-adapters pnpm dev:adapters:local
 ```
 
-`LOCAL_UI_BUILDER_PATH` is still accepted as a temporary compatibility alias, but new scripts and docs should use `LOCAL_ADAPTERS_PATH`.
+Use this checklist to validate the local-switch flow:
+
+1. Optionally set `LOCAL_ADAPTERS_PATH=/path/to/openzeppelin-adapters` if your checkout is not the default sibling path.
+2. Run `pnpm dev:adapters:local`.
+3. Confirm the install log reports the generated tarball manifests under `.packed-packages/local-dev`.
+4. Run `pnpm dev:npm` to switch back to published/workspace resolution.
+
+If you are switching both UI kit and adapters together, use the same workflow with `pnpm dev:local`.
 
 To switch back to published/workspace resolution for both UI and adapters:
 
@@ -223,7 +220,7 @@ If the missing module comes from `@openzeppelin/adapter-*`, rebuild and relink t
 pnpm dev:adapters:local
 ```
 
-When the configured adapter path is wrong, `.pnpmfile.cjs` now throws a direct error that includes the resolved path and the env vars to fix (`LOCAL_ADAPTERS_PATH` first, `LOCAL_UI_BUILDER_PATH` as a compatibility alias).
+When a configured local checkout path is wrong, `.pnpmfile.cjs` throws a direct error that includes the resolved path and the env vars to fix (`LOCAL_UI_PATH` or `LOCAL_ADAPTERS_PATH`).
 
 ### Changes Not Reflected
 
@@ -250,16 +247,9 @@ pnpm install  # or pnpm dev:local
 When running `pnpm dev:local`, you should see:
 
 ```text
-🔨 Building local openzeppelin-ui packages...
-...
-🔨 Building local openzeppelin-adapters packages...
-...
-[local-dev] @openzeppelin/ui-types → /path/to/openzeppelin-ui/packages/types
-[local-dev] @openzeppelin/ui-utils → /path/to/openzeppelin-ui/packages/utils
-[local-dev] @openzeppelin/adapter-evm → /path/to/openzeppelin-adapters/packages/adapter-evm
-...
-✅ Using local @openzeppelin/ui-* packages from ../openzeppelin-ui
-✅ Using local @openzeppelin/adapter-* packages from ../openzeppelin-adapters
+Using local packages for /path/to/ui-builder
+  ui: 7 tarballs -> /path/to/ui-builder/.packed-packages/local-dev/ui.json
+  adapters: 5 tarballs -> /path/to/ui-builder/.packed-packages/local-dev/adapters.json
 ```
 
 ## Best Practices

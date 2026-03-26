@@ -111,9 +111,9 @@
 
 ### 9. Local Development Contract
 
-**Decision**: Preserve local sibling-repo development through `.pnpmfile.cjs` hooks, and standardize on `LOCAL_ADAPTERS_PATH` as the canonical adapter repo path variable while allowing compatibility aliases in consumers that already use `LOCAL_UI_BUILDER_PATH`.
+**Decision**: Preserve local sibling-repo development through `.pnpmfile.cjs` hooks, and standardize on `LOCAL_ADAPTERS_PATH` as the canonical adapter repo path variable.
 
-**Rationale**: Multiple consumer repos already support local adapter linking, but the naming is inconsistent. Standardizing the canonical path name improves maintainability while compatibility aliases reduce migration friction across existing workflows and docs.
+**Rationale**: Multiple consumer repos already support local adapter linking, but the naming was inconsistent. Standardizing on one path variable improves maintainability, reduces onboarding ambiguity, and keeps the local-dev contract smaller.
 
 **Alternatives Considered**:
 

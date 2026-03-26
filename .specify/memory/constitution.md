@@ -167,10 +167,10 @@ string, addressType?: string)` supports chain-specific behavior.
 
 - Use `pnpm` for all tasks (`pnpm dev`, `pnpm build`, `pnpm test`,
   `pnpm -r format:check`, `pnpm fix-all`).
-- **Local UI development**: Run `pnpm dev:local` to resolve `@openzeppelin/ui-*`
-  packages to local paths in `../openzeppelin-ui` via `.pnpmfile.cjs`. Run
-  `pnpm dev:npm` to switch back to npm packages. This keeps `package.json`
-  unchanged while enabling seamless local development.
+- **Local UI development**: Run `pnpm dev:local` to use the shared `oz-dev`
+  workflow backed by the checked-in `.openzeppelin-dev.json` and
+  `.pnpmfile.cjs` files. Run `pnpm dev:npm` to switch back to published npm
+  packages without rewriting committed dependencies.
 - **Local adapter development**: Use the canonical `LOCAL_ADAPTERS_PATH`
   convention when resolving `@openzeppelin/adapter-*` packages from a sibling
   checkout of `../openzeppelin-adapters`. Compatibility aliases may exist

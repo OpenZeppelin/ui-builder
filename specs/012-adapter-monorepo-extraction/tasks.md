@@ -173,9 +173,9 @@
 **Purpose**: Final verification and closeout across repos and workflows
 
 - [x] T048 [P] Validate new-repo quality gates through `../openzeppelin-adapters/package.json`, `../openzeppelin-adapters/.github/workflows/ci.yml`, `../openzeppelin-adapters/.github/workflows/publish.yml`, and `../openzeppelin-adapters/.github/workflows/publish-rc.yml`
-- [ ] T049 [P] Validate consumer verification entry points in `package.json`, `../openzeppelin-ui/package.json`, `../role-manager/package.json`, and `../rwa-wizard/package.json`
-- [ ] T048a [P] Validate first-release installability and same-day release readiness against `SC-001` and `SC-004` in `../openzeppelin-adapters/docs/RUNBOOK.md`
-- [ ] T049a [P] Validate local-switch timing against `SC-007` in `docs/LOCAL_DEVELOPMENT.md` and `../openzeppelin-adapters/README.md`
+- [x] T049 [P] Validate consumer verification entry points in `package.json`, `../openzeppelin-ui/package.json`, `../role-manager/package.json`, and `../rwa-wizard/package.json`
+- [x] T048a [P] Validate first-release installability and same-day release readiness against `SC-001` and `SC-004` in `../openzeppelin-adapters/docs/RUNBOOK.md`
+- [x] T049a [P] Validate local-switch timing against `SC-007` in `docs/LOCAL_DEVELOPMENT.md` and `../openzeppelin-adapters/README.md`
 - [ ] T050 Run the end-to-end migration verification checklist from `specs/012-adapter-monorepo-extraction/quickstart.md`
 
 ---

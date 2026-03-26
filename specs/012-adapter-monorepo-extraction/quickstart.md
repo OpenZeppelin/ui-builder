@@ -187,7 +187,6 @@ Update:
 Across consumer repos:
 
 - standardize on `LOCAL_ADAPTERS_PATH` as the canonical adapter repo path variable
-- document any temporary compatibility aliases such as `LOCAL_UI_BUILDER_PATH`
 - remove permanent divergence in package-map/local-dev instructions
 
 ## Phase 6: Verification
