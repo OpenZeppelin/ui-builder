@@ -3,18 +3,21 @@
 # This workflow builds staging environment and publishes RC packages for QA testing.
 # Uses public npm registry for @openzeppelin packages.
 #
-# RC PUBLISHING STRATEGY:
-# - Staging resolves @openzeppelin/adapter-* via the npm `rc` dist-tag (published from openzeppelin-adapters).
-# - Exported apps from staging use RC versions for QA testing
-# - Ensures QA tests latest features before stable release
+# ADAPTER RC RESOLUTION (two-step install):
+# The Docker build uses a two-step strategy to ensure staging mirrors production
+# exactly, except for adapter packages:
+#   Step 1: `pnpm install --frozen-lockfile` — exact production dependency tree
+#   Step 2: `resolve-staging-adapters.cjs` — queries npm for `rc` and `latest`
+#           dist-tags per adapter, picks the newer version, and runs a targeted
+#           `pnpm add --save-exact` for only those packages. Non-adapter deps
+#           remain byte-for-byte identical to the frozen lockfile.
 #
-# TRANSITION TO PUBLIC RELEASE:
-# When ready to publish publicly, this workflow will automatically work with public npm:
-# 1. Remove "Configure npm authentication for private registry" step
-# 2. Update .npmrc authentication to use NPM_TOKEN for npm registry (if needed)
-# 3. RC packages will be published to public npm instead of GitHub registry
-# 4. QA engineers will have seamless access via standard 'npm install'
-# 5. All package names and imports will remain the same
+# RC PUBLISHING STRATEGY:
+# - Adapter RC packages are published from the openzeppelin-adapters repo.
+# - UI-builder's own RC packages (ui-*, renderer, etc.) are published by the
+#   publish-rc job below when pending changesets exist.
+# - The Builder app itself runs RC adapter code at runtime on staging.
+# - Exported apps from staging reference the `rc` dist-tag for QA testing.
 
 name: (Staging) Build and Push Docker Images
 
@@ -193,6 +196,7 @@ jobs:
           load: true
           build-args: |
             VITE_EXPORT_ENV=staging
+            ADAPTER_DIST_TAG=rc
             VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=true
             VITE_GA_TAG_ID=${{ secrets.VITE_GA_TAG_ID_STAGING }}
           secrets: |
@@ -226,6 +230,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VITE_EXPORT_ENV=staging
+            ADAPTER_DIST_TAG=rc
             VITE_APP_CFG_FEATURE_FLAG_ANALYTICS_ENABLED=true
             VITE_GA_TAG_ID=${{ secrets.VITE_GA_TAG_ID_STAGING }}
           secrets: |
