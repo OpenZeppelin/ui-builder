@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import debounce from 'lodash-es/debounce';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, UseFormReturn, WatchObserver } from 'react-hook-form';
 

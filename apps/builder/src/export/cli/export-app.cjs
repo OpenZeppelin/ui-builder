@@ -354,9 +354,11 @@ function exportAppSimple(options) {
     debug(`Builder package dir: ${builderPackageDir}`);
     debug(`Test path: ${testPath}`);
 
-    const configFilePath = path.join(builderPackageDir, 'vitest.config.cli-export.ts');
+    const configFilePath = 'vitest.config.cli-export.ts';
     const testFileRelativePath = path.relative(builderPackageDir, testPath);
-    const vitestCommand = `npx vitest run --config ${configFilePath} ${testFileRelativePath} --silent`;
+    // Use pnpm's local binary resolution instead of npx to avoid broken nested
+    // node_modules lookups when this CLI is launched from the monorepo root.
+    const vitestCommand = `pnpm exec vitest run --config ${configFilePath} ${testFileRelativePath} --silent`;
 
     try {
       console.log(`\n${colors.blue}Running export test via Vitest...${colors.reset}`);

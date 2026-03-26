@@ -356,7 +356,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
         'lossless-json',
 
         // Utility libraries
-        'lodash',
+        'lodash-es',
 
         // JSZip for exports
         'jszip',

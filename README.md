@@ -25,7 +25,7 @@ This project is currently in development.
 
 ## Table of Contents
 
-- [Monorepo Structure](#monorepo-structure)
+- [Repository Structure](#repository-structure)
 - [Packages](#packages)
   - [Builder Package](#builder-package)
   - [Adapter Packages](#adapter-packages)
@@ -38,13 +38,12 @@ This project is currently in development.
   - [Running with Docker (Recommended)](#running-with-docker-recommended)
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
-  - [Local Packages](#local-packages)
-  - [External Packages](#external-packages)
+  - [Local Application](#local-application)
+  - [External Package Repositories](#external-package-repositories)
   - [Configuration Structure](#configuration-structure)
 - [Architecture](#architecture)
 - [Project Constitution](#project-constitution)
 - [Build System](#build-system)
-  - [Adapter Pattern Enforcement](#adapter-pattern-enforcement)
 - [Component Architecture](#component-architecture)
   - [Renderer Components](#renderer-components)
   - [Storybook Integration](#storybook-integration)
@@ -71,21 +70,17 @@ This project is currently in development.
   - [Builder Application Configuration (Development)](#builder-application-configuration-development)
   - [Exported Application Configuration](#exported-application-configuration)
 
-## Monorepo Structure
+## Repository Structure
 
-This project is organized as a monorepo with the following packages:
+This repository contains the Builder application plus repository-level tooling,
+workflows, and export scripts.
 
-- **apps/builder**: The main application with the builder app UI and core logic.
-- **packages/adapter-evm**: Adapter implementation for EVM-compatible chains.
-- **packages/adapter-evm-core**: Shared EVM core functionality (internal, not published).
-- **packages/adapter-polkadot**: Adapter implementation for Polkadot ecosystem with EVM support.
-- **packages/adapter-solana**: Adapter implementation for the Solana blockchain.
-- **packages/adapter-stellar**: Adapter implementation for the Stellar network.
-- **packages/adapter-midnight**: Adapter implementation for the Midnight blockchain.
+- **apps/builder**: The main application with the builder UI and export logic.
 
 ### Shared Packages (External)
 
-Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) monorepo:
+Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)
+monorepo:
 
 - **react**: Core React context providers and hooks (AdapterProvider, WalletStateProvider, useWalletState) for managing global wallet/network state and adapter interactions.
 - **renderer**: React components for rendering blockchain transaction forms, contract state displays, execution configuration, and transaction status tracking.
@@ -105,57 +100,22 @@ For more details, see the [Builder README](./apps/builder/README.md).
 
 ### Adapter Packages
 
-#### EVM Adapter
+Adapter implementations live in the
+[openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters) repository and are
+published under the `@openzeppelin/adapter-*` namespace.
 
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-evm.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-evm)
+#### Public Adapter Packages
 
-_Status: Fully implemented._
+- `@openzeppelin/adapter-evm`
+- `@openzeppelin/adapter-midnight`
+- `@openzeppelin/adapter-polkadot`
+- `@openzeppelin/adapter-solana`
+- `@openzeppelin/adapter-stellar`
 
-Adapter implementation for EVM-compatible chains. For more details, see the [EVM Adapter README](./packages/adapter-evm/README.md).
+#### Internal Adapter Package
 
-#### Solana Adapter
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-solana.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-solana)
-
-_Status: Scaffolding._
-
-Adapter implementation for Solana. For more details, see the [Solana Adapter README](./packages/adapter-solana/README.md).
-
-#### Stellar Adapter
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-stellar.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-stellar)
-
-_Status: Fully Implemented._
-
-Adapter implementation for Stellar (Soroban). For more details, see the [Stellar Adapter README](./packages/adapter-stellar/README.md).
-
-#### Midnight Adapter
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-midnight.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-midnight)
-
-_Status: In progress._
-
-Adapter implementation for Midnight. For more details, see the [Midnight Adapter README](./packages/adapter-midnight/README.md).
-
-#### Polkadot Adapter
-
-[![npm version](https://img.shields.io/npm/v/@openzeppelin/ui-builder-adapter-polkadot.svg)](https://www.npmjs.com/package/@openzeppelin/ui-builder-adapter-polkadot)
-
-_Status: In progress._
-
-Adapter implementation for Polkadot ecosystem chains with EVM support (Moonbeam, Polkadot Hub). For more details, see the [Polkadot Adapter README](./packages/adapter-polkadot/README.md).
-
-#### EVM Core (Internal)
-
-_Status: Stable._
-
-Internal shared package providing core EVM functionality used by `adapter-evm` and `adapter-polkadot`. This package is not published to npm. For more details, see the [EVM Core README](./packages/adapter-evm-core/README.md).
-
-### Shared Packages (External)
-
-The following packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository:
-
-See the **Shared Packages (External)** section above for the list of shared packages and their descriptions.
+- `@openzeppelin/adapter-evm-core` is an internal package bundled by the public EVM-oriented
+  adapters rather than consumed directly by Builder applications.
 
 ## Features
 
@@ -247,7 +207,6 @@ For a consistent and reliable development environment, it is highly recommended 
 - `pnpm dev` - Start the development server
 - `pnpm build` - Build for production
 - `pnpm lint` - Run ESLint
-- `pnpm lint:adapters` - Validate adapter implementations against the ContractAdapter interface
 - `pnpm lint:fix` - Fix ESLint issues
 - `pnpm lint:all-fix` - Fix ESLint issues across all file types
 - `pnpm lint:config-files` - Lint Vite/Vitest config files (read-only; fails on issues)
@@ -273,21 +232,19 @@ For a consistent and reliable development environment, it is highly recommended 
 
 ## Project Structure
 
-This monorepo contains the builder application and blockchain adapters:
+This repository contains the Builder application and repository-level tooling.
 
-### Local Packages
+### Local Application
 
-- **[apps/builder/](./apps/builder/README.md)** - Main application with builder UI, export system, and core logic
-- **[packages/adapter-evm/](./packages/adapter-evm/README.md)** - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
-- **[packages/adapter-evm-core/](./packages/adapter-evm-core/README.md)** - Shared EVM core (internal, not published)
-- **[packages/adapter-polkadot/](./packages/adapter-polkadot/README.md)** - Polkadot ecosystem with EVM support (Moonbeam, Polkadot Hub)
-- **[packages/adapter-solana/](./packages/adapter-solana/README.md)** - Solana blockchain implementation
-- **[packages/adapter-stellar/](./packages/adapter-stellar/README.md)** - Stellar network implementation
-- **[packages/adapter-midnight/](./packages/adapter-midnight/README.md)** - Midnight blockchain implementation
+- **[apps/builder/](./apps/builder/README.md)** - Main application with builder UI, export system,
+  and runtime integration code
 
-### Shared Packages (External)
+### External Package Repositories
 
-Core UI packages are maintained in the [openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui) repository (renderer, react, components, storage, types, styles, utils).
+- **[openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters)** - Adapter
+  implementations published as `@openzeppelin/adapter-*`
+- **[openzeppelin-ui](https://github.com/OpenZeppelin/openzeppelin-ui)** - Shared renderer, React,
+  components, storage, types, styles, and utils packages
 
 ### Configuration Structure
 
@@ -307,7 +264,7 @@ ui-builder/
 └── ...                  # Other configuration files
 ```
 
-For detailed internal structure of each package, please refer to the individual package README files linked above.
+For detailed application structure, see the Builder README linked above.
 
 ## Architecture
 
@@ -320,26 +277,33 @@ The application uses a modular, domain-driven adapter pattern to support multipl
   - **Modular State Management**: Decomposed hook architecture with specialized responsibilities.
   - **Application Sidebar**: Complete UI for managing saved configurations with import/export capabilities
 
-- **Storage System (`packages/storage`)**: IndexedDB-based persistence layer built on Dexie.js providing:
+- **Storage System (`@openzeppelin/ui-storage`)**: IndexedDB-based persistence layer built on
+  Dexie.js providing:
   - **Auto-Save Engine**: Debounced saving with in-memory caching and global coordination
   - **Multi-Tab Synchronization**: Real-time updates across browser tabs
   - **Import/Export**: JSON-based configuration sharing with validation
   - **CRUD Operations**: Complete lifecycle management for contract UI configurations
   - **Performance Optimization**: Efficient handling of 1000+ records with reactive updates
 
-- **Adapters (`packages/adapter-*`)**: Individual packages containing chain-specific implementations (e.g., `EvmAdapter`, `SolanaAdapter`). Each adapter conforms to the common `ContractAdapter` interface defined in `@openzeppelin/ui-types`. Adapters are instantiated with a specific `NetworkConfig`, making them network-aware. The `builder` package (via providers from `@openzeppelin/ui-react`) dynamically loads and uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
+- **Adapters (`@openzeppelin/adapter-*`)**: Individual packages maintained in
+  `openzeppelin-adapters` containing chain-specific implementations (for example `adapter-evm` and
+  `adapter-stellar`). Each adapter conforms to the common `ContractAdapter` interface defined in
+  `@openzeppelin/ui-types`. Adapters are instantiated with a specific `NetworkConfig`, making them
+  network-aware. The Builder app (via providers from `@openzeppelin/ui-react`) dynamically loads and
+  uses these adapters. Furthermore, adapters can optionally provide UI-specific functionalities:
   - **React UI Context Provider** (e.g., for `wagmi/react` on EVM): `WalletStateProvider` (from `@openzeppelin/ui-react`) consumes this to set up the necessary app-wide context for the active adapter.
   - **Facade Hooks** (e.g., `useAccount`, `useSwitchChain`): These are exposed by `WalletStateProvider` (via `useWalletState().walletFacadeHooks` from `@openzeppelin/ui-react`) for UI components to interact with wallet functionalities reactively and agnostically.
   - **Standardized UI Components** (e.g., `ConnectButton`): These components are retrieved via `activeAdapter.getEcosystemWalletComponents()` and are expected to internally use the facade hooks.
 
-- **Renderer**: Shared library containing app rendering components and common utilities (like logging).
+- **Renderer (`@openzeppelin/ui-renderer`)**: Shared library containing app rendering components
+  and common utilities (like logging).
 
-- **React Core (`packages/react-core`)**: Centralized React state management providing:
+- **React Core (`@openzeppelin/ui-react`)**: Centralized React state management providing:
   - **Adapter Provider**: Singleton pattern for adapter instance management
   - **Wallet State Provider**: Global wallet/network state coordination
   - **Context Hooks**: `useWalletState()` and `useAdapterContext()` for consistent state access
 
-- **UI Components (`packages/ui`)**: Comprehensive component library including:
+- **UI Components (`@openzeppelin/ui-components`)**: Comprehensive component library including:
   - **Basic Primitives**: Buttons, inputs, cards, dialogs following shadcn/ui patterns
   - **Form Fields**: Specialized components for React Hook Form integration
   - **Field Utilities**: Validation, accessibility, and layout helpers
@@ -358,25 +322,8 @@ This project is governed by the UI Builder Constitution. Please read it before c
 
 ## Build System
 
-The project uses a standardized `tsup`-based build system for all library packages, ensuring proper ES module output with correct import extensions:
-
-- **tsup**: All library packages are built using `tsup` to generate both ES modules (`.js`) and CommonJS (`.cjs`) formats.
-- **TypeScript**: The TypeScript compiler (`tsc`) is used alongside `tsup` to generate declaration files (`.d.ts`).
-- **ES Module Support**: The dual-format build ensures packages can be consumed in both modern and legacy JavaScript environments.
-- **Optimized Output**: Builds are configured for optimal tree-shaking and performance.
-
-Each package contains its own `tsup.config.ts` and the `build` script in its `package.json` orchestrates the two-stage build process. This ensures consistency and reliability across the monorepo.
-
-### Adapter Pattern Enforcement
-
-To maintain the integrity of the adapter pattern, this project includes:
-
-- **Custom ESLint Rule**: Enforces that adapter implementations only include methods defined in the `ContractAdapter` interface
-- **Automated Validation**: The `lint:adapters` command automatically discovers and validates all adapter implementations
-- **CI Integration**: Adapter pattern compliance is checked on every pull request
-- **Pre-Push Hook**: Prevents pushing code that violates the adapter pattern
-
-These enforcement mechanisms ensure that the adapter interface remains the single source of truth for adapter implementations, preventing interface drift and maintaining architectural consistency.
+The primary build target in this repository is the Builder app, while adapter package builds and
+adapter-specific validation live in `openzeppelin-adapters`.
 
 For more detailed documentation about the adapter pattern, implementation guidelines, and validation rules, see the documentation within the [`packages/types/src/adapters/base.ts`](https://github.com/OpenZeppelin/openzeppelin-ui/blob/main/packages/types/src/adapters/base.ts) file where the `ContractAdapter` interface is defined.
 
@@ -517,39 +464,16 @@ The project is configured with:
 
 ## Adding New Adapters
 
-To add support for a new blockchain ecosystem:
+New adapter packages should be created in
+[openzeppelin-adapters](https://github.com/OpenZeppelin/openzeppelin-adapters), not in this
+repository.
 
-1. **Create Package**: Create a new directory `packages/adapter-<chain-name>` (e.g., `packages/adapter-sui`).
-2. **Define `package.json`**:
-   - Set the package name (e.g., `@openzeppelin/ui-builder-adapter-sui`).
-   - Add a dependency on `@openzeppelin/ui-types`.
-   - Add any chain-specific SDKs or libraries required by the adapter.
-   - Include standard build scripts (refer to existing adapter packages).
-   - **Important**: Ensure your package exports a named array of its `NetworkConfig[]` objects (e.g., `export const suiNetworks = [...]`) and its main `Adapter` class from its entry point (`src/index.ts`).
-3. **Define `tsconfig.json`**: Create a `tsconfig.json` extending the root `tsconfig.base.json`.
-4. **Implement Adapter**:
-   - Create `src/adapter.ts`.
-   - Import `ContractAdapter`, the specific `YourEcosystemNetworkConfig` (e.g., `SuiNetworkConfig`), and related types from `@openzeppelin/ui-types`.
-   - Implement the `ContractAdapter` interface. The constructor **must** accept its specific `NetworkConfig` (e.g., `constructor(networkConfig: SuiNetworkConfig)`).
-   - Implement methods to use `this.networkConfig` internally for network-specific operations (e.g., initializing HTTP clients with RPC URLs from the config).
-5. **Define Network Configurations**:\
-   - Create `src/networks/mainnet.ts`, `testnet.ts`, etc., defining `YourEcosystemNetworkConfig` objects for each supported network.
-   - Each network config must provide all necessary details for the adapter to function, such as RPC endpoints (`rpcUrl` or `rpcEndpoint`), chain identifiers (`chainId` for EVM), explorer URLs, native currency details, etc., as defined by its `YourEcosystemNetworkConfig` interface.
-   - Create `src/networks/index.ts` to export the combined list of networks (e.g., `export const suiNetworks = [...mainnetSuiNetworks, ...testnetSuiNetworks];`) and also export each network configuration individually by its constant name (e.g., `export { suiMainnet, suiTestnet } from './mainnet';`).
-6. **Export Adapter & Networks**: Create `src/index.ts` in your adapter package and export the adapter class (e.g., `export { SuiAdapter } from './adapter';`) and the main networks array (e.g., `export { suiNetworks } from './networks';`). It's also good practice to re-export individual network configurations from the adapter's main entry point if they might be directly imported by consumers.
-7. **Register Ecosystem in Builder**:
-   - Open `apps/builder/src/core/ecosystemManager.ts`.
-   - Import the new adapter class (e.g., `import { SuiAdapter } from '@openzeppelin/ui-builder-adapter-sui';`).
-   - Add a new entry to the `ecosystemRegistry` object. This entry defines:
-     - `networksExportName`: The string name of the exported network list (e.g., 'suiNetworks'). This is used by the `EcosystemManager` to dynamically load all network configurations for an ecosystem.
-     - `AdapterClass`: The constructor of your adapter (e.g., `SuiAdapter as AnyAdapterConstructor`).
-   - Add a case for your new ecosystem in the `switch` statement within `loadAdapterPackageModule` to enable dynamic import of your adapter package module (which should export the `AdapterClass` and the `networksExportName` list).
-   - Note: If the adapter requires specific package dependencies for _exported projects_ (beyond its own runtime dependencies), these are typically managed by the `PackageManager` configuration within the adapter package itself (e.g., an `adapter.config.ts` file exporting dependency details).
-8. **Workspace**: Ensure the new package is included in the `pnpm-workspace.yaml` (if not covered by `packages/*`).
-9. **Build & Test**:
-   - Build the new adapter package (`pnpm --filter @openzeppelin/ui-builder-adapter-<chain-name> build`).
-   - Add relevant unit/integration tests.
-   - Ensure the builder application (`pnpm --filter @openzeppelin/ui-builder-app build`) and the export system still function correctly.
+To add support for a new ecosystem end-to-end:
+
+1. Implement and publish the adapter from `openzeppelin-adapters` under `@openzeppelin/adapter-*`.
+2. Register the new package in `apps/builder/src/core/ecosystemManager.ts`.
+3. Update export configuration and tests so generated apps include the new package correctly.
+4. Verify the Builder app still builds and exports successfully.
 
 ## Commit Convention
 
