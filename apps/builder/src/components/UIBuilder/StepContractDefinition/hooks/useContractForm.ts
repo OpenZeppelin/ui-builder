@@ -98,9 +98,10 @@ export function useContractForm({
     // Only restore form values when loading a saved configuration
     if (loadedConfigurationId && existingFormValues) {
       // If user is actively editing the address, do not reset from storage snapshot
+      const currentContractAddress = watch('contractAddress') as string | undefined;
       if (
-        typeof contractAddressValue === 'string' &&
-        contractAddressValue !== existingFormValues.contractAddress
+        typeof currentContractAddress === 'string' &&
+        currentContractAddress !== existingFormValues.contractAddress
       ) {
         return false;
       }
@@ -118,13 +119,13 @@ export function useContractForm({
     }
 
     return false; // No reset needed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     networkId,
     loadedConfigurationId,
     existingFormValues,
     contractDefinitionSource,
     contractDefinitionJson,
-    contractAddressValue,
     reset,
   ]);
 
@@ -134,7 +135,8 @@ export function useContractForm({
     if (!hasUserClearedManualDefinition.current) {
       handleFormReset();
     }
-  }, [handleFormReset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [networkId, loadedConfigurationId, existingFormValues, contractDefinitionSource, contractDefinitionJson]);
 
   // Clear the flag after a delay to allow future resets
   useEffect(() => {
