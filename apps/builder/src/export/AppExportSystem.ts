@@ -6,7 +6,8 @@
  * and ZipGenerator to produce a downloadable ZIP archive containing a
  * standalone app project.
  */
-import { ContractAdapter, ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
+import { ContractSchema, NetworkConfig } from '@openzeppelin/ui-types';
+import type { ContractAdapter } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 // Lazy import types for dependency management
@@ -39,7 +40,6 @@ interface AppExportSystemDependencies {
   styleManager?: StyleManager;
   zipGenerator?: ZipGenerator;
   templateProcessor?: TemplateProcessor;
-  getAdapter?: (networkConfig: NetworkConfig) => Promise<ContractAdapter>;
 }
 
 /**
@@ -154,9 +154,7 @@ export class AppExportSystem {
       logger.info('Export System', 'Options:', exportOptions);
 
       // Get the adapter instance for the selected network
-      const adapter = this.dependencies.getAdapter
-        ? await this.dependencies.getAdapter(networkConfig)
-        : await getAdapter(networkConfig);
+      const adapter = await getAdapter(networkConfig);
 
       // 1. Generate all necessary code components
       logger.info('Export System', 'Generating code components...');

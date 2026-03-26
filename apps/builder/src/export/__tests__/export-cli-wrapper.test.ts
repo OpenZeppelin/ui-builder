@@ -9,7 +9,7 @@ import path from 'path';
 import JSZip from 'jszip';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ContractAdapter, Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
+import { Ecosystem, NetworkConfig } from '@openzeppelin/ui-types';
 import { logger } from '@openzeppelin/ui-utils';
 
 // Import ecosystemManager utils
@@ -148,14 +148,7 @@ describe('Export CLI Wrapper', () => {
       throw new Error('Failed to determine network configuration to use.');
     }
 
-    const exportSystem = new AppExportSystem({
-      // Export generation only needs adapter-specific bootstrap/config hooks, which are optional.
-      // Using a stub here avoids Node importing published adapter bundles during CLI verification.
-      getAdapter: async () =>
-        ({
-          networkConfig: networkConfigToUse,
-        }) as ContractAdapter,
-    });
+    const exportSystem = new AppExportSystem();
 
     // Pass the actual NetworkConfig object
     const result = await exportSystem.exportApp(
